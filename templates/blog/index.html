@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %} Blog {% endblock %}
+
+{% block content %}
+
+{% include "blog/header.html" %}
+
+{% if posts %}
+
+{% include "blog/list_entires.html" with posts=posts %}
+
+{% endif %}
+
+{% endblock %}

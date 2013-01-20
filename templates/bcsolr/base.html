@@ -1,0 +1,19 @@
+Bordercore {% block title %} {% endblock %}
+
+<hr />
+
+{% block content %}
+
+{% endblock %}
+
+<hr />
+
+{% if user.is_authenticated %}
+
+You are logged in as <span style="color: #f00">{{ user.username }}</span>
+
+{% else %}
+
+You are not logged in.
+
+{% endif %}

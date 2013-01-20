@@ -1,0 +1,30 @@
+{% extends "bcsolr/base.html" %}
+
+{% block title %} :: Solr Search {% endblock %}
+
+{% block content %}
+Lucene Search <br /><br />
+
+{% if did_submit %}
+
+{% if results %}
+
+Message: {{ message }} <br />
+
+{% for match in results %}
+Result: {{ match.title }}<br />
+{% endfor %}
+{% else %}
+Nothing found
+{% endif %}
+{% endif %}
+
+<form action="search" method="POST">
+{% csrf_token %}
+Search Lucene index: <input type="text" size="20" name="value" />
+
+<input type="submit" name="Go" value="Go" />
+
+</form>
+
+{% endblock %}

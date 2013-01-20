@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+	<meta charset="utf-8">
+	<title>Bordercore</title>
+
+	<link href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+	<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap.css" />
+	<!-- <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bordercore.css" /> -->
+
+{% block extra_head %}{% endblock %}
+
+  </head>
+
+<body>
+
+  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.min.js"></script>
+  <script src="{{ STATIC_URL }}bootstrap/js/bootstrap.js"></script>
+
+<div class="container">
+
+<!-- <div id="top-row"> -->
+<h1>
+Bordercore :: {% block title %} {% endblock %}
+</h1>
+<!-- </div> -->
+
+{% include "main-nav.html" %}
+
+<hr />
+
+{% block content %}
+
+{% endblock %}
+
+</div>
+
+<br /><br />
+
+<div class="divider"></div>
+
+<div id="frame-footer">
+
+  <div id="footer">
+
+    <a href="/feedback.html">Leave Feedback</a> |
+    <a href="/logout.html">Log Out</a>
+
+  </div>
+
+  <div id="startssl">
+    <a href="https://www.startssl.com/"><img src="{{ STATIC_URL }}img/startcom_secured_lock_80x15.png" border="0" alt="Free SSL Secured By StartCom" title="Free SSL Secured By StartCom" /></a>
+  </div>
+
+</div>
+
+
+</body>
+
+</html>
