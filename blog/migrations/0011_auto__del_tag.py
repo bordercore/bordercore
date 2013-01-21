@@ -8,37 +8,18 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Deleting model 'FeedItem'
-        #db.delete_table('blog_feeditem')
-
-        # Deleting model 'Feed'
-        #db.delete_table('blog_feed')
+        # Deleting model 'Tag'
+        db.delete_table('blog_tag')
 
 
     def backwards(self, orm):
-        # Adding model 'FeedItem'
-        db.create_table('blog_feeditem', (
-            ('feed', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['blog.Feed'])),
-            ('title', self.gf('django.db.models.fields.TextField')()),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('link', self.gf('django.db.models.fields.TextField')()),
+        # Adding model 'Tag'
+        db.create_table('blog_tag', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('name', self.gf('django.db.models.fields.TextField')(unique=True)),
+            ('created', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2012, 12, 29, 0, 0))),
         ))
-        db.send_create_signal('blog', ['FeedItem'])
-
-        # Adding model 'Feed'
-        db.create_table('blog_feed', (
-            ('url', self.gf('django.db.models.fields.TextField')()),
-            ('last_response_code', self.gf('django.db.models.fields.IntegerField')(null=True)),
-            ('name', self.gf('django.db.models.fields.TextField')()),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('homepage', self.gf('django.db.models.fields.TextField')(null=True)),
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-            ('last_check', self.gf('django.db.models.fields.DateTimeField')(null=True)),
-        ))
-        db.send_create_signal('blog', ['Feed'])
+        db.send_create_signal('blog', ['Tag'])
 
 
     models = {
@@ -85,16 +66,10 @@ class Migration(SchemaMigration):
             'date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'post': ('django.db.models.fields.TextField', [], {}),
-            'tags': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['blog.Tag']", 'symmetrical': 'False'}),
+            'tags': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['tag.Tag']", 'symmetrical': 'False'}),
             'title': ('django.db.models.fields.TextField', [], {'null': 'True'}),
             'updated': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
-        },
-        'blog.tag': {
-            'Meta': {'object_name': 'Tag'},
-            'created': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2012, 12, 29, 0, 0)'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.TextField', [], {'unique': 'True'})
         },
         'contenttypes.contenttype': {
             'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
@@ -102,6 +77,12 @@ class Migration(SchemaMigration):
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
+        },
+        'tag.tag': {
+            'Meta': {'object_name': 'Tag'},
+            'created': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 1, 20, 0, 0)'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.TextField', [], {'unique': 'True'})
         }
     }
 

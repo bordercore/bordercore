@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import *
 
+from tag.models import Tag
+
 class TimeStampedActivate(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
@@ -10,9 +12,6 @@ class TimeStampedActivate(models.Model):
     class Meta:
         abstract = True
 
-class Tag(models.Model):
-    name = models.TextField(unique=True)
-    created = models.DateTimeField(default=datetime.now())
 
 class Blog(models.Model):
     """
@@ -33,6 +32,7 @@ class Blog(models.Model):
 
     def __unicode__(self):
         return self.name
+
 
 class Post(models.Model):
     post = models.TextField()

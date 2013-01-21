@@ -1,15 +1,15 @@
 #from bc_solr import *
-from blog.models import *
+from blog.models import User, Blog, Post, Tag
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponse
+#from django.core.urlresolvers import reverse
+#from django.http import HttpResponseRedirect, HttpResponse
 from django.db.models import Q
-from django.shortcuts import get_list_or_404, render_to_response
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response
 from django.template import RequestContext
-from pprint import pprint
+#from pprint import pprint
 
-from subprocess import call
+#from subprocess import call
+
 
 @login_required
 def blog_list(request, blog_id):
@@ -55,12 +55,12 @@ def blog_edit(request, blog_id):
 
     print 'Editing blog_id: %s' % (blog_id)
 
-    action='Add'
+    action = 'Add'
 
     # for arg in request.POST:
     #     print '%s: %s' % (arg, request.POST[arg])
 
-    from datetime import datetime,date
+    from datetime import datetime
     from cgi import escape  # Used for escaping HTML before stored in the db
 
     if 'Go' in request.POST:
@@ -85,7 +85,7 @@ def blog_edit(request, blog_id):
                 e.title = request.POST['title']
                 e.post = escape(request.POST['post'])
                 e.date = ddate
-                e.tags.clear() # Remove all existing tags from the post
+                e.tags.clear()  # Remove all existing tags from the post
                 e.save()
         else:   # Add post
             e = Post(user=u, blog=b, title=request.POST['title'], post=escape(request.POST['post']), date=str(ddate))
@@ -93,7 +93,7 @@ def blog_edit(request, blog_id):
             e.save()
 
         for tag in tags:
-            newtag,created = Tag.objects.get_or_create(name=tag)
+            newtag, created = Tag.objects.get_or_create(name=tag)
             e.tags.add(newtag)
 
     tag_list = ''
@@ -102,7 +102,7 @@ def blog_edit(request, blog_id):
         import HTMLParser
         blog_info = Post.objects.get(id=blog_id)
         blog_info.post = HTMLParser.HTMLParser().unescape(blog_info.post)
-        action='Edit'
+        action = 'Edit'
         print "Edit blog_id: %s, title: %s" % (blog_id, blog_info.title)
     else:
         blog_info = { "date": datetime.now()}  # For new posts, set the default date to now
@@ -111,15 +111,16 @@ def blog_edit(request, blog_id):
                               {'section': 'Blog', 'action': action, 'blog_info': blog_info, 'tags': tag_list },
                               context_instance=RequestContext(request))
 
+
 @login_required
 def tag_search(request):
 
     import json
 
     tags = [ { "label": tag.name, "id": tag.id } for tag in Tag.objects.filter(name__istartswith=request.GET.get('term', '')) ]
-    json_text = json.dumps( tags )
+    json_text = json.dumps(tags)
 
-    return render_to_response( 'blog/tag_search.json',
-                               {'section': 'Blog', 'info': json_text},
-                               context_instance=RequestContext(request),
-                               mimetype="application/json")
+    return render_to_response('blog/tag_search.json',
+                              {'section': 'Blog', 'info': json_text},
+                              context_instance=RequestContext(request),
+                              mimetype="application/json")

@@ -127,6 +127,7 @@ INSTALLED_APPS = (
     'bcsolr',
     'blog',
     'feed',
+    'tag',
 
     'pygments',
     'debug_toolbar',
