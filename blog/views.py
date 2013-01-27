@@ -26,7 +26,7 @@ def blog_list(request, blog_id):
         message = 'Hello ' + request.user.username
 
     if 'tagsearch' in request.GET:
-        posts = Post.objects.filter(tags__name__exact=request.GET['tagsearch'])
+        posts = Post.objects.filter(tags__name__exact=request.GET['tagsearch']).order_by('-created')
     elif 'search_item' in request.GET:
         posts = Post.objects.filter(
             Q(post__icontains=request.GET['search_item']) |
