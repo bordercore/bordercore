@@ -128,6 +128,7 @@ INSTALLED_APPS = (
     'blog',
     'feed',
     'tag',
+    'bookmark',
 
     'pygments',
     'debug_toolbar',

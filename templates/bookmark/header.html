@@ -1,0 +1,53 @@
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+	$('#tag-filter').bind( 'keyup', handleKeyDown );
+
+	function handleKeyDown(e) {
+
+		var keychar = String.fromCharCode(e.which);
+		var numcheck = /\r/;
+		if ( numcheck.test(keychar) ) {
+			window.location='{{ request.path }}?tagsearch=' + $('#tag-filter').val();
+		}
+	}
+
+
+	$("#tag-filter").autocomplete( {
+		source: "tag_search.json",
+		minLength: 2,
+		delay: 250,
+		select: function(event, ui) {
+			window.location='{{ request.get_full_path }}?tagsearch='+this.value;
+		}
+    } );
+
+    $('#blog-search').keypress( function(e) {
+		if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
+			$('#blog-search-form').submit();
+            //$('button[type=submit] .default').click();
+            return false;
+        } else {
+            return true;
+        }
+	});
+
+});
+
+</script>
+
+<form class="form-inline" name="nav_form" id="blog-search-form" action="{{ request.path }}" method="get">
+
+Search
+<input id="blog-search" type="text" name="search_item" size="20" value="{{ request.GET.search_item }}" accesskey="s" />
+
+Tag Filter <input id="tag-filter" type="text" name="Search" value="{{ request.GET.tagsearch }}" size="20" />
+
+<!-- Blog: -->
+<!-- <& /common/dropdown.html, table => 'blog', cols => ['blog_id','blog_name'], value => $blog_id, clause => "WHERE user_id=$local{user_id}", onchange => 'blog_id', sort_order => 'blog_name' &> -->
+
+&nbsp; &nbsp; <a class="btn" href="edit.html?action=add">Add post</a>
+
+</form>

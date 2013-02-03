@@ -93,7 +93,7 @@ def blog_edit(request, blog_id):
             e.save()
 
         for tag in tags:
-            newtag, created = Tag.objects.get_or_create(name=tag)
+            newtag, __ = Tag.objects.get_or_create(name=tag)
             e.tags.add(newtag)
 
     tag_list = ''

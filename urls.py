@@ -1,8 +1,9 @@
 from django.conf.urls.defaults import patterns, include, url
 from django.contrib.auth.views import login, logout
-#from bcsolr.views import search
-
 from django.contrib import admin
+
+from bookmark.views import OrderListJson
+
 admin.autodiscover()
 
 urlpatterns = patterns('blog.views',
@@ -13,6 +14,12 @@ urlpatterns = patterns('blog.views',
 
 urlpatterns += patterns('feed.views',
                         url(r'^feeds/', 'feed_list')
+)
+
+urlpatterns += patterns('bookmark.views',
+                        url(r'^bookmarks/', 'bookmark_list'),
+                        url(r'^my/datatable/data/$', OrderListJson.as_view(), name='get_bookmarks_list')
+#                        url(r'^ajax/get-bookmarks-list/$', 'get_bookmarks_list', name = 'get_bookmarks_list')
 )
 
 # urlpatterns += patterns('bcsolr.views',

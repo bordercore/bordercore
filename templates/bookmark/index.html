@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+
+{% endblock %}
+
+{% block title %} Bookmarks {% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
+
+<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.bootstrap.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/dataTableExt.oApi.fnSetFilteringDelay.js"> </script>
+
+<script type="text/javascript" charset="utf-8">
+
+$(document).ready(function() {
+
+	function formatTitle( oObj ) {
+		return '<a href="' + oObj.aData[1] + '">' + oObj.aData[2] + '</a>';
+	}
+
+	$('#bookmark_list').dataTable( {
+		"bServerSide": true,
+		"sAjaxSource": "{% url get_bookmarks_list %}",
+		"bPaginate": true,
+		"bInfo": false,
+		"iDisplayLength": 50,
+		"aaSorting": [[0, 'desc']],
+		"bFilter": true,
+		"bLengthChange": false,
+		"sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+		"bSearchable": false,
+		"aoColumnDefs": [
+			{ "aTargets": [0], "sClass": "span2", "asSorting": [ "desc", "asc" ] },
+			{ "aTargets": [1], "bVisible": false },
+			{ "aTargets": [2], "fnRender": formatTitle, "useRendered": false },
+                ],
+	} );
+
+	$('#bookmark_list').dataTable().fnSetFilteringDelay(1000);
+
+});
+
+</script>
+
+{% include "bookmark/header.html" %}
+
+{% include "common/datatable.html" with cols=cols id="bookmark_list" %}
+
+{% endblock %}
