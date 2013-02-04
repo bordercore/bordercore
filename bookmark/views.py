@@ -42,7 +42,7 @@ def bookmark_list(request):
     #     results = mysolr.search(request.POST['value'], "title")
 
     return render_to_response('bookmark/index.html',
-                              {'section': 'Bookmark',
+                              {'section': 'Bookmarks',
                                'bookmarks': bookmarks,
                                'cols': ['Date', 'url', 'title'],
                                'message': message,

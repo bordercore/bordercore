@@ -8,7 +8,7 @@
 //  });
 
 $(document).ready(function() {
-	$('.navigation li:contains("{{ section }}")').attr('id', 'current-nav')
+	$('.nav li:contains("{{ section }}")').attr('class', 'active')
 })
 
 </script>
@@ -17,20 +17,20 @@ $(document).ready(function() {
   <div class="navbar-inner">
     <!-- <a class="brand" href="#">Title</a> -->
     <ul class="nav">
-      <li class="active"><a href="/">Home</a></li>
+      <li><a href="/">Home</a></li>
       <li><a href="/bookmarks/">Bookmarks</a></li>
 	  <li><a href="/feeds/">Feeds</a></li>
       <li><a href="/calendar/">Calendar</a></li>
       <li><a href="/todo/">Todo</a></li>
-      <li><a href="/addressbook/">Addressbook</a></li>
+	  <!--      <li><a href="/addressbook/">Addressbook</a></li> -->
       <li><a href="/photos/">Photos</a></li>
-      <li><a href="/blog/blog/">Blog</a></li>
+      <li><a href="/blog/">Blog</a></li>
       <li><a href="/mp3/">Music</a></li>
       <li><a href="/prefs/">Prefs</a></li>
     </ul>
-<form class="navbar-search pull-left">
-  <input type="text" size="20" class="search-query" placeholder="Search">
-</form>
+	<form class="navbar-search pull-left">
+	  <input type="text" size="20" class="search-query" placeholder="Search">
+	</form>
   </div>
 </div>
 
