@@ -19,7 +19,10 @@ urlpatterns += patterns('feed.views',
 urlpatterns += patterns('bookmark.views',
                         url(r'^bookmarks/', 'bookmark_list'),
                         url(r'^my/datatable/data/$', OrderListJson.as_view(), name='get_bookmarks_list')
-#                        url(r'^ajax/get-bookmarks-list/$', 'get_bookmarks_list', name = 'get_bookmarks_list')
+)
+
+urlpatterns += patterns('homepage.views',
+                        url(r'', 'homepage', name='homepage')
 )
 
 # urlpatterns += patterns('bcsolr.views',
