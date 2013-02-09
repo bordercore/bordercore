@@ -6,7 +6,11 @@ from bookmark.views import OrderListJson
 
 admin.autodiscover()
 
-urlpatterns = patterns('blog.views',
+urlpatterns = patterns('homepage.views',
+                        url(r'^$|^index.html', 'homepage', name='homepage')
+)
+
+urlpatterns += patterns('blog.views',
                         url(r'^blog/(?:(\d+)/)?edit', 'blog_edit'),
                         url(r'^blog/(\d+)?', 'blog_list'),
                         url(r'^blog/tag_search.json', 'tag_search')
@@ -18,11 +22,7 @@ urlpatterns += patterns('feed.views',
 
 urlpatterns += patterns('bookmark.views',
                         url(r'^bookmarks/', 'bookmark_list'),
-                        url(r'^my/datatable/data/$', OrderListJson.as_view(), name='get_bookmarks_list')
-)
-
-urlpatterns += patterns('homepage.views',
-                        url(r'', 'homepage', name='homepage')
+                        url(r'^my/datatable/data/$', OrderListJson.as_view(), name='get_bookmarks_list'),
 )
 
 # urlpatterns += patterns('bcsolr.views',
