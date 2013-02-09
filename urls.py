@@ -35,6 +35,6 @@ urlpatterns += patterns('',
 )
 
 urlpatterns += patterns('',
-    (r'^accounts/login/$',  login, {'template_name': 'bcsolr/login.html'}),
+    (r'^accounts/login/$',  login, {'template_name': 'login.html'}),
     (r'^accounts/logout/$', logout),
 )
