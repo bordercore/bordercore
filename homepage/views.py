@@ -8,6 +8,6 @@ from django.template import RequestContext
 @login_required
 def homepage(request):
 
-
     return render_to_response('homepage/index.html',
+                              {'section': 'Home' },
                               context_instance=RequestContext(request))
