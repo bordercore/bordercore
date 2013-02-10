@@ -1,4 +1,3 @@
-#from bc_solr import *
 from blog.models import User, Blog, Post, Tag
 from django.contrib.auth.decorators import login_required
 #from django.core.urlresolvers import reverse
@@ -6,7 +5,6 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-#from pprint import pprint
 
 #from subprocess import call
 
@@ -117,7 +115,7 @@ def tag_search(request):
 
     import json
 
-    tags = [ { "label": tag.name, "id": tag.id } for tag in Tag.objects.filter(name__istartswith=request.GET.get('term', '')) ]
+    tags = [ tag.name for tag in Tag.objects.filter(name__istartswith=request.GET.get('query', '')) ]
     json_text = json.dumps(tags)
 
     return render_to_response('blog/tag_search.json',

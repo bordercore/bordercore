@@ -12,8 +12,8 @@ urlpatterns = patterns('homepage.views',
 
 urlpatterns += patterns('blog.views',
                         url(r'^blog/(?:(\d+)/)?edit', 'blog_edit'),
+                        url(r'^blog/tag_search.json', 'tag_search'),
                         url(r'^blog/(\d+)?', 'blog_list'),
-                        url(r'^blog/tag_search.json', 'tag_search')
 )
 
 urlpatterns += patterns('feed.views',

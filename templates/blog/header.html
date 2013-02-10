@@ -1,39 +1,28 @@
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/ui-lightness/jquery-ui-1.9.2.custom.min.css" />
-<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
-
 <script type="text/javascript">
 
 $(document).ready(function() {
 
-	$('#tag-filter').bind( 'keyup', handleKeyDown );
+    // $('#blog-search').keypress( function(e) {
+	// 	if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
+	// 		$('#blog-search-form').submit();
+    //         //$('button[type=submit] .default').click();
+    //         return false;
+    //     } else {
+    //         return true;
+    //     }
+	// });
 
-	function handleKeyDown(e) {
-
-		var keychar = String.fromCharCode(e.which);
-		var numcheck = /\r/;
-		if ( numcheck.test(keychar) ) {
-			window.location='{{ request.path }}?tagsearch=' + $('#tag-filter').val();
+	$('#tag-filter').typeahead({
+		source: function (query, process) {
+			return $.getJSON('tag_search.json',
+						 { query: query },
+						 function (data) {
+							 return process(data);
+						 });
+		},
+		updater: function(item) {
+			window.location='{{ request.path }}?tagsearch=' + item;
 		}
-	}
-
-
-	$("#tag-filter").autocomplete( {
-		source: "tag_search.json",
-		minLength: 2,
-		delay: 250,
-		select: function(event, ui) {
-			window.location='{{ request.get_full_path }}?tagsearch='+this.value;
-		}
-    } );
-
-    $('#blog-search').keypress( function(e) {
-		if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
-			$('#blog-search-form').submit();
-            //$('button[type=submit] .default').click();
-            return false;
-        } else {
-            return true;
-        }
 	});
 
 });
@@ -45,7 +34,7 @@ $(document).ready(function() {
 Search
 <input id="blog-search" type="text" name="search_item" size="20" value="{{ request.GET.search_item }}" accesskey="s" />
 
-Tag Filter <input id="tag-filter" type="text" name="Search" value="{{ request.GET.tagsearch }}" size="20" />
+Tag Filter <input id="tag-filter" type="text" value="{{ request.GET.tagsearch }}" autocomplete="off" />
 
 <!-- Blog: -->
 <!-- <& /common/dropdown.html, table => 'blog', cols => ['blog_id','blog_name'], value => $blog_id, clause => "WHERE user_id=$local{user_id}", onchange => 'blog_id', sort_order => 'blog_name' &> -->
