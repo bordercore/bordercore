@@ -1,3 +1,6 @@
+from blog.models import User
+from bookmark.models import Bookmark
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -5,6 +8,7 @@ from django.template import RequestContext
 from bookmark.models import Bookmark
 from django_datatables_view.base_datatable_view import BaseDatatableView
 
+section = 'Bookmarks'
 
 @login_required
 def bookmark_list(request):
@@ -42,13 +46,28 @@ def bookmark_list(request):
     #     results = mysolr.search(request.POST['value'], "title")
 
     return render_to_response('bookmark/index.html',
-                              {'section': 'Bookmarks',
+                              {'section': section,
                                'bookmarks': bookmarks,
                                'cols': ['Date', 'url', 'title'],
                                'message': message,
                                'results': results },
                               context_instance=RequestContext(request))
 
+
+@login_required
+def snarf_bookmark(request):
+
+    url = request.GET['url']
+    title = request.GET['title']
+
+    # TODO Add authentication here -- don't assume the user is jerrell
+    u = User.objects.get(username__exact='jerrell')
+    b = Bookmark(user=u, url=url, title=title)
+    b.save()
+
+    return render_to_response('bookmark/snarf.html',
+                              {'section': section, 'url': url, 'title': title},
+                              context_instance=RequestContext(request))
 
 #@login_required
 class OrderListJson(BaseDatatableView):
