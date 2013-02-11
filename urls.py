@@ -2,11 +2,22 @@ from django.conf.urls.defaults import patterns, include, url
 from django.contrib.auth.views import login, logout
 from django.contrib import admin
 
+from tastypie.api import Api
+
+from bookmark.api import BookmarkResource, UserResource
 from bookmark.views import OrderListJson
 
 admin.autodiscover()
 
-urlpatterns = patterns('homepage.views',
+v1_api = Api(api_name='v1')
+v1_api.register(UserResource())
+v1_api.register(BookmarkResource())
+
+urlpatterns = patterns('',
+                        (r'^api/', include(v1_api.urls)),
+)
+
+urlpatterns += patterns('homepage.views',
                         url(r'^$|^index.html', 'homepage', name='homepage')
 )
 

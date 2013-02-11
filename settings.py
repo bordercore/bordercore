@@ -132,7 +132,8 @@ INSTALLED_APPS = (
 
     'pygments',
     'debug_toolbar',
-    'south'
+    'south',
+    'tastypie'
 
 )
 
