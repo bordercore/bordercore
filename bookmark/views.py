@@ -55,7 +55,7 @@ def bookmark_list(request):
 
 
 @login_required
-def snarf_bookmark(request):
+def snarf_link(request):
 
     url = request.GET['url']
     title = request.GET['title']
@@ -65,7 +65,7 @@ def snarf_bookmark(request):
     b = Bookmark(user=u, url=url, title=title)
     b.save()
 
-    return render_to_response('bookmark/snarf.html',
+    return render_to_response('bookmark/snarf_link.html',
                               {'section': section, 'url': url, 'title': title},
                               context_instance=RequestContext(request))
 
