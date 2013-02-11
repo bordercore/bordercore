@@ -14,15 +14,54 @@
 <script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.bootstrap.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/dataTableExt.oApi.fnSetFilteringDelay.js"> </script>
 
+<style>
+.row_selected { background-color: #0173bc; color: #ffffff }
+.table tbody tr:hover td,
+.table tbody tr:hover th {
+  background-color: transparent;
+}
+//.table-striped tbody tr:nth-child(odd):hover td {
+//   background-color: #0173bc;
+//}
+</style>
+
 <script type="text/javascript" charset="utf-8">
 
+var oTable;
+
+/* Get the bookmark ID which is currently selected */
+/* Modified from http://www.datatables.net/examples/api/select_single_row.html */
+function fnGetSelected( oTableLocal ) {
+
+	var aTrs = oTableLocal.fnGetNodes();
+
+	for ( var i=0 ; i<aTrs.length ; i++ ) {
+		if ( $(aTrs[i]).hasClass('row_selected') ) {
+			return oTable.fnGetData( i )[3];
+		}
+	}
+
+}
+
+
 $(document).ready(function() {
+
+    $('#btn-delete').on('click', function() {
+
+		var selectedBookmarkID = fnGetSelected( oTable );
+
+		$.ajax( { type: 'DELETE',
+				  url: '/api/v1/bookmark/' + selectedBookmarkID + '/', async: false });
+
+		oTable.fnDraw();
+
+	});
 
 	function formatTitle( oObj ) {
 		return '<a href="' + oObj.aData[1] + '">' + oObj.aData[2] + '</a>';
 	}
 
-	$('#bookmark_list').dataTable( {
+	oTable = $('#bookmark_list').dataTable( {
 		"bServerSide": true,
 		"sAjaxSource": "{% url get_bookmarks_list %}",
 		"bPaginate": true,
@@ -31,20 +70,49 @@ $(document).ready(function() {
 		"aaSorting": [[0, 'desc']],
 		"bFilter": true,
 		"bLengthChange": false,
-		"sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+		"sDom": "<'row'<'span6'<'toolbar'>l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
 		"bSearchable": false,
 		"aoColumnDefs": [
 			{ "aTargets": [0], "sClass": "span2", "asSorting": [ "desc", "asc" ] },
-			{ "aTargets": [1], "bVisible": false },
+			{ "aTargets": [1,3], "bVisible": false },
 			{ "aTargets": [2], "fnRender": formatTitle, "useRendered": false },
-                ],
+        ],
 	} );
 
 	$('#bookmark_list').dataTable().fnSetFilteringDelay(1000);
 
+//$('#mytable').on('click', 'tbody tr', function(event) {
+//    $(this).addClass('highlight').siblings().removeClass('highlight');
+//});​
+
+	$("#bookmark_list tbody").click( function( e ) {
+
+		$(this.nTr).addClass('highlight').siblings().removeClass('highlight');
+
+		$(oTable.fnSettings().aoData).each(function (){
+			$(this.nTr).removeClass('row_selected');
+		});
+		$(event.target.parentNode).addClass('row_selected');
+
+		console.log('got here');
+
+    });
+
+	// $("div.toolbar").html('Custom tool bar! Text/images etc.');
+	$(".foobar").appendTo("div.toolbar");
+
 });
 
 </script>
+
+<div class="foobar">
+  <div class="btn-group">
+	<button class="btn" disabled>New</button>
+	<button class="btn" disabled>Edit</button>
+	<button class="btn" id="btn-delete">Delete</button>
+  </div>
+  <div id="feedback"></div>
+</div>
 
 {% include "bookmark/header.html" %}
 

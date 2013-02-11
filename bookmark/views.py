@@ -48,7 +48,7 @@ def bookmark_list(request):
     return render_to_response('bookmark/index.html',
                               {'section': section,
                                'bookmarks': bookmarks,
-                               'cols': ['Date', 'url', 'title'],
+                               'cols': ['Date', 'url', 'title', 'id'],
                                'message': message,
                                'results': results },
                               context_instance=RequestContext(request))
@@ -113,6 +113,7 @@ class OrderListJson(BaseDatatableView):
                 item.created.strftime("%b %d, %Y"),
                 item.url,
                 item.title,
+                item.id
                 # "%s %s" % (item.customer_firstname, item.customer_lastname),
                 # item.get_state_display(),
                 # item.modified.strftime("%Y-%m-%d %H:%M:%S")
