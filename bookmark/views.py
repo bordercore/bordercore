@@ -88,7 +88,7 @@ class OrderListJson(BaseDatatableView):
         # simple example:
         sSearch = self.request.GET.get('sSearch', None)
         if sSearch:
-            qs = qs.filter(title__istartswith=sSearch)
+            qs = qs.filter(title__icontains=sSearch)
 
         # more advanced example
         # filter_customer = self.request.GET.get('customer', None)
