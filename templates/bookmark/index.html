@@ -43,6 +43,17 @@ function fnGetSelected( oTableLocal ) {
 
 }
 
+var refreshInterval = 60;  // Minutes
+
+function refreshList() {
+
+    oTable.fnDraw();
+    setTimeout("refreshList()", refreshInterval*60*1000);
+
+}
+
+// periodically refresh the list
+setTimeout("refreshList()", refreshInterval*60*1000);
 
 $(document).ready(function() {
 
