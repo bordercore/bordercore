@@ -14,7 +14,7 @@ $(document).ready(function() {
 
 	$('#tag-filter').typeahead({
 		source: function (query, process) {
-			return $.getJSON('tag_search.json',
+			return $.getJSON('/blog/tag_search.json',
 						 { query: query },
 						 function (data) {
 							 return process(data);
