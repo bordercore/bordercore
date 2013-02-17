@@ -7,7 +7,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 #from subprocess import call
-
+section = 'Blog'
 
 @login_required
 def blog_list(request, blog_id):
@@ -44,7 +44,7 @@ def blog_list(request, blog_id):
     #     results = mysolr.search(request.POST['value'], "title")
 
     return render_to_response('blog/index.html',
-                              {'section': 'Blog', 'posts': posts, 'message': message, 'results': results, 'did_submit': did_submit },
+                              {'section': section, 'posts': posts, 'message': message, 'results': results, 'did_submit': did_submit },
                               context_instance=RequestContext(request))
 
 
@@ -106,7 +106,7 @@ def blog_edit(request, blog_id):
         blog_info = { "date": datetime.now()}  # For new posts, set the default date to now
 
     return render_to_response('blog/edit.html',
-                              {'section': 'Blog', 'action': action, 'blog_info': blog_info, 'tags': tag_list },
+                              {'section': section, 'action': action, 'blog_info': blog_info, 'tags': tag_list },
                               context_instance=RequestContext(request))
 
 
@@ -119,6 +119,6 @@ def tag_search(request):
     json_text = json.dumps(tags)
 
     return render_to_response('blog/tag_search.json',
-                              {'section': 'Blog', 'info': json_text},
+                              {'section': section, 'info': json_text},
                               context_instance=RequestContext(request),
                               mimetype="application/json")
