@@ -14,17 +14,6 @@
 <script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.bootstrap.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/dataTableExt.oApi.fnSetFilteringDelay.js"> </script>
 
-<style>
-.row_selected { background-color: #0173bc; color: #ffffff }
-.table tbody tr:hover td,
-.table tbody tr:hover th {
-  background-color: transparent;
-}
-//.table-striped tbody tr:nth-child(odd):hover td {
-//   background-color: #0173bc;
-//}
-</style>
-
 <script type="text/javascript" charset="utf-8">
 
 var oTable;
@@ -62,10 +51,20 @@ $(document).ready(function() {
 		var selectedBookmarkID = fnGetSelected( oTable );
 
 		$.ajax( { type: 'DELETE',
-				  url: '/api/v1/bookmark/' + selectedBookmarkID + '/', async: false });
+				  url: '/api/v1/bookmark/' + selectedBookmarkID + '/',
+				  success: function() {
+					  $('#feedback').fadeIn(1000).html("Bookmark deleted.");
+					  setTimeout( function() {
+						  $('#feedback').fadeOut(1000);
+					  }, 3000);
 
-		oTable.fnDraw();
+					  oTable.fnDraw();
 
+					  $('#btn-edit').attr("disabled", "disabled");
+					  $('#btn-delete').attr("disabled", "disabled");
+
+				  }
+				});
 	});
 
 	function formatTitle( oObj ) {
@@ -92,20 +91,23 @@ $(document).ready(function() {
 
 	$('#bookmark_list').dataTable().fnSetFilteringDelay(1000);
 
-//$('#mytable').on('click', 'tbody tr', function(event) {
-//    $(this).addClass('highlight').siblings().removeClass('highlight');
-//});​
-
 	$("#bookmark_list tbody").click( function( e ) {
 
-		$(this.nTr).addClass('highlight').siblings().removeClass('highlight');
+		// Hilight the clicked row
+		$(event.target.parentNode).toggleClass("row_selected");
 
-		$(oTable.fnSettings().aoData).each(function (){
-			$(this.nTr).removeClass('row_selected');
-		});
-		$(event.target.parentNode).addClass('row_selected');
+		// Remove hilighting from all other rows
+		$(event.target.parentNode).siblings().removeClass("row_selected");
 
-		console.log('got here');
+		// Enable or disabled the 'Edit' and 'Delete' buttons based
+		//  on whether a row is selected (hilighted)
+		if ( $(event.target.parentNode).hasClass("row_selected") ) {
+			$('#btn-edit').removeAttr("disabled");
+			$('#btn-delete').removeAttr("disabled");
+		} else {
+			$('#btn-edit').attr("disabled", "disabled");
+			$('#btn-delete').attr("disabled", "disabled");
+		}
 
     });
 
@@ -118,11 +120,12 @@ $(document).ready(function() {
 
 <div class="foobar">
   <div class="btn-group">
-	<button class="btn" disabled>New</button>
-	<button class="btn" disabled>Edit</button>
-	<button class="btn" id="btn-delete">Delete</button>
+	<button class="btn" id="btn-add">Add</button>
+	<button class="btn" id="btn-edit" disabled>Edit</button>
+	<button class="btn" id="btn-delete" disabled>Delete</button>
+	<button class="btn" id="btn-test">Test</button>
   </div>
-  <div id="feedback"></div>
+	<div id="feedback" class="alert alert-success hide" style="width: 150px; height: 20px; float: right; margin-bottom: 0px"></div>
 </div>
 
 {% include "bookmark/header.html" %}
@@ -130,3 +133,4 @@ $(document).ready(function() {
 {% include "common/datatable.html" with cols=cols id="bookmark_list" %}
 
 {% endblock %}
+
