@@ -73,7 +73,7 @@ $(document).ready(function() {
 
 	oTable = $('#bookmark_list').dataTable( {
 		"bServerSide": true,
-		"sAjaxSource": "{% url get_bookmarks_list %}",
+		"sAjaxSource": "{% url 'get_bookmarks_list' %}",
 		"bPaginate": true,
 		"bInfo": false,
 		"iDisplayLength": 50,
