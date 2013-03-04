@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %} Blog {% endblock %}
+
+{% block content %}
+
+{% if form.errors %}
+<div class="alert alert-error offset2 span10">
+Please correct the errors below.
+</div>
+{% endif %}
+
+<p class="lead offset2"> {{ action }} Bookmark</p>
+
+<form class="form-horizontal" action="{{ request.path }}" method="post">
+{% csrf_token %}
+
+{% for field in form %}
+<div class="control-group {% if field.errors %}error{% endif %}">
+    <label class="control-label" for="inputTitle">{{ field.label }}</label>
+    <div class="controls">
+{{ field }}
+{% for error in field.errors %}
+<span class="form-error">{{ error }}</span>
+{% endfor %}
+    </div>
+  </div>
+{% endfor %}
+
+  <div class="control-group">
+    <div class="controls">
+	  <input class="btn" type="submit" name="Go" value="{{ action }}">
+	  <input class="btn{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete">
+	  <a class="btn" href="/bookmarks/">Cancel</a>
+	</div>
+  </div>
+
+</form>
+
+{% endblock %}

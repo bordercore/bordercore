@@ -1,12 +1,14 @@
-from blog.models import User
-from bookmark.models import Bookmark
-
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.http import HttpResponseRedirect
+
+from django_datatables_view.base_datatable_view import BaseDatatableView
 
 from bookmark.models import Bookmark
-from django_datatables_view.base_datatable_view import BaseDatatableView
+from blog.models import User
+from bookmark.forms import BookmarkForm
 
 section = 'Bookmarks'
 
@@ -55,10 +57,46 @@ def bookmark_list(request):
 
 
 @login_required
+def bookmark_edit(request, bookmark_id = None):
+
+    action = 'Edit'
+
+    b = Bookmark.objects.get(pk=bookmark_id) if bookmark_id else None
+
+    if request.method == 'POST':
+        if request.POST['Go'] in ['Edit', 'Add']:
+            form = BookmarkForm(request.POST, instance=b) # A form bound to the POST data
+            if form.is_valid():
+                newform = form.save(commit=False)
+                newform.user = request.user
+                newform.save()
+                form.save_m2m() # Save the many-to-many data for the form.
+                messages.add_message(request, messages.INFO, 'Bookmark edited')
+                return bookmark_list(request)
+        elif request.POST['Go'] == 'Delete':
+            b.delete()
+            messages.add_message(request, messages.INFO, 'Bookmark deleted')
+            return bookmark_list(request)
+
+    elif bookmark_id:
+        action = 'Edit'
+        form = BookmarkForm(instance=b)
+
+    else:
+        action = 'Add'
+        form = BookmarkForm() # An unbound form
+
+    return render_to_response('bookmark/edit.html',
+                              {'section': section, 'action': action, 'form': form },
+                              context_instance=RequestContext(request))
+
+@login_required
 def snarf_link(request):
 
     url = request.GET['url']
     title = request.GET['title']
+
+    print title
 
     # TODO Add authentication here -- don't assume the user is jerrell
     u = User.objects.get(username__exact='jerrell')

@@ -25,3 +25,6 @@ class Bookmark(TimeStampedActivate):
     tags = models.ManyToManyField(Tag)
     last_check = models.DateTimeField(null=True)
     last_response_code = models.IntegerField(null=True)
+
+    def get_tags(self):
+        return ", ".join([tag.name for tag in self.tags.all()])

@@ -46,6 +46,15 @@ setTimeout("refreshList()", refreshInterval*60*1000);
 
 $(document).ready(function() {
 
+{% if messages %}
+{% for message in messages %}
+	$('#feedback').fadeIn(1000).html('{{ message }}');
+	setTimeout( function() {
+		$('#feedback').fadeOut(1000);
+	}, 3000);
+{% endfor %}
+{% endif %}
+
     $('#btn-delete').on('click', function() {
 
 		var selectedBookmarkID = fnGetSelected( oTable );
@@ -65,6 +74,13 @@ $(document).ready(function() {
 
 				  }
 				});
+	});
+
+    $('#btn-edit').on('click', function() {
+
+		var selectedBookmarkID = fnGetSelected( oTable );
+		window.location.href = '/bookmarks/edit/' + selectedBookmarkID;
+
 	});
 
 	function formatTitle( oObj ) {
@@ -120,7 +136,7 @@ $(document).ready(function() {
 
 <div class="foobar">
   <div class="btn-group">
-	<button class="btn" id="btn-add">Add</button>
+	<a class="btn" id="btn-add" href="/bookmarks/edit">Add</a>
 	<button class="btn" id="btn-edit" disabled>Edit</button>
 	<button class="btn" id="btn-delete" disabled>Delete</button>
   </div>

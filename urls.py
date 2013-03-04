@@ -32,6 +32,7 @@ urlpatterns += patterns('feed.views',
 )
 
 urlpatterns += patterns('bookmark.views',
+                        url(r'^bookmarks/edit(?:/(\d+))?', 'bookmark_edit', name='bookmark_edit'),
                         url(r'^bookmarks/snarf_link.html', 'snarf_link'),
                         url(r'^bookmarks/', 'bookmark_list'),
                         url(r'^my/datatable/data/$', OrderListJson.as_view(), name='get_bookmarks_list'),
