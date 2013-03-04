@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 
+{% block title %} Blog {% endblock %}
+
 {% block content %}
 
 {% include "blog/header.html" %}
 
 <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
-<link href="{{ STATIC_URL }}css/datepicker.css" rel="stylesheet" media="screen">
+<link href="{{ STATIC_URL }}css/datepicker.css" rel="stylesheet" media="screen" />
 
 <script type="text/javascript">
 
@@ -31,7 +33,7 @@ Post {{ action }}ed
 
 {% endif %}
 
-<span></span><p class="lead offset1"> {{ action }} a Blog Post</p>
+<p class="lead offset2"> {{ action }} a Blog Post</p>
 
 <form class="form-horizontal" method="post" action="{{ request.path }}">
 {% csrf_token %}
