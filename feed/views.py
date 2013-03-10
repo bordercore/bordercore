@@ -1,19 +1,14 @@
-from feed.models import *
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponse
-from django.db.models import Q
-from django.shortcuts import get_list_or_404, render_to_response
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response
 from django.template import RequestContext
-from pprint import pprint
 
-from subprocess import call
+from feed.models import Feed, FeedItem
 
 @login_required
 def feed_list(request):
 
-    current_feed = request.session['current_feed']
+    default_feed_id = Feed.objects.get(name='Hacker News').id
+    current_feed = request.session.get('current_feed', default_feed_id)
 
     import json
 
