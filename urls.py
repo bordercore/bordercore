@@ -28,7 +28,8 @@ urlpatterns += patterns('blog.views',
 )
 
 urlpatterns += patterns('feed.views',
-                        url(r'^feeds/', 'feed_list')
+                        url(r'^feed/set_current_feed/(\d+)', 'set_current_feed'),
+                        url(r'^feeds/', 'feed_list'),
 )
 
 urlpatterns += patterns('bookmark.views',

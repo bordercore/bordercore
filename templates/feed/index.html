@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %} Feeds {% endblock %}
+
 {% block content %}
 
 <script type="text/javascript">
@@ -16,7 +18,7 @@ $(document).ready(function() {
 
 	function showFeed(feed_id) {
 
-		$("a[id='link_" + feed_id+ "']").parent().html( feed_json_text[ feed_id ]['name']);
+		// $("a[id='link_" + feed_id+ "']").parent().html( feed_json_text[ feed_id ]['name'] );
 		$('#feed-title').html( '<a href="' + feed_json_text[ feed_id ]['feed_homepage']+ '">' + feed_json_text[ feed_id ]['name'] + '</a>');
 
 		myText = '';
@@ -27,9 +29,17 @@ $(document).ready(function() {
 
 		$('#feed-item-list').html( myText );
 
+		$.ajax( { type: 'GET',
+                  url: '/feed/set_current_feed/' + feed_id + '/',
+                  success: function() {
+                  }
+                });
+
+
 	}
 
-	showFeed(1);
+	// Get the user's default feed and display it first
+	showFeed( {{ current_feed }} );
 
 });
 
@@ -47,7 +57,7 @@ $(document).ready(function() {
 </div>
 
 <div class="span7">
-<h3 id="feed-title">Hey there</h3>
+<h3 id="feed-title"></h3>
 <hr />
 <span id="feed-item-list"></span>
 </div>
