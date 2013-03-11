@@ -37,7 +37,7 @@ class Blog(models.Model):
 class Post(models.Model):
     post = models.TextField()
     title = models.TextField(null=True)
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField(editable=True)
     user = models.ForeignKey(User)
     blog = models.ForeignKey(Blog)
     tags = models.ManyToManyField(Tag)

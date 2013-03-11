@@ -22,9 +22,9 @@ urlpatterns += patterns('homepage.views',
 )
 
 urlpatterns += patterns('blog.views',
-                        url(r'^blog/(?:(\d+)/)?edit', 'blog_edit'),
+                        url(r'^blog/edit(?:/(\d+))?', 'blog_edit', name='blog_edit'),
                         url(r'^blog/tag_search.json', 'tag_search'),
-                        url(r'^blog/(\d+)?', 'blog_list'),
+                        url(r'^blog/(\d+)?', 'blog_list', name='blog_list'),
 )
 
 urlpatterns += patterns('feed.views',

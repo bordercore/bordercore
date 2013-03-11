@@ -1,23 +1,21 @@
-from blog.models import User, Blog, Post, Tag
 from django.contrib.auth.decorators import login_required
-#from django.core.urlresolvers import reverse
-#from django.http import HttpResponseRedirect, HttpResponse
+from django.contrib import messages
 from django.db.models import Q
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
-#from subprocess import call
+from blog.models import User, Blog, Post, Tag
+from blog.forms import BlogForm
+
 section = 'Blog'
 
 @login_required
 def blog_list(request, blog_id):
 
-    did_submit = False
     #    if not request.user.is_authenticated():
     #        return HttpResponseRedirect('/accounts/login/?next=%s' % request.path)
     message = ''
-    results = ''
-    #    request.session["fav_color"] = "blue"
+
     if not request.user.is_authenticated():
         message = 'User is NOT authenticated'
     else:
@@ -33,23 +31,50 @@ def blog_list(request, blog_id):
     elif blog_id:
         posts = Post.objects.filter(id=blog_id)
     else:
-        # posts = Post.objects.filter(id=1120)
         posts = Post.objects.order_by('-created').all()[:10]
 
-    # pprint(posts)
-
-    # if 'Go' in request.POST:
-    #     did_submit = True
-    #     mysolr = BCSolr()
-    #     results = mysolr.search(request.POST['value'], "title")
-
     return render_to_response('blog/index.html',
-                              {'section': section, 'posts': posts, 'message': message, 'results': results, 'did_submit': did_submit },
+                              {'section': section, 'posts': posts, 'message': message },
                               context_instance=RequestContext(request))
 
 
 @login_required
-def blog_edit(request, blog_id):
+def blog_edit(request, post_id):
+
+    action = 'Edit'
+
+    p = Post.objects.get(pk=post_id) if post_id else None
+
+    if request.method == 'POST':
+
+        if request.POST['Go'] in ['Edit', 'Add']:
+            form = BlogForm(request.POST, instance=p) # A form bound to the POST data
+            if form.is_valid():
+                newform = form.save(commit=False)
+                newform.user = request.user
+                newform.blog = Blog.objects.get(name='General')
+                newform.save()
+                form.save_m2m() # Save the many-to-many data for the form.
+                messages.add_message(request, messages.INFO, 'Blog post edited')
+        elif request.POST['Go'] == 'Delete':
+            p.delete()
+            messages.add_message(request, messages.INFO, 'Blog post deleted')
+            return blog_list(request, None)
+
+    elif post_id:
+        action = 'Edit'
+        form = BlogForm(instance=p)
+
+    else:
+        action = 'Add'
+        form = BlogForm() # An unbound form
+
+    return render_to_response('blog/edit.html',
+                              {'section': section, 'action': action, 'form': form },
+                              context_instance=RequestContext(request))
+
+@login_required
+def blog_edit_old(request, blog_id):
 
     print 'Editing blog_id: %s' % (blog_id)
 
@@ -78,7 +103,6 @@ def blog_edit(request, blog_id):
                 e.delete()
                 return blog_list(request, None)
             else:
-                print "Edit blog_id: %s" % (blog_id)
                 e = Post.objects.get(id=blog_id)
                 e.title = request.POST['title']
                 e.post = escape(request.POST['post'])
