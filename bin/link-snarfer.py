@@ -54,10 +54,10 @@ buffer = quopri.decodestring(buffer)
 matches = p.findall(buffer)
 
 # Save the buffer to a file for later debugging
-import time
-f = open("/tmp/link-snarfer/" + str(time.time()), "w")
-f.write(buffer)
-f.close()
+# import time
+# f = open("/tmp/link-snarfer/" + str(time.time()), "w")
+# f.write(buffer)
+# f.close()
 
 for link in matches:
 
