@@ -93,10 +93,13 @@ def bookmark_edit(request, bookmark_id = None):
 @login_required
 def snarf_link(request):
 
-    url = request.GET['url']
-    title = request.GET['title']
+    import HTMLParser
+    h = HTMLParser.HTMLParser()
 
-    print title
+    url = request.GET['url']
+    title = h.unescape( request.GET['title'] )
+
+    # print title.encode('utf-8')
 
     # TODO Add authentication here -- don't assume the user is jerrell
     u = User.objects.get(username__exact='jerrell')
