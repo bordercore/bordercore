@@ -28,6 +28,10 @@ logging.basicConfig(level=logging.INFO,
 
 logger = logging.getLogger('bordercore.linksnarfer')
 
+# Only let requests log at level WARNING or higher
+requests_log = logging.getLogger("requests")
+requests_log.setLevel(logging.WARNING)
+
 def get_link_info(link):
     r = requests.get(link)
     http_content = r.text
@@ -72,11 +76,12 @@ if link_dict:
 
     for label in link_dict.keys():
 
-        print "label: %s" % label
+        print "label: %s" % label.encode('utf-8')
         print "link: %s" % link_dict[label]
+        logger.info(link_dict[label])
 
         # b = Bookmark(url='http://www.google.com', title='Google Link', user_id=1)
         # b.save()
 
-        cur.execute("insert into bookmark_bookmark(created,modified,active,url,title,user_id) values (now(), now(), 't', %s,%s,1)", (link, label))
+        cur.execute("insert into bookmark_bookmark(created,modified,active,url,title,user_id) values (now(), now(), 't', %s,%s,1)", (link_dict[label], label or 'No Label'))
         conn.commit()
