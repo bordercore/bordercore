@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
@@ -8,13 +9,13 @@ from blog.models import User, Blog, Post, Tag
 from blog.forms import BlogForm
 
 section = 'Blog'
+ITEMS_PER_PAGE = 10
 
 @login_required
 def blog_list(request, blog_id):
 
-    #    if not request.user.is_authenticated():
-    #        return HttpResponseRedirect('/accounts/login/?next=%s' % request.path)
     message = ''
+    show_pagination = True
 
     if not request.user.is_authenticated():
         message = 'User is NOT authenticated'
@@ -22,19 +23,33 @@ def blog_list(request, blog_id):
         message = 'Hello ' + request.user.username
 
     if 'tagsearch' in request.GET:
-        posts = Post.objects.filter(tags__name__exact=request.GET['tagsearch']).order_by('-created')
+        post_list = Post.objects.filter(tags__name__exact=request.GET['tagsearch']).order_by('-created')
     elif 'search_item' in request.GET:
-        posts = Post.objects.filter(
+        post_list = Post.objects.filter(
             Q(post__icontains=request.GET['search_item']) |
             Q(title__icontains=request.GET['search_item'])
         )
     elif blog_id:
-        posts = Post.objects.filter(id=blog_id)
+        post_list = Post.objects.filter(id=blog_id)
+        show_pagination = False
     else:
-        posts = Post.objects.order_by('-created').all()[:10]
+        # posts = Post.objects.order_by('-created').all()[:ITEMS_PER_PAGE]
+        post_list = Post.objects.order_by('-created').all()
+
+    paginator = Paginator(post_list, ITEMS_PER_PAGE)
+
+    page = request.GET.get('page')
+    try:
+        posts = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        posts = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        posts = paginator.page(paginator.num_pages)
 
     return render_to_response('blog/index.html',
-                              {'section': section, 'posts': posts, 'message': message },
+                              {'section': section, 'show_pagination': show_pagination, 'posts': posts, 'message': message },
                               context_instance=RequestContext(request))
 
 
