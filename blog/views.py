@@ -71,6 +71,7 @@ def blog_edit(request, post_id):
                 newform.save()
                 form.save_m2m() # Save the many-to-many data for the form.
                 messages.add_message(request, messages.INFO, 'Blog post edited')
+                return blog_list(request, newform.id)
         elif request.POST['Go'] == 'Delete':
             p.delete()
             messages.add_message(request, messages.INFO, 'Blog post deleted')
