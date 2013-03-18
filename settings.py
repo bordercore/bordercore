@@ -174,7 +174,7 @@ LOGGING = {
 
 # debug_toolbar settings
 if DEBUG:
-    INTERNAL_IPS = ('24.75.168.160', '127.0.0.1', '10.3.2.3')
+    INTERNAL_IPS = ('127.0.0.1', '10.3.2.3')
 
     MIDDLEWARE_CLASSES += (
         'debug_toolbar.middleware.DebugToolbarMiddleware',
