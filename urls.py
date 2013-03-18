@@ -23,7 +23,7 @@ urlpatterns += patterns('homepage.views',
 
 urlpatterns += patterns('blog.views',
                         url(r'^blog/edit(?:/(\d+))?', 'blog_edit', name='blog_edit'),
-                        url(r'^blog/tag_search.json', 'tag_search'),
+                        url(r'^blog/tag_search.json', 'tag_search', name='blog_tag_search'),
                         url(r'^blog/(\d+)?', 'blog_list', name='blog_list'),
 )
 

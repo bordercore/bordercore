@@ -14,14 +14,14 @@ $(document).ready(function() {
 
 	$('#tag-filter').typeahead({
 		source: function (query, process) {
-			return $.getJSON('/blog/tag_search.json',
+			return $.getJSON('{% url 'blog_tag_search' %}',
 						 { query: query },
 						 function (data) {
 							 return process(data);
 						 });
 		},
 		updater: function(item) {
-			window.location='{{ request.path }}?tagsearch=' + item;
+			window.location='{% url 'blog_list' %}?tagsearch=' + item;
 		}
 	});
 
@@ -29,7 +29,7 @@ $(document).ready(function() {
 
 </script>
 
-<form class="form-inline" name="nav_form" id="blog-search-form" action="{{ request.path }}" method="get">
+<form class="form-inline" name="nav_form" id="blog-search-form" action="{% url 'blog_list' %}" method="get">
 
 Search
 <input id="blog-search" type="text" name="search_item" size="20" value="{{ request.GET.search_item }}" accesskey="s" />
