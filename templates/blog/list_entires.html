@@ -1,4 +1,3 @@
-{% load markup %}
 
 {% block extra_head %}
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/code_style.css" />
@@ -16,7 +15,7 @@
 <br /><br />
 
 <div class="blog-entry">
- {{ post.post|markdown:"codehilite"|safe }}
+ {{ post.get_markdown|safe }}
 </div>
 
 {% if post.tags.all %}

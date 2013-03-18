@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from datetime import *
+import markdown
 
 from tag.models import Tag
 
@@ -44,6 +44,9 @@ class Post(models.Model):
 #    reference = models.ForeignKey('self', related_name='reference_id', null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+    def get_markdown(self):
+        return markdown.markdown(self.post, extensions=['codehilite'])
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
