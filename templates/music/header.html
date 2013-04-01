@@ -1,0 +1,47 @@
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+	// Hitting return will begin the search
+    $('#blog-search').keypress( function(e) {
+		if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
+			$('#blog-search-form').submit();
+            return false;
+        } else {
+            return true;
+        }
+	});
+
+	$('#music-search').typeahead({
+		source: function (query, process) {
+			return $.getJSON('{% url 'music_search' %}',
+						 { query: query },
+						 function (data) {
+							 objects = [];
+							 map = {};
+							 $.each(data, function(i, object) {
+								 map[object.label] = object;
+								 objects.push(object.label);
+							 });
+							 return process(objects);
+						 });
+		},
+		updater: function(item) {
+			window.location='{% url 'show_album' 666 %}'.replace(666, map[item].id)
+		}
+	});
+
+});
+
+</script>
+
+<form class="form-inline" name="nav_form" id="blog-search-form" action="{{ request.path }}" method="get">
+
+Search
+<input id="music-search" type="text" name="search_item" size="20" value="{{ request.GET.search_item }}" autocomplete="off" />
+
+<!--
+Tag Filter <input id="tag-filter" type="text" value="{{ request.GET.tagsearch }}" autocomplete="off" />
+-->
+
+</form>

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+
+{% endblock %}
+
+{% block title %} Music {% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
+
+<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.bootstrap.js"></script>
+
+<script type="text/javascript" charset="utf-8">
+
+var oTable;
+
+$(document).ready(function() {
+
+	function formatTitle( oObj ) {
+		return '<a href="{% url 'music_stream' %}' + oObj.aData[0] + '">' + oObj.aData[2] + '</a>';
+	}
+
+	oTable = $('#song_list').dataTable( {
+		"bInfo": false,
+		"bFilter": false,
+		"bPaginate": false,
+		"iDisplayLength": 50,
+		"aaSorting": [[1, 'asc']],
+		"bLengthChange": false,
+		"bSearchable": false,
+		"aoColumnDefs": [
+			{ "aTargets": [0], "bVisible": false },
+			{ "aTargets": [1], "sClass": "span1", "asSorting": [ "asc", "desc" ] },
+			{ "aTargets": [2], "sClass": "span8", "asSorting": [ "asc", "desc" ],  "fnRender": formatTitle, "bUseRendered": false },
+			{ "aTargets": [3], "sClass": "span1", "iDataSort": 4 },
+			{ "aTargets": [4], "bVisible": false }
+        ],
+	} );
+
+});
+
+</script>
+
+<div class="row">
+
+<div class="span3">
+<!-- <img src="{% url 'album_artwork' data.0.id %}" height="250" width="250" /> -->
+<img src="{{ STATIC_URL }}{{ album.artist }}/{{ album.title }}/artwork.jpg" height="250" width="250" />
+
+</div>
+
+<div class="span8">
+<h2>{{ album.title }}</h2>
+<h3>{{ album.artist }}</h3>
+<h5> {{ album.year }} </h5>
+</div>
+
+</div>
+
+<div class="row">
+
+{% include "common/datatable.html" with cols=cols id="song_list" %}
+
+</div>
+
+{% endblock %}

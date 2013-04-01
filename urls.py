@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls import patterns, include, url
 from django.contrib.auth.views import login, logout
 from django.contrib import admin
 
@@ -6,6 +6,7 @@ from tastypie.api import Api
 
 from bookmark.api import BookmarkResource, UserResource
 from bookmark.views import OrderListJson
+from music.views import MusicListJson
 
 admin.autodiscover()
 
@@ -39,9 +40,16 @@ urlpatterns += patterns('bookmark.views',
                         url(r'^my/datatable/data/$', OrderListJson.as_view(), name='get_bookmarks_list'),
 )
 
-# urlpatterns += patterns('bcsolr.views',
-#                        url(r'^solr/search$', 'search')
-# )
+urlpatterns += patterns('music.views',
+                        url(r'^music/edit(?:/(\d+))?', 'song_edit', name='song_edit'),
+                        url(r'^music/add', 'add_song', name='add_song'),
+                        url(r'^music/album/(\d+)', 'show_album', name='show_album'),
+                        url(r'^music/datatable/data/$', MusicListJson.as_view(), name='get_song_list'),
+                        url(r'^music/stream/(\d+)?', 'music_stream', name='music_stream'),
+                        url(r'^music/album_artwork/(\d+)?', 'album_artwork', name='album_artwork'),
+                        url(r'^music/search.json', 'search', name='music_search'),
+                        url(r'^music/', 'music_list'),
+)
 
 
 urlpatterns += patterns('',

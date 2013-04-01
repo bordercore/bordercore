@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+
+{% endblock %}
+
+{% block title %} Music {% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
+
+<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.bootstrap.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/dataTableExt.oApi.fnSetFilteringDelay.js"> </script>
+
+<script type="text/javascript" charset="utf-8">
+
+var oTable;
+
+/* Get the bookmark ID which is currently selected */
+/* Modified from http://www.datatables.net/examples/api/select_single_row.html */
+function fnGetSelected( oTableLocal ) {
+
+	var aTrs = oTableLocal.fnGetNodes();
+
+	for ( var i=0 ; i<aTrs.length ; i++ ) {
+		if ( $(aTrs[i]).hasClass('row_selected') ) {
+			return oTable.fnGetData( i )[3];
+		}
+	}
+
+}
+
+$(document).ready(function() {
+
+{% if messages %}
+{% for message in messages %}
+	$('#feedback').fadeIn(1000).html('{{ message }}');
+	setTimeout( function() {
+		$('#feedback').fadeOut(1000);
+	}, 3000);
+{% endfor %}
+{% endif %}
+
+    $('#btn-edit').on('click', function() {
+
+		var selectedSongID = fnGetSelected( oTable );
+		window.location.href = '/music/edit/' + selectedSongID;
+
+	});
+
+	function formatTitle( oObj ) {
+		return '<a href="{% url 'music_stream' %}' + oObj.aData[3] + '">' + oObj.aData[2] + '</a>';
+	}
+
+	oTable = $('#song_list').dataTable( {
+		"bServerSide": true,
+		"sAjaxSource": "{% url 'get_song_list' %}",
+		"bPaginate": true,
+		"bInfo": false,
+		"iDisplayLength": 50,
+		"aaSorting": [[0, 'desc']],
+		"bFilter": true,
+		"bLengthChange": false,
+		"sDom": "<'row'<'span6'<'toolbar'>l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+		"bSearchable": false,
+		"aoColumnDefs": [
+			{ "aTargets": [0], "sClass": "span2", "asSorting": [ "desc", "asc" ] },
+			{ "aTargets": [2], "fnRender": formatTitle, "useRendered": false },
+			{ "aTargets": [3], "bVisible": false },
+        ],
+	} );
+
+	$('#song_list').dataTable().fnSetFilteringDelay(1000);
+
+	$("#song_list tbody").click( function( e ) {
+
+		// Hilight the clicked row
+		$(event.target.parentNode).toggleClass("row_selected");
+
+		// Remove hilighting from all other rows
+		$(event.target.parentNode).siblings().removeClass("row_selected");
+
+		// Enable or disabled the 'Edit' and 'Delete' buttons based
+		//  on whether a row is selected (hilighted)
+		if ( $(event.target.parentNode).hasClass("row_selected") ) {
+			$('#btn-edit').removeAttr("disabled");
+			$('#btn-delete').removeAttr("disabled");
+		} else {
+			$('#btn-edit').attr("disabled", "disabled");
+			$('#btn-delete').attr("disabled", "disabled");
+		}
+
+    });
+
+	// $("div.toolbar").html('Custom tool bar! Text/images etc.');
+	$(".foobar").appendTo("div.toolbar");
+
+});
+
+</script>
+
+<div class="foobar">
+  <div class="btn-group">
+	<a class="btn" id="btn-add" href="{% url 'add_song' %}">Add</a>
+	<button class="btn" id="btn-edit" disabled>Edit</button>
+	<button class="btn" id="btn-delete" disabled>Delete</button>
+  </div>
+	<div id="feedback" class="alert alert-success hide" style="width: 150px; height: 20px; float: right; margin-bottom: 0px"></div>
+</div>
+
+{% include "music/header.html" %}
+
+<div class="row">
+
+<div class="span4">
+<table class="table table-bordered">
+<caption><strong>Recently Played Songs</strong></caption>
+{% for song in recent_songs %}
+<tr><td><a href="{% url 'music_stream' song.id %}">{{ song.title}} -- {{ song.artist }}</a></td></tr>
+{% endfor %}
+</table>
+</div>
+
+<div class="span5">
+<table>
+<tr><td>
+<img src="{% url 'album_artwork' random_albums.id %}" height="250" width="250" />
+</td>
+<td>
+{{ random_albums.artist }}
+<br />
+{{ random_albums.title }}
+</td>
+</tr>
+</table>
+</div>
+
+</div>
+
+{% include "common/datatable.html" with cols=cols id="song_list" %}
+
+{% endblock %}
+

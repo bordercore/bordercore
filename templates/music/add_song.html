@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %} Music {% endblock %}
+
+{% block content %}
+
+
+<div class="span6">
+
+{% if request.POST.Go and not form.errors %}
+
+<div class="alert alert-success offset2">
+Post {{ action }}ed
+</div>
+
+{% endif %}
+
+<p class="lead offset2"> Upload a Song</p>
+
+<form class="form-horizontal" action="{{ request.path }}" method="post">
+{% csrf_token %}
+
+{% for field in form %}
+<div class="control-group {% if field.errors %}error{% endif %}">
+    <label class="control-label" for="inputTitle">{{ field.label }}</label>
+
+    <div class="controls">
+{% if field.label == 'Date' %}
+
+	<div class="input-large date" id="datepicker" data-date="{{ field.value|date:"m-d-Y" }}" data-date-format="mm-dd-yyyy">
+	  <input class="span2" size="16" type="text" name="date" value="{{ field.value|date:"m-d-Y" }}" />
+	  <span class="add-on"><i class="icon-th"></i></span>
+    </div>
+
+{% else %}
+
+{{ field }}
+
+{% endif %}
+
+{% for error in field.errors %}
+      <span class="form-error">{{ error }}</span>
+{% endfor %}
+
+    </div>
+
+</div>
+{% endfor %}
+
+  <div class="control-group">
+    <div class="controls">
+	  <input class="btn" type="submit" name="Go" value="{{ action }}">
+	  <input class="btn{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete">
+	  <a class="btn" href="{% url 'blog_list' %}">Cancel</a>
+	</div>
+  </div>
+
+</form>
+
+</div>
+
+
+{% endblock %}
