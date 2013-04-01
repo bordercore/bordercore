@@ -1,4 +1,4 @@
-{% load object_attrib %}
+{% load dict_get %}
 
 {% if caption %}
 
@@ -23,7 +23,7 @@
 {% for row in data %}
 <tr>
 {% for col in cols %}
-<td> {{ row|object_attrib:col }} </td>
+<td> {{ row|dict_get:col }} </td>
 {% endfor %}
 </tr>
 {% endfor %}
