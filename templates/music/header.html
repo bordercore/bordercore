@@ -27,7 +27,11 @@ $(document).ready(function() {
 						 });
 		},
 		updater: function(item) {
-			window.location='{% url 'show_album' 666 %}'.replace(666, map[item].id)
+			if ( map[item].type == 'album' ) {
+				window.location='{% url 'show_album' 666 %}'.replace(666, map[item].id)
+			} else {
+				window.location='{% url 'show_artist' 666 %}'.replace(666, map[item].label)
+			}
 		}
 	});
 
@@ -35,7 +39,7 @@ $(document).ready(function() {
 
 </script>
 
-<form class="form-inline" name="nav_form" id="blog-search-form" action="{{ request.path }}" method="get">
+<form class="form-inline pull-right" name="nav_form" id="blog-search-form" action="{{ request.path }}" method="get">
 
 Search
 <input id="music-search" type="text" name="search_item" size="20" value="{{ request.GET.search_item }}" autocomplete="off" />

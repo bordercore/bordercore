@@ -49,7 +49,7 @@ urlpatterns += patterns('music.views',
                         url(r'^music/stream/(\d+)?', 'music_stream', name='music_stream'),
                         url(r'^music/album_artwork/(\d+)?', 'album_artwork', name='album_artwork'),
                         url(r'^music/search.json', 'search', name='music_search'),
-                        url(r'^music/', 'music_list'),
+                        url(r'^music/', 'music_list', name='music_list'),
 )
 
 

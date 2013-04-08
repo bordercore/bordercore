@@ -40,14 +40,16 @@ def music_list(request):
 @login_required
 def music_stream(request, song_id):
 
-    song = Song.objects.get(id=song_id)
+    print "stream song %d" % int(song_id)
 
-    print "request called for %s" % (song_id,)
+    song = Song.objects.get(id=song_id)
 
     # Increment the 'times played' counter
     if song.times_played:
         song.times_played = song.times_played + 1
-        song.save()
+    else:
+        song.times_played = 1
+    song.save()
 
     # Add this song to the listen table
     l = Listen(song=song, user=request.user)
@@ -142,6 +144,7 @@ def song_edit(request, song_id = None):
                               {'section': SECTION, 'action': action, 'form': form, 'file_info': file_info },
                               context_instance=RequestContext(request))
 
+
 @login_required
 def show_album(request, album_id):
 
@@ -158,9 +161,6 @@ def show_album(request, album_id):
                                'cols': ['id', 'track', 'title', 'length', 'length_seconds'] },
                               context_instance=RequestContext(request))
 
-@login_required
-def add_song(request):
-    return render_to_response('music/add_song.html',
 
 @login_required
 def show_artist(request, artist_name):
@@ -172,6 +172,9 @@ def show_artist(request, artist_name):
                               context_instance=RequestContext(request))
 
 
+@login_required
+def add_song(request):
+    return render_to_response('music/add_song.html',
                               {'section': SECTION },
                               context_instance=RequestContext(request))
 
@@ -234,16 +237,22 @@ def search(request):
 
     import json
 
-    albums = Album.objects.filter(
-            Q(artist__icontains=request.GET['query']) |
-            Q(title__icontains=request.GET['query']))
-    album_list = []
+    # The search could match an album name or an artist
+    albums = Album.objects.filter( title__icontains=request.GET['query'])
+    artists = Album.objects.filter( artist__icontains=request.GET['query'] ).distinct('artist')
+
+    results = []
 
     for album in albums:
-        album_list.append( { 'label': "%s - %s" % (album.artist, album.title),
-                             'id': album.id } )
+        results.append( { 'label': "%s - %s" % (album.artist, album.title),
+                             'id': album.id,
+                             'type': 'album' } )
 
-    json_text = json.dumps(album_list)
+    for artist in artists:
+        results.append( { 'label': "%s" % (artist.artist),
+                             'type': 'artist' } )
+
+    json_text = json.dumps(results)
 
     return render_to_response('music/music_search.json',
                               {'section': SECTION, 'info': json_text},
