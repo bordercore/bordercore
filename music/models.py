@@ -1,12 +1,11 @@
-from datetime import datetime
-
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.timezone import now
 
 from tag.models import Tag
 
 class TimeStampedActivate(models.Model):
-    created = models.DateTimeField(default=datetime.now)
+    created = models.DateTimeField(default=now())
     modified = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=True)
 
