@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+
+{% endblock %}
+
+{% block title %} Music {% endblock %}
+
+{% block content %}
+
+<div class="row">
+
+{% block breadcrumbs %}
+<ul class="breadcrumb span6 pull-left">
+<li> <a href="{% url 'music_list' %}">Music</a> </li>  <span class="divider">/</span>
+<li> {{ album_list.0.artist }} </li>
+</ul>
+{% endblock %}
+
+{% include "music/header.html" %}
+
+</div>
+
+<div class="row">
+
+<h2> {{ album_list.0.artist }} </h2>
+
+{{ album_list|length }} albums <br />
+
+</div>
+
+<table class="table no-borders">
+<tr>
+
+{% for album in album_list %}
+
+{% if forloop.counter0|divisibleby:"3" %}
+
+</tr>
+<tr>
+
+{% endif %}
+
+<td>
+<a href="{% url 'show_album' album.id %}">
+<img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title }}/artwork.jpg" height="150" width="150" /> <br />
+</a>
+
+<strong> {{ album.title }} </strong><br />
+{{ album.year }} <br />
+
+</td>
+
+{% endfor %}
+
+</tr>
+</table>
+
+{% endblock %}

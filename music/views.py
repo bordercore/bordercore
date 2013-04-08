@@ -161,6 +161,17 @@ def show_album(request, album_id):
 @login_required
 def add_song(request):
     return render_to_response('music/add_song.html',
+
+@login_required
+def show_artist(request, artist_name):
+
+    album_list = Album.objects.filter(artist=artist_name).order_by('-year')
+
+    return render_to_response('music/show_artist.html',
+                              {'section': SECTION, 'album_list': album_list },
+                              context_instance=RequestContext(request))
+
+
                               {'section': SECTION },
                               context_instance=RequestContext(request))
 
