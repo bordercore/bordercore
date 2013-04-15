@@ -2,20 +2,42 @@
 <html>
 
   <head>
+
 	<meta charset="utf-8" />
 	<title>Bordercore</title>
 
-	<link href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
-	<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bordercore.css" />
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.min.js"></script>
+    <script src="{{ STATIC_URL }}bootstrap/js/bootstrap.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
+
+    <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bordercore.css" />
+
+<script type="text/javascript">
+
+    var csrftoken = $.cookie('csrftoken');
+
+    function csrfSafeMethod(method) {
+		// these HTTP methods do not require CSRF protection
+		return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+	}
+
+    $.ajaxSetup({
+		crossDomain: false, // obviates need for sameOrigin test
+		beforeSend: function(xhr, settings) {
+			if (!csrfSafeMethod(settings.type)) {
+				xhr.setRequestHeader("X-CSRFToken", csrftoken);
+			}
+		}
+	});
+
+</script>
 
 {% block extra_head %}{% endblock %}
 
   </head>
 
 <body>
-
-  <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.min.js"></script>
-  <script src="{{ STATIC_URL }}bootstrap/js/bootstrap.js"></script>
 
 <div class="container">
 
@@ -39,21 +61,20 @@ Bordercore :: {% block title %} {% endblock %}
 
 <div class="divider"></div>
 
-<div id="frame-footer">
+<div class="footer">
 
-  <div id="footer">
+<div class="container offset2">
 
-    <a href="/feedback.html">Leave Feedback</a> |
-    <a href="/logout.html">Log Out</a>
-
-  </div>
-
-  <div id="startssl">
-    <a href="https://www.startssl.com/"><img src="{{ STATIC_URL }}img/startcom_secured_lock_80x15.png" border="0" alt="Free SSL Secured By StartCom" title="Free SSL Secured By StartCom" /></a>
-  </div>
+<h4>
+  Copyright {% now "Y" %} F. Jerrell Schivers
+</h4>
+  <!-- <div id="startssl"> -->
+  <!--   <a href="https://www.startssl.com/"><img src="{{ STATIC_URL }}img/startcom_secured_lock_80x15.png" border="0" alt="Free SSL Secured By StartCom" title="Free SSL Secured By StartCom" /></a> -->
+  <!-- </div> -->
 
 </div>
 
+</div>
 
 </body>
 

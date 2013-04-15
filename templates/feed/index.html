@@ -2,6 +2,10 @@
 
 {% block title %} Feeds {% endblock %}
 
+{% block extra_head %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+{% endblock %}
+
 {% block content %}
 
 <script type="text/javascript">
@@ -41,6 +45,53 @@ $(document).ready(function() {
 	// Get the user's default feed and display it first
 	showFeed( {{ current_feed }} );
 
+    $('#sort-container').sortable( {
+		connectWith: '.feed-list',
+		stop: function(event, ui) {
+
+			var myMatches = $(ui.item).find('a').attr('id').match(/link_(.*)$/);
+			// var myMatches = this.getAttribute('id').match(/link_(.*)$/);
+			var feed_id = myMatches[1];
+
+			// If the destination is the 'all feeds' list on the right and the feed is from the
+			//  'current feeds' list on the left, then we're deleting the feed
+			if ( ui.item.parent().attr('id') === 'sort-container-all' ) {
+				url = 'feed_delete.json?feed_id=' + feed_id;
+			} else {
+				url = '{% url 'sort_feed' %}'
+			}
+
+			console.log(url)
+
+			var request = $.ajax({
+				url: url,
+				type: "POST",
+				data: { feed_id : feed_id, position:  (ui.item.index() + 1) },
+				dataType: "text"
+			});
+
+			request.done(function(msg) {
+				console.log("ALL GOOD")
+			});
+
+			request.fail(function(jqXHR, textStatus) {
+				alert( "Request failed: " + textStatus );
+			});
+
+			// $.ajax( { type: 'GET',
+			// 		  url: url,
+			// 		  dataType: 'text',
+			// 		  success: function(data) {
+			// 			  $('#status').removeClass('status-error').addClass('status-normal').html('All systems normal');
+			// 		  },
+			// 		  error: function(XMLHttpRequest, textStatus, errorThrown) {
+			// 			  $('#status').removeClass('status-normal').addClass('status-error').html('Server Error.');
+			// 		  }
+			// 		} );
+
+		}
+    } );
+
 });
 
 </script>
@@ -48,7 +99,7 @@ $(document).ready(function() {
 <div class="span4">
 <h3>Feed List</h3>
 <hr />
-<ul>
+<ul id="sort-container" class="feed-list">
 {% for feed in feed_info %}
 <li><a href="#" id="link_{{ feed.id }}">{{ feed.name }}</a></li>
 {% endfor %}

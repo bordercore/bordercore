@@ -12,21 +12,28 @@ def feed_list(request):
 
     import json
 
-    feeds = FeedItem.objects.select_related().filter(feed__id__in=[110,121,1,97,119,117,106,120,118,113,115,63,62,68,101,5,78,116,103,56,99,73,92,114,108,37,90,102,100,53,104,9,112,109,105,36,107,93,79,6,98,51,52,65,20,80,70,71,75,61,4,33,38,48,11,76,86,88,85,82,10,89,64,66,91,95])
+    feeds = FeedItem.objects.select_related().filter(feed__id__in=request.user.userprofile.rss_feeds.split(','))
 
     feed_all = {}
-    feed_info = []
 
     for feed in feeds:
+        data = { 'id': feed.feed.id, 'name': feed.feed.name, 'link': feed.link, 'title': feed.title }
         if feed.feed.id in feed_all:
-            feed_all[ feed.feed.id ]['links'].append( { 'id': feed.feed.id, 'name': feed.feed.name, 'link': feed.link, 'title': feed.title } )
+            feed_all[ feed.feed.id ]['links'].append( data )
         else:
-            feed_all[ feed.feed_id ] = { 'links': [ { 'id': feed.feed.id, 'name': feed.feed.name, 'link': feed.link, 'title': feed.title } ],
-                                         'name': feed.feed.name,
-                                         'feed_homepage': feed.feed.homepage }
+            feed_all[ feed.feed_id ] = { 'links': [ data ], 'name': feed.feed.name, 'feed_homepage': feed.feed.homepage }
 
-    for feed in feeds.distinct('feed__name'):
-        feed_info.append( { 'id': feed.feed.id, 'name': feed.feed.name } )
+    # We can't merely use Feed.objects.filter(), since this won't retrieve our feeds in
+    #  the correct order (based on the order of the feed ids in userprofile.rss_feeds)
+    #  So we store the feed name temporarily in a lookup table...
+    lookup = {}
+    for feed in Feed.objects.filter(id__in=request.user.userprofile.rss_feeds.split(',')):
+        lookup[ feed.id ] = feed.name
+
+    # ...then use that here, where the proper order is preserved
+    feed_info = []
+    for feed_id in request.user.userprofile.rss_feeds.split(','):
+        feed_info.append( { 'id': int(feed_id), 'name': lookup[ int(feed_id) ] } )
 
     return render_to_response('feed/index.html',
                               {'section': 'Feeds', 'feed_info': feed_info, 'json': json.dumps(feed_all), 'current_feed': current_feed },
@@ -36,6 +43,27 @@ def feed_list(request):
 def set_current_feed(request, feed_id):
 
     request.session['current_feed'] = feed_id
+
+    return render_to_response('feed/set_current_feed.json',
+                              {'section': 'Feeds'  },
+                              context_instance=RequestContext(request))
+
+
+def sort_feed(request):
+
+    feed_id = int(request.POST['feed_id'])
+    new_position = int(request.POST['position'])
+
+    feeds = [ int(t.strip()) for t in request.user.userprofile.rss_feeds.split(',') ]
+
+    # First remove the feed item from the list
+    feeds.remove( feed_id )
+
+    # Then re-insert it in its new position
+    feeds.insert( new_position - 1, feed_id )
+
+    request.user.userprofile.rss_feeds = ','.join( [ str(feed_id) for feed_id in feeds ] )
+    request.user.userprofile.save()
 
     return render_to_response('feed/set_current_feed.json',
                               {'section': 'Feeds'  },
