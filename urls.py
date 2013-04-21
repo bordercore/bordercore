@@ -58,7 +58,7 @@ urlpatterns += patterns('',
     url(r'^admin/', include(admin.site.urls)),
 )
 
-urlpatterns += patterns('',
-    (r'^accounts/login/$',  login, {'template_name': 'login.html'}),
-    (r'^accounts/logout/$', logout),
+urlpatterns += patterns('accounts.views',
+    url(r'^login/', 'bc_login'),
+    url(r'^logout/$', logout, {'template_name': 'login.html'}),
 )

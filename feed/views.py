@@ -4,6 +4,8 @@ from django.template import RequestContext
 
 from feed.models import Feed, FeedItem
 
+SECTION = 'Feeds'
+
 @login_required
 def feed_list(request):
 
@@ -36,7 +38,7 @@ def feed_list(request):
         feed_info.append( { 'id': int(feed_id), 'name': lookup[ int(feed_id) ] } )
 
     return render_to_response('feed/index.html',
-                              {'section': 'Feeds', 'feed_info': feed_info, 'json': json.dumps(feed_all), 'current_feed': current_feed },
+                              {'section': SECTION, 'feed_info': feed_info, 'json': json.dumps(feed_all), 'current_feed': current_feed },
                               context_instance=RequestContext(request))
 
 
@@ -45,7 +47,7 @@ def set_current_feed(request, feed_id):
     request.session['current_feed'] = feed_id
 
     return render_to_response('feed/set_current_feed.json',
-                              {'section': 'Feeds'  },
+                              {'section': SECTION  },
                               context_instance=RequestContext(request))
 
 
@@ -65,6 +67,8 @@ def sort_feed(request):
     request.user.userprofile.rss_feeds = ','.join( [ str(feed_id) for feed_id in feeds ] )
     request.user.userprofile.save()
 
+    # TODO: Return JSON response here rather than an actual web page
+
     return render_to_response('feed/set_current_feed.json',
-                              {'section': 'Feeds'  },
+                              {'section': SECTION  },
                               context_instance=RequestContext(request))
