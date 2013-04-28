@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.utils.timezone import utc
 
 from django.forms import ModelForm, Textarea, TextInput, ModelMultipleChoiceField
 
@@ -11,7 +12,15 @@ class ModelCommaSeparatedChoiceField(ModelMultipleChoiceField):
     def clean(self, value):
         if value is not None:
             value = [item.strip() for item in value.split(",") if item.strip() != ''] # remove padding
+        # Check if any of these tags are new.  The ORM won't create them for us, and in
+        # fact will complain that the tag 'is not one of the available choices.'
+        # These need to be explicitly created.
+        for tag in value:
+            newtag, created = Tag.objects.get_or_create(name=tag)
+            if created:
+                newtag.save()
         return super(ModelCommaSeparatedChoiceField, self).clean(value)
+
 
 class BlogForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -35,12 +44,12 @@ class BlogForm(ModelForm):
 
     def clean(self):
         cleaned_data = super(BlogForm, self).clean()
+
         date = cleaned_data['date']
 
-        print "calling clean"
-
         # By default, the time portion of the date is derived from the current time
-        cleaned_data['date'] = datetime(date.year, date.month, date.day, datetime.now().hour, datetime.now().minute, datetime.now().second)
+        # utcnow = datetime.utcnow().replace(tzinfo=utc)
+        cleaned_data['date'] = datetime(date.year, date.month, date.day, datetime.now().hour, datetime.now().minute, datetime.now().second).replace(tzinfo=utc)
         return cleaned_data
 
     class Meta:
