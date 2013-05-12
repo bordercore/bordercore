@@ -23,5 +23,5 @@ def favicon(url):
             domain = '.'.join(parts[1:])
 
     return """
-<img src="%s/img/favicons/%s" />
+<img src="%s/img/favicons/%s.ico" />
 """ % (settings.STATIC_URL, domain)

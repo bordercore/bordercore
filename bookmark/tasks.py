@@ -35,7 +35,7 @@ def snarf_favicon(url, parse_domain=True):
         domain = url
 
     # Verify that we don't already have it
-    if os.path.isfile("%s/%s" % (FAVICON_DIR, domain)):
+    if os.path.isfile("%s/%s.ico" % (FAVICON_DIR, domain)):
         return
 
     r = requests.get('http://%s/favicon.ico' % domain)
@@ -43,7 +43,7 @@ def snarf_favicon(url, parse_domain=True):
         print "Error: status code for %s was %d" % (domain, r.status_code)
         return
 
-    f = open("%s/%s" % (FAVICON_DIR, domain), "wb")
+    f = open("%s/%s.ico" % (FAVICON_DIR, domain), "wb")
     f.write(r.content)
     f.close()
 

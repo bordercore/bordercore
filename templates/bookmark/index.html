@@ -102,7 +102,7 @@ $(document).ready(function() {
 	});
 
 	function formatTitle( oObj ) {
-		return '<img src="{{ STATIC_URL }}img/favicons/' + parse_domain( oObj.aData[1] ) + '" width="32" height="32" /> &nbsp; &nbsp; <a href="' + oObj.aData[1] + '" target="_blank">' + oObj.aData[2] + '</a>';
+		return '<img src="{{ STATIC_URL }}img/favicons/' + parse_domain( oObj.aData[1] ) + '.ico" width="32" height="32" /> &nbsp; &nbsp; <a href="' + oObj.aData[1] + '" target="_blank">' + oObj.aData[2] + '</a>';
 	}
 
 	oTable = $('#bookmark_list').dataTable( {
