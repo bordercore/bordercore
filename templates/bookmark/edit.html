@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load favicon %}
+
 {% block title %} Blog {% endblock %}
 
 {% block content %}
@@ -10,7 +12,9 @@ Please correct the errors below.
 </div>
 {% endif %}
 
-<p class="lead offset2"> {{ action }} Bookmark</p>
+<p class="lead offset2">
+{{ form.instance.url|favicon|safe }} {{ action }} Bookmark
+</p>
 
 <form class="form-horizontal" action="{{ request.path }}" method="post">
 {% csrf_token %}

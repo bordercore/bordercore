@@ -46,6 +46,24 @@ setTimeout("refreshList()", refreshInterval*60*1000);
 
 $(document).ready(function() {
 
+	// http://stackoverflow.com/questions/8498592/extract-root-domain-name-from-string
+	function parse_domain(url) {
+
+		var tmp = document.createElement ('a');
+		tmp.href = url;
+
+		domain = tmp.hostname
+
+		parts = domain.split('.')
+
+		if ( parts.length == 3 ) {
+			domain = parts[1] + '.' + parts[2]
+		}
+
+		return domain;
+
+	}
+
 {% if messages %}
 {% for message in messages %}
 	$('#feedback').fadeIn(1000).html('{{ message }}');
@@ -84,7 +102,7 @@ $(document).ready(function() {
 	});
 
 	function formatTitle( oObj ) {
-		return '<a href="' + oObj.aData[1] + '" target="_blank">' + oObj.aData[2] + '</a>';
+		return '<img src="{{ STATIC_URL }}img/favicons/' + parse_domain( oObj.aData[1] ) + '" width="32" height="32" /> &nbsp; &nbsp; <a href="' + oObj.aData[1] + '" target="_blank">' + oObj.aData[2] + '</a>';
 	}
 
 	oTable = $('#bookmark_list').dataTable( {
@@ -92,7 +110,7 @@ $(document).ready(function() {
 		"sAjaxSource": "{% url 'get_bookmarks_list' %}",
 		"bPaginate": true,
 		"bInfo": false,
-		"iDisplayLength": 50,
+		"iDisplayLength": 20,
 		"aaSorting": [[0, 'desc']],
 		"bFilter": true,
 		"bLengthChange": false,

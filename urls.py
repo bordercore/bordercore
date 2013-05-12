@@ -62,3 +62,5 @@ urlpatterns += patterns('accounts.views',
     url(r'^login/', 'bc_login'),
     url(r'^logout/$', logout, {'template_name': 'login.html'}),
 )
+
+handler404 = 'site_utils.handler404'

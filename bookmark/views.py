@@ -7,6 +7,7 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 
 from bookmark.models import Bookmark
 from bookmark.forms import BookmarkForm
+from bookmark.tasks import snarf_favicon
 
 SECTION = 'Bookmarks'
 
@@ -39,6 +40,7 @@ def bookmark_edit(request, bookmark_id = None):
                 newform.user = request.user
                 newform.save()
                 form.save_m2m() # Save the many-to-many data for the form.
+                snarf_favicon.delay(b.url)
                 messages.add_message(request, messages.INFO, 'Bookmark edited')
                 return bookmark_list(request)
         elif request.POST['Go'] == 'Delete':

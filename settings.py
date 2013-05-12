@@ -110,9 +110,12 @@ ROOT_URLCONF = 'bordercore.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'bordercore.wsgi.application'
 
+ALLOWED_HOSTS = ('localhost', 'www.bordercore.com')
+
 TEMPLATE_DIRS = ( os.path.join(SITE_ROOT, 'templates'),)
 
 INSTALLED_APPS = (
+
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -120,10 +123,9 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.markup',
-    # Uncomment the next line to enable the admin:
     'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
     'django.contrib.admindocs',
+    'djcelery',
 
     'accounts',
     'bcsolr',
@@ -147,6 +149,11 @@ TEMPLATE_CONTEXT_PROCESSORS = TCP + (
 )
 
 LOGIN_URL = "/login/"
+
+# Celery support
+import djcelery
+djcelery.setup_loader()
+BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
