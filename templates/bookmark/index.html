@@ -125,7 +125,7 @@ $(document).ready(function() {
 
 	$('#bookmark_list').dataTable().fnSetFilteringDelay(1000);
 
-	$("#bookmark_list tbody").click( function( e ) {
+	$("#bookmark_list tbody").click( function( event ) {
 
 		// Hilight the clicked row
 		$(event.target.parentNode).toggleClass("row_selected");
