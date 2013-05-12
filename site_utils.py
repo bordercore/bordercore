@@ -7,7 +7,7 @@ from bookmark.tasks import snarf_favicon
 
 def handler404(request):
 
-    url = request.get_full_path()
+    url = request.get_full_path().replace('.ico', '')
 
     p = re.compile(".*/img/favicons/(.*)")
     m = p.match(url)

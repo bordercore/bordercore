@@ -6,7 +6,7 @@ from celery import task
 from django.conf import settings
 import requests
 
-FAVICON_DIR = settings.STATIC_URL + "img/favicons"
+FAVICON_DIR = "%s/templates/static/%s" % (settings.PROJECT_ROOT, "img/favicons")
 
 # Tell requests to not be so noisy
 logging.getLogger("requests").setLevel(logging.WARNING)
