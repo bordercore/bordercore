@@ -9,7 +9,7 @@ register = template.Library()
 def favicon(url):
 
     if not url:
-        return
+        return ""
 
     p = re.compile("https?://(.*?)/")
 
