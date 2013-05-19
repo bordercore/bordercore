@@ -39,13 +39,10 @@
 
 <body>
 
-<div class="container">
+<div id="wrap">
+    <div class="container">
 
-<!-- <div id="top-row"> -->
-<h1>
-Bordercore :: {% block title %} {% endblock %}
-</h1>
-<!-- </div> -->
+<h1> Bordercore :: {% block title %} {% endblock %} </h1>
 
 {% include "main-nav.html" %}
 
@@ -57,20 +54,15 @@ Bordercore :: {% block title %} {% endblock %}
 
 </div>
 
-<br /><br />
+<div id="push"></div>
 
-<div class="divider"></div>
+</div>
 
-<div class="footer">
+<div id="footer">
 
 <div class="container offset2">
 
-<h4>
-  Copyright {% now "Y" %} F. Jerrell Schivers
-</h4>
-  <!-- <div id="startssl"> -->
-  <!--   <a href="https://www.startssl.com/"><img src="{{ STATIC_URL }}img/startcom_secured_lock_80x15.png" border="0" alt="Free SSL Secured By StartCom" title="Free SSL Secured By StartCom" /></a> -->
-  <!-- </div> -->
+<h4> Copyright {% now "Y" %} F. Jerrell Schivers </h4>
 
 </div>
 
