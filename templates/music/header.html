@@ -39,13 +39,12 @@ $(document).ready(function() {
 
 </script>
 
-<form class="form-inline pull-right" name="nav_form" id="blog-search-form" action="{{ request.path }}" method="get">
+<div class="row">
 
-Search
-<input id="music-search" type="text" name="search_item" size="20" value="{{ request.GET.search_item }}" autocomplete="off" />
+	<form class="form-inline pull-right" name="nav_form" id="blog-search-form" action="{{ request.path }}" method="get">
+    Search
+	<input id="music-search" type="text" name="search_item" size="20" value="{{ request.GET.search_item }}" autocomplete="off" />
 
-<!--
-Tag Filter <input id="tag-filter" type="text" value="{{ request.GET.tagsearch }}" autocomplete="off" />
--->
+    </form>
 
-</form>
+</div>

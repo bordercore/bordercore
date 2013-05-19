@@ -114,7 +114,7 @@ $(document).ready(function() {
 
 <div class="row">
 
-<div class="span4">
+<div class="span6">
 <table class="table table-bordered">
 <caption><strong>Recently Played Songs</strong></caption>
 {% for song in recent_songs %}
@@ -123,10 +123,14 @@ $(document).ready(function() {
 </table>
 </div>
 
-<div class="span5">
-<table>
+<div class="span6">
+<br />
+<table class="table">
 <tr><td>
-<img src="{% url 'album_artwork' random_albums.id %}" height="250" width="250" />
+<a href="{% url 'show_album' random_albums.id %}">
+<img src="{{ STATIC_URL }}albums/{{ random_albums.artist }}/{{ random_albums.title }}/artwork.jpg" height="150" width="150" />
+</a>
+
 </td>
 <td>
 {{ random_albums.artist }}
@@ -139,7 +143,13 @@ $(document).ready(function() {
 
 </div>
 
+<br />
+
+<div class="row">
+
 {% include "common/datatable.html" with cols=cols id="song_list" %}
+
+</div>
 
 {% endblock %}
 
