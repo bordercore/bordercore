@@ -36,8 +36,8 @@ def get_link_info(link):
     r = requests.get(link)
     http_content = r.text
 
-    # If this link is a redirect (common for shortened urls), return
-    #  the redirected link for storage.
+    # If this link is a redirect (common for shortened urls), we
+    #  want to keep the redirected link.
     # for prev in r.history:
     #     print "  redirected url: %s" % prev.url
 
@@ -57,17 +57,11 @@ for line in sys.stdin:
 buffer = quopri.decodestring(buffer)
 matches = p.findall(buffer)
 
-# Save the buffer to a file for later debugging
-# import time
-# f = open("/tmp/link-snarfer/" + str(time.time()), "w")
-# f.write(buffer)
-# f.close()
-
 for link in matches:
 
     if not ignore.search(link):
         url, label = get_link_info(link)
-        link_dict[ label ] = link
+        link_dict[ label ] = url
 
 if link_dict:
 
