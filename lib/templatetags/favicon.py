@@ -11,7 +11,7 @@ def favicon(url):
     if not url:
         return ""
 
-    p = re.compile("https?://(.*?)/")
+    p = re.compile("https?://([^/]*)")
 
     m = p.match(url)
 
@@ -21,7 +21,8 @@ def favicon(url):
         # We want the domain part of the hostname (eg npr.org instead of www.npr.org)
         if len(parts) == 3:
             domain = '.'.join(parts[1:])
-
-    return """
+        return """
 <img src="%s/img/favicons/%s.ico" />
 """ % (settings.STATIC_URL, domain)
+    else:
+        return ""
