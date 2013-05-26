@@ -17,8 +17,6 @@ RDF_DIR = "/home/www/htdocs/bordercore/rdf"
 
 def update_feeds(feed_id=None):
 
-    print "Updating feed %d: " % feed_id
-
     conn = psycopg2.connect("dbname=django host=localhost user=bordercore password=4locus2")
     cursor = conn.cursor()
 
@@ -36,6 +34,8 @@ def update_feeds(feed_id=None):
         row = dtuple.DatabaseTuple(descr, row)
 
         r = requests.get(row.url)
+
+        print "Updating feed %d: " % row.id
 
         try:
 
@@ -67,7 +67,7 @@ def update_feeds(feed_id=None):
                 message = str(type(e)) + ': ' + str(e)
             else:
                 print str(type(e))
-                message = str(type(e)) + ": " + e.strerror
+                message = str(type(e)) + ": " + str(e)
 
             t = datetime.datetime.now()
             log_file = open(LOG_FILE, 'a')
