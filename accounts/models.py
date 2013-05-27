@@ -2,9 +2,15 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 
+from tag.models import Tag
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
     rss_feeds = models.TextField()
+    favorite_tags = models.ManyToManyField(Tag)
+
+    def get_tags(self):
+        return ", ".join([tag.name for tag in self.favorite_tags.all()])
 
     def __unicode__(self):
         return u'Profile of user: %s' % self.user

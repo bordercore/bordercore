@@ -1,5 +1,5 @@
 from django.conf.urls import patterns, include, url
-from django.contrib.auth.views import login, logout
+from django.contrib.auth.views import logout
 from django.contrib import admin
 
 from tastypie.api import Api
@@ -7,6 +7,7 @@ from tastypie.api import Api
 from bookmark.api import BookmarkResource, UserResource
 from bookmark.views import OrderListJson
 from music.views import MusicListJson
+from accounts.views import UserProfileDetailView
 
 admin.autodiscover()
 
@@ -53,6 +54,9 @@ urlpatterns += patterns('music.views',
                         url(r'^music/', 'music_list', name='music_list'),
 )
 
+urlpatterns += patterns('accounts.views',
+                        url(r'^prefs/', UserProfileDetailView.as_view(), name='prefs'),
+)
 
 urlpatterns += patterns('',
     url(r'^admin/', include(admin.site.urls)),
