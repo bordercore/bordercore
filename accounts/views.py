@@ -5,7 +5,7 @@ from django.template import RequestContext
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView
 from django.contrib.auth.decorators import login_required
-
+from django.core.urlresolvers import reverse
 
 from accounts.forms import UserProfileForm
 from accounts.models import UserProfile
@@ -15,7 +15,6 @@ SECTION = 'Prefs'
 class UserProfileDetailView(UpdateView):
     template_name = 'prefs/index.html'
     form_class = UserProfileForm
-    success_url = '/prefs/index.html'
 
     def get(self, request, **kwargs):
         self.object = UserProfile.objects.get(user=self.request.user)
@@ -29,6 +28,7 @@ class UserProfileDetailView(UpdateView):
         return obj
 
     def form_valid(self, form):
+        self.object = form.save()
         context = self.get_context_data(form=form)
         context["message"] = "Preferences updated"
         return self.render_to_response(context)
