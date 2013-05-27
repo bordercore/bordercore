@@ -1,10 +1,27 @@
 {% extends "base.html" %}
 
+{% block extra_head %}
+
+<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tokenizer.js"></script>
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tokenizer.css" />
+
+{% endblock %}
+
 {% load favicon %}
 
 {% block title %} Blog {% endblock %}
 
 {% block content %}
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+    $("input[name='tags']").tokenizer( { delimiters: [13, 188] } )
+
+});
+
+</script>
 
 {% if form.errors %}
 <div class="alert alert-error offset2 span10">
