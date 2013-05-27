@@ -25,7 +25,6 @@ def info(song):
         print "length: %s" % audio.info.length
         print "sample_rate: %s" % audio.info.sample_rate
         print "bitrate: %s" % audio.info.bitrate
-        # print vars(audio.info)
     except IOError as e:
         print "Error: %s (%s)" % (e.strerror, song)
 
@@ -60,22 +59,27 @@ def snarf_file(song):
         # Insert the metadata into the db
         # If the song doesn't have a date, then we can't lookup album info for it
         if date:
-            a, created = Album.objects.get_or_create(title=audio.get('album')[0], artist=audio.get('artist')[0], year=date)
+            a = Album.objects.filter(title__iexact=audio.get('album')[0]).filter(artist=audio.get('artist')[0]).filter(year=date)
+            if a:
+                if len(a) > 1:
+                    raise Exception ("multiple album matches found")
+                if a[0].title != audio.get('album')[0]:
+                    raise Exception ("album found, but case does not match ('%s' vs '%s')" %
+                                     (a[0].title, audio.get('album')[0]))
+            else:
+                a = Album(title=audio.get('album')[0], artist=audio.get('artist')[0], year=date)
+                a.save()
+
         source = SongSource.objects.get(name=songsource)
 
-        s, created = Song.objects.get_or_create(artist=audio.get('artist')[0], title=audio.get('title')[0], year=date, source=source, track=tracknumber, album=a)
-#        s, created = Song.objects.get_or_create(artist=audio.get('artist')[0], title=audio.get('title')[0], year=audio.get('date')[0], length=int(audio.info.length), source=source, track=tracknumber, album=a)
-
-        if a:
-            a.save()
+        s, created = Song.objects.get_or_create(artist=audio.get('artist')[0], title=audio.get('title')[0],
+                                                year=date, source=source, track=tracknumber, album=a)
 
         if not created:
             logging.warning("Song already exists in db")
-            # Update older songs with length
-            s.length = audio.info.length
-            s.save()
-        else:
-            s.save()
+
+        s.length = audio.info.length
+        s.save()
 
         # Move the song file to its final place
 
