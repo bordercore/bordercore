@@ -24,7 +24,7 @@ def update_feeds(feed_id=None):
     #  feed id to update.  Otherwise update all feeds.
     sql = "SELECT id, name, url FROM feed_feed"
     if feed_id:
-        sql = sql + " WHERE id = %d" % feed_id
+        sql = sql + " WHERE id = %d" % int(feed_id)
 
     cursor.execute(sql)
     descr = dtuple.TupleDescriptor(cursor.description)
@@ -35,12 +35,10 @@ def update_feeds(feed_id=None):
 
         r = requests.get(row.url)
 
-        print "Updating feed %d: " % row.id
-
         try:
 
             if r.status_code != 200:
-                raise IOError("Status code is " + r.status_code)
+                r.raise_for_status()
 
             # Store a copy of the raw RDF for debugging
             raw_file = codecs.open(RDF_DIR + "/%d.xml" % row.id, 'w', 'utf-8')
@@ -59,15 +57,14 @@ def update_feeds(feed_id=None):
         except Exception as e:
 
             message = ""
-            if isinstance(e, IOError):
-                message = e.strerror + ' for ' + e.filename
+            if isinstance(e, requests.exceptions.HTTPError):
+                message = e
             elif isinstance(e, psycopg2.Error):
                 message = e.pgerror
             elif isinstance(e, exceptions.UnicodeEncodeError):
                 message = str(type(e)) + ': ' + str(e)
             else:
-                print str(type(e))
-                message = str(type(e)) + ": " + str(e)
+                message = e
 
             t = datetime.datetime.now()
             log_file = open(LOG_FILE, 'a')
