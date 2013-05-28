@@ -5,11 +5,18 @@ from blog.models import Tag
 
 # http://stackoverflow.com/questions/5608576/django-enter-a-list-of-values-form-error-when-rendering-a-manytomanyfield-as-a
 class ModelCommaSeparatedChoiceField(ModelMultipleChoiceField):
-    widget = TextInput
+    widget = TextInput(attrs={'class': 'input-xlarge'})
 
     def clean(self, value):
         if value is not None:
             value = [item.strip() for item in value.split(",") if item.strip() != ''] # remove padding
+        # Check if any of these tags are new.  The ORM won't create them for us, and in
+        # fact will complain that the tag 'is not one of the available choices.'
+        # These need to be explicitly created.
+        for tag in value:
+            newtag, created = Tag.objects.get_or_create(name=tag)
+            if created:
+                newtag.save()
         return super(ModelCommaSeparatedChoiceField, self).clean(value)
 
 class BookmarkForm(ModelForm):
@@ -34,6 +41,5 @@ class BookmarkForm(ModelForm):
         widgets = {
             'url': TextInput(attrs={'class': 'input-xxlarge'}),
             'title': TextInput(attrs={'class': 'input-xxlarge'}),
-            'note': Textarea(attrs={'rows': 3}),
-            'tags': TextInput()
+            'note': Textarea(attrs={'rows': 3, 'class': 'input-xlarge'})
         }

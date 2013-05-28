@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+{% endblock %}
+
+{% block title %} Bookmarks {% endblock %}
+
+{% block content %}
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+	// Hitting return will begin the search
+    $('#bookmark-search').keypress( function(e) {
+		alert('got here!!!');
+		if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
+			$('#bookmark-search-form').submit();
+            return false;
+        } else {
+            return true;
+        }
+	});
+
+	$('#tag-filter').typeahead({
+		source: function (query, process) {
+			return $.getJSON('{% url 'bookmark_tag_search' %}',
+						 { query: query },
+						 function (data) {
+							 return process(data);
+						 });
+		},
+		updater: function(item) {
+			window.location='{% url 'bookmark_tag' %}?tagsearch=' + item;
+		}
+	});
+
+    $('#sort-container').sortable( {
+		connectWith: '.feed-list',
+		stop: function(event, ui) {
+			var myMatches = $(ui.item).find('a').attr('id').match(/link_(.*)$/);
+			var link_id = myMatches[1];
+			console.log(link_id);
+		}
+	});
+
+	$('#favorite_tags').change( function(e) {
+		var tag = $('#favorite_tags').val();
+		window.location='{% url 'bookmark_tag' %}?tagsearch=' + tag;
+	});
+
+});
+
+</script>
+
+<ul class="breadcrumb pull-right">
+<li><a href="{% url 'bookmark_list' %}">List</a><span class="divider">/</span></li>
+<li>Tags</li>
+</ul>
+
+<br /><br />
+
+<form class="form-inline" name="nav_form" id="tag-search-form" action="{% url 'bookmark_list' %}" method="get">
+
+Search
+<input id="bookmark-search" type="text" name="search_item" size="20" value="{{ request.GET.search_item }}" accesskey="s" />
+
+Tag Filter <input id="tag-filter" type="text" value="{{ tag_filter }}" autocomplete="off" />
+
+<select id="favorite_tags">
+  <option>Favorites</option>
+{% for tag in favorite_tags %}
+  <option value="{{ tag.name }}">{{ tag.name }}</option>
+{% endfor %}
+</select>
+
+</form>
+
+{% if bookmarks %}
+
+<ul id="sort-container" class="feed-list">
+
+{% for link in bookmarks %}
+
+<li><a href="{{ link.url }}" id="link_{{ link.id }}">{{ link.title }}</a></li>
+
+{% endfor %}
+
+</ul>
+
+{% endif %}
+
+{% endblock %}

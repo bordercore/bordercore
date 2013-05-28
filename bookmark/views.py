@@ -1,5 +1,6 @@
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
@@ -8,6 +9,7 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 from bookmark.models import Bookmark
 from bookmark.forms import BookmarkForm
 from bookmark.tasks import snarf_favicon
+from tag.models import Tag
 
 SECTION = 'Bookmarks'
 
@@ -40,7 +42,7 @@ def bookmark_edit(request, bookmark_id = None):
                 newform.user = request.user
                 newform.save()
                 form.save_m2m() # Save the many-to-many data for the form.
-                snarf_favicon.delay(b.url)
+                snarf_favicon.delay(form.instance.url)
                 messages.add_message(request, messages.INFO, 'Bookmark edited')
                 return bookmark_list(request)
         elif request.POST['Go'] == 'Delete':
@@ -75,6 +77,49 @@ def snarf_link(request):
     return render_to_response('bookmark/snarf_link.html',
                               {'section': SECTION, 'url': url, 'title': title},
                               context_instance=RequestContext(request))
+
+@login_required
+def tag_search(request):
+
+    import json
+
+    tags = Tag.objects.filter(name__istartswith=request.GET.get('query', ''))
+    tag_list = []
+
+    # Filter out tags which haven't been applied to at least one bookmark
+    for tag in tags:
+        if tag.bookmark_set.all():
+            tag_list.append(tag.name)
+
+#    json_text = json.dumps(tag_list)
+
+    return HttpResponse(json.dumps( tag_list ), content_type="application/json")
+
+    # return render_to_response('bookmark/tag_search.json',
+    #                           {'section': SECTION, 'info': json_text},
+    #                           context_instance=RequestContext(request),
+    #                           mimetype="application/json")
+
+
+@login_required
+def bookmark_tag(request):
+
+    bookmarks = None
+
+    tag_filter = request.GET.get('tagsearch', None)
+    if not tag_filter:
+        tag_filter = request.session.get('bookmark_tag_filter', None)
+
+    if tag_filter:
+        bookmarks = Bookmark.objects.filter(tags__name__exact=tag_filter).order_by('-created')
+        request.session['bookmark_tag_filter'] = tag_filter
+
+    favorite_tags = request.user.userprofile.favorite_tags.all()
+
+    return render_to_response('bookmark/tag.html',
+                              {'section': SECTION, 'bookmarks': bookmarks, 'tag_filter': tag_filter, 'favorite_tags': favorite_tags },
+                              context_instance=RequestContext(request))
+
 
 #@login_required
 class OrderListJson(BaseDatatableView):

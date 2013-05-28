@@ -1,9 +1,17 @@
+<script type="text/javascript">
 
-<form class="form-inline" name="nav_form" id="blog-search-form" action="{{ request.path }}" method="get">
+// Hilight the current section
+$(document).ready(function() {
+//	$('.breadcrumb li:contains("{{ section }}")').html("{{ section }}")
+	$('.breadcrumb li:contains("{{ section }}")').find("a").removeAttr("href")
 
-<!-- Tag Filter <input id="tag-filter" type="text" name="Search" value="{{ request.GET.tagsearch }}" size="20" /> -->
+});
 
-<!-- Blog: -->
-<!-- <& /common/dropdown.html, table => 'blog', cols => ['blog_id','blog_name'], value => $blog_id, clause => "WHERE user_id=$local{user_id}", onchange => 'blog_id', sort_order => 'blog_name' &> -->
+</script>
 
-</form>
+<ul class="breadcrumb pull-right">
+<li><a href="{% url 'bookmark_list' %}">List</a><span class="divider">/</span></li>
+<li><a href="{% url 'bookmark_tag' %}">Tags</a></li>
+</ul>
+
+<br />
