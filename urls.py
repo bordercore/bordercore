@@ -55,6 +55,7 @@ urlpatterns += patterns('music.views',
 )
 
 urlpatterns += patterns('accounts.views',
+                        url(r'^prefs/store_in_session/', 'store_in_session', name='store_in_session'),
                         url(r'^prefs/', UserProfileDetailView.as_view(), name='prefs'),
 )
 

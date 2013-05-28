@@ -1,11 +1,13 @@
+import json
+
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.http import HttpResponse
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView
-from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
 
 from accounts.forms import UserProfileForm
 from accounts.models import UserProfile
@@ -36,6 +38,13 @@ class UserProfileDetailView(UpdateView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(UserProfileDetailView, self).dispatch(*args, **kwargs)
+
+
+def store_in_session(request):
+
+    for key in request.POST:
+        request.session[ key ] = request.POST[ key ]
+    return HttpResponse(json.dumps('OK'), content_type="application/json")
 
 
 def bc_login(request):

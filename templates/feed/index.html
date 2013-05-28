@@ -33,8 +33,9 @@ $(document).ready(function() {
 
 		$('#feed-item-list').html( myText );
 
-		$.ajax( { type: 'GET',
-                  url: '/feed/set_current_feed/' + feed_id + '/',
+		$.ajax( { type: 'POST',
+                  url: '{% url 'store_in_session' %}',
+                  data: { current_feed: feed_id },
                   success: function() {
                   }
                 });
