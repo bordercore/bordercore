@@ -13,9 +13,9 @@ def handler404(request):
     m = p.match(url)
     if m:
         url = m.group(1)
-        print "No favicon for %s" % url
-
-        snarf_favicon.delay(url, False)
+        if url != 'default':
+            print "No favicon for %s" % url
+            snarf_favicon.delay(url, False)
 
         # Serve back a default favicon
         with open("%s/templates/static/img/favicons/default.png" % (settings.SITE_ROOT,), "rb") as f:
