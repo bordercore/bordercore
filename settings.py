@@ -9,7 +9,12 @@ sys.path.insert(0, os.path.join(PROJECT_ROOT, "apps"))
 
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 
-DEBUG = True
+# Enable debug mode based on whether this is dev or production
+if 'runserver' in sys.argv:
+    DEBUG = True
+else:
+    DEBUG = False
+
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
