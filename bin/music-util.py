@@ -73,7 +73,7 @@ def snarf_file(song):
         source = SongSource.objects.get(name=songsource)
 
         s, created = Song.objects.get_or_create(artist=audio.get('artist')[0], title=audio.get('title')[0],
-                                                year=date, source=source, track=tracknumber, album=a)
+                                                year=date, source=source, track=tracknumber, album=a[0])
 
         if not created:
             logging.warning("Song already exists in db")
