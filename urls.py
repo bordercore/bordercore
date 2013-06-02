@@ -30,7 +30,6 @@ urlpatterns += patterns('blog.views',
 )
 
 urlpatterns += patterns('feed.views',
-                        url(r'^feed/set_current_feed/(\d+)', 'set_current_feed'),
                         url(r'^feed/sort_feed/', 'sort_feed', name='sort_feed'),
                         url(r'^feeds/', 'feed_list'),
 )

@@ -1,4 +1,9 @@
+import json
+import requests
+
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
@@ -11,8 +16,6 @@ def feed_list(request):
 
     default_feed_id = Feed.objects.get(name='Hacker News').id
     current_feed = request.session.get('current_feed', default_feed_id)
-
-    import json
 
     feeds = FeedItem.objects.select_related().filter(feed__id__in=request.user.userprofile.rss_feeds.split(','))
 
@@ -42,15 +45,6 @@ def feed_list(request):
                               context_instance=RequestContext(request))
 
 
-def set_current_feed(request, feed_id):
-
-    request.session['current_feed'] = feed_id
-
-    return render_to_response('feed/set_current_feed.json',
-                              {'section': SECTION  },
-                              context_instance=RequestContext(request))
-
-
 def sort_feed(request):
 
     feed_id = int(request.POST['feed_id'])
@@ -67,8 +61,5 @@ def sort_feed(request):
     request.user.userprofile.rss_feeds = ','.join( [ str(feed_id) for feed_id in feeds ] )
     request.user.userprofile.save()
 
-    # TODO: Return JSON response here rather than an actual web page
+    return HttpResponse(json.dumps('OK'), content_type="application/json")
 
-    return render_to_response('feed/set_current_feed.json',
-                              {'section': SECTION  },
-                              context_instance=RequestContext(request))
