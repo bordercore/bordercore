@@ -141,6 +141,7 @@ INSTALLED_APPS = (
     'bookmark',
     'music',
     'pygments',
+    'quote',
     'south',
     'tastypie'
 
