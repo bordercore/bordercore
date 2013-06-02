@@ -6,7 +6,7 @@ from django.conf import settings
 register = template.Library()
 
 @register.filter(name='favicon')
-def favicon(url):
+def favicon(url, size=32):
 
     if not url:
         return ""
@@ -22,7 +22,7 @@ def favicon(url):
         if len(parts) == 3:
             domain = '.'.join(parts[1:])
         return """
-<img src="%s/img/favicons/%s.ico" />
-""" % (settings.STATIC_URL, domain)
+<img src="%s/img/favicons/%s.ico" width="%d" height="%d" />
+""" % (settings.STATIC_URL, domain, size, size)
     else:
         return ""
