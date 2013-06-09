@@ -104,6 +104,8 @@ def bookmark_tag(request):
     if not tag_filter:
         tag_filter = request.session.get('bookmark_tag_filter', None)
 
+    sorted_bookmarks = []
+
     if tag_filter:
         bookmarks = Bookmark.objects.filter(tags__name__exact=tag_filter).order_by('-created')
         request.session['bookmark_tag_filter'] = tag_filter
