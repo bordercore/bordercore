@@ -4,6 +4,8 @@
 <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
 {% endblock %}
 
+{% load favicon %}
+
 {% block title %} Bookmarks {% endblock %}
 
 {% block content %}
@@ -37,11 +39,18 @@ $(document).ready(function() {
 	});
 
     $('#sort-container').sortable( {
-		connectWith: '.feed-list',
+		connectWith: '.bookmark-list',
 		stop: function(event, ui) {
 			var myMatches = $(ui.item).find('a').attr('id').match(/link_(.*)$/);
 			var link_id = myMatches[1];
-			console.log(link_id);
+
+			$.ajax( { type: 'POST',
+                  url: '{% url 'tag_bookmark_list' %}',
+                  data: { tag: '{{ request.GET.tagsearch }}', link_id: link_id, position: ui.item.index() + 1 },
+                  success: function() {
+                  }
+                });
+
 		}
 	});
 
@@ -79,11 +88,11 @@ Tag Filter <input id="tag-filter" type="text" value="{{ tag_filter }}" autocompl
 
 {% if bookmarks %}
 
-<ul id="sort-container" class="feed-list">
+<ul id="sort-container" class="bookmark-list unstyled">
 
 {% for link in bookmarks %}
 
-<li><a href="{{ link.url }}" id="link_{{ link.id }}">{{ link.title }}</a></li>
+<li style="padding: 4px"><span style="width: 20px">{{ link.url|favicon:16|safe }} </span> &nbsp; &nbsp; <a href="{{ link.url }}" id="link_{{ link.id }}">{{ link.title }}</a> ({{ link.id }})</li>
 
 {% endfor %}
 

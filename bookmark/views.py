@@ -1,12 +1,15 @@
+import json
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 from django_datatables_view.base_datatable_view import BaseDatatableView
 
-from bookmark.models import Bookmark
+from bookmark.models import Bookmark, BookmarkTagUser
 from bookmark.forms import BookmarkForm
 from bookmark.tasks import snarf_favicon
 from tag.models import Tag
@@ -81,8 +84,6 @@ def snarf_link(request):
 @login_required
 def tag_search(request):
 
-    import json
-
     tags = Tag.objects.filter(name__istartswith=request.GET.get('query', ''))
     tag_list = []
 
@@ -91,14 +92,7 @@ def tag_search(request):
         if tag.bookmark_set.all():
             tag_list.append(tag.name)
 
-#    json_text = json.dumps(tag_list)
-
     return HttpResponse(json.dumps( tag_list ), content_type="application/json")
-
-    # return render_to_response('bookmark/tag_search.json',
-    #                           {'section': SECTION, 'info': json_text},
-    #                           context_instance=RequestContext(request),
-    #                           mimetype="application/json")
 
 
 @login_required
@@ -114,11 +108,50 @@ def bookmark_tag(request):
         bookmarks = Bookmark.objects.filter(tags__name__exact=tag_filter).order_by('-created')
         request.session['bookmark_tag_filter'] = tag_filter
 
+        try:
+            sort_order = BookmarkTagUser.objects.get(tag=Tag.objects.get(name=tag_filter), user=request.user)
+            sorted_bookmarks = sorted(bookmarks, key=lambda v : sort_order.bookmark_list.index(v.id))
+        except ObjectDoesNotExist, e:
+            print "Error! %s" % e
+            # TODO: Use celery to fire off an email about the error
+            sorted_bookmarks = bookmarks
+        except ValueError, e:
+            print "Error! %s" % e
+            # TODO: Use celery to fire off an email about the error
+            sorted_bookmarks = bookmarks
+
     favorite_tags = request.user.userprofile.favorite_tags.all()
 
     return render_to_response('bookmark/tag.html',
-                              {'section': SECTION, 'bookmarks': bookmarks, 'tag_filter': tag_filter, 'favorite_tags': favorite_tags },
+                              {'section': SECTION, 'bookmarks': sorted_bookmarks, 'tag_filter': tag_filter, 'favorite_tags': favorite_tags },
                               context_instance=RequestContext(request))
+
+
+@login_required
+def tag_bookmark_list(request):
+
+    tag = request.POST['tag']
+    link_id = int(request.POST['link_id'])
+    position = int(request.POST['position'])
+    print "tag: %s" % tag
+    print "link_id: %d" % link_id
+    print "position: %d" % position
+
+    print Tag.objects.get(name=tag).name
+    sorted_list = BookmarkTagUser.objects.get(tag=Tag.objects.get(name=tag), user=request.user)
+
+    # Verify that the bookmark is in the existing sort list
+    if not link_id in sorted_list.bookmark_list:
+        print "NOT Found!"
+        # TODO Return an exception
+
+    sorted_list.bookmark_list.remove( link_id )
+    sorted_list.bookmark_list.insert( position - 1, link_id )
+
+    print "New order: %s" % sorted_list.bookmark_list
+    sorted_list.save()
+
+    return HttpResponse(json.dumps( 'OK' ), content_type="application/json")
 
 
 #@login_required
