@@ -31,7 +31,7 @@ urlpatterns += patterns('blog.views',
 
 urlpatterns += patterns('feed.views',
                         url(r'^feed/sort_feed/', 'sort_feed', name='sort_feed'),
-                        url(r'^feeds/', 'feed_list'),
+                        url(r'^feeds/', 'feed_list', name="feed_list"),
 )
 
 urlpatterns += patterns('bookmark.views',
@@ -67,7 +67,7 @@ urlpatterns += patterns('',
 
 urlpatterns += patterns('accounts.views',
     url(r'^login/', 'bc_login'),
-    url(r'^logout/$', logout, {'template_name': 'login.html'}),
+    url(r'^logout', logout, {'template_name': 'login.html'}),
 )
 
 handler404 = 'site_utils.handler404'

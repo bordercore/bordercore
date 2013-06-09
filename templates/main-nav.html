@@ -19,11 +19,11 @@ $(document).ready(function() {
   <div class="navbar-inner">
     <!-- <a class="brand" href="#">Title</a> -->
     <ul class="nav">
-      <li><a href="/"><i class="icon-home"></i> Home</a></li>
-      <li><a href="/bookmarks/">Bookmarks</a></li>
-	  <li><a href="/feeds/">Feeds</a></li>
-      <li><a href="/blog/">Blog</a></li>
-      <li><a href="/music/">Music</a></li>
+      <li><a href="{% url 'homepage' %}"><i class="icon-home"></i> Home</a></li>
+      <li><a href="{% url 'bookmark_list' %}">Bookmarks</a></li>
+	  <li><a href="{% url 'feed_list' %}">Feeds</a></li>
+      <li><a href="{% url 'blog_list' %}">Blog</a></li>
+      <li><a href="{% url 'music_list' %}">Music</a></li>
       <li><a href="/calendar/">Calendar</a></li>
       <li><a href="http://www.bordercore.com/todo/">Todo</a></li>
 	  <!--      <li><a href="/addressbook/">Addressbook</a></li> -->
@@ -34,7 +34,7 @@ $(document).ready(function() {
 		  Misc  <b class="caret"></b>
 		</a>
 		<ul class="dropdown-menu">
-		  <li><a href="/prefs/"><i class="icon-cog"></i> Prefs</a></li>
+		  <li><a href="{% url 'prefs' %}"><i class="icon-cog"></i> Prefs</a></li>
 		  <li><a href="/logout"><i class="icon-off"></i> Logout</a></li>
 		</ul>
 	  </li>
