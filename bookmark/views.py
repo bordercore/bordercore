@@ -167,7 +167,13 @@ class OrderListJson(BaseDatatableView):
     def get_initial_queryset(self):
         # return queryset used as base for futher sorting/filtering
         # these are simply objects displayed in datatable
-        return Bookmark.objects.all()
+
+        # If the user has 'show untagged bookmarks only' set in preferences,
+        # then don't show bookmarks which have been tagged
+        if self.request.user.userprofile.bookmarks_show_untagged_only:
+            return Bookmark.objects.filter(tags__isnull=True)
+        else:
+            return Bookmark.objects.all()
 
     def filter_queryset(self, qs):
         # use request parameters to filter queryset

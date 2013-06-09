@@ -58,3 +58,9 @@ html, body {
 .form-error {
   color: #b94a48;
 }
+
+#bookmarks_show_untagged_only_note {
+    font-size: 12px;
+    padding-right: 20px;
+    padding-top: 10px;
+}

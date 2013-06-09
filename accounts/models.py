@@ -8,6 +8,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User)
     rss_feeds = models.TextField()
     favorite_tags = models.ManyToManyField(Tag)
+    bookmarks_show_untagged_only = models.BooleanField(default=False)
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.favorite_tags.all()])

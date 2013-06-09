@@ -166,6 +166,12 @@ $(document).ready(function() {
 <li><a href="{% url 'bookmark_tag' %}">Tags</a></li>
 </ul>
 
+{% if request.user.userprofile.bookmarks_show_untagged_only %}
+<div id="bookmarks_show_untagged_only_note" class="pull-right">
+<a href="{% url 'prefs' %}">Tag filter in effect</a>
+</div>
+{% endif %}
+
 <br />
 
 {% include "common/datatable.html" with cols=cols id="bookmark_list" %}

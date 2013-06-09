@@ -23,6 +23,8 @@ class UserProfileForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(UserProfileForm, self).__init__(*args, **kwargs)
 
+        self.fields['bookmarks_show_untagged_only'].label = "Show untagged bookmarks only"
+
         # If this form has a model attached, get the tags and display them separated by commas
         if self.instance.id:
             self.initial['favorite_tags'] = self.instance.get_tags()
@@ -34,7 +36,7 @@ class UserProfileForm(ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('rss_feeds', 'favorite_tags')
+        fields = ('rss_feeds', 'favorite_tags', 'bookmarks_show_untagged_only')
         widgets = {
             'rss_feeds': TextInput(attrs={'class': 'input-xxlarge'}),
         }
