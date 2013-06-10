@@ -1,4 +1,4 @@
-from django.forms import ModelForm, Textarea, TextInput, ValidationError, ModelMultipleChoiceField
+from django.forms import ModelChoiceField, ChoiceField, ModelForm, TextInput, ModelMultipleChoiceField
 
 from accounts.models import UserProfile
 from tag.models import Tag
@@ -19,6 +19,12 @@ class ModelCommaSeparatedChoiceField(ModelMultipleChoiceField):
                 newtag.save()
         return super(ModelCommaSeparatedChoiceField, self).clean(value)
 
+# We need to create a custom class so that we can define what get's displayed in the select widget
+class MyModelChoiceField(ModelChoiceField):
+    def label_from_instance(self, obj):
+        return obj.name
+
+
 class UserProfileForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(UserProfileForm, self).__init__(*args, **kwargs)
@@ -29,6 +35,8 @@ class UserProfileForm(ModelForm):
         if self.instance.id:
             self.initial['favorite_tags'] = self.instance.get_tags()
 
+    todo_default_tag = MyModelChoiceField(queryset=Tag.objects.filter(todo__isnull=False).distinct('name'), empty_label='Select Tag')
+
     favorite_tags = ModelCommaSeparatedChoiceField(
         required=False,
         queryset=Tag.objects.filter(),
@@ -36,7 +44,7 @@ class UserProfileForm(ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('rss_feeds', 'favorite_tags', 'bookmarks_show_untagged_only')
+        fields = ('rss_feeds', 'favorite_tags', 'bookmarks_show_untagged_only', 'todo_default_tag')
         widgets = {
             'rss_feeds': TextInput(attrs={'class': 'input-xxlarge'}),
         }

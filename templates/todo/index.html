@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+
+{% endblock %}
+
+{% block title %} {{ section }} {% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
+
+<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.bootstrap.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/dataTableExt.oApi.fnSetFilteringDelay.js"> </script>
+
+<script type="text/javascript" charset="utf-8">
+
+var oTable;
+
+/* Get the bookmark ID which is currently selected */
+/* Modified from http://www.datatables.net/examples/api/select_single_row.html */
+function fnGetSelected( oTableLocal ) {
+
+	var aTrs = oTableLocal.fnGetNodes();
+
+	for ( var i=0 ; i<aTrs.length ; i++ ) {
+		if ( $(aTrs[i]).hasClass('row_selected') ) {
+			return oTable.fnGetData( i )[3];
+		}
+	}
+
+}
+
+$(document).ready(function() {
+
+    $('#tags').change( function(e) {
+        var tag = $('#tags').val();
+        window.location='{% url 'todo_list' %}?tagsearch=' + tag;
+    });
+
+{% if messages %}
+{% for message in messages %}
+	$('#feedback').fadeIn(1000).html('{{ message }}');
+	setTimeout( function() {
+		$('#feedback').fadeOut(1000);
+	}, 3000);
+{% endfor %}
+{% endif %}
+
+    $('#btn-delete').on('click', function() {
+
+		var selectedTodoID = fnGetSelected( oTable );
+
+		$.ajax( { type: 'DELETE',
+				  url: '/api/v1/bookmark/' + selectedTodoID + '/',
+				  success: function() {
+					  $('#feedback').fadeIn(1000).html("Bookmark deleted.");
+					  setTimeout( function() {
+						  $('#feedback').fadeOut(1000);
+					  }, 3000);
+
+					  oTable.fnDraw();
+
+					  $('#btn-edit').attr("disabled", "disabled");
+					  $('#btn-delete').attr("disabled", "disabled");
+
+				  }
+				});
+	});
+
+    $('#btn-edit').on('click', function() {
+
+		var selectedTodoID = fnGetSelected( oTable );
+		window.location.href = '/bookmarks/edit/' + selectedTodoID;
+
+	});
+
+	function formatTitle( oObj ) {
+		return '<img src="{{ STATIC_URL }}img/favicons/' + parse_domain( oObj.aData[1] ) + '.ico" width="32" height="32" /> &nbsp; &nbsp; <a href="' + oObj.aData[1] + '" target="_blank">' + oObj.aData[2] + '</a>';
+	}
+
+	oTable = $('#todo_list').dataTable( {
+		"bInfo": false,
+		"iDisplayLength": 20,
+		"aaSorting": [[1, 'desc']],
+		"bFilter": true,
+		"bLengthChange": false,
+		"sDom": "<'row'<'span6'<'toolbar'>l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+		"bSearchable": false,
+		"aoColumnDefs": [
+			{ "aTargets": [0], "asSorting": [ "desc", "asc" ] },
+			{ "aTargets": [1], "sClass": "span3" },
+        ],
+	} );
+
+	$('#todo_list').dataTable().fnSetFilteringDelay(1000);
+
+	$("#todo_list tbody").click( function( event ) {
+
+		// Hilight the clicked row
+		$(event.target.parentNode).toggleClass("row_selected");
+
+		// Remove hilighting from all other rows
+		$(event.target.parentNode).siblings().removeClass("row_selected");
+
+		// Enable or disabled the 'Edit' and 'Delete' buttons based
+		//  on whether a row is selected (hilighted)
+		if ( $(event.target.parentNode).hasClass("row_selected") ) {
+			$('#btn-edit').removeAttr("disabled");
+			$('#btn-delete').removeAttr("disabled");
+		} else {
+			$('#btn-edit').attr("disabled", "disabled");
+			$('#btn-delete').attr("disabled", "disabled");
+		}
+
+    });
+
+	$(".edit-controls").appendTo("div.toolbar");
+
+});
+
+</script>
+
+<div class="row">
+<select id="tags" class="pull-right">
+  <option>Tag filter</option>
+{% for tag in tags %}
+  <option value="{{ tag.name }}"{% ifequal tagsearch tag.name %} selected="selected"{% endifequal %}>{{ tag.name }}</option>
+{% endfor %}
+</select>
+</div>
+
+<div class="edit-controls span3">
+  <div class="btn-group">
+	<a class="btn" id="btn-add" href="{% url 'todo_list' %}">Add</a>
+	<button class="btn" id="btn-edit" disabled>Edit</button>
+	<button class="btn" id="btn-delete" disabled>Delete</button>
+  </div>
+	<div id="feedback" class="alert alert-success hide" style="width: 150px; height: 20px; float: right; margin-bottom: 0px"></div>
+
+</div>
+
+{% include "common/datatable.html" with data=info cols=cols id="todo_list" %}
+
+{% endblock %}
+

@@ -143,7 +143,8 @@ INSTALLED_APPS = (
     'pygments',
     'quote',
     'south',
-    'tastypie'
+    'tastypie',
+    'todo'
 
 )
 

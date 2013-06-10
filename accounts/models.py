@@ -9,6 +9,7 @@ class UserProfile(models.Model):
     rss_feeds = models.TextField()
     favorite_tags = models.ManyToManyField(Tag)
     bookmarks_show_untagged_only = models.BooleanField(default=False)
+    todo_default_tag = models.OneToOneField(Tag, related_name='default_tag', null=True)
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.favorite_tags.all()])
