@@ -95,17 +95,10 @@ def tag_search(request):
 
     import json
 
-    tags = Tag.objects.filter(name__istartswith=request.GET.get('query', ''))
-    tag_list = []
-
-    # Filter out tags which haven't been applied to at least one blog post
-    for tag in tags:
-        if tag.post_set.all():
-            tag_list.append(tag.name)
-
-    json_text = json.dumps(tag_list)
+    # Only retrieve tags which have been applied to at least one blog post
+    tag_list = [x.name for x in Tag.objects.filter(name__istartswith=request.GET.get('query', ''), post__isnull=False).distinct('name')]
 
     return render_to_response('blog/tag_search.json',
-                              {'section': section, 'info': json_text},
+                              {'section': section, 'info': json.dumps(tag_list)},
                               context_instance=RequestContext(request),
                               mimetype="application/json")
