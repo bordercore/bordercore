@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from tastypie.api import Api
 
-from bookmark.api import BookmarkResource, UserResource
+from bookmark.api import BookmarkResource, UserResource, TodoResource
 from bookmark.views import OrderListJson
 from music.views import MusicListJson
 from accounts.views import UserProfileDetailView
@@ -15,6 +15,7 @@ admin.autodiscover()
 v1_api = Api(api_name='v1')
 v1_api.register(UserResource())
 v1_api.register(BookmarkResource())
+v1_api.register(TodoResource())
 
 urlpatterns = patterns('',
                         (r'^api/', include(v1_api.urls)),
