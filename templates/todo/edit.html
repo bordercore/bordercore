@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+
+<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tokenizer.js"></script>
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tokenizer.css" />
+
+{% endblock %}
+
+{% block title %} Todo {% endblock %}
+
+{% block content %}
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+    $("input[name='tags']").tokenizer( { delimiters: [13, 188] } )
+
+});
+
+</script>
+
+{% if message %}
+<div class="alert alert-success">{{ message }}</div>
+{% endif %}
+
+<form class="form-horizontal" action="{{ request.path }}" method="post">
+{% csrf_token %}
+
+{% for field in form %}
+<div class="control-group {% if field.errors %}error{% endif %}">
+    <label class="control-label" for="inputTitle">{{ field.label }}</label>
+
+    <div class="controls">
+{% if field.label == 'Tags' %}
+
+	<input class="input-xxlarge" name="tags" type="text" value="{{ field.value }}" />
+
+{% else %}
+
+{{ field }}
+
+{% endif %}
+
+{% for error in field.errors %}
+      <span class="form-error">{{ error }}</span>
+{% endfor %}
+
+</div>
+
+</div>
+{% endfor %}
+
+  <div class="control-group">
+    <div class="controls">
+	  <input class="btn" type="submit" name="Go" value="Edit">
+	</div>
+  </div>
+
+</form>
+
+{% endblock %}

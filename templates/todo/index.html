@@ -22,7 +22,7 @@ var oTable;
 /* Modified from http://www.datatables.net/examples/api/select_single_row.html */
 function fnGetSelected( oTableLocal ) {
 
-	var aTrs = oTableLocal.fnGetNodes();
+	var aTrs = oTable.fnGetNodes();
 
 	for ( var i=0 ; i<aTrs.length ; i++ ) {
 		if ( $(aTrs[i]).hasClass('row_selected') ) {
@@ -72,7 +72,8 @@ $(document).ready(function() {
     $('#btn-edit').on('click', function() {
 
 		var selectedTodoID = fnGetSelected( oTable );
-		window.location.href = '/bookmarks/edit/' + selectedTodoID;
+		console.log(selectedTodoID);
+        window.location='{% url 'todo_edit' 666 %}'.replace(666, selectedTodoID)
 
 	});
 
@@ -87,7 +88,7 @@ $(document).ready(function() {
 		"aoColumnDefs": [
 			{ "aTargets": [0], "asSorting": [ "desc", "asc" ] },
 			{ "aTargets": [1], "sClass": "span3 monospaced", "iDataSort": 2, "asSorting": [ "desc", "asc" ] },
-			{ "aTargets": [2], "bVisible": false },
+			{ "aTargets": [2,3], "bVisible": false },
         ],
 	} );
 
