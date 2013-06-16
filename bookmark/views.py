@@ -169,8 +169,9 @@ class OrderListJson(BaseDatatableView):
         # these are simply objects displayed in datatable
 
         # If the user has 'show untagged bookmarks only' set in preferences,
-        # then don't show bookmarks which have been tagged
-        if self.request.user.userprofile.bookmarks_show_untagged_only:
+        # then don't show bookmarks which have been tagged.  However, for
+        # searches (filters), ignore that preference
+        if self.request.user.userprofile.bookmarks_show_untagged_only and 'sSearch' not in self.request.GET:
             return Bookmark.objects.filter(tags__isnull=True)
         else:
             return Bookmark.objects.all()
