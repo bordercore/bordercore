@@ -24,3 +24,7 @@ class Todo(TimeStampedActivate):
     due_date = models.DateTimeField(null=True)
     tags = models.ManyToManyField(Tag)
     is_urgent = models.BooleanField(default=False)
+
+    def get_modified(self):
+        return self.modified.strftime('%b %d, %Y')
+

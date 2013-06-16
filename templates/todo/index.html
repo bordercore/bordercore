@@ -18,7 +18,7 @@
 
 var oTable;
 
-/* Get the bookmark ID which is currently selected */
+/* Get the todo task that is currently selected */
 /* Modified from http://www.datatables.net/examples/api/select_single_row.html */
 function fnGetSelected( oTableLocal ) {
 
@@ -53,9 +53,9 @@ $(document).ready(function() {
 		var selectedTodoID = fnGetSelected( oTable );
 
 		$.ajax( { type: 'DELETE',
-				  url: '/api/v1/bookmark/' + selectedTodoID + '/',
+				  url: '/api/v1/todo/' + selectedTodoID + '/',
 				  success: function() {
-					  $('#feedback').fadeIn(1000).html("Bookmark deleted.");
+					  $('#feedback').fadeIn(1000).html("Task deleted.");
 					  setTimeout( function() {
 						  $('#feedback').fadeOut(1000);
 					  }, 3000);
@@ -76,13 +76,9 @@ $(document).ready(function() {
 
 	});
 
-	function formatTitle( oObj ) {
-		return '<img src="{{ STATIC_URL }}img/favicons/' + parse_domain( oObj.aData[1] ) + '.ico" width="32" height="32" /> &nbsp; &nbsp; <a href="' + oObj.aData[1] + '" target="_blank">' + oObj.aData[2] + '</a>';
-	}
-
 	oTable = $('#todo_list').dataTable( {
 		"bInfo": false,
-		"iDisplayLength": 20,
+		"bPaginate": false,
 		"aaSorting": [[1, 'desc']],
 		"bFilter": true,
 		"bLengthChange": false,
@@ -90,7 +86,8 @@ $(document).ready(function() {
 		"bSearchable": false,
 		"aoColumnDefs": [
 			{ "aTargets": [0], "asSorting": [ "desc", "asc" ] },
-			{ "aTargets": [1], "sClass": "span3" },
+			{ "aTargets": [1], "sClass": "span3 monospaced", "iDataSort": 2, "asSorting": [ "desc", "asc" ] },
+			{ "aTargets": [2], "bVisible": false },
         ],
 	} );
 

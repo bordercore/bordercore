@@ -1,3 +1,4 @@
+from django.utils.dateformat import format
 from django.views.generic.list import ListView
 
 from tag.models import Tag
@@ -9,7 +10,6 @@ class TodoListView(ListView):
 
     model = Todo
     template_name = "todo/index.html"
-    paginate_by = 15
     context_object_name = 'info'
     tagsearch = None
 
@@ -29,12 +29,12 @@ class TodoListView(ListView):
 
         info = []
 
-        for object in kwargs['object_list']:
-            info.append( dict(task=object.task, modified=object.modified) )
+        for myobject in kwargs['object_list']:
+            info.append( dict(task=myobject.task, modified=myobject.get_modified(), unixtime=format(myobject.modified, 'U')) )
 
         context['tags'] = Tag.objects.filter(todo__isnull=False).distinct('name')
         context['tagsearch'] = self.tagsearch
-        context['cols'] = ['task', 'modified']
+        context['cols'] = ['task', 'modified', 'unixtime']
         context['section'] = SECTION
         context['info'] = info
         return context
