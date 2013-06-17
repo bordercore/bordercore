@@ -171,7 +171,7 @@ class OrderListJson(BaseDatatableView):
         # If the user has 'show untagged bookmarks only' set in preferences,
         # then don't show bookmarks which have been tagged.  However, for
         # searches (filters), ignore that preference
-        if self.request.user.userprofile.bookmarks_show_untagged_only and 'sSearch' not in self.request.GET:
+        if self.request.user.userprofile.bookmarks_show_untagged_only and self.request.GET.get('sSearch') != None:
             return Bookmark.objects.filter(tags__isnull=True)
         else:
             return Bookmark.objects.all()
