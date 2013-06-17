@@ -67,4 +67,13 @@ html, body {
 
 .monospaced {
     font-family: Courier
- }
+ } }
+
+.tag {
+    font-weight: bold;
+    font-size: 12px;
+    color: #fff;
+    background-color: #999;
+    padding: 2px 4px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
