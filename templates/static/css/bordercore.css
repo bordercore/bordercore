@@ -50,6 +50,13 @@ html, body {
   background-color: transparent;
 }
 
+/* Use this to center content */
+.center {
+     float: none;
+     margin-left: auto;
+     margin-right: auto;
+}
+
 /* For tables with a toolbar, make room for a Bootstrap alert */
 .btn-group {
   height: 40px;
@@ -67,7 +74,7 @@ html, body {
 
 .monospaced {
     font-family: Courier
- } }
+ }
 
 .tag {
     font-weight: bold;
@@ -77,3 +84,5 @@ html, body {
     padding: 2px 4px;
     -webkit-border-radius: 3px;
     border-radius: 3px;
+ }
+
