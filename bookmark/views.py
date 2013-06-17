@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 
 from django_datatables_view.base_datatable_view import BaseDatatableView
@@ -77,9 +77,8 @@ def snarf_link(request):
     b = Bookmark(user=request.user, url=url, title=title)
     b.save()
 
-    return render_to_response('bookmark/snarf_link.html',
-                              {'section': SECTION, 'url': url, 'title': title},
-                              context_instance=RequestContext(request))
+    return redirect('bookmark_edit', b.id)
+
 
 @login_required
 def tag_search(request):

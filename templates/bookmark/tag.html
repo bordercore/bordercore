@@ -92,7 +92,7 @@ Tag Filter <input id="tag-filter" type="text" value="{{ tag_filter }}" autocompl
 
 {% for link in bookmarks %}
 
-<li style="padding: 4px"><span style="width: 20px">{{ link.url|favicon:16|safe }} </span> &nbsp; &nbsp; <a href="{{ link.url }}" id="link_{{ link.id }}">{{ link.title }}</a> ({{ link.id }})</li>
+<li style="padding: 4px"><span style="width: 20px">{{ link.url|favicon:16|safe }} </span> &nbsp; &nbsp; <a href="{{ link.url }}" id="link_{{ link.id }}">{{ link.title }}</a></li>
 
 {% endfor %}
 
