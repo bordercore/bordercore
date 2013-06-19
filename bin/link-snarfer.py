@@ -1,8 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import logging
 import os
-import psycopg2
 import quopri
 import pprint
 import sys
@@ -10,9 +9,9 @@ import re
 import requests
 from lxml.html import fromstring
 
-# os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
-# sys.path.insert(0, "/home/jerrell/dev/django/bordercore")
-# from bookmark.models import Bookmark
+os.environ['DJANGO_SETTINGS_MODULE'] = 'bordercore.settings'
+sys.path.insert(0, '/home/www/htdocs/bordercore-django')
+from bookmark.models import Bookmark
 
 link_dict = {}  # Store links in a dict to avoid duplication
 
@@ -65,17 +64,11 @@ for link in matches:
 
 if link_dict:
 
-    conn = psycopg2.connect("dbname=django host=localhost user=bordercore password=4locus2")
-    cur = conn.cursor()
-
     for label in link_dict.keys():
 
         print "label: %s" % label.encode('utf-8')
         print "link: %s" % link_dict[label]
         logger.info(link_dict[label])
 
-        # b = Bookmark(url='http://www.google.com', title='Google Link', user_id=1)
-        # b.save()
-
-        cur.execute("insert into bookmark_bookmark(created,modified,active,url,title,user_id) values (now(), now(), 't', %s,%s,1)", (link_dict[label], label or 'No Label'))
-        conn.commit()
+        b = Bookmark(url=link_dict[label], title=label or 'No Label', user_id=1)
+        b.save()
