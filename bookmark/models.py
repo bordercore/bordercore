@@ -9,7 +9,7 @@ from tag.models import Tag
 # Should probably put this in a general-purpose file, since it's
 #  used in several Bordercore apps
 class TimeStampedActivate(models.Model):
-    created = models.DateTimeField(default=datetime.now)
+    created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     active = models.BooleanField(default=True)
 
