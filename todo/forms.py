@@ -22,6 +22,12 @@ class ModelCommaSeparatedChoiceField(ModelMultipleChoiceField):
 
 class TodoForm(ModelForm):
     def __init__(self, *args, **kwargs):
+
+        # In case one of our views passed in the request object (eg from get_form_kwargs()),
+        #  save it and remove it from kwargs before calling super()
+        if kwargs.get('request'):
+            request = kwargs.pop("request")
+
         super(TodoForm, self).__init__(*args, **kwargs)
 
         self.fields['is_urgent'].label = "Urgent"
@@ -29,6 +35,9 @@ class TodoForm(ModelForm):
         # If this form has a model attached, get the tags and display them separated by commas
         if self.instance.id:
             self.initial['tags'] = self.instance.get_tags()
+        else:
+            initial_tag = request.session.get('current_todo_tag', None)
+            self.initial['tags'] = initial_tag
 
     tags = ModelCommaSeparatedChoiceField(
         required=False,

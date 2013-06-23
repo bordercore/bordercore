@@ -1,9 +1,10 @@
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
 from django.utils.dateformat import format
 from django.utils.decorators import method_decorator
-from django.views.generic.edit import UpdateView
+from django.http import HttpResponseRedirect, Http404
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
+from django.core.urlresolvers import reverse
 
 from todo.forms import TodoForm
 
@@ -49,6 +50,7 @@ class TodoListView(ListView):
         context['info'] = info
         return context
 
+
 class TodoDetailView(UpdateView):
     template_name = 'todo/edit.html'
     form_class = TodoForm
@@ -56,6 +58,8 @@ class TodoDetailView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super(TodoDetailView, self).get_context_data(**kwargs)
         context['section'] = SECTION
+        context['pk'] = self.kwargs.get('pk')
+        context['action'] = 'Edit'
         return context
 
     def get(self, request, **kwargs):
@@ -94,3 +98,58 @@ class TodoDetailView(UpdateView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(TodoDetailView, self).dispatch(*args, **kwargs)
+
+
+class TodoCreateView(CreateView):
+    template_name = 'todo/edit.html'
+    form_class = TodoForm
+
+    def get_context_data(self, **kwargs):
+        context = super(TodoCreateView, self).get_context_data(**kwargs)
+        context['section'] = SECTION
+        context['action'] = 'Add'
+        return context
+
+    def get_form_kwargs(self):
+        # pass the request object to the form so that we have access to the session
+        kwargs = super(TodoCreateView, self).get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+
+    def form_valid(self, form):
+
+        obj = form.save(commit=False)
+        obj.user = self.request.user
+        obj.save()
+
+        # Take care of the tags.  Create any that are new.
+        for tag in form.cleaned_data['tags']:
+            newtag, created = Tag.objects.get_or_create(name=tag.name)
+            if created:
+                newtag.save()
+            obj.tags.add(newtag)
+
+        obj.save()
+
+        return HttpResponseRedirect(self.get_success_url())
+
+
+    def get_success_url(self):
+        return reverse('todo_list')
+
+
+class TodoDeleteView(DeleteView):
+    template_name = 'todo/edit.html'
+    form_class = TodoForm
+    model = Todo
+
+    # Verify that the user is the owner of the task
+    def get_object(self, queryset=None):
+        obj = super(TodoDeleteView, self).get_object()
+        if not obj.user == self.request.user:
+            raise Http404
+        return obj
+
+    def get_success_url(self):
+        return reverse('todo_list')

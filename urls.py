@@ -8,7 +8,7 @@ from bookmark.api import BookmarkResource, UserResource, TodoResource
 from bookmark.views import OrderListJson
 from music.views import MusicListJson
 from accounts.views import UserProfileDetailView
-from todo.views import TodoDetailView, TodoListView
+from todo.views import TodoCreateView, TodoDeleteView, TodoDetailView, TodoListView
 
 admin.autodiscover()
 
@@ -59,8 +59,9 @@ urlpatterns += patterns('music.views',
 )
 
 urlpatterns += patterns('todo.views',
-#                        url(r'^todo/edit(?:/(\d+))?', 'todo_edit', name='todo_edit'),
+                        url(r'^todo/add', TodoCreateView.as_view(), name='todo_add'),
                         url(r'^todo/edit/(?P<pk>[\d-]+)$', TodoDetailView.as_view(), name='todo_edit'),
+                        url(r'^todo/delete/(?P<pk>[\d-]+)$', TodoDeleteView.as_view(), name='todo_delete'),
                         url(r'^todo/', TodoListView.as_view(), name='todo_list'),
 )
 

@@ -26,7 +26,7 @@ function fnGetSelected( oTableLocal ) {
 
 	for ( var i=0 ; i<aTrs.length ; i++ ) {
 		if ( $(aTrs[i]).hasClass('row_selected') ) {
-			return oTable.fnGetData( i )[3];
+			return [i, oTable.fnGetData( i )[3]];
 		}
 	}
 
@@ -50,11 +50,14 @@ $(document).ready(function() {
 
     $('#btn-delete').on('click', function() {
 
-		var selectedTodoID = fnGetSelected( oTable );
+		var selectedTaskInfo = fnGetSelected( oTable );
+		var selectedRowID = selectedTaskInfo[0];
+		var selectedTodoID = selectedTaskInfo[1];
 
 		$.ajax( { type: 'DELETE',
 				  url: '/api/v1/todo/' + selectedTodoID + '/',
 				  success: function() {
+					  oTable.fnDeleteRow(selectedRowID);
 					  $('#feedback').fadeIn(1000).html("Task deleted.");
 					  setTimeout( function() {
 						  $('#feedback').fadeOut(1000);
@@ -71,8 +74,7 @@ $(document).ready(function() {
 
     $('#btn-edit').on('click', function() {
 
-		var selectedTodoID = fnGetSelected( oTable );
-		console.log(selectedTodoID);
+		var selectedTodoID = fnGetSelected( oTable )[1];
         window.location='{% url 'todo_edit' 666 %}'.replace(666, selectedTodoID)
 
 	});
@@ -131,7 +133,7 @@ $(document).ready(function() {
 
 <div class="edit-controls span3">
   <div class="btn-group">
-	<a class="btn" id="btn-add" href="{% url 'todo_list' %}">Add</a>
+	<a class="btn" id="btn-add" href="{% url 'todo_add' %}">Add</a>
 	<button class="btn" id="btn-edit" disabled>Edit</button>
 	<button class="btn" id="btn-delete" disabled>Delete</button>
   </div>
