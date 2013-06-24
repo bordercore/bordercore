@@ -1,10 +1,37 @@
 {% extends "base.html" %}
 
+{% block extra_head %}
+
+<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tokenizer.js"></script>
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tokenizer.css" />
+
+{% endblock %}
+
 {% block title %} Blog {% endblock %}
 
 {% block content %}
 
 {% include "blog/header.html" %}
+
+<script type="text/javascript" src="{{ STATIC_URL }}/js/jquery.field_selection.js"></script>
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+	$("input[name='tags']").tokenizer( { delimiters: [13, 188] } )
+
+	$('#escape').click( function(event) {
+
+		var range = $('textarea').getSelection();
+		var text = $('textarea').val();
+		var escapedText = range.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+		$('textarea').val( text.substr(0, range.start) + escapedText +  text.substr(range.end, text.length - range.end));
+
+	})
+
+});
+
+</script>
 
 <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
 <link href="{{ STATIC_URL }}css/datepicker.css" rel="stylesheet" media="screen" />
