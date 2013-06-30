@@ -6,10 +6,10 @@ import datetime
 import exceptions
 import feedparser
 import psycopg2
+import psycopg2.extras
 import sys
 import xml.sax.saxutils as saxutils
 
-import dtuple
 import requests
 
 LOG_FILE = "/home/www/logs/get_feed.log"
@@ -18,7 +18,7 @@ RDF_DIR = "/home/www/htdocs/bordercore/rdf"
 def update_feeds(feed_id=None):
 
     conn = psycopg2.connect("dbname=django host=localhost user=bordercore password=4locus2")
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     # If an argument is supplied on the command line, interpret that as the
     #  feed id to update.  Otherwise update all feeds.
@@ -27,13 +27,11 @@ def update_feeds(feed_id=None):
         sql = sql + " WHERE id = %d" % int(feed_id)
 
     cursor.execute(sql)
-    descr = dtuple.TupleDescriptor(cursor.description)
 
     rows = cursor.fetchall()
     for row in rows:
-        row = dtuple.DatabaseTuple(descr, row)
 
-        r = requests.get(row.url)
+        r = requests.get(row['url'])
 
         try:
 
@@ -41,18 +39,18 @@ def update_feeds(feed_id=None):
                 r.raise_for_status()
 
             # Store a copy of the raw RDF for debugging
-            raw_file = codecs.open(RDF_DIR + "/%d.xml" % row.id, 'w', 'utf-8')
-            raw_file.write(r.text)
-            raw_file.close()
+            # raw_file = codecs.open(RDF_DIR + "/%d.xml" % row['id'], 'w', 'utf-8')
+            # raw_file.write(r.text)
+            # raw_file.close()
 
             d = feedparser.parse(r.text)
 
-            cursor.execute("DELETE FROM feed_feeditem WHERE feed_id = %s", (row.id,))
+            cursor.execute("DELETE FROM feed_feeditem WHERE feed_id = %s", (row['id'],))
 
             for x in d.entries:
                 title = x.title or 'No Title'
                 link = x.link or ''
-                cursor.execute("INSERT INTO feed_feeditem (feed_id, title, link, created) VALUES (%s, %s, %s, now())", (row.id, saxutils.unescape(title), saxutils.unescape(link)))
+                cursor.execute("INSERT INTO feed_feeditem (feed_id, title, link, created) VALUES (%s, %s, %s, now())", (row['id'], saxutils.unescape(title), saxutils.unescape(link)))
 
         except Exception as e:
 
@@ -68,12 +66,12 @@ def update_feeds(feed_id=None):
 
             t = datetime.datetime.now()
             log_file = open(LOG_FILE, 'a')
-            log_file.write("%s Exception for %s (feed_id %d): %s\n" % (t.strftime('%Y-%m-%d %H:%M:%S'), row.name, row.id, message))
+            log_file.write("%s Exception for %s (feed_id %d): %s\n" % (t.strftime('%Y-%m-%d %H:%M:%S'), row['name'], row['id'], message))
             log_file.close()
 
         finally:
 
-            cursor.execute("UPDATE feed_feed SET last_response_code = %s, last_check = NOW() WHERE id = %s", (r.status_code, row.id))
+            cursor.execute("UPDATE feed_feed SET last_response_code = %s, last_check = NOW() WHERE id = %s", (r.status_code, row['id']))
             conn.commit()
 
 
