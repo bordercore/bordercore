@@ -237,20 +237,26 @@ def search(request):
 
     import json
 
-    # The search could match an album name or an artist
+    # The search could match an album name or an artist or a song title
     albums = Album.objects.filter( title__icontains=request.GET['query'])
     artists = Album.objects.filter( artist__icontains=request.GET['query'] ).distinct('artist')
+    songs = Song.objects.filter( title__icontains=request.GET['query']).order_by('title')
 
     results = []
 
     for album in albums:
         results.append( { 'label': "%s - %s" % (album.artist, album.title),
-                             'id': album.id,
-                             'type': 'album' } )
+                          'id': album.id,
+                          'type': 'album' } )
 
     for artist in artists:
         results.append( { 'label': "%s" % (artist.artist),
-                             'type': 'artist' } )
+                          'type': 'artist' } )
+
+    for song in songs:
+        results.append( { 'label': "%s - %s" % (song.title, song.artist),
+                          'id': song.album_id,
+                          'type': 'album' } )
 
     json_text = json.dumps(results)
 
