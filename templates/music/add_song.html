@@ -1,63 +1,117 @@
+
 {% extends "base.html" %}
+
+{% load dict_get %}
 
 {% block title %} Music {% endblock %}
 
 {% block content %}
 
+<script type="text/javascript">
 
-<div class="span6">
+$(document).ready(function() {
 
-{% if request.POST.Go and not form.errors %}
+	$("input[type='file']").change( function(){
+		$("button[type='submit']").removeAttr("disabled");
+	});
 
-<div class="alert alert-success offset2">
-Post {{ action }}ed
+});
+
+</script>
+
+{% for message in messages %}
+<div class="alert alert-{{ message.tags|lower }}">{{ message|safe }}</div>
+{% endfor %}
+
+<div class="row">
+
+<div class="span7">
+
+<p class="lead offset2">{{ action}} Song</p>
+
+<form class="form-horizontal" enctype="multipart/form-data" action="{{ request.path }}" method="post">
+{% csrf_token %}
+
+<input type="hidden" name="md5sum" value="{{ md5sum }}" />
+
+{% if action == 'Upload' %}
+<div class="control-group">
+  <div class="controls">
+
+<input type="file" name="song" class="input-xxlarge span5" accept="audio/*" /> &nbsp; &nbsp;
+
+<button type="submit" class="btn" name="upload" disabled="true">Upload</button>
+
+<a class="btn" href="{% url 'music_list' %}">Cancel</a>
+
+  </div>
 </div>
-
 {% endif %}
 
-<p class="lead offset2"> Upload a Song</p>
-
-<form class="form-horizontal" action="{{ request.path }}" method="post">
-{% csrf_token %}
+{% if action == 'Review' %}
 
 {% for field in form %}
 <div class="control-group {% if field.errors %}error{% endif %}">
     <label class="control-label" for="inputTitle">{{ field.label }}</label>
-
     <div class="controls">
-{% if field.label == 'Date' %}
-
-	<div class="input-large date" id="datepicker" data-date="{{ field.value|date:"m-d-Y" }}" data-date-format="mm-dd-yyyy">
-	  <input class="span2" size="16" type="text" name="date" value="{{ field.value|date:"m-d-Y" }}" />
-	  <span class="add-on"><i class="icon-th"></i></span>
-    </div>
-
-{% else %}
-
 {{ field }}
-
-{% endif %}
-
 {% for error in field.errors %}
-      <span class="form-error">{{ error }}</span>
+<span class="form-error">{{ error }}</span>
 {% endfor %}
-
     </div>
-
+  </div>
+{% if field.label == 'Artist' %}
+<div class="control-group {% if field.errors %}error{% endif %}">
+  <label class="control-label" for="inputTitle">Album</label>
+  <div class="controls">
+    <input class="input-large" id="id_album" name="album" type="text" value="{{ info.album.0 }}" />
+  </div>
+  <label class="control-label" for="inputCompilation">Compilation</label>
+  <div class="controls">
+	<input type="checkbox" name="compilation" value="True" id="id_compilation" />
+  </div>
 </div>
+{% endif %}
 {% endfor %}
 
-  <div class="control-group">
-    <div class="controls">
-	  <input class="btn" type="submit" name="Go" value="{{ action }}">
-	  <input class="btn{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete">
-	  <a class="btn" href="{% url 'blog_list' %}">Cancel</a>
-	</div>
+<div class="control-group">
+  <div class="controls">
+	<button type="submit" class="btn" name="add">Add</button>
+	<a class="btn" href="{% url 'add_song' %}">Cancel</a>
   </div>
+</div>
 
 </form>
 
+{% endif %}
+
 </div>
 
+<div class="span5">
+
+<br /><br />
+
+{% if md5sum %}
+<img src="{% url 'album_artwork' md5sum %}" height="300" width="300" />
+{% endif %}
+
+</div>
+
+</div>
+
+{% if notes %}
+<div>
+
+<br /><br />
+
+<table class="table table-bordered table-striped">
+<caption><strong>Notes</strong></caption>
+{% for note in notes %}
+<tr><td>{{ note }}</td></tr>
+{% endfor %}
+</table>
+
+</div>
+{% endif %}
 
 {% endblock %}

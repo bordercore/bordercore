@@ -4,35 +4,12 @@
 
 {% block content %}
 
-<script type="text/javascript" src="{{ STATIC_URL }}/js/jquery.field_selection.js"></script>
-<script type="text/javascript">
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-error">{{ message }}</div>
+{% endfor %}
+{% endif %}
 
-$(document).ready(function() {
-
-	$('#escape').click( function(event) {
-
-		var range = $('textarea').getSelection();
-		var text = $('textarea').val();
-		var escapedText = range.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-		$('textarea').val( text.substr(0, range.start) + escapedText +  text.substr(range.end, text.length - range.end));
-
-	})
-
-});
-
-</script>
-
-<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
-<link href="{{ STATIC_URL }}css/datepicker.css" rel="stylesheet" media="screen" />
-
-<script type="text/javascript">
-
-$(document).ready(function() {
-
-	$('#datepicker').datepicker().on('changeDate', function(ev){ });
-});
-
-</script>
 
 <div class="span6">
 
@@ -54,18 +31,7 @@ Post {{ action }}ed
     <label class="control-label" for="inputTitle">{{ field.label }}</label>
 
     <div class="controls">
-{% if field.label == 'Date' %}
-
-	<div class="input-large date" id="datepicker" data-date="{{ field.value|date:"m-d-Y" }}" data-date-format="mm-dd-yyyy">
-	  <input class="span2" size="16" type="text" name="date" value="{{ field.value|date:"m-d-Y" }}" />
-	  <span class="add-on"><i class="icon-th"></i></span>
-    </div>
-
-{% else %}
-
 {{ field }}
-
-{% endif %}
 
 {% for error in field.errors %}
       <span class="form-error">{{ error }}</span>
@@ -90,7 +56,7 @@ Post {{ action }}ed
     <div class="controls">
 	  <input class="btn" type="submit" name="Go" value="{{ action }}">
 	  <input class="btn{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete">
-	  <a class="btn" href="{% url 'blog_list' %}">Cancel</a>
+	  <a class="btn" href="{% url 'music_list' %}">Cancel</a>
 	</div>
   </div>
 
@@ -113,11 +79,6 @@ Post {{ action }}ed
 <tr><td><strong>sample rate</strong></td><td>{{ file_info.id3_info.info.sample_rate }}</td></tr>
 <tr><td><strong>file size</strong></td><td>{{ file_info.filesize }}</td></tr>
 </table>
-{% else %}
-
-<br />
-<br />
-<div class="alert alert-error">Error: Song cannot be found on disk</div>
 
 {% endif %}
 

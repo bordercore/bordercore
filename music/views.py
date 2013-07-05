@@ -1,13 +1,23 @@
+import errno
+import hashlib
 import os
+from os import makedirs
+from os.path import isfile
+import re
+from shutil import move
 import time
 
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.urlresolvers import reverse
 from django.db.models import Q
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.forms.util import ErrorList
 from django.http import HttpResponse, HttpResponseNotFound
+from django.shortcuts import redirect, render_to_response
+from django.template import RequestContext
 from django_datatables_view.base_datatable_view import BaseDatatableView
+from mutagen.easyid3 import EasyID3
 from mutagen.mp3 import MP3
 
 from music.models import Album, Listen, Song
@@ -55,14 +65,13 @@ def music_stream(request, song_id):
     l = Listen(song=song, user=request.user)
     l.save()
 
-    if not song.album:
-        return HttpResponseNotFound()
-
-    tracknumber = str(song.track)
-    if len(tracknumber) == 1:
-        tracknumber = '0' + tracknumber
-
-    file_path = "%s/%s/%s/%s - %s.mp3" % (MUSIC_ROOT, song.artist, song.album.title, tracknumber, song.title)
+    if song.album:
+        tracknumber = str(song.track)
+        if len(tracknumber) == 1:
+            tracknumber = '0' + tracknumber
+        file_path = "%s/%s/%s/%s - %s.mp3" % (MUSIC_ROOT, song.artist, song.album.title, tracknumber, song.title)
+    else:
+        file_path = "%s/%s/%s.mp3" % (MUSIC_ROOT, song.artist, song.title)
 
     try:
         fsock = open(file_path, "r")
@@ -76,26 +85,27 @@ def music_stream(request, song_id):
 @login_required
 def album_artwork(request, song_id):
 
-    song = Song.objects.get(id=song_id)
+    if len(song_id) == 32:
+        file_path = "/tmp/%s" % song_id
+    else:
+        song = Song.objects.get(id=song_id)
 
-    if not song.album:
-        return HttpResponseNotFound()
+        if not song.album:
+            return HttpResponseNotFound()
 
-    tracknumber = str(song.track)
-    if len(tracknumber) == 1:
-        tracknumber = '0' + tracknumber
+        tracknumber = str(song.track)
+        if len(tracknumber) == 1:
+            tracknumber = '0' + tracknumber
 
-    file_path = "%s/%s/%s/%s - %s.mp3" % (MUSIC_ROOT, song.artist, song.album.title, tracknumber, song.title)
+            file_path = "%s/%s/%s/%s - %s.mp3" % (MUSIC_ROOT, song.artist, song.album.title, tracknumber, song.title)
 
     audio = MP3(file_path)
-    artwork = audio.tags['APIC:']
+    artwork = audio.tags.get('APIC:')
 
-    try:
-        response = HttpResponse( artwork.data, mimetype=artwork.mime )
-    except IOError:
-        response = HttpResponseNotFound()
-
-    return response
+    if artwork:
+        return HttpResponse( artwork.data, mimetype=artwork.mime )
+    else:
+        return redirect("https://www.bordercore.com/static/img/image_not_found.jpg")
 
 
 @login_required
@@ -112,10 +122,13 @@ def song_edit(request, song_id = None):
 
     if song.album:
         filename = "%s/%s/%s/%s - %s.mp3" % (MUSIC_ROOT, song.artist, song.album.title, tracknumber, song.title)
-        id3_info = MP3(filename)
-        file_info = { 'id3_info': id3_info,
-                      'filesize': os.stat(filename).st_size,
-                      'length': time.strftime('%M:%S', time.gmtime( id3_info.info.length )) }
+        try:
+            id3_info = MP3(filename)
+            file_info = { 'id3_info': id3_info,
+                          'filesize': os.stat(filename).st_size,
+                          'length': time.strftime('%M:%S', time.gmtime( id3_info.info.length )) }
+        except IOError, e:
+            messages.add_message(request, messages.ERROR, 'IOError: %s' % e)
 
     if request.method == 'POST':
         if request.POST['Go'] in ['Edit', 'Add']:
@@ -165,17 +178,183 @@ def show_album(request, album_id):
 @login_required
 def show_artist(request, artist_name):
 
+    # Get all albums by this artist
     album_list = Album.objects.filter(artist=artist_name).order_by('-year')
 
+    # Get all songs by this artist that do not appear on an album
+    s = Song.objects.filter(artist=artist_name).filter(album__isnull=True)
+
+    song_list = []
+
+    for song in s:
+        song_list.append( dict(id=song.id, date=song.created.strftime("%b %d, %Y"), title=song.title, artist=song.artist, info=song.comment))
+
     return render_to_response('music/show_artist.html',
-                              {'section': SECTION, 'album_list': album_list },
+                              {'section': SECTION, 'album_list': album_list, 'song_list': song_list, 'cols': ['date', 'artist', 'title', 'info', 'id'] },
                               context_instance=RequestContext(request))
 
 
 @login_required
 def add_song(request):
+
+    info = {}
+    notes = []
+    md5sum = None
+    form = None
+    action = 'Upload'
+
+    if 'upload' in request.POST:
+
+        formdata = {}
+
+        action = 'Review'
+        blob = request.FILES['song'].read()
+        md5sum = hashlib.md5(blob).hexdigest()
+        filename = "/tmp/%s" % md5sum
+        f = open(filename, "w")
+        f.write(blob)
+        f.close()
+        info = MP3(filename, ID3=EasyID3)
+
+        for field in ('artist', 'title', 'album'):
+            formdata[ field ] = info[ field ][0] if info.get(field) else None
+        if info.get('date'):
+            formdata['year'] = info['date'][0]
+        formdata['length'] = int(info.info.length)
+
+        if info.get('album'):
+            if Album.objects.filter(title=info['album'][0], artist=info['artist'][0]):
+                notes.append('You already have an album with this title')
+
+        if Song.objects.filter(title=info['title'][0], artist=info['artist'][0]):
+            notes.append('You already have a song with this title by this artist')
+
+        if info.get('tracknumber'):
+            track_info = info['tracknumber'][0].split('/')
+            track_number = track_info[0]
+            formdata['track'] = track_number
+
+        form = SongForm(initial=formdata)
+
+        # This should initialize form._errors, used below
+        form.full_clean()
+
+        if formdata.get('year') and not re.search('^\d+$', formdata['year']):
+            form._errors["year"] = ErrorList([u"Wrong format"])
+
+    elif 'add' in request.POST:
+
+        md5sum = request.POST['md5sum']
+
+        if request.POST['year']:
+            try:
+                song = Song.objects.get(artist=request.POST['artist'], title=request.POST['title'], year=request.POST['year'])
+            except ObjectDoesNotExist:
+                song = None
+        else:
+            song = None
+
+        form = SongForm(request.POST, instance=song) # A form bound to the POST data
+
+        info = MP3("/tmp/%s" % md5sum, ID3=EasyID3)
+
+        if form.is_valid():
+
+            album_id = None
+
+            # If an album was specified, check if we have the album
+            if request.POST['album']:
+                request.POST['album'] = request.POST['album'].strip()
+                album_artist = form.cleaned_data['artist']
+                print album_artist
+                if request.POST.get('compilation'):
+                    album_artist = "Various Artists"
+                try:
+                    a = Album.objects.get(title=request.POST['album'], artist=album_artist)
+                except ObjectDoesNotExist:
+                    a = None
+                if a:
+                    if a.year != form.cleaned_data['year']:
+                        messages.add_message(request, messages.ERROR, 'The same album exists but with a different year')
+                else:
+                    # This is a new album
+                    a = Album(title=request.POST['album'],
+                              artist=album_artist,
+                              year=form.cleaned_data['year'],
+                              compilation=request.POST.get('compilation', False))
+            else:
+                # No album was specified
+                a = None
+
+            if not messages.get_messages(request):
+                if a:
+                    a.save()
+                form.cleaned_data['length'] = int(info.info.length)
+                newform = form.save(commit=False)
+                if a:
+                    newform.album = a
+                newform.save()
+
+            album_id = a.id
+
+            # First create the directory structure, if necessary.
+            # One directory for the artist and one for the album (if specified)
+            fulldirname = MUSIC_ROOT
+            if request.POST.get('compilation'):
+                fulldirname = "%s/%s/%s" % (fulldirname, "Various Artists", request.POST['album'])
+            else:
+                fulldirname = "%s/%s" % (fulldirname, form.cleaned_data['artist'])
+                if request.POST['album']:
+                    fulldirname = "%s/%s" % (fulldirname, request.POST['album'])
+
+            try:
+                makedirs(fulldirname)
+            except OSError, e:
+                if not e.errno == errno.EEXIST:
+                    raise OSError(e)
+
+            # Move the song to the media drive
+            if len(str(form.cleaned_data['track'])) == 1:
+                form.cleaned_data['track'] = '0' + str(form.cleaned_data['track'])
+
+            # For album tracks, we want to filename to be in this format:  <track> - <song>.mp3
+            #   Check if the track number is already present
+            filename = form.cleaned_data['title'] + '.mp3'
+            if request.POST['album']:
+                p = re.compile("^(\d+) - ")
+                if not p.match(filename):
+                    filename = "%s - %s" % (form.cleaned_data['track'], filename)
+
+            destfilename = "%s/%s" % (fulldirname, filename)
+
+            if isfile(destfilename):
+                messages.add_message(request, messages.ERROR, 'File already exists: %s' % destfilename)
+            else:
+                move("/tmp/%s" % md5sum, destfilename)
+
+            # If album artwork is not found on the filesystem, create it
+            artwork_file = "%s/artwork.jpg" % (fulldirname)
+            if not isfile(artwork_file):
+                audio = MP3(destfilename)
+                if 'APIC:' in audio.tags:
+                    artwork = audio.tags['APIC:']
+                    fh = open(artwork_file, "w")
+                    fh.write(artwork.data)
+                    fh.close()
+
+            if not messages.get_messages(request):
+                action = 'Upload'
+                md5sum = None
+                messages.add_message(request, messages.INFO, 'Song successfully added.  <a href="' + reverse('show_album', args=[album_id]) + '">Listen to it here.</a>')
+            else:
+                action = 'Review'
+
+        else:
+            action = 'Review'
+
+
     return render_to_response('music/add_song.html',
-                              {'section': SECTION },
+                              {'section': SECTION, 'action': action, 'info': info, 'notes': notes, 'md5sum': md5sum, 'form': form },
                               context_instance=RequestContext(request))
 
 
@@ -239,7 +418,7 @@ def search(request):
 
     # The search could match an album name or an artist or a song title
     albums = Album.objects.filter( title__icontains=request.GET['query'])
-    artists = Album.objects.filter( artist__icontains=request.GET['query'] ).distinct('artist')
+    artists = Song.objects.filter( artist__icontains=request.GET['query'] ).distinct('artist')
     songs = Song.objects.filter( title__icontains=request.GET['query']).order_by('title')
 
     results = []

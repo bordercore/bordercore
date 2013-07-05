@@ -8,12 +8,45 @@
 
 {% block content %}
 
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
+
+<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.bootstrap.js"></script>
+
+<script type="text/javascript" charset="utf-8">
+
+$(document).ready(function() {
+
+	function formatTitle( oObj ) {
+		return '<a href="{% url 'music_stream' %}' + oObj.aData[4] + '">' + oObj.aData[2] + '</a>';
+	}
+
+	oTable = $('#song_list').dataTable( {
+		"bPaginate": true,
+		"bInfo": false,
+		"aaSorting": [[0, 'desc']],
+		"bFilter": false,
+		"bLengthChange": false,
+		"sDom": "<'row'<'span6'<'toolbar'>l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+		"bSearchable": false,
+		"aoColumnDefs": [
+			{ "aTargets": [0], "sClass": "span2", "asSorting": [ "desc", "asc" ] },
+			{ "aTargets": [2], "fnRender": formatTitle, "useRendered": false },
+			{ "aTargets": [1,4], "bVisible": false },
+        ],
+	} );
+
+});
+
+</script>
+
+
 <div class="row">
 
 {% block breadcrumbs %}
 <ul class="breadcrumb span6 pull-left">
 <li> <a href="{% url 'music_list' %}">Music</a> </li>  <span class="divider">/</span>
-<li> {{ album_list.0.artist }} </li>
+<li> {% if album_list %} {{ album_list.0.artist }} {% else %} {{ song_list.0.artist }} {% endif %} </li>
 </ul>
 {% endblock %}
 
@@ -23,9 +56,11 @@
 
 <div class="row">
 
-<h2> {{ album_list.0.artist }} </h2>
+<h2> {% if album_list %} {{ album_list.0.artist }} {% else %} {{ song_list.0.artist }} {% endif %} </h2>
 
+{% if album_list %}
 {{ album_list|length }} album{{ album_list|pluralize }} <br />
+{% endif %}
 
 </div>
 
@@ -55,5 +90,20 @@
 
 </tr>
 </table>
+
+{% if song_list %}
+<br />
+{% if album_list %}
+<h4>Other songs</h4>
+<br />
+{% endif %}
+
+<div class="row">
+
+{% include "common/datatable.html" with data=song_list id="song_list" %}
+
+</div>
+
+{% endif %}
 
 {% endblock %}

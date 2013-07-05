@@ -1,16 +1,8 @@
 <script type="text/javascript">
 
-// $("#month").autocomplete({
-//  source: "http://www.bordercore.com/top_search.json",
-//  minLength: 2,
-//  delay: 1000,
-//  select: function(event, ui) { document.location = ui.item.value; }
-//  });
-
-
 // Hilight the current section in the navbar
 $(document).ready(function() {
-	$('.nav li:contains("{{ section }}")').attr('class', 'active')
+	$('.nav li:contains("{{ section }}")').addClass('active')
 })
 
 </script>
@@ -23,21 +15,29 @@ $(document).ready(function() {
       <li><a href="{% url 'bookmark_list' %}">Bookmarks</a></li>
 	  <li><a href="{% url 'feed_list' %}">Feeds</a></li>
       <li><a href="{% url 'blog_list' %}">Blog</a></li>
-      <li><a href="{% url 'music_list' %}">Music</a></li>
+
+	  <li class="dropdown">
+		<a href="#" class="dropdown-toggle" data-toggle="dropdown">Music<b class="caret"></b>
+		</a>
+		<ul class="dropdown-menu">
+		  <li><a href="{% url 'music_list' %}">Browse</a></li>
+		  <li><a href="{% url 'add_song' %}">Add a Song</a></li>
+		</ul>
+	  </li>
+
       <li><a href="/calendar/">Calendar</a></li>
       <li><a href="{% url 'todo_list' %}">Todo</a></li>
-	  <!--      <li><a href="/addressbook/">Addressbook</a></li> -->
       <li><a href="http://www.bordercore.com/photos/">Photos</a></li>
 
 	  <li class="dropdown">
-		<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-		  Misc  <b class="caret"></b>
-		</a>
-		<ul class="dropdown-menu">
-		  <li><a href="{% url 'prefs' %}"><i class="icon-cog"></i> Prefs</a></li>
-		  <li><a href="/logout"><i class="icon-off"></i> Logout</a></li>
-		</ul>
+	    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Misc<b class="caret"></b>
+	    </a>
+	    <ul class="dropdown-menu">
+	      <li><a href="{% url 'prefs' %}"><i class="icon-cog"></i> Prefs</a></li>
+	      <li><a href="/logout"><i class="icon-off"></i> Logout</a></li>
+	    </ul>
 	  </li>
+
     </ul>
 	<form class="navbar-search">
 	  <input type="text" class="search-query span2" placeholder="Search">

@@ -63,6 +63,10 @@ $(document).ready(function() {
 		"aaSorting": [[0, 'desc']],
 		"bFilter": true,
 		"bLengthChange": false,
+        "oLanguage": {
+            "sZeroRecords": "No songs found",
+            "sSearch": "Filter",
+        },
 		"sDom": "<'row'<'span6'<'toolbar'>l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
 		"bSearchable": false,
 		"aoColumnDefs": [
@@ -147,7 +151,7 @@ $(document).ready(function() {
 
 <div class="row">
 
-{% include "common/datatable.html" with cols=cols id="song_list" %}
+{% include "common/datatable.html" with id="song_list" %}
 
 </div>
 
