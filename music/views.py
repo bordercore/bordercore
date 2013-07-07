@@ -211,9 +211,14 @@ def add_song(request):
         blob = request.FILES['song'].read()
         md5sum = hashlib.md5(blob).hexdigest()
         filename = "/tmp/%s" % md5sum
-        f = open(filename, "w")
-        f.write(blob)
-        f.close()
+
+        try:
+            f = open(filename, "w")
+            f.write(blob)
+            f.close()
+        except (IOError) as e:
+            messages.add_message(request, messages.ERROR, 'IOError: %s' % e)
+
         info = MP3(filename, ID3=EasyID3)
 
         for field in ('artist', 'title', 'album'):
@@ -222,12 +227,17 @@ def add_song(request):
             formdata['year'] = info['date'][0]
         formdata['length'] = int(info.info.length)
 
-        if info.get('album'):
-            if Album.objects.filter(title=info['album'][0], artist=info['artist'][0]):
-                notes.append('You already have an album with this title')
+        if info.get('album') and info.get('artist'):
+            if info.get('album'):
+                if Album.objects.filter(title=info['album'][0], artist=info['artist'][0]):
+                    notes.append('You already have an album with this title')
+                # Look for a fuzzy match
+                fuzzy_matches = Album.objects.filter(Q(title__icontains='The Wait Is Over'.lower()))
+                if fuzzy_matches:
+                    notes.append('Found a fuzzy match on the album title: "%s" by %s' % (fuzzy_matches[0].title, fuzzy_matches[0].artist))
 
-        if Song.objects.filter(title=info['title'][0], artist=info['artist'][0]):
-            notes.append('You already have a song with this title by this artist')
+            if Song.objects.filter(title=info['title'][0], artist=info['artist'][0]):
+                notes.append('You already have a song with this title by this artist')
 
         if info.get('tracknumber'):
             track_info = info['tracknumber'][0].split('/')
@@ -266,7 +276,6 @@ def add_song(request):
             if request.POST['album']:
                 request.POST['album'] = request.POST['album'].strip()
                 album_artist = form.cleaned_data['artist']
-                print album_artist
                 if request.POST.get('compilation'):
                     album_artist = "Various Artists"
                 try:
