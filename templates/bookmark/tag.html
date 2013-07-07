@@ -14,9 +14,35 @@
 
 $(document).ready(function() {
 
+	var selectedId;
+
+	$('i.icon-remove').hide();
+
+	$('.tag-container').hover( function() {
+		selectedId = $(this).find('a').attr('id').split('_')[1];
+		$('i.icon-remove').hide();
+		 $('i#delete_' + selectedId ).show();
+	});
+
+	$('.tag-container').mouseleave( function() {
+		$('i.icon-remove').hide();
+	});
+
+	$('i.icon-remove').click( function() {
+		$.ajax( { type: 'DELETE',
+				  url: '{% url 'bookmark_delete' 666 %}'.replace(666, selectedId),
+				  success: function(data) {
+					  $('#link_' + selectedId).parent().remove()
+				  },
+				  error: function(jqXHR, textStatus, errorThrown) {
+					  console.log('error: ' + textStatus);
+				  }
+				});
+
+	})
+
 	// Hitting return will begin the search
     $('#bookmark-search').keypress( function(e) {
-		alert('got here!!!');
 		if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
 			$('#bookmark-search-form').submit();
             return false;
@@ -46,7 +72,7 @@ $(document).ready(function() {
 
 			$.ajax( { type: 'POST',
                   url: '{% url 'tag_bookmark_list' %}',
-                  data: { tag: '{{ request.GET.tagsearch }}', link_id: link_id, position: ui.item.index() + 1 },
+                  data: { tag: '{{ tag_filter }}', link_id: link_id, position: ui.item.index() + 1 },
                   success: function() {
                   }
                 });
@@ -92,7 +118,15 @@ Tag Filter <input id="tag-filter" type="text" value="{{ tag_filter }}" autocompl
 
 {% for link in bookmarks %}
 
-<li style="padding: 4px"><span style="width: 20px">{{ link.url|favicon:16|safe }} </span> &nbsp; &nbsp; <a href="{{ link.url }}" id="link_{{ link.id }}">{{ link.title }}</a></li>
+<li style="padding: 4px;">
+	<span class="tag-container">
+	<span style="width: 18px; border: 1px solid white; float: left">
+	  <i class="icon-remove" id="delete_{{ link.id }}"></i>
+	</span> &nbsp; &nbsp;
+	<span style="width: 20px">{{ link.url|favicon:16|safe }} </span> &nbsp; &nbsp;
+	<a class="one-tag" href="{{ link.url }}" id="link_{{ link.id }}">{{ link.title }}</a>
+	</span>
+</li>
 
 {% endfor %}
 

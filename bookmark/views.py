@@ -65,6 +65,23 @@ def bookmark_edit(request, bookmark_id = None):
                               {'section': SECTION, 'action': action, 'form': form },
                               context_instance=RequestContext(request))
 
+
+@login_required
+def bookmark_delete(request, bookmark_id = None):
+
+    # First delete the bookmark from any tag lists
+    info = BookmarkTagUser.objects.raw("SELECT * FROM bookmark_bookmarktaguser WHERE %s = ANY (bookmark_list)" % bookmark_id)
+    for tag in info:
+        tag.bookmark_list.remove( int(bookmark_id) )
+        tag.save()
+
+    # Then delete the actual bookmark
+    bookmark = Bookmark.objects.get(pk=bookmark_id)
+    bookmark.delete()
+
+    return HttpResponse(json.dumps( 'OK' ), content_type="application/json")
+
+
 @login_required
 def snarf_link(request):
 
@@ -134,11 +151,7 @@ def tag_bookmark_list(request):
     tag = request.POST['tag']
     link_id = int(request.POST['link_id'])
     position = int(request.POST['position'])
-    print "tag: %s" % tag
-    print "link_id: %d" % link_id
-    print "position: %d" % position
 
-    print Tag.objects.get(name=tag).name
     sorted_list = BookmarkTagUser.objects.get(tag=Tag.objects.get(name=tag), user=request.user)
 
     # Verify that the bookmark is in the existing sort list
@@ -149,7 +162,6 @@ def tag_bookmark_list(request):
     sorted_list.bookmark_list.remove( link_id )
     sorted_list.bookmark_list.insert( position - 1, link_id )
 
-    print "New order: %s" % sorted_list.bookmark_list
     sorted_list.save()
 
     return HttpResponse(json.dumps( 'OK' ), content_type="application/json")
