@@ -31,17 +31,8 @@ $(document).ready(function() {
 {% for field in form %}
 <div class="control-group {% if field.errors %}error{% endif %}">
     <label class="control-label" for="inputTitle">{{ field.label }}</label>
-
     <div class="controls">
-{% if field.label == 'Favorite tags' %}
-
-	<input class="input-xxlarge" name="favorite_tags" type="text" value="{{ field.value }}" />
-
-{% else %}
-
 {{ field }}
-
-{% endif %}
 
 {% for error in field.errors %}
       <span class="form-error">{{ error }}</span>
