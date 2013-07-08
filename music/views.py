@@ -355,7 +355,11 @@ def add_song(request):
             if not messages.get_messages(request):
                 action = 'Upload'
                 md5sum = None
-                messages.add_message(request, messages.INFO, 'Song successfully added.  <a href="' + reverse('show_album', args=[album_id]) + '">Listen to it here.</a>')
+                if a:
+                    listen_url = reverse('show_album', args=[album_id])
+                else:
+                    listen_url = reverse('show_artist', args=[form.cleaned_data['artist']])
+                messages.add_message(request, messages.INFO, 'Song successfully added.  <a href="' + listen_url + '">Listen to it here.</a>')
             else:
                 action = 'Review'
 
