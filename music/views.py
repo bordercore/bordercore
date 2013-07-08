@@ -304,7 +304,8 @@ def add_song(request):
                     newform.album = a
                 newform.save()
 
-            album_id = a.id
+            if a:
+                album_id = a.id
 
             # First create the directory structure, if necessary.
             # One directory for the artist and one for the album (if specified)
