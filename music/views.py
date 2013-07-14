@@ -73,9 +73,15 @@ def music_stream(request, song_id):
     else:
         file_path = "%s/%s/%s.mp3" % (MUSIC_ROOT, song.artist, song.title)
 
+    from django.core.servers.basehttp import FileWrapper
+    wrapper = FileWrapper(file(file_path))
+
     try:
-        fsock = open(file_path, "r")
-        response = HttpResponse( fsock, mimetype='audio/mpeg' )
+#        fsock = open(file_path, "r")
+#        response = HttpResponse( fsock, mimetype='audio/mpeg' )
+        response = HttpResponse(wrapper, content_type='audio/mpeg', mimetype='audio/mpeg')
+        response['Content-Length'] = os.path.getsize(file_path)
+
     except IOError:
         response = HttpResponseNotFound()
 
