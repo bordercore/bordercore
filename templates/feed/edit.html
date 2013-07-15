@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% load favicon %}
+
+{% block title %} Feed {% endblock %}
+
+{% block content %}
+
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+    $('#id_url').blur( function(event) {
+
+		var feed_url = $('#id_url').val();
+		if (!feed_url) {
+			return;
+		}
+
+		if ( !$('#id_homepage').val() ) {
+			var baseUrl = $('#id_url').val().match(/^(http:\/\/.*?)\//);
+			if (baseUrl) {
+				$('#id_homepage').val( baseUrl[1] );
+			}
+		}
+
+		$.ajax( { type: 'GET',
+                  url: '/feed/check_url/' + feed_url,
+                }).done(function( json ) {
+					if (!json || json.status != 200) {
+						$('#feed-status').fadeIn(1000).addClass("alert-error").removeClass("alert-success").html("Feed error.  Status: " + json.status);
+					} else if (json.entry_count == 0){
+						$('#feed-status').fadeIn(1000).addClass("alert-error").removeClass("alert-success").html("Feed error.  Found no feed items.");
+					} else {
+						$('#feed-status').fadeIn(1000).addClass("alert-success").removeClass("alert-error").html("Feed OK.  Found " + json.entry_count + " feed items.");
+					}
+				});
+
+    })
+
+});
+
+</script>
+
+<div class="row">
+<div id="feed-status" class="alert offset2 span6" style="display: none">OK</div>
+</div>
+
+{% if form.errors %}
+<div class="alert alert-error offset2 span10">
+Please correct the errors below.
+</div>
+{% endif %}
+
+{% for message in messages %}
+<div class="row">
+    <div class="alert alert-success offset2 span6">{{ message }}</div>
+</div>
+{% endfor %}
+
+<div class="row">
+
+<p class="lead offset2">
+{{ form.instance.url|favicon|safe }} {{ action }} Feed
+</p>
+
+</div>
+
+<form class="form-horizontal" action="{{ request.path }}" method="post">
+{% csrf_token %}
+
+{% for field in form %}
+<div class="control-group {% if field.errors %}error{% endif %}">
+    <label class="control-label" for="inputTitle">{{ field.label }}</label>
+    <div class="controls">
+{{ field }}
+{% for error in field.errors %}
+<span class="form-error">{{ error }}</span>
+{% endfor %}
+    </div>
+  </div>
+{% endfor %}
+
+<div class="control-group {% if field.errors %}error{% endif %}">
+    <label class="control-label" for="inputTitle">Subscribe</label>
+    <div class="controls">
+    <input type="checkbox" name="subscribe" {% if request.POST.subscribe %} checked="yes" {% endif %} />
+    </div>
+</div>
+
+  <div class="control-group">
+    <div class="controls">
+	  <input class="btn" type="submit" name="Go" value="{{ action }}">
+	  <input class="btn{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete">
+	  <a class="btn" href="{% url 'feed_list' %}">Cancel</a>
+	</div>
+  </div>
+
+</form>
+
+{% if subscribers %}
+<div class="alert alert-info offset2 span6">
+The following users are currently subscribed to this feed: <strong>{{ subscribers }}</strong>
+</div>
+{% endif %}
+
+{% endblock %}

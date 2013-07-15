@@ -9,6 +9,7 @@ from bookmark.views import OrderListJson
 from music.views import MusicListJson
 from accounts.views import UserProfileDetailView
 from todo.views import TodoCreateView, TodoDeleteView, TodoDetailView, TodoListView
+from feed.views import FeedListView, FeedSubscriptionListView
 
 admin.autodiscover()
 
@@ -33,7 +34,12 @@ urlpatterns += patterns('blog.views',
 
 urlpatterns += patterns('feed.views',
                         url(r'^feed/sort_feed/', 'sort_feed', name='sort_feed'),
-                        url(r'^feeds/', 'feed_list', name="feed_list"),
+                        url(r'^feed/edit(?:/(\d+))?', 'feed_edit', name='feed_edit'),
+                        url(r'^feed/subscriptions', FeedSubscriptionListView.as_view(), name='feed_subscriptions'),
+                        url(r'^feed/check_url/(.*)', 'check_url', name='check_url'),
+                        url(r'^feed/subscribe', 'feed_subscribe', name='feed_subscribe'),
+                        url(r'^feed/unsubscribe', 'feed_unsubscribe', name='feed_unsubscribe'),
+                        url(r'^feeds/', FeedListView.as_view(), name="feed_list"),
 )
 
 urlpatterns += patterns('bookmark.views',

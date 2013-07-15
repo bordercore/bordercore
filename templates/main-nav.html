@@ -13,7 +13,17 @@ $(document).ready(function() {
     <ul class="nav">
       <li><a href="{% url 'homepage' %}"><i class="icon-home"></i> Home</a></li>
       <li><a href="{% url 'bookmark_list' %}">Bookmarks</a></li>
-	  <li><a href="{% url 'feed_list' %}">Feeds</a></li>
+
+	  <li class="dropdown">
+		<a href="#" class="dropdown-toggle" data-toggle="dropdown">Feeds<b class="caret"></b>
+		</a>
+		<ul class="dropdown-menu">
+		  <li><a href="{% url 'feed_list' %}">Browse</a></li>
+		  <li><a href="{% url 'feed_edit' %}">Add a Feed</a></li>
+		  <li><a href="{% url 'feed_subscriptions' %}">Manage Subscriptions</a></li>
+		</ul>
+	  </li>
+
       <li><a href="{% url 'blog_list' %}">Blog</a></li>
 
 	  <li class="dropdown">
