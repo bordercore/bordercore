@@ -31,9 +31,9 @@ def update_feeds(feed_id=None):
     rows = cursor.fetchall()
     for row in rows:
 
-        r = requests.get(row['url'])
-
         try:
+
+            r = requests.get(row['url'])
 
             if r.status_code != 200:
                 r.raise_for_status()
