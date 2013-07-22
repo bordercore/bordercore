@@ -18,16 +18,28 @@
 
 $(document).ready(function() {
 
-	$("input[name='tags']").tokenizer( { delimiters: [13, 188] } )
+	$("input[name='tags']").tokenizer( { delimiters: [13, 188] } );
 
-	$('#escape').click( function(event) {
-
-		var range = $('textarea').getSelection();
-		var text = $('textarea').val();
-		var escapedText = range.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-		$('textarea').val( text.substr(0, range.start) + escapedText +  text.substr(range.end, text.length - range.end));
-
-	})
+    $('#markdown-support').change( function(event) {
+        var value = $(this).val();
+        var range = $('#id_post').getSelection();
+        var text = $('#id_post').val();
+        if (value == 'Bold') {
+            $('#id_post').val( text.substr(0, range.start) + '**' + range.text + '**' +  text.substr(range.end, text.length - range.end));
+        } else if (value == 'Insert link') {
+            $('#id_post').val( text.substr(0, range.start) + '[text](url)' + range.text + text.substr(range.end, text.length - range.end));
+        } else if (value == 'Insert list') {
+            $('#id_post').val( text.substr(0, range.start) + '\n - List item\n' + text.substr(range.end, text.length - range.end));
+        } else if (value == 'Indent Code') {
+            var newtext = '    ' + range.text.replace(/\n/g, "\n    ");
+            $('#id_post').val( text.substr(0, range.start) + newtext  + text.substr(range.end, text.length - range.end));
+        } else if (value == 'Escape HTML') {
+		    var escapedText = range.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+		    $('textarea').val( text.substr(0, range.start) + escapedText +  text.substr(range.end, text.length - range.end));
+        }
+        // Reset the dropdown
+        $('#markdown-support')[0].selectedIndex = 0
+    } );
 
 });
 
@@ -47,7 +59,7 @@ $(document).ready(function() {
 
 {% if request.POST.Go and not form.errors %}
 
-<div class="alert alert-success">
+<div class="alert alert-success offset2">
 Post {{ action }}ed
 </div>
 
@@ -65,9 +77,19 @@ Post {{ action }}ed
     <div class="controls">
 {% if field.label == 'Date' %}
 
-	<div class="input-large date" id="datepicker" data-date="{{ field.value|date:"m-d-Y" }}" data-date-format="mm-dd-yyyy">
+	<div class="date" id="datepicker" data-date="{{ field.value|date:"m-d-Y" }}" data-date-format="mm-dd-yyyy">
 	  <input class="span2" size="16" type="text" name="date" value="{{ field.value|date:"m-d-Y" }}" />
 	  <span class="add-on"><i class="icon-th"></i></span>
+
+<select id="markdown-support" class="span2">
+<option>Markdown</option>
+<option name="option">Insert link</option>
+<option name="option">Bold</option>
+<option name="option">Indent Code</option>
+<option name="option">Insert list</option>
+<option name="option">Escape HTML</option>
+</select>
+
     </div>
 
 {% else %}
