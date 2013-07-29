@@ -1,22 +1,11 @@
-from datetime import datetime
-
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 
+from lib.mixins import TimeStampedModel
 from tag.models import Tag
 
-# Should probably put this in a general-purpose file, since it's
-#  used in several Bordercore apps
-class TimeStampedActivate(models.Model):
-    created = models.DateTimeField(default=datetime.now)
-    modified = models.DateTimeField(auto_now=True)
-    active = models.BooleanField(default=True)
 
-    class Meta:
-        abstract = True
-
-
-class Todo(TimeStampedActivate):
+class Todo(TimeStampedModel):
     task = models.TextField()
     note = models.TextField(null=True, blank=True)
     url = models.TextField(null=True, blank=True)

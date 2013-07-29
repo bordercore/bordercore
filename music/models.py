@@ -1,19 +1,12 @@
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.utils.timezone import now
 
+from lib.mixins import TimeStampedModel
 from tag.models import Tag
 
-class TimeStampedActivate(models.Model):
-    created = models.DateTimeField(default=now())
-    modified = models.DateTimeField(auto_now=True)
-    active = models.BooleanField(default=True)
 
-    class Meta:
-        abstract = True
-
-class Album(TimeStampedActivate):
+class Album(TimeStampedModel):
     title = models.TextField()
     artist = models.TextField()
     year = models.IntegerField()
@@ -23,14 +16,14 @@ class Album(TimeStampedActivate):
     class Meta:
         unique_together = ("title", "artist")
 
-class SongSource(TimeStampedActivate):
+class SongSource(TimeStampedModel):
     name = models.TextField()
     description = models.TextField()
 
     def __unicode__(self):
         return self.name
 
-class Song(TimeStampedActivate):
+class Song(TimeStampedModel):
     title = models.TextField()
     artist = models.TextField()
     album = models.ForeignKey(Album, null=True)
@@ -45,11 +38,11 @@ class Song(TimeStampedActivate):
     original_year = models.IntegerField(null=True)
     tags = models.ManyToManyField(Tag)
 
-class Listen(TimeStampedActivate):
+class Listen(TimeStampedModel):
     user = models.ForeignKey(User)
     song = models.ForeignKey(Song)
 
-class WishList(TimeStampedActivate):
+class WishList(TimeStampedModel):
     user = models.ForeignKey(User)
     song = models.TextField(null=True, blank=True)
     artist = models.TextField(null=True)

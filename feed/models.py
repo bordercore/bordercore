@@ -1,16 +1,10 @@
 from django.db import models
 
 from accounts.models import UserProfile
+from lib.mixins import TimeStampedModel
 
-class TimeStampedActivate(models.Model):
-    created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
-    active = models.BooleanField(default=True)
 
-    class Meta:
-        abstract = True
-
-class Feed(TimeStampedActivate):
+class Feed(TimeStampedModel):
     name = models.TextField()
     url = models.URLField(unique=True)
     last_check = models.DateTimeField(null=True)

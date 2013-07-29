@@ -1,16 +1,9 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 import markdown
 
+from lib.mixins import TimeStampedModel
 from tag.models import Tag
-
-class TimeStampedActivate(models.Model):
-    created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
-    active = models.BooleanField(default=True)
-
-    class Meta:
-        abstract = True
 
 
 class Blog(models.Model):
@@ -34,7 +27,7 @@ class Blog(models.Model):
         return self.name
 
 
-class Post(models.Model):
+class Post(TimeStampedModel):
     post = models.TextField()
     title = models.TextField(null=True)
     date = models.DateTimeField(editable=True)
@@ -42,8 +35,6 @@ class Post(models.Model):
     blog = models.ForeignKey(Blog)
     tags = models.ManyToManyField(Tag)
 #    reference = models.ForeignKey('self', related_name='reference_id', null=True, blank=True)
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
 
     def get_markdown(self):
         return markdown.markdown(self.post, extensions=['codehilite'])
