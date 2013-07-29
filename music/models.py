@@ -1,5 +1,6 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
+from django.db import models
 from django.utils.timezone import now
 
 from tag.models import Tag
@@ -47,3 +48,16 @@ class Song(TimeStampedActivate):
 class Listen(TimeStampedActivate):
     user = models.ForeignKey(User)
     song = models.ForeignKey(Song)
+
+class WishList(TimeStampedActivate):
+    user = models.ForeignKey(User)
+    song = models.TextField(null=True, blank=True)
+    artist = models.TextField(null=True)
+    album = models.TextField(null=True, blank=True)
+    note = models.TextField(null=True)
+
+    def get_created(self):
+        return self.created.strftime('%b %d, %Y')
+
+    def get_absolute_url(self):
+        return reverse('wishlist_edit', args=[self.id])

@@ -1,7 +1,7 @@
 from django.forms import ModelForm, Textarea, TextInput
 from django import forms
 
-from music.models import Song
+from music.models import Song, WishList
 
 class SongForm(ModelForm):
 
@@ -33,4 +33,23 @@ class SongForm(ModelForm):
             'comment': Textarea(attrs={'rows': 2}),
             'length': TextInput(attrs={'readonly': True}),
             'times_played': TextInput(attrs={'readonly': True})
+        }
+
+class WishListForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+
+        # In case one of our views passed in the request object (eg from get_form_kwargs()),
+        #  save it and remove it from kwargs before calling super()
+        if kwargs.get('request'):
+            request = kwargs.pop("request")
+
+        super(WishListForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = WishList
+        fields = ('artist', 'song', 'album')
+        widgets = {
+            'artist': TextInput(attrs={'class': 'input-xxlarge'}),
+            'song': TextInput(attrs={'class': 'input-xxlarge'}),
+            'album': TextInput(attrs={'class': 'input-xxlarge'}),
         }

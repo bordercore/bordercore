@@ -2,6 +2,7 @@ from tastypie.resources import ModelResource
 from tastypie.authorization import Authorization
 from tastypie import fields
 from bookmark.models import User, Bookmark
+from music.models import WishList
 from todo.models import Todo
 
 class UserResource(ModelResource):
@@ -26,4 +27,12 @@ class TodoResource(ModelResource):
     class Meta:
         queryset = Todo.objects.all()
         resource_name = 'todo'
+        authorization = Authorization()
+
+class MusicWishListResource(ModelResource):
+    user = fields.ForeignKey(UserResource, 'user')
+
+    class Meta:
+        queryset = WishList.objects.all()
+        resource_name = 'wishlist'
         authorization = Authorization()

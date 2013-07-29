@@ -13,15 +13,17 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.forms.util import ErrorList
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
+from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic.list import ListView
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from mutagen.easyid3 import EasyID3
 from mutagen.mp3 import MP3
 
-from music.models import Album, Listen, Song
-from music.forms import SongForm
+from music.models import Album, Listen, Song, WishList
+from music.forms import SongForm, WishListForm
 
 SECTION = 'Music'
 MUSIC_ROOT = "/home/media/music"
@@ -463,3 +465,75 @@ def search(request):
                               {'section': SECTION, 'info': json_text},
                               context_instance=RequestContext(request),
                               mimetype="application/json")
+
+class WishListView(ListView):
+
+    model = WishList
+    template_name = "music/wishlist.html"
+    context_object_name = "info"
+
+    def get_context_data(self, **kwargs):
+        context = super(WishListView, self).get_context_data(**kwargs)
+
+        info = []
+
+        for myobject in kwargs['object_list']:
+            info.append( dict(artist=myobject.artist, song=myobject.song, album=myobject.album, created=myobject.get_created(), unixtime=format(myobject.created, 'U'), wishlistid=myobject.id) )
+
+
+        context['cols'] = ['artist', 'song', 'album', 'created', 'wishlistid']
+        context['section'] = SECTION
+        context['info'] = info
+        return context
+
+
+class WishListDetailView(UpdateView):
+    template_name = 'music/wishlist_edit.html'
+    form_class = WishListForm
+
+    def get_context_data(self, **kwargs):
+        context = super(WishListDetailView, self).get_context_data(**kwargs)
+        context['section'] = SECTION
+        context['pk'] = self.kwargs.get('pk')
+        context['action'] = 'Edit'
+        return context
+
+    def get_object(self, queryset=None):
+        obj = WishList.objects.get(user=self.request.user, id=self.kwargs.get('pk'))
+        return obj
+
+    def form_valid(self, form):
+
+        self.object = form.save()
+        context = self.get_context_data(form=form)
+        context["message"] = "Wishlist updated"
+        return self.render_to_response(context)
+
+
+class WishListCreateView(CreateView):
+    template_name = 'music/wishlist_edit.html'
+    form_class = WishListForm
+
+    def get_context_data(self, **kwargs):
+        context = super(WishListCreateView, self).get_context_data(**kwargs)
+        context['section'] = SECTION
+        context['action'] = 'Add'
+        return context
+
+    def get_form_kwargs(self):
+        # pass the request object to the form so that we have access to the session
+        kwargs = super(WishListCreateView, self).get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+    def form_valid(self, form):
+
+        obj = form.save(commit=False)
+        obj.user = self.request.user
+        obj.save()
+
+        return HttpResponseRedirect(self.get_success_url())
+
+
+    def get_success_url(self):
+        return reverse('wishlist')

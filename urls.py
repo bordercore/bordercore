@@ -4,9 +4,9 @@ from django.contrib import admin
 
 from tastypie.api import Api
 
-from bookmark.api import BookmarkResource, UserResource, TodoResource
+from bookmark.api import BookmarkResource, UserResource, TodoResource, MusicWishListResource
 from bookmark.views import OrderListJson
-from music.views import MusicListJson
+from music.views import MusicListJson, WishListView, WishListCreateView, WishListDetailView
 from accounts.views import UserProfileDetailView
 from todo.views import TodoCreateView, TodoDeleteView, TodoDetailView, TodoListView
 from feed.views import FeedListView, FeedSubscriptionListView
@@ -17,6 +17,7 @@ v1_api = Api(api_name='v1')
 v1_api.register(UserResource())
 v1_api.register(BookmarkResource())
 v1_api.register(TodoResource())
+v1_api.register(MusicWishListResource())
 
 urlpatterns = patterns('',
                         (r'^api/', include(v1_api.urls)),
@@ -62,6 +63,9 @@ urlpatterns += patterns('music.views',
                         url(r'^music/stream/(\d+)?', 'music_stream', name='music_stream'),
                         url(r'^music/album_artwork/(\w+)?', 'album_artwork', name='album_artwork'),
                         url(r'^music/search.json', 'search', name='music_search'),
+                        url(r'^music/wishlistadd', WishListCreateView.as_view(), name='wishlist_add'),
+                        url(r'^music/wishlist/edit/(?P<pk>[\d-]+)$', WishListDetailView.as_view(), name='wishlist_edit'),
+                        url(r'^music/wishlist', WishListView.as_view(), name='wishlist'),
                         url(r'^music/', 'music_list', name='music_list'),
 )
 
