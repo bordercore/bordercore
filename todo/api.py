@@ -3,13 +3,13 @@ from tastypie.authorization import Authorization
 from tastypie.resources import ModelResource
 
 from accounts.api import UserResource
-from bookmark.models import Bookmark
+from todo.models import Todo
 
 
-class BookmarkResource(ModelResource):
+class TodoResource(ModelResource):
     user = fields.ForeignKey(UserResource, 'user')
 
     class Meta:
-        queryset = Bookmark.objects.all()
-        resource_name = 'bookmark'
+        queryset = Todo.objects.all()
+        resource_name = 'todo'
         authorization = Authorization()

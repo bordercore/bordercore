@@ -3,13 +3,13 @@ from tastypie.authorization import Authorization
 from tastypie.resources import ModelResource
 
 from accounts.api import UserResource
-from bookmark.models import Bookmark
+from music.models import WishList
 
 
-class BookmarkResource(ModelResource):
+class MusicWishListResource(ModelResource):
     user = fields.ForeignKey(UserResource, 'user')
 
     class Meta:
-        queryset = Bookmark.objects.all()
-        resource_name = 'bookmark'
+        queryset = WishList.objects.all()
+        resource_name = 'wishlist'
         authorization = Authorization()

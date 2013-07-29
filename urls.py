@@ -1,15 +1,17 @@
 from django.conf.urls import patterns, include, url
-from django.contrib.auth.views import logout
 from django.contrib import admin
-
+from django.contrib.auth.views import logout
 from tastypie.api import Api
 
-from bookmark.api import BookmarkResource, UserResource, TodoResource, MusicWishListResource
-from bookmark.views import OrderListJson
-from music.views import MusicListJson, WishListView, WishListCreateView, WishListDetailView
+from accounts.api import UserResource
 from accounts.views import UserProfileDetailView
-from todo.views import TodoCreateView, TodoDeleteView, TodoDetailView, TodoListView
+from bookmark.api import BookmarkResource
+from bookmark.views import OrderListJson
 from feed.views import FeedListView, FeedSubscriptionListView
+from music.api import MusicWishListResource
+from music.views import MusicListJson, WishListView, WishListCreateView, WishListDetailView
+from todo.api import TodoResource
+from todo.views import TodoCreateView, TodoDeleteView, TodoDetailView, TodoListView
 
 admin.autodiscover()
 
