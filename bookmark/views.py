@@ -100,15 +100,9 @@ def snarf_link(request):
 @login_required
 def tag_search(request):
 
-    tags = Tag.objects.filter(name__istartswith=request.GET.get('query', ''))
-    tag_list = []
+    tags = Tag.objects.filter(name__istartswith=request.GET.get('query', ''), bookmark__isnull=False).distinct('name')
 
-    # Filter out tags which haven't been applied to at least one bookmark
-    for tag in tags:
-        if tag.bookmark_set.all():
-            tag_list.append(tag.name)
-
-    return HttpResponse(json.dumps( tag_list ), content_type="application/json")
+    return HttpResponse(json.dumps( [x.name for x in tags] ), content_type="application/json")
 
 
 @login_required
