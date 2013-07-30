@@ -45,7 +45,4 @@ class UserProfileForm(ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('rss_feeds', 'favorite_tags', 'bookmarks_show_untagged_only', 'todo_default_tag')
-        widgets = {
-            'rss_feeds': TextInput(attrs={'class': 'input-xxlarge'}),
-        }
+        fields = ('favorite_tags', 'bookmarks_show_untagged_only', 'todo_default_tag')

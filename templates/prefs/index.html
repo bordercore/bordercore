@@ -28,6 +28,11 @@ $(document).ready(function() {
 <form class="form-horizontal" action="{{ request.path }}" method="post">
 {% csrf_token %}
 
+<div class="control-group">
+    <label class="control-label" for="inputTitle">RSS Feeds</label>
+    <div class="controls"><a href="{% url 'feed_subscriptions' %}">Edit</a></div>
+</div>
+
 {% for field in form %}
 <div class="control-group {% if field.errors %}error{% endif %}">
     <label class="control-label" for="inputTitle">{{ field.label }}</label>
