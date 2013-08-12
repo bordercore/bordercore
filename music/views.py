@@ -440,7 +440,7 @@ def search(request):
 
     # The search could match an album name or an artist or a song title
     albums = Album.objects.filter( title__icontains=request.GET['query'])
-    artists = Song.objects.filter( artist__icontains=request.GET['query'] ).distinct('artist')
+    artists = Song.objects.filter( artist__icontains=request.GET['query'] ).distinct('artist').order_by('artist')
     songs = Song.objects.filter( title__icontains=request.GET['query']).order_by('title')
 
     results = []
