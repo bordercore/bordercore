@@ -1,4 +1,5 @@
 from tastypie import fields
+from tastypie.authentication import ApiKeyAuthentication, MultiAuthentication, SessionAuthentication
 from tastypie.authorization import Authorization
 from tastypie.resources import ModelResource
 
@@ -13,3 +14,4 @@ class BookmarkResource(ModelResource):
         queryset = Bookmark.objects.all()
         resource_name = 'bookmark'
         authorization = Authorization()
+        authentication = MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())

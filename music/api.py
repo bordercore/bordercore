@@ -1,4 +1,5 @@
 from tastypie import fields
+from tastypie.authentication import ApiKeyAuthentication, MultiAuthentication, SessionAuthentication
 from tastypie.authorization import Authorization
 from tastypie.resources import ModelResource
 
@@ -13,3 +14,4 @@ class MusicWishListResource(ModelResource):
         queryset = WishList.objects.all()
         resource_name = 'wishlist'
         authorization = Authorization()
+        authentication = MultiAuthentication(SessionAuthentication(), ApiKeyAuthentication())
