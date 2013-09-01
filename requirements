@@ -13,6 +13,7 @@ django-crispy-forms==1.2.3
 django-datatables-view==1.2
 -e git://github.com/ecometrica/django-dbarray.git@df336bbef369ee2fec95fe9ba7ceca8032e523d1#egg=django_dbarray-dev
 django-debug-toolbar==0.9.4
+django-debug-toolbar-template-timings==0.4.6
 django-tastypie==0.9.14
 feedparser==5.1.3
 kombu==2.5.10

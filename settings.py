@@ -200,6 +200,7 @@ if DEBUG:
 
     INSTALLED_APPS += (
         'debug_toolbar',
+        'template_timings_panel'
     )
 
     DEBUG_TOOLBAR_PANELS = (
@@ -214,6 +215,7 @@ if DEBUG:
         'debug_toolbar.panels.cache.CacheDebugPanel',
         'debug_toolbar.panels.signals.SignalDebugPanel',
         'debug_toolbar.panels.logger.LoggingPanel',
+        'template_timings_panel.panels.TemplateTimings.TemplateTimings'
     )
 
     DEBUG_TOOLBAR_CONFIG = {
