@@ -15,6 +15,7 @@ import requests
 os.environ['DJANGO_SETTINGS_MODULE'] = 'bordercore.settings'
 sys.path.insert(0, '/home/www/htdocs/bordercore-django')
 sys.path.insert(0, '/home/www/htdocs/bordercore-django/bordercore')
+from django.utils.timezone import utc
 from feed.models import Feed, FeedItem
 
 LOG_FILE = "/home/www/logs/get_feed.log"
@@ -60,7 +61,7 @@ def update_feeds(feed_id=None):
             else:
                 message = e
 
-            t = datetime.now()
+            t = datetime.utcnow().replace(tzinfo=utc)
             log_file = open(LOG_FILE, 'a')
             log_file.write("%s Exception for %s (feed_id %d): %s\n" % (t.strftime('%Y-%m-%d %H:%M:%S'), feed.name, feed.id, message))
             log_file.close()
@@ -68,7 +69,7 @@ def update_feeds(feed_id=None):
         finally:
 
             feed.last_response_code = r.status_code
-            feed.last_check = datetime.now()
+            feed.last_check = datetime.utcnow().replace(tzinfo=utc)
             feed.save()
 
 
