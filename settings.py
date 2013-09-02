@@ -135,6 +135,7 @@ INSTALLED_APPS = (
     'accounts',
     'bcsolr',
     'blog',
+    'book',
     'feed',
     'lib',
     'tag',

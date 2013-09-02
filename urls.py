@@ -7,6 +7,7 @@ from accounts.api import UserResource
 from accounts.views import UserProfileDetailView
 from bookmark.api import BookmarkResource
 from bookmark.views import OrderListJson
+from book.views import BookListView
 from feed.views import FeedListView, FeedSubscriptionListView
 from music.api import MusicWishListResource
 from music.views import MusicListJson, WishListView, WishListCreateView, WishListDetailView
@@ -33,6 +34,10 @@ urlpatterns += patterns('blog.views',
                         url(r'^blog/edit(?:/(\d+))?', 'blog_edit', name='blog_edit'),
                         url(r'^blog/tag_search.json', 'tag_search', name='blog_tag_search'),
                         url(r'^blog/(\d+)?', 'blog_list', name='blog_list'),
+)
+
+urlpatterns += patterns('book.views',
+                        url(r'^books/(\w+)?', BookListView.as_view(), name="book_list")
 )
 
 urlpatterns += patterns('feed.views',
