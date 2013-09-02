@@ -161,6 +161,13 @@ import djcelery
 djcelery.setup_loader()
 BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 
+# Uncomment the following to enable logging in production
+# import logging
+# logging.basicConfig(
+#     level = logging.INFO,
+#     format = '%(asctime)s %(levelname)s %(message)s',
+#     filename = '/tmp/django.log',)
+
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error when DEBUG=False.
