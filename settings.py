@@ -167,7 +167,7 @@ BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 # logging.basicConfig(
 #     level = logging.INFO,
 #     format = '%(asctime)s %(levelname)s %(message)s',
-#     filename = '/tmp/django.log',)
+#     filename = '/var/log/django/django.log',)
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
