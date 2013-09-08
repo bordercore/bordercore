@@ -162,12 +162,13 @@ import djcelery
 djcelery.setup_loader()
 BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 
-# Uncomment the following to enable logging in production
-# import logging
-# logging.basicConfig(
-#     level = logging.INFO,
-#     format = '%(asctime)s %(levelname)s %(message)s',
-#     filename = '/var/log/django/django.log',)
+# Setup logging for production
+if not 'runserver' in sys.argv:
+    import logging
+    logging.basicConfig(
+        level = logging.INFO,
+        format = '%(asctime)s %(levelname)s %(message)s',
+        filename = '/var/log/django/django.log',)
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
