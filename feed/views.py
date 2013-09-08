@@ -1,5 +1,7 @@
+import feedparser
 import json
 import requests
+import urllib
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -170,7 +172,7 @@ def feed_edit(request, feed_id = None):
 @login_required
 def check_url(request, url):
 
-    import feedparser
+    url = urllib.unquote(url).decode('utf8')
 
     # TODO: Use Celery to asynchronously check the url
     r = requests.get(url)

@@ -24,6 +24,8 @@ $(document).ready(function() {
 			}
 		}
 
+     feed_url = encodeURIComponent(feed_url).replace(/%/g, "%25")
+
 		$.ajax( { type: 'GET',
                   url: '/feed/check_url/' + feed_url,
                 }).done(function( json ) {
