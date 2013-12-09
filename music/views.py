@@ -68,10 +68,14 @@ def music_stream(request, song_id):
     l.save()
 
     if song.album:
+        if song.album.compilation:
+            artist_name = 'Various'
+        else:
+            artist_name = song.artist
         tracknumber = str(song.track)
         if len(tracknumber) == 1:
             tracknumber = '0' + tracknumber
-        file_path = "%s/%s/%s/%s - %s.mp3" % (MUSIC_ROOT, song.artist, song.album.title, tracknumber, song.title)
+        file_path = "%s/%s/%s/%s - %s.mp3" % (MUSIC_ROOT, artist_name, song.album.title, tracknumber, song.title)
     else:
         file_path = "%s/%s/%s.mp3" % (MUSIC_ROOT, song.artist, song.title)
 
