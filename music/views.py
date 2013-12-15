@@ -179,7 +179,11 @@ def show_album(request, album_id):
     song_list = []
 
     for song in s:
-        song_list.append( dict(id=song.id, track=song.track, title=song.title, length_seconds=song.length, length=time.strftime('%M:%S', time.gmtime(song.length))))
+        if a.compilation:
+            display_title = song.title + ' - ' + song.artist
+        else:
+            display_title = song.title
+        song_list.append( dict(id=song.id, track=song.track, title=display_title, length_seconds=song.length, length=time.strftime('%M:%S', time.gmtime(song.length))))
 
     return render_to_response('music/show_album.html',
                               {'section': SECTION, 'album': a, 'data': song_list,
