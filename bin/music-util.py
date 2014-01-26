@@ -15,6 +15,7 @@ MUSIC_ROOT = "/home/media/music"
 songsource = "Amazon"
 dry_run = False
 operation = None
+compilation = False
 
 def info(song):
     try:
@@ -56,10 +57,15 @@ def snarf_file(song):
             if m:
                 date = m.group(0)
 
+        if compilation:
+            artist_name = 'Various'
+        else:
+            artist_name = audio.get('artist')[0]
+
         # Insert the metadata into the db
         # If the song doesn't have a date, then we can't lookup album info for it
         if date:
-            a = Album.objects.filter(title__iexact=audio.get('album')[0]).filter(artist=audio.get('artist')[0]).filter(year=date)
+            a = Album.objects.filter(title__iexact=audio.get('album')[0]).filter(artist=artist_name).filter(year=date)
             if a:
                 if len(a) > 1:
                     raise Exception ("multiple album matches found")
@@ -67,7 +73,7 @@ def snarf_file(song):
                     raise Exception ("album found, but case does not match ('%s' vs '%s')" %
                                      (a[0].title, audio.get('album')[0]))
             else:
-                a = Album(title=audio.get('album')[0], artist=audio.get('artist')[0], year=date)
+                a = Album(title=audio.get('album')[0], artist=artist_name, year=date)
                 a.save()
 
         source = SongSource.objects.get(name=songsource)
@@ -84,8 +90,8 @@ def snarf_file(song):
         # Move the song file to its final place
 
         # First create the directory structure, if necessary.
-        # One for the artist and one for the album
-        for dirname in ("%s" % (audio.get('artist')[0],), "%s/%s" % (audio.get('artist')[0], audio.get('album')[0])):
+        # One for the artist and one for the album.
+        for dirname in ("%s" % (artist_name,), "%s/%s" % (artist_name, audio.get('album')[0])):
             fulldirname = "%s/%s" % (MUSIC_ROOT, dirname)
             if not isdir(fulldirname):
                 logging.info("Creating dir %s", fulldirname)
@@ -104,7 +110,7 @@ def snarf_file(song):
             logging.warning("Input filename does not match output filename (%s vs %s)", basename(song), filename)
 
         # Copy the file
-        destfilename = "%s/%s/%s/%s" % (MUSIC_ROOT, audio.get('artist')[0], audio.get('album')[0], filename)
+        destfilename = "%s/%s/%s/%s" % (MUSIC_ROOT, artist_name, audio.get('album')[0], filename)
 
         if isfile(destfilename):
             logging.warning("File already exists")
@@ -112,7 +118,7 @@ def snarf_file(song):
             copy2(song, destfilename)
 
         # If album artwork is not found, create it
-        artwork_file = "%s/%s/%s/artwork.jpg" % (MUSIC_ROOT, audio.get('artist')[0], audio.get('album')[0])
+        artwork_file = "%s/%s/%s/artwork.jpg" % (MUSIC_ROOT, artist_name, audio.get('album')[0])
         if not isfile(artwork_file):
             logging.info("Creating artwork for album")
             audio = MP3(destfilename)
@@ -132,14 +138,14 @@ if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(levelname)s: %(message)s')
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hi:o:ns:f:i:d:", ["ifile=","ofile="])
+        opts, args = getopt.getopt(sys.argv[1:], "hi:o:ns:f:i:d:c", ["ifile=","ofile="])
     except getopt.GetoptError:
         print 'test.py -i <inputfile> -o <outputfile>'
         sys.exit(2)
 
     for opt, arg in opts:
         if opt == '-h':
-            print 'test.py -n -s <song>'
+            print 'test.py -c -n -s <song>'
             sys.exit()
         elif opt in ("-n", "--dry-run"):
             dry_run = True
@@ -156,6 +162,8 @@ if __name__ == "__main__":
             outputfile = arg
         elif opt in ("-s", "--source"):
             songsource = arg
+        elif opt in ("-c", "--compilation"):
+            compilation = True
 
     if operation == 'snarf_file':
         snarf_file(song)
