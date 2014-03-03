@@ -1,37 +1,21 @@
-
-/* Sticky footer support.  See http://twitter.github.io/bootstrap/examples/sticky-footer.html */
-
-html, body {
-             height: 100%;
-             /* The html and body elements cannot have any padding or margin. */
-             }
-
-/* Wrapper for page content to push down footer */
-#wrap {
-        min-height: 100%;
-        height: auto !important;
-        height: 100%;
-        /* Negative indent footer by it's height */
-        margin: 0 auto -60px;
-        }
-
-/* Set the fixed height of the footer here */
-#push, #footer {
-                 height: 60px;
-                 }
+/* Sticky footer support
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 60px;
+}
 #footer {
-          color: #eeeeee;
-          background-color: #465158;
-          }
-
-/* Lastly, apply responsive CSS fixes as necessary */
-@media (max-width: 767px) {
-#footer {
-          margin-left: -20px;
-          margin-right: -20px;
-          padding-left: 20px;
-          padding-right: 20px;
-          }
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 60px;
+          background-color: #e5e5e5;
+          border-top: 1px solid #cccccc;
 }
 
 /* End of sticky footer support */
@@ -44,10 +28,15 @@ html, body {
 
 /* Additional support for hilighting a clicked row.  This is needed to
   better integrate datatables with Bootstrap. */
-.row_selected, .row_selected a { background-color: #0173bc; color: #ffffff }
-.table tbody tr:hover td,
+/*.row_selected, .row_selected a { background-color: #0173bc; color: #ffffff }*/
+/*.table tbody tr:hover td,
 .table tbody tr:hover th {
   background-color: transparent;
+}*/
+
+#row_selected, #row_selected a {
+           background-color: #0173bc;
+           color: #ffffff;
 }
 
 /* Use this to center content */
@@ -58,9 +47,9 @@ html, body {
 }
 
 /* For tables with a toolbar, make room for a Bootstrap alert */
-.btn-group {
-  height: 40px;
-}
+/* .btn-group { */
+/*   height: 40px; */
+/* } */
 
 .form-error {
   color: #b94a48;
@@ -76,13 +65,16 @@ html, body {
     font-family: Courier
  }
 
-.tag {
-    font-weight: bold;
-    font-size: 12px;
-    color: #fff;
-    background-color: #999;
-    padding: 2px 4px;
-    -webkit-border-radius: 3px;
-    border-radius: 3px;
- }
+/* The default margin for the pagination controls at the bottom
+   of a datatables table is 20px -- why is this? */
+ul.pagination {
+    margin: 0px;
+                }
 
+#bookmarks_show_untagged_only_note {
+                                     margin-right: 10px;
+                                     }
+
+#bookmarks_breadcrumb {
+                        margin: 0px;
+                        }

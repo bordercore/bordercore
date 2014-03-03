@@ -55,24 +55,24 @@ $(document).ready(function() {
 	}
 
 	oTable = $('#song_list').dataTable( {
-		"bServerSide": true,
-		"sAjaxSource": "{% url 'get_song_list' %}",
-		"bPaginate": true,
-		"bInfo": false,
-		"iDisplayLength": 50,
-		"aaSorting": [[0, 'desc']],
-		"bFilter": true,
-		"bLengthChange": false,
-        "oLanguage": {
-            "sZeroRecords": "No songs found",
-            "sSearch": "Filter",
+		"serverSide": true,
+		"ajaxSource": "{% url 'get_song_list' %}",
+		"paginate": true,
+		"info": false,
+		"displayLength": 50,
+		"sorting": [[0, 'desc']],
+		"filter": true,
+		"lengthChange": false,
+        "language": {
+            "zeroRecords": "No songs found",
+            "search": "Filter",
         },
-		"sDom": "<'row'<'span6'<'toolbar'>l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
-		"bSearchable": false,
-		"aoColumnDefs": [
-			{ "aTargets": [0], "sClass": "span2", "asSorting": [ "desc", "asc" ] },
-			{ "aTargets": [2], "fnRender": formatTitle, "useRendered": false },
-			{ "aTargets": [3], "bVisible": false },
+		"dom": "<'row'<'span6'<'toolbar'>l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+		"searchable": false,
+		"columnDefs": [
+			{ "targets": [0], "class": "span2", "sorting": [ "desc", "asc" ] },
+			{ "targets": [2], "render": formatTitle, "useRendered": false },
+			{ "targets": [3], "visible": false },
         ],
 	} );
 
@@ -80,26 +80,27 @@ $(document).ready(function() {
 
 	$("#song_list tbody").click( function( e ) {
 
-		// Hilight the clicked row
-		$(event.target.parentNode).toggleClass("row_selected");
+    if ( $(event.target.parentNode).attr("id") == "row_selected" ) {
 
-		// Remove hilighting from all other rows
-		$(event.target.parentNode).siblings().removeClass("row_selected");
+        $(event.target.parentNode).attr("id", "");
+        $('#btn-edit').attr("disabled", "disabled");
+	    $('#btn-delete').attr("disabled", "disabled");
 
-		// Enable or disabled the 'Edit' and 'Delete' buttons based
-		//  on whether a row is selected (hilighted)
-		if ( $(event.target.parentNode).hasClass("row_selected") ) {
-			$('#btn-edit').removeAttr("disabled");
-			$('#btn-delete').removeAttr("disabled");
-		} else {
-			$('#btn-edit').attr("disabled", "disabled");
-			$('#btn-delete').attr("disabled", "disabled");
-		}
+     } else {
+
+        $('#btn-edit').removeAttr("disabled");
+	    $('#btn-delete').removeAttr("disabled");
+
+ 	    // Hilight the clicked row
+ 	    $(event.target.parentNode).attr("id", "row_selected");
+	    $(event.target.parentNode).siblings().attr("id", "");
+
+     }
 
     });
 
 	// $("div.toolbar").html('Custom tool bar! Text/images etc.');
-	$(".foobar").appendTo("div.toolbar");
+	// $(".foobar").appendTo("div.toolbar");
 
 });
 

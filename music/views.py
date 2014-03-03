@@ -480,6 +480,9 @@ class WishListView(ListView):
     template_name = "music/wishlist.html"
     context_object_name = "info"
 
+    def get_queryset(self):
+        return WishList.objects.filter(user=self.request.user).order_by('-created')
+
     def get_context_data(self, **kwargs):
         context = super(WishListView, self).get_context_data(**kwargs)
 

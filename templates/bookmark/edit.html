@@ -2,8 +2,10 @@
 
 {% block extra_head %}
 
-<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tokenizer.js"></script>
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tokenizer.css" />
+<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap3-typeahead.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/bloodhound.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.min.js"></script>
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput.css" />
 
 {% endblock %}
 
@@ -17,19 +19,40 @@
 
 $(document).ready(function() {
 
-    $("input[name='tags']").tokenizer( { delimiters: [13, 188] } )
+   var engine = new Bloodhound({
+	 name: 'tags',
+	 remote: '{% url 'blog_tag_search' %}?query=%QUERY',
+	 datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
+	 queryTokenizer: Bloodhound.tokenizers.whitespace
+   });
+
+   engine.initialize();
+
+   $('#id_tags').tagsinput({
+	 confirmKeys: [13, 188],
+	 tagClass: function(item) {
+	   return 'label label-primary';
+	   }
+   });
+
+   $('#id_tags').tagsinput('input').typeahead( {
+	 source: engine.ttAdapter(),
+	 updater: function(item) {
+	   $('#id_tags').tagsinput('add', item);
+	 }
+   })
 
 });
 
 </script>
 
 {% if form.errors %}
-<div class="alert alert-error offset2 span10">
+<div class="alert alert-error col-lg-offset-2 col-lg-10">
 Please correct the errors below.
 </div>
 {% endif %}
 
-<p class="lead offset2">
+<p class="lead col-lg-offset-1">
 {{ form.instance.url|favicon|safe }} {{ action }} Bookmark
 </p>
 
@@ -37,9 +60,9 @@ Please correct the errors below.
 {% csrf_token %}
 
 {% for field in form %}
-<div class="control-group {% if field.errors %}error{% endif %}">
-    <label class="control-label" for="inputTitle">{{ field.label }}</label>
-    <div class="controls">
+<div class="form-group {% if field.errors %}error{% endif %}">
+    <label class="col-lg-1 control-label" for="inputTitle">{{ field.label }}</label>
+    <div class="col-lg-5">
 {{ field }}
 {% for error in field.errors %}
 <span class="form-error">{{ error }}</span>
@@ -48,13 +71,11 @@ Please correct the errors below.
   </div>
 {% endfor %}
 
-  <div class="control-group">
-    <div class="controls">
-	  <input class="btn" type="submit" name="Go" value="{{ action }}">
-	  <input class="btn{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete">
-	  <a class="btn" href="/bookmarks/">Cancel</a>
-	</div>
-  </div>
+<div class="form-group">
+    <div class="col-lg-offset-1">
+	<input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
+	<input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
+	<a class="btn btn-<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap</div>
 
 </form>
 

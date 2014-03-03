@@ -21,7 +21,7 @@
 {% if post.tags.all %}
 
 {% for tag in post.tags.all %}
-<a class="label label-info" href="{% url 'blog_list' %}?tagsearch={{ tag.name }}">{{ tag.name }}</a>
+<a class="label label-primary" href="{% url 'blog_list' %}?tagsearch={{ tag.name }}">{{ tag.name }}</a>
 {% endfor %}
 
 {% endif %}

@@ -10,10 +10,13 @@
 
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
 
-<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
-<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.bootstrap.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/dataTableExt.oApi.fnSetFilteringDelay.js"> </script>
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.css" />
 
+<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.js"></script>
+
+<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap.js"></script>
+
+<script type="text/javascript" src="{{ STATIC_URL }}js/dataTableExt.oApi.fnSetFilteringDelay.js"> </script>
 <script type="text/javascript" charset="utf-8">
 
 var oTable;
@@ -22,11 +25,11 @@ var oTable;
 /* Modified from http://www.datatables.net/examples/api/select_single_row.html */
 function fnGetSelected( oTableLocal ) {
 
-	var aTrs = oTable.fnGetNodes();
+	var aTrs = oTableLocal.fnGetNodes();
 
 	for ( var i=0 ; i<aTrs.length ; i++ ) {
-		if ( $(aTrs[i]).hasClass('row_selected') ) {
-			return [i, oTable.fnGetData( i )[4]];
+	 if ( $(aTrs[i]).attr('id') == 'row_selected' ) {
+			return oTable.fnGetData( i )[4];
 		}
 	}
 
@@ -41,17 +44,22 @@ $(document).ready(function() {
 	}, 3000);
 {% endfor %}
 
+   $('#myfilter').keydown( function(e) {
+
+      var filterString = $(this).val();
+      oTable.fnFilter(filterString);
+
+   });
+
     $('#btn-delete').on('click', function() {
 
-		var selectedRow = fnGetSelected( oTable );
-		var selectedRowID = selectedRow[0];
-		var selectedWishListID = selectedRow[1];
+		var selectedWishListID = fnGetSelected( oTable );
 
 		$.ajax( { type: 'DELETE',
 				  url: '/api/v1/wishlist/' + selectedWishListID + '/',
 				  success: function() {
-					  oTable.fnDeleteRow(selectedRowID);
-					  $('#feedback').fadeIn(1000).html("Task deleted.");
+					  // oTable.fnDeleteRow(selectedRowID);
+					  $('#feedback').fadeIn(1000).html("Item deleted.");
 					  setTimeout( function() {
 						  $('#feedback').fadeOut(1000);
 					  }, 3000);
@@ -67,23 +75,24 @@ $(document).ready(function() {
 
     $('#btn-edit').on('click', function() {
 
-		var selectedWishListID = fnGetSelected( oTable )[1];
-        window.location='{% url 'wishlist_edit' 666 %}'.replace(666, selectedWishListID)
+		var selectedWishListID = fnGetSelected( oTable );
+        window.location='{% url 'wishlist_edit' 666 %}'.replace(666, selectedWishListID);
+	    return false;
 
 	});
 
 	oTable = $('#wishlist_list').dataTable( {
-		"bInfo": false,
-		"bPaginate": false,
-		"aaSorting": [[3, 'desc']],
-		"bFilter": true,
-		"bLengthChange": false,
-		"sDom": "<'row'<'span6'<'toolbar'>l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
-		"bSearchable": false,
-		"aoColumnDefs": [
-			{ "aTargets": [0], "asSorting": [ "desc", "asc" ] },
-			{ "aTargets": [3], "sClass": "span3 monospaced", "iDataSort": 4, "asSorting": [ "desc", "asc" ] },
-			{ "aTargets": [4], "bVisible": false },
+		"info": false,
+		"paginate": false,
+		"sorting": [[3, 'desc']],
+		"filter": true,
+		"lengthChange": false,
+		"dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'pull-right col-lg-4'p>>",
+		"searchable": false,
+		"columnDefs": [
+			{ "targets": [0], "sorting": [ "desc", "asc" ] },
+			{ "targets": [3], "class": "col-lg-3 monospaced", "dataSort": 4, "sorting": [ "desc", "asc" ] },
+			{ "targets": [4], "visible": false },
         ],
 	} );
 
@@ -91,38 +100,48 @@ $(document).ready(function() {
 
 	$("#wishlist_list tbody").click( function( event ) {
 
-		// Hilight the clicked row
-		$(event.target.parentNode).toggleClass("row_selected");
+    if ( $(event.target.parentNode).attr("id") == "row_selected" ) {
 
-		// Remove hilighting from all other rows
-		$(event.target.parentNode).siblings().removeClass("row_selected");
+        $(event.target.parentNode).attr("id", "");
+        $('#btn-edit').attr("disabled", "disabled");
+	    $('#btn-delete').attr("disabled", "disabled");
 
-		// Enable or disabled the 'Edit' and 'Delete' buttons based
-		//  on whether a row is selected (hilighted)
-		if ( $(event.target.parentNode).hasClass("row_selected") ) {
-			$('#btn-edit').removeAttr("disabled");
-			$('#btn-delete').removeAttr("disabled");
-		} else {
-			$('#btn-edit').attr("disabled", "disabled");
-			$('#btn-delete').attr("disabled", "disabled");
-		}
+     } else {
+
+        $('#btn-edit').removeAttr("disabled");
+	    $('#btn-delete').removeAttr("disabled");
+
+ 	    // Hilight the clicked row
+ 	    $(event.target.parentNode).attr("id", "row_selected");
+	    $(event.target.parentNode).siblings().attr("id", "");
+
+     }
 
     });
 
-	$(".edit-controls").appendTo("div.toolbar");
+	//$(".edit-controls").appendTo("div.toolbar");
 
 });
 
 </script>
 
-<div class="edit-controls span3">
-  <div class="btn-group">
-	<a class="btn" id="btn-add" href="{% url 'wishlist_add' %}">Add</a>
-	<button class="btn" id="btn-edit" disabled>Edit</button>
-	<button class="btn" id="btn-delete" disabled>Delete</button>
-  </div>
-	<div id="feedback" class="alert alert-success hide" style="width: 150px; height: 20px; float: right; margin-bottom: 0px"></div>
+<div class="container">
+  <div class="row">
+    <div class="col-lg-7">
+      <form class="form-inline" role="form">
+		<div class="btn-group">
+		<a class="btn btn-default" id="btn-add" href="{% url 'wishlist_add' %}">Add</a>
+		<button class="btn btn-default" id="btn-edit" disabled>Edit</button>
+		<button class="btn btn-default" id="btn-delete" disabled>Delete</button>
+	  </div>
+	  <div id="feedback" class="form-group alert alert-success hide" style="width: 150px; height: 20px; float: right; margin-bottom: 0px"></div>
 
+      <div class="form-group">
+        <input id="myfilter" type="text" style="width: 200px" class="form-control" placeholder="Search">
+      </div>
+	  </form>
+	</div>
+  </div>
 </div>
 
 {% include "common/datatable.html" with data=info cols=cols id="wishlist_list" %}

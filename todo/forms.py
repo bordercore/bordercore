@@ -5,7 +5,8 @@ from tag.models import Tag
 
 # http://stackoverflow.com/questions/5608576/django-enter-a-list-of-values-form-error-when-rendering-a-manytomanyfield-as-a
 class ModelCommaSeparatedChoiceField(ModelMultipleChoiceField):
-    widget = TextInput
+
+    widget = TextInput(attrs={'class': 'form-control typeahead', 'autocomplete': 'off'})
 
     def clean(self, value):
         if value is not None:

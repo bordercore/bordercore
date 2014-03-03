@@ -6,56 +6,60 @@
 
 <div class="row">
 
-<div class="span6">
-<table class="table table-condensed table-bordered">
-<caption>Urgent Tasks</caption>
-<thead><tr><th>Task</th></tr></thead>
+  <div class="col-lg-5">
+    <div class="panel panel-primary">
+      <div class="panel-heading">Urgent Tasks</div>
+      <ul class="list-group">
 {% for task in tasks %}
-<tr><td>
-<a href="{% url 'todo_edit' task.id %}">{{ task.task }}</a>
+<li class="list-group-item"><a href="{% url 'todo_edit' task.id %}">{{ task.task }}</a>
 {% if task.tags %}
-<span class="tag">{{ task.tags.all.0.name }}</span>
+  <span class="label">{{ task.tags.all.0.name }}</span>
 {% endif %}
-</td></tr>
+</li>
 {% endfor %}
-</table>
-</div>
+      </ul>
+    </div>
+  </div>
 
-<div class="span6">
-<table class="table table-condensed table-bordered">
-<caption>Recently Played Music</caption>
-<thead><tr><th>Task</th></tr></thead>
+  <div class="col-lg-5">
+    <div class="panel panel-primary">
+      <div class="panel-heading">Recently Played Music</div>
+      <ul class="list-group">
 {% for song in music %}
-<tr><td>
-{{ song.song.artist }} <a href="{% url 'music_stream' song.song_id %}">{{ song.song.title }}</a>
-</td></tr>
+<li class="list-group-item">{{ song.song.artist }} <a href="{% url 'music_stream' song.song_id %}">{{ song.song.title }}</a></li>
 {% endfor %}
-</table>
+      </ul>
+    </div>
+  </div>
 
 </div>
 
 <div class="row">
-<div class="span12 offset1">
-<div class="btn-group">
-  <a class="btn dropdown-toggle btn-info" data-toggle="dropdown" href="#">
-    Documentation
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu">
-    <li><a href="{{ STATIC_URL }}docs/LJ/tocindex.html">Linux Journal</a></li>
-    <li><a href="{{ STATIC_URL }}docs/sa/html/main.htm">Sys Admin</a></li>
-    <li><a href="{{ STATIC_URL }}docs/LG/lg_index.html">Linux Gazette</a></li>
-    <li><a href="{{ STATIC_URL }}docs/tpj/start.htm">The Perl Journal</a></li>
-  </ul>
-</div>
-</div>
+  <div class="col-lg-2 col-offset-1">
+    <div class="btn-group">
+      <a class="btn dropdown-toggle btn-info" data-toggle="dropdown" href="#">
+        Documentation
+        <span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu">
+        <li><a href="{{ STATIC_URL }}docs/LJ/tocindex.html">Linux Journal</a></li>
+        <li><a href="{{ STATIC_URL }}docs/sa/html/main.htm">Sys Admin</a></li>
+        <li><a href="{{ STATIC_URL }}docs/LG/lg_index.html">Linux Gazette</a></li>
+        <li><a href="{{ STATIC_URL }}docs/tpj/start.htm">The Perl Journal</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-lg-2"><a href="http://www.pinterest.com"><img src="{{ STATIC_URL }}/img/pinterest.jpg" /></a></div>
 </div>
 
-</div>
+<br />
 
-<div class="alert alert-info">
-{{ quote.quote }} <br />
-<strong>{{ quote.source }}</strong>
+<div class="row">
+  <div class="col-lg-10 col-offset-1">
+    <div class="alert alert-info">
+      {{ quote.quote }}<br /><strong>{{ quote.source }}</strong>
+    </div>
+  </div>
 </div>
 
 {% endblock %}

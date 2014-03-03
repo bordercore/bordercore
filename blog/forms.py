@@ -7,7 +7,7 @@ from blog.models import Post, Tag
 
 # http://stackoverflow.com/questions/5608576/django-enter-a-list-of-values-form-error-when-rendering-a-manytomanyfield-as-a
 class ModelCommaSeparatedChoiceField(ModelMultipleChoiceField):
-    widget = TextInput
+    widget = TextInput(attrs={'class': 'form-control'})
 
     def clean(self, value):
         if value is not None:
@@ -56,7 +56,6 @@ class BlogForm(ModelForm):
         model = Post
         fields = ('title', 'date', 'post', 'tags', 'id')
         widgets = {
-            'post': Textarea(attrs={'rows': 20, 'class': 'input-xxlarge'}),
-            'title': TextInput(attrs={'class': 'input-xxlarge'}),
-            'tags': TextInput()
+            'post': Textarea(attrs={'rows': 20, 'class': 'form-control'}),
+            'title': TextInput(attrs={'class': 'form-control'}),
         }

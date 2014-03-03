@@ -2,9 +2,6 @@
 
 {% block extra_head %}
 
-<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tokenizer.js"></script>
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tokenizer.css" />
-
 {% endblock %}
 
 {% block title %} {{ section }} {% endblock %}
@@ -14,8 +11,6 @@
 <script type="text/javascript">
 
 $(document).ready(function() {
-
-    $("input[name='tags']").tokenizer( { delimiters: [13, 188] } )
 
 {% if action == 'Edit' %}
 	$("input.btn[value='Delete']").click( function() {
@@ -31,27 +26,19 @@ $(document).ready(function() {
 <div class="alert alert-success">{{ message }}</div>
 {% endif %}
 
-<p class="lead offset2">
+<p class="lead col-lg-offset-1">
 {{ action }} WishList
 </p>
 
-<form id="todo-form" class="form-horizontal" action="{{ request.path }}" method="post">
+<form class="form-horizontal" action="{{ request.path }}" method="post">
 {% csrf_token %}
 
 {% for field in form %}
-<div class="control-group {% if field.errors %}error{% endif %}">
-    <label class="control-label" for="inputTitle">{{ field.label }}</label>
+<div class="form-group {% if field.errors %}error{% endif %}">
+    <label class="col-lg-1 control-label" for="inputTitle">{{ field.label }}</label>
 
-    <div class="controls">
-{% if field.label == 'Tags' %}
-
-	<input class="input-xxlarge" name="tags" type="text" value="{{ field.value }}" />
-
-{% else %}
-
+    <div class="col-lg-5">
 {{ field }}
-
-{% endif %}
 
 {% for error in field.errors %}
       <span class="form-error">{{ error }}</span>
@@ -62,13 +49,13 @@ $(document).ready(function() {
 </div>
 {% endfor %}
 
-  <div class="control-group">
-    <div class="controls">
-	  <input class="btn" type="submit" name="Go" value="Edit">
-	  <input class="btn" type="submit" name="Go" value="Delete">
-	  <a class="btn" href="{% url 'wishlist' %}">Cancel</a>
-	</div>
-  </div>
+<div class="form-group">
+    <div class="col-lg-offset-1">
+	<input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
+	<input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
+	<a class="btn btn-default" href="{% url 'wishlist' %}">Cancel</a>
+    </div>
+</div>
 
 </form>
 

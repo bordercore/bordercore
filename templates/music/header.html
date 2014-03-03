@@ -1,6 +1,24 @@
+<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap3-typeahead.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/bloodhound.js"></script>
+
 <script type="text/javascript">
 
 $(document).ready(function() {
+
+    var engine = new Bloodhound({
+		name: 'tags',
+		remote: '{% url 'blog_tag_search' %}?query=%QUERY',
+        datumTokenizer: function(d) {
+            return Bloodhound.tokenizers.whitespace(d.val);
+        },
+        queryTokenizer: Bloodhound.tokenizers.whitespace
+    });
+
+    engine.initialize();
+
+    $('#tag-filter').typeahead({
+        source: engine.ttAdapter()
+	});
 
 	// Hitting return will begin the search
     $('#blog-search').keypress( function(e) {

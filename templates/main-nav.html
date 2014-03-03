@@ -7,54 +7,51 @@ $(document).ready(function() {
 
 </script>
 
-<div class="navbar">
-  <div class="navbar-inner">
-    <!-- <a class="brand" href="#">Title</a> -->
-    <ul class="nav">
-      <li><a href="{% url 'homepage' %}"><i class="icon-home"></i> Home</a></li>
-      <li><a href="{% url 'bookmark_list' %}">Bookmarks</a></li>
+<div class="navbar navbar-default">
+  <ul class="nav navbar-nav">
+    <li><a href="{% url 'homepage' %}"><i class="glyphicon glyphicon-home"></i> Home</a></li>
+    <li><a href="{% url 'bookmark_list' %}">Bookmarks</a></li>
 
-	  <li class="dropdown">
-		<a href="#" class="dropdown-toggle" data-toggle="dropdown">Feeds<b class="caret"></b>
-		</a>
-		<ul class="dropdown-menu">
-		  <li><a href="{% url 'feed_list' %}">Browse</a></li>
-		  <li><a href="{% url 'feed_edit' %}">Add a Feed</a></li>
-		  <li><a href="{% url 'feed_subscriptions' %}">Manage Subscriptions</a></li>
-		</ul>
-	  </li>
+	<li class="dropdown">
+	  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Feeds<b class="caret"></b>
+	  </a>
+	  <ul class="dropdown-menu">
+		<li><a href="{% url 'feed_list' %}">Browse</a></li>
+		<li><a href="{% url 'feed_edit' %}">Add a Feed</a></li>
+		<li><a href="{% url 'feed_subscriptions' %}">Manage Subscriptions</a></li>
+	  </ul>
+	</li>
 
-      <li><a href="{% url 'blog_list' %}">Blog</a></li>
+    <li><a href="{% url 'blog_list' %}">Blog</a></li>
 
-	  <li class="dropdown">
-		<a href="#" class="dropdown-toggle" data-toggle="dropdown">Music<b class="caret"></b>
-		</a>
-		<ul class="dropdown-menu">
-		  <li><a href="{% url 'music_list' %}">Browse</a></li>
-		  <li><a href="{% url 'add_song' %}">Add a Song</a></li>
-		  <li><a href="{% url 'wishlist' %}">Wish List</a></li>
-		</ul>
-	  </li>
+	<li class="dropdown">
+	  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Music<b class="caret"></b>
+	  </a>
+	  <ul class="dropdown-menu">
+		<li><a href="{% url 'music_list' %}">Browse</a></li>
+		<li><a href="{% url 'add_song' %}">Add a Song</a></li>
+		<li><a href="{% url 'wishlist' %}">Wish List</a></li>
+	  </ul>
+	</li>
 
-      <li><a href="/calendar/">Calendar</a></li>
-      <li><a href="{% url 'todo_list' %}">Todo</a></li>
-      <li><a href="http://www.bordercore.com/photos/">Photos</a></li>
+    <li><a href="/calendar/">Calendar</a></li>
+    <li><a href="{% url 'todo_list' %}">Todo</a></li>
+    <li><a href="http://www.bordercore.com/photos/">Photos</a></li>
 
-	  <li class="dropdown">
-	    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Misc<b class="caret"></b>
-	    </a>
-	    <ul class="dropdown-menu">
-	      <li><a href="{% url 'prefs' %}"><i class="icon-cog"></i> Prefs</a></li>
-	      <li><a href="{% url 'book_list' %}">Books</a></li>
-	      <li><a href="/logout"><i class="icon-off"></i> Logout</a></li>
-	    </ul>
-	  </li>
+	<li class="dropdown">
+	  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Misc<b class="caret"></b>
+	  </a>
+	  <ul class="dropdown-menu">
+	    <li><a href="{% url 'prefs' %}"><i class="glyphicon glyphicon-cog"></i> Prefs</a></li>
+	    <li><a href="/logout"><i class="glyphicon glyphicon-off"></i> Logout</a></li>
+	  </ul>
+	</li>
 
-    </ul>
-	<form class="navbar-search">
-	  <input type="text" class="search-query span2" placeholder="Search">
-	</form>
-  </div>
+  </ul>
+  <form class="navbar-form pull-left" action="">
+    <input type="text" class="form-control col-lg-8" placeholder="Search">
+  </form>
+
 </div>
 
 
