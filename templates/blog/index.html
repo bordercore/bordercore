@@ -14,19 +14,19 @@
 <div class="pager">
   <ul>
         {% if posts.has_previous %}
-  <li>          <a href="?page={{ posts.previous_page_number }}">previous</a></li>
+  <li>          <a href="?page={{ posts.previous_page_number }}&tagsearch={{ request.GET.tagsearch }}">previous</a></li>
         {% endif %}
 
   <li>          Page <strong>{{ posts.number }}</strong> of <strong>{{ posts.paginator.num_pages }}</strong></li>
 
         {% if posts.has_next %}
-<li>            <a href="?page={{ posts.next_page_number }}">next</a></li>
+<li>            <a href="?page={{ posts.next_page_number }}&tagsearch={{ request.GET.tagsearch }}">next</a></li>
         {% endif %}
   </ul>
 </div>
 {% endif %}
 
-{% else %}
+{% else %}q
 
 <div class="alert">
 <h4>Nothing found</h4>
