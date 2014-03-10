@@ -2,37 +2,42 @@
 
 {% block extra_head %}
 
+	<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
+
+	<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.css" />
+
+	<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.js"></script>
+
+	<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap.js"></script>
+
+	<script type=="text/javascript" src="{{ STATIC_URL }}js/dataTableExt.oApi.fnSetFilteringDelay.js"> </script>
+
 {% endblock %}
 
 {% block title %} Music {% endblock %}
 
 {% block content %}
 
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
-
-<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
-<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.bootstrap.js"></script>
-
 <script type="text/javascript" charset="utf-8">
 
 $(document).ready(function() {
 
 	function formatTitle( oObj ) {
-		return '<a href="{% url 'music_stream' %}' + oObj.aData[4] + '">' + oObj.aData[2] + '</a>';
+		return '<a href="{% url 'music_stream' %}' + row[4] + '">' + row[2] + '</a>';
 	}
 
 	oTable = $('#song_list').dataTable( {
-		"bPaginate": true,
-		"bInfo": false,
-		"aaSorting": [[0, 'desc']],
-		"bFilter": false,
-		"bLengthChange": false,
-		"sDom": "<'row'<'span6'<'toolbar'>l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
-		"bSearchable": false,
-		"aoColumnDefs": [
-			{ "aTargets": [0], "sClass": "span2", "asSorting": [ "desc", "asc" ] },
-			{ "aTargets": [2], "fnRender": formatTitle, "useRendered": false },
-			{ "aTargets": [1,4], "bVisible": false },
+		"paginate": true,
+		"info": false,
+		"sorting": [[0, 'desc']],
+		"filter": false,
+		"lengthChange": false,
+		"dom": "<'row'<'span6'<'toolbar'>l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+		"searchable": false,
+		"columnDefs": [
+			{ "targets": [0], "class": "col-lg-2", "sorting": [ "desc", "asc" ] },
+			{ "targets": [2], "render": formatTitle, "useRendered": false },
+			{ "targets": [1,4], "visible": false },
         ],
 	} );
 
@@ -44,8 +49,8 @@ $(document).ready(function() {
 <div class="row">
 
 {% block breadcrumbs %}
-<ul class="breadcrumb span6 pull-left">
-<li> <a href="{% url 'music_list' %}">Music</a> </li>  <span class="divider">/</span>
+<ul class="breadcrumb pull-left">
+	<li> <a href="{% url 'music_list' %}">Music</a> </li>
 <li> {% if album_list %} {{ album_list.0.artist }} {% else %} {{ song_list.0.artist }} {% endif %} </li>
 </ul>
 {% endblock %}
@@ -56,12 +61,15 @@ $(document).ready(function() {
 
 <div class="row">
 
+	<div class="col-lg-12">
+
 <h2> {% if album_list %} {{ album_list.0.artist }} {% else %} {{ song_list.0.artist }} {% endif %} </h2>
 
 {% if album_list %}
 {{ album_list|length }} album{{ album_list|pluralize }} <br />
 {% endif %}
 
+</div>
 </div>
 
 <table class="table no-borders">

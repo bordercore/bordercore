@@ -2,41 +2,44 @@
 
 {% block extra_head %}
 
+  <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
+
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.css" />
+
+<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.js"></script>
+
+<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap.js"></script>
+
 {% endblock %}
 
 {% block title %} Music {% endblock %}
 
 {% block content %}
 
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
-
-<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
-<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.bootstrap.js"></script>
-
 <script type="text/javascript" charset="utf-8">
 
-var oTable;
+var table;
 
 $(document).ready(function() {
 
-	function formatTitle( oObj ) {
-		return '<a href="{% url 'music_stream' %}' + oObj.aData[0] + '">' + oObj.aData[2] + '</a>';
+	function formatTitle( data, type, row ) {
+		return '<a href="{% url 'music_stream' %}' + row[0] + '">' + row[2] + '</a>';
 	}
 
-	oTable = $('#song_list').dataTable( {
-		"bInfo": false,
-		"bFilter": false,
-		"bPaginate": false,
-		"iDisplayLength": 50,
-		"aaSorting": [[1, 'asc']],
-		"bLengthChange": false,
-		"bSearchable": false,
-		"aoColumnDefs": [
-			{ "aTargets": [0], "bVisible": false },
-			{ "aTargets": [1], "sClass": "span1", "asSorting": [ "asc", "desc" ] },
-			{ "aTargets": [2], "sClass": "span8", "asSorting": [ "asc", "desc" ],  "fnRender": formatTitle, "bUseRendered": false },
-			{ "aTargets": [3], "sClass": "span1", "iDataSort": 4 },
-			{ "aTargets": [4], "bVisible": false }
+	table = $('#song_list').dataTable( {
+		"info": false,
+		"filter": false,
+		"paginate": false,
+		"displayLength": 50,
+		"sorting": [[1, 'asc']],
+		"lengthChange": false,
+		"searchable": false,
+		"columnDefs": [
+			{ "targets": [0], "visible": false },
+			{ "targets": [1], "class": "col-lg-1", "sorting": [ "asc", "desc" ] },
+			{ "targets": [2], "class": "col-lg-8", "sorting": [ "asc", "desc" ],  "render": formatTitle, "useRendered": false },
+			{ "targets": [3], "class": "col-lg-1", "iDataSort": 4 },
+			{ "targets": [4], "visible": false }
         ],
 	} );
 
@@ -47,11 +50,11 @@ $(document).ready(function() {
 <div class="row">
 
 {% block breadcrumbs %}
-<ul class="breadcrumb span6 pull-left">
-<li> <a href="{% url 'music_list' %}">Music</a> </li>  <span class="divider">/</span>
-<li> <a href="{% url 'show_artist' album.artist %}">{{ album.artist }} </li></a> </li>  <span class="divider">/</span>
-<li> {{ album.title }} </li>
-</ul>
+<ol class="breadcrumb pull-left">
+<li> <a href="{% url 'music_list' %}">Music</a> </li>
+<li> <a href="{% url 'show_artist' album.artist %}">{{ album.artist }} </li></a> </li>
+<li class="active"> {{ album.title }} </li>
+</ol>
 {% endblock %}
 
 {% include "music/header.html" %}
@@ -60,13 +63,13 @@ $(document).ready(function() {
 
 <div class="row">
 
-<div class="span3">
+<div class="col-lg-3">
 <!-- <img src="{% url 'album_artwork' data.0.id %}" height="250" width="250" /> -->
 <img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title }}/artwork.jpg" height="250" width="250" />
 
 </div>
 
-<div class="span8">
+<div class="col-lg-8">
 <h2>{{ album.title }}</h2>
 <h3>{{ album.artist }}</h3>
 <h5> {{ album.year }} </h5>
@@ -75,9 +78,11 @@ $(document).ready(function() {
 </div>
 
 <div class="row">
+<div class="col-lg-11">
 
 {% include "common/datatable.html" with cols=cols id="song_list" %}
 
+</div>
 </div>
 
 {% endblock %}

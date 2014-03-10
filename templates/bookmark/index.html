@@ -20,148 +20,151 @@
 
 <script type="text/javascript" charset="utf-8">
 
-var oTable;
+    var oTable;
 
-/* Get the bookmark ID which is currently selected */
-/* Modified from http://www.datatables.net/examples/api/select_single_row.html */
-function fnGetSelected( oTableLocal ) {
+    /* Get the bookmark ID which is currently selected */
+    /* Modified from http://www.datatables.net/examples/api/select_single_row.html */
+    function fnGetSelected( oTableLocal ) {
 
-	var aTrs = oTableLocal.fnGetNodes();
+        var aTrs = oTableLocal.fnGetNodes();
 
-	for ( var i=0 ; i<aTrs.length ; i++ ) {
-	 if ( $(aTrs[i]).attr('id') == 'row_selected' ) {
-			return oTable.fnGetData( i )[3];
-		}
-	}
+        for ( var i=0 ; i<aTrs.length ; i++ ) {
+	        if ( $(aTrs[i]).attr('id') == 'row_selected' ) {
+			    return oTable.fnGetData( i )[3];
+		    }
+	    }
 
-}
+    }
 
-var refreshInterval = 60;  // Minutes
+    var refreshInterval = 60;  // Minutes
 
-function refreshList() {
+    function refreshList() {
 
-    oTable.fnDraw();
+        oTable.fnDraw();
+        setTimeout("refreshList()", refreshInterval*60*1000);
+
+    }
+
+    // periodically refresh the list
     setTimeout("refreshList()", refreshInterval*60*1000);
 
-}
+    $(document).ready(function() {
 
-// periodically refresh the list
-setTimeout("refreshList()", refreshInterval*60*1000);
+	    // http://stackoverflow.com/questions/8498592/extract-root-domain-name-from-string
+	    function parse_domain(url) {
 
-$(document).ready(function() {
+		    var tmp = document.createElement ('a');
+		    tmp.href = url;
 
-	// http://stackoverflow.com/questions/8498592/extract-root-domain-name-from-string
-	function parse_domain(url) {
+		    domain = tmp.hostname
 
-		var tmp = document.createElement ('a');
-		tmp.href = url;
+		    parts = domain.split('.')
 
-		domain = tmp.hostname
+		    if ( parts.length == 3 ) {
+			    domain = parts[1] + '.' + parts[2]
+		    }
 
-		parts = domain.split('.')
+		    return domain;
 
-		if ( parts.length == 3 ) {
-			domain = parts[1] + '.' + parts[2]
-		}
+	    }
 
-		return domain;
+        {% if messages %}
+        {% for message in messages %}
+	    $('#feedback').fadeIn(1000).html('{{ message }}');
+	    setTimeout( function() {
+		    $('#feedback').fadeOut(1000);
+	    }, 3000);
+        {% endfor %}
+        {% endif %}
 
-	}
+        $('#myfilter').keydown( function(e) {
 
-{% if messages %}
-{% for message in messages %}
-	$('#feedback').fadeIn(1000).html('{{ message }}');
-	setTimeout( function() {
-		$('#feedback').fadeOut(1000);
-	}, 3000);
-{% endfor %}
-{% endif %}
+            var filterString = $(this).val();
+            oTable.fnFilter(filterString);
 
-   $('#myfilter').keydown( function(e) {
+        });
 
-      var filterString = $(this).val();
-      oTable.fnFilter(filterString);
+        $('#btn-delete').on('click', function() {
 
-   });
+	 var selectedBookmarkID = fnGetSelected( oTable );
 
-   $('#btn-delete').on('click', function() {
+     $.ajax( { type: 'DELETE',
+	           url: '/api/v1/bookmark/' + selectedBookmarkID + '/',
+	           success: function() {
+	     $('#feedback').fadeIn(1000).html("Bookmark deleted.");
+	     setTimeout( function() {
+	       $('#feedback').fadeOut(1000);
+	     }, 3000);
 
-		var selectedBookmarkID = fnGetSelected( oTable );
+	     oTable.fnDraw();
 
-		$.ajax( { type: 'DELETE',
-				  url: '/api/v1/bookmark/' + selectedBookmarkID + '/',
-				  success: function() {
-					  $('#feedback').fadeIn(1000).html("Bookmark deleted.");
-					  setTimeout( function() {
-						  $('#feedback').fadeOut(1000);
-					  }, 3000);
+	     $('#btn-edit').attr("disabled", "disabled");
+	     $('#btn-delete').attr("disabled", "disabled");
 
-					  oTable.fnDraw();
+	   }
+	           });
 
-					  $('#btn-edit').attr("disabled", "disabled");
-					  $('#btn-delete').attr("disabled", "disabled");
-
-				  }
-				});
-	});
-
-
-    $('#btn-edit').click( function() {
-     var selectedBookmarkID = fnGetSelected( oTable );
-        window.location='{% url 'bookmark_edit' 666 %}'.replace(666, selectedBookmarkID)
-        return false;
-	});
-
-
-	function formatTitle( data, type, row ) {
-		return '<img src="{{ STATIC_URL }}img/favicons/' + parse_domain( row[1] ) + '.ico" width="32" height="32" /> &nbsp; &nbsp; <a href="' + row[1] + '" target="_blank">' + row[2] + '</a>';
-	}
-
-	oTable = $('#bookmark_list').dataTable( {
-		"serverSide": true,
-		"ajaxSource": "{% url 'get_bookmarks_list' %}",
-		"paginate": true,
-		"info": false,
-		"displayLength": 20,
-		"sorting": [[0, 'desc']],
-		"filter": true,
-		"lengthChange": false,
-		"dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'pull-right col-lg-4'p>>",
-		"searchable": false,
-		"columnDefs": [
-			{ "targets": [0], "class": "col-lg-2", "sorting": [ "desc", "asc" ] },
-			{ "targets": [1,3], "visible": false },
-			{ "targets": [2], "render": formatTitle, "useRendered": false },
-        ],
-	} );
-
-	$('#bookmark_list').dataTable().fnSetFilteringDelay(1000);
-
-   $("#bookmark_list tbody").click( function( event ) {
-
-        // Don't hilight the row if the user is clicking on a link in the row
-        if (event.target.nodeName == 'A') {
-	        return;
-        }
-
-    if ( $(event.target.parentNode).attr("id") == "row_selected" ) {
-
-        $(event.target.parentNode).attr("id", "");
-        $('#btn-edit').attr("disabled", "disabled");
-	    $('#btn-delete').attr("disabled", "disabled");
-
-     } else {
-
-        $('#btn-edit').removeAttr("disabled");
-	    $('#btn-delete').removeAttr("disabled");
-
- 	    // Hilight the clicked row
- 	    $(event.target.parentNode).attr("id", "row_selected");
-	    $(event.target.parentNode).siblings().attr("id", "");
-
-     }
+     return false;
 
    });
+
+
+        $('#btn-edit').click( function() {
+            var selectedBookmarkID = fnGetSelected( oTable );
+            window.location='{% url 'bookmark_edit' 666 %}'.replace(666, selectedBookmarkID)
+            return false;
+	    });
+
+
+	    function formatTitle( data, type, row ) {
+		    return '<img src="{{ STATIC_URL }}img/favicons/' + parse_domain( row[1] ) + '.ico" width="32" height="32" /> &nbsp; &nbsp; <a href="' + row[1] + '" target="_blank">' + row[2] + '</a>';
+	    }
+
+	    oTable = $('#bookmark_list').dataTable( {
+		    "serverSide": true,
+		    "ajaxSource": "{% url 'get_bookmarks_list' %}",
+		    "paginate": true,
+		    "info": false,
+		    "displayLength": 20,
+		    "sorting": [[0, 'desc']],
+		    "filter": true,
+		    "lengthChange": false,
+		    "dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'pull-right col-lg-4'p>>",
+		    "searchable": false,
+		    "columnDefs": [
+			    { "targets": [0], "class": "col-lg-2", "sorting": [ "desc", "asc" ] },
+			    { "targets": [1,3], "visible": false },
+			    { "targets": [2], "render": formatTitle, "useRendered": false },
+            ],
+	    } );
+
+	    $('#bookmark_list').dataTable().fnSetFilteringDelay(1000);
+
+        $("#bookmark_list tbody").click( function( event ) {
+
+            // Don't hilight the row if the user is clicking on a link in the row
+            if (event.target.nodeName == 'A') {
+	            return;
+            }
+
+            if ( $(event.target.parentNode).attr("id") == "row_selected" ) {
+
+                $(event.target.parentNode).attr("id", "");
+                $('#btn-edit').attr("disabled", "disabled");
+	            $('#btn-delete').attr("disabled", "disabled");
+
+            } else {
+
+                $('#btn-edit').removeAttr("disabled");
+	            $('#btn-delete').removeAttr("disabled");
+
+ 	            // Hilight the clicked row
+ 	            $(event.target.parentNode).attr("id", "row_selected");
+	            $(event.target.parentNode).siblings().attr("id", "");
+
+            }
+
+        });
 
 });
 

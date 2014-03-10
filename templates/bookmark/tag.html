@@ -2,6 +2,8 @@
 
 {% block extra_head %}
 <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap3-typeahead.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/bloodhound.js"></script>
 {% endblock %}
 
 {% load favicon %}
@@ -13,6 +15,24 @@
 <script type="text/javascript">
 
 $(document).ready(function() {
+
+    var engine = new Bloodhound({
+		name: 'tags',
+		remote: '{% url 'bookmark_tag_search' %}?query=%QUERY',
+        datumTokenizer: function(d) {
+            return Bloodhound.tokenizers.whitespace(d.val);
+        },
+        queryTokenizer: Bloodhound.tokenizers.whitespace
+    });
+
+    engine.initialize();
+
+    $('#tag-filter').typeahead({
+        source: engine.ttAdapter(),
+		updater: function(item) {
+			window.location='{% url 'bookmark_tag' %}?tagsearch=' + item;
+		}
+	});
 
 	var selectedId;
 
@@ -49,19 +69,6 @@ $(document).ready(function() {
         } else {
             return true;
         }
-	});
-
-	$('#tag-filter').typeahead({
-		source: function (query, process) {
-			return $.getJSON('{% url 'bookmark_tag_search' %}',
-						 { query: query },
-						 function (data) {
-							 return process(data);
-						 });
-		},
-		updater: function(item) {
-			window.location='{% url 'bookmark_tag' %}?tagsearch=' + item;
-		}
 	});
 
     $('#sort-container').sortable( {
@@ -121,7 +128,7 @@ Tag Filter <input id="tag-filter" type="text" value="{{ tag_filter }}" autocompl
 <li style="padding: 4px;">
 	<span class="tag-container">
 	<span style="width: 18px; border: 1px solid white; float: left">
-	  <i class="icon-remove" id="delete_{{ link.id }}"></i>
+	  <i class="icon-remove glyphicon glyphicon-remove" id="delete_{{ link.id }}"></i>
 	</span> &nbsp; &nbsp;
 	<span style="width: 20px">{{ link.url|favicon:16|safe }} </span> &nbsp; &nbsp;
 	<a class="one-tag" href="{{ link.url }}" id="link_{{ link.id }}">{{ link.title }}</a>

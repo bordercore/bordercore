@@ -84,28 +84,28 @@ $(document).ready(function() {
 
 </script>
 
-<div class="span4">
-<h3>Subscribed Feeds</h3>
-<hr />
-<ul id="sort-container" class="feed-list">
-{% for feed in feed_info %}
-<li><a href="{% url 'feed_edit' feed.id %}" id="link_{{ feed.id }}">{{ feed.name }}</a></li>
-{% endfor %}
+    <div class="row">
+
+    <div class="col-lg-4">
+    <h3>Subscribed Feeds</h3>
+    <hr />
+    <ul id="sort-container" class="feed-list">
+    {% for feed in feed_info %}
+    <li><a href="{% url 'feed_edit' feed.id %}" id="link_{{ feed.id }}">{{ feed.name }}</a></li>
+    {% endfor %}
 </ul>
 
 </div>
 
-<div class="span6">
-<h3 id="feed-title">Available Feeds</h3>
-<hr />
-<ul id="sort-container-all" class="feed-list">
-{% for feed in feeds_not_subscribed %}
-<li><a href="{% url 'feed_edit' feed.id %}" id="link_{{ feed.id }}">{{ feed.name }}</a></li>
-{% endfor %}
+    <div class="col-lg-6">
+    <h3 id="feed-title">Available Feeds</h3>
+    <hr />
+    <ul id="sort-container-all" class="feed-list">
+    {% for feed in feeds_not_subscribed %}
+    <li><a href="{% url 'feed_edit' feed.id %}" id="link_{{ feed.id }}">{{ feed.name }}</a></li>
+    {% endfor %}
 </ul>
-</div>
-
-<div class="span2">
+    </div>
 
 </div>
 
