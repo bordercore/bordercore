@@ -37,7 +37,7 @@ class Post(TimeStampedModel):
 #    reference = models.ForeignKey('self', related_name='reference_id', null=True, blank=True)
 
     def get_markdown(self):
-        return markdown.markdown(self.post, extensions=['codehilite'])
+        return markdown.markdown(self.post, extensions=['codehilite(guess_lang=False)'])
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
