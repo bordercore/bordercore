@@ -1,6 +1,6 @@
 Django==1.5.2
 Markdown==2.4
-PyOrgMode==0.03a
+-e git://github.com/bordercore/PyOrgMode.git@d49d2cf7fbc00a6f97d550608db1eea889b1e394#egg=PyOrgMode-dev
 Pygments==1.6
 South==0.7.6
 amqp==1.0.11
@@ -12,7 +12,7 @@ distribute==0.6.34
 django-celery==3.0.17
 django-crispy-forms==1.2.3
 django-datatables-view==1.2
--e git://github.com/ecometrica/django-dbarray.git@df336bbef369ee2fec95fe9ba7ceca8032e523d1#egg=django_dbarray-dev
+django-dbarray==0.2
 django-debug-toolbar==0.9.4
 django-debug-toolbar-template-timings==0.4.6
 django-tastypie==0.9.14
