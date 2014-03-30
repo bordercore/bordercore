@@ -45,4 +45,7 @@ class UserProfileForm(ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('favorite_tags', 'bookmarks_show_untagged_only', 'todo_default_tag')
+        fields = ('favorite_tags', 'bookmarks_show_untagged_only', 'todo_default_tag', 'orgmode_file')
+        widgets = {
+            'orgmode_file': TextInput(attrs={'class': 'form-control'})
+        }

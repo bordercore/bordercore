@@ -13,6 +13,7 @@ class UserProfile(models.Model):
     favorite_tags = models.ManyToManyField(Tag)
     bookmarks_show_untagged_only = models.BooleanField(default=False)
     todo_default_tag = models.OneToOneField(Tag, related_name='default_tag', null=True)
+    orgmode_file = models.TextField()
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.favorite_tags.all()])

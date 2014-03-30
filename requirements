@@ -1,5 +1,6 @@
 Django==1.5.2
 Markdown==2.4
+PyOrgMode==0.03a
 Pygments==1.6
 South==0.7.6
 amqp==1.0.11

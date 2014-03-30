@@ -11,11 +11,13 @@
       <div class="panel-heading">Urgent Tasks</div>
       <ul class="list-group">
 {% for task in tasks %}
-<li class="list-group-item"><a href="{% url 'todo_edit' task.id %}">{{ task.task }}</a>
+	<li class="list-group-item">{{ task.task }}&nbsp; &nbsp;<span class="label label-primary">{{ task.parent_category }}</span></li>
 {% if task.tags %}
   <span class="label">{{ task.tags.all.0.name }}</span>
 {% endif %}
 </li>
+{% empty %}
+All done!
 {% endfor %}
       </ul>
     </div>
