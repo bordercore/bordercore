@@ -170,7 +170,6 @@
 
 </script>
 
-<div class="container">
   <div class="row">
     <div class="col-lg-7">
       <form class="form-inline" role="form">
@@ -206,9 +205,11 @@
 
   </div>
 
-</div>
-
+  <div class="row">
+    <div class="col-lg-12">
 {% include "common/datatable.html" with cols=cols id="bookmark_list" %}
+    </div>
+  </div>
 
 {% endblock %}
 
