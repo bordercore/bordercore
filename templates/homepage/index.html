@@ -4,6 +4,26 @@
 
 {% block content %}
 
+<script type="text/javascript">
+
+	$(document).ready(function() {
+        var request = $.ajax({
+            url: '{% url 'get_calendar_events' %}',
+            type: "GET",
+            dataType: "json"
+        }).success(function( data, textStatus ) {
+			html = '';
+			for (i = 0; i < data.length; i++) {
+				html += '<li class="list-group-item">' + data[i]['start_pretty'] + ': <strong>' + data[i]['summary'] + '</strong></li>';
+			}
+			$('#events').html(html);
+		}).error(function( data, textStatus ) {
+			$('#events').html('<div class="alert alert-danger">Error retrieving events</div>');
+		});
+	});
+
+</script>
+
 <div class="row">
 
   <div class="col-lg-5">
@@ -18,6 +38,18 @@
 </li>
 {% empty %}
 All done!
+{% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="panel panel-primary">
+      <div class="panel-heading">Upcoming Calendar Events</div>
+      <ul class="list-group" id="events">
+		  <li class="list-group-item">Retrieving...</li>
+{% for event in calendar %}
+	<li class="list-group-item">{{ event.start_pretty }}: <strong>{{ event.summary }}</strong> </li>
 {% endfor %}
       </ul>
     </div>

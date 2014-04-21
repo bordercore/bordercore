@@ -1,4 +1,5 @@
 import datetime
+import json
 from PyOrgMode import OrgDataStructure
 
 from django.contrib.auth.decorators import login_required
@@ -6,8 +7,9 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 from quote.models import Quote
-from todo.models import Todo
+# from todo.models import Todo
 from music.models import Listen
+from cal.models import Calendar
 
 SECTION = 'Home'
 
@@ -45,3 +47,14 @@ def homepage(request):
                               {'section': SECTION, 'quote': quote, 'tasks': tasks, 'music': music },
                               context_instance=RequestContext(request))
 
+
+@login_required
+def get_calendar_events(request):
+
+    calendar = Calendar(request.user.userprofile)
+    events = calendar.get_calendar_info()
+
+    return render_to_response('homepage/get_calendar_events.json',
+                              {'section': SECTION, 'info': json.dumps(events)},
+                              context_instance=RequestContext(request),
+                              mimetype="application/json")

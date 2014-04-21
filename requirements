@@ -17,6 +17,9 @@ django-debug-toolbar==0.9.4
 django-debug-toolbar-template-timings==0.4.6
 django-tastypie==0.9.14
 feedparser==5.1.3
+google-api-python-client==1.2
+httplib2==0.8
+jsonfield==0.9.20
 kombu==2.5.10
 lxml==3.2.1
 mimeparse==0.1.3

@@ -27,7 +27,8 @@ urlpatterns = patterns('',
 )
 
 urlpatterns += patterns('homepage.views',
-                        url(r'^$|^index.html', 'homepage', name='homepage')
+                        url(r'^$|^index.html', 'homepage', name='homepage'),
+                        url(r'^homepage/get_calendar_events.json', 'get_calendar_events', name='get_calendar_events'),
 )
 
 urlpatterns += patterns('blog.views',

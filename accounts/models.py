@@ -2,8 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from tastypie.models import create_api_key
-
 import dbarray
+from jsonfield import JSONField
 
 from tag.models import Tag
 
@@ -14,6 +14,7 @@ class UserProfile(models.Model):
     bookmarks_show_untagged_only = models.BooleanField(default=False)
     todo_default_tag = models.OneToOneField(Tag, related_name='default_tag', null=True)
     orgmode_file = models.TextField()
+    google_calendar = JSONField()
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.favorite_tags.all()])
