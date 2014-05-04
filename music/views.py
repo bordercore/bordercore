@@ -84,8 +84,8 @@ def music_stream(request, song_id):
 
     try:
 #        fsock = open(file_path, "r")
-#        response = HttpResponse( fsock, mimetype='audio/mpeg' )
-        response = HttpResponse(wrapper, content_type='audio/mpeg', mimetype='audio/mpeg')
+#        response = HttpResponse( fsock, content_type='audio/mpeg' )
+        response = HttpResponse(wrapper, content_type='audio/mpeg')
         response['Content-Length'] = os.path.getsize(file_path)
 
     except IOError:
@@ -115,7 +115,7 @@ def album_artwork(request, song_id):
     artwork = audio.tags.get('APIC:')
 
     if artwork:
-        return HttpResponse( artwork.data, mimetype=artwork.mime )
+        return HttpResponse( artwork.data, content_type=artwork.mime )
     else:
         return redirect("https://www.bordercore.com/static/img/image_not_found.jpg")
 
@@ -472,7 +472,7 @@ def search(request):
     return render_to_response('music/music_search.json',
                               {'section': SECTION, 'info': json_text},
                               context_instance=RequestContext(request),
-                              mimetype="application/json")
+                              content_type="application/json")
 
 class WishListView(ListView):
 

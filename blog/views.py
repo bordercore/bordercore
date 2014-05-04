@@ -106,4 +106,4 @@ def tag_search(request):
     return render_to_response('blog/tag_search.json',
                               {'section': section, 'info': json.dumps(tag_list)},
                               context_instance=RequestContext(request),
-                              mimetype="application/json")
+                              content_type="application/json")

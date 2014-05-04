@@ -19,6 +19,6 @@ def handler404(request):
 
         # Serve back a default favicon
         with open("%s/templates/static/img/favicons/default.png" % (settings.SITE_ROOT,), "rb") as f:
-            return HttpResponse(f.read(), mimetype="image/x-icon")
+            return HttpResponse(f.read(), content_type="image/x-icon")
 
     return HttpResponseNotFound('<h1>Page not found</h1>')

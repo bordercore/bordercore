@@ -40,7 +40,7 @@ class TodoListView(ListView):
 
         info = []
 
-        for myobject in kwargs['object_list']:
+        for myobject in context['object_list']:
             info.append( dict(task=myobject.task, modified=myobject.get_modified(), unixtime=format(myobject.modified, 'U'), todoid=myobject.id) )
 
         context['tags'] = Tag.objects.filter(todo__isnull=False).distinct('name')

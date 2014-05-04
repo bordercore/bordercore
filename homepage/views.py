@@ -57,4 +57,4 @@ def get_calendar_events(request):
     return render_to_response('homepage/get_calendar_events.json',
                               {'section': SECTION, 'info': json.dumps(events)},
                               context_instance=RequestContext(request),
-                              mimetype="application/json")
+                              content_type="application/json")
