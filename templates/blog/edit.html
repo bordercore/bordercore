@@ -8,7 +8,7 @@
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput.css" />
 
 <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
-<link href="{{ STATIC_URL }}css/datepicker.css" rel="stylesheet" media="screen" />
+<link href="{{ STATIC_URL }}css/datepicker3.css" rel="stylesheet" media="screen" />
 
 
 {% endblock %}
@@ -68,7 +68,11 @@ $(document).ready(function() {
         $('#markdown-support')[0].selectedIndex = 0
     } );
 
-   $('#datepicker').datepicker().on('changeDate', function(ev){ });
+	$('.date').datepicker({
+		todayBtn: "linked",
+		format: "mm-dd-yyyy",
+		multidate: false
+	});
 
 });
 
@@ -76,7 +80,7 @@ $(document).ready(function() {
 
 {% if request.POST.Go and not form.errors %}
 
-<div class="alert alert-success col-offset-2">
+<div class="alert alert-success col-lg-offset-2">
 Post {{ action }}ed
 </div>
 
@@ -85,48 +89,57 @@ Post {{ action }}ed
 <br />
 
 <form class="form-horizontal" action="{{ request.path }}" method="post">
-<legend> {{ action }} Blog Post</legend>
+<legend class="col-lg-offset-1"> {{ action }} Blog Post</legend>
 {% csrf_token %}
 
 {% for field in form %}
 <div class="form-group {% if field.errors %}error{% endif %}">
     <label class="col-lg-1 control-label" for="inputTitle">{{ field.label }}</label>
 
-    <div class="col-lg-5">
 {% if field.label == 'Date' %}
 
-	<div class="date" id="datepicker" data-date="{{ field.value|date:"m-d-Y" }}" data-date-format="mm-dd-yyyy">
-	  <input class="col-lg-4 control-label" _size="16" type="text" name="date" value="{{ field.value|date:"m-d-Y" }}" />
-	  <span class="glyphicon glyphicon-th"></span>
+	<div class="col-lg-7">
 
-<select id="markdown-support" class="col-lg-1 form-control">
-<option>Markdown</option>
-<option name="option">Insert link</option>
-<option name="option">Bold</option>
-<option name="option">Indent Code</option>
-<option name="option">Insert list</option>
-<option name="option">Escape HTML</option>
-</select>
+		<div class="form-group row">
 
-    </div>
+			<!-- Tacking on the glyphs in an input-group class messes up the layout -->
+			<!-- <div class="input-group col-lg-3"> -->
+			<div class="col-lg-3">
+				<input class="form-control date" _size="16" type="text" name="date" value="{{ field.value|date:'m-d-Y' }}" />
+				<!-- <span class="input-group-addon glyphicon glyphicon-th"></span> -->
+			</div>
+
+			<div class="col-lg-3">
+				<select id="markdown-support" class="form-control">
+					<option>Markdown</option>
+					<option>Insert link</option>
+					<option>Bold</option>
+					<option>Indent Code</option>
+					<option>Insert list</option>
+					<option>Escape HTML</option>
+				</select>
+			</div>
+
+		</div>
+
+	</div>
 
 {% else %}
 
+	<div class="col-lg-5">
 {{ field }}
-
+	</div>
 {% endif %}
 
 {% for error in field.errors %}
       <span class="form-error">{{ error }}</span>
 {% endfor %}
 
-    </div>
-
 </div>
 {% endfor %}
 
-<div class="form-group col-offset-2">
-  <div class="col-lg-offset-1">
+<div class="form-group">
+  <div class="col-lg-3 col-lg-offset-1">
 	<input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
 	<input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
 	<a class="btn btn-default" href="{% url 'blog_list' %}">Cancel</a>
