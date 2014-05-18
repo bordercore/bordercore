@@ -48,7 +48,7 @@ $(document).ready(function() {
 </script>
 
 <div class="row">
-
+	<div class="col-lg-4">
 {% block breadcrumbs %}
 <ol class="breadcrumb pull-left">
 <li> <a href="{% url 'music_list' %}">Music</a> </li>
@@ -58,7 +58,7 @@ $(document).ready(function() {
 {% endblock %}
 
 {% include "music/header.html" %}
-
+	</div>
 </div>
 
 <div class="row">

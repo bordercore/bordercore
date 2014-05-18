@@ -195,10 +195,13 @@ def show_album(request, album_id):
 def show_artist(request, artist_name):
 
     # Get all albums by this artist
-    album_list = Album.objects.filter(artist=artist_name).order_by('-year')
+    a = Album.objects.filter(artist=artist_name).order_by('-year')
 
     # Get all songs by this artist that do not appear on an album
     s = Song.objects.filter(artist=artist_name).filter(album__isnull=True)
+
+    # Get all songs by this artist that do appear on compilation album
+    c = Album.objects.filter( Q(song__artist=artist_name) & ~Q(artist=artist_name) )
 
     song_list = []
 
@@ -206,7 +209,7 @@ def show_artist(request, artist_name):
         song_list.append( dict(id=song.id, date=song.created.strftime("%b %d, %Y"), title=song.title, artist=song.artist, info=song.comment))
 
     return render_to_response('music/show_artist.html',
-                              {'section': SECTION, 'album_list': album_list, 'song_list': song_list, 'cols': ['date', 'artist', 'title', 'info', 'id'] },
+                              {'section': SECTION, 'artist_name': artist_name, 'album_list': a, 'song_list': song_list, 'compilation_album_list':c, 'cols': ['date', 'artist', 'title', 'info', 'id'] },
                               context_instance=RequestContext(request))
 
 
@@ -488,7 +491,7 @@ class WishListView(ListView):
 
         info = []
 
-        for myobject in kwargs['object_list']:
+        for myobject in context['object_list']:
             info.append( dict(artist=myobject.artist, song=myobject.song, album=myobject.album, created=myobject.get_created(), unixtime=format(myobject.created, 'U'), wishlistid=myobject.id) )
 
 

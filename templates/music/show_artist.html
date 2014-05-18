@@ -22,7 +22,7 @@
 
 $(document).ready(function() {
 
-	function formatTitle( oObj ) {
+	function formatTitle( data, type, row ) {
 		return '<a href="{% url 'music_stream' %}' + row[4] + '">' + row[2] + '</a>';
 	}
 
@@ -48,12 +48,16 @@ $(document).ready(function() {
 
 <div class="row">
 
+	<div class="col-lg-4">
+
 {% block breadcrumbs %}
 <ul class="breadcrumb pull-left">
 	<li> <a href="{% url 'music_list' %}">Music</a> </li>
-<li> {% if album_list %} {{ album_list.0.artist }} {% else %} {{ song_list.0.artist }} {% endif %} </li>
+	<li>{{ artist_name }}</li>
 </ul>
 {% endblock %}
+
+	</div>
 
 {% include "music/header.html" %}
 
@@ -63,13 +67,13 @@ $(document).ready(function() {
 
 	<div class="col-lg-12">
 
-<h2> {% if album_list %} {{ album_list.0.artist }} {% else %} {{ song_list.0.artist }} {% endif %} </h2>
+		<h2> {% if album_list %} {{ album_list.0.artist }} {% else %} {{ song_list.0.artist }} {% endif %} </h2>
 
 {% if album_list %}
 {{ album_list|length }} album{{ album_list|pluralize }} <br />
 {% endif %}
 
-</div>
+	</div>
 </div>
 
 <table class="table no-borders">
@@ -99,6 +103,42 @@ $(document).ready(function() {
 </tr>
 </table>
 
+{% if compilation_album_list %}
+
+{{ compilation_album_list|length }} compilation album{{ compilation_album_list|pluralize }} <br />
+
+<table class="table no-borders">
+<tr>
+
+{% for album in compilation_album_list %}
+
+{% if forloop.counter0|divisibleby:"3" %}
+
+</tr>
+<tr>
+
+{% endif %}
+
+<td>
+<a href="{% url 'show_album' album.id %}">
+<img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title }}/artwork.jpg" height="150" width="150" /> <br />
+</a>
+
+<strong> {{ album.title }} </strong><br />
+{{ album.year }} <br />
+
+</td>
+
+{% endfor %}
+
+</tr>
+</table>
+{% endif %}
+
+<div class="row">
+
+	<div class="col-lg-8">
+
 {% if song_list %}
 <br />
 {% if album_list %}
@@ -113,5 +153,9 @@ $(document).ready(function() {
 </div>
 
 {% endif %}
+
+	</div>
+
+</div>
 
 {% endblock %}
