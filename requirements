@@ -1,4 +1,4 @@
-Django==1.6.4
+Django==1.6.5
 Markdown==2.4
 ## !! Could not determine repository location
 PyOrgMode==0.03a
