@@ -209,6 +209,8 @@ class OrderListJson(BaseDatatableView):
 
         json_data = []
         for item in qs:
+            if not item.title:
+                item.title = 'No Title'
             json_data.append([
                 item.created.strftime("%b %d, %Y"),
                 item.url,
