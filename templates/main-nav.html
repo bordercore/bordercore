@@ -2,7 +2,15 @@
 
 // Hilight the current section in the navbar
 $(document).ready(function() {
+
 	$('.nav li:contains("{{ section }}")').addClass('active')
+
+	$('.navbar .dropdown').hover(function() {
+		$(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+	}, function() {
+		$(this).find('.dropdown-menu').first().stop(true, true).slideUp(105)
+	});
+
 })
 
 </script>
