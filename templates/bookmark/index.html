@@ -77,11 +77,12 @@
         {% endfor %}
         {% endif %}
 
-        $('#myfilter').keydown( function(e) {
-
-            var filterString = $(this).val();
-            oTable.fnFilter(filterString);
-
+        $(document).on('keyup', '#myfilter', function(e){
+            var regex = new RegExp("^[a-zA-Z0-9]+$");
+            var str = String.fromCharCode(!e.charCode ? e.which : e.charCode);
+            if (regex.test(str) || e.keyCode == 8) {  // 8 is backspace
+                oTable.fnFilter( $(this).val() );
+            }
         });
 
         $('#btn-delete').on('click', function() {
@@ -138,7 +139,7 @@
             ],
 	    } );
 
-	    $('#bookmark_list').dataTable().fnSetFilteringDelay(1000);
+	    $('#bookmark_list').dataTable().fnSetFilteringDelay(2000);
 
         $("#bookmark_list tbody").click( function( event ) {
 
