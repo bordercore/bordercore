@@ -7,6 +7,7 @@ import pprint
 import sys
 import re
 import requests
+from lxml import etree
 from lxml.html import fromstring
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'bordercore.settings'
@@ -34,14 +35,16 @@ requests_log.setLevel(logging.WARNING)
 
 def get_link_info(link):
     r = requests.get(link)
-    http_content = r.text
+    http_content = r.text.encode('utf-8')
 
     # If this link is a redirect (common for shortened urls), we
     #  want to keep the redirected link.
     # for prev in r.history:
     #     print "  redirected url: %s" % prev.url
 
-    doc = fromstring(http_content)
+    # http://stackoverflow.com/questions/15830421/xml-unicode-strings-with-encoding-declaration-are-not-supported
+    parser = etree.XMLParser(ns_clean=True, recover=True, encoding='utf-8')
+    doc = fromstring(http_content, parser=parser)
     title = doc.xpath('.//title')
     if title:
         return (r.url, title[0].text)
@@ -61,7 +64,7 @@ for link in matches:
 
     if not ignore.search(link):
         url, label = get_link_info(link)
-        link_dict[ label ] = url
+        link_dict[label] = url
 
 if link_dict:
 
