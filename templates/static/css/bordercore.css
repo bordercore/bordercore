@@ -82,3 +82,17 @@ ul.pagination {
 #bookmarks_breadcrumb {
                         margin: 0px;
                         }
+
+.search_book_title {
+                    color: #0173bc;
+ }
+
+.search_todo_date {
+                    font-weight: normal;
+                    color: #C76257;
+                    font-size: 10px;
+ }
+
+.search_bordercore_blogpost_snippet {
+                                      font-weight: bold;
+ }

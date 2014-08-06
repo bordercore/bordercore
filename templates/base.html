@@ -1,70 +1,67 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 
-  <head>
+	<head>
 
-	<meta charset="utf-8" />
-	<title>Bordercore</title>
+		<meta charset="utf-8" />
+		<title>Bordercore</title>
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.min.js"></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap.js"></script>
+		<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
 
-    <link rel="stylesheet" media="screen" href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" />
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-glyphicons.css" />
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bordercore.css" />
+		<link rel="stylesheet" media="screen" href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-glyphicons.css" />
+		<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bordercore.css" />
 
-<script type="text/javascript">
+		<script type="text/javascript">
 
-    var csrftoken = $.cookie('csrftoken');
+			var csrftoken = $.cookie('csrftoken');
 
-    function csrfSafeMethod(method) {
-		// these HTTP methods do not require CSRF protection
-		return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-	}
-
-    $.ajaxSetup({
-		crossDomain: false, // obviates need for sameOrigin test
-		beforeSend: function(xhr, settings) {
-			if (!csrfSafeMethod(settings.type)) {
-				xhr.setRequestHeader("X-CSRFToken", csrftoken);
+			function csrfSafeMethod(method) {
+				// these HTTP methods do not require CSRF protection
+				return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 			}
-		}
-	});
 
-</script>
+			$.ajaxSetup({
+				crossDomain: false, // obviates need for sameOrigin test
+				beforeSend: function(xhr, settings) {
+					if (!csrfSafeMethod(settings.type)) {
+						xhr.setRequestHeader("X-CSRFToken", csrftoken);
+					}
+				}
+			});
 
-{% block extra_head %}{% endblock %}
+		</script>
 
-  </head>
+		{% block extra_head %}{% endblock %}
 
-<body>
+	</head>
 
-  <div id="wrap">
-    <div class="container">
+	<body>
 
-      <h1> Bordercore :: {% block title %} {% endblock %} </h1>
+		<div class="container" style="max-width: 1200px;">
 
-{% include "main-nav.html" %}
+			<h1> Bordercore :: {% block title %} {% endblock %} </h1>
 
-{% block content %}
+			{% include "main-nav.html" %}
 
-{% endblock %}
+			{% block content %}
 
-    </div>
+			{% endblock %}
 
-  </div>
+		</div>
 
-  <div id="footer">
+		</div>
 
-    <div class="container">
+		<div id="footer">
 
-      <h5 class="pull-right"> Copyright {% now "Y" %} F. Jerrell Schivers </h5>
+			<div class="container">
 
-    </div>
+				<h5 class="pull-right"> Copyright {% now "Y" %} F. Jerrell Schivers </h5>
 
-  </div>
+			</div>
 
-</body>
+	</body>
 
 </html>

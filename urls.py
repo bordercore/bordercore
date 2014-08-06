@@ -13,6 +13,7 @@ from music.api import MusicWishListResource
 from music.views import MusicListJson, WishListView, WishListCreateView, WishListDetailView
 from todo.api import TodoResource
 from todo.views import TodoCreateView, TodoDeleteView, TodoDetailView, TodoListView
+from search.views import SearchListView
 
 admin.autodiscover()
 
@@ -82,6 +83,12 @@ urlpatterns += patterns('todo.views',
                         url(r'^todo/edit/(?P<pk>[\d-]+)$', TodoDetailView.as_view(), name='todo_edit'),
                         url(r'^todo/delete/(?P<pk>[\d-]+)$', TodoDeleteView.as_view(), name='todo_delete'),
                         url(r'^todo/', TodoListView.as_view(), name='todo_list'),
+)
+
+urlpatterns += patterns('search.views',
+                        url(r'^search/admin', 'search_admin', name='search_admin'),
+                        url(r'^search/booktitle', 'search_book_title', name='search_book_title'),
+                        url(r'^search/', SearchListView.as_view(), name='search')
 )
 
 urlpatterns += patterns('accounts.views',

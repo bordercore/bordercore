@@ -5,6 +5,7 @@ import sys
 
 PROJECT_ROOT = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(PROJECT_ROOT, "apps"))
+sys.path.insert(0, os.path.join(PROJECT_ROOT, "lib"))
 #sys.path.insert(0, os.path.join(PROJECT_ROOT, "apps/debug_toolbar"))
 
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
@@ -73,13 +74,13 @@ MEDIA_URL = ''
 STATIC_ROOT = ''
 
 # URL prefix for static files.
-# Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'templates/static'),
-    '/home/media/music'
+    '/home/media/music',
+    '/home/media/ebooks'
 )
 
 # List of finder classes that know how to find static files in
@@ -135,6 +136,7 @@ INSTALLED_APPS = (
     'bcsolr',
     'blog',
     'book',
+    'document',
     'feed',
     'lib',
     'tag',
@@ -142,6 +144,7 @@ INSTALLED_APPS = (
     'music',
     'pygments',
     'quote',
+    'solr',
     'south',
     'tastypie',
     'todo'
