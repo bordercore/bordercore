@@ -69,7 +69,7 @@
             });
 
         $('#book-title-search').bind('typeahead:selected', function(obj, datum, name) {
-            window.open("{{ STATIC_URL }}" + datum.filename, "book")
+            window.open("{{ STATIC_URL }}ebooks/" + datum.filename, "book")
         });
 
     });
