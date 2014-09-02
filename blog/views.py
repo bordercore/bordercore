@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
-from blog.models import Blog, Post, Tag
+from blog.models import Blog, Post
 from blog.forms import BlogForm
 
 section = 'Blog'
@@ -90,20 +90,20 @@ def blog_edit(request, post_id):
                               context_instance=RequestContext(request))
 
 
-@login_required
-def tag_search(request):
+# @login_required
+# def tag_search(request):
 
-    import json
+#     import json
 
-    # Only retrieve tags which have been applied to at least one blog post
+#     # Only retrieve tags which have been applied to at least one blog post
 
-    # Use this for the new Twitter typeahead
-    # tag_list = [{'value':x.name} for x in Tag.objects.filter(name__istartswith=request.GET.get('query', ''), post__isnull=False).distinct('name')]
+#     # Use this for the new Twitter typeahead
+#     # tag_list = [{'value':x.name} for x in Tag.objects.filter(name__istartswith=request.GET.get('query', ''), post__isnull=False).distinct('name')]
 
-    # Use this for the typeahead included in Bootstrap 2
-    tag_list = [x.name for x in Tag.objects.filter(name__istartswith=request.GET.get('query', ''), post__isnull=False).distinct('name')]
+#     # Use this for the typeahead included in Bootstrap 2
+#     tag_list = [x.name for x in Tag.objects.filter(name__istartswith=request.GET.get('query', ''), post__isnull=False).distinct('name')]
 
-    return render_to_response('blog/tag_search.json',
-                              {'section': section, 'info': json.dumps(tag_list)},
-                              context_instance=RequestContext(request),
-                              content_type="application/json")
+#     return render_to_response('return_json.json',
+#                               {'section': section, 'info': json.dumps(tag_list)},
+#                               context_instance=RequestContext(request),
+#                               content_type="application/json")

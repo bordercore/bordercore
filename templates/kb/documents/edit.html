@@ -2,18 +2,20 @@
 
 {% block extra_head %}
 
-<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap3-typeahead.min.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/bloodhound.js"></script>
+	<!-- <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script> -->
+
+	<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap3-typeahead.min.js"></script>
+	<script type="text/javascript" src="{{ STATIC_URL }}js/bloodhound.js"></script>
+
 <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.min.js"></script>
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput.css" />
 
 <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
 <link href="{{ STATIC_URL }}css/datepicker3.css" rel="stylesheet" media="screen" />
 
-
 {% endblock %}
 
-{% block title %} Blog {% endblock %}
+{% block title %} KB :: Documents {% endblock %}
 
 {% block content %}
 
@@ -78,23 +80,23 @@ $(document).ready(function() {
 
 {% if request.POST.Go and not form.errors %}
 
-<div class="alert alert-success col-lg-offset-2">
-Post {{ action }}ed
-</div>
+	<div class="row">
+		<div class="alert alert-success col-lg-offset-1 col-lg-3">
+Document {{ action }}ed
+		</div>
+	</div>
 
 {% endif %}
 
-<br />
-
 <form class="form-horizontal" action="{{ request.path }}" method="post">
-<legend class="col-lg-offset-1"> {{ action }} Blog Post</legend>
+<legend class="col-lg-offset-1"> {{ action }} Document</legend>
 {% csrf_token %}
 
 {% for field in form %}
 <div class="form-group {% if field.errors %}error{% endif %}">
     <label class="col-lg-1 control-label" for="inputTitle">{{ field.label }}</label>
 
-{% if field.label == 'Date' %}
+{% if field.label == 'Pub date' %}
 
 	<div class="col-lg-7">
 
@@ -103,7 +105,7 @@ Post {{ action }}ed
 			<!-- Tacking on the glyphs in an input-group class messes up the layout -->
 			<!-- <div class="input-group col-lg-3"> -->
 			<div class="col-lg-3">
-				<input class="form-control date" _size="16" type="text" name="date" value="{{ field.value|date:'m-d-Y' }}" />
+				<input class="form-control date" _size="16" type="text" name="pub_date" value="{{ field.value|date:'m-d-Y' }}" />
 				<!-- <span class="input-group-addon glyphicon glyphicon-th"></span> -->
 			</div>
 
@@ -140,7 +142,7 @@ Post {{ action }}ed
   <div class="col-lg-3 col-lg-offset-1">
 	<input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
 	<input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
-	<a class="btn btn-default" href="{% url 'blog_list' %}">Cancel</a>
+	<a class="btn btn-default" href="">Cancel</a>
   </div>
 </div>
 

@@ -2,22 +2,11 @@
 
 {% load dict_get %}
 
-{% block extra_head %}
-
-    <!-- <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap3-typeahead.min.js"></script> -->
-
-    <!-- <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap3-typeahead.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/bloodhound.js"></script> -->
-
-    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.js"></script>
-
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/typeahead-bootstrap3.css" />
-
-{% endblock %}
-
-{% block title %} Search {% endblock %}
+{% block title %} KB :: Search {% endblock %}
 
 {% block content %}
+
+{% include "kb/header.html" %}
 
 <script type="text/javascript" charset="utf-8">
 
@@ -42,43 +31,13 @@
 
         });
 
-        var engine = new Bloodhound({
-            datumTokenizer: function(data) {
-                return Bloodhound.tokenizers.obj.whitespace(data.title);
-            },
-            remote: {
-                url: '{% url 'search_book_title' %}?title=%QUERY',
-            },
-	        mydatumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
-	        queryTokenizer: Bloodhound.tokenizers.whitespace
-        });
-
-        engine.initialize();
-
-        $('#book-title-search').typeahead(
-            {
-                hint: true,
-                highlight: true,
-                minLength: 3
-            }, {
-	            source: engine.ttAdapter(),
-                displayKey: 'title',
-                updater: function(item) {
-                    console.log(item);
-	            }
-            });
-
-        $('#book-title-search').bind('typeahead:selected', function(obj, datum, name) {
-            window.open("{{ STATIC_URL }}ebooks/" + datum.filename, "book")
-        });
-
     });
 
 </script>
 
     <div class="row">
 
-        <div class="col-md-12">
+        <div class="col-md-10">
 
             <form id="search" class="form-inline" action="{% url 'search' %}" method="get">
                 <input type="hidden" id="facets" name="facets" value="" />
@@ -106,8 +65,6 @@ Sort by
     &nbsp; <strong>{{ numFound }}</strong> match{{ info|pluralize:"es" }} found
 {% endif %}
 
-<span class="pull-right"><a href="{% url 'search_admin' %}">Admin</a></span>
-
                 </div>
 
             </form>
@@ -118,7 +75,9 @@ Sort by
 
 	<br />
 
-{% if request.GET and not info %}
+{% if request.GET %}
+
+{% if not info %}
 
 	<div class="row">
 		<br />
@@ -132,7 +91,7 @@ Sort by
         <div class="col-md-2">
 		<div class="panel panel-info">
 
-			<div class="panel-heading">Categories</div>
+			<div class="panel-heading">Match Categories</div>
             <div class="panel-body">
 {% for facet in facet_counts|dictsortreversed:"count" %}
 
@@ -144,12 +103,7 @@ Sort by
 {% endfor %}
 
             </div>
-            </div>
-
-<div class="form-group">
-<input id="book-title-search" type="text" class="form-control _typeahead" placeholder="Book Title" />
-</div>
-
+        </div>
 		</div>
 
 		<div class="col-md-10">
@@ -170,17 +124,14 @@ Sort by
 
 {% elif match.doctype == 'bordercore_blog' %}
 
-	<h4 class="search_book_title">{{ match.bordercore_blogpost_title.0|default:"Blog Post" }}  <span class="search_todo_date">{{ match.last_modified }}</span></h4>
+	<h4 class="search_book_title"><a href="{% url 'blog_list' match.internal_id %}">{{ match.bordercore_blogpost_title.0|default:"Blog Post" }}</a>  <span class="search_todo_date">{{ match.last_modified }}</span></h4>
 
     <h5>{{ match.blogpost_snippet|safe }}</h5>
 
 {% elif match.doctype == 'document' %}
 
-	<h4 class="search_book_title">{{ match.title|default:"Blog Post" }}
+	<h4 class="search_book_title"><a href="{% url 'document_detail' match.internal_id %}">{{ match.title|default:"Title" }}</a>
         <span class="search_todo_date">{{ match.last_modified }}</span>
-{% if match.url  %}
-    <a href="{{ match.url }}"><i class="glyphicon glyphicon-link"></i></a>
-{% endif %}
     </h4>
 
     <h5>{{ match.blogpost_snippet|safe }}</h5>
@@ -188,11 +139,13 @@ Sort by
 {% else %}
 
 	<h4 class="search_book_title"><a href="{{ STATIC_URL }}ebooks/{{ match.filename }}" target="book">{{ match.title }}</a></h4>
-	&nbsp; &nbsp; {{ match.author }}
+	&nbsp; &nbsp; {{ match.author.0 }}
 
 {% endif %}
 
 {% endfor %}
+
+{% endif %}
 
 {% endif %}
 

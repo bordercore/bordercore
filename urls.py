@@ -13,7 +13,7 @@ from music.api import MusicWishListResource
 from music.views import MusicListJson, WishListView, WishListCreateView, WishListDetailView
 from todo.api import TodoResource
 from todo.views import TodoCreateView, TodoDeleteView, TodoDetailView, TodoListView
-from search.views import SearchListView
+from search.views import SearchListView, SearchTagDetailView
 
 admin.autodiscover()
 
@@ -34,12 +34,16 @@ urlpatterns += patterns('homepage.views',
 
 urlpatterns += patterns('blog.views',
                         url(r'^blog/edit(?:/(\d+))?', 'blog_edit', name='blog_edit'),
-                        url(r'^blog/tag_search.json', 'tag_search', name='blog_tag_search'),
                         url(r'^blog/(\d+)?', 'blog_list', name='blog_list'),
 )
 
 urlpatterns += patterns('book.views',
                         url(r'^books/(\w+)?', BookListView.as_view(), name="book_list")
+)
+
+urlpatterns += patterns('document.views',
+                        url(r'^kb/documents(?:/(\d+))?/edit', 'document_edit', name='document_edit'),
+                        url(r'^kb/documents/(\d+)', 'document_detail', name='document_detail'),
 )
 
 urlpatterns += patterns('feed.views',
@@ -55,7 +59,6 @@ urlpatterns += patterns('feed.views',
 urlpatterns += patterns('bookmark.views',
                         url(r'^bookmarks/edit(?:/(\d+))?', 'bookmark_edit', name='bookmark_edit'),
                         url(r'^bookmarks/snarf_link.html', 'snarf_link'),
-                        url(r'^bookmarks/tag_search.json', 'tag_search', name='bookmark_tag_search'),
                         url(r'^bookmarks/tag/', 'bookmark_tag', name='bookmark_tag'),
                         url(r'^bookmarks/tag_bookmark_list.json', 'tag_bookmark_list', name='tag_bookmark_list'),
                         url(r'^bookmarks/delete/(\d+)', 'bookmark_delete', name='bookmark_delete'),
@@ -86,9 +89,15 @@ urlpatterns += patterns('todo.views',
 )
 
 urlpatterns += patterns('search.views',
-                        url(r'^search/admin', 'search_admin', name='search_admin'),
-                        url(r'^search/booktitle', 'search_book_title', name='search_book_title'),
-                        url(r'^search/', SearchListView.as_view(), name='search')
+                        url(r'^kb/search/admin', 'search_admin', name='search_admin'),
+                        url(r'^kb/search/booktitle', 'search_book_title', name='search_book_title'),
+                        url(r'^kb/search/tagstitle', 'kb_search_tags_booktitles', name='kb_search_tags_booktitles'),
+                        url(r'^kb/search/tagdetail/(?P<tag>.*)', SearchTagDetailView.as_view(), name='kb_search_tag_detail'),
+                        url(r'^kb/search/', SearchListView.as_view(), name='search')
+)
+
+urlpatterns += patterns('tag.views',
+                        url(r'^tag/search', 'tag_search', name='tag_search')
 )
 
 urlpatterns += patterns('accounts.views',

@@ -7,6 +7,7 @@ import json
 import os
 from os.path import basename
 import solr
+import urllib
 
 SOLR_HOST = 'localhost'
 SOLR_PORT = 8080
@@ -14,6 +15,10 @@ SOLR_COLLECTION = 'solr/bordercore'
 
 
 class SearchListView(ListView):
+
+    template_name = 'kb/search/index.html'
+    SOLR_COUNT_PER_PAGE = 100
+    context_object_name = 'info'
 
     def get_facet_query(self, facet, term):
 
@@ -32,15 +37,11 @@ class SearchListView(ListView):
         elif facet == 'Tags':
             return 'tags:%s' % (term)
 
-    template_name = 'search/index.html'
-    SOLR_COUNT_PER_PAGE = 100
-    context_object_name = 'info'
-
     def get_queryset(self):
 
         if 'search' in self.request.GET:
 
-            search_term = self.request.GET['search']
+            search_term = urllib.quote_plus(self.request.GET['search'])
             rows = 100
             # rows = self.request.GET['rows']
             # if rows == 'No limit':
@@ -55,9 +56,9 @@ class SearchListView(ListView):
                           'rows': rows,
                           'facet': 'on',
                           'facet.mincount': '1',
-                          'fields': ['attr_*','doctype','filepath','tags','title','author', 'url'],
+                          'fields': ['attr_*','author','doctype','filepath','tags','title','author', 'url'],
                           'wt': 'json',
-                          'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,doctype,filepath,id,last_modified,tags,title,url,bordercore_blogpost_title',
+                          'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,doctype,filepath,id,internal_id,last_modified,tags,title,url,bordercore_blogpost_title',
                           'hl': 'true',
                           'hl.fl': 'attr_content,bordercore_todo_task,bordercore_bookmark_title,title',
                           'hl.simple.pre': '<span class="search_bordercore_blogpost_snippet">',
@@ -86,7 +87,7 @@ class SearchListView(ListView):
         from solr.core import utc_from_string
         from lib.time_utils import pretty_date
 
-        if context['info']['response']:
+        if context['info']:
 
             for k, v in context['info']['facet_counts']['facet_queries'].iteritems():
                 if v > 0:
@@ -110,6 +111,7 @@ class SearchListView(ListView):
                                   author=myobject.get('author','no author'),
                                   doctype=myobject['doctype'],
                                   id=myobject['id'],
+                                  internal_id=myobject.get('internal_id', ''),
                                   last_modified=last_modified,
                                   url=myobject.get('url', ''),
                                   filename=filename,
@@ -126,6 +128,41 @@ class SearchListView(ListView):
 
         context['info'] = info
         return context
+
+
+class SearchTagDetailView(ListView):
+
+    template_name = 'kb/search/tag_detail.html'
+    SOLR_COUNT_PER_PAGE = 100
+    context_object_name = 'info'
+
+    def get_context_data(self, **kwargs):
+        context = super(SearchTagDetailView, self).get_context_data(**kwargs)
+        context['tag'] = self.kwargs['tag']
+        results = {}
+        for one_doc in context['info']['response']['docs']:
+            if results.get(one_doc['doctype'], ''):
+                results[one_doc['doctype']].append(one_doc)
+            else:
+                results[one_doc['doctype']] = [ one_doc ]
+        context['info']['matches'] = results
+        return context
+
+    def get_queryset(self):
+        tag = self.kwargs['tag']
+        rows = 100
+
+        conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION) )
+
+        solr_args = { 'q': 'tags:"%s"' % (tag),
+                      'rows': rows,
+                      'fields': ['attr_*','author','doctype','filepath','tags','title','author', 'url'],
+                      'wt': 'json',
+                      'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,doctype,filepath,id,internal_id,last_modified,tags,title,url,bordercore_blogpost_title'
+        }
+
+        results = conn.raw_query(**solr_args)
+        return json.loads(results)
 
 
 def get_title(myobject):
@@ -166,6 +203,47 @@ def search_book_title(request):
 
     return render_to_response('return_json.json',
                               { 'info': json.dumps(filtered_results['response']['docs']) },
+                              content_type="application/json",
+                              context_instance=RequestContext(request))
+
+
+def kb_search_tags_booktitles(request):
+
+    conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION) )
+
+    term = request.GET['term']
+
+    solr_args = { 'q': 'tags:%s* OR (doctype:book AND title:*%s*)' % (term, term),
+                  'fl': 'doctype,filepath,tags,title',
+                  'wt': 'json' }
+
+    results = json.loads(conn.raw_query(**solr_args))
+
+    tags = {}
+    matches = []
+
+#    print results['response']['docs']
+
+    for match in results['response']['docs']:
+        if match['doctype'] == 'book':
+            matches.append({'type': 'Book', 'value': match['title'], 'filename': os.path.basename(match.get('filepath'))})
+        if match.get('tags', ''):
+            for tag in [x for x in match['tags'] if x.startswith(term)]:
+                tags[tag] = 1
+#            matches.append({'type': 'tag', 'match': tag})
+#            matches['tags'][tag] = 1
+#        matches['tags'][match.get('tags')] = 1
+        # If the book doesn't have a title, use the filename
+        # match['filename'] = os.path.basename(match.get('filepath'))
+        # if not match.get('title'):
+        #     match['title'] = basename(os.path.splitext(match['filepath'])[0])
+
+    for tag in tags:
+        matches.append({'type': 'Tag', 'value': tag})
+    print matches
+
+    return render_to_response('return_json.json',
+                              { 'info': json.dumps(matches) },
                               content_type="application/json",
                               context_instance=RequestContext(request))
 

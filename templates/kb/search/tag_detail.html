@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %} KB :: Tag Detail {% endblock %}
+
+{% block content %}
+
+{% include "kb/header.html" %}
+
+	<div class="row">
+		<div class="col-md-12"><h1>{{ tag }}</h1></div>
+	</div>
+
+{% for match in info.matches.bordercore_bookmark %}
+	{% if forloop.first %}<h4>Links</h4>{% endif %}
+	<div class="row">
+		<div class="col-md-12">
+			<a href="{{ match.url }}">{{ match.bordercore_bookmark_title.0 }}</a>
+		</div>
+	</div>
+{% endfor %}
+
+{% for match in info.matches.document %}
+	{% if forloop.first %}<h4>Documents</h4>{% endif %}
+	<div class="row">
+		<div class="col-md-12">
+			<a href="{% url 'document_detail' match.internal_id %}">{{ match.title }}</a>
+		</div>
+	</div>
+{% endfor %}
+
+{% for match in info.matches.bordercore_blog %}
+	{% if forloop.first %}<h4>Blog Entries</h4>{% endif %}
+	<div class="row">
+		<div class="col-md-12">
+			<a href="{% url 'blog_list' match.internal_id %}">{{ match.bordercore_blogpost_title.0|default:"Blog Post" }}</a>
+		</div>
+	</div>
+{% endfor %}
+
+{% for match in info.matches.bordercore_todo %}
+	{% if forloop.first %}<h4>Todo</h4>{% endif %}
+	<div class="row">
+		<div class="col-md-12">
+			{{ match.bordercore_todo_task.0 }}  <span class="search_todo_date">{{ match.last_modified }}</span>
+		</div>
+	</div>
+{% endfor %}
+
+{% endblock %}

@@ -19,7 +19,7 @@ $(document).ready(function() {
 
    var engine = new Bloodhound({
 	 name: 'tags',
-	 remote: '{% url 'blog_tag_search' %}?query=%QUERY',
+	 remote: '{% url 'tag_search' %}?query=%QUERY',
 	 datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
 	 queryTokenizer: Bloodhound.tokenizers.whitespace
    });
