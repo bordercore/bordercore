@@ -472,7 +472,7 @@ def search(request):
 
     json_text = json.dumps(results)
 
-    return render_to_response('music/music_search.json',
+    return render_to_response('return_json.json',
                               {'section': SECTION, 'info': json_text},
                               context_instance=RequestContext(request),
                               content_type="application/json")
