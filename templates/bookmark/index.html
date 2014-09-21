@@ -12,11 +12,11 @@
 
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.css" />
 
-<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.js"></script>
+<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
 
 <script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap.js"></script>
 
-<script type="text/javascript" src="{{ STATIC_URL }}js/dataTableExt.oApi.fnSetFilteringDelay.js"> </script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/fnSetFilteringDelay.js"> </script>
 
 <script type="text/javascript" charset="utf-8">
 
@@ -81,7 +81,7 @@
             var regex = new RegExp("^[a-zA-Z0-9]+$");
             var str = String.fromCharCode(!e.charCode ? e.which : e.charCode);
             if (regex.test(str) || e.keyCode == 8) {  // 8 is backspace
-                oTable.fnFilter( $(this).val() );
+				oTable.search( $(this).val() );
             }
         });
 
@@ -121,7 +121,7 @@
 		    return '<img src="{{ STATIC_URL }}img/favicons/' + parse_domain( row[1] ) + '.ico" width="32" height="32" /> &nbsp; &nbsp; <a href="' + row[1] + '" target="_blank">' + row[2] + '</a>';
 	    }
 
-	    oTable = $('#bookmark_list').dataTable( {
+	    oTable = $('#bookmark_list').DataTable( {
 		    "serverSide": true,
 		    "ajaxSource": "{% url 'get_bookmarks_list' %}",
 		    "paginate": true,
@@ -139,7 +139,7 @@
             ],
 	    } );
 
-	    $('#bookmark_list').dataTable().fnSetFilteringDelay(2000);
+	    $('#bookmark_list').dataTable().fnSetFilteringDelay(1000, $('#myfilter'));
 
         $("#bookmark_list tbody").click( function( event ) {
 
