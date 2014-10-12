@@ -21,28 +21,11 @@
 <script type="text/javascript" charset="utf-8">
 
     var oTable;
-
-    /* Get the bookmark ID which is currently selected */
-    /* Modified from http://www.datatables.net/examples/api/select_single_row.html */
-    function fnGetSelected( oTableLocal ) {
-
-        var aTrs = oTableLocal.fnGetNodes();
-
-        for ( var i=0 ; i<aTrs.length ; i++ ) {
-	        if ( $(aTrs[i]).attr('id') == 'row_selected' ) {
-			    return oTable.fnGetData( i )[3];
-		    }
-	    }
-
-    }
-
     var refreshInterval = 60;  // Minutes
 
     function refreshList() {
-
-        oTable.fnDraw();
+        oTable.draw();
         setTimeout("refreshList()", refreshInterval*60*1000);
-
     }
 
     // periodically refresh the list
@@ -50,167 +33,155 @@
 
     $(document).ready(function() {
 
-	    // http://stackoverflow.com/questions/8498592/extract-root-domain-name-from-string
-	    function parse_domain(url) {
+        $('#bookmark_list tbody').on( 'click', 'tr', function () {
+            if ( $(this).hasClass('selected') ) {
+                $(this).removeClass('selected');
+                $('#btn-edit').attr("disabled", "disabled");
+                $('#btn-delete').attr("disabled", "disabled");
+            } else {
+                oTable.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+                $('#btn-edit').removeAttr("disabled");
+                $('#btn-delete').removeAttr("disabled");
+            }
+        } );
 
-		    var tmp = document.createElement ('a');
-		    tmp.href = url;
+        // http://stackoverflow.com/questions/8498592/extract-root-domain-name-from-string
+        function parse_domain(url) {
 
-		    domain = tmp.hostname
+            var tmp = document.createElement ('a');
+            tmp.href = url;
 
-		    parts = domain.split('.')
+            domain = tmp.hostname
 
-		    if ( parts.length == 3 ) {
-			    domain = parts[1] + '.' + parts[2]
-		    }
+            parts = domain.split('.')
 
-		    return domain;
+            if ( parts.length == 3 ) {
+                domain = parts[1] + '.' + parts[2]
+            }
 
-	    }
+            return domain;
+
+        }
 
         {% if messages %}
         {% for message in messages %}
-	    $('#feedback').fadeIn(1000).html('{{ message }}');
-	    setTimeout( function() {
-		    $('#feedback').fadeOut(1000);
-	    }, 3000);
+    $('#feedback').fadeIn(1000).html('{{ message }}');
+    setTimeout( function() {
+        $('#feedback').fadeOut(1000);
+    }, 3000);
         {% endfor %}
         {% endif %}
 
-        $(document).on('keyup', '#myfilter', function(e){
-            var regex = new RegExp("^[a-zA-Z0-9]+$");
-            var str = String.fromCharCode(!e.charCode ? e.which : e.charCode);
-            if (regex.test(str) || e.keyCode == 8) {  // 8 is backspace
-				oTable.search( $(this).val() );
-            }
-        });
+    $(document).on('keyup', '#myfilter', function(e){
+        var regex = new RegExp("^[a-zA-Z0-9]+$");
+        var str = String.fromCharCode(!e.charCode ? e.which : e.charCode);
+        if (regex.test(str) || e.keyCode == 8) {  // 8 is backspace
+            oTable.search( $(this).val() );
+        }
+    });
 
-        $('#btn-delete').on('click', function() {
+    $('#btn-delete').on('click', function() {
 
-	 var selectedBookmarkID = fnGetSelected( oTable );
+        var selectedBookmarkID = $('#bookmark_list').DataTable().cell('.selected', 3).data();
 
-     $.ajax( { type: 'DELETE',
-	           url: '/api/v1/bookmark/' + selectedBookmarkID + '/',
-	           success: function() {
-	     $('#feedback').fadeIn(1000).html("Bookmark deleted.");
-	     setTimeout( function() {
-	       $('#feedback').fadeOut(1000);
-	     }, 3000);
+        $.ajax( { type: 'DELETE',
+                  url: '/api/v1/bookmark/' + selectedBookmarkID + '/',
+                  success: function() {
+                $('#feedback').fadeIn(1000).html("Bookmark deleted.");
+                setTimeout( function() {
+                    $('#feedback').fadeOut(1000);
+                }, 3000);
 
-	     oTable.fnDraw();
+                oTable.draw();
 
-	     $('#btn-edit').attr("disabled", "disabled");
-	     $('#btn-delete').attr("disabled", "disabled");
-
-	   }
-	           });
-
-     return false;
-
-   });
-
-
-        $('#btn-edit').click( function() {
-            var selectedBookmarkID = fnGetSelected( oTable );
-            window.location='{% url 'bookmark_edit' 666 %}'.replace(666, selectedBookmarkID)
-            return false;
-	    });
-
-
-	    function formatTitle( data, type, row ) {
-		    return '<img src="{{ STATIC_URL }}img/favicons/' + parse_domain( row[1] ) + '.ico" width="32" height="32" /> &nbsp; &nbsp; <a href="' + row[1] + '" target="_blank">' + row[2] + '</a>';
-	    }
-
-	    oTable = $('#bookmark_list').DataTable( {
-		    "serverSide": true,
-		    "ajaxSource": "{% url 'get_bookmarks_list' %}",
-		    "paginate": true,
-		    "info": false,
-		    "displayLength": 20,
-		    "sorting": [[0, 'desc']],
-		    "filter": true,
-		    "lengthChange": false,
-		    "dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'pull-right col-lg-5'p>>",
-		    "searchable": false,
-		    "columnDefs": [
-			    { "targets": [0], "class": "col-lg-2", "sorting": [ "desc", "asc" ] },
-			    { "targets": [1,3], "visible": false },
-			    { "targets": [2], "render": formatTitle, "useRendered": false },
-            ],
-	    } );
-
-	    $('#bookmark_list').dataTable().fnSetFilteringDelay(1000, $('#myfilter'));
-
-        $("#bookmark_list tbody").click( function( event ) {
-
-            // Don't hilight the row if the user is clicking on a link in the row
-            if (event.target.nodeName == 'A') {
-	            return;
-            }
-
-            if ( $(event.target.parentNode).attr("id") == "row_selected" ) {
-
-                $(event.target.parentNode).attr("id", "");
                 $('#btn-edit').attr("disabled", "disabled");
-	            $('#btn-delete').attr("disabled", "disabled");
-
-            } else {
-
-                $('#btn-edit').removeAttr("disabled");
-	            $('#btn-delete').removeAttr("disabled");
-
- 	            // Hilight the clicked row
- 	            $(event.target.parentNode).attr("id", "row_selected");
-	            $(event.target.parentNode).siblings().attr("id", "");
+                $('#btn-delete').attr("disabled", "disabled");
 
             }
+                  });
 
-        });
+        return false;
 
-});
+    });
+
+
+    $('#btn-edit').click( function() {
+        var selectedBookmarkID = $('#bookmark_list').DataTable().cell('.selected', 3).data();
+        window.location='{% url 'bookmark_edit' 666 %}'.replace(666, selectedBookmarkID)
+        return false;
+    });
+
+
+    function formatTitle( data, type, row ) {
+        return '<img src="{{ STATIC_URL }}img/favicons/' + parse_domain( row[1] ) + '.ico" width="32" height="32" /> &nbsp; &nbsp; <a href="' + row[1] + '" target="_blank">' + row[2] + '</a>';
+    }
+
+    oTable = $('#bookmark_list').DataTable( {
+        "serverSide": true,
+        "ajaxSource": "{% url 'get_bookmarks_list' %}",
+        "paginate": true,
+        "info": false,
+        "displayLength": 20,
+        "sorting": [[0, 'desc']],
+        "filter": true,
+        "lengthChange": false,
+        "dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'pull-right col-lg-5'p>>",
+        "searchable": false,
+        "columnDefs": [
+            { "targets": [0], "class": "col-lg-2", "sorting": [ "desc", "asc" ] },
+            { "targets": [1,3], "visible": false },
+            { "targets": [2], "render": formatTitle, "useRendered": false },
+        ],
+    } );
+
+    $('#bookmark_list').dataTable().fnSetFilteringDelay(1000, $('#myfilter'));
+
+    });
 
 </script>
 
-  <div class="row">
+<div class="row">
     <div class="col-lg-7">
-      <form class="form-inline" role="form">
+        <form class="form-inline" role="form">
 
-	    <div class="btn-group">
-	      <a class="btn btn-default" id="btn-add" href="{% url 'bookmark_edit' %}">Add</a>
-	      <button class="btn btn-default" id="btn-edit" disabled>Edit</button>
-	      <button class="btn btn-default" id="btn-delete" disabled>Delete</button>
-        </div>
+            <div class="btn-group">
+                <a class="btn btn-default" id="btn-add" href="{% url 'bookmark_edit' %}">Add</a>
+                <button class="btn btn-default" id="btn-edit" disabled>Edit</button>
+                <button class="btn btn-default" id="btn-delete" disabled>Delete</button>
+            </div>
 
-        <div class="form-group">
-          <input id="myfilter" type="text" style="width: 200px" class="form-control" placeholder="Search">
-        </div>
+            <div class="form-group">
+                <input id="myfilter" type="text" style="width: 200px" class="form-control" placeholder="Search">
+            </div>
 
-        <div class="form-group">
-          <label id="feedback" _class="alert alert-success _hide"></label>
-        </div>
+            <div class="form-group">
+                <label id="feedback" _class="alert alert-success _hide"></label>
+            </div>
 
-      </form>
+        </form>
 
     </div>
+
     <div class="col-lg-5">
-      <ul id="bookmarks_breadcrumb" class="breadcrumb pull-right">
-        {% if request.user.userprofile.bookmarks_show_untagged_only %}
-          <span id="bookmarks_show_untagged_only_note">
-            <a href="{% url 'prefs' %}">Tag filter in effect</a>
-          </span>
-        {% endif %}
-        <li>List<span class="divider"></span></li>
-        <li><a href="{% url 'bookmark_tag' %}">Tags</a></li>
-      </ul>
+        <ul id="bookmarks_breadcrumb" class="breadcrumb pull-right">
+            {% if request.user.userprofile.bookmarks_show_untagged_only %}
+                <span id="bookmarks_show_untagged_only_note">
+                    <a href="{% url 'prefs' %}">Tag filter in effect</a>
+                </span>
+            {% endif %}
+            <li>List<span class="divider"></span></li>
+            <li><a href="{% url 'bookmark_tag' %}">Tags</a></li>
+        </ul>
     </div>
 
-  </div>
+</div>
 
-  <div class="row">
+<div class="row">
     <div class="col-lg-12">
 {% include "common/datatable.html" with cols=cols id="bookmark_list" %}
     </div>
-  </div>
+</div>
 
 {% endblock %}
 

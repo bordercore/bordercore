@@ -8,137 +8,110 @@
 
 {% block content %}
 
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
+	<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
 
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.css" />
+	<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.css" />
 
-<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
 
-<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap.js"></script>
+	<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap.js"></script>
 
 <script type="text/javascript" charset="utf-8">
 
-var oTable;
+	var oTable;
 
-/* Get the row that is currently selected */
-/* Modified from http://www.datatables.net/examples/api/select_single_row.html */
-function fnGetSelected( oTableLocal ) {
+	$(document).ready(function() {
 
-	var aTrs = oTableLocal.fnGetNodes();
+        $('#wishlist_list tbody').on( 'click', 'tr', function () {
+            if ( $(this).hasClass('selected') ) {
+                $(this).removeClass('selected');
+                $('#btn-edit').attr("disabled", "disabled");
+                $('#btn-delete').attr("disabled", "disabled");
+            } else {
+                oTable.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+                $('#btn-edit').removeAttr("disabled");
+                $('#btn-delete').removeAttr("disabled");
+            }
+        } );
 
-	for ( var i=0 ; i<aTrs.length ; i++ ) {
-	 if ( $(aTrs[i]).attr('id') == 'row_selected' ) {
-			return oTable.fnGetData( i )[4];
-		}
-	}
+		{% for message in messages %}
+		$('#feedback').fadeIn(1000).html('{{ message }}');
+		setTimeout( function() {
+			$('#feedback').fadeOut(1000);
+		}, 3000);
+		{% endfor %}
 
-}
+		$('#myfilter').on( 'keyup', function () {
+			oTable.search($(this).val()).draw();
+		});
 
-$(document).ready(function() {
 
-{% for message in messages %}
-	$('#feedback').fadeIn(1000).html('{{ message }}');
-	setTimeout( function() {
-		$('#feedback').fadeOut(1000);
-	}, 3000);
-{% endfor %}
+		$('#btn-delete').on('click', function() {
 
-   $('#myfilter').keydown( function(e) {
+        var selectedWishListID = $('#wishlist_list').DataTable().cell('.selected', 4).data();
 
-      var filterString = $(this).val();
-      oTable.fnFilter(filterString);
+			$.ajax( { type: 'DELETE',
+					  url: '/api/v1/wishlist/' + selectedWishListID + '/',
+					  success: function() {
+                    $('#feedback').fadeIn(1000).html("Item deleted.");
+                    setTimeout( function() {
+                        $('#feedback').fadeOut(1000);
+                    }, 3000);
 
-   });
+                    oTable.draw();
 
-    $('#btn-delete').on('click', function() {
+                    $('#btn-edit').attr("disabled", "disabled");
+                    $('#btn-delete').attr("disabled", "disabled");
 
-		var selectedWishListID = fnGetSelected( oTable );
+                }
+					  });
+		});
 
-		$.ajax( { type: 'DELETE',
-				  url: '/api/v1/wishlist/' + selectedWishListID + '/',
-				  success: function() {
-					  // oTable.fnDeleteRow(selectedRowID);
-					  $('#feedback').fadeIn(1000).html("Item deleted.");
-					  setTimeout( function() {
-						  $('#feedback').fadeOut(1000);
-					  }, 3000);
 
-					  oTable.fnDraw();
+		$('#btn-edit').on('click', function() {
+			var selectedWishListID = $('#wishlist_list').DataTable().cell('.selected', 4).data();
+			window.location='{% url 'wishlist_edit' 666 %}'.replace(666, selectedWishListID);
+			return false;
+		});
 
-					  $('#btn-edit').attr("disabled", "disabled");
-					  $('#btn-delete').attr("disabled", "disabled");
 
-				  }
-				});
+		oTable = $('#wishlist_list').DataTable( {
+			"info": false,
+			"paginate": false,
+			"sorting": [[3, 'desc']],
+			"filter": true,
+			"lengthChange": false,
+			"dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'pull-right col-lg-4'p>>",
+			"searchable": false,
+			"columnDefs": [
+				{ "targets": [0], "sorting": [ "desc", "asc" ] },
+				{ "targets": [3], "class": "col-lg-3 monospaced", "dataSort": 4, "sorting": [ "desc", "asc" ] },
+				{ "targets": [4], "visible": false },
+			],
+		} );
+
 	});
-
-    $('#btn-edit').on('click', function() {
-
-		var selectedWishListID = fnGetSelected( oTable );
-        window.location='{% url 'wishlist_edit' 666 %}'.replace(666, selectedWishListID);
-	    return false;
-
-	});
-
-	oTable = $('#wishlist_list').dataTable( {
-		"info": false,
-		"paginate": false,
-		"sorting": [[3, 'desc']],
-		"filter": true,
-		"lengthChange": false,
-		"dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'pull-right col-lg-4'p>>",
-		"searchable": false,
-		"columnDefs": [
-			{ "targets": [0], "sorting": [ "desc", "asc" ] },
-			{ "targets": [3], "class": "col-lg-3 monospaced", "dataSort": 4, "sorting": [ "desc", "asc" ] },
-			{ "targets": [4], "visible": false },
-        ],
-	} );
-
-	$("#wishlist_list tbody").click( function( event ) {
-
-    if ( $(event.target.parentNode).attr("id") == "row_selected" ) {
-
-        $(event.target.parentNode).attr("id", "");
-        $('#btn-edit').attr("disabled", "disabled");
-	    $('#btn-delete').attr("disabled", "disabled");
-
-     } else {
-
-        $('#btn-edit').removeAttr("disabled");
-	    $('#btn-delete').removeAttr("disabled");
-
- 	    // Hilight the clicked row
- 	    $(event.target.parentNode).attr("id", "row_selected");
-	    $(event.target.parentNode).siblings().attr("id", "");
-
-     }
-
-    });
-
-	//$(".edit-controls").appendTo("div.toolbar");
-
-});
 
 </script>
 
-<div class="container">
-  <div class="row">
-    <div class="col-lg-7">
-      <form class="form-inline" role="form">
-		<div class="btn-group">
-		<a class="btn btn-default" id="btn-add" href="{% url 'wishlist_add' %}">Add</a>
-		<button class="btn btn-default" id="btn-edit" disabled>Edit</button>
-		<button class="btn btn-default" id="btn-delete" disabled>Delete</button>
-	  </div>
-	  <div id="feedback" class="form-group alert alert-success hide" style="width: 150px; height: 20px; float: right; margin-bottom: 0px"></div>
 
-      <div class="form-group">
-        <input id="myfilter" type="text" style="width: 200px" class="form-control" placeholder="Search">
-      </div>
-	  </form>
+<div class="container">
+	<div class="row">
+		<div class="col-lg-7">
+			<form class="form-inline" role="form">
+				<div class="btn-group">
+					<a class="btn btn-default" id="btn-add" href="{% url 'wishlist_add' %}">Add</a>
+					<button class="btn btn-default" id="btn-edit" disabled>Edit</button>
+					<button class="btn btn-default" id="btn-delete" disabled>Delete</button>
+				</div>
+				<div id="feedback" class="form-group alert alert-success hide" style="width: 150px; height: 20px; float: right; margin-bottom: 0px"></div>
+				<div class="form-group">
+					<input id="myfilter" type="text" style="width: 200px" class="form-control" placeholder="Search">
+				</div>
+			</form>
+		</div>
 	</div>
-  </div>
 </div>
 
 {% include "common/datatable.html" with data=info cols=cols id="wishlist_list" %}

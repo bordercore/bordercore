@@ -18,172 +18,122 @@
 
 <script type="text/javascript" charset="utf-8">
 
-var oTable;
+    var oTable;
 
-/* Get the todo task that is currently selected */
-/* Modified from http://www.datatables.net/examples/api/select_single_row.html */
-function fnGetSelected( oTableLocal ) {
+    $(document).ready(function() {
 
-	var aTrs = oTableLocal.fnGetNodes();
+        $('#todo_list tbody').on( 'click', 'tr', function () {
+            if ( $(this).hasClass('selected') ) {
+                $(this).removeClass('selected');
+                $('#btn-edit').attr("disabled", "disabled");
+                $('#btn-delete').attr("disabled", "disabled");
+            } else {
+                oTable.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+                $('#btn-edit').removeAttr("disabled");
+                $('#btn-delete').removeAttr("disabled");
+            }
+        } );
 
-	for ( var i=0 ; i<aTrs.length ; i++ ) {
-		if ( $(aTrs[i]).attr('id') == 'row_selected' ) {
-			return oTable.fnGetData( i )[3];
-		}
-	}
-
-}
-
-$(document).ready(function() {
-
-    $('#tags').change( function(e) {
-        var tag = $('#tags').val();
-        window.location='{% url 'todo_list' %}?tagsearch=' + tag;
-    });
+        $('#tags').change( function(e) {
+            var tag = $('#tags').val();
+            window.location='{% url 'todo_list' %}?tagsearch=' + tag;
+        });
 
 {% if messages %}
 {% for message in messages %}
-	$('#feedback').fadeIn(1000).html('{{ message }}');
-	setTimeout( function() {
-		$('#feedback').fadeOut(1000);
-	}, 3000);
+    $('#feedback').fadeIn(1000).html('{{ message }}');
+    setTimeout( function() {
+        $('#feedback').fadeOut(1000);
+    }, 3000);
 {% endfor %}
 {% endif %}
 
-   $('#myfilter').keydown( function(e) {
-
-      var filterString = $(this).val();
-      oTable.fnFilter(filterString);
-
-   });
+    $('#myfilter').on( 'keyup', function () {
+        oTable.search($(this).val()).draw();
+    });
 
     $('#btn-delete').on('click', function() {
 
-		var selectedTodoID = fnGetSelected( oTable );
+        var selectedTodoID = $('#todo_list').DataTable().cell('.selected', 3).data();
 
-		$.ajax( { type: 'DELETE',
-				  url: '/api/v1/todo/' + selectedTodoID + '/',
-				  success: function() {
-					  //oTable.fnDeleteRow(selectedRowID);
-					  $('#feedback').fadeIn(1000).html("Task deleted.");
-					  setTimeout( function() {
-						  $('#feedback').fadeOut(1000);
-					  }, 3000);
+        $.ajax( { type: 'DELETE',
+                  url: '/api/v1/todo/' + selectedTodoID + '/',
+                  success: function() {
+                $('#feedback').fadeIn(1000).html("Task deleted.");
+                setTimeout( function() {
+                    $('#feedback').fadeOut(1000);
+                }, 3000);
 
-					  oTable.fnDraw();
+                oTable.draw();
 
-					  $('#btn-edit').attr("disabled", "disabled");
-					  $('#btn-delete').attr("disabled", "disabled");
+                $('#btn-edit').attr("disabled", "disabled");
+                $('#btn-delete').attr("disabled", "disabled");
 
-				  }
-				});
-	});
-
-    $('#btn-edit').on('click', function() {
-
-		var selectedTodoID = fnGetSelected( oTable );
-        window.location='{% url 'todo_edit' 666 %}'.replace(666, selectedTodoID);
-	    return false;
-
-	});
-
-	oTable = $('#todo_list').dataTable( {
-		"info": false,
-		"paginate": false,
-		"sorting": [[1, 'desc']],
-		"filter": true,
-		"lengthChange": false,
-		"dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'pull-right col-lg-4'p>>",
-		"searchable": false,
-		"columnDefs": [
-			{ "targets": [0], "sorting": [ "desc", "asc" ] },
-			{ "targets": [1], "class": "col-lg-3 monospaced", "dataSort": 2, "sorting": [ "desc", "asc" ] },
-			{ "targets": [2,3], "visible": false },
-        ],
-	} );
-
-	$("#todo_list tbody").click( function( event ) {
-
-    if ( $(event.target.parentNode).attr("id") == "row_selected" ) {
-
-        $(event.target.parentNode).attr("id", "");
-        $('#btn-edit').attr("disabled", "disabled");
-	    $('#btn-delete').attr("disabled", "disabled");
-
-     } else {
-
-        $('#btn-edit').removeAttr("disabled");
-	    $('#btn-delete').removeAttr("disabled");
-
- 	    // Hilight the clicked row
- 	    $(event.target.parentNode).attr("id", "row_selected");
-	    $(event.target.parentNode).siblings().attr("id", "");
-
-     }
-
+            }
+                  });
     });
 
-	// $(".edit-controls").appendTo("div.toolbar");
+    $('#btn-edit').on('click', function() {
+        var selectedTodoID = $('#todo_list').DataTable().cell('.selected', 3).data();
+        window.location='{% url 'todo_edit' 666 %}'.replace(666, selectedTodoID);
+        return false;
+    });
+
+    oTable = $('#todo_list').DataTable( {
+        "info": false,
+        "paginate": false,
+        "sorting": [[1, 'desc']],
+        "filter": true,
+        "lengthChange": false,
+        "dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'pull-right col-lg-4'p>>",
+        "searchable": false,
+        "columnDefs": [
+            { "targets": [0], "sorting": [ "desc", "asc" ] },
+            { "targets": [1], "class": "col-lg-3 monospaced", "dataSort": 2, "sorting": [ "desc", "asc" ] },
+            { "targets": [2,3], "visible": false },
+        ],
+    } );
 
 });
 
 </script>
 
-<!-- <div class="row">
-<select id="tags" class="pull-right">
-<option>Tag filter</option>
-{% for tag in tags %}
-<option value="{{ tag.name }}"{% ifequal tagsearch tag.name %} selected="selected"{% endifequal %}>{{ tag.name }}</option>
-{% endfor %}
-</select>
-</div>
-
-<div class="edit-controls span3">
-<div class="btn-group">
-<a class="btn" id="btn-add" href="{% url 'todo_add' %}">Add</a>
-<button class="btn" id="btn-edit" disabled>Edit</button>
-<button class="btn" id="btn-delete" disabled>Delete</button>
-</div>
-<div id="feedback" class="alert alert-success hide" style="width: 150px; height: 20px; float: right; margin-bottom: 0px"></div>
-
-</div> -->
-
-
 <div class="container">
-  <div class="row">
-    <div class="col-lg-7">
-      <form class="form-inline" role="form">
+    <div class="row">
+        <div class="col-lg-7">
+            <form class="form-inline" role="form">
 
-	    <div class="btn-group">
-	      <a class="btn btn-default" id="btn-add" href="{% url 'todo_add' %}">Add</a>
-	      <button class="btn btn-default" id="btn-edit" disabled>Edit</button>
-	      <button class="btn btn-default" id="btn-delete" disabled>Delete</button>
+                <div class="btn-group">
+                    <a class="btn btn-default" id="btn-add" href="{% url 'todo_add' %}">Add</a>
+                    <button class="btn btn-default" id="btn-edit" disabled>Edit</button>
+                    <button class="btn btn-default" id="btn-delete" disabled>Delete</button>
+                </div>
+
+                <div class="form-group">
+                    <input id="myfilter" type="text" style="width: 200px" class="form-control" placeholder="Search">
+                </div>
+
+                <div class="form-group">
+                    <label id="feedback" _class="alert alert-success _hide"></label>
+                </div>
+
+            </form>
+
         </div>
 
-        <div class="form-group">
-          <input id="myfilter" type="text" style="width: 200px" class="form-control" placeholder="Search">
-        </div>
+        <div class="col-lg-5">
 
-        <div class="form-group">
-          <label id="feedback" _class="alert alert-success _hide"></label>
-        </div>
-
-      </form>
-
-    </div>
-    <div class="col-lg-5">
-
-<select id="tags" class="pull-right">
-  <option>Tag filter</option>
+            <select id="tags" class="pull-right">
+                <option>Tag filter</option>
 {% for tag in tags %}
-  <option value="{{ tag.name }}"{% ifequal tagsearch tag.name %} selected="selected"{% endifequal %}>{{ tag.name }}</option>
+    <option value="{{ tag.name }}"{% ifequal tagsearch tag.name %} selected="selected"{% endifequal %}>{{ tag.name }}</option>
 {% endfor %}
-</select>
+            </select>
 
+        </div>
 
     </div>
-
-  </div>
 
 </div>
 
