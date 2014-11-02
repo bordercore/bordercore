@@ -9,10 +9,7 @@ import json
 def tag_search(request):
 
     # Use this for the new Twitter typeahead
-    # tag_list = [{'value':x.name} for x in Tag.objects.filter(name__istartswith=request.GET.get('query', '')).distinct('name')]
-
-    # Use this for the typeahead included in Bootstrap 2
-    tag_list = [x.name for x in Tag.objects.filter(name__istartswith=request.GET.get('query', '')).distinct('name')]
+    tag_list = [{'value':x.name} for x in Tag.objects.filter(name__istartswith=request.GET.get('query', '')).distinct('name')]
 
     return render_to_response('return_json.json',
                               {'info': json.dumps(tag_list)},

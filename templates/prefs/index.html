@@ -1,83 +1,78 @@
 {% extends "base.html" %}
 
-{% block extra_head %}
-
-<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap3-typeahead.min.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/bloodhound.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.min.js"></script>
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput.css" />
-
-{% endblock %}
-
 {% block title %} Preferences {% endblock %}
 
 {% block content %}
+
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput-custom.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/typeahead-bootstrap3.css" />
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
 
 <script type="text/javascript">
 
 $(document).ready(function() {
 
-   var engine = new Bloodhound({
-	 name: 'tags',
-	 remote: '{% url 'tag_search' %}?query=%QUERY',
-	 datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
-	 queryTokenizer: Bloodhound.tokenizers.whitespace
-   });
+		var engine = new Bloodhound({
+			name: 'tags',
+			remote: '{% url 'tag_search' %}?query=%QUERY',
+			datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
+			queryTokenizer: Bloodhound.tokenizers.whitespace
+		});
 
-   engine.initialize();
+		engine.initialize();
 
-   $('#id_favorite_tags').tagsinput({
-	 confirmKeys: [13, 188],
-	 tagClass: function(item) {
-	   return 'label label-primary';
-	   }
-   });
+		$('#id_favorite_tags').tagsinput({
+			confirmKeys: [13, 188],
+			tagClass: function(item) {
+				return 'label label-primary';
+			},
+            typeaheadjs: {
+                source: engine.ttAdapter(),
+                displayKey: 'value',
+                valueKey: 'value'
+            }
 
-   $('#id_favorite_tags').tagsinput('input').typeahead( {
-	 source: engine.ttAdapter(),
-	 updater: function(item) {
-	   $('#id_favorite_tags').tagsinput('add', item);
-	 }
-   })
-
-//    $("input[name='favorite_tags']").tokenizer( { delimiters: [13, 188] } )
+		});
 
 });
 
 </script>
 
 {% if message %}
-<div class="alert alert-success">{{ message }}</div>
+	<div class="alert alert-success">{{ message }}</div>
 {% endif %}
 
 <form class="form-horizontal" action="{{ request.path }}" method="post">
-{% csrf_token %}
+	{% csrf_token %}
 
-<div class="form-group">
-    <label class="col-lg-2 control-label" for="inputTitle">RSS Feeds</label>
-    <div class="col-lg-5"><a href="{% url 'feed_subscriptions' %}">Edit</a></div>
-</div>
-
-{% for field in form %}
-<div class="form-group {% if field.errors %}error{% endif %}">
-    <label class="col-lg-2 control-label" for="inputTitle">{{ field.label }}</label>
-    <div class="col-lg-5">
-{{ field }}
-
-{% for error in field.errors %}
-      <span class="form-error">{{ error }}</span>
-{% endfor %}
-
-</div>
-
-</div>
-{% endfor %}
-
-  <div class="form-group">
-    <div class="col-lg-offset-2">
-	  <input class="btn btn-default" type="submit" name="Go" value="Edit">
+	<div class="form-group">
+		<label class="col-lg-2 control-label" for="inputTitle">RSS Feeds</label>
+		<div class="col-lg-5"><a href="{% url 'feed_subscriptions' %}">Edit</a></div>
 	</div>
-  </div>
+
+	{% for field in form %}
+		<div class="form-group {% if field.errors %}error{% endif %}">
+			<label class="col-lg-2 control-label" for="inputTitle">{{ field.label }}</label>
+			<div class="col-lg-5">
+				{{ field }}
+
+				{% for error in field.errors %}
+					<span class="form-error">{{ error }}</span>
+				{% endfor %}
+
+			</div>
+
+		</div>
+	{% endfor %}
+
+	<div class="form-group">
+		<div class="col-lg-3 col-lg-offset-2">
+			<input class="btn btn-default" type="submit" name="Go" value="Edit">
+		</div>
+	</div>
 
 </form>
 

@@ -1,35 +1,39 @@
 
-<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap3-typeahead.min.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/bloodhound.js"></script>
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput-custom.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datepicker3.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/typeahead-bootstrap3.css" />
+
+<script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
 
 <script type="text/javascript">
 
-$(document).ready(function() {
+	$(document).ready(function() {
 
-    var engine = new Bloodhound({
-		name: 'tags',
-		remote: '{% url 'tag_search' %}?query=%QUERY',
-        datumTokenizer: function(d) {
-            return Bloodhound.tokenizers.whitespace(d.val);
-        },
-        queryTokenizer: Bloodhound.tokenizers.whitespace
-    });
+		var engine = new Bloodhound({
+			name: 'tags',
+			remote: '{% url 'tag_search' %}?query=%QUERY',
+			datumTokenizer: function(d) {
+				return Bloodhound.tokenizers.whitespace(d.val);
+			},
+			queryTokenizer: Bloodhound.tokenizers.whitespace
+		});
 
-    engine.initialize();
+		engine.initialize();
 
-    $('#tag-filter').typeahead({
-        source: engine.ttAdapter()
+		$('#tag-filter').typeahead({
+			source: engine.ttAdapter()
+		});
+
+		$('#tag-filter').change(function(obj) {
+			window.location='{% url 'blog_list' %}?tagsearch=' + $(this).val();
+		});
+
+		$('#blog-search').change(function(obj) {
+			$('form#blog-search-form').submit();
+		});
+
 	});
-
-   $('#tag-filter').change(function(obj) {
-     window.location='{% url 'blog_list' %}?tagsearch=' + $(this).val();
-   });
-
-   $('#blog-search').change(function(obj) {
-     $('form#blog-search-form').submit();
-   });
-
-});
 
 </script>
 

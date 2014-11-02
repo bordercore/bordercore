@@ -1,149 +1,145 @@
 {% extends "base.html" %}
 
-{% block extra_head %}
-
-<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap3-typeahead.min.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/bloodhound.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.min.js"></script>
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput.css" />
-
-<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
-<link href="{{ STATIC_URL }}css/datepicker3.css" rel="stylesheet" media="screen" />
-
-
-{% endblock %}
-
 {% block title %} Blog {% endblock %}
 
 {% block content %}
 
-<script type="text/javascript" src="{{ STATIC_URL }}/js/jquery.field_selection.js"></script>
-<script type="text/javascript">
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput-custom.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datepicker3.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/typeahead-bootstrap3.css" />
 
-$(document).ready(function() {
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.field_selection.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
 
-   var engine = new Bloodhound({
-	 name: 'tags',
-	 remote: '{% url 'tag_search' %}?query=%QUERY',
-	 datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
-	 queryTokenizer: Bloodhound.tokenizers.whitespace
-   });
+    <script type="text/javascript">
 
-   engine.initialize();
+        $(document).ready(function() {
 
-   $('#id_tags').tagsinput({
-	 confirmKeys: [13, 188],
-	 tagClass: function(item) {
-	   return 'label label-primary';
-	   }
-   });
+            var engine = new Bloodhound({
+                name: 'tags',
+                remote: '{% url 'tag_search' %}?query=%QUERY',
+                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
+                queryTokenizer: Bloodhound.tokenizers.whitespace
+            });
 
-   $('#id_tags').tagsinput('input').typeahead( {
-	 source: engine.ttAdapter(),
-	 updater: function(item) {
-	   $('#id_tags').tagsinput('add', item);
-	 }
-   })
+            engine.initialize();
 
-    $('#markdown-support').change( function(event) {
-        var value = $(this).val();
-        var range = $('#id_post').getSelection();
-        var text = $('#id_post').val();
-        if (value == 'Bold') {
-            $('#id_post').val( text.substr(0, range.start) + '**' + range.text + '**' +  text.substr(range.end, text.length - range.end));
-        } else if (value == 'Insert link') {
-            $('#id_post').val( text.substr(0, range.start) + '[text](url)' + range.text + text.substr(range.end, text.length - range.end));
-        } else if (value == 'Insert list') {
-            $('#id_post').val( text.substr(0, range.start) + '\n - List item\n' + text.substr(range.end, text.length - range.end));
-        } else if (value == 'Indent Code') {
-            var newtext = '    ' + range.text.replace(/\n/g, "\n    ");
-            $('#id_post').val( text.substr(0, range.start) + newtext  + text.substr(range.end, text.length - range.end));
-        } else if (value == 'Escape HTML') {
-		    var escapedText = range.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-		    $('textarea').val( text.substr(0, range.start) + escapedText +  text.substr(range.end, text.length - range.end));
-        }
-        // Reset the dropdown
-        $('#markdown-support')[0].selectedIndex = 0
-    } );
+            $('#id_tags').tagsinput({
+                confirmKeys: [13, 188],
+                tagClass: function(item) {
+                    return 'label label-primary';
+                },
+                /* itemValue: 'value',
+                itemText: 'name', */
+                typeaheadjs: {
+                    source: engine.ttAdapter(),
+                    displayKey: 'value',
+                    valueKey: 'value'
+                }
+            });
 
-	$('.date').datepicker({
-		todayBtn: "linked",
-		format: "mm-dd-yyyy",
-		multidate: false
-	});
+            $('#markdown-support').change( function(event) {
+                var value = $(this).val();
+                var range = $('#id_post').getSelection();
+                var text = $('#id_post').val();
+                if (value == 'Bold') {
+                    $('#id_post').val( text.substr(0, range.start) + '**' + range.text + '**' +  text.substr(range.end, text.length - range.end));
+                } else if (value == 'Insert link') {
+                    $('#id_post').val( text.substr(0, range.start) + '[text](url)' + range.text + text.substr(range.end, text.length - range.end));
+                } else if (value == 'Insert list') {
+                    $('#id_post').val( text.substr(0, range.start) + '\n - List item\n' + text.substr(range.end, text.length - range.end));
+                } else if (value == 'Indent Code') {
+                    var newtext = '    ' + range.text.replace(/\n/g, "\n    ");
+                    $('#id_post').val( text.substr(0, range.start) + newtext  + text.substr(range.end, text.length - range.end));
+                } else if (value == 'Escape HTML') {
+                    var escapedText = range.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    $('textarea').val( text.substr(0, range.start) + escapedText +  text.substr(range.end, text.length - range.end));
+                }
+                // Reset the dropdown
+                $('#markdown-support')[0].selectedIndex = 0
+            } );
 
-});
+            $('.date').datepicker({
+                todayBtn: "linked",
+                format: "mm-dd-yyyy",
+                multidate: false
+            });
 
-</script>
+        });
 
-{% if request.POST.Go and not form.errors %}
+    </script>
 
-<div class="alert alert-success col-lg-offset-2">
+    {% if request.POST.Go and not form.errors %}
+
+        <div class="alert alert-success col-lg-offset-2">
 Post {{ action }}ed
-</div>
+        </div>
 
-{% endif %}
+    {% endif %}
 
-<br />
+    <br />
 
-<form class="form-horizontal" action="{{ request.path }}" method="post">
-<legend class="col-lg-offset-1"> {{ action }} Blog Post</legend>
-{% csrf_token %}
+    <form class="form-horizontal" action="{{ request.path }}" method="post">
+        <legend class="col-lg-offset-1"> {{ action }} Blog Post</legend>
+        {% csrf_token %}
 
-{% for field in form %}
-<div class="form-group {% if field.errors %}error{% endif %}">
-    <label class="col-lg-1 control-label" for="inputTitle">{{ field.label }}</label>
+        {% for field in form %}
+            <div class="form-group {% if field.errors %}error{% endif %}">
+                <label class="col-lg-1 control-label" for="inputTitle">{{ field.label }}</label>
 
-{% if field.label == 'Date' %}
+                {% if field.label == 'Date' %}
 
-	<div class="col-lg-7">
+                    <div class="col-lg-7">
 
-		<div class="form-group row">
+                        <div class="form-group row">
 
-			<!-- Tacking on the glyphs in an input-group class messes up the layout -->
-			<!-- <div class="input-group col-lg-3"> -->
-			<div class="col-lg-3">
-				<input class="form-control date" _size="16" type="text" name="date" value="{{ field.value|date:'m-d-Y' }}" />
-				<!-- <span class="input-group-addon glyphicon glyphicon-th"></span> -->
-			</div>
+                            <!-- Tacking on the glyphs in an input-group class messes up the layout -->
+                            <!-- <div class="input-group col-lg-3"> -->
+                            <div class="col-lg-3">
+                                <input class="form-control date" _size="16" type="text" name="date" value="{{ field.value|date:'m-d-Y' }}" />
+                                <!-- <span class="input-group-addon glyphicon glyphicon-th"></span> -->
+                            </div>
 
-			<div class="col-lg-3">
-				<select id="markdown-support" class="form-control">
-					<option>Markdown</option>
-					<option>Insert link</option>
-					<option>Bold</option>
-					<option>Indent Code</option>
-					<option>Insert list</option>
-					<option>Escape HTML</option>
-				</select>
-			</div>
+                            <div class="col-lg-3">
+                                <select id="markdown-support" class="form-control">
+                                    <option>Markdown</option>
+                                    <option>Insert link</option>
+                                    <option>Bold</option>
+                                    <option>Indent Code</option>
+                                    <option>Insert list</option>
+                                    <option>Escape HTML</option>
+                                </select>
+                            </div>
 
-		</div>
+                        </div>
 
-	</div>
+                    </div>
 
-{% else %}
+                {% else %}
 
-	<div class="col-lg-5">
-{{ field }}
-	</div>
-{% endif %}
+                    <div class="col-lg-5">
+                        {{ field }}
+                    </div>
+                {% endif %}
 
-{% for error in field.errors %}
-      <span class="form-error">{{ error }}</span>
-{% endfor %}
+                {% for error in field.errors %}
+                    <span class="form-error">{{ error }}</span>
+                {% endfor %}
 
-</div>
-{% endfor %}
+            </div>
+        {% endfor %}
 
-<div class="form-group">
-  <div class="col-lg-3 col-lg-offset-1">
-	<input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
-	<input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
-	<a class="btn btn-default" href="{% url 'blog_list' %}">Cancel</a>
-  </div>
-</div>
+        <div class="form-group">
+            <div class="col-lg-3 col-lg-offset-1">
+                <input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
+                <input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
+                <a class="btn btn-default" href="{% url 'blog_list' %}">Cancel</a>
+            </div>
+        </div>
 
-</form>
+    </form>
 
 {% endblock %}

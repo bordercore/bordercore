@@ -1,144 +1,158 @@
 {% extends "base.html" %}
 
-{% block extra_head %}
-<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap3-typeahead.min.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/bloodhound.js"></script>
-{% endblock %}
-
 {% load favicon %}
 
 {% block title %} Bookmarks {% endblock %}
 
 {% block content %}
 
-<script type="text/javascript">
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
 
-$(document).ready(function() {
+    <script type="text/javascript">
 
-    var engine = new Bloodhound({
-		name: 'tags',
-		remote: '{% url 'tag_search' %}?query=%QUERY',
-        datumTokenizer: function(d) {
-            return Bloodhound.tokenizers.whitespace(d.val);
-        },
-        queryTokenizer: Bloodhound.tokenizers.whitespace
-    });
+        $(document).ready(function() {
 
-    engine.initialize();
+            var engine = new Bloodhound({
+                name: 'tags',
+                remote: '{% url 'tag_search' %}?query=%QUERY',
+                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
+                queryTokenizer: Bloodhound.tokenizers.whitespace
+            });
 
-    $('#tag-filter').typeahead({
-        source: engine.ttAdapter(),
-		updater: function(item) {
-			window.location='{% url 'bookmark_tag' %}?tagsearch=' + item;
-		}
-	});
+            engine.initialize();
 
-	var selectedId;
+            $('#tag-filter').typeahead(null, {
+                source: engine.ttAdapter(),
+                updater: function(item) {
+                    window.location='{% url 'bookmark_tag' %}?tagsearch=' + item;
+                }
+            });
 
-	$('i.icon-remove').hide();
+            var selectedId;
 
-	$('.tag-container').hover( function() {
-		selectedId = $(this).find('a').attr('id').split('_')[1];
-		$('i.icon-remove').hide();
-		 $('i#delete_' + selectedId ).show();
-	});
+            $('i.icon-remove').hide();
 
-	$('.tag-container').mouseleave( function() {
-		$('i.icon-remove').hide();
-	});
+            $('.tag-container').hover( function() {
+                selectedId = $(this).find('a').attr('id').split('_')[1];
+                $('i.icon-remove').hide();
+                $('i#delete_' + selectedId ).show();
+            });
 
-	$('i.icon-remove').click( function() {
-		$.ajax( { type: 'DELETE',
-				  url: '{% url 'bookmark_delete' 666 %}'.replace(666, selectedId),
-				  success: function(data) {
-					  $('#link_' + selectedId).parent().remove()
-				  },
-				  error: function(jqXHR, textStatus, errorThrown) {
-					  console.log('error: ' + textStatus);
-				  }
-				});
+            $('.tag-container').mouseleave( function() {
+                $('i.icon-remove').hide();
+            });
 
-	})
+            $('i.icon-remove').click( function() {
+                $.ajax( { type: 'DELETE',
+                          url: '{% url 'bookmark_delete' 666 %}'.replace(666, selectedId),
+                          success: function(data) {
+                        $('#link_' + selectedId).parent().remove()
+                    },
+                          error: function(jqXHR, textStatus, errorThrown) {
+                        console.log('error: ' + textStatus);
+                    }
+                          });
 
-	// Hitting return will begin the search
-    $('#bookmark-search').keypress( function(e) {
-		if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
-			$('#bookmark-search-form').submit();
-            return false;
-        } else {
-            return true;
-        }
-	});
+            })
 
-    $('#sort-container').sortable( {
-		connectWith: '.bookmark-list',
-		stop: function(event, ui) {
-			var myMatches = $(ui.item).find('a').attr('id').match(/link_(.*)$/);
-			var link_id = myMatches[1];
+            // Hitting return will begin the search
+            $('#bookmark-search').keypress( function(e) {
+                if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
+                    $('#bookmark-search-form').submit();
+                    return false;
+                } else {
+                    return true;
+                }
+            });
 
-			$.ajax( { type: 'POST',
-                  url: '{% url 'tag_bookmark_list' %}',
-                  data: { tag: '{{ tag_filter }}', link_id: link_id, position: ui.item.index() + 1 },
-                  success: function() {
-                  }
-                });
+            $('#sort-container').sortable( {
+                connectWith: '.bookmark-list',
+                stop: function(event, ui) {
+                    var myMatches = $(ui.item).find('a').attr('id').match(/link_(.*)$/);
+                    var link_id = myMatches[1];
 
-		}
-	});
+                    $.ajax( { type: 'POST',
+                              url: '{% url 'tag_bookmark_list' %}',
+                              data: { tag: '{{ tag_filter }}', link_id: link_id, position: ui.item.index() + 1 },
+                              success: function() {
+                        }
+                              });
 
-	$('#favorite_tags').change( function(e) {
-		var tag = $('#favorite_tags').val();
-		window.location='{% url 'bookmark_tag' %}?tagsearch=' + tag;
-	});
+                }
+            });
 
-});
+            $('#favorite_tags').change( function(e) {
+                var tag = $('#favorite_tags').val();
+                window.location='{% url 'bookmark_tag' %}?tagsearch=' + tag;
+            });
 
-</script>
+        });
 
-<ul class="breadcrumb pull-right">
-<li><a href="{% url 'bookmark_list' %}">List</a><span class="divider">/</span></li>
-<li>Tags</li>
-</ul>
+    </script>
 
-<br /><br />
+    <div class="row">
 
-<form class="form-inline" name="nav_form" id="tag-search-form" action="{% url 'bookmark_list' %}" method="get">
+        <div class="col-lg-7">
 
-Search
-<input id="bookmark-search" type="text" name="search_item" size="20" value="{{ request.GET.search_item }}" accesskey="s" />
+            <form class="form-inline" rolw="form" name="nav_form" id="tag-search-form" action="{% url 'bookmark_list' %}" method="get">
 
-Tag Filter <input id="tag-filter" type="text" value="{{ tag_filter }}" autocomplete="off" />
+                <div class="form-group">
+                    <input id="bookmark-search" type="text" name="search_item" class="form-control" size="20" value="{{ request.GET.search_item }}" placeholder="Search" />
+                </div>
 
-<select id="favorite_tags">
-  <option>Favorites</option>
-{% for tag in favorite_tags %}
-  <option value="{{ tag.name }}">{{ tag.name }}</option>
-{% endfor %}
-</select>
+                <div class="form-group">
+                    <input id="tag-filter" type="text" value="{{ tag_filter }}" class="form-control" autocomplete="off" placeholder="Tag Filter"/>
+                </div>
 
-</form>
+                <div class="form-group">
+                    <select id="favorite_tags" class="form-control">
+                        <option>Favorites</option>
+                        {% for tag in favorite_tags %}
+                            <option value="{{ tag.name }}">{{ tag.name }}</option>
+                        {% endfor %}
+                    </select>
 
-{% if bookmarks %}
+                </div>
 
-<ul id="sort-container" class="bookmark-list unstyled">
+            </form>
 
-{% for link in bookmarks %}
+        </div>
 
-<li style="padding: 4px;">
-	<span class="tag-container">
-	<span style="width: 18px; border: 1px solid white; float: left">
-	  <i class="icon-remove glyphicon glyphicon-remove" id="delete_{{ link.id }}"></i>
-	</span> &nbsp; &nbsp;
-	<span style="width: 20px">{{ link.url|favicon:16|safe }} </span> &nbsp; &nbsp;
-	<a class="one-tag" href="{{ link.url }}" id="link_{{ link.id }}">{{ link.title }}</a>
-	</span>
-</li>
+        <div class="col-lg-5">
 
-{% endfor %}
+            <ul id="bookmarks_breadcrumb" class="breadcrumb pull-right">
+                <li><a href="{% url 'bookmark_list' %}">List</a><span class="divider"></span></li>
+                <li>Tags</li>
+            </ul>
 
-</ul>
+        </div>
 
-{% endif %}
+    </div>
+
+    <br />
+
+    {% if bookmarks %}
+
+        <div class="row">
+            <ul id="sort-container" class="bookmark-list">
+
+                {% for link in bookmarks %}
+
+                    <li style="padding: 4px">
+                        <span class="tag-container">
+                            <span style="width: 18px; border: 1px solid white; float: left">
+                                <i class="icon-remove glyphicon glyphicon-remove" id="delete_{{ link.id }}"></i>
+                            </span> &nbsp; &nbsp;
+                            <span style="width: 20px">{{ link.url|favicon:16|safe }} </span> &nbsp; &nbsp;
+                            <a class="one-tag" href="{{ link.url }}" id="link_{{ link.id }}">{{ link.title }}</a>
+                        </span>
+                    </li>
+
+                {% endfor %}
+
+            </ul>
+        </div>
+    {% endif %}
 
 {% endblock %}

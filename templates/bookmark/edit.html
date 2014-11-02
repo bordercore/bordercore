@@ -1,81 +1,80 @@
 {% extends "base.html" %}
 
-{% block extra_head %}
-
-<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap3-typeahead.min.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/bloodhound.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.min.js"></script>
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput.css" />
-
-{% endblock %}
-
 {% load favicon %}
 
 {% block title %} Bookmarks {% endblock %}
 
 {% block content %}
 
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput-custom.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/typeahead-bootstrap3.css" />
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+
 <script type="text/javascript">
 
 $(document).ready(function() {
 
-   var engine = new Bloodhound({
-	 name: 'tags',
-	 remote: '{% url 'tag_search' %}?query=%QUERY',
-	 datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
-	 queryTokenizer: Bloodhound.tokenizers.whitespace
-   });
+		var engine = new Bloodhound({
+			name: 'tags',
+			remote: '{% url 'tag_search' %}?query=%QUERY',
+			datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
+			queryTokenizer: Bloodhound.tokenizers.whitespace
+		});
 
-   engine.initialize();
+		engine.initialize();
 
-   $('#id_tags').tagsinput({
-	 confirmKeys: [13, 188],
-	 tagClass: function(item) {
-	   return 'label label-primary';
-	   }
-   });
+		$('#id_tags').tagsinput({
+			confirmKeys: [13, 188],
+			tagClass: function(item) {
+				return 'label label-primary';
+			},
+            typeaheadjs: {
+                source: engine.ttAdapter(),
+                displayKey: 'value',
+                valueKey: 'value'
+            }
 
-   $('#id_tags').tagsinput('input').typeahead( {
-	 source: engine.ttAdapter(),
-	 updater: function(item) {
-	   $('#id_tags').tagsinput('add', item);
-	 }
-   })
+		});
 
 });
 
 </script>
 
 {% if form.errors %}
-<div class="alert alert-error col-lg-offset-2 col-lg-10">
+	<div class="alert alert-error col-lg-offset-2 col-lg-10">
 Please correct the errors below.
-</div>
+	</div>
 {% endif %}
 
 <p class="lead col-lg-offset-1">
-{{ form.instance.url|favicon|safe }} {{ action }} Bookmark
+	{{ form.instance.url|favicon|safe }} {{ action }} Bookmark
 </p>
 
 <form class="form-horizontal" action="{{ request.path }}" method="post">
-{% csrf_token %}
+	{% csrf_token %}
 
-{% for field in form %}
-<div class="form-group {% if field.errors %}error{% endif %}">
-    <label class="col-lg-1 control-label" for="inputTitle">{{ field.label }}</label>
-    <div class="col-lg-5">
-{{ field }}
-{% for error in field.errors %}
-<span class="form-error">{{ error }}</span>
-{% endfor %}
+	{% for field in form %}
+		<div class="form-group {% if field.errors %}error{% endif %}">
+			<label class="col-lg-1 control-label" for="inputTitle">{{ field.label }}</label>
+			<div class="col-lg-5">
+				{{ field }}
+				{% for error in field.errors %}
+					<span class="form-error">{{ error }}</span>
+				{% endfor %}
+			</div>
+		</div>
+	{% endfor %}
+
+	<div class="form-group">
+		<div class="col-lg-3 col-lg-offset-1">
+			<input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
+			<input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
+            <a class="btn btn-default" href="{% url 'bookmark_list' %}">Cancel</a>
+        </div>
     </div>
-  </div>
-{% endfor %}
-
-<div class="form-group">
-    <div class="col-lg-offset-1">
-	<input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
-	<input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
-	<a class="btn btn-<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap</div>
 
 </form>
 
