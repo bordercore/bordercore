@@ -8,6 +8,7 @@
 
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/typeahead-bootstrap3.css" />
 
     <script type="text/javascript">
 
@@ -23,10 +24,11 @@
             engine.initialize();
 
             $('#tag-filter').typeahead(null, {
-                source: engine.ttAdapter(),
-                updater: function(item) {
-                    window.location='{% url 'bookmark_tag' %}?tagsearch=' + item;
-                }
+                source: engine.ttAdapter()
+            });
+
+            $('#tag-filter').bind('typeahead:selected', function(obj, datum, name) {
+                window.location='{% url 'bookmark_tag' %}?tagsearch=' + datum.value;
             });
 
             var selectedId;
