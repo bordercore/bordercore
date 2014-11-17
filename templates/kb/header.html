@@ -83,34 +83,20 @@
 	</script>
 {% endverbatim %}
 
-    <div class="row">
+<div class="row">
 
-        <div class="dropdown col-md-1">
-            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown">
-    Menu
-                <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                <li role="presentation"><a role="menuitem" tabindex="-1" href="{% url 'search' %}">Search</a></li>
-                <li role="presentation" class="divider"></li>
-                <li role="presentation"><a role="menuitem" tabindex="-1" href="{% url 'document_edit' %}">Add document</a></li>
-                <li role="presentation"><a role="menuitem" tabindex="-1" href="{% url 'search_admin' %}">Admin</a></li>
-                <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
-            </ul>
-        </div>
+    <div class="col-md-5">
 
-		<div class="col-md-5">
+        <form id="search" class="form-inline" action="{% url 'search' %}" method="get" autocomplete="off">
+            <input type="hidden" id="facets" name="facets" value="" />
 
-			<form id="search" class="form-inline" action="{% url 'search' %}" method="get" autocomplete="off">
-				<input type="hidden" id="facets" name="facets" value="" />
+            <div class="form-group">
+                <input id="kbsearch" class="form-control input-xlarge" type="text" name="search" value="{{ request.GET.search }}" placeholder="Search" />
+            </div>
 
-				<div class="form-group">
-					<input id="kbsearch" class="form-control" type="text" name="search" value="{{ request.GET.search }}" placeholder="Search" />
-				</div>
+        </form>
 
-			</form>
+    </div>
 
-		</div>
-
-	</div>
+</div>
 

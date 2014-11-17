@@ -1,71 +1,81 @@
 <script type="text/javascript">
 
-// Hilight the current section in the navbar
-$(document).ready(function() {
+    // Hilight the current section in the navbar
+    $(document).ready(function() {
 
-	$('.nav li:contains("{{ section }}")').addClass('active')
+        $('.nav li:contains("{{ section }}")').addClass('active')
 
-	$('.navbar .dropdown').hover(function() {
-		$(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
-	}, function() {
-		$(this).find('.dropdown-menu').first().stop(true, true).slideUp(105)
-	});
+        $('.navbar .dropdown').hover(function() {
+            $(this).find('.dropdown-menu').first().stop(true, true).slideDown(150);
+        }, function() {
+                $(this).find('.dropdown-menu').first().stop(true, true).slideUp(105)
+            });
 
-})
+    })
 
 </script>
 
 <div class="row">
-	<div class="col-md-12">
+    <div class="col-md-12">
 
-		<div class="navbar navbar-default">
-			<ul class="nav navbar-nav">
-				<li><a href="{% url 'homepage' %}"><i class="glyphicon glyphicon-home"></i> Home</a></li>
-				<li><a href="{% url 'bookmark_list' %}">Bookmarks</a></li>
+        <div class="navbar navbar-default">
+            <ul class="nav navbar-nav">
+                <li><a href="{% url 'homepage' %}"><i class="glyphicon glyphicon-home"></i> Home</a></li>
+                <li><a href="{% url 'bookmark_list' %}">Bookmarks</a></li>
 
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Feeds<b class="caret"></b>
-					</a>
-					<ul class="dropdown-menu">
-						<li><a href="{% url 'feed_list' %}">Browse</a></li>
-						<li><a href="{% url 'feed_edit' %}">Add a Feed</a></li>
-						<li><a href="{% url 'feed_subscriptions' %}">Manage Subscriptions</a></li>
-					</ul>
-				</li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Feeds<b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'feed_list' %}">Browse</a></li>
+                        <li><a href="{% url 'feed_edit' %}">Add a Feed</a></li>
+                        <li><a href="{% url 'feed_subscriptions' %}">Manage Subscriptions</a></li>
+                    </ul>
+                </li>
 
-				<li><a href="{% url 'blog_list' %}">Blog</a></li>
+                <li><a href="{% url 'blog_list' %}">Blog</a></li>
 
-				<li><a href="{% url 'search' %}">KB</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">KB<b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'search' %}">Search</a></li>
+                        <li><a href="{% url 'document_edit' %}">Add Document</a></li>
+                        <li><a href="{% url 'search_admin' %}">Admin</a></li>
+                    </ul>
+                </li>
 
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Music<b class="caret"></b>
-					</a>
-					<ul class="dropdown-menu">
-						<li><a href="{% url 'music_list' %}">Browse</a></li>
-						<li><a href="{% url 'add_song' %}">Add a Song</a></li>
-						<li><a href="{% url 'wishlist' %}">Wish List</a></li>
-					</ul>
-				</li>
+                <li><a href="{% url 'search' %}">KB</a></li>
 
-				<!-- <li><a href="/calendar/">Calendar</a></li> -->
-				<li><a href="{% url 'todo_list' %}">Todo</a></li>
-				<!-- <li><a href="http://www.bordercore.com/photos/">Photos</a></li> -->
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Music<b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'music_list' %}">Browse</a></li>
+                        <li><a href="{% url 'add_song' %}">Add a Song</a></li>
+                        <li><a href="{% url 'wishlist' %}">Wish List</a></li>
+                    </ul>
+                </li>
 
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Misc<b class="caret"></b>
-					</a>
-					<ul class="dropdown-menu">
-						<li><a href="{% url 'prefs' %}"><i class="glyphicon glyphicon-cog"></i> Prefs</a></li>
-						<li><a href="/logout"><i class="glyphicon glyphicon-off"></i> Logout</a></li>
-					</ul>
-				</li>
+                <!-- <li><a href="/calendar/">Calendar</a></li> -->
+                <li><a href="{% url 'todo_list' %}">Todo</a></li>
+                <!-- <li><a href="http://www.bordercore.com/photos/">Photos</a></li> -->
 
-			</ul>
-			<form class="navbar-form pull-left" action="{% url 'search' %}">
-				<input type="text" class="form-control col-lg-1" size="10" placeholder="Search" name="search">
-			</form>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Misc<b class="caret"></b>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'prefs' %}"><i class="glyphicon glyphicon-cog"></i> Prefs</a></li>
+                        <li><a href="/logout"><i class="glyphicon glyphicon-off"></i> Logout</a></li>
+                    </ul>
+                </li>
 
-		</div>
+            </ul>
+            <form class="navbar-form pull-left" action="{% url 'search' %}">
+                <input type="text" class="form-control col-lg-1" size="10" placeholder="Search" name="search">
+            </form>
 
-	</div>
+        </div>
+
+    </div>
 </div>
