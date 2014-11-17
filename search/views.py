@@ -41,7 +41,7 @@ class SearchListView(ListView):
 
         if 'search' in self.request.GET:
 
-            search_term = urllib.quote_plus(self.request.GET['search'])
+            search_term = self.request.GET['search']
             rows = 100
             # rows = self.request.GET['rows']
             # if rows == 'No limit':
@@ -52,7 +52,7 @@ class SearchListView(ListView):
             # TODO: catch SolrException
             conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION) )
 
-            solr_args = { 'q': 'title:%s attr_content:%s bordercore_todo_task:%s tags:%s' % (search_term, search_term, search_term, search_term),
+            solr_args = { 'q': 'title:%s attr_content:%s bordercore_todo_task:%s tags:%s bordercore_bookmark_title:%s' % (search_term, search_term, search_term, search_term, search_term),
                           'rows': rows,
                           'facet': 'on',
                           'facet.mincount': '1',
