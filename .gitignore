@@ -1,4 +1,5 @@
 *.pyc
 .#*
+templates/static/docs/
 templates/static/img/favicons/*
 !templates/static/img/favicons/README
