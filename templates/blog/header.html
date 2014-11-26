@@ -15,8 +15,10 @@
 
         engine.initialize();
 
-        $('#tag-filter').typeahead(null, {
-            source: engine.ttAdapter()
+        $('#tag-filter').typeahead({
+            autoselect: true
+        }, {
+            source: engine.ttAdapter(),
         });
 
 		$('#tag-filter').bind('typeahead:selected', function(obj, datum, name) {

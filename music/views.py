@@ -457,16 +457,16 @@ def search(request):
     results = []
 
     for album in albums:
-        results.append( { 'label': "%s - %s" % (album.artist, album.title),
+        results.append( { 'value': "%s - %s" % (album.artist, album.title),
                           'id': album.id,
                           'type': 'album' } )
 
     for artist in artists:
-        results.append( { 'label': "%s" % (artist.artist),
+        results.append( { 'value': "%s" % (artist.artist),
                           'type': 'artist' } )
 
     for song in songs:
-        results.append( { 'label': "%s - %s" % (song.title, song.artist),
+        results.append( { 'value': "%s - %s" % (song.title, song.artist),
                           'id': song.album_id,
                           'type': 'album' } )
 
