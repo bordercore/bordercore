@@ -248,6 +248,32 @@ def kb_search_tags_booktitles(request):
                               context_instance=RequestContext(request))
 
 
+def search_document_source(request):
+
+    conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION) )
+
+    doc_source = request.GET['doc_source']
+
+    solr_args = { 'q': 'doctype:document AND source:*%s*' % doc_source,
+                  'fl': 'id,source',
+                  'wt': 'json',
+                  'group': 'true',
+                  'group.field': 'source'
+              }
+
+    results = json.loads(conn.raw_query(**solr_args))
+
+    return_data = []
+
+    for match in results['grouped']['source']['groups']:
+        return_data.append( {'source': match['doclist']['docs'][0]['source'] } )
+
+    return render_to_response('return_json.json',
+                              { 'info': json.dumps(sorted(return_data)) },
+                              content_type="application/json",
+                              context_instance=RequestContext(request))
+
+
 @login_required
 def search_admin(request):
 

@@ -70,9 +70,9 @@ class DocumentForm(ModelForm):
         widgets = {
             'content': Textarea(attrs={'rows': 20, 'class': 'form-control'}),
             'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),
-            'title': TextInput(attrs={'class': 'form-control'}),
-            'url': TextInput(attrs={'class': 'form-control'}),
-            'author': TextInput(attrs={'class': 'form-control'}),
-            'source': TextInput(attrs={'class': 'form-control'}),
-            'sub_heading': TextInput(attrs={'class': 'form-control'})
+            'title': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'url': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'author': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'source': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'sub_heading': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'})
         }

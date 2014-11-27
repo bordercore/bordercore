@@ -72,6 +72,24 @@
 				multidate: false
 			});
 
+            // Handle the typeahead for the Source field
+            var engineSource = new Bloodhound({
+                name: 'tags',
+                remote: '{% url 'search_document_source' %}?doc_source=%QUERY',
+                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
+                queryTokenizer: Bloodhound.tokenizers.whitespace
+            });
+
+            engineSource.initialize();
+
+            $('#id_source').typeahead({
+                autoselect: true,
+                minLength: 3,
+            }, {
+                    displayKey: 'source',
+                    source: engineSource.ttAdapter(),
+                });
+
 		});
 
 	</script>
