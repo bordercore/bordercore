@@ -1,4 +1,4 @@
-from django.forms import ModelForm, Textarea, TextInput, ModelMultipleChoiceField
+from django.forms import CheckboxInput, ModelForm, Textarea, TextInput, ModelMultipleChoiceField
 
 from todo.models import Todo
 from tag.models import Tag
@@ -49,7 +49,7 @@ class TodoForm(ModelForm):
         model = Todo
         fields = ('task', 'note', 'url', 'due_date', 'is_urgent')
         widgets = {
-            'task': TextInput(attrs={'class': 'input-xxlarge'}),
-            'note': Textarea(attrs={'rows': 2, 'class': 'input-xxlarge'}),
-            'url': TextInput(attrs={'class': 'input-xxlarge'}),
+            'task': TextInput(attrs={'class': 'form-control'}),
+            'note': Textarea(attrs={'rows': 2}),
+            'url': TextInput(attrs={'class': 'form-control'}),
         }

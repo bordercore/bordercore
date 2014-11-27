@@ -22,67 +22,65 @@ var table;
 
 $(document).ready(function() {
 
-	function formatTitle( data, type, row ) {
-		return '<a href="{% url 'music_stream' %}' + row[0] + '">' + row[2] + '</a>';
-	}
+    function formatTitle( data, type, row ) {
+        return '<a href="{% url 'music_stream' %}' + row[0] + '">' + row[2] + '</a>';
+    }
 
-	table = $('#song_list').dataTable( {
-		"info": false,
-		"filter": false,
-		"paginate": false,
-		"displayLength": 50,
-		"sorting": [[1, 'asc']],
-		"lengthChange": false,
-		"searchable": false,
-		"columnDefs": [
-			{ "targets": [0], "visible": false },
-			{ "targets": [1], "class": "col-lg-1", "sorting": [ "asc", "desc" ] },
-			{ "targets": [2], "class": "col-lg-8", "sorting": [ "asc", "desc" ],  "render": formatTitle, "useRendered": false },
-			{ "targets": [3], "class": "col-lg-1", "iDataSort": 4 },
-			{ "targets": [4], "visible": false }
+    table = $('#song_list').dataTable( {
+        "info": false,
+        "filter": false,
+        "paginate": false,
+        "displayLength": 50,
+        "sorting": [[1, 'asc']],
+        "lengthChange": false,
+        "searchable": false,
+        "columnDefs": [
+            { "targets": [0], "visible": false },
+            { "targets": [1], "class": "col-lg-1", "sorting": [ "asc", "desc" ] },
+            { "targets": [2], "class": "col-lg-8", "sorting": [ "asc", "desc" ],  "render": formatTitle, "useRendered": false },
+            { "targets": [3], "class": "col-lg-1", "iDataSort": 4 },
+            { "targets": [4], "visible": false }
         ],
-	} );
+    } );
 
 });
 
 </script>
 
 <div class="row">
-	<div class="col-lg-4">
-{% block breadcrumbs %}
-<ol class="breadcrumb pull-left">
-<li> <a href="{% url 'music_list' %}">Music</a> </li>
-<li> <a href="{% url 'show_artist' album.artist %}">{{ album.artist }} </li></a> </li>
+    <div class="col-lg-5">
+        {% block breadcrumbs %}
+            <ol class="breadcrumb pull-left">
+                <li> <a href="{% url 'music_list' %}">Music</a> </li>
+                <li> <a href="{% url 'show_artist' album.artist %}">{{ album.artist }} </li></a> </li>
 <li class="active"> {{ album.title }} </li>
-</ol>
-{% endblock %}
+            </ol>
+        {% endblock %}
 
-{% include "music/header.html" %}
-	</div>
+    </div>
+    {% include "music/header.html" %}
 </div>
 
 <div class="row">
 
-<div class="col-lg-3">
-<!-- <img src="{% url 'album_artwork' data.0.id %}" height="250" width="250" /> -->
-<img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title }}/artwork.jpg" height="250" width="250" />
+    <div class="col-lg-3">
+        <img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title }}/artwork.jpg" height="250" width="250" />
+    </div>
 
-</div>
-
-<div class="col-lg-8">
-<h2>{{ album.title }}</h2>
-<h3>{{ album.artist }}</h3>
-<h5> {{ album.year }} </h5>
-</div>
+    <div class="col-lg-8">
+        <h2>{{ album.title }}</h2>
+        <h3>{{ album.artist }}</h3>
+        <h5> {{ album.year }} </h5>
+    </div>
 
 </div>
 
 <div class="row">
-<div class="col-lg-11">
+    <div class="col-lg-11">
 
-{% include "common/datatable.html" with cols=cols id="song_list" %}
+        {% include "common/datatable.html" with cols=cols id="song_list" %}
 
-</div>
+    </div>
 </div>
 
 {% endblock %}

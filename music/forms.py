@@ -1,4 +1,4 @@
-from django.forms import ModelForm, Textarea, TextInput
+from django.forms import ModelForm, Select, Textarea, TextInput
 from django import forms
 
 from music.models import Song, WishList
@@ -28,11 +28,14 @@ class SongForm(ModelForm):
         model = Song
         fields = ('title', 'artist', 'track', 'year', 'comment', 'source', 'times_played', 'length', 'id')
         widgets = {
-            'title': TextInput(attrs={'class': 'input-large'}),
-            'artist': TextInput(attrs={'class': 'input-large'}),
-            'comment': Textarea(attrs={'rows': 2}),
-            'length': TextInput(attrs={'readonly': True}),
-            'times_played': TextInput(attrs={'readonly': True})
+            'title': TextInput(attrs={'class': 'form-control'}),
+            'artist': TextInput(attrs={'class': 'form-control'}),
+            'comment': Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+            'source': Select(attrs={'class': 'form-control'}),
+            'track': TextInput(attrs={'class': 'form-control'}),
+            'year': TextInput(attrs={'class': 'form-control'}),
+            'length': TextInput(attrs={'readonly': True, 'class': 'form-control'}),
+            'times_played': TextInput(attrs={'readonly': True, 'class': 'form-control'})
         }
 
 class WishListForm(ModelForm):
@@ -49,7 +52,7 @@ class WishListForm(ModelForm):
         model = WishList
         fields = ('artist', 'song', 'album')
         widgets = {
-            'artist': TextInput(attrs={'class': 'input-xxlarge'}),
-            'song': TextInput(attrs={'class': 'input-xxlarge'}),
-            'album': TextInput(attrs={'class': 'input-xxlarge'}),
+            'artist': TextInput(attrs={'class': 'form-control'}),
+            'song': TextInput(attrs={'class': 'form-control'}),
+            'album': TextInput(attrs={'class': 'form-control'}),
         }

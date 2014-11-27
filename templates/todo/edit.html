@@ -15,71 +15,68 @@
 
 $(document).ready(function() {
 
-		var engine = new Bloodhound({
-			name: 'tags',
-			remote: '{% url 'tag_search' %}?query=%QUERY',
-			datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
-			queryTokenizer: Bloodhound.tokenizers.whitespace
-		});
+        var engine = new Bloodhound({
+            name: 'tags',
+            remote: '{% url 'tag_search' %}?query=%QUERY',
+            datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
+            queryTokenizer: Bloodhound.tokenizers.whitespace
+        });
 
-		engine.initialize();
+        engine.initialize();
 
-		$('#id_tags').tagsinput({
-			confirmKeys: [13, 188],
-			tagClass: function(item) {
-				return 'label label-primary';
-			},
+        $('#id_tags').tagsinput({
+            confirmKeys: [13, 188],
+            tagClass: function(item) {
+                return 'label label-primary';
+            },
             typeaheadjs: {
                 source: engine.ttAdapter(),
                 displayKey: 'value',
                 valueKey: 'value',
                 options: {'autoselect': true}
             }
-		});
+        });
 
-		{% if action == 'Edit' %}
-		$("input.btn[value='Delete']").click( function() {
-			$("form#todo-form").attr("action", "{% url 'todo_delete' pk %}");
-		})
-		{% endif %}
+        {% if action == 'Edit' %}
+        $("input.btn[value='Delete']").click( function() {
+            $("form#todo-form").attr("action", "{% url 'todo_delete' pk %}");
+        })
+        {% endif %}
 
 });
 
 </script>
 
 {% if message %}
-	<div class="alert alert-success">{{ message }}</div>
+    <div class="alert alert-success">{{ message }}</div>
 {% endif %}
 
-<p class="lead col-lg-offset-1">
-	{{ action }} Task
-</p>
+<p class="lead col-lg-offset-2">{{ action }} Task</p>
 
 <form id="todo-form" class="form-horizontal" action="{{ request.path }}" method="post">
-	{% csrf_token %}
+    {% csrf_token %}
 
-	{% for field in form %}
-		<div class="form-group {% if field.errors %}error{% endif %}">
-			<label class="col-lg-1 control-label" for="inputTitle">{{ field.label }}</label>
+    {% for field in form %}
+        <div class="form-group{% if field.errors %} error{% endif %}">
+            <label class="col-lg-2 control-label" for="inputTitle">{{ field.label }}</label>
 
-			<div class="col-lg-5">
-				{{ field }}
-				{% for error in field.errors %}
-					<span class="form-error">{{ error }}</span>
-				{% endfor %}
+            <div class="col-lg-5">
+                {{ field }}
+                {% for error in field.errors %}
+                    <span class="form-error">{{ error }}</span>
+                {% endfor %}
+            </div>
 
-			</div>
+        </div>
+    {% endfor %}
 
-		</div>
-	{% endfor %}
-
-	<div class="form-group">
-		<div class="col-lg-3 col-lg-offset-1">
-			<input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
-			<input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
-			<a class="btn btn-default" href="{% url 'todo_list' %}">Cancel</a>
-		</div>
-	</div>
+    <div class="form-group">
+        <div class="col-lg-3 col-lg-offset-2">
+            <input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
+            <input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
+            <a class="btn btn-default" href="{% url 'todo_list' %}">Cancel</a>
+        </div>
+    </div>
 
 </form>
 

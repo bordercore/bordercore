@@ -30,7 +30,7 @@ class UserProfileForm(ModelForm):
         super(UserProfileForm, self).__init__(*args, **kwargs)
 
         self.fields['bookmarks_show_untagged_only'].label = "Show untagged bookmarks only"
-        self.fields['favorite_tags'].widget.attrs['class'] = 'input-xxlarge'
+        self.fields['favorite_tags'].widget.attrs['class'] = 'form-control'
 
         # If this form has a model attached, get the tags and display them separated by commas
         if self.instance.id:

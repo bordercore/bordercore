@@ -166,7 +166,7 @@ def song_edit(request, song_id = None):
         form = SongForm() # An unbound form
 
     return render_to_response('music/edit.html',
-                              {'section': SECTION, 'action': action, 'form': form, 'file_info': file_info },
+                              {'section': SECTION, 'action': action, 'form': form, 'file_info': file_info, 'song': song },
                               context_instance=RequestContext(request))
 
 
@@ -384,7 +384,6 @@ def add_song(request):
 
         else:
             action = 'Review'
-
 
     return render_to_response('music/add_song.html',
                               {'section': SECTION, 'action': action, 'info': info, 'notes': notes, 'md5sum': md5sum, 'form': form },

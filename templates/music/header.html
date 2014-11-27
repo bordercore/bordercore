@@ -44,15 +44,11 @@ $(document).ready(function() {
 
 </script>
 
-<div class="row">
-
-	<div class="col-lg-3">
+<div class="col-lg-3 pull-right">
 
 	<form class="form-inline pull-right" name="nav_form" id="blog-search-form" action="{{ request.path }}" method="get">
-	<input id="music-search" type="text" class="form-control" name="search_item" value="{{ request.GET.search_item }}" autocomplete="off" placeholder="Search" />
-
+	    <input id="music-search" type="text" class="form-control" name="search_item" value="{{ request.GET.search_item }}" autocomplete="off" placeholder="Search" />
     </form>
 
-	</div>
-
 </div>
+
