@@ -42,12 +42,11 @@ class SearchListView(ListView):
         if 'search' in self.request.GET:
 
             search_term = self.request.GET['search']
-            rows = 100
-            # rows = self.request.GET['rows']
-            # if rows == 'No limit':
-            #     rows = 1000000
-            # elif rows is None:
-            #     rows = self.SOLR_COUNT_PER_PAGE
+            rows = self.request.GET['rows']
+            if rows == 'No limit':
+                rows = 1000000
+            elif rows is None:
+                rows = self.SOLR_COUNT_PER_PAGE
 
             # TODO: catch SolrException
             conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION) )
@@ -115,6 +114,7 @@ class SearchListView(ListView):
                                   last_modified=last_modified,
                                   url=myobject.get('url', ''),
                                   filename=filename,
+                                  tags=myobject.get('tags'),
                                   bordercore_todo_task=myobject.get('bordercore_todo_task',''),
                                   bordercore_blogpost_title=myobject.get('bordercore_blogpost_title',''),
                                   blogpost_snippet = blogpost_snippet,

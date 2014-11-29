@@ -95,4 +95,8 @@ ul.pagination {
 
 .search_bordercore_blogpost_snippet {
                                       font-weight: bold;
- }
+                                      }
+
+#kbsearch {
+                width: 300px;
+                }

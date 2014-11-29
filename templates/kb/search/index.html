@@ -35,44 +35,6 @@
 
 </script>
 
-    <div class="row">
-
-        <div class="col-md-10">
-
-            <form id="search" class="form-inline" action="{% url 'search' %}" method="get">
-                <input type="hidden" id="facets" name="facets" value="" />
-
-                <div class="form-group">
-
-                    <input class="form-control" type="text" name="search" value="{{ request.GET.search }}" placeholder="Search" />
-
-Limit
-                    <select name="rows" class="form-control">
-                        <option>100</option>
-                        <option>200</option>
-                        <option>1000</option>
-                        <option>No limit</option>
-                    </select>
-Sort by
-                    <select name="sort" class="form-control">
-                        <option value="rank">Rank</option>
-                        <option value="project_name">Project Name</option>
-                    </select>
-
-                    <input class="btn btn-default" type="submit" name="Go" value="Search" />
-
-{% if info %}
-    &nbsp; <strong>{{ numFound }}</strong> match{{ info|pluralize:"es" }} found
-{% endif %}
-
-                </div>
-
-            </form>
-
-        </div>
-
-    </div>
-
 	<br />
 
 {% if request.GET %}
@@ -120,7 +82,14 @@ Sort by
 
 {% elif match.doctype == 'bordercore_bookmark' %}
 
-	<h4 class="search_book_title">Link: <a href="{{ match.url }}">{{ match.bordercore_bookmark_title.0 }}</a>  <span class="search_todo_date">{{ match.last_modified }}</span></h4>
+	<h4 class="search_book_title">
+        <img src="{{ STATIC_URL }}img/kb_link.png" />
+        <a href="{{ match.url }}">{{ match.bordercore_bookmark_title.0 }}</a>
+        <span class="search_todo_date">{{ match.last_modified }}</span>
+        {% for tag in match.tags %}
+            <span class="label label-default"><a href="{% url 'kb_search_tag_detail' tag %}">{{ tag }}</a></span>
+        {% endfor %}
+    </h4>
 
 {% elif match.doctype == 'bordercore_blog' %}
 
@@ -138,7 +107,10 @@ Sort by
 
 {% else %}
 
-	<h4 class="search_book_title"><a href="{{ STATIC_URL }}ebooks/{{ match.filename }}" target="book">{{ match.title }}</a></h4>
+	<h4 class="search_book_title">
+        <img src="{{ STATIC_URL }}img/kb_book.png" />
+        <a href="{{ STATIC_URL }}ebooks/{{ match.filename }}" target="book">{{ match.title }}</a>
+    </h4>
 	&nbsp; &nbsp; {{ match.author.0 }}
 
 {% endif %}
