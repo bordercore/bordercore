@@ -222,25 +222,16 @@ def kb_search_tags_booktitles(request):
     tags = {}
     matches = []
 
-#    print results['response']['docs']
-
     for match in results['response']['docs']:
         if match['doctype'] == 'book':
             matches.append({'type': 'Book', 'value': match['title'], 'filename': os.path.basename(match.get('filepath'))})
         if match.get('tags', ''):
-            for tag in [x for x in match['tags'] if x.startswith(term)]:
+            print match['tags']
+            for tag in [x for x in match['tags'] if x.lower().startswith(term.lower())]:
                 tags[tag] = 1
-#            matches.append({'type': 'tag', 'match': tag})
-#            matches['tags'][tag] = 1
-#        matches['tags'][match.get('tags')] = 1
-        # If the book doesn't have a title, use the filename
-        # match['filename'] = os.path.basename(match.get('filepath'))
-        # if not match.get('title'):
-        #     match['title'] = basename(os.path.splitext(match['filepath'])[0])
 
     for tag in tags:
         matches.append({'type': 'Tag', 'value': tag})
-    print matches
 
     return render_to_response('return_json.json',
                               { 'info': json.dumps(matches) },
