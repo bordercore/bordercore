@@ -12,6 +12,7 @@ class Bookmark(TimeStampedModel):
     user = models.ForeignKey(User)
     note = models.TextField(null=True)
     tags = models.ManyToManyField(Tag)
+    is_pinned = models.BooleanField(default=False)
     last_check = models.DateTimeField(null=True)
     last_response_code = models.IntegerField(null=True)
 

@@ -91,7 +91,7 @@ def snarf_link(request):
     url = request.GET['url']
     title = h.unescape( request.GET['title'] )
 
-    b = Bookmark(user=request.user, url=url, title=title)
+    b = Bookmark(is_pinned=False, user=request.user, url=url, title=title)
     b.save()
 
     return redirect('bookmark_edit', b.id)

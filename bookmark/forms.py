@@ -48,12 +48,9 @@ class BookmarkForm(ModelForm):
                     sorted_list.save()
 
         for new_tag in new_tags:
-            print self.instance.user
             # Has the user already used this tag with any bookmarks?
             try:
-                print self.instance.user
                 sorted_list = BookmarkTagUser.objects.get(tag=Tag.objects.get(name=new_tag.name), user=self.instance.user)
-                print "got here -- a"
                 # Yes.  Now check if this bookmark already has this tag.
                 if not self.instance.id in sorted_list.bookmark_list:
                     # Nope.  So this bookmark goes to the top of the sorted list.
@@ -62,7 +59,6 @@ class BookmarkForm(ModelForm):
             except ObjectDoesNotExist:
                 # This is the first time this tag has been applied to a bookmark.
                 # Create a new list with one member (the current bookmark)
-                print "foobar"
                 sorted_list = BookmarkTagUser(tag=Tag.objects.get(name=new_tag.name),
                                               bookmark_list=[self.instance.id],
                                               user=self.instance.user)
@@ -77,7 +73,7 @@ class BookmarkForm(ModelForm):
 
     class Meta:
         model = Bookmark
-        fields = ('url', 'title', 'note', 'tags', 'id')
+        fields = ('url', 'title', 'note', 'tags', 'is_pinned', 'id')
         widgets = {
             'url': TextInput(attrs={'class': 'form-control'}),
             'title': TextInput(attrs={'class': 'form-control'}),
