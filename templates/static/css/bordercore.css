@@ -99,4 +99,23 @@ ul.pagination {
 
 #kbsearch {
                 width: 300px;
-                }
+            }
+
+a.tag:link {
+    color: white;
+}
+
+/* visited link */
+a.tag:visited {
+    color: white;
+}
+
+/* mouse over link */
+a.tag:hover {
+    color: white;
+}
+
+/* selected link */
+a.tag:active {
+    color: yellow;
+}

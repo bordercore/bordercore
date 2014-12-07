@@ -89,7 +89,17 @@
         <a href="{{ match.url }}">{{ match.bordercore_bookmark_title.0 }}</a>
         <span class="search_todo_date">{{ match.last_modified }}</span>
         {% for tag in match.tags %}
-            <span class="label label-default"><a href="{% url 'kb_search_tag_detail' tag %}">{{ tag }}</a></span>
+            {% if tag|slice:":1" == '_' %}
+                <span class="label label-info">
+                    <a class="tag" href="{% url 'kb_search_tag_detail' tag|slice:"1:" %}">{{ tag|slice:"1:" }}</a>
+                </span>
+            {% else %}
+                <span class="label label-default">
+                    <a class="tag" href="{% url 'kb_search_tag_detail' tag %}">{{ tag }}</a>
+                </span>
+            {% endif %}
+                                &nbsp;
+
         {% endfor %}
     </h4>
 
