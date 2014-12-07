@@ -1,10 +1,5 @@
 {% extends "base.html" %}
 
-{% block extra_head %}
-
-
-{% endblock %}
-
 {% block title %} KB :: Documents {% endblock %}
 
 {% block content %}
@@ -47,17 +42,17 @@
 
 			$('#markdown-support').change( function(event) {
 				var value = $(this).val();
-				var range = $('#id_post').getSelection();
-				var text = $('#id_post').val();
+				var range = $('#id_content').getSelection();
+				var text = $('#id_content').val();
 				if (value == 'Bold') {
-					$('#id_post').val( text.substr(0, range.start) + '**' + range.text + '**' +  text.substr(range.end, text.length - range.end));
+					$('#id_content').val( text.substr(0, range.start) + '**' + range.text + '**' +  text.substr(range.end, text.length - range.end));
 				} else if (value == 'Insert link') {
-					$('#id_post').val( text.substr(0, range.start) + '[text](url)' + range.text + text.substr(range.end, text.length - range.end));
+					$('#id_content').val( text.substr(0, range.start) + '[text](url)' + range.text + text.substr(range.end, text.length - range.end));
 				} else if (value == 'Insert list') {
-					$('#id_post').val( text.substr(0, range.start) + '\n - List item\n' + text.substr(range.end, text.length - range.end));
+					$('#id_content').val( text.substr(0, range.start) + '\n - List item\n' + text.substr(range.end, text.length - range.end));
 				} else if (value == 'Indent Code') {
 					var newtext = '    ' + range.text.replace(/\n/g, "\n    ");
-					$('#id_post').val( text.substr(0, range.start) + newtext  + text.substr(range.end, text.length - range.end));
+					$('#id_content').val( text.substr(0, range.start) + newtext  + text.substr(range.end, text.length - range.end));
 				} else if (value == 'Escape HTML') {
 					var escapedText = range.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 					$('textarea').val( text.substr(0, range.start) + escapedText +  text.substr(range.end, text.length - range.end));
