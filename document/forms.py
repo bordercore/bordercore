@@ -34,6 +34,7 @@ class DocumentForm(ModelForm):
         self.fields['source'].required = False
         self.fields['pub_date'].required = False
         self.fields['pub_date'].input_formats = ['%m-%d-%Y']
+        self.fields['url'].required = False
 
         if self.instance.id:
             # If this form has a model attached, get the tags and display them separated by commas
