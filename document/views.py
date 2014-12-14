@@ -52,7 +52,6 @@ def document_detail(request, document_id):
     d = Document.objects.get(pk=document_id)
 
     d.authors = ', '.join(d.author)
-    d.content = d.content.replace('\n', '<br/>')
 
     return render_to_response('kb/documents/view.html',
                               { 'document': d },
