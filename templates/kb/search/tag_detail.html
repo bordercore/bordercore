@@ -6,44 +6,113 @@
 
 {% include "kb/header.html" %}
 
-	<div class="row">
-		<div class="col-md-12"><h1>{{ tag }}</h1></div>
-	</div>
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput-custom.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/typeahead-bootstrap3.css" />
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            var engine = new Bloodhound({
+                name: 'tags',
+                remote: '{% url 'tag_search' %}?query=%QUERY',
+                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
+                queryTokenizer: Bloodhound.tokenizers.whitespace
+            });
+
+            engine.initialize();
+
+            $('#tag-filter').tagsinput({
+                confirmKeys: [13, 188],
+                tagClass: function(item) {
+                    return 'label label-primary';
+                },
+                typeaheadjs: {
+                    source: engine.ttAdapter(),
+                    displayKey: 'value',
+                    valueKey: 'value',
+                    options: {'autoselect': true}
+                }
+
+            });
+
+            $('#tag-filter').change(function(obj) {
+                var tags = $('#tag-filter').tagsinput('items')
+                window.location='{% url 'kb_search_tag_detail' 666 %}'.replace('666', tags);
+            });
+
+            $('#other_tags').change( function(event) {
+                var new_tag = $(this).val();
+                $('#tag-filter').tagsinput('add', new_tag)
+            });
+
+});
+
+</script>
+
+    <div class="row">
+        <div class="col-md-12"><h1>{{ tag }}</h1></div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-10">
+
+            <form id="tag-filter-form" class="form-inline" action="{% url 'kb_search_tag_detail' tag %}" method="get" autocomplete="off">
+                <div class="form-group search_input">
+                    <input id="tag-filter" class="form-control" type="text" name="taglist" value="{{ taglist }}" placeholder="Tag List" />
+                </div>
+                {% if tag_counts %}
+                <div class="form-group search_input">
+                    <label>&nbsp; &nbsp; Other tags:</label>
+                    <select id="other_tags" class="form-control">
+                        {% for tag, count in tag_counts %}
+                            <option value="{{ tag }}">{{ tag }} ({{ count }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
 
 {% for match in info.matches.bordercore_bookmark %}
-	{% if forloop.first %}<h4>Links</h4>{% endif %}
-	<div class="row">
-		<div class="col-md-12">
-			<a href="{{ match.url }}">{{ match.bordercore_bookmark_title.0 }}</a>
-		</div>
-	</div>
+    {% if forloop.first %}<h4>Links</h4>{% endif %}
+    <div class="row">
+        <div class="col-md-12">
+            <a href="{{ match.url }}">{{ match.bordercore_bookmark_title.0 }}</a>
+        </div>
+    </div>
 {% endfor %}
 
 {% for match in info.matches.document %}
-	{% if forloop.first %}<h4>Documents</h4>{% endif %}
-	<div class="row">
-		<div class="col-md-12">
-			<a href="{% url 'document_detail' match.internal_id %}">{{ match.title }}</a>
-		</div>
-	</div>
+    {% if forloop.first %}<h4>Documents</h4>{% endif %}
+    <div class="row">
+        <div class="col-md-12">
+            <a href="{% url 'document_detail' match.internal_id %}">{{ match.title }}</a>
+        </div>
+    </div>
 {% endfor %}
 
 {% for match in info.matches.bordercore_blog %}
-	{% if forloop.first %}<h4>Blog Entries</h4>{% endif %}
-	<div class="row">
-		<div class="col-md-12">
-			<a href="{% url 'blog_list' match.internal_id %}">{{ match.bordercore_blogpost_title.0|default:"Blog Post" }}</a>
-		</div>
-	</div>
+    {% if forloop.first %}<h4>Blog Entries</h4>{% endif %}
+    <div class="row">
+        <div class="col-md-12">
+            <a href="{% url 'blog_list' match.internal_id %}">{{ match.bordercore_blogpost_title.0|default:"Blog Post" }}</a>
+        </div>
+    </div>
 {% endfor %}
 
 {% for match in info.matches.bordercore_todo %}
-	{% if forloop.first %}<h4>Todo</h4>{% endif %}
-	<div class="row">
-		<div class="col-md-12">
-			{{ match.bordercore_todo_task.0 }}  <span class="search_todo_date">{{ match.last_modified }}</span>
-		</div>
-	</div>
+    {% if forloop.first %}<h4>Todo</h4>{% endif %}
+    <div class="row">
+        <div class="col-md-12">
+            {{ match.bordercore_todo_task.0 }}  <span class="search_todo_date">{{ match.last_modified }}</span>
+        </div>
+    </div>
 {% endfor %}
 
 <br />

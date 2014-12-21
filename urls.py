@@ -94,7 +94,7 @@ urlpatterns += patterns('search.views',
                         url(r'^kb/search/booktitle', 'search_book_title', name='search_book_title'),
                         url(r'^kb/search/documentsource', 'search_document_source', name='search_document_source'),
                         url(r'^kb/search/tagstitle', 'kb_search_tags_booktitles', name='kb_search_tags_booktitles'),
-                        url(r'^kb/search/tagdetail/(?P<tag>.*)', SearchTagDetailView.as_view(), name='kb_search_tag_detail'),
+                        url(r'^kb/search/tagdetail/(?P<taglist>.*)', SearchTagDetailView.as_view(), name='kb_search_tag_detail'),
                         url(r'^kb/search/', SearchListView.as_view(), name='search')
 )
 

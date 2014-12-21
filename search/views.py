@@ -138,7 +138,7 @@ class SearchTagDetailView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(SearchTagDetailView, self).get_context_data(**kwargs)
-        context['tag'] = self.kwargs['tag']
+        context['taglist'] = self.kwargs['taglist']
         results = {}
         for one_doc in context['info']['response']['docs']:
             if results.get(one_doc['doctype'], ''):
@@ -146,23 +146,47 @@ class SearchTagDetailView(ListView):
             else:
                 results[one_doc['doctype']] = [ one_doc ]
         context['info']['matches'] = results
+
+        tag_counts = {}
+        tag_list = self.kwargs['taglist'].split(',')
+        for x, y in grouped(context['info']['facet_counts']['facet_fields']['tags'], 2):
+            if x not in tag_list:
+                tag_counts[x] = y
+
+        import operator
+        tag_counts_sorted = sorted(tag_counts.items(), key=operator.itemgetter(1), reverse=True)
+
+        context['tag_counts'] = tag_counts_sorted
+
         return context
 
     def get_queryset(self):
-        tag = self.kwargs['tag']
+        taglist = self.kwargs['taglist']
         rows = 100
+
+        q = ' AND '.join([ 'tags:%s' % (t,) for t in taglist.split(',') ])
 
         conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION) )
 
-        solr_args = { 'q': 'tags:"%s"' % (tag),
+        solr_args = { 'q': q,
                       'rows': rows,
                       'fields': ['attr_*','author','doctype','filepath','tags','title','author', 'url'],
                       'wt': 'json',
-                      'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,doctype,filepath,id,internal_id,last_modified,tags,title,url,bordercore_blogpost_title'
+                      'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,doctype,filepath,id,internal_id,last_modified,tags,title,url,bordercore_blogpost_title',
+                      'facet': 'on',
+                      'facet.mincount': '1',
+                      'facet.field': '{!ex=tags}tags'
         }
 
         results = conn.raw_query(**solr_args)
         return json.loads(results)
+
+
+from itertools import izip
+
+def grouped(iterable, n):
+    "s -> (s0,s1,s2,...sn-1), (sn,sn+1,sn+2,...s2n-1), (s2n,s2n+1,s2n+2,...s3n-1), ..."
+    return izip(*[iter(iterable)]*n)
 
 
 def get_title(myobject):
