@@ -152,17 +152,22 @@ class SearchTagDetailView(ListView):
         for x, y in grouped(context['info']['facet_counts']['facet_fields']['tags'], 2):
             if x not in tag_list:
                 tag_counts[x] = y
+        doctype_counts = {}
+        for x, y in grouped(context['info']['facet_counts']['facet_fields']['doctype'], 2):
+            if x not in tag_list:
+                doctype_counts[x] = y
 
         import operator
         tag_counts_sorted = sorted(tag_counts.items(), key=operator.itemgetter(1), reverse=True)
-
         context['tag_counts'] = tag_counts_sorted
+        doctype_counts_sorted = sorted(doctype_counts.items(), key=operator.itemgetter(1), reverse=True)
+        context['doctype_counts'] = doctype_counts_sorted
 
         return context
 
     def get_queryset(self):
         taglist = self.kwargs['taglist']
-        rows = 100
+        rows = 1000
 
         q = ' AND '.join([ 'tags:"%s"' % (urllib.unquote(t).decode('utf8'),) for t in taglist.split(',') ])
 
@@ -175,7 +180,7 @@ class SearchTagDetailView(ListView):
                       'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,doctype,filepath,id,internal_id,last_modified,tags,title,url,bordercore_blogpost_title',
                       'facet': 'on',
                       'facet.mincount': '1',
-                      'facet.field': '{!ex=tags}tags'
+                      'facet.field': ['{!ex=tags}tags','{!ex=doctype}doctype'],
         }
 
         results = conn.raw_query(**solr_args)

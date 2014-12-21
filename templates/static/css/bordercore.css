@@ -97,6 +97,10 @@ ul.pagination {
                                       font-weight: bold;
                                       }
 
+#search_tags_searchform {
+   font-size: 18px;
+}
+
 #kbsearch {
                 width: 300px;
             }
@@ -118,4 +122,12 @@ a.tag:hover {
 /* selected link */
 a.tag:active {
     color: yellow;
+               }
+
+.voffset {
+   margin-top: 5px;
+}
+
+.bootstrap-tagsinput {
+width: 100% !important;
 }
