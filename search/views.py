@@ -164,7 +164,7 @@ class SearchTagDetailView(ListView):
         taglist = self.kwargs['taglist']
         rows = 100
 
-        q = ' AND '.join([ 'tags:%s' % (t,) for t in taglist.split(',') ])
+        q = ' AND '.join([ 'tags:"%s"' % (urllib.unquote(t).decode('utf8'),) for t in taglist.split(',') ])
 
         conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION) )
 
