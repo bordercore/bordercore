@@ -22,7 +22,7 @@
             var engine = new Bloodhound({
                 name: 'tags',
                 remote: '{% url 'tag_search' %}?query=%QUERY',
-                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
+                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.text); },
                 queryTokenizer: Bloodhound.tokenizers.whitespace
             });
 
@@ -31,33 +31,69 @@
             $('#tag-filter').tagsinput({
                 confirmKeys: [13, 188],
                 tagClass: function(item) {
-                    return 'label label-primary';
+                    if (item.is_meta == 'true') {
+                        return 'label label-success';
+                    } else {
+                        return 'label label-primary';
+                    }
                 },
+                itemValue: 'value',
                 typeaheadjs: {
                     source: engine.ttAdapter(),
                     displayKey: 'value',
                     valueKey: 'value',
                     options: {'autoselect': true}
                 }
-
             });
 
-            $('#tag-filter').change(function(obj) {
-                var tags = $('#tag-filter').tagsinput('items')
+            // Tags are stored by tagsinput as objects which look like this:
+            //
+            // { 'text': 'emacs', 'value': 'emacs', 'is_meta': 'false' }
+
+            // Add the initial list of tags in the search box
+            {% for tag in tag_list %}
+            $('#tag-filter').tagsinput('add',{'value':'{{ tag.name }}', 'text':'{{ tag.name }}', 'is_meta': '{{ tag.is_meta }}'});
+            {% endfor %}
+
+            $('#tag-filter').on('beforeItemAdd', function(event) {
+                var tags = get_tag_list_string();
+                if (tags) {
+                    tags = tags + ',' + event.item;
+                } else {
+                    tags = event.item;
+                }
+                event.cancel = true;
+                window.location='{% url 'kb_search_tag_detail' 666 %}'.replace('666', tags);
+            });
+
+            $('#tag-filter').on('itemRemoved', function(event) {
+                var tags = get_tag_list_string();
+                event.cancel = true;
                 window.location='{% url 'kb_search_tag_detail' 666 %}'.replace('666', tags);
             });
 
             $('#other_tags').change( function(event) {
-                var new_tag = $(this).val();
-                $('#tag-filter').tagsinput('add', new_tag)
+                var tags = get_tag_list_string() + ',' + $(this).val();
+                window.location='{% url 'kb_search_tag_detail' 666 %}'.replace('666', tags);
             });
 
-            $('#myTab a').click(function (e) {
-                e.preventDefault()
-                $(this).tab('show')
-            })
+            $('#myTab a').click(function (event) {
+                event.preventDefault();
+                $(this).tab('show');
+            });
 
-            $('#myTab a:first').tab('show') // Select first tab
+            $('.meta_tag').click(function (event) {
+                event.preventDefault();
+                var tags = get_tag_list_string() + ',' + event.target.innerHTML;
+                window.location='{% url 'kb_search_tag_detail' 666 %}'.replace('666', tags);
+            });
+
+            function get_tag_list_string() {
+                return $.map( $('#tag-filter').tagsinput('items'), function( element ) { return element.value } ).join();
+            }
+
+             // Select first tab when the page first loads
+            $('#myTab a:first').tab('show');
 
         });
 
@@ -69,19 +105,28 @@
         <div class="col-md-10">
 
             <form id="tag-filter-form" class="form-inline" action="{% url 'kb_search_tag_detail' tag %}" method="get" autocomplete="off">
-                <div class="form-group search_input">
-                    <input id="tag-filter" class="form-control" type="text" name="taglist" value="{{ taglist }}" placeholder="Tag List" />
+                <div class="form-group">
+                    <input id="tag-filter" class="form-control" type="text" name="taglist" placeholder="Tag List" />
                 </div>
                 {% if tag_counts %}
-                <div class="form-group search_input">
-                    <label>&nbsp; &nbsp; Other tags:</label>
+                <div class="form-group">
+                    <!-- <label>&nbsp; &nbsp; Other tags:</label> -->
                     <select id="other_tags" class="form-control">
+                        <option value="-1">Other tags</option>
                         {% for tag, count in tag_counts %}
                             <option value="{{ tag }}">{{ tag }} ({{ count }})</option>
                         {% endfor %}
                     </select>
                 </div>
                 {% endif %}
+                <div class="form-group">
+                {% for tag in meta_tags %}
+                    {% if forloop.first %}
+                        &nbsp; <label>Meta Tags: </label>
+                    {% endif %}
+                    <span class="label label-success"><a class="meta_tag tag" href="">{{ tag }}</a></span>
+                {% endfor %}
+                </div>
             </form>
         </div>
     </div>
@@ -92,7 +137,7 @@
         {% endfor %}
     </ul>
 
-    <div class="tab-content">
+    <div class="tab-content" id="tag-detail-tab-content">
 
         <br />
         <div id="bordercore_bookmark" class="tab-pane fade in active">

@@ -98,7 +98,7 @@ ul.pagination {
                                       }
 
 #search_tags_searchform {
-   font-size: 18px;
+    font-size: 18px;
 }
 
 #kbsearch {
@@ -130,4 +130,8 @@ a.tag:active {
 
 .bootstrap-tagsinput {
 width: 100% !important;
+}
+
+#tag-detail-tab-content {
+    padding-left: 10px;
 }

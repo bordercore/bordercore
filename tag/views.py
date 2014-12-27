@@ -14,7 +14,7 @@ def tag_search(request):
     if request.GET.get('type') == 'blog':
         args['post__isnull'] = False
 
-    tag_list = [{'value':x.name} for x in Tag.objects.filter(name__istartswith=request.GET.get('query', ''), **args).distinct('name')]
+    tag_list = [{'value':x.name, 'is_meta': x.is_meta} for x in Tag.objects.filter(name__istartswith=request.GET.get('query', ''), **args).distinct('name')]
 
     return render_to_response('return_json.json',
                               {'info': json.dumps(tag_list)},

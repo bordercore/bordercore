@@ -10,17 +10,17 @@
 
    $(document).ready(function() {
 
-		Handlebars.registerHelper("debug", function(optionalValue) {
-			console.log("Current Context");
-			console.log("====================");
-			console.log(this);
+        Handlebars.registerHelper("debug", function(optionalValue) {
+            console.log("Current Context");
+            console.log("====================");
+            console.log(this);
 
-			if (optionalValue) {
-				console.log("Value");
-				console.log("====================");
-				console.log(optionalValue);
-			}
-		});
+            if (optionalValue) {
+                console.log("Value");
+                console.log("====================");
+                console.log(optionalValue);
+            }
+        });
 
         var myengine = new Bloodhound({
             datumTokenizer: function(data) {
@@ -29,13 +29,13 @@
             remote: {
                 url: '{% url 'kb_search_tags_booktitles' %}?term=%QUERY',
             },
-	        queryTokenizer: Bloodhound.tokenizers.whitespace,
-			limit: 20
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            limit: 20
         });
 
         myengine.initialize();
 
-		var template_source = $("#entry-template-what").html()
+        var template_source = $("#entry-template-what").html()
 
         $('#kbsearch').typeahead(
             {
@@ -43,31 +43,31 @@
                 highlight: true,
                 minLength: 3
             }, {
-	            source: myengine.ttAdapter(),
+                source: myengine.ttAdapter(),
                 displayKey: 'value',
-				templates: {
-					suggestion: Handlebars.compile(template_source)
-				}
-			});
+                templates: {
+                    suggestion: Handlebars.compile(template_source)
+                }
+            });
 
-		$('#kbsearch').on('keyup', function(event, selection) {
-			if ((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) {
-				$('#search').submit();
-				return false;
-			} else {
-				return true;
-			}
-		});
+        $('#kbsearch').on('keyup', function(event, selection) {
+            if ((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) {
+                $('#search').submit();
+                return false;
+            } else {
+                return true;
+            }
+        });
 
-		$('#kbsearch').bind('typeahead:selected', function(obj, datum, name) {
-			var url = null;
-			var name = '_self';
-			if (datum.type == 'Tag') {
-				url = '{% url 'kb_search_tag_detail' 666 %}'.replace(666, datum.value);
-			} else {
-				name = 'search'
-				url = '{{ STATIC_URL }}ebooks/' + datum.filename;
-			}
+        $('#kbsearch').bind('typeahead:selected', function(obj, datum, name) {
+            var url = null;
+            var name = '_self';
+            if (datum.type == 'Tag') {
+                url = '{% url 'kb_search_tag_detail' 666 %}'.replace(666, datum.value);
+            } else {
+                name = 'search'
+                url = '{{ STATIC_URL }}ebooks/' + datum.filename;
+            }
             window.open(url, name)
         });
 
@@ -76,11 +76,11 @@
 </script>
 
 {% verbatim %}
-	<script id="entry-template-what" type="text/x-handlebars-template">
-		<div>{{ debug }}
-			<em>{{type}}</em> - {{value}}
-		</div>
-	</script>
+    <script id="entry-template-what" type="text/x-handlebars-template">
+        <div>{{ debug }}
+            <em>{{type}}</em> - {{value}}
+        </div>
+    </script>
 {% endverbatim %}
 
 <div class="row">
@@ -90,7 +90,7 @@
         <form id="search" class="form-inline" action="{% url 'search' %}" method="get" autocomplete="off">
             <input type="hidden" id="facets" name="facets" value="" />
 
-            <div class="form-group search_input">
+            <div class="form-group">
 
                 <input id="kbsearch" class="form-control" type="text" name="search" value="{{ request.GET.search }}" placeholder="Search" />
 

@@ -9,6 +9,8 @@ from os.path import basename
 import solr
 import urllib
 
+from tag.models import Tag
+
 SOLR_HOST = 'localhost'
 SOLR_PORT = 8080
 SOLR_COLLECTION = 'solr/bordercore'
@@ -138,7 +140,6 @@ class SearchTagDetailView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(SearchTagDetailView, self).get_context_data(**kwargs)
-        context['taglist'] = self.kwargs['taglist']
         results = {}
         for one_doc in context['info']['response']['docs']:
             if results.get(one_doc['doctype'], ''):
@@ -157,11 +158,20 @@ class SearchTagDetailView(ListView):
             if x not in tag_list:
                 doctype_counts[x] = y
 
+        meta_tags = [x for x in tag_counts if x in Tag.get_meta_tags()]
+        context['meta_tags'] = meta_tags
+
         import operator
         tag_counts_sorted = sorted(tag_counts.items(), key=operator.itemgetter(1), reverse=True)
         context['tag_counts'] = tag_counts_sorted
         doctype_counts_sorted = sorted(doctype_counts.items(), key=operator.itemgetter(1), reverse=True)
         context['doctype_counts'] = doctype_counts_sorted
+
+        tag_list_js = []
+        for tag in tag_list:
+            if tag != '':
+                tag_list_js.append( {'name': tag, 'is_meta': 'true' if tag in Tag.get_meta_tags() else 'false'} )
+        context['tag_list'] = tag_list_js
 
         return context
 
