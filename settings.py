@@ -122,6 +122,7 @@ TEMPLATE_DIRS = ( os.path.join(SITE_ROOT, 'templates'),)
 
 INSTALLED_APPS = (
 
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -134,6 +135,7 @@ INSTALLED_APPS = (
 
     'accounts',
     'bcsolr',
+    'blob',
     'blog',
     'book',
     'document',

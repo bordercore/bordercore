@@ -5,6 +5,7 @@ from tastypie.api import Api
 
 from accounts.api import UserResource
 from accounts.views import UserProfileDetailView
+from blob.views import BlobDetailView, BlobListView
 from bookmark.api import BookmarkResource
 from bookmark.views import OrderListJson
 from book.views import BookListView
@@ -30,6 +31,11 @@ urlpatterns = patterns('',
 urlpatterns += patterns('homepage.views',
                         url(r'^$|^index.html', 'homepage', name='homepage'),
                         url(r'^homepage/get_calendar_events.json', 'get_calendar_events', name='get_calendar_events'),
+)
+
+urlpatterns += patterns('blob.views',
+                        url(r'^blob/edit/(?P<pk>[\d-]+)$', BlobDetailView.as_view(), name='blob_edit'),
+                        url(r'^todo/', BlobListView.as_view(), name='blob_list'),
 )
 
 urlpatterns += patterns('blog.views',
