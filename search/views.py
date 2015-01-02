@@ -142,6 +142,8 @@ class SearchTagDetailView(ListView):
         context = super(SearchTagDetailView, self).get_context_data(**kwargs)
         results = {}
         for one_doc in context['info']['response']['docs']:
+            if one_doc['doctype'] == 'book':
+                one_doc['filename'] = os.path.basename(one_doc['filepath'])
             if results.get(one_doc['doctype'], ''):
                 results[one_doc['doctype']].append(one_doc)
             else:

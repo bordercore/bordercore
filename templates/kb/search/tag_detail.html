@@ -95,6 +95,8 @@
              // Select first tab when the page first loads
             $('#myTab a:first').tab('show');
 
+            $("#tag-filter").focus();
+
         });
 
     </script>
@@ -140,6 +142,17 @@
     <div class="tab-content" id="tag-detail-tab-content">
 
         <br />
+
+        <div id="book" class="tab-pane fade in active">
+            {% for match in info.matches.book %}
+                <div class="row voffset">
+                    <div class="col-md-12">
+                        <a href="{{ STATIC_URL }}ebooks/{{ match.filename }}" target="book">{{ match.title }}</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
         <div id="bordercore_bookmark" class="tab-pane fade in active">
             {% for match in info.matches.bordercore_bookmark %}
                 <div class="row voffset">
