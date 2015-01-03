@@ -36,7 +36,6 @@ urlpatterns += patterns('homepage.views',
 urlpatterns += patterns('blob.views',
                         url(r'^blob/edit/(?P<pk>[\d-]+)$', BlobDetailView.as_view(), name='blob_edit'),
                         url(r'^blob/metadata_name_search/', 'metadata_name_search', name='metadata_name_search'),
-                        url(r'^todo/', BlobListView.as_view(), name='blob_list'),
 )
 
 urlpatterns += patterns('blog.views',
