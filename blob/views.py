@@ -1,12 +1,14 @@
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render_to_response
+from django.template import RequestContext
 from django.utils.dateformat import format
 from django.utils.decorators import method_decorator
-from django.http import HttpResponseRedirect, Http404
-from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.edit import UpdateView
 from django.views.generic.list import ListView
-from django.core.urlresolvers import reverse
+import json
 
 from blob.forms import BlobForm
+from blob.models import MetaData
 
 from tag.models import Tag
 from blob.models import Blob
@@ -98,5 +100,17 @@ class BlobDetailView(UpdateView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(BlobDetailView, self).dispatch(*args, **kwargs)
+
+
+def metadata_name_search(request):
+
+    m = MetaData.objects.all().values('name').filter(name__icontains=request.GET['query']).distinct('name').order_by('name'.lower())
+
+    return_data = [{'value': x['name']} for x in m]
+
+    return render_to_response('return_json.json',
+                              { 'info': json.dumps(return_data) },
+                              content_type="application/json",
+                              context_instance=RequestContext(request))
 
 
