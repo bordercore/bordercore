@@ -11,9 +11,45 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
 
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.css" />
+    <script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap.js"></script>
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.color-2.1.2.min.js"></script>
+
 <script type="text/javascript">
 
+    var metadata = []
+    var table;
+
     $(document).ready(function() {
+
+        table = $('#metadata').DataTable( {
+            info: false,
+            paging: false,
+            searching: false
+        });
+
+        $('#metadata tbody').on( 'click', 'tr', function () {
+            if ( $(this).hasClass('selected') ) {
+                $(this).removeClass('selected');
+                $('#btn-metadata').attr("disabled", "disabled");
+            }
+            else {
+                table.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+                $('#btn-metadata').removeAttr("disabled");
+            }
+        } );
+
+        $('#btn-metadata').click( function () {
+            table.row('.selected').remove().draw( false );
+        } );
+
+        {% for data in metadata %}
+        metadata.push({'name':'{{ data.name }}', 'value':'{{ data.value }}'})
+        {% endfor %}
 
         var engine = new Bloodhound({
             name: 'tags',
@@ -52,9 +88,35 @@
             source: engineMetadata.ttAdapter(),
         });
 
-        /* $('#metadata-name').bind('typeahead:selected', function(obj, datum, name) {
-        window.location='{% url 'blog_list' %}?tagsearch=' + datum.value;
-		}); */
+        $('#metadata-name').bind('typeahead:selected', function(obj, datum, name) {
+            $('#metadata-value').focus();
+		});
+
+        $('#metadata-value').keydown(function(event){
+
+            // If the enter key is pressed...
+            if (event.keyCode == 13) {
+
+                event.preventDefault();
+
+                // Add the new metadata to the table
+                var rowNode = table.row.add( [ $('#metadata-name').val(), $('#metadata-value').val() ] ).draw().node();
+                $( rowNode ).css( 'color', 'red' ).animate( { color: '#666666' }, 2000 );
+
+                // Add the new metadata to our local copy
+                metadata.push({'name': $('#metadata-name').val(), 'value': $('#metadata-value').val()})
+
+                // Reset the fields
+                $('#metadata-name').val('').focus();
+                $('#metadata-value').val('');
+
+            }
+
+        });
+
+        $("#blob-form").submit(function(e) {
+            $('#input-metadata').val(JSON.stringify(table.data().toArray()));
+        });
 
     });
 
@@ -67,6 +129,8 @@
 <p class="lead col-lg-offset-2">{{ action }} Blob</p>
 
 <form id="blob-form" class="form-horizontal" action="{{ request.path }}" method="post">
+    <input type="hidden" name="metadata" id="input-metadata" />
+
     {% csrf_token %}
 
     {% for field in form %}
@@ -84,36 +148,44 @@
     {% endfor %}
 
     <div class="row">
-        <div class="col-lg-5 col-lg-offset-2">
+        <div class="col-lg-6 col-lg-offset-2">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">MetaData</h3>
                 </div>
                 <div class="panel-body">
-                    <table class="table">
-                        <tr>
-                            <th>Name</th>
-                            <th>Value</th>
-                        </tr>
-                        {% for data in metadata %}
-                            <tr><td>{{ data.name }}</td><td>{{ data.value }}</td></tr>
-                        {% endfor %}
-                        <tr>
-                            <td>
-                                <div class="form-inline">
-                                    <div class="form-group">
-                                        <input id="metadata-name" class="form-control" name="metadata_name" type="text" placeholder="Name" />
-                                    </div>
-                            </td>
-                            <td>
-                                <div class="form-group">
-                                    <input class="form-control" name="metadata_value" type="text" placeholder="Value" />
-                                </div>
-                            </td>
-                        </tr>
+                    <table id="metadata" class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for data in metadata %}
+                                <tr><td>{{ data.name }}</td><td>{{ data.value }}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <div class="form-inline">
+                                <tr>
+                                    <td>
+                                        <div class="form-group">
+                                            <input id="metadata-name" class="form-control" name="metadata_name" type="text" placeholder="Name" />
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-group">
+                                            <input id="metadata-value" class="form-control" name="metadata_value" type="text" placeholder="Value" />
+                                            <input class="btn btn-default" id="btn-metadata" type="button" value="Delete" disabled />
+                                        </div>
+                                    </td>
+                                </tr>
+                            </div>
+                        </tfoot>
                     </table>
-                                </div>
                 </div>
+            </div>
             </div>
         </div>
 
@@ -121,7 +193,6 @@
             <div class="col-lg-3 col-lg-offset-2">
                 <input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
                 <input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
-                <a class="btn btn-default" href="{% url 'blob_list' %}">Cancel</a>
             </div>
         </div>
 

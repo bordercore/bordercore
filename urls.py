@@ -5,7 +5,7 @@ from tastypie.api import Api
 
 from accounts.api import UserResource
 from accounts.views import UserProfileDetailView
-from blob.views import BlobDetailView, BlobListView
+from blob.views import BlobDetailView
 from bookmark.api import BookmarkResource
 from bookmark.views import OrderListJson
 from book.views import BookListView
