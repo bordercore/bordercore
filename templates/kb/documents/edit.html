@@ -85,7 +85,18 @@
                     source: engineSource.ttAdapter(),
                 });
 
+            $('#id_author').keypress( function(e) {
+                // Transforms 'JERRELL SCHIVERS' to 'Jerrell Schivers'
+                if (e.which && e.which == 2) { // Control-B
+                    $('#id_author').val( $('#id_author').val().toLowerCase().replace(/(\s+)(.)|^(.)/g, formatName) );
+                }
+            });
+
 		});
+
+        function formatName(match, capture1, capture2) {
+            return capture2 ? capture1 + capture2.toUpperCase() : match.toUpperCase();
+        }
 
 	</script>
 
