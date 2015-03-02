@@ -140,6 +140,7 @@ INSTALLED_APPS = (
     'book',
     'document',
     'feed',
+    'fitness',
     'lib',
     'tag',
     'bookmark',

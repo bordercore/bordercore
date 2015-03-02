@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %} Fitness :: Summary {% endblock %}
+
+{% block content %}
+
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.css" />
+    <script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap.js"></script>
+
+    <script type="text/javascript">
+
+        var metadata = []
+        var table;
+
+        $(document).ready(function() {
+
+            table = $('#exercises').DataTable( {
+                "columnDefs": [
+                    { "targets": [2], "dataSort": 4 },
+                    { "targets": [4], "visible": false },
+                ],
+                info: false,
+                language: {
+                    'emptyTable': 'No workout data entered'
+                },
+                paging: false,
+                searching: false,
+                "sorting": [[4, 'asc']],
+            });
+
+        });
+
+    </script>
+
+    <h1>Recent Exercises</h1>
+
+    <table class="table" id="exercises">
+
+        <thead>
+            <tr>
+                <th>Muscle Group</th>
+                <th>Exercise</th>
+                <th>Date</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+
+    {% for key, values in recent_data.items %}
+
+        <tr>
+            <td>{{ key }}</td>
+            <td>{{ values.exercise.exercise }}</td>
+            <td>{{ values.date }}</td>
+            <td><a href="{% url 'fitness_add' values.exercise_id %}">Add</a></td>
+            <td>{{ values.date|date:"U" }}</td>
+        </tr>
+
+    {% endfor %}
+
+    </table>
+
+{% endblock %}

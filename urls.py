@@ -62,6 +62,11 @@ urlpatterns += patterns('feed.views',
                         url(r'^feeds/', FeedListView.as_view(), name="feed_list"),
 )
 
+urlpatterns += patterns('fitness.views',
+                        url(r'^fitness/add/(?P<exercise_id>\d+)$', 'fitness_add', name='fitness_add'),
+                        url(r'^fitness/', 'fitness_summary', name='fitness_summary')
+)
+
 urlpatterns += patterns('bookmark.views',
                         url(r'^bookmarks/edit(?:/(\d+))?', 'bookmark_edit', name='bookmark_edit'),
                         url(r'^bookmarks/snarf_link.html', 'snarf_link'),
