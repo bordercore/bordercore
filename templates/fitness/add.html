@@ -42,13 +42,20 @@
     </script>
 
     <div class="row">
+        <div class="col-lg-4">
+            {% block breadcrumbs %}
+                <ul class="breadcrumb pull-left">
+                    <li> <a href="{% url 'fitness_summary' %}">Recent Exercises</a> </li>
+                    <li>{{ exercise }}</li>
+                </ul>
+            {% endblock %}
+        </div>
+    </div>
 
+    <div class="row">
         <h3 class="col-md-10">
-
-            <div class="row">Muscle Group: {{ muscle_group.muscle_group }}</div>
-
+            Exercise: {{ exercise.exercise }}
         </h3>
-
     </div>
 
 <div class="row">

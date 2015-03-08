@@ -3,7 +3,7 @@ from django.template import RequestContext
 
 import json
 
-from fitness.models import Data, Exercise, MuscleGroup
+from fitness.models import Data, Exercise, Muscle, MuscleGroup
 
 SECTION = 'Fitness'
 
@@ -38,12 +38,12 @@ def fitness_add(request, exercise_id):
 
 def fitness_summary(request):
 
-    muscle_groups = MuscleGroup.objects.all()
+    muscles = Muscle.objects.all()
 
     recent_data = {}
-    for m in muscle_groups:
+    for m in muscles:
         try:
-            recent_data[m.muscle_group] = Data.objects.filter(exercise__muscle__muscle_group__muscle_group=m).order_by('-date')[0]
+            recent_data[m.muscle] = Data.objects.filter(exercise__muscle=m).order_by('-date')[0]
         except IndexError:
             pass
 
