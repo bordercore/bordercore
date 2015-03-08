@@ -1,5 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.forms import ModelForm, Textarea, TextInput, ModelMultipleChoiceField
+from django.forms import ModelForm, Textarea, TextInput, ModelMultipleChoiceField, ValidationError
 
 from bookmark.models import Bookmark, BookmarkTagUser
 from blog.models import Tag
@@ -65,6 +65,14 @@ class BookmarkForm(ModelForm):
                 sorted_list.save()
 
         return new_tags
+
+    def clean_url(self):
+        data = self.cleaned_data['url']
+        # Verify that this url is not a dupe.  Note: exclude current url when searching.
+        b = Bookmark.objects.filter(url=data).exclude(id=self.instance.id)
+        if b:
+            raise ValidationError("Error: this bookmark already exists")
+        return data
 
     tags = ModelCommaSeparatedChoiceField(
         required=False,
