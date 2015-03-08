@@ -44,12 +44,6 @@ $(document).ready(function() {
 
 </script>
 
-{% if form.errors %}
-	<div class="alert alert-error col-lg-offset-2 col-lg-10">
-Please correct the errors below.
-	</div>
-{% endif %}
-
 <p class="lead col-lg-offset-1">
 	{{ form.instance.url|favicon|safe }} {{ action }} Bookmark
 </p>
