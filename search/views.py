@@ -59,7 +59,7 @@ class SearchListView(ListView):
                           'facet.mincount': '1',
                           'fields': ['attr_*','author','doctype','filepath','tags','title','author', 'url'],
                           'wt': 'json',
-                          'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,doctype,filepath,id,internal_id,last_modified,tags,title,url,bordercore_blogpost_title',
+                          'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,doctype,filepath,id,internal_id,last_modified,tags,title,url,bordercore_blogpost_title,attr_publication_date',
                           'hl': 'true',
                           'hl.fl': 'attr_content,bordercore_todo_task,bordercore_bookmark_title,title',
                           'hl.simple.pre': '<span class="search_bordercore_blogpost_snippet">',
@@ -110,6 +110,7 @@ class SearchListView(ListView):
                         blogpost_snippet = context['info']['highlighting'][ myobject['id'] ]['attr_content'][0]
                 info.append( dict(title=get_title(myobject),
                                   author=myobject.get('author','no author'),
+                                  pub_date=myobject.get('attr_publication_date',''),
                                   doctype=myobject['doctype'],
                                   id=myobject['id'],
                                   internal_id=myobject.get('internal_id', ''),
