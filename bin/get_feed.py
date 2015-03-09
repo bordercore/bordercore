@@ -4,6 +4,7 @@
 from datetime import datetime
 import exceptions
 import feedparser
+import django
 import os
 import psycopg2
 import psycopg2.extras
@@ -19,7 +20,8 @@ from django.utils.timezone import utc
 from feed.models import Feed, FeedItem
 
 LOG_FILE = "/home/www/logs/get_feed.log"
-RDF_DIR = "/home/www/htdocs/bordercore/rdf"
+
+django.setup()
 
 def update_feeds(feed_id=None):
 
