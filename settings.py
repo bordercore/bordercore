@@ -122,7 +122,6 @@ TEMPLATE_DIRS = ( os.path.join(SITE_ROOT, 'templates'),)
 
 INSTALLED_APPS = (
 
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -148,7 +147,6 @@ INSTALLED_APPS = (
     'pygments',
     'quote',
     'solr',
-    'south',
     'tastypie',
     'todo'
 
@@ -159,6 +157,8 @@ from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 TEMPLATE_CONTEXT_PROCESSORS = TCP + (
     'django.core.context_processors.request',
 )
+
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 LOGIN_URL = "/login/"
 
@@ -207,10 +207,6 @@ LOGGING = {
 # debug_toolbar settings
 if DEBUG:
     INTERNAL_IPS = ('127.0.0.1', '10.3.2.3')
-
-    MIDDLEWARE_CLASSES += (
-        'debug_toolbar.middleware.DebugToolbarMiddleware',
-    )
 
     INSTALLED_APPS += (
         'debug_toolbar',
