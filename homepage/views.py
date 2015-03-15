@@ -31,17 +31,20 @@ def homepage(request):
     else:
         start_node_category = 'Bordercore'
 
-    tree = OrgDataStructure()
-    tree.load_from_file(request.user.userprofile.orgmode_file)
-
-    startnode = OrgDataStructure.get_node_by_heading(tree.root, start_node_category, [])[0]
-    nodes = OrgDataStructure.get_nodes_by_priority(startnode, "A", [])
-
     tasks = []
-    for node in nodes:
-        tasks.append( {'task': OrgDataStructure.parse_heading(node.heading)['heading'],
-                       'tag': node.tags,
-                       'parent_category': OrgDataStructure.parse_heading(node.parent.heading)['heading']} )
+    try:
+        tree = OrgDataStructure()
+        tree.load_from_file(request.user.userprofile.orgmode_file)
+
+        startnode = OrgDataStructure.get_node_by_heading(tree.root, start_node_category, [])[0]
+        nodes = OrgDataStructure.get_nodes_by_priority(startnode, "A", [])
+
+        for node in nodes:
+            tasks.append( {'task': OrgDataStructure.parse_heading(node.heading)['heading'],
+                           'tag': node.tags,
+                           'parent_category': OrgDataStructure.parse_heading(node.parent.heading)['heading']} )
+    except AttributeError, e:
+        print "AttributeError: %s" % e
 
     # Get some recently played music
     music = Listen.objects.all().select_related().distinct().order_by('-created')[:3]
