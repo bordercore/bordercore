@@ -1,4 +1,4 @@
-Django==1.7.5
+Django==1.7.6
 Markdown==2.6
 -e git+git@github.com:bordercore/PyOrgMode.git@d43dac98c938313f029d290155e8c136ec2a537f#egg=PyOrgMode-master
 Pygments==2.0.2
