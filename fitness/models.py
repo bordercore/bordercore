@@ -28,5 +28,5 @@ class Data(models.Model):
     user = models.ForeignKey(User)
     exercise = models.ForeignKey(Exercise)
     date = models.DateTimeField(auto_now_add=True)
-    weight = models.IntegerField()
+    weight = models.FloatField()
     reps = models.IntegerField()
