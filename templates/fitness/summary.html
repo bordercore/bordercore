@@ -19,7 +19,7 @@
             table = $('#exercises').DataTable( {
                 "columnDefs": [
                     { "targets": [2], "dataSort": 4 },
-                    { "targets": [4], "visible": false },
+                    { "targets": [4,5], "visible": false },
                 ],
                 info: false,
                 language: {
@@ -53,9 +53,10 @@
         <tr>
             <td>{{ key }}</td>
             <td>{{ values.exercise.exercise }}</td>
-            <td>{{ values.date }}</td>
+            <td>{{ values.date|date:"N j, Y" }} - {{ values.delta_days }} day{{ values.delta_days|pluralize:"s" }} ago</td>
             <td><a href="{% url 'fitness_add' values.exercise_id %}">Add</a></td>
             <td>{{ values.date|date:"U" }}</td>
+            <td>{{ values.delta_days }}</td>
         </tr>
 
     {% endfor %}

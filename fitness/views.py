@@ -1,6 +1,7 @@
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
+import datetime
 import json
 
 from fitness.models import Data, Exercise, Muscle, MuscleGroup
@@ -44,10 +45,9 @@ def fitness_summary(request):
     for m in muscles:
         try:
             recent_data[m.muscle] = Data.objects.filter(exercise__muscle=m).order_by('-date')[0]
+            recent_data[m.muscle].delta_days = (int(datetime.datetime.now().strftime("%s")) - int(recent_data[m.muscle].date.strftime("%s")))/86400 + 1
         except IndexError:
             pass
-
-    print recent_data
 
     return render_to_response('fitness/summary.html',
                               { 'section': SECTION,
