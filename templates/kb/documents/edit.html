@@ -85,10 +85,10 @@
                     source: engineSource.ttAdapter(),
                 });
 
-            $('#id_author').keypress( function(e) {
+            $('#id_author, #id_title').keypress( function(e) {
                 // Transforms 'JERRELL SCHIVERS' to 'Jerrell Schivers'
                 if (e.which && e.which == 2) { // Control-B
-                    $('#id_author').val( $('#id_author').val().toLowerCase().replace(/(\s+)(.)|^(.)/g, formatName) );
+                    $(this).val( $(this).val().toLowerCase().replace(/(\s+)(.)|^(.)/g, formatName) );
                 }
             });
 
