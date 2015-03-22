@@ -31,7 +31,6 @@ class Song(TimeStampedModel):
     year = models.IntegerField(null=True)
     length = models.IntegerField(null=True)
     comment = models.TextField(null=True)
-    filename = models.TextField()
     source = models.ForeignKey(SongSource)
     times_played = models.IntegerField(default=0, null=True)
     original_album = models.TextField(null=True)
