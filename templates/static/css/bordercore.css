@@ -87,6 +87,10 @@ ul.pagination {
                     color: #0173bc;
  }
 
+.search_book_title #edit_link{
+                    font-size: 8px;
+ }
+
 .search_todo_date {
                     font-weight: normal;
                     color: #C76257;
@@ -102,9 +106,12 @@ ul.pagination {
 }
 
 #kbsearch {
-                width: 300px;
+                width: 330px;
             }
 
+#kb_blob_search {
+   width: 340px;
+}
 a.tag:link {
     color: white;
 }

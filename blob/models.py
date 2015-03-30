@@ -8,7 +8,7 @@ class Blob(TimeStampedModel):
     """
     A blob belonging to a user.
     """
-    sha1sum = models.CharField(max_length=40)
+    sha1sum = models.CharField(max_length=40, unique=True)
     file_path = models.TextField()
     user = models.ForeignKey(User)
     tags = models.ManyToManyField(Tag)

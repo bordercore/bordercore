@@ -35,40 +35,42 @@
 
 </script>
 
-	<br />
+<br />
 
 {% if request.GET %}
 
 {% if not info %}
 
-	<div class="row">
-		<br />
-		<div class="_col-md-offset-1 col-md-10 alert alert-info">Nothing found</div>
-	</div>
+    <div class="row">
+        <br />
+        <div class="col-md-10">
+            <div class="alert alert-info">Nothing found</div>
+        </div>
+    </div>
 
 {% else %}
 
-	<div class="row">
+    <div class="row">
 
         <div class="col-md-2">
-		<div class="panel panel-info">
+            <div class="panel panel-info">
 
-			<div class="panel-heading">Match Categories</div>
-            <div class="panel-body">
+                <div class="panel-heading">Match Categories</div>
+                <div class="panel-body">
 {% for facet in facet_counts|dictsortreversed:"count" %}
 
-	<label class="checkbox">
+    <label class="checkbox">
         <input type="checkbox" name="filter_query" class="facet" id="{{ facet.doctype }}"
                {% if facet.doctype in filter_query %}checked="checked"{% endif %}
-			   /> {{ facet.doctype_purty }} ({{ facet.count }})
-   </label>
+               /> {{ facet.doctype_purty }} ({{ facet.count }})
+    </label>
 {% endfor %}
 
+                </div>
             </div>
         </div>
-		</div>
 
-		<div class="col-md-10">
+        <div class="col-md-10">
 
 {% if request.GET %}
 
@@ -78,13 +80,13 @@
 
 {% if match.doctype == 'bordercore_todo' %}
 
-	<h4 class="search_book_title">Todo: <a href="{% url 'todo_edit' match.internal_id %}">{{ match.bordercore_todo_task.0 }}</a>
+    <h4 class="search_book_title">Todo: <a href="{% url 'todo_edit' match.internal_id %}">{{ match.bordercore_todo_task.0 }}</a>
         <span class="search_todo_date">{{ match.last_modified }}</span>
     </h4>
 
 {% elif match.doctype == 'bordercore_bookmark' %}
 
-	<h4 class="search_book_title">
+    <h4 class="search_book_title">
         <img src="{{ STATIC_URL }}img/kb_link.png" />
         <a href="{{ match.url }}">{{ match.bordercore_bookmark_title.0 }}</a>
         <span class="search_todo_date">{{ match.last_modified }}</span>
@@ -105,13 +107,13 @@
 
 {% elif match.doctype == 'bordercore_blog' %}
 
-	<h4 class="search_book_title"><a href="{% url 'blog_list' match.internal_id %}">{{ match.bordercore_blogpost_title.0|default:"Blog Post" }}</a>  <span class="search_todo_date">{{ match.last_modified }}</span></h4>
+    <h4 class="search_book_title"><a href="{% url 'blog_list' match.internal_id %}">{{ match.bordercore_blogpost_title.0|default:"Blog Post" }}</a>  <span class="search_todo_date">{{ match.last_modified }}</span></h4>
 
     <h5>{{ match.blogpost_snippet|safe }}</h5>
 
 {% elif match.doctype == 'document' %}
 
-	<h4 class="search_book_title"><a href="{% url 'document_detail' match.internal_id %}">{{ match.title|default:"Title" }}</a>
+    <h4 class="search_book_title"><a href="{% url 'document_detail' match.internal_id %}">{{ match.title|default:"Title" }}</a>
         <span class="search_todo_date">{{ match.last_modified }}</span>
     </h4>
 
@@ -119,11 +121,12 @@
 
 {% else %}
 
-	<h4 class="search_book_title">
+    <h4 class="search_book_title">
         <img src="{{ STATIC_URL }}img/kb_book.png" />
         <a href="{{ STATIC_URL }}ebooks/{{ match.filename }}" target="book">{{ match.title }}</a>
+        <a href="{% url 'blob_edit' match.sha1sum %}" id="edit_link">Edit</a>
     </h4>
-	&nbsp; &nbsp; {{ match.pub_date.0 }} - {{ match.author.0 }}
+    &nbsp; &nbsp; {{ match.pub_date.0 }} - {{ match.author.0 }}
 
 {% endif %}
 

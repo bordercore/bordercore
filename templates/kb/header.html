@@ -10,18 +10,6 @@
 
    $(document).ready(function() {
 
-        Handlebars.registerHelper("debug", function(optionalValue) {
-            console.log("Current Context");
-            console.log("====================");
-            console.log(this);
-
-            if (optionalValue) {
-                console.log("Value");
-                console.log("====================");
-                console.log(optionalValue);
-            }
-        });
-
         var myengine = new Bloodhound({
             datumTokenizer: function(data) {
                 return Bloodhound.tokenizers.obj.whitespace(data.value);
@@ -71,6 +59,13 @@
             window.open(url, name)
         });
 
+        $('#advanced_search_link').click( function(e) {
+            console.log('click!');
+            $('#advanced_search_form').toggle();
+        })
+
+        $('#advanced_search_form').hide();
+
     });
 
 </script>
@@ -83,11 +78,13 @@
     </script>
 {% endverbatim %}
 
+<form id="search" class="form-inline" action="{% url 'search' %}" method="get" autocomplete="off">
+
 <div class="row">
 
     <div class="col-md-10">
 
-        <form id="search" class="form-inline" action="{% url 'search' %}" method="get" autocomplete="off">
+        <!-- <form id="search" class="form-inline" action="{% url 'search' %}" method="get" autocomplete="off"> -->
             <input type="hidden" id="facets" name="facets" value="" />
 
             <div class="form-group">
@@ -122,9 +119,44 @@
 
             <input class="btn btn-default" type="submit" name="Go" value="Search" />
 
-        </form>
+            &nbsp; &nbsp; <a href="#" id="advanced_search_link">Advanced Search</a>
+
+            <!-- </form> -->
 
     </div>
 
 </div>
 
+<div class="row voffset" id="advanced_search_form">
+
+    <div class="col-md-10">
+
+        <!-- <form id="search" class="form-inline" action="{% url 'search' %}" method="get" autocomplete="off"> -->
+
+            <div class="form-group">
+
+                <label>Boolean Search Type</label>
+
+                <select name="boolean_search_type" class="form-control">
+                    <option selected="selected">AND</option>
+                    <option>OR</option>
+                </select>
+
+            </div>
+            <div class="form-group">
+
+                <label>Blob Search</label>
+
+                <input type="checkbox" name="blob_search" />
+
+            </div>
+
+            <!-- <input class="btn btn-default" type="submit" name="Go" value="Search" /> -->
+
+            <!-- </form> -->
+
+    </div>
+
+</div>
+
+</form>

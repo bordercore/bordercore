@@ -143,6 +143,16 @@
 
         <br />
 
+        <div id="blob" class="tab-pane fade in active">
+            {% for match in info.matches.blob %}
+                <div class="row voffset">
+                    <div class="col-md-12">
+                        <a href="{{ STATIC_URL }}blobs/{{ match.filename }}" target="blob">{{ match.title }}</a> ({{ match.content_type }})
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
         <div id="book" class="tab-pane fade in active">
             {% for match in info.matches.book %}
                 <div class="row voffset">

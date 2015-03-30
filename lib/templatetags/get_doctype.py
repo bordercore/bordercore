@@ -3,7 +3,8 @@ from django.template.defaultfilters import stringfilter
 
 register = template.Library()
 
-doctype_mapping = { 'book': 'Books',
+doctype_mapping = { 'blob': 'Blobs',
+                    'book': 'Books',
                     'bordercore_blog': 'Blog Entries',
                     'bordercore_bookmark': 'Bookmarks',
                     'bordercore_todo': 'Todo Items',

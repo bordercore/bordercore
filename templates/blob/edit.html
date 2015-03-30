@@ -123,7 +123,7 @@
 </script>
 
 {% if message %}
-    <div class="alert alert-success">{{ message }}</div>
+    <div class="alert {{ message_level|default:'alert-success' }}">{{ message }}</div>
 {% endif %}
 
 <p class="lead col-lg-offset-2">{{ action }} Blob</p>
@@ -137,7 +137,7 @@
         <div class="form-group{% if field.errors %} error{% endif %}">
             <label class="col-lg-2 control-label" for="inputTitle">{{ field.label }}</label>
 
-            <div class="col-lg-5">
+            <div class="col-lg-6">
                 {{ field }}
                 {% for error in field.errors %}
                     <span class="form-error">{{ error }}</span>

@@ -24,7 +24,9 @@ class SearchListView(ListView):
 
     def get_facet_query(self, facet, term):
 
-        if facet == 'Books':
+        if facet == 'Blobs':
+            return 'doctype:blob'
+        elif facet == 'Books':
             return 'doctype:book'
         elif facet == 'Documents':
             return 'doctype:document'
@@ -53,22 +55,32 @@ class SearchListView(ListView):
             # TODO: catch SolrException
             conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION) )
 
-            solr_args = { 'q': 'title:%s attr_content:%s bordercore_todo_task:%s tags:%s bordercore_bookmark_title:%s' % (search_term, search_term, search_term, search_term, search_term),
-                          'rows': rows,
+            solr_args = { 'wt': 'json',
+                          'fl': 'attr_publication_date,author,bordercore_blogpost_title,bordercore_bookmark_title,bordercore_todo_task,doctype,filepath,id,internal_id,last_modified,sha1sum,tags,title,url',
                           'facet': 'on',
                           'facet.mincount': '1',
                           'fields': ['attr_*','author','doctype','filepath','tags','title','author', 'url'],
-                          'wt': 'json',
-                          'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,doctype,filepath,id,internal_id,last_modified,tags,title,url,bordercore_blogpost_title,attr_publication_date',
-                          'hl': 'true',
-                          'hl.fl': 'attr_content,bordercore_todo_task,bordercore_bookmark_title,title',
-                          'hl.simple.pre': '<span class="search_bordercore_blogpost_snippet">',
-                          'hl.simple.post': '</span>'}
+                          'rows': rows,
+            }
+
+            if 'blob_search' in self.request.GET:
+
+                solr_args['q'] = 'sha1sum:%s' % (search_term)
+
+            else:
+
+                solr_args.update(
+                    { 'q': 'title:%s attr_content:%s bordercore_todo_task:%s tags:%s bordercore_bookmark_title:%s' % (search_term, search_term, search_term, search_term, search_term),
+                      'hl': 'true',
+                      'hl.fl': 'attr_content,bordercore_todo_task,bordercore_bookmark_title,title',
+                      'hl.simple.pre': '<span class="search_bordercore_blogpost_snippet">',
+                      'hl.simple.post': '</span>' }
+                )
 
             facet_queries = []
-            for facet in ['Blog Posts', 'Books', 'Book Titles', 'Documents', 'Links', 'Tags', 'Todos']:
+            for facet in ['Blobs', 'Blog Posts', 'Books', 'Book Titles', 'Documents', 'Links', 'Tags', 'Todos']:
                 facet_queries.append( '{!key="%s" ex=dt}' % (facet) + self.get_facet_query(facet, search_term) )
-            solr_args['facet.query'] = facet_queries
+                solr_args['facet.query'] = facet_queries
 
             if self.request.GET.get('facets'):
                 solr_args['fq'] = '{!tag=dt}' + ' OR '.join([self.get_facet_query(x, search_term) for x in self.request.GET.get('facets').split(',')])
@@ -112,6 +124,7 @@ class SearchListView(ListView):
                                   author=myobject.get('author','no author'),
                                   pub_date=myobject.get('attr_publication_date',''),
                                   doctype=myobject['doctype'],
+                                  sha1sum=myobject.get('sha1sum', ''),
                                   id=myobject['id'],
                                   internal_id=myobject.get('internal_id', ''),
                                   last_modified=last_modified,
@@ -122,7 +135,7 @@ class SearchListView(ListView):
                                   bordercore_blogpost_title=myobject.get('bordercore_blogpost_title',''),
                                   blogpost_snippet = blogpost_snippet,
                                   bordercore_bookmark_title=myobject.get('bordercore_bookmark_title',''),
- ) )
+                              ) )
             context['numFound'] = context['info']['response']['numFound']
 
             # Convert to a list of dicts.  This lets us use the dictsortreversed
@@ -143,8 +156,12 @@ class SearchTagDetailView(ListView):
         context = super(SearchTagDetailView, self).get_context_data(**kwargs)
         results = {}
         for one_doc in context['info']['response']['docs']:
-            if one_doc['doctype'] == 'book':
+            if one_doc['doctype'] == 'book' or one_doc['doctype'] == 'blob':
                 one_doc['filename'] = os.path.basename(one_doc['filepath'])
+                if one_doc['content_type']:
+                    one_doc['content_type'] = one_doc['content_type'][0].split('/')[1]
+                if not one_doc.get('title', ''):
+                    one_doc['title'] = one_doc['filename']
             if results.get(one_doc['doctype'], ''):
                 results[one_doc['doctype']].append(one_doc)
             else:
@@ -188,9 +205,9 @@ class SearchTagDetailView(ListView):
 
         solr_args = { 'q': q,
                       'rows': rows,
-                      'fields': ['attr_*','author','doctype','filepath','tags','title','author', 'url'],
+                      'fields': ['attr_*','author','content_type', 'doctype','filepath','tags','title','author', 'url'],
                       'wt': 'json',
-                      'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,doctype,filepath,id,internal_id,last_modified,tags,title,url,bordercore_blogpost_title',
+                      'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,last_modified,tags,title,url,bordercore_blogpost_title',
                       'facet': 'on',
                       'facet.mincount': '1',
                       'facet.field': ['{!ex=tags}tags','{!ex=doctype}doctype'],
