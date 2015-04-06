@@ -17,9 +17,6 @@ def fitness_add(request, exercise_id):
             new_data = Data(weight=datum[0], reps=datum[1], user=request.user, exercise=exercise)
             new_data.save()
 
-            print datum[0]
-            print datum[1]
-
     recent_data = []
     muscle_group = MuscleGroup.objects.get(id=exercise.muscle.muscle_group_id)
     muscle = exercise.muscle
@@ -39,17 +36,19 @@ def fitness_add(request, exercise_id):
 
 def fitness_summary(request):
 
-    muscles = Muscle.objects.all()
+    exercises = Exercise.objects.all()
 
     recent_data = {}
-    for m in muscles:
+    for e in exercises:
         try:
-            recent_data[m.muscle] = Data.objects.filter(exercise__muscle=m).order_by('-date')[0]
-            recent_data[m.muscle].delta_days = (int(datetime.datetime.now().strftime("%s")) - int(recent_data[m.muscle].date.strftime("%s")))/86400 + 1
+            recent_data[e.exercise] = e
+            recent_data[e.exercise].date = e.data_set.order_by('-date')[0].date
+            recent_data[e.exercise].delta_days = (int(datetime.datetime.now().strftime("%s")) - int(recent_data[e.exercise].date.strftime("%s")))/86400 + 1
         except IndexError:
             pass
 
     return render_to_response('fitness/summary.html',
                               { 'section': SECTION,
-                                'recent_data': recent_data },
+                                'recent_data': recent_data
+                                },
                               context_instance=RequestContext(request))

@@ -40,8 +40,8 @@
 
         <thead>
             <tr>
-                <th>Muscle Group</th>
                 <th>Exercise</th>
+                <th>Muscle Group</th>
                 <th>Date</th>
                 <th></th>
                 <th></th>
@@ -52,9 +52,13 @@
 
         <tr>
             <td>{{ key }}</td>
-            <td>{{ values.exercise.exercise }}</td>
-            <td>{{ values.date|date:"N j, Y" }} - {{ values.delta_days }} day{{ values.delta_days|pluralize:"s" }} ago</td>
-            <td><a href="{% url 'fitness_add' values.exercise_id %}">Add</a></td>
+            <td>{{ values.muscle.muscle_group.muscle_group }}</td>
+            {% if values.date %}
+                <td>{{ values.date|date:"N j, Y" }} - {{ values.delta_days }} day{{ values.delta_days|pluralize:"s" }} ago</td>
+            {% else %}
+                <td>Never</td>
+            {% endif %}
+            <td><a href="{% url 'fitness_add' values.id %}">Add</a></td>
             <td>{{ values.date|date:"U" }}</td>
             <td>{{ values.delta_days }}</td>
         </tr>
