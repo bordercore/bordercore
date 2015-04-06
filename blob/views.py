@@ -94,21 +94,26 @@ class BlobDetailView(UpdateView):
         return obj
 
     def form_valid(self, form):
-
         blob = form.instance
 
         # Delete all existing tags
         blob.tags.clear()
 
-        # Then add the tags specified in the form
-        for tag in form.cleaned_data['tags']:
-            newtag, created = Tag.objects.get_or_create(name=tag.name)
-            if created:
-                newtag.save()
-            blob.tags.add(newtag)
+        if form.cleaned_data['replacement_sha1sum']:
+            b = Blob.objects.get(sha1sum=form.cleaned_data['replacement_sha1sum'])
+            tags = b.tags.all()
+            form.cleaned_data['tags'] = tags
+
+            # This block of code is needed to force the form to render the replacement tags
+            data = form.data.copy()
+            data['tags'] =  ", ".join([tag.name for tag in tags])
+            form.data = data
+
+            metadata = [[x.name, x.value] for x in b.metadata_set.all()]
+        else:
+            metadata = json.loads(self.request.POST['metadata'])
 
         # Metadata objects are not handled by the form -- handle them manually
-        metadata = json.loads(self.request.POST['metadata'])
 
         # Delete all existing metadata
         blob.metadata_set.all().delete()
@@ -121,6 +126,7 @@ class BlobDetailView(UpdateView):
         self.object = form.save()
         context = self.get_context_data(form=form)
         context["message"] = "Blob updated"
+
         return self.render_to_response(context)
 
     @method_decorator(login_required)

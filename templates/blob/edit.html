@@ -118,6 +118,14 @@
             $('#input-metadata').val(JSON.stringify(table.data().toArray()));
         });
 
+        $('#advanced_link').click( function(e) {
+            $('#id_replacement_sha1sum').parent().parent().toggle();
+        })
+
+        {% if not form.replacement_sha1sum.value %}
+        $('#id_replacement_sha1sum').parent().parent().hide();
+        {% endif %}
+
     });
 
 </script>
@@ -146,6 +154,11 @@
 
         </div>
     {% endfor %}
+
+    <div class="col-lg-offset-2">
+    &nbsp; &nbsp; <a href="#" id="advanced_link">Advanced</a>
+        <br />
+    </div>
 
     <div class="row">
         <div class="col-lg-6 col-lg-offset-2">

@@ -1,4 +1,4 @@
-from django.forms import CheckboxInput, ModelForm, Textarea, TextInput, ModelMultipleChoiceField
+from django.forms import CharField, ModelForm, TextInput, ModelMultipleChoiceField, ValidationError
 
 from blob.models import Blob
 from tag.models import Tag
@@ -22,6 +22,7 @@ class ModelCommaSeparatedChoiceField(ModelMultipleChoiceField):
 
 
 class BlobForm(ModelForm):
+
     def __init__(self, *args, **kwargs):
 
         # In case one of our views passed in the request object (eg from get_form_kwargs()),
@@ -42,6 +43,18 @@ class BlobForm(ModelForm):
         required=False,
         queryset=Tag.objects.filter(),
         to_field_name='name')
+
+    replacement_sha1sum = CharField(
+        required=False,
+        widget=TextInput(attrs={'class': 'form-control'})
+    )
+
+    def clean_replacement_sha1sum(self):
+        data = self.cleaned_data['replacement_sha1sum']
+        if data:
+            if not Blob.objects.filter(sha1sum=data).exists():
+                raise ValidationError("replacement sha1sum not found")
+        return data
 
     class Meta:
         model = Blob
