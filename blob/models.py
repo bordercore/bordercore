@@ -14,12 +14,19 @@ class Blob(TimeStampedModel):
     BLOB_STORE = '/home/media/blobs'
 
     sha1sum = models.CharField(max_length=40, unique=True)
+    filename = models.TextField()
     file_path = models.TextField()
     user = models.ForeignKey(User)
     tags = models.ManyToManyField(Tag)
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
+
+    def get_parent_dir(self):
+        if self.file_path.startswith(self.BLOB_STORE):
+            return "%s/%s/%s" % (self.BLOB_STORE, self.sha1sum[0:2], self.sha1sum)
+        else:
+            return self.EBOOK_DIR
 
     def get_title(self):
         m = self.metadata_set.filter(name='Title')
@@ -41,6 +48,7 @@ class Blob(TimeStampedModel):
             super(Blob, self).delete()
         else:
             raise Exception("File does not exist: %s" % self.file_path)
+
 
 class MetaData(TimeStampedModel):
     name = models.TextField()

@@ -1,3 +1,5 @@
+import os
+
 from django.forms import CharField, ModelForm, TextInput, ModelMultipleChoiceField, ValidationError
 
 from blob.models import Blob
@@ -56,11 +58,19 @@ class BlobForm(ModelForm):
                 raise ValidationError("replacement sha1sum not found")
         return data
 
+    def clean_filename(self):
+        data = self.cleaned_data['filename']
+        if self.has_changed():
+            parent_dir = self.instance.get_parent_dir()
+            os.rename("%s/%s" % (parent_dir, self.initial['filename']), "%s/%s" % (parent_dir, data))
+        return data
+
     class Meta:
         model = Blob
-        fields = ('sha1sum', 'file_path', 'tags')
+        fields = ('sha1sum', 'filename', 'file_path', 'tags')
         widgets = {
             'sha1sum': TextInput(attrs={'class': 'form-control'}),
-            'file_path': TextInput(attrs={'class': 'form-control'}),
+            'file_path': TextInput(attrs={'class': 'form-control', 'readonly': 'True'}),
+            'filename': TextInput(attrs={'class': 'form-control'}),
             'tags': TextInput(attrs={'class': 'form-control'})
         }
