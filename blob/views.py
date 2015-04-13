@@ -1,8 +1,11 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse_lazy
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
-from django.views.generic.edit import UpdateView
+from django.views.generic.edit import DeleteView, UpdateView
 
 import hashlib
 import json
@@ -10,17 +13,13 @@ import os
 
 from blob.forms import BlobForm
 from blob.models import MetaData
-from tag.models import Tag
 from blob.models import Blob
 
 SECTION = 'Blob'
-EBOOK_DIR = '/home/media/ebooks'
-BLOB_STORE = '/home/media/blobs'
 
 def blob_add(request):
 
     template_name = 'blob/add.html'
-    message = ''
 
     if request.method == 'POST':
 
@@ -39,35 +38,53 @@ def blob_add(request):
         # Do we already know about this blob?
         existing_blob = Blob.objects.filter(sha1sum=hasher.hexdigest())
         if existing_blob:
-            message = 'This blob already exists'
+            messages.add_message(request, messages.INFO, 'This blob already exists')
         else:
             if request.POST.get('store-on-filesystem', '') == 'on':
-                filepath = store_blob(request.FILES['blob'], hasher.hexdigest(), store_as_ebook = True if request.POST.get('store-on-filesystem', '') == 'on' else False)
+                filepath = store_blob(request.FILES['blob'], hasher.hexdigest(), store_as_ebook = True if request.POST.get('store-as-ebook', '') == 'on' else False)
             else:
-                filepath = "%s/%s" % (EBOOK_DIR, request.POST['filename'].split('\\')[-1])
+                filepath = "%s/%s" % (Blob.EBOOK_DIR, request.POST['filename'].split('\\')[-1])
 
             b = Blob(sha1sum = hasher.hexdigest(), file_path = filepath, user = request.user)
             b.save()
             return redirect('blob_edit', b.sha1sum)
 
     return render_to_response(template_name,
-                              {'section': SECTION, 'message': message},
+                              {'section': SECTION},
                               context_instance=RequestContext(request))
 
 
 def store_blob(blob, sha1sum, store_as_ebook=False):
 
     if store_as_ebook:
-        filepath = "%s/%s" % (EBOOK_DIR, blob.name)
+        filepath = "%s/%s" % (Blob.EBOOK_DIR, blob.name)
     else:
-        if not os.path.exists("%s/%s" % (BLOB_STORE, sha1sum[0:2])):
-            os.makedirs("%s/%s/%s" % (BLOB_STORE, sha1sum[0:2], sha1sum))
-        filepath = "%s/%s/%s/%s" % (BLOB_STORE, sha1sum[0:2], sha1sum, blob.name)
+        if not os.path.exists("%s/%s/%s" % (Blob.BLOB_STORE, sha1sum[0:2], sha1sum)):
+            os.makedirs("%s/%s/%s" % (Blob.BLOB_STORE, sha1sum[0:2], sha1sum))
+        filepath = "%s/%s/%s/%s" % (Blob.BLOB_STORE, sha1sum[0:2], sha1sum, blob.name)
+
     with open(filepath, 'wb+') as destination:
         for chunk in blob.chunks():
             destination.write(chunk)
 
     return filepath
+
+
+class BlobDeleteView(DeleteView):
+    template_name = 'blob/delete.html'
+    model = Blob
+    success_url = reverse_lazy('blob_add')
+
+    def post(self, request, *args, **kwargs):
+        if request.POST['action'] == 'Cancel':
+            # We must call self.get_object() in order for self.get_success_url() to work
+            self.object = self.get_object()
+            url = self.get_success_url()
+            return HttpResponseRedirect(url)
+        else:
+            obj = super(BlobDeleteView, self).post(request, *args, **kwargs)
+            messages.add_message(request, messages.INFO, 'Blob deleted')
+            return obj
 
 
 class BlobDetailView(UpdateView):
@@ -125,7 +142,7 @@ class BlobDetailView(UpdateView):
 
         self.object = form.save()
         context = self.get_context_data(form=form)
-        context["message"] = "Blob updated"
+        messages.add_message(self.request, messages.INFO, 'Blob updated')
 
         return self.render_to_response(context)
 

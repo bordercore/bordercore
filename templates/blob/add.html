@@ -17,14 +17,16 @@
 
     </script>
 
-    {% if message %}
-        <div class="row">
-            <div class="col-lg-7 col-lg-offset2">
-                <div class="alert alert-danger">
-                    {{ message }}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="row">
+                <div class="col-lg-7 col-lg-offset2">
+                    <div class="alert alert-danger">
+                        {{ message }}
+                    </div>
                 </div>
             </div>
-        </div>
+        {% endfor %}
     {% endif %}
 
     <form class="form-horizontal" enctype="multipart/form-data" action="{% url 'blob_add' %}" method="post">
@@ -46,7 +48,7 @@
 
                 <div class="form-group">
                     <div class="controls">
-                        <input type="checkbox" name="store-on-filesystem" /> Store on filesystem
+                        <input type="checkbox" name="store-on-filesystem" checked="checked" /> Store on filesystem
                         &nbsp; &nbsp;
                         <input type="checkbox" name="store-as-ebook" /> Store as ebook
                     </div>

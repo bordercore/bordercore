@@ -130,8 +130,16 @@
 
 </script>
 
-{% if message %}
-    <div class="alert {{ message_level|default:'alert-success' }}">{{ message }}</div>
+{% if messages %}
+    {% for message in messages %}
+        <div class="row">
+            <div class="col-lg-7 col-lg-offset2">
+                <div class="alert alert-danger">
+                    {{ message }}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
 {% endif %}
 
 <p class="lead col-lg-offset-2">{{ action }} Blob</p>
@@ -205,7 +213,9 @@
         <div class="form-group">
             <div class="col-lg-3 col-lg-offset-2">
                 <input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
-                <input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
+                <a href="{% url 'blob_delete' object.id %}">
+                    <input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="button" name="Go" value="Delete" />
+                </a>
             </div>
         </div>
 

@@ -5,7 +5,7 @@ from tastypie.api import Api
 
 from accounts.api import UserResource
 from accounts.views import UserProfileDetailView
-from blob.views import BlobDetailView
+from blob.views import BlobDeleteView, BlobDetailView
 from bookmark.api import BookmarkResource
 from bookmark.views import OrderListJson
 from book.views import BookListView
@@ -35,6 +35,7 @@ urlpatterns += patterns('homepage.views',
 
 urlpatterns += patterns('blob.views',
                         url(r'^blob/add', 'blob_add', name='blob_add'),
+                        url(r'^blob/delete/(?P<pk>\w+)$', BlobDeleteView.as_view(), name='blob_delete'),
                         url(r'^blob/edit/(?P<sha1sum>\w+)$', BlobDetailView.as_view(), name='blob_edit'),
                         url(r'^blob/metadata_name_search/', 'metadata_name_search', name='metadata_name_search'),
 )
