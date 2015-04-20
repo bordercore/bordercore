@@ -34,6 +34,7 @@ urlpatterns += patterns('homepage.views',
 )
 
 urlpatterns += patterns('blob.views',
+                        url(r'^blob/add/(\w+)$', 'blob_add', name='blob_add'),
                         url(r'^blob/add', 'blob_add', name='blob_add'),
                         url(r'^blob/delete/(?P<pk>\w+)$', BlobDeleteView.as_view(), name='blob_delete'),
                         url(r'^blob/edit/(?P<sha1sum>\w+)$', BlobDetailView.as_view(), name='blob_edit'),

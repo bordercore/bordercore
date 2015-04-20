@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render_to_response
@@ -17,7 +18,7 @@ from blob.models import Blob
 
 SECTION = 'Blob'
 
-def blob_add(request):
+def blob_add(request, replaced_sha1sum=None):
 
     template_name = 'blob/add.html'
 
@@ -45,12 +46,35 @@ def blob_add(request):
             else:
                 filepath = "%s/%s" % (Blob.EBOOK_DIR, request.POST['filename'].split('\\')[-1])
 
-            b = Blob(sha1sum = hasher.hexdigest(), file_path = filepath, user = request.user)
-            b.save()
+            replaced_sha1sum = request.POST.get('replaced_sha1sum', '')
+            if replaced_sha1sum != None:
+                b = Blob.objects.get(sha1sum=replaced_sha1sum)
+                old_tags = b.tags.all()
+                old_metadata = b.metadata_set.all()
+                b.sha1sum = hasher.hexdigest()
+                b.pk = None
+                b.save()
+                b.tags = old_tags
+                b.metadata_set = old_metadata
+                b.save()
+                # TODO: Delete the replaced sha1sum.  This will be safe once ebooks are stored as blobs
+            else:
+                b = Blob(sha1sum = hasher.hexdigest(), file_path = filepath, user = request.user)
+                b.save()
+
             return redirect('blob_edit', b.sha1sum)
 
+    else:
+
+        try:
+            replaced_sha1sum_info = Blob.objects.get(sha1sum = replaced_sha1sum)
+            replaced_sha1sum_info.metadata = [[x.name, x.value] for x in replaced_sha1sum_info.metadata_set.all()]
+        except ObjectDoesNotExist:
+            replaced_sha1sum_info = None
+            pass
+
     return render_to_response(template_name,
-                              {'section': SECTION},
+                              {'replaced_sha1sum_info': replaced_sha1sum_info, 'section': SECTION},
                               context_instance=RequestContext(request))
 
 
@@ -116,19 +140,7 @@ class BlobDetailView(UpdateView):
         # Delete all existing tags
         blob.tags.clear()
 
-        if form.cleaned_data['replacement_sha1sum']:
-            b = Blob.objects.get(sha1sum=form.cleaned_data['replacement_sha1sum'])
-            tags = b.tags.all()
-            form.cleaned_data['tags'] = tags
-
-            # This block of code is needed to force the form to render the replacement tags
-            data = form.data.copy()
-            data['tags'] =  ", ".join([tag.name for tag in tags])
-            form.data = data
-
-            metadata = [[x.name, x.value] for x in b.metadata_set.all()]
-        else:
-            metadata = json.loads(self.request.POST['metadata'])
+        metadata = json.loads(self.request.POST['metadata'])
 
         # Metadata objects are not handled by the form -- handle them manually
 

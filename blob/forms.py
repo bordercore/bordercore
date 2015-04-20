@@ -46,18 +46,6 @@ class BlobForm(ModelForm):
         queryset=Tag.objects.filter(),
         to_field_name='name')
 
-    replacement_sha1sum = CharField(
-        required=False,
-        widget=TextInput(attrs={'class': 'form-control'})
-    )
-
-    def clean_replacement_sha1sum(self):
-        data = self.cleaned_data['replacement_sha1sum']
-        if data:
-            if not Blob.objects.filter(sha1sum=data).exists():
-                raise ValidationError("replacement sha1sum not found")
-        return data
-
     def clean_filename(self):
         data = self.cleaned_data['filename']
         if self.has_changed():

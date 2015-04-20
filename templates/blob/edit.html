@@ -118,14 +118,6 @@
             $('#input-metadata').val(JSON.stringify(table.data().toArray()));
         });
 
-        $('#advanced_link').click( function(e) {
-            $('#id_replacement_sha1sum').parent().parent().toggle();
-        })
-
-        {% if not form.replacement_sha1sum.value %}
-        $('#id_replacement_sha1sum').parent().parent().hide();
-        {% endif %}
-
     });
 
 </script>
@@ -142,83 +134,89 @@
     {% endfor %}
 {% endif %}
 
-<p class="lead col-lg-offset-2">{{ action }} Blob</p>
+<div class="row">
 
-<form id="blob-form" class="form-horizontal" action="{{ request.path }}" method="post">
-    <input type="hidden" name="metadata" id="input-metadata" />
+    <div class="col-lg-10">
+        <p class="lead col-lg-offset-2">{{ action }} Blob</p>
 
-    {% csrf_token %}
+        <form id="blob-form" class="form-horizontal" action="{{ request.path }}" method="post">
+            <input type="hidden" name="metadata" id="input-metadata" />
 
-    {% for field in form %}
-        <div class="form-group{% if field.errors %} error{% endif %}">
-            <label class="col-lg-2 control-label" for="inputTitle">{{ field.label }}</label>
+            {% csrf_token %}
 
-            <div class="col-lg-6">
-                {{ field }}
-                {% for error in field.errors %}
-                    <span class="form-error">{{ error }}</span>
-                {% endfor %}
+            {% for field in form %}
+                <div class="form-group{% if field.errors %} error{% endif %}">
+                    <label class="col-lg-2 control-label" for="inputTitle">{{ field.label }}</label>
+
+                    <div class="col-lg-6">
+                        {{ field }}
+                        {% for error in field.errors %}
+                            <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                </div>
+            {% endfor %}
+
+            <div class="row">
+                <div class="col-lg-6 col-lg-offset-2">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">MetaData</h3>
+                        </div>
+                        <div class="panel-body">
+                            <table id="metadata" class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for data in metadata %}
+                                        <tr><td>{{ data.name }}</td><td>{{ data.value }}</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <div class="form-inline">
+                                        <tr>
+                                            <td>
+                                                <div class="form-group">
+                                                    <input id="metadata-name" class="form-control" name="metadata_name" type="text" placeholder="Name" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    <input id="metadata-value" class="form-control" name="metadata_value" type="text" placeholder="Value" />
+                                                    <input class="btn btn-default" id="btn-metadata" type="button" value="Delete" disabled />
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </div>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-        </div>
-    {% endfor %}
+            <div class="form-group">
+                <div class="col-lg-3 col-lg-offset-2">
+                    <input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
+                    <a href="{% url 'blob_delete' object.id %}">
+                        <input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="button" name="Go" value="Delete" />
+                    </a>
+                </div>
+            </div>
 
-    <div class="col-lg-offset-2">
-    &nbsp; &nbsp; <a href="#" id="advanced_link">Advanced</a>
-        <br />
+        </form>
+
     </div>
 
-    <div class="row">
-        <div class="col-lg-6 col-lg-offset-2">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">MetaData</h3>
-                </div>
-                <div class="panel-body">
-                    <table id="metadata" class="table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Value</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for data in metadata %}
-                                <tr><td>{{ data.name }}</td><td>{{ data.value }}</td></tr>
-                            {% endfor %}
-                        </tbody>
-                        <tfoot>
-                            <div class="form-inline">
-                                <tr>
-                                    <td>
-                                        <div class="form-group">
-                                            <input id="metadata-name" class="form-control" name="metadata_name" type="text" placeholder="Name" />
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="form-group">
-                                            <input id="metadata-value" class="form-control" name="metadata_value" type="text" placeholder="Value" />
-                                            <input class="btn btn-default" id="btn-metadata" type="button" value="Delete" disabled />
-                                        </div>
-                                    </td>
-                                </tr>
-                            </div>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-            </div>
-        </div>
+    <div class="col-lg-2" id="kb_blob_detail_links">
+        <a href="{% url 'blob_add' sha1sum %}">Replace this blob</a>
+    </div>
 
-        <div class="form-group">
-            <div class="col-lg-3 col-lg-offset-2">
-                <input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
-                <a href="{% url 'blob_delete' object.id %}">
-                    <input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="button" name="Go" value="Delete" />
-                </a>
-            </div>
-        </div>
-
-</form>
+</div>
 
 {% endblock %}

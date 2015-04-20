@@ -106,12 +106,17 @@ ul.pagination {
 }
 
 #kbsearch {
-                width: 330px;
-            }
+    width: 330px;
+}
 
 #kb_blob_search {
    width: 340px;
 }
+
+#kb_blob_detail_links {
+   margin-top: 40px;
+}
+
 a.tag:link {
     color: white;
 }
