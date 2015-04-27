@@ -21,6 +21,7 @@ SECTION = 'Blob'
 def blob_add(request, replaced_sha1sum=None):
 
     template_name = 'blob/add.html'
+    replaced_sha1sum_info = None
 
     if request.method == 'POST':
 
@@ -39,12 +40,9 @@ def blob_add(request, replaced_sha1sum=None):
         # Do we already know about this blob?
         existing_blob = Blob.objects.filter(sha1sum=hasher.hexdigest())
         if existing_blob:
-            messages.add_message(request, messages.INFO, 'This blob already exists')
+            messages.add_message(request, messages.INFO, 'This blob already exists.  <a href="%s">Click here to edit</a>' % reverse_lazy('blob_edit', kwargs={"sha1sum": existing_blob[0].sha1sum}), extra_tags='safe')
         else:
-            if request.POST.get('store-on-filesystem', '') == 'on':
-                filepath = store_blob(request.FILES['blob'], hasher.hexdigest(), store_as_ebook = True if request.POST.get('store-as-ebook', '') == 'on' else False)
-            else:
-                filepath = "%s/%s" % (Blob.EBOOK_DIR, request.POST['filename'].split('\\')[-1])
+            filepath = store_blob(request.FILES['blob'], hasher.hexdigest())
 
             replaced_sha1sum = request.POST.get('replaced_sha1sum', '')
             if replaced_sha1sum != None:
@@ -54,12 +52,16 @@ def blob_add(request, replaced_sha1sum=None):
                 b.sha1sum = hasher.hexdigest()
                 b.pk = None
                 b.save()
+                b.filename = request.FILES['blob'].name
+                b.file_path = "%s/%s" % (b.get_parent_dir(), b.filename)
                 b.tags = old_tags
                 b.metadata_set = old_metadata
                 b.save()
-                # TODO: Delete the replaced sha1sum.  This will be safe once ebooks are stored as blobs
+                # Delete the old blob
+                old_blob = Blob.objects.get(sha1sum=replaced_sha1sum)
+                old_blob.delete()
             else:
-                b = Blob(sha1sum = hasher.hexdigest(), file_path = filepath, user = request.user)
+                b = Blob(sha1sum=hasher.hexdigest(), file_path=filepath, user=request.user)
                 b.save()
 
             return redirect('blob_edit', b.sha1sum)
@@ -67,25 +69,21 @@ def blob_add(request, replaced_sha1sum=None):
     else:
 
         try:
-            replaced_sha1sum_info = Blob.objects.get(sha1sum = replaced_sha1sum)
+            replaced_sha1sum_info = Blob.objects.get(sha1sum=replaced_sha1sum)
             replaced_sha1sum_info.metadata = [[x.name, x.value] for x in replaced_sha1sum_info.metadata_set.all()]
         except ObjectDoesNotExist:
             replaced_sha1sum_info = None
-            pass
 
     return render_to_response(template_name,
                               {'replaced_sha1sum_info': replaced_sha1sum_info, 'section': SECTION},
                               context_instance=RequestContext(request))
 
 
-def store_blob(blob, sha1sum, store_as_ebook=False):
+def store_blob(blob, sha1sum):
 
-    if store_as_ebook:
-        filepath = "%s/%s" % (Blob.EBOOK_DIR, blob.name)
-    else:
-        if not os.path.exists("%s/%s/%s" % (Blob.BLOB_STORE, sha1sum[0:2], sha1sum)):
-            os.makedirs("%s/%s/%s" % (Blob.BLOB_STORE, sha1sum[0:2], sha1sum))
-        filepath = "%s/%s/%s/%s" % (Blob.BLOB_STORE, sha1sum[0:2], sha1sum, blob.name)
+    if not os.path.exists("%s/%s/%s" % (Blob.BLOB_STORE, sha1sum[0:2], sha1sum)):
+        os.makedirs("%s/%s/%s" % (Blob.BLOB_STORE, sha1sum[0:2], sha1sum))
+    filepath = "%s/%s/%s/%s" % (Blob.BLOB_STORE, sha1sum[0:2], sha1sum, blob.name)
 
     with open(filepath, 'wb+') as destination:
         for chunk in blob.chunks():

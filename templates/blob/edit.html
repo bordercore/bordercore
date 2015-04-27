@@ -125,10 +125,8 @@
 {% if messages %}
     {% for message in messages %}
         <div class="row">
-            <div class="col-lg-7 col-lg-offset2">
-                <div class="alert alert-danger">
-                    {{ message }}
-                </div>
+            <div class="col-lg-7 col-lg-offset2 alert alert-danger">
+                {{ message|safe }}
             </div>
         </div>
     {% endfor %}
@@ -148,7 +146,7 @@
                 <div class="form-group{% if field.errors %} error{% endif %}">
                     <label class="col-lg-2 control-label" for="inputTitle">{{ field.label }}</label>
 
-                    <div class="col-lg-6">
+                    <div class="col-lg-7">
                         {{ field }}
                         {% for error in field.errors %}
                             <span class="form-error">{{ error }}</span>
@@ -159,7 +157,7 @@
             {% endfor %}
 
             <div class="row">
-                <div class="col-lg-6 col-lg-offset-2">
+                <div class="col-lg-7 col-lg-offset-2">
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h3 class="panel-title">MetaData</h3>
