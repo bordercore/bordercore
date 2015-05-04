@@ -45,7 +45,7 @@ def blob_add(request, replaced_sha1sum=None):
             filepath = store_blob(request.FILES['blob'], hasher.hexdigest())
 
             replaced_sha1sum = request.POST.get('replaced_sha1sum', '')
-            if replaced_sha1sum != None:
+            if replaced_sha1sum != '':
                 b = Blob.objects.get(sha1sum=replaced_sha1sum)
                 old_tags = b.tags.all()
                 old_metadata = b.metadata_set.all()
@@ -61,7 +61,7 @@ def blob_add(request, replaced_sha1sum=None):
                 old_blob = Blob.objects.get(sha1sum=replaced_sha1sum)
                 old_blob.delete()
             else:
-                b = Blob(sha1sum=hasher.hexdigest(), file_path=filepath, user=request.user)
+                b = Blob(sha1sum=hasher.hexdigest(), filename=request.FILES['blob'].name, user=request.user)
                 b.save()
 
             return redirect('blob_edit', b.sha1sum)
