@@ -15,7 +15,6 @@ class Blob(TimeStampedModel):
 
     sha1sum = models.CharField(max_length=40, unique=True)
     filename = models.TextField()
-    file_path = models.TextField(null=True, blank=True)
     user = models.ForeignKey(User)
     tags = models.ManyToManyField(Tag)
 

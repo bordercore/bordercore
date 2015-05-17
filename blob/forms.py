@@ -55,10 +55,9 @@ class BlobForm(ModelForm):
 
     class Meta:
         model = Blob
-        fields = ('sha1sum', 'filename', 'file_path', 'tags')
+        fields = ('sha1sum', 'filename', 'tags')
         widgets = {
             'sha1sum': TextInput(attrs={'class': 'form-control'}),
-            'file_path': TextInput(attrs={'class': 'form-control', 'readonly': 'True'}),
             'filename': TextInput(attrs={'class': 'form-control'}),
             'tags': TextInput(attrs={'class': 'form-control'})
         }
