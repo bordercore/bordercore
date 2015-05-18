@@ -147,7 +147,10 @@
             {% for match in info.matches.blob %}
                 <div class="row voffset">
                     <div class="col-md-12">
-                        <a href="{{ STATIC_URL }}blobs/{{ match.filename }}" target="blob">{{ match.title }}</a> ({{ match.content_type }})
+                        {% if match.is_image %}
+                        <img width="32" height="32" src="{{ STATIC_URL }}blobs{{ match.url }}" />
+                        {% endif %}
+                        <a href="{{ STATIC_URL }}blobs{{ match.url }}" target="blob">{{ match.title }}</a> ({{ match.content_type }})
                     </div>
                 </div>
             {% endfor %}

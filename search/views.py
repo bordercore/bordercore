@@ -9,12 +9,14 @@ from os.path import basename
 import solr
 import urllib
 
+from blob.models import Blob
 from tag.models import Tag
 
 SOLR_HOST = 'localhost'
 SOLR_PORT = 8080
 SOLR_COLLECTION = 'solr/bordercore'
 
+IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
 
 class SearchListView(ListView):
 
@@ -158,8 +160,11 @@ class SearchTagDetailView(ListView):
         for one_doc in context['info']['response']['docs']:
             if one_doc['doctype'] == 'book' or one_doc['doctype'] == 'blob':
                 one_doc['filename'] = os.path.basename(one_doc['filepath'])
+                one_doc['url'] = one_doc['filepath'].split(Blob.BLOB_STORE)[1]
                 if one_doc['content_type']:
                     one_doc['content_type'] = one_doc['content_type'][0].split('/')[1]
+                    if one_doc['content_type'] in IMAGE_TYPE_LIST:
+                        one_doc['is_image'] = True
                 if not one_doc.get('title', ''):
                     one_doc['title'] = one_doc['filename']
             if results.get(one_doc['doctype'], ''):
