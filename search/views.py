@@ -49,6 +49,7 @@ class SearchListView(ListView):
 
             search_term = self.request.GET['search']
             rows = self.request.GET['rows']
+            boolean_type = self.request.GET.get('boolean_search_type', 'AND')
             if rows == 'No limit':
                 rows = 1000000
             elif rows is None:
@@ -71,12 +72,14 @@ class SearchListView(ListView):
 
             else:
 
+                query = 'title:%s bordercore_todo_task:%s tags:%s bordercore_bookmark_title:%s ' % (search_term, search_term, search_term, search_term)
+                query = query + (' %s ' % boolean_type).join(['attr_content:%s' % x for x in search_term.split()])
                 solr_args.update(
-                    { 'q': 'title:%s attr_content:%s bordercore_todo_task:%s tags:%s bordercore_bookmark_title:%s' % (search_term, search_term, search_term, search_term, search_term),
-                      'hl': 'true',
-                      'hl.fl': 'attr_content,bordercore_todo_task,bordercore_bookmark_title,title',
-                      'hl.simple.pre': '<span class="search_bordercore_blogpost_snippet">',
-                      'hl.simple.post': '</span>' }
+                    {'q': query,
+                     'hl': 'true',
+                     'hl.fl': 'attr_content,bordercore_todo_task,bordercore_bookmark_title,title',
+                     'hl.simple.pre': '<span class="search_bordercore_blogpost_snippet">',
+                     'hl.simple.post': '</span>'}
                 )
 
             facet_queries = []
