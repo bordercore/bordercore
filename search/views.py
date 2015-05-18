@@ -56,14 +56,14 @@ class SearchListView(ListView):
                 rows = self.SOLR_COUNT_PER_PAGE
 
             # TODO: catch SolrException
-            conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION) )
+            conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
 
-            solr_args = { 'wt': 'json',
-                          'fl': 'attr_publication_date,author,bordercore_blogpost_title,bordercore_bookmark_title,bordercore_todo_task,doctype,filepath,id,internal_id,last_modified,sha1sum,tags,title,url',
-                          'facet': 'on',
-                          'facet.mincount': '1',
-                          'fields': ['attr_*','author','doctype','filepath','tags','title','author', 'url'],
-                          'rows': rows,
+            solr_args = {'wt': 'json',
+                         'fl': 'attr_publication_date,author,bordercore_blogpost_title,bordercore_bookmark_title,bordercore_todo_task,doctype,filepath,id,internal_id,last_modified,sha1sum,tags,title,url',
+                         'facet': 'on',
+                         'facet.mincount': '1',
+                         'fields': ['attr_*', 'author', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
+                         'rows': rows,
             }
 
             if 'blob_search' in self.request.GET:
@@ -84,7 +84,7 @@ class SearchListView(ListView):
 
             facet_queries = []
             for facet in ['Blobs', 'Blog Posts', 'Books', 'Book Titles', 'Documents', 'Links', 'Tags', 'Todos']:
-                facet_queries.append( '{!key="%s" ex=dt}' % (facet) + self.get_facet_query(facet, search_term) )
+                facet_queries.append('{!key="%s" ex=dt}' % (facet) + self.get_facet_query(facet, search_term))
                 solr_args['facet.query'] = facet_queries
 
             if self.request.GET.get('facets'):
@@ -123,29 +123,29 @@ class SearchListView(ListView):
                 if myobject['doctype'] == 'book' and not myobject.get('title', ''):
                     myobject['title'] = filename
                 if myobject['doctype'] == 'bordercore_blog':
-                    if context['info']['highlighting'][ myobject['id'] ].get('attr_content'):
-                        blogpost_snippet = context['info']['highlighting'][ myobject['id'] ]['attr_content'][0]
-                info.append( dict(title=get_title(myobject),
-                                  author=myobject.get('author','no author'),
-                                  pub_date=myobject.get('attr_publication_date',''),
-                                  doctype=myobject['doctype'],
-                                  sha1sum=myobject.get('sha1sum', ''),
-                                  id=myobject['id'],
-                                  internal_id=myobject.get('internal_id', ''),
-                                  last_modified=last_modified,
-                                  url=myobject.get('url', ''),
-                                  filename=filename,
-                                  tags=myobject.get('tags'),
-                                  bordercore_todo_task=myobject.get('bordercore_todo_task',''),
-                                  bordercore_blogpost_title=myobject.get('bordercore_blogpost_title',''),
-                                  blogpost_snippet = blogpost_snippet,
-                                  bordercore_bookmark_title=myobject.get('bordercore_bookmark_title',''),
-                              ) )
+                    if context['info']['highlighting'][myobject['id']].get('attr_content'):
+                        blogpost_snippet = context['info']['highlighting'][myobject['id']]['attr_content'][0]
+                info.append(dict(title=get_title(myobject),
+                                 author=myobject.get('author', 'no author'),
+                                 pub_date=myobject.get('attr_publication_date', ''),
+                                 doctype=myobject['doctype'],
+                                 sha1sum=myobject.get('sha1sum', ''),
+                                 id=myobject['id'],
+                                 internal_id=myobject.get('internal_id', ''),
+                                 last_modified=last_modified,
+                                 url=myobject.get('url', ''),
+                                 filename=filename,
+                                 tags=myobject.get('tags'),
+                                 bordercore_todo_task=myobject.get('bordercore_todo_task', ''),
+                                 bordercore_blogpost_title=myobject.get('bordercore_blogpost_title', ''),
+                                 blogpost_snippet=blogpost_snippet,
+                                 bordercore_bookmark_title=myobject.get('bordercore_bookmark_title', ''),
+                             ))
             context['numFound'] = context['info']['response']['numFound']
 
             # Convert to a list of dicts.  This lets us use the dictsortreversed
             #  filter in our template to sort by count.
-            context['facet_counts'] = [{'doctype_purty': k, 'doctype': k, 'count': v } for k, v in facet_counts.iteritems()]
+            context['facet_counts'] = [{'doctype_purty': k, 'doctype': k, 'count': v} for k, v in facet_counts.iteritems()]
 
         context['info'] = info
         return context
@@ -173,7 +173,7 @@ class SearchTagDetailView(ListView):
             if results.get(one_doc['doctype'], ''):
                 results[one_doc['doctype']].append(one_doc)
             else:
-                results[one_doc['doctype']] = [ one_doc ]
+                results[one_doc['doctype']] = [one_doc]
         context['info']['matches'] = results
 
         tag_counts = {}
@@ -198,7 +198,7 @@ class SearchTagDetailView(ListView):
         tag_list_js = []
         for tag in tag_list:
             if tag != '':
-                tag_list_js.append( {'name': tag, 'is_meta': 'true' if tag in Tag.get_meta_tags() else 'false'} )
+                tag_list_js.append({'name': tag, 'is_meta': 'true' if tag in Tag.get_meta_tags() else 'false'})
         context['tag_list'] = tag_list_js
 
         return context
@@ -207,19 +207,19 @@ class SearchTagDetailView(ListView):
         taglist = self.kwargs['taglist']
         rows = 1000
 
-        q = ' AND '.join([ 'tags:"%s"' % (urllib.unquote(t).decode('utf8'),) for t in taglist.split(',') ])
+        q = ' AND '.join(['tags:"%s"' % (urllib.unquote(t).decode('utf8'),) for t in taglist.split(',')])
 
-        conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION) )
+        conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
 
-        solr_args = { 'q': q,
-                      'rows': rows,
-                      'fields': ['attr_*','author','content_type', 'doctype','filepath','tags','title','author', 'url'],
-                      'wt': 'json',
-                      'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,last_modified,tags,title,url,bordercore_blogpost_title',
-                      'facet': 'on',
-                      'facet.mincount': '1',
-                      'facet.field': ['{!ex=tags}tags','{!ex=doctype}doctype'],
-                      'sort': 'last_modified+desc'
+        solr_args = {'q': q,
+                     'rows': rows,
+                     'fields': ['attr_*', 'author', 'content_type', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
+                     'wt': 'json',
+                     'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,last_modified,tags,title,url,bordercore_blogpost_title',
+                     'facet': 'on',
+                     'facet.mincount': '1',
+                     'facet.field': ['{!ex=tags}tags', '{!ex=doctype}doctype'],
+                     'sort': 'last_modified+desc'
         }
 
         results = conn.raw_query(**solr_args)
@@ -251,13 +251,13 @@ def get_title(myobject):
 @login_required
 def search_book_title(request):
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION) )
+    conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
 
     title = request.GET['title']
 
-    solr_args = { 'q': 'doctype:book AND filepath:*%s*' % title,
-                  'fl': 'id,score,title,author,filepath',
-                  'wt': 'json' }
+    solr_args = {'q': 'doctype:book AND filepath:*%s*' % title,
+                 'fl': 'id,score,title,author,filepath',
+                 'wt': 'json'}
 
     results = conn.raw_query(**solr_args)
 
@@ -270,20 +270,20 @@ def search_book_title(request):
             match['title'] = basename(os.path.splitext(match['filepath'])[0])
 
     return render_to_response('return_json.json',
-                              { 'info': json.dumps(filtered_results['response']['docs']) },
+                              {'info': json.dumps(filtered_results['response']['docs'])},
                               content_type="application/json",
                               context_instance=RequestContext(request))
 
 
 def kb_search_tags_booktitles(request):
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION) )
+    conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
 
     term = request.GET['term']
 
-    solr_args = { 'q': 'tags:%s* OR (doctype:book AND title:*%s*)' % (term, term),
-                  'fl': 'doctype,filepath,tags,title',
-                  'wt': 'json' }
+    solr_args = {'q': 'tags:%s* OR (doctype:book AND title:*%s*)' % (term, term),
+                 'fl': 'doctype,filepath,tags,title',
+                 'wt': 'json'}
 
     results = json.loads(conn.raw_query(**solr_args))
 
@@ -302,33 +302,33 @@ def kb_search_tags_booktitles(request):
         matches.append({'type': 'Tag', 'value': tag})
 
     return render_to_response('return_json.json',
-                              { 'info': json.dumps(matches) },
+                              {'info': json.dumps(matches)},
                               content_type="application/json",
                               context_instance=RequestContext(request))
 
 
 def search_document_source(request):
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION) )
+    conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
 
     doc_source = request.GET['doc_source']
 
-    solr_args = { 'q': 'doctype:document AND source:*%s*' % doc_source,
-                  'fl': 'id,source',
-                  'wt': 'json',
-                  'group': 'true',
-                  'group.field': 'source'
-              }
+    solr_args = {'q': 'doctype:document AND source:*%s*' % doc_source,
+                 'fl': 'id,source',
+                 'wt': 'json',
+                 'group': 'true',
+                 'group.field': 'source'
+             }
 
     results = json.loads(conn.raw_query(**solr_args))
 
     return_data = []
 
     for match in results['grouped']['source']['groups']:
-        return_data.append( {'source': match['doclist']['docs'][0]['source'] } )
+        return_data.append({'source': match['doclist']['docs'][0]['source']})
 
     return render_to_response('return_json.json',
-                              { 'info': json.dumps(sorted(return_data)) },
+                              {'info': json.dumps(sorted(return_data))},
                               content_type="application/json",
                               context_instance=RequestContext(request))
 
@@ -339,7 +339,7 @@ def search_admin(request):
     # Get some document count stats.  Any way to do this with just one query?
     stats = {}
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION) )
+    conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
     for doctype in ['book', 'bordercore_todo', 'bordercore_bookmark']:
         r = conn.query('doctype:%s' % doctype, rows=1)
         stats[doctype] = r.numFound
@@ -349,15 +349,15 @@ def search_admin(request):
         if request.POST['Go'] in ['Delete']:
             print request.POST['doc_type']
 
-            conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION) )
+            conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
             conn.delete_query('doctype:%s' % request.POST['doc_type'])
             conn.commit()
         elif request.POST['Go'] in ['Commit']:
 
-            conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION) )
+            conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
             conn.commit()
 
 
     return render_to_response('search/admin.html',
-                              { 'stats': stats },
+                              {'stats': stats},
                               context_instance=RequestContext(request))
