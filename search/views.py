@@ -6,6 +6,7 @@ from django.template import RequestContext
 import json
 import os
 from os.path import basename
+import re
 import solr
 import urllib
 
@@ -17,6 +18,7 @@ SOLR_PORT = 8080
 SOLR_COLLECTION = 'solr/bordercore'
 
 IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
+
 
 class SearchListView(ListView):
 
@@ -39,7 +41,7 @@ class SearchListView(ListView):
         elif facet == 'Links':
             return 'doctype:bordercore_bookmark'
         elif facet == 'Book Titles':
-            return '(doctype:book AND title:%s)' % (term)
+            return '(doctype:blob AND title:%s)' % (term)
         elif facet == 'Tags':
             return 'tags:%s' % (term)
 
@@ -120,7 +122,7 @@ class SearchListView(ListView):
                     last_modified = pretty_date(utc_from_string(myobject.get('last_modified')))
                 if myobject.get('filepath'):
                     filename = os.path.basename(myobject['filepath'])
-                if myobject['doctype'] == 'book' and not myobject.get('title', ''):
+                if myobject['doctype'] == 'blob' and not myobject.get('title', ''):
                     myobject['title'] = filename
                 if myobject['doctype'] == 'bordercore_blog':
                     if context['info']['highlighting'][myobject['id']].get('attr_content'):
@@ -161,7 +163,7 @@ class SearchTagDetailView(ListView):
         context = super(SearchTagDetailView, self).get_context_data(**kwargs)
         results = {}
         for one_doc in context['info']['response']['docs']:
-            if one_doc['doctype'] == 'book' or one_doc['doctype'] == 'blob':
+            if one_doc['doctype'] == 'blob':
                 one_doc['filename'] = os.path.basename(one_doc['filepath'])
                 one_doc['url'] = one_doc['filepath'].split(Blob.BLOB_STORE)[1]
                 if one_doc['content_type']:
@@ -228,9 +230,10 @@ class SearchTagDetailView(ListView):
 
 from itertools import izip
 
+
 def grouped(iterable, n):
     "s -> (s0,s1,s2,...sn-1), (sn,sn+1,sn+2,...s2n-1), (s2n,s2n+1,s2n+2,...s3n-1), ..."
-    return izip(*[iter(iterable)]*n)
+    return izip(*[iter(iterable)] * n)
 
 
 def get_title(myobject):
@@ -240,7 +243,6 @@ def get_title(myobject):
         title = '<no title>'
     elif title == 'untitled':
         # Use the filename (minus the extension) as the title
-        import re
         p = re.compile('^(.*/)?(?:$|(.+?)(?:(\.[^.]*$)|$))')
         m = p.match(myobject['filepath'])
         if m:
@@ -255,7 +257,7 @@ def search_book_title(request):
 
     title = request.GET['title']
 
-    solr_args = {'q': 'doctype:book AND filepath:*%s*' % title,
+    solr_args = {'q': 'doctype:blob AND filepath:*%s*' % title,
                  'fl': 'id,score,title,author,filepath',
                  'wt': 'json'}
 
@@ -281,7 +283,7 @@ def kb_search_tags_booktitles(request):
 
     term = request.GET['term']
 
-    solr_args = {'q': 'tags:%s* OR (doctype:book AND title:*%s*)' % (term, term),
+    solr_args = {'q': 'tags:%s* OR (doctype:blob AND title:*%s*)' % (term, term),
                  'fl': 'doctype,filepath,tags,title',
                  'wt': 'json'}
 
@@ -291,8 +293,8 @@ def kb_search_tags_booktitles(request):
     matches = []
 
     for match in results['response']['docs']:
-        if match['doctype'] == 'book':
-            matches.append({'type': 'Book', 'value': match['title'], 'filename': os.path.basename(match.get('filepath'))})
+        if match['doctype'] == 'blob':
+            matches.append({'type': 'Blob', 'value': match['title'], 'filename': os.path.basename(match.get('filepath'))})
         if match.get('tags', ''):
             print match['tags']
             for tag in [x for x in match['tags'] if x.lower().startswith(term.lower())]:
@@ -340,7 +342,7 @@ def search_admin(request):
     stats = {}
 
     conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
-    for doctype in ['book', 'bordercore_todo', 'bordercore_bookmark']:
+    for doctype in ['blob', 'bordercore_todo', 'bordercore_bookmark']:
         r = conn.query('doctype:%s' % doctype, rows=1)
         stats[doctype] = r.numFound
 
@@ -356,7 +358,6 @@ def search_admin(request):
 
             conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
             conn.commit()
-
 
     return render_to_response('search/admin.html',
                               {'stats': stats},
