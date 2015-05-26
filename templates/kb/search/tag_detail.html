@@ -150,7 +150,7 @@
                         {% if match.is_image %}
                         <img width="32" height="32" src="{{ STATIC_URL }}blobs{{ match.url }}" />
                         {% endif %}
-                        <a href="{{ STATIC_URL }}blobs{{ match.url }}" target="blob">{{ match.title }}</a> ({{ match.content_type }})
+                        <a href="{{ STATIC_URL }}blobs{{ match.url }}" target="blob">{{ match.title.0 }}</a> ({{ match.content_type }})
                     </div>
                 </div>
             {% endfor %}
@@ -160,7 +160,7 @@
             {% for match in info.matches.book %}
                 <div class="row voffset">
                     <div class="col-md-12">
-                        <a href="{{ STATIC_URL }}ebooks/{{ match.filename }}" target="book">{{ match.title }}</a>
+                        <a href="{{ STATIC_URL }}ebooks/{{ match.filename }}" target="book">{{ match.title.0 }}</a>
                     </div>
                 </div>
             {% endfor %}
@@ -180,7 +180,7 @@
             {% for match in info.matches.document %}
                 <div class="row voffset">
                     <div class="col-md-12">
-                        <a href="{% url 'document_detail' match.internal_id %}">{{ match.title }}</a>
+                        <a href="{% url 'document_detail' match.internal_id %}">{{ match.title.0 }}</a>
                     </div>
                 </div>
             {% endfor %}

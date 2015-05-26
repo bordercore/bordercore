@@ -18,6 +18,7 @@ from blob.models import Blob
 
 SECTION = 'Blob'
 
+
 def blob_add(request, replaced_sha1sum=None):
 
     template_name = 'blob/add.html'
@@ -42,7 +43,7 @@ def blob_add(request, replaced_sha1sum=None):
         if existing_blob:
             messages.add_message(request, messages.INFO, 'This blob already exists.  <a href="%s">Click here to edit</a>' % reverse_lazy('blob_edit', kwargs={"sha1sum": existing_blob[0].sha1sum}), extra_tags='safe')
         else:
-            filepath = store_blob(request.FILES['blob'], hasher.hexdigest())
+            store_blob(request.FILES['blob'], hasher.hexdigest())
 
             replaced_sha1sum = request.POST.get('replaced_sha1sum', '')
             if replaced_sha1sum != '':
@@ -117,7 +118,9 @@ class BlobDetailView(UpdateView):
         context = super(BlobDetailView, self).get_context_data(**kwargs)
         context['section'] = SECTION
         context['sha1sum'] = self.kwargs.get('sha1sum')
-        context['metadata'] = self.object.metadata_set.all()
+        context['metadata'] = [x for x in self.object.metadata_set.all() if x.name != 'is_book']
+        if True in [True for x in self.object.metadata_set.all() if x.name == 'is_book']:
+            context['is_book'] = True
         context['action'] = 'Edit'
         return context
 
@@ -149,6 +152,9 @@ class BlobDetailView(UpdateView):
             new_metadata, created = MetaData.objects.get_or_create(name=m[0], value=m[1], blob=blob)
             if created:
                 new_metadata.save()
+        if self.request.POST['is_book']:
+            new_metadata = MetaData(name='is_book', value='true', blob=blob)
+            new_metadata.save()
 
         self.object = form.save()
         context = self.get_context_data(form=form)
@@ -168,8 +174,6 @@ def metadata_name_search(request):
     return_data = [{'value': x['name']} for x in m]
 
     return render_to_response('return_json.json',
-                              { 'info': json.dumps(return_data) },
+                              {'info': json.dumps(return_data)},
                               content_type="application/json",
                               context_instance=RequestContext(request))
-
-

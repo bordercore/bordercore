@@ -30,7 +30,7 @@ class SearchListView(ListView):
 
         if facet == 'Blobs':
             return 'doctype:blob'
-        elif facet == 'Books':
+        elif facet == 'Book':
             return 'doctype:book'
         elif facet == 'Documents':
             return 'doctype:document'
@@ -163,7 +163,7 @@ class SearchTagDetailView(ListView):
         context = super(SearchTagDetailView, self).get_context_data(**kwargs)
         results = {}
         for one_doc in context['info']['response']['docs']:
-            if one_doc['doctype'] == 'blob':
+            if one_doc['doctype'] in ('blob', 'book'):
                 one_doc['filename'] = os.path.basename(one_doc['filepath'])
                 one_doc['url'] = one_doc['filepath'].split(Blob.BLOB_STORE)[1]
                 if one_doc['content_type']:
@@ -217,7 +217,7 @@ class SearchTagDetailView(ListView):
                      'rows': rows,
                      'fields': ['attr_*', 'author', 'content_type', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
                      'wt': 'json',
-                     'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,last_modified,tags,title,url,bordercore_blogpost_title',
+                     'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,url,bordercore_blogpost_title',
                      'facet': 'on',
                      'facet.mincount': '1',
                      'facet.field': ['{!ex=tags}tags', '{!ex=doctype}doctype'],

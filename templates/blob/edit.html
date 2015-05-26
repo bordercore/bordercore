@@ -125,7 +125,7 @@
 {% if messages %}
     {% for message in messages %}
         <div class="row">
-            <div class="col-lg-7 col-lg-offset2 alert alert-danger">
+            <div class="col-lg-7 col-lg-offset-2 alert alert-danger">
                 {{ message|safe }}
             </div>
         </div>
@@ -155,6 +155,13 @@
 
                 </div>
             {% endfor %}
+
+            <div class="form-group{% if field.errors %} error{% endif %}">
+                <label class="col-lg-2 control-label" for="inputTitle">Is Book</label>
+                <div class="col-lg-7">
+                    <input name="is_book" type="checkbox"{% if is_book %} checked="checked"{% endif %} />
+                </div>
+            </div>
 
             <div class="row">
                 <div class="col-lg-7 col-lg-offset-2">
