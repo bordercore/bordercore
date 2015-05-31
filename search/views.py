@@ -30,7 +30,7 @@ class SearchListView(ListView):
 
         if facet == 'Blobs':
             return 'doctype:blob'
-        elif facet == 'Book':
+        elif facet == 'Books':
             return 'doctype:book'
         elif facet == 'Documents':
             return 'doctype:document'
