@@ -152,7 +152,7 @@ class BlobDetailView(UpdateView):
             new_metadata, created = MetaData.objects.get_or_create(name=m[0], value=m[1], blob=blob)
             if created:
                 new_metadata.save()
-        if self.request.POST['is_book']:
+        if self.request.POST.get('is_book', ''):
             new_metadata = MetaData(name='is_book', value='true', blob=blob)
             new_metadata.save()
 
