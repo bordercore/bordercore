@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% load dict_get %}
+
+{% block title %} Blob :: Detail {% endblock %}
+
+{% block content %}
+
+    <div class="row">
+
+        <div class="col-md-5">
+
+            <h1>{{ metadata.Title }}</h1>
+
+            <br />
+
+            by {{ metadata.Author }}
+
+            <br />
+
+            {{ metadata|dict_get:"Publication Date" }}
+
+            <br /><br />
+
+            Tags: <strong>{{ object.get_tags }}</strong>
+
+            <br /><br />
+
+            Object Type: <strong>{{ content_type }}</strong>
+
+            <br /><br />
+
+            <a href="{{ STATIC_URL }}blobs/{{ object.get_url }}" target="blob">Download</a>
+
+            <br /><br />
+
+            <form action="{% url 'blob_edit' object.sha1sum %}">
+                <input type="submit" class="btn btn-primary" value="Edit">
+            </form>
+
+        </div>
+
+        <div class="col-md-4">
+
+            {% if cover_url %}
+                <img src="{{ STATIC_URL }}blobs/{{ cover_url }}" />
+            {% endif %}
+
+        </div>
+
+    </div>
+
+{% endblock %}
