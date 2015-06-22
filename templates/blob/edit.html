@@ -220,8 +220,7 @@
 
     <div class="col-lg-2" id="kb_blob_detail_links">
         {% if blob.get_cover_url %}
-            <!-- <img src="{{ STATIC_URL }}blobs/{{ blob.get_cover_url }}" /> -->
-            <img src="https://www.bordercore.com/static/blobs/{{ blob.get_cover_url }}" />
+            <img src="{{ STATIC_URL }}blobs/{{ blob.get_cover_url }}" />
         {% endif %}
         <a href="{% url 'blob_add' sha1sum %}">Replace this blob</a>
     </div>
