@@ -123,7 +123,7 @@
 
     <h4 class="search_book_title">
         <img src="{{ STATIC_URL }}img/kb_book.png" />
-        <a href="{{ STATIC_URL }}ebooks/{{ match.filename }}" target="book">{{ match.title.0 }}</a>
+        <a href="{% url 'blob_detail' match.sha1sum %}">{{ match.title.0 }}</a>
         <a href="{% url 'blob_edit' match.sha1sum %}" id="edit_link">Edit</a>
     </h4>
     &nbsp; &nbsp; {{ match.pub_date.0 }} - {{ match.author.0 }}
