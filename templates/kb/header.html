@@ -49,14 +49,12 @@
 
         $('#kbsearch').bind('typeahead:selected', function(obj, datum, name) {
             var url = null;
-            var name = '_self';
             if (datum.type == 'Tag') {
                 url = '{% url 'kb_search_tag_detail' 666 %}'.replace(666, datum.value);
             } else {
-                name = 'search'
-                url = '{{ STATIC_URL }}ebooks/' + datum.filename;
+                url = '{% url 'blob_detail' 666 %}'.replace(666, datum.sha1sum);
             }
-            window.open(url, name)
+            window.open(url, '_self')
         });
 
         $('#advanced_search_link').click( function(e) {

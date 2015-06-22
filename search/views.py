@@ -257,7 +257,7 @@ def search_book_title(request):
 
     title = request.GET['title']
 
-    solr_args = {'q': 'doctype:blob AND filepath:*%s*' % title,
+    solr_args = {'q': 'doctype:book AND filepath:*%s*' % title,
                  'fl': 'id,score,title,author,filepath',
                  'wt': 'json'}
 
@@ -283,8 +283,8 @@ def kb_search_tags_booktitles(request):
 
     term = request.GET['term']
 
-    solr_args = {'q': 'tags:%s* OR (doctype:blob AND title:*%s*)' % (term, term),
-                 'fl': 'doctype,filepath,tags,title',
+    solr_args = {'q': 'tags:%s* OR (doctype:book AND title:*%s*)' % (term, term),
+                 'fl': 'doctype,filepath,sha1sum,tags,title',
                  'wt': 'json'}
 
     results = json.loads(conn.raw_query(**solr_args))
@@ -293,8 +293,8 @@ def kb_search_tags_booktitles(request):
     matches = []
 
     for match in results['response']['docs']:
-        if match['doctype'] == 'blob':
-            matches.append({'type': 'Blob', 'value': match['title'], 'filename': os.path.basename(match.get('filepath'))})
+        if match['doctype'] == 'book':
+            matches.append({'type': 'Book', 'value': match['title'][0], 'sha1sum': match.get('sha1sum')})
         if match.get('tags', ''):
             print match['tags']
             for tag in [x for x in match['tags'] if x.lower().startswith(term.lower())]:
