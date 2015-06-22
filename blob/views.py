@@ -6,6 +6,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
+from django.views.generic.detail import DetailView
 from django.views.generic.edit import DeleteView, UpdateView
 
 import hashlib
@@ -110,12 +111,36 @@ class BlobDeleteView(DeleteView):
             return obj
 
 
-class BlobDetailView(UpdateView):
+class BlobDetailView(DetailView):
+
+    model = Blob
+    slug_field = 'sha1sum'
+    slug_url_kwarg = 'sha1sum'
+
+    def get_context_data(self, **kwargs):
+        context = super(BlobDetailView, self).get_context_data(**kwargs)
+        context['metadata'] = {}
+        for x in self.object.metadata_set.all():
+            if context['metadata'].get(x.name, ''):
+                context['metadata'][x.name] = ', '.join([context['metadata'][x.name], x.value])
+            else:
+                context['metadata'][x.name] = x.value
+        context['cover_url'] = self.object.get_cover_url('large')
+        context['solr_info'] = self.object.get_solr_info()['docs'][0]
+        context['content_type'] = self.object.get_content_type(context['solr_info']['content_type'][0])
+        print context['content_type']
+        # context['metadata'] = []
+        # for name in ['Title', 'Author', 'Publication Date']:
+        #     context['metadata'].append((name, metadata.get(name, '')))
+        return context
+
+
+class BlobUpdateView(UpdateView):
     template_name = 'blob/edit.html'
     form_class = BlobForm
 
     def get_context_data(self, **kwargs):
-        context = super(BlobDetailView, self).get_context_data(**kwargs)
+        context = super(BlobUpdateView, self).get_context_data(**kwargs)
         context['section'] = SECTION
         context['sha1sum'] = self.kwargs.get('sha1sum')
         context['metadata'] = [x for x in self.object.metadata_set.all() if x.name != 'is_book']
@@ -164,7 +189,7 @@ class BlobDetailView(UpdateView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        return super(BlobDetailView, self).dispatch(*args, **kwargs)
+        return super(BlobUpdateView, self).dispatch(*args, **kwargs)
 
 
 def metadata_name_search(request):
