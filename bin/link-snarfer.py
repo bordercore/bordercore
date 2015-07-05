@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import django
+import email
 import logging
 import os
 import quopri
@@ -21,7 +22,7 @@ link_dict = {}  # Store links in a dict to avoid duplication
 
 pp = pprint.PrettyPrinter()
 p = re.compile("(https?://[^\">\s\n]*)[\">\s\n]")
-ignore = re.compile("doubleclick|https://twitter.com|tapbots.com|tapbots.net|search.twitter.com")
+ignore = re.compile("doubleclick|https://twitter.com|tapbots.com|tapbots.net|search.twitter.com|www.youtube.com/subscription_manager")
 
 # Remove existing handlers added by Django
 for handler in logging.root.handlers[:]:
@@ -56,9 +57,26 @@ def get_link_info(link):
         return (r.url, "No title")
 
 
+def get_plain_content(msg):
+
+    msg_part = ''
+
+    for i, part in enumerate(msg.walk(), 1):
+        if part.get_content_type() == 'text/plain':
+            msg_part = part.get_payload(decode=True)
+
+    return msg_part
+
+
 buffer = ''
 for line in sys.stdin:
     buffer += line
+
+msg = email.message_from_string(buffer)
+if msg.get('From', None).startswith('YouTube'):
+    logger.info('YouTube email detected')
+    buffer = get_plain_content(msg)
+    logger.info(buffer)
 
 # Decode quoted-printable contents
 buffer = quopri.decodestring(buffer)
