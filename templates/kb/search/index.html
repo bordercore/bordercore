@@ -113,7 +113,7 @@
 
 {% elif match.doctype == 'document' %}
 
-    <h4 class="search_book_title"><a href="{% url 'document_detail' match.internal_id %}">{{ match.title|default:"Title" }}</a>
+    <h4 class="search_book_title"><a href="{% url 'document_detail' match.internal_id %}">{{ match.title.0|default:"Title" }}</a>
         <span class="search_todo_date">{{ match.last_modified }}</span>
     </h4>
 
