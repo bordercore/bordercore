@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from django.core.cache import cache
 from django.db import models
 
@@ -7,7 +5,7 @@ from django.db import models
 class Tag(models.Model):
     name = models.TextField(unique=True)
     is_meta = models.BooleanField(default=False)
-    created = models.DateTimeField(default=datetime.now())
+    created = models.DateTimeField(auto_now_add=True)
 
     @staticmethod
     def get_meta_tags():
