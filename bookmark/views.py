@@ -16,6 +16,7 @@ from tag.models import Tag
 
 SECTION = 'Bookmarks'
 
+
 @login_required
 def bookmark_list(request):
 
@@ -26,12 +27,12 @@ def bookmark_list(request):
                               {'section': SECTION,
                                'bookmarks': bookmarks,
                                'cols': ['Date', 'url', 'title', 'id'],
-                               'message': message },
+                               'message': message},
                               context_instance=RequestContext(request))
 
 
 @login_required
-def bookmark_edit(request, bookmark_id = None):
+def bookmark_edit(request, bookmark_id=None):
 
     action = 'Edit'
 
@@ -39,12 +40,12 @@ def bookmark_edit(request, bookmark_id = None):
 
     if request.method == 'POST':
         if request.POST['Go'] in ['Edit', 'Add']:
-            form = BookmarkForm(request.POST, instance=b) # A form bound to the POST data
+            form = BookmarkForm(request.POST, instance=b)  # A form bound to the POST data
             if form.is_valid():
                 newform = form.save(commit=False)
                 newform.user = request.user
                 newform.save()
-                form.save_m2m() # Save the many-to-many data for the form.
+                form.save_m2m()  # Save the many-to-many data for the form.
                 snarf_favicon.delay(form.instance.url)
                 messages.add_message(request, messages.INFO, 'Bookmark edited')
                 return bookmark_list(request)
@@ -59,27 +60,27 @@ def bookmark_edit(request, bookmark_id = None):
 
     else:
         action = 'Add'
-        form = BookmarkForm() # An unbound form
+        form = BookmarkForm()  # An unbound form
 
     return render_to_response('bookmark/edit.html',
-                              {'section': SECTION, 'action': action, 'form': form },
+                              {'section': SECTION, 'action': action, 'form': form},
                               context_instance=RequestContext(request))
 
 
 @login_required
-def bookmark_delete(request, bookmark_id = None):
+def bookmark_delete(request, bookmark_id=None):
 
     # First delete the bookmark from any tag lists
     info = BookmarkTagUser.objects.raw("SELECT * FROM bookmark_bookmarktaguser WHERE %s = ANY (bookmark_list)" % bookmark_id)
     for tag in info:
-        tag.bookmark_list.remove( int(bookmark_id) )
+        tag.bookmark_list.remove(int(bookmark_id))
         tag.save()
 
     # Then delete the actual bookmark
     bookmark = Bookmark.objects.get(pk=bookmark_id)
     bookmark.delete()
 
-    return HttpResponse(json.dumps( 'OK' ), content_type="application/json")
+    return HttpResponse(json.dumps('OK'), content_type="application/json")
 
 
 @login_required
@@ -89,7 +90,7 @@ def snarf_link(request):
     h = HTMLParser.HTMLParser()
 
     url = request.GET['url']
-    title = h.unescape( request.GET['title'] )
+    title = h.unescape(request.GET['title'])
 
     b = Bookmark(is_pinned=False, user=request.user, url=url, title=title)
     b.save()
@@ -102,7 +103,7 @@ def tag_search(request):
 
     tags = Tag.objects.filter(name__istartswith=request.GET.get('query', ''), bookmark__isnull=False).distinct('name')
 
-    return HttpResponse(json.dumps( [x.name for x in tags] ), content_type="application/json")
+    return HttpResponse(json.dumps([x.name for x in tags]), content_type="application/json")
 
 
 @login_required
@@ -122,7 +123,7 @@ def bookmark_tag(request):
 
         try:
             sort_order = BookmarkTagUser.objects.get(tag=Tag.objects.get(name=tag_filter), user=request.user)
-            sorted_bookmarks = sorted(bookmarks, key=lambda v : sort_order.bookmark_list.index(v.id))
+            sorted_bookmarks = sorted(bookmarks, key=lambda v: sort_order.bookmark_list.index(v.id))
         except ObjectDoesNotExist, e:
             print "Error! %s" % e
             # TODO: Use celery to fire off an email about the error
@@ -135,7 +136,7 @@ def bookmark_tag(request):
     favorite_tags = request.user.userprofile.favorite_tags.all()
 
     return render_to_response('bookmark/tag.html',
-                              {'section': SECTION, 'bookmarks': sorted_bookmarks, 'tag_filter': tag_filter, 'favorite_tags': favorite_tags },
+                              {'section': SECTION, 'bookmarks': sorted_bookmarks, 'tag_filter': tag_filter, 'favorite_tags': favorite_tags},
                               context_instance=RequestContext(request))
 
 
@@ -153,12 +154,12 @@ def tag_bookmark_list(request):
         print "NOT Found!"
         # TODO Return an exception
 
-    sorted_list.bookmark_list.remove( link_id )
-    sorted_list.bookmark_list.insert( position - 1, link_id )
+    sorted_list.bookmark_list.remove(link_id)
+    sorted_list.bookmark_list.insert(position - 1, link_id)
 
     sorted_list.save()
 
-    return HttpResponse(json.dumps( 'OK' ), content_type="application/json")
+    return HttpResponse(json.dumps('OK'), content_type="application/json")
 
 
 #@login_required
