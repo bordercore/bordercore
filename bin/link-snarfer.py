@@ -73,6 +73,6 @@ for link in matches:
 if link_dict:
 
     for label in link_dict.keys():
-        logger.info("%s - %s" % (link_dict[label], label.encode('utf-8')))
+        logger.info(u"%s - %s" % (link_dict[label], label))
         b = Bookmark(url=link_dict[label], title=label or 'No Label', user_id=1)
         b.save()
