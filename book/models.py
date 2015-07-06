@@ -2,12 +2,14 @@ from django.db import models
 
 from lib.mixins import TimeStampedModel
 
+
 class Author(TimeStampedModel):
     name = models.TextField()
 
+
 class Book(TimeStampedModel):
     title = models.TextField()
-    author = models.ManyToManyField(Author, null=True)
+    author = models.ManyToManyField(Author)
     subtitle = models.TextField(null=True)
     isbn = models.TextField(null=True)
     asin = models.TextField(null=True)
