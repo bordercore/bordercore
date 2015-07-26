@@ -58,6 +58,13 @@ class Blob(TimeStampedModel):
         file_path = "%s/%s" % (self.get_parent_dir(), self.filename)
         if os.path.isfile(file_path):
             os.remove(file_path)
+
+            # Delete any cover images
+            for file in os.listdir(self.get_parent_dir()):
+                filename, file_extension = os.path.splitext(file)
+                if file_extension[1:] in ['jpg', 'png']:
+                    os.remove("%s/%s" % (self.get_parent_dir(), file))
+
             # Delete the parent dir if this is not an ebook
             os.rmdir("%s/%s/%s" % (self.BLOB_STORE, self.sha1sum[0:2], self.sha1sum))
             # If the parent of that is empty, delete it, too

@@ -12,6 +12,7 @@ from django.views.generic.edit import DeleteView, UpdateView
 import hashlib
 import json
 import os
+import shutil
 
 from blob.forms import BlobForm
 from blob.models import MetaData
@@ -59,8 +60,16 @@ def blob_add(request, replaced_sha1sum=None):
                 b.tags = old_tags
                 b.metadata_set = old_metadata
                 b.save()
-                # Delete the old blob
+
                 old_blob = Blob.objects.get(sha1sum=replaced_sha1sum)
+
+                # Move any cover images from the old blob to the new
+                for file in os.listdir(old_blob.get_parent_dir()):
+                    filename, file_extension = os.path.splitext(file)
+                    if file_extension[1:] in ['jpg', 'png']:
+                        shutil.move("%s/%s" % (old_blob.get_parent_dir(), file), b.get_parent_dir())
+
+                # Delete the old blob
                 old_blob.delete()
             else:
                 b = Blob(sha1sum=hasher.hexdigest(), filename=request.FILES['blob'].name, user=request.user)
