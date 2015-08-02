@@ -28,6 +28,7 @@ from music.forms import SongForm, WishListForm
 SECTION = 'Music'
 MUSIC_ROOT = "/home/media/music"
 
+
 @login_required
 def music_list(request):
 
@@ -40,14 +41,13 @@ def music_list(request):
     random_albums = Album.objects.order_by('?')[0]
 
     return render_to_response('music/index.html',
-                              {
-            'section': SECTION,
-            'cols': ['Date', 'artist', 'title', 'id'],
-            'message': message,
-            'recent_songs': recent_songs,
-            'random_albums': random_albums
-            },
-                              context_instance=RequestContext(request))
+                              {'section': SECTION,
+                               'cols': ['Date', 'artist', 'title', 'id'],
+                               'message': message,
+                               'recent_songs': recent_songs,
+                               'random_albums': random_albums
+                           }, context_instance=RequestContext(request))
+
 
 @login_required
 def music_stream(request, song_id):
@@ -115,13 +115,13 @@ def album_artwork(request, song_id):
     artwork = audio.tags.get('APIC:')
 
     if artwork:
-        return HttpResponse( artwork.data, content_type=artwork.mime )
+        return HttpResponse(artwork.data, content_type=artwork.mime)
     else:
         return redirect("https://www.bordercore.com/static/img/image_not_found.jpg")
 
 
 @login_required
-def song_edit(request, song_id = None):
+def song_edit(request, song_id=None):
 
     action = 'Edit'
     file_info = None
@@ -136,20 +136,20 @@ def song_edit(request, song_id = None):
         filename = "%s/%s/%s/%s - %s.mp3" % (MUSIC_ROOT, song.artist, song.album.title, tracknumber, song.title)
         try:
             id3_info = MP3(filename)
-            file_info = { 'id3_info': id3_info,
-                          'filesize': os.stat(filename).st_size,
-                          'length': time.strftime('%M:%S', time.gmtime( id3_info.info.length )) }
+            file_info = {'id3_info': id3_info,
+                         'filesize': os.stat(filename).st_size,
+                         'length': time.strftime('%M:%S', time.gmtime(id3_info.info.length))}
         except IOError, e:
             messages.add_message(request, messages.ERROR, 'IOError: %s' % e)
 
     if request.method == 'POST':
         if request.POST['Go'] in ['Edit', 'Add']:
-            form = SongForm(request.POST, instance=song) # A form bound to the POST data
+            form = SongForm(request.POST, instance=song)  # A form bound to the POST data
             if form.is_valid():
                 newform = form.save(commit=False)
                 newform.user = request.user
                 newform.save()
-                form.save_m2m() # Save the many-to-many data for the form.
+                form.save_m2m()  # Save the many-to-many data for the form.
                 messages.add_message(request, messages.INFO, 'Song edited')
                 return music_list(request)
         elif request.POST['Go'] == 'Delete':
@@ -163,10 +163,10 @@ def song_edit(request, song_id = None):
 
     else:
         action = 'Add'
-        form = SongForm() # An unbound form
+        form = SongForm()  # An unbound form
 
     return render_to_response('music/edit.html',
-                              {'section': SECTION, 'action': action, 'form': form, 'file_info': file_info, 'song': song },
+                              {'section': SECTION, 'action': action, 'form': form, 'file_info': file_info, 'song': song},
                               context_instance=RequestContext(request))
 
 
@@ -187,7 +187,7 @@ def show_album(request, album_id):
 
     return render_to_response('music/show_album.html',
                               {'section': SECTION, 'album': a, 'data': song_list,
-                               'cols': ['id', 'track', 'title', 'length', 'length_seconds'] },
+                               'cols': ['id', 'track', 'title', 'length', 'length_seconds']},
                               context_instance=RequestContext(request))
 
 
@@ -201,15 +201,15 @@ def show_artist(request, artist_name):
     s = Song.objects.filter(artist=artist_name).filter(album__isnull=True)
 
     # Get all songs by this artist that do appear on compilation album
-    c = Album.objects.filter( Q(song__artist=artist_name) & ~Q(artist=artist_name) )
+    c = Album.objects.filter(Q(song__artist=artist_name) & ~Q(artist=artist_name))
 
     song_list = []
 
     for song in s:
-        song_list.append( dict(id=song.id, date=song.created.strftime("%b %d, %Y"), title=song.title, artist=song.artist, info=song.comment))
+        song_list.append(dict(id=song.id, date=song.created.strftime("%b %d, %Y"), title=song.title, artist=song.artist, info=song.comment))
 
     return render_to_response('music/show_artist.html',
-                              {'section': SECTION, 'artist_name': artist_name, 'album_list': a, 'song_list': song_list, 'compilation_album_list':c, 'cols': ['date', 'artist', 'title', 'info', 'id'] },
+                              {'section': SECTION, 'artist_name': artist_name, 'album_list': a, 'song_list': song_list, 'compilation_album_list': c, 'cols': ['date', 'artist', 'title', 'info', 'id']},
                               context_instance=RequestContext(request))
 
 
@@ -241,7 +241,7 @@ def add_song(request):
         info = MP3(filename, ID3=EasyID3)
 
         for field in ('artist', 'title', 'album'):
-            formdata[ field ] = info[ field ][0] if info.get(field) else None
+            formdata[field] = info[field][0] if info.get(field) else None
         if info.get('date'):
             formdata['year'] = info['date'][0]
         formdata['length'] = int(info.info.length)
@@ -283,7 +283,7 @@ def add_song(request):
         else:
             song = None
 
-        form = SongForm(request.POST, instance=song) # A form bound to the POST data
+        form = SongForm(request.POST, instance=song)  # A form bound to the POST data
 
         info = MP3("/tmp/%s" % md5sum, ID3=EasyID3)
 
@@ -386,7 +386,7 @@ def add_song(request):
             action = 'Review'
 
     return render_to_response('music/add_song.html',
-                              {'section': SECTION, 'action': action, 'info': info, 'notes': notes, 'md5sum': md5sum, 'form': form },
+                              {'section': SECTION, 'action': action, 'info': info, 'notes': notes, 'md5sum': md5sum, 'form': form},
                               context_instance=RequestContext(request))
 
 
@@ -409,9 +409,9 @@ class MusicListJson(BaseDatatableView):
         sSearch = self.request.GET.get('sSearch', None)
         if sSearch:
             qs = qs.filter(
-                Q( title__icontains=sSearch ) |
-                Q( artist__icontains=sSearch )
-                )
+                Q(title__icontains=sSearch) |
+                Q(artist__icontains=sSearch)
+            )
 
         # more advanced example
         # filter_customer = self.request.GET.get('customer', None)
@@ -443,31 +443,32 @@ class MusicListJson(BaseDatatableView):
             ])
         return json_data
 
+
 @login_required
 def search(request):
 
     import json
 
     # The search could match an album name or an artist or a song title
-    albums = Album.objects.filter( title__icontains=request.GET['query'])
-    artists = Song.objects.filter( artist__icontains=request.GET['query'] ).distinct('artist').order_by('artist')
-    songs = Song.objects.filter( title__icontains=request.GET['query']).order_by('title')
+    albums = Album.objects.filter(title__icontains=request.GET['query'])
+    artists = Song.objects.filter(artist__icontains=request.GET['query']).distinct('artist').order_by('artist')
+    songs = Song.objects.filter(title__icontains=request.GET['query']).order_by('title')
 
     results = []
 
     for album in albums:
-        results.append( { 'value': "%s - %s" % (album.artist, album.title),
-                          'id': album.id,
-                          'type': 'album' } )
+        results.append({'value': "%s - %s" % (album.artist, album.title),
+                        'id': album.id,
+                        'type': 'album'})
 
     for artist in artists:
-        results.append( { 'value': "%s" % (artist.artist),
-                          'type': 'artist' } )
+        results.append({'value': "%s" % (artist.artist),
+                        'type': 'artist'})
 
     for song in songs:
-        results.append( { 'value': "%s - %s" % (song.title, song.artist),
-                          'id': song.album_id,
-                          'type': 'album' } )
+        results.append({'value': "%s - %s" % (song.title, song.artist),
+                        'id': song.album_id,
+                        'type': 'album'})
 
     json_text = json.dumps(results)
 
@@ -475,6 +476,7 @@ def search(request):
                               {'section': SECTION, 'info': json_text},
                               context_instance=RequestContext(request),
                               content_type="application/json")
+
 
 class WishListView(ListView):
 
@@ -491,8 +493,7 @@ class WishListView(ListView):
         info = []
 
         for myobject in context['object_list']:
-            info.append( dict(artist=myobject.artist, song=myobject.song, album=myobject.album, created=myobject.get_created(), unixtime=format(myobject.created, 'U'), wishlistid=myobject.id) )
-
+            info.append(dict(artist=myobject.artist, song=myobject.song, album=myobject.album, created=myobject.get_created(), unixtime=format(myobject.created, 'U'), wishlistid=myobject.id))
 
         context['cols'] = ['artist', 'song', 'album', 'created', 'wishlistid']
         context['section'] = SECTION
@@ -546,7 +547,6 @@ class WishListCreateView(CreateView):
         obj.save()
 
         return HttpResponseRedirect(self.get_success_url())
-
 
     def get_success_url(self):
         return reverse('wishlist')

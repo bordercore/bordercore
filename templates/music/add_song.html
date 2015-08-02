@@ -7,111 +7,113 @@
 
 {% block content %}
 
-<script type="text/javascript">
+    <script type="text/javascript">
 
-$(document).ready(function() {
+        $(document).ready(function() {
 
-    $("input[type='file']").change( function(){
-        $("button[type='submit']").removeAttr("disabled");
-    });
+            $("input[type='file']").change( function(){
+                $("button[type='submit']").removeAttr("disabled");
+            });
 
-});
+        });
 
-</script>
+    </script>
 
-{% for message in messages %}
-<div class="alert alert-{{ message.tags|lower }}">{{ message|safe }}</div>
-{% endfor %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags|lower }}">{{ message|safe }}</div>
+    {% endfor %}
 
-<div class="row">
+    <div class="row">
 
-<div class="span7">
+        <div class="col-lg-7">
+            <p class="lead col-lg-offset2-2">{{ action}} Song</p>
+        </div>
 
-<p class="lead col-lg-offset2-2">{{ action}} Song</p>
+        <div class="col-lg-7">
 
-<form class="form-horizontal" enctype="multipart/form-data" action="{{ request.path }}" method="post">
-{% csrf_token %}
+            <form class="form-horizontal" enctype="multipart/form-data" action="{{ request.path }}" method="post">
+                {% csrf_token %}
 
-<input type="hidden" name="md5sum" value="{{ md5sum }}" />
+                <input type="hidden" name="md5sum" value="{{ md5sum }}" />
 
-{% if action == 'Upload' %}
-    <div class="forrm-group">
-        <div class="controls">
+                {% if action == 'Upload' %}
+                    <div class="form-group">
+                        <div class="controls">
 
-            <input type="file" name="song" class="form-control col-lg-5" accept="audio/*" /> &nbsp; &nbsp;
+                            <input type="file" name="song" class="form-control col-lg-5" accept="audio/*" /> &nbsp; &nbsp;
 
-            <button type="submit" class="btn btn-default" name="upload" disabled="true">Upload</button>
+                            <button type="submit" class="btn btn-default" name="upload" disabled="true">Upload</button>
 
-            <a class="btn btn-default" href="{% url 'music_list' %}">Cancel</a>
+                            <a class="btn btn-default" href="{% url 'music_list' %}">Cancel</a>
+
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if action == 'Review' %}
+
+                    {% for field in form %}
+                        <div class="form-group{% if field.errors %} error{% endif %}">
+                            <label class="control-label" for="inputTitle">{{ field.label }}</label>
+                            <div class="controls">
+                                {{ field }}
+                                {% for error in field.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% if field.label == 'Artist' %}
+                            <div class="form-group{% if field.errors %} error{% endif %}">
+                                <label class="control-label" for="inputTitle">Album</label>
+                                <div class="col-lg-5">
+                                    <input class="form-control" id="id_album" name="album" type="text" value="{{ info.album.0 }}" />
+                                </div>
+                                <label class="control-label" for="inputCompilation">Compilation</label>
+                                <div class="col-lg-5">
+                                    <input class="form-control" type="checkbox" name="compilation" value="True" id="id_compilation" />
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <div class="form-group">
+                        <div class="col-lg-3 col-lg-offset-2">
+                            <button type="submit" class="btn btn-default" name="add">Add</button>
+                            <a class="btn btn-default" href="{% url 'add_song' %}">Cancel</a>
+                        </div>
+                    </div>
+
+            </form>
+
+                {% endif %}
 
         </div>
+
+        <div class="col-lg-5">
+
+            <br /><br />
+
+            {% if md5sum %}
+                <img src="{% url 'album_artwork' md5sum %}" height="300" width="300" />
+            {% endif %}
+
+        </div>
+
     </div>
-{% endif %}
 
-{% if action == 'Review' %}
+    {% if notes %}
+        <div>
 
-{% for field in form %}
-<div class="form-group{% if field.errors %} error{% endif %}">
-    <label class="control-label" for="inputTitle">{{ field.label }}</label>
-    <div class="controls">
-{{ field }}
-{% for error in field.errors %}
-<span class="form-error">{{ error }}</span>
-{% endfor %}
-    </div>
-  </div>
-{% if field.label == 'Artist' %}
-<div class="form-group{% if field.errors %} error{% endif %}">
-  <label class="control-label" for="inputTitle">Album</label>
-  <div class="col-lg-5">
-    <input class="form-control" id="id_album" name="album" type="text" value="{{ info.album.0 }}" />
-  </div>
-  <label class="control-label" for="inputCompilation">Compilation</label>
-  <div class="col-lg-5">
-    <input class="form-control" type="checkbox" name="compilation" value="True" id="id_compilation" />
-  </div>
-</div>
-{% endif %}
-{% endfor %}
+            <br /><br />
 
-<div class="form-group">
-    <div class="col-lg-3 col-lg-offset-2">
-        <button type="submit" class="btn btn-default" name="add">Add</button>
-        <a class="btn btn-default" href="{% url 'add_song' %}">Cancel</a>
-    </div>
-</div>
+            <table class="table table-bordered table-striped">
+                <caption><strong>Notes</strong></caption>
+                {% for note in notes %}
+                    <tr><td>{{ note }}</td></tr>
+                {% endfor %}
+            </table>
 
-</form>
-
-{% endif %}
-
-</div>
-
-<div class="col-lg-5">
-
-    <br /><br />
-
-    {% if md5sum %}
-        <img src="{% url 'album_artwork' md5sum %}" height="300" width="300" />
+        </div>
     {% endif %}
-
-</div>
-
-</div>
-
-{% if notes %}
-    <div>
-
-        <br /><br />
-
-        <table class="table table-bordered table-striped">
-            <caption><strong>Notes</strong></caption>
-            {% for note in notes %}
-                <tr><td>{{ note }}</td></tr>
-            {% endfor %}
-        </table>
-
-    </div>
-{% endif %}
 
 {% endblock %}
