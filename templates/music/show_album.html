@@ -16,7 +16,7 @@
         .webPlayer .controls {
             box-sizing: content-box;
         }
-        .progress {
+        .progressbar {
             background-image: none;
             background-color: transparent;
             border-radius: 0px;
@@ -78,9 +78,6 @@
                 }
             });
 
-            $('#song_list tbody tr:eq(0)').click();
-            $("#uniqueContainer-1").jPlayer("stop");
-
             $('#song_list tbody').on( 'click', 'tr', function () {
                 table.$('tr.selected').removeClass('selected');
                 $(this).addClass('selected');
@@ -140,21 +137,6 @@
     </div>
 </div>
 
-
-<div class="row">
-    <div class="col-lg-11">
-
-        <div id="uniquePlayer-1" class="webPlayer light audioPlayer">
-                <div id="uniqueContainer-1" class="videoPlayer"></div>
-                <div style="display:none;" class="playerData">
-                    {
-                    "size": {
-                            "width": ""
-                        },
-                    }
-                </div>
-        </div>
-    </div>
-</div>
+{% include "common/jplayer.html" %}
 
 {% endblock %}
