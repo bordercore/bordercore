@@ -157,13 +157,20 @@
         </div>
 
         <div id="book" class="tab-pane fade in active">
+            <table class="table-borderless">
+                <tr>
+
             {% for match in info.matches.book %}
-                <div class="row voffset">
-                    <div class="col-md-12">
-                        <a href="{{ STATIC_URL }}ebooks/{{ match.filename }}" target="book">{{ match.title.0 }}</a>
-                    </div>
-                </div>
+                {% if forloop.counter0|divisibleby:"3" %}
+                </tr><tr>
+                {% endif %}
+                <td>
+                    <img src="{{ match.cover_url }}" height="75" width="70"/>
+                    <br/>
+                    <a href="{% url 'blob_detail' match.sha1sum %}">{{ match.title.0 }}</a>
+                </td>
             {% endfor %}
+            </table>
         </div>
 
         <div id="bordercore_bookmark" class="tab-pane fade in active">

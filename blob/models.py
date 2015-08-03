@@ -1,6 +1,7 @@
 import json
 import os
 import os.path
+import re
 
 from django.contrib.auth.models import User
 from django.db import models
@@ -12,6 +13,13 @@ from tag.models import Tag
 SOLR_HOST = 'localhost'
 SOLR_PORT = 8080
 SOLR_COLLECTION = 'solr/bordercore'
+
+EDITIONS = {'1': 'First',
+            '2': 'Second',
+            '3': 'Third',
+            '4': 'Fourth',
+            '5': 'Fifth',
+            '6': 'Sixth'}
 
 
 class Blob(TimeStampedModel):
@@ -35,12 +43,26 @@ class Blob(TimeStampedModel):
     def get_url(self):
         return "%s/%s/%s" % (self.sha1sum[0:2], self.sha1sum, self.filename)
 
-    def get_title(self):
+    def get_title(self, remove_edition_string=False):
         m = self.metadata_set.filter(name='Title')
         if m:
+            if remove_edition_string:
+                pattern = re.compile('(.*) (\d)E$')
+                matches = pattern.match(m[0].value)
+                if matches and EDITIONS[matches.group(2)]:
+                    return "%s" % (matches.group(1))
             return m[0].value
         else:
             return "No title"
+
+    def get_edition_string(self):
+        m = self.metadata_set.filter(name='Title')
+        if m:
+            pattern = re.compile('(.*) (\d)E$')
+            matches = pattern.match(m[0].value)
+            if matches and EDITIONS[matches.group(2)]:
+                return "%s Edition" % (EDITIONS[matches.group(2)])
+        return ""
 
     def get_cover_url(self, size='medium'):
 

@@ -135,9 +135,13 @@ class BlobDetailView(DetailView):
             else:
                 context['metadata'][x.name] = x.value
         context['cover_url'] = self.object.get_cover_url('large')
-        context['solr_info'] = self.object.get_solr_info()['docs'][0]
-        context['content_type'] = self.object.get_content_type(context['solr_info']['content_type'][0])
-        print context['content_type']
+        try:
+            context['solr_info'] = self.object.get_solr_info()['docs'][0]
+            context['content_type'] = self.object.get_content_type(context['solr_info']['content_type'][0])
+        except IndexError, e:
+            context['error'] = 'Error retrieving info from Solr'
+            print ("%s, sha1sum=%s, error=%s" % (context['error'], self.object.sha1sum, e))
+        context['title'] = self.object.get_title(remove_edition_string=True)
         # context['metadata'] = []
         # for name in ['Title', 'Author', 'Publication Date']:
         #     context['metadata'].append((name, metadata.get(name, '')))

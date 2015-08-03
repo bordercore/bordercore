@@ -2,6 +2,7 @@ from django.views.generic.list import ListView
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
+from django.templatetags.static import static
 
 import json
 import os
@@ -166,6 +167,9 @@ class SearchTagDetailView(ListView):
             if one_doc['doctype'] in ('blob', 'book'):
                 one_doc['filename'] = os.path.basename(one_doc['filepath'])
                 one_doc['url'] = one_doc['filepath'].split(Blob.BLOB_STORE)[1]
+                one_doc['cover_url'] = static("blobs/%s/%s/cover-small.jpg" % (one_doc['sha1sum'][0:2], one_doc['sha1sum']))
+                if not os.path.isfile("%s/%s/%s/cover-small.jpg" % (Blob.BLOB_STORE, one_doc['sha1sum'][0:2], one_doc['sha1sum'])):
+                    one_doc['cover_url'] = static("images/book.png")
                 if one_doc['content_type']:
                     one_doc['content_type'] = one_doc['content_type'][0].split('/')[1]
                     if one_doc['content_type'] in IMAGE_TYPE_LIST:
@@ -217,7 +221,7 @@ class SearchTagDetailView(ListView):
                      'rows': rows,
                      'fields': ['attr_*', 'author', 'content_type', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
                      'wt': 'json',
-                     'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,url,bordercore_blogpost_title',
+                     'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url,bordercore_blogpost_title',
                      'facet': 'on',
                      'facet.mincount': '1',
                      'facet.field': ['{!ex=tags}tags', '{!ex=doctype}doctype'],
