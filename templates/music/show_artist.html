@@ -2,13 +2,14 @@
 
 {% block extra_head %}
 
-	<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jplayer.clean.player.light.css" />
 
-	<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.css" />
-
-	<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
-
-	<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap.js"></script>
+    <script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}/js/jquery.jplayer.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}/js/jplayer.cleanskin.js"></script>
 
 {% endblock %}
 
@@ -16,144 +17,186 @@
 
 {% block content %}
 
-<script type="text/javascript" charset="utf-8">
+    <script type="text/javascript" charset="utf-8">
 
-$(document).ready(function() {
+        $(document).ready(function() {
 
-	function formatTitle( data, type, row ) {
-		return '<a href="{% url 'music_stream' %}' + row[4] + '">' + row[2] + '</a>';
-	}
+            function formatTitle( data, type, row ) {
+                return '<a href="{% url 'music_stream' %}' + row[4] + '">' + row[2] + '</a>';
+            }
 
-	oTable = $('#song_list').dataTable( {
-		"paginate": true,
-		"info": false,
-		"sorting": [[0, 'desc']],
-		"filter": false,
-		"lengthChange": false,
-		"dom": "<'row'<'span6'<'toolbar'>l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
-		"searchable": false,
-		"columnDefs": [
-			{ "targets": [0], "class": "col-lg-2", "sorting": [ "desc", "asc" ] },
-			{ "targets": [2], "render": formatTitle, "useRendered": false },
-			{ "targets": [1,4], "visible": false },
-        ],
-	} );
+            table = $('#song_list').dataTable( {
+                "paginate": true,
+                "info": false,
+                "sorting": [[0, 'desc']],
+                "filter": false,
+                "lengthChange": false,
+                "dom": "<'row'<'span6'<'toolbar'>l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+                "searchable": false,
+                "columnDefs": [
+                    { "targets": [0], "class": "col-lg-2", "sorting": [ "desc", "asc" ] },
+                    { "targets": [2], "render": formatTitle, "useRendered": false },
+                    { "targets": [1,4], "visible": false },
+                ],
+            } );
 
-});
+            $('.webPlayer').videoPlayer({
+                swfPath: "/js",
+                supplied: "mp3",
+                useStateClassSkin: true,
+                autoBlur: false,
+                smoothPlayBar: true,
+                keyEnabled: true,
+                remainingDuration: true,
+                toggleDuration: true,
+                volume: 1.0,
+                size: {
+                    "width": "600px"
+                },
+                name: $('#song_list').DataTable().cell(0, 2).data(),
+                "media": {
+                    "mp3": "{{ STATIC_URL }}albums/{{ album.artist|safe }}/{{ album.title|safe }}/01 - " + $('#song_list').DataTable().cell(0, 2).data() + ".mp3"
+                }
+            });
 
-</script>
+            $('#song_list tbody').on( 'click', 'tr', function () {
+                table.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+
+                var songId = $('#song_list').DataTable().cell('.selected', 4).data();
+
+                var info;
+                $.ajax( { type: 'GET',
+                          url: '{% url 'get_song_location' 666%}'.replace(666, songId),
+                          success: function(json) {
+                        info = json;
+                        $('.play-progress span').html(info.title);
+
+                        $("#uniqueContainer-1").jPlayer("setMedia", {
+                            title: info.title,
+                            mp3: "{{ STATIC_URL }}" + info.url
+                        });
+
+                        $("#uniqueContainer-1").jPlayer("play");
+
+                    }
+                          });
+
+            } );
+
+        });
+
+    </script>
 
 
-<div class="row">
+    <div class="row">
 
-	<div class="col-lg-4">
+        <div class="col-lg-4">
 
-{% block breadcrumbs %}
-<ul class="breadcrumb pull-left">
-	<li> <a href="{% url 'music_list' %}">Music</a> </li>
-	<li>{{ artist_name }}</li>
-</ul>
-{% endblock %}
+            {% block breadcrumbs %}
+                <ul class="breadcrumb pull-left">
+                    <li> <a href="{% url 'music_list' %}">Music</a> </li>
+                    <li>{{ artist_name }}</li>
+                </ul>
+            {% endblock %}
 
-	</div>
+        </div>
 
-{% include "music/header.html" %}
+        {% include "music/header.html" %}
 
-</div>
+    </div>
 
-<div class="row">
+    <div class="row">
 
-	<div class="col-lg-12">
+        <div class="col-lg-11">
 
-		<h2> {% if album_list %} {{ album_list.0.artist }} {% else %} {{ song_list.0.artist }} {% endif %} </h2>
+            <h2> {% if album_list %} {{ album_list.0.artist }} {% else %} {{ song_list.0.artist }} {% endif %} </h2>
 
-{% if album_list %}
-{{ album_list|length }} album{{ album_list|pluralize }} <br />
-{% endif %}
+            {% if album_list %}
+                {{ album_list|length }} album{{ album_list|pluralize }} <br />
+            {% endif %}
 
-	</div>
-</div>
+        </div>
+    </div>
 
-<table class="table no-borders">
-<tr>
+    <table class="table-borderless">
+        <tr>
 
-{% for album in album_list %}
+            {% for album in album_list %}
 
-{% if forloop.counter0|divisibleby:"3" %}
+                {% if forloop.counter0|divisibleby:"3" %}
 
-</tr>
-<tr>
+        </tr>
+        <tr>
 
-{% endif %}
+                {% endif %}
 
-<td>
-<a href="{% url 'show_album' album.id %}">
-<img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title }}/artwork.jpg" height="150" width="150" /> <br />
-</a>
+                <td>
+                    <a href="{% url 'show_album' album.id %}">
+                        <img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title }}/artwork.jpg" height="150" width="150" /> <br />
+                    </a>
 
-<strong> {{ album.title }} </strong><br />
-{{ album.year }} <br />
+                    <strong> {{ album.title }} </strong><br />
+                    {{ album.year }} <br />
 
-</td>
+                </td>
 
-{% endfor %}
+            {% endfor %}
 
-</tr>
-</table>
+        </tr>
+    </table>
 
-{% if compilation_album_list %}
+    {% if compilation_album_list %}
 
-{{ compilation_album_list|length }} compilation album{{ compilation_album_list|pluralize }} <br />
+        {{ compilation_album_list|length }} compilation album{{ compilation_album_list|pluralize }} <br />
 
-<table class="table no-borders">
-<tr>
+        <table class="table-borderless">
+            <tr>
 
-{% for album in compilation_album_list %}
+                {% for album in compilation_album_list %}
 
-{% if forloop.counter0|divisibleby:"3" %}
+                    {% if forloop.counter0|divisibleby:"3" %}
 
-</tr>
-<tr>
+            </tr>
+            <tr>
 
-{% endif %}
+                    {% endif %}
 
-<td>
-<a href="{% url 'show_album' album.id %}">
-<img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title }}/artwork.jpg" height="150" width="150" /> <br />
-</a>
+                    <td>
+                        <a href="{% url 'show_album' album.id %}">
+                            <img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title }}/artwork.jpg" height="150" width="150" /> <br />
+                        </a>
 
-<strong> {{ album.title }} </strong><br />
-{{ album.year }} <br />
+                        <strong> {{ album.title }} </strong><br />
+                        {{ album.year }} <br />
 
-</td>
+                    </td>
 
-{% endfor %}
+                {% endfor %}
 
-</tr>
-</table>
-{% endif %}
+            </tr>
+        </table>
+    {% endif %}
 
-<div class="row">
+    <div class="row">
 
-	<div class="col-lg-8">
+        <div class="col-lg-11">
 
-{% if song_list %}
-<br />
-{% if album_list %}
-<h4>Other songs</h4>
-<br />
-{% endif %}
+            {% if song_list %}
+                <br />
+                {% if album_list %}
+                    <h4>Other songs</h4>
+                    <br />
+                {% endif %}
 
-<div class="row">
+                {% include "common/datatable.html" with data=song_list id="song_list" %}
 
-{% include "common/datatable.html" with data=song_list id="song_list" %}
+            {% endif %}
 
-</div>
+        </div>
 
-{% endif %}
+    </div>
 
-	</div>
-
-</div>
+    {% include "common/jplayer.html" %}
 
 {% endblock %}

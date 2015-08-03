@@ -147,3 +147,9 @@ width: 100% !important;
 #tag-detail-tab-content {
     padding-left: 10px;
 }
+
+.table-borderless td,
+.table-borderless th {
+   border: 0;
+   padding: 10px;
+}

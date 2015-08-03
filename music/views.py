@@ -1,5 +1,6 @@
 import errno
 import hashlib
+import json
 import os
 from os import makedirs
 from os.path import isfile
@@ -13,7 +14,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.forms.utils import ErrorList
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound
+from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponseNotFound
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django.views.generic.edit import CreateView, UpdateView
@@ -474,6 +475,42 @@ def search(request):
 
     return render_to_response('return_json.json',
                               {'section': SECTION, 'info': json_text},
+                              context_instance=RequestContext(request),
+                              content_type="application/json")
+
+
+def get_song_location(request, id):
+
+    # First check for a 'non-album' song
+    song = Song.objects.get(pk=id)
+
+    response_data = {}
+    file = "/home/media/mp3/%s - %s.mp3" % (song.artist, song.title)
+
+    if not os.path.isfile(file):
+
+        # Second check for a 'non-album' song inside a directory based on the first letter of the artist's name
+        file = "/home/media/mp3/%s/%s - %s.mp3" % (song.artist[0].lower(), song.artist, song.title)
+
+        if not os.path.isfile(file):
+
+            # Finally check for a song inside an album's directory
+            track = song.track
+            if len(str(track)) == 1:
+                track = "0%s" % track
+            file = "/home/media/music/%s/%s/%s - %s.mp3" % (song.artist, song.album.title, track, song.title)
+            if not os.path.isfile(file):
+                raise Http404("File not found")
+        else:
+            response_data['url'] = "%s/%s - %s.mp3" % (song.artist[0].lower(), song.artist, song.title)
+    else:
+        response_data['url'] = "%s - %s.mp3" % (song.artist, song.title)
+
+    response_data['file'] = file
+    response_data['title'] = song.title
+
+    return render_to_response('return_json.json',
+                              {'section': SECTION, 'info': json.dumps(response_data)},
                               context_instance=RequestContext(request),
                               content_type="application/json")
 
