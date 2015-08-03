@@ -6,6 +6,41 @@
 
 {% block content %}
 
+    {% if content_type == 'audio/mpeg' %}
+
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jplayer.clean.player.light.css" />
+        <script type="text/javascript" src="{{ STATIC_URL }}/js/jquery.jplayer.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}/js/jplayer.cleanskin.js"></script>
+
+        <script type="text/javascript" charset="utf-8">
+
+            $(document).ready(function() {
+
+                $('.webPlayer').videoPlayer({
+                    swfPath: "/js",
+                    supplied: "mp3",
+                    useStateClassSkin: true,
+                    autoBlur: false,
+                    smoothPlayBar: true,
+                    keyEnabled: true,
+                    remainingDuration: true,
+                    toggleDuration: true,
+                    volume: 1.0,
+                    size: {
+                        "width": "600px"
+                    },
+                    name: "{{ title }}",
+                    "media": {
+                        "mp3": "{{ STATIC_URL }}blobs/{{ object.get_url }}"
+                    }
+                });
+
+            });
+
+        </script>
+
+    {% endif %}
+
     <div class="row">
 
         <div class="col-md-5">
@@ -39,6 +74,12 @@
             {% endif %}
 
             Object Type: <strong>{{ content_type }}</strong>
+
+            <br /><br />
+
+            {% if content_type == 'audio/mpeg' %}
+                {% include "common/jplayer.html" %}
+            {% endif %}
 
             <br /><br />
 
