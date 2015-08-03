@@ -30,6 +30,14 @@
 
             <br /><br />
 
+            {% if metadata.Url %}
+
+            URL: <strong><a href="{{ metadata.Url }}">{{ metadata.Url }}</a></strong>
+
+            <br /><br />
+
+            {% endif %}
+
             Object Type: <strong>{{ content_type }}</strong>
 
             <br /><br />
