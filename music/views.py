@@ -502,9 +502,9 @@ def get_song_location(request, id):
             if not os.path.isfile(file):
                 raise Http404("File not found")
         else:
-            response_data['url'] = "%s/%s - %s.mp3" % (song.artist[0].lower(), song.artist, song.title)
+            response_data['url'] = "mp3/%s/%s - %s.mp3" % (song.artist[0].lower(), song.artist, song.title)
     else:
-        response_data['url'] = "%s - %s.mp3" % (song.artist, song.title)
+        response_data['url'] = "mp3/%s - %s.mp3" % (song.artist, song.title)
 
     response_data['file'] = file
     response_data['title'] = song.title

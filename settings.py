@@ -79,8 +79,8 @@ STATIC_URL = '/static/'
 # Additional locations of static files
 STATICFILES_DIRS = (
     os.path.join(SITE_ROOT, 'templates/static'),
-    '/home/media/mp3',
-    '/home/media/music'
+    '/home/media/music',
+    '/home/media'
 )
 
 # List of finder classes that know how to find static files in
