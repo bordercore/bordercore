@@ -4,7 +4,10 @@ from book.models import Book
 
 SECTION = 'Books'
 
+
 class BookListView(ListView):
+
+    model = Book
     template_name = 'book/index.html'
     context_object_name = 'info'
     selected_letter = 'A'
@@ -20,8 +23,8 @@ class BookListView(ListView):
 
         info = []
 
-        for myobject in kwargs['object_list']:
-            info.append( dict(title=myobject.title, author=', '.join([author.name for author in myobject.author.all()]), year=myobject.year) )
+        for myobject in context['object_list']:
+            info.append(dict(title=myobject.title, author=', '.join([author.name for author in myobject.author.all()]), year=myobject.year))
 
         import string
         context['alphabet'] = string.ascii_uppercase
