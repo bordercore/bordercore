@@ -57,9 +57,15 @@
 
             <br />
 
+            {% if metadata|dict_get:"Publication Date" %}
+
             {{ metadata|dict_get:"Publication Date" }}
 
-            <br /><br />
+            <br />
+
+            {% endif  %}
+
+            <br />
 
             Tags: <strong>{{ object.get_tags }}</strong>
 
@@ -67,7 +73,7 @@
 
             {% if metadata.Url %}
 
-            URL: <strong><a href="{{ metadata.Url }}">{{ metadata.Url }}</a></strong>
+            <strong><a href="{{ metadata.Url }}">Reference Link</a></strong>
 
             <br /><br />
 
