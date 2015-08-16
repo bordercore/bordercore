@@ -19,7 +19,8 @@ EDITIONS = {'1': 'First',
             '3': 'Third',
             '4': 'Fourth',
             '5': 'Fifth',
-            '6': 'Sixth'}
+            '6': 'Sixth',
+            '7': 'Seventh'}
 
 
 class Blob(TimeStampedModel):
@@ -81,11 +82,7 @@ class Blob(TimeStampedModel):
         if os.path.isfile(file_path):
             os.remove(file_path)
 
-            # Delete any cover images
-            for file in os.listdir(self.get_parent_dir()):
-                filename, file_extension = os.path.splitext(file)
-                if file_extension[1:] in ['jpg', 'png']:
-                    os.remove("%s/%s" % (self.get_parent_dir(), file))
+            self.delete_cover_images()
 
             # Delete the parent dir if this is not an ebook
             os.rmdir("%s/%s/%s" % (self.BLOB_STORE, self.sha1sum[0:2], self.sha1sum))
@@ -96,6 +93,12 @@ class Blob(TimeStampedModel):
             super(Blob, self).delete()
         else:
             raise Exception("File does not exist: %s" % file_path)
+
+    def delete_cover_images(self):
+        for file in os.listdir(self.get_parent_dir()):
+            filename, file_extension = os.path.splitext(file)
+            if file_extension[1:] in ['jpg', 'png']:
+                os.remove("%s/%s" % (self.get_parent_dir(), file))
 
     def get_content_type(self, argument):
         switcher = {
