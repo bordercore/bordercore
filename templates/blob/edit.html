@@ -211,18 +211,15 @@
                     <a href="{% url 'blob_delete' object.id %}">
                         <input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="button" name="Go" value="Delete" />
                     </a>
+                    <a href="{% url 'blob_add' sha1sum %}">
+                        <input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="button" name="Go" value="Replace" />
+                    </a>
+
                 </div>
             </div>
 
         </form>
 
-    </div>
-
-    <div class="col-lg-2" id="kb_blob_detail_links">
-        {% if blob.get_cover_url %}
-            <img src="{{ STATIC_URL }}blobs/{{ blob.get_cover_url }}" />
-        {% endif %}
-        <a href="{% url 'blob_add' sha1sum %}">Replace this blob</a>
     </div>
 
 </div>
