@@ -207,7 +207,7 @@ class SearchTagDetailView(ListView):
                 tag_list_js.append({'name': tag, 'is_meta': 'true' if tag in Tag.get_meta_tags() else 'false'})
         context['tag_list'] = tag_list_js
 
-        context['kb_tag_detail_current_tab'] = self.request.session['kb_tag_detail_current_tab']
+        context['kb_tag_detail_current_tab'] = self.request.session.get('kb_tag_detail_current_tab', '')
 
         return context
 
