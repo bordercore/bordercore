@@ -78,6 +78,12 @@
             });
 
             $('#myTab a').click(function (event) {
+                $.ajax( { type: 'POST',
+                          url: '{% url 'store_in_session' %}',
+                          data: { kb_tag_detail_current_tab:  $(this).attr('id').replace('tab_', '') },
+                          success: function() {
+                    }
+                          });
                 event.preventDefault();
                 $(this).tab('show');
             });
@@ -92,8 +98,12 @@
                 return $.map( $('#tag-filter').tagsinput('items'), function( element ) { return element.value } ).join();
             }
 
-             // Select first tab when the page first loads
+            // Try to select the tab based on what's stored in the user's session
+            {% if kb_tag_detail_current_tab %}
+            $('#myTab a#tab_{{ kb_tag_detail_current_tab }}').tab('show');
+            {% else %}
             $('#myTab a:first').tab('show');
+            {% endif %}
 
             $('#tag-filter').tagsinput('focus');
 
@@ -135,7 +145,7 @@
 
     <ul class="nav nav-tabs" id="myTab">
         {% for doctype in doctype_counts %}
-            <li><a href="#{{ doctype.0 }}">{{ doctype_mapping|get_doctype:doctype.0 }} <span class="badge alert-info">{{ doctype.1 }}</span></a></li>
+            <li><a id="tab_{{ doctype.0 }}" href="#{{ doctype.0 }}">{{ doctype_mapping|get_doctype:doctype.0 }} <span class="badge alert-info">{{ doctype.1 }}</span></a></li>
         {% endfor %}
     </ul>
 
