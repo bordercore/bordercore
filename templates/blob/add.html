@@ -19,10 +19,8 @@
 
     {% if messages %}
         {% for message in messages %}
-            <div class="row">
-                <div class="col-md-7 col-md-offset2 alert alert-danger">
-                    {{ message }}
-                </div>
+            <div class="col-md-7 col-md-offset2 alert alert-danger">
+                {{ message|safe }}
             </div>
         {% endfor %}
     {% endif %}
@@ -32,14 +30,10 @@
         {% csrf_token %}
 
         {% if replaced_sha1sum_info %}
-            <div class="row">
-                <div class="col-md-7 col-md-offset2 alert alert-info">
+            <div class="col-md-7 col-md-offset2 alert alert-info">
                   Replacing <strong>{{ replaced_sha1sum_info.metadata.title|default:replaced_sha1sum_info.sha1sum }}</strong>
-                </div>
             </div>
         {% endif %}
-
-        <div class="row">
 
             <div class="col-md-7 col-md-offset2">
 
@@ -59,8 +53,6 @@
                 </div>
 
             </div>
-
-        </div>
 
     </form>
 
