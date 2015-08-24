@@ -76,7 +76,7 @@ class SearchListView(ListView):
             else:
 
                 query = 'title:%s bordercore_todo_task:%s tags:%s bordercore_bookmark_title:%s ' % (search_term, search_term, search_term, search_term)
-                query = query + (' %s ' % boolean_type).join(['attr_content:%s' % x for x in re.split(' "', search_term)])
+                query = query + (' %s ' % boolean_type).join(['attr_content:%s' % x for x in re.split('[ "]', search_term)])
                 solr_args.update(
                     {'q': query,
                      'hl': 'true',
