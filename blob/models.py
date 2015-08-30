@@ -20,7 +20,8 @@ EDITIONS = {'1': 'First',
             '4': 'Fourth',
             '5': 'Fifth',
             '6': 'Sixth',
-            '7': 'Seventh'}
+            '7': 'Seventh',
+            '8': 'Eighth'}
 
 
 class Blob(TimeStampedModel):
