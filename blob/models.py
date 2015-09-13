@@ -73,9 +73,12 @@ class Blob(TimeStampedModel):
                 return "%s/%s/cover-%s.%s" % (self.sha1sum[0:2], self.sha1sum, size, image_type)
         return None
 
-    def get_solr_info(self):
+    def get_solr_info(self, query, **kwargs):
         conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
-        solr_args = {'q': 'sha1sum:%s' % self.sha1sum, 'wt': 'json', 'fl': 'content_type'}
+        solr_args = {'q': query,
+                     'wt': 'json',
+                     'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url,bordercore_blogpost_title',
+                     'rows': 1000}
         return json.loads(conn.raw_query(**solr_args))['response']
 
     def delete(self):

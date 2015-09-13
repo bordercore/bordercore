@@ -8,6 +8,7 @@ from accounts.views import UserProfileDetailView
 from blob.views import BlobDeleteView, BlobDetailView, BlobUpdateView
 from bookmark.api import BookmarkResource
 from bookmark.views import OrderListJson
+from bookshelf.views import BookshelfListView
 from book.views import BookListView
 from feed.views import FeedListView, FeedSubscriptionListView
 from music.api import MusicWishListResource
@@ -49,6 +50,13 @@ urlpatterns += patterns('blog.views',
 
 urlpatterns += patterns('book.views',
                         url(r'^books/(\w+)?', BookListView.as_view(), name="book_list")
+)
+
+urlpatterns += patterns('bookshelf.views',
+                        url(r'^bookshelf/add', 'add_to_bookshelf', name='add_to_bookshelf'),
+                        url(r'^bookshelf/sort', 'sort_bookshelf', name='sort_bookshelf'),
+                        url(r'^bookshelf/remove', 'remove_from_bookshelf', name='remove_from_bookshelf'),
+                        url(r'^bookshelf/', BookshelfListView.as_view(), name='bookshelf_list'),
 )
 
 urlpatterns += patterns('document.views',

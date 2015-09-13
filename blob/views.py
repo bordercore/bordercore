@@ -15,8 +15,8 @@ import os
 import shutil
 
 from blob.forms import BlobForm
-from blob.models import MetaData
-from blob.models import Blob
+from blob.models import Blob, MetaData
+from bookshelf.models import Bookshelf
 
 SECTION = 'Blob'
 
@@ -136,15 +136,21 @@ class BlobDetailView(DetailView):
                 context['metadata'][x.name] = x.value
         context['cover_url'] = self.object.get_cover_url('large')
         try:
-            context['solr_info'] = self.object.get_solr_info()['docs'][0]
+            query = 'sha1sum:%s' % self.object.sha1sum
+            context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
             context['content_type'] = self.object.get_content_type(context['solr_info']['content_type'][0])
         except IndexError, e:
             context['error'] = 'Error retrieving info from Solr'
             print ("%s, sha1sum=%s, error=%s" % (context['error'], self.object.sha1sum, e))
         context['title'] = self.object.get_title(remove_edition_string=True)
-        # context['metadata'] = []
-        # for name in ['Title', 'Author', 'Publication Date']:
-        #     context['metadata'].append((name, metadata.get(name, '')))
+
+        try:
+            id = int(context['solr_info']['id'].split('blob_')[1])
+            if id in Bookshelf.objects.get(user=self.request.user).blob_list[0]["blobs"]:
+                context['on_bookshelf'] = True
+        except KeyError:
+            pass
+
         return context
 
 

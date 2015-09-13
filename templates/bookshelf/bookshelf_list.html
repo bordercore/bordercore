@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %} Bookshelf {% endblock %}
+
+{% block extra_head %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+{% endblock %}
+
+{% block content %}
+
+    <script>
+
+        $(document).ready(function() {
+
+            $('#bookshelf_sortable').sortable(           {
+                connectWith: '.bookshelf_sortable',
+                stop: function(event, ui) {
+
+                    $.ajax({
+                        url: '{% url 'sort_bookshelf' %}',
+                        type: "POST",
+                        data: { blob_id : ui.item.attr('id').split('_')[1], position:  (ui.item.index() + 1) }
+                    });
+
+                }
+            });
+
+            $( "#bookshelf_sortable" ).disableSelection();
+
+        });
+
+    </script>
+
+    <div class="row">
+        <div class="col-lg-12">
+
+            <ul id="bookshelf_sortable">
+                {% for match in object_list %}
+                    <li id="{{ match.id }}">
+                        <img src="{{ match.cover_url }}" height="75" width="70"/>
+                        <br/>
+                        <a href="{% url 'blob_detail' match.sha1sum %}">{{ match.title.0 }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+{% endblock %}

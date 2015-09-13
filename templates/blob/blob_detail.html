@@ -6,6 +6,37 @@
 
 {% block content %}
 
+    <script type="text/javascript" charset="utf-8">
+
+        $(document).ready(function() {
+
+            $('#bookshelf-action').on('click', function() {
+                if ($(this).attr('value') == 'Remove from Bookshelf') {
+                    url = '{% url 'remove_from_bookshelf' %}'
+                    button_value = 'Add to Bookshelf'
+                } else {
+                    url = '{% url 'add_to_bookshelf' %}'
+                    button_value = 'Remove from Bookshelf'
+                }
+                $.ajax( { type: 'POST',
+                          url: url,
+                          data: {
+                        id: '{{ solr_info.id }}'
+                    }
+                          } ).done( function(data) {
+                    $('#bookshelf-action').attr('value', button_value);
+                    $('#bookshelf-feedback').fadeIn(1000).html(data.message);
+                    setTimeout( function() {
+                        $('#bookshelf-feedback').fadeOut(1000);
+                    }, 3000);
+                });
+            });
+
+        });
+
+    </script>
+
+
     {% if content_type == 'audio/mpeg' %}
 
         <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jplayer.clean.player.light.css" />
@@ -96,6 +127,15 @@
             <form action="{% url 'blob_edit' object.sha1sum %}">
                 <input type="submit" class="btn btn-primary" value="Edit">
             </form>
+
+            <br /><br />
+            {% if on_bookshelf %}
+                <input id="bookshelf-action" type="button" class="btn btn-primary" value="Remove from Bookshelf">
+            {% else %}
+                <input id="bookshelf-action" type="button" class="btn btn-primary" value="Add to Bookshelf">
+            {% endif %}
+
+            <span id="bookshelf-feedback"></span>
 
         </div>
 

@@ -137,6 +137,7 @@ INSTALLED_APPS = (
     'blob',
     'blog',
     'book',
+    'bookshelf',
     'document',
     'feed',
     'fitness',
