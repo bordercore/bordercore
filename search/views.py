@@ -171,7 +171,7 @@ class SearchTagDetailView(ListView):
                 if not os.path.isfile("%s/%s/%s/cover-small.jpg" % (Blob.BLOB_STORE, one_doc['sha1sum'][0:2], one_doc['sha1sum'])):
                     one_doc['cover_url'] = static("images/book.png")
                 if one_doc['content_type']:
-                    one_doc['content_type'] = one_doc['content_type'][0].split('/')[1]
+                    one_doc['content_type'] = one_doc['content_type'][0]
                     if one_doc['content_type'] in IMAGE_TYPE_LIST:
                         one_doc['is_image'] = True
                 if not one_doc.get('title', ''):

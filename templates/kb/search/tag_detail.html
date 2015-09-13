@@ -160,7 +160,7 @@
                         {% if match.is_image %}
                         <img width="32" height="32" src="{{ STATIC_URL }}blobs{{ match.url }}" />
                         {% endif %}
-                        <a href="{{ STATIC_URL }}blobs{{ match.url }}" target="blob">{{ match.title.0 }}</a> ({{ match.content_type }})
+                        <a href="{% url 'blob_detail' match.sha1sum %}">{{ match.title.0 }}</a> ({{ match.content_type }})
                     </div>
                 </div>
             {% endfor %}
