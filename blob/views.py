@@ -128,6 +128,7 @@ class BlobDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(BlobDetailView, self).get_context_data(**kwargs)
+        context['id'] = self.object.id
         context['metadata'] = {}
         for x in self.object.metadata_set.all():
             if context['metadata'].get(x.name, ''):
@@ -145,8 +146,7 @@ class BlobDetailView(DetailView):
         context['title'] = self.object.get_title(remove_edition_string=True)
 
         try:
-            id = int(context['solr_info']['id'].split('blob_')[1])
-            if id in Bookshelf.objects.get(user=self.request.user).blob_list[0]["blobs"]:
+            if self.object.id in Bookshelf.objects.get(user=self.request.user).blob_list[0]["blobs"]:
                 context['on_bookshelf'] = True
         except KeyError:
             pass

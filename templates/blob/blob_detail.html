@@ -21,7 +21,7 @@
                 $.ajax( { type: 'POST',
                           url: url,
                           data: {
-                        id: '{{ solr_info.id }}'
+                        id: {{ id }}
                     }
                           } ).done( function(data) {
                     $('#bookshelf-action').attr('value', button_value);

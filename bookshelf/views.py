@@ -96,7 +96,7 @@ def sort_bookshelf(request):
 
 def add_to_bookshelf(request):
 
-    id = int(request.POST['id'].split('blob_')[1])
+    id = int(request.POST['id'])
     b = Bookshelf.objects.get(user=request.user)
 
     if id not in b.blob_list[0]['blobs']:
@@ -112,7 +112,7 @@ def add_to_bookshelf(request):
 
 def remove_from_bookshelf(request):
 
-    id = int(request.POST['id'].split('blob_')[1])
+    id = int(request.POST['id'])
     b = Bookshelf.objects.get(user=request.user)
 
     try:
