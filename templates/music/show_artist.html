@@ -67,7 +67,7 @@
 
                 var info;
                 $.ajax( { type: 'GET',
-                          url: '{% url 'get_song_location' 666%}'.replace(666, songId),
+                          url: '{% url 'get_song_info' 666%}'.replace(666, songId),
                           success: function(json) {
                         info = json;
                         $('.play-progress span').html(info.title);

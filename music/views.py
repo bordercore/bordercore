@@ -14,7 +14,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.forms.utils import ErrorList
-from django.http import Http404, HttpResponse, HttpResponseRedirect, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django.views.generic.edit import CreateView, UpdateView
@@ -57,6 +57,8 @@ def music_stream(request, song_id):
 
     song = Song.objects.get(id=song_id)
 
+    file_location = get_song_location(song)
+
     # Increment the 'times played' counter
     if song.times_played:
         song.times_played = song.times_played + 1
@@ -68,26 +70,12 @@ def music_stream(request, song_id):
     l = Listen(song=song, user=request.user)
     l.save()
 
-    if song.album:
-        if song.album.compilation:
-            artist_name = 'Various'
-        else:
-            artist_name = song.artist
-        tracknumber = str(song.track)
-        if len(tracknumber) == 1:
-            tracknumber = '0' + tracknumber
-        file_path = "%s/%s/%s/%s - %s.mp3" % (MUSIC_ROOT, artist_name, song.album.title, tracknumber, song.title)
-    else:
-        file_path = "%s/%s/%s.mp3" % (MUSIC_ROOT, song.artist, song.title)
-
     from django.core.servers.basehttp import FileWrapper
-    wrapper = FileWrapper(file(file_path))
+    wrapper = FileWrapper(file(file_location))
 
     try:
-#        fsock = open(file_path, "r")
-#        response = HttpResponse( fsock, content_type='audio/mpeg' )
         response = HttpResponse(wrapper, content_type='audio/mpeg')
-        response['Content-Length'] = os.path.getsize(file_path)
+        response['Content-Length'] = os.path.getsize(file_location)
 
     except IOError:
         response = HttpResponseNotFound()
@@ -479,35 +467,40 @@ def search(request):
                               content_type="application/json")
 
 
-def get_song_location(request, id):
+def get_song_location(song):
 
-    # First check for a 'non-album' song
+    # If the song is associated with an album, look for it in the album's directory
+    if song.album:
+        if song.album.compilation:
+            artist_name = 'Various'
+        else:
+            artist_name = song.artist
+        tracknumber = str(song.track)
+        if len(tracknumber) == 1:
+            tracknumber = '0' + tracknumber
+        file_info = {'root': MUSIC_ROOT, 'url': '/%s/%s/%s.mp3' % (artist_name, song.album.title, tracknumber, song.title)}
+    else:
+        file_info = {'root': MUSIC_ROOT, 'url': '/%s/%s.mp3' % (song.artist, song.title)}
+
+        if not os.path.isfile('%s/%s' % (file_info['root'], file_info['url'])):
+            # Check this type of file path: /home/media/mp3/Primitives - Crash.mp3
+            file_info = {'root': '/home/media', 'url': '/mp3/%s - %s.mp3' % (song.artist, song.title)}
+
+            if not os.path.isfile('%s/%s' % (file_info['root'], file_info['url'])):
+                # Check this type of file path: /home/media/mp3/m/Motley Crue - She's Got Looks That Kill.mp3
+                file_info = {'root': '/home/media', 'url': '/mp3/%s/%s - %s.mp3' % (song.artist[0].lower(), song.artist, song.title)}
+
+    return file_info
+
+
+def get_song_info(request, id):
+
     song = Song.objects.get(pk=id)
 
-    response_data = {}
-    file = "/home/media/mp3/%s - %s.mp3" % (song.artist, song.title)
+    file_location = get_song_location(song)
 
-    if not os.path.isfile(file):
-
-        # Second check for a 'non-album' song inside a directory based on the first letter of the artist's name
-        file = "/home/media/mp3/%s/%s - %s.mp3" % (song.artist[0].lower(), song.artist, song.title)
-
-        if not os.path.isfile(file):
-
-            # Finally check for a song inside an album's directory
-            track = song.track
-            if len(str(track)) == 1:
-                track = "0%s" % track
-            file = "/home/media/music/%s/%s/%s - %s.mp3" % (song.artist, song.album.title, track, song.title)
-            if not os.path.isfile(file):
-                raise Http404("File not found")
-        else:
-            response_data['url'] = "mp3/%s/%s - %s.mp3" % (song.artist[0].lower(), song.artist, song.title)
-    else:
-        response_data['url'] = "mp3/%s - %s.mp3" % (song.artist, song.title)
-
-    response_data['file'] = file
-    response_data['title'] = song.title
+    response_data = {'title': song.title,
+                     'url': file_location['url']}
 
     return render_to_response('return_json.json',
                               {'section': SECTION, 'info': json.dumps(response_data)},
