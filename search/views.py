@@ -8,6 +8,7 @@ import json
 import os
 from os.path import basename
 import re
+import shlex
 import solr
 import urllib
 
@@ -74,11 +75,10 @@ class SearchListView(ListView):
                 solr_args['q'] = 'sha1sum:%s' % (search_term)
 
             else:
-
-                query = 'title:%s bordercore_todo_task:%s tags:%s bordercore_bookmark_title:%s ' % (search_term, search_term, search_term, search_term)
-                query = query + (' %s ' % boolean_type).join(['attr_content:%s' % x for x in re.split('[ "]', search_term)])
                 solr_args.update(
-                    {'q': query,
+                    {'q': search_term,
+                     'q.op': boolean_type,
+                     'qf': 'title bordercore_todo_task tags bordercore_bookmark_title attr_content',
                      'hl': 'true',
                      'hl.fl': 'attr_content,bordercore_todo_task,bordercore_bookmark_title,title',
                      'hl.simple.pre': '<span class="search_bordercore_blogpost_snippet">',
