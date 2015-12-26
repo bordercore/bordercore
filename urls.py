@@ -41,7 +41,8 @@ urlpatterns += patterns('blob.views',
                         url(r'^blob/edit/(?P<sha1sum>\w+)$', BlobUpdateView.as_view(), name='blob_edit'),
                         url(r'^blob/metadata_name_search/', 'metadata_name_search', name='metadata_name_search'),
                         url(r'^blob/get_amazon_metadata/(?P<title>[\w|\W]+)$', 'get_amazon_metadata', name='get_amazon_metadata'),
-                        url(r'^blob/(?P<sha1sum>\w+)$', BlobDetailView.as_view(), name='blob_detail'),
+                        url(r'^blob/todo', 'blob_todo', name='blob_todo'),
+                        url(r'^blob/(?P<sha1sum>\w+)$', BlobDetailView.as_view(), name='blob_detail')
 )
 
 urlpatterns += patterns('blog.views',

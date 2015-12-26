@@ -258,3 +258,26 @@ def get_amazon_metadata(request, title):
                               {'info': json.dumps(return_data)},
                               content_type="application/json",
                               context_instance=RequestContext(request))
+
+# Temp code to randomly choose blobs with insufficient metadata to edit
+def blob_todo(request):
+
+    SOLR_HOST = 'localhost'
+    SOLR_PORT = 8983
+    SOLR_COLLECTION = 'solr/bordercore'
+
+    import solr
+    conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
+
+    solr_args = {'wt': 'json',
+                 'fl': 'id,sha1sum,filepath,tags,internal_id',
+                 'q': 'doctype:book AND -tags:[* TO *]',
+                 'rows': 500}
+
+    results = json.loads(conn.raw_query(**solr_args))
+
+    import random
+    blob = random.choice(results['response']['docs'])
+    print blob['sha1sum']
+
+    return redirect('blob_edit', blob['sha1sum'])
