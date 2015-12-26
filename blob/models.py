@@ -94,6 +94,12 @@ class Blob(TimeStampedModel):
             parent_dir = "%s/%s" % (self.BLOB_STORE, self.sha1sum[0:2])
             if os.listdir(parent_dir) == []:
                 os.rmdir(parent_dir)
+
+            # Delete the blob in Solr
+            conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
+            conn.delete(queries=['sha1sum:%s' % (self.sha1sum)])
+            conn.commit()
+
             super(Blob, self).delete()
         else:
             raise Exception("File does not exist: %s" % file_path)
