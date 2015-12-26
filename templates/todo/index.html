@@ -8,94 +8,90 @@
 
 {% block content %}
 
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
+    <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
 
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
 
-<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
 
-<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap.js"></script>
+        var oTable;
 
-<script type="text/javascript" charset="utf-8">
+        $(document).ready(function() {
 
-    var oTable;
+            $('#todo_list tbody').on( 'click', 'tr', function () {
+                if ( $(this).hasClass('selected') ) {
+                    $(this).removeClass('selected');
+                    $('#btn-edit').attr("disabled", "disabled");
+                    $('#btn-delete').attr("disabled", "disabled");
+                } else {
+                    oTable.$('tr.selected').removeClass('selected');
+                    $(this).addClass('selected');
+                    $('#btn-edit').removeAttr("disabled");
+                    $('#btn-delete').removeAttr("disabled");
+                }
+            } );
 
-    $(document).ready(function() {
+            $('#tags').change( function(e) {
+                var tag = $('#tags').val();
+                window.location='{% url 'todo_list' %}?tagsearch=' + tag;
+            });
 
-        $('#todo_list tbody').on( 'click', 'tr', function () {
-            if ( $(this).hasClass('selected') ) {
-                $(this).removeClass('selected');
-                $('#btn-edit').attr("disabled", "disabled");
-                $('#btn-delete').attr("disabled", "disabled");
-            } else {
-                oTable.$('tr.selected').removeClass('selected');
-                $(this).addClass('selected');
-                $('#btn-edit').removeAttr("disabled");
-                $('#btn-delete').removeAttr("disabled");
-            }
-        } );
+            {% if messages %}
+            {% for message in messages %}
+            $('#feedback').fadeIn(1000).html('{{ message }}');
+            setTimeout( function() {
+                $('#feedback').fadeOut(1000);
+            }, 3000);
+            {% endfor %}
+            {% endif %}
 
-        $('#tags').change( function(e) {
-            var tag = $('#tags').val();
-            window.location='{% url 'todo_list' %}?tagsearch=' + tag;
+            $('#myfilter').on( 'keyup', function () {
+                oTable.search($(this).val()).draw();
+            });
+
+            $('#btn-delete').on('click', function() {
+
+                var selectedTodoID = $('#todo_list').DataTable().cell('.selected', 3).data();
+
+                $.ajax( { type: 'DELETE',
+                          url: '/api/v1/todo/' + selectedTodoID + '/',
+                          success: function() {
+                              $('#feedback').fadeIn(1000).html("Task deleted.");
+                              setTimeout( function() {
+                                  $('#feedback').fadeOut(1000);
+                              }, 3000);
+
+                              oTable.draw();
+
+                              $('#btn-edit').attr("disabled", "disabled");
+                              $('#btn-delete').attr("disabled", "disabled");
+
+                          }
+                });
+            });
+
+            $('#btn-edit').on('click', function() {
+                var selectedTodoID = $('#todo_list').DataTable().cell('.selected', 3).data();
+                window.location='{% url 'todo_edit' 666 %}'.replace(666, selectedTodoID);
+                return false;
+            });
+
+            oTable = $('#todo_list').DataTable( {
+                "info": false,
+                "paginate": false,
+                "sorting": [[1, 'desc']],
+                "filter": true,
+                "lengthChange": false,
+                "dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'pull-right col-lg-4'p>>",
+                "searchable": false,
+                "columnDefs": [
+                    { "targets": [0], "sorting": [ "desc", "asc" ] },
+                    { "targets": [1], "class": "col-lg-3 monospaced", "dataSort": 2, "sorting": [ "desc", "asc" ] },
+                    { "targets": [2,3], "visible": false },
+                ],
+            } );
+
         });
-
-{% if messages %}
-{% for message in messages %}
-    $('#feedback').fadeIn(1000).html('{{ message }}');
-    setTimeout( function() {
-        $('#feedback').fadeOut(1000);
-    }, 3000);
-{% endfor %}
-{% endif %}
-
-    $('#myfilter').on( 'keyup', function () {
-        oTable.search($(this).val()).draw();
-    });
-
-    $('#btn-delete').on('click', function() {
-
-        var selectedTodoID = $('#todo_list').DataTable().cell('.selected', 3).data();
-
-        $.ajax( { type: 'DELETE',
-                  url: '/api/v1/todo/' + selectedTodoID + '/',
-                  success: function() {
-                $('#feedback').fadeIn(1000).html("Task deleted.");
-                setTimeout( function() {
-                    $('#feedback').fadeOut(1000);
-                }, 3000);
-
-                oTable.draw();
-
-                $('#btn-edit').attr("disabled", "disabled");
-                $('#btn-delete').attr("disabled", "disabled");
-
-            }
-                  });
-    });
-
-    $('#btn-edit').on('click', function() {
-        var selectedTodoID = $('#todo_list').DataTable().cell('.selected', 3).data();
-        window.location='{% url 'todo_edit' 666 %}'.replace(666, selectedTodoID);
-        return false;
-    });
-
-    oTable = $('#todo_list').DataTable( {
-        "info": false,
-        "paginate": false,
-        "sorting": [[1, 'desc']],
-        "filter": true,
-        "lengthChange": false,
-        "dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'pull-right col-lg-4'p>>",
-        "searchable": false,
-        "columnDefs": [
-            { "targets": [0], "sorting": [ "desc", "asc" ] },
-            { "targets": [1], "class": "col-lg-3 monospaced", "dataSort": 2, "sorting": [ "desc", "asc" ] },
-            { "targets": [2,3], "visible": false },
-        ],
-    } );
-
-});
 
 </script>
 
@@ -126,9 +122,9 @@
 
             <select id="tags" class="pull-right">
                 <option>Tag filter</option>
-{% for tag in tags %}
-    <option value="{{ tag.name }}"{% ifequal tagsearch tag.name %} selected="selected"{% endifequal %}>{{ tag.name }}</option>
-{% endfor %}
+                {% for tag in tags %}
+                    <option value="{{ tag.name }}"{% ifequal tagsearch tag.name %} selected="selected"{% endifequal %}>{{ tag.name }}</option>
+                {% endfor %}
             </select>
 
         </div>
@@ -140,4 +136,3 @@
 {% include "common/datatable.html" with data=info cols=cols id="todo_list" %}
 
 {% endblock %}
-

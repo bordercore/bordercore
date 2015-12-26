@@ -4,12 +4,10 @@
 
 {% block content %}
 
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.css" />
-    <script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap.js"></script>
-
+    <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.color-2.1.2.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
 
     <script type="text/javascript">
 
@@ -42,7 +40,7 @@
     </script>
 
     <div class="row">
-        <div class="col-lg-4">
+        <div class="col-lg-5">
             {% block breadcrumbs %}
                 <ul class="breadcrumb pull-left">
                     <li> <a href="{% url 'fitness_summary' %}">Recent Exercises</a> </li>

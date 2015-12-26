@@ -1,6 +1,5 @@
 {% block extra_head %}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/handlebars.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/typeahead-bootstrap3.css" />
 
@@ -11,12 +10,11 @@
    $(document).ready(function() {
 
         var myengine = new Bloodhound({
-            datumTokenizer: function(data) {
-                return Bloodhound.tokenizers.obj.whitespace(data.value);
-            },
             remote: {
                 url: '{% url 'kb_search_tags_booktitles' %}?term=%QUERY',
+                wildcard: '%QUERY'
             },
+            datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
             queryTokenizer: Bloodhound.tokenizers.whitespace,
             limit: 20
         });
@@ -31,12 +29,16 @@
                 highlight: true,
                 minLength: 3
             }, {
-                source: myengine.ttAdapter(),
-                displayKey: 'value',
+                limit: 10,
+                display: 'value',
+                source: myengine,
                 templates: {
-                    suggestion: Handlebars.compile(template_source)
+                    suggestion: function(data) {
+                        return '<div class="tt-suggest-page"><em>' + data.type + '</em> - ' + data.value + '</div>';
+                    }
                 }
-            });
+                }
+        );
 
         $('#kbsearch').on('keyup', function(event, selection) {
             if ((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) {
@@ -67,21 +69,12 @@
 
 </script>
 
-{% verbatim %}
-    <script id="entry-template-what" type="text/x-handlebars-template">
-        <div>{{ debug }}
-            <em>{{type}}</em> - {{value}}
-        </div>
-    </script>
-{% endverbatim %}
-
 <form id="search" class="form-inline" action="{% url 'search' %}" method="get" autocomplete="off">
 
 <div class="row">
 
     <div class="col-md-10">
 
-        <!-- <form id="search" class="form-inline" action="{% url 'search' %}" method="get" autocomplete="off"> -->
             <input type="hidden" id="facets" name="facets" value="" />
 
             <div class="form-group">
@@ -128,29 +121,23 @@
 
     <div class="col-md-10">
 
-        <!-- <form id="search" class="form-inline" action="{% url 'search' %}" method="get" autocomplete="off"> -->
+        <div class="form-group">
 
-            <div class="form-group">
+            <label>Boolean Search Type</label>
 
-                <label>Boolean Search Type</label>
+            <select name="boolean_search_type" class="form-control">
+                <option selected="selected">AND</option>
+                <option>OR</option>
+            </select>
 
-                <select name="boolean_search_type" class="form-control">
-                    <option selected="selected">AND</option>
-                    <option>OR</option>
-                </select>
+        </div>
+        <div class="form-group">
 
-            </div>
-            <div class="form-group">
+            <label>Blob Search</label>
 
-                <label>Blob Search</label>
+            <input type="checkbox" name="blob_search" />
 
-                <input type="checkbox" name="blob_search" />
-
-            </div>
-
-            <!-- <input class="btn btn-default" type="submit" name="Go" value="Search" /> -->
-
-            <!-- </form> -->
+        </div>
 
     </div>
 

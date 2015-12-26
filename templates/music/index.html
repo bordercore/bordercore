@@ -2,13 +2,9 @@
 
 {% block extra_head %}
 
-	<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
+    <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
 
-	<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.css" />
-
-	<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
-
-	<script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
 
 {% endblock %}
 
@@ -45,9 +41,9 @@
         {% endif %}
 
         $('#btn-edit').on('click', function() {
-			var selectedSongID = $('#song_list').DataTable().cell('.selected', 4).data();
-			window.location='{% url 'song_edit' 666 %}'.replace(666, selectedSongID);
-			return false;
+            var selectedSongID = $('#song_list').DataTable().cell('.selected', 4).data();
+            window.location='{% url 'song_edit' 666 %}'.replace(666, selectedSongID);
+            return false;
         });
 
         function formatArtist( data, type, row ) {
@@ -81,7 +77,7 @@
             ],
         } );
 
-	});
+    });
 
 </script>
 

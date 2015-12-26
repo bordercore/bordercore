@@ -8,7 +8,10 @@
 
         var engine = new Bloodhound({
             name: 'tags',
-            remote: '{% url 'tag_search' %}?query=%QUERY' + '&type=blog',
+            remote: {
+                url: '{% url 'tag_search' %}?query=%QUERY' + '&type=blog',
+                wildcard: '%QUERY'
+            },
             datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
             queryTokenizer: Bloodhound.tokenizers.whitespace
         });
@@ -18,7 +21,8 @@
         $('#tag-filter').typeahead({
             autoselect: true
         }, {
-            source: engine.ttAdapter(),
+            display: 'value',
+            source: engine,
         });
 
 		$('#tag-filter').bind('typeahead:selected', function(obj, datum, name) {

@@ -10,92 +10,182 @@
 
     <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.jeditable.mini.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
 
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.bootstrap.css" />
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jquery.dataTables.css" />
-    <script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" charset="utf-8" language="javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
 
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.color-2.1.2.min.js"></script>
 
-<script type="text/javascript">
+    <script type="text/javascript">
 
-    var metadata = []
-    var table;
+        var metadata = []
+        var table;
 
-    $(document).ready(function() {
+        $(document).ready(function() {
 
-        table = $('#metadata').DataTable( {
-            info: false,
-            paging: false,
-            searching: false
-        });
+            table = $('#metadata').DataTable( {
+                info: false,
+                paging: false,
+                searching: false
+            });
 
-        $('#metadata tbody').on( 'click', 'tr', function () {
-            if ( $(this).hasClass('selected') ) {
-                $(this).removeClass('selected');
-                $('#btn-metadata').attr("disabled", "disabled");
+            table_amazon = $('#table-amazon-metadata').DataTable( {
+                info: false,
+                paging: false,
+                searching: false,
+                select: {
+                    style: 'multi'
+                }
+            });
+
+            $('#metadata tbody td.metadata-value').editable( function( sValue ) {
+                table.cell(this).data(sValue);
+                return sValue;
+            }, { "onblur": 'submit' } );
+
+            $('#metadata tbody').on( 'click', 'tr', function () {
+                if ( $(this).hasClass('selected') ) {
+                    $(this).removeClass('selected');
+                    $('#btn-delete').attr("disabled", "disabled");
+                }
+                else {
+                    table.$('tr.selected').removeClass('selected');
+                    $(this).addClass('selected');
+                    $('#btn-delete').removeAttr("disabled");
+                }
+            } );
+
+            $('#btn-delete').click( function () {
+                table.row('.selected').remove().draw( false );
+            } );
+
+            $('#btn-amazon').click( function () {
+                table_amazon.clear().draw();
+            } );
+
+            // focus() events in modals need to be handled in a special way
+            $('#myModal').on('shown.bs.modal', function () {
+                $('#title').focus()
+            });
+
+            $('#myModal2').on('shown.bs.modal', function () {
+                $('#metadata-name').focus()
+            })
+
+            function searchAmazon() {
+                var title = $('#title').val();
+                if (title == null) {
+                    return;
+                }
+
+                $('#myModalLabel').html("Retrieving information from Amazon...");
+                table_amazon.clear().draw();
+
+                $.ajax( { type: 'GET',
+                          url: '{% url 'get_amazon_metadata' 666 %}'.replace(666, title),
+                }).done(function( json ) {
+                    if (!json || json.error != null) {
+                        $('#myModalLabel').html("Error: " + json.error);
+                    } else {
+                        $('#myModalLabel').html("Choose metadata");
+                        for (var i = 0; i < json.data.length; i++) {
+                            table_amazon.row.add([json.data[i][0], json.data[i][1]]);
+                        }
+                        table_amazon.draw();
+                    }
+                });
+
             }
-            else {
-                table.$('tr.selected').removeClass('selected');
-                $(this).addClass('selected');
-                $('#btn-metadata').removeAttr("disabled");
-            }
-        } );
 
-        $('#btn-metadata').click( function () {
-            table.row('.selected').remove().draw( false );
-        } );
+            $('#title').keydown(function(event){
+                // Initiate a search if the enter key is pressed.  Do NOT submit the form.
+                if (event.keyCode == 13) {
+                    event.preventDefault();
+                    searchAmazon();
+                }
+            });
 
-        {% for data in metadata %}
-        metadata.push({'name':'{{ data.name }}', 'value':'{{ data.value }}'})
-        {% endfor %}
+            $('#btn-lookup').click( function () {
+                searchAmazon();
+            } );
 
-        var engine = new Bloodhound({
-            name: 'tags',
-            remote: '{% url 'tag_search' %}?query=%QUERY',
-            datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
-            queryTokenizer: Bloodhound.tokenizers.whitespace
-        });
+            $('#btn-choose').click( function () {
+                var data = table_amazon.rows({selected:true}).data();
+                for (var i = 0; i < data.length; i++) {
+                    var rowNode = table.row.add( [ data[i][0], data[i][1] ] );
+                    metadata.push({'name': data[i][0], 'value': data[i][1]});
+                }
+                table.draw();
+            } );
 
-        engine.initialize();
+            $('#btn-fixfilename').click( function () {
+                table.rows().every( function ( rowIdx, tableLoop, rowLoop ) {
+                    var data = this.data();
+                    if (data[0] == 'Title') {
+                        var fileName = $('#id_filename').val();
+                        var match = /(.*)(\..*?)$/.exec(fileName);
+                        if (match) {
+                            $('#id_filename').val(data[1] + match[2]);
+                            $('#id_filename').css( 'color', 'red' ).animate( { color: '#666666' }, 2000 );
+                        }
+                    }
+                } );
+            });
 
-        $('#id_tags').tagsinput({
-            confirmKeys: [13, 188],
-            tagClass: function(item) {
-                return 'label label-primary';
-            },
-            typeaheadjs: {
-                source: engine.ttAdapter(),
-                displayKey: 'value',
-                valueKey: 'value',
-                options: {'autoselect': true}
-            }
-        });
+            {% for data in metadata %}
+            metadata.push({'name':'{{ data.name }}', 'value':'{{ data.value }}'})
+            {% endfor %}
 
-        var engineMetadata = new Bloodhound({
-            name: 'metadata',
-            remote: '{% url 'metadata_name_search' %}?query=%QUERY',
-            datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.value); },
-            queryTokenizer: Bloodhound.tokenizers.whitespace
-        });
+                var engine = new Bloodhound({
+                    name: 'tags',
+                    remote: {
+                        url: '{% url 'tag_search' %}?query=%QUERY',
+                        wildcard: '%QUERY'
+                    },
+                    datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
+                    queryTokenizer: Bloodhound.tokenizers.whitespace
+                });
 
-        engineMetadata.initialize();
+            engine.initialize();
 
-        $('#metadata-name').typeahead({
-            autoselect: true
-        }, {
-            source: engineMetadata.ttAdapter(),
-        });
+            $('#id_tags').tagsinput({
+                confirmKeys: [13, 188],
+                tagClass: function(item) {
+                    return 'label label-primary';
+                },
+                typeaheadjs: {
+                    source: engine,
+                    displayKey: 'value',
+                    valueKey: 'value',
+                    options: {'autoselect': true}
+                }
+            });
 
-        $('#metadata-name').bind('typeahead:selected', function(obj, datum, name) {
-            $('#metadata-value').focus();
-		});
+            var engineMetadata = new Bloodhound({
+                name: 'metadata',
+                remote: {
+                    url: '{% url 'metadata_name_search' %}?query=%QUERY',
+                    wildcard: '%QUERY'
+                },
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace
+            });
 
-        $('#metadata-value').keydown(function(event){
+            engineMetadata.initialize();
 
-            // If the enter key is pressed...
-            if (event.keyCode == 13) {
+            $('#metadata-name').typeahead({
+                autoselect: true
+            }, {
+                display: 'value',
+                source: engineMetadata,
+            });
+
+            $('#metadata-name').bind('typeahead:selected', function(obj, datum, name) {
+                $('#metadata-value').focus();
+            });
+
+            function addMetadata() {
 
                 event.preventDefault();
 
@@ -104,28 +194,37 @@
                 $( rowNode ).css( 'color', 'red' ).animate( { color: '#666666' }, 2000 );
 
                 // Add the new metadata to our local copy
-                metadata.push({'name': $('#metadata-name').val(), 'value': $('#metadata-value').val()})
+                metadata.push({'name': $('#metadata-name').val(), 'value': $('#metadata-value').val()});
 
                 // Reset the fields
-                $('#metadata-name').val('').focus();
+                $('#metadata-name').typeahead('val', '').focus();
                 $('#metadata-value').val('');
 
             }
 
-        });
+            $('#btn-addandcontinue').click( function () {
+                addMetadata();
+            } );
 
-        $("#blob-form").submit(function(e) {
-            $('#input-metadata').val(JSON.stringify(table.data().toArray()));
-        });
+            $('#metadata-value').keydown(function(event) {
+                // If the enter key is pressed...
+                if (event.keyCode == 13) {
+                    addMetadata();
+                }
+            });
 
-    });
+            $("#blob-form").submit(function(e) {
+                $('#input-metadata').val(JSON.stringify(table.data().toArray()));
+            });
+
+        });
 
 </script>
 
 
 <div class="row">
 
-    <div class="col-lg-10">
+    <div class="col-lg-11">
         <p class="lead col-lg-offset-2">{{ action }} Blob</p>
 
         <form id="blob-form" class="form-horizontal" action="{{ request.path }}" method="post">
@@ -180,27 +279,38 @@
                                 </thead>
                                 <tbody>
                                     {% for data in metadata %}
-                                        <tr><td>{{ data.name }}</td><td>{{ data.value }}</td></tr>
+                                        <tr><td>{{ data.name }}</td><td class="metadata-value">{{ data.value }}</td></tr>
                                     {% endfor %}
                                 </tbody>
-                                <tfoot>
+                                <!-- <tfoot>
                                     <div class="form-inline">
                                         <tr>
                                             <td>
                                                 <div class="form-group">
-                                                    <input id="metadata-name" class="form-control" name="metadata_name" type="text" placeholder="Name" />
+                                                    <input _id="metadata-name" class="form-control" name="metadata_name" type="text" placeholder="Name" />
                                                 </div>
                                             </td>
                                             <td>
                                                 <div class="form-group">
-                                                    <input id="metadata-value" class="form-control" name="metadata_value" type="text" placeholder="Value" />
-                                                    <input class="btn btn-default" id="btn-metadata" type="button" value="Delete" disabled />
+                                                    <input _id="metadata-value" class="form-control" name="metadata_value" type="text" placeholder="Value" />
                                                 </div>
                                             </td>
                                         </tr>
                                     </div>
-                                </tfoot>
+                                </tfoot> -->
                             </table>
+
+                            <!-- I'm in the body!
+
+                            <form class="form-inline">
+                                <div class="form-group"> -->
+                                    <input type="button" class="btn btn-default" id="btn-add" data-toggle="modal" data-target="#myModal2" value="Add" />
+                                    <input type="button" class="btn btn-default" id="btn-delete" value="Delete" disabled />
+                                    <input type="button" class="btn btn-default" id="btn-amazon" data-toggle="modal" data-target="#myModal" value="Amazon Lookup" />
+                                    <input type="button" class="btn btn-default" id="btn-fixfilename" value="Fix Filename" />
+                                    <!-- </div>
+                            </form> -->
+
                         </div>
                     </div>
                 </div>
@@ -223,6 +333,74 @@
 
     </div>
 
+</div>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Amazon Lookup</h4>
+            </div>
+            <div class="modal-body">
+
+                <form id="form-workout" class="form-inline" method="post" autocomplete="off">
+
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input id="title" class="form-control" type="text" name="title" />
+                    </div>
+
+                    <input class="btn btn-default" id="btn-lookup" type="button" name="Go" value="Lookup" />
+
+                </form>
+
+                <table class="table table-condensed" id="table-amazon-metadata" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="btn-choose">Choose</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Add Metadata</h4>
+            </div>
+            <div class="modal-body">
+
+                <form class="form-inline">
+                    <div class="form-group">
+                        <label for="exampleInputName2">Name</label>
+                        <input type="text" class="form-control" id="metadata-name" placeholder="Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputEmail2">Value</label>
+                        <input type="email" class="form-control" id="metadata-value" placeholder="Value">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="btn-choose">Done</button>
+                <button type="button" class="btn btn-default" id="btn-addandcontinue">Add</button>
+            </div>
+
+        </div>
+    </div>
 </div>
 
 {% endblock %}

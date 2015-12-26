@@ -21,7 +21,10 @@
 
             var engine = new Bloodhound({
                 name: 'tags',
-                remote: '{% url 'tag_search' %}?query=%QUERY',
+                remote: {
+                    url: '{% url 'tag_search' %}?query=%QUERY',
+                    wildcard: '%QUERY'
+                    },
                 datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.text); },
                 queryTokenizer: Bloodhound.tokenizers.whitespace
             });
@@ -39,7 +42,7 @@
                 },
                 itemValue: 'value',
                 typeaheadjs: {
-                    source: engine.ttAdapter(),
+                    source: engine,
                     displayKey: 'value',
                     valueKey: 'value',
                     options: {'autoselect': true}

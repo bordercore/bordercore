@@ -9,9 +9,12 @@ from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import DeleteView, UpdateView
 
+from amazonproduct import API
+from amazonproduct.errors import NoExactMatchesFound
 import hashlib
 import json
 import os
+import re
 import shutil
 
 from blob.forms import BlobForm
@@ -20,6 +23,8 @@ from bookshelf.models import Bookshelf
 
 SECTION = 'Blob'
 
+amazon_api_config = {
+}
 
 def blob_add(request, replaced_sha1sum=None):
 
@@ -216,6 +221,38 @@ def metadata_name_search(request):
     m = MetaData.objects.all().values('name').filter(name__icontains=request.GET['query']).distinct('name').order_by('name'.lower())
 
     return_data = [{'value': x['name']} for x in m]
+
+    return render_to_response('return_json.json',
+                              {'info': json.dumps(return_data)},
+                              content_type="application/json",
+                              context_instance=RequestContext(request))
+
+
+def get_amazon_metadata(request, title):
+
+    api = API(cfg=amazon_api_config)
+
+    return_data = {'data':[]}
+
+    try:
+        results = api.item_search('Books', Title=title, ResponseGroup='Medium', Sort='-publication_date')
+        for result in results:
+            try:
+                return_data['data'].append(['Title', str(result.ItemAttributes.Title)])
+                author_raw = str(result.ItemAttributes.Author)
+                matches = re.split("\s?;\s?|\s?,\s?", author_raw)
+                for author in matches:
+                    return_data['data'].append(['Author', author.strip()])
+                publication_data_raw = str(result.ItemAttributes.PublicationDate)
+                matches = re.match(r'^(\d\d\d\d)', publication_data_raw)
+                if matches:
+                    return_data['data'].append(['Publication Date', matches.group(1)])
+                else:
+                    return_data['data'].append(['Publication Date', str(result.ItemAttributes.PublicationDate)])
+            except AttributeError, e:
+                print "AttributeError: %s" % e
+    except NoExactMatchesFound:
+        return_data['error'] = "No Amazon matches found"
 
     return render_to_response('return_json.json',
                               {'info': json.dumps(return_data)},
