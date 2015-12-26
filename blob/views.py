@@ -238,8 +238,8 @@ def get_amazon_metadata(request, title):
         results = api.item_search('Books', Title=title, ResponseGroup='Medium', Sort='-publication_date')
         for result in results:
             try:
-                return_data['data'].append(['Title', str(result.ItemAttributes.Title)])
-                author_raw = str(result.ItemAttributes.Author)
+                return_data['data'].append(['Title', result.ItemAttributes.Title.text])
+                author_raw = result.ItemAttributes.Author.text
                 matches = re.split("\s?;\s?|\s?,\s?", author_raw)
                 for author in matches:
                     return_data['data'].append(['Author', author.strip()])
