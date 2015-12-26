@@ -224,8 +224,10 @@
 
 <div class="row">
 
-    <div class="col-lg-11">
+    <div class="col-lg-8">
         <p class="lead col-lg-offset-2">{{ action }} Blob</p>
+        <div class="col-lg-2 pull-right"><a href="{% url 'blob_detail' sha1sum %}">View</a></div>
+        </p>
 
         <form id="blob-form" class="form-horizontal" action="{{ request.path }}" method="post">
             <input type="hidden" name="metadata" id="input-metadata" />
