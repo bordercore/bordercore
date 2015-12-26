@@ -119,19 +119,29 @@
                 table.draw();
             } );
 
+            function parseFilename() {
+                var fileName = $('#id_filename').val();
+                var match = /(.*)(\..*?)$/.exec(fileName);
+                if (match) {
+                    return {'base': match[1], 'extension': match[2]};
+                }
+            }
+
             $('#btn-fixfilename').click( function () {
                 table.rows().every( function ( rowIdx, tableLoop, rowLoop ) {
                     var data = this.data();
                     if (data[0] == 'Title') {
-                        var fileName = $('#id_filename').val();
-                        var match = /(.*)(\..*?)$/.exec(fileName);
-                        if (match) {
-                            $('#id_filename').val(data[1] + match[2]);
+                        parsedFileName = parseFilename();
+                        if (parsedFileName) {
+                            $('#id_filename').val(data[1] + parsedFileName.extension);
                             $('#id_filename').css( 'color', 'red' ).animate( { color: '#666666' }, 2000 );
                         }
                     }
                 } );
             });
+
+            // The default 'Amazon Lookup' field should default to the filename, minus the file extension
+            $('#title').val(parseFilename().base);
 
             {% for data in metadata %}
             metadata.push({'name':'{{ data.name }}', 'value':'{{ data.value }}'})
