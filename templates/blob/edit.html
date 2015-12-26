@@ -282,34 +282,12 @@
                                         <tr><td>{{ data.name }}</td><td class="metadata-value">{{ data.value }}</td></tr>
                                     {% endfor %}
                                 </tbody>
-                                <!-- <tfoot>
-                                    <div class="form-inline">
-                                        <tr>
-                                            <td>
-                                                <div class="form-group">
-                                                    <input _id="metadata-name" class="form-control" name="metadata_name" type="text" placeholder="Name" />
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="form-group">
-                                                    <input _id="metadata-value" class="form-control" name="metadata_value" type="text" placeholder="Value" />
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </div>
-                                </tfoot> -->
                             </table>
 
-                            <!-- I'm in the body!
-
-                            <form class="form-inline">
-                                <div class="form-group"> -->
-                                    <input type="button" class="btn btn-default" id="btn-add" data-toggle="modal" data-target="#myModal2" value="Add" />
-                                    <input type="button" class="btn btn-default" id="btn-delete" value="Delete" disabled />
-                                    <input type="button" class="btn btn-default" id="btn-amazon" data-toggle="modal" data-target="#myModal" value="Amazon Lookup" />
-                                    <input type="button" class="btn btn-default" id="btn-fixfilename" value="Fix Filename" />
-                                    <!-- </div>
-                            </form> -->
+                            <input type="button" class="btn btn-default" id="btn-add" data-toggle="modal" data-target="#myModal2" value="Add" />
+                            <input type="button" class="btn btn-default" id="btn-delete" value="Delete" disabled />
+                            <input type="button" class="btn btn-default" id="btn-amazon" data-toggle="modal" data-target="#myModal" value="Amazon Lookup" />
+                            <input type="button" class="btn btn-default" id="btn-fixfilename" value="Fix Filename" />
 
                         </div>
                     </div>
@@ -317,7 +295,7 @@
             </div>
 
             <div class="form-group">
-                <div class="col-lg-3 col-lg-offset-2">
+                <div class="col-lg-4 col-lg-offset-2">
                     <input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
                     <a href="{% url 'blob_delete' object.id %}">
                         <input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="button" name="Go" value="Delete" />
@@ -395,8 +373,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal" id="btn-choose">Done</button>
                 <button type="button" class="btn btn-default" id="btn-addandcontinue">Add</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="btn-choose">Done</button>
             </div>
 
         </div>

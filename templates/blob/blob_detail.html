@@ -120,20 +120,15 @@
 
             <br /><br />
 
-            <a href="{{ STATIC_URL }}blobs/{{ object.get_url }}" target="blob">Download</a>
-
-            <br /><br />
-
             <form action="{% url 'blob_edit' object.sha1sum %}">
-                <input type="submit" class="btn btn-primary" value="Edit">
-            </form>
-
-            <br /><br />
+                <a class="btn btn-default" href="{{ STATIC_URL }}blobs/{{ object.get_url }}" role="button" target="blob">Download</a>
             {% if on_bookshelf %}
                 <input id="bookshelf-action" type="button" class="btn btn-primary" value="Remove from Bookshelf">
             {% else %}
                 <input id="bookshelf-action" type="button" class="btn btn-primary" value="Add to Bookshelf">
             {% endif %}
+                <input type="submit" class="btn btn-primary" value="Edit">
+            </form>
 
             <span id="bookshelf-feedback"></span>
 

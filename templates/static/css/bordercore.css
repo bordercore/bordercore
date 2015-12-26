@@ -113,6 +113,10 @@ ul.pagination {
    width: 340px;
 }
 
+#myModal #title {
+    width: 300px;
+}
+
 a.tag:link {
     color: white;
 }
