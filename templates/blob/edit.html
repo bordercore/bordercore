@@ -39,10 +39,18 @@
                 }
             });
 
-            $('#metadata tbody td.metadata-value').editable( function( sValue ) {
-                table.cell(this).data(sValue);
-                return sValue;
-            }, { "onblur": 'submit' } );
+            // Call this function anytime a row is added to the metadata table
+            //  so that the jEditable plugin will work with it
+            function makeEditable() {
+
+                $('#metadata tbody td.metadata-value').editable( function( sValue ) {
+                    return sValue;
+                } );
+
+            }
+
+            // Enable the jEditable plugin for the initial set of metadata
+            makeEditable();
 
             $('#metadata tbody').on( 'click', 'tr', function () {
                 if ( $(this).hasClass('selected') ) {
@@ -113,10 +121,12 @@
             $('#btn-choose').click( function () {
                 var data = table_amazon.rows({selected:true}).data();
                 for (var i = 0; i < data.length; i++) {
-                    var rowNode = table.row.add( [ data[i][0], data[i][1] ] );
+                    var rowNode = table.row.add( [ data[i][0], data[i][1] ] ).node();
+                    $( rowNode ).find('td').eq(1).addClass('metadata-value');
                     metadata.push({'name': data[i][0], 'value': data[i][1]});
                 }
                 table.draw();
+                makeEditable();
             } );
 
             function parseFilename() {
@@ -201,6 +211,9 @@
 
                 // Add the new metadata to the table
                 var rowNode = table.row.add( [ $('#metadata-name').val(), $('#metadata-value').val() ] ).draw().node();
+                $( rowNode ).find('td').eq(1).addClass('metadata-value');
+                makeEditable();
+
                 $( rowNode ).css( 'color', 'red' ).animate( { color: '#666666' }, 2000 );
 
                 // Add the new metadata to our local copy
