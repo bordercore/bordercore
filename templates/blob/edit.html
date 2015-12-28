@@ -19,7 +19,6 @@
 
     <script type="text/javascript">
 
-        var metadata = []
         var table;
 
         $(document).ready(function() {
@@ -44,6 +43,8 @@
             function makeEditable() {
 
                 $('#metadata tbody td.metadata-value').editable( function( sValue ) {
+                    // Update the data in the DataTables
+                    table.cell(this).data(sValue);
                     return sValue;
                 } );
 
@@ -123,7 +124,6 @@
                 for (var i = 0; i < data.length; i++) {
                     var rowNode = table.row.add( [ data[i][0], data[i][1] ] ).node();
                     $( rowNode ).find('td').eq(1).addClass('metadata-value');
-                    metadata.push({'name': data[i][0], 'value': data[i][1]});
                 }
                 table.draw();
                 makeEditable();
@@ -153,19 +153,15 @@
             // The default 'Amazon Lookup' field should default to the filename, minus the file extension
             $('#title').val(parseFilename().base);
 
-            {% for data in metadata %}
-            metadata.push({'name':'{{ data.name }}', 'value':'{{ data.value }}'})
-            {% endfor %}
-
-                var engine = new Bloodhound({
-                    name: 'tags',
-                    remote: {
-                        url: '{% url 'tag_search' %}?query=%QUERY',
-                        wildcard: '%QUERY'
-                    },
-                    datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
-                    queryTokenizer: Bloodhound.tokenizers.whitespace
-                });
+            var engine = new Bloodhound({
+                name: 'tags',
+                remote: {
+                    url: '{% url 'tag_search' %}?query=%QUERY',
+                    wildcard: '%QUERY'
+                },
+                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
+                queryTokenizer: Bloodhound.tokenizers.whitespace
+            });
 
             engine.initialize();
 
@@ -215,9 +211,6 @@
                 makeEditable();
 
                 $( rowNode ).css( 'color', 'red' ).animate( { color: '#666666' }, 2000 );
-
-                // Add the new metadata to our local copy
-                metadata.push({'name': $('#metadata-name').val(), 'value': $('#metadata-value').val()});
 
                 // Reset the fields
                 $('#metadata-name').typeahead('val', '').focus();
