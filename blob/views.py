@@ -109,20 +109,13 @@ def store_blob(blob, sha1sum):
 
 
 class BlobDeleteView(DeleteView):
-    template_name = 'blob/delete.html'
     model = Blob
     success_url = reverse_lazy('blob_add')
 
     def post(self, request, *args, **kwargs):
-        if request.POST['action'] == 'Cancel':
-            # We must call self.get_object() in order for self.get_success_url() to work
-            self.object = self.get_object()
-            url = self.get_success_url()
-            return HttpResponseRedirect(url)
-        else:
-            obj = super(BlobDeleteView, self).post(request, *args, **kwargs)
-            messages.add_message(request, messages.INFO, 'Blob deleted')
-            return obj
+        obj = super(BlobDeleteView, self).post(request, *args, **kwargs)
+        messages.add_message(request, messages.INFO, 'Blob deleted')
+        return obj
 
 
 class BlobDetailView(DetailView):

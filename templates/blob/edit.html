@@ -322,9 +322,7 @@
             <div class="form-group">
                 <div class="col-lg-4 col-lg-offset-2">
                     <input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
-                    <a href="{% url 'blob_delete' object.id %}">
-                        <input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="button" name="Go" value="Delete" />
-                    </a>
+                    <input type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal3" value="Delete" />
                     <a href="{% url 'blob_add' sha1sum %}">
                         <input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="button" name="Go" value="Replace" />
                     </a>
@@ -402,6 +400,30 @@
                 <button type="button" class="btn btn-default" data-dismiss="modal" id="btn-choose">Done</button>
             </div>
 
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Delete Blob</h4>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning" role="alert">
+            Are you sure you want to delete <strong>{{ object.filename }}</strong>?
+                    <br /><br />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form method="post" action="{% url 'blob_delete' object.id %}">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-default" data-dismiss="modal" id="btn-choose">Cancel</button>
+                    <button type="submit" class="btn btn-default" id="btn-addandcontinue">Delete</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
