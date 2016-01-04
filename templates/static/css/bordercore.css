@@ -19,7 +19,9 @@ body {
 }
 
 /* End of sticky footer support */
-
+.hidden {
+   display: none;
+}
 
 /* Don't display the '*' for required fields */
 .asteriskField {

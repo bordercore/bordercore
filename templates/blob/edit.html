@@ -233,6 +233,60 @@
                 $('#input-metadata').val(JSON.stringify(table.data().toArray()));
             });
 
+            var amazon_cover_image_index = 0;
+            var amazon_cover_image_info;
+
+            function get_amazon_cover_image() {
+
+                $.ajax( { type: 'GET',
+                          url: '{% url 'get_amazon_image_info' sha1sum 666 %}'.replace(666, amazon_cover_image_index),
+                          }).done(function( json ) {
+                    if (!json || json.error != null) {
+                        console.log("Error: " + json.error);
+                    } else {
+                        amazon_cover_image_info = json;
+                        $('#amazon-cover-image').attr('src', json.large)
+                        $('#amazon-feedback').html('Image: <span class="badge">' + (amazon_cover_image_index+1) + '</span> of <span class="badge">' + (json.count) + '</span>');
+                        amazon_cover_image_index++;
+                        if (amazon_cover_image_index == (json.count)) {
+                            amazon_cover_image_index = 0;
+                        }
+                    }
+
+                });
+
+                }
+
+            function set_amazon_cover_image() {
+
+                $.ajax( { type: 'POST',
+                          url: '{% url 'set_amazon_image_info' sha1sum 666 %}'.replace(666, amazon_cover_image_index),
+                          data: amazon_cover_image_info
+                          }).done(function( json ) {
+                    if (!json || json.error != null) {
+                        $('#feedback').addClass('alert-danger').html(json.message);
+                    } else {
+                        $('#feedback').addClass('alert-success').html(json.message);
+                    }
+                })
+            }
+
+            $('#update-cover').click( function() {
+                $('#update-cover-div').addClass('hidden');
+                $('#set-cover-div').removeClass('hidden');
+                get_amazon_cover_image();
+            });
+
+            $('#set-cover').click( function() {
+                $('#set-cover-div').addClass('hidden');
+                $('#update-cover-div').removeClass('hidden');
+                set_amazon_cover_image();
+            });
+
+            $('#next-cover').click( function() {
+                get_amazon_cover_image();
+            });
+
         });
 
 </script>
@@ -325,6 +379,21 @@
 
         </form>
 
+    </div>
+
+    <div class="col-lg-4">
+        <img id="amazon-cover-image" src="{{ STATIC_URL }}{{ cover_url }}" width="381" height="500" />
+        <br /><br />
+        <div id="update-cover-div">
+            <input id="update-cover" class="btn btn-default" type="button" value="Update" />
+        </div>
+        <div id="set-cover-div" class="hidden">
+            <input id="next-cover" class="btn btn-default" type="button" value="Next" />
+            <input id="set-cover" class="btn btn-default" type="button" value="Set" />
+            <span id="amazon-feedback"></span>
+        </div>
+        <br />
+        <div class="alert" id="feedback"></div>
     </div>
 
 </div>

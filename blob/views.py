@@ -161,6 +161,11 @@ class BlobUpdateView(UpdateView):
         context['section'] = SECTION
         context['sha1sum'] = self.kwargs.get('sha1sum')
         context['metadata'] = [x for x in self.object.metadata_set.all() if x.name != 'is_book']
+        cover_url = self.object.get_cover_url('large')
+        if cover_url:
+            context['cover_url'] = 'blobs/' + cover_url
+        else:
+            context['cover_url'] = 'img/no_image_available.svg'
         if True in [True for x in self.object.metadata_set.all() if x.name == 'is_book']:
             context['is_book'] = True
         context['action'] = 'Edit'
@@ -221,11 +226,39 @@ def metadata_name_search(request):
                               context_instance=RequestContext(request))
 
 
+def get_amazon_image_info(request, sha1sum, index=0):
+
+    b = Blob.objects.get(sha1sum=sha1sum)
+    result = b.get_amazon_cover_url(int(index))
+
+    return render_to_response('return_json.json',
+                              {'info': json.dumps(result)},
+                              content_type="application/json",
+                              context_instance=RequestContext(request))
+
+
+def set_amazon_image_info(request, sha1sum, index=0):
+
+    b = Blob.objects.get(sha1sum=sha1sum)
+    try:
+        b.set_amazon_cover_url('small', request.POST['small'])
+        b.set_amazon_cover_url('medium', request.POST['medium'])
+        b.set_amazon_cover_url('large', request.POST['large'])
+        result = {'message': 'Cover image updated'}
+    except Exception, e:
+        result = {'message': str(e), 'error': True}
+
+    return render_to_response('return_json.json',
+                              {'info': json.dumps(result)},
+                              content_type="application/json",
+                              context_instance=RequestContext(request))
+
+
 def get_amazon_metadata(request, title):
 
     api = API(cfg=amazon_api_config)
 
-    return_data = {'data':[]}
+    return_data = {'data': []}
 
     try:
         results = api.item_search('Books', Title=title, ResponseGroup='Medium', Sort='-publication_date')
@@ -251,6 +284,7 @@ def get_amazon_metadata(request, title):
                               {'info': json.dumps(return_data)},
                               content_type="application/json",
                               context_instance=RequestContext(request))
+
 
 # Temp code to randomly choose blobs with insufficient metadata to edit
 def blob_todo(request):

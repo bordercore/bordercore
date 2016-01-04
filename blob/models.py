@@ -8,6 +8,7 @@ from django.db import models
 from lib.mixins import TimeStampedModel
 import solr
 
+from blob.amazon import AmazonMixin
 from tag.models import Tag
 
 SOLR_HOST = 'localhost'
@@ -24,7 +25,7 @@ EDITIONS = {'1': 'First',
             '8': 'Eighth'}
 
 
-class Blob(TimeStampedModel):
+class Blob(TimeStampedModel, AmazonMixin):
     """
     A blob belonging to a user.
     """
