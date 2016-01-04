@@ -3,8 +3,8 @@ import requests
 from amazonproduct import API
 from amazonproduct.errors import NoExactMatchesFound
 
-config = {
-}
+# Note: be sure to install a ~/.amazon-product-api file containing
+#  your Amazon Associates Web Service account info
 
 
 class AmazonMixin(object):
@@ -13,13 +13,15 @@ class AmazonMixin(object):
         self.api = API(locale='us')
 
     def get_amazon_cover_url(self, index=0):
-        title = self.get_title(remove_edition_string=True)
-        author = self.metadata_set.filter(name='Author')[0].value
 
         try:
-            results = self.api.item_search('Books', Title=title, Author=author, ResponseGroup='Images', Sort='-publication_date')
+            title = self.get_title(remove_edition_string=True)
+            author = self.metadata_set.filter(name='Author')
+            if not author:
+                return {'error': 'Error: Amazon API lookup requires an author'}
+            results = self.api.item_search('Books', Title=title, Author=author[0].value, ResponseGroup='Images', Sort='-publication_date')
         except NoExactMatchesFound:
-            return None
+            return {'error': 'Error: no matches found from Amazon API'}
 
         for index_loop, result in enumerate(results):
             if index_loop == index:

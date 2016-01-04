@@ -242,7 +242,7 @@
                           url: '{% url 'get_amazon_image_info' sha1sum 666 %}'.replace(666, amazon_cover_image_index),
                           }).done(function( json ) {
                     if (!json || json.error != null) {
-                        console.log("Error: " + json.error);
+                        $('#feedback').addClass('alert-danger').html(json.error);
                     } else {
                         amazon_cover_image_info = json;
                         $('#amazon-cover-image').attr('src', json.large)
