@@ -25,10 +25,20 @@ class AmazonMixin(object):
 
         for index_loop, result in enumerate(results):
             if index_loop == index:
-                return {'small': str(result.SmallImage.URL),
-                        'medium': str(result.MediumImage.URL),
-                        'large': str(result.LargeImage.URL),
-                        'count': sum(1 for _ in results)}
+                result = {'count': sum(1 for _ in results)}
+                try:
+                    result['small'] = str(result.SmallImage.URL)
+                except:
+                    pass
+                try:
+                    result['medium'] = str(result.MediumImage.URL)
+                except:
+                    pass
+                try:
+                    result['large'] = str(result.LargeImage.URL)
+                except:
+                    pass
+                return result
 
     def set_amazon_cover_url(self, size, url):
         r = requests.get(str(url))
