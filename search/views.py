@@ -52,6 +52,9 @@ class SearchListView(ListView):
         if 'search' in self.request.GET:
 
             search_term = self.request.GET['search']
+            # Escape special characters to Solr
+            search_term = search_term.replace(':', '\\:')
+
             rows = self.request.GET['rows']
             boolean_type = self.request.GET.get('boolean_search_type', 'AND')
             if rows == 'No limit':
