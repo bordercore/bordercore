@@ -11,17 +11,11 @@ FAVICON_DIR = "%s/templates/static/%s" % (settings.PROJECT_ROOT, "img/favicons")
 # Tell requests to not be so noisy
 logging.getLogger("requests").setLevel(logging.WARNING)
 
-@task()
-def check_url(url, task_id=None):
-    print "task_id: %s" % task_id
 
 from celery import Celery
 
 celery = Celery('tasks', broker='amqp://guest@localhost//')
 
-@task
-def add(x, y):
-    return x + y
 
 @task()
 def snarf_favicon(url, parse_domain=True):
@@ -59,10 +53,10 @@ def snarf_favicon(url, parse_domain=True):
     f.write(r.content)
     f.close()
 
+
 @task()
 def update_feed(feed_id):
     import sys
     sys.path.append(settings.PROJECT_ROOT + "/bin")
     from get_feed import update_feeds
     update_feeds(feed_id)
-

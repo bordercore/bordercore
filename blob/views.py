@@ -2,7 +2,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse_lazy
-from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django.utils.decorators import method_decorator
@@ -19,12 +18,15 @@ import shutil
 
 from blob.forms import BlobForm
 from blob.models import Blob, MetaData
+from blob.tasks import index_document
 from bookshelf.models import Bookshelf
+
 
 SECTION = 'Blob'
 
 amazon_api_config = {
 }
+
 
 def blob_add(request, replaced_sha1sum=None):
 
@@ -36,14 +38,6 @@ def blob_add(request, replaced_sha1sum=None):
         hasher = hashlib.sha1()
         for chunk in request.FILES['blob'].chunks():
             hasher.update(chunk)
-
-        # BLOCKSIZE = 65536
-        # hasher = hashlib.sha1()
-        # with open(filename, 'rb') as afile:
-        #     buf = afile.read(BLOCKSIZE)
-        #     while len(buf) > 0:
-        #         hasher.update(buf)
-        #         buf = afile.read(BLOCKSIZE)
 
         # Do we already know about this blob?
         existing_blob = Blob.objects.filter(sha1sum=hasher.hexdigest())
@@ -206,6 +200,8 @@ class BlobUpdateView(UpdateView):
         self.object = form.save()
         context = self.get_context_data(form=form)
         messages.add_message(self.request, messages.INFO, 'Blob updated')
+
+        index_document.delay(blob.sha1sum)
 
         return self.render_to_response(context)
 

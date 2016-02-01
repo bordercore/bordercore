@@ -11,6 +11,7 @@ FAVICON_DIR = "%s/templates/static/%s" % (settings.PROJECT_ROOT, "img/favicons")
 # Tell requests to not be so noisy
 logging.getLogger("requests").setLevel(logging.WARNING)
 
+
 @task()
 def snarf_favicon(url, parse_domain=True):
 
@@ -46,4 +47,3 @@ def snarf_favicon(url, parse_domain=True):
     f = open("%s/%s.ico" % (FAVICON_DIR, domain), "wb")
     f.write(r.content)
     f.close()
-

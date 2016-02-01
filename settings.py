@@ -26,7 +26,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',  # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'django',                      # Or path to database file if using sqlite3.
         'USER': 'bordercore',                      # Not used with sqlite3.
         'PASSWORD': '4locus2',                  # Not used with sqlite3.
@@ -88,7 +88,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -98,7 +98,7 @@ SECRET_KEY = '^q$7#ge(!9p!rqzbh*g3%-0q7=*sxcs!$&amp;$8)i33g3a%a+o#4m'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    # 'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -118,10 +118,11 @@ WSGI_APPLICATION = 'bordercore.wsgi.application'
 
 ALLOWED_HOSTS = ('localhost', 'www.bordercore.com')
 
-TEMPLATE_DIRS = ( os.path.join(SITE_ROOT, 'templates'),)
+TEMPLATE_DIRS = (os.path.join(SITE_ROOT, 'templates'),)
 
 INSTALLED_APPS = (
 
+    'celery',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -130,7 +131,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.admindocs',
-    'djcelery',
 
     'accounts',
     'bcsolr',
@@ -164,17 +164,15 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 LOGIN_URL = "/login/"
 
 # Celery support
-import djcelery
-djcelery.setup_loader()
 BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 
 # Setup logging for production
 if not 'runserver' in sys.argv:
     import logging
     logging.basicConfig(
-        level = logging.INFO,
-        format = '%(asctime)s %(levelname)s %(message)s',
-        filename = '/var/log/django/django.log',)
+        level=logging.INFO,
+        format='%(asctime)s %(levelname)s %(message)s',
+        filename='/var/log/django/django.log',)
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
