@@ -57,15 +57,28 @@ def get_link_info(link):
         return (r.url, "No title")
 
 
-def get_plain_content(msg):
+def get_youtube_content(msg):
 
-    msg_part = ''
+    info = {}
 
     for i, part in enumerate(msg.walk(), 1):
         if part.get_content_type() == 'text/plain':
-            msg_part = part.get_payload(decode=True)
+            content = part.get_payload(decode=True)
 
-    return msg_part
+    p = re.compile('^Content-Type: text/plain')
+    lines = content.split('\n')
+    info['uploader'] = lines[0]
+    info['title'] = lines[1]
+    info['url'] = lines[2]
+
+    p = re.compile('(.*) just uploaded a video')
+    m = p.match(info['uploader'])
+    if m:
+        info['subject'] = "%s: %s" % (m.group(1), info['title'])
+    else:
+        info['subject'] = info['title']
+
+    return info
 
 
 buffer = ''
@@ -74,9 +87,13 @@ for line in sys.stdin:
 
 msg = email.message_from_string(buffer)
 if msg.get('From', None).startswith('YouTube'):
-    logger.info('YouTube email detected')
-    buffer = get_plain_content(msg)
-    logger.info(buffer)
+    link_info = get_youtube_content(msg)
+    logger.info('YouTube email: %s' % link_info['subject'])
+    if link_info:
+        b = Bookmark(url=link_info['url'], title=link_info['subject'] or 'No Label', user_id=1)
+        b.save()
+        sys.exit(0)
+
 
 # Decode quoted-printable contents
 buffer = quopri.decodestring(buffer)
