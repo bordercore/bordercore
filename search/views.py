@@ -1,8 +1,9 @@
-from django.views.generic.list import ListView
-from django.shortcuts import render_to_response
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.templatetags.static import static
+from django.views.generic.list import ListView
 
 import json
 import os
@@ -14,10 +15,6 @@ import urllib
 
 from blob.models import Blob
 from tag.models import Tag
-
-SOLR_HOST = 'localhost'
-SOLR_PORT = 8080
-SOLR_COLLECTION = 'solr/bordercore'
 
 IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
 
@@ -63,7 +60,7 @@ class SearchListView(ListView):
                 rows = self.SOLR_COUNT_PER_PAGE
 
             # TODO: catch SolrException
-            conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
+            conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
             solr_args = {'wt': 'json',
                          'fl': 'attr_publication_date,author,bordercore_blogpost_title,bordercore_bookmark_title,bordercore_todo_task,doctype,filepath,id,internal_id,last_modified,sha1sum,tags,title,url',
@@ -220,7 +217,7 @@ class SearchTagDetailView(ListView):
 
         q = ' AND '.join(['tags:"%s"' % (urllib.unquote(t).decode('utf8'),) for t in taglist.split(',')])
 
-        conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
+        conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
         solr_args = {'q': q,
                      'rows': rows,
@@ -262,7 +259,7 @@ def get_title(myobject):
 @login_required
 def search_book_title(request):
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
+    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
     title = request.GET['title']
 
@@ -288,7 +285,7 @@ def search_book_title(request):
 
 def kb_search_tags_booktitles(request):
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
+    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
     term = request.GET['term']
 
@@ -320,7 +317,7 @@ def kb_search_tags_booktitles(request):
 
 def search_document_source(request):
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
+    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
     doc_source = request.GET['doc_source']
 
@@ -350,7 +347,7 @@ def search_admin(request):
     # Get some document count stats.  Any way to do this with just one query?
     stats = {}
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
+    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
     for doctype in ['blob', 'bordercore_todo', 'bordercore_bookmark']:
         r = conn.query('doctype:%s' % doctype, rows=1)
         stats[doctype] = r.numFound
@@ -360,12 +357,12 @@ def search_admin(request):
         if request.POST['Go'] in ['Delete']:
             print request.POST['doc_type']
 
-            conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
+            conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
             conn.delete_query('doctype:%s' % request.POST['doc_type'])
             conn.commit()
         elif request.POST['Go'] in ['Commit']:
 
-            conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
+            conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
             conn.commit()
 
     return render_to_response('search/admin.html',

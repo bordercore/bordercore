@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
@@ -285,12 +286,8 @@ def get_amazon_metadata(request, title):
 # Temp code to randomly choose blobs with insufficient metadata to edit
 def blob_todo(request):
 
-    SOLR_HOST = 'localhost'
-    SOLR_PORT = 8983
-    SOLR_COLLECTION = 'solr/bordercore'
-
     import solr
-    conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
+    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
     solr_args = {'wt': 'json',
                  'fl': 'id,sha1sum,filepath,tags,internal_id',

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.http import HttpResponse
 from django.templatetags.static import static
 from django.views.generic.list import ListView
@@ -9,10 +10,6 @@ from blob.models import Blob
 import json
 import os
 import solr
-
-SOLR_HOST = 'localhost'
-SOLR_PORT = 8080
-SOLR_COLLECTION = 'solr/bordercore'
 
 IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
 
@@ -31,7 +28,7 @@ class BookshelfListView(ListView):
 
         q = 'id:(%s)' % ' '.join(['"blob_%s"' % t for t in blobs])
 
-        conn = solr.SolrConnection('http://%s:%d/%s' % (SOLR_HOST, SOLR_PORT, SOLR_COLLECTION))
+        conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
         solr_args = {'q': q,
                      'rows': 1000,

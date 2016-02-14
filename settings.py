@@ -166,6 +166,11 @@ LOGIN_URL = "/login/"
 # Celery support
 BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 
+# Solr config
+SOLR_HOST = 'localhost'
+SOLR_PORT = 8080
+SOLR_COLLECTION = 'solr/bordercore'
+
 # Setup logging for production
 if not 'runserver' in sys.argv:
     import logging
