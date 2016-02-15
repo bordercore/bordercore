@@ -24,9 +24,19 @@ class Exercise(models.Model):
     def __unicode__(self):
         return self.exercise
 
+
 class Data(models.Model):
     user = models.ForeignKey(User)
     exercise = models.ForeignKey(Exercise)
     date = models.DateTimeField(auto_now_add=True)
     weight = models.FloatField()
     reps = models.IntegerField()
+
+
+class ExerciseUser(models.Model):
+    user = models.ForeignKey(User)
+    exercise = models.ForeignKey(Exercise)
+    started = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'exercise')

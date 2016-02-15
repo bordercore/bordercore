@@ -1,12 +1,33 @@
-from django.shortcuts import render_to_response
+from django.contrib import messages
+from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
+from django.views.generic.detail import DetailView
 
 import datetime
 import json
 
-from fitness.models import Data, Exercise, Muscle, MuscleGroup
+from fitness.models import Data, Exercise, ExerciseUser, MuscleGroup
 
 SECTION = 'Fitness'
+
+
+class ExerciseDetailView(DetailView):
+
+    model = Exercise
+    slug_field = 'id'
+    slug_url_kwarg = 'exercise_id'
+
+    def get_context_data(self, **kwargs):
+        context = super(ExerciseDetailView, self).get_context_data(**kwargs)
+        context['id'] = self.object.id
+        try:
+            context['recent_data'] = Data.objects.filter(user=self.request.user, exercise__id=self.object.id).order_by('-date')[0]
+            context['delta_days'] = (int(datetime.datetime.now().strftime("%s")) - int(context['recent_data'].date.strftime("%s"))) / 86400 + 1
+        except IndexError:
+            pass
+        context['activity_info'] = ExerciseUser.objects.filter(user=self.request.user, exercise__id=self.object.id)
+        return context
+
 
 def fitness_add(request, exercise_id):
 
@@ -26,29 +47,57 @@ def fitness_add(request, exercise_id):
         pass
 
     return render_to_response('fitness/add.html',
-                              { 'section': SECTION,
-                                'exercise': exercise,
-                                'muscle_group': muscle_group,
-                                'muscle': muscle,
-                                'recent_data': recent_data },
+                              {'section': SECTION,
+                               'exercise': exercise,
+                               'muscle_group': muscle_group,
+                               'muscle': muscle,
+                               'recent_data': recent_data},
                               context_instance=RequestContext(request))
+
+
+def add_exercise_info(exercise_list, exercise):
+
+    try:
+        exercise_list[exercise.exercise] = exercise
+        exercise_list[exercise.exercise].date = exercise.data_set.order_by('-date')[0].date
+        exercise_list[exercise.exercise].delta_days = (int(datetime.datetime.now().strftime("%s")) - int(exercise_list[exercise.exercise].date.strftime("%s"))) / 86400 + 1
+    except IndexError:
+        pass
 
 
 def fitness_summary(request):
 
     exercises = Exercise.objects.all()
 
-    recent_data = {}
+    active_exercises = {}
+    inactive_exercises = {}
+
     for e in exercises:
-        try:
-            recent_data[e.exercise] = e
-            recent_data[e.exercise].date = e.data_set.order_by('-date')[0].date
-            recent_data[e.exercise].delta_days = (int(datetime.datetime.now().strftime("%s")) - int(recent_data[e.exercise].date.strftime("%s")))/86400 + 1
-        except IndexError:
-            pass
+        if e.exerciseuser_set.filter(user=request.user):
+            add_exercise_info(active_exercises, e)
+        else:
+            add_exercise_info(inactive_exercises, e)
 
     return render_to_response('fitness/summary.html',
-                              { 'section': SECTION,
-                                'recent_data': recent_data
-                                },
+                              {'section': SECTION,
+                               'active_exercises': active_exercises,
+                               'inactive_exercises': inactive_exercises
+                               },
                               context_instance=RequestContext(request))
+
+
+def change_active_status(request):
+
+    exercise_id = request.POST['exercise_id']
+
+    if request.POST['state'] == 'inactive':
+        eu = ExerciseUser.objects.get(user=request.user, exercise=exercise_id)
+        eu.delete()
+        messages.add_message(request, messages.INFO, 'This exercise is no longer active')
+    elif request.POST['state'] == 'active':
+        e = Exercise.objects.get(id=exercise_id)
+        eu = ExerciseUser(user=request.user, exercise=e)
+        eu.save()
+        messages.add_message(request, messages.INFO, 'This exercise is now active for you')
+
+    return redirect('exercise_detail', exercise_id)

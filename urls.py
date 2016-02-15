@@ -11,6 +11,7 @@ from bookmark.views import OrderListJson
 from bookshelf.views import BookshelfListView
 from book.views import BookListView
 from feed.views import FeedListView, FeedSubscriptionListView
+from fitness.views import ExerciseDetailView
 from music.api import MusicWishListResource
 from music.views import MusicListJson, WishListView, WishListCreateView, WishListDetailView
 from todo.api import TodoResource
@@ -26,7 +27,7 @@ v1_api.register(TodoResource())
 v1_api.register(MusicWishListResource())
 
 urlpatterns = patterns('',
-                        (r'^api/', include(v1_api.urls)),
+                       (r'^api/', include(v1_api.urls)),
 )
 
 urlpatterns += patterns('homepage.views',
@@ -81,6 +82,8 @@ urlpatterns += patterns('feed.views',
 
 urlpatterns += patterns('fitness.views',
                         url(r'^fitness/add/(?P<exercise_id>\d+)$', 'fitness_add', name='fitness_add'),
+                        url(r'^fitness/change_active_status', 'change_active_status', name='change_active_status'),
+                        url(r'^fitness/(?P<exercise_id>\d+)$', ExerciseDetailView.as_view(), name='exercise_detail'),
                         url(r'^fitness/', 'fitness_summary', name='fitness_summary')
 )
 
