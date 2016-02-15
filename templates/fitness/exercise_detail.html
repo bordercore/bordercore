@@ -6,11 +6,36 @@
 
 {% block content %}
 
+    <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.color-2.1.2.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
+
     <script type="text/javascript" charset="utf-8">
 
+        var metadata = []
         var table;
 
         $(document).ready(function() {
+
+            table = $('#workout').DataTable( {
+                info: false,
+                language: {
+                    'emptyTable': 'No workout data entered'
+                },
+                paging: false,
+                searching: false
+            });
+
+            $('#btn-add').click( function () {
+                var rowNode = table.row.add( [ $('#weight').val(), $('#reps').val() ] ).draw().node();
+                $( rowNode ).css( 'color', 'red' ).animate( { color: '#666666' }, 2000 );
+                $('#btn-submit').removeAttr("disabled");
+            } );
+
+            $("#form-workout").submit(function(e) {
+                $('input[name="workout-data"]').val(JSON.stringify(table.data().toArray()));
+            });
 
         });
 
@@ -28,20 +53,14 @@
         </div>
     </div>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="col-md-7 col-md-offset2 alert alert-info">
-                {{ message|safe }}
-            </div>
-        {% endfor %}
-        <br/><br/><br/>
-    {% endif %}
+    {% include "common/show_messages.html" %}
 
     <h1>{{ object.exercise }}</h1>
 
     Last workout: {{ recent_data.date|date:"N j, Y" }} - {{ delta_days }} day{{ delta_days|pluralize:"s" }} ago
 
     <br /><br />
+
     <form action="{% url 'change_active_status' %}" method="post">
         {% csrf_token %}
         <input type="hidden" name="exercise_id" value="{{ object.id }}" />
@@ -54,4 +73,52 @@
         <input type="hidden" name="state" value="active" />
     {% endif %}
     </form>
+
+    <br /><br />
+    <div class="panel panel-default">
+        <div class="panel-heading">Add a new workout</div>
+        <div class="panel-body">
+
+            <form id="form-workout" class="form-inline" action="{% url 'fitness_add' exercise.id %}" method="post" autocomplete="off">
+                <input type="hidden" name="workout-data" id="input-metadata" />
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label>Weight</label>
+                    <input id="weight" class="form-control" type="text" name="weight" value="{{ recent_data.weight }}" />
+                </div>
+
+                <div class="form-group">
+                    <label>Reps</label>
+                    <input id="reps" class="form-control" type="text" name="reps" value="{{ recent_data.reps }}" />
+                </div>
+
+                <input class="btn btn-default" id="btn-add" type="button" name="Go" value="Add" />
+                <input class="btn btn-default" id="btn-submit" disabled="disabled" type="submit" name="Go" value="Submit" />
+
+            </form>
+
+            <br />
+
+            <div class="row">
+
+                <div class="col-md-5">
+                    <table class="table table-bordered" id="workout">
+                        <caption>Current workout</caption>
+                        <thead>
+                            <tr>
+                                <th>Weight</th>
+                                <th>Reps</th>
+                            </tr>
+                        </thead>
+                        {% for w in workout %}
+                            <tr><td>{{ w.0 }}</td><td>{{ w.1 }}</td></tr>
+                        {% endfor %}
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

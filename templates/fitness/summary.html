@@ -18,7 +18,7 @@
             table = $('#active_exercises, #inactive_exercises').DataTable( {
                 "columnDefs": [
                     { "targets": [2], "dataSort": 4 },
-                    { "targets": [4,5], "visible": false },
+                    { "targets": [3,4], "visible": false },
                 ],
                 info: false,
                 language: {
@@ -26,12 +26,14 @@
                 },
                 paging: false,
                 searching: false,
-                "sorting": [[4, 'asc']],
+                "sorting": [[3, 'asc']],
             });
 
         });
 
     </script>
+
+    {% include "common/show_messages.html" %}
 
     <h1>Active Exercises</h1>
 
@@ -57,7 +59,6 @@
             {% else %}
                 <td>Never</td>
             {% endif %}
-            <td><a href="{% url 'fitness_add' values.id %}">Add</a></td>
             <td>{{ values.date|date:"U" }}</td>
             <td>{{ values.delta_days }}</td>
         </tr>
@@ -90,7 +91,6 @@
             {% else %}
                 <td>Never</td>
             {% endif %}
-            <td><a href="{% url 'fitness_add' values.id %}">Add</a></td>
             <td>{{ values.date|date:"U" }}</td>
             <td>{{ values.delta_days }}</td>
         </tr>

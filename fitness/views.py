@@ -6,7 +6,7 @@ from django.views.generic.detail import DetailView
 import datetime
 import json
 
-from fitness.models import Data, Exercise, ExerciseUser, MuscleGroup
+from fitness.models import Data, Exercise, ExerciseUser
 
 SECTION = 'Fitness'
 
@@ -37,22 +37,9 @@ def fitness_add(request, exercise_id):
         for datum in json.loads(request.POST['workout-data']):
             new_data = Data(weight=datum[0], reps=datum[1], user=request.user, exercise=exercise)
             new_data.save()
+        messages.add_message(request, messages.INFO, 'Added workout data for exercise <strong>%s</strong>' % exercise)
 
-    recent_data = []
-    muscle_group = MuscleGroup.objects.get(id=exercise.muscle.muscle_group_id)
-    muscle = exercise.muscle
-    try:
-        recent_data = Data.objects.filter(user=request.user, exercise__id=exercise_id).order_by('-date')[0]
-    except IndexError:
-        pass
-
-    return render_to_response('fitness/add.html',
-                              {'section': SECTION,
-                               'exercise': exercise,
-                               'muscle_group': muscle_group,
-                               'muscle': muscle,
-                               'recent_data': recent_data},
-                              context_instance=RequestContext(request))
+    return redirect('fitness_summary')
 
 
 def add_exercise_info(exercise_list, exercise):
