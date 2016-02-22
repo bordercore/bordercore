@@ -1,6 +1,7 @@
 import errno
 import hashlib
 import json
+import mimetypes
 import os
 from os import makedirs
 from os.path import isfile
@@ -14,7 +15,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.forms.utils import ErrorList
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, StreamingHttpResponse
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django.views.generic.edit import CreateView, UpdateView
@@ -53,11 +54,10 @@ def music_list(request):
 @login_required
 def music_stream(request, song_id):
 
-    print "stream song %d" % int(song_id)
-
     song = Song.objects.get(id=song_id)
 
-    file_location = get_song_location(song)
+    file_info = get_song_location(song)
+    file_location = "%s%s" % (file_info['root'], file_info['url'])
 
     # Increment the 'times played' counter
     if song.times_played:
@@ -71,12 +71,12 @@ def music_stream(request, song_id):
     l.save()
 
     from django.core.servers.basehttp import FileWrapper
-    wrapper = FileWrapper(file(file_location))
+    chunk_size = 8192
+    wrapper = FileWrapper(open(file_location), chunk_size)
 
     try:
-        response = HttpResponse(wrapper, content_type='audio/mpeg')
+        response = StreamingHttpResponse(wrapper, content_type=mimetypes.guess_type(file_location)[0])
         response['Content-Length'] = os.path.getsize(file_location)
-
     except IOError:
         response = HttpResponseNotFound()
 
@@ -478,7 +478,7 @@ def get_song_location(song):
         tracknumber = str(song.track)
         if len(tracknumber) == 1:
             tracknumber = '0' + tracknumber
-        file_info = {'root': MUSIC_ROOT, 'url': '/%s/%s/%s.mp3' % (artist_name, song.album.title, tracknumber, song.title)}
+        file_info = {'root': MUSIC_ROOT, 'url': '/%s/%s/%s - %s.mp3' % (artist_name, song.album.title, tracknumber, song.title)}
     else:
         file_info = {'root': MUSIC_ROOT, 'url': '/%s/%s.mp3' % (song.artist, song.title)}
 
