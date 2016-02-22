@@ -77,7 +77,7 @@
       <div class="panel-heading">Recently Played Music</div>
       <ul class="list-group">
 {% for song in music %}
-<li class="list-group-item">{{ song.song.artist }} <a href="{% url 'music_stream' song.song_id %}">{{ song.song.title }}</a></li>
+    <li class="list-group-item">{{ song.song.title }} <strong>{{ song.song.artist }}</strong></li>
 {% endfor %}
       </ul>
     </div>

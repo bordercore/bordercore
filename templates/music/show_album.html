@@ -36,10 +36,6 @@
 
         $(document).ready(function() {
 
-            function formatTitle( data, type, row ) {
-                return '<a href="{% url 'music_stream' %}' + row[0] + '">' + row[2] + '</a>';
-            }
-
             table = $('#song_list').dataTable( {
                 "info": false,
                 "filter": false,
@@ -51,7 +47,6 @@
                 "columnDefs": [
                     { "targets": [0], "visible": false },
                     { "targets": [1], "class": "col-lg-1", "sorting": [ "asc", "desc" ] },
-                    { "targets": [2], "class": "col-lg-8", "sorting": [ "asc", "desc" ],  "render": formatTitle, "useRendered": false },
                     { "targets": [3], "class": "col-lg-1", "iDataSort": 4 },
                     { "targets": [4], "visible": false }
                 ],

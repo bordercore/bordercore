@@ -50,10 +50,6 @@
             return '<a href="{% url 'show_artist' 666 %}">'.replace(666, row[1]) + row[1] + '</a>';
         }
 
-        function formatTitle( data, type, row ) {
-            return '<a href="{% url 'music_stream' %}' + row[3] + '">' + row[2] + '</a>';
-        }
-
         oTable = $('#song_list').DataTable( {
             "serverSide": true,
             "ajaxSource": "{% url 'get_song_list' %}",
@@ -72,7 +68,6 @@
             "columnDefs": [
                 { "targets": [0], "class": "col-lg-2", "sorting": [ "desc", "asc" ] },
                 { "targets": [1], "render": formatArtist, "useRendered": false },
-                { "targets": [2], "render": formatTitle, "useRendered": false },
                 { "targets": [3], "visible": false },
             ],
         } );
@@ -91,7 +86,7 @@
             <ul class="list-group">
 
 {% for song in recent_songs %}
-    <li class="list-group-item"><a href="{% url 'music_stream' song.id %}">{{ song.title}} -- {{ song.artist }}</a></li>
+    <li class="list-group-item">{{ song.song.title}} <strong>{{ song.song.artist }}</strong></li>
 {% endfor %}
             </ul>
         </div>

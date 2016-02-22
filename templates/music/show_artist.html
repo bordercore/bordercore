@@ -19,10 +19,6 @@
 
         $(document).ready(function() {
 
-            function formatTitle( data, type, row ) {
-                return '<a href="{% url 'music_stream' %}' + row[4] + '">' + row[2] + '</a>';
-            }
-
             table = $('#song_list').dataTable( {
                 "paginate": true,
                 "info": false,
@@ -33,7 +29,6 @@
                 "searchable": false,
                 "columnDefs": [
                     { "targets": [0], "class": "col-lg-2", "sorting": [ "desc", "asc" ] },
-                    { "targets": [2], "render": formatTitle, "useRendered": false },
                     { "targets": [1,4], "visible": false },
                 ],
             } );
@@ -176,11 +171,12 @@
         </table>
     {% endif %}
 
-    <div class="row">
+    {% if song_list %}
 
-        <div class="col-lg-11">
+        <div class="row">
 
-            {% if song_list %}
+            <div class="col-lg-11">
+
                 <br />
                 {% if album_list %}
                     <h4>Other songs</h4>
@@ -189,12 +185,13 @@
 
                 {% include "common/datatable.html" with data=song_list id="song_list" %}
 
-            {% endif %}
+
+            </div>
 
         </div>
 
-    </div>
+        {% include "common/jplayer.html" %}
 
-    {% include "common/jplayer.html" %}
+    {% endif %}
 
 {% endblock %}

@@ -15,7 +15,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.forms.utils import ErrorList
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, StreamingHttpResponse
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django.views.generic.edit import CreateView, UpdateView
@@ -37,7 +37,7 @@ def music_list(request):
     message = ''
 
     # Get a list of recently played songs
-    recent_songs = Song.objects.all().order_by('-created')[:5]
+    recent_songs = Listen.objects.all().select_related().distinct().order_by('-created')[:5]
 
     # Get a random album
     random_albums = Album.objects.order_by('?')[0]
@@ -49,38 +49,6 @@ def music_list(request):
                                'recent_songs': recent_songs,
                                'random_albums': random_albums
                            }, context_instance=RequestContext(request))
-
-
-@login_required
-def music_stream(request, song_id):
-
-    song = Song.objects.get(id=song_id)
-
-    file_info = get_song_location(song)
-    file_location = "%s%s" % (file_info['root'], file_info['url'])
-
-    # Increment the 'times played' counter
-    if song.times_played:
-        song.times_played = song.times_played + 1
-    else:
-        song.times_played = 1
-    song.save()
-
-    # Add this song to the listen table
-    l = Listen(song=song, user=request.user)
-    l.save()
-
-    from django.core.servers.basehttp import FileWrapper
-    chunk_size = 8192
-    wrapper = FileWrapper(open(file_location), chunk_size)
-
-    try:
-        response = StreamingHttpResponse(wrapper, content_type=mimetypes.guess_type(file_location)[0])
-        response['Content-Length'] = os.path.getsize(file_location)
-    except IOError:
-        response = HttpResponseNotFound()
-
-    return response
 
 
 @login_required
@@ -496,6 +464,17 @@ def get_song_location(song):
 def get_song_info(request, id):
 
     song = Song.objects.get(pk=id)
+
+    # Increment the 'times played' counter
+    if song.times_played:
+        song.times_played = song.times_played + 1
+    else:
+        song.times_played = 1
+    song.save()
+
+    # Add this song to the listen table
+    l = Listen(song=song, user=request.user)
+    l.save()
 
     file_location = get_song_location(song)
 
