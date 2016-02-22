@@ -8,6 +8,7 @@
 
     <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.color-2.1.2.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
 
@@ -17,6 +18,40 @@
         var table;
 
         $(document).ready(function() {
+
+            var data = [
+                {
+                    x: {{ labels|safe }},
+                    y: {{ plotdata|safe }},
+                    type: 'bar',
+                    marker: {
+                        color: 'rgb(158,202,225)',
+                        opacity: 0.6,
+                        line: {
+                            color: 'rbg(8,48,107)',
+                            width: 1.5
+                        }
+                    }
+                }
+            ];
+
+            var layout = {
+                title: 'Workout Data',
+                yaxis: {
+                    title: 'Weight',
+                    titlefont: {
+                        size: 16,
+                        color: 'rgb(107, 107, 107)'
+                    },
+                    tickfont: {
+                        size: 14,
+                        color: 'rgb(107, 107, 107)'
+                    }
+                }
+            };
+
+
+            Plotly.newPlot('exerciseDetailChart', data, layout);
 
             table = $('#workout').DataTable( {
                 info: false,
@@ -74,6 +109,10 @@
     {% endif %}
     </form>
 
+    <div id="exerciseDetailChart"></div>
+
+    <p class="alert alert-info">Reps last workout: <strong>{{ reps }}</strong></p>
+
     <br /><br />
     <div class="panel panel-default">
         <div class="panel-heading">Add a new workout</div>
@@ -90,7 +129,7 @@
 
                 <div class="form-group">
                     <label>Reps</label>
-                    <input id="reps" class="form-control" type="text" name="reps" value="{{ recent_data.reps }}" />
+                    <input id="reps" class="form-control" type="text" name="reps" value="{{ first_reps }}" />
                 </div>
 
                 <input class="btn btn-default" id="btn-add" type="button" name="Go" value="Add" />

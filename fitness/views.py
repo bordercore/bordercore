@@ -8,8 +8,6 @@ import json
 
 from fitness.models import Data, Exercise, ExerciseUser
 
-SECTION = 'Fitness'
-
 
 class ExerciseDetailView(DetailView):
 
@@ -21,12 +19,39 @@ class ExerciseDetailView(DetailView):
         context = super(ExerciseDetailView, self).get_context_data(**kwargs)
         context['id'] = self.object.id
         try:
-            context['recent_data'] = Data.objects.filter(user=self.request.user, exercise__id=self.object.id).order_by('-date')[0]
+            workout_data = Data.objects.filter(user=self.request.user, exercise__id=self.object.id).order_by('-date')[:70]
+            context['recent_data'] = workout_data[0]
             context['delta_days'] = (int(datetime.datetime.now().strftime("%s")) - int(context['recent_data'].date.strftime("%s"))) / 86400 + 1
         except IndexError:
             pass
         context['activity_info'] = ExerciseUser.objects.filter(user=self.request.user, exercise__id=self.object.id)
+        self.set_plot_data(context, workout_data)
         return context
+
+    def set_plot_data(self, context, data):
+
+        plotdata = []
+        current_workout = None
+        reps = []
+        labels = []
+
+        for d in data:
+            day = int(d.date.strftime("%s")) / 86400
+            if current_workout is not None:
+                if day != int(current_workout.date.strftime("%s")) / 86400:
+                    labels.append(current_workout.date.strftime("%b %d"))
+                    plotdata.append(current_workout.weight)
+                    if not context.get('reps', ''):
+                        context['first_reps'] = reps[-1]
+                        context['reps'] = ", ".join(str(x) for x in reversed(reps))
+                    reps = []
+                    current_workout = d
+            else:
+                current_workout = d
+            reps.append(d.reps)
+
+        context['labels'] = json.dumps(labels[::-1])
+        context['plotdata'] = json.dumps(plotdata[::-1])
 
 
 def fitness_add(request, exercise_id):
@@ -66,8 +91,7 @@ def fitness_summary(request):
             add_exercise_info(inactive_exercises, e)
 
     return render_to_response('fitness/summary.html',
-                              {'section': SECTION,
-                               'active_exercises': active_exercises,
+                              {'active_exercises': active_exercises,
                                'inactive_exercises': inactive_exercises
                                },
                               context_instance=RequestContext(request))

@@ -77,6 +77,11 @@ ul.pagination {
     margin: 0px;
                 }
 
+#exerciseDetailChart {
+   width: 800px;
+   height: 400px;
+}
+
 #bookmarks_show_untagged_only_note {
                                      margin-right: 10px;
                                      }
