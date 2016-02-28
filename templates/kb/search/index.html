@@ -59,7 +59,7 @@
                 <div class="panel-body">
 {% for facet in facet_counts|dictsortreversed:"count" %}
 
-    <label class="checkbox">
+    <label>
         <input type="checkbox" name="filter_query" class="facet" id="{{ facet.doctype }}"
                {% if facet.doctype in filter_query %}checked="checked"{% endif %}
                /> {{ facet.doctype_purty }} ({{ facet.count }})

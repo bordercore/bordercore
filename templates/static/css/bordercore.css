@@ -28,14 +28,6 @@ body {
     display: none;
 }
 
-/* Additional support for hilighting a clicked row.  This is needed to
-  better integrate datatables with Bootstrap. */
-/*.row_selected, .row_selected a { background-color: #0173bc; color: #ffffff }*/
-/*.table tbody tr:hover td,
-.table tbody tr:hover th {
-  background-color: transparent;
-}*/
-
 #row_selected, #row_selected a {
            background-color: #0173bc;
            color: #ffffff;
