@@ -1,16 +1,16 @@
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 import markdown
 
 from lib.mixins import TimeStampedModel
 from tag.models import Tag
 
-import dbarray
 
 class Document(TimeStampedModel):
     content = models.TextField()
     title = models.TextField(null=True)
-    author = dbarray.TextArrayField(blank=True)
+    author = ArrayField(models.TextField(blank=True))
     source = models.TextField(null=True)
     pub_date = models.DateField(null=True)
     url = models.TextField(null=True)
@@ -24,4 +24,3 @@ class Document(TimeStampedModel):
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
-

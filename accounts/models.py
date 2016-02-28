@@ -1,15 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
 from django.db.models.signals import post_save
 from tastypie.models import create_api_key
-import dbarray
 from jsonfield import JSONField
 
 from tag.models import Tag
 
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
-    rss_feeds = dbarray.IntegerArrayField()
+    rss_feeds = ArrayField(models.IntegerField())
     favorite_tags = models.ManyToManyField(Tag)
     bookmarks_show_untagged_only = models.BooleanField(default=False)
     todo_default_tag = models.OneToOneField(Tag, related_name='default_tag', null=True)

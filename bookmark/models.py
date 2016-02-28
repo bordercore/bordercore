@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
-import dbarray
 from lib.mixins import TimeStampedModel
 from tag.models import Tag
 
@@ -23,5 +23,4 @@ class Bookmark(TimeStampedModel):
 class BookmarkTagUser(models.Model):
     tag = models.ForeignKey(Tag)
     user = models.ForeignKey(User)
-    bookmark_list = dbarray.IntegerArrayField()
-
+    bookmark_list = ArrayField(models.IntegerField())
