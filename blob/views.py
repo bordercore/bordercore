@@ -129,6 +129,7 @@ class BlobDetailView(DetailView):
             else:
                 context['metadata'][x.name] = x.value
         context['cover_url'] = self.object.get_cover_url('large')
+        context['cover_url_small'] = self.object.get_cover_url('small')
         try:
             query = 'sha1sum:%s' % self.object.sha1sum
             context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
@@ -139,8 +140,13 @@ class BlobDetailView(DetailView):
         context['title'] = self.object.get_title(remove_edition_string=True)
 
         try:
-            if self.object.id in Bookshelf.objects.get(user=self.request.user).blob_list[0]["blobs"]:
-                context['on_bookshelf'] = True
+            all_shelves = Bookshelf.objects.filter(user=self.request.user).order_by('name')
+            current_shelves = {}
+            context['all_shelves'] = [{'id': x.id, 'name': x.name} for x in all_shelves]
+            for shelf in all_shelves:
+                if shelf.blob_list and self.object.id in shelf.blob_list:
+                    current_shelves[shelf.id] = True
+            context['current_shelves'] = current_shelves
         except KeyError:
             pass
 
