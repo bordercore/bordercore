@@ -3,20 +3,16 @@
 import os
 import sys
 
-PROJECT_ROOT = os.path.dirname(__file__)
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
+
+# Absolute filesystem path to the config directory:
+CONFIG_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Absolute filesystem path to the project directory:
+PROJECT_ROOT = os.path.dirname(CONFIG_ROOT)
+
 sys.path.insert(0, os.path.join(PROJECT_ROOT, "apps"))
 sys.path.insert(0, os.path.join(PROJECT_ROOT, "lib"))
-#sys.path.insert(0, os.path.join(PROJECT_ROOT, "apps/debug_toolbar"))
-
-SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
-
-# Enable debug mode based on whether this is dev or production
-if 'runserver' in sys.argv:
-    DEBUG = True
-else:
-    DEBUG = False
-
-TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
     ('F. Jerrell Schivers', 'jerrell@bordercore.com'),
@@ -78,7 +74,7 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    os.path.join(SITE_ROOT, 'templates/static'),
+    os.path.join(PROJECT_ROOT, 'templates/static'),
     '/home/media/music',
     '/home/media'
 )
@@ -87,8 +83,7 @@ STATICFILES_DIRS = (
 # various locations.
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder'
 )
 
 # Make this unique, and don't share it with anybody.
@@ -97,8 +92,7 @@ SECRET_KEY = '^q$7#ge(!9p!rqzbh*g3%-0q7=*sxcs!$&amp;$8)i33g3a%a+o#4m'
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-    # 'django.template.loaders.eggs.Loader',
+    'django.template.loaders.app_directories.Loader'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -106,19 +100,19 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware'
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'bordercore.urls'
+ROOT_URLCONF = 'bordercore.config.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'bordercore.wsgi.application'
+WSGI_APPLICATION = 'bordercore.config.wsgi.application'
 
 ALLOWED_HOSTS = ('localhost', 'www.bordercore.com')
 
-TEMPLATE_DIRS = (os.path.join(SITE_ROOT, 'templates'),)
+TEMPLATE_DIRS = (os.path.join(PROJECT_ROOT, 'templates'),)
 
 INSTALLED_APPS = (
 
@@ -153,8 +147,6 @@ INSTALLED_APPS = (
 
 )
 
-from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
-
 TEMPLATE_CONTEXT_PROCESSORS = TCP + (
     'django.core.context_processors.request',
 )
@@ -170,14 +162,6 @@ BROKER_URL = 'amqp://guest:guest@localhost:5672/'
 SOLR_HOST = 'localhost'
 SOLR_PORT = 8080
 SOLR_COLLECTION = 'solr/bordercore'
-
-# Setup logging for production
-if not 'runserver' in sys.argv:
-    import logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s %(levelname)s %(message)s',
-        filename='/var/log/django/django.log',)
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -207,31 +191,3 @@ LOGGING = {
         },
     }
 }
-
-# debug_toolbar settings
-if DEBUG:
-    INTERNAL_IPS = ('127.0.0.1', '10.3.2.3')
-
-    INSTALLED_APPS += (
-        'debug_toolbar',
-        'template_timings_panel'
-    )
-
-    DEBUG_TOOLBAR_PANELS = (
-        'debug_toolbar.panels.versions.VersionsPanel',
-        'debug_toolbar.panels.timer.TimerPanel',
-        'debug_toolbar.panels.settings.SettingsPanel',
-        'debug_toolbar.panels.headers.HeadersPanel',
-        #'debug_toolbar.panels.profiling.ProfilingDebugPanel',
-        'debug_toolbar.panels.request.RequestPanel',
-        'debug_toolbar.panels.sql.SQLPanel',
-        'debug_toolbar.panels.templates.TemplatesPanel',
-        'debug_toolbar.panels.cache.CachePanel',
-        'debug_toolbar.panels.signals.SignalsPanel',
-        'debug_toolbar.panels.logging.LoggingPanel',
-        'template_timings_panel.panels.TemplateTimings.TemplateTimings'
-    )
-
-    # DEBUG_TOOLBAR_CONFIG = {
-    #     'DISABLE_PANELS': True,
-    # }
