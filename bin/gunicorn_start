@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Based on http://michal.karzynski.pl/blog/2013/06/09/django-nginx-gunicorn-virtualenv-supervisor/
+
+NAME="django_app"
+DJANGODIR=/home/www/htdocs/bordercore-django
+HOST=127.0.0.1:9000
+USER=www-data
+GROUP=www-data
+NUM_WORKERS=3
+DJANGO_SETTINGS_MODULE=bordercore.config.settings.prod
+DJANGO_WSGI_MODULE=bordercore.config.wsgi
+PYTHONPATH=/home/www/htdocs/bordercore-django/bordercore
+
+echo "Starting $NAME as `whoami`"
+
+# Activate the virtual environment
+source $DJANGODIR/env/bin/activate
+export DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
+export PYTHONPATH=$PYTHONPATH
+
+# Start your Django Unicorn
+# Programs meant to be run under supervisor should not daemonize themselves (do not use --daemon)
+exec gunicorn ${DJANGO_WSGI_MODULE}:application \
+  --name $NAME \
+  --workers $NUM_WORKERS \
+  --pythonpath $PYTHONPATH/bordercore \
+  --user=$USER \
+  --group=$GROUP \
+  --bind=$HOST \
+  --log-level=debug \
+  --log-file=-
