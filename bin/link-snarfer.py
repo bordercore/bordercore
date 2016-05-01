@@ -11,9 +11,9 @@ import re
 import requests
 from lxml import html
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'bordercore.settings'
-sys.path.insert(0, '/home/www/htdocs/bordercore-django')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'bordercore.config.settings.prod'
 sys.path.insert(0, '/home/www/htdocs/bordercore-django/bordercore')
+sys.path.insert(0, '/home/www/htdocs/bordercore-django/bordercore/bordercore')
 from bookmark.models import Bookmark
 
 django.setup()

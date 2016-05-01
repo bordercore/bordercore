@@ -3,13 +3,12 @@
 import os
 import sys
 
-from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
+from unipath import Path
 
-# Absolute filesystem path to the config directory:
-CONFIG_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CONFIG_ROOT = Path(__file__).ancestor(2)
 
 # Absolute filesystem path to the project directory:
-PROJECT_ROOT = os.path.dirname(CONFIG_ROOT)
+PROJECT_ROOT = CONFIG_ROOT.ancestor(1)
 
 sys.path.insert(0, os.path.join(PROJECT_ROOT, "apps"))
 sys.path.insert(0, os.path.join(PROJECT_ROOT, "lib"))
@@ -22,12 +21,12 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',  # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'django',                      # Or path to database file if using sqlite3.
-        'USER': 'bordercore',                      # Not used with sqlite3.
-        'PASSWORD': '4locus2',                  # Not used with sqlite3.
-        'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'django',
+        'USER': 'bordercore',
+        'PASSWORD': '4locus2',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
@@ -41,7 +40,7 @@ TIME_ZONE = None
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
-SITE_ID = 1
+#SITE_ID = 1
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -74,7 +73,7 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    os.path.join(PROJECT_ROOT, 'templates/static'),
+    PROJECT_ROOT.child('templates').child('static'),
     '/home/media/music',
     '/home/media'
 )
@@ -89,30 +88,12 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '^q$7#ge(!9p!rqzbh*g3%-0q7=*sxcs!$&amp;$8)i33g3a%a+o#4m'
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader'
-)
-
-MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware'
-    # Uncomment the next line for simple clickjacking protection:
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-)
-
 ROOT_URLCONF = 'bordercore.config.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'bordercore.config.wsgi.application'
 
 ALLOWED_HOSTS = ('localhost', 'www.bordercore.com')
-
-TEMPLATE_DIRS = (os.path.join(PROJECT_ROOT, 'templates'),)
 
 INSTALLED_APPS = (
 
@@ -143,13 +124,40 @@ INSTALLED_APPS = (
     'quote',
     'solr',
     'tastypie',
-    'todo'
+    'todo',
 
 )
 
-TEMPLATE_CONTEXT_PROCESSORS = TCP + (
-    'django.core.context_processors.request',
-)
+MIDDLEWARE_CLASSES = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [PROJECT_ROOT.child("templates")],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.core.context_processors.request',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+            ]
+        },
+    },
+]
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
