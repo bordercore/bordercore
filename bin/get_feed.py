@@ -18,11 +18,12 @@ from django.utils.timezone import utc
 os.environ['DJANGO_SETTINGS_MODULE'] = 'bordercore.config.settings.prod'
 sys.path.insert(0, '/home/jerrell/dev/django/bordercore_project')
 sys.path.insert(0, '/home/jerrell/dev/django/bordercore_project/bordercore')
+
+django.setup()
+
 from feed.models import Feed, FeedItem
 
 LOG_FILE = "/home/www/logs/get_feed.log"
-
-django.setup()
 
 
 def update_feeds(feed_id=None):

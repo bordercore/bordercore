@@ -14,9 +14,11 @@ from lxml import html
 os.environ['DJANGO_SETTINGS_MODULE'] = 'bordercore.config.settings.prod'
 sys.path.insert(0, '/home/www/htdocs/bordercore-django/bordercore')
 sys.path.insert(0, '/home/www/htdocs/bordercore-django/bordercore/bordercore')
-from bookmark.models import Bookmark
 
 django.setup()
+
+from bookmark.models import Bookmark
+
 
 link_dict = {}  # Store links in a dict to avoid duplication
 
