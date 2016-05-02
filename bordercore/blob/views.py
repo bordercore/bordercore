@@ -50,6 +50,7 @@ def blob_add(request, replaced_sha1sum=None):
             replaced_sha1sum = request.POST.get('replaced_sha1sum', '')
             if replaced_sha1sum != '':
                 b = Blob.objects.get(sha1sum=replaced_sha1sum)
+                old_id = b.id
                 old_tags = b.tags.all()
                 old_metadata = b.metadata_set.all()
                 b.sha1sum = hasher.hexdigest()
@@ -60,6 +61,11 @@ def blob_add(request, replaced_sha1sum=None):
                 b.tags = old_tags
                 b.metadata_set = old_metadata
                 b.save()
+
+                # If this blob sits on any bookshelves, replace it with the new blob
+                for shelf in Bookshelf.objects.filter(user=request.user):
+                    shelf.blob_list = [b.id if x == old_id else x for x in shelf.blob_list]
+                    shelf.save()
 
                 old_blob = Blob.objects.get(sha1sum=replaced_sha1sum)
 
