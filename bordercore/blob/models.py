@@ -96,7 +96,7 @@ class Blob(TimeStampedModel, AmazonMixin):
 
             # Remove this blob from any shelves it sits on
             for shelf in Bookshelf.objects.all():
-                shelf.blob_list = [x for x in shelf.blob_list if x != self.id]
+                shelf.blob_list = [x for x in shelf.blob_list if x['id'] != self.id]
                 shelf.save()
 
             # Delete the blob in Solr

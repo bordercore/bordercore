@@ -1,4 +1,3 @@
-from django.db import models
 from accounts.models import UserProfile
 from oauth2client.client import OAuth2Credentials
 from datetime import datetime, timedelta
@@ -8,6 +7,7 @@ import httplib2
 import dateutil.parser
 
 api_key = ""
+
 
 class Calendar():
 
@@ -62,5 +62,3 @@ class Calendar():
             event_list.append(one_event)
 
         return event_list
-
-

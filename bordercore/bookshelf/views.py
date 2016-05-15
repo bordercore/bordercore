@@ -7,6 +7,7 @@ from bookshelf.models import Bookshelf
 
 from blob.models import Blob
 
+import datetime
 import json
 import os
 import solr
@@ -26,7 +27,7 @@ class BookshelfListView(ListView):
         blob_list = {}
 
         for shelf in book_shelves:
-            q = 'id:(%s)' % ' '.join(['"blob_%s"' % t for t in shelf.blob_list])
+            q = 'id:(%s)' % ' '.join(['"blob_%s"' % t['id'] for t in shelf.blob_list])
 
             conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
@@ -48,9 +49,9 @@ class BookshelfListView(ListView):
             blob_list_temp = []
             for blob in shelf.blob_list:
                 try:
-                    blob_list_temp.append(solr_list_objects[blob])
+                    blob_list_temp.append(solr_list_objects[blob['id']])
                 except KeyError:
-                    print "Warning: blob_id = %s not found in solr.  It's probably new." % blob
+                    print "Warning: blob_id = %s not found in solr.  It's probably new." % blob['id']
             blob_list[shelf.id] = {'blob_list': blob_list_temp, 'name': shelf.name}
 
         return blob_list
@@ -67,7 +68,10 @@ class BookshelfListView(ListView):
                     if not os.path.isfile("%s/%s/%s/cover-small.jpg" % (Blob.BLOB_STORE, object['sha1sum'][0:2], object['sha1sum'])):
                         object['cover_url'] = static("images/book.png")
                     if object['content_type']:
-                        object['content_type'] = object['content_type'][0].split('/')[1]
+                        try:
+                            object['content_type'] = object['content_type'][0].split('/')[1]
+                        except IndexError:
+                            print "Warning: content_type malformed: id=%s, sha1sum=%s, content_type=%s" % (object['id'], object['sha1sum'], object['content_type'])
                         if object['content_type'] in IMAGE_TYPE_LIST:
                             object['is_image'] = True
                     if not object.get('title', ''):
@@ -78,18 +82,29 @@ class BookshelfListView(ListView):
 
 def sort_bookshelf(request):
 
+    shelf_id = int(request.POST['shelf_id'])
     blob_id = int(request.POST['blob_id'])
     new_position = int(request.POST['position'])
 
-    b = Bookshelf.objects.get(user=request.user)
+    shelf = Bookshelf.objects.get(user=request.user, id=shelf_id)
 
     # First remove the blob from the existing list
-    b.blob_list[0]['blobs'].remove(blob_id)
+    saved_blob = []
+    new_blob_list = []
+    print blob_id
+    for blob in shelf.blob_list:
+        print blob['id']
+        if blob['id'] == blob_id:
+            saved_blob = blob
+            print 'saved_blob: %s' % saved_blob
+        else:
+            new_blob_list.append(blob)
 
     # Then re-insert it in its new position
-    b.blob_list[0]['blobs'].insert(new_position - 1, blob_id)
+    new_blob_list.insert(new_position - 1, saved_blob)
+    shelf.blob_list = new_blob_list
 
-    b.save()
+    shelf.save()
 
     return HttpResponse(json.dumps('OK'), content_type="application/json")
 
@@ -98,20 +113,24 @@ def add_to_bookshelf(request):
 
     blob_id = int(request.POST['blob_id'])
     shelf_id = int(request.POST['shelf_id'])
-    b = Bookshelf.objects.filter(user=request.user, id=shelf_id)
+    shelf = Bookshelf.objects.get(user=request.user, id=shelf_id)
 
     message = ''
-    for shelf in b:
-        if shelf.blob_list:
-            if blob_id not in shelf.blob_list:
-                shelf.blob_list.append(blob_id)
-                shelf.save()
-                message = 'Added to bookshelf'
-            else:
-                message = 'Already on bookshelf'
-        else:
-            shelf.blob_list = [blob_id]
+
+    new_blob = {'id': blob_id,
+                'added': datetime.datetime.now().strftime("%s")}
+
+    print [x for x in shelf.blob_list if x['id'] == blob_id]
+    if shelf.blob_list:
+        if not [x for x in shelf.blob_list if x['id'] == blob_id]:
+            shelf.blob_list.append(new_blob)
             shelf.save()
+            message = 'Added to bookshelf'
+        else:
+            message = 'Already on bookshelf'
+    else:
+        shelf.blob_list = [new_blob]
+        shelf.save()
 
     response = json.dumps({"message": message})
     return HttpResponse(response, content_type="application/json")
@@ -121,11 +140,12 @@ def remove_from_bookshelf(request):
 
     blob_id = int(request.POST['blob_id'])
     shelf_id = int(request.POST['shelf_id'])
-    b = Bookshelf.objects.get(user=request.user, id=shelf_id)
+    shelf = Bookshelf.objects.get(user=request.user, id=shelf_id)
 
     try:
-        b.blob_list.remove(blob_id)
-        b.save()
+        new_blob_list = [x for x in shelf.blob_list if x['id'] != blob_id]
+        shelf.blob_list = new_blob_list
+        shelf.save()
         message = 'Removed from bookshelf'
     except ValueError:
         message = 'Not on bookshelf'

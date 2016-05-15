@@ -64,7 +64,9 @@ def blob_add(request, replaced_sha1sum=None):
 
                 # If this blob sits on any bookshelves, replace it with the new blob
                 for shelf in Bookshelf.objects.filter(user=request.user):
-                    shelf.blob_list = [b.id if x == old_id else x for x in shelf.blob_list]
+                    for blob in shelf.blob_list:
+                        if blob['id'] == old_id:
+                            blob['id'] = b.id
                     shelf.save()
 
                 old_blob = Blob.objects.get(sha1sum=replaced_sha1sum)
@@ -150,7 +152,7 @@ class BlobDetailView(DetailView):
             current_shelves = {}
             context['all_shelves'] = [{'id': x.id, 'name': x.name} for x in all_shelves]
             for shelf in all_shelves:
-                if shelf.blob_list and self.object.id in shelf.blob_list:
+                if [x for x in shelf.blob_list if x['id'] == self.object.id]:
                     current_shelves[shelf.id] = True
             context['current_shelves'] = current_shelves
         except KeyError:
