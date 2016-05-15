@@ -7,16 +7,16 @@ import sys
 from django.db.models import Count
 from django.conf import settings
 # from django.test import TestCase
-from blob.models import Blob
-from tag.models import Tag
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'bordercore.settings'
-# sys.path.insert(0, '/home/www/htdocs/bordercore-django')
-# sys.path.insert(0, '/home/www/htdocs/bordercore-django/bordercore')
-sys.path.insert(0, '/home/jerrell/dev/django')
-sys.path.insert(0, '/home/jerrell/dev/django/bordercore')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'bordercore.config.settings.prod'
+sys.path.insert(0, '/home/www/htdocs/bordercore-django/bordercore')
+sys.path.insert(0, '/home/www/htdocs/bordercore-django/bordercore/bordercore')
 
 django.setup()
+
+from blob.models import Blob
+from bookshelf.models import Bookshelf
+from tag.models import Tag
 
 # t = Tag.objects.filter(name='linux')
 # print t[0].name
@@ -103,3 +103,28 @@ def test_blob_permissions():
             file_path = os.path.join(root, filename)
             assert getpwuid(stat(file_path).st_uid).pw_name == owner, "file not owned by %s: %s" % (owner, file_path)
 #            print "%s, %s" % (file_path, getpwuid(stat(file_path).st_uid).pw_name)
+
+
+def test_bookshelf_books_exists_in_db():
+    "Assert that all books currently on bookshelves actually exist in the database"
+    book_shelves = Bookshelf.objects.filter(blob_list__isnull=False)
+
+    for shelf in book_shelves:
+        for blob in shelf.blob_list:
+            assert Blob.objects.filter(pk=blob['id']).count() > 0, "blob_id %s does not exist in the database" % blob['id']
+
+
+def test_bookshelf_books_exists_in_solr():
+    "Assert that all books currently on bookshelves actually exist in the database"
+    book_shelves = Bookshelf.objects.filter(blob_list__isnull=False)
+
+    for shelf in book_shelves:
+        for blob in shelf.blob_list:
+            solr_args = {'q': 'doctype:book AND id:blob_%s' % blob['id'],
+                         'fl': 'id',
+                         'wt': 'json'}
+
+            conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+            response = conn.raw_query(**solr_args)
+            data = json.loads(response)['response']['numFound']
+            assert data == 1, "blob_id %s does not exist in solr" % blob['id']
