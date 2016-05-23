@@ -136,8 +136,8 @@ class BlobDetailView(DetailView):
                 context['metadata'][x.name] = ', '.join([context['metadata'][x.name], x.value])
             else:
                 context['metadata'][x.name] = x.value
-        context['cover_url'] = self.object.get_cover_url('large')
-        context['cover_url_small'] = self.object.get_cover_url('small')
+        context['cover_url'] = Blob.get_cover_url(self.object.sha1sum, 'large')
+        context['cover_url_small'] = Blob.get_cover_url(self.object.sha1sum, 'small')
         try:
             query = 'sha1sum:%s' % self.object.sha1sum
             context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
@@ -170,11 +170,7 @@ class BlobUpdateView(UpdateView):
         context['section'] = SECTION
         context['sha1sum'] = self.kwargs.get('sha1sum')
         context['metadata'] = [x for x in self.object.metadata_set.all() if x.name != 'is_book']
-        cover_url = self.object.get_cover_url('large')
-        if cover_url:
-            context['cover_url'] = 'blobs/' + cover_url
-        else:
-            context['cover_url'] = 'img/no_image_available.svg'
+        context['cover_url'] = Blob.get_cover_url(self.object.sha1sum, 'large')
         if True in [True for x in self.object.metadata_set.all() if x.name == 'is_book']:
             context['is_book'] = True
         context['action'] = 'Edit'

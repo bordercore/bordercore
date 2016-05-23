@@ -176,12 +176,12 @@
             <br /><br />
 
             <form action="{% url 'blob_edit' object.sha1sum %}">
-                
+
                 <a class="btn btn-default" href="{{ STATIC_URL }}blobs/{{ object.get_url }}" role="button" target="blob">Download</a>
                 <input type="submit" class="btn btn-primary" value="Edit">
 
                 <br /><br />
-                
+
             </form>
 
         </div>
@@ -189,7 +189,7 @@
         <div class="col-md-4">
 
             {% if cover_url %}
-                <img src="{{ STATIC_URL }}blobs/{{ cover_url }}" />
+                <img src="{{ STATIC_URL }}{{ cover_url }}" height="500" width="400"/>
             {% endif %}
 
         </div>
@@ -206,7 +206,7 @@
                 <div class="panel-body panel">
 
                     <div id="current-blob" class="ui-widget-content ui-state-default">
-                        <img src="{{ STATIC_URL }}blobs/{{ cover_url_small }}" width="57" height="75" />
+                        <img src="{{ STATIC_URL }}{{ cover_url_small }}" width="57" height="75" />
                     </div>
 
                     <h4><strong>Book Shelves</strong></h4>
@@ -214,7 +214,7 @@
                         {% for shelf in all_shelves %}
                             {% if current_shelves|dict_get:shelf.id %}
                                 <li id="shelf_{{ shelf.id }}" class="ui-widget-content ui-corner-tr on-shelf">
-                                    <img src="{{ STATIC_URL }}blobs/{{ cover_url_small }}" width="57" height="75" />
+                                    <img src="{{ STATIC_URL }}{{ cover_url_small }}" width="57" height="75" />
                                     <h5 class="ui-widget-header">{{ shelf.name }}</h5>
                                 </li>
                             {% else %}
@@ -234,5 +234,5 @@
 
         </div>
     </div>
-    
+
 {% endblock %}

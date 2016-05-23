@@ -65,12 +65,20 @@ class Blob(TimeStampedModel, AmazonMixin):
                 return "%s Edition" % (EDITIONS[matches.group(2)])
         return ""
 
-    def get_cover_url(self, size='medium'):
+    # This is static so that it can be called without a blob object, eg
+    #  based on results from a Solr query
+    @staticmethod
+    def get_cover_url(sha1sum, size='medium'):
+
+        parent_dir = "%s/%s/%s" % (Blob.BLOB_STORE, sha1sum[0:2], sha1sum)
 
         for image_type in ['jpg', 'png']:
-            if os.path.isfile("%s/cover-%s.%s" % (self.get_parent_dir(), size, image_type)):
-                return "%s/%s/cover-%s.%s" % (self.sha1sum[0:2], self.sha1sum, size, image_type)
-        return None
+            if os.path.isfile("%s/cover.%s" % (parent_dir, image_type)):
+                return "blobs/%s/%s/cover.%s" % (sha1sum[0:2], sha1sum, image_type)
+            elif os.path.isfile("%s/cover-%s.%s" % (parent_dir, size, image_type)):
+                return "blobs/%s/%s/cover-%s.%s" % (sha1sum[0:2], sha1sum, size, image_type)
+
+        return "images/book.png"
 
     def get_solr_info(self, query, **kwargs):
         conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))

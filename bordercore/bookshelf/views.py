@@ -64,9 +64,7 @@ class BookshelfListView(ListView):
                 if object['doctype'] in ('blob', 'book'):
                     filename = os.path.basename(object['filepath'])
                     object['url'] = object['filepath'].split(Blob.BLOB_STORE)[1]
-                    object['cover_url'] = static("blobs/%s/%s/cover-small.jpg" % (object['sha1sum'][0:2], object['sha1sum']))
-                    if not os.path.isfile("%s/%s/%s/cover-small.jpg" % (Blob.BLOB_STORE, object['sha1sum'][0:2], object['sha1sum'])):
-                        object['cover_url'] = static("images/book.png")
+                    object['cover_url'] = static(Blob.get_cover_url(object['sha1sum']))
                     if object['content_type']:
                         try:
                             object['content_type'] = object['content_type'][0].split('/')[1]
