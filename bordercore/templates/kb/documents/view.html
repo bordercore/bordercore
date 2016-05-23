@@ -4,11 +4,21 @@
 
 {% block content %}
 
+    {% if messages %}
+        {% for message in messages %}
+            <div class="form-group">
+                <div class="col-lg-7 alert alert-info">
+                    {{ message|safe }}
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
 <div class="row">
 
-	<div class="col-md-12">
-		<h1>{{ document.title }}</h1>
-	</div>
+    <div class="col-md-12">
+        <h1>{{ document.title }}</h1>
+    </div>
 
 </div>
 
@@ -16,9 +26,9 @@
 
 {% if document.sub_heading %}
 
-	<div class="col-md-12">
-		<h3>{{ document.sub_heading }}</h3>
-	</div>
+    <div class="col-md-12">
+        <h3>{{ document.sub_heading }}</h3>
+    </div>
 
 {% endif %}
 
@@ -28,9 +38,7 @@
 
 {% if document.authors %}
 
-	<div class="col-md-12">
-		by {{ document.authors }}
-	</div>
+    <div class="col-md-12">by {{ document.authors }}</div>
 
 {% endif %}
 
@@ -40,9 +48,7 @@
 
 {% if document.pub_date %}
 
-	<div class="col-md-12">
-		{{ document.pub_date }}
-	</div>
+    <div class="col-md-12">{{ document.pub_date }}</div>
 
 {% endif %}
 
@@ -52,11 +58,11 @@
 
 {% if document.tags.all %}
 
-	<div class="col-md-12">Tags:
+    <div class="col-md-12">Tags:
 {% for tag in document.tags.all %}
-	<span class="label label-primary">{{ tag.name }}</span>
+    <span class="label label-primary">{{ tag.name }}</span>
 {% endfor %}
-	</div>
+    </div>
 {% endif %}
 
 </div>
@@ -64,8 +70,8 @@
 <div class="row">
 
 <div class="col-md-12">
-	<br />
-{{ document.get_markdown|safe }}
+    <br />
+    {{ document.get_markdown|safe }}
 </div>
 
 </div>
@@ -74,29 +80,25 @@
 
 {% if document.source %}
 
-	<div class="col-md-12">
+    <div class="col-md-12">
 
 {% if document.url %}
 
-	Source: <a href="{{ document.url }}">{{ document.source }}</a>
+Source: <a href="{{ document.url }}">{{ document.source }}</a>
 
 {% else %}
 
-	Source: {{ document.source }}
+Source: {{ document.source }}
 
 {% endif %}
 
-	</div>
+    </div>
 
 {% else %}
 
 {% if document.url %}
 
-	<div class="col-md-12">
-
-		<a href="{{ document.url }}">Source</a>
-
-	</div>
+    <div class="col-md-12"><a href="{{ document.url }}">Source</a></div>
 
 {% endif %}
 
@@ -106,10 +108,10 @@
 
 <div class="row">
 
-<div class="col-md-12">
-	<br />
-	<a href="{% url 'document_edit' document.id %}">Edit</a>
-</div>
+    <div class="col-md-12">
+        <br />
+        <a href="{% url 'document_edit' document.id %}">Edit</a>
+    </div>
 
 </div>
 
