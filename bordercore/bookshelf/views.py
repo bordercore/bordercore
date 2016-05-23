@@ -36,7 +36,7 @@ class BookshelfListView(ListView):
                          'fields': ['attr_*', 'author', 'content_type', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
                          'wt': 'json',
                          'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url,bordercore_blogpost_title'
-            }
+                         }
 
             results = conn.raw_query(**solr_args)
 
@@ -49,9 +49,12 @@ class BookshelfListView(ListView):
             blob_list_temp = []
             for blob in shelf.blob_list:
                 try:
+                    if blob.get('note', ''):
+                        solr_list_objects[blob['id']]['note'] = blob['note']
+                    solr_list_objects[blob['id']]['added_to_bookshelf'] = datetime.datetime.fromtimestamp(blob['added']).strftime("%B %d, %Y")
                     blob_list_temp.append(solr_list_objects[blob['id']])
                 except KeyError:
-                    print "Warning: blob_id = %s not found in solr.  It's probably new." % blob['id']
+                    print "Warning: blob_id = %s not found in solr." % blob['id']
             blob_list[shelf.id] = {'blob_list': blob_list_temp, 'name': shelf.name}
 
         return blob_list
@@ -116,7 +119,7 @@ def add_to_bookshelf(request):
     message = ''
 
     new_blob = {'id': blob_id,
-                'added': datetime.datetime.now().strftime("%s")}
+                'added': int(datetime.datetime.now().strftime("%s"))}
 
     print [x for x in shelf.blob_list if x['id'] == blob_id]
     if shelf.blob_list:

@@ -12,6 +12,8 @@
 
         $(document).ready(function() {
 
+            $('[data-toggle="popover"]').popover({});
+
             $('#bookshelf_sortable').sortable(           {
                 connectWith: '.bookshelf_sortable',
                 stop: function(event, ui) {
@@ -31,22 +33,22 @@
 
     </script>
 
-    <div class="row">
-        <div class="col-lg-12">
+    {% for id, properties in object_list.items %}
+        <div class="row">
+            <div class="col-lg-12">
 
-            <ul id="bookshelf_sortable">
-                {% for id, properties in object_list.items %}
-                    <h3>{{ properties.name }}</h3>
+                <h3>{{ properties.name }}</h3>
+                <ul id="bookshelf_sortable">
                     {% for match in properties.blob_list %}
-                        <li id="{{ id }},{{ match.internal_id }}">
-                            <img src="{{ match.cover_url }}" height="75" width="70"/>
+                        <li id="{{ id }},{{ match.internal_id }}" data-toggle="popover" title="Added {{ match.added_to_bookshelf }}" data-content="{{ match.note }}">
+                            <img src="{{ match.cover_url }}" height="92" width="70"/>
                             <br/>
-                            <a href="{% url 'blob_detail' match.sha1sum %}">{{ match.title.0 }}</a>
+                            <a href="{% url 'blob_detail' match.sha1sum %}">{{ match.title.0 }}</a> {% if match.note %}<img src="{{ STATIC_URL }}/img/note.png" height="16" width="16" />{% endif %}
                         </li>
                     {% endfor %}
-                {% endfor %}
-            </ul>
+                </ul>
+            </div>
         </div>
-    </div>
+    {% endfor %}
 
 {% endblock %}
