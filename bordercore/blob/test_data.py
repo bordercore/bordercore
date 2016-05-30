@@ -1,6 +1,7 @@
 import django
 import json
 import os
+import re
 import solr
 import sys
 
@@ -89,8 +90,18 @@ def test_blobs_with_duplicate_filenames():
     assert len(t) == 0, "%s tags fail this test" % len(t)
 
 
+def test_blobs_exist_in_db():
+    "Assert that all blobs found on the filesystem exist in the database"
+    p = re.compile('%s/\w\w/(\w{40})' % Blob.BLOB_STORE)
+
+    for root, subdirs, files in os.walk(Blob.BLOB_STORE):
+        matches = p.match(root)
+        if matches:
+            assert Blob.objects.filter(sha1sum=matches.group(1)).count() == 1, "blob %s exists on filesystem but not in database" % matches.group(1)
+
+
 def test_blob_permissions():
-    "Alert that all blobs are owned by www-data"
+    "Assert that all blobs are owned by www-data"
     import os
     from os import stat
     from pwd import getpwuid
