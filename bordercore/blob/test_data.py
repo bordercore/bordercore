@@ -115,12 +115,12 @@ def test_bookshelf_books_exists_in_db():
 
 
 def test_bookshelf_books_exists_in_solr():
-    "Assert that all books currently on bookshelves actually exist in the database"
+    "Assert that all books currently on bookshelves actually exist in Solr"
     book_shelves = Bookshelf.objects.filter(blob_list__isnull=False)
 
     for shelf in book_shelves:
         for blob in shelf.blob_list:
-            solr_args = {'q': 'doctype:book AND id:blob_%s' % blob['id'],
+            solr_args = {'q': 'id:blob_%s' % blob['id'],
                          'fl': 'id',
                          'wt': 'json'}
 
