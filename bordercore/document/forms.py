@@ -43,10 +43,6 @@ class DocumentForm(ModelForm):
 
             self.initial['author'] = ','.join(self.initial['author'])
 
-        # else:
-        #     # For new documents, set the default date to now
-        #     self.initial['pub_date'] = datetime.now()
-
     tags = ModelCommaSeparatedChoiceField(
         required=False,
         queryset=Tag.objects.filter(),
@@ -55,7 +51,7 @@ class DocumentForm(ModelForm):
     def clean(self):
         cleaned_data = super(DocumentForm, self).clean()
 
-        cleaned_data['author'] = [x.strip() for x in ''.join( cleaned_data['author'] ).split(',') ]
+        cleaned_data['author'] = [x.strip() for x in ''.join(cleaned_data['author']).split(',')]
 
         if cleaned_data['pub_date']:
             date = cleaned_data['pub_date']

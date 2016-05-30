@@ -5,10 +5,10 @@ from django.shortcuts import render_to_response
 
 from document.models import Document
 from document.forms import DocumentForm
-from tag.models import Tag
 from django.template import RequestContext
 
 section = 'Documents'
+
 
 @login_required
 def document_edit(request, document_id):
@@ -20,18 +20,19 @@ def document_edit(request, document_id):
     if request.method == 'POST':
 
         if request.POST['Go'] in ['Edit', 'Add']:
-            form = DocumentForm(request.POST, instance=p) # A form bound to the POST data
+            form = DocumentForm(request.POST, instance=p)
             if form.is_valid():
                 newform = form.save(commit=False)
                 newform.user = request.user
                 newform.save()
-                form.save_m2m() # Save the many-to-many data for the form.
-                messages.add_message(request, messages.INFO, 'Document edited')
+                form.save_m2m()
+                messages.add_message(request, messages.INFO, 'Document {}ed'.format(request.POST['Go'].lower()))
                 return document_detail(request, newform.id)
         elif request.POST['Go'] == 'Delete':
             p.delete()
             messages.add_message(request, messages.INFO, 'Document deleted')
-#            return document_list(request, None)
+            form = DocumentForm()
+            action = 'Add'
 
     elif document_id:
         action = 'Edit'
@@ -39,10 +40,10 @@ def document_edit(request, document_id):
 
     else:
         action = 'Add'
-        form = DocumentForm() # An unbound form
+        form = DocumentForm()
 
     return render_to_response('kb/documents/edit.html',
-                              {'section': section, 'action': action, 'form': form },
+                              {'section': section, 'action': action, 'form': form},
                               context_instance=RequestContext(request))
 
 
@@ -54,5 +55,5 @@ def document_detail(request, document_id):
     d.authors = ', '.join(d.author)
 
     return render_to_response('kb/documents/view.html',
-                              { 'document': d },
+                              {'document': d},
                               context_instance=RequestContext(request))
