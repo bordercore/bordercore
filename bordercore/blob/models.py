@@ -34,6 +34,7 @@ class Blob(TimeStampedModel, AmazonMixin):
     filename = models.TextField()
     user = models.ForeignKey(User)
     tags = models.ManyToManyField(Tag)
+    blobs = models.ManyToManyField("self")
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
@@ -87,6 +88,12 @@ class Blob(TimeStampedModel, AmazonMixin):
                      'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url,bordercore_blogpost_title',
                      'rows': 1000}
         return json.loads(conn.raw_query(**solr_args))['response']
+
+    def get_related_blobs(self):
+        related_blobs = []
+        for blob in self.blobs.all():
+            related_blobs.append({'sha1sum': blob.sha1sum, 'title': blob.metadata_set.filter(name='Title')})
+        return related_blobs
 
     def delete(self):
         file_path = "%s/%s" % (self.get_parent_dir(), self.filename)

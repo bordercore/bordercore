@@ -139,7 +139,9 @@
                 <div class="alert alert-danger">{{ error  }}</div>
             {% endif %}
 
+            {% if metadata.Author %}
             by {{ metadata.Author }}
+            {% endif %}
 
             <br />
 
@@ -153,7 +155,7 @@
 
             <br />
 
-            Tags: <strong>{{ object.get_tags }}</strong>
+            Tags: <strong>{{ object.get_tags|default:"None" }}</strong>
 
             <br /><br />
 
@@ -183,6 +185,18 @@
                 <br /><br />
 
             </form>
+
+            <br/>
+            <br/>
+
+            {% if object.get_related_blobs %}
+                Related blobs:
+                <ul>
+                {% for blob in object.get_related_blobs %}
+                    <li> <a href="{% url 'blob_detail' blob.sha1sum %}">{{ blob.title.0.value|default:"No Title" }}</a> </li>
+                {% endfor %}
+                </ul>
+            {% endif %}
 
         </div>
 
