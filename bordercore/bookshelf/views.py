@@ -92,12 +92,10 @@ def sort_bookshelf(request):
     # First remove the blob from the existing list
     saved_blob = []
     new_blob_list = []
-    print blob_id
+
     for blob in shelf.blob_list:
-        print blob['id']
         if blob['id'] == blob_id:
             saved_blob = blob
-            print 'saved_blob: %s' % saved_blob
         else:
             new_blob_list.append(blob)
 
@@ -121,7 +119,6 @@ def add_to_bookshelf(request):
     new_blob = {'id': blob_id,
                 'added': int(datetime.datetime.now().strftime("%s"))}
 
-    print [x for x in shelf.blob_list if x['id'] == blob_id]
     if shelf.blob_list:
         if not [x for x in shelf.blob_list if x['id'] == blob_id]:
             shelf.blob_list.append(new_blob)

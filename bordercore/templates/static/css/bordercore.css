@@ -153,13 +153,13 @@ width: 100% !important;
    padding: 10px;
 }
 
-#bookshelf_sortable {
+.bookshelf_sortable {
    list-style-type: none;
    margin: 0;
    padding: 0;
 }
 
-#bookshelf_sortable li {
+.bookshelf_sortable li {
    margin: 3px 3px 3px 0;
    padding: 15px 15px 130px 15px;
    float: left;
