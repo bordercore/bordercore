@@ -138,6 +138,7 @@ class BlobDetailView(DetailView):
                 context['metadata'][x.name] = x.value
         context['cover_url'] = Blob.get_cover_url(self.object.sha1sum, 'large')
         context['cover_url_small'] = Blob.get_cover_url(self.object.sha1sum, 'small')
+        context['cover_info'] = Blob.get_cover_info(self.object.sha1sum, 'large')
         try:
             query = 'sha1sum:%s' % self.object.sha1sum
             context['solr_info'] = self.object.get_solr_info(query)['docs'][0]

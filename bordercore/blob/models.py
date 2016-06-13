@@ -1,6 +1,7 @@
 import json
 import os
 import os.path
+from PIL import Image
 import re
 
 from django.conf import settings
@@ -21,6 +22,8 @@ EDITIONS = {'1': 'First',
             '6': 'Sixth',
             '7': 'Seventh',
             '8': 'Eighth'}
+
+MAX_COVER_IMAGE_WIDTH = 600
 
 
 class Blob(TimeStampedModel, AmazonMixin):
@@ -73,6 +76,12 @@ class Blob(TimeStampedModel, AmazonMixin):
 
         parent_dir = "%s/%s/%s" % (Blob.BLOB_STORE, sha1sum[0:2], sha1sum)
 
+        b = Blob.objects.get(sha1sum=sha1sum)
+
+        filename, file_extension = os.path.splitext(b.filename)
+        if file_extension[1:] in ['gif', 'jpg', 'png']:
+            return "blobs/%s/%s/%s" % (sha1sum[0:2], sha1sum, b.filename)
+
         for image_type in ['jpg', 'png']:
             if os.path.isfile("%s/cover.%s" % (parent_dir, image_type)):
                 return "blobs/%s/%s/cover.%s" % (sha1sum[0:2], sha1sum, image_type)
@@ -80,6 +89,39 @@ class Blob(TimeStampedModel, AmazonMixin):
                 return "blobs/%s/%s/cover-%s.%s" % (sha1sum[0:2], sha1sum, size, image_type)
 
         return "images/book.png"
+
+    @staticmethod
+    def get_image_dimensions(file_path):
+
+        width, height = Image.open(file_path).size
+        if width > MAX_COVER_IMAGE_WIDTH:
+            height = int(MAX_COVER_IMAGE_WIDTH * height / width)
+            width = MAX_COVER_IMAGE_WIDTH
+
+        return width, height
+
+    @staticmethod
+    def get_cover_info(sha1sum, size='medium'):
+
+        parent_dir = "%s/%s/%s" % (Blob.BLOB_STORE, sha1sum[0:2], sha1sum)
+
+        b = Blob.objects.get(sha1sum=sha1sum)
+        file_path = "%s/%s" % (b.get_parent_dir(), b.filename)
+
+        # Is the blob itself an image?
+        filename, file_extension = os.path.splitext(b.filename)
+        if file_extension[1:] in ['gif', 'jpg', 'png']:
+            return Blob.get_image_dimensions(file_path), "blobs/%s/%s/%s" % (sha1sum[0:2], sha1sum, b.filename)
+
+        # Nope. Look for a cover image
+        for image_type in ['jpg', 'png']:
+            for cover_image in ["cover.%s" % image_type, "cover-%s.%s" % (size, image_type)]:
+                file_path = "%s/%s" % (parent_dir, cover_image)
+                if os.path.isfile(file_path):
+                    return Blob.get_image_dimensions(file_path), "blobs/%s/%s/%s" % (sha1sum[0:2], sha1sum, cover_image)
+
+        # If we get this far, return the default image
+        return (128, 128), "images/book.png"
 
     def get_solr_info(self, query, **kwargs):
         conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))

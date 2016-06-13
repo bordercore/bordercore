@@ -200,10 +200,16 @@
 
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-6">
 
             {% if cover_url %}
-                <img src="{{ STATIC_URL }}{{ cover_url }}" height="500" width="400"/>
+                <img src="{{ STATIC_URL }}{{ cover_info.1 }}" height="{{ cover_info.0.1 }}" width="{{ cover_info.0.0 }}"/>
+            {% endif %}
+
+            <br /><br />
+
+            {% if content_type == 'audio/mpeg' %}
+                {% include "common/jplayer.html" %}
             {% endif %}
 
         </div>
