@@ -19,27 +19,6 @@ from blob.models import Blob
 from bookshelf.models import Bookshelf
 from tag.models import Tag
 
-# t = Tag.objects.filter(name='linux')
-# print t[0].name
-
-# class DataQualityTests(TestCase):
-
-#     def setUp(self):
-#         os.environ['DJANGO_SETTINGS_MODULE'] = 'bordercore.settings'
-#         sys.path.insert(0, '/home/jerrell/dev/django')
-#         sys.path.insert(0, '/home/jerrell/dev/django/bordercore')
-#         self.conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-
-#     def test_books_with_tags(self):
-
-#         solr_args = {'q': 'doctype:book AND -tags:[* TO *]',
-#                      'fl': 'id',
-#                      'wt': 'json'}
-
-#         response = self.conn.raw_query(**solr_args)
-#         data = json.loads(response)['response']['numFound']
-#         self.assertEquals(data, 0)
-
 
 def test_books_with_tags():
     "Assert that all books have at least one tag"
@@ -90,7 +69,7 @@ def test_blobs_with_duplicate_filenames():
     assert len(t) == 0, "%s tags fail this test" % len(t)
 
 
-def test_blobs_exist_in_db():
+def test_blobs_on_filesystem_exist_in_db():
     "Assert that all blobs found on the filesystem exist in the database"
     p = re.compile('%s/\w\w/(\w{40})' % Blob.BLOB_STORE)
 
@@ -98,6 +77,51 @@ def test_blobs_exist_in_db():
         matches = p.match(root)
         if matches:
             assert Blob.objects.filter(sha1sum=matches.group(1)).count() == 1, "blob %s exists on filesystem but not in database" % matches.group(1)
+
+
+def test_blobs_in_db_exist_in_solr():
+    "Assert that all blobs in the database exist in Solr"
+    blobs = Blob.objects.all()
+
+    for b in blobs:
+        if b.sha1sum in ['e5bd032709cc5aa2a0be50c6eeb19be788f8b404',
+                         'f01176a1dbcf335159d78792a8b5f20746d3b12f',
+                         '076d6870f5ee0626817a38b65c28b60c61e1628d']:
+            continue
+        solr_args = {'q': 'sha1sum:%s' % b.sha1sum,
+                     'fl': 'id',
+                     'wt': 'json'}
+
+        conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+        response = conn.raw_query(**solr_args)
+        data = json.loads(response)['response']['numFound']
+        assert data == 1, "blob %s found in the database but not in Solr" % b.sha1sum
+
+
+def test_solr_blobs_exist_on_filesystem():
+    "Assert that all blobs in Solr exist on the filesystem"
+    solr_args = {'q': 'doctype:book OR doctype:blob',
+                 'fl': 'sha1sum',
+                 'wt': 'json'}
+
+    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    response = conn.raw_query(**solr_args)
+    data = json.loads(response)['response']
+    for result in data['docs']:
+        assert os.listdir("%s/%s/%s/" % (Blob.BLOB_STORE, result['sha1sum'][:2], result['sha1sum'])) != [], "blob %s exists in Solr but not on the filesystem" % result['sha1sum']
+
+
+def test_solr_blobs_exist_in_db():
+    "Assert that all blobs in Solr exist in the database"
+    solr_args = {'q': 'doctype:book OR doctype:blob',
+                 'fl': 'sha1sum',
+                 'wt': 'json'}
+
+    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    response = conn.raw_query(**solr_args)
+    data = json.loads(response)['response']
+    for result in data['docs']:
+        assert Blob.objects.filter(sha1sum=result['sha1sum']).count() == 1, "blob %s exists in Solr but not in database" % result['sha1sum']
 
 
 def test_blob_permissions():
