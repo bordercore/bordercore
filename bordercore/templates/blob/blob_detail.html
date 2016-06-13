@@ -155,7 +155,10 @@
 
             <br />
 
-            Tags: <strong>{{ object.get_tags|default:"None" }}</strong>
+            Tags:
+            {% for tag in object.tags.all %}
+                <a class="label label-primary" href="{% url 'kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
+            {% endfor %}
 
             <br /><br />
 
@@ -171,11 +174,16 @@
 
             <br /><br />
 
-            {% if content_type == 'audio/mpeg' %}
-                {% include "common/jplayer.html" %}
-            {% endif %}
+            {% if metadata.Description %}
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        {{ metadata.Description }}
 
-            <br /><br />
+
+                    </div>
+                </div>
+                <br /><br />
+            {% endif %}
 
             <form action="{% url 'blob_edit' object.sha1sum %}">
 
@@ -186,8 +194,7 @@
 
             </form>
 
-            <br/>
-            <br/>
+            <br /><br />
 
             {% if object.get_related_blobs %}
                 Related blobs:
