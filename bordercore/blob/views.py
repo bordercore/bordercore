@@ -294,21 +294,11 @@ def get_amazon_metadata(request, title):
                               context_instance=RequestContext(request))
 
 
-# Temp code to randomly choose blobs with insufficient metadata to edit
+# Temp code to randomly choose documents with formatting that needs fixing
 def blob_todo(request):
 
-    import solr
-    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    from document.models import Document
 
-    solr_args = {'wt': 'json',
-                 'fl': 'id,sha1sum,filepath,tags,internal_id',
-                 'q': 'doctype:book AND -tags:[* TO *]',
-                 'rows': 500}
+    x = Document.objects.filter(created__gte='2011-04-17').filter(created__lt='2014-08-24').order_by('?').first()
 
-    results = json.loads(conn.raw_query(**solr_args))
-
-    import random
-    blob = random.choice(results['response']['docs'])
-    print blob['sha1sum']
-
-    return redirect('blob_edit', blob['sha1sum'])
+    return redirect('document_edit', x.id)
