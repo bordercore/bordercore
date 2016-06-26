@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
@@ -297,8 +296,12 @@ def get_amazon_metadata(request, title):
 # Temp code to randomly choose documents with formatting that needs fixing
 def blob_todo(request):
 
+    from django.db.models import Q
     from document.models import Document
 
-    x = Document.objects.filter(created__gte='2011-04-17').filter(created__lt='2014-08-24').order_by('?').first()
+#    x = Document.objects.filter(created__gte='2011-04-17').filter(created__lt='2014-08-24').order_by('?').first()
+
+    # Documents with no authors or whose author field == ''
+    x = Document.objects.filter(Q(author__len=0) | Q(author__0_1=[''])).order_by('?').first()
 
     return redirect('document_edit', x.id)
