@@ -35,7 +35,7 @@
                     }
                           } ).done( function(data) {
                     if (action == 'add') {
-                        $("#shelf_" + shelf_id + " > img").attr("src", "{{ STATIC_URL }}blobs/{{ cover_url_small }}");
+                        $("#shelf_" + shelf_id + " > img").attr("src", "{{ STATIC_URL }}blobs/{{ cover_info_small.1 }}");
                     } else {
                         $("#shelf_" + shelf_id + " > img").attr("src", "{{ STATIC_URL }}img/empty_shelf.jpg");
                     }
@@ -209,7 +209,7 @@
 
         <div class="col-md-6">
 
-            {% if cover_url %}
+            {% if cover_info %}
                 <img src="{{ STATIC_URL }}{{ cover_info.1 }}" height="{{ cover_info.0.1 }}" width="{{ cover_info.0.0 }}"/>
             {% endif %}
 
@@ -233,7 +233,7 @@
                 <div class="panel-body panel">
 
                     <div id="current-blob" class="ui-widget-content ui-state-default">
-                        <img src="{{ STATIC_URL }}{{ cover_url_small }}" width="57" height="75" />
+                        <img src="{{ STATIC_URL }}{{ cover_info_small.1 }}" width="57" height="75" />
                     </div>
 
                     <h4><strong>Book Shelves</strong></h4>
@@ -241,7 +241,7 @@
                         {% for shelf in all_shelves %}
                             {% if current_shelves|dict_get:shelf.id %}
                                 <li id="shelf_{{ shelf.id }}" class="ui-widget-content ui-corner-tr on-shelf">
-                                    <img src="{{ STATIC_URL }}{{ cover_url_small }}" width="57" height="75" />
+                                    <img src="{{ STATIC_URL }}{{ cover_info_small.1 }}" width="57" height="75" />
                                     <h5 class="ui-widget-header">{{ shelf.name }}</h5>
                                 </li>
                             {% else %}

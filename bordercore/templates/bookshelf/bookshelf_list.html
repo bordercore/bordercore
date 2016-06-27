@@ -45,7 +45,7 @@
                 <ul class="bookshelf_sortable" id="bookshelf_sortable_{{ id  }}">
                     {% for match in properties.blob_list %}
                         <li id="{{ id }},{{ match.internal_id }}" data-toggle="popover" title="Added {{ match.added_to_bookshelf }}" data-content="{{ match.note }}">
-                            <img src="{{ match.cover_url }}" height="92" width="70"/>
+                            <img src="{{ match.cover_info }}" height="92" width="70"/>
                             <br/>
                             <a href="{% url 'blob_detail' match.sha1sum %}">{{ match.title.0 }}</a> {% if match.note %}<img src="{{ STATIC_URL }}/img/note.png" height="16" width="16" />{% endif %}
                         </li>
