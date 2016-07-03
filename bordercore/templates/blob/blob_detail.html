@@ -21,6 +21,10 @@
 
         $(document).ready(function() {
 
+            // Dynamically set the width of the modal dialog based on the width of the image.
+            //  Add 32 to account for the modal dialog border.
+            $('.modal-dialog').css('width', {{ cover_info.width}} + 32);
+
             function bookshelf_action(action, shelf_id) {
                 if (action == 'add') {
                     url = '{% url 'add_to_bookshelf' %}';
@@ -35,7 +39,7 @@
                     }
                           } ).done( function(data) {
                     if (action == 'add') {
-                        $("#shelf_" + shelf_id + " > img").attr("src", "{{ STATIC_URL }}blobs/{{ cover_info_small.1 }}");
+                        $("#shelf_" + shelf_id + " > img").attr("src", "{{ STATIC_URL }}blobs/{{ cover_info_small.url }}");
                     } else {
                         $("#shelf_" + shelf_id + " > img").attr("src", "{{ STATIC_URL }}img/empty_shelf.jpg");
                     }
@@ -127,6 +131,20 @@
 
     {% endif %}
 
+    <div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <img src="{{ STATIC_URL }}{{ cover_info.url }}" height="{{ cover_info.height }}" width="{{ cover_info.width }}"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
 
         <div class="col-md-5">
@@ -210,7 +228,7 @@
         <div class="col-md-6">
 
             {% if cover_info %}
-                <img src="{{ STATIC_URL }}{{ cover_info.1 }}" height="{{ cover_info.0.1 }}" width="{{ cover_info.0.0 }}"/>
+                <img src="{{ STATIC_URL }}{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" data-toggle="modal" data-target="#myModal3" />
             {% endif %}
 
             <br /><br />
@@ -233,7 +251,7 @@
                 <div class="panel-body panel">
 
                     <div id="current-blob" class="ui-widget-content ui-state-default">
-                        <img src="{{ STATIC_URL }}{{ cover_info_small.1 }}" width="57" height="75" />
+                        <img src="{{ STATIC_URL }}{{ cover_info_small.url }}" width="57" height="75" />
                     </div>
 
                     <h4><strong>Book Shelves</strong></h4>
@@ -241,7 +259,7 @@
                         {% for shelf in all_shelves %}
                             {% if current_shelves|dict_get:shelf.id %}
                                 <li id="shelf_{{ shelf.id }}" class="ui-widget-content ui-corner-tr on-shelf">
-                                    <img src="{{ STATIC_URL }}{{ cover_info_small.1 }}" width="57" height="75" />
+                                    <img src="{{ STATIC_URL }}{{ cover_info_small.url }}" width="57" height="75" />
                                     <h5 class="ui-widget-header">{{ shelf.name }}</h5>
                                 </li>
                             {% else %}

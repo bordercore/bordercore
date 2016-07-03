@@ -135,7 +135,7 @@ class BlobDetailView(DetailView):
                 context['metadata'][x.name] = ', '.join([context['metadata'][x.name], x.value])
             else:
                 context['metadata'][x.name] = x.value
-        context['cover_info'] = Blob.get_cover_info(self.object.sha1sum, 'large')
+        context['cover_info'] = Blob.get_cover_info(self.object.sha1sum)
         context['cover_info_small'] = Blob.get_cover_info(self.object.sha1sum, 'small')
         try:
             query = 'sha1sum:%s' % self.object.sha1sum
@@ -169,7 +169,7 @@ class BlobUpdateView(UpdateView):
         context['section'] = SECTION
         context['sha1sum'] = self.kwargs.get('sha1sum')
         context['metadata'] = [x for x in self.object.metadata_set.all() if x.name != 'is_book']
-        context['cover_info'] = Blob.get_cover_info(self.object.sha1sum, 'large')
+        context['cover_info'] = Blob.get_cover_info(self.object.sha1sum)
         if True in [True for x in self.object.metadata_set.all() if x.name == 'is_book']:
             context['is_book'] = True
         context['action'] = 'Edit'

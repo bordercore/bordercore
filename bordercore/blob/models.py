@@ -69,23 +69,26 @@ class Blob(TimeStampedModel, AmazonMixin):
                 return "%s Edition" % (EDITIONS[matches.group(2)])
         return ""
 
-
     @staticmethod
     def get_image_dimensions(file_path):
 
-        width, height = Image.open(file_path).size
-        if width > MAX_COVER_IMAGE_WIDTH:
-            height = int(MAX_COVER_IMAGE_WIDTH * height / width)
-            width = MAX_COVER_IMAGE_WIDTH
+        info = {}
 
-        return width, height
+        info['width'], info['height'] = Image.open(file_path).size
+        if info['width'] > MAX_COVER_IMAGE_WIDTH:
+            info['height_cropped'] = int(MAX_COVER_IMAGE_WIDTH * info['height'] / info['width'])
+            info['width_cropped'] = MAX_COVER_IMAGE_WIDTH
 
-    @staticmethod
-    def get_cover_info(sha1sum, size='medium'):
+        return info
 
-        parent_dir = "%s/%s/%s" % (Blob.BLOB_STORE, sha1sum[0:2], sha1sum)
     # This is static so that it can be called without a blob object, eg
     #  based on results from a Solr query
+    @staticmethod
+    def get_cover_info(sha1sum, size='large'):
+
+        info = {}
+
+        parent_dir = "%s/%s/%s" % (Blob.BLOB_STORE, sha1sum[0:2], sha1sum)
 
         b = Blob.objects.get(sha1sum=sha1sum)
         file_path = "%s/%s" % (b.get_parent_dir(), b.filename)
@@ -93,17 +96,22 @@ class Blob(TimeStampedModel, AmazonMixin):
         # Is the blob itself an image?
         filename, file_extension = os.path.splitext(b.filename)
         if file_extension[1:] in ['gif', 'jpg', 'png']:
-            return Blob.get_image_dimensions(file_path), "blobs/%s/%s/%s" % (sha1sum[0:2], sha1sum, b.filename)
+            info = Blob.get_image_dimensions(file_path)
+            info['url'] = "blobs/%s/%s/%s" % (sha1sum[0:2], sha1sum, b.filename)
 
         # Nope. Look for a cover image
         for image_type in ['jpg', 'png']:
             for cover_image in ["cover.%s" % image_type, "cover-%s.%s" % (size, image_type)]:
                 file_path = "%s/%s" % (parent_dir, cover_image)
                 if os.path.isfile(file_path):
-                    return Blob.get_image_dimensions(file_path), "blobs/%s/%s/%s" % (sha1sum[0:2], sha1sum, cover_image)
+                    info = Blob.get_image_dimensions(file_path)
+                    info['url'] = "blobs/%s/%s/%s" % (sha1sum[0:2], sha1sum, cover_image)
 
         # If we get this far, return the default image
-        return (128, 128), "images/book.png"
+        if not info.get('url'):
+            info = {'url': 'images/book.png', 'height_cropped': 128, 'width_cropped': 128}
+
+        return info
 
     def get_solr_info(self, query, **kwargs):
         conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
