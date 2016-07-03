@@ -51,7 +51,10 @@ class DocumentForm(ModelForm):
     def clean(self):
         cleaned_data = super(DocumentForm, self).clean()
 
-        cleaned_data['author'] = [x.strip() for x in ''.join(cleaned_data['author']).split(',')]
+        try:
+            cleaned_data['author'] = [x.strip() for x in ''.join(cleaned_data['author']).split(',')]
+        except KeyError:
+            pass
 
         if cleaned_data['pub_date']:
             date = cleaned_data['pub_date']

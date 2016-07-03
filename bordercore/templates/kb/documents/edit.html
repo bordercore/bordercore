@@ -127,10 +127,8 @@
                     <div class="form-group row">
 
                         <!-- Tacking on the glyphs in an input-group class messes up the layout -->
-                        <!-- <div class="input-group col-lg-3"> -->
                         <div class="col-lg-3">
-                            <input class="form-control date" _size="16" type="text" name="pub_date" value="{{ field.value|date:'m-d-Y' }}" />
-                            <!-- <span class="input-group-addon glyphicon glyphicon-th"></span> -->
+                            <input class="form-control date" type="text" name="pub_date" value="{{ field.value }}" />
                         </div>
 
                         <div class="col-lg-3">
