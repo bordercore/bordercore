@@ -78,7 +78,7 @@ class SearchListView(ListView):
                 solr_args.update(
                     {'q': search_term,
                      'q.op': boolean_type,
-                     'qf': 'title bordercore_todo_task tags bordercore_bookmark_title attr_content',
+                     'qf': 'title bordercore_todo_task tags bordercore_bookmark_title attr_content description',
                      'hl': 'true',
                      'hl.fl': 'attr_content,bordercore_todo_task,bordercore_bookmark_title,title',
                      'hl.simple.pre': '<span class="search_bordercore_blogpost_snippet">',
@@ -124,12 +124,12 @@ class SearchListView(ListView):
                 if myobject.get('filepath'):
                     filename = os.path.basename(myobject['filepath'])
                 if myobject['doctype'] == 'blob' and not myobject.get('title', ''):
-                    myobject['title'] = filename
+                    myobject['title'] = [filename]
                 if myobject['doctype'] == 'bordercore_blog':
                     if context['info']['highlighting'][myobject['id']].get('attr_content'):
                         blogpost_snippet = context['info']['highlighting'][myobject['id']]['attr_content'][0]
                 info.append(dict(title=get_title(myobject),
-                                 author=myobject.get('author', 'no author'),
+                                 author=myobject.get('author', ['']),
                                  pub_date=myobject.get('attr_publication_date', ''),
                                  doctype=myobject['doctype'],
                                  sha1sum=myobject.get('sha1sum', ''),
@@ -302,7 +302,6 @@ def kb_search_tags_booktitles(request):
         if match['doctype'] == 'book':
             matches.append({'type': 'Book', 'value': match['title'][0], 'sha1sum': match.get('sha1sum')})
         if match.get('tags', ''):
-            print match['tags']
             for tag in [x for x in match['tags'] if x.lower().startswith(term.lower())]:
                 tags[tag] = 1
 

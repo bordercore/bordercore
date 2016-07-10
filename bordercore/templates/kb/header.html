@@ -40,8 +40,13 @@
                 }
         );
 
+        // This is set when an item from the autocomplete options is selected.  Otherwise there would be
+        //  a race between the window.open() in $('#kbsearch').bind(...) and the form submission from the
+        //  $('#kbsearch').on('keyup', ...)
+        var autocomplete_selected = false;
+
         $('#kbsearch').on('keyup', function(event, selection) {
-            if ((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) {
+            if (((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) && !autocomplete_selected) {
                 $('#search').submit();
                 return false;
             } else {
@@ -56,7 +61,8 @@
             } else {
                 url = '{% url 'blob_detail' 666 %}'.replace(666, datum.sha1sum);
             }
-            window.open(url, '_self')
+            autocomplete_selected = true;
+            window.open(url, '_self');
         });
 
         $('#advanced_search_link').click( function(e) {
