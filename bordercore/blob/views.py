@@ -1,10 +1,9 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.urlresolvers import reverse_lazy
+from django.core.urlresolvers import reverse, reverse_lazy
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
-from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import DeleteView, UpdateView
 
@@ -208,16 +207,14 @@ class BlobUpdateView(UpdateView):
             new_metadata.save()
 
         self.object = form.save()
-        context = self.get_context_data(form=form)
         messages.add_message(self.request, messages.INFO, 'Blob updated')
-
         index_document.delay(blob.sha1sum)
 
-        return self.render_to_response(context)
+        return HttpResponseRedirect(reverse('blob_detail', kwargs={'sha1sum': blob.sha1sum}))
 
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(BlobUpdateView, self).dispatch(*args, **kwargs)
+#    @method_decorator(login_required)
+#    def dispatch(self, *args, **kwargs):
+#        return super(BlobUpdateView, self).dispatch(*args, **kwargs)
 
 
 def metadata_name_search(request):
