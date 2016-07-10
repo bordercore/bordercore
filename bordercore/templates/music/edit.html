@@ -4,12 +4,7 @@
 
 {% block content %}
 
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-danger">{{ message }}</div>
-    {% endfor %}
-{% endif %}
-
+{% include "common/show_messages.html" %}
 
 {% if request.POST.Go and not form.errors %}
     <div class="alert alert-success offset2">Post {{ action }}ed</div>

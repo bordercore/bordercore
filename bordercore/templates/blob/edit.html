@@ -304,16 +304,6 @@
 
             {% csrf_token %}
 
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="form-group">
-                        <div class="col-lg-7 col-lg-offset-2 alert alert-danger">
-                            {{ message|safe }}
-                        </div>
-                    </div>
-                {% endfor %}
-            {% endif %}
-
             {% for field in form %}
                 <div class="form-group{% if field.errors %} error{% endif %}">
                     <label class="col-lg-2 control-label" for="inputTitle">{{ field.label }}</label>

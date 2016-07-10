@@ -4,15 +4,7 @@
 
 {% block content %}
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="form-group">
-                <div class="col-lg-7 alert alert-info">
-                    {{ message|safe }}
-                </div>
-            </div>
-        {% endfor %}
-    {% endif %}
+{% include "common/show_messages.html" with offset="0" %}
 
 <div class="row">
 

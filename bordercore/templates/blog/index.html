@@ -6,16 +6,7 @@
 
 {% include "blog/header.html" %}
 
-    {% if messages %}
-        {% for message in messages %}
-            <br />
-            <div class="form-group">
-                <div class="col-lg-7 alert alert-danger">
-                    {{ message|safe }}
-                </div>
-            </div>
-        {% endfor %}
-    {% endif %}
+    {% include "common/show_messages.html" %}
 
 {% if posts %}
 
@@ -42,11 +33,11 @@
 <br />
 
 <div class="row">
-	<div class="col-lg-9">
-		<div class="alert alert-danger">
-			<h4>Nothing found</h4>
-		</div>
-	</div>
+    <div class="col-lg-9">
+        <div class="alert alert-danger">
+            <h4>Nothing found</h4>
+        </div>
+    </div>
 </div>
 
 {% endif %}

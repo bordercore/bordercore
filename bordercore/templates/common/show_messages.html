@@ -1,6 +1,7 @@
 {% if messages %}
     {% for message in messages %}
-        <div class="col-md-7 col-md-offset2 alert alert-info">
+        <br />
+        <div class="col-md-{{ width|default:7 }} col-md-offset-{{ offset|default:2 }} alert alert-{{ class|default:"success" }}">
             {{ message|safe }}
         </div>
     {% endfor %}

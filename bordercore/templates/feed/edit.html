@@ -6,98 +6,96 @@
 
 {% block content %}
 
-<script type="text/javascript">
+    <script type="text/javascript">
 
-$(document).ready(function() {
+        $(document).ready(function() {
 
-        $('#id_url').blur( function(event) {
+            $('#id_url').blur( function(event) {
 
-            var feed_url = $('#id_url').val();
-            if (!feed_url) {
-                return;
-            }
-
-            if ( !$('#id_homepage').val() ) {
-                var baseUrl = $('#id_url').val().match(/^(http:\/\/.*?)\//);
-                if (baseUrl) {
-                    $('#id_homepage').val( baseUrl[1] );
+                var feed_url = $('#id_url').val();
+                if (!feed_url) {
+                    return;
                 }
-            }
 
-            feed_url = encodeURIComponent(feed_url).replace(/%/g, "%25")
-
-            $.ajax( { type: 'GET',
-                      url: '{% url 'check_url' 666 %}'.replace(666, feed_url),
-                      }).done(function( json ) {
-                if (!json || json.status != 200) {
-                    $('#feed-status').fadeIn(1000).addClass("alert-danger").removeClass("alert-success").html("Feed error.  Status: " + json.status);
-                } else if (json.entry_count == 0){
-                    $('#feed-status').fadeIn(1000).addClass("alert-danger").removeClass("alert-success").html("Feed error.  Found no feed items.");
-                } else {
-                    $('#feed-status').fadeIn(1000).addClass("alert-success").removeClass("alert-danger").html("Feed OK.  Found " + json.entry_count + " feed items.");
+                if ( !$('#id_homepage').val() ) {
+                    var baseUrl = $('#id_url').val().match(/^(http:\/\/.*?)\//);
+                    if (baseUrl) {
+                        $('#id_homepage').val( baseUrl[1] );
+                    }
                 }
-            });
 
-        })
+                feed_url = encodeURIComponent(feed_url).replace(/%/g, "%25")
 
-});
+                $.ajax( { type: 'GET',
+                          url: '{% url 'check_url' 666 %}'.replace(666, feed_url),
+                          }).done(function( json ) {
+                    if (!json || json.status != 200) {
+                        $('#feed-status').fadeIn(1000).addClass("alert-danger").removeClass("alert-success").html("Feed error.  Status: " + json.status);
+                    } else if (json.entry_count == 0){
+                        $('#feed-status').fadeIn(1000).addClass("alert-danger").removeClass("alert-success").html("Feed error.  Found no feed items.");
+                    } else {
+                        $('#feed-status').fadeIn(1000).addClass("alert-success").removeClass("alert-danger").html("Feed OK.  Found " + json.entry_count + " feed items.");
+                    }
+                });
 
-</script>
+            })
 
-<div class="row">
-<div id="feed-status" class="alert col-md-offset-2 col-md-6" style="display: none">OK</div>
-</div>
+        });
 
-{% if form.errors %}
-<div class="alert alert-danger col-md-offset-2 col-md-10">
+    </script>
+
+    <div class="row">
+        <div id="feed-status" class="alert col-md-offset-2 col-md-6" style="display: none">OK</div>
+    </div>
+
+    {% if form.errors %}
+        <div class="alert alert-danger col-md-offset-2 col-md-10">
 Please correct the errors below.
-</div>
-{% endif %}
+        </div>
+    {% endif %}
 
-{% for message in messages %}
-<div class="row">
-    <div class="alert alert-success col-md-offset-2 col-md-6">{{ message }}</div>
-</div>
-{% endfor %}
+    <div class="row">
+        {% include "common/show_messages.html" with width=6 %}
+    </div>
 
-<p class="lead col-lg-offset-2">{{ form.instance.url|favicon|safe }} {{ action }} Feed</p>
+    <p class="lead col-lg-offset-2">{{ form.instance.url|favicon|safe }} {{ action }} Feed</p>
 
-<form class="form-horizontal" action="{{ request.path }}" method="post">
-{% csrf_token %}
+    <form class="form-horizontal" action="{{ request.path }}" method="post">
+        {% csrf_token %}
 
-    {% for field in form %}
+        {% for field in form %}
+            <div class="form-group{% if field.errors %} error{% endif %}">
+                <label class="col-lg-2 control-label" for="inputTitle">{{ field.label }}</label>
+                <div class="col-lg-5">
+                    {{ field }}
+                    {% for error in field.errors %}
+                        <span class="form-error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+
         <div class="form-group{% if field.errors %} error{% endif %}">
-            <label class="col-lg-2 control-label" for="inputTitle">{{ field.label }}</label>
+            <label class="col-lg-2 control-label" for="inputTitle">Subscribe</label>
             <div class="col-lg-5">
-                {{ field }}
-                {% for error in field.errors %}
-                    <span class="form-error">{{ error }}</span>
-                {% endfor %}
+                <input type="checkbox" name="subscribe" {% if request.POST.subscribe %} checked="yes" {% endif %} />
             </div>
         </div>
-    {% endfor %}
 
-    <div class="form-group{% if field.errors %} error{% endif %}">
-        <label class="col-lg-2 control-label" for="inputTitle">Subscribe</label>
-        <div class="col-lg-5">
-            <input type="checkbox" name="subscribe" {% if request.POST.subscribe %} checked="yes" {% endif %} />
+        <div class="form-group">
+            <div class="col-lg-3 col-lg-offset-2">
+                <input class="btn btn-default" type="submit" name="Go" value="{{ action }}">
+                <input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete">
+                <a class="btn btn-default" href="{% url 'feed_list' %}">Cancel</a>
+            </div>
         </div>
-    </div>
 
-<div class="form-group">
-    <div class="col-lg-3 col-lg-offset-2">
-        <input class="btn btn-default" type="submit" name="Go" value="{{ action }}">
-        <input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete">
-        <a class="btn btn-default" href="{% url 'feed_list' %}">Cancel</a>
-    </div>
-</div>
+    </form>
 
-</form>
-
-{% if subscribers %}
-<div class="alert alert-info col-md-offset-2 col-md-6">
+    {% if subscribers %}
+        <div class="alert alert-info col-md-offset-2 col-md-6">
 The following users are currently subscribed to this feed: <strong>{{ subscribers }}</strong>
-</div>
-{% endif %}
+        </div>
+    {% endif %}
 
 {% endblock %}
