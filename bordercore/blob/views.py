@@ -1,7 +1,8 @@
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse, reverse_lazy
-from django.http import HttpResponseRedirect
+from django.db.models import Q
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django.views.generic.detail import DetailView
@@ -9,6 +10,7 @@ from django.views.generic.edit import DeleteView, UpdateView
 
 from amazonproduct import API
 from amazonproduct.errors import NoExactMatchesFound
+import datetime
 import hashlib
 import json
 import os
@@ -17,8 +19,8 @@ import shutil
 
 from blob.forms import BlobForm
 from blob.models import Blob, MetaData
+from collection.models import Collection
 from blob.tasks import index_document
-from bookshelf.models import Bookshelf
 
 
 SECTION = 'Blob'
@@ -60,12 +62,12 @@ def blob_add(request, replaced_sha1sum=None):
                 b.metadata_set = old_metadata
                 b.save()
 
-                # If this blob sits on any bookshelves, replace it with the new blob
-                for shelf in Bookshelf.objects.filter(user=request.user):
-                    for blob in shelf.blob_list:
+                # If this blob is in any collections, replace it with the new blob
+                for c in Collection.objects.filter(user=request.user):
+                    for blob in c.blob_list:
                         if blob['id'] == old_id:
                             blob['id'] = b.id
-                    shelf.save()
+                    c.save()
 
                 old_blob = Blob.objects.get(sha1sum=replaced_sha1sum)
 
@@ -145,16 +147,7 @@ class BlobDetailView(DetailView):
             print ("%s, sha1sum=%s, error=%s" % (context['error'], self.object.sha1sum, e))
         context['title'] = self.object.get_title(remove_edition_string=True)
 
-        try:
-            all_shelves = Bookshelf.objects.filter(user=self.request.user).order_by('name')
-            current_shelves = {}
-            context['all_shelves'] = [{'id': x.id, 'name': x.name} for x in all_shelves]
-            for shelf in all_shelves:
-                if [x for x in shelf.blob_list if x['id'] == self.object.id]:
-                    current_shelves[shelf.id] = True
-            context['current_shelves'] = current_shelves
-        except KeyError:
-            pass
+        context['current_collections'] = Collection.objects.filter(blob_list__contains=[{'id': self.object.id}])
 
         return context
 
@@ -171,6 +164,7 @@ class BlobUpdateView(UpdateView):
         context['cover_info'] = Blob.get_cover_info(self.object.sha1sum)
         if True in [True for x in self.object.metadata_set.all() if x.name == 'is_book']:
             context['is_book'] = True
+        context['collections_other'] = Collection.objects.filter(Q(user=self.request.user) & ~Q(blob_list__contains=[{'id': self.object.id}]))
         context['action'] = 'Edit'
         return context
 
@@ -223,10 +217,7 @@ def metadata_name_search(request):
 
     return_data = [{'value': x['name']} for x in m]
 
-    return render_to_response('return_json.json',
-                              {'info': json.dumps(return_data)},
-                              content_type="application/json",
-                              context_instance=RequestContext(request))
+    return JsonResponse(return_data, safe=False)
 
 
 def get_amazon_image_info(request, sha1sum, index=0):
@@ -234,10 +225,7 @@ def get_amazon_image_info(request, sha1sum, index=0):
     b = Blob.objects.get(sha1sum=sha1sum)
     result = b.get_amazon_cover_url(int(index))
 
-    return render_to_response('return_json.json',
-                              {'info': json.dumps(result)},
-                              content_type="application/json",
-                              context_instance=RequestContext(request))
+    return JsonResponse(result)
 
 
 def set_amazon_image_info(request, sha1sum, index=0):
@@ -251,10 +239,7 @@ def set_amazon_image_info(request, sha1sum, index=0):
     except Exception, e:
         result = {'message': str(e), 'error': True}
 
-    return render_to_response('return_json.json',
-                              {'info': json.dumps(result)},
-                              content_type="application/json",
-                              context_instance=RequestContext(request))
+    return JsonResponse(result)
 
 
 def get_amazon_metadata(request, title):
@@ -283,21 +268,31 @@ def get_amazon_metadata(request, title):
     except NoExactMatchesFound:
         return_data['error'] = "No Amazon matches found"
 
-    return render_to_response('return_json.json',
-                              {'info': json.dumps(return_data)},
-                              content_type="application/json",
-                              context_instance=RequestContext(request))
+    return JsonResponse(return_data)
 
 
-# Temp code to randomly choose documents with formatting that needs fixing
-def blob_todo(request):
+def collection_mutate(request):
 
-    from django.db.models import Q
-    from document.models import Document
+    blob_id = int(request.POST['blob_id'])
+    collection = Collection.objects.get(user=request.user, id=int(request.POST['collection_id']))
+    mutation = request.POST['mutation']
 
-#    x = Document.objects.filter(created__gte='2011-04-17').filter(created__lt='2014-08-24').order_by('?').first()
+    message = ''
 
-    # Documents with no authors or whose author field == ''
-    x = Document.objects.filter(Q(author__len=0) | Q(author__0_1=[''])).order_by('?').first()
+    if mutation == 'add':
+        blob = {'id': blob_id, 'added': int(datetime.datetime.now().strftime("%s"))}
+        if collection.blob_list:
+            if [x for x in collection.blob_list if x['id'] == blob_id]:
+                message = 'Blob already in collection'
+            else:
+                collection.blob_list.append(blob)
+        else:
+            collection.blob_list = [blob]
+        message = 'Added to collection'
+    elif mutation == 'delete':
+        collection.blob_list = [x for x in collection.blob_list if x['id'] != blob_id]
+        message = 'Delete from collection'
 
-    return redirect('document_edit', x.id)
+    collection.save()
+
+    return JsonResponse({'message': message})

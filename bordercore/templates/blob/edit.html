@@ -287,6 +287,31 @@
                 get_amazon_cover_image();
             });
 
+            $('#collections_other, #collections_current').change( function(e) {
+                var collection_id = $(this).val();
+                console.log(collection_id);
+                // window.location='{% url 'todo_list' %}?tagsearch=' + tag;
+
+                var mutation = 'add';
+                if ($(this).attr('id') == 'collections_current') {
+                    mutation = 'delete';
+                }
+
+                $.ajax( { type: 'POST',
+                          url: '{% url 'collection_mutate' %}',
+                          data: {'mutation': mutation,
+                                 'blob_id': {{ object.id }},
+                                 'collection_id': collection_id}
+                          }).done(function( json ) {
+                    if (!json || json.error != null) {
+                        $('#feedback').addClass('alert-danger').html(json.message);
+                    } else {
+                        $('#feedback').addClass('alert-success').html(json.message);
+                    }
+                })
+
+            });
+
         });
 
 </script>
@@ -378,8 +403,9 @@
             <input id="update-cover" class="btn btn-default" type="button" value="Update" />
         </div>
         <div id="set-cover-div" class="hidden">
+            <span id="progress" class="glyphicon glyphicon-refresh glyphicon-refresh-animate hidden"></span>
             <input id="next-cover" class="btn btn-default" type="button" value="Next" />
-            <input id="set-cover" class="btn btn-default" type="button" value="Set" />
+            <input id="set-cover" class="btn btn-primary" type="button" value="Set" />
             <span id="amazon-feedback"></span>
         </div>
         <br />
@@ -387,6 +413,38 @@
     </div>
 
 </div>
+
+<form class="form-horizontal">
+
+    <div class="form-group">
+        <div class="row">
+            <div class="col-lg-5 col-lg-offset-1">
+            Add to collection
+                <select id="collections_other" class="form-control">
+                    <option value="666">--Select--</option>
+                    {% for collection in collections_other %}
+                        <option value="{{ collection.id }}">{{ collection.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="row">
+            <div class="col-lg-5 col-lg-offset-1">
+            Remove from collection
+                <select id="collections_current" class="form-control">
+                    <option>--Select--</option>
+                    {% for collection in object.get_collection_info %}
+                        <option value="{{ collection.id }}">{{ collection.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+</form>
 
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">

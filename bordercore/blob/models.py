@@ -11,7 +11,7 @@ from lib.mixins import TimeStampedModel
 import solr
 
 from blob.amazon import AmazonMixin
-from bookshelf.models import Bookshelf
+from collection.models import Collection
 from tag.models import Tag
 
 EDITIONS = {'1': 'First',
@@ -141,10 +141,10 @@ class Blob(TimeStampedModel, AmazonMixin):
             if os.listdir(parent_dir) == []:
                 os.rmdir(parent_dir)
 
-            # Remove this blob from any shelves it sits on
-            for shelf in Bookshelf.objects.all():
-                shelf.blob_list = [x for x in shelf.blob_list if x['id'] != self.id]
-                shelf.save()
+            # Remove this blob from any collections
+            for c in Collection.objects.all():
+                c.blob_list = [x for x in c.blob_list if x['id'] != self.id]
+                c.save()
 
             # Delete the blob in Solr
             conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
@@ -169,6 +169,9 @@ class Blob(TimeStampedModel, AmazonMixin):
         }
 
         return switcher.get(argument, lambda: argument)
+
+    def get_collection_info(self):
+        return Collection.objects.filter(blob_list__contains=[{'id': self.id}])
 
 
 class MetaData(TimeStampedModel):

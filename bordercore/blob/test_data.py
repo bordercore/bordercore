@@ -16,7 +16,7 @@ sys.path.insert(0, '/home/www/htdocs/bordercore-django/bordercore/bordercore')
 django.setup()
 
 from blob.models import Blob
-from bookshelf.models import Bookshelf
+from collection.models import Collection
 from document.models import Document
 from tag.models import Tag
 
@@ -141,21 +141,21 @@ def test_blob_permissions():
 #            print "%s, %s" % (file_path, getpwuid(stat(file_path).st_uid).pw_name)
 
 
-def test_bookshelf_books_exists_in_db():
-    "Assert that all books currently on bookshelves actually exist in the database"
-    book_shelves = Bookshelf.objects.filter(blob_list__isnull=False)
+def test_collection_blobs_exists_in_db():
+    "Assert that all blobs currently in collections actually exist in the database"
+    collections = Collection.objects.filter(blob_list__isnull=False)
 
-    for shelf in book_shelves:
-        for blob in shelf.blob_list:
+    for c in collections:
+        for blob in c.blob_list:
             assert Blob.objects.filter(pk=blob['id']).count() > 0, "blob_id %s does not exist in the database" % blob['id']
 
 
-def test_bookshelf_books_exists_in_solr():
-    "Assert that all books currently on bookshelves actually exist in Solr"
-    book_shelves = Bookshelf.objects.filter(blob_list__isnull=False)
+def test_collection_blobs_exists_in_solr():
+    "Assert that all blobs currently in collections actually exist in Solr"
+    collections = Collection.objects.filter(blob_list__isnull=False)
 
-    for shelf in book_shelves:
-        for blob in shelf.blob_list:
+    for c in collections:
+        for blob in c.blob_list:
             solr_args = {'q': 'id:blob_%s' % blob['id'],
                          'fl': 'id',
                          'wt': 'json'}

@@ -1,10 +1,11 @@
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect, Http404
+from django.shortcuts import render
 from django.utils.dateformat import format
 from django.utils.decorators import method_decorator
-from django.http import HttpResponseRedirect, Http404
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
-from django.core.urlresolvers import reverse
 
 from todo.forms import TodoForm
 
@@ -12,6 +13,7 @@ from tag.models import Tag
 from todo.models import Todo
 
 SECTION = 'Todo'
+
 
 class TodoListView(ListView):
 
@@ -41,7 +43,7 @@ class TodoListView(ListView):
         info = []
 
         for myobject in context['object_list']:
-            info.append( dict(task=myobject.task, modified=myobject.get_modified(), unixtime=format(myobject.modified, 'U'), todoid=myobject.id) )
+            info.append(dict(task=myobject.task, modified=myobject.get_modified(), unixtime=format(myobject.modified, 'U'), todoid=myobject.id))
 
         context['tags'] = Tag.objects.filter(todo__isnull=False).distinct('name')
         context['tagsearch'] = self.tagsearch
@@ -64,10 +66,11 @@ class TodoDetailView(UpdateView):
 
     def get(self, request, **kwargs):
         self.object = Todo.objects.get(user=self.request.user, id=self.kwargs.get('pk'))
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        context = self.get_context_data(object=self.object, form=form)
-        return self.render_to_response(context)
+        # form_class = self.get_form_class()
+        form = self.get_form(self.get_form_class())
+        # context = self.get_context_data(object=self.object, form=form)
+        # return self.render(context)
+        return render(request, self.template_name, {'form': form})
 
     def get_object(self, queryset=None):
         obj = Todo.objects.get(user=self.request.user, id=self.kwargs.get('pk'))
@@ -116,7 +119,6 @@ class TodoCreateView(CreateView):
         kwargs['request'] = self.request
         return kwargs
 
-
     def form_valid(self, form):
 
         obj = form.save(commit=False)
@@ -133,7 +135,6 @@ class TodoCreateView(CreateView):
         obj.save()
 
         return HttpResponseRedirect(self.get_success_url())
-
 
     def get_success_url(self):
         return reverse('todo_list')

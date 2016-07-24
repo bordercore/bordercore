@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+
+{% endblock %}
+
+{% block title %} {{ section }} {% endblock %}
+
+{% block content %}
+
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput-custom.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/typeahead-bootstrap3.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
+
+    <script type="text/javascript" charset="utf-8">
+
+        var table;
+
+        $(document).ready(function() {
+
+            function formatName( data, type, row ) {
+                return '<a href="{% url 'collection_detail' 666 %}">'.replace(666, row[5]) + row[0] + '</a>';
+            }
+
+            table = $('#collection_list').DataTable( {
+                "info": false,
+                "paginate": false,
+                "sorting": [[2, 'desc']],
+                "filter": true,
+                "lengthChange": false,
+                "dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'pull-right col-lg-4'p>>",
+                "searchable": false,
+                "columnDefs": [
+                    { "targets": [0], "sorting": [ "desc", "asc" ], "render": formatName, "useRendered": false  },
+                    { "targets": [2], "class": "col-lg-3 monospaced", "dataSort": 3, "sorting": [ "desc", "asc" ] },
+                    { "targets": [3,5], "visible": false },
+                ],
+            } );
+
+            $('#collection_list tbody').on( 'click', 'tr', function () {
+                if ( $(this).hasClass('selected') ) {
+                    $(this).removeClass('selected');
+                    $('#btn-edit').attr("disabled", "disabled");
+                    $('#btn-delete').attr("disabled", "disabled");
+                } else {
+                    table.$('tr.selected').removeClass('selected');
+                    $(this).addClass('selected');
+                    $('#btn-edit').removeAttr("disabled");
+                    $('#btn-delete').removeAttr("disabled");
+                }
+            } );
+
+            $('#btn-addcollection').click( function() {
+
+                $.ajax( { type: 'GET',
+                          url: '{% url 'collection_get_info' %}',
+                          data: { name: $('#name').val() }
+                          }).done(function( json ) {
+                    if (!json || json.error != null) {
+                        console.log("Error: " + json);
+                    } else {
+                        if (json.length > 0) {
+                            $('#feedback').fadeIn(1000).html("Sorry, a collection with that name already exists");
+                            setTimeout( function() {
+                                $('#feedback').fadeOut(1000);
+                            }, 3000);
+                        }
+                    }
+
+                });
+
+            });
+
+            $('#btn-add').on('click', function() {
+                $('#action-type').html('Add');
+                $('#btn-action').val('Add');
+                $("#form-collection-edit").attr("action", "{% url 'collection_add' %}");
+                $('#modalAdd').modal('show');
+            });
+
+            $('#btn-edit').on('click', function() {
+                var selectedId = $('#collection_list').DataTable().cell('.selected', 5).data();
+                console.log(selectedId);
+
+                $.ajax( { type: 'GET',
+                          url: '{% url 'collection_get_info' %}',
+                          data: { id: selectedId,
+                                  query_type: 'id' }
+                          }).done(function( json ) {
+                    if (!json || json.error != null) {
+                        console.log("Error: " + json);
+                    } else {
+                        $('#id_name').val(json.name);
+                        var tags = json.tags.split(",")
+                        for (var i = 0; i < tags.length; i++) {
+                            console.log(tags[i]);
+                            $('#id_tags').tagsinput('add', tags[i]);
+                        }
+                        console.log(json);
+                    }
+
+                    $('#action-type').html('Edit');
+                    $('#btn-action').val('Edit');
+                    $("#form-collection-edit").attr("action", '{% url 'collection_edit' 666 %}'.replace(666, selectedId));
+                    $('#modalAdd').modal('show');
+
+                });
+
+                // window.location='{% url 'todo_edit' 666 %}'.replace(666, selectedId);
+                return false;
+            });
+
+            $('#modalAdd').on('shown.bs.modal', function() {
+                console.log('show');
+            })
+            $('#modalAdd').on('hidden.bs.modal', function () {
+                $('#id_name').val('');
+                $('#id_tags').tagsinput('removeAll');
+            })
+
+            var engine = new Bloodhound({
+                name: 'tags',
+                remote: {
+                    url: '{% url 'tag_search' %}?query=%QUERY',
+                    wildcard: '%QUERY'
+                },
+                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
+                queryTokenizer: Bloodhound.tokenizers.whitespace
+            });
+
+            engine.initialize();
+
+            $('#id_tags').tagsinput({
+                confirmKeys: [13, 188],
+                tagClass: function(item) {
+                    return 'label label-primary';
+                },
+                typeaheadjs: {
+                    source: engine,
+                    displayKey: 'value',
+                    valueKey: 'value',
+                    options: {'autoselect': true}
+                }
+            });
+
+        });
+
+</script>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-7">
+
+            <h1>Collection List</h1>
+            
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-7">
+        <form class="form-inline" role="form">
+
+            <div class="btn-group">
+                <input type="button" class="btn btn-default" id="btn-add" value="Add" />
+                <input type="button" class="btn btn-default" id="btn-edit" value="Edit" disabled="disabled" />
+                <button class="btn btn-default" id="btn-delete" disabled>Delete</button>
+            </div>
+
+            <div class="form-group">
+                <input id="myfilter" type="text" style="width: 200px" class="form-control" placeholder="Search">
+            </div>
+
+            <div class="form-group">
+                <label id="feedback"></label>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{% include "common/datatable.html" with data=info cols=cols id="collection_list" %}
+
+<form class="form-horizontal" action="{% url 'collection_list' %}" method="post" id="form-collection-edit">
+    <div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel"><span id="action-type">Add</span> Collection</h4>
+                </div>
+                <div class="modal-body">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="form-group{% if field.errors %} error{% endif %}">
+                            <label class="col-lg-2 control-label" for="inputTitle">{{ field.label }}</label>
+
+                            <div class="col-lg-5">
+                                {{ field }}
+                                {% for error in field.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+
+                        </div>
+                    {% endfor %}
+
+                </div>
+                <div class="modal-footer">
+                    <label id="feedback" _class="alert alert-success"></label>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <input id="btn-action" class="btn btn-primary" type="submit" name="Go" value="Add" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

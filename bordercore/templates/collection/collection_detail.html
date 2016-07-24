@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %} Collection {% endblock %}
+
+{% block extra_head %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+{% endblock %}
+
+{% block content %}
+
+    <script>
+
+        $(document).ready(function() {
+
+            $('[data-toggle="popover"]').popover({});
+
+            {% for id, properties in object_list.items %}
+
+            $('#collection_sortable_{{ id }}').sortable(           {
+                connectWith: '#collection_sortable_{{ id }}',
+                stop: function(event, ui) {
+                    var info = ui.item.attr('id').split(',')
+                    $.ajax({
+                        url: '{% url 'sort_collection' %}',
+                        type: "POST",
+                        data: { shelf_id : info[0], blob_id : info[1], position:  (ui.item.index() + 1) }
+                    });
+
+                }
+            });
+
+            $( "#collection_sortable_{{ id }}" ).disableSelection();
+
+            {% endfor %}
+
+        });
+
+    </script>
+
+    <div class="row">
+
+        <div class="col-lg-6">
+
+            {% block breadcrumbs %}
+                <ul class="breadcrumb pull-left">
+                    <li> <a href="{% url 'collection_list' %}">Collection List</a> </li>
+                    <li>{{ object.name }}</li>
+                </ul>
+            {% endblock %}
+
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+
+            <h3>{{ object.name }}</h3>
+            <ul class="collection_sortable" id="collection_sortable_{{ id }}">
+                {% for match in blob_list %}
+                    <li id="{{ id }},{{ match.internal_id }}" data-toggle="popover" title="Added {{ match.added_to_collection }}" data-content="{{ match.note }}">
+                        <img src="{{ match.cover_info }}" height="92" width="70"/>
+                        <br/>
+                        <a href="{% url 'blob_detail' match.sha1sum %}">{{ match.title.0 }}</a> {% if match.note %}<img src="{{ STATIC_URL }}/img/note.png" height="16" width="16" />{% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+{% endblock %}

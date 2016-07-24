@@ -6,15 +6,6 @@
 
 {% block content %}
 
-    <style>
-
-        #bookshelf { float: left; width: 32%; padding: 1%; }
-        #bookshelf li { float: left; padding: 0.4em; margin: 0 1.6em 1.6em 0; border: solid 1px; width: 96px; display:inline; text-align: center;}
-
-        .top-buffer { margin-top:20px; }
-
-    </style>
-
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
 
     <script type="text/javascript" charset="utf-8">
@@ -24,72 +15,6 @@
             // Dynamically set the width of the modal dialog based on the width of the image.
             //  Add 32 to account for the modal dialog border.
             $('.modal-dialog').css('width', {{ cover_info.width}} + 32);
-
-            function bookshelf_action(action, shelf_id) {
-                if (action == 'add') {
-                    url = '{% url 'add_to_bookshelf' %}';
-                } else {
-                    url = '{% url 'remove_from_bookshelf' %}';
-                }
-                $.ajax( { type: 'POST',
-                          url: url,
-                          data: {
-                        blob_id: {{ id }},
-                        shelf_id: shelf_id
-                    }
-                          } ).done( function(data) {
-                    if (action == 'add') {
-                        $("#shelf_" + shelf_id + " > img").attr("src", "{{ STATIC_URL }}blobs/{{ cover_info_small.url }}");
-                    } else {
-                        $("#shelf_" + shelf_id + " > img").attr("src", "{{ STATIC_URL }}img/empty_shelf.jpg");
-                    }
-                    $('#bookshelf-feedback').fadeIn(1000).html(data.message);
-                    setTimeout( function() {
-                        $('#bookshelf-feedback').fadeOut(1000);
-                    }, 3000);
-                    set_drag_and_drop();
-                } )
-
-            };
-
-            function set_drag_and_drop() {
-
-                var draggable_properties = {
-                    cancel: "a.ui-icon", // clicking an icon won't initiate dragging
-                    revert: "invalid", // when not dropped, the item will revert back to its initial position
-                    containment: "panel",
-                    helper: "clone",
-                    cursor: "move"
-                }
-
-                $("#current-blob").draggable(draggable_properties);
-                $(".on-shelf").draggable(draggable_properties);
-
-                $("#current-blob").droppable({
-                    accept: ".on-shelf",
-                    activeClass: "ui-state-highlight",
-                    drop: function( event, ui ) {
-                        matched_shelf = $(ui.draggable).attr('id').match(/shelf_(.*)$/);
-                        bookshelf_action('remove', matched_shelf[1]);
-                        $(ui.draggable).removeClass('on-shelf').addClass('not-on-shelf');
-                        $('.on-shelf').draggable(draggable_properties);
-                    }
-                });
-
-                $('.not-on-shelf').droppable({
-                    accept: "#current-blob",
-                    activeClass: "ui-state-highlight",
-                    drop: function( event, ui ) {
-                        matched_shelf = $(this).attr('id').match(/shelf_(.*)$/);
-                        bookshelf_action('add', matched_shelf[1]);
-                        $(this).removeClass('not-on-shelf').addClass('on-shelf');
-                        $('.on-shelf').draggable(draggable_properties);
-                    }
-                });
-
-            }
-
-            set_drag_and_drop();
 
         });
 
@@ -245,43 +170,15 @@
 
     </div>
 
+{% if current_collections %}
     <div class="row top-buffer">
         <div class="col-md-12">
-
-            <div class="panel panel-info">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Bookshelf Management</h3>
-                </div>
-                <div class="panel-body panel">
-
-                    <div id="current-blob" class="ui-widget-content ui-state-default">
-                        <img src="{{ STATIC_URL }}{{ cover_info_small.url }}" width="57" height="75" />
-                    </div>
-
-                    <h4><strong>Book Shelves</strong></h4>
-                    <ul id="bookshelf"">
-                        {% for shelf in all_shelves %}
-                            {% if current_shelves|dict_get:shelf.id %}
-                                <li id="shelf_{{ shelf.id }}" class="ui-widget-content ui-corner-tr on-shelf">
-                                    <img src="{{ STATIC_URL }}{{ cover_info_small.url }}" width="57" height="75" />
-                                    <h5 class="ui-widget-header">{{ shelf.name }}</h5>
-                                </li>
-                            {% else %}
-                                <li id="shelf_{{ shelf.id }}" class="ui-widget-content ui-corner-tr not-on-shelf">
-                                    <img src="{{ STATIC_URL }}img/empty_shelf.jpg" width="57" height="75" />
-                                    <h5 class="ui-widget-header">{{ shelf.name }}</h5>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
-
-                    <br />
-                    <div class="alert alert-success collapse" style="float: left" id="bookshelf-feedback" _role="alert"></div>
-
-                </div>
-            </div>
-
+            In collections:
+            {% for collection in current_collections %}
+                <a href="{% url 'collection_detail' collection.id %}">{{ collection.name }}</a>
+            {% endfor %}
         </div>
     </div>
+{% endif %}
 
 {% endblock %}

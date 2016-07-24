@@ -152,14 +152,18 @@ width: 100% !important;
    border: 0;
    padding: 10px;
 }
+.top-buffer {
+   margin-top: 20px;
+}
 
-.bookshelf_sortable {
+
+.collection_sortable {
    list-style-type: none;
    margin: 0;
    padding: 0;
 }
 
-.bookshelf_sortable li {
+.collection_sortable li {
    margin: 3px 3px 3px 0;
    padding: 15px 15px 130px 15px;
    float: left;
