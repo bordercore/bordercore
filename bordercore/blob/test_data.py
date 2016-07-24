@@ -5,7 +5,7 @@ import re
 import solr
 import sys
 
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.conf import settings
 # from django.test import TestCase
 
@@ -17,6 +17,7 @@ django.setup()
 
 from blob.models import Blob
 from bookshelf.models import Bookshelf
+from document.models import Document
 from tag.models import Tag
 
 
@@ -163,3 +164,8 @@ def test_bookshelf_books_exists_in_solr():
             response = conn.raw_query(**solr_args)
             data = json.loads(response)['response']['numFound']
             assert data == 1, "blob_id %s does not exist in solr" % blob['id']
+
+
+def test_documents_with_author():
+    "Assert that all documents have at least one author"
+    assert Document.objects.filter(Q(author__len=0) | Q(author__0_1=[''])).count() == 0
