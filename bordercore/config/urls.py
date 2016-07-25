@@ -78,6 +78,7 @@ urlpatterns = [
     url(r'^collection/edit/(?P<pk>[\d-]+)$', CollectionUpdateView.as_view(), name='collection_edit'),
     url(r'^collection/(?P<collection_id>\d+)$', CollectionDetailView.as_view(), name='collection_detail'),
     url(r'^collection/get_info', collection_views.get_info, name='collection_get_info'),
+    url(r'^collection/sort', collection_views.sort_collection, name='sort_collection'),
     url(r'^collection/', CollectionListView.as_view(), name='collection_list'),
 
     url(r'^kb/documents(?:/(\d+))?/edit', document_views.document_edit, name='document_edit'),

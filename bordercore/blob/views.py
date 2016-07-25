@@ -63,7 +63,7 @@ def blob_add(request, replaced_sha1sum=None):
                 b.save()
 
                 # If this blob is in any collections, replace it with the new blob
-                for c in Collection.objects.filter(user=request.user):
+                for c in Collection.objects.filter(user=request.user).filter(blob_list__isnull=False):
                     for blob in c.blob_list:
                         if blob['id'] == old_id:
                             blob['id'] = b.id

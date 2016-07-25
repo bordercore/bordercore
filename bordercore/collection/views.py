@@ -52,51 +52,52 @@ class CollectionDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(CollectionDetailView, self).get_context_data(**kwargs)
 
-        q = 'id:(%s)' % ' '.join(['"blob_%s"' % t['id'] for t in self.object.blob_list])
+        if self.object.blob_list:
+            q = 'id:(%s)' % ' '.join(['"blob_%s"' % t['id'] for t in self.object.blob_list])
 
-        conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+            conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
-        solr_args = {'q': q,
-                     'rows': 1000,
-                     'fields': ['attr_*', 'author', 'content_type', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
-                     'wt': 'json',
-                     'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url,bordercore_blogpost_title'
-        }
+            solr_args = {'q': q,
+                         'rows': 1000,
+                         'fields': ['attr_*', 'author', 'content_type', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
+                         'wt': 'json',
+                         'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url,bordercore_blogpost_title'
+            }
 
-        results = conn.raw_query(**solr_args)
+            results = conn.raw_query(**solr_args)
 
-        # Build a temporary dict for fast lookup
-        solr_list_objects = {}
-        for x in json.loads(results)['response']['docs']:
-            solr_list_objects[int(x['id'].split('blob_')[1])] = x
+            # Build a temporary dict for fast lookup
+            solr_list_objects = {}
+            for x in json.loads(results)['response']['docs']:
+                solr_list_objects[int(x['id'].split('blob_')[1])] = x
 
-        # Solr doesn't return the blobs in the order specified in postgres, so we need to re-order
-        blob_list_temp = []
-        for blob in self.object.blob_list:
-            try:
-                if blob.get('note', ''):
-                    solr_list_objects[blob['id']]['note'] = blob['note']
-                solr_list_objects[blob['id']]['added_to_collection'] = datetime.datetime.fromtimestamp(blob['added']).strftime("%B %d, %Y")
-                blob_list_temp.append(solr_list_objects[blob['id']])
-            except KeyError:
-                print "Warning: blob_id = %s not found in solr." % blob['id']
+            # Solr doesn't return the blobs in the order specified in postgres, so we need to re-order
+            blob_list_temp = []
+            for blob in self.object.blob_list:
+                try:
+                    if blob.get('note', ''):
+                        solr_list_objects[blob['id']]['note'] = blob['note']
+                    solr_list_objects[blob['id']]['added_to_collection'] = datetime.datetime.fromtimestamp(blob['added']).strftime("%B %d, %Y")
+                    blob_list_temp.append(solr_list_objects[blob['id']])
+                except KeyError:
+                    print "Warning: blob_id = %s not found in solr." % blob['id']
 
-        for object in blob_list_temp:
-            if object['doctype'] in ('blob', 'book'):
-                filename = os.path.basename(object['filepath'])
-                object['url'] = object['filepath'].split(Blob.BLOB_STORE)[1]
-                object['cover_info'] = static(Blob.get_cover_info(object['sha1sum'])['url'])
-                if object['content_type']:
-                    try:
-                        object['content_type'] = object['content_type'][0].split('/')[1]
-                    except IndexError:
-                        print "Warning: content_type malformed: id=%s, sha1sum=%s, content_type=%s" % (object['id'], object['sha1sum'], object['content_type'])
-                    if object['content_type'] in IMAGE_TYPE_LIST:
-                        object['is_image'] = True
-                if not object.get('title', ''):
-                    object['title'] = filename
+            for object in blob_list_temp:
+                if object['doctype'] in ('blob', 'book'):
+                    filename = os.path.basename(object['filepath'])
+                    object['url'] = object['filepath'].split(Blob.BLOB_STORE)[1]
+                    object['cover_info'] = static(Blob.get_cover_info(object['sha1sum'])['url'])
+                    if object['content_type']:
+                        try:
+                            object['content_type'] = object['content_type'][0].split('/')[1]
+                        except IndexError:
+                            print "Warning: content_type malformed: id=%s, sha1sum=%s, content_type=%s" % (object['id'], object['sha1sum'], object['content_type'])
+                        if object['content_type'] in IMAGE_TYPE_LIST:
+                            object['is_image'] = True
+                    if not object.get('title', ''):
+                        object['title'] = filename
 
-        context['blob_list'] = blob_list_temp
+            context['blob_list'] = blob_list_temp
         return context
 
 
@@ -171,3 +172,30 @@ def get_info(request):
         pass
 
     return JsonResponse(info)
+
+
+def sort_collection(request):
+
+    collection_id = int(request.POST['collection_id'])
+    blob_id = int(request.POST['blob_id'])
+    new_position = int(request.POST['position'])
+
+    collection = Collection.objects.get(user=request.user, id=collection_id)
+
+    # First remove the blob from the existing list
+    saved_blob = []
+    new_blob_list = []
+
+    for blob in collection.blob_list:
+        if blob['id'] == blob_id:
+            saved_blob = blob
+        else:
+            new_blob_list.append(blob)
+
+    # Then re-insert it in its new position
+    new_blob_list.insert(new_position - 1, saved_blob)
+    collection.blob_list = new_blob_list
+
+    collection.save()
+
+    return JsonResponse('OK', safe=False)
