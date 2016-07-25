@@ -1,7 +1,5 @@
 import errno
 import hashlib
-import json
-import mimetypes
 import os
 from os import makedirs
 from os.path import isfile
@@ -15,7 +13,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.forms.utils import ErrorList
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, JsonResponse
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django.views.generic.edit import CreateView, UpdateView
@@ -404,8 +402,6 @@ class MusicListJson(BaseDatatableView):
 @login_required
 def search(request):
 
-    import json
-
     # The search could match an album name or an artist or a song title
     albums = Album.objects.filter(title__icontains=request.GET['query'])
     artists = Song.objects.filter(artist__icontains=request.GET['query']).distinct('artist').order_by('artist')
@@ -427,12 +423,7 @@ def search(request):
                         'id': song.album_id,
                         'type': 'album'})
 
-    json_text = json.dumps(results)
-
-    return render_to_response('return_json.json',
-                              {'section': SECTION, 'info': json_text},
-                              context_instance=RequestContext(request),
-                              content_type="application/json")
+    return JsonResponse(results, safe=False)
 
 
 def get_song_location(song):
@@ -478,13 +469,10 @@ def get_song_info(request, id):
 
     file_location = get_song_location(song)
 
-    response_data = {'title': song.title,
-                     'url': file_location['url']}
+    results = {'title': song.title,
+               'url': file_location['url']}
 
-    return render_to_response('return_json.json',
-                              {'section': SECTION, 'info': json.dumps(response_data)},
-                              context_instance=RequestContext(request),
-                              content_type="application/json")
+    return JsonResponse(results)
 
 
 class WishListView(ListView):

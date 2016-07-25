@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.templatetags.static import static
@@ -9,7 +10,6 @@ import json
 import os
 from os.path import basename
 import re
-import shlex
 import solr
 import urllib
 
@@ -277,10 +277,7 @@ def search_book_title(request):
         if not match.get('title'):
             match['title'] = basename(os.path.splitext(match['filepath'])[0])
 
-    return render_to_response('return_json.json',
-                              {'info': json.dumps(filtered_results['response']['docs'])},
-                              content_type="application/json",
-                              context_instance=RequestContext(request))
+    return JsonResponse(filtered_results['response']['docs'], safe=False)
 
 
 def kb_search_tags_booktitles(request):
@@ -308,10 +305,7 @@ def kb_search_tags_booktitles(request):
     for tag in tags:
         matches.append({'type': 'Tag', 'value': tag})
 
-    return render_to_response('return_json.json',
-                              {'info': json.dumps(matches)},
-                              content_type="application/json",
-                              context_instance=RequestContext(request))
+    return JsonResponse(matches, safe=False)
 
 
 def search_document_source(request):
@@ -334,10 +328,7 @@ def search_document_source(request):
     for match in results['grouped']['source']['groups']:
         return_data.append({'source': match['doclist']['docs'][0]['source']})
 
-    return render_to_response('return_json.json',
-                              {'info': json.dumps(sorted(return_data))},
-                              content_type="application/json",
-                              context_instance=RequestContext(request))
+    return JsonResponse(sorted(return_data), safe=False)
 
 
 @login_required
