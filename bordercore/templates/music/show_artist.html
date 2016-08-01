@@ -126,7 +126,7 @@
 
                 <td>
                     <a href="{% url 'show_album' album.id %}">
-                        <img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title }}/artwork.jpg" height="150" width="150" /> <br />
+                        <img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title|urlencode }}/artwork.jpg" height="150" width="150" /> <br />
                     </a>
 
                     <strong> {{ album.title }} </strong><br />

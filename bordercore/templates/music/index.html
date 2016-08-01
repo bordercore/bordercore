@@ -97,7 +97,7 @@
         <table class="table">
             <tr><td>
                 <a href="{% url 'show_album' random_albums.id %}">
-                    <img src="{{ STATIC_URL }}albums/{{ random_albums.artist }}/{{ random_albums.title }}/artwork.jpg" height="150" width="150" />
+                    <img src="{{ STATIC_URL }}albums/{{ random_albums.artist }}/{{ random_albums.title|urlencode }}/artwork.jpg" height="150" width="150" />
                 </a>
 
             </td>

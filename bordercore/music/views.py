@@ -138,11 +138,16 @@ def show_album(request, album_id):
             display_title = song.title + ' - ' + song.artist
         else:
             display_title = song.title
-        song_list.append( dict(id=song.id, track=song.track, title=display_title, length_seconds=song.length, length=time.strftime('%M:%S', time.gmtime(song.length))))
+        song_list.append(dict(id=song.id,
+                              track=song.track,
+                              title=song.title.replace('/', 'FORWARDSLASH'),
+                              display_title=display_title,
+                              length_seconds=song.length,
+                              length=time.strftime('%M:%S', time.gmtime(song.length))))
 
     return render_to_response('music/show_album.html',
                               {'section': SECTION, 'album': a, 'data': song_list,
-                               'cols': ['id', 'track', 'title', 'length', 'length_seconds']},
+                               'cols': ['id', 'track', 'title', 'display_title', 'length', 'length_seconds']},
                               context_instance=RequestContext(request))
 
 
@@ -156,7 +161,7 @@ def show_artist(request, artist_name):
     s = Song.objects.filter(artist=artist_name).filter(album__isnull=True)
 
     # Get all songs by this artist that do appear on compilation album
-    c = Album.objects.filter(Q(song__artist=artist_name) & ~Q(artist=artist_name))
+    c = Album.objects.filter(Q(song__artist=artist_name) & ~Q(artist=artist_name)).distinct('song__album')
 
     song_list = []
 
@@ -301,7 +306,7 @@ def add_song(request):
             if len(str(form.cleaned_data['track'])) == 1:
                 form.cleaned_data['track'] = '0' + str(form.cleaned_data['track'])
 
-            # For album tracks, we want to filename to be in this format:  <track> - <song>.mp3
+            # For album tracks, we want the filename to be in this format:  <track> - <song>.mp3
             #   Check if the track number is already present
             filename = form.cleaned_data['title'] + '.mp3'
             if request.POST['album']:

@@ -45,10 +45,9 @@
                 "lengthChange": false,
                 "searchable": false,
                 "columnDefs": [
-                    { "targets": [0], "visible": false },
+                    { "targets": [0,2,5], "visible": false },
                     { "targets": [1], "class": "col-lg-1", "sorting": [ "asc", "desc" ] },
-                    { "targets": [3], "class": "col-lg-1", "iDataSort": 4 },
-                    { "targets": [4], "visible": false }
+                    { "targets": [4], "class": "col-lg-1", "iDataSort": 5 }
                 ],
             } );
 
@@ -67,7 +66,7 @@
                 },
                 name: $('#song_list').DataTable().cell(0, 2).data(),
                 "media": {
-                    "mp3": "{{ STATIC_URL }}albums/{{ album.artist|safe }}/{{ album.title|safe }}/01 - " + $('#song_list').DataTable().cell(0, 2).data() + ".mp3"
+                    "mp3": "{{ STATIC_URL }}albums/{{ album.artist|safe }}/{{ album.title|safe|urlencode }}/01 - " + $('#song_list').DataTable().cell(0, 2).data() + ".mp3"
                 }
             });
 
@@ -85,16 +84,22 @@
                         info = json;
 
                         var songTitle = $('#song_list').DataTable().cell('.selected', 2).data();
+
+                        // Unescape any HTML entities (eg translate "&amp;" to "&")
+                        // http://stackoverflow.com/questions/1912501/unescape-html-entities-in-javascript
+                        songTitle = new DOMParser().parseFromString(songTitle, "text/html").documentElement.textContent;
+
+                        var songTitleDisplay = $('#song_list').DataTable().cell('.selected', 3).data();
                         var trackNumber = $('#song_list').DataTable().cell('.selected', 1).data();
                         if (trackNumber.length == 1) {
                             trackNumber = "0" + trackNumber;
                         }
 
-                        $('.play-progress span').html(songTitle);
+                        $('.play-progress span').html(songTitleDisplay);
 
                         $("#uniqueContainer-1").jPlayer("setMedia", {
                             title: songTitle,
-                            mp3: "{{ STATIC_URL }}albums/{{ album.artist|safe }}/{{ album.title|safe }}/" + trackNumber + " - " + songTitle + ".mp3"
+                            mp3: "{{ STATIC_URL }}albums/{{ album.artist|safe }}/{{ album.title|safe|urlencode }}/" + trackNumber + " - " + encodeURIComponent(songTitle) + ".mp3"
                         });
 
                         $("#uniqueContainer-1").jPlayer("play");
@@ -108,7 +113,7 @@
 </script>
 
 <div class="row">
-    <div class="col-lg-5">
+    <div class="col-lg-8">
         {% block breadcrumbs %}
             <ol class="breadcrumb pull-left">
                 <li> <a href="{% url 'music_list' %}">Music</a> </li>
@@ -124,13 +129,13 @@
 <div class="row">
 
     <div class="col-lg-3">
-        <img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title }}/artwork.jpg" height="250" width="250" />
+        <img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title|urlencode }}/artwork.jpg" height="250" width="250" />
     </div>
 
     <div class="col-lg-8">
         <h2>{{ album.title }}</h2>
         <h3>{{ album.artist }}</h3>
-        <h5> {{ album.year }} </h5>
+        <h5>{{ album.year }}</h5>
     </div>
 
 </div>
