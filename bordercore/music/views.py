@@ -459,14 +459,17 @@ def get_song_location(song):
 
 def get_song_info(request, id):
 
+    from django.conf import settings
+
     song = Song.objects.get(pk=id)
 
-    # Increment the 'times played' counter
-    if song.times_played:
-        song.times_played = song.times_played + 1
-    else:
-        song.times_played = 1
-    song.save()
+    # Increment the 'times played' counter, but only if we're in production
+    if not settings.DEBUG:
+        if song.times_played:
+            song.times_played = song.times_played + 1
+        else:
+            song.times_played = 1
+        song.save()
 
     # Add this song to the listen table
     l = Listen(song=song, user=request.user)
