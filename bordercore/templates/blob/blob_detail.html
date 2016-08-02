@@ -88,19 +88,16 @@
 
             {% if metadata.Author %}
             by {{ metadata.Author }}
+                <br />
             {% endif %}
-
-            <br />
 
             {% if metadata|dict_get:"Publication Date" %}
 
             {{ metadata|dict_get:"Publication Date" }}
 
-            <br />
+            <br /><br />
 
             {% endif  %}
-
-            <br />
 
             Tags:
             {% for tag in object.tags.all %}
@@ -111,11 +108,25 @@
 
             {% if metadata.Url %}
 
-            <strong><a href="{{ metadata.Url }}">Reference Link</a></strong>
+            {% for url in metadata.Url %}
+                <strong><a href="{{ url }}">Reference Link</a></strong>
+                <br />
+            {% endfor %}
 
             <br /><br />
 
             {% endif %}
+
+            <table class="table table-condensed">
+                {% for key, values in metadata.items %}
+                    {% if not key in fields_ignore %}
+                        <tr>
+                            <td><strong>{{ key }}</strong></td>
+                            <td>{{ values }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </table>
 
             Object Type: <strong>{{ content_type }}</strong>
 

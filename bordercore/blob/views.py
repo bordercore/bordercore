@@ -132,10 +132,17 @@ class BlobDetailView(DetailView):
         context['id'] = self.object.id
         context['metadata'] = {}
         for x in self.object.metadata_set.all():
-            if context['metadata'].get(x.name, ''):
-                context['metadata'][x.name] = ', '.join([context['metadata'][x.name], x.value])
+            if x.name == 'Url':
+                try:
+                    context['metadata'][x.name].append(x.value)
+                    print 'b'
+                except KeyError:
+                    context['metadata'][x.name] = [x.value]
             else:
-                context['metadata'][x.name] = x.value
+                if context['metadata'].get(x.name, ''):
+                    context['metadata'][x.name] = ', '.join([context['metadata'][x.name], x.value])
+                else:
+                    context['metadata'][x.name] = x.value
         context['cover_info'] = Blob.get_cover_info(self.object.sha1sum)
         context['cover_info_small'] = Blob.get_cover_info(self.object.sha1sum, 'small')
         try:
@@ -146,6 +153,7 @@ class BlobDetailView(DetailView):
             context['error'] = 'Error retrieving info from Solr'
             print ("%s, sha1sum=%s, error=%s" % (context['error'], self.object.sha1sum, e))
         context['title'] = self.object.get_title(remove_edition_string=True)
+        context['fields_ignore'] = ['is_book', 'Url', 'Publication Date', 'Title', 'Author']
 
         context['current_collections'] = Collection.objects.filter(blob_list__contains=[{'id': self.object.id}])
 
