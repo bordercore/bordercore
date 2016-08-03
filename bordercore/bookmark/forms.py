@@ -3,25 +3,8 @@ from django.forms import ModelForm, Textarea, TextInput, ModelMultipleChoiceFiel
 
 from bookmark.models import Bookmark, BookmarkTagUser
 from blog.models import Tag
+from lib.fields import ModelCommaSeparatedChoiceField
 
-# http://stackoverflow.com/questions/5608576/django-enter-a-list-of-values-form-error-when-rendering-a-manytomanyfield-as-a
-class ModelCommaSeparatedChoiceField(ModelMultipleChoiceField):
-#    widget = TextInput(attrs={'class': 'form-control', 'data-role': '', 'data-provide': ''})
-
-    widget = TextInput(attrs={'class': 'form-control typeahead', 'autocomplete': 'off'})
-
-    def clean(self, value):
-        if value is not None:
-            value = [item.strip() for item in value.split(",") if item.strip() != ''] # remove padding
-        # Check if any of these tags are new.  The ORM won't create them for us, and in
-        # fact will complain that the tag 'is not one of the available choices.'
-        # These need to be explicitly created.
-
-        for tag in value:
-            newtag, created = Tag.objects.get_or_create(name=tag)
-            if created:
-                newtag.save()
-        return super(ModelCommaSeparatedChoiceField, self).clean(value)
 
 class BookmarkForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -42,7 +25,7 @@ class BookmarkForm(ModelForm):
         # If so, we need to remove it from the sorted list
         if self.instance.pk:
             for old_tag in self.instance.tags.all():
-                if not old_tag.name in [new_tag.name for new_tag in new_tags]:
+                if old_tag.name not in [new_tag.name for new_tag in new_tags]:
                     sorted_list = BookmarkTagUser.objects.get(tag=Tag.objects.get(name=old_tag.name), user=self.instance.user)
                     sorted_list.bookmark_list.remove(self.instance.id)
                     sorted_list.save()
@@ -52,7 +35,7 @@ class BookmarkForm(ModelForm):
             try:
                 sorted_list = BookmarkTagUser.objects.get(tag=Tag.objects.get(name=new_tag.name), user=self.instance.user)
                 # Yes.  Now check if this bookmark already has this tag.
-                if not self.instance.id in sorted_list.bookmark_list:
+                if self.instance.id not in sorted_list.bookmark_list:
                     # Nope.  So this bookmark goes to the top of the sorted list.
                     sorted_list.bookmark_list.insert(0, self.instance.id)
                     sorted_list.save()

@@ -1,25 +1,10 @@
 from datetime import datetime
 from django.utils.timezone import utc
 
-from django.forms import ModelForm, Textarea, TextInput, ModelMultipleChoiceField
+from django.forms import ModelForm, Textarea, TextInput
 
 from blog.models import Post, Tag
-
-# http://stackoverflow.com/questions/5608576/django-enter-a-list-of-values-form-error-when-rendering-a-manytomanyfield-as-a
-class ModelCommaSeparatedChoiceField(ModelMultipleChoiceField):
-    widget = TextInput(attrs={'class': 'form-control'})
-
-    def clean(self, value):
-        if value is not None:
-            value = [item.strip() for item in value.split(",") if item.strip() != ''] # remove padding
-        # Check if any of these tags are new.  The ORM won't create them for us, and in
-        # fact will complain that the tag 'is not one of the available choices.'
-        # These need to be explicitly created.
-        for tag in value:
-            newtag, created = Tag.objects.get_or_create(name=tag)
-            if created:
-                newtag.save()
-        return super(ModelCommaSeparatedChoiceField, self).clean(value)
+from lib.fields import ModelCommaSeparatedChoiceField
 
 
 class BlogForm(ModelForm):
