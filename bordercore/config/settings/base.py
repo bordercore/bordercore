@@ -108,7 +108,6 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
 
     'accounts',
-    'bcsolr',
     'blob',
     'blog',
     'book',
