@@ -2,14 +2,14 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 
 from blog.models import Blog, Post
 from blog.forms import BlogForm
 
 section = 'Blog'
 ITEMS_PER_PAGE = 10
+
 
 @login_required
 def blog_list(request, blog_id):
@@ -48,9 +48,11 @@ def blog_list(request, blog_id):
         # If page is out of range (e.g. 9999), deliver last page of results.
         posts = paginator.page(paginator.num_pages)
 
-    return render_to_response('blog/index.html',
-                              {'section': section, 'show_pagination': show_pagination, 'posts': posts, 'message': message },
-                              context_instance=RequestContext(request))
+    return render(request, 'blog/index.html',
+                  {'section': section,
+                   'show_pagination': show_pagination,
+                   'posts': posts,
+                   'message': message})
 
 
 @login_required
@@ -63,13 +65,13 @@ def blog_edit(request, post_id):
     if request.method == 'POST':
 
         if request.POST['Go'] in ['Edit', 'Add']:
-            form = BlogForm(request.POST, instance=p) # A form bound to the POST data
+            form = BlogForm(request.POST, instance=p)  # A form bound to the POST data
             if form.is_valid():
                 newform = form.save(commit=False)
                 newform.user = request.user
                 newform.blog = Blog.objects.get(name='General')
                 newform.save()
-                form.save_m2m() # Save the many-to-many data for the form.
+                form.save_m2m()  # Save the many-to-many data for the form.
                 messages.add_message(request, messages.INFO, 'Blog post edited')
                 return blog_list(request, newform.id)
         elif request.POST['Go'] == 'Delete':
@@ -83,9 +85,9 @@ def blog_edit(request, post_id):
 
     else:
         action = 'Add'
-        form = BlogForm() # An unbound form
+        form = BlogForm()  # An unbound form
 
-    return render_to_response('blog/edit.html',
-                              {'section': section, 'action': action, 'form': form },
-                              context_instance=RequestContext(request))
-
+    return render(request, 'blog/edit.html',
+                  {'section': section,
+                   'action': action,
+                   'form': form})

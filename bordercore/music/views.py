@@ -14,7 +14,7 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.forms.utils import ErrorList
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, JsonResponse
-from django.shortcuts import redirect, render_to_response
+from django.shortcuts import redirect, render, render_to_response
 from django.template import RequestContext
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
@@ -40,13 +40,12 @@ def music_list(request):
     # Get a random album
     random_albums = Album.objects.order_by('?')[0]
 
-    return render_to_response('music/index.html',
-                              {'section': SECTION,
-                               'cols': ['Date', 'artist', 'title', 'id'],
-                               'message': message,
-                               'recent_songs': recent_songs,
-                               'random_albums': random_albums
-                           }, context_instance=RequestContext(request))
+    return render(request, 'music/index.html',
+                  {'section': SECTION,
+                   'cols': ['Date', 'artist', 'title', 'id'],
+                   'message': message,
+                   'recent_songs': recent_songs,
+                   'random_albums': random_albums})
 
 
 @login_required
@@ -120,9 +119,12 @@ def song_edit(request, song_id=None):
         action = 'Add'
         form = SongForm()  # An unbound form
 
-    return render_to_response('music/edit.html',
-                              {'section': SECTION, 'action': action, 'form': form, 'file_info': file_info, 'song': song},
-                              context_instance=RequestContext(request))
+    return render(request, 'music/edit.html',
+                  {'section': SECTION,
+                   'action': action,
+                   'form': form,
+                   'file_info': file_info,
+                   'song': song})
 
 
 @login_required
@@ -145,10 +147,11 @@ def show_album(request, album_id):
                               length_seconds=song.length,
                               length=time.strftime('%M:%S', time.gmtime(song.length))))
 
-    return render_to_response('music/show_album.html',
-                              {'section': SECTION, 'album': a, 'data': song_list,
-                               'cols': ['id', 'track', 'title', 'display_title', 'length', 'length_seconds']},
-                              context_instance=RequestContext(request))
+    return render(request, 'music/show_album.html',
+                  {'section': SECTION,
+                   'album': a,
+                   'data': song_list,
+                   'cols': ['id', 'track', 'title', 'display_title', 'length', 'length_seconds']})
 
 
 @login_required
@@ -168,9 +171,13 @@ def show_artist(request, artist_name):
     for song in s:
         song_list.append(dict(id=song.id, date=song.created.strftime("%b %d, %Y"), title=song.title, artist=song.artist, info=song.comment))
 
-    return render_to_response('music/show_artist.html',
-                              {'section': SECTION, 'artist_name': artist_name, 'album_list': a, 'song_list': song_list, 'compilation_album_list': c, 'cols': ['date', 'artist', 'title', 'info', 'id']},
-                              context_instance=RequestContext(request))
+    return render(request, 'music/show_artist.html',
+                  {'section': SECTION,
+                   'artist_name': artist_name,
+                   'album_list': a,
+                   'song_list': song_list,
+                   'compilation_album_list': c,
+                   'cols': ['date', 'artist', 'title', 'info', 'id']})
 
 
 @login_required
@@ -345,9 +352,13 @@ def add_song(request):
         else:
             action = 'Review'
 
-    return render_to_response('music/add_song.html',
-                              {'section': SECTION, 'action': action, 'info': info, 'notes': notes, 'md5sum': md5sum, 'form': form},
-                              context_instance=RequestContext(request))
+    return render(request, 'music/add_song.html',
+                  {'section': SECTION,
+                   'action': action,
+                   'info': info,
+                   'notes': notes,
+                   'md5sum': md5sum,
+                   'form': form})
 
 
 class MusicListJson(BaseDatatableView):

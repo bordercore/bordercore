@@ -3,8 +3,7 @@ import json
 from PyOrgMode import OrgDataStructure
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 
 from bookmark.models import Bookmark
 from quote.models import Quote
@@ -12,6 +11,7 @@ from music.models import Listen
 from cal.models import Calendar
 
 SECTION = 'Home'
+
 
 @login_required
 def homepage(request):
@@ -40,18 +40,21 @@ def homepage(request):
         nodes = OrgDataStructure.get_nodes_by_priority(startnode, "A", [])
 
         for node in nodes:
-            tasks.append( {'task': OrgDataStructure.parse_heading(node.heading)['heading'],
-                           'tag': node.tags,
-                           'parent_category': OrgDataStructure.parse_heading(node.parent.heading)['heading']} )
+            tasks.append({'task': OrgDataStructure.parse_heading(node.heading)['heading'],
+                          'tag': node.tags,
+                          'parent_category': OrgDataStructure.parse_heading(node.parent.heading)['heading']})
     except AttributeError, e:
         print "AttributeError: %s" % e
 
     # Get some recently played music
     music = Listen.objects.all().select_related().distinct().order_by('-created')[:3]
 
-    return render_to_response('homepage/index.html',
-                              {'section': SECTION, 'quote': quote, 'tasks': tasks, 'music': music, 'pinned_bookmarks': pinned_bookmarks },
-                              context_instance=RequestContext(request))
+    return render(request, 'homepage/index.html',
+                  {'section': SECTION,
+                   'quote': quote,
+                   'tasks': tasks,
+                   'music': music,
+                   'pinned_bookmarks': pinned_bookmarks})
 
 
 @login_required
@@ -60,7 +63,6 @@ def get_calendar_events(request):
     calendar = Calendar(request.user.userprofile)
     events = calendar.get_calendar_info()
 
-    return render_to_response('homepage/get_calendar_events.json',
-                              {'section': SECTION, 'info': json.dumps(events)},
-                              context_instance=RequestContext(request),
-                              content_type="application/json")
+    return render(request, 'homepage/get_calendar_events.json',
+                  {'section': SECTION,
+                   'info': json.dumps(events)})

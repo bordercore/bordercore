@@ -4,8 +4,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponse
-from django.shortcuts import redirect, render_to_response
-from django.template import RequestContext
+from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView
 
@@ -13,6 +12,7 @@ from accounts.forms import UserProfileForm
 from accounts.models import UserProfile
 
 SECTION = 'Prefs'
+
 
 class UserProfileDetailView(UpdateView):
     template_name = 'prefs/index.html'
@@ -43,7 +43,7 @@ class UserProfileDetailView(UpdateView):
 def store_in_session(request):
 
     for key in request.POST:
-        request.session[ key ] = request.POST[ key ]
+        request.session[key] = request.POST[key]
     return HttpResponse(json.dumps('OK'), content_type="application/json")
 
 
@@ -72,5 +72,4 @@ def bc_login(request):
                 message = 'Invalid login'
                 # Return an 'invalid login' error message.
 
-    return render_to_response('login.html', { 'message': message },
-                              context_instance=RequestContext(request))
+    return render(request, 'login.html', {'message': message})

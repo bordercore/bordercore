@@ -1,8 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 from django.templatetags.static import static
 from django.views.generic.list import ListView
 
@@ -355,6 +354,5 @@ def search_admin(request):
             conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
             conn.commit()
 
-    return render_to_response('search/admin.html',
-                              {'stats': stats},
-                              context_instance=RequestContext(request))
+    return render(request, 'search/admin.html',
+                  {'stats': stats})

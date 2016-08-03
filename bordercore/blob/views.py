@@ -3,8 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import redirect, render_to_response
-from django.template import RequestContext
+from django.shortcuts import redirect, render
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import DeleteView, UpdateView
 
@@ -93,9 +92,9 @@ def blob_add(request, replaced_sha1sum=None):
         except ObjectDoesNotExist:
             replaced_sha1sum_info = None
 
-    return render_to_response(template_name,
-                              {'replaced_sha1sum_info': replaced_sha1sum_info, 'section': SECTION},
-                              context_instance=RequestContext(request))
+    return render(request, template_name,
+                  {'replaced_sha1sum_info': replaced_sha1sum_info,
+                   'section': SECTION})
 
 
 def store_blob(blob, sha1sum):
@@ -181,7 +180,7 @@ class BlobUpdateView(UpdateView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         context = self.get_context_data(object=self.object, form=form)
-        return self.render_to_response(context)
+        return render(request, self.template_name, context)
 
     def get_object(self, queryset=None):
         obj = Blob.objects.get(user=self.request.user, sha1sum=self.kwargs.get('sha1sum'))

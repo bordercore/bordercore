@@ -1,11 +1,9 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.shortcuts import render_to_response
 
 from document.models import Document
 from document.forms import DocumentForm
-from django.template import RequestContext
 
 section = 'Documents'
 
@@ -42,9 +40,9 @@ def document_edit(request, document_id):
         action = 'Add'
         form = DocumentForm()
 
-    return render_to_response('kb/documents/edit.html',
-                              {'section': section, 'action': action, 'form': form},
-                              context_instance=RequestContext(request))
+    return render(request, 'kb/documents/edit.html', {'section': section,
+                                                      'action': action,
+                                                      'form': form})
 
 
 @login_required
@@ -54,6 +52,4 @@ def document_detail(request, document_id):
 
     d.authors = ', '.join(d.author)
 
-    return render_to_response('kb/documents/view.html',
-                              {'document': d},
-                              context_instance=RequestContext(request))
+    return render(request, 'kb/documents/view.html', {'document': d})

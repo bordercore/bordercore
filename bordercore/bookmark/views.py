@@ -4,8 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
-from django.shortcuts import redirect, render_to_response
-from django.template import RequestContext
+from django.shortcuts import redirect, render
 
 from django_datatables_view.base_datatable_view import BaseDatatableView
 
@@ -23,12 +22,11 @@ def bookmark_list(request):
     message = ''
     bookmarks = []
 
-    return render_to_response('bookmark/index.html',
-                              {'section': SECTION,
-                               'bookmarks': bookmarks,
-                               'cols': ['Date', 'url', 'title', 'id'],
-                               'message': message},
-                              context_instance=RequestContext(request))
+    return render(request, 'bookmark/index.html',
+                  {'section': SECTION,
+                   'bookmarks': bookmarks,
+                   'cols': ['Date', 'url', 'title', 'id'],
+                   'message': message})
 
 
 @login_required
@@ -62,9 +60,10 @@ def bookmark_edit(request, bookmark_id=None):
         action = 'Add'
         form = BookmarkForm()  # An unbound form
 
-    return render_to_response('bookmark/edit.html',
-                              {'section': SECTION, 'action': action, 'form': form},
-                              context_instance=RequestContext(request))
+    return render(request, 'bookmark/edit.html',
+                  {'section': SECTION,
+                   'action': action,
+                   'form': form})
 
 
 @login_required
@@ -135,9 +134,11 @@ def bookmark_tag(request):
 
     favorite_tags = request.user.userprofile.favorite_tags.all()
 
-    return render_to_response('bookmark/tag.html',
-                              {'section': SECTION, 'bookmarks': sorted_bookmarks, 'tag_filter': tag_filter, 'favorite_tags': favorite_tags},
-                              context_instance=RequestContext(request))
+    return render(request, 'bookmark/tag.html',
+                  {'section': SECTION,
+                   'bookmarks': sorted_bookmarks,
+                   'tag_filter': tag_filter,
+                   'favorite_tags': favorite_tags})
 
 
 @login_required

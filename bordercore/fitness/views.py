@@ -1,6 +1,5 @@
 from django.contrib import messages
-from django.shortcuts import redirect, render_to_response
-from django.template import RequestContext
+from django.shortcuts import redirect, render
 from django.views.generic.detail import DetailView
 
 import datetime
@@ -90,11 +89,8 @@ def fitness_summary(request):
         else:
             add_exercise_info(inactive_exercises, e)
 
-    return render_to_response('fitness/summary.html',
-                              {'active_exercises': active_exercises,
-                               'inactive_exercises': inactive_exercises
-                               },
-                              context_instance=RequestContext(request))
+    return render(request, 'fitness/summary.html', {'active_exercises': active_exercises,
+                                                    'inactive_exercises': inactive_exercises})
 
 
 def change_active_status(request):
