@@ -474,7 +474,7 @@ def get_song_info(request, id):
 
     song = Song.objects.get(pk=id)
 
-    # Increment the 'times played' counter, but only if we're in production
+    # Indicate that this song has been listened to, but only if we're in production
     if not settings.DEBUG:
         if song.times_played:
             song.times_played = song.times_played + 1
@@ -482,9 +482,8 @@ def get_song_info(request, id):
             song.times_played = 1
         song.save()
 
-    # Add this song to the listen table
-    l = Listen(song=song, user=request.user)
-    l.save()
+        l = Listen(song=song, user=request.user)
+        l.save()
 
     file_location = get_song_location(song)
 
@@ -533,7 +532,6 @@ class WishListDetailView(UpdateView):
         return obj
 
     def form_valid(self, form):
-
         self.object = form.save()
         context = self.get_context_data(form=form)
         context["message"] = "Wishlist updated"
