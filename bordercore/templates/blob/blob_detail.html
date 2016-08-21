@@ -76,7 +76,7 @@
 
     <div class="row">
 
-        <div class="col-md-5">
+        <div class="col-lg-5">
 
             <h1>{{ title }}</h1>
             <h5>{{ object.get_edition_string }}</h5>
@@ -165,7 +165,7 @@
 
         </div>
 
-        <div class="col-md-6">
+        <div class="col-lg-6">
 
             {% if cover_info %}
                 <img src="{{ STATIC_URL }}{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" data-toggle="modal" data-target="#myModal3" />
@@ -183,7 +183,7 @@
 
 {% if current_collections %}
     <div class="row top-buffer">
-        <div class="col-md-12">
+        <div class="col-lg-12">
             In collections:
             {% for collection in current_collections %}
                 <a href="{% url 'collection_detail' collection.id %}">{{ collection.name }}</a>

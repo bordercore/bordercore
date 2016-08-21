@@ -24,12 +24,12 @@
         {% csrf_token %}
 
         {% if replaced_sha1sum_info %}
-            <div class="col-md-7 col-md-offset2 alert alert-info">
+            <div class="col-lg-7 col-lg-offset2 alert alert-info">
                   Replacing <strong>{{ replaced_sha1sum_info.metadata.title|default:replaced_sha1sum_info.sha1sum }}</strong>
             </div>
         {% endif %}
 
-            <div class="col-md-7 col-md-offset2">
+            <div class="col-lg-7 col-lg-offset2">
 
                 <p class="lead">Choose blob from filesystem</p>
 
@@ -37,7 +37,7 @@
 
                 <div class="form-group">
                     <div class="controls">
-                        <input type="file" id="new-blob" name="blob" class="form-control col-md-5" />
+                        <input type="file" id="new-blob" name="blob" class="form-control col-lg-5" />
                     </div>
                 </div>
 

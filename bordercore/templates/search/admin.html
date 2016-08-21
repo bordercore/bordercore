@@ -12,30 +12,30 @@
 
     <div class="row">
 
-        <div class="col-md-3">
-			<h3>Document counts</h3>
-		</div>
-        <div class="col-md-3">
+        <div class="col-lg-3">
+            <h3>Document counts</h3>
+        </div>
+        <div class="col-lg-3">
 
-			<table class="table table-bordered">
+            <table class="table table-bordered">
 {% for x in stats %}
 
-	<tr><td>{{ x }}</td><td><strong>{{ stats|dict_get:x }}</strong></td>
+    <tr><td>{{ x }}</td><td><strong>{{ stats|dict_get:x }}</strong></td>
 
 {% endfor %}
-			</table>
-		</div>
+            </table>
+        </div>
 
-	</div>
+    </div>
 
-	<br />
+    <br />
 
     <div class="row">
 
-        <div class="col-md-12">
+        <div class="col-lg-12">
 
             <form class="form-inline" action="{% url 'search_admin' %}" method="post">
-				{% csrf_token %}
+                {% csrf_token %}
 
                 <div class="form-group">
 
@@ -47,34 +47,34 @@
 
                     <input class="btn btn-default" type="submit" name="Go" value="Delete" />
 
-				</div>
+                </div>
 
-			</form>
+            </form>
 
-		</div>
+        </div>
 
-	</div>
+    </div>
 
-	<br />
+    <br />
 
     <div class="row">
 
-        <div class="col-md-12">
+        <div class="col-lg-12">
 
             <form class="form-inline" action="{% url 'search_admin' %}" method="post">
-				{% csrf_token %}
+                {% csrf_token %}
 
                 <div class="form-group">
 
-					Send a commit
+                    Send a commit
                     <input class="btn btn-default" type="submit" name="Go" value="Commit" />
 
-				</div>
+                </div>
 
-			</form>
+            </form>
 
-		</div>
+        </div>
 
-	</div>
+    </div>
 
 {% endblock %}
