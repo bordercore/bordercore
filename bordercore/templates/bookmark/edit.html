@@ -43,6 +43,10 @@ $(document).ready(function() {
 
         });
 
+        {% if action == 'Edit' %}
+        $('#id_tags').tagsinput('focus');
+        {% endif %}
+
 });
 
 </script>
