@@ -38,6 +38,7 @@ class Blob(TimeStampedModel, AmazonMixin):
     user = models.ForeignKey(User)
     tags = models.ManyToManyField(Tag)
     blobs = models.ManyToManyField("self")
+    is_private = models.BooleanField(default=False)
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
