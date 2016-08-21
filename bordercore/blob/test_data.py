@@ -87,7 +87,8 @@ def test_blobs_in_db_exist_in_solr():
     for b in blobs:
         if b.sha1sum in ['e5bd032709cc5aa2a0be50c6eeb19be788f8b404',
                          'f01176a1dbcf335159d78792a8b5f20746d3b12f',
-                         '076d6870f5ee0626817a38b65c28b60c61e1628d']:
+                         '076d6870f5ee0626817a38b65c28b60c61e1628d',
+                         '01cfa4c1c2007055fbaf27e3ffaf871ac217271d']:
             continue
         solr_args = {'q': 'sha1sum:%s' % b.sha1sum,
                      'fl': 'id',
@@ -156,6 +157,13 @@ def test_collection_blobs_exists_in_solr():
 
     for c in collections:
         for blob in c.blob_list:
+            sha1sum = Blob.objects.get(pk=blob['id']).sha1sum
+            if sha1sum in ['e5bd032709cc5aa2a0be50c6eeb19be788f8b404',
+                           'f01176a1dbcf335159d78792a8b5f20746d3b12f',
+                           '076d6870f5ee0626817a38b65c28b60c61e1628d',
+                           '01cfa4c1c2007055fbaf27e3ffaf871ac217271d']:
+                continue
+
             solr_args = {'q': 'id:blob_%s' % blob['id'],
                          'fl': 'id',
                          'wt': 'json'}
