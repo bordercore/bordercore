@@ -92,22 +92,33 @@
 
     <h1>{{ object.exercise }}</h1>
 
+    <div class="row">
+        <div class="col-md-6">
+
     Last workout: {{ recent_data.date|date:"N j, Y" }} - {{ delta_days }} day{{ delta_days|pluralize:"s" }} ago
 
-    <br /><br />
+            <br /><br />
 
-    <form action="{% url 'change_active_status' %}" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="exercise_id" value="{{ object.id }}" />
-    {% if activity_info %}
+            <form action="{% url 'change_active_status' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="exercise_id" value="{{ object.id }}" />
+                {% if activity_info %}
         You've been doing this exercise since {{ activity_info.0.started|date:"N j, Y" }} &nbsp;
-        <button type="submit" class="btn btn-primary" id="inactive">Make Inactive</button>
-        <input type="hidden" name="state" value="inactive" />
-    {% else %}
-        <button type="submit" class="btn btn-primary" id="active">Make Active</button>
-        <input type="hidden" name="state" value="active" />
-    {% endif %}
-    </form>
+                    <button type="submit" class="btn btn-primary" id="inactive">Make Inactive</button>
+                    <input type="hidden" name="state" value="inactive" />
+                {% else %}
+                    <button type="submit" class="btn btn-primary" id="active">Make Active</button>
+                    <input type="hidden" name="state" value="active" />
+                {% endif %}
+            </form>
+
+        </div>
+        <div class="col-md-6">
+            <p class="alert alert-info">
+                {{ object.note }}
+            </p>
+        </div>
+    </div>
 
     <div id="exerciseDetailChart"></div>
 

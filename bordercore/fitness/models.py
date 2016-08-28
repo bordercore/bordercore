@@ -20,6 +20,8 @@ class Muscle(models.Model):
 class Exercise(models.Model):
     exercise = models.TextField(unique=True)
     muscle = models.ForeignKey(Muscle)
+    description = models.TextField(blank=True)
+    note = models.TextField(blank=True)
 
     def __unicode__(self):
         return self.exercise
