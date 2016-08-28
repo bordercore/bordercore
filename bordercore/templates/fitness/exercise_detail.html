@@ -113,11 +113,13 @@
             </form>
 
         </div>
-        <div class="col-lg-6">
-            <p class="alert alert-info">
-                {{ object.note }}
-            </p>
-        </div>
+        {% if object.note %}
+            <div class="col-lg-6">
+                <p class="alert alert-info">
+                    {{ object.note }}
+                </p>
+            </div>
+        {% endif %}
     </div>
 
     <div id="exerciseDetailChart"></div>
