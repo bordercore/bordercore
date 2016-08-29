@@ -1,5 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.forms import ModelForm, Textarea, TextInput, ModelMultipleChoiceField, ValidationError
+from django.forms import ModelForm, Select, Textarea, TextInput, ValidationError
 
 from bookmark.models import Bookmark, BookmarkTagUser
 from blog.models import Tag
@@ -64,9 +64,10 @@ class BookmarkForm(ModelForm):
 
     class Meta:
         model = Bookmark
-        fields = ('url', 'title', 'note', 'tags', 'is_pinned', 'id')
+        fields = ('url', 'title', 'note', 'tags', 'importance', 'is_pinned', 'id')
         widgets = {
             'url': TextInput(attrs={'class': 'form-control'}),
             'title': TextInput(attrs={'class': 'form-control'}),
-            'note': Textarea(attrs={'rows': 3, 'class': 'form-control'})
+            'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'importance': Select(attrs={'class': 'form-control', 'autocomplete': 'off'}, choices=((1, 'Normal'), (5, 'High'), (10, 'Highest')))
         }

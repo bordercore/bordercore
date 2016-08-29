@@ -62,6 +62,7 @@ class SearchListView(ListView):
             conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
             solr_args = {'wt': 'json',
+                         'boost': 'importance',
                          'fl': 'attr_publication_date,author,bordercore_blogpost_title,bordercore_bookmark_title,bordercore_todo_task,doctype,filepath,id,internal_id,last_modified,sha1sum,tags,title,url',
                          'facet': 'on',
                          'facet.mincount': '1',
@@ -219,6 +220,7 @@ class SearchTagDetailView(ListView):
         conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
         solr_args = {'q': q,
+                     'boost': 'importance',
                      'rows': rows,
                      'fields': ['attr_*', 'author', 'content_type', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
                      'wt': 'json',
@@ -318,7 +320,7 @@ def search_document_source(request):
                  'wt': 'json',
                  'group': 'true',
                  'group.field': 'source'
-             }
+    }
 
     results = json.loads(conn.raw_query(**solr_args))
 

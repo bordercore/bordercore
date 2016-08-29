@@ -15,6 +15,7 @@ class Bookmark(TimeStampedModel):
     is_pinned = models.BooleanField(default=False)
     last_check = models.DateTimeField(null=True)
     last_response_code = models.IntegerField(null=True)
+    importance = models.IntegerField(default=1)
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])

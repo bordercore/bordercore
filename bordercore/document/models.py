@@ -18,6 +18,7 @@ class Document(TimeStampedModel):
     user = models.ForeignKey(User)
     note = models.TextField(null=True)
     tags = models.ManyToManyField(Tag)
+    importance = models.IntegerField(default=1)
 
     def get_markdown(self):
         return markdown.markdown(self.content, extensions=['codehilite(guess_lang=False)'])

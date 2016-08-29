@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.utils.timezone import utc
 
-from django.forms import ModelForm, Textarea, TextInput
+from django.forms import ModelForm, Select, Textarea, TextInput
 
 from document.models import Document
 from lib.fields import ModelCommaSeparatedChoiceField
@@ -51,7 +51,7 @@ class DocumentForm(ModelForm):
 
     class Meta:
         model = Document
-        fields = ('title', 'author', 'source', 'pub_date', 'tags', 'sub_heading', 'content', 'note', 'url', 'id')
+        fields = ('title', 'author', 'source', 'pub_date', 'tags', 'sub_heading', 'content', 'note', 'url', 'importance', 'id')
         widgets = {
             'content': Textarea(attrs={'rows': 20, 'class': 'form-control'}),
             'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),
@@ -59,5 +59,6 @@ class DocumentForm(ModelForm):
             'url': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'author': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'source': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-            'sub_heading': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'})
+            'sub_heading': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'importance': Select(attrs={'class': 'form-control', 'autocomplete': 'off'}, choices=((1, 'Normal'), (5, 'High'), (10, 'Highest')))
         }
