@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
 from bookmark.models import Bookmark
+from django.http import JsonResponse
 from quote.models import Quote
 from music.models import Listen
 from cal.models import Calendar
@@ -63,6 +64,4 @@ def get_calendar_events(request):
     calendar = Calendar(request.user.userprofile)
     events = calendar.get_calendar_info()
 
-    return render(request, 'homepage/get_calendar_events.json',
-                  {'section': SECTION,
-                   'info': json.dumps(events)})
+    return JsonResponse(events, safe=False)
