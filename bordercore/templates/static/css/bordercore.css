@@ -156,6 +156,19 @@ width: 100% !important;
    margin-top: 20px;
 }
 
+.random-image-panel {
+   border: 0px;
+}
+
+.random-image-panel .panel-heading {
+   margin-bottom: 15px;
+}
+
+.random-image-panel .list-group {
+   width: 90%;
+   margin: 0 auto;
+}
+
 
 .collection_sortable {
    list-style-type: none;
