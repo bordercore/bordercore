@@ -25,6 +25,7 @@ def test_books_with_tags():
     "Assert that all books have at least one tag"
     solr_args = {'q': 'doctype:book AND -tags:[* TO *]',
                  'fl': 'id',
+                 'rows': 2147483647,
                  'wt': 'json'}
 
     conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
@@ -37,6 +38,7 @@ def test_books_with_title():
     "Assert that all books have a title"
     solr_args = {'q': 'doctype:book AND -title:[* TO *]',
                  'fl': 'id',
+                 'rows': 2147483647,
                  'wt': 'json'}
 
     conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
@@ -49,6 +51,7 @@ def test_books_with_author():
     "Assert that all books have at least one author"
     solr_args = {'q': 'doctype:book AND -author:[* TO *]',
                  'fl': 'id',
+                 'rows': 2147483647,
                  'wt': 'json'}
 
     conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
@@ -103,20 +106,22 @@ def test_blobs_in_db_exist_in_solr():
 def test_solr_blobs_exist_on_filesystem():
     "Assert that all blobs in Solr exist on the filesystem"
     solr_args = {'q': 'doctype:book OR doctype:blob',
-                 'fl': 'sha1sum',
+                 'fl': 'filepath,sha1sum',
+                 'rows': 2147483647,
                  'wt': 'json'}
 
     conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
     response = conn.raw_query(**solr_args)
     data = json.loads(response)['response']
     for result in data['docs']:
-        assert os.listdir("%s/%s/%s/" % (Blob.BLOB_STORE, result['sha1sum'][:2], result['sha1sum'])) != [], "blob %s exists in Solr but not on the filesystem" % result['sha1sum']
+        assert os.path.isfile(result['filepath']) is not False, "blob %s exists in Solr but not on the filesystem" % result['sha1sum']
 
 
 def test_solr_blobs_exist_in_db():
     "Assert that all blobs in Solr exist in the database"
     solr_args = {'q': 'doctype:book OR doctype:blob',
                  'fl': 'sha1sum',
+                 'rows': 2147483647,
                  'wt': 'json'}
 
     conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
