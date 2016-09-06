@@ -71,21 +71,21 @@ class Blob(TimeStampedModel, AmazonMixin):
         return ""
 
     @staticmethod
-    def get_image_dimensions(file_path):
+    def get_image_dimensions(file_path, max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
 
         info = {}
 
         info['width'], info['height'] = Image.open(file_path).size
-        if info['width'] > MAX_COVER_IMAGE_WIDTH:
-            info['height_cropped'] = int(MAX_COVER_IMAGE_WIDTH * info['height'] / info['width'])
-            info['width_cropped'] = MAX_COVER_IMAGE_WIDTH
+        if info['width'] > max_cover_image_width:
+            info['height_cropped'] = int(max_cover_image_width * info['height'] / info['width'])
+            info['width_cropped'] = max_cover_image_width
 
         return info
 
     # This is static so that it can be called without a blob object, eg
     #  based on results from a Solr query
     @staticmethod
-    def get_cover_info(sha1sum, size='large'):
+    def get_cover_info(sha1sum, size='large', max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
 
         info = {}
 
@@ -97,7 +97,7 @@ class Blob(TimeStampedModel, AmazonMixin):
         # Is the blob itself an image?
         filename, file_extension = os.path.splitext(b.filename)
         if file_extension[1:] in ['gif', 'jpg', 'png']:
-            info = Blob.get_image_dimensions(file_path)
+            info = Blob.get_image_dimensions(file_path, max_cover_image_width)
             info['url'] = "blobs/%s/%s/%s" % (sha1sum[0:2], sha1sum, b.filename)
 
         # Nope. Look for a cover image
@@ -105,7 +105,7 @@ class Blob(TimeStampedModel, AmazonMixin):
             for cover_image in ["cover.%s" % image_type, "cover-%s.%s" % (size, image_type)]:
                 file_path = "%s/%s" % (parent_dir, cover_image)
                 if os.path.isfile(file_path):
-                    info = Blob.get_image_dimensions(file_path)
+                    info = Blob.get_image_dimensions(file_path, max_cover_image_width)
                     info['url'] = "blobs/%s/%s/%s" % (sha1sum[0:2], sha1sum, cover_image)
 
         # If we get this far, return the default image
