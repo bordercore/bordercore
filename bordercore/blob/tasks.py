@@ -17,5 +17,5 @@ logger = logging.getLogger('bordercore.solrindexer')
 def index_document(sha1sum):
 
     logger.info("index document: %s" % (sha1sum))
-    cmd = "java -jar /home/jerrell/dev/solr/solrindexer/build/libs/solrindexer-0.4.jar -s %s" % (sha1sum,)
+    cmd = "java -jar /home/jerrell/dev/solr/solrindexer/build/libs/solrindexer.jar -s %s" % (sha1sum,)
     call(cmd.split())
