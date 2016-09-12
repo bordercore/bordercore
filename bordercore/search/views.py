@@ -82,7 +82,7 @@ class SearchListView(ListView):
                 solr_args.update(
                     {'q': search_term,
                      'q.op': boolean_type,
-                     'qf': 'title bordercore_todo_task tags bordercore_bookmark_title attr_content description ' + metadata,
+                     'qf': 'author title bordercore_todo_task tags bordercore_bookmark_title attr_content description ' + metadata,
                      'hl': 'true',
                      'hl.fl': 'attr_content,bordercore_todo_task,bordercore_bookmark_title,title',
                      'hl.simple.pre': '<span class="search_bordercore_blogpost_snippet">',
