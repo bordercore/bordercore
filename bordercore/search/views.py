@@ -12,7 +12,7 @@ import re
 import solr
 import urllib
 
-from blob.models import Blob
+from blob.models import Blob, MetaData
 from tag.models import Tag
 
 IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
@@ -58,7 +58,6 @@ class SearchListView(ListView):
             elif rows is None:
                 rows = self.SOLR_COUNT_PER_PAGE
 
-            # TODO: catch SolrException
             conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
             solr_args = {'wt': 'json',
@@ -75,10 +74,15 @@ class SearchListView(ListView):
                 solr_args['q'] = 'sha1sum:%s' % (search_term)
 
             else:
+
+                # Get a list of all unique blob metadata names and add them to the list of fields to search.
+                #  These are stored as dynamic fields prefixed with 'attr_'
+                metadata = ' '.join(["attr_%s" % x.name.lower() for x in MetaData.objects.all().distinct('name')])
+
                 solr_args.update(
                     {'q': search_term,
                      'q.op': boolean_type,
-                     'qf': 'title bordercore_todo_task tags bordercore_bookmark_title attr_content description',
+                     'qf': 'title bordercore_todo_task tags bordercore_bookmark_title attr_content description ' + metadata,
                      'hl': 'true',
                      'hl.fl': 'attr_content,bordercore_todo_task,bordercore_bookmark_title,title',
                      'hl.simple.pre': '<span class="search_bordercore_blogpost_snippet">',
