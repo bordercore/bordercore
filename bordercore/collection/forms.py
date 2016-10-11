@@ -21,7 +21,7 @@ class CollectionForm(ModelForm):
 
     class Meta:
         model = Collection
-        fields = ('name',)
+        fields = ('name', 'description')
         widgets = {
             'name': TextInput(attrs={'class': 'form-control'})
         }

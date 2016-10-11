@@ -17,6 +17,7 @@ class Collection(TimeStampedModel):
     user = models.ForeignKey(User)
     blob_list = JSONField(blank=True, null=True)
     tags = models.ManyToManyField(Tag)
+    description = models.TextField(null=True)
 
     def get_created(self):
         return self.created.strftime('%b %d, %Y')
