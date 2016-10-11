@@ -59,13 +59,17 @@ def homepage(request):
     random_image_info = {'sha1sum': random_image.sha1sum,
                          'cover_info': Blob.get_cover_info(random_image.sha1sum, 'small', 500)}
 
+    # Get the most recent untagged bookmarks
+    bookmarks = Bookmark.objects.filter(tags__isnull=True)[:10]
+
     return render(request, 'homepage/index.html',
                   {'section': SECTION,
                    'quote': quote,
                    'tasks': tasks,
                    'music': music,
                    'pinned_bookmarks': pinned_bookmarks,
-                   'random_image_info': random_image_info})
+                   'random_image_info': random_image_info,
+                   'bookmarks': bookmarks})
 
 
 @login_required

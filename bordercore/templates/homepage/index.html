@@ -2,6 +2,35 @@
 
 {% block title %} Home {% endblock %}
 
+{% block left-block %}
+
+        <div class="panel panel-primary">
+            <div class="panel-heading">Urgent Tasks</div>
+            <ul class="list-group">
+                {% for task in tasks %}
+                    <li class="list-group-item">{{ task.task }}
+                    &nbsp; &nbsp;<span class="label label-primary">{{ task.parent_category }}</span>
+                        {% if task.tags %}
+                            <span class="label">{{ task.tags.all.0.name }}</span>
+                        {% endif %}
+                    </li>
+                {% empty %}
+                    <li class="list-group-item">All done!</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="panel panel-primary">
+            <div class="panel-heading">Pinned Bookmarks</div>
+            <ul class="list-group">
+                {% for bookmark in pinned_bookmarks %}
+                    <li class="list-group-item"><a href="{{ bookmark.url }}">{{ bookmark.title }}</a> </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+{% endblock %}
+
 {% block content %}
 
 <script type="text/javascript">
@@ -32,25 +61,9 @@
     <div class="col-lg-6">
 
         <div class="panel panel-primary">
-            <div class="panel-heading">Urgent Tasks</div>
+            <div class="panel-heading">Recent Bookmarks</div>
             <ul class="list-group">
-                {% for task in tasks %}
-                    <li class="list-group-item">{{ task.task }}
-                    &nbsp; &nbsp;<span class="label label-primary">{{ task.parent_category }}</span>
-                        {% if task.tags %}
-                            <span class="label">{{ task.tags.all.0.name }}</span>
-                        {% endif %}
-                    </li>
-                {% empty %}
-                    <li class="list-group-item">All done!</li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <div class="panel panel-primary">
-            <div class="panel-heading">Pinned Bookmarks</div>
-            <ul class="list-group">
-                {% for bookmark in pinned_bookmarks %}
+                {% for bookmark in bookmarks %}
                     <li class="list-group-item"><a href="{{ bookmark.url }}">{{ bookmark.title }}</a> </li>
                 {% endfor %}
             </ul>
@@ -109,7 +122,6 @@
       </ul>
     </div>
   </div>
-  <div class="col-lg-2"><a href="http://www.pinterest.com"><img src="{{ STATIC_URL }}/img/pinterest.jpg" /></a></div>
 </div>
 
 <br />

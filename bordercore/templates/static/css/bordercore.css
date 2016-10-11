@@ -1,13 +1,26 @@
-/* Sticky footer support
--------------------------------------------------- */
 html {
-  position: relative;
-  min-height: 100%;
+   position: relative;
+   min-height: 100%;
+   height: 100%;
 }
+
 body {
   /* Margin bottom by footer height */
-  margin-bottom: 60px;
+   margin-bottom: 60px;
+   height: 100%;
 }
+
+#left-block {
+   height: 100%;
+}
+
+#left-block-container {
+   border: 2px solid #e5e5e5;
+   background-color: #f1f1f1;
+   height: 100%;
+   padding: 15px;
+}
+
 #footer {
   position: absolute;
   bottom: 0;
@@ -18,7 +31,6 @@ body {
           border-top: 1px solid #cccccc;
 }
 
-/* End of sticky footer support */
 .hidden {
    display: none;
 }
@@ -40,10 +52,22 @@ body {
      margin-right: auto;
 }
 
-/* For tables with a toolbar, make room for a Bootstrap alert */
-/* .btn-group { */
-/*   height: 40px; */
-/* } */
+/* Animated buttons */
+
+.glyphicon-refresh-animate {
+    -animation: spin .7s infinite linear;
+    -webkit-animation: spin2 .7s infinite linear;
+}
+
+@-webkit-keyframes spin2 {
+    from { -webkit-transform: rotate(0deg);}
+    to { -webkit-transform: rotate(360deg);}
+}
+
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg);}
+    to { transform: scale(1) rotate(360deg);}
+}
 
 .form-error {
   color: #b94a48;
@@ -85,6 +109,14 @@ ul.pagination {
 .search_book_title {
                     color: #0173bc;
  }
+
+.search_book_author {
+   font-size: smaller;
+ }
+
+.important {
+   background-color: #cccccc;
+}
 
 .search_book_title #edit_link{
                     font-size: 8px;
@@ -139,19 +171,6 @@ a.tag:active {
    margin-top: 5px;
 }
 
-.bootstrap-tagsinput {
-width: 100% !important;
-}
-
-#tag-detail-tab-content {
-    padding-left: 10px;
-}
-
-.table-borderless td,
-.table-borderless th {
-   border: 0;
-   padding: 10px;
-}
 .top-buffer {
    margin-top: 20px;
 }
@@ -169,6 +188,19 @@ width: 100% !important;
    margin: 0 auto;
 }
 
+.bootstrap-tagsinput {
+width: 100% !important;
+}
+
+#tag-detail-tab-content {
+    padding-left: 10px;
+}
+
+.table-borderless td,
+.table-borderless th {
+   border: 0;
+   padding: 10px;
+}
 
 .collection_sortable {
    list-style-type: none;

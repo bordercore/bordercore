@@ -40,21 +40,30 @@
 
     <body>
 
-        <div class="container" style="max-width: 1200px;">
+        <div class="container-fluid" style="height: 100%">
 
             <h1> Bordercore :: {% block title %} {% endblock %} </h1>
 
             {% include "main-nav.html" %}
 
-            {% block content %}
-
-            {% endblock %}
-
+            <div class="row" style="height: 100%">
+                <div class="col-lg-3" id="left-block">
+                    <div id="left-block-container">
+                        {% block left-block %}
+                            Default
+                        {% endblock %}
+                    </div>
+                </div>
+                <div class="col-lg-9">
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </div>
         </div>
 
         <div id="footer">
             <div class="container">
-                <h5 class="pull-right"> Copyright {% now "Y" %} F. Jerrell Schivers </h5>
+                <h5 class="pull-right"> Logged in as <strong>{{ user.get_username }}</strong>. <a href="/logout">Logout</a></h5>
             </div>
         </div>
 

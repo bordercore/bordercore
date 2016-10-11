@@ -4,6 +4,32 @@
 
 {% block title %} KB :: Search {% endblock %}
 
+{% block left-block %}
+
+    {% if request.GET and info %}
+
+    <div class="panel panel-info">
+
+        <div class="panel-heading">Match Categories</div>
+        <div class="panel-body">
+{% for facet in facet_counts|dictsortreversed:"count" %}
+
+                <label>
+                    <input type="checkbox" name="filter_query" class="facet" id="{{ facet.doctype }}"
+                           {% if facet.doctype in filter_query %}checked="checked"{% endif %}
+                           /> {{ facet.doctype_purty }} ({{ facet.count }})
+                </label>
+
+                <br/>
+{% endfor %}
+
+        </div>
+    </div>
+
+    {% endif %}
+
+{% endblock %}
+
 {% block content %}
 
 {% include "kb/header.html" %}
@@ -50,34 +76,19 @@
 
 {% else %}
 
-    <div class="row">
+    <div class="col-lg-10">
 
-        <div class="col-lg-2">
-            <div class="panel panel-info">
-
-                <div class="panel-heading">Match Categories</div>
-                <div class="panel-body">
-{% for facet in facet_counts|dictsortreversed:"count" %}
-
-    <label>
-        <input type="checkbox" name="filter_query" class="facet" id="{{ facet.doctype }}"
-               {% if facet.doctype in filter_query %}checked="checked"{% endif %}
-               /> {{ facet.doctype_purty }} ({{ facet.count }})
-    </label>
-{% endfor %}
-
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-10">
-
-{% if request.GET %}
+        <table>
 
 {% for match in info %}
 
-<!-- id: {{ match.id }} -->
-
+    <tr>
+        <td>
+            {% if match.importance == 5 %}
+            <img src="{{ STATIC_URL }}img/star.jpg" />
+            {% endif %}
+        </td>
+        <td>
 {% if match.doctype == 'bordercore_todo' %}
 
     <h4 class="search_book_title">Todo: <a href="{% url 'todo_edit' match.internal_id %}">{{ match.bordercore_todo_task.0 }}</a>
@@ -90,19 +101,6 @@
         <img src="{{ STATIC_URL }}img/kb_link.png" />
         <a href="{{ match.url }}">{{ match.bordercore_bookmark_title.0 }}</a>
         <span class="search_todo_date">{{ match.last_modified }}</span>
-        {% for tag in match.tags %}
-            {% if tag|slice:":1" == '_' %}
-                <span class="label label-info">
-                    <a class="tag" href="{% url 'kb_search_tag_detail' tag|slice:"1:" %}">{{ tag|slice:"1:" }}</a>
-                </span>
-            {% else %}
-                <span class="label label-default">
-                    <a class="tag" href="{% url 'kb_search_tag_detail' tag %}">{{ tag }}</a>
-                </span>
-            {% endif %}
-                                &nbsp;
-
-        {% endfor %}
     </h4>
 
 {% elif match.doctype == 'bordercore_blog' %}
@@ -113,7 +111,8 @@
 
 {% elif match.doctype == 'document' %}
 
-    <h4 class="search_book_title"><a href="{% url 'document_detail' match.internal_id %}">{{ match.title.0|default:"Title" }}</a>
+    <h4 class="search_book_title">
+        <a href="{% url 'document_detail' match.internal_id %}">{{ match.title.0|default:"Title" }}</a>
         <span class="search_todo_date">{{ match.last_modified }}</span>
     </h4>
 
@@ -121,17 +120,32 @@
 
 {% else %}
 
-    <h4 class="search_book_title">
+    <h4>
         <img src="{{ STATIC_URL }}img/kb_book.png" />
-        <a href="{% url 'blob_detail' match.sha1sum %}">{{ match.title.0 }}</a>
+        <span class="search_book_title">
+            <a href="{% url 'blob_detail' match.sha1sum %}">{{ match.title.0 }}</a>
+        </span>
+        <span class="search_book_author">
+            {% if match.author.0 %} - {{ match.author.0 }}{% endif %}
+        </span>
     </h4>
-    &nbsp; &nbsp; {{ match.pub_date.0 }}{% if match.author.0 %} - {{ match.author.0 }}{% endif %}
-
 {% endif %}
+
+    &nbsp; &nbsp; {{ match.pub_date.0 }}
+
+Tags:
+{% for tag in match.tags %}
+
+    <strong><a href="{% url 'kb_search_tag_detail' tag %}">{{ tag }}</a></strong>{% if not forloop.last %}, {% endif %}
 
 {% endfor %}
 
-{% endif %}
+        </td>
+    </tr>
+
+{% endfor %}
+
+        </table>
 
 {% endif %}
 

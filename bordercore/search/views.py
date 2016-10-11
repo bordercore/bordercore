@@ -51,7 +51,7 @@ class SearchListView(ListView):
             # Escape special characters to Solr
             search_term = search_term.replace(':', '\\:')
 
-            rows = self.request.GET['rows']
+            rows = self.request.GET.get('rows', None)
             boolean_type = self.request.GET.get('boolean_search_type', 'AND')
             if rows == 'No limit':
                 rows = 1000000
@@ -62,7 +62,7 @@ class SearchListView(ListView):
 
             solr_args = {'wt': 'json',
                          'boost': 'importance',
-                         'fl': 'attr_publication_date,author,bordercore_blogpost_title,bordercore_bookmark_title,bordercore_todo_task,doctype,filepath,id,internal_id,last_modified,sha1sum,tags,title,url',
+                         'fl': 'attr_publication_date,author,bordercore_blogpost_title,bordercore_bookmark_title,bordercore_todo_task,doctype,filepath,id,importance,internal_id,last_modified,sha1sum,tags,title,url',
                          'facet': 'on',
                          'facet.mincount': '1',
                          'fields': ['attr_*', 'author', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
@@ -138,6 +138,7 @@ class SearchListView(ListView):
                                  doctype=myobject['doctype'],
                                  sha1sum=myobject.get('sha1sum', ''),
                                  id=myobject['id'],
+                                 importance=myobject.get('importance', ''),
                                  internal_id=myobject.get('internal_id', ''),
                                  last_modified=last_modified,
                                  url=myobject.get('url', ''),
