@@ -16,12 +16,14 @@ class Album(TimeStampedModel):
     class Meta:
         unique_together = ("title", "artist")
 
+
 class SongSource(TimeStampedModel):
     name = models.TextField()
     description = models.TextField()
 
     def __unicode__(self):
         return self.name
+
 
 class Song(TimeStampedModel):
     title = models.TextField()
@@ -37,9 +39,11 @@ class Song(TimeStampedModel):
     original_year = models.IntegerField(null=True)
     tags = models.ManyToManyField(Tag)
 
+
 class Listen(TimeStampedModel):
     user = models.ForeignKey(User)
     song = models.ForeignKey(Song)
+
 
 class WishList(TimeStampedModel):
     user = models.ForeignKey(User)

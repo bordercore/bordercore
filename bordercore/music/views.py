@@ -22,7 +22,7 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 from mutagen.easyid3 import EasyID3
 from mutagen.mp3 import MP3
 
-from music.models import Album, Listen, Song, WishList
+from music.models import Album, Listen, Song, SongSource, WishList
 from music.forms import SongForm, WishListForm
 
 SECTION = 'Music'
@@ -212,6 +212,9 @@ def add_song(request):
         if info.get('date'):
             formdata['year'] = info['date'][0]
         formdata['length'] = int(info.info.length)
+
+        # I usually buy my music from Amazon, so set that as the default
+        formdata['source'] = SongSource.objects.get(name='Amazon').id
 
         if info.get('album') and info.get('artist'):
             if info.get('album'):

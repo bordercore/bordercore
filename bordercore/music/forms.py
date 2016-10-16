@@ -3,6 +3,7 @@ from django import forms
 
 from music.models import Song, WishList
 
+
 class SongForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
@@ -15,7 +16,7 @@ class SongForm(ModelForm):
     def clean(self):
         cleaned_data = super(SongForm, self).clean()
         for field in ['title', 'artist', 'comment']:
-            cleaned_data[ field ] = cleaned_data[ field ].strip()
+            cleaned_data[field] = cleaned_data[field].strip()
         return cleaned_data
 
     def clean_year(self):
@@ -37,6 +38,7 @@ class SongForm(ModelForm):
             'length': TextInput(attrs={'readonly': True, 'class': 'form-control'}),
             'times_played': TextInput(attrs={'readonly': True, 'class': 'form-control'})
         }
+
 
 class WishListForm(ModelForm):
     def __init__(self, *args, **kwargs):
