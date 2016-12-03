@@ -7,7 +7,7 @@ backports.ssl-match-hostname==3.5.0.1
 billiard==3.3.0.22
 celery==3.1.19
 certifi==2015.11.20.1
-Django==1.10.1
+Django==1.10.4
 django-datatables-view==1.12.1
 django-tastypie==0.13.3
 -e git+git@github.com:bordercore/PyOrgMode.git@d43dac98c938313f029d290155e8c136ec2a537f#egg=PyOrgMode-master
