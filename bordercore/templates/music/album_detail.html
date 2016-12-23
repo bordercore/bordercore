@@ -117,7 +117,7 @@
         {% block breadcrumbs %}
             <ol class="breadcrumb pull-left">
                 <li> <a href="{% url 'music_list' %}">Music</a> </li>
-                <li> <a href="{% url 'show_artist' album.artist %}">{{ album.artist }} </li></a> </li>
+                <li> <a href="{% url 'artist_detail' album.artist %}">{{ album.artist }} </li></a> </li>
                 <li class="active"> {{ album.title }} </li>
             </ol>
         {% endblock %}
@@ -142,7 +142,7 @@
 
 <div class="row">
     <div class="col-lg-11">
-        {% include "common/datatable.html" with cols=cols id="song_list" %}
+        {% include "common/datatable.html" with data=song_list cols=cols id="song_list" %}
     </div>
 </div>
 

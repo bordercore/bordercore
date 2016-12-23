@@ -125,7 +125,7 @@
                 {% endif %}
 
                 <td>
-                    <a href="{% url 'show_album' album.id %}">
+                    <a href="{% url 'album_detail' album.id %}">
                         <img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title|urlencode }}/artwork.jpg" height="150" width="150" /> <br />
                     </a>
 
@@ -156,7 +156,7 @@
                     {% endif %}
 
                     <td>
-                        <a href="{% url 'show_album' album.id %}">
+                        <a href="{% url 'album_detail' album.id %}">
                             <img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title }}/artwork.jpg" height="150" width="150" /> <br />
                         </a>
 

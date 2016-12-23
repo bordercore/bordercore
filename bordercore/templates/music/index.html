@@ -47,7 +47,7 @@
         });
 
         function formatArtist( data, type, row ) {
-            return '<a href="{% url 'show_artist' 666 %}">'.replace(666, row[1]) + row[1] + '</a>';
+            return '<a href="{% url 'artist_detail' 666 %}">'.replace(666, row[1]) + row[1] + '</a>';
         }
 
         oTable = $('#song_list').DataTable( {
@@ -96,7 +96,7 @@
         <br />
         <table class="table">
             <tr><td>
-                <a href="{% url 'show_album' random_albums.id %}">
+                <a href="{% url 'album_detail' random_albums.id %}">
                     <img src="{{ STATIC_URL }}albums/{{ random_albums.artist }}/{{ random_albums.title|urlencode }}/artwork.jpg" height="150" width="150" />
                 </a>
 

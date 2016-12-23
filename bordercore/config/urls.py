@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.auth.views import logout
@@ -25,7 +26,7 @@ from fitness import views as fitness_views
 from fitness.views import ExerciseDetailView
 from homepage import views as homepage_views
 from music import views as music_views
-from music.views import MusicListJson, WishListView, WishListCreateView, WishListDetailView
+from music.views import AlbumDetailView, MusicListJson, WishListView, WishListCreateView, WishListDetailView
 from search import views as search_views
 from search.views import SearchListView, SearchTagDetailView
 from tag import views as tag_views
@@ -99,8 +100,8 @@ urlpatterns = [
 
     url(r'^music/edit(?:/(\d+))?', music_views.song_edit, name='song_edit'),
     url(r'^music/add', music_views.add_song, name='add_song'),
-    url(r'^music/album/(\d+)', music_views.show_album, name='show_album'),
-    url(r'^music/artist/(.*)', music_views.show_artist, name='show_artist'),
+    url(r'^music/album/(?P<pk>.*)$', AlbumDetailView.as_view(), name='album_detail'),
+    url(r'^music/artist/(.*)', music_views.artist_detail, name='artist_detail'),
     url(r'^music/datatable/data/$', MusicListJson.as_view(), name='get_song_list'),
     url(r'^music/album_artwork/(\w+)?', music_views.album_artwork, name='album_artwork'),
     url(r'^music/search.json', music_views.search, name='music_search'),
@@ -130,5 +131,11 @@ urlpatterns = [
     url(r'^todo/', TodoListView.as_view(), name='todo_list'),
 
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ]
 
 handler404 = 'site_utils.handler404'

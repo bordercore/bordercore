@@ -16,6 +16,7 @@ from django.forms.utils import ErrorList
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, JsonResponse
 from django.shortcuts import redirect, render, render_to_response
 from django.template import RequestContext
+from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
 from django_datatables_view.base_datatable_view import BaseDatatableView
@@ -127,35 +128,38 @@ def song_edit(request, song_id=None):
                    'song': song})
 
 
+class AlbumDetailView(DetailView):
+
+    model = Album
+
+    def get_context_data(self, **kwargs):
+        context = super(AlbumDetailView, self).get_context_data(**kwargs)
+
+        context['a'] = self.object
+        s = Song.objects.filter(album=self.object).order_by('track')
+
+        song_list = []
+
+        for song in s:
+            if self.object.compilation:
+                display_title = song.title + ' - ' + song.artist
+            else:
+                display_title = song.title
+                song_list.append(dict(id=song.id,
+                                      track=song.track,
+                                      title=song.title.replace('/', 'FORWARDSLASH'),
+                                      display_title=display_title,
+                                      length_seconds=song.length,
+                                      length=time.strftime('%M:%S', time.gmtime(song.length))))
+
+        context['song_list'] = song_list
+        context['cols'] = ['id', 'track', 'title', 'display_title', 'length', 'length_seconds']
+
+        return context
+
+
 @login_required
-def show_album(request, album_id):
-
-    a = Album.objects.get(pk=album_id)
-    s = Song.objects.filter(album=a).order_by('track')
-
-    song_list = []
-
-    for song in s:
-        if a.compilation:
-            display_title = song.title + ' - ' + song.artist
-        else:
-            display_title = song.title
-        song_list.append(dict(id=song.id,
-                              track=song.track,
-                              title=song.title.replace('/', 'FORWARDSLASH'),
-                              display_title=display_title,
-                              length_seconds=song.length,
-                              length=time.strftime('%M:%S', time.gmtime(song.length))))
-
-    return render(request, 'music/show_album.html',
-                  {'section': SECTION,
-                   'album': a,
-                   'data': song_list,
-                   'cols': ['id', 'track', 'title', 'display_title', 'length', 'length_seconds']})
-
-
-@login_required
-def show_artist(request, artist_name):
+def artist_detail(request, artist_name):
 
     # Get all albums by this artist
     a = Album.objects.filter(artist=artist_name).order_by('-year')
@@ -171,7 +175,7 @@ def show_artist(request, artist_name):
     for song in s:
         song_list.append(dict(id=song.id, date=song.created.strftime("%b %d, %Y"), title=song.title, artist=song.artist, info=song.comment))
 
-    return render(request, 'music/show_artist.html',
+    return render(request, 'music/artist_detail.html',
                   {'section': SECTION,
                    'artist_name': artist_name,
                    'album_list': a,
@@ -345,9 +349,9 @@ def add_song(request):
                 action = 'Upload'
                 md5sum = None
                 if a:
-                    listen_url = reverse('show_album', args=[album_id])
+                    listen_url = reverse('album_detail', args=[album_id])
                 else:
-                    listen_url = reverse('show_artist', args=[form.cleaned_data['artist']])
+                    listen_url = reverse('artist_detail', args=[form.cleaned_data['artist']])
                 messages.add_message(request, messages.INFO, 'Song successfully added.  <a href="' + listen_url + '">Listen to it here.</a>')
             else:
                 action = 'Review'
