@@ -66,13 +66,6 @@ def test_tags_all_lowercase():
     assert len(t) == 0, "%s tags fail this test" % len(t)
 
 
-# I'm not sure I need this test, as there could be legitimate reasons this test might fail
-def test_blobs_with_duplicate_filenames():
-    "Assert that all blobs have unique filenames"
-    t = Blob.objects.values('filename').order_by().annotate(dcount=Count('sha1sum')).filter(dcount__gt=1)
-    assert len(t) == 0, "%s tags fail this test" % len(t)
-
-
 def test_blobs_on_filesystem_exist_in_db():
     "Assert that all blobs found on the filesystem exist in the database"
     p = re.compile('%s/\w\w/(\w{40})' % Blob.BLOB_STORE)
