@@ -54,6 +54,7 @@ class TodoListView(ListView):
 
 
 class TodoDetailView(UpdateView):
+    model = Todo
     template_name = 'todo/edit.html'
     form_class = TodoForm
 
@@ -63,18 +64,6 @@ class TodoDetailView(UpdateView):
         context['pk'] = self.kwargs.get('pk')
         context['action'] = 'Edit'
         return context
-
-    def get(self, request, **kwargs):
-        self.object = Todo.objects.get(user=self.request.user, id=self.kwargs.get('pk'))
-        # form_class = self.get_form_class()
-        form = self.get_form(self.get_form_class())
-        # context = self.get_context_data(object=self.object, form=form)
-        # return self.render(context)
-        return render(request, self.template_name, {'form': form})
-
-    def get_object(self, queryset=None):
-        obj = Todo.objects.get(user=self.request.user, id=self.kwargs.get('pk'))
-        return obj
 
     def form_valid(self, form):
 
@@ -94,9 +83,6 @@ class TodoDetailView(UpdateView):
         context = self.get_context_data(form=form)
         context["message"] = "Task updated"
         return self.render_to_response(context)
-
-    # def get_success_url(self):
-    #     return reverse('todo_edit', kwargs={'pk': self.object.id})
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):

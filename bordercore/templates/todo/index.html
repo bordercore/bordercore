@@ -118,9 +118,9 @@
 
         </div>
 
-        <div class="col-lg-5">
+        <div class="col-lg-offset-1 col-lg-2">
 
-            <select id="tags" class="pull-right">
+            <select id="tags" class="form-control pull-right">
                 <option>Tag filter</option>
                 {% for tag in tags %}
                     <option value="{{ tag.name }}"{% ifequal tagsearch tag.name %} selected="selected"{% endifequal %}>{{ tag.name }}</option>
