@@ -91,11 +91,16 @@ def snarf_link(request):
     url = request.GET['url']
     title = h.unescape(request.GET['title'])
 
-    b = Bookmark(is_pinned=False, user=request.user, url=url, title=title)
-    b.save()
+    # First verify that this url does not already exist
+    try:
+        b = Bookmark.objects.get(url=url)
+        messages.add_message(request, messages.WARNING, 'Bookmark already exists and was added on %s' % b.created.strftime("%B %d, %Y"))
+        return redirect('bookmark_edit', b.id)
+    except ObjectDoesNotExist:
+        b = Bookmark(is_pinned=False, user=request.user, url=url, title=title)
+        b.save()
 
     return redirect('bookmark_edit', b.id)
-
 
 @login_required
 def tag_search(request):

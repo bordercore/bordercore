@@ -51,6 +51,10 @@ $(document).ready(function() {
 
 </script>
 
+{% for message in messages %}
+    <div class="alert alert-{{ message.tags|lower }}">{{ message|safe }}</div>
+{% endfor %}
+
 <p class="lead col-lg-offset-1">
     {{ form.instance.url|favicon|safe }} {{ action }} Bookmark
 </p>
