@@ -134,7 +134,6 @@ class BlobDetailView(DetailView):
             if x.name == 'Url':
                 try:
                     context['metadata'][x.name].append(x.value)
-                    print 'b'
                 except KeyError:
                     context['metadata'][x.name] = [x.value]
             else:
@@ -149,9 +148,12 @@ class BlobDetailView(DetailView):
             context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
             context['content_type'] = self.object.get_content_type(context['solr_info']['content_type'][0])
         except IndexError, e:
-            context['error'] = 'Error retrieving info from Solr'
-            print ("%s, sha1sum=%s, error=%s" % (context['error'], self.object.sha1sum, e))
-        context['title'] = self.object.get_title(remove_edition_string=True)
+            # Give Solr up to a minute to index the blob
+            if int(datetime.datetime.now().strftime("%s")) - int(self.object.created.strftime("%s")) < 60:
+                messages.add_message(self.request, messages.INFO, 'New blob not yet indexed in Solr')
+            else:
+                messages.add_message(self.request, messages.ERROR, 'Blob not found in Solr')
+            context['title'] = self.object.get_title(remove_edition_string=True)
         context['fields_ignore'] = ['is_book', 'Url', 'Publication Date', 'Title', 'Author']
 
         context['current_collections'] = Collection.objects.filter(blob_list__contains=[{'id': self.object.id}])
