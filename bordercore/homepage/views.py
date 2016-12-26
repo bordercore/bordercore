@@ -62,11 +62,19 @@ def homepage(request):
     # Get the most recent untagged bookmarks
     bookmarks = Bookmark.objects.filter(tags__isnull=True)[:10]
 
+    # Get the list of 'daily' bookmarks
+    daily_bookmarks = Bookmark.objects.filter(tags__name__in=['daily'])
+    for bookmark in daily_bookmarks:
+        if int(datetime.datetime.now().strftime("%s")) - int(bookmark.last_check.strftime("%s")) > 1:
+            bookmark.css_class = "bookmark-daily"
+            print("%s needs to be checked" % bookmark.title)
+
     return render(request, 'homepage/index.html',
                   {'section': SECTION,
                    'quote': quote,
                    'tasks': tasks,
                    'music': music,
+                   'daily_bookmarks': daily_bookmarks,
                    'pinned_bookmarks': pinned_bookmarks,
                    'random_image_info': random_image_info,
                    'bookmarks': bookmarks})

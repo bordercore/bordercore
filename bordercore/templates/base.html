@@ -40,31 +40,37 @@
 
     <body>
 
-        <div class="container-fluid" style="height: 100%">
+        <h1> Bordercore :: {% block title %} {% endblock %} </h1>
 
-            <h1> Bordercore :: {% block title %} {% endblock %} </h1>
+        {% include "main-nav.html" %}
 
-            {% include "main-nav.html" %}
+        <!-- Inspiration for this layout comes from here: http://stackoverflow.com/questions/19089384/twitter-bootstrap-3-two-columns-full-height -->
 
-            <div class="row" style="height: 100%">
+        <div class="container-fluid">
+
+            <div class="row">
+
                 <div class="col-lg-3" id="left-block">
-                    <div id="left-block-container">
-                        {% block left-block %}
-                            Default
-                        {% endblock %}
-                    </div>
+                    {% block left-block %}
+                            Default left block content
+                    {% endblock %}
                 </div>
+
                 <div class="col-lg-9">
                     {% block content %}
                     {% endblock %}
                 </div>
+
             </div>
+
         </div>
 
-        <div id="footer">
-            <div class="container">
-                <h5 class="pull-right"> Logged in as <strong>{{ user.get_username }}</strong>. <a href="/logout">Logout</a></h5>
+        <div class="row">
+
+            <div class="col-lg-12">
+                <h5 id="footer"> Logged in as <strong>{{ user.get_username }}</strong>. <a href="/logout">Logout</a></h5>
             </div>
+
         </div>
 
     </body>

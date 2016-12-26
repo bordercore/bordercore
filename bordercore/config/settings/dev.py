@@ -6,12 +6,14 @@ from .base import *
 
 DEBUG = True
 
-TEMPLATE_DEBUG = True
+for t in TEMPLATES:
+    t['OPTIONS']['debug'] = True
 
 INTERNAL_IPS = ('127.0.0.1', '10.3.2.3')
 
 MIDDLEWARE_CLASSES += (
     'debug_panel.middleware.DebugPanelMiddleware',
+#  'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 INSTALLED_APPS += (

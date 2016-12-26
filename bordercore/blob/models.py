@@ -164,6 +164,7 @@ class Blob(TimeStampedModel, AmazonMixin):
 
     def get_content_type(self, argument):
         switcher = {
+            "application/mp4": "Video",
             "application/pdf": "PDF",
             "image/jpeg": "Image",
             "image/png": "Image"

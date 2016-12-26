@@ -65,20 +65,17 @@
 
 {% if request.GET %}
 
+    <div class="row">
+        <div class="col-lg-6">
+
 {% if not info %}
 
-    <div class="row">
-        <br />
-        <div class="col-lg-10">
-            <div class="alert alert-info">Nothing found</div>
-        </div>
-    </div>
+    <br />
+    <div class="alert alert-info">Nothing found</div>
 
 {% else %}
 
-    <div class="col-lg-10">
-
-        <table>
+    <table>
 
 {% for match in info %}
 
@@ -147,8 +144,13 @@ Tags:
 
         </table>
 
-{% endif %}
+    </div>
 
 {% endif %}
 
+{% endif %}
+
+        </div>
+    </div>
+    
 {% endblock %}

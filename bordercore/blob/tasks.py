@@ -1,13 +1,12 @@
 from __future__ import absolute_import
 from celery import shared_task
 import logging
-import os
 from subprocess import call
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                     datefmt='%m-%d %H:%M:%S',
-                    filename=os.environ['HOME'] + '/logs/solr-indexer.log',
+                    filename='/home/jerrell/logs/solr-indexer.log',
                     filemode='a')
 
 logger = logging.getLogger('bordercore.solrindexer')
