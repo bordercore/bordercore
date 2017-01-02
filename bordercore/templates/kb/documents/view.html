@@ -2,16 +2,68 @@
 
 {% block title %} KB :: Document Detail {% endblock %}
 
+{% block left-block %}
+
+{% if document.authors %}
+{{ document.authors }}
+{% endif %}
+
+{% if document.pub_date %}
+    <br /><br />
+    {{ document.pub_date }}
+{% endif %}
+
+{% if document.tags.all %}
+    <br /><br />
+    Tags:
+{% for tag in document.tags.all %}
+    <span class="label label-primary">{{ tag.name }}</span>
+{% endfor %}
+{% endif %}
+
+{% if document.source %}
+
+    <br /><br />
+
+{% if document.url %}
+
+Source: <a href="{{ document.url }}">{{ document.source }}</a>
+
+{% else %}
+
+Source: {{ document.source }}
+
+{% endif %}
+
+{% else %}
+
+{% if document.url %}
+
+    <a href="{{ document.url }}">Source</a>
+
+{% endif %}
+
+{% endif %}
+
+{% if document.note %}
+    <br /><br />
+    <div id="document_note">{{ document.note }}</div>
+{% endif %}
+
+<hr />
+
+<a href="{% url 'document_edit' document.id %}">Edit</a>
+
+{% endblock %}
+
 {% block content %}
 
 {% include "common/show_messages.html" with offset="0" %}
 
 <div class="row">
-
     <div class="col-lg-12">
         <h1>{{ document.title }}</h1>
     </div>
-
 </div>
 
 <div class="row">
@@ -27,84 +79,10 @@
 </div>
 
 <div class="row">
-
-{% if document.authors %}
-
-    <div class="col-lg-12">by {{ document.authors }}</div>
-
-{% endif %}
-
-</div>
-
-<div class="row">
-
-{% if document.pub_date %}
-
-    <div class="col-lg-12">{{ document.pub_date }}</div>
-
-{% endif %}
-
-</div>
-
-<div class="row">
-
-{% if document.tags.all %}
-
-    <div class="col-lg-12">Tags:
-{% for tag in document.tags.all %}
-    <span class="label label-primary">{{ tag.name }}</span>
-{% endfor %}
-    </div>
-{% endif %}
-
-</div>
-
-<div class="row">
-
-<div class="col-lg-12">
-    <br />
-    {{ document.get_markdown|safe }}
-</div>
-
-</div>
-
-<div class="row">
-
-{% if document.source %}
-
-    <div class="col-lg-12">
-
-{% if document.url %}
-
-Source: <a href="{{ document.url }}">{{ document.source }}</a>
-
-{% else %}
-
-Source: {{ document.source }}
-
-{% endif %}
-
-    </div>
-
-{% else %}
-
-{% if document.url %}
-
-    <div class="col-lg-12"><a href="{{ document.url }}">Source</a></div>
-
-{% endif %}
-
-{% endif %}
-
-</div>
-
-<div class="row">
-
     <div class="col-lg-12">
         <br />
-        <a href="{% url 'document_edit' document.id %}">Edit</a>
+        {{ document.get_markdown|safe }}
     </div>
-
 </div>
 
 {% endblock %}
