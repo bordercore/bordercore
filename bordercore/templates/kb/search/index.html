@@ -80,12 +80,7 @@
 {% for match in info %}
 
     <tr>
-        <td>
-            {% if match.importance == 5 %}
-            <img src="{{ STATIC_URL }}img/star.jpg" />
-            {% endif %}
-        </td>
-        <td>
+        <td{% if match.importance == 10 %} class="important"{% endif %}>
 {% if match.doctype == 'bordercore_todo' %}
 
     <h4 class="search_book_title">Todo: <a href="{% url 'todo_edit' match.internal_id %}">{{ match.bordercore_todo_task.0 }}</a>

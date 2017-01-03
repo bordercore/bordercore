@@ -119,7 +119,8 @@ ul.pagination {
  }
 
 .important {
-   background-color: #cccccc;
+   background-color: #eeeeee;
+   padding: 3px;
 }
 
 .search_book_title #edit_link{
