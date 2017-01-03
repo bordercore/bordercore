@@ -3,6 +3,14 @@
 
 import pytz
 
+
+def cleanup(interval, time_unit):
+
+    if interval == 1:
+        return "1 %s ago" % time_unit
+    else:
+        return "%s %ss ago" % (interval, time_unit)
+
 def pretty_date(time=False):
     """
     Get a datetime object or a int() Epoch timestamp and return a
@@ -11,7 +19,6 @@ def pretty_date(time=False):
     """
     from datetime import datetime
     now = datetime.now(pytz.timezone('US/Eastern'))
-#    now = datetime.now()
     if type(time) is int:
         diff = now - datetime.fromtimestamp(time)
     elif isinstance(time, datetime):
@@ -28,21 +35,21 @@ def pretty_date(time=False):
         if second_diff < 10:
             return "just now"
         if second_diff < 60:
-            return str(second_diff) + " seconds ago"
+            return cleanup(second_diff, "second")
         if second_diff < 120:
-            return  "a minute ago"
+            return "a minute ago"
         if second_diff < 3600:
-            return str( second_diff / 60 ) + " minutes ago"
+            return cleanup(second_diff / 60, "minute")
         if second_diff < 7200:
             return "an hour ago"
         if second_diff < 86400:
-            return str( second_diff / 3600 ) + " hours ago"
+            return cleanup(second_diff / 3600, "hour")
     if day_diff == 1:
         return "Yesterday"
     if day_diff < 7:
-        return str(day_diff) + " days ago"
+        return cleanup(day_diff, "day")
     if day_diff < 31:
-        return str(day_diff/7) + " weeks ago"
+        return cleanup(day_diff / 7, "week")
     if day_diff < 365:
-        return str(day_diff/30) + " months ago"
-    return str(day_diff/365) + " years ago"
+        return cleanup(day_diff / 30, "month")
+    return cleanup(day_diff / 365, "year")
