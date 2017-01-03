@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render
 from django.utils.dateformat import format
@@ -57,6 +57,7 @@ class TodoDetailView(UpdateView):
     model = Todo
     template_name = 'todo/edit.html'
     form_class = TodoForm
+    success_url = reverse_lazy('todo_list')
 
     def get_context_data(self, **kwargs):
         context = super(TodoDetailView, self).get_context_data(**kwargs)
@@ -74,15 +75,12 @@ class TodoDetailView(UpdateView):
 
         # Then add the tags specified in the form
         for tag in form.cleaned_data['tags']:
-            newtag, created = Tag.objects.get_or_create(name=tag.name)
-            if created:
-                newtag.save()
-            task.tags.add(newtag)
+            task.tags.add(tag)
 
         self.object = form.save()
         context = self.get_context_data(form=form)
         context["message"] = "Task updated"
-        return self.render_to_response(context)
+        return HttpResponseRedirect(self.get_success_url())
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
@@ -113,10 +111,7 @@ class TodoCreateView(CreateView):
 
         # Take care of the tags.  Create any that are new.
         for tag in form.cleaned_data['tags']:
-            newtag, created = Tag.objects.get_or_create(name=tag.name)
-            if created:
-                newtag.save()
-            obj.tags.add(newtag)
+            obj.tags.add(tag)
 
         obj.save()
 

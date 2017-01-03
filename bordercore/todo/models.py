@@ -19,5 +19,3 @@ class Todo(TimeStampedModel):
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
-
-

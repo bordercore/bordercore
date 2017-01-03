@@ -118,10 +118,7 @@ class CollectionCreateView(CreateView):
 
         # Take care of the tags.  Create any that are new.
         for tag in form.cleaned_data['tags']:
-            newtag, created = Tag.objects.get_or_create(name=tag.name)
-            if created:
-                newtag.save()
-            obj.tags.add(newtag)
+            obj.tags.add(tag)
 
         obj.save()
 
