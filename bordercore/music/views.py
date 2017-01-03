@@ -15,7 +15,6 @@ from django.db.models import Q
 from django.forms.utils import ErrorList
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, JsonResponse
 from django.shortcuts import redirect, render, render_to_response
-from django.template import RequestContext
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
@@ -147,13 +146,13 @@ class AlbumDetailView(DetailView):
                 display_title = song.title
                 song_list.append(dict(id=song.id,
                                       track=song.track,
-                                      title=song.title.replace('/', 'FORWARDSLASH'),
-                                      display_title=display_title,
+                                      raw_title=song.title.replace('/', 'FORWARDSLASH'),
+                                      title=display_title,
                                       length_seconds=song.length,
                                       length=time.strftime('%M:%S', time.gmtime(song.length))))
 
         context['song_list'] = song_list
-        context['cols'] = ['id', 'track', 'title', 'display_title', 'length', 'length_seconds']
+        context['cols'] = ['id', 'track', 'raw_title', 'title', 'length', 'length_seconds']
 
         return context
 
@@ -477,6 +476,7 @@ def get_song_location(song):
 
 def get_song_info(request, id):
 
+    from datetime import datetime
     from django.conf import settings
 
     song = Song.objects.get(pk=id)
@@ -487,6 +487,8 @@ def get_song_info(request, id):
             song.times_played = song.times_played + 1
         else:
             song.times_played = 1
+
+        song.last_time_played = datetime.now()
         song.save()
 
         l = Listen(song=song, user=request.user)
