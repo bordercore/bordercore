@@ -57,6 +57,8 @@
 
         });
 
+        $('#kbsearch').focus();
+
     });
 
 </script>
@@ -120,16 +122,15 @@
         <span class="search_book_author">
             {% if match.author.0 %} - {{ match.author.0 }}{% endif %}
         </span>
+        <span class="search_todo_date">{{ match.last_modified }}</span>
     </h4>
 {% endif %}
 
     &nbsp; &nbsp; {{ match.pub_date.0 }}
 
-Tags:
+Tags: {% if not match.tags%}None{% endif %}
 {% for tag in match.tags %}
-
     <strong><a href="{% url 'kb_search_tag_detail' tag %}">{{ tag }}</a></strong>{% if not forloop.last %}, {% endif %}
-
 {% endfor %}
 
         </td>
@@ -147,5 +148,5 @@ Tags:
 
         </div>
     </div>
-    
+
 {% endblock %}
