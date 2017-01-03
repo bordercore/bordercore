@@ -56,6 +56,10 @@ html, body {
      margin-right: auto;
 }
 
+.alert-margin {
+   margin-left: 0px;
+}
+
 /* Animated buttons */
 
 .glyphicon-refresh-animate {
