@@ -144,12 +144,12 @@ class AlbumDetailView(DetailView):
                 display_title = song.title + ' - ' + song.artist
             else:
                 display_title = song.title
-                song_list.append(dict(id=song.id,
-                                      track=song.track,
-                                      raw_title=song.title.replace('/', 'FORWARDSLASH'),
-                                      title=display_title,
-                                      length_seconds=song.length,
-                                      length=time.strftime('%M:%S', time.gmtime(song.length))))
+            song_list.append(dict(id=song.id,
+                                  track=song.track,
+                                  raw_title=song.title.replace('/', 'FORWARDSLASH'),
+                                  title=display_title,
+                                  length_seconds=song.length,
+                                  length=time.strftime('%M:%S', time.gmtime(song.length))))
 
         context['song_list'] = song_list
         context['cols'] = ['id', 'track', 'raw_title', 'title', 'length', 'length_seconds']
