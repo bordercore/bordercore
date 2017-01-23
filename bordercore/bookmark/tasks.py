@@ -1,10 +1,11 @@
+from celery import shared_task, task
 import logging
 import os.path
 import re
-
-from celery import task
-from django.conf import settings
 import requests
+import solr
+
+from django.conf import settings
 
 FAVICON_DIR = "%s/templates/static/%s" % (settings.PROJECT_ROOT, "img/favicons")
 
@@ -47,3 +48,28 @@ def snarf_favicon(url, parse_domain=True):
     f = open("%s/%s.ico" % (FAVICON_DIR, domain), "wb")
     f.write(r.content)
     f.close()
+
+
+@shared_task()
+def index_bookmark(id):
+
+    # Import Django models here rather than globally at the top to avoid circular dependencies
+    from bookmark.models import Bookmark
+    bookmark = Bookmark.objects.get(pk=id)
+
+    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+
+    doc = dict(
+        id="bordercore_bookmark_%s" % bookmark.id,
+        internal_id=bookmark.id,
+        bordercore_bookmark_title=bookmark.title,
+        bordercore_bookmark_note=bookmark.note,
+        tags=[tag.name for tag in bookmark.tags.all()],
+        url=bookmark.url,
+        note=bookmark.note,
+        importance=bookmark.importance,
+        last_modified=bookmark.modified,
+        doctype='bordercore_bookmark'
+    )
+    conn.add(doc)
+    conn.commit()
