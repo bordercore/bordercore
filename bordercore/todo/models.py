@@ -1,6 +1,11 @@
+import solr
+
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.signals import post_save
 
+from todo.tasks import index_todo
 from lib.mixins import TimeStampedModel
 from tag.models import Tag
 
@@ -19,3 +24,18 @@ class Todo(TimeStampedModel):
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
+
+    def delete(self):
+        conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+        conn.delete(queries=['id:bordercore_todo_%s' % (self.id)])
+        conn.commit()
+
+        super(Todo, self).delete()
+
+
+def postSaveForTodo(**kwargs):
+    instance = kwargs.get('instance')
+    index_todo.delay(instance.id)
+
+
+post_save.connect(postSaveForTodo, Todo)
