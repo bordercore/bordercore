@@ -136,6 +136,9 @@
         <h2>{{ album.title }}</h2>
         <h3>{{ album.artist }}</h3>
         <h5>{{ album.year }}</h5>
+        {% if album.original_release_year != album.year %}
+            <h5>Originally released {{ album.original_release_year }}</h5>
+        {% endif %}
     </div>
 
 </div>

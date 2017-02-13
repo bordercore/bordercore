@@ -161,7 +161,7 @@ class AlbumDetailView(DetailView):
 def artist_detail(request, artist_name):
 
     # Get all albums by this artist
-    a = Album.objects.filter(artist=artist_name).order_by('-year')
+    a = Album.objects.filter(artist=artist_name).order_by('-original_release_year')
 
     # Get all songs by this artist that do not appear on an album
     s = Song.objects.filter(artist=artist_name).filter(album__isnull=True)
@@ -282,6 +282,7 @@ def add_song(request):
                     a = Album(title=request.POST['album'],
                               artist=album_artist,
                               year=form.cleaned_data['year'],
+                              original_release_year=request.POST['original_release_year'] if request.POST['original_release_year'] else form.cleaned_data['year'],
                               compilation=request.POST.get('compilation', False))
             else:
                 # No album was specified

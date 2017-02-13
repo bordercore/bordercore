@@ -10,6 +10,7 @@ class Album(TimeStampedModel):
     title = models.TextField()
     artist = models.TextField()
     year = models.IntegerField()
+    original_release_year = models.IntegerField(null=True)
     compilation = models.BooleanField(default=False)
     comment = models.TextField(null=True)
 

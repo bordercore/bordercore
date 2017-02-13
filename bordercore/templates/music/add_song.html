@@ -1,9 +1,32 @@
-
 {% extends "base.html" %}
 
 {% load dict_get %}
 
 {% block title %} Music {% endblock %}
+
+{% block left-block %}
+
+    {% if md5sum %}
+        <img src="{% url 'album_artwork' md5sum %}" height="300" width="300" />
+    {% endif %}
+
+    {% if notes %}
+        <div>
+
+            <br /><br />
+
+            <table class="table table-bordered table-striped">
+                <caption><strong>Notes</strong></caption>
+                {% for note in notes %}
+                    <tr><td>{{ note }}</td></tr>
+                {% endfor %}
+            </table>
+
+        </div>
+    {% endif %}
+
+
+{% endblock %}
 
 {% block content %}
 
@@ -25,8 +48,8 @@
 
     <div class="row">
 
-        <div class="col-lg-7">
-            <p class="lead col-lg-offset2-2">{{ action}} Song</p>
+        <div class="col-lg-7 col-lg-offset-1">
+            <p class="lead">{{ action}} Song</p>
         </div>
 
         <div class="col-lg-7">
@@ -40,7 +63,7 @@
                     <div class="form-group">
                         <div class="controls">
 
-                            <input type="file" name="song" class="form-control col-lg-5" accept="audio/*" /> &nbsp; &nbsp;
+                            <input type="file" name="song" class="form-control col-lg-4" accept="audio/*" /> &nbsp; &nbsp;
 
                             <button type="submit" class="btn btn-default" name="upload" disabled="true">Upload</button>
 
@@ -54,25 +77,36 @@
 
                     {% for field in form %}
                         <div class="form-group{% if field.errors %} error{% endif %}">
-                            <label class="control-label" for="inputTitle">{{ field.label }}</label>
-                            <div class="controls">
+                            <label class="col-lg-2 control-label" for="inputTitle">{{ field.label }}</label>
+                            <div class="col-lg-5 controls">
                                 {{ field }}
                                 {% for error in field.errors %}
                                     <span class="form-error">{{ error }}</span>
                                 {% endfor %}
                             </div>
                         </div>
-                        {% if field.label == 'Artist' %}
+                        {% if field.label == 'Year' %}
                             <div class="form-group{% if field.errors %} error{% endif %}">
-                                <label class="control-label" for="inputTitle">Album</label>
+                                <label class="col-lg-2 control-label" for="inputTitle">Album</label>
                                 <div class="col-lg-5">
                                     <input class="form-control" id="id_album" name="album" type="text" value="{{ info.album.0 }}" />
                                 </div>
-                                <label class="control-label" for="inputCompilation">Compilation</label>
+                            </div>
+
+                            <div class="form-group{% if field.errors %} error{% endif %}">
+                                <label class="col-lg-2 control-label" for="inputTitle">Compilation</label>
                                 <div class="col-lg-5">
-                                    <input class="form-control" type="checkbox" name="compilation" value="True" id="id_compilation" />
+                                    <input type="checkbox" name="compilation" id="id_compilation" />
                                 </div>
                             </div>
+
+                            <div class="form-group{% if field.errors %} error{% endif %}">
+                                <label class="col-lg-2 control-label" for="inputTitle">Original Release Year</label>
+                                <div class="col-lg-5">
+                                    <input class="form-control" id="id_original_release_year" name="original_release_year" type="text" />
+                                </div>
+                            </div>
+
                         {% endif %}
                     {% endfor %}
 
@@ -89,31 +123,6 @@
 
         </div>
 
-        <div class="col-lg-5">
-
-            <br /><br />
-
-            {% if md5sum %}
-                <img src="{% url 'album_artwork' md5sum %}" height="300" width="300" />
-            {% endif %}
-
-        </div>
-
     </div>
-
-    {% if notes %}
-        <div>
-
-            <br /><br />
-
-            <table class="table table-bordered table-striped">
-                <caption><strong>Notes</strong></caption>
-                {% for note in notes %}
-                    <tr><td>{{ note }}</td></tr>
-                {% endfor %}
-            </table>
-
-        </div>
-    {% endif %}
 
 {% endblock %}
