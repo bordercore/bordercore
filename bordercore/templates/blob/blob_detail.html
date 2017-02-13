@@ -56,17 +56,6 @@
 
             <br /><br />
 
-            {% if metadata.Description %}
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        {{ metadata.Description }}
-
-
-                    </div>
-                </div>
-                <br /><br />
-            {% endif %}
-
             <form action="{% url 'blob_edit' object.sha1sum %}">
 
                 <a class="btn btn-default" href="{{ STATIC_URL }}blobs/{{ object.get_url }}" role="button" target="blob">Download</a>
