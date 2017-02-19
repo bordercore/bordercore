@@ -77,7 +77,6 @@ class CollectionDetailView(DetailView):
                 try:
                     if blob.get('note', ''):
                         solr_list_objects[blob['id']]['note'] = blob['note']
-                    solr_list_objects[blob['id']]['added_to_collection'] = datetime.datetime.fromtimestamp(blob['added']).strftime("%B %d, %Y")
                     blob_list_temp.append(solr_list_objects[blob['id']])
                 except KeyError:
                     print "Warning: blob_id = %s not found in solr." % blob['id']
