@@ -58,7 +58,7 @@
             <ul class="collection_sortable">
                 {% for blob in blob_list %}
                     <li id="{{ blob.internal_id }}" data-toggle="popover" title="Added {{ blob.added_to_collection }}" data-content="{{ blob.note }}">
-                        <img src="{{ blob.cover_info }}" height="92" width="70"/>
+                        <img src="{{ STATIC_URL }}{{ blob.cover_info.url }}" height="{{ blob.cover_info.height_cropped }}" width="{{ blob.cover_info.width_cropped }}"/>
                         <br/>
                         <a href="{% url 'blob_detail' blob.sha1sum %}">{{ blob.title.0 }}</a> {% if blob.note %}<img src="{{ STATIC_URL }}/img/note.png" height="16" width="16" />{% endif %}
                     </li>

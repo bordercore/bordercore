@@ -86,7 +86,7 @@ class CollectionDetailView(DetailView):
                 if object['doctype'] in ('blob', 'book'):
                     filename = os.path.basename(object['filepath'])
                     object['url'] = object['filepath'].split(Blob.BLOB_STORE)[1]
-                    object['cover_info'] = static(Blob.get_cover_info(object['sha1sum'])['url'])
+                    object['cover_info'] = Blob.get_cover_info(object['sha1sum'], max_cover_image_width=70)
                     if object['content_type']:
                         try:
                             object['content_type'] = object['content_type'][0].split('/')[1]
