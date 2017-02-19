@@ -170,7 +170,7 @@ class BlobUpdateView(UpdateView):
         context['section'] = SECTION
         context['sha1sum'] = self.kwargs.get('sha1sum')
         context['metadata'] = [x for x in self.object.metadata_set.all() if x.name != 'is_book']
-        context['cover_info'] = Blob.get_cover_info(self.object.sha1sum)
+        context['cover_info'] = Blob.get_cover_info(self.object.sha1sum, max_cover_image_width=400)
         if True in [True for x in self.object.metadata_set.all() if x.name == 'is_book']:
             context['is_book'] = True
         context['collections_other'] = Collection.objects.filter(Q(user=self.request.user) & ~Q(blob_list__contains=[{'id': self.object.id}]))

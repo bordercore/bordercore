@@ -23,7 +23,7 @@ EDITIONS = {'1': 'First',
             '7': 'Seventh',
             '8': 'Eighth'}
 
-MAX_COVER_IMAGE_WIDTH = 600
+MAX_COVER_IMAGE_WIDTH = 800
 
 
 class Blob(TimeStampedModel, AmazonMixin):

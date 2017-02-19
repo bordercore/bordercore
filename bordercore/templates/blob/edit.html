@@ -2,6 +2,29 @@
 
 {% block title %} Blob {% endblock %}
 
+{% block left-block %}
+
+    <img id="amazon-cover-image" src="{{ STATIC_URL }}{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" />
+
+    <br /><br />
+
+    <div id="update-cover-div">
+        <input id="update-cover" class="btn btn-default" type="button" value="Update Image" />
+    </div>
+
+    <div id="set-cover-div" class="hidden">
+        <span id="progress" class="glyphicon glyphicon-refresh glyphicon-refresh-animate hidden"></span>
+        <input id="next-cover" class="btn btn-default" type="button" value="Next Image" />
+        <input id="set-cover" class="btn btn-primary" type="button" value="Set Image" />
+        <span id="amazon-feedback"></span>
+    </div>
+
+    <br />
+
+    <div class="alert" id="feedback"></div>
+
+{% endblock %}
+
 {% block content %}
 
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput-custom.css" />
@@ -320,9 +343,11 @@
 <div class="row">
 
     <div class="col-lg-8">
-        <p class="lead col-lg-offset-2">{{ action }} Blob</p>
-        <div class="col-lg-2 pull-right"><a href="{% url 'blob_detail' sha1sum %}">View</a></div>
-        </p>
+
+        <ol class="breadcrumb">
+            <li><a href="{% url 'blob_detail' sha1sum %}">Blob Detail</a></li>
+            <li class="active">Edit Blob</li>
+        </ol>
 
         <form id="blob-form" class="form-horizontal" action="{{ request.path }}" method="post">
             <input type="hidden" name="metadata" id="input-metadata" />
@@ -394,22 +419,6 @@
 
         </form>
 
-    </div>
-
-    <div class="col-lg-4">
-        <img id="amazon-cover-image" src="{{ STATIC_URL }}{{ cover_info.url }}" width="381" height="500" />
-        <br /><br />
-        <div id="update-cover-div">
-            <input id="update-cover" class="btn btn-default" type="button" value="Update" />
-        </div>
-        <div id="set-cover-div" class="hidden">
-            <span id="progress" class="glyphicon glyphicon-refresh glyphicon-refresh-animate hidden"></span>
-            <input id="next-cover" class="btn btn-default" type="button" value="Next" />
-            <input id="set-cover" class="btn btn-primary" type="button" value="Set" />
-            <span id="amazon-feedback"></span>
-        </div>
-        <br />
-        <div class="alert" id="feedback"></div>
     </div>
 
 </div>
