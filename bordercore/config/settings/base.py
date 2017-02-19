@@ -93,7 +93,7 @@ ROOT_URLCONF = 'bordercore.config.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'bordercore.config.wsgi.application'
 
-ALLOWED_HOSTS = ('localhost', 'www.bordercore.com')
+ALLOWED_HOSTS = ('localhost', 'www.bordercore.com', '10.3.2.3')
 
 INSTALLED_APPS = (
 
