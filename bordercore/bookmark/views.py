@@ -99,8 +99,10 @@ def snarf_link(request):
     except ObjectDoesNotExist:
         b = Bookmark(is_pinned=False, user=request.user, url=url, title=title)
         b.save()
+        snarf_favicon.delay(url)
 
     return redirect('bookmark_edit', b.id)
+
 
 @login_required
 def tag_search(request):
@@ -156,7 +158,7 @@ def tag_bookmark_list(request):
     sorted_list = BookmarkTagUser.objects.get(tag=Tag.objects.get(name=tag), user=request.user)
 
     # Verify that the bookmark is in the existing sort list
-    if not link_id in sorted_list.bookmark_list:
+    if link_id not in sorted_list.bookmark_list:
         print "NOT Found!"
         # TODO Return an exception
 
@@ -168,7 +170,6 @@ def tag_bookmark_list(request):
     return HttpResponse(json.dumps('OK'), content_type="application/json")
 
 
-#@login_required
 class OrderListJson(BaseDatatableView):
     # define column names that will be used in sorting
     # order is important and should be same as order of columns
@@ -191,22 +192,9 @@ class OrderListJson(BaseDatatableView):
     def filter_queryset(self, qs):
         # use request parameters to filter queryset
 
-#        qs = [ bookmark for bookmark in qs if not bookmark.tags.all() ]
-
         sSearch = self.request.GET.get('sSearch', None)
         if sSearch:
             qs = qs.filter(title__icontains=sSearch)
-
-        # more advanced example
-        # filter_customer = self.request.GET.get('customer', None)
-
-        # if filter_customer:
-        #     customer_parts = filter_customer.split(' ')
-        #     qs_params = None
-        #     for part in customer_parts:
-        #         q = Q(customer_firstname__istartswith=part)|Q(customer_lastname__istartswith=part)
-        #         qs_params = qs_params | q if qs_params else q
-        #         qs = qs.filter(qs_params)
 
         return qs
 
@@ -223,8 +211,5 @@ class OrderListJson(BaseDatatableView):
                 item.url,
                 item.title,
                 item.id
-                # "%s %s" % (item.customer_firstname, item.customer_lastname),
-                # item.get_state_display(),
-                # item.modified.strftime("%Y-%m-%d %H:%M:%S")
             ])
         return json_data

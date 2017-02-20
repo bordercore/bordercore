@@ -16,7 +16,7 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 @task()
 def snarf_favicon(url, parse_domain=True):
 
-    print "Snarfing favicon for %s" % url
+    logging.info("Snarfing favicon for %s" % url)
 
     if parse_domain:
 
@@ -30,7 +30,7 @@ def snarf_favicon(url, parse_domain=True):
             if len(parts) == 3:
                 domain = '.'.join(parts[1:])
         else:
-            print "Can't parse domain from url"
+            logging.warn("Can't parse domain from url: %s" % url)
             return
 
     else:
@@ -42,7 +42,7 @@ def snarf_favicon(url, parse_domain=True):
 
     r = requests.get('http://%s/favicon.ico' % domain)
     if r.status_code != 200:
-        print "Error: status code for %s was %d" % (domain, r.status_code)
+        logging.error("Error: status code for %s was %d" % (domain, r.status_code))
         return
 
     f = open("%s/%s.ico" % (FAVICON_DIR, domain), "wb")
