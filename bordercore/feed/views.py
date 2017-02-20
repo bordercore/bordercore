@@ -5,7 +5,8 @@ import urllib
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic.list import ListView
 
@@ -142,7 +143,7 @@ def feed_edit(request, feed_id=None):
                 if request.POST['Go'] == 'Add':
                     update_feed.delay(newform.id)
                     # If the user clicked the 'subscribe' checkbox, subscribe her
-                    if request.POST['subscribe']:
+                    if request.POST.get('subscribe', ''):
                         newform.subscribe_user(request.user, 1)
 
                 # snarf_favicon.delay(b.url)
@@ -150,7 +151,7 @@ def feed_edit(request, feed_id=None):
         elif request.POST['Go'] == 'Delete':
             f.delete()
             messages.add_message(request, messages.INFO, 'Feed deleted')
-            return FeedListView.as_view()(request)
+            return HttpResponseRedirect(reverse('feed_subscriptions'))
 
     else:
         form = FeedForm()  # An unbound form
@@ -173,7 +174,6 @@ def check_url(request, url):
 
     url = urllib.unquote(url).decode('utf8')
 
-    # TODO: Use Celery to asynchronously check the url
     r = requests.get(url)
     if r.status_code != 200:
         status = {'status': r.status_code,
