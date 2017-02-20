@@ -39,6 +39,7 @@ class ExerciseUser(models.Model):
     user = models.ForeignKey(User)
     exercise = models.ForeignKey(Exercise)
     started = models.DateTimeField(auto_now_add=True)
+    frequency = models.IntegerField(blank=False, default=7)
 
     class Meta:
         unique_together = ('user', 'exercise')

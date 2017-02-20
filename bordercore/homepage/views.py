@@ -6,11 +6,13 @@ import solr
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import render
 
 from blob.models import Blob
 from bookmark.models import Bookmark
+from fitness.models import ExerciseUser
 from quote.models import Quote
 from music.models import Listen
 from cal.models import Calendar
@@ -69,6 +71,15 @@ def homepage(request):
             bookmark.css_class = "bookmark-daily"
             print("%s needs to be checked" % bookmark.title)
 
+    # Get overdue exercises
+    overdue_exercises = []
+    active_exercises = ExerciseUser.objects.filter(user=1)
+    for exercise in active_exercises:
+        lag = (int(datetime.datetime.now().strftime("%s")) - int(exercise.exercise.data_set.order_by('-date')[0].date.strftime("%s"))) / 86400 + 1
+        if (lag >= exercise.frequency):
+            overdue_exercises.append({'exercise': exercise,
+                                      'lag': lag})
+
     return render(request, 'homepage/index.html',
                   {'section': SECTION,
                    'quote': quote,
@@ -77,7 +88,8 @@ def homepage(request):
                    'daily_bookmarks': daily_bookmarks,
                    'pinned_bookmarks': pinned_bookmarks,
                    'random_image_info': random_image_info,
-                   'bookmarks': bookmarks})
+                   'bookmarks': bookmarks,
+                   'overdue_exercises': sorted(overdue_exercises, key=lambda x: x['lag'], reverse=True)})
 
 
 @login_required
