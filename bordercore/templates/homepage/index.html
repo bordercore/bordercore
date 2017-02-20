@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load favicon %}
+
 {% block title %} Home {% endblock %}
 
 {% block left-block %}
@@ -82,7 +84,7 @@
             <div class="panel-heading">Recent Bookmarks</div>
             <ul class="list-group">
                 {% for bookmark in bookmarks %}
-                    <li class="list-group-item"><a href="{{ bookmark.url }}">{{ bookmark.title }}</a> </li>
+                    <li class="list-group-item">{{ bookmark.url|favicon:16|safe }} &nbsp; <a href="{{ bookmark.url }}">{{ bookmark.title }}</a> </li>
                 {% endfor %}
             </ul>
         </div>
