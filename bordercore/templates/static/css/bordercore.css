@@ -153,6 +153,10 @@ ul.pagination {
    width: 340px;
 }
 
+.blob_edit_amazon_name_field {
+   width: 100px;
+}
+
 #myModal #title {
     width: 300px;
 }

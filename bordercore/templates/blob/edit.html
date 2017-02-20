@@ -58,7 +58,10 @@
                 searching: false,
                 select: {
                     style: 'multi'
-                }
+                },
+                columnDefs: [
+                    { targets: [0], class: "blob_edit_amazon_name_field" }
+                ]
             });
 
             // Call this function anytime a row is added to the metadata table

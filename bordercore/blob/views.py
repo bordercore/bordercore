@@ -251,27 +251,41 @@ def set_amazon_image_info(request, sha1sum, index=0):
     return JsonResponse(result)
 
 
+def amazon_metadata_dupe_check(dupes, name, value):
+    if value in dupes[name]:
+        return False
+    else:
+        dupes[name][value] = True
+        return True
+
+
 def get_amazon_metadata(request, title):
 
     api = API(cfg=amazon_api_config)
 
     return_data = {'data': []}
+    dupes = {'Title': {}, 'Author': {}, 'Publication Date': {}}
 
     try:
         results = api.item_search('Books', Title=title, ResponseGroup='Medium', Sort='-publication_date')
         for result in results:
             try:
-                return_data['data'].append(['Title', result.ItemAttributes.Title.text])
+                title = result.ItemAttributes.Title.text
+                if amazon_metadata_dupe_check(dupes, 'Title', title):
+                    return_data['data'].append(['Title', title])
                 author_raw = result.ItemAttributes.Author.text
-                matches = re.split("\s?;\s?|\s?,\s?", author_raw)
+                matches = [x.strip() for x in re.split("\s?;\s?|\s?,\s?", author_raw)]
                 for author in matches:
-                    return_data['data'].append(['Author', author.strip()])
+                    if amazon_metadata_dupe_check(dupes, 'Author', author):
+                        return_data['data'].append(['Author', author])
                 publication_data_raw = str(result.ItemAttributes.PublicationDate)
                 matches = re.match(r'^(\d\d\d\d)', publication_data_raw)
                 if matches:
-                    return_data['data'].append(['Publication Date', matches.group(1)])
+                    publication_date = matches.group(1)
                 else:
-                    return_data['data'].append(['Publication Date', str(result.ItemAttributes.PublicationDate)])
+                    publication_date = str(result.ItemAttributes.PublicationDate)
+                if amazon_metadata_dupe_check(dupes, 'Publication Date', publication_date):
+                    return_data['data'].append(['Publication Date', publication_date])
             except AttributeError, e:
                 print "AttributeError: %s" % e
     except NoExactMatchesFound:
