@@ -86,7 +86,7 @@ Please correct the errors below.
             <div class="col-lg-3 col-lg-offset-2">
                 <input class="btn btn-default" type="submit" name="Go" value="{{ action }}">
                 <input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete">
-                <a class="btn btn-default" href="{% url 'feed_list' %}">Cancel</a>
+                <a class="btn btn-default" href="{% url 'feed_subscriptions' %}">Cancel</a>
             </div>
         </div>
 
