@@ -129,7 +129,7 @@
 
                         <!-- Tacking on the glyphs in an input-group class messes up the layout -->
                         <div class="col-lg-3">
-                            <input class="form-control date" type="text" name="pub_date" value="{{ field.value }}" />
+                            <input class="form-control date" type="text" id="id_pub_date" name="pub_date" value="{{ field.value|date:'m-d-Y' }}" />
                         </div>
 
                         <div class="col-lg-3">
