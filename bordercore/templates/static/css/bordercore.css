@@ -56,6 +56,10 @@ html, body {
      margin-right: auto;
 }
 
+.bold {
+   font-weight: bold;
+}
+
 .alert-margin {
    margin-left: 0px;
 }

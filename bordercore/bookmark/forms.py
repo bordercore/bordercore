@@ -1,12 +1,21 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.forms import ModelForm, Select, Textarea, TextInput, ValidationError
+from django.db import models
+from django.forms import CheckboxInput, ModelForm, Select, Textarea, TextInput, ValidationError
 
 from bookmark.models import Bookmark, BookmarkTagUser
 from blog.models import Tag
 from lib.fields import ModelCommaSeparatedChoiceField
 
 
+def daily_check_test(value):
+    if value == 'null':
+        return False
+    else:
+        return True
+
+
 class BookmarkForm(ModelForm):
+
     def __init__(self, *args, **kwargs):
         super(BookmarkForm, self).__init__(*args, **kwargs)
 
@@ -57,6 +66,10 @@ class BookmarkForm(ModelForm):
             raise ValidationError("Error: this bookmark already exists")
         return data
 
+    def clean_daily(self):
+        data = self.cleaned_data['daily']
+        return data
+
     tags = ModelCommaSeparatedChoiceField(
         required=False,
         queryset=Tag.objects.filter(),
@@ -64,10 +77,11 @@ class BookmarkForm(ModelForm):
 
     class Meta:
         model = Bookmark
-        fields = ('url', 'title', 'note', 'tags', 'importance', 'is_pinned', 'id')
+        fields = ('url', 'title', 'note', 'tags', 'importance', 'is_pinned', 'daily', 'id')
         widgets = {
             'url': TextInput(attrs={'class': 'form-control'}),
             'title': TextInput(attrs={'class': 'form-control'}),
             'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),
-            'importance': Select(attrs={'class': 'form-control', 'autocomplete': 'off'}, choices=((1, 'Normal'), (5, 'High'), (10, 'Highest')))
+            'importance': Select(attrs={'class': 'form-control', 'autocomplete': 'off'}, choices=((1, 'Normal'), (5, 'High'), (10, 'Highest'))),
+            'daily': CheckboxInput(check_test=daily_check_test)
         }

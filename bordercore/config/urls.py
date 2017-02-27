@@ -64,6 +64,7 @@ urlpatterns = [
     url(r'^blog/edit(?:/(\d+))?', blog_views.blog_edit, name='blog_edit'),
     url(r'^blog/(\d+)?', blog_views.blog_list, name='blog_list'),
 
+    url(r'^bookmarks/click(?:/(\d+))?', bookmark_views.bookmark_click, name='bookmark_click'),
     url(r'^bookmarks/edit(?:/(\d+))?', bookmark_views.bookmark_edit, name='bookmark_edit'),
     url(r'^bookmarks/snarf_link.html', bookmark_views.snarf_link),
     url(r'^bookmarks/tag/', bookmark_views.bookmark_tag, name='bookmark_tag'),

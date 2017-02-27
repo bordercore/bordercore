@@ -65,11 +65,10 @@ def homepage(request):
     bookmarks = Bookmark.objects.filter(tags__isnull=True)[:10]
 
     # Get the list of 'daily' bookmarks
-    daily_bookmarks = Bookmark.objects.filter(tags__name__in=['daily'])
+    daily_bookmarks = Bookmark.objects.filter(daily__isnull=False)
     for bookmark in daily_bookmarks:
-        if int(datetime.datetime.now().strftime("%s")) - int(bookmark.last_check.strftime("%s")) > 1:
-            bookmark.css_class = "bookmark-daily"
-            print("%s needs to be checked" % bookmark.title)
+        if bookmark.daily['viewed'] != 'true':
+            bookmark.css_class = "bold"
 
     # Get overdue exercises
     overdue_exercises = []

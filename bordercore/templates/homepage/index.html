@@ -23,6 +23,16 @@
         </div>
 
         <div class="panel panel-primary">
+            <div class="panel-heading">Daily Bookmarks</div>
+            <ul class="list-group">
+                {% for bookmark in daily_bookmarks %}
+                    <li class="list-group-item {{ bookmark.css_class }}"><a href="{% url 'bookmark_click' bookmark.id %}">{{ bookmark.title }}</a></li>
+                    <!-- <li class="list-group-item {{ bookmark.css_class }}"><a href="{{ bookmark.url }}">{{ bookmark.title }}</a></li> -->
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="panel panel-primary">
             <div class="panel-heading">Overdue Exercises</div>
             <ul class="list-group">
                 {% for exercise in overdue_exercises %}
@@ -36,15 +46,6 @@
             <ul class="list-group">
                 {% for bookmark in pinned_bookmarks %}
                     <li class="list-group-item"><a href="{{ bookmark.url }}">{{ bookmark.title }}</a> </li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <div class="panel panel-primary">
-            <div class="panel-heading">Daily Bookmarks</div>
-            <ul class="list-group">
-                {% for bookmark in daily_bookmarks %}
-                    <li class="list-group-item {{ bookmark.css_class }}"><a href="{{ bookmark.url }}">{{ bookmark.title }}</a></li>
                 {% endfor %}
             </ul>
         </div>

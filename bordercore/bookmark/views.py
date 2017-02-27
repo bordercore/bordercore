@@ -30,6 +30,15 @@ def bookmark_list(request):
 
 
 @login_required
+def bookmark_click(request, bookmark_id=None):
+
+    b = Bookmark.objects.get(pk=bookmark_id) if bookmark_id else None
+    b.daily['viewed'] = 'true'
+    b.save()
+    return redirect(b.url)
+
+
+@login_required
 def bookmark_edit(request, bookmark_id=None):
 
     action = 'Edit'

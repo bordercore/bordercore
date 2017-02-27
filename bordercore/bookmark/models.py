@@ -1,14 +1,25 @@
+import json
 import solr
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.fields import ArrayField, JSONField
 from django.db import models
 from django.db.models.signals import post_save
 
 from bookmark.tasks import index_bookmark
 from lib.mixins import TimeStampedModel
 from tag.models import Tag
+
+
+class DailyBookmarkJSONField(JSONField):
+
+    def to_python(self, value):
+        print("value is {}".format(value))
+        if value is True:
+            return json.loads('{"viewed": "false"}')
+        else:
+            return None
 
 
 class Bookmark(TimeStampedModel):
@@ -18,6 +29,7 @@ class Bookmark(TimeStampedModel):
     note = models.TextField(null=True)
     tags = models.ManyToManyField(Tag)
     is_pinned = models.BooleanField(default=False)
+    daily = DailyBookmarkJSONField(blank=True, null=True)
     last_check = models.DateTimeField(null=True)
     last_response_code = models.IntegerField(null=True)
     importance = models.IntegerField(default=1)
