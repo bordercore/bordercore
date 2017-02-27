@@ -93,8 +93,9 @@
 
             $('#id_author, #id_title').keypress( function(e) {
                 // Transforms 'JERRELL SCHIVERS' to 'Jerrell Schivers'
-                if (e.which && e.which == 2) { // Control-B
+                if (e.which && (e.which == 2 || e.which == 8747)) { // Control-B (Linux) or Alt-B (Mac)
                     $(this).val( $(this).val().toLowerCase().replace(/(\s+)(.)|^(.)/g, formatName) );
+                    return false;
                 }
             });
 
