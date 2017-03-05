@@ -224,7 +224,7 @@ def add_song(request):
                 if Album.objects.filter(title=info['album'][0], artist=info['artist'][0]):
                     notes.append('You already have an album with this title')
                 # Look for a fuzzy match
-                fuzzy_matches = Album.objects.filter(Q(title__icontains='The Wait Is Over'.lower()))
+                fuzzy_matches = Album.objects.filter(Q(title__icontains=info['title'][0].lower()))
                 if fuzzy_matches:
                     notes.append('Found a fuzzy match on the album title: "%s" by %s' % (fuzzy_matches[0].title, fuzzy_matches[0].artist))
 
