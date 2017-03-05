@@ -96,7 +96,7 @@ class Blob(TimeStampedModel, AmazonMixin):
 
         # Is the blob itself an image?
         filename, file_extension = os.path.splitext(b.filename)
-        if file_extension[1:] in ['gif', 'jpg', 'png']:
+        if file_extension[1:] in ['gif', 'jpg', 'jpeg', 'png']:
             info = Blob.get_image_dimensions(file_path, max_cover_image_width)
             info['url'] = "blobs/%s/%s/%s" % (sha1sum[0:2], sha1sum, b.filename)
 
