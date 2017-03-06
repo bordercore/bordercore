@@ -25,7 +25,7 @@
     var refreshInterval = 60;  // Minutes
 
     function refreshList() {
-        oTable.draw();
+        oTable.draw('page');
         setTimeout("refreshList()", refreshInterval*60*1000);
     }
 
@@ -94,7 +94,7 @@
                     $('#feedback').fadeOut(1000);
                 }, 3000);
 
-                oTable.draw();
+                oTable.draw('page');
 
                 $('#btn-edit').attr("disabled", "disabled");
                 $('#btn-delete').attr("disabled", "disabled");
