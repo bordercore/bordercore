@@ -22,11 +22,14 @@ def bookmark_list(request):
     message = ''
     bookmarks = []
 
+    untagged_count = Bookmark.objects.filter(tags__isnull=True).count()
+
     return render(request, 'bookmark/index.html',
                   {'section': SECTION,
                    'bookmarks': bookmarks,
                    'cols': ['Date', 'url', 'title', 'id'],
-                   'message': message})
+                   'message': message,
+                   'untagged_count': untagged_count})
 
 
 @login_required
