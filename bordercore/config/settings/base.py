@@ -162,8 +162,8 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 LOGIN_URL = "/login/"
 
-# Celery support
-BROKER_URL = 'amqp://guest:guest@localhost:5672/'
+# Set Redis as my Celery broker
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
 
 # Solr config
 SOLR_HOST = 'localhost'

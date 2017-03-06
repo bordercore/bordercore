@@ -1,10 +1,10 @@
-from celery import shared_task
+from celery import task
 import solr
 
 from django.conf import settings
 
 
-@shared_task()
+@task()
 def index_document(id):
 
     # Import Django models here rather than globally at the top to avoid circular dependencies

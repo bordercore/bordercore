@@ -1,5 +1,5 @@
 from __future__ import absolute_import
-from celery import shared_task
+from celery import task
 import logging
 from subprocess import call
 
@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger('bordercore.solrindexer')
 
 
-@shared_task()
+@task()
 def index_document(sha1sum):
 
     logger.info("index document: %s" % (sha1sum))

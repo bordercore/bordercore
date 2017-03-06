@@ -1,4 +1,4 @@
-from celery import shared_task, task
+from celery import task
 import logging
 import os.path
 import re
@@ -50,7 +50,7 @@ def snarf_favicon(url, parse_domain=True):
     f.close()
 
 
-@shared_task()
+@task
 def index_bookmark(id):
 
     # Import Django models here rather than globally at the top to avoid circular dependencies
