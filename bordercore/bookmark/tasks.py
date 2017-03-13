@@ -45,6 +45,10 @@ def snarf_favicon(url, parse_domain=True):
         logging.error("Error: status code for %s was %d" % (domain, r.status_code))
         return
 
+    if len(r.content) == 0:
+        logging.warn("favicon image size is zero for {}".format(domain))
+        return
+
     f = open("%s/%s.ico" % (FAVICON_DIR, domain), "wb")
     f.write(r.content)
     f.close()
