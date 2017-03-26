@@ -82,6 +82,7 @@ def test_blobs_in_db_exist_in_solr():
 
     for b in blobs:
         if b.sha1sum in ['e5bd032709cc5aa2a0be50c6eeb19be788f8b404',
+                         'edac0af3e77180bc920d0190e5b388c213d76c9c',
                          'f01176a1dbcf335159d78792a8b5f20746d3b12f',
                          '076d6870f5ee0626817a38b65c28b60c61e1628d',
                          '01cfa4c1c2007055fbaf27e3ffaf871ac217271d']:
