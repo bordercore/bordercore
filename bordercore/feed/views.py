@@ -13,7 +13,6 @@ from django.views.generic.list import ListView
 from accounts.models import UserProfile
 from feed.forms import FeedForm
 from feed.models import Feed, FeedItem
-from feed.tasks import update_feed
 
 SECTION = 'Feeds'
 
