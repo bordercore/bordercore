@@ -147,7 +147,7 @@ class BlobDetailView(DetailView):
             query = 'sha1sum:%s' % self.object.sha1sum
             context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
             context['content_type'] = self.object.get_content_type(context['solr_info']['content_type'][0])
-        except IndexError, e:
+        except IndexError:
             # Give Solr up to a minute to index the blob
             if int(datetime.datetime.now().strftime("%s")) - int(self.object.created.strftime("%s")) < 60:
                 messages.add_message(self.request, messages.INFO, 'New blob not yet indexed in Solr')
@@ -245,7 +245,7 @@ def set_amazon_image_info(request, sha1sum, index=0):
         b.set_amazon_cover_url('medium', request.POST['medium'])
         b.set_amazon_cover_url('large', request.POST['large'])
         result = {'message': 'Cover image updated'}
-    except Exception, e:
+    except Exception as e:
         result = {'message': str(e), 'error': True}
 
     return JsonResponse(result)
@@ -286,8 +286,8 @@ def get_amazon_metadata(request, title):
                     publication_date = str(result.ItemAttributes.PublicationDate)
                 if amazon_metadata_dupe_check(dupes, 'Publication Date', publication_date):
                     return_data['data'].append(['Publication Date', publication_date])
-            except AttributeError, e:
-                print "AttributeError: %s" % e
+            except AttributeError as e:
+                print("AttributeError: %s" % e)
     except NoExactMatchesFound:
         return_data['error'] = "No Amazon matches found"
 

@@ -1,5 +1,5 @@
 from celery import task
-import solr
+from solrpy.core import SolrConnection
 
 from django.conf import settings
 
@@ -11,7 +11,7 @@ def index_blog(id):
     from blog.models import Post
     blog = Post.objects.get(pk=id)
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
     doc = dict(
         id="bordercore_blogpost_%s" % blog.id,

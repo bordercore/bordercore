@@ -14,7 +14,7 @@ from tag.models import Tag
 import datetime
 import json
 import os
-import solr
+from solrpy.core import SolrConnection
 
 IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
 SECTION = 'Collections'
@@ -55,7 +55,7 @@ class CollectionDetailView(DetailView):
         if self.object.blob_list:
             q = 'id:(%s)' % ' '.join(['"blob_%s"' % t['id'] for t in self.object.blob_list])
 
-            conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+            conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
             solr_args = {'q': q,
                          'rows': 1000,
@@ -68,7 +68,7 @@ class CollectionDetailView(DetailView):
 
             # Build a temporary dict for fast lookup
             solr_list_objects = {}
-            for x in json.loads(results)['response']['docs']:
+            for x in json.loads(results.decode('UTF-8'))['response']['docs']:
                 solr_list_objects[int(x['id'].split('blob_')[1])] = x
 
             # Solr doesn't return the blobs in the order specified in postgres, so we need to re-order
@@ -79,7 +79,7 @@ class CollectionDetailView(DetailView):
                         solr_list_objects[blob['id']]['note'] = blob['note']
                     blob_list_temp.append(solr_list_objects[blob['id']])
                 except KeyError:
-                    print "Warning: blob_id = %s not found in solr." % blob['id']
+                    print("Warning: blob_id = %s not found in solr." % blob['id'])
 
             for object in blob_list_temp:
                 if object['doctype'] in ('blob', 'book'):
@@ -90,7 +90,7 @@ class CollectionDetailView(DetailView):
                         try:
                             object['content_type'] = object['content_type'][0].split('/')[1]
                         except IndexError:
-                            print "Warning: content_type malformed: id=%s, sha1sum=%s, content_type=%s" % (object['id'], object['sha1sum'], object['content_type'])
+                            print("Warning: content_type malformed: id=%s, sha1sum=%s, content_type=%s" % (object['id'], object['sha1sum'], object['content_type']))
                         if object['content_type'] in IMAGE_TYPE_LIST:
                             object['is_image'] = True
                     if not object.get('title', ''):

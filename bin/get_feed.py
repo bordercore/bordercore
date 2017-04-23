@@ -2,7 +2,6 @@
 # encoding: utf-8
 
 from datetime import datetime
-import exceptions
 import feedparser
 import django
 import os
@@ -61,7 +60,7 @@ def update_feeds(feed_id=None):
                 message = e
             elif isinstance(e, psycopg2.Error):
                 message = e.pgerror
-            elif isinstance(e, exceptions.UnicodeEncodeError):
+            elif isinstance(e, UnicodeEncodeError):
                 message = str(type(e)) + ': ' + str(e)
             else:
                 message = e

@@ -2,7 +2,7 @@ import django
 import json
 import os
 import re
-import solr
+from solrpy.core import SolrConnection
 import sys
 
 from django.db.models import Count, Q
@@ -28,9 +28,9 @@ def test_books_with_tags():
                  'rows': 2147483647,
                  'wt': 'json'}
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
     response = conn.raw_query(**solr_args)
-    data = json.loads(response)['response']['numFound']
+    data = json.loads(response.decode('UTF-8'))['response']['numFound']
     assert data == 0, "%s books fail this test" % data
 
 
@@ -41,9 +41,9 @@ def test_books_with_title():
                  'rows': 2147483647,
                  'wt': 'json'}
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
     response = conn.raw_query(**solr_args)
-    data = json.loads(response)['response']['numFound']
+    data = json.loads(response.decode('UTF-8'))['response']['numFound']
     assert data == 0, "%s books fail this test" % data
 
 
@@ -54,9 +54,9 @@ def test_books_with_author():
                  'rows': 2147483647,
                  'wt': 'json'}
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
     response = conn.raw_query(**solr_args)
-    data = json.loads(response)['response']['numFound']
+    data = json.loads(response.decode('UTF-8'))['response']['numFound']
     assert data == 0, "%s books fail this test" % data
 
 
@@ -91,9 +91,9 @@ def test_blobs_in_db_exist_in_solr():
                      'fl': 'id',
                      'wt': 'json'}
 
-        conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+        conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
         response = conn.raw_query(**solr_args)
-        data = json.loads(response)['response']['numFound']
+        data = json.loads(response.decode('UTF-8'))['response']['numFound']
         assert data == 1, "blob %s found in the database but not in Solr" % b.sha1sum
 
 
@@ -104,9 +104,9 @@ def test_solr_blobs_exist_on_filesystem():
                  'rows': 2147483647,
                  'wt': 'json'}
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
     response = conn.raw_query(**solr_args)
-    data = json.loads(response)['response']
+    data = json.loads(response.decode('UTF-8'))['response']
     for result in data['docs']:
         assert os.path.isfile(result['filepath']) is not False, "blob %s exists in Solr but not on the filesystem" % result['sha1sum']
 
@@ -118,9 +118,9 @@ def test_solr_blobs_exist_in_db():
                  'rows': 2147483647,
                  'wt': 'json'}
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
     response = conn.raw_query(**solr_args)
-    data = json.loads(response)['response']
+    data = json.loads(response.decode('UTF-8'))['response']
     for result in data['docs']:
         assert Blob.objects.filter(sha1sum=result['sha1sum']).count() == 1, "blob %s exists in Solr but not in database" % result['sha1sum']
 
@@ -167,9 +167,9 @@ def test_collection_blobs_exists_in_solr():
                          'fl': 'id',
                          'wt': 'json'}
 
-            conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+            conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
             response = conn.raw_query(**solr_args)
-            data = json.loads(response)['response']['numFound']
+            data = json.loads(response.decode('UTF-8'))['response']['numFound']
             assert data == 1, "blob_id %s does not exist in solr" % blob['id']
 
 

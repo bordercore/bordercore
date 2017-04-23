@@ -93,7 +93,7 @@ def song_edit(request, song_id=None):
             file_info = {'id3_info': id3_info,
                          'filesize': os.stat(filename).st_size,
                          'length': time.strftime('%M:%S', time.gmtime(id3_info.info.length))}
-        except IOError, e:
+        except IOError as e:
             messages.add_message(request, messages.ERROR, 'IOError: %s' % e)
 
     if request.method == 'POST':
@@ -202,7 +202,7 @@ def add_song(request):
         filename = "/tmp/%s" % md5sum
 
         try:
-            f = open(filename, "w")
+            f = open(filename, "wb")
             f.write(blob)
             f.close()
         except (IOError) as e:
@@ -312,7 +312,7 @@ def add_song(request):
 
             try:
                 makedirs(fulldirname)
-            except OSError, e:
+            except OSError as e:
                 if not e.errno == errno.EEXIST:
                     raise OSError(e)
 

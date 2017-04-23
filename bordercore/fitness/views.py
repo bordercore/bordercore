@@ -20,7 +20,7 @@ class ExerciseDetailView(DetailView):
         try:
             workout_data = Data.objects.filter(user=self.request.user, exercise__id=self.object.id).order_by('-date')[:70]
             context['recent_data'] = workout_data[0]
-            context['delta_days'] = (int(datetime.datetime.now().strftime("%s")) - int(context['recent_data'].date.strftime("%s"))) / 86400 + 1
+            context['delta_days'] = int((int(datetime.datetime.now().strftime("%s")) - int(context['recent_data'].date.strftime("%s"))) / 86400) + 1
         except IndexError:
             pass
         context['activity_info'] = ExerciseUser.objects.filter(user=self.request.user, exercise__id=self.object.id)
@@ -71,7 +71,7 @@ def add_exercise_info(exercise_list, exercise):
     try:
         exercise_list[exercise.exercise] = exercise
         exercise_list[exercise.exercise].date = exercise.data_set.order_by('-date')[0].date
-        exercise_list[exercise.exercise].delta_days = (int(datetime.datetime.now().strftime("%s")) - int(exercise_list[exercise.exercise].date.strftime("%s"))) / 86400 + 1
+        exercise_list[exercise.exercise].delta_days = int((int(datetime.datetime.now().strftime("%s")) - int(exercise_list[exercise.exercise].date.strftime("%s"))) / 86400) + 1
     except IndexError:
         pass
 

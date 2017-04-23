@@ -1,4 +1,4 @@
-import solr
+from solrpy.core import SolrConnection
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -32,7 +32,7 @@ class Document(TimeStampedModel):
         return ", ".join([tag.name for tag in self.tags.all()])
 
     def delete(self):
-        conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+        conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
         conn.delete(queries=['id:bordercore_document_%s' % (self.id)])
         conn.commit()
 

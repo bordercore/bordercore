@@ -44,5 +44,5 @@ class AmazonMixin(object):
         r = requests.get(str(url))
         image_filename = "%s/cover-%s.jpg" % (self.get_parent_dir(), size)
         if r.status_code == 200:
-            f = open(image_filename, 'w')
+            f = open(image_filename, 'wb')
             f.write(r.content)

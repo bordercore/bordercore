@@ -2,7 +2,7 @@ import datetime
 import json
 from PyOrgMode import OrgDataStructure
 import random
-import solr
+from solrpy.core import SolrConnection
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -50,8 +50,8 @@ def homepage(request):
             tasks.append({'task': OrgDataStructure.parse_heading(node.heading)['heading'],
                           'tag': node.tags,
                           'parent_category': OrgDataStructure.parse_heading(node.parent.heading)['heading']})
-    except AttributeError, e:
-        print "AttributeError: %s" % e
+    except AttributeError as e:
+        print("AttributeError: %s" % e)
 
     # Get some recently played music
     music = Listen.objects.all().select_related().distinct().order_by('-created')[:3]
@@ -74,7 +74,7 @@ def homepage(request):
     overdue_exercises = []
     active_exercises = ExerciseUser.objects.filter(user=1)
     for exercise in active_exercises:
-        lag = (int(datetime.datetime.now().strftime("%s")) - int(exercise.exercise.data_set.order_by('-date')[0].date.strftime("%s"))) / 86400 + 1
+        lag = int((int(datetime.datetime.now().strftime("%s")) - int(exercise.exercise.data_set.order_by('-date')[0].date.strftime("%s"))) / 86400) + 1
         if (lag >= exercise.frequency):
             overdue_exercises.append({'exercise': exercise,
                                       'lag': lag})
@@ -102,13 +102,13 @@ def get_calendar_events(request):
 
 def get_random_blob(content_type):
     seed = random.randint(1, 10000)
-    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
     solr_args = {'q': 'content_type:%s' % (content_type),
                  'sort': 'random_%s+desc' % (seed),
                  'wt': 'json',
                  'fl': 'internal_id,sha1sum',
                  'fq': '-is_private:true',
                  'rows': 1}
-    solr_results = json.loads(conn.raw_query(**solr_args))['response']['docs'][0]
+    solr_results = json.loads(conn.raw_query(**solr_args).decode('UTF-8'))['response']['docs'][0]
     blob = Blob.objects.get(pk=solr_results['internal_id'])
     return blob

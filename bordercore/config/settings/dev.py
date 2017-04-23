@@ -33,5 +33,5 @@ DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.cache.CachePanel',
     'debug_toolbar.panels.signals.SignalsPanel',
     'debug_toolbar.panels.logging.LoggingPanel',
-    'template_timings_panel.panels.TemplateTimings.TemplateTimings'
+#    'template_timings_panel.panels.TemplateTimings.TemplateTimings'
 )

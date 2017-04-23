@@ -1,7 +1,7 @@
 import django
 import json
 import os
-import solr
+from solrpy.core import SolrConnection
 import sys
 
 from django.conf import settings
@@ -24,9 +24,9 @@ def test_documents_in_db_exist_in_solr():
                      'fl': 'id',
                      'wt': 'json'}
 
-        conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+        conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
         response = conn.raw_query(**solr_args)
-        data = json.loads(response)['response']['numFound']
+        data = json.loads(response.decode('UTF-8'))['response']['numFound']
         assert data == 1, "document %s found in the database but not in Solr" % b.id
 
 
@@ -37,8 +37,8 @@ def test_solr_documents_exist_in_db():
                  'rows': 2147483647,
                  'wt': 'json'}
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
     response = conn.raw_query(**solr_args)
-    data = json.loads(response)['response']
+    data = json.loads(response.decode('UTF-8'))['response']
     for result in data['docs']:
         assert Document.objects.filter(id=result['internal_id']).count() == 1, "document %s exists in Solr but not in database" % result['internal_id']

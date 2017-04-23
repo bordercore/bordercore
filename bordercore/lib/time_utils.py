@@ -6,10 +6,12 @@ import pytz
 
 def cleanup(interval, time_unit):
 
+    interval = int(interval)
+
     if interval == 1:
-        return "1 %s ago" % time_unit
+        return "1 {} ago".format(time_unit)
     else:
-        return "%s %ss ago" % (interval, time_unit)
+        return "{} {}s ago".format(interval, time_unit)
 
 def pretty_date(time=False):
     """

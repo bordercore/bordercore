@@ -9,7 +9,7 @@ import json
 import os
 from os.path import basename
 import re
-import solr
+from solrpy.core import SolrConnection
 import urllib
 
 from blob.models import Blob, MetaData
@@ -58,7 +58,7 @@ class SearchListView(ListView):
             elif rows is None:
                 rows = self.SOLR_COUNT_PER_PAGE
 
-            conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+            conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
             solr_args = {'wt': 'json',
                          'boost': 'importance',
@@ -98,7 +98,7 @@ class SearchListView(ListView):
                 solr_args['fq'] = '{!tag=dt}' + ' OR '.join([self.get_facet_query(x, search_term) for x in self.request.GET.get('facets').split(',')])
 
             results = conn.raw_query(**solr_args)
-            return json.loads(results)
+            return json.loads(results.decode('UTF-8'))
 
     def get_context_data(self, **kwargs):
         context = super(SearchListView, self).get_context_data(**kwargs)
@@ -109,12 +109,12 @@ class SearchListView(ListView):
         if self.request.GET.get('facets'):
             context['filter_query'] = self.request.GET.get('facets').split(',')
 
-        from solr.core import utc_from_string
+        from solrpy.core import utc_from_string
         from lib.time_utils import pretty_date
 
         if context['info']:
 
-            for k, v in context['info']['facet_counts']['facet_queries'].iteritems():
+            for k, v in context['info']['facet_counts']['facet_queries'].items():
                 if v > 0:
                     facet_counts[k] = v
 
@@ -153,7 +153,7 @@ class SearchListView(ListView):
 
             # Convert to a list of dicts.  This lets us use the dictsortreversed
             #  filter in our template to sort by count.
-            context['facet_counts'] = [{'doctype_purty': k, 'doctype': k, 'count': v} for k, v in facet_counts.iteritems()]
+            context['facet_counts'] = [{'doctype_purty': k, 'doctype': k, 'count': v} for k, v in facet_counts.items()]
 
         context['info'] = info
         return context
@@ -220,9 +220,9 @@ class SearchTagDetailView(ListView):
         taglist = self.kwargs['taglist']
         rows = 1000
 
-        q = ' AND '.join(['tags:"%s"' % (urllib.unquote(t).decode('utf8'),) for t in taglist.split(',')])
+        q = ' AND '.join(['tags:"%s"' % (urllib.parse.unquote(t),) for t in taglist.split(',')])
 
-        conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+        conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
         solr_args = {'q': q,
                      'boost': 'importance',
@@ -237,15 +237,12 @@ class SearchTagDetailView(ListView):
         }
 
         results = conn.raw_query(**solr_args)
-        return json.loads(results)
-
-
-from itertools import izip
+        return json.loads(results.decode('UTF-8'))
 
 
 def grouped(iterable, n):
     "s -> (s0,s1,s2,...sn-1), (sn,sn+1,sn+2,...s2n-1), (s2n,s2n+1,s2n+2,...s3n-1), ..."
-    return izip(*[iter(iterable)] * n)
+    return zip(*[iter(iterable)] * n)
 
 
 def get_title(myobject):
@@ -265,7 +262,7 @@ def get_title(myobject):
 @login_required
 def search_book_title(request):
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
     title = request.GET['title']
 
@@ -275,7 +272,7 @@ def search_book_title(request):
 
     results = conn.raw_query(**solr_args)
 
-    filtered_results = json.loads(results)
+    filtered_results = json.loads(results.decode('UTF-8'))
 
     for match in filtered_results['response']['docs']:
         # If the book doesn't have a title, use the filename
@@ -288,7 +285,7 @@ def search_book_title(request):
 
 def kb_search_tags_booktitles(request):
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
     term = request.GET['term']
 
@@ -296,7 +293,7 @@ def kb_search_tags_booktitles(request):
                  'fl': 'doctype,filepath,sha1sum,tags,title',
                  'wt': 'json'}
 
-    results = json.loads(conn.raw_query(**solr_args))
+    results = json.loads(conn.raw_query(**solr_args).decode('UTF-8'))
 
     tags = {}
     matches = []
@@ -316,7 +313,7 @@ def kb_search_tags_booktitles(request):
 
 def search_document_source(request):
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
     doc_source = request.GET['doc_source']
 
@@ -327,14 +324,14 @@ def search_document_source(request):
                  'group.field': 'source'
     }
 
-    results = json.loads(conn.raw_query(**solr_args))
+    results = json.loads(conn.raw_query(**solr_args).decode('UTF-8'))
 
     return_data = []
 
     for match in results['grouped']['source']['groups']:
         return_data.append({'source': match['doclist']['docs'][0]['source']})
 
-    return JsonResponse(sorted(return_data), safe=False)
+    return JsonResponse(sorted(return_data, key=lambda x: x['source']), safe=False)
 
 
 @login_required
@@ -343,22 +340,22 @@ def search_admin(request):
     # Get some document count stats.  Any way to do this with just one query?
     stats = {}
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
     for doctype in ['blob', 'bordercore_todo', 'bordercore_bookmark']:
-        r = conn.query('doctype:%s' % doctype, rows=1)
+        r = conn.query('doctype:{}'.format(doctype), rows=1)
         stats[doctype] = r.numFound
 
     if request.method == 'POST':
 
         if request.POST['Go'] in ['Delete']:
-            print request.POST['doc_type']
+            print (request.POST['doc_type'])
 
-            conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+            conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
             conn.delete_query('doctype:%s' % request.POST['doc_type'])
             conn.commit()
         elif request.POST['Go'] in ['Commit']:
 
-            conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+            conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
             conn.commit()
 
     return render(request, 'search/admin.html',

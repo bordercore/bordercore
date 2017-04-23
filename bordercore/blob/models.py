@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from lib.mixins import TimeStampedModel
-import solr
+from solrpy.core import SolrConnection
 
 from blob.amazon import AmazonMixin
 from collection.models import Collection
@@ -115,12 +115,12 @@ class Blob(TimeStampedModel, AmazonMixin):
         return info
 
     def get_solr_info(self, query, **kwargs):
-        conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+        conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
         solr_args = {'q': query,
                      'wt': 'json',
                      'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url,bordercore_blogpost_title',
                      'rows': 1000}
-        return json.loads(conn.raw_query(**solr_args))['response']
+        return json.loads(conn.raw_query(**solr_args).decode('UTF-8'))['response']
 
     def get_related_blobs(self):
         related_blobs = []
@@ -148,7 +148,7 @@ class Blob(TimeStampedModel, AmazonMixin):
                 c.save()
 
             # Delete the blob in Solr
-            conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+            conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
             conn.delete(queries=['sha1sum:%s' % (self.sha1sum)])
             conn.commit()
 

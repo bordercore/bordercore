@@ -1,5 +1,5 @@
 import json
-import solr
+from solrpy.core import SolrConnection
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -12,6 +12,9 @@ from lib.mixins import TimeStampedModel
 from tag.models import Tag
 
 
+# This custom field lets us use a checkbox on the form, which, if checked,
+#  results in a blob of JSON stored in the database rather than
+#  the usual boolean value.
 class DailyBookmarkJSONField(JSONField):
 
     def to_python(self, value):
@@ -38,7 +41,7 @@ class Bookmark(TimeStampedModel):
         return ", ".join([tag.name for tag in self.tags.all()])
 
     def delete(self):
-        conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+        conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
         conn.delete(queries=['id:bordercore_bookmark_%s' % (self.id)])
         conn.commit()
 

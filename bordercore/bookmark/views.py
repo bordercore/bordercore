@@ -97,8 +97,8 @@ def bookmark_delete(request, bookmark_id=None):
 @login_required
 def snarf_link(request):
 
-    import HTMLParser
-    h = HTMLParser.HTMLParser()
+    from html.parser import HTMLParser
+    h = HTMLParser()
 
     url = request.GET['url']
     title = h.unescape(request.GET['title'])
@@ -142,12 +142,12 @@ def bookmark_tag(request):
         try:
             sort_order = BookmarkTagUser.objects.get(tag=Tag.objects.get(name=tag_filter), user=request.user)
             sorted_bookmarks = sorted(bookmarks, key=lambda v: sort_order.bookmark_list.index(v.id))
-        except ObjectDoesNotExist, e:
-            print "Error! %s" % e
+        except ObjectDoesNotExist as e:
+            print("Error! %s" % e)
             # TODO: Use celery to fire off an email about the error
             sorted_bookmarks = bookmarks
-        except ValueError, e:
-            print "Error! %s" % e
+        except ValueError as e:
+            print("Error! %s" % e)
             # TODO: Use celery to fire off an email about the error
             sorted_bookmarks = bookmarks
 
@@ -171,7 +171,7 @@ def tag_bookmark_list(request):
 
     # Verify that the bookmark is in the existing sort list
     if link_id not in sorted_list.bookmark_list:
-        print "NOT Found!"
+        print("NOT Found!")
         # TODO Return an exception
 
     sorted_list.bookmark_list.remove(link_id)

@@ -68,7 +68,7 @@ def get_youtube_content(msg):
             content = part.get_payload(decode=True)
 
     p = re.compile('^Content-Type: text/plain')
-    lines = content.split('\n')
+    lines = content.decode('UTF-8', 'ignore').split('\n')
     info['uploader'] = lines[0]
     info['title'] = lines[1]
     info['url'] = lines[2]
@@ -99,7 +99,7 @@ if msg.get('From', None).startswith('YouTube'):
 
 # Decode quoted-printable contents
 buffer = quopri.decodestring(buffer)
-matches = p.findall(buffer)
+matches = p.findall(buffer.decode('UTF-8', 'ignore'))
 
 for link in matches:
 

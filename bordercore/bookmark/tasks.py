@@ -3,7 +3,7 @@ import logging
 import os.path
 import re
 import requests
-import solr
+from solrpy.core import SolrConnection
 
 from django.conf import settings
 
@@ -61,7 +61,7 @@ def index_bookmark(id):
     from bookmark.models import Bookmark
     bookmark = Bookmark.objects.get(pk=id)
 
-    conn = solr.SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
     doc = dict(
         id="bordercore_bookmark_%s" % bookmark.id,
