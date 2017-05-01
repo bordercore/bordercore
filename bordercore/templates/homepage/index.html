@@ -36,7 +36,7 @@
             <div class="panel-heading">Overdue Exercises</div>
             <ul class="list-group">
                 {% for exercise in overdue_exercises %}
-                    <li class="list-group-item"><a href="{% url 'exercise_detail' exercise.exercise.id %}">{{ exercise.exercise.exercise }}</a> {{ exercise.lag }} days</li>
+                    <li class="list-group-item"><a href="{% url 'exercise_detail' exercise.exercise.exercise_id %}">{{ exercise.exercise.exercise.exercise }}</a> {{ exercise.lag }} days</li>
                 {% endfor %}
             </ul>
         </div>
