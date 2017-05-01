@@ -33,7 +33,7 @@ class Calendar():
     def get_calendar_info(self):
         http = httplib2.Http()
         http = self.credentials.authorize(http)
-        service = build(serviceName='calendar', version='v3', http=http, developerKey=api_key)
+        service = build(serviceName='calendar', version='v3', http=http, developerKey=api_key, cache_discovery=False)
         timeMax = datetime.now() + timedelta(days=7)
 
         events = service.events().list(calendarId=self.calendar_id,
