@@ -162,6 +162,7 @@ def get_info(request):
             match = Collection.objects.get(name=request.GET['name'])
         if match:
             info = {'name': match.name,
+                    'description': match.description,
                     'id': match.id,
                     'tags': ','.join([tag.name for tag in match.tags.all()])}
     except ObjectDoesNotExist:

@@ -96,6 +96,7 @@
                         console.log("Error: " + json);
                     } else {
                         $('#id_name').val(json.name);
+                        $('#id_description').val(json.description);
                         var tags = json.tags.split(",")
                         for (var i = 0; i < tags.length; i++) {
                             console.log(tags[i]);
@@ -120,6 +121,7 @@
             })
             $('#modalAdd').on('hidden.bs.modal', function () {
                 $('#id_name').val('');
+                $('#id_description').val('');
                 $('#id_tags').tagsinput('removeAll');
             })
 
