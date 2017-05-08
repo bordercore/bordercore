@@ -1,6 +1,6 @@
 import json
 
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponse
@@ -63,7 +63,10 @@ def bc_login(request):
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    return redirect('homepage')
+                    response = redirect('homepage')
+                    # Remember the username for a month
+                    response.set_cookie('bordercore_username', username, max_age=2592000)
+                    return response
                     # Redirect to a success page.
                 else:
                     message = 'Disabled account'
@@ -73,3 +76,8 @@ def bc_login(request):
                 # Return an 'invalid login' error message.
 
     return render(request, 'login.html', {'message': message})
+
+
+def bc_logout(request):
+    logout(request)
+    return redirect('login')

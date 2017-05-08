@@ -114,8 +114,8 @@ urlpatterns = [
 
     url(r'^prefs/store_in_session/', accounts_views.store_in_session, name='store_in_session'),
     url(r'^prefs/', UserProfileDetailView.as_view(), name='prefs'),
-    url(r'^login/', accounts_views.bc_login),
-    url(r'^logout', logout, {'template_name': 'login.html'}),
+    url(r'^login/', accounts_views.bc_login, name="login"),
+    url(r'^logout', accounts_views.bc_logout, name="logout"),
 
     url(r'^kb/search/admin', search_views.search_admin, name='search_admin'),
     url(r'^kb/search/booktitle', search_views.search_book_title, name='search_book_title'),
