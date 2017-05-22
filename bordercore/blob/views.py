@@ -19,7 +19,7 @@ import shutil
 from blob.forms import BlobForm
 from blob.models import Blob, MetaData
 from collection.models import Collection
-from blob.tasks import index_document
+from blob.tasks import index_blob
 
 
 SECTION = 'Blob'
@@ -211,7 +211,7 @@ class BlobUpdateView(UpdateView):
 
         self.object = form.save()
         messages.add_message(self.request, messages.INFO, 'Blob updated')
-        index_document.delay(blob.sha1sum)
+        index_blob.delay(blob.sha1sum)
 
         return HttpResponseRedirect(reverse('blob_detail', kwargs={'sha1sum': blob.sha1sum}))
 

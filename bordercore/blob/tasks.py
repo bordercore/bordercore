@@ -1,20 +1,14 @@
 from __future__ import absolute_import
+
 from celery import task
-import logging
 from subprocess import call
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-                    datefmt='%m-%d %H:%M:%S',
-                    filename='/home/jerrell/logs/solr-indexer.log',
-                    filemode='a')
-
-logger = logging.getLogger('bordercore.solrindexer')
+JAVA_HOME = '/opt/jdk1.8.0_73'
+SOLRINDEXER_JAR = '/opt/lib/solrindexer.jar'
 
 
 @task()
-def index_document(sha1sum):
-
-    logger.info("index document: %s" % (sha1sum))
-    cmd = "java -jar /home/jerrell/dev/solr/solrindexer/build/libs/solrindexer.jar -s %s" % (sha1sum,)
+def index_blob(sha1sum):
+    print("index blob: %s" % (sha1sum))
+    cmd = "{}/bin/java -cp {} com.bordercore.solr.SolrIndexerDriver -s {}".format(JAVA_HOME, SOLRINDEXER_JAR, sha1sum)
     call(cmd.split())
