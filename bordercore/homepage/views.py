@@ -62,7 +62,7 @@ def homepage(request):
                          'cover_info': Blob.get_cover_info(random_image.sha1sum, 'small', 500)}
 
     # Get the most recent untagged bookmarks
-    bookmarks = Bookmark.objects.filter(tags__isnull=True)[:10]
+    bookmarks = Bookmark.objects.filter(tags__isnull=True).order_by('-created')[:10]
 
     # Get the list of 'daily' bookmarks
     daily_bookmarks = Bookmark.objects.filter(daily__isnull=False)
