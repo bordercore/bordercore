@@ -14,9 +14,7 @@ import requests
 
 from django.utils.timezone import utc
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'bordercore.config.settings.prod'
-sys.path.insert(0, '/home/www/htdocs/bordercore-django/bordercore')
-sys.path.insert(0, '/home/www/htdocs/bordercore-django/bordercore/bordercore')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.prod'
 
 django.setup()
 

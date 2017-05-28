@@ -2,9 +2,7 @@ import django
 import os
 import sys
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'bordercore.config.settings.prod'
-sys.path.insert(0, '/home/www/htdocs/bordercore-django/bordercore')
-sys.path.insert(0, '/home/www/htdocs/bordercore-django/bordercore/bordercore')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.prod'
 
 django.setup()
 

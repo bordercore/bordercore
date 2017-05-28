@@ -40,6 +40,5 @@ singledispatch==3.4.0.3
 six==1.10.0
 sqlparse==0.2.3
 tornado==4.3
-Unipath==1.1
 uritemplate==3.0.0
 vine==1.1.3

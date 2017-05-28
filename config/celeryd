@@ -1,5 +1,3 @@
-# Defaults for the celeryd daemon.  Place this in /etc/default/
-
 # Name of nodes to start, here we have a single node
 CELERYD_NODES="worker"
 # or we could have three nodes:
@@ -7,6 +5,7 @@ CELERYD_NODES="worker"
 
 # Where to chdir at start
 CELERYD_CHDIR="/home/www/htdocs/bordercore-django"
+# CELERYD_CHDIR="/home/jerrell/dev/django"
 
 # Python interpreter from environment.
 ENV_PYTHON="$CELERYD_CHDIR/env/bin/python"
@@ -18,7 +17,8 @@ CELERY_BIN="$CELERYD_CHDIR/env/bin/celery"
 #CELERYD_MULTI="$ENV_PYTHON $CELERYD_CHDIR/bordercore/manage.py celeryd_multi"
 
 # How to call "manage.py celeryctl"
-CELERYCTL="$ENV_PYTHON $CELERYD_CHDIR/manage.py celeryctl"
+# CELERYCTL="$ENV_PYTHON $CELERYD_CHDIR/bordercore/manage.py celeryctl"
+CELERYCTL="$ENV_PYTHON $CELERYD_CHDIR/bordercore/manage.py celeryctl"
 
 CELERY_APP="bordercore"
 
@@ -37,6 +37,6 @@ CELERYD_USER="celery"
 CELERYD_GROUP="celery"
 
 # Name of the projects settings module.
-export DJANGO_SETTINGS_MODULE="bordercore.config.settings.prod"
+export DJANGO_SETTINGS_MODULE="config.settings.prod"
 
 export PYTHONPATH="/home/www/htdocs/bordercore-django/bordercore:/home/www/htdocs/bordercore-django/bordercore/bordercore"

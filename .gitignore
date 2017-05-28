@@ -1,6 +1,6 @@
 *.pyc
 .#*
-bordercore/templates/static/docs/
-bordercore/templates/static/img/favicons/*
-!bordercore/templates/static/img/favicons/README
-bordercore/templates/static/blobs
+bordercore/static/docs/
+bordercore/static/img/favicons/*
+!bordercore/static/img/favicons/README
+bordercore/static/blobs

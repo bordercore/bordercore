@@ -7,7 +7,7 @@ from solrpy.core import SolrConnection
 
 from django.conf import settings
 
-FAVICON_DIR = "%s/templates/static/%s" % (settings.PROJECT_ROOT, "img/favicons")
+FAVICON_DIR = "%s/static/%s" % (settings.PROJECT_DIR, "img/favicons")
 
 # Tell requests to not be so noisy
 logging.getLogger("requests").setLevel(logging.WARNING)

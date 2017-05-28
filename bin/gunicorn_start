@@ -8,8 +8,8 @@ HOST=127.0.0.1:9000
 USER=www-data
 GROUP=www-data
 NUM_WORKERS=3
-DJANGO_SETTINGS_MODULE=bordercore.config.settings.prod
-DJANGO_WSGI_MODULE=bordercore.config.wsgi
+DJANGO_SETTINGS_MODULE=config.settings.prod
+DJANGO_WSGI_MODULE=config.wsgi
 PYTHONPATH=/home/www/htdocs/bordercore-django/bordercore
 
 echo "Starting $NAME as `whoami`"

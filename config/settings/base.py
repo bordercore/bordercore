@@ -1,17 +1,15 @@
 # Django settings for bordercore project.
 
-import os
 import sys
 
-from unipath import Path
+from pathlib import Path
 
-CONFIG_ROOT = Path(__file__).ancestor(2)
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-# Absolute filesystem path to the project directory:
-PROJECT_ROOT = CONFIG_ROOT.ancestor(1)
+PROJECT_DIR = BASE_DIR / "bordercore"
 
-sys.path.insert(0, os.path.join(PROJECT_ROOT, "apps"))
-sys.path.insert(0, os.path.join(PROJECT_ROOT, "lib"))
+sys.path.insert(0, str(PROJECT_DIR / "apps"))
+sys.path.insert(0, str(PROJECT_DIR / "lib"))
 
 ADMINS = (
     ('F. Jerrell Schivers', 'jerrell@bordercore.com'),
@@ -73,7 +71,7 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    PROJECT_ROOT.child('templates').child('static'),
+    str(PROJECT_DIR / "static"),
     '/home/media/music',
     '/home/media'
 )
@@ -88,10 +86,10 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '^q$7#ge(!9p!rqzbh*g3%-0q7=*sxcs!$&amp;$8)i33g3a%a+o#4m'
 
-ROOT_URLCONF = 'bordercore.config.urls'
+ROOT_URLCONF = 'config.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'bordercore.config.wsgi.application'
+WSGI_APPLICATION = 'config.wsgi.application'
 
 ALLOWED_HOSTS = ('localhost', 'www.bordercore.com', '10.3.2.3')
 
@@ -141,7 +139,7 @@ MIDDLEWARE_CLASSES = [
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [PROJECT_ROOT.child("templates")],
+        'DIRS': [str(PROJECT_DIR / "templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

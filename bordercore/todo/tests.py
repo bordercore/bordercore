@@ -2,14 +2,10 @@ import django
 import json
 import os
 from solrpy.core import SolrConnection
-import sys
 
 from django.conf import settings
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'bordercore.config.settings.prod'
-sys.path.insert(0, '/home/www/htdocs/bordercore-django/bordercore')
-sys.path.insert(0, '/home/www/htdocs/bordercore-django/bordercore/bordercore')
-
+os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.prod'
 django.setup()
 
 from todo.models import Todo

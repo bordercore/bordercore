@@ -3,15 +3,12 @@ import json
 import os
 import re
 from solrpy.core import SolrConnection
-import sys
 
-from django.db.models import Count, Q
+from django.db.models import Q
 from django.conf import settings
 # from django.test import TestCase
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'bordercore.config.settings.prod'
-sys.path.insert(0, '/home/www/htdocs/bordercore-django/bordercore')
-sys.path.insert(0, '/home/www/htdocs/bordercore-django/bordercore/bordercore')
+os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.prod'
 
 django.setup()
 
