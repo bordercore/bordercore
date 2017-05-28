@@ -5,8 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
-
 from django_datatables_view.base_datatable_view import BaseDatatableView
+import requests
 
 from bookmark.models import Bookmark, BookmarkTagUser
 from bookmark.forms import BookmarkForm
@@ -218,10 +218,15 @@ class OrderListJson(BaseDatatableView):
         for item in qs:
             if not item.title:
                 item.title = 'No Title'
+            try:
+                response_status = requests.status_codes._codes[item.last_response_code][0]
+            except KeyError:
+                response_status = ''
             json_data.append([
                 item.created.strftime("%b %d, %Y"),
                 item.url,
                 item.title,
-                item.id
+                item.id,
+                response_status
             ])
         return json_data

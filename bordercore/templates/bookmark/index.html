@@ -115,7 +115,11 @@
 
 
     function formatTitle( data, type, row ) {
-        return '<img src="{{ STATIC_URL }}img/favicons/' + parse_domain( row[1] ) + '.ico" width="32" height="32" /> &nbsp; &nbsp; <a href="' + row[1] + '" target="_blank">' + row[2] + '</a>';
+        title = '<img src="{{ STATIC_URL }}img/favicons/' + parse_domain( row[1] ) + '.ico" width="32" height="32" /> &nbsp; &nbsp; <a href="' + row[1] + '" target="_blank">' + row[2] + '</a>';
+        if (row[4] != null && row[4] != 'ok') {
+            title = title + '&nbsp; &nbsp;<a class="form-error" target="wayback" href="https://web.archive.org/web/1000/' + row[1]+ '">' + row[4] + '</a>'
+        }
+        return title;
     }
 
     oTable = $('#bookmark_list').DataTable( {
