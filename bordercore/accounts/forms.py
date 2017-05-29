@@ -2,6 +2,7 @@ from django.forms import ModelChoiceField, ModelForm, TextInput
 
 from accounts.models import UserProfile
 from lib.fields import ModelCommaSeparatedChoiceField
+from collection.models import Collection
 from tag.models import Tag
 
 
@@ -16,6 +17,7 @@ class UserProfileForm(ModelForm):
         super(UserProfileForm, self).__init__(*args, **kwargs)
 
         self.fields['bookmarks_show_untagged_only'].label = "Show untagged bookmarks only"
+        self.fields['homepage_default_collection'].label = "Default collection"
         self.fields['favorite_tags'].widget.attrs['class'] = 'form-control'
 
         # If this form has a model attached, get the tags and display them separated by commas
@@ -24,6 +26,8 @@ class UserProfileForm(ModelForm):
 
     todo_default_tag = MyModelChoiceField(queryset=Tag.objects.filter(todo__isnull=False).distinct('name'), empty_label='Select Tag')
 
+    homepage_default_collection = MyModelChoiceField(queryset=Collection.objects.all(), empty_label='Select Collection')
+
     favorite_tags = ModelCommaSeparatedChoiceField(
         required=False,
         queryset=Tag.objects.filter(),
@@ -31,7 +35,7 @@ class UserProfileForm(ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('favorite_tags', 'bookmarks_show_untagged_only', 'todo_default_tag', 'orgmode_file', 'google_calendar')
+        fields = ('favorite_tags', 'bookmarks_show_untagged_only', 'todo_default_tag', 'homepage_default_collection', 'orgmode_file', 'google_calendar')
         widgets = {
             'orgmode_file': TextInput(attrs={'class': 'form-control'})
         }

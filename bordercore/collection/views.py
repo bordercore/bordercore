@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import render
 from django.templatetags.static import static
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, FormMixin, UpdateView
@@ -51,6 +52,9 @@ class CollectionDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(CollectionDetailView, self).get_context_data(**kwargs)
+
+        if self.kwargs.get('embedded', ''):
+            self.template_name = 'collection/embedded.html'
 
         if self.object.blob_list:
             q = 'id:(%s)' % ' '.join(['"blob_%s"' % t['id'] for t in self.object.blob_list])

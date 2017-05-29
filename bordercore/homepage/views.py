@@ -12,6 +12,7 @@ from django.shortcuts import render
 
 from blob.models import Blob
 from bookmark.models import Bookmark
+from collection.models import Collection
 from fitness.models import ExerciseUser
 from quote.models import Quote
 from music.models import Listen
@@ -70,6 +71,9 @@ def homepage(request):
         if bookmark.daily['viewed'] != 'true':
             bookmark.css_class = "bold"
 
+    # Get the default collection
+    default_collection = request.user.userprofile.homepage_default_collection.id
+
     # Get overdue exercises
     overdue_exercises = []
     active_exercises = ExerciseUser.objects.filter(user=1)
@@ -88,6 +92,7 @@ def homepage(request):
                    'pinned_bookmarks': pinned_bookmarks,
                    'random_image_info': random_image_info,
                    'bookmarks': bookmarks,
+                   'default_collection': default_collection,
                    'overdue_exercises': sorted(overdue_exercises, key=lambda x: x['lag'], reverse=True)})
 
 

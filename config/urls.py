@@ -76,6 +76,7 @@ urlpatterns = [
 
     url(r'^books/(\w+)?', BookListView.as_view(), name="book_list"),
 
+    url(r'^collection/embedded/(?P<collection_id>\d+)$', CollectionDetailView.as_view(), {'embedded': True}, name='collection_embedded'),
     url(r'^collection/add', CollectionCreateView.as_view(), name='collection_add'),
     url(r'^collection/edit/(?P<pk>[\d-]+)$', CollectionUpdateView.as_view(), name='collection_edit'),
     url(r'^collection/(?P<collection_id>\d+)$', CollectionDetailView.as_view(), name='collection_detail'),

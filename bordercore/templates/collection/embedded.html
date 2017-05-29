@@ -1,0 +1,46 @@
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-glyphicons.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bordercore.css" />
+
+<script>
+
+    $(document).ready(function() {
+
+        $('[data-toggle="popover"]').popover({});
+
+        $('.collection_sortable').sortable(           {
+            connectWith: '.collection_sortable',
+            stop: function(event, ui) {
+                $.ajax({
+                    url: '{% url 'sort_collection' %}',
+                    type: "POST",
+                    data: { collection_id : {{ collection.id }},
+                            blob_id : ui.item.attr('id'),
+                            position:  (ui.item.index() + 1) }
+                });
+
+            }
+        });
+
+        $( "#collection_sortable" ).disableSelection();
+
+    });
+
+</script>
+
+<ul class="collection_sortable">
+    {% for blob in blob_list %}
+        <li id="{{ blob.internal_id }}">
+            <a href="{{ STATIC_URL }}blobs/{{ blob.url }}"><img src="{{ STATIC_URL }}{{ blob.cover_info.url }}" height="{{ blob.cover_info.height_cropped }}" width="{{ blob.cover_info.width_cropped }}"/></a>
+            <br/>
+            <a href="{{ STATIC_URL }}blobs/{{ blob.url }}">{{ blob.title.0 }}</a> {% if blob.note %}<img src="{{ STATIC_URL }}/img/note.png" height="16" width="16" data-toggle="popover" data-content="{{ blob.note }}"/>{% endif %}
+        </li>
+    {% empty %}
+        <div class="alert alert-warning" role="alert">Nothing in this collection</div>
+    {% endfor %}
+</ul>

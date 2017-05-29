@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import ArrayField, JSONField
 from django.db.models.signals import post_save
 from tastypie.models import create_api_key
 
+from collection.models import Collection
 from tag.models import Tag
 
 
@@ -15,6 +16,7 @@ class UserProfile(models.Model):
     todo_default_tag = models.OneToOneField(Tag, related_name='default_tag', null=True)
     orgmode_file = models.TextField()
     google_calendar = JSONField(blank=True, null=True)
+    homepage_default_collection = models.OneToOneField(Collection, related_name='default_collection', null=True)
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.favorite_tags.all()])
