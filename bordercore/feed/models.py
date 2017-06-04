@@ -1,4 +1,12 @@
+from datetime import datetime
+
 from django.db import models
+from django.utils.timezone import utc
+import feedparser
+import psycopg2
+import psycopg2.extras
+import requests
+import xml.sax.saxutils as saxutils
 
 from accounts.models import UserProfile
 from lib.mixins import TimeStampedModel
@@ -13,26 +21,63 @@ class Feed(TimeStampedModel):
 
     def delete(self):
         # Unsubscribe all users who are currently subscribed to this feed
-        subscribers = UserProfile.objects.raw("select * from accounts_userprofile where %d = any (rss_feeds)" % int(self.pk))
+        subscribers = UserProfile.objects.filter(rss_feeds__contains=[int(self.pk)])
         for userprofile in subscribers:
             feeds = userprofile.rss_feeds
-            feeds.remove( self.pk )
+            feeds.remove(self.pk)
             userprofile.rss_feeds = feeds
             userprofile.save()
         super(Feed, self).delete()
+
+    def update(self):
+        try:
+
+            r = requests.get(self.url)
+
+            if r.status_code != 200:
+                r.raise_for_status()
+
+            d = feedparser.parse(r.text)
+
+            FeedItem.objects.filter(feed_id=self.pk).delete()
+
+            for x in d.entries:
+                title = x.title or 'No Title'
+                link = x.link or ''
+                FeedItem.objects.create(feed_id=self.pk, title=saxutils.unescape(title), link=saxutils.unescape(link))
+
+        except Exception as e:
+
+            message = ""
+            if isinstance(e, requests.exceptions.HTTPError):
+                message = e
+            elif isinstance(e, psycopg2.Error):
+                message = e.pgerror
+            elif isinstance(e, UnicodeEncodeError):
+                message = str(type(e)) + ': ' + str(e)
+            else:
+                message = e
+
+            raise Exception(message)
+
+        finally:
+
+            self.last_response_code = r.status_code
+            self.last_check = datetime.utcnow().replace(tzinfo=utc)
+            self.save()
 
     def subscribe_user(self, user, position):
         feeds = user.userprofile.rss_feeds
         # Verify that the user isn't already subscribed
         if self.pk in feeds:
             return
-        feeds.insert( position - 1, self.pk )
+        feeds.insert(position - 1, self.pk)
         user.userprofile.rss_feeds = feeds
         user.userprofile.save()
 
     def unsubscribe_user(self, user):
         feeds = user.userprofile.rss_feeds
-        feeds.remove( self.pk )
+        feeds.remove(self.pk)
         user.userprofile.rss_feeds = feeds
         user.userprofile.save()
 

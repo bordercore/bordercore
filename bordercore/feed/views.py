@@ -13,6 +13,7 @@ from django.views.generic.list import ListView
 from accounts.models import UserProfile
 from feed.forms import FeedForm
 from feed.models import Feed, FeedItem
+from feed.tasks import update_feed
 
 SECTION = 'Feeds'
 
@@ -171,7 +172,7 @@ def feed_edit(request, feed_id=None):
 @login_required
 def check_url(request, url):
 
-    url = urllib.unquote(url).decode('utf8')
+    url = urllib.parse.unquote(url)
 
     r = requests.get(url)
     if r.status_code != 200:
