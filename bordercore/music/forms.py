@@ -1,5 +1,6 @@
-from django.forms import ModelChoiceField, ModelForm, Select, Textarea, TextInput
 from django import forms
+from django.forms import (ModelChoiceField, ModelForm, Select, Textarea,
+                          TextInput)
 
 from music.models import Song, SongSource, WishList
 

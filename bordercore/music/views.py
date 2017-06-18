@@ -1,11 +1,11 @@
 import errno
 import hashlib
 import os
+import re
+import time
 from os import makedirs
 from os.path import isfile
-import re
 from shutil import move
-import time
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -13,17 +13,18 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.forms.utils import ErrorList
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, JsonResponse
+from django.http import (HttpResponse, HttpResponseNotFound,
+                         HttpResponseRedirect, JsonResponse)
 from django.shortcuts import redirect, render, render_to_response
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
+
 from django_datatables_view.base_datatable_view import BaseDatatableView
+from music.forms import SongForm, WishListForm
+from music.models import Album, Listen, Song, SongSource, WishList
 from mutagen.easyid3 import EasyID3
 from mutagen.mp3 import MP3
-
-from music.models import Album, Listen, Song, SongSource, WishList
-from music.forms import SongForm, WishListForm
 
 SECTION = 'Music'
 MUSIC_ROOT = "/home/media/music"
@@ -264,14 +265,19 @@ def add_song(request):
 
             album_id = None
 
+            album_title = None
+            try:
+                album_title = request.POST['album'].strip()
+            except:
+                pass
+
             # If an album was specified, check if we have the album
-            if request.POST['album']:
-                request.POST['album'] = request.POST['album'].strip()
+            if album_title:
                 album_artist = form.cleaned_data['artist']
                 if request.POST.get('compilation'):
                     album_artist = "Various Artists"
                 try:
-                    a = Album.objects.get(title=request.POST['album'], artist=album_artist)
+                    a = Album.objects.get(title=album_title, artist=album_artist)
                 except ObjectDoesNotExist:
                     a = None
                 if a:
@@ -279,7 +285,7 @@ def add_song(request):
                         messages.add_message(request, messages.ERROR, 'The same album exists but with a different year')
                 else:
                     # This is a new album
-                    a = Album(title=request.POST['album'],
+                    a = Album(title=album_title,
                               artist=album_artist,
                               year=form.cleaned_data['year'],
                               original_release_year=request.POST['original_release_year'] if request.POST['original_release_year'] else form.cleaned_data['year'],
@@ -304,11 +310,11 @@ def add_song(request):
             # One directory for the artist and one for the album (if specified)
             fulldirname = MUSIC_ROOT
             if request.POST.get('compilation'):
-                fulldirname = "%s/%s/%s" % (fulldirname, "Various Artists", request.POST['album'])
+                fulldirname = "%s/%s/%s" % (fulldirname, "Various Artists", album_title)
             else:
                 fulldirname = "%s/%s" % (fulldirname, form.cleaned_data['artist'])
-                if request.POST['album']:
-                    fulldirname = "%s/%s" % (fulldirname, request.POST['album'])
+                if album_title:
+                    fulldirname = "%s/%s" % (fulldirname, album_title)
 
             try:
                 makedirs(fulldirname)
@@ -323,7 +329,7 @@ def add_song(request):
             # For album tracks, we want the filename to be in this format:  <track> - <song>.mp3
             #   Check if the track number is already present
             filename = form.cleaned_data['title'] + '.mp3'
-            if request.POST['album']:
+            if album_title:
                 p = re.compile("^(\d+) - ")
                 if not p.match(filename):
                     filename = "%s - %s" % (form.cleaned_data['track'], filename)
@@ -341,7 +347,7 @@ def add_song(request):
                 audio = MP3(destfilename)
                 if 'APIC:' in audio.tags:
                     artwork = audio.tags['APIC:']
-                    fh = open(artwork_file, "w")
+                    fh = open(artwork_file, "wb")
                     fh.write(artwork.data)
                     fh.close()
 
