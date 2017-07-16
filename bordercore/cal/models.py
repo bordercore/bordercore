@@ -15,18 +15,17 @@ class Calendar():
         if not isinstance(user_profile, UserProfile):
             raise ValueError("Calendar must be passed a UserProfile instance")
         cal_info = user_profile.google_calendar
-        self.calendar_id = cal_info['id']
         credentials = OAuth2Credentials(
-            cal_info['credentials']['access_token'],
-            cal_info['credentials']['client_id'],
-            cal_info['credentials']['client_secret'],
-            cal_info['credentials']['refresh_token'],
-            cal_info['credentials']['token_expiry'],
-            cal_info['credentials']['token_uri'],
-            cal_info['credentials']['user_agent'],
-            cal_info['credentials']['revoke_uri'],
-            cal_info['credentials']['id_token'],
-            cal_info['credentials']['token_response'],
+            cal_info['access_token'],
+            cal_info['client_id'],
+            cal_info['client_secret'],
+            cal_info['refresh_token'],
+            cal_info['token_expiry'],
+            cal_info['token_uri'],
+            cal_info['user_agent'],
+            cal_info['revoke_uri'],
+            cal_info['id_token'],
+            cal_info['token_response'],
         )
         self.credentials = credentials
 
@@ -36,7 +35,7 @@ class Calendar():
         service = build(serviceName='calendar', version='v3', http=http, developerKey=api_key, cache_discovery=False)
         timeMax = datetime.now() + timedelta(days=7)
 
-        events = service.events().list(calendarId=self.calendar_id,
+        events = service.events().list(calendarId='bordercore@gmail.com',
                                        orderBy='startTime',
                                        singleEvents=True,
                                        timeMin=str(now_rfc3339()).replace(' ', 'T'),
