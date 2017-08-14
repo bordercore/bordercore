@@ -1,8 +1,45 @@
 {% extends "base.html" %}
 
-{% block title %} Blob {% endblock %}
+{% block title %} KB :: Documents {% endblock %}
 
 {% block left-block %}
+
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/smoke.min.css" />
+    <script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            $('#collections_other, #collections_current').change( function(e) {
+                var collection_id = $(this).val();
+                console.log(collection_id);
+
+                var mutation = 'add';
+                if ($(this).attr('id') == 'collections_current') {
+                    mutation = 'delete';
+                }
+
+                $.ajax( { type: 'POST',
+                          url: '{% url 'collection_mutate' %}',
+                          data: {'mutation': mutation,
+                                 'blob_id': {{ object.id }},
+                                 'collection_id': collection_id}
+                          }).done(function( json ) {
+                    if (json) {
+                        $.smkAlert({text: json.message, type: 'success', position:'top-right'});
+                    } else {
+                        $.smkAlert({text: 'Error changing collection status', type: 'error', position:'top-right'});
+                    }
+                })
+
+            });
+
+        });
+
+    </script>
+        
+    {% if object %}
 
     <img id="amazon-cover-image" src="{{ STATIC_URL }}{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" />
 
@@ -19,9 +56,49 @@
         <span id="amazon-feedback"></span>
     </div>
 
-    <br />
+    <br /><br />
 
-    <div class="alert" id="feedback"></div>
+    <div class="form-group">
+        <div class="row">
+            <div class="col-lg-5">
+            Add to collection
+                <select id="collections_other" class="form-control">
+                    <option value="666">--Select--</option>
+                    {% for collection in collections_other %}
+                        <option value="{{ collection.id }}">{{ collection.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+{% if object.get_collection_info %}
+    <div class="form-group">
+        <div class="row">
+            <div class="col-lg-5">
+            Remove from collection
+                <select id="collections_current" class="form-control">
+                    <option>--Select--</option>
+                    {% for collection in object.get_collection_info %}
+                        <option value="{{ collection.id }}">{{ collection.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+    </form>
+
+    <br /><br />
+    
+    <form action="{% url 'blob_delete' object.uuid %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="uuid" value="{{ object.uuid }}" />
+        <input type="submit" name="Delete" value="Delete" class="btn btn-default" />
+    </form>
+
+    {% endif %}
 
 {% endblock %}
 
@@ -29,20 +106,21 @@
 
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput-custom.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-datepicker3.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/typeahead-bootstrap3.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/smoke.min.css" />
 
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.color-2.1.2.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.field_selection.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.jeditable.mini.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
-
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
-
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.color-2.1.2.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
 
     <script type="text/javascript">
-
-        var table;
 
         $(document).ready(function() {
 
@@ -50,18 +128,6 @@
                 info: false,
                 paging: false,
                 searching: false
-            });
-
-            table_amazon = $('#table-amazon-metadata').DataTable( {
-                info: false,
-                paging: false,
-                searching: false,
-                select: {
-                    style: 'multi'
-                },
-                columnDefs: [
-                    { targets: [0], class: "blob_edit_amazon_name_field" }
-                ]
             });
 
             // Call this function anytime a row is added to the metadata table
@@ -94,90 +160,6 @@
             $('#btn-delete').click( function () {
                 table.row('.selected').remove().draw( false );
             } );
-
-            $('#btn-amazon').click( function () {
-                table_amazon.clear().draw();
-            } );
-
-            // focus() events in modals need to be handled in a special way
-            $('#myModal').on('shown.bs.modal', function () {
-                $('#title').focus()
-            });
-
-            $('#myModal2').on('shown.bs.modal', function () {
-                $('#metadata-name').focus()
-            })
-
-            function searchAmazon() {
-                var title = $('#title').val();
-                if (title == null) {
-                    return;
-                }
-
-                $('#myModalLabel').html("Retrieving information from Amazon...");
-                table_amazon.clear().draw();
-
-                $.ajax( { type: 'GET',
-                          url: '{% url 'get_amazon_metadata' 666 %}'.replace(666, title),
-                }).done(function( json ) {
-                    if (!json || json.error != null) {
-                        $('#myModalLabel').html("Error: " + json.error);
-                    } else {
-                        $('#myModalLabel').html("Choose metadata");
-                        for (var i = 0; i < json.data.length; i++) {
-                            table_amazon.row.add([json.data[i][0], json.data[i][1]]);
-                        }
-                        table_amazon.draw();
-                    }
-                });
-
-            }
-
-            $('#title').keydown(function(event){
-                // Initiate a search if the enter key is pressed.  Do NOT submit the form.
-                if (event.keyCode == 13) {
-                    event.preventDefault();
-                    searchAmazon();
-                }
-            });
-
-            $('#btn-lookup').click( function () {
-                searchAmazon();
-            } );
-
-            $('#btn-choose').click( function () {
-                var data = table_amazon.rows({selected:true}).data();
-                for (var i = 0; i < data.length; i++) {
-                    var rowNode = table.row.add( [ data[i][0], data[i][1] ] ).node();
-                    $( rowNode ).find('td').eq(1).addClass('metadata-value');
-                }
-                table.draw();
-                makeEditable();
-            } );
-
-            function parseFilename() {
-                var fileName = $('#id_filename').val();
-                var match = /(.*)(\..*?)$/.exec(fileName);
-                if (match) {
-                    return {'base': match[1], 'extension': match[2]};
-                }
-            }
-
-            $('#btn-fixfilename').click( function () {
-                table.rows().every( function ( rowIdx, tableLoop, rowLoop ) {
-                    var data = this.data();
-                    if (data[0] == 'Title') {
-                        parsedFileName = parseFilename();
-                        if (parsedFileName) {
-                            $('#id_filename').val(data[1] + parsedFileName.extension);
-                            $('#id_filename').css( 'color', 'red' ).animate( { color: '#666666' }, 2000 );
-                        }
-                    }
-                } );
-            });
-
-            // The default 'Amazon Lookup' field should default to the filename, minus the file extension
-            $('#title').val(parseFilename().base);
 
             var engine = new Bloodhound({
                 name: 'tags',
@@ -216,6 +198,10 @@
 
             engineMetadata.initialize();
 
+            $('#btn-add').click( function () {
+                $('#metadata-name').focus();
+            } );
+
             $('#metadata-name').typeahead({
                 autoselect: true
             }, {
@@ -244,6 +230,11 @@
 
             }
 
+            // Focus the text input when the dialog is displayed
+            $('#myModal2').on('shown.bs.modal', function () {
+                $('#metadata-name').focus();
+            })
+
             $('#btn-addandcontinue').click( function () {
                 addMetadata();
             } );
@@ -255,247 +246,178 @@
                 }
             });
 
-            $("#blob-form").submit(function(e) {
+            $("#form-blob").submit(function(e) {
                 $('#input-metadata').val(JSON.stringify(table.data().toArray()));
             });
 
-            var amazon_cover_image_index = 0;
-            var amazon_cover_image_info;
-
-            function get_amazon_cover_image() {
-
-                $.ajax( { type: 'GET',
-                          url: '{% url 'get_amazon_image_info' sha1sum 666 %}'.replace(666, amazon_cover_image_index),
-                          }).done(function( json ) {
-                    if (!json || json.error != null) {
-                        $('#feedback').addClass('alert-danger').html(json.error);
-                    } else {
-                        amazon_cover_image_info = json;
-                        $('#amazon-cover-image').attr('src', json.large)
-                        $('#amazon-feedback').html('Image: <span class="badge">' + (amazon_cover_image_index+1) + '</span> of <span class="badge">' + (json.count) + '</span>');
-                        amazon_cover_image_index++;
-                        if (amazon_cover_image_index == (json.count)) {
-                            amazon_cover_image_index = 0;
-                        }
-                    }
-
-                });
-
+            $('#markdown-support').change( function(event) {
+                var value = $(this).val();
+                var range = $('#id_content').getSelection();
+                var text = $('#id_content').val();
+                if (value == 'Bold') {
+                    $('#id_content').val( text.substr(0, range.start) + '**' + range.text + '**' +  text.substr(range.end, text.length - range.end));
+                } else if (value == 'Insert link') {
+                    $('#id_content').val( text.substr(0, range.start) + '[text](url)' + range.text + text.substr(range.end, text.length - range.end));
+                } else if (value == 'Insert list') {
+                    $('#id_content').val( text.substr(0, range.start) + '\n - List item\n' + text.substr(range.end, text.length - range.end));
+                } else if (value == 'Indent Code') {
+                    var newtext = '    ' + range.text.replace(/\n/g, "\n    ");
+                    $('#id_content').val( text.substr(0, range.start) + newtext  + text.substr(range.end, text.length - range.end));
+                } else if (value == 'Escape HTML') {
+                    var escapedText = range.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    $('textarea').val( text.substr(0, range.start) + escapedText +  text.substr(range.end, text.length - range.end));
                 }
+                // Reset the dropdown
+                $('#markdown-support')[0].selectedIndex = 0
+            } );
 
-            function set_amazon_cover_image() {
-
-                $.ajax( { type: 'POST',
-                          url: '{% url 'set_amazon_image_info' sha1sum 666 %}'.replace(666, amazon_cover_image_index),
-                          data: amazon_cover_image_info
-                          }).done(function( json ) {
-                    if (!json || json.error != null) {
-                        $('#feedback').addClass('alert-danger').html(json.message);
-                    } else {
-                        $('#feedback').addClass('alert-success').html(json.message);
-                    }
-                })
-            }
-
-            $('#update-cover').click( function() {
-                $('#update-cover-div').addClass('hidden');
-                $('#set-cover-div').removeClass('hidden');
-                get_amazon_cover_image();
+            $('.date').datepicker({
+                todayBtn: "linked",
+                format: "yyyy-mm-dd",
+                multidate: false
             });
 
-            $('#set-cover').click( function() {
-                $('#set-cover-div').addClass('hidden');
-                $('#update-cover-div').removeClass('hidden');
-                set_amazon_cover_image();
+            // Handle the typeahead for the Source field
+            var engineSource = new Bloodhound({
+                name: 'tags',
+                remote: {
+                    url: '{% url 'search_document_source' %}?doc_source=%QUERY',
+                    wildcard: '%QUERY'
+                },
+                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
+                queryTokenizer: Bloodhound.tokenizers.whitespace
             });
 
-            $('#next-cover').click( function() {
-                get_amazon_cover_image();
+            engineSource.initialize();
+
+            $('#id_source').typeahead({
+                autoselect: true,
+                minLength: 3,
+            }, {
+                displayKey: 'source',
+                source: engineSource,
             });
 
-            $('#collections_other, #collections_current').change( function(e) {
-                var collection_id = $(this).val();
-                console.log(collection_id);
-                // window.location='{% url 'todo_list' %}?tagsearch=' + tag;
-
-                var mutation = 'add';
-                if ($(this).attr('id') == 'collections_current') {
-                    mutation = 'delete';
+            $('#metadata-value').keypress( function(e) {
+                // Transforms 'JERRELL SCHIVERS' to 'Jerrell Schivers'
+                if (e.which && (e.which == 2 || e.which == 8747)) { // Control-B (Linux) or Alt-B (Mac)
+                    $(this).val( $(this).val().toLowerCase().replace(/(\s+)(.)|^(.)/g, formatName) );
+                    return false;
                 }
-
-                $.ajax( { type: 'POST',
-                          url: '{% url 'collection_mutate' %}',
-                          data: {'mutation': mutation,
-                                 'blob_id': {{ object.id }},
-                                 'collection_id': collection_id}
-                          }).done(function( json ) {
-                    if (!json || json.error != null) {
-                        $('#feedback').addClass('alert-danger').html(json.message);
-                    } else {
-                        $('#feedback').addClass('alert-success').html(json.message);
-                    }
-                })
-
             });
 
         });
 
-</script>
+        function formatName(match, capture1, capture2) {
+            return capture2 ? capture1 + capture2.toUpperCase() : match.toUpperCase();
+        }
 
+    </script>
 
+{% if request.POST.Go and not form.errors %}
+
+    {% include "common/show_messages.html" %}
+
+{% endif %}
+
+{% if object %}
 <div class="row">
-
     <div class="col-lg-8">
-
         <ol class="breadcrumb">
-            <li><a href="{% url 'blob_detail' sha1sum %}">Blob Detail</a></li>
+            <li><a href="{% url 'blob_detail' object.uuid %}">Blob Detail</a></li>
             <li class="active">Edit Blob</li>
         </ol>
+    </div>
+</div>
+{% endif %}
 
-        <form id="blob-form" class="form-horizontal" action="{{ request.path }}" method="post">
-            <input type="hidden" name="metadata" id="input-metadata" />
+<form class="form-horizontal" id="form-blob" action="{{ request.path }}" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="metadata" id="input-metadata" />
+    {% csrf_token %}
 
-            {% csrf_token %}
+    {% for field in form %}
+        <div class="form-group {% if field.errors %}error{% endif %}">
+            <label class="col-lg-1 control-label" for="inputTitle">{{ field.label }}</label>
 
-            {% for field in form %}
-                <div class="form-group{% if field.errors %} error{% endif %}">
-                    <label class="col-lg-2 control-label" for="inputTitle">{{ field.label }}</label>
+            {% if field.label == 'Date' %}
 
-                    <div class="col-lg-7">
-                        {{ field }}
-                        {% for error in field.errors %}
-                            <span class="form-error">{{ error }}</span>
-                        {% endfor %}
+                <div class="col-lg-7">
+
+                    <div class="form-group row">
+
+                        <!-- Tacking on the glyphs in an input-group class messes up the layout -->
+                        <div class="col-lg-3">
+                            <input class="form-control date" type="text" id="id_date" name="date" value="{{ field.value }}" />
+                        </div>
+
+                        <div class="col-lg-3">
+                            <select id="markdown-support" class="form-control">
+                                <option>Markdown</option>
+                                <option>Insert link</option>
+                                <option>Bold</option>
+                                <option>Indent Code</option>
+                                <option>Insert list</option>
+                                <option>Escape HTML</option>
+                            </select>
+                        </div>
+
                     </div>
 
                 </div>
+
+            {% else %}
+
+                <div class="col-lg-5">
+                    {{ field }}
+                </div>
+            {% endif %}
+
+            {% for error in field.errors %}
+                <span class="form-error">{{ error }}</span>
             {% endfor %}
 
-            <div class="form-group{% if field.errors %} error{% endif %}">
-                <label class="col-lg-2 control-label" for="inputTitle">Is Book</label>
-                <div class="col-lg-7">
-                    <input name="is_book" type="checkbox"{% if is_book %} checked="checked"{% endif %} />
+        </div>
+    {% endfor %}
+
+
+    <div class="row">
+        <div class="col-lg-7 col-lg-offset-2">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">MetaData</h3>
                 </div>
-            </div>
+                <div class="panel-body">
+                    <table id="metadata" class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for data in metadata %}
+                                <tr><td>{{ data.name }}</td><td class="metadata-value">{{ data.value }}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
 
-            <div class="row">
-                <div class="col-lg-7 col-lg-offset-2">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">MetaData</h3>
-                        </div>
-                        <div class="panel-body">
-                            <table id="metadata" class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Value</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for data in metadata %}
-                                        <tr><td>{{ data.name }}</td><td class="metadata-value">{{ data.value }}</td></tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-
-                            <input type="button" class="btn btn-default" id="btn-add" data-toggle="modal" data-target="#myModal2" value="Add" />
-                            <input type="button" class="btn btn-default" id="btn-delete" value="Delete" disabled />
-                            <input type="button" class="btn btn-default" id="btn-amazon" data-toggle="modal" data-target="#myModal" value="Amazon Lookup" />
-                            <input type="button" class="btn btn-default" id="btn-fixfilename" value="Fix Filename" />
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <div class="col-lg-4 col-lg-offset-2">
-                    <input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
-                    <input type="button" class="btn btn-default" data-toggle="modal" data-target="#myModal3" value="Delete" />
-                    <a href="{% url 'blob_add' sha1sum %}">
-                        <input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="button" name="Go" value="Replace" />
-                    </a>
+                    <input type="button" class="btn btn-default" id="btn-add" data-toggle="modal" data-target="#myModal2" value="Add" />
+                    <input type="button" class="btn btn-default" id="btn-delete" value="Delete" disabled />
+                    <input type="button" class="btn btn-default" id="btn-amazon" data-toggle="modal" data-target="#myModal" value="Amazon Lookup" />
+                    <input type="button" class="btn btn-default" id="btn-fixfilename" value="Fix Filename" />
 
                 </div>
-            </div>
-
-        </form>
-
-    </div>
-
-</div>
-
-<form class="form-horizontal">
-
-    <div class="form-group">
-        <div class="row">
-            <div class="col-lg-5 col-lg-offset-1">
-            Add to collection
-                <select id="collections_other" class="form-control">
-                    <option value="666">--Select--</option>
-                    {% for collection in collections_other %}
-                        <option value="{{ collection.id }}">{{ collection.name }}</option>
-                    {% endfor %}
-                </select>
             </div>
         </div>
     </div>
 
     <div class="form-group">
-        <div class="row">
-            <div class="col-lg-5 col-lg-offset-1">
-            Remove from collection
-                <select id="collections_current" class="form-control">
-                    <option>--Select--</option>
-                    {% for collection in object.get_collection_info %}
-                        <option value="{{ collection.id }}">{{ collection.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+        <div class="col-lg-3 col-lg-offset-1">
+            <input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
         </div>
     </div>
 
 </form>
-
-<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">Amazon Lookup</h4>
-            </div>
-            <div class="modal-body">
-
-                <form id="form-workout" class="form-inline" method="post" autocomplete="off">
-
-                    <div class="form-group">
-                        <label>Title</label>
-                        <input id="title" class="form-control" type="text" name="title" />
-                    </div>
-
-                    <input class="btn btn-default" id="btn-lookup" type="button" name="Go" value="Lookup" />
-
-                </form>
-
-                <table class="table table-condensed" id="table-amazon-metadata" width="100%">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Value</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal" id="btn-choose">Choose</button>
-            </div>
-        </div>
-    </div>
-
-</div>
 
 <div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
@@ -522,30 +444,6 @@
                 <button type="button" class="btn btn-default" data-dismiss="modal" id="btn-choose">Done</button>
             </div>
 
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">Delete Blob</h4>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-warning" role="alert">
-            Are you sure you want to delete <strong>{{ object.filename }}</strong>?
-                    <br /><br />
-                </div>
-            </div>
-            <div class="modal-footer">
-                <form method="post" action="{% url 'blob_delete' object.id %}">
-                    {% csrf_token %}
-                    <button type="button" class="btn btn-default" data-dismiss="modal" id="btn-choose">Cancel</button>
-                    <button type="submit" class="btn btn-default" id="btn-addandcontinue">Delete</button>
-                </form>
-            </div>
         </div>
     </div>
 </div>

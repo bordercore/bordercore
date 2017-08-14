@@ -6,11 +6,12 @@ from solrpy.core import SolrConnection
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from blob.models import Blob
+from blob.models import Document
 from bookmark.models import Bookmark
 from collection.models import Collection
 from fitness.models import ExerciseUser
@@ -59,8 +60,8 @@ def homepage(request):
 
     # Choose a random image
     random_image = get_random_blob('image/*')
-    random_image_info = {'sha1sum': random_image.sha1sum,
-                         'cover_info': Blob.get_cover_info(random_image.sha1sum, 'small', 500)}
+    random_image_info = {'uuid': random_image.uuid,
+                         'cover_info': Document.get_cover_info(random_image.sha1sum, 'small', 500)}
 
     # Get the most recent untagged bookmarks
     bookmarks = Bookmark.objects.filter(tags__isnull=True).order_by('-created')[:10]
@@ -111,9 +112,13 @@ def get_random_blob(content_type):
     solr_args = {'q': 'content_type:%s' % (content_type),
                  'sort': 'random_%s+desc' % (seed),
                  'wt': 'json',
-                 'fl': 'internal_id,sha1sum',
+                 'fl': 'internal_id,sha1sum,uuid',
                  'fq': '-is_private:true',
                  'rows': 1}
     solr_results = json.loads(conn.raw_query(**solr_args).decode('UTF-8'))['response']['docs'][0]
-    blob = Blob.objects.get(pk=solr_results['internal_id'])
+    try:
+        print("Trying to get uuid={} from the database".format(solr_results['internal_id']))
+        blob = Document.objects.get(pk=solr_results['internal_id'])
+    except ObjectDoesNotExist:
+        pass
     return blob

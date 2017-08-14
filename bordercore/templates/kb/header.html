@@ -59,7 +59,7 @@
             if (datum.type == 'Tag') {
                 url = '{% url 'kb_search_tag_detail' 666 %}'.replace(666, datum.value);
             } else {
-                url = '{% url 'blob_detail' 666 %}'.replace(666, datum.sha1sum);
+                url = '{% url 'blob_detail' 666 %}'.replace(666, datum.uuid);
             }
             autocomplete_selected = true;
             window.open(url, '_self');

@@ -2,35 +2,36 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.auth.views import logout
-from tastypie.api import Api
-
-from accounts.api import UserResource
-from bookmark.api import BookmarkResource
-from music.api import MusicWishListResource
-from todo.api import TodoResource
 
 from accounts import views as accounts_views
+from accounts.api import UserResource
 from accounts.views import UserProfileDetailView
+from blob.views import (BlobDeleteView, BlobDetailView, BlobUpdateView, DocumentCreateView)
 from blob import views as blob_views
-from blob.views import BlobDeleteView, BlobDetailView, BlobUpdateView
 from blog import views as blog_views
 from book.views import BookListView
 from bookmark import views as bookmark_views
+from bookmark.api import BookmarkResource
 from bookmark.views import OrderListJson
 from collection import views as collection_views
-from collection.views import CollectionCreateView, CollectionDetailView, CollectionListView, CollectionUpdateView
-from document import views as document_views
+from collection.views import (CollectionCreateView, CollectionDetailView,
+                              CollectionListView, CollectionUpdateView)
 from feed import views as feed_views
 from feed.views import FeedListView, FeedSubscriptionListView
 from fitness import views as fitness_views
 from fitness.views import ExerciseDetailView
 from homepage import views as homepage_views
 from music import views as music_views
-from music.views import AlbumDetailView, MusicListJson, WishListView, WishListCreateView, WishListDetailView
+from music.api import MusicWishListResource
+from music.views import (AlbumDetailView, MusicListJson, WishListCreateView,
+                         WishListDetailView, WishListView)
 from search import views as search_views
 from search.views import SearchListView, SearchTagDetailView
 from tag import views as tag_views
-from todo.views import TodoCreateView, TodoDeleteView, TodoDetailView, TodoListView
+from tastypie.api import Api
+from todo.api import TodoResource
+from todo.views import (TodoCreateView, TodoDeleteView, TodoDetailView,
+                        TodoListView)
 
 admin.autodiscover()
 
@@ -49,17 +50,17 @@ urlpatterns = [
     url(r'^$|^index.html', homepage_views.homepage, name='homepage'),
     url(r'^homepage/get_calendar_events.json', homepage_views.get_calendar_events, name='get_calendar_events'),
 
-    url(r'^blob/add/(\w+)$', blob_views.blob_add, name='blob_add'),
-    url(r'^blob/add', blob_views.blob_add, name='blob_add'),
-    url(r'^blob/delete/(?P<pk>\w+)$', BlobDeleteView.as_view(), name='blob_delete'),
-    url(r'^blob/edit/(?P<sha1sum>\w+)$', BlobUpdateView.as_view(), name='blob_edit'),
+    url(r'^blob/add', DocumentCreateView.as_view(), name='blob_add'),
+    # url(r'^blob/upload', blob_views.blob_upload, name='blob_upload'),
+    url(r'^blob/(?P<uuid>[0-9a-f-]+)/delete$', BlobDeleteView.as_view(), name='blob_delete'),
     url(r'^blob/metadata_name_search/', blob_views.metadata_name_search, name='metadata_name_search'),
-    url(r'^blob/get_amazon_metadata/(?P<title>[\w|\W]+)$', blob_views.get_amazon_metadata, name='get_amazon_metadata'),
-    url(r'^blob/get_amazon_image_info/(?P<sha1sum>[\w|\W]+)/(?P<index>\d+)$', blob_views.get_amazon_image_info, name='get_amazon_image_info'),
-    url(r'^blob/get_amazon_image_info/(?P<sha1sum>[\w|\W]+)$', blob_views.get_amazon_image_info, name='get_amazon_image_info'),
-    url(r'^blob/set_amazon_image_info/(?P<sha1sum>[\w|\W]+)/(?P<index>\d+)$', blob_views.set_amazon_image_info, name='set_amazon_image_info'),
+    # url(r'^blob/get_amazon_metadata/(?P<title>[\w|\W]+)$', blob_views.get_amazon_metadata, name='get_amazon_metadata'),
+    # url(r'^blob/get_amazon_image_info/(?P<sha1sum>[\w|\W]+)/(?P<index>\d+)$', blob_views.get_amazon_image_info, name='get_amazon_image_info'),
+    # url(r'^blob/get_amazon_image_info/(?P<sha1sum>[\w|\W]+)$', blob_views.get_amazon_image_info, name='get_amazon_image_info'),
+    # url(r'^blob/set_amazon_image_info/(?P<sha1sum>[\w|\W]+)/(?P<index>\d+)$', blob_views.set_amazon_image_info, name='set_amazon_image_info'),
     url(r'^blob/mutate', blob_views.collection_mutate, name='collection_mutate'),
-    url(r'^blob/(?P<sha1sum>\w+)$', BlobDetailView.as_view(), name='blob_detail'),
+    url(r'^blob/(?P<uuid>[0-9a-f-]+)$', BlobDetailView.as_view(), name='blob_detail'),
+    url(r'^blob/(?P<uuid>[0-9a-f-]+)/edit$', BlobUpdateView.as_view(), name='blob_edit'),
 
     url(r'^blog/edit(?:/(\d+))?', blog_views.blog_edit, name='blog_edit'),
     url(r'^blog/(\d+)?', blog_views.blog_list, name='blog_list'),
@@ -83,9 +84,6 @@ urlpatterns = [
     url(r'^collection/get_info', collection_views.get_info, name='collection_get_info'),
     url(r'^collection/sort', collection_views.sort_collection, name='sort_collection'),
     url(r'^collection/', CollectionListView.as_view(), name='collection_list'),
-
-    url(r'^kb/documents(?:/(\d+))?/edit', document_views.document_edit, name='document_edit'),
-    url(r'^kb/documents/(\d+)', document_views.document_detail, name='document_detail'),
 
     url(r'^feed/sort_feed/', feed_views.sort_feed, name='sort_feed'),
     url(r'^feed/edit(?:/(\d+))?', feed_views.feed_edit, name='feed_edit'),

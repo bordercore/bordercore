@@ -6,75 +6,74 @@
 
 {% block left-block %}
 
-                <h1>{{ title }}</h1>
-            <h5>{{ object.get_edition_string }}</h5>
-            <br />
+    <h1>{{ title }}</h1>
 
-            {% if metadata.Author %}
-            by {{ metadata.Author }}
-                <br />
-            {% endif %}
+    <h5>{{ object.get_edition_string }}</h5>
 
-            {% if metadata|dict_get:"Publication Date" %}
+    <br />
 
-            {{ metadata|dict_get:"Publication Date" }}
+    {% if metadata.Author %}by {{ metadata.Author }}<br />{% endif %}
 
-            <br /><br />
+    {% if object.date %}{{ object.date }}<br /><br />{% endif  %}
 
-            {% endif  %}
-
+    {% if object.tags.all %}
             Tags:
-            {% for tag in object.tags.all %}
-                <a class="label label-primary" href="{% url 'kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
-            {% endfor %}
+        {% for tag in object.tags.all %}
+            <a class="label label-primary" href="{% url 'kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
+        {% endfor %}
+        <br /><br />
+    {% endif %}
 
-            <br /><br />
+    {% if metadata.Url %}
 
-            {% if metadata.Url %}
+        {% for url in metadata.Url %}
+            <strong><a href="{{ url }}">Reference Link</a></strong>
+            <br />
+        {% endfor %}
 
-            {% for url in metadata.Url %}
-                <strong><a href="{{ url }}">Reference Link</a></strong>
-                <br />
-            {% endfor %}
+        <br /><br />
 
-            <br /><br />
+    {% endif %}
 
+    <table class="table table-condensed">
+        {% for key, values in metadata.items %}
+            {% if not key in fields_ignore %}
+                <tr>
+                    <td><strong>{{ key }}</strong></td>
+                    <td>{{ values }}</td>
+                </tr>
             {% endif %}
+        {% endfor %}
+    </table>
 
-            <table class="table table-condensed">
-                {% for key, values in metadata.items %}
-                    {% if not key in fields_ignore %}
-                        <tr>
-                            <td><strong>{{ key }}</strong></td>
-                            <td>{{ values }}</td>
-                        </tr>
-                    {% endif %}
-                {% endfor %}
-            </table>
-
+    {% if content_type %}
             Object Type: <strong>{{ content_type }}</strong>
+        <br /><br />
+    {% endif %}
 
-            <br /><br />
+    <form action="{% url 'blob_edit' object.uuid %}">
 
-            <form action="{% url 'blob_edit' object.sha1sum %}">
+    {% if object.sha1sum %}
+        <a class="btn btn-default" href="{{ STATIC_URL }}blobs/{{ object.get_url }}" role="button" target="blob">Download</a>
+    {% endif %}
+        <input type="submit" class="btn btn-primary" value="Edit">
 
-                <a class="btn btn-default" href="{{ STATIC_URL }}blobs/{{ object.get_url }}" role="button" target="blob">Download</a>
-                <input type="submit" class="btn btn-primary" value="Edit">
+        <br /><br />
 
-                <br /><br />
+    </form>
 
-            </form>
+    <br /><br />
 
-            <br /><br />
-
-            {% if object.get_related_blobs %}
+    {% for blob in object.get_related_blobs %}
+        {% if forloop.first %}
                 Related blobs:
-                <ul>
-                {% for blob in object.get_related_blobs %}
-                    <li> <a href="{% url 'blob_detail' blob.sha1sum %}">{{ blob.title.0.value|default:"No Title" }}</a> </li>
-                {% endfor %}
-                </ul>
-            {% endif %}
+            <ul>
+        {% endif %}
+        {% if forloop.last %}
+            </ul>
+        {% endif %}
+        <li> <a href="{% url 'blob_detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a> </li>
+    {% endfor %}
 
 {% endblock %}
 
@@ -150,7 +149,11 @@
 
     <div class="row">
 
-        <div class="col-lg-6">
+      <div class="col-lg-6">
+
+          {% if object.content %}
+              {{ object.get_content|safe }}
+          {% endif %}
 
             {% if cover_info %}
                 <img src="{{ STATIC_URL }}{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" data-toggle="modal" data-target="#myModal3" />
@@ -166,7 +169,7 @@
 
     </div>
 
-{% if current_collections %}
+    {% if current_collections %}
     <div class="row top-buffer">
         <div class="col-lg-12">
             In collections:

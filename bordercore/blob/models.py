@@ -1,17 +1,24 @@
+import hashlib
 import json
 import os
 import os.path
-from PIL import Image
 import re
+import shutil
+import uuid
 
+import markdown
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.files.storage import FileSystemStorage
 from django.db import models
-from lib.mixins import TimeStampedModel
-from solrpy.core import SolrConnection
+from django.db.models.signals import pre_delete
+from django.dispatch.dispatcher import receiver
+from PIL import Image
 
 from blob.amazon import AmazonMixin
 from collection.models import Collection
+from lib.mixins import TimeStampedModel
+from solrpy.core import SolrConnection
 from tag.models import Tag
 
 EDITIONS = {'1': 'First',
@@ -26,49 +33,158 @@ EDITIONS = {'1': 'First',
 MAX_COVER_IMAGE_WIDTH = 800
 
 
-class Blob(TimeStampedModel, AmazonMixin):
-    """
-    A blob belonging to a user.
-    """
-    EBOOK_DIR = '/home/media/ebooks'
-    BLOB_STORE = '/home/media/blobs'
+# Override FileSystemStorage to get better control of how files are named
+class BlobFileSystemStorage(FileSystemStorage):
+    def get_available_name(self, name, max_length=None):
+        if max_length and len(name) > max_length:
+            raise(Exception("name's length is greater than max_length"))
+        return name
 
-    sha1sum = models.CharField(max_length=40, unique=True)
-    filename = models.TextField()
+    # Override this to prevent Django from cleaning the name (eg replacing spaces with underscores)
+    def get_valid_name(self, name):
+        return name
+
+    def _save(self, name, content):
+        if self.exists(name):
+            # if the file exists, do not call the superclasses _save method
+            return name
+        # if the file is new, DO call it
+        return super(BlobFileSystemStorage, self)._save(name, content)
+
+
+def blob_directory_path(instance, filename):
+
+    hasher = hashlib.sha1()
+    for chunk in instance.file.chunks():
+        hasher.update(chunk)
+
+    sha1sum = hasher.hexdigest()
+
+    dir = "{}/{}/{}".format(settings.MEDIA_ROOT, sha1sum[0:2], sha1sum)
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+        os.chmod(dir, 0o2775)
+    filepath = "{}/{}/{}".format(sha1sum[0:2], sha1sum, filename)
+
+    return filepath
+
+
+class Document(TimeStampedModel):
+    """
+    The base class
+    """
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    content = models.TextField(null=True)
+    title = models.TextField(null=True)
+    sha1sum = models.CharField(max_length=40, unique=True, blank=True, null=True)
+    file = models.FileField(upload_to=blob_directory_path, storage=BlobFileSystemStorage(), max_length=500)
     user = models.ForeignKey(User)
+    note = models.TextField(null=True)
     tags = models.ManyToManyField(Tag)
-    blobs = models.ManyToManyField("self")
+    date = models.TextField(null=True)
+    importance = models.IntegerField(default=1)
     is_private = models.BooleanField(default=False)
+    documents = models.ManyToManyField("self")
+
+    def get_content(self):
+        return markdown.markdown(self.content, extensions=['codehilite(guess_lang=False)'])
+
+    def get_content_type(self, argument):
+        switcher = {
+            "application/mp4": "Video",
+            "application/pdf": "PDF",
+            "image/jpeg": "Image",
+            "image/png": "Image"
+        }
+
+        return switcher.get(argument, lambda: argument)
+
+    def get_parent_dir(self):
+        return "{}/{}/{}".format(settings.MEDIA_ROOT, self.sha1sum[0:2], self.sha1sum)
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
 
-    def get_parent_dir(self):
-        return "%s/%s/%s" % (self.BLOB_STORE, self.sha1sum[0:2], self.sha1sum)
-
     def get_url(self):
-        return "%s/%s/%s" % (self.sha1sum[0:2], self.sha1sum, self.filename)
+        return self.file
 
     def get_title(self, remove_edition_string=False):
-        m = self.metadata_set.filter(name='Title')
-        if m:
+        title = self.title
+        if title:
             if remove_edition_string:
                 pattern = re.compile('(.*) (\d)E$')
-                matches = pattern.match(m[0].value)
+                matches = pattern.match(title)
                 if matches and EDITIONS[matches.group(2)]:
                     return "%s" % (matches.group(1))
-            return m[0].value
+            return title
         else:
             return "No title"
 
     def get_edition_string(self):
-        m = self.metadata_set.filter(name='Title')
-        if m:
-            pattern = re.compile('(.*) (\d)E$')
-            matches = pattern.match(m[0].value)
-            if matches and EDITIONS[matches.group(2)]:
-                return "%s Edition" % (EDITIONS[matches.group(2)])
-        return ""
+        pattern = re.compile('(.*) (\d)E$')
+        matches = pattern.match(self.title)
+        if matches and EDITIONS[matches.group(2)]:
+            return "%s Edition" % (EDITIONS[matches.group(2)])
+        else:
+            return ""
+
+    def get_solr_info(self, query, **kwargs):
+        conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+        solr_args = {'q': query,
+                     'wt': 'json',
+                     'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url,bordercore_blogpost_title',
+                     'rows': 1000}
+        return json.loads(conn.raw_query(**solr_args).decode('UTF-8'))['response']
+
+    def save(self, *args, **kwargs):
+        if self.file:
+            old_sha1sum = self.sha1sum
+            hasher = hashlib.sha1()
+            for chunk in self.file.chunks():
+                hasher.update(chunk)
+            self.sha1sum = hasher.hexdigest()
+        super(Document, self).save(*args, **kwargs)
+
+        if self.file and old_sha1sum is not None:
+            # We can only move files after super() is called to create the new file's directory structure
+            if self.sha1sum != old_sha1sum:
+                self.change_file(old_sha1sum)
+
+    def change_file(self, old_sha1sum):
+
+        dir_old = "{}/{}/{}".format(settings.MEDIA_ROOT, old_sha1sum[0:2], old_sha1sum)
+        dir_new = self.get_parent_dir()
+
+        # Delete the old file.  I don't have access to the old filename at this point,
+        #  so instead delete anything that doesn't look like a cover image
+        for fn in os.listdir(dir_old):
+            if not os.path.basename(fn).startswith('cover-'):
+                print ("Deleting {}/{}".format(dir_old, fn))
+                os.remove("{}/{}".format(dir_old, fn))
+
+        # Move any cover images for the old file to the new file's directory
+        for file in os.listdir(dir_old):
+            _, file_extension = os.path.splitext(file)
+            if file_extension[1:] in ['jpg', 'png']:
+                shutil.move("{}/{}".format(dir_old, file), dir_new)
+
+        # Delete the old file's directory.  It should be empty at this point.
+        os.rmdir(dir_old)
+
+        # If the parent of that is also empty, delete it, too
+        parent_dir = "{}/{}".format(settings.MEDIA_ROOT, self.sha1sum[0:2])
+        if os.listdir(parent_dir) == []:
+            print("Deleting empty parent dir: {}".format(parent_dir))
+            os.rmdir(parent_dir)
+
+    def get_related_blobs(self):
+        related_blobs = []
+        for blob in self.documents.all():
+            related_blobs.append({'uuid': blob.uuid, 'title': blob.title})
+        return related_blobs
+
+    def get_collection_info(self):
+        return Collection.objects.filter(blob_list__contains=[{'id': self.id}])
 
     @staticmethod
     def get_image_dimensions(file_path, max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
@@ -89,23 +205,23 @@ class Blob(TimeStampedModel, AmazonMixin):
 
         info = {}
 
-        parent_dir = "%s/%s/%s" % (Blob.BLOB_STORE, sha1sum[0:2], sha1sum)
+        parent_dir = "{}/{}/{}".format(settings.MEDIA_ROOT, sha1sum[0:2], sha1sum)
 
-        b = Blob.objects.get(sha1sum=sha1sum)
-        file_path = "%s/%s" % (b.get_parent_dir(), b.filename)
+        b = Document.objects.get(sha1sum=sha1sum)
+        file_path = "{}/{}".format(settings.MEDIA_ROOT, b.file.name)
 
         # Is the blob itself an image?
-        filename, file_extension = os.path.splitext(b.filename)
+        filename, file_extension = os.path.splitext(file_path)
         if file_extension[1:] in ['gif', 'jpg', 'jpeg', 'png']:
-            info = Blob.get_image_dimensions(file_path, max_cover_image_width)
-            info['url'] = "blobs/%s/%s/%s" % (sha1sum[0:2], sha1sum, b.filename)
+            info = Document.get_image_dimensions(file_path, max_cover_image_width)
+            info['url'] = "blobs/{}".format(b.file.name)
 
         # Nope. Look for a cover image
         for image_type in ['jpg', 'png']:
             for cover_image in ["cover.%s" % image_type, "cover-%s.%s" % (size, image_type)]:
                 file_path = "%s/%s" % (parent_dir, cover_image)
                 if os.path.isfile(file_path):
-                    info = Blob.get_image_dimensions(file_path, max_cover_image_width)
+                    info = Document.get_image_dimensions(file_path, max_cover_image_width)
                     info['url'] = "blobs/%s/%s/%s" % (sha1sum[0:2], sha1sum, cover_image)
 
         # If we get this far, return the default image
@@ -114,72 +230,40 @@ class Blob(TimeStampedModel, AmazonMixin):
 
         return info
 
-    def get_solr_info(self, query, **kwargs):
-        conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-        solr_args = {'q': query,
-                     'wt': 'json',
-                     'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url,bordercore_blogpost_title',
-                     'rows': 1000}
-        return json.loads(conn.raw_query(**solr_args).decode('UTF-8'))['response']
-
-    def get_related_blobs(self):
-        related_blobs = []
-        for blob in self.blobs.all():
-            related_blobs.append({'sha1sum': blob.sha1sum, 'title': blob.metadata_set.filter(name='Title')})
-        return related_blobs
-
     def delete(self):
-        file_path = "%s/%s" % (self.get_parent_dir(), self.filename)
-        if os.path.isfile(file_path):
-            os.remove(file_path)
+        conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+        conn.delete(queries=['uuid:{}'.format(self.uuid)])
+        conn.commit()
 
-            self.delete_cover_images()
+        super(Document, self).delete()
 
-            # Delete the parent dir if this is not an ebook
-            os.rmdir("%s/%s/%s" % (self.BLOB_STORE, self.sha1sum[0:2], self.sha1sum))
-            # If the parent of that is empty, delete it, too
-            parent_dir = "%s/%s" % (self.BLOB_STORE, self.sha1sum[0:2])
-            if os.listdir(parent_dir) == []:
-                os.rmdir(parent_dir)
 
-            # Remove this blob from any collections
-            for c in Collection.objects.all():
-                c.blob_list = [x for x in c.blob_list if x['id'] != self.id]
-                c.save()
+@receiver(pre_delete, sender=Document)
+def mymodel_delete(sender, instance, **kwargs):
 
-            # Delete the blob in Solr
-            conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-            conn.delete(queries=['sha1sum:%s' % (self.sha1sum)])
-            conn.commit()
+    if instance.file:
+        dir = instance.get_parent_dir()
+        for fn in os.listdir(dir):
+            print ("Deleting {}/{}".format(dir, fn))
+            os.remove("{}/{}".format(dir, fn))
 
-            super(Blob, self).delete()
-        else:
-            raise Exception("File does not exist: %s" % file_path)
+        # Delete the old file's directory.  It should be empty at this point.
+        os.rmdir(dir)
 
-    def delete_cover_images(self):
-        for file in os.listdir(self.get_parent_dir()):
-            filename, file_extension = os.path.splitext(file)
-            if file_extension[1:] in ['jpg', 'png']:
-                os.remove("%s/%s" % (self.get_parent_dir(), file))
+        # If the parent of that is also empty, delete it, too
+        parent_dir = "{}/{}".format(settings.MEDIA_ROOT, instance.sha1sum[0:2])
+        if os.listdir(parent_dir) == []:
+            print("Deleting empty parent dir: {}".format(parent_dir))
+            os.rmdir(parent_dir)
 
-    def get_content_type(self, argument):
-        switcher = {
-            "application/mp4": "Video",
-            "application/pdf": "PDF",
-            "image/jpeg": "Image",
-            "image/png": "Image"
-        }
-
-        return switcher.get(argument, lambda: argument)
-
-    def get_collection_info(self):
-        return Collection.objects.filter(blob_list__contains=[{'id': self.id}])
+        # Pass false so FileField doesn't save the model.
+        instance.file.delete(False)
 
 
 class MetaData(TimeStampedModel):
     name = models.TextField()
     value = models.TextField()
-    blob = models.ForeignKey(Blob)
+    blob = models.ForeignKey(Document)
 
     class Meta:
         unique_together = ('name', 'value', 'blob')

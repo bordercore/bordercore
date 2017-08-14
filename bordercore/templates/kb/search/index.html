@@ -93,7 +93,7 @@
 
     <h4 class="search_book_title">
         <img src="{{ STATIC_URL }}img/kb_link.png" />
-        <a href="{{ match.url }}">{{ match.bordercore_bookmark_title.0 }}</a>
+        <a href="{{ match.url.0 }}">{{ match.bordercore_bookmark_title.0 }}</a>
         <span class="search_todo_date">{{ match.last_modified }}</span>
     </h4>
 
@@ -106,7 +106,7 @@
 {% elif match.doctype == 'document' %}
 
     <h4 class="search_book_title">
-        <a href="{% url 'document_detail' match.internal_id %}">{{ match.title.0|default:"Title" }}</a>
+        <a href="{% url 'blob_detail' match.uuid %}">{{ match.title.0|default:"Title" }}</a>
         <span class="search_todo_date">{{ match.last_modified }}</span>
     </h4>
 
@@ -117,7 +117,7 @@
     <h4>
         <img src="{{ STATIC_URL }}img/kb_book.png" />
         <span class="search_book_title">
-            <a href="{% url 'blob_detail' match.sha1sum %}">{{ match.title.0 }}</a>
+            <a href="{% url 'blob_detail' match.uuid %}">{{ match.title.0 }}</a>
         </span>
         <span class="search_book_author">
             {% if match.author.0 %} - {{ match.author.0 }}{% endif %}

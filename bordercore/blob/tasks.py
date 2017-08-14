@@ -8,7 +8,7 @@ SOLRINDEXER_JAR = '/opt/lib/solrindexer.jar'
 
 
 @task()
-def index_blob(sha1sum):
-    print("index blob: %s" % (sha1sum))
-    cmd = "{}/bin/java -cp {} com.bordercore.solr.SolrIndexerDriver -s {}".format(JAVA_HOME, SOLRINDEXER_JAR, sha1sum)
+def index_blob(uuid):
+    print("index blob: {}".format(uuid))
+    cmd = "{}/bin/java -cp {} com.bordercore.solr.SolrIndexerDriver -u {}".format(JAVA_HOME, SOLRINDEXER_JAR, uuid)
     call(cmd.split())

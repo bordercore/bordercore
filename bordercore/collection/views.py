@@ -9,7 +9,7 @@ from django.views.generic.list import ListView
 
 from collection.forms import CollectionForm
 from collection.models import Collection
-from blob.models import Blob
+from blob.models import Document
 from tag.models import Tag
 
 import datetime
@@ -65,7 +65,7 @@ class CollectionDetailView(DetailView):
                          'rows': 1000,
                          'fields': ['attr_*', 'author', 'content_type', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
                          'wt': 'json',
-                         'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url,bordercore_blogpost_title'
+                         'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,uuid,url,bordercore_blogpost_title'
             }
 
             results = conn.raw_query(**solr_args)
@@ -87,9 +87,10 @@ class CollectionDetailView(DetailView):
 
             for object in blob_list_temp:
                 if object['doctype'] in ('blob', 'book'):
-                    filename = os.path.basename(object['filepath'])
-                    object['url'] = object['filepath'].split(Blob.BLOB_STORE)[1]
-                    object['cover_info'] = Blob.get_cover_info(object['sha1sum'], max_cover_image_width=70)
+                    if 'filepath' in object:
+                        filename = os.path.basename(object['filepath'])
+                        # object['url'] = object['filepath'].split(Document.BLOB_STORE)[1]
+                    object['cover_info'] = Document.get_cover_info(object['sha1sum'], max_cover_image_width=70)
                     if object['content_type']:
                         try:
                             object['content_type'] = object['content_type'][0].split('/')[1]

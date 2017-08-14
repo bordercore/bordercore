@@ -1,8 +1,8 @@
 # Django settings for bordercore project.
 
 import sys
-
 from pathlib import Path
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -38,8 +38,6 @@ TIME_ZONE = 'US/Eastern'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
-#SITE_ID = 1
-
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
 USE_I18N = True
@@ -53,7 +51,7 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = ''
+MEDIA_ROOT = '/home/media/blobs'
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -83,6 +81,8 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder'
 )
 
+FILE_UPLOAD_PERMISSIONS = 0o664
+
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '^q$7#ge(!9p!rqzbh*g3%-0q7=*sxcs!$&amp;$8)i33g3a%a+o#4m'
 
@@ -110,7 +110,6 @@ INSTALLED_APPS = (
     'blog',
     'book',
     'collection',
-    'document',
     'feed',
     'fitness',
     'lib',

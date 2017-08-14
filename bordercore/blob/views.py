@@ -1,26 +1,23 @@
-from django.contrib import messages
-from django.core.exceptions import ObjectDoesNotExist
-from django.core.urlresolvers import reverse, reverse_lazy
-from django.db.models import Q
-from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import redirect, render
-from django.views.generic.detail import DetailView
-from django.views.generic.edit import DeleteView, UpdateView
-
-from amazonproduct import API
-from amazonproduct.errors import NoExactMatchesFound
 import datetime
 import hashlib
 import json
-import os
 import re
-import shutil
 
-from blob.forms import BlobForm
-from blob.models import Blob, MetaData
-from collection.models import Collection
+from django.contrib import messages
+from django.core.urlresolvers import reverse, reverse_lazy
+from django.db.models import Q
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import render
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
+
+from amazonproduct import API
+from amazonproduct.errors import NoExactMatchesFound
+from blob.forms import DocumentForm
+from blob.models import Document, MetaData
 from blob.tasks import index_blob
-
+from blob.utils import get_cover_info
+from collection.models import Collection
 
 SECTION = 'Blob'
 
@@ -28,103 +25,77 @@ amazon_api_config = {
 }
 
 
-def blob_add(request, replaced_sha1sum=None):
+class DocumentCreateView(CreateView):
+    template_name = 'blob/edit.html'
+    form_class = DocumentForm
 
-    template_name = 'blob/add.html'
-    replaced_sha1sum_info = None
+    def get_context_data(self, **kwargs):
+        context = super(DocumentCreateView, self).get_context_data(**kwargs)
+        context['action'] = 'Add'
+        return context
 
-    if request.method == 'POST':
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.user = self.request.user
+        obj.save()
 
-        hasher = hashlib.sha1()
-        for chunk in request.FILES['blob'].chunks():
-            hasher.update(chunk)
+        # Take care of the tags.  Create any that are new.
+        for tag in form.cleaned_data['tags']:
+            obj.tags.add(tag)
 
-        # Do we already know about this blob?
-        existing_blob = Blob.objects.filter(sha1sum=hasher.hexdigest())
-        if existing_blob:
-            messages.add_message(request, messages.INFO, 'This blob already exists.  <a href="%s">Click here to edit</a>' % reverse_lazy('blob_edit', kwargs={"sha1sum": existing_blob[0].sha1sum}), extra_tags='safe')
-        else:
-            store_blob(request.FILES['blob'], hasher.hexdigest())
+        obj.save()
 
-            replaced_sha1sum = request.POST.get('replaced_sha1sum', '')
-            if replaced_sha1sum != '':
-                b = Blob.objects.get(sha1sum=replaced_sha1sum)
-                old_id = b.id
-                old_tags = b.tags.all()
-                old_metadata = b.metadata_set.all()
-                b.sha1sum = hasher.hexdigest()
-                b.pk = None
-                b.save()
-                b.filename = request.FILES['blob'].name
-                b.file_path = "%s/%s" % (b.get_parent_dir(), b.filename)
-                b.tags = old_tags
-                b.metadata_set = old_metadata
-                b.save()
+        handle_metadata(obj, self.request)
 
-                # If this blob is in any collections, replace it with the new blob
-                for c in Collection.objects.filter(user=request.user).filter(blob_list__isnull=False):
-                    for blob in c.blob_list:
-                        if blob['id'] == old_id:
-                            blob['id'] = b.id
-                    c.save()
+        index_blob.delay(obj.uuid)
 
-                old_blob = Blob.objects.get(sha1sum=replaced_sha1sum)
+        return super(DocumentCreateView, self).form_valid(form)
 
-                # Move any cover images from the old blob to the new
-                for file in os.listdir(old_blob.get_parent_dir()):
-                    filename, file_extension = os.path.splitext(file)
-                    if file_extension[1:] in ['jpg', 'png']:
-                        shutil.move("%s/%s" % (old_blob.get_parent_dir(), file), b.get_parent_dir())
+    def get_success_url(self):
+        return reverse_lazy('blob_detail', kwargs={'uuid': self.object.uuid})
 
-                # Delete the old blob
-                old_blob.delete()
-            else:
-                b = Blob(sha1sum=hasher.hexdigest(), filename=request.FILES['blob'].name, user=request.user)
-                b.save()
 
-            return redirect('blob_edit', b.sha1sum)
+def blob_upload(request):
 
+    # Verify that we don't already have this document
+    hasher = hashlib.sha1()
+    for chunk in request.FILES['blob'].chunks():
+        hasher.update(chunk)
+    sha1sum = hasher.hexdigest()
+
+    existing_blob = Blob.objects.filter(sha1sum=hasher.hexdigest())
+    if existing_blob:
+        message = 'This document already exists.  <a href="%s">Click here to edit</a>' % reverse_lazy('blob_edit', kwargs={"sha1sum": existing_blob[0].sha1sum})
+        success = False
     else:
+        message = 'Document successfully uploaded.'
+        success = True
 
-        try:
-            replaced_sha1sum_info = Blob.objects.get(sha1sum=replaced_sha1sum)
-            replaced_sha1sum_info.metadata = [[x.name, x.value] for x in replaced_sha1sum_info.metadata_set.all()]
-        except ObjectDoesNotExist:
-            replaced_sha1sum_info = None
+    result = {'message': message,
+              'success': success,
+              'sha1sum': sha1sum}
 
-    return render(request, template_name,
-                  {'replaced_sha1sum_info': replaced_sha1sum_info,
-                   'section': SECTION})
-
-
-def store_blob(blob, sha1sum):
-
-    if not os.path.exists("%s/%s/%s" % (Blob.BLOB_STORE, sha1sum[0:2], sha1sum)):
-        os.makedirs("%s/%s/%s" % (Blob.BLOB_STORE, sha1sum[0:2], sha1sum))
-    filepath = "%s/%s/%s/%s" % (Blob.BLOB_STORE, sha1sum[0:2], sha1sum, blob.name)
-
-    with open(filepath, 'wb+') as destination:
-        for chunk in blob.chunks():
-            destination.write(chunk)
-
-    return filepath
+    return JsonResponse(result)
 
 
 class BlobDeleteView(DeleteView):
-    model = Blob
+    model = Document
     success_url = reverse_lazy('blob_add')
 
-    def post(self, request, *args, **kwargs):
-        obj = super(BlobDeleteView, self).post(request, *args, **kwargs)
-        messages.add_message(request, messages.INFO, 'Blob deleted')
+    def get_object(self, queryset=None):
+        obj = Document.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
         return obj
 
 
 class BlobDetailView(DetailView):
 
-    model = Blob
-    slug_field = 'sha1sum'
-    slug_url_kwarg = 'sha1sum'
+    model = Document
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
+
+    # When we rename the object, we should be able to remove this and let
+    # Django figure out the template name on its own
+    template_name = 'blob/blob_detail.html'
 
     def get_context_data(self, **kwargs):
         context = super(BlobDetailView, self).get_context_data(**kwargs)
@@ -141,12 +112,14 @@ class BlobDetailView(DetailView):
                     context['metadata'][x.name] = ', '.join([context['metadata'][x.name], x.value])
                 else:
                     context['metadata'][x.name] = x.value
-        context['cover_info'] = Blob.get_cover_info(self.object.sha1sum)
-        context['cover_info_small'] = Blob.get_cover_info(self.object.sha1sum, 'small')
+        if self.object.sha1sum:
+            context['cover_info'] = Document.get_cover_info(self.object.sha1sum)
+            context['cover_info_small'] = Document.get_cover_info(self.object.sha1sum, 'small')
         try:
-            query = 'sha1sum:%s' % self.object.sha1sum
+            query = 'uuid:%s' % self.object.uuid
             context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
-            context['content_type'] = self.object.get_content_type(context['solr_info']['content_type'][0])
+            if context['solr_info'].get('content_type', ''):
+                context['content_type'] = self.object.get_content_type(context['solr_info']['content_type'][0])
         except IndexError:
             # Give Solr up to a minute to index the blob
             if int(datetime.datetime.now().strftime("%s")) - int(self.object.created.strftime("%s")) < 60:
@@ -163,29 +136,31 @@ class BlobDetailView(DetailView):
 
 class BlobUpdateView(UpdateView):
     template_name = 'blob/edit.html'
-    form_class = BlobForm
+    form_class = DocumentForm
 
     def get_context_data(self, **kwargs):
         context = super(BlobUpdateView, self).get_context_data(**kwargs)
         context['section'] = SECTION
         context['sha1sum'] = self.kwargs.get('sha1sum')
+        context['cover_info'] = get_cover_info(self.object.sha1sum, max_cover_image_width=400)
         context['metadata'] = [x for x in self.object.metadata_set.all() if x.name != 'is_book']
-        context['cover_info'] = Blob.get_cover_info(self.object.sha1sum, max_cover_image_width=400)
         if True in [True for x in self.object.metadata_set.all() if x.name == 'is_book']:
             context['is_book'] = True
-        context['collections_other'] = Collection.objects.filter(Q(user=self.request.user) & ~Q(blob_list__contains=[{'id': self.object.id}]))
+        context['collections_other'] = Collection.objects.filter(Q(user=self.request.user)
+                                                                 & ~Q(blob_list__contains=[{'id': self.object.id}])
+                                                                 & Q(is_private=False))
         context['action'] = 'Edit'
         return context
 
     def get(self, request, **kwargs):
-        self.object = Blob.objects.get(user=self.request.user, sha1sum=self.kwargs.get('sha1sum'))
+        self.object = Document.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         context = self.get_context_data(object=self.object, form=form)
         return render(request, self.template_name, context)
 
     def get_object(self, queryset=None):
-        obj = Blob.objects.get(user=self.request.user, sha1sum=self.kwargs.get('sha1sum'))
+        obj = Document.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
         return obj
 
     def form_valid(self, form):
@@ -194,30 +169,29 @@ class BlobUpdateView(UpdateView):
         # Delete all existing tags
         blob.tags.clear()
 
-        metadata = json.loads(self.request.POST['metadata'])
-
-        # Metadata objects are not handled by the form -- handle them manually
-
-        # Delete all existing metadata
-        blob.metadata_set.all().delete()
-
-        for m in metadata:
-            new_metadata, created = MetaData.objects.get_or_create(name=m[0], value=m[1], blob=blob)
-            if created:
-                new_metadata.save()
-        if self.request.POST.get('is_book', ''):
-            new_metadata = MetaData(name='is_book', value='true', blob=blob)
-            new_metadata.save()
+        handle_metadata(blob, self.request)
 
         self.object = form.save()
         messages.add_message(self.request, messages.INFO, 'Blob updated')
-        index_blob.delay(blob.sha1sum)
+        index_blob.delay(blob.uuid)
 
-        return HttpResponseRedirect(reverse('blob_detail', kwargs={'sha1sum': blob.sha1sum}))
+        return HttpResponseRedirect(reverse('blob_detail', kwargs={'uuid': str(blob.uuid)}))
 
-#    @method_decorator(login_required)
-#    def dispatch(self, *args, **kwargs):
-#        return super(BlobUpdateView, self).dispatch(*args, **kwargs)
+
+# Metadata objects are not handled by the form -- handle them manually
+def handle_metadata(blob, request):
+    metadata = json.loads(request.POST['metadata'])
+
+    # Delete all existing metadata
+    blob.metadata_set.all().delete()
+
+    for m in metadata:
+        new_metadata, created = MetaData.objects.get_or_create(name=m[0], value=m[1], blob=blob)
+        if created:
+            new_metadata.save()
+    if request.POST.get('is_book', ''):
+        new_metadata = MetaData(name='is_book', value='true', blob=blob)
+        new_metadata.save()
 
 
 def metadata_name_search(request):
@@ -231,7 +205,7 @@ def metadata_name_search(request):
 
 def get_amazon_image_info(request, sha1sum, index=0):
 
-    b = Blob.objects.get(sha1sum=sha1sum)
+    b = Document.objects.get(sha1sum=sha1sum)
     result = b.get_amazon_cover_url(int(index))
 
     return JsonResponse(result)
@@ -239,7 +213,7 @@ def get_amazon_image_info(request, sha1sum, index=0):
 
 def set_amazon_image_info(request, sha1sum, index=0):
 
-    b = Blob.objects.get(sha1sum=sha1sum)
+    b = Document.objects.get(sha1sum=sha1sum)
     try:
         b.set_amazon_cover_url('small', request.POST['small'])
         b.set_amazon_cover_url('medium', request.POST['medium'])
@@ -314,7 +288,7 @@ def collection_mutate(request):
         message = 'Added to collection'
     elif mutation == 'delete':
         collection.blob_list = [x for x in collection.blob_list if x['id'] != blob_id]
-        message = 'Delete from collection'
+        message = 'Deleted from collection'
 
     collection.save()
 

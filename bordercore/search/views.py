@@ -12,7 +12,7 @@ import re
 from solrpy.core import SolrConnection
 import urllib
 
-from blob.models import Blob, MetaData
+from blob.models import MetaData
 from tag.models import Tag
 
 IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
@@ -62,7 +62,7 @@ class SearchListView(ListView):
 
             solr_args = {'wt': 'json',
                          'boost': 'importance',
-                         'fl': 'attr_publication_date,author,bordercore_blogpost_title,bordercore_bookmark_title,bordercore_todo_task,doctype,filepath,id,importance,internal_id,last_modified,sha1sum,tags,title,url',
+                         'fl': 'attr_publication_date,author,bordercore_blogpost_title,bordercore_bookmark_title,bordercore_todo_task,doctype,filepath,id,importance,internal_id,last_modified,sha1sum,tags,title,url,uuid',
                          'facet': 'on',
                          'facet.mincount': '1',
                          'fields': ['attr_*', 'author', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
@@ -137,6 +137,7 @@ class SearchListView(ListView):
                                  pub_date=myobject.get('attr_publication_date', ''),
                                  doctype=myobject['doctype'],
                                  sha1sum=myobject.get('sha1sum', ''),
+                                 uuid=myobject.get('uuid', ''),
                                  id=myobject['id'],
                                  importance=myobject.get('importance', ''),
                                  internal_id=myobject.get('internal_id', ''),
@@ -171,9 +172,9 @@ class SearchTagDetailView(ListView):
         for one_doc in context['info']['response']['docs']:
             if one_doc['doctype'] in ('blob', 'book'):
                 one_doc['filename'] = os.path.basename(one_doc['filepath'])
-                one_doc['url'] = one_doc['filepath'].split(Blob.BLOB_STORE)[1]
+                one_doc['url'] = one_doc['filepath'].split(settings.MEDIA_ROOT)[1]
                 one_doc['cover_url'] = static("blobs/%s/%s/cover-small.jpg" % (one_doc['sha1sum'][0:2], one_doc['sha1sum']))
-                if not os.path.isfile("%s/%s/%s/cover-small.jpg" % (Blob.BLOB_STORE, one_doc['sha1sum'][0:2], one_doc['sha1sum'])):
+                if not os.path.isfile("%s/%s/%s/cover-small.jpg" % (settings.MEDIA_ROOT, one_doc['sha1sum'][0:2], one_doc['sha1sum'])):
                     one_doc['cover_url'] = static("images/book.png")
                 if one_doc['content_type']:
                     one_doc['content_type'] = one_doc['content_type'][0]
@@ -229,7 +230,7 @@ class SearchTagDetailView(ListView):
                      'rows': rows,
                      'fields': ['attr_*', 'author', 'content_type', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
                      'wt': 'json',
-                     'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url,bordercore_blogpost_title',
+                     'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,uuid,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url,bordercore_blogpost_title',
                      'facet': 'on',
                      'facet.mincount': '1',
                      'facet.field': ['{!ex=tags}tags', '{!ex=doctype}doctype'],
@@ -267,7 +268,7 @@ def search_book_title(request):
     title = request.GET['title']
 
     solr_args = {'q': 'doctype:book AND filepath:*%s*' % title,
-                 'fl': 'id,score,title,author,filepath',
+                 'fl': 'id,score,title,author,filepath,uuid',
                  'wt': 'json'}
 
     results = conn.raw_query(**solr_args)
@@ -290,7 +291,7 @@ def kb_search_tags_booktitles(request):
     term = request.GET['term']
 
     solr_args = {'q': 'tags:%s* OR (doctype:book AND title:*%s*)' % (term, term),
-                 'fl': 'doctype,filepath,sha1sum,tags,title',
+                 'fl': 'doctype,filepath,sha1sum,tags,title,uuid',
                  'wt': 'json'}
 
     results = json.loads(conn.raw_query(**solr_args).decode('UTF-8'))
@@ -300,7 +301,7 @@ def kb_search_tags_booktitles(request):
 
     for match in results['response']['docs']:
         if match['doctype'] == 'book':
-            matches.append({'type': 'Book', 'value': match['title'][0], 'sha1sum': match.get('sha1sum')})
+            matches.append({'type': 'Book', 'value': match['title'][0], 'uuid': match.get('uuid')})
         if match.get('tags', ''):
             for tag in [x for x in match['tags'] if x.lower().startswith(term.lower())]:
                 tags[tag] = 1

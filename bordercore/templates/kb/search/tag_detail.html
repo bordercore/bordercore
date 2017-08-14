@@ -163,7 +163,7 @@
                         {% if match.is_image %}
                         <img width="32" height="32" src="{{ STATIC_URL }}blobs{{ match.url }}" />
                         {% endif %}
-                        <a href="{% url 'blob_detail' match.sha1sum %}">{{ match.title.0 }}</a> ({{ match.content_type }})
+                        <a href="{% url 'blob_detail' match.uuid %}">{{ match.title.0 }}</a> ({{ match.content_type }})
                     </div>
                 </div>
             {% endfor %}
@@ -180,7 +180,7 @@
                 <td>
                     <img src="{{ match.cover_url }}" height="75" width="70"/>
                     <br/>
-                    <a href="{% url 'blob_detail' match.sha1sum %}">{{ match.title.0 }}</a>
+                    <a href="{% url 'blob_detail' match.uuid %}">{{ match.title.0 }}</a>
                 </td>
             {% endfor %}
             </table>
@@ -190,7 +190,7 @@
             {% for match in info.matches.bordercore_bookmark %}
                 <div class="row voffset">
                     <div class="col-lg-12">
-                        <a href="{{ match.url }}">{{ match.bordercore_bookmark_title.0 }}</a>
+                        <a href="{{ match.url.0 }}">{{ match.bordercore_bookmark_title.0 }}</a>
                     </div>
                 </div>
             {% endfor %}
@@ -200,7 +200,7 @@
             {% for match in info.matches.document %}
                 <div class="row voffset">
                     <div class="col-lg-12">
-                        <a href="{% url 'document_detail' match.internal_id %}">{{ match.title.0 }}</a>
+                        <a href="{% url 'blob_detail' match.uuid %}">{{ match.title.0 }}</a>
                     </div>
                 </div>
             {% endfor %}
