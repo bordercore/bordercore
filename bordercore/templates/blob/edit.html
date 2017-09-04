@@ -38,7 +38,7 @@
         });
 
     </script>
-        
+
     {% if object %}
 
     <img id="amazon-cover-image" src="{{ STATIC_URL }}{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" />
@@ -90,15 +90,29 @@
 
     </form>
 
-    <br /><br />
-    
     <form action="{% url 'blob_delete' object.uuid %}" method="post">
         {% csrf_token %}
         <input type="hidden" name="uuid" value="{{ object.uuid }}" />
         <input type="submit" name="Delete" value="Delete" class="btn btn-default" />
     </form>
 
+    <hr/>
+
     {% endif %}
+
+    <div class="row">
+        <div class="col-lg-4">
+            <select id="markdown-support" class="form-control">
+                <option>Markdown</option>
+                <option>Insert link</option>
+                <option>Bold</option>
+                <option>Indent Code</option>
+                <option>Insert list</option>
+                <option>Escape HTML</option>
+            </select>
+        </div>
+    </div>
+
 
 {% endblock %}
 
@@ -272,7 +286,9 @@
             } );
 
             $('.date').datepicker({
+                autoclose: true,
                 todayBtn: "linked",
+                forceParse: false,
                 format: "yyyy-mm-dd",
                 multidate: false
             });
@@ -341,27 +357,17 @@
 
             {% if field.label == 'Date' %}
 
-                <div class="col-lg-7">
+                <div class="col-lg-5">
 
-                    <div class="form-group row">
 
                         <!-- Tacking on the glyphs in an input-group class messes up the layout -->
-                        <div class="col-lg-3">
-                            <input class="form-control date" type="text" id="id_date" name="date" value="{{ field.value }}" />
+                        <div class="col-lg-4 input-group date">
+                            <input class="form-control" type="text" id="id_date" name="date" value="{{ field.value }}" />
+                            <span class="input-group-addon">
+                                <img src="{{ STATIC_URL }}img/calendar-icon.png" width="16" height="16" />
+                            </span>
                         </div>
 
-                        <div class="col-lg-3">
-                            <select id="markdown-support" class="form-control">
-                                <option>Markdown</option>
-                                <option>Insert link</option>
-                                <option>Bold</option>
-                                <option>Indent Code</option>
-                                <option>Insert list</option>
-                                <option>Escape HTML</option>
-                            </select>
-                        </div>
-
-                    </div>
 
                 </div>
 

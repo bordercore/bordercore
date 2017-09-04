@@ -18,6 +18,7 @@ class DocumentForm(ModelForm):
         self.fields['file'].required = False
         self.fields['date'].required = False
         self.fields['date'].input_formats = ['%m-%d-%Y']
+        self.fields['date'].initial = ''
         self.fields['content'].required = False
         self.fields['note'].required = False
         self.fields['tags'].required = False
