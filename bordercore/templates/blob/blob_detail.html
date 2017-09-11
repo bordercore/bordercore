@@ -48,8 +48,20 @@
 
     {% if content_type %}
             Object Type: <strong>{{ content_type }}</strong>
-        <br /><br />
     {% endif %}
+
+    {% if current_collections %}
+    <div class="row top-buffer">
+        <div class="col-lg-12">
+            In collections:
+            {% for collection in current_collections %}
+                <a href="{% url 'collection_detail' collection.id %}">{{ collection.name }}</a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <br /><br />
 
     <form action="{% url 'blob_edit' object.uuid %}">
 
@@ -168,16 +180,5 @@
         </div>
 
     </div>
-
-    {% if current_collections %}
-    <div class="row top-buffer">
-        <div class="col-lg-12">
-            In collections:
-            {% for collection in current_collections %}
-                <a href="{% url 'collection_detail' collection.id %}">{{ collection.name }}</a>
-            {% endfor %}
-        </div>
-    </div>
-{% endif %}
 
 {% endblock %}
