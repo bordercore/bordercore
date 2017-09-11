@@ -293,27 +293,6 @@
                 multidate: false
             });
 
-            // Handle the typeahead for the Source field
-            var engineSource = new Bloodhound({
-                name: 'tags',
-                remote: {
-                    url: '{% url 'search_document_source' %}?doc_source=%QUERY',
-                    wildcard: '%QUERY'
-                },
-                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
-                queryTokenizer: Bloodhound.tokenizers.whitespace
-            });
-
-            engineSource.initialize();
-
-            $('#id_source').typeahead({
-                autoselect: true,
-                minLength: 3,
-            }, {
-                displayKey: 'source',
-                source: engineSource,
-            });
-
             $('#metadata-value').keypress( function(e) {
                 // Transforms 'JERRELL SCHIVERS' to 'Jerrell Schivers'
                 if (e.which && (e.which == 2 || e.which == 8747)) { // Control-B (Linux) or Alt-B (Mac)

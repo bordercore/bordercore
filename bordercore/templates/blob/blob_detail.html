@@ -4,6 +4,10 @@
 
 {% block title %} Blob :: Detail {% endblock %}
 
+{% block extra_head %}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/code_style.css" />
+{% endblock %}
+
 {% block left-block %}
 
     <h1>{{ title }}</h1>

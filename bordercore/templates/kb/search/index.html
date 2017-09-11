@@ -99,7 +99,7 @@
 
 {% elif match.doctype == 'bordercore_blog' %}
 
-    <h4 class="search_book_title"><a href="{% url 'blog_list' match.internal_id %}">{{ match.bordercore_blogpost_title.0|default:"Blog Post" }}</a>  <span class="search_todo_date">{{ match.last_modified }}</span></h4>
+    <h4 class="search_book_title"><a href="{% url 'blog_list' match.uuid %}">{{ match.bordercore_blogpost_title.0|default:"Blog Post" }}</a>  <span class="search_todo_date">{{ match.last_modified }}</span></h4>
 
     <h5>{{ match.blogpost_snippet|safe }}</h5>
 

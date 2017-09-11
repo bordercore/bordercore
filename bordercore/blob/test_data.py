@@ -110,7 +110,7 @@ def test_solr_blobs_exist_on_filesystem():
 
 def test_solr_blobs_exist_in_db():
     "Assert that all blobs in Solr exist in the database"
-    solr_args = {'q': 'doctype:book OR doctype:blob',
+    solr_args = {'q': 'doctype:book OR doctype:blob OR doctype:document',
                  'fl': 'sha1sum,uuid,id',
                  'rows': 2147483647,
                  'wt': 'json'}

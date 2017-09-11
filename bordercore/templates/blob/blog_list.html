@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %} Blog {% endblock %}
+
+{% block content %}
+
+{% include "blob/blog_header.html" %}
+
+{% include "common/show_messages.html" with offset="0" width="12" %}
+
+{% include "blob/blog_posts.html" with posts=object_list %}
+
+    {% if object_list %}
+
+        <div class="pager">
+            <ul>
+                {% if object_list.has_previous %}
+                    <li><a href="?page={{ object_list.previous_page_number }}&tagsearch={{ request.GET.tagsearch }}&search_item={{ request.GET.search_item }}">previous</a></li>
+                {% endif %}
+                <li>Page <strong>{{ object_list.number }}</strong> of <strong>{{ object_list.paginator.num_pages }}</strong></li>
+                {% if object_list.has_next %}
+                    <li>            <a href="?page={{ object_list.next_page_number }}&tagsearch={{ request.GET.tagsearch }}&search_item={{ request.GET.search_item }}">next</a></li>
+                {% endif %}
+            </ul>
+        </div>
+
+    {% endif %}
+
+{% endblock %}

@@ -11,7 +11,7 @@ def tag_search(request):
 
     # Only retrieve tags which have been applied to at least one blog post
     if request.GET.get('type') == 'blog':
-        args['post__isnull'] = False
+        args['document__is_blog'] = True
 
     tag_list = [{'value': x.name, 'is_meta': x.is_meta} for x in Tag.objects.filter(name__istartswith=request.GET.get('query', ''), **args).distinct('name')]
 

@@ -3,7 +3,7 @@ from django.db import models
 from django.forms import CheckboxInput, ModelForm, Select, Textarea, TextInput, ValidationError
 
 from bookmark.models import Bookmark, BookmarkTagUser
-from blog.models import Tag
+from tag.models import Tag
 from lib.fields import ModelCommaSeparatedChoiceField
 
 

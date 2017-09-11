@@ -25,9 +25,9 @@
             source: engine,
         });
 
-		$('#tag-filter').bind('typeahead:selected', function(obj, datum, name) {
+        $('#tag-filter').bind('typeahead:selected', function(obj, datum, name) {
             window.location='{% url 'blog_list' %}?tagsearch=' + datum.value;
-		}).bind('focus', function(obj) {
+        }).bind('focus', function(obj) {
             $('#blog-search').val('');
         });
 
@@ -46,24 +46,24 @@
 
 </script>
 
-    <div class="row">
-        <div class="col-lg-7">
+<div class="row">
+    <div class="col-lg-7">
 
-            <form class="form-inline" name="nav_form" id="blog-search-form" action="{% url 'blog_list' %}" method="get">
+        <form class="form-inline" name="nav_form" id="blog-search-form" action="{% url 'blog_list' %}" method="get">
 
-                <label>Search</label>
-                <div class="form-group">
-                    <input class="form-control" id="blog-search" type="text" name="search_item" value="{{ request.GET.search_item }}" accesskey="s" />
-                </div>
+            <label>Search</label>
+            <div class="form-group">
+                <input class="form-control" id="blog-search" type="text" name="search_item" value="{{ request.GET.search_item }}" accesskey="s" />
+            </div>
 
-                <label>Tag Filter</label>
-                <div class="form-group">
-                    <input class="form-control" id="tag-filter" type="text" value="{{ request.GET.tagsearch }}" autocomplete="off" />
-                </div>
+            <label>Tag Filter</label>
+            <div class="form-group">
+                <input class="form-control" id="tag-filter" type="text" value="{{ request.GET.tagsearch }}" autocomplete="off" />
+            </div>
 
-&nbsp; &nbsp; <a class="btn" href="{% url 'blog_edit' %}">Add post</a>
+&nbsp; &nbsp; <a class="btn" href="{% url 'blob_add' %}?is_blog=true">Add post</a>
 
-            </form>
+        </form>
 
-        </div>
     </div>
+</div>

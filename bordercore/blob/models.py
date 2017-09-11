@@ -84,6 +84,7 @@ class Document(TimeStampedModel):
     date = models.TextField(null=True)
     importance = models.IntegerField(default=1)
     is_private = models.BooleanField(default=False)
+    is_blog = models.BooleanField(default=False)
     documents = models.ManyToManyField("self")
 
     def get_content(self):
@@ -212,7 +213,7 @@ class Document(TimeStampedModel):
 
         # Is the blob itself an image?
         filename, file_extension = os.path.splitext(file_path)
-        if file_extension[1:] in ['gif', 'jpg', 'jpeg', 'png']:
+        if file_extension[1:].lower() in ['gif', 'jpg', 'jpeg', 'png']:
             info = Document.get_image_dimensions(file_path, max_cover_image_width)
             info['url'] = "blobs/{}".format(b.file.name)
 
@@ -231,9 +232,15 @@ class Document(TimeStampedModel):
         return info
 
     def delete(self):
+        # Delete from Solr
         conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
         conn.delete(queries=['uuid:{}'.format(self.uuid)])
         conn.commit()
+
+        # Delete from any collections
+        for collection in Collection.objects.filter(blob_list__contains=[{'id': self.id}]):
+            collection.blob_list = [x for x in collection.blob_list if x['id'] != self.id]
+            collection.save()
 
         super(Document, self).delete()
 

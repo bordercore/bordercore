@@ -1,3 +1,9 @@
+import json
+import os
+import re
+import urllib
+from os.path import basename
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -5,14 +11,8 @@ from django.shortcuts import render
 from django.templatetags.static import static
 from django.views.generic.list import ListView
 
-import json
-import os
-from os.path import basename
-import re
-from solrpy.core import SolrConnection
-import urllib
-
 from blob.models import MetaData
+from solrpy.core import SolrConnection
 from tag.models import Tag
 
 IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
@@ -236,7 +236,6 @@ class SearchTagDetailView(ListView):
                      'facet.field': ['{!ex=tags}tags', '{!ex=doctype}doctype'],
                      'sort': 'last_modified+desc'
         }
-
         results = conn.raw_query(**solr_args)
         return json.loads(results.decode('UTF-8'))
 
@@ -312,29 +311,6 @@ def kb_search_tags_booktitles(request):
     return JsonResponse(matches, safe=False)
 
 
-def search_document_source(request):
-
-    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-
-    doc_source = request.GET['doc_source']
-
-    solr_args = {'q': 'doctype:document AND source:*%s*' % doc_source,
-                 'fl': 'id,source',
-                 'wt': 'json',
-                 'group': 'true',
-                 'group.field': 'source'
-    }
-
-    results = json.loads(conn.raw_query(**solr_args).decode('UTF-8'))
-
-    return_data = []
-
-    for match in results['grouped']['source']['groups']:
-        return_data.append({'source': match['doclist']['docs'][0]['source']})
-
-    return JsonResponse(sorted(return_data, key=lambda x: x['source']), safe=False)
-
-
 @login_required
 def search_admin(request):
 
@@ -349,7 +325,6 @@ def search_admin(request):
     if request.method == 'POST':
 
         if request.POST['Go'] in ['Delete']:
-            print (request.POST['doc_type'])
 
             conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
             conn.delete_query('doctype:%s' % request.POST['doc_type'])

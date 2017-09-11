@@ -6,9 +6,9 @@ from django.contrib.auth.views import logout
 from accounts import views as accounts_views
 from accounts.api import UserResource
 from accounts.views import UserProfileDetailView
-from blob.views import (BlobDeleteView, BlobDetailView, BlobUpdateView, DocumentCreateView)
 from blob import views as blob_views
-from blog import views as blog_views
+from blob.views import (BlobDeleteView, BlobDetailView, BlobUpdateView,
+                        BlogListView, DocumentCreateView)
 from book.views import BookListView
 from bookmark import views as bookmark_views
 from bookmark.api import BookmarkResource
@@ -62,8 +62,7 @@ urlpatterns = [
     url(r'^blob/(?P<uuid>[0-9a-f-]+)$', BlobDetailView.as_view(), name='blob_detail'),
     url(r'^blob/(?P<uuid>[0-9a-f-]+)/edit$', BlobUpdateView.as_view(), name='blob_edit'),
 
-    url(r'^blog/edit(?:/(\d+))?', blog_views.blog_edit, name='blog_edit'),
-    url(r'^blog/(\d+)?', blog_views.blog_list, name='blog_list'),
+    url(r'^blog/(\d+)?', BlogListView.as_view(), name='blog_list'),
 
     url(r'^bookmarks/click(?:/(\d+))?', bookmark_views.bookmark_click, name='bookmark_click'),
     url(r'^bookmarks/edit(?:/(\d+))?', bookmark_views.bookmark_edit, name='bookmark_edit'),
@@ -118,7 +117,6 @@ urlpatterns = [
 
     url(r'^kb/search/admin', search_views.search_admin, name='search_admin'),
     url(r'^kb/search/booktitle', search_views.search_book_title, name='search_book_title'),
-    url(r'^kb/search/documentsource', search_views.search_document_source, name='search_document_source'),
     url(r'^kb/search/tagstitle', search_views.kb_search_tags_booktitles, name='kb_search_tags_booktitles'),
     url(r'^kb/search/tagdetail/(?P<taglist>.*)', SearchTagDetailView.as_view(), name='kb_search_tag_detail'),
     url(r'^kb/search/', SearchListView.as_view(), name='search'),

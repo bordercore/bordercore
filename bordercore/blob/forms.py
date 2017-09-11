@@ -64,7 +64,7 @@ class DocumentForm(ModelForm):
 
     class Meta:
         model = Document
-        fields = ('file', 'title', 'date', 'tags', 'content', 'note', 'importance', 'is_private', 'id')
+        fields = ('file', 'title', 'date', 'tags', 'content', 'note', 'importance', 'is_blog', 'is_private', 'id')
         widgets = {
             'content': Textarea(attrs={'rows': 20, 'class': 'form-control'}),
             'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),

@@ -4,12 +4,14 @@ import json
 import re
 
 from django.contrib import messages
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.list import ListView
 
 from amazonproduct import API
 from amazonproduct.errors import NoExactMatchesFound
@@ -33,6 +35,13 @@ class DocumentCreateView(CreateView):
         context = super(DocumentCreateView, self).get_context_data(**kwargs)
         context['action'] = 'Add'
         return context
+
+    def get_form(self, form_class=None):
+        form = super(DocumentCreateView, self).get_form(form_class)
+
+        if self.request.GET.get('is_blog', False):
+            form.initial['is_blog'] = True
+        return form
 
     def form_valid(self, form):
         obj = form.save(commit=False)
@@ -293,3 +302,43 @@ def collection_mutate(request):
     collection.save()
 
     return JsonResponse({'message': message})
+
+
+class BlogListView(ListView):
+    model = Document
+    template_name = "blob/blog_list.html"
+    ITEMS_PER_PAGE = 10
+    SECTION = 'Blog'
+
+    def get_queryset(self):
+        if self.request.GET.get('tagsearch', ''):
+            post_list = Document.objects.filter(tags__name__exact=self.request.GET['tagsearch']).filter(is_blog=True).order_by('-created')
+        elif 'search_item' in self.request.GET:
+            post_list = Document.objects.filter(
+                (Q(content__icontains=self.request.GET['search_item']) |
+                 Q(title__icontains=self.request.GET['search_item'])) &
+                Q(is_blog=True)
+            )
+        else:
+            # posts = Post.objects.order_by('-created').all()[:ITEMS_PER_PAGE]
+            post_list = Document.objects.order_by('-created').filter(is_blog=True)
+
+        paginator = Paginator(post_list, self.ITEMS_PER_PAGE)
+
+        page = self.request.GET.get('page')
+        try:
+            posts = paginator.page(page)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            posts = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results.
+            posts = paginator.page(paginator.num_pages)
+
+        return posts
+
+    def get_context_data(self, **kwargs):
+        context = super(BlogListView, self).get_context_data(**kwargs)
+
+        context['section'] = self.SECTION
+        return context
