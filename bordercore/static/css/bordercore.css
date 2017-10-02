@@ -161,6 +161,11 @@ ul.pagination {
    width: 100px;
 }
 
+#blob_collection_list {
+   font-size: 18px;
+   margin-botoom: 10px;
+}
+
 #myModal #title {
     width: 300px;
 }

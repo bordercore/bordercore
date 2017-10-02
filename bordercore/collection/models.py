@@ -18,6 +18,7 @@ class Collection(TimeStampedModel):
     blob_list = JSONField(blank=True, null=True)
     tags = models.ManyToManyField(Tag)
     description = models.TextField(null=True)
+    is_private = models.BooleanField(default=False)
 
     def get_created(self):
         return self.created.strftime('%b %d, %Y')

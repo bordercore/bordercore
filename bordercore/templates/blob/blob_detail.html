@@ -48,21 +48,41 @@
                 </tr>
             {% endif %}
         {% endfor %}
+        {% if content_type %}
+            <tr>
+                <td><strong>Object Type</strong></td>
+                <td>{{ content_type }}</td>
+            </tr>
+        {% endif %}
     </table>
 
-    {% if content_type %}
-            Object Type: <strong>{{ content_type }}</strong>
-    {% endif %}
-
-    {% if current_collections %}
-    <div class="row top-buffer">
-        <div class="col-lg-12">
-            In collections:
-            {% for collection in current_collections %}
-                <a href="{% url 'collection_detail' collection.id %}">{{ collection.name }}</a>
-            {% endfor %}
+    {% if collection_info %}
+        <div class="row top-buffer">
+            <div class="col-lg-12">
+                {% for collection in collection_info %}
+                    {% if collection.is_private is True %}
+                        <div id="blob_collection_list">
+Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}"></a>
+                        </div>
+                        <ul class="list-group">
+                            {% for blob in collection.blob_list %}
+                                <li class="list-group-item">
+                                    <a href="{% url 'blob_detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
+                                </li>
+                            {% endfor %}
+                            <li class="list-group-item">
+                                <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}">Add Blob</a>
+                                &nbsp;
+                                <span class="glyphicon glyphicon-plus"></span>
+                            </li>
+                                            {% else %}
+                        In collection:
+                        <a href="{% url 'collection_detail' collection.id %}">{{ collection.name }}</a>
+                    {% endif %}
+                    <br />
+                {% endfor %}
+            </div>
         </div>
-    </div>
     {% endif %}
 
     <br /><br />
@@ -78,6 +98,9 @@
 
     </form>
 
+    <br /><br />
+
+    <a href="{% url 'blob_add' %}?linked_blob={{ object.id }}">Link to New Blob</a>
     <br /><br />
 
     {% for blob in object.get_related_blobs %}

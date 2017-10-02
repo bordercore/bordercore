@@ -4,7 +4,7 @@ import json
 import re
 
 from django.contrib import messages
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
@@ -34,6 +34,17 @@ class DocumentCreateView(CreateView):
     def get_context_data(self, **kwargs):
         context = super(DocumentCreateView, self).get_context_data(**kwargs)
         context['action'] = 'Add'
+        if self.request.GET.get('linked_blob', ''):
+            linked_blob = Document.objects.get(id=self.request.GET['linked_blob'])
+            context['linked_blob'] = linked_blob
+            # Grab the initial metadata from the linked blob
+            context['metadata'] = linked_blob.metadata_set.all()
+        if self.request.GET.get('linked_collection', ''):
+            collection_id = self.request.GET['linked_collection']
+            context['linked_collection_info'] = Collection.objects.get(id=collection_id)
+            context['linked_collection_blob_list'] = [Document.objects.get(pk=x['id']) for x in Collection.objects.get(id=collection_id).blob_list]
+            # Grab the initial metadata from one of the other blobs in the collection
+            context['metadata'] = context['linked_collection_blob_list'][0].metadata_set.all()
         return context
 
     def get_form(self, form_class=None):
@@ -41,6 +52,19 @@ class DocumentCreateView(CreateView):
 
         if self.request.GET.get('is_blog', False):
             form.initial['is_blog'] = True
+        if self.request.GET.get('linked_blob', False):
+            blob = Document.objects.get(pk=int(self.request.GET.get('linked_blob')))
+            form.initial['tags'] = ','.join([x.name for x in blob.tags.all()])
+            form.initial['date'] = blob.date
+            form.initial['title'] = blob.title
+        if self.request.GET.get('linked_collection', False):
+            collection_id = self.request.GET['linked_collection']
+            blob_id = Collection.objects.get(id=collection_id).blob_list[0]['id']
+            blob = Document.objects.get(pk=blob_id)
+            form.initial['tags'] = ','.join([x.name for x in blob.tags.all()])
+            form.initial['date'] = blob.date
+            form.initial['title'] = blob.title
+
         return form
 
     def form_valid(self, form):
@@ -55,6 +79,10 @@ class DocumentCreateView(CreateView):
         obj.save()
 
         handle_metadata(obj, self.request)
+
+        handle_linked_blob(obj, self.request)
+
+        handle_linked_collection(obj, self.request)
 
         index_blob.delay(obj.uuid)
 
@@ -140,6 +168,15 @@ class BlobDetailView(DetailView):
 
         context['current_collections'] = Collection.objects.filter(blob_list__contains=[{'id': self.object.id}])
 
+        collection_info = []
+
+        for collection in Collection.objects.filter(blob_list__contains=[{'id': self.object.id}]):
+            blob_list = Document.objects.filter(pk__in=[x['id'] for x in collection.blob_list if x['id'] != self.object.id])
+            collection_info.append({'id': collection.id,
+                                    'name': collection.name,
+                                    'is_private': collection.is_private,
+                                    'blob_list': blob_list})
+        context['collection_info'] = collection_info
         return context
 
 
@@ -201,6 +238,24 @@ def handle_metadata(blob, request):
     if request.POST.get('is_book', ''):
         new_metadata = MetaData(name='is_book', value='true', blob=blob)
         new_metadata.save()
+
+
+def handle_linked_blob(blob, request):
+
+    if request.POST.get('linked_blob', ''):
+        blob_list = [{'id': int(request.POST['linked_blob']), 'added': int(datetime.datetime.now().strftime("%s"))},
+                     {'id': blob.id, 'added': int(datetime.datetime.now().strftime("%s"))}]
+        collection = Collection(blob_list=blob_list, user=request.user, is_private=True)
+        collection.save()
+
+
+def handle_linked_collection(blob, request):
+
+    if request.POST.get('linked_collection', ''):
+        collection = Collection.objects.get(user=request.user, id=int(request.POST['linked_collection']))
+        blob = {'id': blob.id, 'added': int(datetime.datetime.now().strftime("%s"))}
+        collection.blob_list.append(blob)
+        collection.save()
 
 
 def metadata_name_search(request):

@@ -113,6 +113,20 @@
         </div>
     </div>
 
+    {% if linked_blob %}
+        <br /><br />
+Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.title|default:"Blob" }}</a>
+    {% endif %}
+    {% if linked_collection_blob_list %}
+        <br /><br />
+        <div style="font-size: 18px; margin-bottom: 10px">Linking to a collection with these blobs: </div>
+        <ul class="list-group">
+            {% for blob in linked_collection_blob_list %}
+                <li class="list-group-item">
+                    <a href="{% url 'blob_detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
+                </li>
+        {% endfor %}
+    {% endif %}
 
 {% endblock %}
 
@@ -328,6 +342,8 @@
 
 <form class="form-horizontal" id="form-blob" action="{{ request.path }}" method="post" enctype="multipart/form-data">
     <input type="hidden" name="metadata" id="input-metadata" />
+    <input type="hidden" name="linked_blob" value="{{ linked_blob.id }}" />
+    <input type="hidden" name="linked_collection" value="{{ linked_collection_info.id }}" />
     {% csrf_token %}
 
     {% for field in form %}

@@ -27,7 +27,7 @@ class CollectionListView(FormMixin, ListView):
     form_class = CollectionForm
 
     def get_queryset(self):
-        return Collection.objects.filter(user=self.request.user)
+        return Collection.objects.filter(user=self.request.user).filter(is_private=False)
 
     def get_context_data(self, **kwargs):
         context = super(CollectionListView, self).get_context_data(**kwargs)
