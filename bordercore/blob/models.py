@@ -16,6 +16,7 @@ from django.dispatch.dispatcher import receiver
 from PIL import Image
 
 from blob.amazon import AmazonMixin
+from blob.tasks import create_thumbnail
 from collection.models import Collection
 from lib.mixins import TimeStampedModel
 from solrpy.core import SolrConnection
@@ -100,6 +101,13 @@ class Document(TimeStampedModel):
 
         return switcher.get(argument, lambda: argument)
 
+    def is_image(self):
+        if self.file:
+            _, file_extension = os.path.splitext(str(self.file))
+            if file_extension[1:].lower() in ['gif', 'jpg', 'jpeg', 'png']:
+                return True
+        return False
+
     def get_parent_dir(self):
         return "{}/{}/{}".format(settings.MEDIA_ROOT, self.sha1sum[0:2], self.sha1sum)
 
@@ -149,7 +157,11 @@ class Document(TimeStampedModel):
         if self.file and old_sha1sum is not None:
             # We can only move files after super() is called to create the new file's directory structure
             if self.sha1sum != old_sha1sum:
+                create_thumbnail.delay(self.uuid)
                 self.change_file(old_sha1sum)
+        else:
+            # This is a new file.  Attempt to create a thumbnail.
+            create_thumbnail.delay(self.uuid)
 
     def change_file(self, old_sha1sum):
 
@@ -187,6 +199,17 @@ class Document(TimeStampedModel):
     def get_collection_info(self):
         return Collection.objects.filter(blob_list__contains=[{'id': self.id}])
 
+    def has_thumbnail_url(self):
+        try:
+            _ = Document.get_cover_info(self.sha1sum, get_thumbnail=True)['url']
+            return True
+        except:
+            return False
+
+    def get_thumbnail_url(self):
+        return Document.get_cover_info(self.sha1sum, get_thumbnail=True)['url']
+
+
     @staticmethod
     def get_image_dimensions(file_path, max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
 
@@ -202,7 +225,10 @@ class Document(TimeStampedModel):
     # This is static so that it can be called without a blob object, eg
     #  based on results from a Solr query
     @staticmethod
-    def get_cover_info(sha1sum, size='large', max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
+    def get_cover_info(sha1sum, size='large', max_cover_image_width=MAX_COVER_IMAGE_WIDTH, get_thumbnail=False):
+
+        if sha1sum is None:
+            return {}
 
         info = {}
 
@@ -214,8 +240,16 @@ class Document(TimeStampedModel):
         # Is the blob itself an image?
         filename, file_extension = os.path.splitext(file_path)
         if file_extension[1:].lower() in ['gif', 'jpg', 'jpeg', 'png']:
+            # If so, look for a thumbnail.  Otherwise return the image itself
+            if get_thumbnail:
+                thumbnail_file_path = "{}/{}".format(parent_dir, "thumbnail.jpg")
+                if os.path.isfile(thumbnail_file_path):
+                    file_path = thumbnail_file_path
+                    url_path = "{}/{}/{}".format(sha1sum[0:2], sha1sum, "thumbnail.jpg")
+            else:
+                url_path = b.file.name
             info = Document.get_image_dimensions(file_path, max_cover_image_width)
-            info['url'] = "blobs/{}".format(b.file.name)
+            info['url'] = "blobs/{}".format(url_path)
 
         # Nope. Look for a cover image
         for image_type in ['jpg', 'png']:

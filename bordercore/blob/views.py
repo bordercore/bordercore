@@ -18,7 +18,6 @@ from amazonproduct.errors import NoExactMatchesFound
 from blob.forms import DocumentForm
 from blob.models import Document, MetaData
 from blob.tasks import index_blob
-from blob.utils import get_cover_info
 from collection.models import Collection
 
 SECTION = 'Blob'
@@ -188,7 +187,7 @@ class BlobUpdateView(UpdateView):
         context = super(BlobUpdateView, self).get_context_data(**kwargs)
         context['section'] = SECTION
         context['sha1sum'] = self.kwargs.get('sha1sum')
-        context['cover_info'] = get_cover_info(self.object.sha1sum, max_cover_image_width=400)
+        context['cover_info'] = Document.get_cover_info(self.object.sha1sum, max_cover_image_width=400)
         context['metadata'] = [x for x in self.object.metadata_set.all() if x.name != 'is_book']
         if True in [True for x in self.object.metadata_set.all() if x.name == 'is_book']:
             context['is_book'] = True

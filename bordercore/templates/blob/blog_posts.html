@@ -10,7 +10,7 @@
 {% for post in posts %}
 
 <h2>
-{{ post.title|default:"Blog Post" }}
+    <a href="{% url 'blob_detail' post.uuid %}">{{ post.title|default:"Blog Post" }}</a>
 </h2>
 
 <span class="glyphicon glyphicon-time"></span> <span class="muted"> {{ post.date }} </span>

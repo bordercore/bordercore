@@ -1,12 +1,12 @@
-import django
 import json
 import os
 import re
-from solrpy.core import SolrConnection
 
-from django.db.models import Q
+import django
 from django.conf import settings
-# from django.test import TestCase
+from django.db.models import Q
+
+from solrpy.core import SolrConnection
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.prod'
 
@@ -15,7 +15,6 @@ django.setup()
 from blob.models import Document
 from collection.models import Collection
 from tag.models import Tag
-
 
 def test_books_with_tags():
     "Assert that all books have at least one tag"
@@ -94,6 +93,18 @@ def test_blobs_in_db_exist_in_solr():
         assert data == 1, "blob found in the database but not in Solr, uuid={}".format(b.uuid)
 
 
+def test_images_on_filesystem_have_thumbnails():
+    "Assert that every image blob has a thumbnail"
+    p = re.compile(settings.MEDIA_ROOT + '/\w\w/(\w{40})')
+
+    images = Document.objects.filter(~Q(file=''))
+    for blob in images:
+        _, file_extension = os.path.splitext(str(blob.file))
+        if blob.is_image():
+            filename = "{}/{}/thumbnail.jpg".format(settings.MEDIA_ROOT, os.path.dirname(blob.file.name))
+            assert os.path.isfile(filename) is not False, "image blob {} does not have a thumbnail".format(blob.sha1sum)
+
+
 def test_solr_blobs_exist_on_filesystem():
     "Assert that all blobs in Solr exist on the filesystem"
     solr_args = {'q': 'doctype:book OR doctype:blob',
@@ -128,13 +139,13 @@ def test_blob_permissions():
     from os import stat
     from pwd import getpwuid
 
-    owner = "www-data"
+    owners = ("celery", "www-data")
     walk_dir = "/home/media/blobs/"
 
     for root, subdirs, files in os.walk(walk_dir):
         for filename in files:
             file_path = os.path.join(root, filename)
-            assert getpwuid(stat(file_path).st_uid).pw_name == owner, "file not owned by {}: {}".format(owner, file_path)
+            assert getpwuid(stat(file_path).st_uid).pw_name in owners, "file not owned by {}: {}".format(owner, file_path)
 
 
 def test_collection_blobs_exists_in_db():
