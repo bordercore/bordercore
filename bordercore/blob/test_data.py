@@ -134,7 +134,7 @@ def test_solr_blobs_exist_in_db():
 
 
 def test_blob_permissions():
-    "Assert that all blobs are owned by www-data"
+    "Assert that all blobs are owned by www-data and all directories have permissions 775"
     import os
     from os import stat
     from pwd import getpwuid
@@ -143,6 +143,10 @@ def test_blob_permissions():
     walk_dir = "/home/media/blobs/"
 
     for root, subdirs, files in os.walk(walk_dir):
+        for subdir in subdirs:
+            dir_path = os.path.join(root, subdir)
+            permissions = oct(stat(dir_path).st_mode & 0o777)
+            assert permissions == "0o775", "directory is not 775 {}: {}".format(dir_path, permissions)
         for filename in files:
             file_path = os.path.join(root, filename)
             assert getpwuid(stat(file_path).st_uid).pw_name in owners, "file not owned by {}: {}".format(owner, file_path)
