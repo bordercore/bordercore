@@ -166,19 +166,19 @@ def test_collection_blobs_exists_in_solr():
     collections = Collection.objects.filter(blob_list__isnull=False)
 
     for c in collections:
-        for blob in c.blob_list:
-            sha1sum = Document.objects.get(pk=blob['id']).sha1sum
-            if sha1sum in ['e5bd032709cc5aa2a0be50c6eeb19be788f8b404',
-                           'f01176a1dbcf335159d78792a8b5f20746d3b12f',
-                           '076d6870f5ee0626817a38b65c28b60c61e1628d',
-                           '01cfa4c1c2007055fbaf27e3ffaf871ac217271d']:
+        for blob_info in c.blob_list:
+            blob = Document.objects.get(pk=blob_info['id'])
+            if blob.sha1sum in ['e5bd032709cc5aa2a0be50c6eeb19be788f8b404',
+                                'f01176a1dbcf335159d78792a8b5f20746d3b12f',
+                                '076d6870f5ee0626817a38b65c28b60c61e1628d',
+                                '01cfa4c1c2007055fbaf27e3ffaf871ac217271d']:
                 continue
 
-            solr_args = {'q': 'id:blob_{}'.format(blob['id']),
+            solr_args = {'q': 'uuid:{}'.format(blob.uuid),
                          'fl': 'id',
                          'wt': 'json'}
 
             conn = SolrConnection('http://{}:{}/{}'.format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
             response = conn.raw_query(**solr_args)
             data = json.loads(response.decode('UTF-8'))['response']['numFound']
-            assert data == 1, "blob_id {} does not exist in solr".format(blob['id'])
+            assert data == 1, "blob uuid={} does not exist in solr".format(blob.uuid)
