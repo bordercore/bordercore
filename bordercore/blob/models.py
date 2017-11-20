@@ -130,12 +130,13 @@ class Document(TimeStampedModel):
             return "No title"
 
     def get_edition_string(self):
-        pattern = re.compile('(.*) (\d)E$')
-        matches = pattern.match(self.title)
-        if matches and EDITIONS[matches.group(2)]:
-            return "%s Edition" % (EDITIONS[matches.group(2)])
-        else:
-            return ""
+        if self.title:
+            pattern = re.compile('(.*) (\d)E$')
+            matches = pattern.match(self.title)
+            if matches and EDITIONS[matches.group(2)]:
+                return "%s Edition" % (EDITIONS[matches.group(2)])
+
+        return ""
 
     def get_solr_info(self, query, **kwargs):
         conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))

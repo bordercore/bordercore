@@ -3,7 +3,6 @@
 import sys
 from pathlib import Path
 
-
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 PROJECT_DIR = BASE_DIR / "bordercore"
@@ -163,7 +162,7 @@ CELERY_BROKER_URL = 'redis://localhost:6379/0'
 
 # Solr config
 SOLR_HOST = 'localhost'
-SOLR_PORT = 8080
+SOLR_PORT = 8983
 SOLR_COLLECTION = 'solr/bordercore'
 
 # A sample logging configuration. The only tangible logging
