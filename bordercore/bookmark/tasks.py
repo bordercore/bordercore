@@ -55,7 +55,7 @@ def snarf_favicon(url, parse_domain=True):
 
 
 @task
-def index_bookmark(id):
+def index_bookmark(id, commit=True):
 
     # Import Django models here rather than globally at the top to avoid circular dependencies
     from bookmark.models import Bookmark
@@ -76,4 +76,6 @@ def index_bookmark(id):
         doctype='bordercore_bookmark'
     )
     conn.add(doc)
-    conn.commit()
+
+    if commit:
+        conn.commit()

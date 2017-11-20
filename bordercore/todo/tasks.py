@@ -5,7 +5,7 @@ from django.conf import settings
 
 
 @task()
-def index_todo(id):
+def index_todo(id, commit=True):
 
     # Import Django models here rather than globally at the top to avoid circular dependencies
     from todo.models import Todo
@@ -24,4 +24,6 @@ def index_todo(id):
         doctype='bordercore_todo'
     )
     conn.add(doc)
-    conn.commit()
+
+    if commit:
+        conn.commit()
