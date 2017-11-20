@@ -78,10 +78,7 @@ def test_blobs_in_db_exist_in_solr():
 
     for b in blobs:
         if b.sha1sum in ['e5bd032709cc5aa2a0be50c6eeb19be788f8b404',
-                         'edac0af3e77180bc920d0190e5b388c213d76c9c',
-                         'f01176a1dbcf335159d78792a8b5f20746d3b12f',
-                         '076d6870f5ee0626817a38b65c28b60c61e1628d',
-                         '01cfa4c1c2007055fbaf27e3ffaf871ac217271d']:
+                         'f01176a1dbcf335159d78792a8b5f20746d3b12f']:
             continue
         solr_args = {'q': 'uuid:{}'.format(b.uuid),
                      'fl': 'id',
@@ -149,7 +146,7 @@ def test_blob_permissions():
             assert permissions == "0o775", "directory is not 775 {}: {}".format(dir_path, permissions)
         for filename in files:
             file_path = os.path.join(root, filename)
-            assert getpwuid(stat(file_path).st_uid).pw_name in owners, "file not owned by {}: {}".format(owner, file_path)
+            assert getpwuid(stat(file_path).st_uid).pw_name in owners, "file not owned by {}: {}".format(owners, file_path)
 
 
 def test_collection_blobs_exists_in_db():
@@ -169,9 +166,7 @@ def test_collection_blobs_exists_in_solr():
         for blob_info in c.blob_list:
             blob = Document.objects.get(pk=blob_info['id'])
             if blob.sha1sum in ['e5bd032709cc5aa2a0be50c6eeb19be788f8b404',
-                                'f01176a1dbcf335159d78792a8b5f20746d3b12f',
-                                '076d6870f5ee0626817a38b65c28b60c61e1628d',
-                                '01cfa4c1c2007055fbaf27e3ffaf871ac217271d']:
+                                'f01176a1dbcf335159d78792a8b5f20746d3b12f']:
                 continue
 
             solr_args = {'q': 'uuid:{}'.format(blob.uuid),
@@ -182,3 +177,17 @@ def test_collection_blobs_exists_in_solr():
             response = conn.raw_query(**solr_args)
             data = json.loads(response.decode('UTF-8'))['response']['numFound']
             assert data == 1, "blob uuid={} does not exist in solr".format(blob.uuid)
+
+
+def test_solr_search():
+    "Assert that a simple Solr search works"
+
+    solr_args = {'q': 'carl sagan',
+                 'fl': 'id',
+                 'rows': 1,
+                 'wt': 'json'}
+
+    conn = SolrConnection('http://{}:{}/{}'.format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    response = conn.raw_query(**solr_args)
+    data = json.loads(response.decode('UTF-8'))['response']['numFound']
+    assert data >= 1, "solr search fails"
