@@ -15,6 +15,7 @@ from tag.models import Tag
 import datetime
 import json
 import os
+from search.solr import SolrResultSet
 from solrpy.core import SolrConnection
 
 IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
@@ -86,6 +87,7 @@ class CollectionDetailView(DetailView):
                     print("Warning: blob_id = %s not found in solr." % blob['id'])
 
             for object in blob_list_temp:
+                solr_result_set = SolrResultSet(object)
                 if object['doctype'] in ('blob', 'book'):
                     if 'filepath' in object:
                         filename = os.path.basename(object['filepath'])
@@ -97,8 +99,7 @@ class CollectionDetailView(DetailView):
                             print("Warning: content_type malformed: id=%s, sha1sum=%s, content_type=%s" % (object['id'], object['sha1sum'], object['content_type']))
                         if object['content_type'] in IMAGE_TYPE_LIST:
                             object['is_image'] = True
-                    if not object.get('title', ''):
-                        object['title'] = filename
+                    object['title'] = solr_result_set.get_title()
 
             context['blob_list'] = blob_list_temp
         return context

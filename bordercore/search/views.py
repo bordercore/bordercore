@@ -12,6 +12,7 @@ from django.templatetags.static import static
 from django.views.generic.list import ListView
 
 from blob.models import MetaData
+from search.solr import SolrResultSet
 from solrpy.core import SolrConnection
 from tag.models import Tag
 
@@ -38,8 +39,8 @@ class SearchListView(ListView):
             return 'doctype:bordercore_blog'
         elif facet == 'Links':
             return 'doctype:bordercore_bookmark'
-        elif facet == 'Book Titles':
-            return '(doctype:blob AND title:%s)' % (term)
+        elif facet == 'Titles':
+            return '(title:%s)' % (term)
         elif facet == 'Tags':
             return 'tags:%s' % (term)
 
@@ -48,6 +49,7 @@ class SearchListView(ListView):
         if 'search' in self.request.GET:
 
             search_term = self.request.GET['search']
+
             # Escape special characters to Solr
             search_term = search_term.replace(':', '\\:')
 
@@ -60,12 +62,12 @@ class SearchListView(ListView):
 
             conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
-            solr_args = {'wt': 'json',
-                         'boost': 'importance',
+            solr_args = {'boost': 'importance',
+                         'defType': 'edismax',
                          'fl': 'attr_publication_date,author,bordercore_blogpost_title,bordercore_bookmark_title,bordercore_todo_task,doctype,filepath,id,importance,internal_id,last_modified,sha1sum,tags,title,url,uuid',
                          'facet': 'on',
                          'facet.mincount': '1',
-                         'fields': ['attr_*', 'author', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
+#                         'fields': ['attr_*', 'author', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
                          'rows': rows,
             }
 
@@ -90,7 +92,7 @@ class SearchListView(ListView):
                 )
 
             facet_queries = []
-            for facet in ['Blobs', 'Blog Posts', 'Books', 'Book Titles', 'Documents', 'Links', 'Tags', 'Todos']:
+            for facet in ['Blobs', 'Blog Posts', 'Books', 'Titles', 'Documents', 'Links', 'Tags', 'Todos']:
                 facet_queries.append('{!key="%s" ex=dt}' % (facet) + self.get_facet_query(facet, search_term))
                 solr_args['facet.query'] = facet_queries
 
@@ -119,6 +121,7 @@ class SearchListView(ListView):
                     facet_counts[k] = v
 
             for myobject in context['info']['response']['docs']:
+                solr_result_set = SolrResultSet(myobject)
                 filename = ''
                 last_modified = ''
                 blogpost_snippet = ''
@@ -132,7 +135,7 @@ class SearchListView(ListView):
                 if myobject['doctype'] == 'bordercore_blog':
                     if context['info']['highlighting'][myobject['id']].get('attr_content'):
                         blogpost_snippet = context['info']['highlighting'][myobject['id']]['attr_content'][0]
-                info.append(dict(title=get_title(myobject),
+                info.append(dict(title=solr_result_set.get_title(),
                                  author=myobject.get('author', ['']),
                                  pub_date=myobject.get('attr_publication_date', ''),
                                  doctype=myobject['doctype'],
@@ -170,8 +173,10 @@ class SearchTagDetailView(ListView):
         context = super(SearchTagDetailView, self).get_context_data(**kwargs)
         results = {}
         for one_doc in context['info']['response']['docs']:
+            solr_result_set = SolrResultSet(one_doc)
             if one_doc['doctype'] in ('blob', 'book'):
-                one_doc['filename'] = os.path.basename(one_doc['filepath'])
+
+                one_doc['filename'] = solr_result_set.filename
                 one_doc['url'] = one_doc['filepath'].split(settings.MEDIA_ROOT)[1]
                 one_doc['cover_url'] = static("blobs/%s/%s/cover-small.jpg" % (one_doc['sha1sum'][0:2], one_doc['sha1sum']))
                 if not os.path.isfile("%s/%s/%s/cover-small.jpg" % (settings.MEDIA_ROOT, one_doc['sha1sum'][0:2], one_doc['sha1sum'])):
@@ -180,8 +185,7 @@ class SearchTagDetailView(ListView):
                     one_doc['content_type'] = one_doc['content_type'][0]
                     if one_doc['content_type'] in IMAGE_TYPE_LIST:
                         one_doc['is_image'] = True
-                if not one_doc.get('title', ''):
-                    one_doc['title'] = one_doc['filename']
+            one_doc['title'] = solr_result_set.get_title()
             if results.get(one_doc['doctype'], ''):
                 results[one_doc['doctype']].append(one_doc)
             else:
@@ -229,7 +233,6 @@ class SearchTagDetailView(ListView):
                      'boost': 'importance',
                      'rows': rows,
                      'fields': ['attr_*', 'author', 'content_type', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
-                     'wt': 'json',
                      'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,uuid,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url,bordercore_blogpost_title',
                      'facet': 'on',
                      'facet.mincount': '1',
@@ -245,20 +248,6 @@ def grouped(iterable, n):
     return zip(*[iter(iterable)] * n)
 
 
-def get_title(myobject):
-
-    title = myobject.get('title')
-    if not title:
-        title = '<no title>'
-    elif title == 'untitled':
-        # Use the filename (minus the extension) as the title
-        p = re.compile('^(.*/)?(?:$|(.+?)(?:(\.[^.]*$)|$))')
-        m = p.match(myobject['filepath'])
-        if m:
-            title = m.group(2)
-    return title
-
-
 @login_required
 def search_book_title(request):
 
@@ -267,8 +256,7 @@ def search_book_title(request):
     title = request.GET['title']
 
     solr_args = {'q': 'doctype:book AND filepath:*%s*' % title,
-                 'fl': 'id,score,title,author,filepath,uuid',
-                 'wt': 'json'}
+                 'fl': 'id,score,title,author,filepath,uuid'}
 
     results = conn.raw_query(**solr_args)
 
@@ -290,8 +278,7 @@ def kb_search_tags_booktitles(request):
     term = request.GET['term']
 
     solr_args = {'q': 'tags:%s* OR (doctype:book AND title:*%s*)' % (term, term),
-                 'fl': 'doctype,filepath,sha1sum,tags,title,uuid',
-                 'wt': 'json'}
+                 'fl': 'doctype,filepath,sha1sum,tags,title,uuid'}
 
     results = json.loads(conn.raw_query(**solr_args).decode('UTF-8'))
 

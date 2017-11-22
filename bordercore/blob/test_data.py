@@ -77,9 +77,6 @@ def test_blobs_in_db_exist_in_solr():
     blobs = Document.objects.all()
 
     for b in blobs:
-        if b.sha1sum in ['e5bd032709cc5aa2a0be50c6eeb19be788f8b404',
-                         'f01176a1dbcf335159d78792a8b5f20746d3b12f']:
-            continue
         solr_args = {'q': 'uuid:{}'.format(b.uuid),
                      'fl': 'id',
                      'wt': 'json'}
@@ -165,9 +162,6 @@ def test_collection_blobs_exists_in_solr():
     for c in collections:
         for blob_info in c.blob_list:
             blob = Document.objects.get(pk=blob_info['id'])
-            if blob.sha1sum in ['e5bd032709cc5aa2a0be50c6eeb19be788f8b404',
-                                'f01176a1dbcf335159d78792a8b5f20746d3b12f']:
-                continue
 
             solr_args = {'q': 'uuid:{}'.format(blob.uuid),
                          'fl': 'id',

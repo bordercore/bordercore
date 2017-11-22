@@ -210,7 +210,6 @@ class Document(TimeStampedModel):
     def get_thumbnail_url(self):
         return Document.get_cover_info(self.sha1sum, get_thumbnail=True)['url']
 
-
     @staticmethod
     def get_image_dimensions(file_path, max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
 
