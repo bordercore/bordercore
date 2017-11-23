@@ -66,7 +66,7 @@ class CollectionDetailView(DetailView):
                          'rows': 1000,
                          'fields': ['attr_*', 'author', 'content_type', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
                          'wt': 'json',
-                         'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,uuid,url,bordercore_blogpost_title'
+                         'fl': 'author,bordercore_todo_task,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,uuid,url,bordercore_blogpost_title'
             }
 
             results = conn.raw_query(**solr_args)

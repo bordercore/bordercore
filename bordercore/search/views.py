@@ -64,7 +64,7 @@ class SearchListView(ListView):
 
             solr_args = {'boost': 'importance',
                          'defType': 'edismax',
-                         'fl': 'attr_publication_date,author,bordercore_blogpost_title,bordercore_bookmark_title,bordercore_todo_task,doctype,filepath,id,importance,internal_id,last_modified,sha1sum,tags,title,url,uuid',
+                         'fl': 'attr_publication_date,author,bordercore_blogpost_title,bordercore_todo_task,doctype,filepath,id,importance,internal_id,last_modified,sha1sum,tags,title,url,uuid',
                          'facet': 'on',
                          'facet.mincount': '1',
 #                         'fields': ['attr_*', 'author', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
@@ -84,9 +84,9 @@ class SearchListView(ListView):
                 solr_args.update(
                     {'q': search_term,
                      'q.op': boolean_type,
-                     'qf': 'author title bordercore_todo_task tags bordercore_bookmark_title attr_content description ' + metadata,
+                     'qf': 'author title bordercore_todo_task tags attr_content description ' + metadata,
                      'hl': 'true',
-                     'hl.fl': 'attr_content,bordercore_todo_task,bordercore_bookmark_title,title',
+                     'hl.fl': 'attr_content,bordercore_todo_task,title',
                      'hl.simple.pre': '<span class="search_bordercore_blogpost_snippet">',
                      'hl.simple.post': '</span>'}
                 )
@@ -151,7 +151,6 @@ class SearchListView(ListView):
                                  bordercore_todo_task=myobject.get('bordercore_todo_task', ''),
                                  bordercore_blogpost_title=myobject.get('bordercore_blogpost_title', ''),
                                  blogpost_snippet=blogpost_snippet,
-                                 bordercore_bookmark_title=myobject.get('bordercore_bookmark_title', ''),
                              ))
             context['numFound'] = context['info']['response']['numFound']
 
@@ -233,7 +232,7 @@ class SearchTagDetailView(ListView):
                      'boost': 'importance',
                      'rows': rows,
                      'fields': ['attr_*', 'author', 'content_type', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
-                     'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,uuid,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url,bordercore_blogpost_title',
+                     'fl': 'author,bordercore_todo_task,content_type,doctype,uuid,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url,bordercore_blogpost_title',
                      'facet': 'on',
                      'facet.mincount': '1',
                      'facet.field': ['{!ex=tags}tags', '{!ex=doctype}doctype'],

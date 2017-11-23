@@ -142,7 +142,7 @@ class Document(TimeStampedModel):
         conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
         solr_args = {'q': query,
                      'wt': 'json',
-                     'fl': 'author,bordercore_todo_task,bordercore_bookmark_title,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url,bordercore_blogpost_title',
+                     'fl': 'author,bordercore_todo_task,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url,bordercore_blogpost_title',
                      'rows': 1000}
         return json.loads(conn.raw_query(**solr_args).decode('UTF-8'))['response']
 
