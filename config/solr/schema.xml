@@ -359,6 +359,7 @@
 
     <!-- boolean type: "true" or "false" -->
     <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true"/>
+    <fieldType name="booleans" class="solr.BoolField" sortMissingLast="true" multiValued="true"/>
 
     <!-- sortMissingLast and sortMissingFirst attributes are optional attributes are
          currently supported on types that are sorted internally as strings
@@ -444,9 +445,12 @@
     -->
     <fieldType name="pint" class="solr.TrieIntField"/>
     <fieldType name="plong" class="solr.TrieLongField"/>
+    <fieldType name="plongs" class="solr.LongPointField" docValues="true" multiValued="true"/>
     <fieldType name="pfloat" class="solr.TrieFloatField"/>
     <fieldType name="pdouble" class="solr.TrieDoubleField"/>
+    <fieldType name="pdoubles" class="solr.DoublePointField" docValues="true" multiValued="true"/>
     <fieldType name="pdate" class="solr.TrieDateField" sortMissingLast="true"/>
+    <fieldType name="pdates" class="solr.DatePointField" docValues="true" multiValued="true"/>
 
     <!-- The "RandomSortField" is not used to store or search any
          data.  You can declare fields of this type it in your schema

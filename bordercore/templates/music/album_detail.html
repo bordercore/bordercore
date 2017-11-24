@@ -28,6 +28,11 @@
 
 {% block title %} Music {% endblock %}
 
+{% block left-block %}
+    <img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title|urlencode }}/artwork.jpg" height="500" width="500" />
+    <h4>{{ object.comment|safe }}</h4>
+{% endblock %}
+
 {% block content %}
 
     <script type="text/javascript" charset="utf-8">
@@ -127,10 +132,6 @@
 </div>
 
 <div class="row">
-
-    <div class="col-lg-3">
-        <img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title|urlencode }}/artwork.jpg" height="250" width="250" />
-    </div>
 
     <div class="col-lg-8">
         <h2>{{ album.title }}</h2>
