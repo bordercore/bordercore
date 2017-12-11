@@ -1,8 +1,8 @@
 import datetime
-import hashlib
 import json
 import re
 
+from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.core.urlresolvers import reverse, reverse_lazy
@@ -22,6 +22,7 @@ from collection.models import Collection
 
 SECTION = 'Blob'
 
+# TODO: Move this to Django config file
 amazon_api_config = {
 }
 
@@ -89,29 +90,6 @@ class DocumentCreateView(CreateView):
 
     def get_success_url(self):
         return reverse_lazy('blob_detail', kwargs={'uuid': self.object.uuid})
-
-
-def blob_upload(request):
-
-    # Verify that we don't already have this document
-    hasher = hashlib.sha1()
-    for chunk in request.FILES['blob'].chunks():
-        hasher.update(chunk)
-    sha1sum = hasher.hexdigest()
-
-    existing_blob = Blob.objects.filter(sha1sum=hasher.hexdigest())
-    if existing_blob:
-        message = 'This document already exists.  <a href="%s">Click here to edit</a>' % reverse_lazy('blob_edit', kwargs={"sha1sum": existing_blob[0].sha1sum})
-        success = False
-    else:
-        message = 'Document successfully uploaded.'
-        success = True
-
-    result = {'message': message,
-              'success': success,
-              'sha1sum': sha1sum}
-
-    return JsonResponse(result)
 
 
 class BlobDeleteView(DeleteView):
@@ -223,6 +201,26 @@ class BlobUpdateView(UpdateView):
         return HttpResponseRedirect(reverse('blob_detail', kwargs={'uuid': str(blob.uuid)}))
 
 
+class BlobThumbnailView(UpdateView):
+    template_name = 'blob/thumbnail.html'
+    form_class = DocumentForm
+
+    def get_context_data(self, **kwargs):
+        context = super(BlobThumbnailView, self).get_context_data(**kwargs)
+        context['cover_info'] = Document.get_cover_info(self.object.sha1sum, max_cover_image_width=70, size='small')
+        context['filename'] = self.object.file
+        query = 'uuid:{}'.format(self.object.uuid)
+        context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
+        if context['solr_info'].get('content_type', ''):
+            context['content_type'] = self.object.get_content_type(context['solr_info']['content_type'][0]).lower()
+
+        return context
+
+    def get_object(self, queryset=None):
+        obj = Document.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
+        return obj
+
+
 # Metadata objects are not handled by the form -- handle them manually
 def handle_metadata(blob, request):
     metadata = json.loads(request.POST['metadata'])
@@ -279,7 +277,6 @@ def set_amazon_image_info(request, sha1sum, index=0):
     b = Document.objects.get(sha1sum=sha1sum)
     try:
         b.set_amazon_cover_url('small', request.POST['small'])
-        b.set_amazon_cover_url('medium', request.POST['medium'])
         b.set_amazon_cover_url('large', request.POST['large'])
         result = {'message': 'Cover image updated'}
     except Exception as e:
@@ -329,6 +326,28 @@ def get_amazon_metadata(request, title):
         return_data['error'] = "No Amazon matches found"
 
     return JsonResponse(return_data)
+
+
+def extract_thumbnail_from_pdf(request, uuid, page_number):
+
+    b = Document.objects.get(uuid=uuid)
+    import os
+    filename = os.path.basename(b.file.name)
+    script = "{}/bin/create-thumbnail-from-pdf.sh \"{}\" {}".format(settings.BASE_DIR, filename, page_number)
+    output = ""
+    try:
+        import subprocess
+        output = subprocess.check_output(
+            script,
+            cwd=b.get_parent_dir(),
+            stderr=subprocess.STDOUT,
+            shell=True)
+    except subprocess.CalledProcessError as e:
+        return JsonResponse({'error': e.output.decode("utf-8")})
+
+    cover_info = Document.get_cover_info(b.sha1sum, max_cover_image_width=70, size='small')
+
+    return JsonResponse({'message': 'OK', 'cover_url': cover_info['url']})
 
 
 def collection_mutate(request):

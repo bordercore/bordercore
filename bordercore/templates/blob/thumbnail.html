@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %} Blob Thumbnail {% endblock %}
+
+{% block left-block %}
+
+    Current Thumbnail
+    <br /><br />
+    <img id="amazon-cover-image" src="{{ STATIC_URL }}{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}"/>
+
+{% endblock %}
+
+{% block content %}
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            var amazon_cover_image_index = 0;
+            var amazon_cover_image_info;
+
+            function get_amazon_cover_image() {
+
+                $.ajax( { type: 'GET',
+                          url: '{% url 'get_amazon_image_info' object.sha1sum 666 %}'.replace(666, amazon_cover_image_index),
+                          }).done(function( json ) {
+                    if (!json || json.error != null) {
+                        $('#feedback').addClass('alert-danger').html(json.error);
+                    } else {
+                        amazon_cover_image_info = json;
+                        $('#amazon-cover-image').attr('src', json.large)
+                        $('#amazon-feedback').html('Image: <span class="badge">' + (amazon_cover_image_index+1) + '</span> of <span class="badge">' + (json.count) + '</span>');
+                        if ( (amazon_cover_image_index+1) == json.count) {
+                            $('#next-cover').attr('disabled', 'disabled');
+                        } else {
+                            $('#next-cover').removeAttr('disabled');
+                        }
+                        amazon_cover_image_index++;
+                        if (amazon_cover_image_index == (json.count)) {
+                            amazon_cover_image_index = 0;
+                        }
+                    }
+
+                });
+
+            }
+
+            function set_amazon_cover_image() {
+
+                $.ajax( { type: 'POST',
+                          url: '{% url 'set_amazon_image_info' object.sha1sum 666 %}'.replace(666, amazon_cover_image_index),
+                          data: amazon_cover_image_info
+                          }).done(function( json ) {
+                    if (!json || json.error != null) {
+                        $('#feedback').addClass('alert-danger').html(json.message);
+                    } else {
+                        $('#feedback').addClass('alert-success').html(json.message);
+                    }
+                })
+            }
+
+            function set_thumbnail_from_pdf() {
+
+                var page_number = $('#page-number').val();
+
+                $.ajax( { type: 'GET',
+                          url: '{% url 'extract_thumbnail_from_pdf' object.uuid 666 %}'.replace(666, page_number),
+                          }).done(function( json ) {
+                    if (!json || json.error != null) {
+                        $('#feedback').addClass('alert-danger').html(json.error);
+                    } else {
+                        d = new Date(); // Use this to avoid browser cache
+                        $('#amazon-cover-image').attr('src', '{{ STATIC_URL }}' + json.cover_url + '?' + d.getTime());
+                    }
+
+                });
+
+            }
+
+            $('#update-cover').click( function() {
+                $('#update-cover-div').addClass('hidden');
+                $('#set-cover-div').removeClass('hidden');
+                get_amazon_cover_image();
+            });
+
+            $('#set-cover').click( function() {
+                $('#set-cover-div').addClass('hidden');
+                $('#update-cover-div').removeClass('hidden');
+                set_amazon_cover_image();
+            });
+
+            $('#next-cover').click( function() {
+                get_amazon_cover_image();
+            });
+
+            $('#set-thumbnail-from-pdf').click( function() {
+                set_thumbnail_from_pdf();
+            });
+
+        });
+
+</script>
+
+<div class="row">
+    <div class="col-lg-8">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'blob_detail' object.uuid %}">Blob Detail</a></li>
+            <li class="active">Blob Thumbnail</li>
+        </ol>
+    </div>
+</div>
+
+{% if content_type == 'pdf' or content_type == 'e-book' %}
+
+    <div class="row">
+        <div class="col-lg-6">
+
+            <h2>Amazon Image Search</h2>
+
+            <div id="update-cover-div">
+                <input id="update-cover" class="btn btn-default" type="button" value="Choose Image" />
+            </div>
+
+            <div id="set-cover-div" class="hidden">
+                <span id="progress" class="glyphicon glyphicon-refresh glyphicon-refresh-animate hidden"></span>
+                <input id="next-cover" class="btn btn-default" type="button" value="Next Image" />
+                <span id="amazon-feedback"></span>
+                <br /><br />
+                <input id="set-cover" class="btn btn-primary" type="button" value="Set Thumbnail" />
+            </div>
+
+            <br />
+
+        </div>
+    </div>
+
+        <div class="row">
+        <div class="col-lg-6">
+
+            <h2>Extract Image from PDF</h2>
+
+            <div _id="set-cover-div" _class="hidden">
+                <span id="progress" class="glyphicon glyphicon-refresh glyphicon-refresh-animate hidden"></span>
+    Page Number: <input id="page-number" type="text" size="2" value="1" />
+                <input id="set-thumbnail-from-pdf" class="btn btn-primary" type="button" value="Set Thumbnail" />
+            </div>
+
+            <br />
+
+            <div class="alert" id="feedback"></div>
+
+        </div>
+        </div>
+
+{% else %}
+
+        <div class="alert alert-info" role="alert">
+Thumbnail editing is not supported for this document type.
+        </div>
+
+{% endif %}
+
+
+{% endblock %}

@@ -77,7 +77,7 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
                             {% for blob in collection.blob_list %}
                                 <li class="list-group-item">
                                     {% if blob.has_thumbnail_url %}
-                                        <img src="{{ STATIC_URL }}{{ blob.get_thumbnail_url }}" />
+                                        <img src="{{ STATIC_URL }}{{ blob.get_cover_url_small }}" />
                                     {% endif %}
                                     <a href="{% url 'blob_detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
                                 </li>
@@ -102,7 +102,7 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
     <form action="{% url 'blob_edit' object.uuid %}">
 
     {% if object.sha1sum %}
-        <a class="btn btn-default" href="{{ STATIC_URL }}blobs/{{ object.get_url }}" role="button" target="blob">Download</a>
+        <a class="btn btn-default" href="{{ STATIC_URL }}blobs/{{ object.get_url|safe }}" role="button" target="blob">Download</a>
     {% endif %}
         <input type="submit" class="btn btn-primary" value="Edit">
 
@@ -113,6 +113,9 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
     <br /><br />
 
     <a href="{% url 'blob_add' %}?linked_blob={{ object.id }}">Link to New Blob</a>
+    <br /><br />
+
+    <a href="{% url 'blob_thumbnail' object.uuid %}">Edit Thumbnail</a>
     <br /><br />
 
     {% for blob in object.get_related_blobs %}
@@ -170,7 +173,7 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
                     },
                     name: "{{ title }}",
                     "media": {
-                        "mp3": "{{ STATIC_URL }}blobs/{{ object.get_url }}"
+                        "mp3": "{{ STATIC_URL }}blobs/{{ object.get_url|safe }}"
                     }
                 });
 

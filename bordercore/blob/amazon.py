@@ -31,10 +31,6 @@ class AmazonMixin(object):
                 except:
                     pass
                 try:
-                    info['medium'] = str(result.MediumImage.URL)
-                except:
-                    pass
-                try:
                     info['large'] = str(result.LargeImage.URL)
                 except:
                     pass

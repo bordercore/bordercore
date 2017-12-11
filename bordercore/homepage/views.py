@@ -1,8 +1,6 @@
 import datetime
 import json
-from PyOrgMode import OrgDataStructure
 import random
-from solrpy.core import SolrConnection
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -13,11 +11,13 @@ from django.shortcuts import render
 
 from blob.models import Document
 from bookmark.models import Bookmark
+from cal.models import Calendar
 from collection.models import Collection
 from fitness.models import ExerciseUser
-from quote.models import Quote
 from music.models import Listen
-from cal.models import Calendar
+from PyOrgMode import OrgDataStructure
+from quote.models import Quote
+from solrpy.core import SolrConnection
 
 SECTION = 'Home'
 
@@ -61,7 +61,7 @@ def homepage(request):
     # Choose a random image
     random_image = get_random_blob('image/*')
     random_image_info = {'uuid': random_image.uuid,
-                         'cover_info': Document.get_cover_info(random_image.sha1sum, 'small', 500)}
+                         'cover_info': Document.get_cover_info(random_image.sha1sum, 'large', 500)}
 
     # Get the most recent untagged bookmarks
     bookmarks = Bookmark.objects.filter(tags__isnull=True).order_by('-created')[:10]

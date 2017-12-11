@@ -29,7 +29,7 @@ def create_thumbnail(uuid):
     b = Document.objects.get(uuid=uuid)
     if b.is_image():
         infile = "{}/{}".format(settings.MEDIA_ROOT, b.file.name)
-        outfile = "{}/{}/thumbnail.jpg".format(settings.MEDIA_ROOT, os.path.dirname(b.file.name))
+        outfile = "{}/{}/cover-small.jpg".format(settings.MEDIA_ROOT, os.path.dirname(b.file.name))
         try:
             # Convert images to RGB mode to avoid "cannot write mode P as JPEG" errors for PNGs
             im = Image.open(infile).convert('RGB')

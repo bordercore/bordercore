@@ -95,7 +95,7 @@ def test_images_on_filesystem_have_thumbnails():
     for blob in images:
         _, file_extension = os.path.splitext(str(blob.file))
         if blob.is_image():
-            filename = "{}/{}/thumbnail.jpg".format(settings.MEDIA_ROOT, os.path.dirname(blob.file.name))
+            filename = "{}/{}/cover-small.jpg".format(settings.MEDIA_ROOT, os.path.dirname(blob.file.name))
             assert os.path.isfile(filename) is not False, "image blob {} does not have a thumbnail".format(blob.sha1sum)
 
 

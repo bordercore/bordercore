@@ -70,7 +70,7 @@ def blob_directory_path(instance, filename):
     return filepath
 
 
-class Document(TimeStampedModel):
+class Document(TimeStampedModel, AmazonMixin):
     """
     The base class
     """
@@ -202,13 +202,13 @@ class Document(TimeStampedModel):
 
     def has_thumbnail_url(self):
         try:
-            _ = Document.get_cover_info(self.sha1sum, get_thumbnail=True)['url']
+            _ = Document.get_cover_info(self.sha1sum, size='small')['url']
             return True
         except:
             return False
 
-    def get_thumbnail_url(self):
-        return Document.get_cover_info(self.sha1sum, get_thumbnail=True)['url']
+    def get_cover_url_small(self):
+        return Document.get_cover_info(self.sha1sum, size='small')['url']
 
     @staticmethod
     def get_image_dimensions(file_path, max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
@@ -225,7 +225,7 @@ class Document(TimeStampedModel):
     # This is static so that it can be called without a blob object, eg
     #  based on results from a Solr query
     @staticmethod
-    def get_cover_info(sha1sum, size='large', max_cover_image_width=MAX_COVER_IMAGE_WIDTH, get_thumbnail=False):
+    def get_cover_info(sha1sum, size='large', max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
 
         if sha1sum is None:
             return {}
@@ -238,26 +238,28 @@ class Document(TimeStampedModel):
         file_path = "{}/{}".format(settings.MEDIA_ROOT, b.file.name)
 
         # Is the blob itself an image?
-        filename, file_extension = os.path.splitext(file_path)
+        _, file_extension = os.path.splitext(file_path)
         if file_extension[1:].lower() in ['gif', 'jpg', 'jpeg', 'png']:
             # If so, look for a thumbnail.  Otherwise return the image itself
-            if get_thumbnail:
-                thumbnail_file_path = "{}/{}".format(parent_dir, "thumbnail.jpg")
+            if size == 'small':
+                thumbnail_file_path = "{}/{}".format(parent_dir, "cover-small.jpg")
                 if os.path.isfile(thumbnail_file_path):
                     file_path = thumbnail_file_path
-                    url_path = "{}/{}/{}".format(sha1sum[0:2], sha1sum, "thumbnail.jpg")
+                    url_path = "{}/{}/{}".format(sha1sum[0:2], sha1sum, "cover-small.jpg")
+                    info['url'] = "blobs/{}".format(url_path)
             else:
-                url_path = b.file.name
-            info = Document.get_image_dimensions(file_path, max_cover_image_width)
-            info['url'] = "blobs/{}".format(url_path)
+                # url_path = b.file.name
+                # info['url'] = "blobs/{}".format(url_path)
+                info = Document.get_image_dimensions(file_path, max_cover_image_width)
+                info['url'] = "blobs/{}".format(b.file.name)
 
         # Nope. Look for a cover image
         for image_type in ['jpg', 'png']:
-            for cover_image in ["cover.%s" % image_type, "cover-%s.%s" % (size, image_type)]:
-                file_path = "%s/%s" % (parent_dir, cover_image)
+            for cover_image in ["cover.{}".format(image_type), "cover-{}.{}".format(size, image_type)]:
+                file_path = "{}/{}".format(parent_dir, cover_image)
                 if os.path.isfile(file_path):
                     info = Document.get_image_dimensions(file_path, max_cover_image_width)
-                    info['url'] = "blobs/%s/%s/%s" % (sha1sum[0:2], sha1sum, cover_image)
+                    info['url'] = "blobs/{}/{}/{}".format(sha1sum[0:2], sha1sum, cover_image)
 
         # If we get this far, return the default image
         if not info.get('url'):

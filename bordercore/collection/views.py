@@ -1,3 +1,7 @@
+import datetime
+import json
+import os
+
 from django.conf import settings
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, JsonResponse
@@ -7,16 +11,12 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, FormMixin, UpdateView
 from django.views.generic.list import ListView
 
+from blob.models import Document
 from collection.forms import CollectionForm
 from collection.models import Collection
-from blob.models import Document
-from tag.models import Tag
-
-import datetime
-import json
-import os
 from search.solr import SolrResultSet
 from solrpy.core import SolrConnection
+from tag.models import Tag
 
 IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
 SECTION = 'Collections'
@@ -91,7 +91,7 @@ class CollectionDetailView(DetailView):
                 if object['doctype'] in ('blob', 'book'):
                     if 'filepath' in object:
                         filename = os.path.basename(object['filepath'])
-                    object['cover_info'] = Document.get_cover_info(object['sha1sum'], max_cover_image_width=70, get_thumbnail=True)
+                    object['cover_info'] = Document.get_cover_info(object['sha1sum'], max_cover_image_width=70, size='small')
                     if object['content_type']:
                         try:
                             object['content_type'] = object['content_type'][0].split('/')[1]

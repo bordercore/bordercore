@@ -7,8 +7,8 @@ from accounts import views as accounts_views
 from accounts.api import UserResource
 from accounts.views import UserProfileDetailView
 from blob import views as blob_views
-from blob.views import (BlobDeleteView, BlobDetailView, BlobUpdateView,
-                        BlogListView, DocumentCreateView)
+from blob.views import (BlobDeleteView, BlobDetailView, BlobThumbnailView,
+                        BlobUpdateView, BlogListView, DocumentCreateView)
 from book.views import BookListView
 from bookmark import views as bookmark_views
 from bookmark.api import BookmarkResource
@@ -51,16 +51,17 @@ urlpatterns = [
     url(r'^homepage/get_calendar_events.json', homepage_views.get_calendar_events, name='get_calendar_events'),
 
     url(r'^blob/add', DocumentCreateView.as_view(), name='blob_add'),
-    # url(r'^blob/upload', blob_views.blob_upload, name='blob_upload'),
     url(r'^blob/(?P<uuid>[0-9a-f-]+)/delete$', BlobDeleteView.as_view(), name='blob_delete'),
     url(r'^blob/metadata_name_search/', blob_views.metadata_name_search, name='metadata_name_search'),
-    # url(r'^blob/get_amazon_metadata/(?P<title>[\w|\W]+)$', blob_views.get_amazon_metadata, name='get_amazon_metadata'),
-    # url(r'^blob/get_amazon_image_info/(?P<sha1sum>[\w|\W]+)/(?P<index>\d+)$', blob_views.get_amazon_image_info, name='get_amazon_image_info'),
-    # url(r'^blob/get_amazon_image_info/(?P<sha1sum>[\w|\W]+)$', blob_views.get_amazon_image_info, name='get_amazon_image_info'),
-    # url(r'^blob/set_amazon_image_info/(?P<sha1sum>[\w|\W]+)/(?P<index>\d+)$', blob_views.set_amazon_image_info, name='set_amazon_image_info'),
+    url(r'^blob/get_amazon_metadata/(?P<title>[\w|\W]+)$', blob_views.get_amazon_metadata, name='get_amazon_metadata'),
+    url(r'^blob/get_amazon_image_info/(?P<sha1sum>[\w|\W]+)/(?P<index>\d+)$', blob_views.get_amazon_image_info, name='get_amazon_image_info'),
+    url(r'^blob/get_amazon_image_info/(?P<sha1sum>[\w|\W]+)$', blob_views.get_amazon_image_info, name='get_amazon_image_info'),
+    url(r'^blob/set_amazon_image_info/(?P<sha1sum>[\w|\W]+)/(?P<index>\d+)$', blob_views.set_amazon_image_info, name='set_amazon_image_info'),
+    url(r'^blob/extract_thumbnail_from_pdf/(?P<uuid>[0-9a-f-]+)/(?P<page_number>\d+)$', blob_views.extract_thumbnail_from_pdf, name='extract_thumbnail_from_pdf'),
     url(r'^blob/mutate', blob_views.collection_mutate, name='collection_mutate'),
     url(r'^blob/(?P<uuid>[0-9a-f-]+)$', BlobDetailView.as_view(), name='blob_detail'),
     url(r'^blob/(?P<uuid>[0-9a-f-]+)/edit$', BlobUpdateView.as_view(), name='blob_edit'),
+    url(r'^blob/(?P<uuid>[0-9a-f-]+)/thumbnail$', BlobThumbnailView.as_view(), name='blob_thumbnail'),
 
     url(r'^blog/(\d+)?', BlogListView.as_view(), name='blog_list'),
 
