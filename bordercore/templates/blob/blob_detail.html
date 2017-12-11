@@ -47,14 +47,23 @@
                     <td>{{ values }}</td>
                 </tr>
             {% endif %}
-        {% endfor %}
-        {% if content_type %}
-            <tr>
-                <td><strong>Object Type</strong></td>
-                <td>{{ content_type }}</td>
-            </tr>
-        {% endif %}
-    </table>
+    {% endfor %}
+    {% if content_type %}
+        <div>
+            <strong>Object Type</strong><br />
+            {{ content_type }}
+        </div>
+    {% endif %}
+    {% if object.sha1sum %}
+        <div>
+            <strong>Sha1sum</strong><br />
+            <small>{{ object.sha1sum }}</small>
+        </div>
+    {% endif %}
+
+    {% if solr_info.note %}
+        <div id="blob_note">{{ object.get_note|safe }}</div>
+    {% endif %}
 
     {% if collection_info %}
         <div class="row top-buffer">
