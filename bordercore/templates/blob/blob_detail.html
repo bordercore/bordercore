@@ -148,7 +148,7 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
     </script>
 
 
-    {% if content_type == 'audio/mpeg' %}
+    {% if content_type == 'Audio' %}
 
         <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jplayer.clean.player.light.css" />
         <script type="text/javascript" src="{{ STATIC_URL }}/js/jquery.jplayer.min.js"></script>
@@ -215,7 +215,7 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
 
             <br /><br />
 
-            {% if content_type == 'audio/mpeg' %}
+            {% if content_type == 'Audio' %}
                 {% include "common/jplayer.html" %}
             {% endif %}
 

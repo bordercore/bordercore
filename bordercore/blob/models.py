@@ -95,11 +95,13 @@ class Document(TimeStampedModel, AmazonMixin):
         switcher = {
             "application/mp4": "Video",
             "application/pdf": "PDF",
+            "audio/mpeg": "Audio",
             "image/jpeg": "Image",
-            "image/png": "Image"
+            "image/png": "Image",
+            "application/x-mobipocket-ebook": "E-Book",
         }
 
-        return switcher.get(argument, lambda: argument)
+        return switcher.get(argument, "")
 
     def is_image(self):
         if self.file:
