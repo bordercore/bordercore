@@ -19,10 +19,10 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'django',
+        'NAME': 'bordercore',
         'USER': 'bordercore',
         'PASSWORD': '4locus2',
-        'HOST': 'localhost',
+        'HOST': '10.3.2.2',
         'PORT': '',
     }
 }
