@@ -6,5 +6,4 @@ django-debug-toolbar==1.7
 
 # The latest version of this package in PyPi isn't compatible with Django 1.10.
 # However, the master branch on Github is compatible, so use that instead.
-# django-debug-toolbar-template-timings==0.6.6
--e git+git@github.com:orf/django-debug-toolbar-template-timings.git#egg=orf-django-debug-toolbar-template-timings-master
+https://github.com/orf/django-debug-toolbar-template-timings/archive/master.zip

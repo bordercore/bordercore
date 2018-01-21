@@ -13,7 +13,7 @@ INTERNAL_IPS = ('127.0.0.1', '10.3.2.3')
 
 MIDDLEWARE_CLASSES += (
     'debug_panel.middleware.DebugPanelMiddleware',
-#  'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 INSTALLED_APPS += (
@@ -33,5 +33,5 @@ DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.cache.CachePanel',
     'debug_toolbar.panels.signals.SignalsPanel',
     'debug_toolbar.panels.logging.LoggingPanel',
-#    'template_timings_panel.panels.TemplateTimings.TemplateTimings'
+    'template_timings_panel.panels.TemplateTimings.TemplateTimings'
 )
