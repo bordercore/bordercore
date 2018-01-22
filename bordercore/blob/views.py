@@ -393,7 +393,6 @@ class BlogListView(ListView):
                 Q(is_blog=True)
             )
         else:
-            # posts = Post.objects.order_by('-created').all()[:ITEMS_PER_PAGE]
             post_list = Document.objects.order_by('-created').filter(is_blog=True)
 
         paginator = Paginator(post_list, self.ITEMS_PER_PAGE)
@@ -412,6 +411,9 @@ class BlogListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(BlogListView, self).get_context_data(**kwargs)
+
+        if not self.object_list.paginator.page(1).object_list:
+            messages.add_message(self.request, messages.ERROR, 'No blog entries found')
 
         context['section'] = self.SECTION
         return context
