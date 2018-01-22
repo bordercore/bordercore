@@ -70,13 +70,17 @@ def get_youtube_content(msg):
     info['uploader'] = lines[0]
     info['title'] = lines[1]
     info['url'] = lines[2]
+    # Sometimes the title takes up two lines
+    if not info['url'].startswith('http'):
+        info['url'] = lines[3]
+        info['title'] = info['title'] + lines[2]
 
     p = re.compile('(.*) just uploaded a video')
     m = p.match(info['uploader'])
     if m:
         info['subject'] = "%s: %s" % (m.group(1), info['title'])
     else:
-        info['subject'] = info['title']
+        return None
 
     return info
 
@@ -92,8 +96,7 @@ if msg.get('From', None).startswith('YouTube'):
     if link_info:
         b = Bookmark(url=link_info['url'], title=link_info['subject'] or 'No Label', user_id=1)
         b.save()
-        sys.exit(0)
-
+    sys.exit(0)
 
 # Decode quoted-printable contents
 buffer = quopri.decodestring(buffer)
