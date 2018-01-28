@@ -7,11 +7,14 @@
 {% block left-block %}
 
         <div class="panel panel-primary">
-            <div class="panel-heading">Urgent Tasks</div>
+            <div class="panel-heading">Important Tasks</div>
             <ul class="list-group">
                 {% for task in tasks %}
                     <li class="list-group-item">{{ task.task }}
                     &nbsp; &nbsp;<span class="label label-primary">{{ task.parent_category }}</span>
+                        {% if task.date %}
+                            {{ task.date }}
+                        {% endif %}
                         {% if task.tags %}
                             <span class="label">{{ task.tags.all.0.name }}</span>
                         {% endif %}

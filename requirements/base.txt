@@ -9,7 +9,7 @@ certifi==2015.11.20.1
 Django==1.11
 django-datatables-view==1.12.1
 django-tastypie==0.13.3
--e git+git@github.com:bordercore/PyOrgMode.git@d43dac98c938313f029d290155e8c136ec2a537f#egg=PyOrgMode-master
+https://github.com/bjonnh/PyOrgMode/archive/master.zip
 feedparser==5.1.3
 flower==0.8.3
 futures==3.0.3

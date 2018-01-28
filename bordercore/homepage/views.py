@@ -1,21 +1,20 @@
 import datetime
 import json
 import random
+import re
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import render
 
 from blob.models import Document
 from bookmark.models import Bookmark
 from cal.models import Calendar
-from collection.models import Collection
 from fitness.models import ExerciseUser
 from music.models import Listen
-from PyOrgMode import OrgDataStructure
+from PyOrgMode import PyOrgMode
 from quote.models import Quote
 from solrpy.core import SolrConnection
 
@@ -30,28 +29,19 @@ def homepage(request):
     # Get any 'pinned' bookmarks
     pinned_bookmarks = Bookmark.objects.filter(is_pinned=True)
 
-    # Get the latest 'urgent' todo tasks
-    # tasks = Todo.objects.filter(is_urgent=True).order_by('-modified')[:3]
-
-    # During work hours, show work todos.  Otherwise show personal todos
-    t = datetime.datetime.now()
-    if t.hour > 9 and t.hour < 18 and t.isoweekday() not in [6, 7]:
-        start_node_category = 'Black Duck'
-    else:
-        start_node_category = 'Bordercore'
-
     tasks = []
     try:
-        tree = OrgDataStructure()
+        tree = PyOrgMode.OrgDataStructure()
         tree.load_from_file(request.user.userprofile.orgmode_file)
 
-        startnode = OrgDataStructure.get_node_by_heading(tree.root, start_node_category, [])[0]
-        nodes = OrgDataStructure.get_nodes_by_priority(startnode, "A", [])
+        startnode = get_nodes_by_tag(tree.root, "todo", [])
+        nodes = PyOrgMode.OrgDataStructure.get_nodes_by_priority(startnode[0], "A", [])
 
         for node in nodes:
-            tasks.append({'task': OrgDataStructure.parse_heading(node.heading)['heading'],
+            tasks.append({'task': PyOrgMode.OrgDataStructure.parse_heading(node.heading)['heading'],
                           'tag': node.tags,
-                          'parent_category': OrgDataStructure.parse_heading(node.parent.heading)['heading']})
+                          'date': get_date(node),
+                          'parent_category': PyOrgMode.OrgDataStructure.parse_heading(node.parent.heading)['heading']})
     except AttributeError as e:
         print("AttributeError: %s" % e)
 
@@ -117,8 +107,36 @@ def get_random_blob(content_type):
                  'rows': 1}
     solr_results = json.loads(conn.raw_query(**solr_args).decode('UTF-8'))['response']['docs'][0]
     try:
-        print("Trying to get uuid={} from the database".format(solr_results['internal_id']))
         blob = Document.objects.get(pk=solr_results['internal_id'])
     except ObjectDoesNotExist:
         pass
     return blob
+
+
+# This possibly should be moved to a static method in PyOrgMode
+def get_nodes_by_tag(node, tag, found_nodes=[]):
+
+        if isinstance(node, PyOrgMode.OrgElement):
+            try:
+                if tag in node.tags:
+                    found_nodes.append(node)
+            except AttributeError:
+                pass
+            for node in node.content:
+                get_nodes_by_tag(node, tag, found_nodes)
+            return found_nodes
+        else:
+            return found_nodes
+
+
+def get_date(node):
+
+    if len(node.content) > 0 and isinstance(node.content[0], PyOrgMode.OrgDrawer.Element):
+        property = node.content[0].content[0]
+        if property.name == 'CREATED':
+            raw_date = property.value
+            matches = re.match(r'\[(\d\d\d\d-\d\d-\d\d).*\]', raw_date)
+            if matches:
+                return matches.group(1)
+            else:
+                return property.value
