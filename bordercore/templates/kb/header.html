@@ -65,12 +65,6 @@
             window.open(url, '_self');
         });
 
-        $('#advanced_search_link').click( function(e) {
-            $('#advanced_search_form').toggle();
-        })
-
-        $('#advanced_search_form').hide();
-
     });
 
 </script>
@@ -86,6 +80,7 @@
             <div class="form-group">
 
                 <input id="kbsearch" class="form-control" type="text" name="search" value="{{ request.GET.search }}" placeholder="Search" />
+                &nbsp;
 
             </div>
 
@@ -100,6 +95,8 @@
                     <option>No limit</option>
                 </select>
 
+                &nbsp;
+
             </div>
 
             <div class="form-group">
@@ -111,21 +108,27 @@
                     <option value="project_name">Project Name</option>
                 </select>
 
+                &nbsp;
+
             </div>
 
-            <input class="btn btn-default" type="submit" name="Go" value="Search" />
-
-            &nbsp; &nbsp; <a href="#" id="advanced_search_link">Advanced Search</a>
-
-            <!-- </form> -->
+            <input class="btn btn-default btn btn-primary" type="submit" name="Go" value="Search" />
 
     </div>
 
 </div>
 
-<div class="row voffset" id="advanced_search_form">
+<div class="row voffset">
 
     <div class="col-lg-10">
+
+        <div class="form-group">
+
+            <label>Exact Match</label>
+            <input type="checkbox" name="exact_match"{% if request.GET.exact_match %} checked="checked"{% endif %} />
+            &nbsp;
+
+        </div>
 
         <div class="form-group">
 
@@ -135,13 +138,6 @@
                 <option selected="selected">AND</option>
                 <option>OR</option>
             </select>
-
-        </div>
-        <div class="form-group">
-
-            <label>Blob Search</label>
-
-            <input type="checkbox" name="blob_search" />
 
         </div>
 

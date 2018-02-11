@@ -71,16 +71,16 @@ class SearchListView(ListView):
                          'rows': rows,
             }
 
-            if 'blob_search' in self.request.GET:
-
+            p = re.compile("^[0-9a-f]{40}$")
+            if p.search(search_term):
                 solr_args['q'] = 'sha1sum:%s' % (search_term)
-
             else:
 
                 # Get a list of all unique blob metadata names and add them to the list of fields to search.
                 #  These are stored as dynamic fields prefixed with 'attr_'
                 metadata = ' '.join(["attr_%s" % x.name.lower() for x in MetaData.objects.all().distinct('name')])
 
+                search_term = handle_quotes(self.request, search_term)
                 solr_args.update(
                     {'q': search_term,
                      'q.op': boolean_type,
@@ -273,7 +273,7 @@ def kb_search_tags_booktitles(request):
 
     conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
-    term = request.GET['term']
+    term = handle_quotes(request, request.GET['term'])
 
     solr_args = {'q': 'tags:%s* OR (doctype:book AND title:*%s*)' % (term, term),
                  'fl': 'doctype,filepath,sha1sum,tags,title,uuid'}
@@ -294,6 +294,14 @@ def kb_search_tags_booktitles(request):
         matches.append({'type': 'Tag', 'value': tag})
 
     return JsonResponse(matches, safe=False)
+
+
+def handle_quotes(request, search_term):
+    """Remove quotes to avoid Solr errors. Support the 'Exact Match' search option."""
+    search_term = search_term.replace("\"", "")
+    if request.GET.get('exact_match'):
+        search_term = "\"{}\"".format(search_term)
+    return search_term
 
 
 @login_required
