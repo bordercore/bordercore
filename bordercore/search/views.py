@@ -76,15 +76,11 @@ class SearchListView(ListView):
                 solr_args['q'] = 'sha1sum:%s' % (search_term)
             else:
 
-                # Get a list of all unique blob metadata names and add them to the list of fields to search.
-                #  These are stored as dynamic fields prefixed with 'attr_'
-                metadata = ' '.join(["attr_%s" % x.name.lower() for x in MetaData.objects.all().distinct('name')])
-
                 search_term = handle_quotes(self.request, search_term)
                 solr_args.update(
                     {'q': search_term,
                      'q.op': boolean_type,
-                     'qf': 'author title bordercore_todo_task tags attr_content description ' + metadata,
+                     'qf': 'text',
                      'hl': 'true',
                      'hl.fl': 'attr_content,bordercore_todo_task,title',
                      'hl.simple.pre': '<span class="search_bordercore_blogpost_snippet">',
