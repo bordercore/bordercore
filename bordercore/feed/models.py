@@ -11,6 +11,7 @@ import xml.sax.saxutils as saxutils
 from accounts.models import UserProfile
 from lib.mixins import TimeStampedModel
 
+USER_AGENT = "Bordercore/1.0"
 
 class Feed(TimeStampedModel):
     name = models.TextField()
@@ -32,7 +33,8 @@ class Feed(TimeStampedModel):
     def update(self):
         try:
 
-            r = requests.get(self.url)
+            headers = {'user-agent': USER_AGENT}
+            r = requests.get(self.url, headers=headers)
 
             if r.status_code != 200:
                 r.raise_for_status()
