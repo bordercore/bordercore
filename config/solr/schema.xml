@@ -129,14 +129,13 @@
    <field name="tags" type="FT_string_lc_trimmed" indexed="true" stored="true"
           multiValued="true" required="false" />
 
-   <field name="tags_test" type="BC_tag_reference" indexed="true" stored="true"
-          multiValued="true" required="false" />
-
    <field name="doctype" type="FT_string_lc_trimmed" indexed="true" stored="true" multiValued="false" required="true" />
 
    <field name="filepath" type="FT_string_lc_trimmed" indexed="true" stored="true" multiValued="false" required="false" />
 
    <field name="note" type="FT_string_lc_trimmed" indexed="true" stored="true" multiValued="false" required="false" />
+
+   <field name="document_body" type="text_general" indexed="true" stored="true" multiValued="false" required="false" />
 
    <!-- Common metadata fields, named specifically to match up with
      SolrCell metadata when parsing rich documents such as Word, PDF.
@@ -149,7 +148,7 @@
    <field name="title" type="text_general" indexed="true" stored="true" multiValued="true"/>
    <field name="subtitle" type="text_general" indexed="true" stored="true" multiValued="false"/>
    <field name="source" type="text_general" indexed="true" stored="true" multiValued="false"/>
-   <field name="subject" type="text_general" indexed="true" stored="true"/>
+   <!-- <field name="subject" type="text_general" indexed="true" stored="true"/> -->
    <field name="description" type="text_general" indexed="true" stored="true"/>
    <field name="comments" type="text_general" indexed="true" stored="true"/>
    <field name="author" type="text_general" indexed="true" multiValued="true" stored="true"/>
@@ -280,17 +279,20 @@
         is added to the index.  It's used either to index the same field differently,
         or to add multiple fields to the same field for easier/faster searching.  -->
 
-  <copyField source="tags" dest="tags_test"/>
-
    <!-- Text fields from SolrCell to search by default in our catch-all field -->
    <copyField source="title" dest="text"/>
-   <!-- <copyField source="author" dest="text"/> -->
+   <copyField source="author" dest="text"/>
    <copyField source="description" dest="text"/>
+   <copyField source="document_body" dest="text"/>
    <copyField source="keywords" dest="text"/>
+   <copyField source="note" dest="text"/>
    <copyField source="content" dest="text"/>
    <copyField source="content_type" dest="text"/>
    <copyField source="resourcename" dest="text"/>
    <copyField source="url" dest="text"/>
+
+   <copyField source="attr_*" dest="text"/>
+   <copyField source="bordercore_*" dest="text"/>
 
    <!-- Create a string version of author for faceting -->
    <!-- <copyField source="author" dest="author_s"/> -->
