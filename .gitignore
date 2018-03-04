@@ -4,3 +4,4 @@ bordercore/static/docs/
 bordercore/static/img/favicons/*
 !bordercore/static/img/favicons/README
 bordercore/static/blobs
+secrets.json

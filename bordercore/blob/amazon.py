@@ -3,8 +3,11 @@ import requests
 from amazonproduct import API
 from amazonproduct.errors import NoExactMatchesFound
 
-# Note: be sure to install a ~/.amazon-product-api file containing
-#  your Amazon Associates Web Service account info
+# Note: be sure the following environment variables are set
+#
+# AWS_ACCESS_KEY
+# AWS_SECRET_ACCESS_KEY
+# AWS_ASSOCIATE_TAG
 
 
 class AmazonMixin(object):

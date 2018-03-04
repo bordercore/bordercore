@@ -1,7 +1,11 @@
 # Django settings for bordercore project.
 
+import json
+import os
 import sys
 from pathlib import Path
+
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -9,6 +13,20 @@ PROJECT_DIR = BASE_DIR / "bordercore"
 
 sys.path.insert(0, str(PROJECT_DIR / "apps"))
 sys.path.insert(0, str(PROJECT_DIR / "lib"))
+
+# JSON-based secrets module
+with open('{}/config/settings/secrets.json'.format(BASE_DIR)) as f:
+    secrets = json.loads(f.read())
+
+
+def get_secret(setting, secrets=secrets):
+    '''Get the secret variable or return explicit exception.'''
+    try:
+        return secrets[setting]
+    except KeyError:
+        error_msg = 'Set the {0} environment variable'.format(setting)
+        raise ImproperlyConfigured(error_msg)
+
 
 ADMINS = (
     ('F. Jerrell Schivers', 'jerrell@bordercore.com'),
@@ -83,7 +101,10 @@ STATICFILES_FINDERS = (
 FILE_UPLOAD_PERMISSIONS = 0o664
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '^q$7#ge(!9p!rqzbh*g3%-0q7=*sxcs!$&amp;$8)i33g3a%a+o#4m'
+SECRET_KEY = get_secret('SECRET_KEY')
+
+for env in ('AWS_ACCESS_KEY', 'AWS_SECRET_ACCESS_KEY', 'AWS_ASSOCIATE_TAG'):
+    os.environ[env] = get_secret(env)
 
 ROOT_URLCONF = 'config.urls'
 
