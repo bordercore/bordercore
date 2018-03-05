@@ -40,9 +40,9 @@ class SearchListView(ListView):
         elif facet == 'Links':
             return 'doctype:bordercore_bookmark'
         elif facet == 'Titles':
-            return '(title:%s)' % (term)
+            return '(title:{})'.format(term)
         elif facet == 'Tags':
-            return 'tags:%s' % (term)
+            return 'tags:{}'.format(term)
 
     def get_queryset(self):
 
@@ -50,8 +50,7 @@ class SearchListView(ListView):
 
             search_term = self.request.GET['search']
 
-            # Escape special characters to Solr
-            search_term = search_term.replace(':', '\\:')
+            search_term = escape_solr_terms(search_term)
 
             rows = self.request.GET.get('rows', None)
             boolean_type = self.request.GET.get('boolean_search_type', 'AND')
@@ -269,7 +268,7 @@ def kb_search_tags_booktitles(request):
 
     conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
-    term = handle_quotes(request, request.GET['term'])
+    term = escape_solr_terms(handle_quotes(request, request.GET['term']))
 
     solr_args = {'q': 'tags:%s* OR (doctype:book AND title:*%s*)' % (term, term),
                  'fl': 'doctype,filepath,sha1sum,tags,title,uuid'}
@@ -290,6 +289,11 @@ def kb_search_tags_booktitles(request):
         matches.append({'type': 'Tag', 'value': tag})
 
     return JsonResponse(matches, safe=False)
+
+
+def escape_solr_terms(term):
+    """Escape special characters used by Solr with a backslash"""
+    return re.sub(r"([:\[\]\{\}\(\)])", r"\\\1", term)
 
 
 def handle_quotes(request, search_term):
