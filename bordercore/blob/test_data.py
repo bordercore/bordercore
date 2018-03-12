@@ -16,7 +16,7 @@ from blob.models import Document
 from collection.models import Collection
 from tag.models import Tag
 
-blob_whitelist = ("f864440b-928b-4a80-a232-ce0a554c5a83")
+blob_whitelist = ()
 
 def test_books_with_tags():
     "Assert that all books have at least one tag"
