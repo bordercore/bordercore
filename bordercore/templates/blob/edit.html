@@ -11,6 +11,7 @@
 
         $(document).ready(function() {
 
+            {% if object %}
             $('#collections_other, #collections_current').change( function(e) {
                 var collection_id = $(this).val();
                 console.log(collection_id);
@@ -34,6 +35,7 @@
                 })
 
             });
+            {% endif %}
 
         });
 
@@ -61,9 +63,8 @@
     <div class="form-group">
         <div class="row">
             <div class="col-lg-5">
-            Add to collection
                 <select id="collections_other" class="form-control">
-                    <option value="666">--Select--</option>
+                    <option value="666">Add to collection</option>
                     {% for collection in collections_other %}
                         <option value="{{ collection.id }}">{{ collection.name }}</option>
                     {% endfor %}
@@ -76,9 +77,8 @@
     <div class="form-group">
         <div class="row">
             <div class="col-lg-5">
-            Remove from collection
                 <select id="collections_current" class="form-control">
-                    <option>--Select--</option>
+                    <option>Remove from collection</option>
                     {% for collection in object.get_collection_info %}
                         <option value="{{ collection.id }}">{{ collection.name }}</option>
                     {% endfor %}
@@ -93,7 +93,9 @@
     <form action="{% url 'blob_delete' object.uuid %}" method="post">
         {% csrf_token %}
         <input type="hidden" name="uuid" value="{{ object.uuid }}" />
-        <input type="submit" name="Delete" value="Delete" class="btn btn-default" />
+        <button type="submit" class="btn btn-warning">
+            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete
+        </button>
     </form>
 
     <hr/>
@@ -315,6 +317,9 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                 }
             });
 
+            $("#id_file").on('change', function() {
+                $('#id_filename').val($(this)[0].files[0].name);
+            });
         });
 
         function formatName(match, capture1, capture2) {
@@ -340,6 +345,16 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
 </div>
 {% endif %}
 
+{% if form.errors %}
+    <div class="row">
+        <div class="col-lg-12">
+{% for field,error in form.errors.items %}
+    <div class="alert alert-danger">{{ error }}</div>
+{% endfor %}
+        </div>
+    </div>
+{% endif %}
+
 <div class="row">
     <div class="col-lg-12">
 
@@ -350,10 +365,22 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
     {% csrf_token %}
 
     {% for field in form %}
+        {% if field.label != 'Filename' %}
         <div class="form-group {% if field.errors %}error{% endif %}">
             <label class="col-lg-1 col-sm-2 control-label" for="inputTitle">{{ field.label }}</label>
 
-            {% if field.label == 'Date' %}
+            {% if field.label == 'File' %}
+
+                <div class="col-lg-4 input-group" id="blob_edit_file">
+                    <input type="text" name="filename" value="{{ form.filename.value|default:"" }}" class="form-control" id="id_filename" />
+                    <span class="input-group-btn">
+                        <label class="btn btn-primary">Choose file
+                            <input type="file" name="file" id="id_file" hidden />
+                        </label>
+                    </span>
+                </div>
+
+            {% elif field.label == 'Date' %}
 
                 <div class="col-lg-11 col-sm-10">
 
@@ -368,17 +395,14 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                 </div>
 
             {% else %}
-
                 <div class="col-lg-11 col-sm-10">
                     {{ field }}
                 </div>
             {% endif %}
 
-            {% for error in field.errors %}
-                <span class="form-error">{{ error }}</span>
-            {% endfor %}
-
         </div>
+
+        {% endif %}
     {% endfor %}
 
     <div class="form-group {% if field.errors %}error{% endif %}">

@@ -189,6 +189,20 @@ class BlobUpdateView(UpdateView):
     def form_valid(self, form):
         blob = form.instance
 
+        # Only check for a renamed file if the file itself hasn't changed
+        if 'file' not in form.changed_data:
+            import os
+            old_filename = str(form.instance.file)
+            if (form.cleaned_data['filename'] != os.path.basename(old_filename)):
+                new_file_path = '{}/{}/{}'.format(settings.MEDIA_ROOT, os.path.dirname(old_filename), form.cleaned_data['filename'])
+                try:
+                    os.rename(blob.file.path, new_file_path)
+                    blob.file.name = "{}/{}".format(os.path.dirname(str(form.instance.file)), form.cleaned_data['filename'])
+                    blob.save()
+                except Exception as e:
+                    from django.forms import ValidationError
+                    raise ValidationError("Error: {}".format(e))
+
         # Delete all existing tags
         blob.tags.clear()
 

@@ -1,8 +1,11 @@
 import hashlib
+import os
 
 from django import forms
+from django.conf import settings
 from django.core.urlresolvers import reverse_lazy
-from django.forms import (ModelForm, Select, Textarea, TextInput)
+from django.forms import (ModelForm, Select, Textarea, TextInput, ValidationError)
+from django.forms.fields import CharField
 from django.utils.safestring import mark_safe
 
 from blob.models import Document
@@ -14,7 +17,6 @@ class DocumentForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(DocumentForm, self).__init__(*args, **kwargs)
-
         self.fields['file'].required = False
         self.fields['date'].required = False
         self.fields['date'].input_formats = ['%m-%d-%Y']
@@ -24,9 +26,17 @@ class DocumentForm(ModelForm):
         self.fields['tags'].required = False
         self.fields['title'].required = False
 
+        self.fields['filename'].required = False
+        if not self.instance.id:
+            self.fields['filename'].disabled = True
+        else:
+            self.fields['filename'].initial = os.path.basename(str(self.instance.file))
+
         if self.instance.id:
             # If this form has a model attached, get the tags and display them separated by commas
             self.initial['tags'] = self.instance.get_tags()
+
+    filename = CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     tags = ModelCommaSeparatedChoiceField(
         required=False,
@@ -46,6 +56,12 @@ class DocumentForm(ModelForm):
         if cleaned_data.get('sha1sum', '') == '':
             cleaned_data['sha1sum'] = None
 
+        old_filename = str(self.instance.file)
+        if (cleaned_data.get('filename', '') != os.path.basename(old_filename)):
+            new_file_path = '{}/{}/{}'.format(settings.MEDIA_ROOT, os.path.dirname(old_filename), cleaned_data['filename'])
+            if os.path.isfile(new_file_path):
+                self.add_error("file", ValidationError("Rename failed: file exists"))
+
         return cleaned_data
 
     def clean_file(self):
@@ -64,7 +80,7 @@ class DocumentForm(ModelForm):
 
     class Meta:
         model = Document
-        fields = ('file', 'title', 'date', 'tags', 'content', 'note', 'importance', 'is_blog', 'is_private', 'id')
+        fields = ('file', 'title', 'filename', 'date', 'tags', 'content', 'note', 'importance', 'is_blog', 'is_private', 'id')
         widgets = {
             'content': Textarea(attrs={'rows': 20, 'class': 'form-control'}),
             'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),

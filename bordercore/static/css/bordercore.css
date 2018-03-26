@@ -1,3 +1,7 @@
+[hidden] {
+  display: none !important;
+           }
+
 html, body {
     height: 100%;
     margin: 0 10px 0 10px;
@@ -164,6 +168,11 @@ ul.pagination {
 #blob_collection_list {
    font-size: 18px;
    margin-botoom: 10px;
+}
+
+/* We need this because the "input-group" class ruins the field alignment */
+#blob_edit_file {
+   padding-left: 15px;
 }
 
 #myModal #title {
