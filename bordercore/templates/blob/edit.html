@@ -14,7 +14,6 @@
             {% if object %}
             $('#collections_other, #collections_current').change( function(e) {
                 var collection_id = $(this).val();
-                console.log(collection_id);
 
                 var mutation = 'add';
                 if ($(this).attr('id') == 'collections_current') {
@@ -36,6 +35,25 @@
 
             });
             {% endif %}
+
+            function parseFilename() {
+                var fileName = $('#id_filename').val();
+                var match = /(.*)(\..*?)$/.exec(fileName);
+                if (match) {
+                    return {'base': match[1], 'extension': match[2]};
+                }
+            }
+
+            $('#btn-cleanupfilename').click( function () {
+                var title = $('#id_title').val();
+                if (title) {
+                    parsedFileName = parseFilename();
+                    if (parsedFileName) {
+                        $('#id_filename').val(title + parsedFileName.extension);
+                        $('#id_filename').css( 'color', 'red' ).animate( { color: '#666666' }, 2000 );
+                    }
+                }
+            });
 
         });
 
@@ -112,6 +130,13 @@
                 <option>Insert list</option>
                 <option>Escape HTML</option>
             </select>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <br />
+            <input type="button" class="btn btn-default" id="btn-cleanupfilename" value="Cleanup Filename" />
         </div>
     </div>
 
@@ -436,7 +461,6 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                     <input type="button" class="btn btn-default" id="btn-add" data-toggle="modal" data-target="#myModal2" value="Add" />
                     <input type="button" class="btn btn-default" id="btn-delete" value="Delete" disabled />
                     <input type="button" class="btn btn-default" id="btn-amazon" data-toggle="modal" data-target="#myModal" value="Amazon Lookup" />
-                    <input type="button" class="btn btn-default" id="btn-fixfilename" value="Fix Filename" />
 
                 </div>
             </div>
