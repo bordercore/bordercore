@@ -8,12 +8,18 @@ class MuscleGroup(models.Model):
     def __unicode__(self):
         return self.muscle_group
 
+    def __str__(self):
+        return self.muscle_group
+
 
 class Muscle(models.Model):
     muscle = models.TextField(unique=True)
     muscle_group = models.ForeignKey(MuscleGroup)
 
     def __unicode__(self):
+        return self.muscle
+
+    def __str__(self):
         return self.muscle
 
 
@@ -26,6 +32,9 @@ class Exercise(models.Model):
     def __unicode__(self):
         return self.exercise
 
+    def __str__(self):
+        return self.exercise
+
 
 class Data(models.Model):
     user = models.ForeignKey(User)
@@ -33,6 +42,9 @@ class Data(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     weight = models.FloatField()
     reps = models.IntegerField()
+
+    class Meta:
+        verbose_name_plural = 'Data'
 
 
 class ExerciseUser(models.Model):
