@@ -19,11 +19,18 @@
         engine.initialize();
 
         $('#tag-filter').typeahead({
-            autoselect: true
+            autoselect: true,
+            minLength: 2
         }, {
-            display: 'value',
-            source: engine,
-        });
+                display: 'value',
+                source: engine,
+                templates: {
+                    suggestion: function(data) {
+                        return '<div class="tt-suggest-page">' + data.value.replace(data._query, '<strong>' + data._query+ '</strong>') + '</div>';
+                    }
+                }
+            }
+        );
 
         $('#tag-filter').bind('typeahead:selected', function(obj, datum, name) {
             window.location='{% url 'blog_list' %}?tagsearch=' + datum.value;

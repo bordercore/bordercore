@@ -13,6 +13,7 @@ def tag_search(request):
     if request.GET.get('type') == 'blog':
         args['document__is_blog'] = True
 
-    tag_list = [{'value': x.name, 'is_meta': x.is_meta} for x in Tag.objects.filter(name__istartswith=request.GET.get('query', ''), **args).distinct('name')]
+    query = request.GET.get('query', '')
+    tag_list = [{'value': x.name, 'is_meta': x.is_meta} for x in Tag.objects.filter(name__icontains=query, **args).distinct('name')]
 
     return JsonResponse(tag_list, safe=False)

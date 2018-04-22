@@ -20,6 +20,7 @@
     line-height: 1.33;
 }
 .tt-menu {
+    width: 300px;
     min-width: 160px;
     margin-top: 2px;
     padding: 5px 0;
@@ -59,5 +60,3 @@
 .tt-suggestion p {
      margin: 0;
 }
-
-

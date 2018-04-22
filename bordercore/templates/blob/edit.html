@@ -233,12 +233,21 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                 tagClass: function(item) {
                     return 'label label-primary';
                 },
-                typeaheadjs: {
-                    source: engine,
-                    displayKey: 'value',
-                    valueKey: 'value',
-                    options: {'autoselect': true}
-                }
+                typeaheadjs: [{
+                    minLength: 2
+                }, {
+                        source: engine,
+                        displayKey: function (data) {
+                            return data.value;
+                        },
+                        valueKey: 'value',
+                        options: {'autoselect': true},
+                        templates: {
+                            suggestion: function(data) {
+                                return '<div class="tt-suggest-page">' + data.value.replace(data._query, '<strong>' + data._query+ '</strong>') + '</div>';
+                            }
+                        }
+                    }]
             });
 
             var engineMetadata = new Bloodhound({
