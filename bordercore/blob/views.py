@@ -84,7 +84,7 @@ class DocumentCreateView(CreateView):
 
         handle_linked_collection(obj, self.request)
 
-        index_blob.delay(obj.uuid)
+        index_blob.delay(obj.uuid, True)
 
         return super(DocumentCreateView, self).form_valid(form)
 
@@ -189,8 +189,10 @@ class BlobUpdateView(UpdateView):
     def form_valid(self, form):
         blob = form.instance
 
+        file_changed = False if 'file' not in form.changed_data else True
+
         # Only check for a renamed file if the file itself hasn't changed
-        if 'file' not in form.changed_data:
+        if not file_changed:
             import os
             old_filename = str(form.instance.file)
             if (form.cleaned_data['filename'] != os.path.basename(old_filename)):
@@ -210,7 +212,7 @@ class BlobUpdateView(UpdateView):
 
         self.object = form.save()
         messages.add_message(self.request, messages.INFO, 'Blob updated')
-        index_blob.delay(blob.uuid)
+        index_blob.delay(blob.uuid, file_changed)
 
         return HttpResponseRedirect(reverse('blob_detail', kwargs={'uuid': str(blob.uuid)}))
 

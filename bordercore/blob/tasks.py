@@ -13,9 +13,9 @@ SOLRINDEXER_JAR = '/opt/lib/solrindexer.jar'
 
 
 @task()
-def index_blob(uuid):
+def index_blob(uuid, file_changed):
     print("index blob: {}".format(uuid))
-    cmd = "{}/bin/java -cp {} com.bordercore.solr.SolrIndexerDriver -u {}".format(JAVA_HOME, SOLRINDEXER_JAR, uuid)
+    cmd = "{}/bin/java -cp {} com.bordercore.solr.SolrIndexerDriver -u {} {}".format(JAVA_HOME, SOLRINDEXER_JAR, uuid, "--skip-indexing-file" if not file_changed else "")
     call(cmd.split())
 
 
