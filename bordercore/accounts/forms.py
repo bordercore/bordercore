@@ -30,6 +30,7 @@ class UserProfileForm(ModelForm):
 
     favorite_tags = ModelCommaSeparatedChoiceField(
         required=False,
+        id='id_tags',
         queryset=Tag.objects.filter(),
         to_field_name='name')
 

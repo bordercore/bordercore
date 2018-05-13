@@ -17,31 +17,7 @@
 
 $(document).ready(function() {
 
-        var engine = new Bloodhound({
-            name: 'tags',
-            remote: {
-                url: '{% url 'tag_search' %}?query=%QUERY',
-                wildcard: '%QUERY'
-            },
-            datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
-            queryTokenizer: Bloodhound.tokenizers.whitespace
-        });
-
-        engine.initialize();
-
-        $('#id_tags').tagsinput({
-            confirmKeys: [13, 188],
-            tagClass: function(item) {
-                return 'label label-primary';
-            },
-            typeaheadjs: {
-                source: engine,
-                displayKey: 'value',
-                valueKey: 'value',
-                options: {'autoselect': true}
-            }
-
-        });
+        {% include "common/common-typeaheadjs-tagsinput.js" %}
 
         {% if action == 'Edit' %}
         $('#id_tags').tagsinput('focus');
