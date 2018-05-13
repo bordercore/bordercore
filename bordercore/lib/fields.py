@@ -8,6 +8,15 @@ class ModelCommaSeparatedChoiceField(ModelMultipleChoiceField):
 
     widget = TextInput(attrs={'class': 'form-control typeahead', 'autocomplete': 'off'})
 
+    def __init__(self, *args, **kwargs):
+        # Allow the user to supply a custom id attribute for the form field
+        id = kwargs.get('id', '')
+        if id:
+            self.widget.attrs['id'] = id
+            # Remove this arg to avoid an "got an unexpected keyword argument" error
+            kwargs.pop('id', None)
+        super(ModelCommaSeparatedChoiceField, self).__init__(*args, **kwargs)
+
     def clean(self, value):
         if value is not None:
             value = [item.strip() for item in value.split(",") if item.strip() != '']  # remove padding
