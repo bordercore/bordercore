@@ -1,7 +1,9 @@
 # Adapted from
 # http://stackoverflow.com/questions/1551382/user-friendly-time-format-in-python
 
+import datetime
 import pytz
+import re
 
 
 def cleanup(interval, time_unit):
@@ -13,7 +15,8 @@ def cleanup(interval, time_unit):
     else:
         return "{} {}s ago".format(interval, time_unit)
 
-def pretty_date(time=False):
+
+def get_relative_date(time=False):
     """
     Get a datetime object or a int() Epoch timestamp and return a
     pretty string like 'an hour ago', 'Yesterday', '3 months ago',
@@ -55,3 +58,24 @@ def pretty_date(time=False):
     if day_diff < 365:
         return cleanup(day_diff / 30, "month")
     return cleanup(day_diff / 365, "year")
+
+
+def get_date_from_pattern(date):
+
+    if date is None:
+        return None
+
+    if re.compile('^\d\d\d\d-\d\d-\d\d$').match(date):
+        return datetime.datetime.strptime(date, '%Y-%m-%d').strftime('%B %d, %Y')
+    elif re.compile('^\d\d\d\d-\d\d$').match(date):
+        return datetime.datetime.strptime(date, '%Y-%m').strftime('%B %Y')
+    elif re.compile('^\d\d\d\d$').match(date):
+        return date
+    elif re.compile('^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ').match(date):
+        return datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ').strftime('%B %d, %Y')
+    else:
+        matches = re.compile('^\[([-\d]*) TO ([-\d]*)\]$').match(date)
+        if matches:
+            return "{} to {}".format(get_date_from_pattern(matches.group(1)), get_date_from_pattern(matches.group(2)))
+
+    return date

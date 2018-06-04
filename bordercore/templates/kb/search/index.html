@@ -57,7 +57,9 @@
 
         });
 
-        $('#kbsearch').focus();
+        if ($('#kbsearch').val() == '') {
+            $('#kbsearch').focus();
+        }
 
     });
 
@@ -66,6 +68,8 @@
 <br />
 
 {% if request.GET %}
+
+    {% include "common/show_messages.html" %}
 
     <div class="row">
         <div class="col-lg-6">
@@ -85,21 +89,18 @@
         <td{% if match.importance == 10 %} class="important"{% endif %}>
 {% if match.doctype == 'bordercore_todo' %}
 
-    <h4 class="search_book_title">Todo: <a href="{% url 'todo_edit' match.internal_id %}">{{ match.bordercore_todo_task.0 }}</a>
-        <span class="search_todo_date">{{ match.last_modified }}</span>
-    </h4>
+    <h4 class="search_book_title">Todo: <a href="{% url 'todo_edit' match.internal_id %}">{{ match.bordercore_todo_task.0 }}</a></h4>
 
 {% elif match.doctype == 'bordercore_bookmark' %}
 
     <h4 class="search_book_title">
         <img src="{{ STATIC_URL }}img/kb_link.png" />
         <a href="{{ match.url.0 }}">{{ match.title }}</a>
-        <span class="search_todo_date">{{ match.last_modified }}</span>
     </h4>
 
 {% elif match.doctype == 'bordercore_blog' %}
 
-    <h4 class="search_book_title"><a href="{% url 'blob_detail' match.uuid %}">{{ match.title|default:"Blog Post" }}</a>  <span class="search_todo_date">{{ match.last_modified }}</span></h4>
+    <h4 class="search_book_title"><a href="{% url 'blob_detail' match.uuid %}">{{ match.title|default:"Blog Post" }}</a></h4>
 
     <h5>{{ match.blogpost_snippet|safe }}</h5>
 
@@ -107,7 +108,6 @@
 
     <h4 class="search_book_title">
         <a href="{% url 'blob_detail' match.uuid %}">{{ match.title|default:"Title" }}</a>
-        <span class="search_todo_date">{{ match.last_modified }}</span>
     </h4>
 
     <h5>{{ match.blogpost_snippet|safe }}</h5>
@@ -122,11 +122,10 @@
         <span class="search_book_author">
             {% if match.author.0 %} - {{ match.author.0 }}{% endif %}
         </span>
-        <span class="search_todo_date">{{ match.last_modified }}</span>
     </h4>
 {% endif %}
 
-    &nbsp; &nbsp; {{ match.pub_date.0 }}
+    &nbsp; &nbsp; <strong>{{ match.date }}</strong>
 
 Tags: {% if not match.tags%}None{% endif %}
 {% for tag in match.tags %}

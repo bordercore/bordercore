@@ -162,7 +162,8 @@
    <field name="sha1sum" type="text_general" indexed="true" stored="true" multiValued="false"/>
    <field name="importance" type="int" indexed="true" stored="true" multiValued="false"/>
    <field name="is_private" type="boolean" indexed="true" stored="true" multiValued="false" default="false"/>
-   <field name="date" type="text_general" indexed="true" stored="true" multiValued="false"/>
+   <field name="date" type="daterange" indexed="true" stored="true" multiValued="false"/>
+   <field name="date_unixtime" type="long" indexed="true" stored="true" multiValued="false" docValues="true"/>
 
    <!-- Main body of document extracted by SolrCell.
         NOTE: This field is not indexed by default, since it is also copied to "text"
@@ -432,6 +433,7 @@
     <!-- A Trie based date field for faster date range queries and date faceting. -->
     <fieldType name="tdate" class="solr.TrieDateField" precisionStep="6" positionIncrementGap="0"/>
 
+    <fieldType name="daterange" class="solr.DateRangeField"/>
 
     <!--Binary data type. The data should be sent/retrieved in as Base64 encoded Strings -->
     <fieldtype name="binary" class="solr.BinaryField"/>

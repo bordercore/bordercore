@@ -5,6 +5,7 @@ import urllib
 from os.path import basename
 
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -13,7 +14,7 @@ from django.views.generic.list import ListView
 
 from blob.models import MetaData
 from search.solr import SolrResultSet
-from solrpy.core import SolrConnection
+from solrpy.core import SolrConnection, SolrException
 from tag.models import Tag
 
 IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
@@ -48,9 +49,8 @@ class SearchListView(ListView):
 
         if 'search' in self.request.GET:
 
-            search_term = self.request.GET['search']
-
-            search_term = escape_solr_terms(search_term)
+            search_term = escape_solr_terms(self.request.GET['search'])
+            sort = self.request.GET['sort']
 
             rows = self.request.GET.get('rows', None)
             boolean_type = self.request.GET.get('boolean_search_type', 'AND')
@@ -63,11 +63,12 @@ class SearchListView(ListView):
 
             solr_args = {'boost': 'importance',
                          'defType': 'edismax',
-                         'fl': 'attr_publication_date,author,bordercore_todo_task,doctype,filepath,id,importance,internal_id,last_modified,sha1sum,tags,title,url,uuid',
+                         'fl': 'author,bordercore_todo_task,date,date_unixtime,doctype,filepath,id,importance,internal_id,last_modified,sha1sum,tags,title,url,uuid',
                          'facet': 'on',
                          'facet.mincount': '1',
 #                         'fields': ['attr_*', 'author', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
                          'rows': rows,
+                         'sort': sort + ' desc'
             }
 
             p = re.compile("^[0-9a-f]{40}$")
@@ -94,8 +95,11 @@ class SearchListView(ListView):
             if self.request.GET.get('facets'):
                 solr_args['fq'] = '{!tag=dt}' + ' OR '.join([self.get_facet_query(x, search_term) for x in self.request.GET.get('facets').split(',')])
 
-            results = conn.raw_query(**solr_args)
-            return json.loads(results.decode('UTF-8'))
+            try:
+                results = conn.raw_query(**solr_args)
+                return json.loads(results.decode('UTF-8'))
+            except SolrException as e:
+                messages.add_message(self.request, messages.ERROR, e)
 
     def get_context_data(self, **kwargs):
         context = super(SearchListView, self).get_context_data(**kwargs)
@@ -107,13 +111,15 @@ class SearchListView(ListView):
             context['filter_query'] = self.request.GET.get('facets').split(',')
 
         from solrpy.core import utc_from_string
-        from lib.time_utils import pretty_date
+        from lib.time_utils import get_relative_date
 
         if context['info']:
 
             for k, v in context['info']['facet_counts']['facet_queries'].items():
                 if v > 0:
                     facet_counts[k] = v
+
+            from lib.time_utils import get_date_from_pattern
 
             for myobject in context['info']['response']['docs']:
                 solr_result_set = SolrResultSet(myobject)
@@ -122,7 +128,7 @@ class SearchListView(ListView):
                 blogpost_snippet = ''
                 # TODO: Handle matches with multiple titles
                 if myobject.get('last_modified'):
-                    last_modified = pretty_date(utc_from_string(myobject.get('last_modified')))
+                    last_modified = get_relative_date(utc_from_string(myobject.get('last_modified')))
                 if myobject.get('filepath'):
                     filename = os.path.basename(myobject['filepath'])
                 if myobject['doctype'] == 'blob' and not myobject.get('title', ''):
@@ -132,7 +138,7 @@ class SearchListView(ListView):
                         blogpost_snippet = context['info']['highlighting'][myobject['id']]['attr_content'][0]
                 info.append(dict(title=solr_result_set.get_title(),
                                  author=myobject.get('author', ['']),
-                                 pub_date=myobject.get('attr_publication_date', ''),
+                                 date=get_date_from_pattern(myobject.get('date','')),
                                  doctype=myobject['doctype'],
                                  sha1sum=myobject.get('sha1sum', ''),
                                  uuid=myobject.get('uuid', ''),

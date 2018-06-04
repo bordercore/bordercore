@@ -126,6 +126,10 @@ class BlobDetailView(DetailView):
                     context['metadata'][x.name] = ', '.join([context['metadata'][x.name], x.value])
                 else:
                     context['metadata'][x.name] = x.value
+
+        from lib.time_utils import get_date_from_pattern
+        context['date'] = get_date_from_pattern(self.object.date)
+
         if self.object.sha1sum:
             context['cover_info'] = Document.get_cover_info(self.object.sha1sum)
             context['cover_info_small'] = Document.get_cover_info(self.object.sha1sum, 'small')

@@ -18,6 +18,7 @@ from tag.models import Tag
 
 blob_whitelist = ()
 
+
 def test_books_with_tags():
     "Assert that all books have at least one tag"
     solr_args = {'q': 'doctype:book AND -tags:[* TO *]',
@@ -29,6 +30,32 @@ def test_books_with_tags():
     response = conn.raw_query(**solr_args)
     data = json.loads(response.decode('UTF-8'))['response']['numFound']
     assert data == 0, "{} books fail this test".format(data)
+
+
+def test_documents_with_dates():
+    "Assert that all documents have a date"
+    solr_args = {'q': 'doctype:document+AND+-date_unixtime:[*+TO+*]',
+                 'fl': 'id',
+                 'rows': 2147483647,
+                 'wt': 'json'}
+
+    conn = SolrConnection('http://{}:{}/{}'.format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    response = conn.raw_query(**solr_args)
+    data = json.loads(response.decode('UTF-8'))['response']['numFound']
+    assert data == 0, "{} documents fail this test".format(data)
+
+
+def test_dates_with_unixtimes():
+    "Assert that all documents with dates also have a date_unixtime field"
+    solr_args = {'q': 'doctype:blob AND -date_unixtime:[* TO *] AND date:[* TO *]',
+                 'fl': 'id',
+                 'rows': 2147483647,
+                 'wt': 'json'}
+
+    conn = SolrConnection('http://{}:{}/{}'.format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    response = conn.raw_query(**solr_args)
+    data = json.loads(response.decode('UTF-8'))['response']['numFound']
+    assert data == 0, "{} documents fail this test".format(data)
 
 
 def test_books_with_title():

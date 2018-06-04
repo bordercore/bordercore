@@ -21,7 +21,9 @@ def index_todo(id, commit=True):
         url=todo.url,
         note=todo.note,
         last_modified=todo.modified,
-        doctype='bordercore_todo'
+        date=todo.created,
+        doctype='bordercore_todo',
+        date_unixtime=todo.created.strftime("%s")
     )
     conn.add(doc)
 

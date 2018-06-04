@@ -9,6 +9,7 @@ from PIL import Image
 from celery import task
 
 JAVA_HOME = '/opt/jdk1.8.0_73'
+
 SOLRINDEXER_JAR = '/opt/lib/solrindexer.jar'
 
 
