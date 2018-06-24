@@ -159,6 +159,7 @@ class SearchListView(ListView):
             context['facet_counts'] = [{'doctype_purty': k, 'doctype': k, 'count': v} for k, v in facet_counts.items()]
 
         context['info'] = info
+        context['search_sort_by'] = self.request.session.get('search_sort_by', '')
         return context
 
 

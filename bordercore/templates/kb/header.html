@@ -9,6 +9,21 @@
 
    $(document).ready(function() {
 
+        {% if search_sort_by %}
+        $("#search-sort-by").val('{{ search_sort_by }}');
+        {% endif %}
+
+        $('#search-sort-by').change( function(event) {
+            var value = $(this).val();
+            $.ajax( { type: 'POST',
+                      url: '{% url 'store_in_session' %}',
+                      data: { search_sort_by: value },
+                      success: function() {
+                }
+                      });
+
+        })
+
         var myengine = new Bloodhound({
             remote: {
                 url: '{% url 'kb_search_tags_booktitles' %}?term=%QUERY',
@@ -103,7 +118,7 @@
 
                 <label>Sort by</label>
 
-                <select name="sort" class="form-control">
+                <select id="search-sort-by" name="sort" class="form-control">
                     <option value="score">Rank</option>
                     <option value="date_unixtime">Date</option>
                 </select>
