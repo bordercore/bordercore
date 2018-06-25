@@ -174,8 +174,7 @@ class SearchTagDetailView(ListView):
         results = {}
         for one_doc in context['info']['response']['docs']:
             solr_result_set = SolrResultSet(one_doc)
-            if one_doc['doctype'] in ('blob', 'book'):
-
+            if one_doc.get('sha1sum', ''):
                 one_doc['filename'] = solr_result_set.filename
                 one_doc['url'] = one_doc['filepath'].split(settings.MEDIA_ROOT)[1]
                 one_doc['cover_url'] = static("blobs/%s/%s/cover-small.jpg" % (one_doc['sha1sum'][0:2], one_doc['sha1sum']))

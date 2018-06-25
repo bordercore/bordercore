@@ -132,7 +132,7 @@ def test_images_on_filesystem_have_thumbnails():
 
 def test_solr_blobs_exist_on_filesystem():
     "Assert that all blobs in Solr exist on the filesystem"
-    solr_args = {'q': 'doctype:book OR doctype:blob',
+    solr_args = {'q': 'sha1sum:[* TO *]',
                  'fl': 'filepath,sha1sum',
                  'rows': 2147483647,
                  'wt': 'json'}
