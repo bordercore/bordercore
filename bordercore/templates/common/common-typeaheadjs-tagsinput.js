@@ -25,6 +25,7 @@ $('#id_tags').tagsinput({
     typeaheadjs: [{
         minLength: 2
     }, {
+        limit: 10,
         source: engine,
         displayKey: function (data) {
             return data.value;

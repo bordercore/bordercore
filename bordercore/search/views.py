@@ -277,7 +277,8 @@ def kb_search_tags_booktitles(request):
     term = escape_solr_terms(handle_quotes(request, request.GET['term']))
 
     solr_args = {'q': 'tags:%s* OR (doctype:book AND title:*%s*)' % (term, term),
-                 'fl': 'doctype,filepath,sha1sum,tags,title,uuid'}
+                 'fl': 'doctype,filepath,sha1sum,tags,title,uuid',
+                 'rows': 20}
 
     results = json.loads(conn.raw_query(**solr_args).decode('UTF-8'))
 
