@@ -175,6 +175,11 @@ ul.pagination {
    padding-left: 15px;
 }
 
+#blob_note {
+             border: 1px solid #999999;
+             padding: 5px;
+}
+
 #myModal #title {
     width: 300px;
 }

@@ -65,6 +65,10 @@
         <div id="blob_note">{{ object.get_note|safe }}</div>
     {% endif %}
 
+    {% if solr_info.note %}
+        <div id="blob_note">{{ solr_info.note }}</div>
+    {% endif %}
+
     {% if collection_info %}
         <div class="row top-buffer">
             <div class="col-lg-12">
