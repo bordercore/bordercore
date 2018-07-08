@@ -79,7 +79,7 @@ class Document(TimeStampedModel, AmazonMixin):
     title = models.TextField(null=True)
     sha1sum = models.CharField(max_length=40, unique=True, blank=True, null=True)
     file = models.FileField(upload_to=blob_directory_path, storage=BlobFileSystemStorage(), max_length=500)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     note = models.TextField(null=True)
     tags = models.ManyToManyField(Tag)
     date = models.TextField(null=True)
@@ -308,7 +308,7 @@ def mymodel_delete(sender, instance, **kwargs):
 class MetaData(TimeStampedModel):
     name = models.TextField()
     value = models.TextField()
-    blob = models.ForeignKey(Document)
+    blob = models.ForeignKey(Document, on_delete=models.CASCADE)
 
     class Meta:
         unique_together = ('name', 'value', 'blob')

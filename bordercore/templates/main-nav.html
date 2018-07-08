@@ -28,7 +28,7 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a href="{% url 'feed_list' %}">Browse</a></li>
-                        <li><a href="{% url 'feed_edit' %}">Add a Feed</a></li>
+                        <li><a href="{% url 'feed_add' %}">Add a Feed</a></li>
                         <li><a href="{% url 'feed_subscriptions' %}">Manage Subscriptions</a></li>
                     </ul>
                 </li>
@@ -40,7 +40,7 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li><a href="{% url 'search' %}">Search</a></li>
-                        <li><a href="{% url 'kb_search_tag_detail' '' %}">Tag Search</a></li>
+                        <li><a href="{% url 'kb_search_tag_detail_search' %}">Tag Search</a></li>
                         <li><a href="{% url 'collection_list' %}">Collections</a></li>
                         <li><a href="{% url 'blob_add' %}">Add Blob</a></li>
                         <li><a href="{% url 'search_admin' %}">Admin</a></li>

@@ -9,14 +9,14 @@ from tag.models import Tag
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, on_delete=models.PROTECT)
     rss_feeds = ArrayField(models.IntegerField())
     favorite_tags = models.ManyToManyField(Tag)
     bookmarks_show_untagged_only = models.BooleanField(default=False)
-    todo_default_tag = models.OneToOneField(Tag, related_name='default_tag', null=True)
+    todo_default_tag = models.OneToOneField(Tag, related_name='default_tag', null=True, on_delete=models.PROTECT)
     orgmode_file = models.TextField()
     google_calendar = JSONField(blank=True, null=True)
-    homepage_default_collection = models.OneToOneField(Collection, related_name='default_collection', null=True)
+    homepage_default_collection = models.OneToOneField(Collection, related_name='default_collection', null=True, on_delete=models.PROTECT)
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.favorite_tags.all()])

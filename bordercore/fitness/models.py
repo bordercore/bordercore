@@ -14,7 +14,7 @@ class MuscleGroup(models.Model):
 
 class Muscle(models.Model):
     muscle = models.TextField(unique=True)
-    muscle_group = models.ForeignKey(MuscleGroup)
+    muscle_group = models.ForeignKey(MuscleGroup, on_delete=models.PROTECT)
 
     def __unicode__(self):
         return self.muscle
@@ -25,7 +25,7 @@ class Muscle(models.Model):
 
 class Exercise(models.Model):
     exercise = models.TextField(unique=True)
-    muscle = models.ForeignKey(Muscle)
+    muscle = models.ForeignKey(Muscle, on_delete=models.PROTECT)
     description = models.TextField(blank=True)
     note = models.TextField(blank=True)
 
@@ -37,8 +37,8 @@ class Exercise(models.Model):
 
 
 class Data(models.Model):
-    user = models.ForeignKey(User)
-    exercise = models.ForeignKey(Exercise)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    exercise = models.ForeignKey(Exercise, on_delete=models.PROTECT)
     date = models.DateTimeField(auto_now_add=True)
     weight = models.FloatField()
     reps = models.IntegerField()
@@ -48,8 +48,8 @@ class Data(models.Model):
 
 
 class ExerciseUser(models.Model):
-    user = models.ForeignKey(User)
-    exercise = models.ForeignKey(Exercise)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    exercise = models.ForeignKey(Exercise, on_delete=models.PROTECT)
     started = models.DateTimeField(auto_now_add=True)
     frequency = models.IntegerField(blank=False, default=7)
 

@@ -3,7 +3,7 @@ import json
 import os
 
 from django.conf import settings
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.templatetags.static import static

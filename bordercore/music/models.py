@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
 from django.db import models
+from django.urls import reverse
 
 from lib.mixins import TimeStampedModel
 from tag.models import Tag
@@ -29,12 +29,12 @@ class SongSource(TimeStampedModel):
 class Song(TimeStampedModel):
     title = models.TextField()
     artist = models.TextField()
-    album = models.ForeignKey(Album, null=True)
+    album = models.ForeignKey(Album, null=True, on_delete=models.PROTECT)
     track = models.IntegerField(null=True)
     year = models.IntegerField(null=True)
     length = models.IntegerField(blank=True, null=True)
     comment = models.TextField(null=True)
-    source = models.ForeignKey(SongSource)
+    source = models.ForeignKey(SongSource, on_delete=models.PROTECT)
     last_time_played = models.DateTimeField(null=True)
     times_played = models.IntegerField(default=0, blank=True, null=True)
     original_album = models.TextField(null=True)
@@ -43,12 +43,12 @@ class Song(TimeStampedModel):
 
 
 class Listen(TimeStampedModel):
-    user = models.ForeignKey(User)
-    song = models.ForeignKey(Song)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    song = models.ForeignKey(Song, on_delete=models.PROTECT)
 
 
 class WishList(TimeStampedModel):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     song = models.TextField(null=True, blank=True)
     artist = models.TextField(null=True)
     album = models.TextField(null=True, blank=True)

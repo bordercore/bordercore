@@ -22,5 +22,5 @@ class Contact(models.Model):
     im = models.TextField(blank=True, null=True)
     birthday = models.DateField(blank=True, null=True)
     note = models.TextField(blank=True, null=True)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)

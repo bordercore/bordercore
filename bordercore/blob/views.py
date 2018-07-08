@@ -6,10 +6,10 @@ import re
 from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.core.urlresolvers import reverse, reverse_lazy
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
+from django.urls import reverse, reverse_lazy
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
@@ -288,7 +288,7 @@ def metadata_name_search(request):
 def get_amazon_image_info(request, sha1sum, index=0):
 
     b = Document.objects.get(sha1sum=sha1sum)
-    result = b.get_amazon_cover_url(int(index))
+    result = b.get_amazon_cover_url(index)
 
     return JsonResponse(result)
 
@@ -352,7 +352,7 @@ def get_amazon_metadata(request, title):
 def extract_thumbnail_from_pdf(request, uuid, page_number):
     from PyPDF2 import PdfFileReader, PdfFileWriter
 
-    page_number = int(page_number) - 1
+    page_number = page_number - 1
 
     b = Document.objects.get(uuid=uuid)
 

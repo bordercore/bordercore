@@ -84,7 +84,7 @@ def bookmark_delete(request, bookmark_id=None):
     # First delete the bookmark from any tag lists
     info = BookmarkTagUser.objects.raw("SELECT * FROM bookmark_bookmarktaguser WHERE %s = ANY (bookmark_list)" % bookmark_id)
     for tag in info:
-        tag.bookmark_list.remove(int(bookmark_id))
+        tag.bookmark_list.remove(bookmark_id)
         tag.save()
 
     # Then delete the actual bookmark

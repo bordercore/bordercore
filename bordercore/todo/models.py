@@ -14,7 +14,7 @@ class Todo(TimeStampedModel):
     task = models.TextField()
     note = models.TextField(null=True, blank=True)
     url = models.TextField(null=True, blank=True)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     due_date = models.DateTimeField(null=True, blank=True)
     tags = models.ManyToManyField(Tag)
     is_urgent = models.BooleanField(default=False)

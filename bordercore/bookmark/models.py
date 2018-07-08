@@ -28,7 +28,7 @@ class DailyBookmarkJSONField(JSONField):
 class Bookmark(TimeStampedModel):
     url = models.TextField()
     title = models.TextField()
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     note = models.TextField(null=True)
     tags = models.ManyToManyField(Tag)
     is_pinned = models.BooleanField(default=False)
@@ -57,6 +57,6 @@ post_save.connect(postSaveForBookmark, Bookmark)
 
 
 class BookmarkTagUser(models.Model):
-    tag = models.ForeignKey(Tag)
-    user = models.ForeignKey(User)
+    tag = models.ForeignKey(Tag, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     bookmark_list = ArrayField(models.IntegerField())

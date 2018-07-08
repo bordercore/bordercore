@@ -14,7 +14,7 @@ class Collection(TimeStampedModel):
     """
 
     name = models.CharField(max_length=200)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     blob_list = JSONField(blank=True, null=True)
     tags = models.ManyToManyField(Tag)
     description = models.TextField(null=True)

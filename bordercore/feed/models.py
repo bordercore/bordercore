@@ -85,7 +85,7 @@ class Feed(TimeStampedModel):
 
 
 class FeedItem(models.Model):
-    feed = models.ForeignKey(Feed)
+    feed = models.ForeignKey(Feed, on_delete=models.PROTECT)
     title = models.TextField()
     link = models.TextField()
     created = models.DateTimeField(auto_now_add=True)

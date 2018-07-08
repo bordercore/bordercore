@@ -5,7 +5,7 @@ import urllib
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic.list import ListView
@@ -158,7 +158,7 @@ def feed_edit(request, feed_id=None):
 
     if feed_id:
         form = FeedForm(instance=f)
-        subscribers = UserProfile.objects.raw("select * from accounts_userprofile where %d = any (rss_feeds)" % int(feed_id))
+        subscribers = UserProfile.objects.raw("select * from accounts_userprofile where %d = any (rss_feeds)" % feed_id)
         if subscribers:
             subscribers = ', '.join([x.user.username for x in subscribers])
 

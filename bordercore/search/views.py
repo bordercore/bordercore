@@ -192,7 +192,7 @@ class SearchTagDetailView(ListView):
         context['info']['matches'] = results
 
         tag_counts = {}
-        tag_list = self.kwargs['taglist'].split(',')
+        tag_list = self.kwargs.get('taglist', '').split(',')
         for x, y in grouped(context['info']['facet_counts']['facet_fields']['tags'], 2):
             if x not in tag_list:
                 tag_counts[x] = y
@@ -221,7 +221,7 @@ class SearchTagDetailView(ListView):
         return context
 
     def get_queryset(self):
-        taglist = self.kwargs['taglist']
+        taglist = self.kwargs.get('taglist', '')
         rows = 1000
 
         q = ' AND '.join(['tags:"%s"' % (urllib.parse.unquote(t),) for t in taglist.split(',')])

@@ -3,7 +3,7 @@ import os
 
 from django import forms
 from django.conf import settings
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from django.forms import (ModelForm, Select, Textarea, TextInput, ValidationError)
 from django.forms.fields import CharField
 from django.utils.safestring import mark_safe

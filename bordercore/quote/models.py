@@ -7,4 +7,4 @@ from lib.mixins import TimeStampedModel
 class Quote(TimeStampedModel):
     quote = models.TextField()
     source = models.TextField()
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
