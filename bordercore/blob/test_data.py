@@ -12,7 +12,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.prod'
 
 django.setup()
 
-from blob.models import Document
+from blob.models import Document, MetaData
 from collection.models import Collection
 from tag.models import Tag
 
@@ -202,6 +202,29 @@ def test_collection_blobs_exists_in_solr():
             response = conn.raw_query(**solr_args)
             data = json.loads(response.decode('UTF-8'))['response']['numFound']
             assert data == 1, "blob uuid={} does not exist in solr".format(blob.uuid)
+
+
+def test_blob_metadata_exists_in_solr():
+    "Assert that blob metadata exists in Solr"
+    some = MetaData.objects.order_by('?')[:100]
+
+    defined_solr_fields = ('doctype', 'title', 'author', 'url')
+
+    for m in some:
+        name = m.name.replace(' ', '_').lower()
+        if name == 'is_book':
+            continue
+        if name not in defined_solr_fields:
+            name = 'attr_' + name
+        # print('uuid:{} AND {}:"{}"'.format(m.blob.uuid, name, m.value.lower()))
+        solr_args = {'q': 'uuid:{} AND {}:"{}"'.format(m.blob.uuid, name, m.value.lower()),
+                     'fl': 'id',
+                     'wt': 'json'}
+
+        conn = SolrConnection('http://{}:{}/{}'.format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+        response = conn.raw_query(**solr_args)
+        data = json.loads(response.decode('UTF-8'))['response']['numFound']
+        assert data == 1, "metadata for blob uuid={} does not exist in solr, {}:{}".format(m.blob.uuid, m.name, m.value)
 
 
 def test_solr_search():

@@ -246,8 +246,9 @@ class BlobThumbnailView(UpdateView):
 def handle_metadata(blob, request):
     metadata = json.loads(request.POST['metadata'])
 
-    # Delete all existing metadata
-    blob.metadata_set.all().delete()
+    metadata_old = blob.metadata_set.all()
+    for i in metadata_old:
+        i.delete()
 
     for m in metadata:
         new_metadata, created = MetaData.objects.get_or_create(name=m[0], value=m[1], blob=blob)

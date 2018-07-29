@@ -16,7 +16,7 @@ from django.dispatch.dispatcher import receiver
 from PIL import Image
 
 from blob.amazon import AmazonMixin
-from blob.tasks import create_thumbnail
+from blob.tasks import create_thumbnail, delete_metadata
 from collection.models import Collection
 from lib.mixins import TimeStampedModel
 from solrpy.core import SolrConnection
@@ -312,3 +312,9 @@ class MetaData(TimeStampedModel):
 
     class Meta:
         unique_together = ('name', 'value', 'blob')
+
+    def delete(self):
+
+        delete_metadata.delay(self.blob.uuid, self.name, self.value)
+
+        super(MetaData, self).delete()

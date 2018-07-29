@@ -5,6 +5,7 @@ from subprocess import call
 
 from django.conf import settings
 from PIL import Image
+import requests
 
 from celery import task
 
@@ -39,3 +40,27 @@ def create_thumbnail(uuid):
             os.chmod(outfile, 0o664)
         except IOError as err:
             print("cannot create thumbnail; error={}".format(err))
+
+
+@task()
+def delete_metadata(uuid, name, value):
+
+    from blob.models import Document
+    blob = Document.objects.get(uuid=uuid)
+
+    url = 'http://{}:{}/{}/update?commit=true'.format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION)
+    headers = {'Content-type': 'application/json'}
+
+    data = [{'doctype': 'blob',
+             'uuid': str(blob.uuid),
+             'id': "blob_{}".format(blob.id),
+             'attr_{}'.format(name): {'remove': value}
+    }]
+
+    # metadata_old = blob.metadata_set.all()
+    # for m in metadata_old:
+    #     data[0]['attr_{}'.format(m.name)]={'remove': m.value}
+
+    r = requests.post(url, headers=headers, json=data)
+    if (r.status_code != requests.codes.ok):
+        print("Error deleting metadata for blod uuid={}: {}".format(blob.uuid, r.text))
