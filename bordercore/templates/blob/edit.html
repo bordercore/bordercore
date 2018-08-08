@@ -162,7 +162,6 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput-custom.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-datepicker3.css" />
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/typeahead-bootstrap3.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/smoke.min.css" />
 
@@ -171,8 +170,6 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.color-2.1.2.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.field_selection.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.jeditable.mini.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
 
     <script type="text/javascript">
@@ -180,43 +177,6 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
         $(document).ready(function() {
 
             {% include "common/common-typeaheadjs-tagsinput.js" %}
-
-            table = $('#metadata').DataTable( {
-                info: false,
-                paging: false,
-                searching: false
-            });
-
-            // Call this function anytime a row is added to the metadata table
-            //  so that the jEditable plugin will work with it
-            function makeEditable() {
-
-                $('#metadata tbody td.metadata-value').editable( function( sValue ) {
-                    // Update the data in the DataTables
-                    table.cell(this).data(sValue);
-                    return sValue;
-                } );
-
-            }
-
-            // Enable the jEditable plugin for the initial set of metadata
-            makeEditable();
-
-            $('#metadata tbody').on( 'click', 'tr', function () {
-                if ( $(this).hasClass('selected') ) {
-                    $(this).removeClass('selected');
-                    $('#btn-delete').attr("disabled", "disabled");
-                }
-                else {
-                    table.$('tr.selected').removeClass('selected');
-                    $(this).addClass('selected');
-                    $('#btn-delete').removeAttr("disabled");
-                }
-            } );
-
-            $('#btn-delete').click( function () {
-                table.row('.selected').remove().draw( false );
-            } );
 
             var engineMetadata = new Bloodhound({
                 name: 'metadata',
@@ -231,55 +191,18 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
             engineMetadata.initialize();
 
             $('#btn-add').click( function () {
-                $('#metadata-name').focus();
+                $('#id_name').focus();
             } );
 
-            $('#metadata-name').typeahead({
+            $('#id_name').typeahead({
                 autoselect: true
             }, {
                 display: 'value',
                 source: engineMetadata,
             });
 
-            $('#metadata-name').bind('typeahead:selected', function(obj, datum, name) {
-                $('#metadata-value').focus();
-            });
-
-            function addMetadata() {
-
-                event.preventDefault();
-
-                // Add the new metadata to the table
-                var rowNode = table.row.add( [ $('#metadata-name').val(), $('#metadata-value').val() ] ).draw().node();
-                $( rowNode ).find('td').eq(1).addClass('metadata-value');
-                makeEditable();
-
-                $( rowNode ).css( 'color', 'red' ).animate( { color: '#666666' }, 2000 );
-
-                // Reset the fields
-                $('#metadata-name').typeahead('val', '').focus();
-                $('#metadata-value').val('');
-
-            }
-
-            // Focus the text input when the dialog is displayed
-            $('#myModal2').on('shown.bs.modal', function () {
-                $('#metadata-name').focus();
-            })
-
-            $('#btn-addandcontinue').click( function () {
-                addMetadata();
-            } );
-
-            $('#metadata-value').keydown(function(event) {
-                // If the enter key is pressed...
-                if (event.keyCode == 13) {
-                    addMetadata();
-                }
-            });
-
-            $("#form-blob").submit(function(e) {
-                $('#input-metadata').val(JSON.stringify(table.data().toArray()));
+            $('#id_name').bind('typeahead:selected', function(obj, datum, name) {
+                $('#id_value').focus();
             });
 
             $('#markdown-support').change( function(event) {
@@ -322,6 +245,40 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
             $("#id_file").on('change', function() {
                 $('#id_filename').val($(this)[0].files[0].name);
             });
+
+            function addMetadata() {
+                var name = $('#id_name').val();
+                var value = $('#id_value').val();
+                $('.metadata_hidden:first').clone(true).insertAfter("#new_metadata");
+                $('.metadata_hidden:eq(1)').find('input').val(value).attr('name', 'm_' + name);
+                $('.metadata_hidden:eq(1)').find('label').html(name);
+                $('#id_name').val('');
+                $('#id_value').val('');
+                $('#id_name').typeahead('val', '').focus();
+                $('.metadata_hidden:eq(1)').removeClass('hidden');
+            }
+
+            $('#id_value').keydown(function(event) {
+                // If the enter key is pressed...
+                if (event.keyCode == 13) {
+                    addMetadata();
+                    event.preventDefault();
+                    return false;
+                }
+            });
+
+            $('#id_content').focus(function () {
+                $(this).animate({ height: "30em" }, 500);
+            })
+
+            $('.btn-add').click( function () {
+                addMetadata();
+            } );
+
+            $('.btn-remove').click( function () {
+                $(this).parents('.form-group').remove();
+            } );
+
         });
 
         function formatName(match, capture1, capture2) {
@@ -331,9 +288,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
     </script>
 
 {% if request.POST.Go and not form.errors %}
-
     {% include "common/show_messages.html" %}
-
 {% endif %}
 
 {% if object %}
@@ -369,7 +324,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
     {% for field in form %}
         {% if field.label != 'Filename' %}
         <div class="form-group {% if field.errors %}error{% endif %}">
-            <label class="col-lg-1 col-sm-2 control-label" for="inputTitle">{{ field.label }}</label>
+            <label class="col-lg-2 col-sm-2 control-label" for="inputTitle">{{ field.label }}</label>
 
             {% if field.label == 'File' %}
 
@@ -384,7 +339,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
 
             {% elif field.label == 'Date' %}
 
-                <div class="col-lg-11 col-sm-10">
+                <div class="col-lg-10 col-sm-10">
 
                     <!-- Tacking on the glyphs in an input-group class messes up the layout -->
                     <div class="col-lg-4 input-group date">
@@ -397,7 +352,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                 </div>
 
             {% else %}
-                <div class="col-lg-11 col-sm-10">
+                <div class="col-lg-10 col-sm-10">
                     {{ field }}
                 </div>
             {% endif %}
@@ -408,79 +363,66 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
     {% endfor %}
 
     <div class="form-group {% if field.errors %}error{% endif %}">
-        <label class="col-lg-1 col-sm-2 control-label" for="inputTitle">Is book</label>
-        <div class="col-lg-11 col-sm-10">
+        <label class="col-lg-2 col-sm-2 control-label" for="inputTitle">Is book</label>
+        <div class="col-lg-10 col-sm-10">
             <input type="checkbox"{% if is_book %} checked="checked"{% endif %} name="is_book" id="id_is_book" />
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-7 col-lg-offset-2">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">MetaData</h3>
-                </div>
-                <div class="panel-body">
-                    <table id="metadata" class="table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Value</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for data in metadata %}
-                                <tr><td>{{ data.name }}</td><td class="metadata-value">{{ data.value }}</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-
-                    <input type="button" class="btn btn-default" id="btn-add" data-toggle="modal" data-target="#myModal2" value="Add" />
-                    <input type="button" class="btn btn-default" id="btn-delete" value="Delete" disabled />
-                    <input type="button" class="btn btn-default" id="btn-amazon" data-toggle="modal" data-target="#myModal" value="Amazon Lookup" />
-
-                </div>
+    <div id="new_metadata" class="form-group">
+        <div class="col-lg-2 col-sm-2">
+            <input type="text" id="id_name" class="form-control initial-text" placeholder="New Metadata Name" autocomplete="off" />
+        </div>
+        <div class="col-lg-10 col-sm-10">
+            <div class="col-lg-10 input-group">
+            <input type="text" id="id_value" class="form-control" placeholder="New Metadata Value" autocomplete="off" />
+            <span class="input-group-btn">
+                <button class="btn btn-success btn-add" type="button">
+                    <span class="glyphicon glyphicon-plus"></span>
+                </button>
+            </span>
             </div>
         </div>
     </div>
 
+    <div class="hidden metadata_hidden form-group">
+        <label class="col-lg-2 col-sm-2 control-label" for="inputTitle"></label>
+        <div class="col-lg-10 col-sm-10">
+            <div class="col-lg-10 input-group">
+                <input id="new_value" type="text" name="" value="" class="form-control" autocomplete="off" />
+                <span class="input-group-btn">
+                    <button class="btn btn-danger btn-remove" type="button">
+                        <span class="glyphicon glyphicon-minus"></span>
+                    </button>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    {% for key, value in metadata.items %}
+        <div class="form-group {% if field.errors %}error{% endif %}">
+            <label class="col-lg-2 col-sm-2 control-label" for="inputTitle">{{ key }}</label>
+            <div class="col-lg-10 col-sm-10">
+                <div class="col-lg-10 input-group">
+                    <input type="text" name="m_{{ key }}" id="id_new" value="{{ value }}" class="form-control" autocomplete="off" />
+                    <span class="input-group-btn">
+                        <button class="btn btn-danger btn-remove" type="button">
+                            <span class="glyphicon glyphicon-minus"></span>
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
     <div class="form-group">
-        <div class="col-lg-3 col-lg-offset-1">
-            <input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
+        <div class="col-lg-3 col-lg-offset-2">
+            <input class="btn btn-primary btn-lg" type="submit" name="Go" value="{{ action }}" />
         </div>
     </div>
 
 </form>
 
-    </div>
-</div>
-
-<div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">Add Metadata</h4>
-            </div>
-            <div class="modal-body">
-
-                <form class="form-inline">
-                    <div class="form-group">
-                        <label for="exampleInputName2">Name</label>
-                        <input type="text" class="form-control" id="metadata-name" placeholder="Name">
-                    </div>
-                    <div class="form-group">
-                        <label for="exampleInputEmail2">Value</label>
-                        <input type="email" class="form-control" id="metadata-value" placeholder="Value">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" id="btn-addandcontinue">Add</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal" id="btn-choose">Done</button>
-            </div>
-
-        </div>
     </div>
 </div>
 

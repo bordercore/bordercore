@@ -171,7 +171,7 @@ class BlobUpdateView(UpdateView):
         context['section'] = SECTION
         context['sha1sum'] = self.kwargs.get('sha1sum')
         context['cover_info'] = Document.get_cover_info(self.object.sha1sum, max_cover_image_width=400)
-        context['metadata'] = [x for x in self.object.metadata_set.all() if x.name != 'is_book']
+        context['metadata'] = preprocess_metadata(self.object.metadata_set.all())
         if True in [True for x in self.object.metadata_set.all() if x.name == 'is_book']:
             context['is_book'] = True
         context['collections_other'] = Collection.objects.filter(Q(user=self.request.user)
@@ -244,19 +244,37 @@ class BlobThumbnailView(UpdateView):
 
 # Metadata objects are not handled by the form -- handle them manually
 def handle_metadata(blob, request):
-    metadata = json.loads(request.POST['metadata'])
 
     metadata_old = blob.metadata_set.all()
     for i in metadata_old:
         i.delete()
 
-    for m in metadata:
-        new_metadata, created = MetaData.objects.get_or_create(name=m[0], value=m[1], blob=blob)
-        if created:
-            new_metadata.save()
+    for key, value in request.POST.items():
+        p = re.compile("^m_(.*)")
+        m = p.match(key)
+        if m:
+            for i in value.split(","):
+                new_metadata, created = MetaData.objects.get_or_create(name=m.group(1), value=i.strip(), blob=blob)
+                if created:
+                    new_metadata.save()
+
     if request.POST.get('is_book', ''):
         new_metadata = MetaData(name='is_book', value='true', blob=blob)
         new_metadata.save()
+
+
+def preprocess_metadata(metadata_in):
+    metadata_out = {}
+
+    for m in metadata_in:
+        if m.name == 'is_book':
+            continue
+        try:
+            metadata_out[m.name] = metadata_out[m.name] + ", " + m.value
+        except KeyError:
+            metadata_out[m.name] = m.value
+
+    return metadata_out
 
 
 def handle_linked_blob(blob, request):

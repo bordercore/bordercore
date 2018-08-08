@@ -82,8 +82,14 @@ class DocumentForm(ModelForm):
         model = Document
         fields = ('file', 'title', 'filename', 'date', 'tags', 'content', 'note', 'importance', 'is_blog', 'is_private', 'id')
         widgets = {
-            'content': Textarea(attrs={'rows': 20, 'class': 'form-control'}),
+            'content': Textarea(attrs={'rows': 5, 'class': 'form-control'}),
             'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'title': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'importance': Select(attrs={'class': 'form-control', 'autocomplete': 'off'}, choices=((1, 'Normal'), (5, 'High'), (10, 'Highest')))
         }
+
+
+
+
+
+
