@@ -439,18 +439,28 @@ def search(request):
     results = []
 
     for album in albums:
-        results.append({'value': "%s - %s" % (album.artist, album.title),
+        results.append({'name': '{} - {}'.format(album.artist, album.title),
+                        'value': '{} - {}'.format(album.artist, album.title),
                         'id': album.id,
                         'type': 'album'})
 
     for artist in artists:
-        results.append({'value': "%s" % (artist.artist),
+        results.append({'name': '{}'.format(artist.artist),
+                        'value': '{}'.format(artist.artist),
                         'type': 'artist'})
 
     for song in songs:
-        results.append({'value': "%s - %s" % (song.title, song.artist),
-                        'id': song.album_id,
-                        'type': 'album'})
+        # If we don't have the album for the song (eg it's a "loose" song), return an 'artist' result,
+        #  otherwise return the 'album' result
+        if song.album_id:
+            results.append({'name': '{} - {}'.format(song.title, song.artist),
+                            'value': '{} - {}'.format(song.title, song.artist),
+                            'id': song.album_id,
+                            'type': 'album'})
+        else:
+            results.append({'name': '{} - {}'.format(song.title, song.artist),
+                            'value': '{}'.format(song.artist),
+                            'type': 'artist'})
 
     return JsonResponse(results, safe=False)
 
@@ -466,17 +476,17 @@ def get_song_location(song):
         tracknumber = str(song.track)
         if len(tracknumber) == 1:
             tracknumber = '0' + tracknumber
-        file_info = {'root': MUSIC_ROOT, 'url': '/%s/%s/%s - %s.mp3' % (artist_name, song.album.title, tracknumber, song.title)}
+        file_info = {'url': '/music/{}/{}/{} - {}.mp3'.format(artist_name, song.album.title, tracknumber, song.title)}
     else:
-        file_info = {'root': MUSIC_ROOT, 'url': '/%s/%s.mp3' % (song.artist, song.title)}
+        file_info = {'url': '/music/{}/{}.mp3'.format(song.artist, song.title)}
 
-        if not os.path.isfile('%s/%s' % (file_info['root'], file_info['url'])):
+        if not os.path.isfile('/home/media/{}'.format(file_info['url'])):
             # Check this type of file path: /home/media/mp3/Primitives - Crash.mp3
-            file_info = {'root': '/home/media', 'url': '/mp3/%s - %s.mp3' % (song.artist, song.title)}
+            file_info = {'url': '/mp3/{} - {}.mp3'.format(song.artist, song.title)}
 
-            if not os.path.isfile('%s/%s' % (file_info['root'], file_info['url'])):
+            if not os.path.isfile('/home/media/{}'.format(file_info['url'])):
                 # Check this type of file path: /home/media/mp3/m/Motley Crue - She's Got Looks That Kill.mp3
-                file_info = {'root': '/home/media', 'url': '/mp3/%s/%s - %s.mp3' % (song.artist[0].lower(), song.artist, song.title)}
+                file_info = {'url': '/mp3/{}/{} - {}.mp3'.format(song.artist[0].lower(), song.artist, song.title)}
 
     return file_info
 
