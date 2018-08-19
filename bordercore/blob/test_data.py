@@ -90,6 +90,17 @@ def test_tags_all_lowercase():
     assert len(t) == 0, "{} tags fail this test".format(len(t))
 
 
+def test_tags_no_orphans():
+    "Assert that all tags are used by some object"
+    t = Tag.objects.filter(Q(todo__isnull=True) &
+                           Q(document__isnull=True) &
+                           Q(bookmark__isnull=True) &
+                           Q(collection__isnull=True) &
+                           Q(song__isnull=True) &
+                           Q(bookmarktaguser__isnull=True))
+    assert len(t) == 0, "{} tags fail this test; example: name={}".format(len(t), t[0].name)
+
+
 def test_blobs_on_filesystem_exist_in_db():
     "Assert that all blobs found on the filesystem exist in the database"
     p = re.compile(settings.MEDIA_ROOT + '/\w\w/(\w{40})')
