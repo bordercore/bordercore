@@ -6,12 +6,12 @@
 
 {% block left-block %}
 
-        <div class="panel panel-primary">
-            <div class="panel-heading">Important Tasks</div>
+        <div class="card bg-info my-3">
+            <div class="card-header text-white">Important Tasks</div>
             <ul class="list-group">
                 {% for task in tasks %}
                     <li class="list-group-item">{{ task.task }}
-                    &nbsp; &nbsp;<span class="label label-primary">{{ task.parent_category }}</span>
+                    <span class="badge badge-primary ml-1">{{ task.parent_category }}</span>
                         {% if task.date %}
                             {{ task.date }}
                         {% endif %}
@@ -25,8 +25,8 @@
             </ul>
         </div>
 
-        <div class="panel panel-primary">
-            <div class="panel-heading">Daily Bookmarks</div>
+        <div class="card bg-info my-3">
+            <div class="card-header text-white">Daily Bookmarks</div>
             <ul class="list-group">
                 {% for bookmark in daily_bookmarks %}
                     <li class="list-group-item {{ bookmark.css_class }}"><a href="{% url 'bookmark_click' bookmark.id %}">{{ bookmark.title }}</a></li>
@@ -35,8 +35,8 @@
             </ul>
         </div>
 
-        <div class="panel panel-primary">
-            <div class="panel-heading">Overdue Exercises</div>
+        <div class="card bg-info my-3">
+            <div class="card-header text-white">Overdue Exercises</div>
             <ul class="list-group">
                 {% for exercise in overdue_exercises %}
                     <li class="list-group-item"><a href="{% url 'exercise_detail' exercise.exercise.exercise_id %}">{{ exercise.exercise.exercise.exercise }}</a> {{ exercise.lag }} days</li>
@@ -44,8 +44,8 @@
             </ul>
         </div>
 
-        <div class="panel panel-primary">
-            <div class="panel-heading">Pinned Bookmarks</div>
+        <div class="card bg-info">
+            <div class="card-header text-white">Pinned Bookmarks</div>
             <ul class="list-group">
                 {% for bookmark in pinned_bookmarks %}
                     <li class="list-group-item"><a href="{{ bookmark.url }}">{{ bookmark.title }}</a> </li>
@@ -63,18 +63,20 @@
         var request = $.ajax({
             url: '{% url 'get_calendar_events' %}',
             type: "GET",
-            dataType: "json"
-        }).success(function( data, textStatus ) {
-            html = '';
-            for (i = 0; i < data.length; i++) {
-                html += '<li class="list-group-item">' + data[i]['start_pretty'] + ': <strong>' + data[i]['summary'] + '</strong></li>';
+            dataType: "json",
+            success: function( data, textStatus ) {
+                html = '';
+                for (i = 0; i < data.length; i++) {
+                    html += '<li class="list-group-item">' + data[i]['start_pretty'] + ': <strong>' + data[i]['summary'] + '</strong></li>';
+                }
+                if (!html) {
+                    html = '<li class="list-group-item">Your calendar is empty</li>';
+                }
+                $('#events').html(html);
+            },
+            error: function( data, textStatus ) {
+                $('#events').html('<div class="alert alert-danger">Error retrieving events</div>');
             }
-            if (!html) {
-                html = '<li class="list-group-item">Your calendar is empty</li>';
-            }
-            $('#events').html(html);
-        }).error(function( data, textStatus ) {
-            $('#events').html('<div class="alert alert-danger">Error retrieving events</div>');
         });
     });
 
@@ -82,21 +84,21 @@
 
 <div class="row">
 
-    <div class="col-lg-6">
+    <div class="col-lg-7">
 
-        <div class="panel panel-primary">
-            <div class="panel-heading">Recent Bookmarks</div>
+        <div class="card bg-info">
+            <div class="card-header text-white">Recent Bookmarks</div>
             <ul class="list-group">
                 {% for bookmark in bookmarks %}
-                    <li class="list-group-item">{{ bookmark.url|favicon:16|safe }} &nbsp; <a href="{{ bookmark.url }}">{{ bookmark.title }}</a> </li>
+                    <li class="list-group-item">{{ bookmark.url|favicon:16|safe }} <a class="ml-2" href="{{ bookmark.url }}">{{ bookmark.title }}</a> </li>
                 {% endfor %}
             </ul>
         </div>
 
         <iframe src="{% url 'collection_embedded' default_collection %}" frameborder=0 scrolling="no" width="100%"></iframe>
 
-        <div class="panel panel-primary">
-            <div class="panel-heading">Recently Played Music</div>
+        <div class="card bg-info my-3">
+            <div class="card-header text-white">Recently Played Music</div>
             <ul class="list-group">
                 {% for song in music %}
                     <li class="list-group-item">{{ song.song.title }} <strong>{{ song.song.artist }}</strong></li>
@@ -106,10 +108,10 @@
 
     </div>
 
-    <div class="col-lg-6">
+    <div class="col-lg-5">
 
-        <div class="panel panel-primary">
-            <div class="panel-heading">Upcoming Calendar Events</div>
+        <div class="card bg-info">
+            <div class="card-header text-white">Upcoming Calendar Events</div>
             <ul class="list-group" id="events">
                 <li class="list-group-item">Retrieving...</li>
                 {% for event in calendar %}
@@ -118,18 +120,20 @@
             </ul>
         </div>
 
-    </div>
+        <!-- <div class="my-3">
+            <div class="card bg-info random-image-card">
+                <div class="card-header text-white">Random Picture</div>
+                <ul class="list-group"> -->
+        <div class="my-3">
+            <a href="{% url 'blob_detail' random_image_info.uuid %}">
+                <img src="{{ STATIC_URL }}{{ random_image_info.cover_info.url }}" height="{{ random_image_info.cover_info.height_cropped }}" width="{{ random_image_info.cover_info.width_cropped }}" />
+            </a>
+        </div>
+                    <!-- </ul>
+            </div>
+        </div> -->
 
-  <div class="col-lg-6">
-    <div class="panel panel-primary random-image-panel">
-      <div class="panel-heading">Random Picture</div>
-      <ul class="list-group">
-          <a href="{% url 'blob_detail' random_image_info.uuid %}">
-              <img src="{{ STATIC_URL }}{{ random_image_info.cover_info.url }}" height="{{ random_image_info.cover_info.height_cropped }}" width="{{ random_image_info.cover_info.width_cropped }}" />
-          </a>
-      </ul>
     </div>
-  </div>
 
 </div>
 

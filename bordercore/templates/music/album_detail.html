@@ -3,10 +3,12 @@
 {% block extra_head %}
 
     <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap4.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}/js/jquery.jplayer.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}/js/jplayer.cleanskin.js"></script>
 
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/dataTables.bootstrap4.min.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jplayer.clean.player.light.css" />
 
     <style>
@@ -30,7 +32,7 @@
 
 {% block left-block %}
     <img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title|urlencode }}/artwork.jpg" height="500" width="500" />
-    <h4>{{ object.comment|safe }}</h4>
+    <h5>{{ object.comment|default:""|safe }}</h5>
 {% endblock %}
 
 {% block content %}
@@ -51,8 +53,8 @@
                 "searchable": false,
                 "columnDefs": [
                     { "targets": [0,2,5], "visible": false },
-                    { "targets": [1], "class": "col-lg-1", "sorting": [ "asc", "desc" ] },
-                    { "targets": [4], "class": "col-lg-1", "iDataSort": 5 }
+                    { "targets": [1], "sorting": [ "asc", "desc" ] },
+                    { "targets": [4], "iDataSort": 5 }
                 ],
             } );
 
@@ -120,10 +122,10 @@
 <div class="row">
     <div class="col-lg-8">
         {% block breadcrumbs %}
-            <ol class="breadcrumb pull-left">
-                <li> <a href="{% url 'music_list' %}">Music</a> </li>
-                <li> <a href="{% url 'artist_detail' album.artist %}">{{ album.artist }} </li></a> </li>
-                <li class="active"> {{ album.title }} </li>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"> <a href="{% url 'music_list' %}">Music</a> </li>
+                <li class="breadcrumb-item"> <a href="{% url 'artist_detail' album.artist %}">{{ album.artist }} </li></a> </li>
+                <li class="breadcrumb-item active"> {{ album.title }} </li>
             </ol>
         {% endblock %}
 

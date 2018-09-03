@@ -23,7 +23,7 @@
     {% if object.tags.all %}
             Tags:
         {% for tag in object.tags.all %}
-            <a class="label label-primary" href="{% url 'kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
+            <a class="badge badge-primary" href="{% url 'kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
         {% endfor %}
         <br /><br />
     {% endif %}
@@ -35,17 +35,16 @@
             <br />
         {% endfor %}
 
-        <br /><br />
+        <br />
 
     {% endif %}
 
-    <table class="table table-condensed">
-        {% for key, values in metadata.items %}
-            {% if not key in fields_ignore %}
-                <tr>
-                    <td><strong>{{ key }}</strong></td>
-                    <td>{{ values }}</td>
-                </tr>
+    {% for key, values in metadata.items %}
+        {% if not key in fields_ignore %}
+            <div>
+                <strong>{{ key }}</strong><br />
+                {{ values }}
+            </div>
             {% endif %}
     {% endfor %}
     {% if content_type %}
@@ -87,11 +86,9 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
                                 </li>
                             {% endfor %}
                             <li class="list-group-item">
-                                <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}">Add Blob</a>
-                                &nbsp;
-                                <span class="glyphicon glyphicon-plus"></span>
+                                <a class="btn btn-secondary" href="{% url 'blob_add' %}?linked_collection={{ collection.id }}">Add Blob</a>
                             </li>
-                                            {% else %}
+                    {% else %}
                         In collection:
                         <a href="{% url 'collection_detail' collection.id %}">{{ collection.name }}</a>
                     {% endif %}
@@ -106,7 +103,7 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
     <form action="{% url 'blob_edit' object.uuid %}">
 
     {% if object.sha1sum %}
-        <a class="btn btn-default" href="{{ STATIC_URL }}blobs/{{ object.get_url|safe }}" role="button" target="blob">Download</a>
+        <a class="btn btn-secondary" href="{{ STATIC_URL }}blobs/{{ object.get_url|safe }}" role="button" target="blob">Download</a>
     {% endif %}
         <input type="submit" class="btn btn-primary" value="Edit">
 
@@ -116,9 +113,7 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
 
     <br /><br />
 
-    <a href="{% url 'blob_add' %}?linked_blob={{ object.id }}">Link to New Blob</a>
-    <br /><br />
-
+    <a href="{% url 'blob_add' %}?linked_blob={{ object.id }}">Link to New Blob</a> <strong>|</strong>
     <a href="{% url 'blob_thumbnail' object.uuid %}">Edit Thumbnail</a>
     <br /><br />
 

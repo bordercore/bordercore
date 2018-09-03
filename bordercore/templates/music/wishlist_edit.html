@@ -13,9 +13,9 @@
 $(document).ready(function() {
 
 {% if action == 'Edit' %}
-	$("input.btn[value='Delete']").click( function() {
-		$("form#todo-form").attr("action", "{% url 'todo_delete' pk %}");
-	})
+        $("input.btn[value='Delete']").click( function() {
+            $("form#todo-form").attr("action", "{% url 'todo_delete' pk %}");
+        })
 {% endif %}
 
 });
@@ -26,16 +26,16 @@ $(document).ready(function() {
 <div class="alert alert-success">{{ message }}</div>
 {% endif %}
 
-<p class="lead col-lg-offset-1">
+<p class="lead offset-lg-1">
 {{ action }} WishList
 </p>
 
-<form class="form-horizontal" action="{{ request.path }}" method="post">
+<form action="{{ request.path }}" method="post">
 {% csrf_token %}
 
 {% for field in form %}
-<div class="form-group {% if field.errors %}error{% endif %}">
-    <label class="col-lg-1 control-label" for="inputTitle">{{ field.label }}</label>
+<div class="form-group {% if field.errors %}error{% endif %} row">
+    <label class="col-lg-1 col-form-label" for="inputTitle">{{ field.label }}</label>
 
     <div class="col-lg-5">
 {{ field }}
@@ -50,10 +50,10 @@ $(document).ready(function() {
 {% endfor %}
 
 <div class="form-group">
-    <div class="col-lg-offset-1">
-	<input class="btn btn-default" type="submit" name="Go" value="{{ action }}" />
-	<input class="btn btn-default{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
-	<a class="btn btn-default" href="{% url 'wishlist' %}">Cancel</a>
+    <div class="offset-lg-1">
+        <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}" />
+        <input class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
+        <a class="btn btn-secondary" href="{% url 'wishlist' %}">Cancel</a>
     </div>
 </div>
 

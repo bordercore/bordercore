@@ -14,9 +14,9 @@ $('#id_tags').tagsinput({
     confirmKeys: [13, 188],
     tagClass: function(item) {
         if (item.is_meta == 'true') {
-            return 'label label-success';
+            return 'badge badge-success';
         } else {
-            return 'label label-primary';
+            return 'badge badge-primary';
         }
     },
     {% if itemValue %}

@@ -8,23 +8,17 @@
 
     {% if request.GET and info %}
 
-    <div class="panel panel-info">
-
-        <div class="panel-heading">Match Categories</div>
-        <div class="panel-body">
+        <div class="card bg-info">
+            <div class="card-header text-white">Match Categories</div>
+            <div class="card-body bg-light">
 {% for facet in facet_counts|dictsortreversed:"count" %}
-
-                <label>
-                    <input type="checkbox" name="filter_query" class="facet" id="{{ facet.doctype }}"
+                    <input type="checkbox" name="filter_query" class="facet my-2" id="{{ facet.doctype }}"
                            {% if facet.doctype in filter_query %}checked="checked"{% endif %}
                            /> {{ facet.doctype_purty }} ({{ facet.count }})
-                </label>
-
                 <br/>
 {% endfor %}
-
+            </div>
         </div>
-    </div>
 
     {% endif %}
 
@@ -72,7 +66,7 @@
     {% include "common/show_messages.html" %}
 
     <div class="row">
-        <div class="col-lg-6">
+        <div class="col-lg-12">
 
 {% if not info %}
 
@@ -125,7 +119,7 @@
     </h4>
 {% endif %}
 
-    &nbsp; &nbsp; <strong>{{ match.date }}</strong>
+    <strong class="ml-3">{{ match.date }}</strong>
 
 Tags: {% if not match.tags%}None{% endif %}
 {% for tag in match.tags %}

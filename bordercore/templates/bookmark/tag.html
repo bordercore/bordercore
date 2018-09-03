@@ -129,9 +129,9 @@
 
         <div class="col-lg-5">
 
-            <ul id="bookmarks_breadcrumb" class="breadcrumb pull-right">
-                <li><a href="{% url 'bookmark_list' %}">List</a><span class="divider"></span></li>
-                <li>Tags</li>
+            <ul id="bookmarks_breadcrumb" class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'bookmark_list' %}">List</a></li>
+                <li class="breadcrumb-item active">Tags</li>
             </ul>
 
         </div>
@@ -151,9 +151,9 @@
                         <span class="tag-container">
                             <span style="width: 18px; border: 1px solid white; float: left">
                                 <i class="icon-remove glyphicon glyphicon-remove" id="delete_{{ link.id }}"></i>
-                            </span> &nbsp; &nbsp;
-                            <span style="width: 20px">{{ link.url|favicon:16|safe }} </span> &nbsp; &nbsp;
-                            <a class="one-tag" href="{{ link.url }}" id="link_{{ link.id }}">{{ link.title }}</a>
+                            </span>
+                            <span class="ml-2" style="width: 20px">{{ link.url|favicon:16|safe }} </span>
+                            <a class="one-tag ml-2" href="{{ link.url }}" id="link_{{ link.id }}">{{ link.title }}</a>
                         </span>
                     </li>
 

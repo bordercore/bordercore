@@ -104,8 +104,8 @@
 <div class="row">
     <div class="col-lg-8">
         <ol class="breadcrumb">
-            <li><a href="{% url 'blob_detail' object.uuid %}">Blob Detail</a></li>
-            <li class="active">Blob Thumbnail</li>
+            <li class="breadcrumb-item"><a href="{% url 'blob_detail' object.uuid %}">Blob Detail</a></li>
+            <li class="breadcrumb-item active">Blob Thumbnail</li>
         </ol>
     </div>
 </div>
@@ -118,12 +118,12 @@
             <h2>Amazon Image Search</h2>
 
             <div id="update-cover-div">
-                <input id="update-cover" class="btn btn-default" type="button" value="Choose Image" />
+                <input id="update-cover" class="btn btn-secondary" type="button" value="Choose Image" />
             </div>
 
             <div id="set-cover-div" class="hidden">
                 <span id="progress" class="glyphicon glyphicon-refresh glyphicon-refresh-animate hidden"></span>
-                <input id="next-cover" class="btn btn-default" type="button" value="Next Image" />
+                <input id="next-cover" class="btn btn-secondary" type="button" value="Next Image" />
                 <span id="amazon-feedback"></span>
                 <br /><br />
                 <input id="set-cover" class="btn btn-primary" type="button" value="Set Thumbnail" />

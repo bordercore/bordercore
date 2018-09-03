@@ -19,6 +19,8 @@ from tag.models import Tag
 
 IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
 
+SECTION = 'KB'
+
 
 class SearchListView(ListView):
 
@@ -159,6 +161,7 @@ class SearchListView(ListView):
             context['facet_counts'] = [{'doctype_purty': k, 'doctype': k, 'count': v} for k, v in facet_counts.items()]
 
         context['info'] = info
+        context['section'] = SECTION
         context['search_sort_by'] = self.request.session.get('search_sort_by', '')
         return context
 
@@ -210,6 +213,11 @@ class SearchTagDetailView(ListView):
         doctype_counts_sorted = sorted(doctype_counts.items(), key=operator.itemgetter(1), reverse=True)
         context['doctype_counts'] = doctype_counts_sorted
 
+        doctypes = {}
+        for x in doctype_counts.keys():
+            doctypes[x] = 1
+        context['doctypes'] = doctypes
+
         tag_list_js = []
         for tag in tag_list:
             if tag != '':
@@ -217,6 +225,7 @@ class SearchTagDetailView(ListView):
         context['tag_list'] = tag_list_js
 
         context['kb_tag_detail_current_tab'] = self.request.session.get('kb_tag_detail_current_tab', '')
+        context['section'] = SECTION
 
         return context
 

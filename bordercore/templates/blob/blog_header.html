@@ -1,4 +1,3 @@
-
 <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/typeahead-bootstrap3.css" />
 
@@ -53,22 +52,18 @@
 
 </script>
 
-<div class="row">
+<div class="row mb-3">
     <div class="col-lg-7">
 
         <form class="form-inline" name="nav_form" id="blog-search-form" action="{% url 'blog_list' %}" method="get">
 
-            <label>Search</label>
-            <div class="form-group">
-                <input class="form-control" id="blog-search" type="text" name="search_item" value="{{ request.GET.search_item }}" accesskey="s" />
-            </div>
+            <label class="mr-2">Search</label>
+            <input class="mr-2 form-control" id="blog-search" type="text" name="search_item" value="{{ request.GET.search_item }}" accesskey="s" />
 
-            <label>Tag Filter</label>
-            <div class="form-group">
-                <input class="form-control" id="tag-filter" type="text" value="{{ request.GET.tagsearch }}" autocomplete="off" />
-            </div>
+            <label class="mr-2">Tag Filter</label>
+            <input class="form-control" id="tag-filter" type="text" value="{{ request.GET.tagsearch }}" autocomplete="off" />
 
-&nbsp; &nbsp; <a class="btn" href="{% url 'blob_add' %}?is_blog=true">Add post</a>
+            <a class="btn btn-primary ml-2" href="{% url 'blob_add' %}?is_blog=true">Add post</a>
 
         </form>
 

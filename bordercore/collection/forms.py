@@ -1,4 +1,4 @@
-from django.forms import ModelForm, TextInput
+from django.forms import ModelForm, Textarea, TextInput
 
 from collection.models import Collection
 from lib.fields import ModelCommaSeparatedChoiceField
@@ -23,5 +23,14 @@ class CollectionForm(ModelForm):
         model = Collection
         fields = ('name', 'description')
         widgets = {
+            'description': Textarea(attrs={'class': 'form-control'}),
             'name': TextInput(attrs={'class': 'form-control'})
         }
+
+
+
+
+
+
+
+

@@ -46,6 +46,7 @@ class DocumentCreateView(CreateView):
             context['linked_collection_blob_list'] = [Document.objects.get(pk=x['id']) for x in Collection.objects.get(id=collection_id).blob_list]
             # Grab the initial metadata from one of the other blobs in the collection
             context['metadata'] = context['linked_collection_blob_list'][0].metadata_set.all()
+        context['section'] = SECTION
         return context
 
     def get_form(self, form_class=None):
@@ -159,6 +160,7 @@ class BlobDetailView(DetailView):
                                     'is_private': collection.is_private,
                                     'blob_list': blob_list})
         context['collection_info'] = collection_info
+        context['section'] = SECTION
         return context
 
 
@@ -234,6 +236,7 @@ class BlobThumbnailView(UpdateView):
         context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
         if context['solr_info'].get('content_type', ''):
             context['content_type'] = self.object.get_content_type(context['solr_info']['content_type'][0]).lower()
+        context['section'] = SECTION
 
         return context
 

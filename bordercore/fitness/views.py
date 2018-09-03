@@ -7,6 +7,8 @@ import json
 
 from fitness.models import Data, Exercise, ExerciseUser
 
+SECTION = 'Fitness'
+
 
 class ExerciseDetailView(DetailView):
 
@@ -24,6 +26,7 @@ class ExerciseDetailView(DetailView):
         except IndexError:
             pass
         context['activity_info'] = ExerciseUser.objects.filter(user=self.request.user, exercise__id=self.object.id)
+        context['section'] = SECTION
         self.set_plot_data(context, workout_data)
         return context
 
@@ -90,7 +93,8 @@ def fitness_summary(request):
             add_exercise_info(inactive_exercises, e)
 
     return render(request, 'fitness/summary.html', {'active_exercises': active_exercises,
-                                                    'inactive_exercises': inactive_exercises})
+                                                    'inactive_exercises': inactive_exercises,
+                                                    'section': SECTION})
 
 
 def change_active_status(request):

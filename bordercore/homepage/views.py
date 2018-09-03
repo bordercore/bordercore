@@ -84,7 +84,8 @@ def homepage(request):
                    'random_image_info': random_image_info,
                    'bookmarks': bookmarks,
                    'default_collection': default_collection,
-                   'overdue_exercises': sorted(overdue_exercises, key=lambda x: x['lag'], reverse=True)})
+                   'overdue_exercises': sorted(overdue_exercises, key=lambda x: x['lag'], reverse=True),
+                   'left_block_nohighlight': True})
 
 
 @login_required

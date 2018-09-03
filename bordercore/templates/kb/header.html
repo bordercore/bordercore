@@ -84,80 +84,63 @@
 
 </script>
 
-<form id="search" class="form-inline" action="{% url 'search' %}" method="get" autocomplete="off">
+<form id="search" action="{% url 'search' %}" method="get" autocomplete="off">
+    <input type="hidden" id="facets" name="facets" value="" />
 
-<div class="row">
+    <div class="form-row align-items-center">
 
-    <div class="col-lg-10">
+        <div class="col-auto">
+            <input id="kbsearch" class="form-control" type="text" name="search" value="{{ request.GET.search }}" placeholder="Search" />
+        </div>
 
-            <input type="hidden" id="facets" name="facets" value="" />
+        <div class="col-auto">
+            <label class="bold">Limit</label>
+        </div>
+        <div class="col-auto">
+            <select name="rows" class="form-control">
+                <option>100</option>
+                <option>200</option>
+                <option>1000</option>
+                <option>No limit</option>
+            </select>
+        </div>
 
-            <div class="form-group">
+        <div class="col-auto">
+            <label class="bold">Sort by</label>
+        </div>
 
-                <input id="kbsearch" class="form-control" type="text" name="search" value="{{ request.GET.search }}" placeholder="Search" />
-                &nbsp;
-
-            </div>
-
-            <div class="form-group">
-
-                <label>Limit</label>
-
-                <select name="rows" class="form-control">
-                    <option>100</option>
-                    <option>200</option>
-                    <option>1000</option>
-                    <option>No limit</option>
-                </select>
-
-                &nbsp;
-
-            </div>
-
-            <div class="form-group">
-
-                <label>Sort by</label>
-
-                <select id="search-sort-by" name="sort" class="form-control">
-                    <option value="score">Rank</option>
-                    <option value="date_unixtime">Date</option>
-                </select>
-
-                &nbsp;
-
-            </div>
-
-            <input class="btn btn-default btn btn-primary" type="submit" name="Go" value="Search" />
+        <div class="col-auto">
+            <select id="search-sort-by" name="sort" class="form-control">
+                <option value="score">Rank</option>
+                <option value="date_unixtime">Date</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <input class="btn btn-primary ml-3" type="submit" name="Go" value="Search" />
+        </div>
 
     </div>
 
-</div>
+    <div class="form-row align-items-center mt-2">
 
-<div class="row voffset">
+        <div class="col-auto">
 
-    <div class="col-lg-10">
-
-        <div class="form-group">
-
-            <label>Exact Match</label>
+            <label class="bold">Exact Match</label>
             <input type="checkbox" name="exact_match"{% if request.GET.exact_match %} checked="checked"{% endif %} />
-            &nbsp;
 
         </div>
 
-        <div class="form-group">
+        <div class="col-auto">
+            <label class="bold">Boolean Search Type</label>
+        </div>
 
-            <label>Boolean Search Type</label>
-
+        <div class="col-auto">
             <select name="boolean_search_type" class="form-control">
                 <option selected="selected">AND</option>
                 <option>OR</option>
             </select>
-
         </div>
 
     </div>
-
-</div>
 
 </form>

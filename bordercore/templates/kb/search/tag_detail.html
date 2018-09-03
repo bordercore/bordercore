@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% load get_doctype %}
+{% load dict_get %}
 
 {% block title %} KB :: Tag Detail {% endblock %}
 
@@ -8,9 +9,7 @@
 
 {% include "kb/header.html" %}
 
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput-custom.css" />
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-tagsinput.css" />
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/typeahead-bootstrap3.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
 
     <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
@@ -28,14 +27,17 @@
             // Add the initial list of tags in the search box
             {% for tag in tag_list %}
             $('#id_tags').tagsinput('add',{'value':'{{ tag.name }}', 'text':'{{ tag.name }}', 'is_meta': '{{ tag.is_meta }}'});
+            {% if forloop.last %}
+            $('.bootstrap-tagsinput input').attr('placeholder', '')
+            {% endif %}
             {% endfor %}
 
             $('#id_tags').on('beforeItemAdd', function(event) {
                 var tags = get_tag_list_string();
                 if (tags) {
-                    tags = tags + ',' + event.item;
+                    tags = tags + ',' + event.item.value;
                 } else {
-                    tags = event.item;
+                    tags = event.item.value;
                 }
                 event.cancel = true;
                 window.location='{% url 'kb_search_tag_detail' 666 %}'.replace('666', tags);
@@ -74,7 +76,7 @@
             }
 
             // Try to select the tab based on what's stored in the user's session
-            {% if kb_tag_detail_current_tab %}
+            {% if kb_tag_detail_current_tab and doctypes|dict_get:kb_tag_detail_current_tab %}
             $('#myTab a#tab_{{ kb_tag_detail_current_tab }}').tab('show');
             {% else %}
             $('#myTab a:first').tab('show');
@@ -88,15 +90,15 @@
 
     <br />
 
-    <div class="row" id="search_tags_searchform">
+    <div class="row">
         <div class="col-lg-10">
 
             <form id="tag-filter-form" class="form-inline" action="{% url 'kb_search_tag_detail' tag %}" method="get" autocomplete="off">
-                <div class="form-group _col-lg-10">
+                <div class="form-group">
                     <input id="id_tags" class="form-control" type="text" name="taglist" placeholder="Tag List" />
                 </div>
                 {% if tag_counts %}
-                <div class="form-group">
+                <div class="form-group ml-2">
                     <select id="other_tags" class="form-control">
                         <option value="-1">Other tags</option>
                         {% for tag, count in tag_counts %}
@@ -108,39 +110,39 @@
                 <div class="form-group">
                 {% for tag in meta_tags %}
                     {% if forloop.first %}
-                        &nbsp; <label>Meta Tags: </label>
+                        <label class="ml-3">Meta Tags: </label>
                     {% endif %}
-                    <span class="label label-success"><a class="meta_tag tag" href="">{{ tag }}</a></span>
+                    <span class="badge badge-success ml-2"><a class="meta_tag tag" href="">{{ tag }}</a></span>
                 {% endfor %}
                 </div>
             </form>
         </div>
     </div>
 
+    <br />
+
     <ul class="nav nav-tabs" id="myTab">
         {% for doctype in doctype_counts %}
-            <li><a id="tab_{{ doctype.0 }}" href="#{{ doctype.0 }}">{{ doctype_mapping|get_doctype:doctype.0 }} <span class="badge alert-info">{{ doctype.1 }}</span></a></li>
+            <li class="nav-item"><a class="nav-link" id="tab_{{ doctype.0 }}" href="#{{ doctype.0 }}">{{ doctype_mapping|get_doctype:doctype.0 }} <span class="badge alert-info">{{ doctype.1 }}</span></a></li>
         {% endfor %}
     </ul>
 
     <div class="tab-content" id="tag-detail-tab-content">
 
-        <br />
-
-        <div id="blob" class="tab-pane fade in active">
+        <div id="blob" class="tab-pane fade">
             {% for match in info.matches.blob %}
                 <div class="row voffset">
                     <div class="col-lg-12">
                         {% if match.is_image %}
                         <img width="32" height="32" src="{{ STATIC_URL }}blobs{{ match.url }}" />
                         {% endif %}
-                        <a href="{% url 'blob_detail' match.uuid %}">{{ match.title|default:"No Title" }}</a> ({{ match.content_type }})
+                        <a href="{% url 'blob_detail' match.uuid %}">{{ match.title|default:"No Title" }}</a>{% if match.content_type %} ({{ match.content_type }}){% endif %}
                     </div>
                 </div>
             {% endfor %}
         </div>
 
-        <div id="book" class="tab-pane fade in active">
+        <div id="book" class="tab-pane fade">
             <table class="table-borderless">
                 <tr>
 
@@ -157,7 +159,7 @@
             </table>
         </div>
 
-        <div id="bordercore_bookmark" class="tab-pane fade in active">
+        <div id="bordercore_bookmark" class="tab-pane fade">
             {% for match in info.matches.bordercore_bookmark %}
                 <div class="row voffset">
                     <div class="col-lg-12">
@@ -167,7 +169,7 @@
             {% endfor %}
         </div>
 
-        <div id="document" class="tab-pane fade in active">
+        <div id="document" class="tab-pane fade">
             {% for match in info.matches.document %}
                 <div class="row voffset">
                     <div class="col-lg-12">
@@ -177,7 +179,7 @@
             {% endfor %}
         </div>
 
-        <div id="bordercore_blog" class="tab-pane fade in active">
+        <div id="bordercore_blog" class="tab-pane fade">
             {% for match in info.matches.bordercore_blog %}
                 <div class="row voffset">
                     <div class="col-lg-12">
@@ -187,7 +189,7 @@
             {% endfor %}
         </div>
 
-        <div id="bordercore_todo" class="tab-pane fade in active">
+        <div id="bordercore_todo" class="tab-pane fade">
             {% for match in info.matches.bordercore_todo %}
                 <div class="row voffset">
                     <div class="col-lg-12">
@@ -198,7 +200,5 @@
         </div>
 
      </div>
-<br />
-<a href="{{ request.META.HTTP_REFERER }}">Back</a>
 
 {% endblock %}

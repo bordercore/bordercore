@@ -12,17 +12,15 @@
 
     {% if object_list %}
 
-        <div class="pager">
-            <ul>
-                {% if object_list.has_previous %}
-                    <li><a href="?page={{ object_list.previous_page_number }}&tagsearch={{ request.GET.tagsearch }}&search_item={{ request.GET.search_item }}">previous</a></li>
-                {% endif %}
-                <li>Page <strong>{{ object_list.number }}</strong> of <strong>{{ object_list.paginator.num_pages }}</strong></li>
-                {% if object_list.has_next %}
-                    <li>            <a href="?page={{ object_list.next_page_number }}&tagsearch={{ request.GET.tagsearch }}&search_item={{ request.GET.search_item }}">next</a></li>
-                {% endif %}
-            </ul>
-        </div>
+        <nav class="mb-5">
+            {% if object_list.has_previous %}
+                <a class="btn btn-primary" href="?page={{ object_list.previous_page_number }}&tagsearch={{ request.GET.tagsearch }}&search_item={{ request.GET.search_item }}">previous</a>
+            {% endif %}
+            Page <strong>{{ object_list.number }}</strong> of <strong>{{ object_list.paginator.num_pages }}</strong>
+            {% if object_list.has_next %}
+                <a class="btn btn-primary" href="?page={{ object_list.next_page_number }}&tagsearch={{ request.GET.tagsearch }}&search_item={{ request.GET.search_item }}">next</a>
+            {% endif %}
+        </nav>
 
     {% endif %}
 

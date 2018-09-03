@@ -3,8 +3,10 @@
 {% block extra_head %}
 
     <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap4.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/dataTables.bootstrap4.min.css" />
 
 {% endblock %}
 
@@ -66,7 +68,7 @@
             "dom": "<'row'<'span6'<'toolbar'>l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
             "searchable": false,
             "columnDefs": [
-                { "targets": [0], "class": "col-lg-2", "sorting": [ "desc", "asc" ] },
+                { "targets": [0], "sorting": [ "desc", "asc" ] },
                 { "targets": [1], "render": formatArtist, "useRendered": false },
                 { "targets": [3], "visible": false },
             ],
@@ -81,8 +83,8 @@
 <div class="row">
 
     <div class="col-lg-5">
-        <div class="panel panel-primary">
-            <div class="panel-heading">Recently Played Songs</div>
+        <div class="card bg-info">
+            <div class="card-header text-white">Recently Played Songs</div>
             <ul class="list-group">
 
 {% for song in recent_songs %}
@@ -114,11 +116,6 @@
 
 <br />
 
-<div class="row">
-
 {% include "common/datatable.html" with id="song_list" %}
 
-</div>
-
 {% endblock %}
-

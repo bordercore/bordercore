@@ -102,7 +102,8 @@ class CollectionDetailView(DetailView):
                     object['title'] = solr_result_set.get_title()
 
             context['blob_list'] = blob_list_temp
-        return context
+            context['section'] = SECTION
+            return context
 
 
 class CollectionCreateView(CreateView):

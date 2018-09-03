@@ -9,8 +9,10 @@
 {% block content %}
 
     <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap4.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/dataTables.bootstrap4.min.css" />
 
     <script type="text/javascript" charset="utf-8">
 
@@ -82,11 +84,11 @@
                 "sorting": [[1, 'desc']],
                 "filter": true,
                 "lengthChange": false,
-                "dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'pull-right col-lg-4'p>>",
+                "dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'float-right col-lg-4'p>>",
                 "searchable": false,
                 "columnDefs": [
                     { "targets": [0], "sorting": [ "desc", "asc" ] },
-                    { "targets": [1], "class": "col-lg-3 monospaced", "dataSort": 2, "sorting": [ "desc", "asc" ] },
+                    { "targets": [1], "class": "monospaced", "dataSort": 2, "sorting": [ "desc", "asc" ] },
                     { "targets": [2,3], "visible": false },
                 ],
             } );
@@ -100,9 +102,9 @@
             <form class="form-inline" role="form">
 
                 <div class="btn-group">
-                    <a class="btn btn-default" id="btn-add" href="{% url 'todo_add' %}">Add</a>
-                    <button class="btn btn-default" id="btn-edit" disabled>Edit</button>
-                    <button class="btn btn-default" id="btn-delete" disabled>Delete</button>
+                    <a class="btn btn-secondary" id="btn-add" href="{% url 'todo_add' %}">Add</a>
+                    <button class="btn btn-secondary" id="btn-edit" disabled>Edit</button>
+                    <button class="btn btn-secondary" id="btn-delete" disabled>Delete</button>
                 </div>
 
                 <div class="form-group">
@@ -117,9 +119,9 @@
 
         </div>
 
-        <div class="col-lg-offset-1 col-lg-2">
+        <div class="offset-lg-1 col-lg-2">
 
-            <select id="tags" class="form-control pull-right">
+            <select id="tags" class="form-control float-right">
                 <option>Tag filter</option>
                 {% for tag in tags %}
                     <option value="{{ tag.name }}"{% ifequal tagsearch tag.name %} selected="selected"{% endifequal %}>{{ tag.name }}</option>
