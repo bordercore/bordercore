@@ -28,10 +28,10 @@
         <br /><br />
     {% endif %}
 
-    {% if metadata.Url %}
+    {% if urls %}
 
-        {% for url in metadata.Url %}
-            <strong><a href="{{ url }}">Reference Link</a></strong>
+        {% for url in urls %}
+            <strong><a href="{{ url.url }}">{{ url.domain }}</a></strong>
             <br />
         {% endfor %}
 

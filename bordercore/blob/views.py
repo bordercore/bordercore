@@ -1,7 +1,7 @@
 import datetime
-import json
 import os
 import re
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.contrib import messages
@@ -117,12 +117,11 @@ class BlobDetailView(DetailView):
         context = super(BlobDetailView, self).get_context_data(**kwargs)
         context['id'] = self.object.id
         context['metadata'] = {}
+        context['urls'] = []
         for x in self.object.metadata_set.all():
             if x.name == 'Url':
-                try:
-                    context['metadata'][x.name].append(x.value)
-                except KeyError:
-                    context['metadata'][x.name] = [x.value]
+                parsed_uri = urlparse(x.value)
+                context['urls'].append({'url': x.value, 'domain': parsed_uri.netloc})
             else:
                 if context['metadata'].get(x.name, ''):
                     context['metadata'][x.name] = ', '.join([context['metadata'][x.name], x.value])
