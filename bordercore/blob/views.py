@@ -152,14 +152,20 @@ class BlobDetailView(DetailView):
         context['current_collections'] = Collection.objects.filter(blob_list__contains=[{'id': self.object.id}])
 
         collection_info = []
+        linked_blobs = []
 
         for collection in Collection.objects.filter(blob_list__contains=[{'id': self.object.id}]):
             blob_list = Document.objects.filter(pk__in=[x['id'] for x in collection.blob_list if x['id'] != self.object.id])
-            collection_info.append({'id': collection.id,
-                                    'name': collection.name,
-                                    'is_private': collection.is_private,
-                                    'blob_list': blob_list})
+            if collection.is_private:
+                linked_blobs.append({'id': collection.id,
+                                     'name': collection.name,
+                                     'is_private': collection.is_private,
+                                     'blob_list': blob_list})
+            else:
+                collection_info.append({'id': collection.id,
+                                        'name': collection.name})
         context['collection_info'] = collection_info
+        context['linked_blobs'] = linked_blobs
         context['section'] = SECTION
         return context
 

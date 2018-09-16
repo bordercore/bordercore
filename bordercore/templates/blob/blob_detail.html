@@ -68,31 +68,36 @@
         <div id="blob_note">{{ solr_info.note }}</div>
     {% endif %}
 
+    {% if linked_blobs %}
+        <div class="row top-buffer">
+            <div class="col-lg-12">
+                {% for collection in linked_blobs %}
+                    <div id="blob_collection_list">
+Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}"></a>
+                    </div>
+                    <ul class="list-group">
+                        {% for blob in collection.blob_list %}
+                            <li class="list-group-item">
+                                {% if blob.has_thumbnail_url %}
+                                    <img src="{{ STATIC_URL }}{{ blob.get_cover_url_small }}" />
+                                {% endif %}
+                                <a href="{% url 'blob_detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
+                            </li>
+                        {% endfor %}
+                        <li class="list-group-item">
+                            <a class="btn btn-secondary" href="{% url 'blob_add' %}?linked_collection={{ collection.id }}">Add Blob</a>
+                        </li>
+                        <br />
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
     {% if collection_info %}
         <div class="row top-buffer">
             <div class="col-lg-12">
+                In collections:
                 {% for collection in collection_info %}
-                    {% if collection.is_private is True %}
-                        <div id="blob_collection_list">
-Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}"></a>
-                        </div>
-                        <ul class="list-group">
-                            {% for blob in collection.blob_list %}
-                                <li class="list-group-item">
-                                    {% if blob.has_thumbnail_url %}
-                                        <img src="{{ STATIC_URL }}{{ blob.get_cover_url_small }}" />
-                                    {% endif %}
-                                    <a href="{% url 'blob_detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
-                                </li>
-                            {% endfor %}
-                            <li class="list-group-item">
-                                <a class="btn btn-secondary" href="{% url 'blob_add' %}?linked_collection={{ collection.id }}">Add Blob</a>
-                            </li>
-                    {% else %}
-                        In collection:
-                        <a href="{% url 'collection_detail' collection.id %}">{{ collection.name }}</a>
-                    {% endif %}
-                    <br />
+                    <a href="{% url 'collection_detail' collection.id %}">{{ collection.name }}{% if not forloop.last %}, {% endif %}</a>
                 {% endfor %}
             </div>
         </div>
