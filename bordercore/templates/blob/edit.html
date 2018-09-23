@@ -129,6 +129,7 @@
                 <option>Indent Code</option>
                 <option>Insert list</option>
                 <option>Escape HTML</option>
+                <option>Table</option>
             </select>
         </div>
     </div>
@@ -220,6 +221,8 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                 } else if (value == 'Escape HTML') {
                     var escapedText = range.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                     $('textarea').val( text.substr(0, range.start) + escapedText +  text.substr(range.end, text.length - range.end));
+                } else if (value == 'Table') {
+                    $('#id_content').val( text.substr(0, range.start) + '\nFirst Header  | Second Header\n------------- | -------------\nContent Cell  | Content Cell\nContent Cell  | Content Cell\n' + text.substr(range.end, text.length - range.end));
                 }
                 // Reset the dropdown
                 $('#markdown-support')[0].selectedIndex = 0

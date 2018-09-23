@@ -89,7 +89,7 @@ class Document(TimeStampedModel, AmazonMixin):
     documents = models.ManyToManyField("self")
 
     def get_content(self):
-        return markdown.markdown(self.content, extensions=['codehilite(guess_lang=False)'])
+        return markdown.markdown(self.content, extensions=['codehilite(guess_lang=False)', 'tables'])
 
     @staticmethod
     def get_content_type(argument):
