@@ -10,101 +10,90 @@
 
 <script type="text/javascript">
 
-$(document).ready(function() {
+    $(document).ready(function() {
 
-	var feed_json_text = {{ json|safe }};
+        var feed_json_text = {{ json|safe }};
 
-	$("a[id^='link_']").click( function(e) {
-		var myMatches = this.getAttribute('id').match(/link_(.*)$/);
-		var feed_id = myMatches[1];
-	})
+        $("a[id^='link_']").click( function(e) {
+            var myMatches = this.getAttribute('id').match(/link_(.*)$/);
+            var feed_id = myMatches[1];
+        })
 
-    $('#sort-container').sortable( {
-		connectWith: '.feed-list',
-		stop: function(event, ui) {
+        $('#sort-container').sortable( {
+            connectWith: '.feed-list',
+            stop: function(event, ui) {
 
-			console.log(ui.item.find('a').attr('id').split('_')[1]);
-			console.log(ui.item.index() + 1);
+                // If the destination is the 'all feeds' list on the right and the feed is from the
+                //  'current feeds' list on the left, then we're deleting the feed
+                if ( ui.item.parent().attr('id') === 'sort-container-all' ) {
+                    url = '{% url 'feed_unsubscribe' %}'
+                } else {
+                    url = '{% url 'sort_feed' %}'
+                }
 
-			// If the destination is the 'all feeds' list on the right and the feed is from the
-			//  'current feeds' list on the left, then we're deleting the feed
-			if ( ui.item.parent().attr('id') === 'sort-container-all' ) {
-				url = '{% url 'feed_unsubscribe' %}'
-			} else {
-				url = '{% url 'sort_feed' %}'
-			}
+                var request = $.ajax({
+                    url: url,
+                    type: "POST",
+                    data: { feed_id : ui.item.find('a').attr('id').split('_')[1], position:  (ui.item.index() + 1) },
+                    dataType: "text"
+                });
 
-			var request = $.ajax({
-				url: url,
-				type: "POST",
-				data: { feed_id : ui.item.find('a').attr('id').split('_')[1], position:  (ui.item.index() + 1) },
-				dataType: "text"
-			});
+            }
+        } );
 
-			// request.done(function(msg) {
-			// 	console.log("ALL GOOD")
-			// });
+        $('#sort-container-all').sortable( {
 
-			// request.fail(function(jqXHR, textStatus) {
-			// 	alert( "Request failed: " + textStatus );
-			// });
+            connectWith: '.feed-list',
+            stop: function(event, ui) {
 
-		}
-    } );
+                // If the destination is the 'all feeds' list on the right and the feed is also from the
+                //  right, then the user is trying to sort this list, which isn't allowed.  Bail.
+                if ( ui.item.parent().attr('id') === 'sort-container-all' ) {
+                    return;
+                }
 
-    $('#sort-container-all').sortable( {
+                var request = $.ajax({
+                    url: '{% url 'feed_subscribe' %}',
+                    type: "POST",
+                    data: { feed_id : ui.item.find('a').attr('id').split('_')[1], position:  (ui.item.index() + 1) },
+                    dataType: "text"
+                });
 
-		connectWith: '.feed-list',
-		stop: function(event, ui) {
+            }
 
-			// If the destination is the 'all feeds' list on the right and the feed is also from the
-			//  right, then the user is trying to sort this list, which isn't allowed.  Bail.
-			if ( ui.item.parent().attr('id') === 'sort-container-all' ) {
-				return;
-			}
-
-			console.log(ui.item.find('a').attr('id').split('_')[1]);
-			console.log(ui.item.index() + 1);
-
-			var request = $.ajax({
-				url: '{% url 'feed_subscribe' %}',
-				type: "POST",
-				data: { feed_id : ui.item.find('a').attr('id').split('_')[1], position:  (ui.item.index() + 1) },
-				dataType: "text"
-			});
-
-			// TODO: Add error handling
-
-		}
-
-    } );
-
+        } );
 
 });
 
 </script>
 
-    <div class="row">
+<div class="row">
 
     <div class="col-lg-4">
-    <h3>Subscribed Feeds</h3>
-    <hr />
-    <ul id="sort-container" class="feed-list">
-    {% for feed in feed_info %}
-    <li><a href="{% url 'feed_edit' feed.id %}" id="link_{{ feed.id }}">{{ feed.name }}</a></li>
-    {% endfor %}
-</ul>
+        <h3>Subscribed Feeds</h3>
+        <hr />
+        <ul id="sort-container" class="feed-list">
+            {% for feed in feed_info %}
+                <li>
+                    <a href="{% url 'feed_edit' feed.id %}" id="link_{{ feed.id }}">{{ feed.name }}</a>
+                    {% if feed.feed.last_response_code != 200 %}<span class="list_annotation">{{ feed.feed.last_response_code }}</span>{% endif %}
+                </li>
+            {% endfor %}
+        </ul>
 
-</div>
+    </div>
 
     <div class="col-lg-6">
-    <h3 id="feed-title">Available Feeds</h3>
-    <hr />
-    <ul id="sort-container-all" class="feed-list">
-    {% for feed in feeds_not_subscribed %}
-    <li><a href="{% url 'feed_edit' feed.id %}" id="link_{{ feed.id }}">{{ feed.name }}</a></li>
-    {% endfor %}
-</ul>
+        <h3 id="feed-title">Available Feeds</h3>
+        <hr />
+        <ul id="sort-container-all" class="feed-list">
+            {% for feed in feeds_not_subscribed %}
+                <li>
+                    <a href="{% url 'feed_edit' feed.id %}" id="link_{{ feed.id }}">{{ feed.name }}</a>
+                    {% if feed.feed.last_response_code != 200 %}<span class="feed_not_200 small">{{ feed.feed.last_response_code }}</span>{% endif %}
+                </li>
+            {% endfor %}
+        </ul>
     </div>
 
 </div>

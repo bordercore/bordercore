@@ -13,6 +13,7 @@ from lib.mixins import TimeStampedModel
 
 USER_AGENT = "Bordercore/1.0"
 
+
 class Feed(TimeStampedModel):
     name = models.TextField()
     url = models.URLField(unique=True)

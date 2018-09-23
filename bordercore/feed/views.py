@@ -44,12 +44,12 @@ class FeedListView(ListView):
         #  So we store the feed name temporarily in a lookup table...
         lookup = {}
         for feed in Feed.objects.filter(id__in=self.request.user.userprofile.rss_feeds):
-            lookup[feed.id] = feed.name
+            lookup[feed.id] = feed
 
         # ...then use that here, where the proper order is preserved
         feed_info = []
         for feed_id in self.request.user.userprofile.rss_feeds:
-            feed_info.append({'id': feed_id, 'name': lookup[feed_id]})
+            feed_info.append({'id': feed_id, 'feed': lookup[feed_id], 'name': lookup[feed_id].name})
 
         return feed_info
 

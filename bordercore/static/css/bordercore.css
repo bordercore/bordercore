@@ -14,6 +14,12 @@
    display: none;
 }
 
+
+.list_annotation {
+  color: #C76257;
+  font-size: 80%;
+}
+
 /* Don't display the '*' for required fields */
 .asteriskField {
     display: none;
