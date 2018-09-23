@@ -91,11 +91,13 @@ class Document(TimeStampedModel, AmazonMixin):
     def get_content(self):
         return markdown.markdown(self.content, extensions=['codehilite(guess_lang=False)'])
 
-    def get_content_type(self, argument):
+    @staticmethod
+    def get_content_type(argument):
         switcher = {
             "application/mp4": "Video",
             "application/pdf": "PDF",
             "audio/mpeg": "Audio",
+            "image/gif": "Image",
             "image/jpeg": "Image",
             "image/png": "Image",
             "application/x-mobipocket-ebook": "E-Book",

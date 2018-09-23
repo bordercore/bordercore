@@ -138,7 +138,7 @@ class BlobDetailView(DetailView):
             query = 'uuid:%s' % self.object.uuid
             context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
             if context['solr_info'].get('content_type', ''):
-                context['content_type'] = self.object.get_content_type(context['solr_info']['content_type'][0])
+                context['content_type'] = Document.get_content_type(context['solr_info']['content_type'][0])
         except IndexError:
             # Give Solr up to a minute to index the blob
             if int(datetime.datetime.now().strftime("%s")) - int(self.object.created.strftime("%s")) < 60:
@@ -240,7 +240,7 @@ class BlobThumbnailView(UpdateView):
         query = 'uuid:{}'.format(self.object.uuid)
         context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
         if context['solr_info'].get('content_type', ''):
-            context['content_type'] = self.object.get_content_type(context['solr_info']['content_type'][0]).lower()
+            context['content_type'] = Document.get_content_type(context['solr_info']['content_type'][0]).lower()
         context['section'] = SECTION
 
         return context

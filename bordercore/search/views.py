@@ -12,12 +12,10 @@ from django.shortcuts import render
 from django.templatetags.static import static
 from django.views.generic.list import ListView
 
-from blob.models import MetaData
+from blob.models import Document
 from search.solr import SolrResultSet
 from solrpy.core import SolrConnection, SolrException
 from tag.models import Tag
-
-IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
 
 SECTION = 'KB'
 
@@ -184,9 +182,7 @@ class SearchTagDetailView(ListView):
                 if not os.path.isfile("%s/%s/%s/cover-small.jpg" % (settings.MEDIA_ROOT, one_doc['sha1sum'][0:2], one_doc['sha1sum'])):
                     one_doc['cover_url'] = static("images/book.png")
                 if one_doc['content_type']:
-                    one_doc['content_type'] = one_doc['content_type'][0]
-                    if one_doc['content_type'] in IMAGE_TYPE_LIST:
-                        one_doc['is_image'] = True
+                    one_doc['content_type'] = Document.get_content_type(one_doc['content_type'][0])
             one_doc['title'] = solr_result_set.get_title()
             if results.get(one_doc['doctype'], ''):
                 results[one_doc['doctype']].append(one_doc)
