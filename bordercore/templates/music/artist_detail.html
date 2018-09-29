@@ -9,10 +9,16 @@
 
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/dataTables.bootstrap4.min.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jplayer.clean.player.light.css" />
 
 {% endblock %}
 
 {% block title %} Music {% endblock %}
+
+{% block left-block %}
+    {% include "common/jplayer.html" %}
+{% endblock %}
+
 
 {% block content %}
 
@@ -21,7 +27,7 @@
         $(document).ready(function() {
 
             table = $('#song_list').dataTable( {
-                "paginate": true,
+                "paginate": false,
                 "info": false,
                 "sorting": [[0, 'desc']],
                 "filter": false,
@@ -45,7 +51,7 @@
                 toggleDuration: true,
                 volume: 1.0,
                 size: {
-                    "width": "600px"
+                    "width": "400px"
                 },
                 name: $('#song_list').DataTable().cell(0, 2).data(),
                 "media": {
@@ -190,8 +196,6 @@
             </div>
 
         </div>
-
-        {% include "common/jplayer.html" %}
 
     {% endif %}
 
