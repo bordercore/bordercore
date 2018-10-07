@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %} Deck Detail :: {{ deck.title }}{% endblock %}
+
+{% block left-block %}
+
+    <h2>{{ deck.description }}</h2>
+
+    <br />
+
+State: <strong>{{ state_name  }}</strong>
+    <br />
+{% if state_name == 'Learning' %}
+        Learning step: <strong>{{ question.learning_step }}</strong> out of {{ learning_step_count  }}
+        <br />
+{% endif %}
+{% if state_name == 'To Review' %}
+Last Reviewed: <strong>{{ question.last_reviewed }}</strong>
+    <br />
+{% endif %}
+Interval: <strong>{{ question.interval|floatformat:1 }}</strong>
+    <br />
+Easiness Factor: <strong>{{ question.efactor|floatformat:1 }}</strong>
+
+    <form action="{% url 'question_edit' question.id %}" class="mt-5">
+        <input type="submit" class="btn btn-primary" value="Edit">
+    </form>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+
+        <div class="col-lg-12">
+
+            {% block breadcrumbs %}
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"> <a href="{% url 'deck_list' %}">Deck List</a> </li>
+                    <li class="breadcrumb-item active">{{ deck.title }}</li>
+                </ul>
+            {% endblock %}
+
+        </div>
+
+    </div>
+
+    {% if message %}
+        <div class="alert alert-info">{{ message }}</div>
+    {% endif %}
+
+    <h1>
+        {{ question.get_question|safe }}
+    </h1>
+
+    <a href="{% url 'answer' question.id %}" class="btn btn-primary btn-lg" role="button">Show Answer</a>
+
+{% endblock %}

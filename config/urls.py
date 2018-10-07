@@ -17,6 +17,9 @@ from bookmark.views import OrderListJson
 from collection import views as collection_views
 from collection.views import (CollectionCreateView, CollectionDetailView,
                               CollectionListView, CollectionUpdateView)
+from drill import views as drill_views
+from drill.views import (DeckCreateView, DeckDetailView, DeckListView, DeckUpdateView,
+                         QuestionCreateView, QuestionDeleteView, QuestionUpdateView)
 from feed import views as feed_views
 from feed.views import FeedListView, FeedSubscriptionListView
 from fitness import views as fitness_views
@@ -85,6 +88,18 @@ urlpatterns = [
     path('collection/get_info', collection_views.get_info, name='collection_get_info'),
     path('collection/sort', collection_views.sort_collection, name='sort_collection'),
     path('collection/', CollectionListView.as_view(), name='collection_list'),
+
+    path('drill/', DeckListView.as_view(), name='deck_list'),
+    path('drill/deck/<int:deck_id>/', DeckDetailView.as_view(), name='deck_detail'),
+    path('drill/deck/add', DeckCreateView.as_view(), name='deck_add'),
+    path('drill/question/delete/<int:pk>', QuestionDeleteView.as_view(), name='question_delete'),
+    path('drill/edit/<int:pk>', DeckUpdateView.as_view(), name='deck_edit'),
+    path('drill/deck/get_info', drill_views.get_info, name='deck_get_info'),
+    path('drill/question/<int:deck_id>/', drill_views.ask_question, name='question'),
+    path('drill/question/add/<int:deck_id>/', QuestionCreateView.as_view(), name='question_add'),
+    path('drill/question/edit/<int:pk>/', QuestionUpdateView.as_view(), name='question_edit'),
+    path('drill/answer/<int:question_id>/', drill_views.show_answer, name='answer'),
+    path('drill/result/<int:question_id>/<str:result>', drill_views.record_result, name='record_result'),
 
     path('feed/sort_feed/', feed_views.sort_feed, name='sort_feed'),
     path('feed/edit/<int:feed_id>', feed_views.feed_edit, name='feed_edit'),

@@ -130,6 +130,7 @@ INSTALLED_APPS = (
     'book',
     'collection',
     'contact',
+    'drill',
     'feed',
     'fitness',
     'lib',

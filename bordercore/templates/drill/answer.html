@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %} Deck Detail :: {{ deck.title }}{% endblock %}
+
+{% block left-block %}
+    <h2>{{ deck.description }}</h2>
+
+    State: <strong>{{ state_name  }}</strong>
+    <br />
+{% if state_name == 'Learning' %}
+        Learning step: <strong>{{ question.learning_step }}</strong> out of {{ learning_step_count  }}
+        <br />
+{% endif %}
+{% if state_name != 'New' %}
+Last Reviewed: <strong>{{ question.last_reviewed }}</strong>
+    <br />
+{% endif %}
+Interval: <strong>{{ question.interval|floatformat:1 }}</strong>
+    <br />
+Easiness Factor: <strong>{{ question.efactor|floatformat:1 }}</strong>
+
+{% if state_name == 'Learning' %}
+
+    <div class="mt-5">
+        <strong>Again</strong> Move the question to the first step
+    </div>
+
+    <div>
+        <strong>Good</strong> Move the question to the next step
+    </div>
+
+    <div>
+        <strong>Easy</strong> Graduate the question to state 'To Review'
+    </div>
+
+{% else %}
+
+    <div class="mt-5">
+        <strong>Again</strong> You failed to correctly answer the question, ie you've "lapsed". The question goes back into "learning" mode
+    </div>
+
+    <div>
+        <strong>Hard</strong> Show the card more frequently in the future
+    </div>
+
+    <div>
+        <strong>Good</strong> Should be the most common response
+    </div>
+
+    <div>
+        <strong>Easy</strong> Only use for the easiest of questions
+    </div>
+
+{% endif %}
+
+{% endblock %}
+
+{% block content %}
+
+        <div class="row">
+
+        <div class="col-lg-12">
+
+            {% block breadcrumbs %}
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"> <a href="{% url 'deck_list' %}">Deck List</a> </li>
+                    <li class="breadcrumb-item active">{{ deck.title }}</li>
+                </ul>
+            {% endblock %}
+
+        </div>
+
+    </div>
+
+    <h1>
+        {{ question.get_question|safe }}
+        <hr />
+        {{ question.get_answer|safe }}
+    </h1>
+
+    <a href="{% url 'record_result' question.id 'again' %}" class="btn btn-primary btn-lg" role="button">Again</a>
+    {% if state_name == 'To Review' %}
+        <a href="{% url 'record_result' question.id 'hard' %}" class="btn btn-primary btn-lg" role="button">Hard</a>
+    {% endif %}
+    <a href="{% url 'record_result' question.id 'good' %}" class="btn btn-primary btn-lg" role="button">Good</a>
+    <a href="{% url 'record_result' question.id 'easy' %}" class="btn btn-primary btn-lg" role="button">Easy</a>
+
+{% endblock %}
