@@ -61,9 +61,10 @@
 
     {% if object %}
 
-    <img id="amazon-cover-image" src="{{ STATIC_URL }}{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" />
-
-    <br /><br />
+        {% if cover_info %}
+            <img id="amazon-cover-image" src="{{ STATIC_URL }}{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" />
+            <br /><br />
+        {% endif %}
 
     <div id="update-cover-div">
         <input id="update-cover" class="btn btn-secondary" type="button" value="Update Image" />
