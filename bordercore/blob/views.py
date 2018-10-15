@@ -36,14 +36,14 @@ class DocumentCreateView(CreateView):
         context = super(DocumentCreateView, self).get_context_data(**kwargs)
         context['action'] = 'Add'
         if self.request.GET.get('linked_blob', ''):
-            linked_blob = Document.objects.get(id=self.request.GET['linked_blob'])
+            linked_blob = Document.objects.get(user=self.request.user, id=self.request.GET['linked_blob'])
             context['linked_blob'] = linked_blob
             # Grab the initial metadata from the linked blob
             context['metadata'] = linked_blob.metadata_set.all()
         if self.request.GET.get('linked_collection', ''):
             collection_id = self.request.GET['linked_collection']
-            context['linked_collection_info'] = Collection.objects.get(id=collection_id)
-            context['linked_collection_blob_list'] = [Document.objects.get(pk=x['id']) for x in Collection.objects.get(id=collection_id).blob_list]
+            context['linked_collection_info'] = Collection.objects.get(user=self.request.user, id=collection_id)
+            context['linked_collection_blob_list'] = [Document.objects.get(user=self.request.user, pk=x['id']) for x in Collection.objects.get(user=self.request.user, id=collection_id).blob_list]
             # Grab the initial metadata from one of the other blobs in the collection
             context['metadata'] = context['linked_collection_blob_list'][0].metadata_set.all()
         context['section'] = SECTION
@@ -55,14 +55,14 @@ class DocumentCreateView(CreateView):
         if self.request.GET.get('is_blog', False):
             form.initial['is_blog'] = True
         if self.request.GET.get('linked_blob', False):
-            blob = Document.objects.get(pk=int(self.request.GET.get('linked_blob')))
+            blob = Document.objects.get(user=self.request.user, pk=int(self.request.GET.get('linked_blob')))
             form.initial['tags'] = ','.join([x.name for x in blob.tags.all()])
             form.initial['date'] = blob.date
             form.initial['title'] = blob.title
         if self.request.GET.get('linked_collection', False):
             collection_id = self.request.GET['linked_collection']
-            blob_id = Collection.objects.get(id=collection_id).blob_list[0]['id']
-            blob = Document.objects.get(pk=blob_id)
+            blob_id = Collection.objects.get(user=self.request.user, id=collection_id).blob_list[0]['id']
+            blob = Document.objects.get(user=self.request.user, pk=blob_id)
             form.initial['tags'] = ','.join([x.name for x in blob.tags.all()])
             form.initial['date'] = blob.date
             form.initial['title'] = blob.title
@@ -118,7 +118,7 @@ class BlobDetailView(DetailView):
         context['id'] = self.object.id
         context['metadata'] = {}
         context['urls'] = []
-        for x in self.object.metadata_set.all():
+        for x in self.object.metadata_set.filter(user=self.request.user):
             if x.name == 'Url':
                 parsed_uri = urlparse(x.value)
                 context['urls'].append({'url': x.value, 'domain': parsed_uri.netloc})
@@ -132,8 +132,8 @@ class BlobDetailView(DetailView):
         context['date'] = get_date_from_pattern(self.object.date)
 
         if self.object.sha1sum:
-            context['cover_info'] = Document.get_cover_info(self.object.sha1sum)
-            context['cover_info_small'] = Document.get_cover_info(self.object.sha1sum, 'small')
+            context['cover_info'] = Document.get_cover_info(self.request.user, self.object.sha1sum)
+            context['cover_info_small'] = Document.get_cover_info(self.request.user, self.object.sha1sum, 'small')
         try:
             query = 'uuid:%s' % self.object.uuid
             context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
@@ -148,13 +148,13 @@ class BlobDetailView(DetailView):
         context['title'] = self.object.get_title(remove_edition_string=True)
         context['fields_ignore'] = ['is_book', 'Url', 'Publication Date', 'Title', 'Author']
 
-        context['current_collections'] = Collection.objects.filter(blob_list__contains=[{'id': self.object.id}])
+        context['current_collections'] = Collection.objects.filter(user=self.request.user, blob_list__contains=[{'id': self.object.id}])
 
         collection_info = []
         linked_blobs = []
 
-        for collection in Collection.objects.filter(blob_list__contains=[{'id': self.object.id}]):
-            blob_list = Document.objects.filter(pk__in=[x['id'] for x in collection.blob_list if x['id'] != self.object.id])
+        for collection in Collection.objects.filter(user=self.request.user, blob_list__contains=[{'id': self.object.id}]):
+            blob_list = Document.objects.filter(user=self.request.user, pk__in=[x['id'] for x in collection.blob_list if x['id'] != self.object.id])
             if collection.is_private:
                 linked_blobs.append({'id': collection.id,
                                      'name': collection.name,
@@ -168,6 +168,9 @@ class BlobDetailView(DetailView):
         context['section'] = SECTION
         return context
 
+    def get_queryset(self):
+        return Document.objects.filter(user=self.request.user)
+
 
 class BlobUpdateView(UpdateView):
     template_name = 'blob/edit.html'
@@ -177,7 +180,7 @@ class BlobUpdateView(UpdateView):
         context = super(BlobUpdateView, self).get_context_data(**kwargs)
         context['section'] = SECTION
         context['sha1sum'] = self.kwargs.get('sha1sum')
-        context['cover_info'] = Document.get_cover_info(self.object.sha1sum, max_cover_image_width=400)
+        context['cover_info'] = Document.get_cover_info(self.request.user, self.object.sha1sum, max_cover_image_width=400)
         context['metadata'] = preprocess_metadata(self.object.metadata_set.all())
         if True in [True for x in self.object.metadata_set.all() if x.name == 'is_book']:
             context['is_book'] = True
@@ -235,7 +238,7 @@ class BlobThumbnailView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(BlobThumbnailView, self).get_context_data(**kwargs)
-        context['cover_info'] = Document.get_cover_info(self.object.sha1sum, max_cover_image_width=70, size='small')
+        context['cover_info'] = Document.get_cover_info(self.request.user, self.object.sha1sum, max_cover_image_width=70, size='small')
         context['filename'] = self.object.file
         query = 'uuid:{}'.format(self.object.uuid)
         context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
@@ -262,12 +265,12 @@ def handle_metadata(blob, request):
         m = p.match(key)
         if m:
             for i in value.split(","):
-                new_metadata, created = MetaData.objects.get_or_create(name=m.group(1), value=i.strip(), blob=blob)
+                new_metadata, created = MetaData.objects.get_or_create(user=request.user, name=m.group(1), value=i.strip(), blob=blob)
                 if created:
                     new_metadata.save()
 
     if request.POST.get('is_book', ''):
-        new_metadata = MetaData(name='is_book', value='true', blob=blob)
+        new_metadata = MetaData(user=request.user, name='is_book', value='true', blob=blob)
         new_metadata.save()
 
 
@@ -305,7 +308,7 @@ def handle_linked_collection(blob, request):
 
 def metadata_name_search(request):
 
-    m = MetaData.objects.all().values('name').filter(name__icontains=request.GET['query']).distinct('name').order_by('name'.lower())
+    m = MetaData.objects.filter(user=request.user).values('name').filter(name__icontains=request.GET['query']).distinct('name').order_by('name'.lower())
 
     return_data = [{'value': x['name']} for x in m]
 
@@ -314,7 +317,7 @@ def metadata_name_search(request):
 
 def get_amazon_image_info(request, sha1sum, index=0):
 
-    b = Document.objects.get(sha1sum=sha1sum)
+    b = Document.objects.get(user=request.user, sha1sum=sha1sum)
     result = b.get_amazon_cover_url(index)
 
     return JsonResponse(result)
@@ -322,7 +325,7 @@ def get_amazon_image_info(request, sha1sum, index=0):
 
 def set_amazon_image_info(request, sha1sum, index=0):
 
-    b = Document.objects.get(sha1sum=sha1sum)
+    b = Document.objects.get(user=request.user, sha1sum=sha1sum)
     try:
         b.set_amazon_cover_url('small', request.POST['small'])
         b.set_amazon_cover_url('large', request.POST['large'])
@@ -381,7 +384,7 @@ def extract_thumbnail_from_pdf(request, uuid, page_number):
 
     page_number = page_number - 1
 
-    b = Document.objects.get(uuid=uuid)
+    b = Document.objects.get(user=request.user, uuid=uuid)
 
     os.chdir("{}/{}".format(settings.MEDIA_ROOT, os.path.dirname(b.file.name)))
 
@@ -419,7 +422,7 @@ def extract_thumbnail_from_pdf(request, uuid, page_number):
 
     os.remove(outfile)
 
-    cover_info = Document.get_cover_info(b.sha1sum, max_cover_image_width=70, size='small')
+    cover_info = Document.get_cover_info(request.user, b.sha1sum, max_cover_image_width=70, size='small')
 
     return JsonResponse({'message': 'OK', 'cover_url': cover_info['url']})
 
@@ -459,15 +462,16 @@ class BlogListView(ListView):
 
     def get_queryset(self):
         if self.request.GET.get('tagsearch', ''):
-            post_list = Document.objects.filter(tags__name__exact=self.request.GET['tagsearch']).filter(is_blog=True).order_by('-created')
+            post_list = Document.objects.filter(user=self.request.user, tags__name__exact=self.request.GET['tagsearch']).filter(is_blog=True).order_by('-created')
         elif 'search_item' in self.request.GET:
             post_list = Document.objects.filter(
+                Q(user=self.request.user) &
                 (Q(content__icontains=self.request.GET['search_item']) |
                  Q(title__icontains=self.request.GET['search_item'])) &
                 Q(is_blog=True)
             )
         else:
-            post_list = Document.objects.order_by('-created').filter(is_blog=True)
+            post_list = Document.objects.order_by('-created').filter(user=self.request.user, is_blog=True)
 
         paginator = Paginator(post_list, self.ITEMS_PER_PAGE)
 

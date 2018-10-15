@@ -22,34 +22,39 @@ class FeedListView(ListView):
     template_name = 'feed/index.html'
     context_object_name = 'feed_info'
 
+    feed_all = None
+
     def get_queryset(self):
         default_feed_id = Feed.objects.get(name='Hacker News').id
         self.current_feed = self.request.session.get('current_feed', default_feed_id)
 
-        feeds = FeedItem.objects.select_related().filter(feed__id__in=self.request.user.userprofile.rss_feeds)
-
-        feed_all = {}
-
-        for feed in feeds:
-            data = {'id': feed.feed.id, 'name': feed.feed.name, 'link': feed.link, 'title': feed.title}
-            if feed.feed.id in feed_all:
-                feed_all[feed.feed.id]['links'].append(data)
-            else:
-                feed_all[feed.feed_id] = {'links': [data], 'name': feed.feed.name, 'feed_homepage': feed.feed.homepage}
-
-        self.feed_all = feed_all
-
-        # We can't merely use Feed.objects.filter(), since this won't retrieve our feeds in
-        #  the correct order (based on the order of the feed ids in userprofile.rss_feeds)
-        #  So we store the feed name temporarily in a lookup table...
-        lookup = {}
-        for feed in Feed.objects.filter(id__in=self.request.user.userprofile.rss_feeds):
-            lookup[feed.id] = feed
-
-        # ...then use that here, where the proper order is preserved
         feed_info = []
-        for feed_id in self.request.user.userprofile.rss_feeds:
-            feed_info.append({'id': feed_id, 'feed': lookup[feed_id], 'name': lookup[feed_id].name})
+
+        if self.request.user.userprofile.rss_feeds:
+            print(self.request.user.userprofile.rss_feeds)
+            feeds = FeedItem.objects.select_related().filter(feed__id__in=self.request.user.userprofile.rss_feeds)
+
+            feed_all = {}
+
+            for feed in feeds:
+                data = {'id': feed.feed.id, 'name': feed.feed.name, 'link': feed.link, 'title': feed.title}
+                if feed.feed.id in feed_all:
+                    feed_all[feed.feed.id]['links'].append(data)
+                else:
+                    feed_all[feed.feed_id] = {'links': [data], 'name': feed.feed.name, 'feed_homepage': feed.feed.homepage}
+
+            self.feed_all = feed_all
+
+            # We can't merely use Feed.objects.filter(), since this won't retrieve our feeds in
+            #  the correct order (based on the order of the feed ids in userprofile.rss_feeds)
+            #  So we store the feed name temporarily in a lookup table...
+            lookup = {}
+            for feed in Feed.objects.filter(id__in=self.request.user.userprofile.rss_feeds):
+                lookup[feed.id] = feed
+
+            # ...then use that here, where the proper order is preserved
+            for feed_id in self.request.user.userprofile.rss_feeds:
+                feed_info.append({'id': feed_id, 'feed': lookup[feed_id], 'name': lookup[feed_id].name})
 
         return feed_info
 
@@ -68,7 +73,10 @@ class FeedSubscriptionListView(FeedListView):
     def get_queryset(self):
 
         # Get a list of all feeds not currently subscribed
-        feeds_not_subscribed = Feed.objects.exclude(id__in=self.request.user.userprofile.rss_feeds)
+        rss_feeds = self.request.user.userprofile.rss_feeds
+        if rss_feeds is None:
+            rss_feeds = []
+        feeds_not_subscribed = Feed.objects.exclude(id__in=rss_feeds)
         self.feeds_not_subscribed = sorted(feeds_not_subscribed, key=lambda feed: feed.name.lower())
         return super(FeedSubscriptionListView, self).get_queryset()
 

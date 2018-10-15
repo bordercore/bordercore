@@ -26,7 +26,7 @@ class Deck(TimeStampedModel):
         return self.title
 
     def is_empty(self):
-        if Question.objects.filter(deck=self).count() == 0:
+        if Question.objects.filter(user=self.user, deck=self).count() == 0:
             return True
         else:
             return False

@@ -10,11 +10,11 @@ from tag.models import Tag
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT)
-    rss_feeds = ArrayField(models.IntegerField())
-    favorite_tags = models.ManyToManyField(Tag)
+    rss_feeds = ArrayField(models.IntegerField(), null=True)
+    favorite_tags = models.ManyToManyField(Tag, null=True)
     bookmarks_show_untagged_only = models.BooleanField(default=False)
     todo_default_tag = models.OneToOneField(Tag, related_name='default_tag', null=True, on_delete=models.PROTECT)
-    orgmode_file = models.TextField()
+    orgmode_file = models.TextField(null=True)
     google_calendar = JSONField(blank=True, null=True)
     homepage_default_collection = models.OneToOneField(Collection, related_name='default_collection', null=True, on_delete=models.PROTECT)
 

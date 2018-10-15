@@ -22,7 +22,7 @@ def bookmark_list(request):
     message = ''
     bookmarks = []
 
-    untagged_count = Bookmark.objects.filter(tags__isnull=True).count()
+    untagged_count = Bookmark.objects.filter(user=request.user, tags__isnull=True).count()
 
     return render(request, 'bookmark/index.html',
                   {'section': SECTION,
@@ -35,7 +35,7 @@ def bookmark_list(request):
 @login_required
 def bookmark_click(request, bookmark_id=None):
 
-    b = Bookmark.objects.get(pk=bookmark_id) if bookmark_id else None
+    b = Bookmark.objects.get(user=request.user, pk=bookmark_id) if bookmark_id else None
     b.daily['viewed'] = 'true'
     b.save()
     return redirect(b.url)
@@ -46,7 +46,7 @@ def bookmark_edit(request, bookmark_id=None):
 
     action = 'Edit'
 
-    b = Bookmark.objects.get(pk=bookmark_id) if bookmark_id else None
+    b = Bookmark.objects.get(user=request.user, pk=bookmark_id) if bookmark_id else None
 
     if request.method == 'POST':
         if request.POST['Go'] in ['Edit', 'Add']:
@@ -82,13 +82,13 @@ def bookmark_edit(request, bookmark_id=None):
 def bookmark_delete(request, bookmark_id=None):
 
     # First delete the bookmark from any tag lists
-    info = BookmarkTagUser.objects.raw("SELECT * FROM bookmark_bookmarktaguser WHERE %s = ANY (bookmark_list)" % bookmark_id)
+    info = BookmarkTagUser.objects.raw("SELECT * FROM bookmark_bookmarktaguser WHERE user_id = %s AND %s = ANY (bookmark_list)", [request.user.id, bookmark_id])
     for tag in info:
         tag.bookmark_list.remove(bookmark_id)
         tag.save()
 
     # Then delete the actual bookmark
-    bookmark = Bookmark.objects.get(pk=bookmark_id)
+    bookmark = Bookmark.objects.get(user=request.user, pk=bookmark_id)
     bookmark.delete()
 
     return HttpResponse(json.dumps('OK'), content_type="application/json")
@@ -105,7 +105,7 @@ def snarf_link(request):
 
     # First verify that this url does not already exist
     try:
-        b = Bookmark.objects.get(url=url)
+        b = Bookmark.objects.get(user=request.user, url=url)
         messages.add_message(request, messages.WARNING, 'Bookmark already exists and was added on %s' % b.created.strftime("%B %d, %Y"))
         return redirect('bookmark_edit', b.id)
     except ObjectDoesNotExist:
@@ -119,7 +119,7 @@ def snarf_link(request):
 @login_required
 def tag_search(request):
 
-    tags = Tag.objects.filter(name__istartswith=request.GET.get('query', ''), bookmark__isnull=False).distinct('name')
+    tags = Tag.objects.filter(user=request.user, name__istartswith=request.GET.get('query', ''), bookmark__isnull=False).distinct('name')
 
     return HttpResponse(json.dumps([x.name for x in tags]), content_type="application/json")
 
@@ -136,11 +136,11 @@ def bookmark_tag(request):
     sorted_bookmarks = []
 
     if tag_filter:
-        bookmarks = Bookmark.objects.filter(tags__name__exact=tag_filter).order_by('-created')
+        bookmarks = Bookmark.objects.filter(user=request.user, tags__name__exact=tag_filter).order_by('-created')
         request.session['bookmark_tag_filter'] = tag_filter
 
         try:
-            sort_order = BookmarkTagUser.objects.get(tag=Tag.objects.get(name=tag_filter), user=request.user)
+            sort_order = BookmarkTagUser.objects.get(user=request.user, tag=Tag.objects.get(name=tag_filter))
             sorted_bookmarks = sorted(bookmarks, key=lambda v: sort_order.bookmark_list.index(v.id))
         except ObjectDoesNotExist as e:
             print("Error! %s" % e)
@@ -167,7 +167,7 @@ def tag_bookmark_list(request):
     link_id = int(request.POST['link_id'])
     position = int(request.POST['position'])
 
-    sorted_list = BookmarkTagUser.objects.get(tag=Tag.objects.get(name=tag), user=request.user)
+    sorted_list = BookmarkTagUser.objects.get(user=request.user, tag=Tag.objects.get(name=tag))
 
     # Verify that the bookmark is in the existing sort list
     if link_id not in sorted_list.bookmark_list:
@@ -197,9 +197,9 @@ class OrderListJson(BaseDatatableView):
         # then don't show bookmarks which have been tagged.  However, for
         # searches (filters), ignore that preference
         if self.request.user.userprofile.bookmarks_show_untagged_only and self.request.GET.get('sSearch') == '':
-            return Bookmark.objects.filter(tags__isnull=True)
+            return Bookmark.objects.filter(user=self.request.user, tags__isnull=True)
         else:
-            return Bookmark.objects.all()
+            return Bookmark.objects.filter(user=self.request.user)
 
     def filter_queryset(self, qs):
         # use request parameters to filter queryset

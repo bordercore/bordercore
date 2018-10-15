@@ -126,7 +126,9 @@
 
     <div id="exerciseDetailChart"></div>
 
-    <p class="alert alert-info">Reps last workout: <strong>{{ reps }}</strong></p>
+    {% if reps %}
+        <p class="alert alert-info">Reps last workout: <strong>{{ reps }}</strong></p>
+    {% endif %}
 
     <br /><br />
     <div class="card">

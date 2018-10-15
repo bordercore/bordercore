@@ -75,7 +75,8 @@ def index_bookmark(id, commit=True):
         last_modified=bookmark.modified,
         doctype='bordercore_bookmark',
         date=bookmark.created,
-        date_unixtime=bookmark.created.strftime("%s")
+        date_unixtime=bookmark.created.strftime("%s"),
+        user_id=bookmark.user.id
     )
     conn.add(doc)
 

@@ -14,6 +14,6 @@ def tag_search(request):
         args['document__is_blog'] = True
 
     query = request.GET.get('query', '')
-    tag_list = [{'value': x.name, 'is_meta': x.is_meta} for x in Tag.objects.filter(name__icontains=query, **args).distinct('name')]
+    tag_list = [{'value': x.name, 'is_meta': x.is_meta} for x in Tag.objects.filter(document__user=request.user, name__icontains=query, **args).distinct('name')]
 
     return JsonResponse(tag_list, safe=False)

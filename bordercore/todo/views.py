@@ -33,7 +33,10 @@ class TodoListView(ListView):
             tag = self.request.user.userprofile.todo_default_tag.name
         else:
             # TODO: get a random tag
-            tag = Tag.objects.filter(todo__isnull=False).distinct('name')[0].name
+            tag_info = Tag.objects.filter(todo__user=self.request.user, todo__isnull=False).distinct('name')
+            tag = None
+            if tag_info:
+                tag = tag_info[0].name
         self.tagsearch = tag
         return Todo.objects.filter(user=self.request.user, tags__name=tag)
 
@@ -45,7 +48,7 @@ class TodoListView(ListView):
         for myobject in context['object_list']:
             info.append(dict(task=myobject.task, modified=myobject.get_modified(), unixtime=format(myobject.modified, 'U'), todoid=myobject.id))
 
-        context['tags'] = Tag.objects.filter(todo__isnull=False).distinct('name')
+        context['tags'] = Tag.objects.filter(todo__user=self.request.user, todo__isnull=False).distinct('name')
         context['tagsearch'] = self.tagsearch
         context['cols'] = ['task', 'modified', 'unixtime', 'todoid']
         context['section'] = SECTION
@@ -65,6 +68,9 @@ class TodoDetailView(UpdateView):
         context['pk'] = self.kwargs.get('pk')
         context['action'] = 'Edit'
         return context
+
+    def get_queryset(self):
+        return Todo.objects.filter(user=self.request.user)
 
     def form_valid(self, form):
 

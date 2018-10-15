@@ -69,11 +69,11 @@ def fitness_add(request, exercise_id):
     return redirect('fitness_summary')
 
 
-def add_exercise_info(exercise_list, exercise):
+def add_exercise_info(user, exercise_list, exercise):
 
     try:
         exercise_list[exercise.exercise] = exercise
-        exercise_list[exercise.exercise].date = exercise.data_set.order_by('-date')[0].date
+        exercise_list[exercise.exercise].date = exercise.data_set.filter(user=user).order_by('-date')[0].date
         exercise_list[exercise.exercise].delta_days = int((int(datetime.datetime.now().strftime("%s")) - int(exercise_list[exercise.exercise].date.strftime("%s"))) / 86400) + 1
     except IndexError:
         pass
@@ -88,9 +88,9 @@ def fitness_summary(request):
 
     for e in exercises:
         if e.exerciseuser_set.filter(user=request.user):
-            add_exercise_info(active_exercises, e)
+            add_exercise_info(request.user, active_exercises, e)
         else:
-            add_exercise_info(inactive_exercises, e)
+            add_exercise_info(request.user, inactive_exercises, e)
 
     return render(request, 'fitness/summary.html', {'active_exercises': active_exercises,
                                                     'inactive_exercises': inactive_exercises,
@@ -102,12 +102,13 @@ def change_active_status(request):
     exercise_id = request.POST['exercise_id']
 
     if request.POST['state'] == 'inactive':
-        eu = ExerciseUser.objects.get(user=request.user, exercise=exercise_id)
+        exercise = Exercise.objects.get(id=exercise_id)
+        eu = ExerciseUser.objects.get(user=request.user, exercise=exercise)
         eu.delete()
         messages.add_message(request, messages.INFO, 'This exercise is no longer active')
     elif request.POST['state'] == 'active':
-        e = Exercise.objects.get(id=exercise_id)
-        eu = ExerciseUser(user=request.user, exercise=e)
+        exercise = Exercise.objects.get(id=exercise_id)
+        eu = ExerciseUser(user=request.user, exercise=exercise)
         eu.save()
         messages.add_message(request, messages.INFO, 'This exercise is now active for you')
 

@@ -78,6 +78,8 @@
                     <a href="{% url 'feed_edit' feed.id %}" id="link_{{ feed.id }}">{{ feed.name }}</a>
                     {% if feed.feed.last_response_code != 200 %}<span class="list_annotation">{{ feed.feed.last_response_code }}</span>{% endif %}
                 </li>
+            {% empty %}
+                Drag here to add new subscriptions.
             {% endfor %}
         </ul>
 

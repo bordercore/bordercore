@@ -16,7 +16,7 @@ class BookListView(ListView):
         if self.args[0]:
             self.selected_letter = self.args[0]
 
-        return Book.objects.filter(title__istartswith=self.selected_letter)
+        return Book.objects.filter(user=self.request.user, title__istartswith=self.selected_letter)
 
     def get_context_data(self, **kwargs):
         context = super(BookListView, self).get_context_data(**kwargs)

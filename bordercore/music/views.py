@@ -36,10 +36,13 @@ def music_list(request):
     message = ''
 
     # Get a list of recently played songs
-    recent_songs = Listen.objects.all().select_related().distinct().order_by('-created')[:5]
+    recent_songs = Listen.objects.filter(user=request.user).select_related().distinct().order_by('-created')[:5]
 
     # Get a random album
-    random_albums = Album.objects.order_by('?')[0]
+    random_albums = None
+    random_album_info = Album.objects.filter(user=request.user).order_by('?')
+    if random_album_info:
+        random_albums = random_album_info[0]
 
     return render(request, 'music/index.html',
                   {'section': SECTION,
@@ -55,7 +58,7 @@ def album_artwork(request, song_id):
     if len(song_id) == 32:
         file_path = "/tmp/%s" % song_id
     else:
-        song = Song.objects.get(id=song_id)
+        song = Song.objects.get(user=request.user, id=song_id)
 
         if not song.album:
             return HttpResponseNotFound()
@@ -81,7 +84,7 @@ def song_edit(request, song_id=None):
     action = 'Edit'
     file_info = None
 
-    song = Song.objects.get(pk=song_id) if song_id else None
+    song = Song.objects.get(user=request.user, pk=song_id) if song_id else None
 
     tracknumber = str(song.track)
     if len(tracknumber) == 1:
@@ -136,7 +139,7 @@ class AlbumDetailView(DetailView):
         context = super(AlbumDetailView, self).get_context_data(**kwargs)
 
         context['a'] = self.object
-        s = Song.objects.filter(album=self.object).order_by('track')
+        s = Song.objects.filter(user=self.request.user, album=self.object).order_by('track')
 
         song_list = []
 
@@ -157,18 +160,21 @@ class AlbumDetailView(DetailView):
 
         return context
 
+    def get_queryset(self):
+        return Album.objects.filter(user=self.request.user)
+
 
 @login_required
 def artist_detail(request, artist_name):
 
     # Get all albums by this artist
-    a = Album.objects.filter(artist=artist_name).order_by('-original_release_year')
+    a = Album.objects.filter(user=request.user, artist=artist_name).order_by('-original_release_year')
 
     # Get all songs by this artist that do not appear on an album
-    s = Song.objects.filter(artist=artist_name).filter(album__isnull=True)
+    s = Song.objects.filter(user=request.user, artist=artist_name).filter(album__isnull=True)
 
     # Get all songs by this artist that do appear on compilation album
-    c = Album.objects.filter(Q(song__artist=artist_name) & ~Q(artist=artist_name)).distinct('song__album')
+    c = Album.objects.filter(Q(user=request.user) & Q(song__artist=artist_name) & ~Q(artist=artist_name)).distinct('song__album')
 
     song_list = []
 
@@ -222,14 +228,14 @@ def add_song(request):
 
         if info.get('album') and info.get('artist'):
             if info.get('album'):
-                if Album.objects.filter(title=info['album'][0], artist=info['artist'][0]):
+                if Album.objects.filter(user=request.user, title=info['album'][0], artist=info['artist'][0]):
                     notes.append('You already have an album with this title')
                 # Look for a fuzzy match
-                fuzzy_matches = Album.objects.filter(Q(title__icontains=info['title'][0].lower()))
+                fuzzy_matches = Album.objects.filter(Q(user=request.user) & Q(title__icontains=info['title'][0].lower()))
                 if fuzzy_matches:
                     notes.append('Found a fuzzy match on the album title: "%s" by %s' % (fuzzy_matches[0].title, fuzzy_matches[0].artist))
 
-            if Song.objects.filter(title=info['title'][0], artist=info['artist'][0]):
+            if Song.objects.filter(user=request.user, title=info['title'][0], artist=info['artist'][0]):
                 notes.append('You already have a song with this title by this artist')
 
         if info.get('tracknumber'):
@@ -251,7 +257,7 @@ def add_song(request):
 
         if request.POST['year']:
             try:
-                song = Song.objects.get(artist=request.POST['artist'], title=request.POST['title'], year=request.POST['year'])
+                song = Song.objects.get(user=request.user, artist=request.POST['artist'], title=request.POST['title'], year=request.POST['year'])
             except ObjectDoesNotExist:
                 song = None
         else:
@@ -277,7 +283,7 @@ def add_song(request):
                 if request.POST.get('compilation'):
                     album_artist = "Various Artists"
                 try:
-                    a = Album.objects.get(title=album_title, artist=album_artist)
+                    a = Album.objects.get(user=request.user, title=album_title, artist=album_artist)
                 except ObjectDoesNotExist:
                     a = None
                 if a:
@@ -301,6 +307,7 @@ def add_song(request):
                 newform = form.save(commit=False)
                 if a:
                     newform.album = a
+                newform.user = request.user
                 newform.save()
 
             if a:
@@ -384,7 +391,7 @@ class MusicListJson(BaseDatatableView):
     def get_initial_queryset(self):
         # return queryset used as base for futher sorting/filtering
         # these are simply objects displayed in datatable
-        return Song.objects.all()
+        return Song.objects.filter(user=self.request.user)
 
     def filter_queryset(self, qs):
         # use request parameters to filter queryset
@@ -432,9 +439,9 @@ class MusicListJson(BaseDatatableView):
 def search(request):
 
     # The search could match an album name or an artist or a song title
-    albums = Album.objects.filter(title__icontains=request.GET['query'])
-    artists = Song.objects.filter(artist__icontains=request.GET['query']).distinct('artist').order_by('artist')
-    songs = Song.objects.filter(title__icontains=request.GET['query']).order_by('title')
+    albums = Album.objects.filter(user=request.user, title__icontains=request.GET['query'])
+    artists = Song.objects.filter(user=request.user, artist__icontains=request.GET['query']).distinct('artist').order_by('artist')
+    songs = Song.objects.filter(user=request.user, title__icontains=request.GET['query']).order_by('title')
 
     results = []
 
@@ -496,7 +503,7 @@ def get_song_info(request, id):
     from datetime import datetime
     from django.conf import settings
 
-    song = Song.objects.get(pk=id)
+    song = Song.objects.get(user=request.user, pk=id)
 
     # Indicate that this song has been listened to, but only if we're in production
     if not settings.DEBUG:

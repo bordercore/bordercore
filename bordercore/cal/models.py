@@ -11,23 +11,29 @@ api_key = ""
 
 class Calendar():
 
+    credentials = None
+
     def __init__(self, user_profile):
         if not isinstance(user_profile, UserProfile):
             raise ValueError("Calendar must be passed a UserProfile instance")
         cal_info = user_profile.google_calendar
-        credentials = OAuth2Credentials(
-            cal_info['access_token'],
-            cal_info['client_id'],
-            cal_info['client_secret'],
-            cal_info['refresh_token'],
-            cal_info['token_expiry'],
-            cal_info['token_uri'],
-            cal_info['user_agent'],
-            cal_info['revoke_uri'],
-            cal_info['id_token'],
-            cal_info['token_response'],
-        )
-        self.credentials = credentials
+        if cal_info:
+            credentials = OAuth2Credentials(
+                cal_info['access_token'],
+                cal_info['client_id'],
+                cal_info['client_secret'],
+                cal_info['refresh_token'],
+                cal_info['token_expiry'],
+                cal_info['token_uri'],
+                cal_info['user_agent'],
+                cal_info['revoke_uri'],
+                cal_info['id_token'],
+                cal_info['token_response'],
+            )
+            self.credentials = credentials
+
+    def has_credentials(self):
+        return True if self.credentials else False
 
     def get_calendar_info(self):
         http = httplib2.Http()

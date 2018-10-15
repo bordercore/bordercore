@@ -65,6 +65,9 @@ class DeckDetailView(DetailView):
         context["title"] = "Deck Detail :: {}".format(self.object.title)
         return context
 
+    def get_queryset(self):
+        return Deck.objects.filter(user=self.request.user)
+
 
 class DeckListView(FormMixin, ListView):
 
@@ -89,6 +92,9 @@ class DeckListView(FormMixin, ListView):
         context['info'] = info
 
         return context
+
+    def get_queryset(self):
+        return Deck.objects.filter(user=self.request.user)
 
 #     def get_queryset(self):
 #         print("get_queryset")

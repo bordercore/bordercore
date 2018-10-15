@@ -94,6 +94,8 @@
                     <a href="#" id="link_{{ feed.feed.id }}">{{ feed.feed.name }}</a>
                     {% if feed.feed.last_response_code != 200 %}<span class="list_annotation">{{ feed.feed.last_response_code }}</span>{% endif %}
                 </li>
+            {% empty %}
+                No feed subscriptions found. <a href="{% url 'feed_subscriptions' %}">Subscribe here.</a>
             {% endfor %}
         </ul>
 

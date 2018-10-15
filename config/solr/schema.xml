@@ -126,6 +126,8 @@
 
    <field name="internal_id" type="string" indexed="true" stored="true" required="false" multiValued="false" />
 
+   <field name="user_id" type="int" indexed="true" stored="true" required="true" multiValued="false"/>
+
    <field name="tags" type="FT_string_lc_trimmed" indexed="true" stored="true"
           multiValued="true" required="false" />
 

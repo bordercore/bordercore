@@ -16,7 +16,6 @@ from collection.forms import CollectionForm
 from collection.models import Collection
 from search.solr import SolrResultSet
 from solrpy.core import SolrConnection
-from tag.models import Tag
 
 IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
 SECTION = 'Collections'
@@ -91,7 +90,7 @@ class CollectionDetailView(DetailView):
                 if object['doctype'] in ('blob', 'book'):
                     if 'filepath' in object:
                         filename = os.path.basename(object['filepath'])
-                    object['cover_info'] = Document.get_cover_info(object['sha1sum'], max_cover_image_width=70, size='small')
+                    object['cover_info'] = Document.get_cover_info(self.request.user, object['sha1sum'], max_cover_image_width=70, size='small')
                     if object['content_type']:
                         try:
                             object['content_type'] = object['content_type'][0].split('/')[1]
@@ -103,7 +102,8 @@ class CollectionDetailView(DetailView):
 
             context['blob_list'] = blob_list_temp
             context['section'] = SECTION
-            return context
+
+        return context
 
 
 class CollectionCreateView(CreateView):
@@ -138,6 +138,10 @@ class CollectionUpdateView(UpdateView):
     form_class = CollectionForm
     success_url = reverse_lazy('collection_list')
 
+    def get_queryset(self):
+        base_qs = super(CollectionUpdateView, self).get_queryset()
+        return base_qs.filter(user=self.request.user)
+
     def form_valid(self, form):
 
         obj = form.save(commit=False)
@@ -163,9 +167,9 @@ def get_info(request):
 
     try:
         if request.GET.get('query_type', '') == 'id':
-            match = Collection.objects.get(pk=request.GET['id'])
+            match = Collection.objects.get(user=request.user, pk=request.GET['id'])
         else:
-            match = Collection.objects.get(name=request.GET['name'])
+            match = Collection.objects.get(user=request.user, name=request.GET['name'])
         if match:
             info = {'name': match.name,
                     'description': match.description,

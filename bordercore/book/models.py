@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 from lib.mixins import TimeStampedModel
@@ -17,3 +18,4 @@ class Book(TimeStampedModel):
     publisher = models.TextField(null=True)
     notes = models.TextField(null=True)
     own = models.BooleanField(default=True)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)

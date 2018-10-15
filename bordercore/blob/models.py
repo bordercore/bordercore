@@ -202,17 +202,17 @@ class Document(TimeStampedModel, AmazonMixin):
         return related_blobs
 
     def get_collection_info(self):
-        return Collection.objects.filter(blob_list__contains=[{'id': self.id}])
+        return Collection.objects.filter(user=self.user, blob_list__contains=[{'id': self.id}])
 
     def has_thumbnail_url(self):
         try:
-            _ = Document.get_cover_info(self.sha1sum, size='small')['url']
+            _ = Document.get_cover_info(self.user, self.sha1sum, size='small')['url']
             return True
         except:
             return False
 
     def get_cover_url_small(self):
-        return Document.get_cover_info(self.sha1sum, size='small')['url']
+        return Document.get_cover_info(self.user, self.sha1sum, size='small')['url']
 
     @staticmethod
     def get_image_dimensions(file_path, max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
@@ -229,7 +229,7 @@ class Document(TimeStampedModel, AmazonMixin):
     # This is static so that it can be called without a blob object, eg
     #  based on results from a Solr query
     @staticmethod
-    def get_cover_info(sha1sum, size='large', max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
+    def get_cover_info(user, sha1sum, size='large', max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
 
         if sha1sum is None:
             return {}
@@ -238,7 +238,7 @@ class Document(TimeStampedModel, AmazonMixin):
 
         parent_dir = "{}/{}/{}".format(settings.MEDIA_ROOT, sha1sum[0:2], sha1sum)
 
-        b = Document.objects.get(sha1sum=sha1sum)
+        b = Document.objects.get(user=user, sha1sum=sha1sum)
         file_path = "{}/{}".format(settings.MEDIA_ROOT, b.file.name)
 
         # Is the blob itself an image?
@@ -278,7 +278,7 @@ class Document(TimeStampedModel, AmazonMixin):
         conn.commit()
 
         # Delete from any collections
-        for collection in Collection.objects.filter(blob_list__contains=[{'id': self.id}]):
+        for collection in Collection.objects.filter(user=self.user, blob_list__contains=[{'id': self.id}]):
             collection.blob_list = [x for x in collection.blob_list if x['id'] != self.id]
             collection.save()
 
@@ -311,6 +311,7 @@ class MetaData(TimeStampedModel):
     name = models.TextField()
     value = models.TextField()
     blob = models.ForeignKey(Document, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     class Meta:
         unique_together = ('name', 'value', 'blob')

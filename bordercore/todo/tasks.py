@@ -23,7 +23,8 @@ def index_todo(id, commit=True):
         last_modified=todo.modified,
         date=todo.created,
         doctype='bordercore_todo',
-        date_unixtime=todo.created.strftime("%s")
+        date_unixtime=todo.created.strftime("%s"),
+        user_id=todo.user.id
     )
     conn.add(doc)
 

@@ -30,7 +30,8 @@
             <ul class="list-group">
                 {% for bookmark in daily_bookmarks %}
                     <li class="list-group-item {{ bookmark.css_class }}"><a href="{% url 'bookmark_click' bookmark.id %}">{{ bookmark.title }}</a></li>
-                    <!-- <li class="list-group-item {{ bookmark.css_class }}"><a href="{{ bookmark.url }}">{{ bookmark.title }}</a></li> -->
+                {% empty %}
+                    <li class="list-group-item">No bookmarks marked as Daily.</li>
                 {% endfor %}
             </ul>
         </div>
@@ -40,6 +41,8 @@
             <ul class="list-group">
                 {% for exercise in overdue_exercises %}
                     <li class="list-group-item"><a href="{% url 'exercise_detail' exercise.exercise.exercise_id %}">{{ exercise.exercise.exercise.exercise }}</a> {{ exercise.lag }} days</li>
+                {% empty %}
+                    <li class="list-group-item">No active exercises.</li>
                 {% endfor %}
             </ul>
         </div>
@@ -49,6 +52,8 @@
             <ul class="list-group">
                 {% for bookmark in pinned_bookmarks %}
                     <li class="list-group-item"><a href="{{ bookmark.url }}">{{ bookmark.title }}</a> </li>
+                {% empty %}
+                    <li class="list-group-item">No pinned bookmarks.</li>
                 {% endfor %}
             </ul>
         </div>
@@ -88,20 +93,30 @@
 
         <div class="card bg-info">
             <div class="card-header text-white">Recent Bookmarks</div>
+            {% if bookmarks %}
             <ul class="list-group">
                 {% for bookmark in bookmarks %}
                     <li class="list-group-item">{{ bookmark.url|favicon:16|safe }} <a class="ml-2" href="{{ bookmark.url }}">{{ bookmark.title }}</a> </li>
                 {% endfor %}
             </ul>
+            {% else %}
+            <li class="list-group-item">
+                <a class="ml-2" href="{% url 'bookmark_add' %}">Add a bookmark</a>
+            </li>
+            {% endif %}
         </div>
 
-        <iframe src="{% url 'collection_embedded' default_collection %}" frameborder=0 scrolling="no" width="100%"></iframe>
+        {% if default_collection %}
+            <iframe src="{% url 'collection_embedded' default_collection %}" frameborder=0 scrolling="no" width="100%"></iframe>
+        {% endif %}
 
         <div class="card bg-info my-3">
             <div class="card-header text-white">Recently Played Music</div>
             <ul class="list-group">
                 {% for song in music %}
                     <li class="list-group-item">{{ song.song.title }} <strong>{{ song.song.artist }}</strong></li>
+                {% empty %}
+                    <li class="list-group-item">No music listened to.</li>
                 {% endfor %}
             </ul>
         </div>
@@ -120,18 +135,15 @@
             </ul>
         </div>
 
-        <!-- <div class="my-3">
-            <div class="card bg-info random-image-card">
-                <div class="card-header text-white">Random Picture</div>
-                <ul class="list-group"> -->
         <div class="my-3">
+        {% if random_image_info %}
             <a href="{% url 'blob_detail' random_image_info.uuid %}">
                 <img src="{{ STATIC_URL }}{{ random_image_info.cover_info.url }}" height="{{ random_image_info.cover_info.height_cropped }}" width="{{ random_image_info.cover_info.width_cropped }}" />
             </a>
+        {% else %}
+            <a href="{% url 'blob_add' %}">Add a blob</a>
+        {% endif %}
         </div>
-                    <!-- </ul>
-            </div>
-        </div> -->
 
     </div>
 

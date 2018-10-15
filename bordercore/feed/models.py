@@ -72,6 +72,8 @@ class Feed(TimeStampedModel):
     def subscribe_user(self, user, position):
         feeds = user.userprofile.rss_feeds
         # Verify that the user isn't already subscribed
+        if feeds is None:
+            feeds = []
         if self.pk in feeds:
             return
         feeds.insert(position - 1, self.pk)

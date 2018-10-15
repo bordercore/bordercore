@@ -13,6 +13,7 @@ class Album(TimeStampedModel):
     original_release_year = models.IntegerField(null=True)
     compilation = models.BooleanField(default=False)
     comment = models.TextField(null=True)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     class Meta:
         unique_together = ("title", "artist")
@@ -40,6 +41,7 @@ class Song(TimeStampedModel):
     original_album = models.TextField(null=True)
     original_year = models.IntegerField(null=True)
     tags = models.ManyToManyField(Tag)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
 
 
 class Listen(TimeStampedModel):

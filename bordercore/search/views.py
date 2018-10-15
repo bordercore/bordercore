@@ -66,10 +66,9 @@ class SearchListView(ListView):
                          'fl': 'author,bordercore_todo_task,date,date_unixtime,doctype,filepath,id,importance,internal_id,last_modified,sha1sum,tags,title,url,uuid',
                          'facet': 'on',
                          'facet.mincount': '1',
-#                         'fields': ['attr_*', 'author', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
                          'rows': rows,
                          'sort': sort + ' desc'
-            }
+                         }
 
             p = re.compile("^[0-9a-f]{40}$")
             if p.search(search_term):
@@ -77,6 +76,8 @@ class SearchListView(ListView):
             else:
 
                 search_term = handle_quotes(self.request, search_term)
+                search_term = search_term + " AND user_id:{}".format(self.request.user.id)
+
                 solr_args.update(
                     {'q': search_term,
                      'q.op': boolean_type,
@@ -200,7 +201,7 @@ class SearchTagDetailView(ListView):
             if x not in tag_list:
                 doctype_counts[x] = y
 
-        meta_tags = [x for x in tag_counts if x in Tag.get_meta_tags()]
+        meta_tags = [x for x in tag_counts if x in Tag.get_meta_tags(self.request.user)]
         context['meta_tags'] = meta_tags
 
         import operator
@@ -217,7 +218,7 @@ class SearchTagDetailView(ListView):
         tag_list_js = []
         for tag in tag_list:
             if tag != '':
-                tag_list_js.append({'name': tag, 'is_meta': 'true' if tag in Tag.get_meta_tags() else 'false'})
+                tag_list_js.append({'name': tag, 'is_meta': 'true' if tag in Tag.get_meta_tags(self.request.user) else 'false'})
         context['tag_list'] = tag_list_js
 
         context['kb_tag_detail_current_tab'] = self.request.session.get('kb_tag_detail_current_tab', '')
@@ -230,6 +231,7 @@ class SearchTagDetailView(ListView):
         rows = 1000
 
         q = ' AND '.join(['tags:"%s"' % (urllib.parse.unquote(t),) for t in taglist.split(',')])
+        q = q + ' AND user_id:{}'.format(self.request.user.id)
 
         conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
@@ -259,7 +261,7 @@ def search_book_title(request):
 
     title = request.GET['title']
 
-    solr_args = {'q': 'doctype:book AND filepath:*%s*' % title,
+    solr_args = {'q': 'doctype:book AND filepath:*{}* AND user_id:{}'.format(title, request.user.id),
                  'fl': 'id,score,title,author,filepath,uuid'}
 
     results = conn.raw_query(**solr_args)
@@ -281,7 +283,7 @@ def kb_search_tags_booktitles(request):
 
     term = escape_solr_terms(handle_quotes(request, request.GET['term']))
 
-    solr_args = {'q': 'tags:%s* OR (doctype:book AND title:*%s*)' % (term, term),
+    solr_args = {'q': '(tags:{}* OR (doctype:book AND title:*{}*)) AND user_id:{}'.format(term, term, request.user.id),
                  'fl': 'doctype,filepath,sha1sum,tags,title,uuid',
                  'rows': 20}
 
