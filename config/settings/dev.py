@@ -11,15 +11,13 @@ for t in TEMPLATES:
 
 INTERNAL_IPS = ('127.0.0.1', '10.3.2.2')
 
-MIDDLEWARE_CLASSES += (
-    'debug_panel.middleware.DebugPanelMiddleware',
+MIDDLEWARE += (
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 INSTALLED_APPS += (
     'debug_toolbar',
     'template_timings_panel',
-    'debug_panel'
 )
 
 DEBUG_TOOLBAR_PANELS = (
