@@ -114,6 +114,12 @@
                 return false;
             });
 
+            $("input.btn[value='Delete']").click( function() {
+                var selectedId = $('#deck_list').DataTable().cell('.selected', 4).data();
+                $("#form-deck-delete").attr("action", '{% url 'deck_delete' 666 %}'.replace(666, selectedId));
+                $('#form-deck-delete').submit();
+            })
+
             $('#modalAdd').on('shown.bs.modal', function() {
                 $('#id_title').focus();
             })
@@ -139,12 +145,13 @@
 
 <div class="row">
     <div class="col-lg-7">
-        <form class="form-inline" role="form">
+        <form class="form-inline" role="form" id="form-deck-delete" method="POST">
+            {% csrf_token %}
 
             <div class="btn-group">
                 <input type="button" class="btn btn-secondary" id="btn-add" value="Add" />
                 <input type="button" class="btn btn-secondary" id="btn-edit" value="Edit" disabled="disabled" />
-                <button class="btn btn-secondary" id="btn-delete" disabled>Delete</button>
+                <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" disabled="disabled" />
             </div>
 
             <div class="form-group">

@@ -122,6 +122,15 @@ class DeckUpdateView(UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
+class DeckDeleteView(DeleteView):
+
+    def get_object(self, queryset=None):
+        return Deck.objects.get(user=self.request.user, id=self.kwargs.get("pk"))
+
+    def get_success_url(self):
+        return reverse("deck_list")
+
+
 class QuestionCreateView(CreateView):
     template_name = 'drill/question_edit.html'
     form_class = QuestionForm

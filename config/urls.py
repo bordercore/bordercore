@@ -18,7 +18,7 @@ from collection import views as collection_views
 from collection.views import (CollectionCreateView, CollectionDetailView,
                               CollectionListView, CollectionUpdateView)
 from drill import views as drill_views
-from drill.views import (DeckCreateView, DeckDetailView, DeckListView, DeckUpdateView,
+from drill.views import (DeckCreateView, DeckDeleteView, DeckDetailView, DeckListView, DeckUpdateView,
                          QuestionCreateView, QuestionDeleteView, QuestionUpdateView)
 from feed import views as feed_views
 from feed.views import FeedListView, FeedSubscriptionListView
@@ -92,6 +92,7 @@ urlpatterns = [
     path('drill/', DeckListView.as_view(), name='deck_list'),
     path('drill/deck/<int:deck_id>/', DeckDetailView.as_view(), name='deck_detail'),
     path('drill/deck/add', DeckCreateView.as_view(), name='deck_add'),
+    path('drill/delete/<int:pk>', DeckDeleteView.as_view(), name='deck_delete'),
     path('drill/question/delete/<int:pk>', QuestionDeleteView.as_view(), name='question_delete'),
     path('drill/edit/<int:pk>', DeckUpdateView.as_view(), name='deck_edit'),
     path('drill/deck/get_info', drill_views.get_info, name='deck_get_info'),
