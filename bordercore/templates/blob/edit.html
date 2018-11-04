@@ -81,7 +81,7 @@
 
     <div class="form-group">
         <div class="row">
-            <div class="col-lg-5">
+            <div class="col-lg-7">
                 <select id="collections_other" class="form-control">
                     <option value="666">Add to collection</option>
                     {% for collection in collections_other %}
@@ -95,7 +95,7 @@
 {% if object.get_collection_info %}
     <div class="form-group">
         <div class="row">
-            <div class="col-lg-5">
+            <div class="col-lg-7">
                 <select id="collections_current" class="form-control">
                     <option>Remove from collection</option>
                     {% for collection in object.get_collection_info %}
@@ -122,7 +122,7 @@
     {% endif %}
 
     <div class="row">
-        <div class="col-lg-4">
+        <div class="col-lg-7">
             <select id="markdown-support" class="form-control">
                 <option>Markdown</option>
                 <option>Insert link</option>
