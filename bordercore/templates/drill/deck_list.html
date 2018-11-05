@@ -25,13 +25,13 @@
         $(document).ready(function() {
 
             function formatName( data, type, row ) {
-                return '<a href="{% url 'deck_detail' 666 %}">'.replace(666, row[4]) + row[0] + '</a>';
+                return '<a href="{% url 'deck_detail' 666 %}">'.replace(666, row[5]) + row[0] + '</a>';
             }
 
             table = $('#deck_list').DataTable( {
                 "info": false,
                 "paginate": false,
-                "sorting": [[2, 'desc']],
+                "sorting": [[1, 'desc']],
                 "filter": true,
                 "language": {
                     "emptyTable": "No decks created"
@@ -41,8 +41,8 @@
                 "searchable": false,
                 "columnDefs": [
                     { "targets": [0], "sorting": [ "desc", "asc" ], "render": formatName, "useRendered": false  },
-                    { "targets": [2], "class": "monospaced", "dataSort": 3, "sorting": [ "desc", "asc" ] },
-                    { "targets": [2,4], "visible": false },
+                    { "targets": [1], "class": "monospaced", "sorting": [ "desc", "asc" ] },
+                    { "targets": [2,5], "visible": false },
                 ],
             } );
 
@@ -88,7 +88,7 @@
             });
 
             $('#btn-edit').on('click', function() {
-                var selectedId = $('#deck_list').DataTable().cell('.selected', 4).data();
+                var selectedId = $('#deck_list').DataTable().cell('.selected', 5).data();
                 console.log(selectedId);
 
                 $.ajax( { type: 'GET',
@@ -115,7 +115,7 @@
             });
 
             $("input.btn[value='Delete']").click( function() {
-                var selectedId = $('#deck_list').DataTable().cell('.selected', 4).data();
+                var selectedId = $('#deck_list').DataTable().cell('.selected', 5).data();
                 $("#form-deck-delete").attr("action", '{% url 'deck_delete' 666 %}'.replace(666, selectedId));
                 $('#form-deck-delete').submit();
             })

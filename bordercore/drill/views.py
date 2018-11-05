@@ -81,30 +81,28 @@ class DeckListView(FormMixin, ListView):
         info = []
 
         for deck in context['object_list']:
-            info.append(dict(name=deck.title,
-                             created=deck.get_created(),
-                             unixtime=format(deck.created, 'U'),
-                             questioncount=Question.objects.filter(user=self.request.user, deck=deck).count(),
-                             id=deck.id))
+            if deck['max']:
+                last_reviewed = deck['max'].strftime('%b %d, %Y')
+                last_reviewed_sort = format(deck['max'], 'U')
+            else:
+                last_reviewed = ''
+                last_reviewed_sort = ''
+            info.append(dict(name=deck['title'],
+                             created=format(deck['created'].strftime('%b %d, %Y')),
+                             unixtime=format(deck['created'], 'U'),
+                             questioncount=deck['count'],
+                             lastreviewed=last_reviewed,
+                             lastreviewed_sort=last_reviewed_sort,
+                             id=deck['id']))
 
-        context['cols'] = ['name', 'created', 'unixtime', 'questioncount', 'id']
+        context['cols'] = ['name', 'created', 'unixtime', 'questioncount', 'lastreviewed', 'id']
         context['section'] = SECTION
         context['info'] = info
 
         return context
 
     def get_queryset(self):
-        return Deck.objects.filter(user=self.request.user)
-
-#     def get_queryset(self):
-#         print("get_queryset")
-#         decks = Deck.objects.values('id', 'title', 'created').annotate(max=Max('question__last_reviewed')).annotate(count=Count('question'))
-
-#         for deck in decks:
-#             deck['foo'] = 'bar'
-# #            print("{}, {}, {}, {}, {}".format(deck['id'], deck['title'], deck['count'], deck['created'].strftime('%b %d, %Y'),deck['max']))
-
-#         return decks
+        return Deck.objects.values('id', 'title', 'created').annotate(max=Max('question__last_reviewed')).annotate(count=Count('question')).filter(user=self.request.user)
 
 
 class DeckUpdateView(UpdateView):
