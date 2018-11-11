@@ -29,6 +29,10 @@ class QuestionForm(ModelForm):
 
         super(QuestionForm, self).__init__(*args, **kwargs)
 
+        # Some answers might contain start with code identation required for markdown formatiing,
+        #  so disable automatic whitespace stripping
+        self.fields['answer'].strip = False
+
         # If this form has a model attached, get the tags and display them separated by commas
         if self.instance.id:
             self.initial['tags'] = self.instance.get_tags()

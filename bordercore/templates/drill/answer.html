@@ -2,6 +2,10 @@
 
 {% block title %} Deck Detail :: {{ deck.title }}{% endblock %}
 
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/code_style.css" />
+{% endblock %}
+
 {% block left-block %}
     <h2>{{ deck.description }}</h2>
 
