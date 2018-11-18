@@ -99,8 +99,8 @@ class SearchListView(ListView):
             try:
                 results = conn.raw_query(**solr_args)
                 return json.loads(results.decode('UTF-8'))
-            except SolrException as e:
-                messages.add_message(self.request, messages.ERROR, e)
+            except (SolrException, ConnectionRefusedError) as e:
+                messages.add_message(self.request, messages.ERROR, "Solr error: {}".format(e.strerror))
 
     def get_context_data(self, **kwargs):
         context = super(SearchListView, self).get_context_data(**kwargs)
@@ -238,13 +238,12 @@ class SearchTagDetailView(ListView):
         solr_args = {'q': q,
                      'boost': 'importance',
                      'rows': rows,
-                     'fields': ['attr_*', 'author', 'content_type', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
                      'fl': 'author,bordercore_todo_task,content_type,doctype,uuid,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url',
                      'facet': 'on',
                      'facet.mincount': '1',
                      'facet.field': ['{!ex=tags}tags', '{!ex=doctype}doctype'],
                      'sort': 'last_modified+desc'
-        }
+                     }
         results = conn.raw_query(**solr_args)
         return json.loads(results.decode('UTF-8'))
 

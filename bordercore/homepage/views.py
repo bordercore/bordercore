@@ -4,6 +4,7 @@ import random
 import re
 
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseNotFound, HttpResponse, JsonResponse
@@ -50,11 +51,14 @@ def homepage(request):
     music = Listen.objects.filter(user=request.user).select_related().distinct().order_by('-created')[:3]
 
     # Choose a random image
-    random_image = get_random_blob(request, 'image/*')
     random_image_info = None
-    if random_image:
-        random_image_info = {'uuid': random_image.uuid,
-                             'cover_info': Document.get_cover_info(request.user, random_image.sha1sum, 'large', 500)}
+    try:
+        random_image = get_random_blob(request, 'image/*')
+        if random_image:
+            random_image_info = {'uuid': random_image.uuid,
+                                 'cover_info': Document.get_cover_info(request.user, random_image.sha1sum, 'large', 500)}
+    except ConnectionRefusedError as e:
+        messages.add_message(request, messages.ERROR, 'Cannot connect to Solr')
 
     # Get the most recent untagged bookmarks
     bookmarks = Bookmark.objects.filter(user=request.user, tags__isnull=True).order_by('-created')[:10]
