@@ -63,12 +63,12 @@
 
 {% if request.GET %}
 
-    {% include "common/show_messages.html" %}
+    {% include "common/show_messages_inline.html" %}
 
     <div class="row">
         <div class="col-lg-12">
 
-{% if not info %}
+{% if not info and not messages %}
 
     <br />
     <div class="alert alert-info">Nothing found</div>
