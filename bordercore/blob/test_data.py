@@ -74,14 +74,14 @@ def test_books_with_title():
 def test_books_with_author():
     "Assert that all books have at least one author"
     solr_args = {'q': 'doctype:book AND -author:[* TO *]',
-                 'fl': 'id',
+                 'fl': 'id,uuid',
                  'rows': 2147483647,
                  'wt': 'json'}
 
     conn = SolrConnection('http://{}:{}/{}'.format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
     response = conn.raw_query(**solr_args)
-    data = json.loads(response.decode('UTF-8'))['response']['numFound']
-    assert data == 0, "{} books fail this test".format(data)
+    data = json.loads(response.decode('UTF-8'))['response']
+    assert data['numFound'] == 0, "{} books fail this test; example: uuid={}".format(data['numFound'], data['docs'][0]['uuid'])
 
 
 def test_tags_all_lowercase():
