@@ -22,7 +22,7 @@ SECTION = 'KB'
 
 class SearchListView(ListView):
 
-    template_name = 'kb/search/index.html'
+    template_name = 'kb/search.html'
     SOLR_COUNT_PER_PAGE = 100
     context_object_name = 'info'
 
@@ -167,7 +167,7 @@ class SearchListView(ListView):
 
 class SearchTagDetailView(ListView):
 
-    template_name = 'kb/search/tag_detail.html'
+    template_name = 'kb/tag_detail.html'
     SOLR_COUNT_PER_PAGE = 100
     context_object_name = 'info'
 
@@ -337,5 +337,5 @@ def search_admin(request):
         elif request.POST['Go'] in ['Commit']:
             conn.commit()
 
-    return render(request, 'search/admin.html',
+    return render(request, 'kb/admin.html',
                   {'stats': stats})
