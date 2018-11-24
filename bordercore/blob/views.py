@@ -72,6 +72,7 @@ class DocumentCreateView(CreateView):
     def form_valid(self, form):
         obj = form.save(commit=False)
         obj.user = self.request.user
+        obj.file_modified = form.cleaned_data['file_modified']
         obj.save()
 
         # Take care of the tags.  Create any that are new.
@@ -219,6 +220,8 @@ class BlobUpdateView(UpdateView):
                 except Exception as e:
                     from django.forms import ValidationError
                     raise ValidationError("Error: {}".format(e))
+
+        blob.file_modified = form.cleaned_data['file_modified']
 
         # Delete all existing tags
         blob.tags.clear()

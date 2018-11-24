@@ -24,7 +24,6 @@ def index_blob(uuid, file_changed):
 @task()
 def create_thumbnail(uuid):
 
-    print("create thumbnail for blob: {}".format(uuid))
     size = 128, 128
 
     from blob.models import Document

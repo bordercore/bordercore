@@ -5,7 +5,7 @@ from django import forms
 from django.conf import settings
 from django.urls import reverse_lazy
 from django.forms import (ModelForm, Select, Textarea, TextInput, ValidationError)
-from django.forms.fields import CharField
+from django.forms.fields import CharField, IntegerField
 from django.utils.safestring import mark_safe
 
 from blob.models import Document
@@ -26,17 +26,16 @@ class DocumentForm(ModelForm):
         self.fields['tags'].required = False
         self.fields['title'].required = False
 
-        self.fields['filename'].required = False
-        if not self.instance.id:
-            self.fields['filename'].disabled = True
-        else:
+        if self.instance.id:
             self.fields['filename'].initial = os.path.basename(str(self.instance.file))
 
-        if self.instance.id:
             # If this form has a model attached, get the tags and display them separated by commas
             self.initial['tags'] = self.instance.get_tags()
+        else:
+            self.fields['filename'].disabled = True
 
-    filename = CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
+    filename = CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    file_modified = IntegerField(required=False, widget=forms.HiddenInput())
 
     tags = ModelCommaSeparatedChoiceField(
         required=False,
@@ -80,16 +79,10 @@ class DocumentForm(ModelForm):
 
     class Meta:
         model = Document
-        fields = ('file', 'title', 'filename', 'date', 'tags', 'content', 'note', 'importance', 'is_blog', 'is_private', 'id')
+        fields = ('file', 'title', 'filename', 'file_modified', 'date', 'tags', 'content', 'note', 'importance', 'is_blog', 'is_private', 'id')
         widgets = {
             'content': Textarea(attrs={'rows': 5, 'class': 'form-control'}),
             'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'title': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'importance': Select(attrs={'class': 'form-control', 'autocomplete': 'off'}, choices=((1, 'Normal'), (5, 'High'), (10, 'Highest')))
         }
-
-
-
-
-
-

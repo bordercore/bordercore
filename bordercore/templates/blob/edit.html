@@ -248,6 +248,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
 
             $("#id_file").on('change', function() {
                 $('#id_filename').val($(this)[0].files[0].name);
+                $('#id_file_modified').val($('#id_file')[0].files[0].lastModified);
             });
 
             function addMetadata() {
@@ -325,7 +326,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
     <input type="hidden" name="linked_collection" value="{{ linked_collection_info.id }}" />
     {% csrf_token %}
 
-    {% for field in form %}
+    {% for field in form.visible_fields %}
         {% if field.label != 'Filename' %}
         <div class="form-group {% if field.errors %}error{% endif %} row">
             <label class="bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">{{ field.label }}</label>
@@ -334,6 +335,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
 
                 <div class="col-lg-4 input-group" id="blob_edit_file">
                     <input type="text" name="filename" value="{{ form.filename.value|default:"" }}" class="form-control" id="id_filename" />
+                    <input type="hidden" name="file_modified" id="id_file_modified" />
                     <span class="input-group-append">
                         <label class="btn btn-primary">Choose file
                             <input type="file" name="file" id="id_file" hidden />

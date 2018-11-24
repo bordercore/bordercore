@@ -151,6 +151,7 @@ class Document(TimeStampedModel, AmazonMixin):
         return json.loads(conn.raw_query(**solr_args).decode('UTF-8'))['response']
 
     def save(self, *args, **kwargs):
+
         if self.file:
             old_sha1sum = self.sha1sum
             hasher = hashlib.sha1()
@@ -159,14 +160,17 @@ class Document(TimeStampedModel, AmazonMixin):
             self.sha1sum = hasher.hexdigest()
         super(Document, self).save(*args, **kwargs)
 
-        if self.file and old_sha1sum is not None:
-            # We can only move files after super() is called to create the new file's directory structure
-            if self.sha1sum != old_sha1sum:
+        if self.file:
+            if old_sha1sum is not None:
+                # We can only move files after super() is called to create the new file's directory structure
+                if self.sha1sum != old_sha1sum:
+                    create_thumbnail.delay(self.uuid)
+                    self.change_file(old_sha1sum)
+                    self.set_modified_time(self.file_modified)
+            else:
+                # This is a new file.  Attempt to create a thumbnail.
+                self.set_modified_time(self.file_modified)
                 create_thumbnail.delay(self.uuid)
-                self.change_file(old_sha1sum)
-        else:
-            # This is a new file.  Attempt to create a thumbnail.
-            create_thumbnail.delay(self.uuid)
 
     def change_file(self, old_sha1sum):
 
@@ -194,6 +198,11 @@ class Document(TimeStampedModel, AmazonMixin):
         if os.listdir(parent_dir) == []:
             print("Deleting empty parent dir: {}".format(parent_dir))
             os.rmdir(parent_dir)
+
+    def set_modified_time(self, file_modified):
+        file_path = "{}/{}".format(settings.MEDIA_ROOT, self.file.name)
+        stinfo = os.stat(file_path)
+        os.utime(file_path, (stinfo.st_atime, file_modified / 1000))
 
     def get_related_blobs(self):
         related_blobs = []
