@@ -324,20 +324,17 @@ def search_admin(request):
     stats = {}
 
     conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-    for doctype in ['blob', 'bordercore_todo', 'bordercore_bookmark']:
-        r = conn.query('doctype:{}'.format(doctype), rows=1)
-        stats[doctype] = r.numFound
+    for doctype in ['blob', 'bordercore_blog', 'book', 'bordercore_todo', 'bordercore_bookmark', 'document']:
+        solr_args = {'q': 'doctype:{}'.format(doctype), 'rows': 1}
+        r = json.loads(conn.raw_query(**solr_args).decode('UTF-8'))
+        stats[doctype] = r['response']['numFound']
 
     if request.method == 'POST':
 
         if request.POST['Go'] in ['Delete']:
-
-            conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
             conn.delete_query('doctype:%s' % request.POST['doc_type'])
             conn.commit()
         elif request.POST['Go'] in ['Commit']:
-
-            conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
             conn.commit()
 
     return render(request, 'search/admin.html',
