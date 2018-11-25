@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %} Deck Detail :: {{ deck.title }}{% endblock %}
+{% block title %} Deck Detail :: Question {% endblock %}
 
 {% block extra_head %}
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/code_style.css" />
@@ -49,9 +49,7 @@ Easiness Factor: <strong>{{ question.efactor|floatformat:1 }}</strong>
 
     </div>
 
-    {% if message %}
-        <div class="alert alert-info">{{ message }}</div>
-    {% endif %}
+    {% include "common/show_messages.html" %}
 
     <h1>
         {{ question.get_question|safe }}

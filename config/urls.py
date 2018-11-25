@@ -18,8 +18,8 @@ from collection import views as collection_views
 from collection.views import (CollectionCreateView, CollectionDetailView,
                               CollectionListView, CollectionUpdateView)
 from drill import views as drill_views
-from drill.views import (DeckCreateView, DeckDeleteView, DeckDetailView, DeckListView, DeckUpdateView,
-                         QuestionCreateView, QuestionDeleteView, QuestionUpdateView)
+from drill.views import (DeckCreateView, DeckDeleteView, DeckDetailView, DeckListView, DeckSearchListView, DeckUpdateView,
+                         QuestionCreateView, QuestionDeleteView, QuestionDetailView, QuestionUpdateView)
 from feed import views as feed_views
 from feed.views import FeedListView, FeedSubscriptionListView
 from fitness import views as fitness_views
@@ -96,9 +96,11 @@ urlpatterns = [
     path('drill/question/delete/<int:pk>', QuestionDeleteView.as_view(), name='question_delete'),
     path('drill/edit/<int:pk>', DeckUpdateView.as_view(), name='deck_edit'),
     path('drill/deck/get_info', drill_views.get_info, name='deck_get_info'),
-    path('drill/question/<int:deck_id>/', drill_views.ask_question, name='question'),
+    path('drill/question/<int:question_id>/', QuestionDetailView.as_view(), name='question_detail'),
     path('drill/question/add/<int:deck_id>/', QuestionCreateView.as_view(), name='question_add'),
     path('drill/question/edit/<int:pk>/', QuestionUpdateView.as_view(), name='question_edit'),
+    path('drill/search/', DeckSearchListView.as_view(), name='deck_search'),
+    path('drill/study/<int:deck_id>/', drill_views.study_deck, name='deck_study'),
     path('drill/answer/<int:question_id>/', drill_views.show_answer, name='answer'),
     path('drill/result/<int:question_id>/<str:result>', drill_views.record_result, name='record_result'),
 

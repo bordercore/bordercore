@@ -1,8 +1,9 @@
-from django.db.models import Count, Max
+from django.contrib import messages
+from django.db.models import Count, Max, Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, FormMixin, UpdateView
 from django.views.generic.list import ListView
@@ -105,6 +106,34 @@ class DeckListView(FormMixin, ListView):
         return Deck.objects.values('id', 'title', 'created').annotate(max=Max('question__last_reviewed')).annotate(count=Count('question')).filter(user=self.request.user)
 
 
+class DeckSearchListView(ListView):
+
+    template_name = 'drill/search.html'
+
+    def get_queryset(self):
+        search_term = self.request.GET['search_term']
+
+        return Question.objects.filter(Q(question__icontains=search_term) |
+                                       Q(answer__icontains=search_term))
+
+    def get_context_data(self, **kwargs):
+        context = super(DeckSearchListView, self).get_context_data(**kwargs)
+
+        info = []
+
+        for myobject in context['object_list']:
+            info.append(dict(deck_title=myobject.deck.title,
+                             id=myobject.id,
+                             question=myobject.question,
+                             answer=myobject.answer,
+                             deck_id=myobject.deck.id))
+
+        context['cols'] = ['deck_title', 'id', 'question', 'answer', 'deck_id']
+        context['section'] = SECTION
+        context['info'] = info
+        return context
+
+
 class DeckUpdateView(UpdateView):
     model = Deck
     form_class = DeckForm
@@ -175,11 +204,33 @@ class QuestionDeleteView(DeleteView):
         return reverse('deck_detail', kwargs={'deck_id': self.deck_id})
 
 
+class QuestionDetailView(DetailView):
+
+    model = Question
+    slug_field = 'id'
+    slug_url_kwarg = 'id'
+    template_name = 'drill/question.html'
+
+    def get_object(self, queryset=None):
+        obj = Question.objects.get(user=self.request.user, id=self.kwargs.get('question_id'))
+        return obj
+
+    def get_context_data(self, **kwargs):
+        print(dir(self))
+        context = super(QuestionDetailView, self).get_context_data(**kwargs)
+
+        context['section'] = SECTION
+        context['deck'] = self.object.deck
+        context['question'] = self.object
+        context['state_name'] = Question.get_state_name(self.object.state)
+        context['learning_step_count'] = self.object.get_learning_step_count()
+        return context
+
+
 class QuestionUpdateView(UpdateView):
     model = Question
     form_class = QuestionForm
     template_name = 'drill/question_edit.html'
-    # success_url = reverse_lazy('deck_list')
 
     def get_context_data(self, **kwargs):
         context = super(QuestionUpdateView, self).get_context_data(**kwargs)
@@ -225,10 +276,7 @@ def get_info(request):
     return JsonResponse(info)
 
 
-def ask_question(request, deck_id):
-
-    deck = Deck.objects.get(user=request.user, pk=deck_id)
-    message = None
+def study_deck(request, deck_id):
 
     # Criteria for selecting a question:
     #  The question hasn't been reviewed within its interval
@@ -247,15 +295,9 @@ def ask_question(request, deck_id):
     limit 1""", [deck_id, request.user.id])[0]
     except IndexError:
         question = Question.objects.filter(user=request.user, deck=deck_id).order_by('?')[0]
-        message = 'Nothing to drill. Here''s a random question.'
+        messages.add_message(request, messages.INFO, 'Nothing to drill. Here''s a random question.')
 
-    return render(request, 'drill/question.html',
-                  {'section': SECTION,
-                   'deck': deck,
-                   'question': question,
-                   'state_name': Question.get_state_name(question.state),
-                   'learning_step_count': question.get_learning_step_count(),
-                   'message': message})
+    return redirect('question_detail', question_id=question.id)
 
 
 def show_answer(request, question_id):

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %} Deck Detail {% endblock %}
+{% block title %} {{ section }} :: Deck Detail {% endblock %}
 
 {% block left-block %}
 
@@ -39,7 +39,7 @@
 
     <div class="mt-5">
     {% if not object.is_empty %}
-        <a href="{% url 'question' object.id %}" class="btn btn-primary btn-lg" role="button">Study Now</a>
+        <a href="{% url 'deck_study' object.id %}" class="btn btn-primary btn-lg" role="button">Study Now</a>
     {% endif %}
     </div>
 

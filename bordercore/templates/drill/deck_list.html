@@ -4,7 +4,7 @@
 
 {% endblock %}
 
-{% block title %} {{ section }} {% endblock %}
+{% block title %} {{ section }} :: Deck List {% endblock %}
 
 {% block content %}
 
@@ -120,6 +120,17 @@
                 $('#form-deck-delete').submit();
             })
 
+            $('#search').on('keydown', function(event, selection) {
+                if (((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13))) {
+                    $("#form-deck-delete").attr('action', '{% url 'deck_search' %}');
+                    $("#form-deck-delete").attr('method', 'GET');
+                    $('#form-deck-delete').submit();
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+
             $('#modalAdd').on('shown.bs.modal', function() {
                 $('#id_title').focus();
             })
@@ -145,7 +156,7 @@
 
 <div class="row">
     <div class="col-lg-7">
-        <form class="form-inline" role="form" id="form-deck-delete" method="POST">
+        <form class="form-inline" role="form" id="form-deck-delete" method="POST" autocomplete="off">
             {% csrf_token %}
 
             <div class="btn-group">
@@ -155,7 +166,7 @@
             </div>
 
             <div class="form-group">
-                <label id="feedback"></label>
+                <input id="search" name="search_term" type="text" style="width: 200px" class="form-control ml-3" placeholder="Search">
             </div>
 
         </form>
