@@ -91,6 +91,9 @@ class Document(TimeStampedModel, AmazonMixin):
     def get_content(self):
         return markdown.markdown(self.content, extensions=['codehilite(guess_lang=False)', 'tables'])
 
+    def get_note(self):
+        return markdown.markdown(self.note, extensions=['codehilite(guess_lang=False)', 'tables'])
+
     @staticmethod
     def get_content_type(argument):
         switcher = {

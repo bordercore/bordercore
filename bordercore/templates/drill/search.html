@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %} {{ section }} :: Search Results {% endblock %}
+
+{% block content %}
+
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/dataTables.bootstrap4.min.css" />
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap4.min.js"></script>
+
+    <script type="text/javascript" charset="utf-8">
+
+            var table;
+
+        $(document).ready(function() {
+
+            function formatTitle( data, type, row ) {
+                return '<a href="{% url 'deck_detail' 666 %}">'.replace(666, row[4]) + row[0] + '</a>';
+            }
+
+            function formatQuestion( data, type, row ) {
+                return '<a href="{% url 'question_detail' 666 %}">'.replace(666, row[1]) + row[2] + '</a>';
+            }
+
+            table = $('#search_results').DataTable( {
+                "info": false,
+                "paginate": false,
+                "sorting": [[1, 'desc']],
+                "filter": true,
+                "language": {
+                    "emptyTable": "Nothing found"
+                },
+                "lengthChange": false,
+                "dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'float-right col-lg-4'p>>",
+                "searchable": false,
+                "columnDefs": [
+                    { "targets": [0], "sorting": [ "desc", "asc" ], "render": formatTitle, "useRendered": false  },
+                    { "targets": [2], "sorting": [ "desc", "asc" ], "render": formatQuestion, "useRendered": false  },
+                    { "targets": [1,4], "visible": false },
+                ],
+            } );
+
+    });
+
+    </script>
+
+    {% if info %}
+    <div class="row">
+        <div class="col-lg-12">
+            {% include "common/datatable.html" with data=info cols=cols id="search_results" %}
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">Nothing found. <a href="{% url 'deck_list' %}">Go back</a></div>
+    {% endif %}
+
+{% endblock %}
