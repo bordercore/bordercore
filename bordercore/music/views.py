@@ -56,7 +56,7 @@ def music_list(request):
 def album_artwork(request, song_id):
 
     if len(song_id) == 32:
-        file_path = "/tmp/%s" % song_id
+        file_path = "/tmp/{}".format(song_id)
     else:
         song = Song.objects.get(user=request.user, id=song_id)
 
@@ -67,7 +67,7 @@ def album_artwork(request, song_id):
         if len(tracknumber) == 1:
             tracknumber = '0' + tracknumber
 
-            file_path = "%s/%s/%s/%s - %s.mp3" % (MUSIC_ROOT, song.artist, song.album.title, tracknumber, song.title)
+            file_path = "{}/{}/{}/{} - {}.mp3".format(MUSIC_ROOT, song.artist, song.album.title, tracknumber, song.title)
 
     audio = MP3(file_path)
     artwork = audio.tags.get('APIC:')
@@ -91,14 +91,14 @@ def song_edit(request, song_id=None):
         tracknumber = '0' + tracknumber
 
     if song.album:
-        filename = "%s/%s/%s/%s - %s.mp3" % (MUSIC_ROOT, song.artist, song.album.title, tracknumber, song.title)
+        filename = "{}/{}/{}/{} - {}.mp3".format(MUSIC_ROOT, song.artist, song.album.title, tracknumber, song.title)
         try:
             id3_info = MP3(filename)
             file_info = {'id3_info': id3_info,
                          'filesize': os.stat(filename).st_size,
                          'length': time.strftime('%M:%S', time.gmtime(id3_info.info.length))}
         except IOError as e:
-            messages.add_message(request, messages.ERROR, 'IOError: %s' % e)
+            messages.add_message(request, messages.ERROR, 'IOError: {}'.format(e))
 
     if request.method == 'POST':
         if request.POST['Go'] in ['Edit', 'Add']:
@@ -206,14 +206,14 @@ def add_song(request):
         action = 'Review'
         blob = request.FILES['song'].read()
         md5sum = hashlib.md5(blob).hexdigest()
-        filename = "/tmp/%s" % md5sum
+        filename = "/tmp/{}".format(md5sum)
 
         try:
             f = open(filename, "wb")
             f.write(blob)
             f.close()
         except (IOError) as e:
-            messages.add_message(request, messages.ERROR, 'IOError: %s' % e)
+            messages.add_message(request, messages.ERROR, 'IOError: {}'.format(e))
 
         info = MP3(filename, ID3=EasyID3)
 
@@ -233,7 +233,7 @@ def add_song(request):
                 # Look for a fuzzy match
                 fuzzy_matches = Album.objects.filter(Q(user=request.user) & Q(title__icontains=info['title'][0].lower()))
                 if fuzzy_matches:
-                    notes.append('Found a fuzzy match on the album title: "%s" by %s' % (fuzzy_matches[0].title, fuzzy_matches[0].artist))
+                    notes.append('Found a fuzzy match on the album title: "{}" by {}'.format(fuzzy_matches[0].title, fuzzy_matches[0].artist))
 
             if Song.objects.filter(user=request.user, title=info['title'][0], artist=info['artist'][0]):
                 notes.append('You already have a song with this title by this artist')
@@ -265,7 +265,7 @@ def add_song(request):
 
         form = SongForm(request.POST, instance=song)  # A form bound to the POST data
 
-        info = MP3("/tmp/%s" % md5sum, ID3=EasyID3)
+        info = MP3("/tmp/{}".format(md5sum), ID3=EasyID3)
 
         if form.is_valid():
 
@@ -317,11 +317,11 @@ def add_song(request):
             # One directory for the artist and one for the album (if specified)
             fulldirname = MUSIC_ROOT
             if request.POST.get('compilation'):
-                fulldirname = "%s/%s/%s" % (fulldirname, "Various Artists", album_title)
+                fulldirname = "{}/{}/{}".format(fulldirname, "Various Artists", album_title)
             else:
-                fulldirname = "%s/%s" % (fulldirname, form.cleaned_data['artist'])
+                fulldirname = "{}/{}".format(fulldirname, form.cleaned_data['artist'])
                 if album_title:
-                    fulldirname = "%s/%s" % (fulldirname, album_title)
+                    fulldirname = "{}/{}".format(fulldirname, album_title)
 
             try:
                 makedirs(fulldirname)
@@ -339,20 +339,20 @@ def add_song(request):
             if album_title:
                 p = re.compile("^(\d+) - ")
                 if not p.match(filename):
-                    filename = "%s - %s" % (form.cleaned_data['track'], filename)
+                    filename = "{} - {}".format(form.cleaned_data['track'], filename)
 
-            destfilename = "%s/%s" % (fulldirname, filename)
+            destfilename = "{}/{}".format(fulldirname, filename)
 
             if isfile(destfilename):
-                messages.add_message(request, messages.ERROR, 'File already exists: %s' % destfilename)
+                messages.add_message(request, messages.ERROR, 'File already exists: {}'.format(destfilename))
             else:
-                move("/tmp/%s" % md5sum, destfilename)
+                move("/tmp/{}".format(md5sum), destfilename)
 
-            # If album artwork is not found on the filesystem, create it
-            artwork_file = "%s/artwork.jpg" % (fulldirname)
+            # If album artwork is not found on the filesystem, extract it from the audio file itself
+            artwork_file = "{}/artwork.jpg".format(fulldirname)
             if not isfile(artwork_file):
                 audio = MP3(destfilename)
-                if 'APIC:' in audio.tags:
+                if audio and 'APIC:' in audio.tags:
                     artwork = audio.tags['APIC:']
                     fh = open(artwork_file, "wb")
                     fh.write(artwork.data)
@@ -428,9 +428,6 @@ class MusicListJson(BaseDatatableView):
                 item.artist,
                 item.title,
                 item.id
-                # "%s %s" % (item.customer_firstname, item.customer_lastname),
-                # item.get_state_display(),
-                # item.modified.strftime("%Y-%m-%d %H:%M:%S")
             ])
         return json_data
 
