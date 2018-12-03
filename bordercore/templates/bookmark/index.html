@@ -22,6 +22,10 @@
         </div>
     </div>
 
+    <div class="btn-group mt-5">
+        <button class="btn btn-secondary" id="btn-random">Randomize</button>
+    </div>
+
 {% endblock %}
 
 {% block content %}
@@ -47,6 +51,12 @@
     setTimeout("refreshList()", refreshInterval*60*1000);
 
     $(document).ready(function() {
+
+        $('#btn-random').on('click', function() {
+            randomize = 'yes';
+            oTable.draw();
+            return false;
+        });
 
         $('#bookmark_list tbody').on( 'click', 'tr', function () {
             if ( $(this).hasClass('selected') ) {
@@ -136,9 +146,16 @@
         return title;
     }
 
+    var randomize = 0;
+
     oTable = $('#bookmark_list').DataTable( {
         "serverSide": true,
-        "ajaxSource": "{% url 'get_bookmarks_list' %}",
+        "ajax": {
+            url: "{% url 'get_bookmarks_list' %}",
+            data: function ( d ) {
+                d.randomize = randomize;
+            },
+        },
         "paginate": true,
         "info": false,
         "displayLength": 50,
