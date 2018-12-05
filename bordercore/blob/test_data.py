@@ -217,18 +217,18 @@ def test_collection_blobs_exists_in_solr():
 
 def test_blob_metadata_exists_in_solr():
     "Assert that blob metadata exists in Solr"
-    some = MetaData.objects.order_by('?')[:100]
+    metadata = MetaData.objects.all()
 
     defined_solr_fields = ('doctype', 'title', 'author', 'url')
 
-    for m in some:
+    for m in metadata:
         name = m.name.replace(' ', '_').lower()
         if name == 'is_book':
             continue
         if name not in defined_solr_fields:
             name = 'attr_' + name
         # print('uuid:{} AND {}:"{}"'.format(m.blob.uuid, name, m.value.lower()))
-        solr_args = {'q': 'uuid:{} AND {}:"{}"'.format(m.blob.uuid, name, m.value.lower()),
+        solr_args = {'q': 'uuid:{} AND {}:"{}"'.format(m.blob.uuid, name, m.value.lower().replace('"', '\\"')),
                      'fl': 'id',
                      'wt': 'json'}
 
