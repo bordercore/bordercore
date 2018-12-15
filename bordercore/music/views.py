@@ -291,7 +291,8 @@ def add_song(request):
                         messages.add_message(request, messages.ERROR, 'The same album exists but with a different year')
                 else:
                     # This is a new album
-                    a = Album(title=album_title,
+                    a = Album(user=request.user,
+                              title=album_title,
                               artist=album_artist,
                               year=form.cleaned_data['year'],
                               original_release_year=request.POST['original_release_year'] if request.POST['original_release_year'] else form.cleaned_data['year'],
