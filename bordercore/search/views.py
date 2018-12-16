@@ -99,7 +99,9 @@ class SearchListView(ListView):
             try:
                 results = conn.raw_query(**solr_args)
                 return json.loads(results.decode('UTF-8'))
-            except (SolrException, ConnectionRefusedError) as e:
+            except SolrException as e:
+                messages.add_message(self.request, messages.ERROR, "Solr error: {}".format(e))
+            except ConnectionRefusedError as e:
                 messages.add_message(self.request, messages.ERROR, "Solr error: {}".format(e.strerror))
 
     def get_context_data(self, **kwargs):
@@ -306,7 +308,7 @@ def kb_search_tags_booktitles(request):
 
 def escape_solr_terms(term):
     """Escape special characters used by Solr with a backslash"""
-    return re.sub(r"([:\[\]\{\}\(\)])", r"\\\1", term)
+    return re.sub(r"([:\[\]\{\}\(\)-])", r"\\\1", term)
 
 
 def handle_quotes(request, search_term):
