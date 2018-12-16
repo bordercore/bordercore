@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
+import markdown
 
 from lib.mixins import TimeStampedModel
 from tag.models import Tag
@@ -14,6 +15,9 @@ class Album(TimeStampedModel):
     compilation = models.BooleanField(default=False)
     comment = models.TextField(null=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    def get_comment(self):
+        return markdown.markdown(self.comment, extensions=['codehilite(guess_lang=False)', 'tables'])
 
     class Meta:
         unique_together = ("title", "artist")
