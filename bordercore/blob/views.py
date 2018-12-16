@@ -384,6 +384,7 @@ def get_amazon_metadata(request, title):
 
 def extract_thumbnail_from_pdf(request, uuid, page_number):
     from PyPDF2 import PdfFileReader, PdfFileWriter
+    from PyPDF2.utils import PdfReadError
 
     page_number = page_number - 1
 
@@ -399,11 +400,19 @@ def extract_thumbnail_from_pdf(request, uuid, page_number):
 
     input_pdf = PdfFileReader(open(input_file, "rb"))
 
-    output = PdfFileWriter()
-    output.addPage(input_pdf.getPage(page_number))
-    outputStream = open(outfile, "wb")
-    output.write(outputStream)
-    outputStream.close()
+    # Some documents are recognized as encrypted, even though they're not.
+    #  This is a workaround
+    if input_pdf.getIsEncrypted():
+        input_pdf.decrypt('')
+
+    try:
+        output = PdfFileWriter()
+        output.addPage(input_pdf.getPage(page_number))
+        outputStream = open(outfile, "wb")
+        output.write(outputStream)
+        outputStream.close()
+    except PdfReadError as e:
+        return JsonResponse({'error': str(e)})
 
     # Convert the pdf page to jpg
     from pdf2image import convert_from_path
