@@ -15,7 +15,7 @@ from bookmark import views as bookmark_views
 from bookmark.api import BookmarkResource
 from bookmark.views import OrderListJson
 from collection import views as collection_views
-from collection.views import (CollectionCreateView, CollectionDetailView,
+from collection.views import (CollectionCreateView, CollectionDeleteView, CollectionDetailView,
                               CollectionListView, CollectionUpdateView)
 from drill import views as drill_views
 from drill.views import (DeckCreateView, DeckDeleteView, DeckDetailView, DeckListView, DeckSearchListView, DeckUpdateView,
@@ -83,6 +83,7 @@ urlpatterns = [
 
     path('collection/embedded/<int:collection_id>', CollectionDetailView.as_view(), {'embedded': True}, name='collection_embedded'),
     path('collection/add', CollectionCreateView.as_view(), name='collection_add'),
+    path('collection/delete/<int:pk>', CollectionDeleteView.as_view(), name='collection_delete'),
     path('collection/edit/<int:pk>', CollectionUpdateView.as_view(), name='collection_edit'),
     path('collection/<int:collection_id>/', CollectionDetailView.as_view(), name='collection_detail'),
     path('collection/get_info', collection_views.get_info, name='collection_get_info'),

@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, JsonResponse
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, FormMixin, UpdateView
+from django.views.generic.edit import CreateView, DeleteView, FormMixin, UpdateView
 from django.views.generic.list import ListView
 
 from blob.models import Document
@@ -40,6 +40,16 @@ class CollectionListView(FormMixin, ListView):
         context['info'] = info
 
         return context
+
+
+class CollectionDeleteView(DeleteView):
+
+    def get_object(self, queryset=None):
+        return Collection.objects.get(user=self.request.user, id=self.kwargs.get('pk'))
+
+    def get_success_url(self):
+        messages.add_message(self.request, messages.INFO, "Collection <strong>{}</strong> deleted".format(self.object.name))
+        return reverse('collection_list')
 
 
 class CollectionDetailView(DetailView):
