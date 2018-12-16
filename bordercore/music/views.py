@@ -296,7 +296,7 @@ def add_song(request):
                               artist=album_artist,
                               year=form.cleaned_data['year'],
                               original_release_year=request.POST['original_release_year'] if request.POST['original_release_year'] else form.cleaned_data['year'],
-                              compilation=request.POST.get('compilation', False))
+                              compilation=True if 'compilation' in request.POST else False)
             else:
                 # No album was specified
                 a = None
