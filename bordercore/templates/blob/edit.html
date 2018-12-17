@@ -179,6 +179,8 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
 
             {% include "common/common-typeaheadjs-tagsinput.js" %}
 
+            var metadata_count = {{ metadata|length }};
+
             var engineMetadata = new Bloodhound({
                 name: 'metadata',
                 remote: {
@@ -238,7 +240,6 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
             });
 
             $('#id_value').keypress( function(e) {
-                console.log(e.which);
                 // Transforms 'JERRELL SCHIVERS' to 'Jerrell Schivers'
                 if (e.which && (e.which == 2 || e.which == 8747)) { // Control-B (Linux) or Alt-B (Mac)
                     $(this).val( $(this).val().toLowerCase().replace(/(\s+)(.)|^(.)/g, formatName) );
@@ -252,10 +253,11 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
             });
 
             function addMetadata() {
+                metadata_count++;
                 var name = $('#id_name').val();
                 var value = $('#id_value').val();
                 $('.metadata_hidden:first').clone(true).insertAfter("#new_metadata");
-                $('.metadata_hidden:eq(1)').find('input').val(value).attr('name', 'm_' + name);
+                $('.metadata_hidden:eq(1)').find('input').val(value).attr('name', metadata_count.toString() + '_' + name);
                 $('.metadata_hidden:eq(1)').find('label').html(name);
                 $('#id_name').val('');
                 $('#id_value').val('');
@@ -403,12 +405,12 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
         </div>
     </div>
 
-    {% for key, value in metadata.items %}
+    {% for m in metadata %}
         <div class="form-group {% if field.errors %}error{% endif %} row">
-            <label class="bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">{{ key }}</label>
+            <label class="bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">{{ m.0 }}</label>
             <div class="col-lg-10 col-sm-10">
                 <div class="col-lg-10 input-group">
-                    <input type="text" name="m_{{ key }}" id="id_new" value="{{ value }}" class="form-control" autocomplete="off" />
+                    <input type="text" name="{{ forloop.counter }}_{{ m.0 }}" id="id_new" value="{{ m.1 }}" class="form-control" autocomplete="off" />
                     <span class="input-group-append">
                         <button class="btn btn-danger btn-remove" type="button">
                             <span class="glyphicon glyphicon-minus"></span>

@@ -50,15 +50,18 @@ def delete_metadata(uuid, name, value):
     url = 'http://{}:{}/{}/update?commit=true'.format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION)
     headers = {'Content-type': 'application/json'}
 
+    # "Author" is stored in its own Solr field, so we need
+    # to handle it separately.
+    if name == 'Author':
+        solr_field = 'author'
+    else:
+        solr_field = 'attr_{}'.format(name)
+
     data = [{'doctype': 'blob',
              'uuid': str(blob.uuid),
              'id': "blob_{}".format(blob.id),
-             'attr_{}'.format(name): {'remove': value}
+             solr_field: {'remove': value}
     }]
-
-    # metadata_old = blob.metadata_set.all()
-    # for m in metadata_old:
-    #     data[0]['attr_{}'.format(m.name)]={'remove': m.value}
 
     r = requests.post(url, headers=headers, json=data)
     if (r.status_code != requests.codes.ok):

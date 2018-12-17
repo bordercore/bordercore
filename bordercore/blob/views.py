@@ -264,13 +264,12 @@ def handle_metadata(blob, request):
         i.delete()
 
     for key, value in request.POST.items():
-        p = re.compile("^m_(.*)")
+        p = re.compile("^\d+_(.*)")
         m = p.match(key)
         if m:
-            for i in value.split(","):
-                new_metadata, created = MetaData.objects.get_or_create(user=request.user, name=m.group(1), value=i.strip(), blob=blob)
-                if created:
-                    new_metadata.save()
+            new_metadata, created = MetaData.objects.get_or_create(user=request.user, name=m.group(1), value=value.strip(), blob=blob)
+            if created:
+                new_metadata.save()
 
     if request.POST.get('is_book', ''):
         new_metadata = MetaData(user=request.user, name='is_book', value='true', blob=blob)
@@ -278,15 +277,16 @@ def handle_metadata(blob, request):
 
 
 def preprocess_metadata(metadata_in):
-    metadata_out = {}
+
+    metadata_out = []
+
+    metadata_count = 0
 
     for m in metadata_in:
         if m.name == 'is_book':
             continue
-        try:
-            metadata_out[m.name] = metadata_out[m.name] + ", " + m.value
-        except KeyError:
-            metadata_out[m.name] = m.value
+        metadata_count = metadata_count + 1
+        metadata_out.append((m.name, m.value))
 
     return metadata_out
 
