@@ -49,7 +49,9 @@ def music_list(request):
                    'cols': ['Date', 'artist', 'title', 'id'],
                    'message': message,
                    'recent_songs': recent_songs,
-                   'random_albums': random_albums})
+                   'random_albums': random_albums,
+                   'title': 'Music List'
+                   })
 
 
 @login_required
@@ -576,9 +578,11 @@ class WishListDetailView(UpdateView):
 
     def form_valid(self, form):
         self.object = form.save()
-        context = self.get_context_data(form=form)
-        context["message"] = "Wishlist updated"
-        return self.render_to_response(context)
+        messages.add_message(self.request, messages.INFO, 'Wishlist edited')
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse('wishlist')
 
 
 class WishListCreateView(CreateView):
