@@ -27,6 +27,7 @@ class ExerciseDetailView(DetailView):
             pass
         context['activity_info'] = ExerciseUser.objects.filter(user=self.request.user, exercise__id=self.object.id)
         context['section'] = SECTION
+        context['title'] = 'Exercise Detail :: {}'.format(self.object.exercise)
         self.set_plot_data(context, workout_data)
         return context
 
@@ -94,7 +95,8 @@ def fitness_summary(request):
 
     return render(request, 'fitness/summary.html', {'active_exercises': active_exercises,
                                                     'inactive_exercises': inactive_exercises,
-                                                    'section': SECTION})
+                                                    'section': SECTION,
+                                                    'title': 'Fitness Summary'})
 
 
 def change_active_status(request):

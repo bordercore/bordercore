@@ -164,6 +164,7 @@ class SearchListView(ListView):
         context['info'] = info
         context['section'] = SECTION
         context['search_sort_by'] = self.request.session.get('search_sort_by', '')
+        context['title'] = 'Search'
         return context
 
 
@@ -225,6 +226,11 @@ class SearchTagDetailView(ListView):
 
         context['kb_tag_detail_current_tab'] = self.request.session.get('kb_tag_detail_current_tab', '')
         context['section'] = SECTION
+
+        if context['tag_list']:
+            context['title'] = 'Search :: Tag Detail :: {}'.format(', '.join(tag_list))
+        else:
+            context['title'] = 'Tag Search'
 
         return context
 
@@ -340,4 +346,6 @@ def search_admin(request):
             conn.commit()
 
     return render(request, 'kb/admin.html',
-                  {'stats': stats})
+                  {'section': SECTION,
+                   'stats': stats,
+                   'title': 'Search Admin'})

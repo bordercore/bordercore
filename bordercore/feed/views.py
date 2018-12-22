@@ -63,6 +63,7 @@ class FeedListView(ListView):
         context['section'] = SECTION
         context['current_feed'] = self.current_feed
         context['json'] = json.dumps(self.feed_all)
+        context['title'] = 'Feed List'
         return context
 
 
@@ -83,6 +84,7 @@ class FeedSubscriptionListView(FeedListView):
     def get_context_data(self, **kwargs):
         context = super(FeedSubscriptionListView, self).get_context_data(**kwargs)
         context['feeds_not_subscribed'] = self.feeds_not_subscribed
+        context['title'] = 'Feeds :: Manage Subscriptions'
         return context
 
 
@@ -135,8 +137,10 @@ def feed_edit(request, feed_id=None):
     if feed_id:
         f = Feed.objects.get(pk=feed_id)
         action = 'Edit'
+        title = 'Feed Edit :: {}'.format(f.name)
     else:
         action = 'Add'
+        title = 'Feed Add'
 
     if request.method == 'POST':
         if request.POST['Go'] in ['Edit', 'Add']:
@@ -174,7 +178,8 @@ def feed_edit(request, feed_id=None):
                   {'section': SECTION,
                    'action': action,
                    'form': form,
-                   'subscribers': subscribers})
+                   'subscribers': subscribers,
+                   'title': title})
 
 
 @login_required

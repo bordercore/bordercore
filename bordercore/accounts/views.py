@@ -24,6 +24,7 @@ class UserProfileDetailView(UpdateView):
         form = self.get_form(form_class)
         context = self.get_context_data(object=self.object, form=form)
         context['section'] = SECTION
+        context['title'] = 'Preferences'
         return self.render_to_response(context)
 
     def get_object(self, queryset=None):

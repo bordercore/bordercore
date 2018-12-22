@@ -38,6 +38,7 @@ class CollectionListView(FormMixin, ListView):
         context['cols'] = ['name', 'tags', 'created', 'unixtime', 'objectcount', 'id']
         context['section'] = SECTION
         context['info'] = info
+        context['title'] = 'Collection List'
 
         return context
 
@@ -114,6 +115,7 @@ class CollectionDetailView(DetailView):
                 messages.add_message(self.request, messages.ERROR, 'Cannot connect to Solr')
 
             context['section'] = SECTION
+            context['title'] = 'Collection Detail :: {}'.format(self.object.name)
 
         return context
 
@@ -125,6 +127,7 @@ class CollectionCreateView(CreateView):
     def get_context_data(self, **kwargs):
         context = super(CollectionCreateView, self).get_context_data(**kwargs)
         context['action'] = 'Add'
+        context['title'] = 'Add Collection'
         return context
 
     def form_valid(self, form):

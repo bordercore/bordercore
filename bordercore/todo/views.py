@@ -53,6 +53,7 @@ class TodoListView(ListView):
         context['cols'] = ['task', 'modified', 'unixtime', 'todoid']
         context['section'] = SECTION
         context['info'] = info
+        context['title'] = 'Todo List'
         return context
 
 
@@ -67,6 +68,7 @@ class TodoDetailView(UpdateView):
         context['section'] = SECTION
         context['pk'] = self.kwargs.get('pk')
         context['action'] = 'Edit'
+        context['title'] = 'Todo Edit :: {}'.format(self.object.task)
         return context
 
     def get_queryset(self):
@@ -101,6 +103,7 @@ class TodoCreateView(CreateView):
         context = super(TodoCreateView, self).get_context_data(**kwargs)
         context['section'] = SECTION
         context['action'] = 'Add'
+        context['title'] = 'Todo Add'
         return context
 
     def get_form_kwargs(self):

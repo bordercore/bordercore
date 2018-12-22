@@ -156,6 +156,7 @@ class AlbumDetailView(DetailView):
                                   length=time.strftime('%M:%S', time.gmtime(song.length))))
 
         context['song_list'] = song_list
+        context['title'] = 'Album Detail :: {}'.format(self.object.title)
         context['cols'] = ['id', 'track', 'raw_title', 'title', 'length', 'length_seconds']
 
         return context
@@ -187,7 +188,9 @@ def artist_detail(request, artist_name):
                    'album_list': a,
                    'song_list': song_list,
                    'compilation_album_list': c,
-                   'cols': ['date', 'artist', 'title', 'info', 'id']})
+                   'cols': ['date', 'artist', 'title', 'info', 'id'],
+                   'title': 'Artist Detail :: {}'.format(artist_name)
+                  })
 
 
 @login_required
@@ -379,7 +382,8 @@ def add_song(request):
                    'info': info,
                    'notes': notes,
                    'md5sum': md5sum,
-                   'form': form})
+                   'form': form,
+                   'title': 'Add Song'})
 
 
 class MusicListJson(BaseDatatableView):
@@ -539,11 +543,18 @@ class WishListView(ListView):
         info = []
 
         for myobject in context['object_list']:
-            info.append(dict(artist=myobject.artist, song=myobject.song, album=myobject.album, created=myobject.get_created(), unixtime=format(myobject.created, 'U'), wishlistid=myobject.id))
+            info.append(dict(
+                artist=myobject.artist,
+                song=myobject.song,
+                album=myobject.album,
+                created=myobject.get_created(),
+                unixtime=format(myobject.created, 'U'),
+                wishlistid=myobject.id))
 
         context['cols'] = ['artist', 'song', 'album', 'created', 'wishlistid']
         context['section'] = SECTION
         context['info'] = info
+        context['title'] = 'Wishlist'
         return context
 
 
@@ -556,6 +567,7 @@ class WishListDetailView(UpdateView):
         context['section'] = SECTION
         context['pk'] = self.kwargs.get('pk')
         context['action'] = 'Edit'
+        context['title'] = 'Wishlist Detail :: {} - {}'.format(self.object.artist, self.object.song)
         return context
 
     def get_object(self, queryset=None):
@@ -577,6 +589,7 @@ class WishListCreateView(CreateView):
         context = super(WishListCreateView, self).get_context_data(**kwargs)
         context['section'] = SECTION
         context['action'] = 'Add'
+        context['title'] = 'Wishlist Edit'
         return context
 
     def get_form_kwargs(self):

@@ -99,6 +99,7 @@ class DeckListView(FormMixin, ListView):
         context['cols'] = ['name', 'created', 'unixtime', 'questioncount', 'lastreviewed', 'id']
         context['section'] = SECTION
         context['info'] = info
+        context['title'] = 'Deck List'
 
         return context
 
@@ -131,6 +132,7 @@ class DeckSearchListView(ListView):
         context['cols'] = ['deck_title', 'id', 'question', 'answer', 'deck_id']
         context['section'] = SECTION
         context['info'] = info
+        context['title'] = 'Drill Search'
         return context
 
 
@@ -166,6 +168,7 @@ class QuestionCreateView(CreateView):
         context = super(QuestionCreateView, self).get_context_data(**kwargs)
         context['action'] = 'Add'
         context['deck'] = Deck.objects.get(user=self.request.user, pk=self.kwargs['deck_id'])
+        context['title'] = 'Drill :: Add Question'
         return context
 
     def form_valid(self, form):
@@ -216,7 +219,6 @@ class QuestionDetailView(DetailView):
         return obj
 
     def get_context_data(self, **kwargs):
-        print(dir(self))
         context = super(QuestionDetailView, self).get_context_data(**kwargs)
 
         context['section'] = SECTION
@@ -224,6 +226,7 @@ class QuestionDetailView(DetailView):
         context['question'] = self.object
         context['state_name'] = Question.get_state_name(self.object.state)
         context['learning_step_count'] = self.object.get_learning_step_count()
+        context['title'] = 'Drill :: Question Detail'
         return context
 
 
@@ -236,6 +239,7 @@ class QuestionUpdateView(UpdateView):
         context = super(QuestionUpdateView, self).get_context_data(**kwargs)
         context['action'] = 'Edit'
         context['deck'] = Deck.objects.get(user=self.request.user, pk=context['question'].deck_id)
+        context['title'] = 'Drill :: Question Edit'
         return context
 
     def form_valid(self, form):
@@ -313,7 +317,8 @@ def show_answer(request, question_id):
                    'deck': deck,
                    'question': question,
                    'state_name': Question.get_state_name(question.state),
-                   'learning_step_count': question.get_learning_step_count()})
+                   'learning_step_count': question.get_learning_step_count(),
+                   'title': 'Drill :: Show Answer'})
 
 
 def record_result(request, question_id, result):
@@ -356,4 +361,5 @@ def record_result(request, question_id, result):
                    'deck': deck,
                    'question': question,
                    'state_name': Question.get_state_name(question.state),
-                   'learning_step_count': question.get_learning_step_count()})
+                   'learning_step_count': question.get_learning_step_count(),
+                   'title': 'Drill :: Question Detail'})

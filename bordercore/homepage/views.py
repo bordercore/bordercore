@@ -96,7 +96,8 @@ def homepage(request):
                    'bookmarks': bookmarks,
                    'default_collection': default_collection,
                    'overdue_exercises': sorted(overdue_exercises, key=lambda x: x['lag'], reverse=True),
-                   'left_block_nohighlight': True})
+                   'left_block_nohighlight': True,
+                   'title': 'Homepage'})
 
 
 @login_required

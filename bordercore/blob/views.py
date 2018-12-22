@@ -47,6 +47,7 @@ class DocumentCreateView(CreateView):
             # Grab the initial metadata from one of the other blobs in the collection
             context['metadata'] = context['linked_collection_blob_list'][0].metadata_set.all()
         context['section'] = SECTION
+        context['title'] = 'Add Blob'
         return context
 
     def get_form(self, form_class=None):
@@ -146,7 +147,7 @@ class BlobDetailView(DetailView):
                 messages.add_message(self.request, messages.INFO, 'New blob not yet indexed in Solr')
             else:
                 messages.add_message(self.request, messages.ERROR, 'Blob not found in Solr')
-        context['title'] = self.object.get_title(remove_edition_string=True)
+        context['title'] = 'Blob Detail :: {}'.format(self.object.get_title(remove_edition_string=True))
         context['fields_ignore'] = ['is_book', 'Url', 'Publication Date', 'Title', 'Author']
 
         context['current_collections'] = Collection.objects.filter(user=self.request.user, blob_list__contains=[{'id': self.object.id}])
@@ -189,6 +190,7 @@ class BlobUpdateView(UpdateView):
                                                                  & ~Q(blob_list__contains=[{'id': self.object.id}])
                                                                  & Q(is_private=False))
         context['action'] = 'Edit'
+        context['title'] = 'Blob Edit :: {}'.format(self.object.get_title(remove_edition_string=True))
         return context
 
     def get(self, request, **kwargs):
@@ -248,6 +250,7 @@ class BlobThumbnailView(UpdateView):
         if context['solr_info'].get('content_type', ''):
             context['content_type'] = Document.get_content_type(context['solr_info']['content_type'][0]).lower()
         context['section'] = SECTION
+        context['title'] = 'Blob Thumbnail :: {}'.format(self.object.get_title(remove_edition_string=True))
 
         return context
 
@@ -506,4 +509,5 @@ class BlogListView(ListView):
             messages.add_message(self.request, messages.ERROR, 'No blog entries found')
 
         context['section'] = self.SECTION
+        context['title'] = 'Blog List'
         return context
