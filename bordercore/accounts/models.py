@@ -11,7 +11,7 @@ from tag.models import Tag
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT)
     rss_feeds = ArrayField(models.IntegerField(), null=True)
-    favorite_tags = models.ManyToManyField(Tag, null=True)
+    favorite_tags = models.ManyToManyField(Tag)
     bookmarks_show_untagged_only = models.BooleanField(default=False)
     todo_default_tag = models.OneToOneField(Tag, related_name='default_tag', null=True, on_delete=models.PROTECT)
     orgmode_file = models.TextField(null=True)
@@ -31,5 +31,7 @@ def create_user_profile(sender, instance, created, **kwargs):
         p.user = instance
         p.save()
 
+
 post_save.connect(create_user_profile, sender=User)
+
 post_save.connect(create_api_key, sender=User)
