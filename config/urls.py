@@ -62,6 +62,7 @@ urlpatterns = [
     path('blob/set_amazon_image_info/<str:sha1sum>/<int:index>', blob_views.set_amazon_image_info, name='set_amazon_image_info'),
     path('blob/extract_thumbnail_from_pdf/<uuid:uuid>/<int:page_number>', blob_views.extract_thumbnail_from_pdf, name='extract_thumbnail_from_pdf'),
     path('blob/mutate', blob_views.collection_mutate, name='collection_mutate'),
+    path('blob/parse_date/<path:input_date>', blob_views.parse_date, name='parse_date'),
     path('blob/<uuid:uuid>', BlobDetailView.as_view(), name='blob_detail'),
     path('blob/<uuid:uuid>/edit', BlobUpdateView.as_view(), name='blob_edit'),
     path('blob/<uuid:uuid>/thumbnail', BlobThumbnailView.as_view(), name='blob_thumbnail'),

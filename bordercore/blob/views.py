@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import datetime
 import os
 import re
@@ -467,6 +468,79 @@ def collection_mutate(request):
     collection.save()
 
     return JsonResponse({'message': message})
+
+
+def parse_date_format_1(input_date, matcher):
+    """
+    Parse a date like '01/01/18'
+    """
+    return datetime.datetime.strptime(input_date, '%m/%d/%y')
+
+
+def parse_date_format_2(input_date, matcher):
+    """
+    Parse a date like '01/01/2018'
+    """
+    return datetime.datetime.strptime(input_date, '%m/%d/%Y')
+
+
+def parse_date_format_3(input_date, matcher):
+    """
+    Parse a date like 'Jan 01, 2018'
+    """
+    return datetime.datetime.strptime('{}/{}/{}'.format(matcher.group(1),
+                                                        matcher.group(2),
+                                                        matcher.group(3)),
+                                      '%b/%d/%Y')
+
+
+def parse_date_format_4(input_date, matcher):
+    """
+    Parse a date like 'January 01, 2018'
+    """
+    return datetime.datetime.strptime('{}/{}/{}'.format(matcher.group(1),
+                                                        matcher.group(2),
+                                                        matcher.group(3)),
+                                      '%B/%d/%Y')
+
+
+def parse_date(request, input_date):
+
+    error = None
+    response = ''
+
+    # The order of these regexes is important!
+    # We need 'Feb' to match before 'February', for example, so that the
+    #  right 'do_' function is called
+
+    pdict = OrderedDict()
+
+    # 01/01/99
+    pdict["(\d+)/(\d+)/(\d\d)$"] = parse_date_format_1
+
+    # 01/01/1999
+    pdict["(\d+)/(\d+)/(\d\d\d\d)$"] = parse_date_format_2
+
+    # Jan 1, 1999
+    pdict["(\w\w\w)\.?\s+(\d+),?\s+(\d+)$"] = parse_date_format_3
+
+    # January 1, 1999
+    pdict["(\w+)\.?\s+(\d+),?\s+(\d+)$"] = parse_date_format_4
+
+    # Remove extraneous characters
+    # eg "August 12th, 2001" becomes "August 12, 2001"
+    input_date = re.sub(r"(\d+)(?:nd|rd|st|th)", r"\1", input_date)
+    for key, value in pdict.items():
+        m = re.compile(key).match(input_date)
+        if m:
+            try:
+                response = value(input_date, m).strftime("%Y-%m-%d")
+            except ValueError as e:
+                error = str(e)
+            break
+
+    return JsonResponse({'output_date': response,
+                         'error': error})
 
 
 class BlogListView(ListView):

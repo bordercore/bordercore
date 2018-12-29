@@ -44,6 +44,19 @@
                 }
             }
 
+            $( ".date" ).on( "paste", function() {
+                var clipText = event.clipboardData.getData('Text');
+                $.ajax( { type: 'GET',
+                          url: '{% url 'parse_date' 666 %}'.replace(666, encodeURIComponent($.trim(clipText))),
+                          }).done(function( json ) {
+                    if (!json || json.error != null) {
+                        console.log("Date error: " + json.error);
+                    } else {
+                        $('.date').datepicker('update', json.output_date);
+                    }
+                })
+            });
+
             $('#btn-cleanupfilename').click( function () {
                 var title = $('#id_title').val();
                 if (title) {
@@ -136,8 +149,7 @@
     </div>
 
     <div class="row">
-        <div class="col-lg-4">
-            <br />
+        <div class="col-lg-4 mt-3">
             <input type="button" class="btn btn-secondary" id="btn-cleanupfilename" value="Cleanup Filename" />
         </div>
     </div>
