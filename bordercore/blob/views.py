@@ -148,6 +148,7 @@ class BlobDetailView(DetailView):
                 messages.add_message(self.request, messages.INFO, 'New blob not yet indexed in Solr')
             else:
                 messages.add_message(self.request, messages.ERROR, 'Blob not found in Solr')
+        context['caption'] = self.object.get_title(remove_edition_string=True)
         context['title'] = 'Blob Detail :: {}'.format(self.object.get_title(remove_edition_string=True))
         context['fields_ignore'] = ['is_book', 'Url', 'Publication Date', 'Title', 'Author']
 
