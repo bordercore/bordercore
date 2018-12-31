@@ -124,7 +124,7 @@ class Document(TimeStampedModel, AmazonMixin):
     def get_url(self):
         return self.file
 
-    def get_title(self, remove_edition_string=False):
+    def get_title(self, remove_edition_string=False, use_filename_if_present=False):
         title = self.title
         if title:
             if remove_edition_string:
@@ -134,7 +134,10 @@ class Document(TimeStampedModel, AmazonMixin):
                     return "%s" % (matches.group(1))
             return title
         else:
-            return "No title"
+            if use_filename_if_present:
+                return os.path.basename(str(self.file))
+            else:
+                return "No title"
 
     def get_edition_string(self):
         if self.title:
@@ -149,7 +152,7 @@ class Document(TimeStampedModel, AmazonMixin):
         conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
         solr_args = {'q': query,
                      'wt': 'json',
-                     'fl': 'author,bordercore_todo_task,content_type,doctype,note,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url,bordercore_blogpost_title',
+                     'fl': 'author,bordercore_todo_task,content_type,doctype,note,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url',
                      'rows': 1000}
         return json.loads(conn.raw_query(**solr_args).decode('UTF-8'))['response']
 
