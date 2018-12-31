@@ -1,7 +1,4 @@
-import json
-import os
-
-from django.conf import settings
+from django.db.models import Case, CharField, Value, When
 from django.contrib import messages
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, JsonResponse
@@ -12,8 +9,6 @@ from django.views.generic.list import ListView
 from blob.models import Document
 from collection.forms import CollectionForm
 from collection.models import Collection
-from search.solr import SolrResultSet
-from solrpy.core import SolrConnection
 
 IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
 SECTION = 'Collections'
@@ -33,7 +28,11 @@ class CollectionListView(FormMixin, ListView):
         info = []
 
         for myobject in context['object_list']:
-            info.append(dict(name=myobject.name, tags=myobject.get_tags(), created=myobject.get_created(), unixtime=format(myobject.created, 'U'), objectcount=len(myobject.blob_list) if myobject.blob_list else 0, id=myobject.id))
+            info.append(dict(name=myobject.name,
+                             tags=myobject.get_tags(),
+                             created=myobject.get_created(),
+                             unixtime=format(myobject.created, 'U'),
+                             objectcount=len(myobject.blob_list) if myobject.blob_list else 0, id=myobject.id))
 
         context['cols'] = ['name', 'tags', 'created', 'unixtime', 'objectcount', 'id']
         context['section'] = SECTION
@@ -65,57 +64,26 @@ class CollectionDetailView(DetailView):
         if self.kwargs.get('embedded', ''):
             self.template_name = 'collection/embedded.html'
 
-        if self.object.blob_list:
-            q = 'id:(%s)' % ' '.join(['"blob_%s"' % t['id'] for t in self.object.blob_list])
+        ids = [x['id'] for x in self.object.blob_list]
+        order = Case(*[When(id=i, then=pos) for pos, i in enumerate(ids)])
 
-            conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+        whens = [
+            When(id=x['id'], then=Value(x.get('note', ''))) for x in self.object.blob_list
+        ]
 
-            solr_args = {'q': q,
-                         'rows': 1000,
-                         'fields': ['attr_*', 'author', 'content_type', 'doctype', 'filepath', 'tags', 'title', 'author', 'url'],
-                         'wt': 'json',
-                         'fl': 'author,bordercore_todo_task,content_type,doctype,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,uuid,url,bordercore_blogpost_title'
-            }
+        blob_list = Document.objects.filter(id__in=ids).annotate(
+            collection_note=Case(
+                *whens,
+                output_field=CharField()
+            )).order_by(order)
 
-            try:
-                results = conn.raw_query(**solr_args)
-                # Build a temporary dict for fast lookup
-                solr_list_objects = {}
-                for x in json.loads(results.decode('UTF-8'))['response']['docs']:
-                    solr_list_objects[int(x['id'].split('blob_')[1])] = x
+        for blob in blob_list:
+            blob.cover_info = Document.get_cover_info(self.request.user, blob.sha1sum, max_cover_image_width=70, size='small')
+            blob.title = blob.get_title(use_filename_if_present=True)
 
-                # Solr doesn't return the blobs in the order specified in postgres, so we need to re-order
-                blob_list_temp = []
-                for blob in self.object.blob_list:
-                    try:
-                        if blob.get('note', ''):
-                            solr_list_objects[blob['id']]['note'] = blob['note']
-                        blob_list_temp.append(solr_list_objects[blob['id']])
-                    except KeyError:
-                        print("Warning: blob_id = %s not found in solr." % blob['id'])
-
-                for object in blob_list_temp:
-                    solr_result_set = SolrResultSet(object)
-                    if object['doctype'] in ('blob', 'book'):
-                        if 'filepath' in object:
-                            filename = os.path.basename(object['filepath'])
-                        object['cover_info'] = Document.get_cover_info(self.request.user, object['sha1sum'], max_cover_image_width=70, size='small')
-                        if object['content_type']:
-                            try:
-                                object['content_type'] = object['content_type'][0].split('/')[1]
-                            except IndexError:
-                                print("Warning: content_type malformed: id=%s, sha1sum=%s, content_type=%s" % (object['id'], object['sha1sum'], object['content_type']))
-                            if object['content_type'] in IMAGE_TYPE_LIST:
-                                object['is_image'] = True
-                        object['title'] = solr_result_set.get_title()
-
-                context['blob_list'] = blob_list_temp
-
-            except ConnectionRefusedError as e:
-                messages.add_message(self.request, messages.ERROR, 'Cannot connect to Solr')
-
-            context['section'] = SECTION
-            context['title'] = 'Collection Detail :: {}'.format(self.object.name)
+        context['blob_list'] = blob_list
+        context['section'] = SECTION
+        context['title'] = 'Collection Detail :: {}'.format(self.object.name)
 
         return context
 
