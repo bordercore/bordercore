@@ -3,11 +3,13 @@ import json
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import F
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django_datatables_view.base_datatable_view import BaseDatatableView
 import requests
 
+from accounts.models import SortOrder
 from bookmark.models import Bookmark, BookmarkTagUser
 from bookmark.forms import BookmarkForm
 from bookmark.tasks import snarf_favicon
@@ -125,13 +127,9 @@ def tag_search(request):
 
 
 @login_required
-def bookmark_tag(request):
+def bookmark_tag(request, tag_filter=None):
 
     bookmarks = None
-
-    tag_filter = request.GET.get('tagsearch', None)
-    if not tag_filter:
-        tag_filter = request.session.get('bookmark_tag_filter', None)
 
     sorted_bookmarks = []
 
@@ -151,13 +149,31 @@ def bookmark_tag(request):
             # TODO: Use celery to fire off an email about the error
             sorted_bookmarks = bookmarks
 
-    favorite_tags = request.user.userprofile.favorite_tags.all()
+    tag_counts = {}
+    for tag in BookmarkTagUser.objects.filter(user=request.user, tag__in=request.user.userprofile.favorite_tags.all()):
+        tag_counts[tag.tag.name] = len(tag.bookmark_list)
+
+    favorite_tags = request.user.userprofile.favorite_tags.all().order_by('sortorder__sort_order')
 
     return render(request, 'bookmark/tag.html',
                   {'section': SECTION,
                    'bookmarks': sorted_bookmarks,
                    'tag_filter': tag_filter,
+                   'tag_counts': tag_counts,
                    'favorite_tags': favorite_tags})
+
+
+def sort_favorite_tags(request):
+    """
+    Move a given tag to a new position in a sorted list
+    """
+
+    tag_id = request.POST['tag_id']
+    new_position = int(request.POST['new_position'])
+
+    SortOrder.reorder(tag_id, new_position)
+
+    return HttpResponse(json.dumps('OK'), content_type="application/json")
 
 
 @login_required

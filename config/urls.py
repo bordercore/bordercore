@@ -74,6 +74,8 @@ urlpatterns = [
     path('bookmarks/edit', bookmark_views.bookmark_edit, name='bookmark_add'),
     path('bookmarks/snarf_link.html', bookmark_views.snarf_link),
     path('bookmarks/tag/', bookmark_views.bookmark_tag, name='bookmark_tag'),
+    path('bookmarks/tag/sort', bookmark_views.sort_favorite_tags, name='sort_favorite_tags'),
+    path('bookmarks/tag/<str:tag_filter>', bookmark_views.bookmark_tag, name='bookmark_tag'),
     path('bookmarks/tagsearch/', bookmark_views.tag_search, name='tag_search'),
     path('bookmarks/tag_bookmark_list.json', bookmark_views.tag_bookmark_list, name='tag_bookmark_list'),
     path('bookmarks/delete/<int:bookmark_id>', bookmark_views.bookmark_delete, name='bookmark_delete'),
@@ -146,6 +148,7 @@ urlpatterns = [
     path('kb/search/', SearchListView.as_view(), name='search'),
 
     path('tag/search', tag_views.tag_search, name='tag_search'),
+    path('tag/add_favorite', tag_views.add_favorite_tag, name='add_favorite_tag'),
 
     path('todo/add', TodoCreateView.as_view(), name='todo_add'),
     path('todo/edit/<int:pk>', TodoDetailView.as_view(), name='todo_edit'),
