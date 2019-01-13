@@ -196,6 +196,11 @@
                             </span>
                             <span class="ml-2" style="width: 20px">{{ link.url|favicon:16|safe }} </span>
                             <a class="one-tag ml-2" href="{{ link.url }}" id="link_{{ link.id }}">{{ link.title }}</a>
+                            {% if link.tag_list %}
+                                {% for tag in link.tag_list %}
+                                    <a class="badge badge-info" href="{% url 'bookmark_tag' tag %}">{{ tag }}</a>
+                                {% endfor %}
+                            {% endif %}
                         </span>
                     </li>
 

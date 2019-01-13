@@ -134,8 +134,11 @@ def bookmark_tag(request, tag_filter=None):
     sorted_bookmarks = []
 
     if tag_filter:
-        bookmarks = Bookmark.objects.filter(user=request.user, tags__name__exact=tag_filter).order_by('-created')
         request.session['bookmark_tag_filter'] = tag_filter
+
+        bookmarks = Bookmark.objects.filter(user=request.user, tags__name__exact=tag_filter).order_by('-created')
+        for bookmark in bookmarks:
+            bookmark.tag_list = [x.name for x in bookmark.tags.all() if x.name != tag_filter]
 
         try:
             sort_order = BookmarkTagUser.objects.get(user=request.user, tag=Tag.objects.get(name=tag_filter))
