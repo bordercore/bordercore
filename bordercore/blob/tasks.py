@@ -61,8 +61,8 @@ def delete_metadata(uuid, name, value):
              'uuid': str(blob.uuid),
              'id': "blob_{}".format(blob.id),
              solr_field: {'remove': value}
-    }]
+             }]
 
     r = requests.post(url, headers=headers, json=data)
     if (r.status_code != requests.codes.ok):
-        print("Error deleting metadata for blod uuid={}: {}".format(blob.uuid, r.text))
+        print("Error deleting metadata for blog uuid={}: {}".format(blob.uuid, r.text))
