@@ -68,6 +68,10 @@
         <div id="blob_note">{{ solr_info.note }}</div>
     {% endif %}
 
+    {% if object.has_been_modified %}
+        <div class="mt-3">Last edited: {{ object.modified }}</div>
+    {% endif %}
+
     {% if linked_blobs %}
         <div class="row top-buffer">
             <div class="col-lg-12">
@@ -103,7 +107,7 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
         </div>
     {% endif %}
 
-    <br /><br />
+    <hr />
 
     <form action="{% url 'blob_edit' object.uuid %}">
 

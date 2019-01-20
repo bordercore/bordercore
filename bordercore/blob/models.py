@@ -210,6 +210,17 @@ class Document(TimeStampedModel, AmazonMixin):
         stinfo = os.stat(file_path)
         os.utime(file_path, (stinfo.st_atime, file_modified / 1000))
 
+    def has_been_modified(self):
+        """
+        If the modified time is greater than the creation time by
+        more than one second, assume it has been edited.
+        """
+
+        if int(self.modified.strftime("%s")) - int(self.created.strftime("%s")) > 0:
+            return True
+        else:
+            return False
+
     def get_related_blobs(self):
         related_blobs = []
         for blob in self.documents.all():
