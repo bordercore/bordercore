@@ -65,7 +65,7 @@ class WishListForm(ModelForm):
         model = WishList
         fields = ('artist', 'song', 'album')
         widgets = {
-            'artist': TextInput(attrs={'class': 'form-control'}),
-            'song': TextInput(attrs={'class': 'form-control'}),
-            'album': TextInput(attrs={'class': 'form-control'}),
+            'artist': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'song': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'album': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
         }

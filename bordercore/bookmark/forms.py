@@ -79,8 +79,8 @@ class BookmarkForm(ModelForm):
         model = Bookmark
         fields = ('url', 'title', 'note', 'tags', 'importance', 'is_pinned', 'daily', 'id')
         widgets = {
-            'url': TextInput(attrs={'class': 'form-control'}),
-            'title': TextInput(attrs={'class': 'form-control'}),
+            'url': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'title': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'importance': Select(attrs={'class': 'form-control', 'autocomplete': 'off'}, choices=((1, 'Normal'), (5, 'High'), (10, 'Highest'))),
             'daily': CheckboxInput(check_test=daily_check_test)
