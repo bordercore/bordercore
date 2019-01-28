@@ -4,7 +4,7 @@ import re
 
 import django
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Count, Min, Max, Q
 
 from solrpy.core import SolrConnection
 
@@ -12,6 +12,9 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.prod'
 
 django.setup()
 
+from django.contrib.auth.models import User
+
+from accounts.models import SortOrder
 from blob.models import Document, MetaData
 from collection.models import Collection
 from tag.models import Tag
@@ -101,6 +104,24 @@ def test_tags_no_orphans():
     assert len(t) == 0, "{} tags fail this test; example: name={}".format(len(t), t[0].name)
 
 
+def test_favorite_tags_sort_order():
+    """
+    This test checks for three things:
+
+    For every user, min(sort_order) = 1
+    For every user, max(sort_order) should equal the total count
+    No duplicate sort_order values for each user
+    """
+    for user in User.objects.all():
+        count = SortOrder.objects.filter(user_profile__user=user).count()
+        if count > 0:
+            assert SortOrder.objects.filter(user_profile__user=user).aggregate(Min('sort_order'))['sort_order__min'] == 1, "Min(sort_order) is not 1 for user={}".format(user)
+            assert SortOrder.objects.filter(user_profile__user=user).aggregate(Max('sort_order'))['sort_order__max'] == count, "Max(sort_order) does not equal total count for user={}".format(user)
+
+    q = SortOrder.objects.values('sort_order', 'user_profile_id').order_by().annotate(dcount=Count('sort_order')).filter(dcount__gt=1)
+    assert len(q) == 0, "Multiple sort_order values found"
+
+
 def test_blobs_on_filesystem_exist_in_db():
     "Assert that all blobs found on the filesystem exist in the database"
     p = re.compile(settings.MEDIA_ROOT + '/\w\w/(\w{40})')
@@ -152,7 +173,7 @@ def test_solr_blobs_exist_on_filesystem():
     response = conn.raw_query(**solr_args)
     data = json.loads(response.decode('UTF-8'))['response']
     for result in data['docs']:
-        assert os.path.isfile(result['filepath']) is not False, "blob {} exists in Solr but not on the filesystem".format(result['sha1sum'])
+        assert os.path.isfile(result.get('filepath', '')) is not False, "blob {} exists in Solr but not on the filesystem".format(result['sha1sum'])
 
 
 def test_solr_blobs_exist_in_db():
