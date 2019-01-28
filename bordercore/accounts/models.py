@@ -31,6 +31,18 @@ class SortOrder(models.Model):
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
     sort_order = models.IntegerField()
 
+    def delete(self):
+
+        # Get all tags below this one
+        id_list = SortOrder.objects.filter(user_profile=self.user_profile,
+                                           sort_order__gte=self.sort_order)
+
+        # Move them up by decreasing their sort order
+        SortOrder.objects.filter(id__in=id_list).update(sort_order=F('sort_order') - 1)
+
+        super(SortOrder, self).delete()
+
+
     def save(self, *args, **kwargs):
 
         sorted = SortOrder.objects.filter(user_profile=self.user_profile).order_by('sort_order')
@@ -42,13 +54,15 @@ class SortOrder(models.Model):
         super(SortOrder, self).save(*args, **kwargs)
 
     @staticmethod
-    def reorder(tag_id, new_position):
+    def reorder(user, tag_id, new_position):
         """
         Move a given tag to a new position in a sorted list
         """
 
+        user_profile = UserProfile.objects.get(user=user)
+
         # Get old position
-        old_position = SortOrder.objects.get(tag_id=tag_id)
+        old_position = SortOrder.objects.get(user_profile=user_profile, tag_id=tag_id)
 
         if old_position.sort_order != new_position:
 
@@ -59,14 +73,15 @@ class SortOrder(models.Model):
                     #  need to be re-ordered by increasing their sort order
 
                     # Get all tags which match this criteria
-                    id_list = SortOrder.objects.filter(sort_order__gte=new_position,
+                    id_list = SortOrder.objects.filter(user_profile=user_profile,
+                                                       sort_order__gte=new_position,
                                                        sort_order__lte=old_position.sort_order)
 
                     # Update their sort order
                     SortOrder.objects.filter(id__in=id_list).update(sort_order=F('sort_order') + 1)
 
                     # Finally, update the sort order for the tag in question
-                    SortOrder.objects.filter(tag_id=tag_id).update(sort_order=new_position)
+                    SortOrder.objects.filter(user_profile=user_profile, tag_id=tag_id).update(sort_order=new_position)
                 except Exception as e:
                     print("Exception: {}".format(e))
             else:
@@ -76,19 +91,25 @@ class SortOrder(models.Model):
                     #  need to be re-ordered by decreasing their sort order
 
                     # Get all tags which match this criteria
-                    id_list = SortOrder.objects.filter(sort_order__lte=new_position,
+                    id_list = SortOrder.objects.filter(user_profile=user_profile,
+                                                       sort_order__lte=new_position,
                                                        sort_order__gte=old_position.sort_order)
 
                     # Update their sort order
                     SortOrder.objects.filter(id__in=id_list).update(sort_order=F('sort_order') - 1)
 
                     # Finally, update the sort order for the tag in question
-                    SortOrder.objects.filter(tag_id=tag_id).update(sort_order=new_position)
+                    SortOrder.objects.filter(user_profile=user_profile, tag_id=tag_id).update(sort_order=new_position)
                 except Exception as e:
                     print("Exception: {}".format(e))
 
     class Meta:
-        unique_together = ('user_profile', 'tag', 'sort_order')
+        unique_together = (
+
+            # Avoid duplicate favorite tags
+            ('user_profile', 'tag'),
+
+        )
         ordering = ('sort_order',)
 
 

@@ -8,6 +8,9 @@
 
 {% block extra_head %}
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/smoke.min.css" />
+    <script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
 {% endblock %}
 
 {% block left-block %}
@@ -24,14 +27,13 @@
 
                     $.ajax( { type: 'POST',
                               url: '{% url 'sort_favorite_tags' %}',
-                              data: { tag_id: tag_id, new_position: ui.item.index() + 1 }
-                              }).done(function( json ) {
-                        if (!json || json.error != null) {
-                            console.log("Date error: " + json.error);
+                              data: { tag_id: tag_id, new_position: ui.item.index() + 1 },
+                              error: function (xhr, ajaxOptions, error) {
+                            $.smkAlert({text: 'Error reordering tags: ' + error, type: 'error', position:'top-right'});
                         }
-                    })
+                              } )
                 }
-            });
+            })
         })
 
     </script>
@@ -51,22 +53,24 @@
 
     <br />
 
-    {% if tag_filter not in tag_counts %}
-    <form action="{% url 'add_favorite_tag' %}" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="tag" value="{{ tag_filter }}" />
-        <button type="submit" class="btn">
+    {% if tag_filter %}
+        {% if tag_filter not in tag_counts %}
+            <form action="{% url 'add_favorite_tag' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="tag" value="{{ tag_filter }}" />
+                <button type="submit" class="btn">
             Add To Favorites
-        </button>
-    </form>
-    {% else %}
-    <form action="" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="tag" value="{{ tag_filter }}" />
-        <button type="submit" class="btn">
+                </button>
+            </form>
+        {% else %}
+            <form action="{% url 'remove_favorite_tag' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="tag" value="{{ tag_filter }}" />
+                <button type="submit" class="btn">
             Remove From Favorites
-        </button>
-    </form>
+                </button>
+            </form>
+        {% endif %}
     {% endif %}
 
 
@@ -162,7 +166,7 @@
                 <span class="ml-5 mr-3"><strong>Tag filter</strong></span>
 
                 <div class="form-group">
-                    <input id="tag-filter" type="text" value="{{ tag_filter }}" class="form-control" autocomplete="off" placeholder="Tag Filter"/>
+                    <input id="tag-filter" type="text" value="{{ tag_filter }}" class="form-control" autocomplete="off" placeholder="Tag Name"/>
                 </div>
 
             </form>

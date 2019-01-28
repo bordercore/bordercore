@@ -127,7 +127,7 @@ def tag_search(request):
 
 
 @login_required
-def bookmark_tag(request, tag_filter=None):
+def bookmark_tag(request, tag_filter=""):
 
     bookmarks = None
 
@@ -174,7 +174,7 @@ def sort_favorite_tags(request):
     tag_id = request.POST['tag_id']
     new_position = int(request.POST['new_position'])
 
-    SortOrder.reorder(tag_id, new_position)
+    SortOrder.reorder(request.user, tag_id, new_position)
 
     return HttpResponse(json.dumps('OK'), content_type="application/json")
 

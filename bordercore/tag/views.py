@@ -37,3 +37,16 @@ def add_favorite_tag(request):
     c.save()
 
     return redirect('bookmark_tag', tag_filter=tag)
+
+
+def remove_favorite_tag(request):
+
+    tag = request.POST['tag']
+
+    tag_object = Tag.objects.get(name=tag)
+
+    old_position = SortOrder.objects.get(user_profile=request.user.userprofile, tag=tag_object)
+
+    old_position.delete()
+
+    return redirect('bookmark_tag')
