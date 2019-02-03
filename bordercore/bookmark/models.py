@@ -41,6 +41,13 @@ class Bookmark(TimeStampedModel):
         return ", ".join([tag.name for tag in self.tags.all()])
 
     def delete(self):
+
+        # Delete it from any bookmark_list in BookmarkTagUser
+        bookmarktaguser = BookmarkTagUser.objects.filter(user=self.user, bookmark_list__contains=[self.id])
+        for x in bookmarktaguser:
+            x.bookmark_list.remove(self.id)
+            x.save()
+
         conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
         conn.delete(queries=['id:bordercore_bookmark_%s' % (self.id)])
         conn.commit()

@@ -46,3 +46,12 @@ def test_one_tag_per_user():
     "Only one tag per user should be in represented by a BookmarkTagUser"
     t = BookmarkTagUser.objects.values('tag', 'user').order_by().annotate(user_count=Count('user')).filter(user_count__gt=1)
     assert len(t) == 0, "tags found more than once per user: {}".format(t)
+
+
+def test_deleted_bookmarks_in_bookmarktaguser():
+    "Check if every bookmark listed in each BookmarkTagUser bookmark list exists"
+    all = BookmarkTagUser.objects.all()
+
+    for x in all:
+        bookmarks = Bookmark.objects.filter(id__in=x.bookmark_list)
+        assert len(x.bookmark_list) == len(bookmarks), "Missing bookmark in BookmarkTagUser {}".format(x.id)
