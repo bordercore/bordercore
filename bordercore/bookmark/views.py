@@ -1,9 +1,10 @@
+import datetime
 import json
+import lxml.html as lh
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import F
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django_datatables_view.base_datatable_view import BaseDatatableView
@@ -124,6 +125,101 @@ def tag_search(request):
     tags = Tag.objects.filter(user=request.user, name__istartswith=request.GET.get('query', ''), bookmark__isnull=False).distinct('name')
 
     return HttpResponse(json.dumps([x.name for x in tags]), content_type="application/json")
+
+
+def add_bookmarks_from_import(request, tag, bookmarks):
+    """
+    Add bookmarks with the provided tag. Ignore duplicates.
+    """
+
+    added_count = 0
+    dupe_count = 0
+
+    for link in bookmarks:
+        try:
+            Bookmark.objects.get(url=link["url"])
+            dupe_count = dupe_count + 1
+        except ObjectDoesNotExist:
+            b = Bookmark(
+                user=request.user,
+                url=link["url"],
+                title=link["title"],
+                created=link["created"],
+                modified=link["created"]
+            )
+            b.save()
+
+            # Add the specified tag to the bookmark.
+            # Create the tag if it doesn't exist.
+            try:
+                t = Tag.objects.get(name=tag)
+            except ObjectDoesNotExist:
+                t = Tag(name=tag)
+                t.save()
+            b.tags.set([t])
+
+            # We need to save the model again after adding the tags,
+            #  since the b.tags.set() line above *doesn't* call the
+            #  Bookmark model's post_save signal.
+            b.save()
+
+            snarf_favicon.delay(link["url"])
+            added_count = added_count + 1
+
+    messages.add_message(request, messages.INFO, "Bookmarks added: {}. Duplicates ignored: {}.".format(added_count, dupe_count))
+
+
+def bookmark_import(request):
+    """
+    Import bookmarks from a file.
+    Supported formats: Google bookmark export format
+    """
+
+    if request.method == 'POST':
+
+        start = request.POST.get('start_folder', '')
+        tag = request.POST.get('tag', '')
+
+        links = []
+
+        try:
+
+            if not tag:
+                messages.add_message(request, messages.ERROR, "Please specify a tag")
+                raise ValueError()
+            if not start:
+                messages.add_message(request, messages.ERROR, "Please specify a starting folder")
+                raise ValueError()
+
+            xml_string = ''
+            for chunk in request.FILES['file'].chunks():
+                xml_string = xml_string + str(chunk)
+
+            tree = lh.fromstring(xml_string)
+
+            found = tree.xpath('//dt/h3[text()="{}"]/following::dl[1]//a'.format(start))
+
+            if not found:
+                messages.add_message(request, messages.ERROR, "No bookmarks were found")
+                raise ValueError()
+
+            for link in found:
+                links.append(
+                    {
+                        "url": link.get("href"),
+                        "created": datetime.datetime.fromtimestamp(int(link.get("add_date"))),
+                        "title": link.text
+                    }
+                )
+
+            add_bookmarks_from_import(request, tag, links)
+
+        except ValueError:
+            pass
+
+    return render(request, 'bookmark/import.html',
+                  {'section': SECTION
+                  })
 
 
 @login_required

@@ -72,6 +72,7 @@ urlpatterns = [
     path('bookmarks/click<int:bookmark_id>', bookmark_views.bookmark_click, name='bookmark_click'),
     path('bookmarks/edit/<int:bookmark_id>', bookmark_views.bookmark_edit, name='bookmark_edit'),
     path('bookmarks/edit', bookmark_views.bookmark_edit, name='bookmark_add'),
+    path('bookmarks/import', bookmark_views.bookmark_import, name='bookmark_import'),
     path('bookmarks/snarf_link.html', bookmark_views.snarf_link),
     path('bookmarks/tag/', bookmark_views.bookmark_tag, name='bookmark_tag'),
     path('bookmarks/tag/sort', bookmark_views.sort_favorite_tags, name='sort_favorite_tags'),
