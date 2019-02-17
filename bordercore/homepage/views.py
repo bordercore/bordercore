@@ -36,7 +36,7 @@ def homepage(request):
             tree = PyOrgMode.OrgDataStructure()
             tree.load_from_file(request.user.userprofile.orgmode_file)
 
-            startnode = get_nodes_by_tag(tree.root, "todo", [])
+            startnode = PyOrgMode.OrgDataStructure.get_nodes_by_tag(tree.root, "todo", [])
             nodes = PyOrgMode.OrgDataStructure.get_nodes_by_priority(startnode[0], "A", [])
 
             for node in nodes:
@@ -130,22 +130,6 @@ def get_random_blob(request, content_type):
     except ObjectDoesNotExist:
         pass
     return blob
-
-
-# This possibly should be moved to a static method in PyOrgMode
-def get_nodes_by_tag(node, tag, found_nodes=[]):
-
-        if isinstance(node, PyOrgMode.OrgElement):
-            try:
-                if tag in node.tags:
-                    found_nodes.append(node)
-            except AttributeError:
-                pass
-            for node in node.content:
-                get_nodes_by_tag(node, tag, found_nodes)
-            return found_nodes
-        else:
-            return found_nodes
 
 
 def get_date(node):
