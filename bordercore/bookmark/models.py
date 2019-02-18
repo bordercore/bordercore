@@ -42,8 +42,8 @@ class Bookmark(TimeStampedModel):
 
     def delete(self):
 
-        # Delete it from any bookmark_list in BookmarkTagUser
-        bookmarktaguser = BookmarkTagUser.objects.filter(user=self.user, bookmark_list__contains=[self.id])
+        # Delete it from any bookmark_list in TagBookmarkList
+        bookmarktaguser = TagBookmarkList.objects.filter(user=self.user, bookmark_list__contains=[self.id])
         for x in bookmarktaguser:
             x.bookmark_list.remove(self.id)
             x.save()
@@ -54,9 +54,9 @@ class Bookmark(TimeStampedModel):
 
         super(Bookmark, self).delete()
 
-    def update_bookmark_tags(self):
+    def update_tag_bookmarklist(self):
         """
-        When a bookmark is edited, update all BookmarkTagUser objects
+        When a bookmark is edited, update all TagBookmarkList objects
         to reflect this change.
         """
 
@@ -65,7 +65,7 @@ class Bookmark(TimeStampedModel):
         if self.pk is not None:
             for old_tag in self.tags.all():
                 if old_tag.name not in [new_tag.name for new_tag in self.tags.all()]:
-                    sorted_list = BookmarkTagUser.objects.get(tag=Tag.objects.get(name=old_tag.name), user=self.user)
+                    sorted_list = TagBookmarkList.objects.get(tag=Tag.objects.get(name=old_tag.name), user=self.user)
                     sorted_list.bookmark_list.remove(self.id)
                     sorted_list.save()
 
@@ -81,7 +81,7 @@ class Bookmark(TimeStampedModel):
             except ObjectDoesNotExist:
                 # This is the first time this tag has been applied to a bookmark.
                 # Create a new list with one member (the current bookmark)
-                sorted_list = BookmarkTagUser(tag=Tag.objects.get(name=new_tag.name),
+                sorted_list = TagBookmarkList(tag=Tag.objects.get(name=new_tag.name),
                                               bookmark_list=[self.id],
                                               user=self.user)
                 sorted_list.save()
@@ -89,14 +89,14 @@ class Bookmark(TimeStampedModel):
 
 def postSaveForBookmark(**kwargs):
     instance = kwargs.get('instance')
-    instance.update_bookmark_tags()
+    instance.update_tag_bookmarklist()
     index_bookmark.delay(instance.id)
 
 
 post_save.connect(postSaveForBookmark, Bookmark)
 
 
-class BookmarkTagUser(models.Model):
+class TagBookmarkList(models.Model):
     tag = models.ForeignKey(Tag, on_delete=models.PROTECT)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     bookmark_list = ArrayField(models.IntegerField())

@@ -100,7 +100,7 @@ def test_tags_no_orphans():
                            Q(bookmark__isnull=True) &
                            Q(collection__isnull=True) &
                            Q(song__isnull=True) &
-                           Q(bookmarktaguser__isnull=True))
+                           Q(tagbookmarklist__isnull=True))
     assert len(t) == 0, "{} tags fail this test; example: name={}".format(len(t), t[0].name)
 
 

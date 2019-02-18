@@ -11,7 +11,7 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 import requests
 
 from accounts.models import SortOrder
-from bookmark.models import Bookmark, BookmarkTagUser
+from bookmark.models import Bookmark, TagBookmarkList
 from bookmark.forms import BookmarkForm
 from bookmark.tasks import snarf_favicon
 from tag.models import Tag
@@ -83,7 +83,7 @@ def bookmark_edit(request, bookmark_id=None):
 def bookmark_delete(request, bookmark_id=None):
 
     # First delete the bookmark from any tag lists
-    info = BookmarkTagUser.objects.raw("SELECT * FROM bookmark_bookmarktaguser WHERE user_id = %s AND %s = ANY (bookmark_list)", [request.user.id, bookmark_id])
+    info = TagBookmarkList.objects.raw("SELECT * FROM bookmark_bookmarktaguser WHERE user_id = %s AND %s = ANY (bookmark_list)", [request.user.id, bookmark_id])
     for tag in info:
         tag.bookmark_list.remove(bookmark_id)
         tag.save()
@@ -235,7 +235,7 @@ def bookmark_tag(request, tag_filter=""):
             bookmark.tag_list = [x.name for x in bookmark.tags.all() if x.name != tag_filter]
 
         try:
-            sort_order = BookmarkTagUser.objects.get(user=request.user, tag=Tag.objects.get(name=tag_filter))
+            sort_order = TagBookmarkList.objects.get(user=request.user, tag=Tag.objects.get(name=tag_filter))
             sorted_bookmarks = sorted(bookmarks, key=lambda v: sort_order.bookmark_list.index(v.id))
         except ObjectDoesNotExist as e:
             print("Error! %s" % e)
@@ -247,7 +247,7 @@ def bookmark_tag(request, tag_filter=""):
             sorted_bookmarks = bookmarks
 
     tag_counts = {}
-    for tag in BookmarkTagUser.objects.filter(user=request.user, tag__in=request.user.userprofile.favorite_tags.all()):
+    for tag in TagBookmarkList.objects.filter(user=request.user, tag__in=request.user.userprofile.favorite_tags.all()):
         tag_counts[tag.tag.name] = len(tag.bookmark_list)
 
     favorite_tags = request.user.userprofile.favorite_tags.all().order_by('sortorder__sort_order')
@@ -280,7 +280,7 @@ def tag_bookmark_list(request):
     link_id = int(request.POST['link_id'])
     position = int(request.POST['position'])
 
-    sorted_list = BookmarkTagUser.objects.get(user=request.user, tag=Tag.objects.get(name=tag))
+    sorted_list = TagBookmarkList.objects.get(user=request.user, tag=Tag.objects.get(name=tag))
 
     # Verify that the bookmark is in the existing sort list
     if link_id not in sorted_list.bookmark_list:
