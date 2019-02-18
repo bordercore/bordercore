@@ -22,7 +22,6 @@ SECTION = 'Bookmarks'
 @login_required
 def bookmark_list(request):
 
-    message = ''
     bookmarks = []
 
     untagged_count = Bookmark.objects.filter(user=request.user, tags__isnull=True).count()
@@ -31,7 +30,6 @@ def bookmark_list(request):
                   {'section': SECTION,
                    'bookmarks': bookmarks,
                    'cols': ['Date', 'url', 'title', 'id'],
-                   'message': message,
                    'untagged_count': untagged_count})
 
 
@@ -53,7 +51,7 @@ def bookmark_edit(request, bookmark_id=None):
 
     if request.method == 'POST':
         if request.POST['Go'] in ['Edit', 'Add']:
-            form = BookmarkForm(request.POST, instance=b)  # A form bound to the POST data
+            form = BookmarkForm(request.POST, instance=b, request=request)  # A form bound to the POST data
             if form.is_valid():
                 newform = form.save(commit=False)
                 newform.user = request.user
@@ -69,11 +67,11 @@ def bookmark_edit(request, bookmark_id=None):
 
     elif bookmark_id:
         action = 'Edit'
-        form = BookmarkForm(instance=b)
+        form = BookmarkForm(instance=b, request=request)
 
     else:
         action = 'Add'
-        form = BookmarkForm()  # An unbound form
+        form = BookmarkForm(request=request)  # An unbound form
 
     return render(request, 'bookmark/edit.html',
                   {'section': SECTION,

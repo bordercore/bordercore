@@ -15,6 +15,7 @@ def daily_check_test(value):
 class BookmarkForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
         super(BookmarkForm, self).__init__(*args, **kwargs)
 
         self.fields['note'].required = False
@@ -27,7 +28,7 @@ class BookmarkForm(ModelForm):
     def clean_url(self):
         data = self.cleaned_data['url']
         # Verify that this url is not a dupe.  Note: exclude current url when searching.
-        b = Bookmark.objects.filter(user=self.instance.user, url=data).exclude(id=self.instance.id)
+        b = Bookmark.objects.filter(user=self.request.user, url=data).exclude(id=self.instance.id)
         if b:
             raise ValidationError("Error: this bookmark already exists")
         return data
