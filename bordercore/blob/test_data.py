@@ -271,3 +271,19 @@ def test_solr_search():
     response = conn.raw_query(**solr_args)
     data = json.loads(response.decode('UTF-8'))['response']['numFound']
     assert data >= 1, "solr search fails"
+
+
+def test_blob_tags_match_solr():
+    "Assert that all blob tags match those found in Solr"
+    blobs = Document.objects.filter(tags__isnull=False)
+
+    for b in blobs:
+        tags = " AND ".join(["\"{}\"".format(x.name) for x in b.tags.all()])
+        solr_args = {"q": "uuid:{} AND tags:({})".format(b.uuid, tags),
+                     "fl": "id,tags",
+                     "wt": "json"}
+
+        conn = SolrConnection("http://{}:{}/{}".format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+        response = conn.raw_query(**solr_args)
+        data = json.loads(response.decode("UTF-8"))["response"]["numFound"]
+        assert data == 1, "blob uuid={} has tags which don't match those found in Solr".format(b.uuid)
