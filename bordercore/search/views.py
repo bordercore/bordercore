@@ -250,7 +250,7 @@ class SearchTagDetailView(ListView):
                      'facet': 'on',
                      'facet.mincount': '1',
                      'facet.field': ['{!ex=tags}tags', '{!ex=doctype}doctype'],
-                     'sort': 'last_modified+desc'
+                     'sort': 'last_modified desc'
                      }
         results = conn.raw_query(**solr_args)
         return json.loads(results.decode('UTF-8'))

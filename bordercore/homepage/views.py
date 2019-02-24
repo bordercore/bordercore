@@ -117,7 +117,7 @@ def get_random_blob(request, content_type):
     seed = random.randint(1, 10000)
     conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
     solr_args = {'q': 'content_type:%s' % (content_type),
-                 'sort': 'random_%s+desc' % (seed),
+                 'sort': 'random_%s desc' % (seed),
                  'wt': 'json',
                  'fl': 'internal_id,sha1sum,uuid',
                  'fq': '-is_private:true',

@@ -37,7 +37,7 @@ def test_books_with_tags():
 
 def test_documents_with_dates():
     "Assert that all documents have a date"
-    solr_args = {'q': 'doctype:document+AND+-date_unixtime:[*+TO+*]',
+    solr_args = {'q': 'doctype:document AND -date_unixtime:[* TO *]',
                  'fl': 'id',
                  'rows': 2147483647,
                  'wt': 'json'}
