@@ -13,7 +13,7 @@ import requests
 from accounts.models import SortOrder
 from bookmark.models import Bookmark, TagBookmarkList
 from bookmark.forms import BookmarkForm
-from bookmark.tasks import snarf_favicon
+from bookmark.tasks import index_bookmark, snarf_favicon
 from tag.models import Tag
 
 SECTION = 'Bookmarks'
@@ -56,7 +56,8 @@ def bookmark_edit(request, bookmark_id=None):
                 newform = form.save(commit=False)
                 newform.user = request.user
                 newform.save()
-                form.save_m2m()  # Save the many-to-many data for the form.
+                form.save_m2m()  # Save the many-to-many data for the form (eg tags).
+                index_bookmark.delay(form.instance.id)
                 snarf_favicon.delay(form.instance.url)
                 messages.add_message(request, messages.INFO, 'Bookmark edited')
                 return bookmark_list(request)

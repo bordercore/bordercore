@@ -90,7 +90,6 @@ class Bookmark(TimeStampedModel):
 def postSaveForBookmark(**kwargs):
     instance = kwargs.get('instance')
     instance.update_tag_bookmarklist()
-    index_bookmark.delay(instance.id)
 
 
 post_save.connect(postSaveForBookmark, Bookmark)
