@@ -3,7 +3,6 @@ from solrpy.core import SolrConnection
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models.signals import post_save
 
 from todo.tasks import index_todo
 from lib.mixins import TimeStampedModel
@@ -32,10 +31,6 @@ class Todo(TimeStampedModel):
 
         super(Todo, self).delete()
 
-
-def postSaveForTodo(**kwargs):
-    instance = kwargs.get('instance')
-    index_todo.delay(instance.id)
-
-
-post_save.connect(postSaveForTodo, Todo)
+    def save(self, *args, **kwargs):
+        super(Todo, self).save(*args, **kwargs)
+        index_todo.delay(self.id)

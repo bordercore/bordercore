@@ -16,7 +16,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.prod'
 django.setup()
 
 from bookmark.models import Bookmark
-
+from bookmark.tasks import index_bookmark
 
 link_dict = {}  # Store links in a dict to avoid duplication
 
@@ -96,6 +96,7 @@ if msg.get('From', None).startswith('YouTube'):
     if link_info:
         b = Bookmark(url=link_info['url'], title=link_info['subject'] or 'No Label', user_id=1)
         b.save()
+        index_bookmark.delay(b.id)
     sys.exit(0)
 
 # Decode quoted-printable contents
@@ -114,3 +115,4 @@ if link_dict:
         logger.info(u"%s - %s" % (link_dict[label], label))
         b = Bookmark(url=link_dict[label], title=label or 'No Label', user_id=1)
         b.save()
+        index_bookmark.delay(b.id)

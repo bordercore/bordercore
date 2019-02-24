@@ -6,9 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.db.models.signals import post_save
 
-from bookmark.tasks import index_bookmark
 from lib.mixins import TimeStampedModel
 from tag.models import Tag
 
@@ -54,12 +52,15 @@ class Bookmark(TimeStampedModel):
 
         super(Bookmark, self).delete()
 
+    def save(self, *args, **kwargs):
+        super(Bookmark, self).save(*args, **kwargs)
+        self.update_tag_bookmarklist()
+
     def update_tag_bookmarklist(self):
         """
         When a bookmark is edited, update all TagBookmarkList objects
         to reflect this change.
         """
-
         # For existing bookmarks, check to see if the user is removing a tag.
         # If so, we need to remove it from the sorted list
         if self.pk is not None:
@@ -85,14 +86,6 @@ class Bookmark(TimeStampedModel):
                                               bookmark_list=[self.id],
                                               user=self.user)
                 sorted_list.save()
-
-
-def postSaveForBookmark(**kwargs):
-    instance = kwargs.get('instance')
-    instance.update_tag_bookmarklist()
-
-
-post_save.connect(postSaveForBookmark, Bookmark)
 
 
 class TagBookmarkList(models.Model):

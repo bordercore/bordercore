@@ -113,6 +113,7 @@ def snarf_link(request):
     except ObjectDoesNotExist:
         b = Bookmark(is_pinned=False, user=request.user, url=url, title=title)
         b.save()
+        index_bookmark.delay(b.id)
         snarf_favicon.delay(url)
 
     return redirect('bookmark_edit', b.id)
@@ -147,6 +148,7 @@ def add_bookmarks_from_import(request, tag, bookmarks):
                 modified=link["created"]
             )
             b.save()
+            index_bookmark.delay(b.id)
 
             # Add the specified tag to the bookmark.
             # Create the tag if it doesn't exist.
