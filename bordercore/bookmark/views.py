@@ -57,8 +57,7 @@ def bookmark_edit(request, bookmark_id=None):
                 newform.user = request.user
                 newform.save()
                 form.save_m2m()  # Save the many-to-many data for the form (eg tags).
-                index_bookmark.delay(form.instance.id)
-                snarf_favicon.delay(form.instance.url)
+                form.instance.post_save_wrapper()
                 messages.add_message(request, messages.INFO, 'Bookmark edited')
                 return bookmark_list(request)
         elif request.POST['Go'] == 'Delete':

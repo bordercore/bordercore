@@ -7,6 +7,7 @@ from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 
+from bookmark.tasks import index_bookmark, snarf_favicon
 from lib.mixins import TimeStampedModel
 from tag.models import Tag
 
@@ -52,8 +53,18 @@ class Bookmark(TimeStampedModel):
 
         super(Bookmark, self).delete()
 
-    def save(self, *args, **kwargs):
-        super(Bookmark, self).save(*args, **kwargs)
+    def post_save_wrapper(self):
+        """
+        This should be called anytime a bookmark is added or updated.
+        """
+
+        # Index the bookmark in Solr
+        index_bookmark.delay(self.id)
+
+        # Grab its favicon
+        snarf_favicon.delay(self.url)
+
+        # Update all TagBookmarkList objects
         self.update_tag_bookmarklist()
 
     def update_tag_bookmarklist(self):
@@ -61,12 +72,15 @@ class Bookmark(TimeStampedModel):
         When a bookmark is edited, update all TagBookmarkList objects
         to reflect this change.
         """
+
         # For existing bookmarks, check to see if the user is removing a tag.
         # If so, we need to remove it from the sorted list
         if self.pk is not None:
-            for old_tag in self.tags.all():
-                if old_tag.name not in [new_tag.name for new_tag in self.tags.all()]:
-                    sorted_list = TagBookmarkList.objects.get(tag=Tag.objects.get(name=old_tag.name), user=self.user)
+
+            for old_tag in TagBookmarkList.objects.filter(user=self.user,
+                                                          bookmark_list__contains=[self.id]):
+                if old_tag.tag.name not in [new_tag.name for new_tag in self.tags.all()]:
+                    sorted_list = TagBookmarkList.objects.get(tag=Tag.objects.get(name=old_tag.tag.name), user=self.user)
                     sorted_list.bookmark_list.remove(self.id)
                     sorted_list.save()
 
