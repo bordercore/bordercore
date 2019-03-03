@@ -91,7 +91,7 @@
 
                 var info;
                 $.ajax( { type: 'GET',
-                          url: '{% url 'get_song_info' 666%}'.replace(666, songId),
+                          url: '{% url 'get_song_info' 666%}'.replace(/666$/, songId),
                           success: function(json) {
 
                         info = json;

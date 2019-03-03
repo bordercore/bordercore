@@ -47,7 +47,7 @@
             $( ".date" ).on( "paste", function() {
                 var clipText = event.clipboardData.getData('Text');
                 $.ajax( { type: 'GET',
-                          url: '{% url 'parse_date' 666 %}'.replace(666, encodeURIComponent($.trim(clipText))),
+                          url: '{% url 'parse_date' 666 %}'.replace(/666$/, encodeURIComponent($.trim(clipText))),
                           }).done(function( json ) {
                     if (!json || json.error != null) {
                         console.log("Date error: " + json.error);

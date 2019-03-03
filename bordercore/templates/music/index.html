@@ -44,12 +44,12 @@
 
         $('#btn-edit').on('click', function() {
             var selectedSongID = $('#song_list').DataTable().cell('.selected', 4).data();
-            window.location='{% url 'song_edit' 666 %}'.replace(666, selectedSongID);
+            window.location='{% url 'song_edit' 666 %}'.replace(/666$/, selectedSongID);
             return false;
         });
 
         function formatArtist( data, type, row ) {
-            return '<a href="{% url 'artist_detail' 666 %}">'.replace(666, row[1]) + row[1] + '</a>';
+            return '<a href="{% url 'artist_detail' 666 %}">'.replace(/666$/, row[1]) + row[1] + '</a>';
         }
 
         oTable = $('#song_list').DataTable( {

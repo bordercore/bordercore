@@ -25,7 +25,7 @@
         $(document).ready(function() {
 
             function formatName( data, type, row ) {
-                return '<a href="{% url 'deck_detail' 666 %}">'.replace(666, row[5]) + row[0] + '</a>';
+                return '<a href="{% url 'deck_detail' 666 %}">'.replace(/666/, row[5]) + row[0] + '</a>';
             }
 
             table = $('#deck_list').DataTable( {
@@ -106,7 +106,7 @@
 
                     $('#action-type').html('Edit');
                     $('#btn-action').val('Edit');
-                    $("#form-deck-edit").attr("action", '{% url 'deck_edit' 666 %}'.replace(666, selectedId));
+                    $("#form-deck-edit").attr("action", '{% url 'deck_edit' 666 %}'.replace(/666$/, selectedId));
                     $('#modalAdd').modal('show');
 
                 });
@@ -116,7 +116,7 @@
 
             $("input.btn[value='Delete']").click( function() {
                 var selectedId = $('#deck_list').DataTable().cell('.selected', 5).data();
-                $("#form-deck-delete").attr("action", '{% url 'deck_delete' 666 %}'.replace(666, selectedId));
+                $("#form-deck-delete").attr("action", '{% url 'deck_delete' 666 %}'.replace(/666$/, selectedId));
                 $('#form-deck-delete').submit();
             })
 

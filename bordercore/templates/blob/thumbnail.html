@@ -22,7 +22,7 @@
             function get_amazon_cover_image() {
 
                 $.ajax( { type: 'GET',
-                          url: '{% url 'get_amazon_image_info' object.sha1sum 666 %}'.replace(666, amazon_cover_image_index),
+                          url: '{% url 'get_amazon_image_info' object.sha1sum 666 %}'.replace(/666$/, amazon_cover_image_index),
                           }).done(function( json ) {
                     if (!json || json.error != null) {
                         $('#feedback').addClass('alert-danger').html(json.error);
@@ -48,7 +48,7 @@
             function set_amazon_cover_image() {
 
                 $.ajax( { type: 'POST',
-                          url: '{% url 'set_amazon_image_info' object.sha1sum 666 %}'.replace(666, amazon_cover_image_index),
+                          url: '{% url 'set_amazon_image_info' object.sha1sum 666 %}'.replace(/666$/, amazon_cover_image_index),
                           data: amazon_cover_image_info
                           }).done(function( json ) {
                     if (!json || json.error != null) {
@@ -64,7 +64,7 @@
                 var page_number = $('#page-number').val();
 
                 $.ajax( { type: 'GET',
-                          url: '{% url 'extract_thumbnail_from_pdf' object.uuid 666 %}'.replace(666, page_number),
+                          url: '{% url 'extract_thumbnail_from_pdf' object.uuid 666 %}'.replace(/666$/, page_number),
                           }).done(function( json ) {
                     if (!json || json.error != null) {
                         $('#feedback').addClass('alert-danger').html(json.error);

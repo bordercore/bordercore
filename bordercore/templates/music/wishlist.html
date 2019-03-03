@@ -60,7 +60,7 @@
 
             $('#btn-edit').on('click', function() {
                 var selectedWishListID = $('#wishlist_list').DataTable().cell('.selected', 4).data();
-                window.location='{% url 'wishlist_edit' 666 %}'.replace(666, selectedWishListID);
+                window.location='{% url 'wishlist_edit' 666 %}'.replace(/666$/, selectedWishListID);
                 return false;
             });
 

@@ -25,7 +25,7 @@
         $(document).ready(function() {
 
             function formatName( data, type, row ) {
-                return '<a href="{% url 'collection_detail' 666 %}">'.replace(666, row[5]) + row[0] + '</a>';
+                return '<a href="{% url 'collection_detail' 666 %}">'.replace(/666/, row[5]) + row[0] + '</a>';
             }
 
             table = $('#collection_list').DataTable( {
@@ -108,18 +108,18 @@
 
                     $('#action-type').html('Edit');
                     $('#btn-action').val('Edit');
-                    $("#form-collection-edit").attr("action", '{% url 'collection_edit' 666 %}'.replace(666, selectedId));
+                    $("#form-collection-edit").attr("action", '{% url 'collection_edit' 666 %}'.replace(/666$/, selectedId));
                     $('#modalAdd').modal('show');
 
                 });
 
-                // window.location='{% url 'todo_edit' 666 %}'.replace(666, selectedId);
+                // window.location='{% url 'todo_edit' 666 %}'.replace(/666$/, selectedId);
                 return false;
             });
 
             $("input.btn[value='Delete']").click( function() {
                 var selectedId = $('#collection_list').DataTable().cell('.selected', 5).data();
-                $("#form-collection-delete").attr("action", '{% url 'collection_delete' 666 %}'.replace(666, selectedId));
+                $("#form-collection-delete").attr("action", '{% url 'collection_delete' 666 %}'.replace(/666$/, selectedId));
                 $('#form-collection-delete').submit();
             })
 

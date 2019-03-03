@@ -139,7 +139,7 @@
 
     $('#btn-edit').click( function() {
         var selectedBookmarkID = $('#bookmark_list').DataTable().cell('.selected', 3).data();
-        window.location='{% url 'bookmark_edit' 666 %}'.replace(666, selectedBookmarkID)
+        window.location='{% url 'bookmark_edit' 666 %}'.replace(/666$/, selectedBookmarkID)
         return false;
     });
 

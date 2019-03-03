@@ -27,7 +27,7 @@
                 feed_url = encodeURIComponent(feed_url).replace(/%/g, "%25")
 
                 $.ajax( { type: 'GET',
-                          url: '{% url 'check_url' 666 %}'.replace(666, feed_url),
+                          url: '{% url 'check_url' 666 %}'.replace(/666$/, feed_url),
                           }).done(function( json ) {
                     if (!json || json.status != 200) {
                         $('#feed-status').fadeIn(1000).addClass("alert-danger").removeClass("alert-success").html("Feed error.  Status: " + json.status);

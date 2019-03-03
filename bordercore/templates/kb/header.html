@@ -72,7 +72,7 @@
         $('#kbsearch').bind('typeahead:selected', function(obj, datum, name) {
             var url = null;
             if (datum.type == 'Tag') {
-                url = '{% url 'kb_search_tag_detail' 666 %}'.replace(666, datum.value);
+                url = '{% url 'kb_search_tag_detail' 666 %}'.replace(/666$/, datum.value);
             } else {
                 url = '{% url 'blob_detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', datum.uuid);
             }

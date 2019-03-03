@@ -107,7 +107,7 @@
             });
 
             $('#tag-filter').bind('typeahead:selected', function(obj, datum, name) {
-                window.location='{% url 'bookmark_tag' 666 %}'.replace(666, datum.value);
+                window.location='{% url 'bookmark_tag' 666 %}'.replace(/666$/, datum.value);
             });
 
             var selectedId;
@@ -126,7 +126,7 @@
 
             $('i.icon-remove').click( function() {
                 $.ajax( { type: 'DELETE',
-                          url: '{% url 'bookmark_delete' 666 %}'.replace(666, selectedId),
+                          url: '{% url 'bookmark_delete' 666 %}'.replace(/666$/, selectedId),
                           success: function(data) {
                         $('#link_' + selectedId).parent().remove()
                     },

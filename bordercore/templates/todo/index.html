@@ -74,7 +74,7 @@
 
             $('#btn-edit').on('click', function() {
                 var selectedTodoID = $('#todo_list').DataTable().cell('.selected', 3).data();
-                window.location='{% url 'todo_edit' 666 %}'.replace(666, selectedTodoID);
+                window.location='{% url 'todo_edit' 666 %}'.replace(/666$/, selectedTodoID);
                 return false;
             });
 

@@ -17,11 +17,11 @@
         $(document).ready(function() {
 
             function formatTitle( data, type, row ) {
-                return '<a href="{% url 'deck_detail' 666 %}">'.replace(666, row[4]) + row[0] + '</a>';
+                return '<a href="{% url 'deck_detail' 666 %}">'.replace(/666/, row[4]) + row[0] + '</a>';
             }
 
             function formatQuestion( data, type, row ) {
-                return '<a href="{% url 'question_detail' 666 %}">'.replace(666, row[1]) + row[2] + '</a>';
+                return '<a href="{% url 'question_detail' 666 %}">'.replace(/666/, row[1]) + row[2] + '</a>';
             }
 
             table = $('#search_results').DataTable( {
