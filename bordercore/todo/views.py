@@ -1,7 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, Http404
-from django.shortcuts import render
 from django.utils.dateformat import format
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
@@ -15,6 +14,7 @@ from todo.models import Todo
 SECTION = 'Todo'
 
 
+@method_decorator(login_required, name='dispatch')
 class TodoListView(ListView):
 
     model = Todo
@@ -57,6 +57,7 @@ class TodoListView(ListView):
         return context
 
 
+@method_decorator(login_required, name='dispatch')
 class TodoDetailView(UpdateView):
     model = Todo
     template_name = 'todo/edit.html'
@@ -95,6 +96,7 @@ class TodoDetailView(UpdateView):
         return super(TodoDetailView, self).dispatch(*args, **kwargs)
 
 
+@method_decorator(login_required, name='dispatch')
 class TodoCreateView(CreateView):
     template_name = 'todo/edit.html'
     form_class = TodoForm
@@ -130,6 +132,7 @@ class TodoCreateView(CreateView):
         return reverse('todo_list')
 
 
+@method_decorator(login_required, name='dispatch')
 class TodoDeleteView(DeleteView):
     template_name = 'todo/edit.html'
     form_class = TodoForm

@@ -16,6 +16,7 @@ from django.forms.utils import ErrorList
 from django.http import (HttpResponse, HttpResponseNotFound,
                          HttpResponseRedirect, JsonResponse)
 from django.shortcuts import redirect, render, render_to_response
+from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
@@ -133,6 +134,7 @@ def song_edit(request, song_id=None):
                    'song': song})
 
 
+@method_decorator(login_required, name='dispatch')
 class AlbumDetailView(DetailView):
 
     model = Album
@@ -388,6 +390,7 @@ def add_song(request):
                    'title': 'Add Song'})
 
 
+@method_decorator(login_required, name='dispatch')
 class MusicListJson(BaseDatatableView):
     # define column names that will be used in sorting
     # order is important and should be same as order of columns
@@ -502,6 +505,7 @@ def get_song_location(song):
     return file_info
 
 
+@login_required
 def get_song_info(request, id):
 
     from datetime import datetime
@@ -530,6 +534,7 @@ def get_song_info(request, id):
     return JsonResponse(results)
 
 
+@method_decorator(login_required, name='dispatch')
 class WishListView(ListView):
 
     model = WishList
@@ -560,6 +565,7 @@ class WishListView(ListView):
         return context
 
 
+@method_decorator(login_required, name='dispatch')
 class WishListDetailView(UpdateView):
     template_name = 'music/wishlist_edit.html'
     form_class = WishListForm
@@ -585,6 +591,7 @@ class WishListDetailView(UpdateView):
         return reverse('wishlist')
 
 
+@method_decorator(login_required, name='dispatch')
 class WishListCreateView(CreateView):
     template_name = 'music/wishlist_edit.html'
     form_class = WishListForm

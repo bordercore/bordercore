@@ -1,5 +1,7 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 
 import datetime
@@ -10,6 +12,7 @@ from fitness.models import Data, Exercise, ExerciseUser
 SECTION = 'Fitness'
 
 
+@method_decorator(login_required, name='dispatch')
 class ExerciseDetailView(DetailView):
 
     model = Exercise
@@ -57,6 +60,7 @@ class ExerciseDetailView(DetailView):
         context['plotdata'] = json.dumps(plotdata[::-1])
 
 
+@login_required
 def fitness_add(request, exercise_id):
 
     exercise = Exercise.objects.get(pk=exercise_id)
@@ -80,6 +84,7 @@ def add_exercise_info(user, exercise_list, exercise):
         pass
 
 
+@login_required
 def fitness_summary(request):
 
     exercises = Exercise.objects.all()
@@ -99,6 +104,7 @@ def fitness_summary(request):
                                                     'title': 'Fitness Summary'})
 
 
+@login_required
 def change_active_status(request):
 
     exercise_id = request.POST['exercise_id']

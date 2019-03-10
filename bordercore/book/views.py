@@ -1,3 +1,5 @@
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
 from book.models import Book
@@ -5,6 +7,7 @@ from book.models import Book
 SECTION = 'Books'
 
 
+@method_decorator(login_required, name='dispatch')
 class BookListView(ListView):
 
     model = Book

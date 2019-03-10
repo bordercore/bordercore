@@ -1,8 +1,10 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Max, Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.shortcuts import render, redirect
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, FormMixin, UpdateView
@@ -25,6 +27,7 @@ EFACTOR_DEFAULT = 2.5
 INTERVAL_MODIFIER = 1.0
 
 
+@method_decorator(login_required, name='dispatch')
 class DeckCreateView(CreateView):
     template_name = "drill/deck_list.html"
     form_class = DeckForm
@@ -48,6 +51,7 @@ class DeckCreateView(CreateView):
         return reverse("deck_list")
 
 
+@method_decorator(login_required, name='dispatch')
 class DeckDetailView(DetailView):
 
     model = Deck
@@ -70,6 +74,7 @@ class DeckDetailView(DetailView):
         return Deck.objects.filter(user=self.request.user)
 
 
+@method_decorator(login_required, name='dispatch')
 class DeckListView(FormMixin, ListView):
 
     context_object_name = "info"
@@ -107,6 +112,7 @@ class DeckListView(FormMixin, ListView):
         return Deck.objects.values('id', 'title', 'created').annotate(max=Max('question__last_reviewed')).annotate(count=Count('question')).filter(user=self.request.user)
 
 
+@method_decorator(login_required, name='dispatch')
 class DeckSearchListView(ListView):
 
     template_name = 'drill/search.html'
@@ -136,6 +142,7 @@ class DeckSearchListView(ListView):
         return context
 
 
+@method_decorator(login_required, name='dispatch')
 class DeckUpdateView(UpdateView):
     model = Deck
     form_class = DeckForm
@@ -151,6 +158,7 @@ class DeckUpdateView(UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
+@method_decorator(login_required, name='dispatch')
 class DeckDeleteView(DeleteView):
 
     def get_object(self, queryset=None):
@@ -160,6 +168,7 @@ class DeckDeleteView(DeleteView):
         return reverse("deck_list")
 
 
+@method_decorator(login_required, name='dispatch')
 class QuestionCreateView(CreateView):
     template_name = 'drill/question_edit.html'
     form_class = QuestionForm
@@ -193,6 +202,7 @@ class QuestionCreateView(CreateView):
         return reverse('deck_detail', kwargs={'deck_id': self.deck_id})
 
 
+@method_decorator(login_required, name='dispatch')
 class QuestionDeleteView(DeleteView):
     template_name = 'todo/edit.html'
     form_class = QuestionForm
@@ -207,6 +217,7 @@ class QuestionDeleteView(DeleteView):
         return reverse('deck_detail', kwargs={'deck_id': self.deck_id})
 
 
+@method_decorator(login_required, name='dispatch')
 class QuestionDetailView(DetailView):
 
     model = Question
@@ -230,6 +241,7 @@ class QuestionDetailView(DetailView):
         return context
 
 
+@method_decorator(login_required, name='dispatch')
 class QuestionUpdateView(UpdateView):
     model = Question
     form_class = QuestionForm
@@ -259,6 +271,7 @@ class QuestionUpdateView(UpdateView):
         return reverse('deck_detail', kwargs={'deck_id': self.deck_id})
 
 
+@login_required
 def get_info(request):
 
     from django.core.exceptions import ObjectDoesNotExist
@@ -280,6 +293,7 @@ def get_info(request):
     return JsonResponse(info)
 
 
+@login_required
 def study_deck(request, deck_id):
 
     # Criteria for selecting a question:
@@ -304,6 +318,7 @@ def study_deck(request, deck_id):
     return redirect('question_detail', question_id=question.id)
 
 
+@login_required
 def show_answer(request, question_id):
 
     question = Question.objects.get(user=request.user, pk=question_id)
@@ -321,6 +336,7 @@ def show_answer(request, question_id):
                    'title': 'Drill :: Show Answer'})
 
 
+@login_required
 def record_result(request, question_id, result):
 
     question = Question.objects.get(user=request.user, pk=question_id)

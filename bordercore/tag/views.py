@@ -28,6 +28,7 @@ def tag_search(request):
     return JsonResponse(tag_list, safe=False)
 
 
+@login_required
 def add_favorite_tag(request):
 
     tag = request.POST['tag']
@@ -39,6 +40,7 @@ def add_favorite_tag(request):
     return redirect('bookmark_tag', tag_filter=tag)
 
 
+@login_required
 def remove_favorite_tag(request):
 
     tag = request.POST['tag']

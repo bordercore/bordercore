@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.templatetags.static import static
+from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
 from blob.models import Document
@@ -20,6 +21,7 @@ from tag.models import Tag
 SECTION = 'KB'
 
 
+@method_decorator(login_required, name='dispatch')
 class SearchListView(ListView):
 
     template_name = 'kb/search.html'
@@ -168,6 +170,7 @@ class SearchListView(ListView):
         return context
 
 
+@method_decorator(login_required, name='dispatch')
 class SearchTagDetailView(ListView):
 
     template_name = 'kb/tag_detail.html'
@@ -284,6 +287,7 @@ def search_book_title(request):
     return JsonResponse(filtered_results['response']['docs'], safe=False)
 
 
+@login_required
 def kb_search_tags_booktitles(request):
 
     conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))

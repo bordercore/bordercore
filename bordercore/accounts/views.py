@@ -14,6 +14,7 @@ from accounts.models import UserProfile
 SECTION = 'Prefs'
 
 
+@method_decorator(login_required, name='dispatch')
 class UserProfileDetailView(UpdateView):
     template_name = 'prefs/index.html'
     form_class = UserProfileForm
@@ -42,6 +43,7 @@ class UserProfileDetailView(UpdateView):
         return super(UserProfileDetailView, self).dispatch(*args, **kwargs)
 
 
+@login_required
 def store_in_session(request):
 
     for key in request.POST:
@@ -80,6 +82,7 @@ def bc_login(request):
     return render(request, 'login.html', {'message': message})
 
 
+@login_required
 def bc_logout(request):
     logout(request)
     return redirect('login')

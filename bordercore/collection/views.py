@@ -1,6 +1,8 @@
 from django.db.models import Case, CharField, Value, When
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse, reverse_lazy
+from django.utils.decorators import method_decorator
 from django.http import HttpResponseRedirect, JsonResponse
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, FormMixin, UpdateView
@@ -14,6 +16,7 @@ IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
 SECTION = 'Collections'
 
 
+@method_decorator(login_required, name='dispatch')
 class CollectionListView(FormMixin, ListView):
 
     context_object_name = 'info'
@@ -42,6 +45,7 @@ class CollectionListView(FormMixin, ListView):
         return context
 
 
+@method_decorator(login_required, name='dispatch')
 class CollectionDeleteView(DeleteView):
 
     def get_object(self, queryset=None):
@@ -52,6 +56,7 @@ class CollectionDeleteView(DeleteView):
         return reverse('collection_list')
 
 
+@method_decorator(login_required, name='dispatch')
 class CollectionDetailView(DetailView):
 
     model = Collection
@@ -88,6 +93,7 @@ class CollectionDetailView(DetailView):
         return context
 
 
+@method_decorator(login_required, name='dispatch')
 class CollectionCreateView(CreateView):
     template_name = 'collection/collection_list.html'
     form_class = CollectionForm
@@ -116,6 +122,7 @@ class CollectionCreateView(CreateView):
         return reverse('collection_list')
 
 
+@method_decorator(login_required, name='dispatch')
 class CollectionUpdateView(UpdateView):
     model = Collection
     form_class = CollectionForm
@@ -142,6 +149,7 @@ class CollectionUpdateView(UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
+@login_required
 def get_info(request):
 
     from django.core.exceptions import ObjectDoesNotExist
@@ -164,6 +172,7 @@ def get_info(request):
     return JsonResponse(info)
 
 
+@login_required
 def sort_collection(request):
 
     collection_id = int(request.POST['collection_id'])

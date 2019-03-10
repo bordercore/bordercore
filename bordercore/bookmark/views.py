@@ -8,6 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django_datatables_view.base_datatable_view import BaseDatatableView
+from django.utils.decorators import method_decorator
 import requests
 
 from accounts.models import SortOrder
@@ -169,6 +170,7 @@ def add_bookmarks_from_import(request, tag, bookmarks):
     messages.add_message(request, messages.INFO, "Bookmarks added: {}. Duplicates ignored: {}.".format(added_count, dupe_count))
 
 
+@login_required
 def bookmark_import(request):
     """
     Import bookmarks from a file.
@@ -262,6 +264,7 @@ def bookmark_tag(request, tag_filter=""):
                    'favorite_tags': favorite_tags})
 
 
+@login_required
 def sort_favorite_tags(request):
     """
     Move a given tag to a new position in a sorted list
@@ -297,6 +300,7 @@ def tag_bookmark_list(request):
     return HttpResponse(json.dumps('OK'), content_type="application/json")
 
 
+@method_decorator(login_required, name='dispatch')
 class OrderListJson(BaseDatatableView):
     # define column names that will be used in sorting
     # order is important and should be same as order of columns

@@ -6,11 +6,13 @@ from urllib.parse import urlparse
 
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
+from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
@@ -29,6 +31,7 @@ amazon_api_config = {
 }
 
 
+@method_decorator(login_required, name='dispatch')
 class DocumentCreateView(CreateView):
     template_name = 'blob/edit.html'
     form_class = DocumentForm
@@ -97,6 +100,7 @@ class DocumentCreateView(CreateView):
         return reverse_lazy('blob_detail', kwargs={'uuid': self.object.uuid})
 
 
+@method_decorator(login_required, name='dispatch')
 class BlobDeleteView(DeleteView):
     model = Document
     success_url = reverse_lazy('blob_add')
@@ -106,6 +110,7 @@ class BlobDeleteView(DeleteView):
         return obj
 
 
+@method_decorator(login_required, name='dispatch')
 class BlobDetailView(DetailView):
 
     model = Document
@@ -176,6 +181,7 @@ class BlobDetailView(DetailView):
         return Document.objects.filter(user=self.request.user)
 
 
+@method_decorator(login_required, name='dispatch')
 class BlobUpdateView(UpdateView):
     template_name = 'blob/edit.html'
     form_class = DocumentForm
@@ -239,6 +245,7 @@ class BlobUpdateView(UpdateView):
         return HttpResponseRedirect(reverse('blob_detail', kwargs={'uuid': str(blob.uuid)}))
 
 
+@method_decorator(login_required, name='dispatch')
 class BlobThumbnailView(UpdateView):
     template_name = 'blob/thumbnail.html'
     form_class = DocumentForm
@@ -314,6 +321,7 @@ def handle_linked_collection(blob, request):
         collection.save()
 
 
+@login_required
 def metadata_name_search(request):
 
     m = MetaData.objects.filter(user=request.user).values('name').filter(name__icontains=request.GET['query']).distinct('name').order_by('name'.lower())
@@ -323,6 +331,7 @@ def metadata_name_search(request):
     return JsonResponse(return_data, safe=False)
 
 
+@login_required
 def get_amazon_image_info(request, sha1sum, index=0):
 
     b = Document.objects.get(user=request.user, sha1sum=sha1sum)
@@ -331,6 +340,7 @@ def get_amazon_image_info(request, sha1sum, index=0):
     return JsonResponse(result)
 
 
+@login_required
 def set_amazon_image_info(request, sha1sum, index=0):
 
     b = Document.objects.get(user=request.user, sha1sum=sha1sum)
@@ -352,6 +362,7 @@ def amazon_metadata_dupe_check(dupes, name, value):
         return True
 
 
+@login_required
 def get_amazon_metadata(request, title):
 
     api = API(cfg=amazon_api_config)
@@ -387,6 +398,7 @@ def get_amazon_metadata(request, title):
     return JsonResponse(return_data)
 
 
+@login_required
 def extract_thumbnail_from_pdf(request, uuid, page_number):
     from PyPDF2 import PdfFileReader, PdfFileWriter
     from PyPDF2.utils import PdfReadError
@@ -444,6 +456,7 @@ def extract_thumbnail_from_pdf(request, uuid, page_number):
     return JsonResponse({'message': 'OK', 'cover_url': cover_info['url']})
 
 
+@login_required
 def collection_mutate(request):
 
     blob_id = int(request.POST['blob_id'])
@@ -505,6 +518,7 @@ def parse_date_format_4(input_date, matcher):
                                       '%B/%d/%Y')
 
 
+@login_required
 def parse_date(request, input_date):
 
     error = None
@@ -544,6 +558,7 @@ def parse_date(request, input_date):
                          'error': error})
 
 
+@method_decorator(login_required, name='dispatch')
 class BlogListView(ListView):
     model = Document
     template_name = "blob/blog_list.html"

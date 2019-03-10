@@ -6,6 +6,7 @@ import urllib
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic.list import ListView
@@ -18,6 +19,7 @@ from feed.tasks import update_feed
 SECTION = 'Feeds'
 
 
+@method_decorator(login_required, name='dispatch')
 class FeedListView(ListView):
     template_name = 'feed/index.html'
     context_object_name = 'feed_info'
@@ -67,6 +69,7 @@ class FeedListView(ListView):
         return context
 
 
+@method_decorator(login_required, name='dispatch')
 class FeedSubscriptionListView(FeedListView):
     template_name = 'feed/subscriptions.html'
     context_object_name = 'feed_info'
@@ -88,6 +91,7 @@ class FeedSubscriptionListView(FeedListView):
         return context
 
 
+@login_required
 def sort_feed(request):
 
     feed_id = int(request.POST['feed_id'])
@@ -107,6 +111,7 @@ def sort_feed(request):
     return HttpResponse(json.dumps('OK'), content_type="application/json")
 
 
+@login_required
 def feed_subscribe(request):
 
     feed_id = int(request.POST['feed_id'])
@@ -118,6 +123,7 @@ def feed_subscribe(request):
     return HttpResponse(json.dumps('OK'), content_type="application/json")
 
 
+@login_required
 def feed_unsubscribe(request):
 
     feed_id = int(request.POST['feed_id'])
