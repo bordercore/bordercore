@@ -278,18 +278,17 @@ class Document(TimeStampedModel, AmazonMixin):
                     url_path = "{}/{}/{}".format(sha1sum[0:2], sha1sum, "cover-small.jpg")
                     info['url'] = "blobs/{}".format(url_path)
             else:
-                # url_path = b.file.name
-                # info['url'] = "blobs/{}".format(url_path)
                 info = Document.get_image_dimensions(file_path, max_cover_image_width)
                 info['url'] = "blobs/{}".format(b.file.name)
 
-        # Nope. Look for a cover image
-        for image_type in ['jpg', 'png']:
-            for cover_image in ["cover.{}".format(image_type), "cover-{}.{}".format(size, image_type)]:
-                file_path = "{}/{}".format(parent_dir, cover_image)
-                if os.path.isfile(file_path):
-                    info = Document.get_image_dimensions(file_path, max_cover_image_width)
-                    info['url'] = "blobs/{}/{}/{}".format(sha1sum[0:2], sha1sum, cover_image)
+        else:
+            # Nope. Look for a cover image
+            for image_type in ['jpg', 'png']:
+                for cover_image in ["cover.{}".format(image_type), "cover-{}.{}".format(size, image_type)]:
+                    file_path = "{}/{}".format(parent_dir, cover_image)
+                    if os.path.isfile(file_path):
+                        info = Document.get_image_dimensions(file_path, max_cover_image_width)
+                        info['url'] = "blobs/{}/{}/{}".format(sha1sum[0:2], sha1sum, cover_image)
 
         # If we get this far, return the default image
         if not info.get('url'):
