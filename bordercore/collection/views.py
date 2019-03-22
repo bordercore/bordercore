@@ -69,24 +69,26 @@ class CollectionDetailView(DetailView):
         if self.kwargs.get('embedded', ''):
             self.template_name = 'collection/embedded.html'
 
-        ids = [x['id'] for x in self.object.blob_list]
-        order = Case(*[When(id=i, then=pos) for pos, i in enumerate(ids)])
+        if self.object.blob_list:
+            ids = [x['id'] for x in self.object.blob_list]
+            order = Case(*[When(id=i, then=pos) for pos, i in enumerate(ids)])
 
-        whens = [
-            When(id=x['id'], then=Value(x.get('note', ''))) for x in self.object.blob_list
-        ]
+            whens = [
+                When(id=x['id'], then=Value(x.get('note', ''))) for x in self.object.blob_list
+            ]
 
-        blob_list = Document.objects.filter(id__in=ids).annotate(
-            collection_note=Case(
-                *whens,
-                output_field=CharField()
-            )).order_by(order)
+            blob_list = Document.objects.filter(id__in=ids).annotate(
+                collection_note=Case(
+                    *whens,
+                    output_field=CharField()
+                )).order_by(order)
 
-        for blob in blob_list:
-            blob.cover_info = Document.get_cover_info(self.request.user, blob.sha1sum, max_cover_image_width=70, size='small')
-            blob.title = blob.get_title(use_filename_if_present=True)
+            for blob in blob_list:
+                blob.cover_info = Document.get_cover_info(self.request.user, blob.sha1sum, max_cover_image_width=70, size='small')
+                blob.title = blob.get_title(use_filename_if_present=True)
 
-        context['blob_list'] = blob_list
+            context['blob_list'] = blob_list
+
         context['section'] = SECTION
         context['title'] = 'Collection Detail :: {}'.format(self.object.name)
 
