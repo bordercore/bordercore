@@ -16,6 +16,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
+from PyPDF2.utils import PdfReadError
 
 from amazonproduct import API
 from amazonproduct.errors import NoExactMatchesFound
@@ -399,59 +400,18 @@ def get_amazon_metadata(request, title):
 
 
 @login_required
-def extract_thumbnail_from_pdf(request, uuid, page_number):
-    from PyPDF2 import PdfFileReader, PdfFileWriter
-    from PyPDF2.utils import PdfReadError
-
-    page_number = page_number - 1
-
+def create_thumbnail(request, uuid, page_number=None):
     b = Document.objects.get(user=request.user, uuid=uuid)
 
-    os.chdir("{}/{}".format(settings.MEDIA_ROOT, os.path.dirname(b.file.name)))
-
-    # Ex: d7/d77d08dd2e51680229adbf175101b8f65f3717fc/Comprehensive Report.pdf
-    input_file = os.path.basename(b.file.name)
-
-    # Ex: Comprehensive Report_p1.pdf
-    outfile = "{}_p{}.pdf".format(os.path.splitext(input_file)[0], page_number)
-
-    input_pdf = PdfFileReader(open(input_file, "rb"))
-
-    # Some documents are recognized as encrypted, even though they're not.
-    #  This is a workaround
-    if input_pdf.getIsEncrypted():
-        input_pdf.decrypt('')
-
     try:
-        output = PdfFileWriter()
-        output.addPage(input_pdf.getPage(page_number))
-        outputStream = open(outfile, "wb")
-        output.write(outputStream)
-        outputStream.close()
+        b.create_thumbnail(page_number)
     except PdfReadError as e:
         return JsonResponse({'error': str(e)})
 
-    # Convert the pdf page to jpg
-    from pdf2image import convert_from_path
-    pages = convert_from_path(outfile, dpi=150)
-    cover_large = "cover-large.jpg"
-    pages[0].save(cover_large, "JPEG")
-
-    # Create small (thumbnail) jpg
-    from PIL import Image
-
-    size = 128, 128
-
-    try:
-        im = Image.open(cover_large)
-        im.thumbnail(size)
-        im.save("cover-small.jpg".format(page_number), "JPEG")
-    except IOError:
-        print("Cannot create thumbnail for {}".format(cover_large))
-
-    os.remove(outfile)
-
-    cover_info = Document.get_cover_info(request.user, b.sha1sum, max_cover_image_width=70, size='small')
+    cover_info = Document.get_cover_info(request.user,
+                                         b.sha1sum,
+                                         max_cover_image_width=70,
+                                         size='small')
 
     return JsonResponse({'message': 'OK', 'cover_url': cover_info['url']})
 

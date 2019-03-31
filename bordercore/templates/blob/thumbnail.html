@@ -64,7 +64,7 @@
                 var page_number = $('#page-number').val();
 
                 $.ajax( { type: 'GET',
-                          url: '{% url 'extract_thumbnail_from_pdf' object.uuid 666 %}'.replace(/666$/, page_number),
+                          url: '{% url 'create_thumbnail' object.uuid 666 %}'.replace(/666$/, page_number),
                           }).done(function( json ) {
                     if (!json || json.error != null) {
                         $('#feedback').addClass('alert-danger').html(json.error);

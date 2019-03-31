@@ -22,23 +22,11 @@ def index_blob(uuid, file_changed):
 
 
 @task()
-def create_thumbnail(uuid):
-
-    size = 128, 128
+def create_thumbnail(uuid, page_number=1):
 
     from blob.models import Document
     b = Document.objects.get(uuid=uuid)
-    if b.is_image():
-        infile = "{}/{}".format(settings.MEDIA_ROOT, b.file.name)
-        outfile = "{}/{}/cover-small.jpg".format(settings.MEDIA_ROOT, os.path.dirname(b.file.name))
-        try:
-            # Convert images to RGB mode to avoid "cannot write mode P as JPEG" errors for PNGs
-            im = Image.open(infile).convert('RGB')
-            im.thumbnail(size)
-            im.save(outfile)
-            os.chmod(outfile, 0o664)
-        except IOError as err:
-            print("cannot create thumbnail; error={}".format(err))
+    b.create_thumbnail(page_number)
 
 
 @task()
