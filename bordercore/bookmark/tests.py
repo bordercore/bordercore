@@ -1,18 +1,15 @@
-from django.db.models import Q
-
 import django
 import json
 import os
 from solrpy.core import SolrConnection
 
-from django.db.models import Count
 from django.conf import settings
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.prod'
 
 django.setup()
 
-from bookmark.models import Bookmark, TagBookmarkList
+from bookmark.models import Bookmark
 
 
 def test_bookmarks_in_db_exist_in_solr():
@@ -58,29 +55,3 @@ def test_solr_bookmarks_exist_in_db():
     data = json.loads(response.decode('UTF-8'))['response']
     for result in data['docs']:
         assert Bookmark.objects.filter(id=result['internal_id']).count() == 1, "bookmark %s exists in Solr but not in database" % result['internal_id']
-
-
-def test_one_tag_per_user():
-    "Only one tag per user should be in represented by a TagBookmarkList"
-    t = TagBookmarkList.objects.values('tag', 'user').order_by().annotate(user_count=Count('user')).filter(user_count__gt=1)
-    assert len(t) == 0, "tags found more than once per user: {}".format(t)
-
-
-def test_deleted_bookmarks_in_bookmarktaguser():
-    "Check if every bookmark listed in each TagBookmarkList bookmark list exists"
-    all = TagBookmarkList.objects.all()
-
-    for x in all:
-        bookmarks = Bookmark.objects.filter(id__in=x.bookmark_list)
-        assert len(x.bookmark_list) == len(bookmarks), "Missing bookmark in TagBookmarkList {}".format(x.id)
-
-
-def test_bookmark_tags_in_bookmarktaguser():
-    "Check if every bookmark tag exists in TagBookmarkList"
-    from django.contrib.auth.models import User
-
-    bookmarks = Bookmark.objects.filter(tags__isnull=False).distinct()
-    for b in bookmarks:
-        for tag in b.tags.all():
-            assert TagBookmarkList.objects.filter(Q(tag_id=tag.id) &
-                                                  Q(bookmark_list__contains=[b.id])), "Tag '{}' for Bookmark {} not found in TagBookmarkList".format(tag.name, b.id)

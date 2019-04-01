@@ -5,6 +5,7 @@ import lxml.html as lh
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django_datatables_view.base_datatable_view import BaseDatatableView
@@ -12,10 +13,10 @@ from django.utils.decorators import method_decorator
 import requests
 
 from accounts.models import SortOrder
-from bookmark.models import Bookmark, TagBookmarkList
+from bookmark.models import Bookmark
 from bookmark.forms import BookmarkForm
 from bookmark.tasks import index_bookmark, snarf_favicon
-from tag.models import Tag
+from tag.models import Tag, TagBookmark, TagBookmarkSortOrder
 
 SECTION = 'Bookmarks'
 
@@ -47,7 +48,6 @@ def bookmark_click(request, bookmark_id=None):
 def bookmark_edit(request, bookmark_id=None):
 
     action = 'Edit'
-
     b = Bookmark.objects.get(user=request.user, pk=bookmark_id) if bookmark_id else None
 
     if request.method == 'POST':
@@ -83,13 +83,6 @@ def bookmark_edit(request, bookmark_id=None):
 @login_required
 def bookmark_delete(request, bookmark_id=None):
 
-    # First delete the bookmark from any tag lists
-    info = TagBookmarkList.objects.raw("SELECT * FROM bookmark_bookmarktaguser WHERE user_id = %s AND %s = ANY (bookmark_list)", [request.user.id, bookmark_id])
-    for tag in info:
-        tag.bookmark_list.remove(bookmark_id)
-        tag.save()
-
-    # Then delete the actual bookmark
     bookmark = Bookmark.objects.get(user=request.user, pk=bookmark_id)
     bookmark.delete()
 
@@ -227,34 +220,29 @@ def bookmark_import(request):
 @login_required
 def bookmark_tag(request, tag_filter=""):
 
-    bookmarks = None
-
     sorted_bookmarks = []
 
     if tag_filter:
         request.session['bookmark_tag_filter'] = tag_filter
 
-        bookmarks = Bookmark.objects.filter(user=request.user, tags__name__exact=tag_filter).order_by('-created')
-        for bookmark in bookmarks:
-            bookmark.tag_list = [x.name for x in bookmark.tags.all() if x.name != tag_filter]
+        tag = Tag.objects.get(name=tag_filter)
+        tagbookmark = TagBookmark.objects.get(tag=tag)
 
-        try:
-            sort_order = TagBookmarkList.objects.get(user=request.user, tag=Tag.objects.get(name=tag_filter))
-            sorted_bookmarks = sorted(bookmarks, key=lambda v: sort_order.bookmark_list.index(v.id))
-        except ObjectDoesNotExist as e:
-            print("Error! %s" % e)
-            # TODO: Use celery to fire off an email about the error
-            sorted_bookmarks = bookmarks
-        except ValueError as e:
-            print("Error! %s" % e)
-            # TODO: Use celery to fire off an email about the error
-            sorted_bookmarks = bookmarks
+        # Bookmarks are guaranteed to be returned in sorted order
+        #  because of the "ordering" field in TagBookmarkSortOrder's
+        #  "Meta" inner class
+        sorted_bookmarks = [x.bookmark for x in TagBookmarkSortOrder.objects.filter(tag_bookmark=tagbookmark)]
 
     tag_counts = {}
-    for tag in TagBookmarkList.objects.filter(user=request.user, tag__in=request.user.userprofile.favorite_tags.all()):
-        tag_counts[tag.tag.name] = len(tag.bookmark_list)
 
     favorite_tags = request.user.userprofile.favorite_tags.all().order_by('sortorder__sort_order')
+
+    t = TagBookmark.objects\
+                   .filter(tag__id__in=[x.id for x in favorite_tags])\
+                   .values('tag__id', 'tag__name')\
+                   .annotate(bookmark_count=Count('bookmarks'))
+    for x in t:
+        tag_counts[x["tag__name"]] = x["bookmark_count"]
 
     return render(request, 'bookmark/tag.html',
                   {'section': SECTION,
@@ -285,17 +273,10 @@ def tag_bookmark_list(request):
     link_id = int(request.POST['link_id'])
     position = int(request.POST['position'])
 
-    sorted_list = TagBookmarkList.objects.get(user=request.user, tag=Tag.objects.get(name=tag))
-
-    # Verify that the bookmark is in the existing sort list
-    if link_id not in sorted_list.bookmark_list:
-        print("NOT Found!")
-        # TODO Return an exception
-
-    sorted_list.bookmark_list.remove(link_id)
-    sorted_list.bookmark_list.insert(position - 1, link_id)
-
-    sorted_list.save()
+    tb = TagBookmark.objects.get(tag__name=tag)
+    bookmark = Bookmark.objects.get(id=link_id)
+    tbso = TagBookmarkSortOrder.objects.get(tag_bookmark=tb, bookmark=bookmark)
+    tbso.reorder(position)
 
     return HttpResponse(json.dumps('OK'), content_type="application/json")
 

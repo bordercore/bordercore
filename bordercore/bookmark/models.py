@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+from django.db.models.signals import m2m_changed
 
 from bookmark.tasks import index_bookmark, snarf_favicon
 from lib.mixins import TimeStampedModel
@@ -41,11 +42,10 @@ class Bookmark(TimeStampedModel):
 
     def delete(self):
 
-        # Delete it from any bookmark_list in TagBookmarkList
-        bookmarktaguser = TagBookmarkList.objects.filter(user=self.user, bookmark_list__contains=[self.id])
-        for x in bookmarktaguser:
-            x.bookmark_list.remove(self.id)
-            x.save()
+        # Put the imports here to avoid circular dependencies
+        from tag.models import TagBookmarkSortOrder
+        for x in TagBookmarkSortOrder.objects.filter(bookmark=self):
+            x.delete()
 
         conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
         conn.delete(queries=['id:bordercore_bookmark_%s' % (self.id)])
@@ -64,45 +64,31 @@ class Bookmark(TimeStampedModel):
         # Grab its favicon
         snarf_favicon.delay(self.url)
 
-        # Update all TagBookmarkList objects
-        self.update_tag_bookmarklist()
 
-    def update_tag_bookmarklist(self):
-        """
-        When a bookmark is edited, update all TagBookmarkList objects
-        to reflect this change.
-        """
+def tags_changed(sender, **kwargs):
 
-        # For existing bookmarks, check to see if the user is removing a tag.
-        # If so, we need to remove it from the sorted list
-        if self.pk is not None:
+    # Put the imports here to avoid circular dependencies
+    from tag.models import TagBookmark, TagBookmarkSortOrder
 
-            for old_tag in TagBookmarkList.objects.filter(user=self.user,
-                                                          bookmark_list__contains=[self.id]):
-                if old_tag.tag.name not in [new_tag.name for new_tag in self.tags.all()]:
-                    sorted_list = TagBookmarkList.objects.get(tag=Tag.objects.get(name=old_tag.tag.name), user=self.user)
-                    sorted_list.bookmark_list.remove(self.id)
-                    sorted_list.save()
+    if kwargs["action"] == "post_add":
 
-        for new_tag in self.tags.all():
-            # Has the user already used this tag with any bookmarks?
+        bookmark = kwargs["instance"]
+        for tag_id in kwargs["pk_set"]:
+
             try:
-                sorted_list = TagBookmarkList.objects.get(tag=Tag.objects.get(name=new_tag.name), user=self.user)
-                # Yes.  Now check if this bookmark already has this tag.
-                if self.id not in sorted_list.bookmark_list:
-                    # Nope.  So this bookmark goes to the top of the sorted list.
-                    sorted_list.bookmark_list.insert(0, self.id)
-                    sorted_list.save()
+                tb = TagBookmark.objects.get(tag_id=tag_id, user=bookmark.user)
             except ObjectDoesNotExist:
-                # This is the first time this tag has been applied to a bookmark.
-                # Create a new list with one member (the current bookmark)
-                sorted_list = TagBookmarkList(tag=Tag.objects.get(name=new_tag.name),
-                                              bookmark_list=[self.id],
-                                              user=self.user)
-                sorted_list.save()
+                # If the tag is new, create a new instance
+                tb = TagBookmark(tag_id=tag_id, user=bookmark.user)
+                tb.save()
 
+            tbso = TagBookmarkSortOrder(tag_bookmark=tb, bookmark=bookmark)
+            tbso.save()
 
-class TagBookmarkList(models.Model):
-    tag = models.ForeignKey(Tag, on_delete=models.PROTECT)
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
-    bookmark_list = ArrayField(models.IntegerField())
+    elif kwargs["action"] == "post_remove":
+        bookmark = kwargs["instance"]
+        for tag_id in kwargs["pk_set"]:
+            for x in TagBookmarkSortOrder.objects.filter(bookmark=bookmark).filter(tag_bookmark__tag__id=tag_id):
+                x.delete()
+
+m2m_changed.connect(tags_changed, sender=Bookmark.tags.through)
