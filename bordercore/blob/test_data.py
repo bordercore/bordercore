@@ -99,8 +99,11 @@ def test_tags_no_orphans():
                            Q(document__isnull=True) &
                            Q(bookmark__isnull=True) &
                            Q(collection__isnull=True) &
+                           Q(question__isnull=True) &
                            Q(song__isnull=True) &
-                           Q(tagbookmarklist__isnull=True))
+                           Q(sortorder__isnull=True) &
+                           Q(tagbookmark__isnull=True) &
+                           Q(userprofile__isnull=True))
     assert len(t) == 0, "{} tags fail this test; example: name={}".format(len(t), t[0].name)
 
 
