@@ -187,7 +187,7 @@ class SearchTagDetailView(ListView):
                 one_doc['url'] = one_doc['filepath'].split(settings.MEDIA_ROOT)[1]
                 one_doc['cover_url'] = static("blobs/%s/%s/cover-small.jpg" % (one_doc['sha1sum'][0:2], one_doc['sha1sum']))
                 if not os.path.isfile("%s/%s/%s/cover-small.jpg" % (settings.MEDIA_ROOT, one_doc['sha1sum'][0:2], one_doc['sha1sum'])):
-                    one_doc['cover_url'] = static("images/book.png")
+                    one_doc['cover_url'] = static("img/book.png")
                 if one_doc['content_type']:
                     one_doc['content_type'] = Document.get_content_type(one_doc['content_type'][0])
             one_doc['title'] = solr_result_set.get_title()

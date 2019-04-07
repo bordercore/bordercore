@@ -301,7 +301,7 @@ class Document(TimeStampedModel, AmazonMixin):
 
         # If we get this far, return the default image
         if not info.get('url'):
-            info = {'url': 'images/book.png', 'height_cropped': 128, 'width_cropped': 128}
+            info = {'url': 'img/book.png', 'height_cropped': 128, 'width_cropped': 128}
 
         return info
 
