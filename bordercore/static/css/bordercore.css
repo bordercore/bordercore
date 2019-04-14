@@ -157,10 +157,6 @@ ul.pagination {
     width: 300px;
 }
 
-li.active a {
-    color: #ffffff
-}
-
 a.tag:link {
     color: white;
 }
