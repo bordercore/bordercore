@@ -5,12 +5,10 @@ import lxml.html as lh
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
-from django_datatables_view.base_datatable_view import BaseDatatableView
-from django.utils.decorators import method_decorator
-import requests
 
 from accounts.models import SortOrder
 from bookmark.models import Bookmark
@@ -19,24 +17,11 @@ from bookmark.tasks import index_bookmark, snarf_favicon
 from tag.models import Tag, TagBookmark, TagBookmarkSortOrder
 
 SECTION = 'Bookmarks'
+BOOKMARKS_PER_PAGE = 50
 
 
 @login_required
-def bookmark_list(request):
-
-    bookmarks = []
-
-    untagged_count = Bookmark.objects.filter(user=request.user, tags__isnull=True).count()
-
-    return render(request, 'bookmark/index.html',
-                  {'section': SECTION,
-                   'bookmarks': bookmarks,
-                   'cols': ['Date', 'url', 'title', 'id'],
-                   'untagged_count': untagged_count})
-
-
-@login_required
-def bookmark_click(request, bookmark_id=None):
+def click(request, bookmark_id=None):
 
     b = Bookmark.objects.get(user=request.user, pk=bookmark_id) if bookmark_id else None
     b.daily['viewed'] = 'true'
@@ -45,7 +30,7 @@ def bookmark_click(request, bookmark_id=None):
 
 
 @login_required
-def bookmark_edit(request, bookmark_id=None):
+def edit(request, bookmark_id=None):
 
     action = 'Edit'
     b = Bookmark.objects.get(user=request.user, pk=bookmark_id) if bookmark_id else None
@@ -60,11 +45,11 @@ def bookmark_edit(request, bookmark_id=None):
                 form.save_m2m()  # Save the many-to-many data for the form (eg tags).
                 form.instance.post_save_wrapper()
                 messages.add_message(request, messages.INFO, 'Bookmark edited')
-                return bookmark_list(request)
+                return list(request)
         elif request.POST['Go'] == 'Delete':
             b.delete()
             messages.add_message(request, messages.INFO, 'Bookmark deleted')
-            return bookmark_list(request)
+            return list(request)
 
     elif bookmark_id:
         action = 'Edit'
@@ -81,7 +66,7 @@ def bookmark_edit(request, bookmark_id=None):
 
 
 @login_required
-def bookmark_delete(request, bookmark_id=None):
+def delete(request, bookmark_id=None):
 
     bookmark = Bookmark.objects.get(user=request.user, pk=bookmark_id)
     bookmark.delete()
@@ -164,7 +149,7 @@ def add_bookmarks_from_import(request, tag, bookmarks):
 
 
 @login_required
-def bookmark_import(request):
+def do_import(request):
     """
     Import bookmarks from a file.
     Supported formats: Google bookmark export format
@@ -218,9 +203,24 @@ def bookmark_import(request):
 
 
 @login_required
-def bookmark_tag(request, tag_filter=""):
+def get_random_bookmarks(request):
+    return list(request, random=True)
+
+
+@login_required
+def search(request, search):
+    return list(request, search=search)
+
+
+@login_required
+def list(request,
+         random=False,
+         tag_filter="",
+         page_number=1,
+         search=None):
 
     sorted_bookmarks = []
+    tag_counts = {}
 
     if tag_filter:
         request.session['bookmark_tag_filter'] = tag_filter
@@ -231,9 +231,35 @@ def bookmark_tag(request, tag_filter=""):
         # Bookmarks are guaranteed to be returned in sorted order
         #  because of the "ordering" field in TagBookmarkSortOrder's
         #  "Meta" inner class
-        sorted_bookmarks = [x.bookmark for x in TagBookmarkSortOrder.objects.filter(tag_bookmark=tagbookmark)]
+        bookmark_info = [(x.bookmark, x.note) for x in tagbookmark.tagbookmarksortorder_set.all()]
 
-    tag_counts = {}
+        bookmark_range = 1 # Not used in this case
+
+    else:
+
+        if search is not None:
+            bookmarks = Bookmark.objects.filter(user=request.user, title__icontains=search)
+        else:
+            bookmarks = Bookmark.objects.filter(user=request.user, tags__isnull=True)
+
+        if random is True:
+            bookmarks = bookmarks.order_by("?")
+        else:
+            bookmarks = bookmarks.order_by("-created")
+
+        paginator = Paginator(bookmarks, BOOKMARKS_PER_PAGE)
+        bookmark_range = 5 if paginator.num_pages > 5 else paginator.num_pages
+
+        try:
+            sorted_bookmarks = paginator.page(page_number)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            sorted_bookmarks = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results.
+            sorted_bookmarks = paginator.page(paginator.num_pages)
+
+    tag_counts["Untagged"] = Bookmark.objects.filter(user=request.user, tags__isnull=True).count()
 
     favorite_tags = request.user.userprofile.favorite_tags.all().order_by('sortorder__sort_order')
 
@@ -244,9 +270,11 @@ def bookmark_tag(request, tag_filter=""):
     for x in t:
         tag_counts[x["tag__name"]] = x["bookmark_count"]
 
-    return render(request, 'bookmark/tag.html',
+    return render(request, 'bookmark/index.html',
                   {'section': SECTION,
                    'bookmarks': sorted_bookmarks,
+                   'page_number': page_number,
+                   'range': range(1, bookmark_range + 1),
                    'tag_filter': tag_filter,
                    'tag_counts': tag_counts,
                    'favorite_tags': favorite_tags})
@@ -279,61 +307,3 @@ def tag_bookmark_list(request):
     tbso.reorder(position)
 
     return HttpResponse(json.dumps('OK'), content_type="application/json")
-
-
-@method_decorator(login_required, name='dispatch')
-class OrderListJson(BaseDatatableView):
-    # define column names that will be used in sorting
-    # order is important and should be same as order of columns
-    # displayed by datatables. For non sortable columns use empty
-    # value like ''
-    order_columns = ['created', 'url', 'title']
-
-    def get_initial_queryset(self):
-        # return queryset used as base for futher sorting/filtering
-        # these are simply objects displayed in datatable
-
-        # If the user has 'show untagged bookmarks only' set in preferences,
-        # then don't show bookmarks which have been tagged.  However, for
-        # searches (filters), ignore that preference
-        if self.request.user.userprofile.bookmarks_show_untagged_only and self.request.GET['search[value]'] == '':
-            return Bookmark.objects.filter(user=self.request.user, tags__isnull=True)
-        else:
-            return Bookmark.objects.filter(user=self.request.user)
-
-    def filter_queryset(self, qs):
-        # use request parameters to filter queryset
-
-        filter = self.request.GET.get('search[value]', None)
-        if filter:
-            qs = qs.filter(title__icontains=filter)
-
-        return qs
-
-    def ordering(self, qs):
-        randomize = self.request.GET.get('randomize', False)
-        if randomize == 'yes':
-            return qs.order_by('?')
-        else:
-            return super(OrderListJson, self).ordering(qs)
-
-    def prepare_results(self, qs):
-        # prepare list with output column data
-        # queryset is already paginated here
-
-        json_data = []
-        for item in qs:
-            if not item.title:
-                item.title = 'No Title'
-            try:
-                response_status = requests.status_codes._codes[item.last_response_code][0]
-            except KeyError:
-                response_status = ''
-            json_data.append([
-                item.created.strftime("%b %d, %Y"),
-                item.url,
-                item.title,
-                item.id,
-                response_status
-            ])
-        return json_data

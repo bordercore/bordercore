@@ -13,7 +13,6 @@ from blob.views import (BlobDeleteView, BlobDetailView, BlobThumbnailView,
 from book.views import BookListView
 from bookmark import views as bookmark_views
 from bookmark.api import BookmarkResource
-from bookmark.views import OrderListJson
 from collection import views as collection_views
 from collection.views import (CollectionCreateView, CollectionDeleteView, CollectionDetailView,
                               CollectionListView, CollectionUpdateView)
@@ -69,19 +68,22 @@ urlpatterns = [
 
     path('blog/', BlogListView.as_view(), name='blog_list'),
 
-    path('bookmarks/click<int:bookmark_id>', bookmark_views.bookmark_click, name='bookmark_click'),
-    path('bookmarks/edit/<int:bookmark_id>', bookmark_views.bookmark_edit, name='bookmark_edit'),
-    path('bookmarks/edit', bookmark_views.bookmark_edit, name='bookmark_add'),
-    path('bookmarks/import', bookmark_views.bookmark_import, name='bookmark_import'),
+    path('bookmarks/click<int:bookmark_id>', bookmark_views.click, name='bookmark_click'),
+    path('bookmarks/edit/<int:bookmark_id>', bookmark_views.edit, name='bookmark_edit'),
+    path('bookmarks/edit', bookmark_views.edit, name='bookmark_add'),
+    path('bookmarks/import', bookmark_views.do_import, name='bookmark_import'),
+    path('bookmarks/random/', bookmark_views.get_random_bookmarks, name='get_random_bookmarks'),
+    path('bookmarks/search/<str:search>', bookmark_views.search, name='bookmark_search'),
     path('bookmarks/snarf_link.html', bookmark_views.snarf_link),
-    path('bookmarks/tag/', bookmark_views.bookmark_tag, name='bookmark_tag'),
+
+    path('bookmarks/list/', bookmark_views.list, name='bookmark_list'),
+    path('bookmarks/list/<int:page_number>', bookmark_views.list, name='bookmark_list'),
+
     path('bookmarks/tag/sort', bookmark_views.sort_favorite_tags, name='sort_favorite_tags'),
-    path('bookmarks/tag/<str:tag_filter>', bookmark_views.bookmark_tag, name='bookmark_tag'),
+    path('bookmarks/tag/<str:tag_filter>', bookmark_views.list, name='bookmark_tag'),
     path('bookmarks/tagsearch/', bookmark_views.tag_search, name='tag_search'),
     path('bookmarks/tag_bookmark_list.json', bookmark_views.tag_bookmark_list, name='tag_bookmark_list'),
-    path('bookmarks/delete/<int:bookmark_id>', bookmark_views.bookmark_delete, name='bookmark_delete'),
-    path('bookmarks/', bookmark_views.bookmark_list, name='bookmark_list'),
-    path('my/datatable/data/', OrderListJson.as_view(), name='get_bookmarks_list'),
+    path('bookmarks/delete/<int:bookmark_id>', bookmark_views.delete, name='bookmark_delete'),
 
     path('books/(\w+)?', BookListView.as_view(), name="book_list"),
 

@@ -14,7 +14,6 @@
    display: none;
 }
 
-
 .list_annotation {
   color: #C76257;
   font-size: 80%;
@@ -26,6 +25,11 @@
 }
 
 #row_selected, #row_selected a {
+   background-color: #0173bc;
+   color: #ffffff;
+}
+
+.selected, .selected a {
    background-color: #0173bc;
    color: #ffffff;
 }
@@ -74,6 +78,10 @@
 
 .bookmark-list {
     list-style-type: none;
+}
+
+.bookmark-tag-filter-input {
+    width: 260px;
 }
 
 .monospaced {
@@ -155,6 +163,10 @@ ul.pagination {
 
 #myModal #title {
     width: 300px;
+}
+
+li.active a {
+    color: #ffffff
 }
 
 a.tag:link {
