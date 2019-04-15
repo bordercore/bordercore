@@ -30,7 +30,7 @@
 
                     $.ajax( { type: 'POST',
                               url: '{% url 'sort_favorite_tags' %}',
-                              data: { tag_id: tag_id, new_position: ui.item.index() + 1 },
+                              data: { tag_id: tag_id, new_position: ui.item.index() },
                               error: function (xhr, ajaxOptions, error) {
                             $.smkAlert({text: 'Error reordering tags: ' + error, type: 'error', position:'top-right'});
                         }
@@ -108,7 +108,7 @@
             var engine = new Bloodhound({
                 name: 'tags',
                 remote: {
-                    url: '{% url 'tag_search' %}?query=%QUERY',
+                    url: '{% url 'bookmark_tag_search' %}?query=%QUERY',
                     wildcard: '%QUERY'
                 },
                 datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
@@ -138,7 +138,7 @@
                     var link_id = myMatches[1];
 
                     $.ajax( { type: 'POST',
-                              url: '{% url 'tag_bookmark_list' %}',
+                              url: '{% url 'sort_bookmarks' %}',
                               data: { tag: '{{ tag_filter }}', link_id: link_id, position: ui.item.index() + 1 },
                               success: function() {
                         }
@@ -196,7 +196,7 @@
 
     <div class="row">
 
-        <div class="col-lg-8">
+        <div class="col-lg-12">
 
             <form class="form-inline" role="form" name="nav_form" id="tag-search-form" method="get">
 
@@ -212,15 +212,7 @@
                     <button class="btn btn-secondary" id="btn-delete" disabled>Delete</button>
                 </div>
 
-                <!-- <div class="form-group">
-                    <input autocomplete="off" id="search" type="text" style="width: 200px" class="form-control ml-3" placeholder="Search">
-                </div> -->
-
                 <div class="input-group ml-3">
-                    <!-- <span class="input-group-addon">
-                        <i class="fas fa-search"></i>
-                    </span> -->
-
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="basic-addon1">
                             <i class="fa fa-search"></i>
@@ -245,12 +237,16 @@
 
                 {% for link in bookmarks %}
 
-                    <li class="bookmark" data-id="{{ link.id }}" style="padding: 4px">
-                        <div class="tag-container">
-                            <span class="ml-2" style="width: 120px; color: #999999; display: inline-block;">{{ link.created|date:"N j, Y" }}</span>
-                            <span class="ml-2" style="width: 20px">{{ link.url|favicon:16|safe }} </span>
+                    <li class="bookmark" data-id="{{ link.id }}">
+                        <div>
+                            <span class="ml-1">{{ link.created|date:"N j," }}</span>
+                            <span class="">{{ link.created|date:"Y" }}</span>
+                            <span class="ml-2">{{ link.url|favicon:16|safe }} </span>
                             <span>
-                                <a class="one-tag ml-2" href="{{ link.url }}" id="link_{{ link.id }}">{{ link.title }}</a>
+                                <a class="one-tag ml-2" href="{{ link.url }}" id="link_{{ link.id }}" target="_blank">{{ link.title }}</a>
+                                {% if link.last_response_code != None and link.last_response_code != 200 %}
+                                    <a class="form-error ml-3" target="wayback" href="https://web.archive.org/web/1000/{{ link.url }}">{{ link.last_response_code }}</a>
+                                {% endif %}
                             </span>
                             {% if link.tag_list %}
                                 {% for tag in link.tag_list %}

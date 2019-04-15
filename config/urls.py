@@ -81,8 +81,8 @@ urlpatterns = [
 
     path('bookmarks/tag/sort', bookmark_views.sort_favorite_tags, name='sort_favorite_tags'),
     path('bookmarks/tag/<str:tag_filter>', bookmark_views.list, name='bookmark_tag'),
-    path('bookmarks/tagsearch/', bookmark_views.tag_search, name='tag_search'),
-    path('bookmarks/tag_bookmark_list.json', bookmark_views.tag_bookmark_list, name='tag_bookmark_list'),
+    path('bookmarks/tagsearch/', bookmark_views.tag_search, name='bookmark_tag_search'),
+    path('bookmarks/sort_bookmarks.json', bookmark_views.sort_bookmarks, name='sort_bookmarks'),
     path('bookmarks/delete/<int:bookmark_id>', bookmark_views.delete, name='bookmark_delete'),
 
     path('books/(\w+)?', BookListView.as_view(), name="book_list"),

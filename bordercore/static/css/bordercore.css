@@ -70,11 +70,7 @@
   color: #b94a48;
 }
 
-#bookmarks_show_untagged_only_note {
-    font-size: 12px;
-    padding-right: 20px;
-    padding-top: 10px;
-}
+/*** Bookmarks ***/
 
 .bookmark-list {
     list-style-type: none;
@@ -82,6 +78,24 @@
 
 .bookmark-tag-filter-input {
     width: 260px;
+}
+
+ul.bookmark-list li {
+   padding: 4px;
+}
+
+ul.bookmark-list span:nth-child(1) {
+    color: #999999;
+    display: inline-block;
+    width: 80px;
+}
+
+ul.bookmark-list span:nth-child(2) {
+    color: #999999;
+}
+
+ul.bookmark-list span:nth-child(3) {
+    width: 20px;
 }
 
 .monospaced {
@@ -98,14 +112,6 @@ ul.pagination {
    width: 800px;
    height: 400px;
 }
-
-#bookmarks_show_untagged_only_note {
-                                     margin-right: 10px;
-                                     }
-
-#bookmarks_breadcrumb {
-                        margin: 0px;
-                        }
 
 .search_book_title {
                     color: #0173bc;

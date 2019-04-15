@@ -16,7 +16,6 @@ class UserProfileForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(UserProfileForm, self).__init__(*args, **kwargs)
 
-        self.fields['bookmarks_show_untagged_only'].label = "Show untagged bookmarks only"
         self.fields['homepage_default_collection'].label = "Default collection"
         self.fields['homepage_default_collection'].widget.attrs['class'] = 'form-control'
         self.fields['favorite_tags'].widget.attrs['class'] = 'form-control'
@@ -38,7 +37,7 @@ class UserProfileForm(ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('favorite_tags', 'bookmarks_show_untagged_only', 'todo_default_tag', 'homepage_default_collection', 'orgmode_file', 'google_calendar')
+        fields = ('favorite_tags', 'todo_default_tag', 'homepage_default_collection', 'orgmode_file', 'google_calendar')
         widgets = {
             'orgmode_file': TextInput(attrs={'class': 'form-control'})
         }

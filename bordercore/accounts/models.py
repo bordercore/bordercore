@@ -13,7 +13,6 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT)
     rss_feeds = ArrayField(models.IntegerField(), null=True)
     favorite_tags = models.ManyToManyField(Tag, through='SortOrder')
-    bookmarks_show_untagged_only = models.BooleanField(default=False)
     todo_default_tag = models.OneToOneField(Tag, related_name='default_tag', null=True, on_delete=models.PROTECT)
     orgmode_file = models.TextField(null=True)
     google_calendar = JSONField(blank=True, null=True)
@@ -41,7 +40,6 @@ class SortOrder(models.Model):
         SortOrder.objects.filter(id__in=id_list).update(sort_order=F('sort_order') - 1)
 
         super(SortOrder, self).delete()
-
 
     def save(self, *args, **kwargs):
 

@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Count
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 
 from accounts.models import SortOrder
@@ -100,9 +100,9 @@ def snarf_link(request):
 @login_required
 def tag_search(request):
 
-    tags = Tag.objects.filter(user=request.user, name__istartswith=request.GET.get('query', ''), bookmark__isnull=False).distinct('name')
+    tags = Tag.objects.filter(bookmark__user=request.user, name__icontains=request.GET.get("query", ""), bookmark__isnull=False).distinct("name")
 
-    return HttpResponse(json.dumps([x.name for x in tags]), content_type="application/json")
+    return JsonResponse([{"value": x.name, "is_meta": x.is_meta} for x in tags], safe=False)
 
 
 def add_bookmarks_from_import(request, tag, bookmarks):
@@ -295,7 +295,11 @@ def sort_favorite_tags(request):
 
 
 @login_required
-def tag_bookmark_list(request):
+def sort_bookmarks(request):
+    """
+    Given an ordered list of bookmarks with a specified tag, move a
+    bookmark to a new position within that list
+    """
 
     tag = request.POST['tag']
     link_id = int(request.POST['link_id'])
