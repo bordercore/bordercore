@@ -1,3 +1,4 @@
+import base64
 import datetime
 import json
 import lxml.html as lh
@@ -233,7 +234,14 @@ def list(request,
         #  "Meta" inner class
         bookmark_info = [(x.bookmark, x.note) for x in tagbookmark.tagbookmarksortorder_set.all()]
 
-        bookmark_range = 1 # Not used in this case
+        # If there is an associated note, add it to the bookmark object
+        sorted_bookmarks = []
+        for bookmarks in bookmark_info:
+            if bookmarks[1]:
+                bookmarks[0].note = base64.b64encode(bookmarks[1].encode()).decode()
+            sorted_bookmarks.append(bookmarks[0])
+
+        bookmark_range = 1  # Not used in this case
 
     else:
 
@@ -311,3 +319,15 @@ def sort_bookmarks(request):
     tbso.reorder(position)
 
     return HttpResponse(json.dumps('OK'), content_type="application/json")
+
+
+@login_required
+def add_note(request):
+    print(request.POST)
+
+    t = TagBookmark.objects.get(tag__name=request.POST.get("tag"))
+    TagBookmarkSortOrder.objects.filter(
+        tag_bookmark=t,
+        bookmark_id=request.POST.get("link_id")).update(note=request.POST.get("note"))
+
+    return JsonResponse("OK", safe=False)

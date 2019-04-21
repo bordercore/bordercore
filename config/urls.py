@@ -68,6 +68,7 @@ urlpatterns = [
 
     path('blog/', BlogListView.as_view(), name='blog_list'),
 
+    path('bookmarks/add_note', bookmark_views.add_note, name='bookmark_add_note'),
     path('bookmarks/click<int:bookmark_id>', bookmark_views.click, name='bookmark_click'),
     path('bookmarks/edit/<int:bookmark_id>', bookmark_views.edit, name='bookmark_edit'),
     path('bookmarks/edit', bookmark_views.edit, name='bookmark_add'),

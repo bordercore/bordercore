@@ -98,6 +98,17 @@ ul.bookmark-list span:nth-child(3) {
     width: 20px;
 }
 
+#bookmark-sidebar {
+    background-color: #ffffff;
+    border: 1px solid #999999;
+    display:none;
+    height: 400px;
+    padding: 5px;
+    position:fixed!important;
+    width: 300px;
+    z-index:20;
+}
+
 .monospaced {
     font-family: Courier
  }

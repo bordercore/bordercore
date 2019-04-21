@@ -13,12 +13,21 @@
     <script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
 
     <script src="https://use.fontawesome.com/4a95cb196f.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
 
 {% endblock %}
 
 {% block left-block %}
 
     <script type="text/javascript">
+
+        // Create a hash of bookmark ids and their attributes
+        var link_info = {};
+        {% for link in bookmarks %}
+          {% if link.note != None %}
+        link_info[{{ link.id }}] = "{{ link.note }}";
+          {% endif %}
+        {% endfor %}
 
         $(document).ready(function() {
 
@@ -40,6 +49,18 @@
         })
 
     </script>
+
+    <div id="bookmark-sidebar">
+
+        <form>
+            <div class="form-group">
+                <label class="col-form-label">Note</label>
+                <textarea class="form-control" id="note" rows="9"></textarea>
+            </div>
+            <button id="btn-add-note" type="button" class="btn btn-primary">Add</button>
+        </form>
+
+    </div>
 
     <h2>
     Favorite Tags
@@ -163,7 +184,9 @@
                         $("li.bookmark.selected").remove();
                         $('#btn-edit').attr("disabled", "disabled");
                         $('#btn-delete').attr("disabled", "disabled");
-
+                        {% if tag_filter %}
+                        $("#bookmark-sidebar").hide( "slide", { direction: "left" } );
+                        {% endif %}
                     }
                           });
 
@@ -171,12 +194,43 @@
 
             });
 
+            $("#btn-add-note").click( function() {
+
+                var note = $("#note").val();
+                var selectedBookmarkID = $("li.bookmark.selected").data("id");
+
+                $.ajax( { type: "POST",
+                          url: "{% url "bookmark_add_note" %}",
+                          data: { tag: "{{ tag_filter }}", link_id: selectedBookmarkID, note: note },
+                          success: function() {
+                        link_info[selectedBookmarkID] = btoa(note);
+                    }
+                          });
+
+                return false;
+            });
+
             $("li.bookmark").click( function () {
                 if ( $(this).hasClass("selected") ) {
+                    {% if tag_filter %}
+                    $("#bookmark-sidebar").hide( "slide", { direction: "left" } );
+                    {% endif %}
                     $(this).removeClass("selected");
                     $('#btn-edit').attr("disabled", "disabled");
                     $('#btn-delete').attr("disabled", "disabled");
                 } else {
+                    {% if tag_filter %}
+                    $("#note").val("");
+                    var selectedBookmarkID = $(this).data("id");
+                    if (link_info[selectedBookmarkID]) {
+                        try {
+                            $("#note").val(atob(link_info[selectedBookmarkID]));
+                        } catch(err) {
+                            console.log(err);
+                        };
+                    }
+                    $("#bookmark-sidebar").show( "slide", { direction: "left" } );
+                    {% endif %}
                     $("li.bookmark.selected").removeClass("selected");
                     $(this).addClass("selected");
                     $('#btn-edit').removeAttr("disabled");
@@ -246,6 +300,9 @@
                                 <a class="one-tag ml-2" href="{{ link.url }}" id="link_{{ link.id }}" target="_blank">{{ link.title }}</a>
                                 {% if link.last_response_code != None and link.last_response_code != 200 %}
                                     <a class="form-error ml-3" target="wayback" href="https://web.archive.org/web/1000/{{ link.url }}">{{ link.last_response_code }}</a>
+                                {% endif %}
+                                {% if link.note %}
+                                    <i class="fa fa-clipboard"></i>
                                 {% endif %}
                             </span>
                             {% if link.tag_list %}
