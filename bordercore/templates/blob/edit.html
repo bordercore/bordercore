@@ -290,8 +290,13 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                 }
             });
 
+            // Expand the content for editing, but only do it once.
+            var isExpanded = false;
             $('#id_content').focus(function () {
-                $(this).animate({ height: "30em" }, 500);
+                if (! isExpanded) {
+                    $(this).animate({ height: "30em" }, 500);
+                    isExpanded = true;
+                }
             })
 
             $('.btn-add').click( function () {
