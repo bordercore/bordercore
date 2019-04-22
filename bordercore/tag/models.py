@@ -28,6 +28,12 @@ class TagBookmark(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     bookmarks = models.ManyToManyField(Bookmark, through='TagBookmarkSortOrder')
 
+    def __unicode__(self):
+        return self.tag.name
+
+    def __str__(self):
+        return self.tag.name
+
 
 class TagBookmarkSortOrder(models.Model):
     tag_bookmark = models.ForeignKey(TagBookmark, on_delete=models.CASCADE)
