@@ -2,8 +2,8 @@ anyjson==0.3.3
 Babel==2.2.0
 backports-abc==0.4
 backports.ssl-match-hostname==3.5.0.1
-billiard==3.5.0.2
-celery==4.0.2
+billiard==3.6.0.0
+celery==4.3.0
 certifi==2015.11.20.1
 Django==2.0.7
 django-datatables-view==1.12.1
@@ -14,8 +14,8 @@ flower==0.8.3
 futures==3.0.3
 google-api-python-client==1.6.2
 httplib2==0.10.3
-kombu==4.0.2
-lxml==3.4.2
+kombu==4.5.0
+lxml==4.3.3
 Markdown==2.6
 mutagen==1.28
 oauth2client==4.0.0
@@ -23,7 +23,7 @@ pdf2image==0.1.14
 Pillow==4.0.0
 pipdeptree==0.5.0
 pkg-resources==0.0.0
-psycopg2==2.6
+psycopg2==2.8.2
 pyasn1==0.2.3
 pyasn1-modules==0.0.8
 Pygments==2.0.2
@@ -33,7 +33,7 @@ https://bitbucket.org/basti/python-amazon-product-api/get/tip.tar.gz
 python-dateutil==2.7.3
 python-mimeparse==1.6.0
 pytz==2018.5
-redis==2.10.5
+redis==3.2.1
 requests==2.5.3
 rsa==3.4.2
 https://github.com/bordercore/bordercore-solrpy/archive/python3.zip
