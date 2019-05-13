@@ -92,11 +92,11 @@
         <a href="{{ match.url.0 }}">{{ match.title }}</a>
     </h4>
 
-{% elif match.doctype == 'bordercore_blog' %}
+{% elif match.doctype == 'note' %}
 
-    <h4 class="search_book_title"><a href="{% url 'blob_detail' match.uuid %}">{{ match.title|default:"Blog Post" }}</a></h4>
+    <h4 class="search_book_title"><a href="{% url 'blob_detail' match.uuid %}">{{ match.title|default:"Note" }}</a></h4>
 
-    <h5>{{ match.blogpost_snippet|safe }}</h5>
+    <h5>{{ match.note|safe }}</h5>
 
 {% elif match.doctype == 'document' %}
 
@@ -104,7 +104,7 @@
         <a href="{% url 'blob_detail' match.uuid %}">{{ match.title|default:"Title" }}</a>
     </h4>
 
-    <h5>{{ match.blogpost_snippet|safe }}</h5>
+    <h5>{{ match.note|safe }}</h5>
 
 {% else %}
 

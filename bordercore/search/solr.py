@@ -1,5 +1,9 @@
 import os
 
+from solrpy.core import utc_from_string
+
+from lib.time_utils import get_relative_date
+
 
 class SolrResultSet():
 
@@ -10,6 +14,16 @@ class SolrResultSet():
         self.file_path = result_set.get('filepath', '')
         if self.file_path:
             self.filename = os.path.basename(self.file_path)
+
+    def get_filename(self):
+        try:
+            filename = os.path.basename(self.result_set['filepath'])
+        except KeyError:
+            filename = None
+        return filename
+
+    def get_last_modified(self):
+        return get_relative_date(utc_from_string(self.result_set['last_modified']))
 
     def get_title(self):
         try:

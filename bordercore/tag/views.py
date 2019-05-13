@@ -12,9 +12,9 @@ def tag_search(request):
 
     args = {}
 
-    # Only retrieve tags which have been applied to at least one blog post
-    if request.GET.get('type') == 'blog':
-        args['document__is_blog'] = True
+    # Only retrieve tags which have been applied to at least one note
+    if request.GET.get('type') == 'note':
+        args['document__is_note'] = True
 
     query = request.GET.get('query', '')
     tag_list = [{'value': x.name, 'is_meta': x.is_meta} for x in

@@ -87,7 +87,7 @@ class Document(TimeStampedModel, AmazonMixin):
     date = models.TextField(null=True)
     importance = models.IntegerField(default=1)
     is_private = models.BooleanField(default=False)
-    is_blog = models.BooleanField(default=False)
+    is_note = models.BooleanField(default=False)
     documents = models.ManyToManyField("self")
 
     def get_content(self):

@@ -190,11 +190,11 @@
             {% endfor %}
         </div>
 
-        <div id="bordercore_blog" class="tab-pane fade">
-            {% for match in info.matches.bordercore_blog %}
+        <div id="note" class="tab-pane fade">
+            {% for match in info.matches.note %}
                 <div class="row voffset">
                     <div class="col-lg-12">
-                        <a href="{% url 'blob_detail' match.uuid %}">{{ match.title|default:"Blog Post" }}</a>
+                        <a href="{% url 'blob_detail' match.uuid %}">{{ match.title|default:"Note" }}</a>
                     </div>
                 </div>
             {% endfor %}

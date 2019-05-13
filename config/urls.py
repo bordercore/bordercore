@@ -9,7 +9,7 @@ from accounts.api import UserResource
 from accounts.views import UserProfileDetailView
 from blob import views as blob_views
 from blob.views import (BlobDeleteView, BlobDetailView, BlobThumbnailView,
-                        BlobUpdateView, BlogListView, DocumentCreateView)
+                        BlobUpdateView, DocumentCreateView)
 from book.views import BookListView
 from bookmark import views as bookmark_views
 from bookmark.api import BookmarkResource
@@ -66,7 +66,7 @@ urlpatterns = [
     path('blob/<uuid:uuid>/edit', BlobUpdateView.as_view(), name='blob_edit'),
     path('blob/<uuid:uuid>/thumbnail', BlobThumbnailView.as_view(), name='blob_thumbnail'),
 
-    path('blog/', BlogListView.as_view(), name='blog_list'),
+    path('notes/', SearchListView.as_view(), {'notes_search': True}, name='notes_list'),
 
     path('bookmarks/add_note', bookmark_views.add_note, name='bookmark_add_note'),
     path('bookmarks/click<int:bookmark_id>', bookmark_views.click, name='bookmark_click'),

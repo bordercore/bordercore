@@ -38,8 +38,8 @@ class SearchListView(ListView):
             return 'doctype:document'
         elif facet == 'Todos':
             return 'doctype:bordercore_todo'
-        elif facet == 'Blog Posts':
-            return 'doctype:bordercore_blog'
+        elif facet == 'Notes':
+            return 'doctype:note'
         elif facet == 'Links':
             return 'doctype:bordercore_bookmark'
         elif facet == 'Titles':
@@ -47,15 +47,21 @@ class SearchListView(ListView):
         elif facet == 'Tags':
             return 'tags:{}'.format(term)
 
-    def get_queryset(self):
+    def get_queryset(self, **kwargs):
 
-        if 'search' in self.request.GET:
+        notes_search = True if self.kwargs.get('notes_search', '') else False
 
-            search_term = escape_solr_terms(self.request.GET['search'])
-            sort = self.request.GET['sort']
+        if notes_search:
+            self.SOLR_COUNT_PER_PAGE = 10
+
+        if 'search' in self.request.GET or notes_search:
+
+            search_term = escape_solr_terms(self.request.GET.get("search", ""))
+            sort = self.request.GET.get("sort", "date_unixtime")
 
             rows = self.request.GET.get('rows', None)
             boolean_type = self.request.GET.get('boolean_search_type', 'AND')
+
             if rows == 'No limit':
                 rows = 1000000
             elif rows is None:
@@ -63,35 +69,47 @@ class SearchListView(ListView):
 
             conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
-            solr_args = {'boost': 'importance',
-                         'defType': 'edismax',
-                         'fl': 'author,bordercore_todo_task,date,date_unixtime,doctype,filepath,id,importance,internal_id,last_modified,sha1sum,tags,title,url,uuid',
-                         'facet': 'on',
-                         'facet.mincount': '1',
-                         'rows': rows,
-                         'sort': sort + ' desc'
-                         }
+            search_terms = []
 
             p = re.compile("^[0-9a-f]{40}$")
             if p.search(search_term):
-                solr_args['q'] = 'sha1sum:%s' % (search_term)
+                search_terms.append("sha1sum:{}".format(search_term))
+                search_term = ""
+
+            if search_term:
+                search_terms.append(handle_quotes(self.request, search_term))
             else:
+                search_terms.insert(0, "''")
 
-                search_term = handle_quotes(self.request, search_term)
-                search_term = search_term + " AND user_id:{}".format(self.request.user.id)
+            search_terms.append("user_id:{}".format(self.request.user.id))
 
-                solr_args.update(
-                    {'q': search_term,
-                     'q.op': boolean_type,
-                     'qf': 'text',
-                     'hl': 'true',
-                     'hl.fl': 'attr_content,bordercore_todo_task,title',
-                     'hl.simple.pre': '<span class="search_bordercore_blogpost_snippet">',
-                     'hl.simple.post': '</span>'}
-                )
+            if notes_search:
+                search_terms.append("doctype:note")
+                tagsearch = self.request.GET.get('tagsearch', '')
+                if tagsearch:
+                    search_terms.extend(['tags:"{}"'.format(urllib.parse.unquote(t),) for t in tagsearch.split(',')])
+
+            search_term = " AND ".join(search_terms)
+
+            solr_args = {
+                'q': search_term,
+                'q.op': boolean_type,
+                'rows': rows,
+                'sort': sort + ' desc',
+                'qf': 'text',
+                'boost': 'importance',
+                'defType': 'edismax',
+                'fl': 'author,bordercore_todo_task,date,date_unixtime,doctype,filepath,id,importance,internal_id,last_modified,sha1sum,tags,title,url,uuid',
+                'facet': 'on',
+                'facet.mincount': '1',
+                'hl': 'true',
+                'hl.fl': 'attr_content,bordercore_todo_task,title',
+                'hl.simple.pre': '<span class="search_bordercore_blogpost_snippet">',
+                'hl.simple.post': '</span>'
+            }
 
             facet_queries = []
-            for facet in ['Blobs', 'Blog Posts', 'Books', 'Titles', 'Documents', 'Links', 'Tags', 'Todos']:
+            for facet in ['Blobs', 'Notes', 'Books', 'Titles', 'Documents', 'Links', 'Tags', 'Todos']:
                 facet_queries.append('{!key="%s" ex=dt}' % (facet) + self.get_facet_query(facet, search_term))
                 solr_args['facet.query'] = facet_queries
 
@@ -102,21 +120,32 @@ class SearchListView(ListView):
                 results = conn.raw_query(**solr_args)
                 return json.loads(results.decode('UTF-8'))
             except SolrException as e:
-                messages.add_message(self.request, messages.ERROR, "Solr error: {}".format(e))
+                messages.add_message(
+                    self.request,
+                    messages.ERROR,
+                    "Solr error: {}".format(e)
+                )
             except ConnectionRefusedError as e:
-                messages.add_message(self.request, messages.ERROR, "Solr error: {}".format(e.strerror))
+                messages.add_message(
+                    self.request,
+                    messages.ERROR,
+                    "Solr error: {}".format(e.strerror)
+                )
 
     def get_context_data(self, **kwargs):
         context = super(SearchListView, self).get_context_data(**kwargs)
+
+        notes_search = True if self.kwargs.get('notes_search', '') else False
+
+        if notes_search:
+            SECTION = "Notes"
+            self.template_name = 'blob/note_list.html'
 
         info = []
         facet_counts = {}
 
         if self.request.GET.get('facets'):
             context['filter_query'] = self.request.GET.get('facets').split(',')
-
-        from solrpy.core import utc_from_string
-        from lib.time_utils import get_relative_date
 
         if context['info']:
 
@@ -128,35 +157,34 @@ class SearchListView(ListView):
 
             for myobject in context['info']['response']['docs']:
                 solr_result_set = SolrResultSet(myobject)
-                filename = ''
-                last_modified = ''
-                blogpost_snippet = ''
-                # TODO: Handle matches with multiple titles
-                if myobject.get('last_modified'):
-                    last_modified = get_relative_date(utc_from_string(myobject.get('last_modified')))
-                if myobject.get('filepath'):
-                    filename = os.path.basename(myobject['filepath'])
-                if myobject['doctype'] == 'blob' and not myobject.get('title', ''):
-                    myobject['title'] = [filename]
-                if myobject['doctype'] == 'bordercore_blog':
+                note = ''
+                if myobject['doctype'] == 'note':
                     if context['info']['highlighting'][myobject['id']].get('attr_content'):
-                        blogpost_snippet = context['info']['highlighting'][myobject['id']]['attr_content'][0]
-                info.append(dict(title=solr_result_set.get_title(),
-                                 author=myobject.get('author', ['']),
-                                 date=get_date_from_pattern(myobject.get('date','')),
-                                 doctype=myobject['doctype'],
-                                 sha1sum=myobject.get('sha1sum', ''),
-                                 uuid=myobject.get('uuid', ''),
-                                 id=myobject['id'],
-                                 importance=myobject.get('importance', ''),
-                                 internal_id=myobject.get('internal_id', ''),
-                                 last_modified=last_modified,
-                                 url=myobject.get('url', ''),
-                                 filename=filename,
-                                 tags=myobject.get('tags'),
-                                 bordercore_todo_task=myobject.get('bordercore_todo_task', ''),
-                                 blogpost_snippet=blogpost_snippet,
-                             ))
+                        note = context['info']['highlighting'][myobject['id']]['attr_content'][0]
+
+                match = dict(title=solr_result_set.get_title(),
+                             author=myobject.get('author', ['']),
+                             date=get_date_from_pattern(myobject.get('date', '')),
+                             doctype=myobject['doctype'],
+                             sha1sum=myobject.get('sha1sum', ''),
+                             uuid=myobject.get('uuid', ''),
+                             id=myobject['id'],
+                             importance=myobject.get('importance', ''),
+                             internal_id=myobject.get('internal_id', ''),
+                             last_modified=solr_result_set.get_last_modified(),
+                             url=myobject.get('url', ''),
+                             filename=solr_result_set.get_filename(),
+                             tags=myobject.get('tags'),
+                             bordercore_todo_task=myobject.get('bordercore_todo_task', ''),
+                             note=note
+                )
+
+                if notes_search:
+                    obj = Document.objects.get(uuid=match["uuid"])
+                    match["content"] = obj.get_content()
+
+                info.append(match)
+
             context['numFound'] = context['info']['response']['numFound']
 
             # Convert to a list of dicts.  This lets us use the dictsortreversed
@@ -178,6 +206,7 @@ class SearchTagDetailView(ListView):
     context_object_name = 'info'
 
     def get_context_data(self, **kwargs):
+
         context = super(SearchTagDetailView, self).get_context_data(**kwargs)
         results = {}
         for one_doc in context['info']['response']['docs']:
@@ -336,7 +365,7 @@ def search_admin(request):
     stats = {}
 
     conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-    for doctype in ['blob', 'bordercore_blog', 'book', 'bordercore_todo', 'bordercore_bookmark', 'document']:
+    for doctype in ['blob', 'note', 'book', 'bordercore_todo', 'bordercore_bookmark', 'document']:
         solr_args = {'q': 'doctype:{}'.format(doctype), 'rows': 1}
         r = json.loads(conn.raw_query(**solr_args).decode('UTF-8'))
         stats[doctype] = r['response']['numFound']

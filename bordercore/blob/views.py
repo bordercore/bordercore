@@ -1,6 +1,5 @@
 from collections import OrderedDict
 import datetime
-import os
 import re
 from urllib.parse import urlparse
 
@@ -58,8 +57,8 @@ class DocumentCreateView(CreateView):
     def get_form(self, form_class=None):
         form = super(DocumentCreateView, self).get_form(form_class)
 
-        if self.request.GET.get('is_blog', False):
-            form.initial['is_blog'] = True
+        if self.request.GET.get('is_note', False):
+            form.initial['is_note'] = True
         if self.request.GET.get('linked_blob', False):
             blob = Document.objects.get(user=self.request.user, pk=int(self.request.GET.get('linked_blob')))
             form.initial['tags'] = ','.join([x.name for x in blob.tags.all()])
@@ -516,48 +515,3 @@ def parse_date(request, input_date):
 
     return JsonResponse({'output_date': response,
                          'error': error})
-
-
-@method_decorator(login_required, name='dispatch')
-class BlogListView(ListView):
-    model = Document
-    template_name = "blob/blog_list.html"
-    ITEMS_PER_PAGE = 10
-    SECTION = 'Blog'
-
-    def get_queryset(self):
-        if self.request.GET.get('tagsearch', ''):
-            post_list = Document.objects.filter(user=self.request.user, tags__name__exact=self.request.GET['tagsearch']).filter(is_blog=True).order_by('-created')
-        elif 'search_item' in self.request.GET:
-            post_list = Document.objects.filter(
-                Q(user=self.request.user) &
-                (Q(content__icontains=self.request.GET['search_item']) |
-                 Q(title__icontains=self.request.GET['search_item'])) &
-                Q(is_blog=True)
-            )
-        else:
-            post_list = Document.objects.order_by('-created').filter(user=self.request.user, is_blog=True)
-
-        paginator = Paginator(post_list, self.ITEMS_PER_PAGE)
-
-        page = self.request.GET.get('page')
-        try:
-            posts = paginator.page(page)
-        except PageNotAnInteger:
-            # If page is not an integer, deliver first page.
-            posts = paginator.page(1)
-        except EmptyPage:
-            # If page is out of range (e.g. 9999), deliver last page of results.
-            posts = paginator.page(paginator.num_pages)
-
-        return posts
-
-    def get_context_data(self, **kwargs):
-        context = super(BlogListView, self).get_context_data(**kwargs)
-
-        if not self.object_list.paginator.page(1).object_list:
-            messages.add_message(self.request, messages.ERROR, 'No blog entries found')
-
-        context['section'] = self.SECTION
-        context['title'] = 'Blog List'
-        return context
