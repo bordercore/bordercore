@@ -73,6 +73,8 @@ def get_date_from_pattern(date):
         return date
     elif re.compile('^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ').match(date):
         return datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ').strftime('%B %d, %Y')
+    elif re.compile('^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d').match(date):
+        return datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%B %d, %Y, %I:%M %p').replace("PM", "p.m.").replace("AM", "a.m.")
     else:
         matches = re.compile('^\[([-\d]*) TO ([-\d]*)\]$').match(date)
         if matches:
