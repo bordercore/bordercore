@@ -17,6 +17,8 @@ MIDDLEWARE += (
 
 INSTALLED_APPS += (
     'debug_toolbar',
+    'django_extensions',
+    'notebook',
     'template_timings_panel',
 )
 
