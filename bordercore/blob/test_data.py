@@ -225,6 +225,8 @@ def test_collection_blobs_exists_in_solr():
     "Assert that all blobs currently in collections actually exist in Solr"
     collections = Collection.objects.filter(blob_list__isnull=False)
 
+    conn = SolrConnection('http://{}:{}/{}'.format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+
     for c in collections:
         for blob_info in c.blob_list:
             blob = Document.objects.get(pk=blob_info['id'])
@@ -233,7 +235,6 @@ def test_collection_blobs_exists_in_solr():
                          'fl': 'id',
                          'wt': 'json'}
 
-            conn = SolrConnection('http://{}:{}/{}'.format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
             response = conn.raw_query(**solr_args)
             data = json.loads(response.decode('UTF-8'))['response']['numFound']
             assert data == 1, "blob uuid={} does not exist in solr".format(blob.uuid)
@@ -244,6 +245,8 @@ def test_blob_metadata_exists_in_solr():
     metadata = MetaData.objects.all()
 
     defined_solr_fields = ('doctype', 'title', 'author', 'url')
+
+    conn = SolrConnection('http://{}:{}/{}'.format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
     for m in metadata:
         name = m.name.replace(' ', '_').lower()
@@ -256,7 +259,6 @@ def test_blob_metadata_exists_in_solr():
                      'fl': 'id',
                      'wt': 'json'}
 
-        conn = SolrConnection('http://{}:{}/{}'.format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
         response = conn.raw_query(**solr_args)
         data = json.loads(response.decode('UTF-8'))['response']['numFound']
         assert data == 1, "metadata for blob uuid={} does not exist in solr, {}:{}".format(m.blob.uuid, m.name, m.value)
@@ -279,6 +281,8 @@ def test_solr_search():
 def test_blob_tags_match_solr():
     "Assert that all blob tags match those found in Solr"
     blobs = Document.objects.filter(tags__isnull=False)
+
+    conn = SolrConnection("http://{}:{}/{}".format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 
     for b in blobs:
         tags = " AND ".join(["\"{}\"".format(x.name) for x in b.tags.all()])
