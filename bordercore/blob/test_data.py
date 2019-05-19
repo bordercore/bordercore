@@ -286,7 +286,24 @@ def test_blob_tags_match_solr():
                      "fl": "id,tags",
                      "wt": "json"}
 
-        conn = SolrConnection("http://{}:{}/{}".format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
         response = conn.raw_query(**solr_args)
         data = json.loads(response.decode("UTF-8"))["response"]["numFound"]
         assert data == 1, "blob uuid={} has tags which don't match those found in Solr".format(b.uuid)
+
+
+def test_all_notes_exist_in_solr():
+    "Assert that all notes exist in Solr"
+
+    conn = SolrConnection('http://{}:{}/{}'.format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+
+    notes = Document.objects.filter(is_note=True)
+
+    for note in notes:
+
+        solr_args = {'q': 'uuid:{} AND doctype:note'.format(note.uuid),
+                     'fl': 'id',
+                     'wt': 'json'}
+
+        response = conn.raw_query(**solr_args)
+        data = json.loads(response.decode('UTF-8'))['response']['numFound']
+        assert data == 1, "note uuid={} does not exist in solr".format(note.uuid)
