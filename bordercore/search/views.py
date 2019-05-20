@@ -18,13 +18,12 @@ from search.solr import SolrResultSet
 from solrpy.core import SolrConnection, SolrException
 from tag.models import Tag
 
-SECTION = 'KB'
-
 
 @method_decorator(login_required, name='dispatch')
 class SearchListView(ListView):
 
     template_name = 'kb/search.html'
+    SECTION = 'KB'
     SOLR_COUNT_PER_PAGE = 100
     context_object_name = 'info'
 
@@ -133,12 +132,12 @@ class SearchListView(ListView):
                 )
 
     def get_context_data(self, **kwargs):
-        context = super(SearchListView, self).get_context_data(**kwargs)
 
+        context = super(SearchListView, self).get_context_data(**kwargs)
         notes_search = True if self.kwargs.get('notes_search', '') else False
 
         if notes_search:
-            SECTION = "Notes"
+            self.SECTION = "Notes"
             self.template_name = 'blob/note_list.html'
 
         info = []
@@ -192,7 +191,7 @@ class SearchListView(ListView):
             context['facet_counts'] = [{'doctype_purty': k, 'doctype': k, 'count': v} for k, v in facet_counts.items()]
 
         context['info'] = info
-        context['section'] = SECTION
+        context['section'] = self.SECTION
         context['search_sort_by'] = self.request.session.get('search_sort_by', '')
         context['title'] = 'Search'
         return context
@@ -202,6 +201,7 @@ class SearchListView(ListView):
 class SearchTagDetailView(ListView):
 
     template_name = 'kb/tag_detail.html'
+    SECTION = 'KB'
     SOLR_COUNT_PER_PAGE = 100
     context_object_name = 'info'
 
@@ -257,7 +257,7 @@ class SearchTagDetailView(ListView):
         context['tag_list'] = tag_list_js
 
         context['kb_tag_detail_current_tab'] = self.request.session.get('kb_tag_detail_current_tab', '')
-        context['section'] = SECTION
+        context['section'] = self.SECTION
 
         if context['tag_list']:
             context['title'] = 'Search :: Tag Detail :: {}'.format(', '.join(tag_list))
@@ -379,6 +379,6 @@ def search_admin(request):
             conn.commit()
 
     return render(request, 'kb/admin.html',
-                  {'section': SECTION,
+                  {'section': 'KB',
                    'stats': stats,
                    'title': 'Search Admin'})
