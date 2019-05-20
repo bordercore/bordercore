@@ -23,7 +23,11 @@ class SolrResultSet():
         return filename
 
     def get_last_modified(self):
-        return get_relative_date(utc_from_string(self.result_set['last_modified']))
+        try:
+            last_modified = self.result_set['last_modified']
+        except KeyError:
+            return ''
+        return get_relative_date(utc_from_string(last_modified))
 
     def get_title(self):
         try:
