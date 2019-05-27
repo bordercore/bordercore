@@ -42,9 +42,9 @@ class ExerciseDetailView(DetailView):
         labels = []
 
         for d in data:
-            day = int(d.date.strftime("%s")) / 86400
+            day = int(int(d.date.strftime("%s")) / 86400)
             if current_workout is not None:
-                if day != int(current_workout.date.strftime("%s")) / 86400:
+                if day != int(int(current_workout.date.strftime("%s")) / 86400):
                     labels.append(current_workout.date.strftime("%b %d"))
                     plotdata.append(current_workout.weight)
                     if not context.get('reps', ''):
@@ -55,7 +55,6 @@ class ExerciseDetailView(DetailView):
             else:
                 current_workout = d
             reps.append(d.reps)
-
         context['labels'] = json.dumps(labels[::-1])
         context['plotdata'] = json.dumps(plotdata[::-1])
 
