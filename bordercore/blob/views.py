@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import datetime
+import random
 import re
 from urllib.parse import urlparse
 
@@ -361,6 +362,24 @@ def amazon_metadata_dupe_check(dupes, name, value):
         dupes[name][value] = True
         return True
 
+
+@login_required
+def slideshow(request):
+    """
+    Select a random blob from the collection "To Display"
+    to display in a slideshow
+    """
+
+    c = Collection.objects.filter(name="To Display")[0]
+
+    blob = Document.objects.get(pk=random.choice(c.blob_list)["id"])
+
+    cover_info = Document.get_cover_info(request.user, blob.sha1sum)
+
+    return render(request, "blob/slideshow.html",
+                  {"section": SECTION,
+                   "blob": blob,
+                   "cover_info": cover_info})
 
 @login_required
 def get_amazon_metadata(request, title):

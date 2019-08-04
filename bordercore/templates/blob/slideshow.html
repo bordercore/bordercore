@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+
+    <head>
+
+        <meta charset="utf-8" />
+        <meta http-equiv="refresh" content="3600; URL={% url 'blob_slideshow' %}">
+        <title>Bordercore :: Slideshow</title>
+
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/slideshow.css" />
+
+    </head>
+
+    <body bgcolor="000000">
+
+        {% block content %}
+
+            <div id="bg">
+            <img src="{{ STATIC_URL }}{{ cover_info.url }}" _class="bg" />
+            </div>
+
+            <div id="container" _style="background-image:url({{ STATIC_URL }}{{ cover_info.url }})">
+            </div>
+
+            <!-- <div class="_noscrollbars _verticalcenter slideshow" style="text-align: center">
+                <img class="_noscrollbars _slideshow" src="{{ STATIC_URL }}{{ cover_info.url }}" _height="auto" _height="{{ cover_info.height_cropped }}" _width="100%" _width="{{ cover_info.width_cropped }}" />
+            </div> -->
+
+        {% endblock %}
+
+    </body>
+
+</html>

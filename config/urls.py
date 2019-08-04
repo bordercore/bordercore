@@ -62,6 +62,7 @@ urlpatterns = [
     path('blob/create_thumbnail/<uuid:uuid>/<int:page_number>', blob_views.create_thumbnail, name='create_thumbnail'),
     path('blob/mutate', blob_views.collection_mutate, name='collection_mutate'),
     path('blob/parse_date/<path:input_date>', blob_views.parse_date, name='parse_date'),
+    path('blob/slideshow', blob_views.slideshow, name='blob_slideshow'),
     path('blob/<uuid:uuid>', BlobDetailView.as_view(), name='blob_detail'),
     path('blob/<uuid:uuid>/edit', BlobUpdateView.as_view(), name='blob_edit'),
     path('blob/<uuid:uuid>/thumbnail', BlobThumbnailView.as_view(), name='blob_thumbnail'),

@@ -147,9 +147,9 @@ ul.pagination {
                     font-size: 10px;
  }
 
-.search_bordercore_blogpost_snippet {
-                                      font-weight: bold;
-                                      }
+.search_note_snippet {
+    font-weight: bold;
+}
 
 #kbsearch {
     width: 330px;
