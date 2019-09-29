@@ -66,14 +66,25 @@ USE_L10N = True
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
 
-# Absolute filesystem path to the directory that will hold user-uploaded files.
-# Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = '/home/media/blobs'
+FILE_UPLOAD_PERMISSIONS = 0o664
 
-# URL that handles the media served from MEDIA_ROOT. Make sure to use a
-# trailing slash.
-# Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
-MEDIA_URL = ''
+# Make this unique, and don't share it with anybody.
+SECRET_KEY = get_secret('SECRET_KEY')
+
+for env in ('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_ASSOCIATE_TAG'):
+    os.environ[env] = get_secret(env)
+
+USE_S3 = True
+AWS_STORAGE_BUCKET_NAME = "bordercore-blobs"
+AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+AWS_LOCATION = "django"
+
+# Set this to silence S3Boto3Storage warning
+AWS_DEFAULT_ACL = None
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
@@ -82,7 +93,8 @@ MEDIA_URL = ''
 STATIC_ROOT = ''
 
 # URL prefix for static files.
-STATIC_URL = '/static/'
+# STATIC_URL = '/static/'
+STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{AWS_LOCATION}/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -98,13 +110,14 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder'
 )
 
-FILE_UPLOAD_PERMISSIONS = 0o664
+# Absolute filesystem path to the directory that will hold user-uploaded files.
+# Example: "/home/media/media.lawrence.com/media/"
+MEDIA_ROOT = 'blobs'
 
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = get_secret('SECRET_KEY')
-
-for env in ('AWS_ACCESS_KEY', 'AWS_SECRET_ACCESS_KEY', 'AWS_ASSOCIATE_TAG'):
-    os.environ[env] = get_secret(env)
+# URL that handles the media served from MEDIA_ROOT. Make sure to use a
+# trailing slash.
+# Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
+MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
 
 ROOT_URLCONF = 'config.urls'
 
@@ -140,8 +153,9 @@ INSTALLED_APPS = (
     'pygments',
     'quote',
     'solrpy',
+    'storages',
     'tastypie',
-    'todo',
+    'todo'
 
 )
 

@@ -108,7 +108,7 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
     <form action="{% url 'blob_edit' object.uuid %}">
 
     {% if object.sha1sum %}
-        <a class="btn btn-secondary" href="{{ STATIC_URL }}blobs/{{ object.get_url|safe }}" role="button" target="blob">Download</a>
+        <a class="btn btn-secondary" href="{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}" role="button" target="blob">Download</a>
     {% endif %}
         <input type="submit" class="btn btn-primary" value="Edit">
 
@@ -155,8 +155,8 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
     {% if content_type == 'Audio' %}
 
         <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jplayer.clean.player.light.css" />
-        <script type="text/javascript" src="{{ STATIC_URL }}/js/jquery.jplayer.min.js"></script>
-        <script type="text/javascript" src="{{ STATIC_URL }}/js/jplayer.cleanskin.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.jplayer.min.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/jplayer.cleanskin.js"></script>
 
         <script type="text/javascript" charset="utf-8">
 
@@ -177,7 +177,7 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
                     },
                     name: "{{ title }}",
                     "media": {
-                        "mp3": "{{ STATIC_URL }}blobs/{{ object.get_url|safe }}"
+                        "mp3": "{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}"
                     }
                 });
 
@@ -193,7 +193,7 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-lg-12">
-                            <img src="{{ STATIC_URL }}{{ cover_info.url }}" height="{{ cover_info.height }}" width="{{ cover_info.width }}"/>
+                            <img src="{{ MEDIA_URL }}{{ cover_info.url }}" height="{{ cover_info.height }}" width="{{ cover_info.width }}"/>
                         </div>
                     </div>
                 </div>
@@ -213,8 +213,8 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
               {{ object.get_content|safe }}
           {% endif %}
 
-            {% if cover_info %}
-                <img src="{{ STATIC_URL }}{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" data-toggle="modal" data-target="#myModal3" />
+          {% if cover_info %}
+              <img src="{{ MEDIA_URL }}{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" data-toggle="modal" data-target="#myModal3" />
             {% endif %}
 
             <br /><br />

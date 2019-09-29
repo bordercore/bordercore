@@ -3,6 +3,7 @@ import json
 import random
 import re
 
+from botocore.errorfactory import ClientError
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -55,8 +56,11 @@ def homepage(request):
     try:
         random_image = get_random_blob(request, 'image/*')
         if random_image:
-            random_image_info = {'uuid': random_image.uuid,
-                                 'cover_info': Document.get_cover_info(request.user, random_image.sha1sum, 'large', 500)}
+            try:
+                random_image_info = {'uuid': random_image.uuid,
+                                     'cover_info': Document.get_cover_info_s3(request.user, random_image.sha1sum, 'large', 500)}
+            except ClientError as e:
+                messages.add_message(request, messages.ERROR, f"Error getting random image info: {e}")
     except ConnectionRefusedError as e:
         messages.add_message(request, messages.ERROR, 'Cannot connect to Solr')
 

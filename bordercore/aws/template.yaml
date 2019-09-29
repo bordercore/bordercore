@@ -1,0 +1,79 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Create Thumbnails from uploaded blobs
+
+Globals:
+    Function:
+        Timeout: 60
+
+
+Resources:
+
+    CreateThumbnailFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: .
+            FunctionName: CreateThumbnail
+            Handler: create_thumbnail_lambda.handler
+            Layers:
+                - arn:aws:lambda:us-east-1:192218769908:layer:pdfinfo:6
+            MemorySize: 256
+            Runtime: python3.7
+            Role: !GetAtt CreateThumbnailLambdaRole.Arn
+            Environment:
+                Variables:
+                    BUCKET_NAME: bordercore-blobs
+
+    # Add a permission for the lambda to be invoked by S3
+    CreateThumbnailLambdaPermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: 'lambda:InvokeFunction'
+            FunctionName: !Ref CreateThumbnailFunction
+            Principal: s3.amazonaws.com
+            SourceArn: !Sub 'arn:aws:s3:::bordercore-blobs'
+            SourceAccount: !Ref AWS::AccountId
+
+    CreateThumbnailLambdaRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: 2012-10-17
+                Statement:
+                    - Effect: 'Allow'
+                      Principal:
+                          Service:
+                              - 'lambda.amazonaws.com'
+                      Action:
+                          - 'sts:AssumeRole'
+
+            Policies:
+            - PolicyName: WriteToS3
+              PolicyDocument:
+                  Statement:
+                      - Effect: 'Allow'
+                        Action:
+                            - s3:PutObject
+                        Resource:
+                            # TODO: Do we need both lines?
+                            - 'arn:aws:s3:::bordercore-blobs'
+                            - 'arn:aws:s3:::bordercore-blobs/*'
+
+            - PolicyName: LambdaWriteToLogs
+              PolicyDocument:
+                  Statement:
+                      - Effect: 'Allow'
+                        Action:
+                            - 'logs:CreateLogGroup'
+                            - 'logs:CreateLogStream'
+                            - 'logs:PutLogEvents'
+                            - 'logs:DescribeLogStreams'
+                        Resource:
+                            - 'arn:aws:logs:*:*:*'
+
+
+Outputs:
+
+    CreateThumbnailFunction:
+      Description: "Create thumbnails from uploaded blobs"
+      Value: !GetAtt CreateThumbnailFunction.Arn

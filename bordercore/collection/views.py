@@ -84,7 +84,7 @@ class CollectionDetailView(DetailView):
                 )).order_by(order)
 
             for blob in blob_list:
-                blob.cover_info = Document.get_cover_info(self.request.user, blob.sha1sum, max_cover_image_width=70, size='small')
+                blob.cover_info = Document.get_cover_info_s3(self.request.user, blob.sha1sum, max_cover_image_width=70, size='small')
                 blob.title = blob.get_title(use_filename_if_present=True)
 
             context['blob_list'] = blob_list

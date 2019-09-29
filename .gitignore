@@ -6,3 +6,6 @@ bordercore/static/img/favicons/*
 !bordercore/static/img/favicons/README
 bordercore/static/blobs
 secrets.json
+
+bordercore/aws/.aws-sam/build/
+

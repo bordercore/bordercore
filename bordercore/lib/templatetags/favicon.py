@@ -22,7 +22,7 @@ def favicon(url, size=32):
         if len(parts) == 3:
             domain = '.'.join(parts[1:])
         return """
-<img src="%s/img/favicons/%s.ico" width="%d" height="%d" />
+<img src="%simg/favicons/%s.ico" width="%d" height="%d" />
 """ % (settings.STATIC_URL, domain, size, size)
     else:
         return ""

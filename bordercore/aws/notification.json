@@ -1,0 +1,30 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Resources": {
+    "bucketperm": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties" : {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": "CreateThumbnail",
+        "Principal": "s3.amazonaws.com",
+        "SourceAccount": {"Ref": "AWS::AccountId"},
+        "SourceArn": { "Fn::Join": [":", [
+            "arn", "aws", "s3", "" , "", "bordercore-blobs"]]
+        }
+      }
+    },
+    "mybucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "NotificationConfiguration": {
+          "LambdaConfigurations": [
+            {
+              "Event" : "s3:ObjectCreated:*",
+              "Function" : "CreateThumbnail"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

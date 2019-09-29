@@ -75,7 +75,7 @@
     {% if object %}
 
         {% if cover_info %}
-            <img id="amazon-cover-image" src="{{ STATIC_URL }}{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" />
+            <img id="amazon-cover-image" src="{{ MEDIA_URL }}{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" />
             <br /><br />
         {% endif %}
 
@@ -263,9 +263,9 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                 $('#id_value').css( 'color', 'red' ).animate( { color: '#4A5158' }, 2000 );
             });
 
-            $("#id_file").on('change', function() {
+            $("#id_file_s3").on('change', function() {
                 $('#id_filename').val($(this)[0].files[0].name);
-                $('#id_file_modified').val($('#id_file')[0].files[0].lastModified);
+                $('#id_file_modified').val($('#id_file_s3')[0].files[0].lastModified);
             });
 
             function addMetadata() {
@@ -372,7 +372,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                     <input type="hidden" name="file_modified" id="id_file_modified" />
                     <span class="input-group-append">
                         <label class="btn btn-primary">Choose file
-                            <input type="file" name="file" id="id_file" hidden />
+                            <input type="file" name="file_s3" id="id_file_s3" hidden />
                         </label>
                     </span>
                 </div>

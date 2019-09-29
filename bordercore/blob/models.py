@@ -7,15 +7,17 @@ import re
 import shutil
 import uuid
 
+import boto3
 import markdown
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
 from django.db import models
-from django.db.models.signals import pre_delete
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch.dispatcher import receiver
 from PyPDF2 import PdfFileReader, PdfFileWriter
 from PIL import Image
+from storages.backends.s3boto3 import S3Boto3Storage
 
 from blob.amazon import AmazonMixin
 from blob.tasks import create_thumbnail, delete_metadata
@@ -72,14 +74,31 @@ def blob_directory_path(instance, filename):
     return filepath
 
 
+class DownloadableS3Boto3Storage(S3Boto3Storage):
+
+    blob = None
+
+    def __init__(self, blob=None, acl=None, bucket=None, **settings):
+        self.blob = self.blob
+        super().__init__(acl, bucket, **settings)
+
+    def _save(self, name, content):
+
+        hasher = hashlib.sha1()
+        for chunk in content.chunks():
+            hasher.update(chunk)
+        sha1sum = hasher.hexdigest()
+
+        self.location = "blobs/{}/{}".format(sha1sum[0:2], sha1sum)
+        return super()._save(name, content)
+
+
 class Document(TimeStampedModel, AmazonMixin):
-    """
-    The base class
-    """
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     content = models.TextField(null=True)
     title = models.TextField(null=True)
     sha1sum = models.CharField(max_length=40, unique=True, blank=True, null=True)
+    file_s3 = models.FileField(max_length=500, storage=DownloadableS3Boto3Storage())
     file = models.FileField(upload_to=blob_directory_path, storage=BlobFileSystemStorage(), max_length=500)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     note = models.TextField(null=True)
@@ -131,7 +150,7 @@ class Document(TimeStampedModel, AmazonMixin):
         return ", ".join([tag.name for tag in self.tags.all()])
 
     def get_url(self):
-        return self.file
+        return f"{self.sha1sum[0:2]}/{self.sha1sum}/{self.file_s3}"
 
     def get_title(self, remove_edition_string=False, use_filename_if_present=False):
         title = self.title
@@ -157,6 +176,12 @@ class Document(TimeStampedModel, AmazonMixin):
 
         return ""
 
+    def get_s3_key(self):
+        if self.file_s3:
+            return "{}/{}/{}/{}".format(settings.MEDIA_ROOT, self.sha1sum[0:2], self.sha1sum, self.file_s3)
+        else:
+            return None
+
     def get_solr_info(self, query, **kwargs):
         conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
         solr_args = {'q': query,
@@ -167,52 +192,50 @@ class Document(TimeStampedModel, AmazonMixin):
 
     def save(self, *args, **kwargs):
 
-        if self.file:
+        if self.file_s3:
             old_sha1sum = self.sha1sum
             hasher = hashlib.sha1()
-            for chunk in self.file.chunks():
+            for chunk in self.file_s3.chunks():
                 hasher.update(chunk)
             self.sha1sum = hasher.hexdigest()
         super(Document, self).save(*args, **kwargs)
 
-        if self.file:
-            if old_sha1sum is not None:
-                # We can only move files after super() is called to create the new file's directory structure
-                if self.sha1sum != old_sha1sum:
-                    create_thumbnail.delay(self.uuid)
-                    self.change_file(old_sha1sum)
-                    self.set_modified_time(self.file_modified)
-            else:
-                # This is a new file.  Attempt to create a thumbnail.
-                self.set_modified_time(self.file_modified)
-                create_thumbnail.delay(self.uuid)
+    #     if self.file_s3:
+    #         if old_sha1sum is not None:
+    #             # We can only move files after super() is called to create the new file's directory structure
+    #             # NOTE: the previous comment may not be relevant for storage in S3
+    #             if self.sha1sum != old_sha1sum:
+    #                 create_thumbnail.delay(self.uuid)
+    #                 self.change_file_s3(old_sha1sum)
 
-    def change_file(self, old_sha1sum):
+    def change_file_s3(self, old_sha1sum):
 
         dir_old = "{}/{}/{}".format(settings.MEDIA_ROOT, old_sha1sum[0:2], old_sha1sum)
         dir_new = self.get_parent_dir()
 
+        # TODO Can we eliminate the client object and just use the s3 object?
+        client = boto3.client("s3")
+        s3 = boto3.resource("s3")
+        my_bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
+
         # Delete the old file.  I don't have access to the old filename at this point,
         #  so instead delete anything that doesn't look like a cover image
-        for fn in os.listdir(dir_old):
-            if not os.path.basename(fn).startswith('cover-'):
-                print ("Deleting {}/{}".format(dir_old, fn))
-                os.remove("{}/{}".format(dir_old, fn))
+        print("dir_old: {}".format(dir_old))
+        for fn in my_bucket.objects.filter(Prefix=dir_old):
+            print("looking for old key to delete,  fn: {}".format(str(fn.key)))
+        # for fn in os.listdir(dir_old):
+            if not os.path.basename(str(fn)).startswith("cover-"):
+                print ("Deleting key {}".format(fn.key))
+                client.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key="{}".format(fn.key))
+               # os.remove("{}/{}".format(dir_old, fn))
 
         # Move any cover images for the old file to the new file's directory
-        for file in os.listdir(dir_old):
-            _, file_extension = os.path.splitext(file)
-            if file_extension[1:] in ['jpg', 'png']:
-                shutil.move("{}/{}".format(dir_old, file), dir_new)
-
-        # Delete the old file's directory.  It should be empty at this point.
-        os.rmdir(dir_old)
-
-        # If the parent of that is also empty, delete it, too
-        parent_dir = "{}/{}".format(settings.MEDIA_ROOT, self.sha1sum[0:2])
-        if os.listdir(parent_dir) == []:
-            print("Deleting empty parent dir: {}".format(parent_dir))
-            os.rmdir(parent_dir)
+        # for file in os.listdir(dir_old):
+        #     _, file_extension = os.path.splitext(file)
+        #     if file_extension[1:] in ["jpg", "png"]:
+        #         pass
+        #         # TODO: Implement this in S3
+        #         # shutil.move("{}/{}".format(dir_old, file), dir_new)
 
     def set_modified_time(self, file_modified):
         file_path = "{}/{}".format(settings.MEDIA_ROOT, self.file.name)
@@ -241,30 +264,38 @@ class Document(TimeStampedModel, AmazonMixin):
 
     def has_thumbnail_url(self):
         try:
-            _ = Document.get_cover_info(self.user, self.sha1sum, size='small')['url']
+            _ = Document.get_cover_info_s3(self.user, self.sha1sum, size='small')['url']
             return True
         except:
             return False
 
     def get_cover_url_small(self):
-        return Document.get_cover_info(self.user, self.sha1sum, size='small')['url']
+        return Document.get_cover_info_s3(self.user, self.sha1sum, size='small')['url']
 
     @staticmethod
-    def get_image_dimensions(file_path, max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
+    def get_image_dimensions_s3(blob, max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
 
         info = {}
 
-        info['width'], info['height'] = Image.open(file_path).size
-        if info['width'] > max_cover_image_width:
-            info['height_cropped'] = int(max_cover_image_width * info['height'] / info['width'])
-            info['width_cropped'] = max_cover_image_width
+        s3 = boto3.resource("s3")
+        obj = s3.Object(bucket_name=settings.AWS_STORAGE_BUCKET_NAME, key=blob.get_s3_key())
+
+        try:
+
+            info["width"] = int(obj.metadata["image-width"])
+            info["height"] = int(obj.metadata["image-height"])
+
+            if info["width"] > max_cover_image_width:
+                info["height_cropped"] = int(max_cover_image_width * info["height"] / info["width"])
+                info["width_cropped"] = max_cover_image_width
+
+        except KeyError as e:
+            print(f"Warning: Object has no metadata {e}")
 
         return info
 
-    # This is static so that it can be called without a blob object, eg
-    #  based on results from a Solr query
     @staticmethod
-    def get_cover_info(user, sha1sum, size='large', max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
+    def get_cover_info_s3(user, sha1sum, size="large", max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
 
         if sha1sum is None:
             return {}
@@ -274,34 +305,36 @@ class Document(TimeStampedModel, AmazonMixin):
         parent_dir = "{}/{}/{}".format(settings.MEDIA_ROOT, sha1sum[0:2], sha1sum)
 
         b = Document.objects.get(user=user, sha1sum=sha1sum)
-        file_path = "{}/{}".format(settings.MEDIA_ROOT, b.file.name)
+
+        prefix, filename = os.path.split(b.get_s3_key())
+
+        s3 = boto3.resource("s3")
+        bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
+
+        objects = [os.path.split(x.key)[1] for x in list(bucket.objects.filter(Delimiter="/", Prefix=f"{prefix}/"))]
 
         # Is the blob itself an image?
-        _, file_extension = os.path.splitext(file_path)
-        if file_extension[1:].lower() in ['gif', 'jpg', 'jpeg', 'png']:
+        _, file_extension = os.path.splitext(b.file_s3.name)
+        if file_extension[1:].lower() in ["gif", "jpg", "jpeg", "png"]:
             # If so, look for a thumbnail.  Otherwise return the image itself
-            if size == 'small':
+            if size == "small":
                 thumbnail_file_path = "{}/{}".format(parent_dir, "cover-small.jpg")
-                if os.path.isfile(thumbnail_file_path):
-                    file_path = thumbnail_file_path
-                    url_path = "{}/{}/{}".format(sha1sum[0:2], sha1sum, "cover-small.jpg")
-                    info['url'] = "blobs/{}".format(url_path)
+                if "cover-small.jpg" in objects:
+                    info["url"] = f"{prefix/cover-small.jpg}"
             else:
-                info = Document.get_image_dimensions(file_path, max_cover_image_width)
-                info['url'] = "blobs/{}".format(b.file.name)
+                info = Document.get_image_dimensions_s3(b, max_cover_image_width)
+                info["url"] = b.get_s3_key()
 
         else:
             # Nope. Look for a cover image
-            for image_type in ['jpg', 'png']:
+            for image_type in ["jpg", "png"]:
                 for cover_image in ["cover.{}".format(image_type), "cover-{}.{}".format(size, image_type)]:
-                    file_path = "{}/{}".format(parent_dir, cover_image)
-                    if os.path.isfile(file_path):
-                        info = Document.get_image_dimensions(file_path, max_cover_image_width)
-                        info['url'] = "blobs/{}/{}/{}".format(sha1sum[0:2], sha1sum, cover_image)
+                    if cover_image in objects:
+                        info["url"] = f"{prefix}/{cover_image}"
 
         # If we get this far, return the default image
-        if not info.get('url'):
-            info = {'url': 'img/book.png', 'height_cropped': 128, 'width_cropped': 128}
+        if not info.get("url"):
+            info = {"url": "img/book.png", "height_cropped": 128, "width_cropped": 128}
 
         return info
 
@@ -397,26 +430,40 @@ class Document(TimeStampedModel, AmazonMixin):
         super(Document, self).delete()
 
 
+@receiver(post_save, sender=Document)
+def set_s3_metadata_file_modified(sender, instance, **kwargs):
+    """
+    Store a file's modification time as S3 metadata after it's saved.
+    """
+
+    if not instance.file_s3:
+        return
+
+    s3 = boto3.resource("s3")
+    key = instance.get_s3_key()
+
+    s3_object = s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key)
+
+    s3_object.metadata.update({"file-modified": str(instance.file_modified)})
+    s3_object.copy_from(CopySource={"Bucket": settings.AWS_STORAGE_BUCKET_NAME, "Key": key}, Metadata=s3_object.metadata, MetadataDirective="REPLACE")
+
+
 @receiver(pre_delete, sender=Document)
-def mymodel_delete(sender, instance, **kwargs):
+def mymodel_delete_s3(sender, instance, **kwargs):
 
-    if instance.file:
-        dir = instance.get_parent_dir()
-        for fn in os.listdir(dir):
-            print ("Deleting {}/{}".format(dir, fn))
-            os.remove("{}/{}".format(dir, fn))
+    if instance.file_s3:
 
-        # Delete the old file's directory.  It should be empty at this point.
-        os.rmdir(dir)
+        dir = "{}/{}/{}".format(settings.MEDIA_ROOT, instance.sha1sum[0:2], instance.sha1sum)
+        s3 = boto3.resource("s3")
+        my_bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
 
-        # If the parent of that is also empty, delete it, too
-        parent_dir = "{}/{}".format(settings.MEDIA_ROOT, instance.sha1sum[0:2])
-        if os.listdir(parent_dir) == []:
-            print("Deleting empty parent dir: {}".format(parent_dir))
-            os.rmdir(parent_dir)
+        # TODO: Add sanity check to prevent unwanted deletes?
+        for fn in my_bucket.objects.filter(Prefix=dir):
+            print(f"Deleting blob {fn}")
+            fn.delete()
 
         # Pass false so FileField doesn't save the model.
-        instance.file.delete(False)
+        instance.file_s3.delete(False)
 
 
 class MetaData(TimeStampedModel):

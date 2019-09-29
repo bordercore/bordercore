@@ -18,6 +18,7 @@ class DocumentForm(ModelForm):
     def __init__(self, *args, **kwargs):
         super(DocumentForm, self).__init__(*args, **kwargs)
         self.fields['file'].required = False
+        self.fields['file_s3'].required = False
         self.fields['date'].required = False
         self.fields['date'].input_formats = ['%m-%d-%Y']
         self.fields['date'].initial = ''
@@ -63,23 +64,24 @@ class DocumentForm(ModelForm):
 
         return cleaned_data
 
-    def clean_file(self):
-        file = self.cleaned_data.get('file')
-        if file:
-            hasher = hashlib.sha1()
-            for chunk in file.chunks():
-                hasher.update(chunk)
+    # def clean_file_s3(self):
+    #     file_s3 = self.cleaned_data.get("file_s3")
+    #     if file_s3:
+    #         hasher = hashlib.sha1()
+    #         for chunk in file_s3.chunks():
+    #             hasher.update(chunk)
 
-            # If the sha1sum changed (or didn't exist because this is a new object), check for a dupe
-            if self.instance.sha1sum != hasher.hexdigest():
-                existing_file = Document.objects.filter(sha1sum=hasher.hexdigest())
-                if existing_file:
-                    raise forms.ValidationError(mark_safe('This file <a href="{}">already exists.</a>'.format(reverse_lazy('blob_detail', kwargs={"uuid": existing_file[0].uuid}))))
-            return file
+    #         # If the sha1sum changed (or didn't exist because this is a new object), check for a dupe
+    #         if self.instance.sha1sum != hasher.hexdigest():
+    #             existing_file = Document.objects.filter(sha1sum=hasher.hexdigest())
+    #             if existing_file:
+    #                 raise forms.ValidationError(mark_safe('This file <a href="{}">already exists.</a>'.format(reverse_lazy('blob_detail', kwargs={"uuid": existing_file[0].uuid}))))
+    #         return file_s3
 
     class Meta:
         model = Document
-        fields = ('file', 'title', 'filename', 'file_modified', 'date', 'tags', 'content', 'note', 'importance', 'is_note', 'is_private', 'id')
+        # fields = ('file', 'title', 'filename', 'file_modified', 'date', 'tags', 'content', 'note', 'importance', 'is_note', 'is_private', 'id')
+        fields = ('file_s3', 'file', 'title', 'filename', 'file_modified', 'date', 'tags', 'content', 'note', 'importance', 'is_note', 'is_private', 'id')
         widgets = {
             'content': Textarea(attrs={'rows': 5, 'class': 'form-control'}),
             'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),

@@ -1,6 +1,7 @@
-<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+
 <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}js/jquery_csrf_setup.js"></script>
 
@@ -39,7 +40,7 @@
 <ul class="collection_sortable">
     {% for blob in blob_list %}
         <li id="{{ blob.id }}">
-            <a href="{% url 'blob_detail' blob.uuid %}"><img src="{{ STATIC_URL }}{{ blob.cover_info.url }}" height="{{ blob.cover_info.height_cropped }}" width="{{ blob.cover_info.width_cropped }}"/></a>
+            <a href="{% url 'blob_detail' blob.uuid %}"><img src="{{ MEDIA_URL }}{{ blob.cover_info.url }}" height="{{ blob.cover_info.height_cropped }}" width="{{ blob.cover_info.width_cropped }}"/></a>
             <br/>
             <a href="{% url 'blob_detail' blob.uuid %}">{{ blob.title }}</a> {% if blob.collection_note %}<img src="{{ STATIC_URL }}/img/note.png" height="16" width="16" data-toggle="popover" data-content="{{ blob.collection_note }}"/>{% endif %}
         </li>
