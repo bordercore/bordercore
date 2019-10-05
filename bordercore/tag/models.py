@@ -24,7 +24,7 @@ from bookmark.models import Bookmark
 
 
 class TagBookmark(models.Model):
-    tag = models.ForeignKey(Tag, on_delete=models.PROTECT, unique=True)
+    tag = models.OneToOneField(Tag, on_delete=models.PROTECT)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     bookmarks = models.ManyToManyField(Bookmark, through='TagBookmarkSortOrder')
 
