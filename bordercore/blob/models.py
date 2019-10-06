@@ -5,6 +5,7 @@ import os
 import os.path
 import re
 import shutil
+import urllib.parse
 import uuid
 
 import boto3
@@ -340,6 +341,7 @@ class Document(TimeStampedModel, AmazonMixin):
         if not info.get("url"):
             info = {"url": "img/book.png", "height_cropped": 128, "width_cropped": 128}
 
+        info["url"] = urllib.parse.quote(info["url"])
         return info
 
     def create_thumbnail(self, page_number=1):
