@@ -4,6 +4,7 @@ import random
 import re
 from urllib.parse import urlparse
 
+from botocore.errorfactory import ClientError
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -140,8 +141,15 @@ class BlobDetailView(DetailView):
 
         if self.object.sha1sum:
             # TODO: Avoid calling this method twice
-            context['cover_info'] = Document.get_cover_info_s3(self.request.user, self.object.sha1sum)
-            context['cover_info_small'] = Document.get_cover_info_s3(self.request.user, self.object.sha1sum, 'small')
+            try:
+                context['cover_info'] = Document.get_cover_info_s3(self.request.user, self.object.sha1sum)
+                context['cover_info_small'] = Document.get_cover_info_s3(self.request.user, self.object.sha1sum, 'small')
+            except ClientError as e:
+                messages.add_message(
+                    self.request,
+                    messages.ERROR,
+                    f"S3 error accessing cover info: {e}"
+                    )
         try:
             query = 'uuid:%s' % self.object.uuid
             context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
@@ -190,7 +198,16 @@ class BlobUpdateView(UpdateView):
         context = super(BlobUpdateView, self).get_context_data(**kwargs)
         context['section'] = SECTION
         context['sha1sum'] = self.kwargs.get('sha1sum')
-        context['cover_info'] = Document.get_cover_info_s3(self.request.user, self.object.sha1sum, max_cover_image_width=400)
+
+        try:
+            context['cover_info'] = Document.get_cover_info_s3(self.request.user, self.object.sha1sum, max_cover_image_width=400)
+        except ClientError as e:
+            messages.add_message(
+                self.request,
+                messages.ERROR,
+                f"S3 error accessing cover info: {e}"
+            )
+
         context['metadata'] = preprocess_metadata(self.object.metadata_set.all())
         if True in [True for x in self.object.metadata_set.all() if x.name == 'is_book']:
             context['is_book'] = True
