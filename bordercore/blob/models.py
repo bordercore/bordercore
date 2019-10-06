@@ -76,13 +76,10 @@ def blob_directory_path(instance, filename):
 
 class DownloadableS3Boto3Storage(S3Boto3Storage):
 
-    blob = None
-
-    def __init__(self, blob=None, acl=None, bucket=None, **settings):
-        self.blob = self.blob
-        super().__init__(acl, bucket, **settings)
-
     def _save(self, name, content):
+        """
+        Override _save() to set a custom S3 location for the object
+        """
 
         hasher = hashlib.sha1()
         for chunk in content.chunks():
@@ -192,15 +189,22 @@ class Document(TimeStampedModel, AmazonMixin):
 
     def save(self, *args, **kwargs):
 
-        if self.file_s3:
-            old_sha1sum = self.sha1sum
+        # We rely on the readable() method to determine if we're
+        #  adding a new file or editing an existing one. If it's
+        #  new, we have access to the file since it was just
+        #  uploaded, so calculate the sha1sum. If we're editing the
+        #  file, we don't have access to any file, so don't try
+        #  to calculate the sha1sum.
+        if self.file_s3 and self.file_s3.readable():
             hasher = hashlib.sha1()
             for chunk in self.file_s3.chunks():
                 hasher.update(chunk)
             self.sha1sum = hasher.hexdigest()
+
         super(Document, self).save(*args, **kwargs)
 
     #     if self.file_s3:
+    #         old_sha1sum = self.sha1sum
     #         if old_sha1sum is not None:
     #             # We can only move files after super() is called to create the new file's directory structure
     #             # NOTE: the previous comment may not be relevant for storage in S3
