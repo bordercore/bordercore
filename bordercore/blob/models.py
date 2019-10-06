@@ -339,7 +339,7 @@ class Document(TimeStampedModel, AmazonMixin):
 
         # If we get this far, return the default image
         if not info.get("url"):
-            info = {"url": "img/book.png", "height_cropped": 128, "width_cropped": 128}
+            info = {"url": "django/img/book.png", "height_cropped": 128, "width_cropped": 128}
 
         info["url"] = urllib.parse.quote(info["url"])
         return info
