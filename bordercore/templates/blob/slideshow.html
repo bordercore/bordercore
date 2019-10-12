@@ -11,20 +11,11 @@
 
     </head>
 
-    <body bgcolor="000000">
+    <body>
 
         {% block content %}
 
-            <div id="bg">
-            <img src="{{ MEDIA_URL }}{{ cover_info.url }}" _class="bg" />
-            </div>
-
-            <div id="container" _style="background-image:url({{ MEDIA_URL }}{{ cover_info.url }})">
-            </div>
-
-            <!-- <div class="_noscrollbars _verticalcenter slideshow" style="text-align: center">
-                <img class="_noscrollbars _slideshow" src="{{ STATIC_URL }}{{ cover_info.url }}" _height="auto" _height="{{ cover_info.height_cropped }}" _width="100%" _width="{{ cover_info.width_cropped }}" />
-            </div> -->
+            <img class="slide_show" src="{{ MEDIA_URL }}{{ cover_info.url }}" />
 
         {% endblock %}
 

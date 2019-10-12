@@ -1,77 +1,17 @@
-/* html, body { */
-/*     margin:0; */
-/*     /\* height:100%; *\/ */
-/* } */
-
-/* img { */
-/*   display:block; */
-/*   width:100%; height:100%; */
-/*   object-fit: cover; */
-/* } */
-
-.noscrollbars {
-    overflow-y: scroll;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none;  /* IE 10+ */
-}
-.noscrollbars::-webkit-scrollbar { /* WebKit */
-    width: 0;
-    height: 0;
+body {
+    background-color: black
 }
 
-_html, _body{
-    margin:0;
-    width:100%;
-            /* overflow:hidden; */
-            background-image: url("/static/blobs/db/db9f5fa60798fc118855e9a6cd74344def6a0208/jugoslav-stankin-noir-night.jpg");
-}
-_img{
-    width: 300px;
-    min-height:100%;
-    min-width:100%;
-    height:auto;
-    /* width:auto; */
-    position:absolute;
-    top:-100%; bottom:-100%;
-    left:-100%; right:-100%;
-    margin:auto;
-     }
+// https://stackoverflow.com/questions/18490334/responsive-image-full-screen-and-centered-maintain-aspect-ratio-not-exceed-wi
 
-.slideshow {
+.slide_show {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
     max-width: 100%;
-    height: auto;
-    text-align: center;
+    max-height: 100%;
+    margin: auto;
+    overflow: auto;
 }
-
-.verticalcenter {
-    display: table-cell;
-    height: 400px;
-    vertical-align: middle;
-}
-
-/* html { */
-/*        background: url("/static/blobs/db/db9f5fa60798fc118855e9a6cd74344def6a0208/jugoslav-stankin-noir-night.jpg") no-repeat center center fixed; */
-/*   -webkit-background-size: cover; */
-/*   -moz-background-size: cover; */
-/*   -o-background-size: cover; */
-/*   background-size: cover; */
-/*        } */
-
-#bg {
-  position: fixed; 
-  top: -50%; 
-  left: -50%; 
-  width: 200%; 
-  height: 200%;
-}
-#bg img {
-  position: absolute; 
-  top: 0; 
-  left: 0; 
-  right: 0; 
-  bottom: 0; 
-  margin: auto; 
-  min-width: 50%;
-  min-height: 50%;
-          }
-
