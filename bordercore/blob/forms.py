@@ -17,8 +17,8 @@ class DocumentForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(DocumentForm, self).__init__(*args, **kwargs)
-        self.fields['file'].required = False
         self.fields['file_s3'].required = False
+        self.fields['file_s3'].label = "File"
         self.fields['date'].required = False
         self.fields['date'].input_formats = ['%m-%d-%Y']
         self.fields['date'].initial = ''
@@ -28,7 +28,7 @@ class DocumentForm(ModelForm):
         self.fields['title'].required = False
 
         if self.instance.id:
-            self.fields['filename'].initial = os.path.basename(str(self.instance.file))
+            self.fields['filename'].initial = self.instance.file_s3
 
             # If this form has a model attached, get the tags and display them separated by commas
             self.initial['tags'] = self.instance.get_tags()
@@ -81,7 +81,7 @@ class DocumentForm(ModelForm):
     class Meta:
         model = Document
         # fields = ('file', 'title', 'filename', 'file_modified', 'date', 'tags', 'content', 'note', 'importance', 'is_note', 'is_private', 'id')
-        fields = ('file_s3', 'file', 'title', 'filename', 'file_modified', 'date', 'tags', 'content', 'note', 'importance', 'is_note', 'is_private', 'id')
+        fields = ('file_s3', 'title', 'filename', 'file_modified', 'date', 'tags', 'content', 'note', 'importance', 'is_note', 'is_private', 'id')
         widgets = {
             'content': Textarea(attrs={'rows': 5, 'class': 'form-control'}),
             'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),
