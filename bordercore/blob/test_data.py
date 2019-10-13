@@ -1,5 +1,7 @@
+import datetime
 import json
 import os
+from pathlib import Path
 import re
 
 import boto3
@@ -17,7 +19,7 @@ django.setup()
 from django.contrib.auth.models import User
 
 from accounts.models import SortOrder
-from blob.models import Document, MetaData
+from blob.models import BLOB_TMP_DIR, Document, MetaData
 from collection.models import Collection
 from tag.models import Tag
 
@@ -327,6 +329,14 @@ def test_blob_tags_match_solr():
         response = conn.raw_query(**solr_args)
         data = json.loads(response.decode("UTF-8"))["response"]["numFound"]
         assert data == 1, "blob uuid={} has tags which don't match those found in Solr".format(b.uuid)
+
+
+def test_blob_tmp_dir_is_clean():
+    "Assert that there are no tmp directories older than a day"
+
+    dir = Path(BLOB_TMP_DIR)
+    for x in dir.iterdir():
+        assert(int(datetime.datetime.now().strftime("%s")) - os.stat(x)[8] < 86400)
 
 
 def test_all_notes_exist_in_solr():
