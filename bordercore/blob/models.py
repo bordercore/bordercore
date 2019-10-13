@@ -1,8 +1,10 @@
 import glob
 import hashlib
 import json
+import logging
 import os
 import os.path
+from pathlib import Path
 import re
 import shutil
 import urllib.parse
@@ -37,6 +39,12 @@ EDITIONS = {'1': 'First',
             '8': 'Eighth'}
 
 MAX_COVER_IMAGE_WIDTH = 800
+BLOB_TMP_DIR = "/tmp/bordercore-blobs"
+
+
+logging.getLogger().setLevel(logging.INFO)
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
 
 
 # Override FileSystemStorage to get better control of how files are named
@@ -188,6 +196,25 @@ class Document(TimeStampedModel, AmazonMixin):
                      'rows': 1000}
         return json.loads(conn.raw_query(**solr_args).decode('UTF-8'))['response']
 
+    def create_tmp_directory(self, uuid):
+        """
+        Store newly uploaded files in a tmp directory that looks like this:
+
+        /tmp/bordercore-blobs/<uuid>/<filename>
+
+        This is so a later celery process can send the new file
+        to Solr for indexing. This process is also responsible
+        for cleaning up these tmp directories.
+        """
+
+        dir = Path(f"{BLOB_TMP_DIR}/{uuid}")
+        if not dir.is_dir():
+            os.umask(0o002)
+            dir.mkdir(mode=0o775, parents=True, exist_ok=True)
+            return dir
+        else:
+            log.error("Tmp directory already exists: {dir}")
+
     def save(self, *args, **kwargs):
 
         # We rely on the readable() method to determine if we're
@@ -196,11 +223,19 @@ class Document(TimeStampedModel, AmazonMixin):
         #  uploaded, so calculate the sha1sum. If we're editing the
         #  file, we don't have access to any file, so don't try
         #  to calculate the sha1sum.
+
         if self.file_s3 and self.file_s3.readable():
-            hasher = hashlib.sha1()
-            for chunk in self.file_s3.chunks():
-                hasher.update(chunk)
-            self.sha1sum = hasher.hexdigest()
+
+            tmp_dir = self.create_tmp_directory(self.uuid)
+
+            # While computing the sha1sum, store the file in a tmp
+            # directory for later Solr indexing for a celery process
+            with open(f"{tmp_dir}/{self.file_s3}", "wb") as out_file:
+                hasher = hashlib.sha1()
+                for chunk in self.file_s3.chunks():
+                    hasher.update(chunk)
+                    out_file.write(chunk)
+                self.sha1sum = hasher.hexdigest()
 
         super(Document, self).save(*args, **kwargs)
 
