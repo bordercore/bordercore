@@ -4,6 +4,7 @@ import random
 import re
 from urllib.parse import urlparse
 
+import boto3
 from botocore.errorfactory import ClientError
 from django.conf import settings
 from django.contrib import messages
@@ -236,17 +237,23 @@ class BlobUpdateView(UpdateView):
 
         # Only check for a renamed file if the file itself hasn't changed
         if not file_changed:
-            import os
             old_filename = str(form.instance.file_s3)
-            if (form.cleaned_data['filename'] != os.path.basename(old_filename)):
-                new_file_path = '{}/{}/{}'.format(settings.MEDIA_ROOT, os.path.dirname(old_filename), form.cleaned_data['filename'])
-                # try:
-                #     os.rename(blob.file.path, new_file_path)
-                #     blob.file.name = "{}/{}".format(os.path.dirname(str(form.instance.file)), form.cleaned_data['filename'])
-                #     blob.save()
-                # except Exception as e:
-                #     from django.forms import ValidationError
-                #     raise ValidationError("Error: {}".format(e))
+            new_filename = form.cleaned_data['filename']
+
+            if (new_filename != old_filename):
+
+                try:
+                    key_root = f"{settings.MEDIA_ROOT}/{blob.sha1sum[0:2]}/{blob.sha1sum}"
+                    s3 = boto3.resource("s3")
+                    s3.Object(settings.AWS_STORAGE_BUCKET_NAME, f"{key_root}/{new_filename}").copy_from(CopySource=f"{settings.AWS_STORAGE_BUCKET_NAME}/{key_root}/{old_filename}")
+                    s3.Object(settings.AWS_STORAGE_BUCKET_NAME, f"{key_root}/{old_filename}").delete()
+
+                    blob.file_s3 = new_filename
+                    blob.file_modified = None
+                    blob.save()
+                except Exception as e:
+                    from django.forms import ValidationError
+                    raise ValidationError("Error: {}".format(e))
 
         blob.file_modified = form.cleaned_data['file_modified']
 

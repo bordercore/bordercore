@@ -277,11 +277,6 @@ class Document(TimeStampedModel, AmazonMixin):
         #         # TODO: Implement this in S3
         #         # shutil.move("{}/{}".format(dir_old, file), dir_new)
 
-    def set_modified_time(self, file_modified):
-        file_path = "{}/{}".format(settings.MEDIA_ROOT, self.file.name)
-        stinfo = os.stat(file_path)
-        os.utime(file_path, (stinfo.st_atime, file_modified / 1000))
-
     def has_been_modified(self):
         """
         If the modified time is greater than the creation time by
@@ -477,7 +472,10 @@ def set_s3_metadata_file_modified(sender, instance, **kwargs):
     Store a file's modification time as S3 metadata after it's saved.
     """
 
-    if not instance.file_s3:
+    # instance.file_modified will be "None" if we're editing a blob's
+    # information, but not changing the blob itself. In that case we
+    # don't want to update its "file_modified" metadata.
+    if not instance.file_s3 or instance.file_modified is None:
         return
 
     s3 = boto3.resource("s3")
