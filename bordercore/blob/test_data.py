@@ -331,6 +331,20 @@ def test_blob_tags_match_solr():
         assert data == 1, "blob uuid={} has tags which don't match those found in Solr".format(b.uuid)
 
 
+def test_blobs_have_proper_metadata():
+    "Assert that all blobs have proper S3 metadata"
+
+    s3 = boto3.resource("s3")
+    bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+
+    for blob in Document.objects.filter(~Q(file_s3='')):
+        obj = s3.Object(bucket_name=bucket_name, key=blob.get_s3_key())
+        try:
+            obj.metadata["file-modified"]
+        except KeyError:
+            assert False, f"blob uuid={blob.uuid} has no 'file-modified' S3 metadata"
+
+
 def test_blob_tmp_dir_is_clean():
     "Assert that there are no tmp directories older than a day"
 
