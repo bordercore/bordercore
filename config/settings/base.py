@@ -39,8 +39,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'bordercore',
         'USER': 'bordercore',
-        'PASSWORD': '4locus2',
-        'HOST': '10.3.2.2',
+        'PASSWORD': get_secret('DB_PASSWORD'),
+        'HOST': 'bordercore.cvkm90zuldto.us-east-1.rds.amazonaws.com',
         'PORT': '',
     }
 }
