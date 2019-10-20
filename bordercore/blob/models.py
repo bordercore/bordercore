@@ -85,6 +85,10 @@ def blob_directory_path(instance, filename):
 
 class DownloadableS3Boto3Storage(S3Boto3Storage):
 
+    # Override this to prevent Django from cleaning the name (eg replacing spaces with underscores)
+    def get_valid_name(self, name):
+        return name
+
     def _save(self, name, content):
         """
         Override _save() to set a custom S3 location for the object
