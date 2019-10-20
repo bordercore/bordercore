@@ -194,8 +194,9 @@ def test_solr_blobs_exist_in_s3():
 
     for result in data['docs']:
         try:
-            # Use a slice operator to strip off the "/home/media/blobs/" from the filepath
-            key = f"{settings.MEDIA_ROOT}/{result['filepath'][18:]}"
+            # Use a slice operator to strip off BLOB_TMP_DIR from the filepath
+            filename = Path(result["filepath"]).name
+            key = f"{settings.MEDIA_ROOT}/{result['sha1sum'][:2]}/{result['sha1sum']}/{filename}"
             s3_client.head_object(Bucket=bucket_name, Key=key)
         except ClientError:
             assert False, "blob {} exists in Solr but not in S3".format(result['sha1sum'])
