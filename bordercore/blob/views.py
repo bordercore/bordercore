@@ -472,7 +472,7 @@ def collection_mutate(request):
             if [x for x in collection.blob_list if x['id'] == blob_id]:
                 message = 'Blob already in collection'
             else:
-                collection.blob_list.append(blob)
+                collection.blob_list.insert(0, blob)
         else:
             collection.blob_list = [blob]
         message = 'Added to collection'
