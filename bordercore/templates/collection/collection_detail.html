@@ -62,9 +62,9 @@
             <ul class="collection_sortable">
                 {% for blob in blob_list %}
                     <li id="{{ blob.id }}">
-                        <a href="{% url 'blob_detail' blob.uuid %}"><img src="{{ STATIC_URL }}{{ blob.cover_info.url }}" height="{{ blob.cover_info.height_cropped }}" width="{{ blob.cover_info.width_cropped }}"/></a>
+                        <a href="{% url 'blob_detail' blob.uuid %}"><img src="{{ MEDIA_URL }}{{ blob.cover_info.url }}" height="{{ blob.cover_info.height_cropped }}" width="{{ blob.cover_info.width_cropped }}"/></a>
                         <br/>
-                        <a href="{% url 'blob_detail' blob.uuid %}">{{ blob.title }}</a> {% if blob.collection_note %}<img src="{{ STATIC_URL }}/img/note.png" height="16" width="16" data-toggle="popover" data-content="{{ blob.collection_note }}"/>{% endif %}
+                        <a href="{% url 'blob_detail' blob.uuid %}">{{ blob.title }}</a> {% if blob.collection_note %}<img src="{{ STATIC_URL }}img/note.png" height="16" width="16" data-toggle="popover" data-content="{{ blob.collection_note }}"/>{% endif %}
                     </li>
                 {% empty %}
                     <div class="alert alert-warning" role="alert">Nothing in this collection</div>
