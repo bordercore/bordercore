@@ -356,10 +356,9 @@ class Document(TimeStampedModel, AmazonMixin):
         _, file_extension = os.path.splitext(b.file_s3.name)
         if file_extension[1:].lower() in ["gif", "jpg", "jpeg", "png"]:
             # If so, look for a thumbnail.  Otherwise return the image itself
-            if size == "small":
-                thumbnail_file_path = "{}/{}".format(parent_dir, "cover-small.jpg")
-                if "cover-small.jpg" in objects:
-                    info["url"] = f"{prefix/cover-small.jpg}"
+            thumbnail_file_path = "{}/{}".format(parent_dir, "cover.jpg")
+            if "cover.jpg" in objects:
+                info["url"] = f"{prefix}/cover.jpg"
             else:
                 info = Document.get_image_dimensions_s3(b, max_cover_image_width)
                 info["url"] = b.get_s3_key()
