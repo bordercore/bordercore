@@ -15,7 +15,7 @@
 
         {% block content %}
 
-            <img class="slide_show" src="{{ MEDIA_URL }}{{ cover_info.url }}" />
+            <img class="slide_show" src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" />
 
         {% endblock %}
 

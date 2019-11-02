@@ -397,12 +397,9 @@ def slideshow(request):
 
     blob = Document.objects.get(pk=random.choice(c.blob_list)["id"])
 
-    cover_info = Document.get_cover_info_s3(request.user, blob.sha1sum)
-
     return render(request, "blob/slideshow.html",
                   {"section": SECTION,
-                   "blob": blob,
-                   "cover_info": cover_info})
+                   "blob": blob})
 
 @login_required
 def get_amazon_metadata(request, title):
