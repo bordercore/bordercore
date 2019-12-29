@@ -79,7 +79,7 @@ def get_youtube_content(msg):
     if m:
         info['subject'] = "%s: %s" % (m.group(1), info['title'])
     else:
-        return None
+        info['subject'] = info['title']
 
     return info
 
