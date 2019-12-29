@@ -134,7 +134,7 @@
                 <div class="row voffset">
                     <div class="col-lg-12">
                         {% if match.sha1sum %}
-                            <a href="{{ MEDIA_URL }}blobs{{ match.url|safe }}">
+                            <a href="{{ MEDIA_URL }}{{ match.url|safe }}">
                                 <img src="{{ STATIC_URL }}img/download-2-32.png" width="16" height="16" />
                             </a>
                         {% endif %}
