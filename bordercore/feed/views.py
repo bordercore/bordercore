@@ -14,7 +14,7 @@ from django.views.generic.list import ListView
 from accounts.models import UserProfile
 from feed.forms import FeedForm
 from feed.models import Feed, FeedItem
-from feed.tasks import update_feed
+# from feed.tasks import update_feed
 
 SECTION = 'Feeds'
 
@@ -159,7 +159,7 @@ def feed_edit(request, feed_id=None):
 
                 # If this is a new feed, download the feed items
                 if request.POST['Go'] == 'Add':
-                    update_feed.delay(newform.id)
+                    # update_feed.delay(newform.id)
                     # If the user clicked the 'subscribe' checkbox, subscribe her
                     if request.POST.get('subscribe', ''):
                         newform.subscribe_user(request.user, 1)

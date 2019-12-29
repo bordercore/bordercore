@@ -4,9 +4,7 @@ import json
 import logging
 import os
 import os.path
-from pathlib import Path
 import re
-import shutil
 import urllib.parse
 import uuid
 
@@ -18,15 +16,14 @@ from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch.dispatcher import receiver
+from elasticsearch import Elasticsearch
 from PyPDF2 import PdfFileReader, PdfFileWriter
 from PIL import Image
 from storages.backends.s3boto3 import S3Boto3Storage
 
 from blob.amazon import AmazonMixin
-from blob.tasks import create_thumbnail, delete_metadata
 from collection.models import Collection
 from lib.mixins import TimeStampedModel
-from solrpy.core import SolrConnection
 from tag.models import Tag
 
 EDITIONS = {'1': 'First',
@@ -36,11 +33,20 @@ EDITIONS = {'1': 'First',
             '5': 'Fifth',
             '6': 'Sixth',
             '7': 'Seventh',
-            '8': 'Eighth'}
+            '8': 'Eighth',
+            '9': 'Ninth'}
 
 MAX_COVER_IMAGE_WIDTH = 800
-BLOB_TMP_DIR = "/tmp/bordercore-blobs"
 
+FILE_TYPES_TO_INGEST = [
+    'azw3',
+    'chm',
+    'epub',
+    'html',
+    'mp3',
+    'pdf',
+    'txt'
+]
 
 logging.getLogger().setLevel(logging.INFO)
 log = logging.getLogger(__name__)
@@ -168,7 +174,7 @@ class Document(TimeStampedModel, AmazonMixin):
             if remove_edition_string:
                 pattern = re.compile('(.*) (\d)E$')
                 matches = pattern.match(title)
-                if matches and EDITIONS[matches.group(2)]:
+                if matches and EDITIONS.get(matches.group(2), None):
                     return "%s" % (matches.group(1))
             return title
         else:
@@ -181,10 +187,16 @@ class Document(TimeStampedModel, AmazonMixin):
         if self.title:
             pattern = re.compile('(.*) (\d)E$')
             matches = pattern.match(self.title)
-            if matches and EDITIONS[matches.group(2)]:
+            if matches and EDITIONS.get(matches.group(2), None):
                 return "%s Edition" % (EDITIONS[matches.group(2)])
 
         return ""
+
+    @staticmethod
+    def get_s3_key_from_sha1sum(sha1sum, file_s3):
+        print(f"sha1sum: {sha1sum}")
+        print(f"file_s3: {file_s3}")
+        return "{}/{}/{}/{}".format(settings.MEDIA_ROOT, sha1sum[0:2], sha1sum, file_s3)
 
     def get_s3_key(self):
         if self.file_s3:
@@ -192,32 +204,13 @@ class Document(TimeStampedModel, AmazonMixin):
         else:
             return None
 
-    def get_solr_info(self, query, **kwargs):
-        conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-        solr_args = {'q': query,
-                     'wt': 'json',
-                     'fl': 'author,bordercore_todo_task,content_type,doctype,note,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url',
-                     'rows': 1000}
-        return json.loads(conn.raw_query(**solr_args).decode('UTF-8'))['response']
-
-    def create_tmp_directory(self, uuid):
-        """
-        Store newly uploaded files in a tmp directory that looks like this:
-
-        /tmp/bordercore-blobs/<uuid>/<filename>
-
-        This is so a later celery process can send the new file
-        to Solr for indexing. This process is also responsible
-        for cleaning up these tmp directories.
-        """
-
-        dir = Path(f"{BLOB_TMP_DIR}/{uuid}")
-        if not dir.is_dir():
-            os.umask(0o002)
-            dir.mkdir(mode=0o775, parents=True, exist_ok=True)
-            return dir
-        else:
-            log.error("Tmp directory already exists: {dir}")
+    # def get_solr_info(self, query, **kwargs):
+    #     conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    #     solr_args = {'q': query,
+    #                  'wt': 'json',
+    #                  'fl': 'author,bordercore_todo_task,content_type,doctype,note,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url',
+    #                  'rows': 1000}
+    #     return json.loads(conn.raw_query(**solr_args).decode('UTF-8'))['response']
 
     def save(self, *args, **kwargs):
 
@@ -230,16 +223,10 @@ class Document(TimeStampedModel, AmazonMixin):
 
         if self.file_s3 and self.file_s3.readable():
 
-            tmp_dir = self.create_tmp_directory(self.uuid)
-
-            # While computing the sha1sum, store the file in a tmp
-            # directory for later Solr indexing for a celery process
-            with open(f"{tmp_dir}/{self.file_s3}", "wb") as out_file:
-                hasher = hashlib.sha1()
-                for chunk in self.file_s3.chunks():
-                    hasher.update(chunk)
-                    out_file.write(chunk)
-                self.sha1sum = hasher.hexdigest()
+            hasher = hashlib.sha1()
+            for chunk in self.file_s3.chunks():
+                hasher.update(chunk)
+            self.sha1sum = hasher.hexdigest()
 
         super(Document, self).save(*args, **kwargs)
 
@@ -255,7 +242,6 @@ class Document(TimeStampedModel, AmazonMixin):
     def change_file_s3(self, old_sha1sum):
 
         dir_old = "{}/{}/{}".format(settings.MEDIA_ROOT, old_sha1sum[0:2], old_sha1sum)
-        dir_new = self.get_parent_dir()
 
         # TODO Can we eliminate the client object and just use the s3 object?
         client = boto3.client("s3")
@@ -269,9 +255,9 @@ class Document(TimeStampedModel, AmazonMixin):
             print("looking for old key to delete,  fn: {}".format(str(fn.key)))
         # for fn in os.listdir(dir_old):
             if not os.path.basename(str(fn)).startswith("cover-"):
-                print ("Deleting key {}".format(fn.key))
+                print("Deleting key {}".format(fn.key))
                 client.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key="{}".format(fn.key))
-               # os.remove("{}/{}".format(dir_old, fn))
+                # os.remove("{}/{}".format(dir_old, fn))
 
         # Move any cover images for the old file to the new file's directory
         # for file in os.listdir(dir_old):
@@ -305,7 +291,7 @@ class Document(TimeStampedModel, AmazonMixin):
         try:
             _ = Document.get_cover_info_s3(self.user, self.sha1sum, size='small')['url']
             return True
-        except:
+        except Exception:
             return False
 
     def get_cover_url_small(self):
@@ -334,6 +320,15 @@ class Document(TimeStampedModel, AmazonMixin):
         return info
 
     @staticmethod
+    def is_ingestible_file(filename):
+
+        _, file_extension = os.path.splitext(filename)
+        if file_extension[1:].lower() in FILE_TYPES_TO_INGEST:
+            return True
+        else:
+            return False
+
+    @staticmethod
     def get_cover_info_s3(user, sha1sum, size="large", max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
 
         if sha1sum is None:
@@ -356,7 +351,6 @@ class Document(TimeStampedModel, AmazonMixin):
         _, file_extension = os.path.splitext(b.file_s3.name)
         if file_extension[1:].lower() in ["gif", "jpg", "jpeg", "png"]:
             # If so, look for a thumbnail.  Otherwise return the image itself
-            thumbnail_file_path = "{}/{}".format(parent_dir, "cover.jpg")
             if "cover.jpg" in objects:
                 info["url"] = f"{prefix}/cover.jpg"
             else:
@@ -456,10 +450,15 @@ class Document(TimeStampedModel, AmazonMixin):
             os.chmod(name, 0o664)
 
     def delete(self):
-        # Delete from Solr
-        conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-        conn.delete(queries=['uuid:{}'.format(self.uuid)])
-        conn.commit()
+
+        # Delete from Elasticsearch
+
+        es = Elasticsearch(
+            [settings.ELASTICSEARCH_ENDPOINT],
+            verify_certs=False
+        )
+
+        es.delete(index=settings.ELASTICSEARCH_INDEX, id=self.uuid)
 
         # Delete from any collections
         for collection in Collection.objects.filter(user=self.user, blob_list__contains=[{'id': self.id}]):
@@ -488,6 +487,36 @@ def set_s3_metadata_file_modified(sender, instance, **kwargs):
 
     s3_object.metadata.update({"file-modified": str(instance.file_modified)})
     s3_object.copy_from(CopySource={"Bucket": settings.AWS_STORAGE_BUCKET_NAME, "Key": key}, Metadata=s3_object.metadata, MetadataDirective="REPLACE")
+
+
+@receiver(post_save, sender=Document)
+def index_blob(sender, instance, **kwargs):
+    """
+    Index the blob into Elasticsearch, but only if there is no
+    file associated with it. If there is, then a lambda will be
+    triggered once it's written to S3 to do the indexing
+    """
+    client = boto3.client("sns")
+
+    message = {
+        "Records": [
+            {
+                "s3": {
+                    "bucket": {
+                        "name": settings.AWS_STORAGE_BUCKET_NAME
+                    },
+                    "uuid": str(instance.uuid)
+                }
+            }
+        ]
+    }
+
+    if not instance.file_s3:
+        response = client.publish(
+            TopicArn="arn:aws:sns:us-east-1:192218769908:NewS3Blob",
+            Message=json.dumps(message),
+        )
+        # TODO: Handle response errors
 
 
 @receiver(pre_delete, sender=Document)
@@ -519,6 +548,25 @@ class MetaData(TimeStampedModel):
 
     def delete(self):
 
-        delete_metadata.delay(self.blob.uuid, self.name, self.value)
+        es = Elasticsearch(
+            [settings.ELASTICSEARCH_ENDPOINT],
+            verify_certs=False
+        )
+
+        request_body = {
+            "query": {
+                "ids": {
+                    "values": [
+                        self.blob.uuid
+                    ]
+                }
+            },
+            "script": {
+                "inline": f"ctx._source.remove('{self.name}')",
+                "lang": "painless"
+            },
+        }
+
+        es.update_by_query(index=settings.ELASTICSEARCH_INDEX, body=request_body)
 
         super(MetaData, self).delete()

@@ -34,12 +34,19 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+# Set this so we can read it later in some code shared between
+#  Django and a lambda. In the lambda we don't have access to any
+#  Django modules, and thus can't get in the usual way by
+#  importing settings from django.conf. So use the environment
+#  instead.
+os.environ["DATABASE_PASSWORD"] = get_secret('DATABASE_PASSWORD')
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'bordercore',
         'USER': 'bordercore',
-        'PASSWORD': get_secret('DB_PASSWORD'),
+        'PASSWORD': get_secret('DATABASE_PASSWORD'),
         'HOST': 'bordercore.cvkm90zuldto.us-east-1.rds.amazonaws.com',
         'PORT': '',
     }
@@ -78,6 +85,8 @@ USE_S3 = True
 AWS_STORAGE_BUCKET_NAME = "bordercore-blobs"
 AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
 AWS_LOCATION = "django"
+
+os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 
 # Set this to silence S3Boto3Storage warning
 AWS_DEFAULT_ACL = None
@@ -128,7 +137,6 @@ ALLOWED_HOSTS = ('localhost', 'www.bordercore.com', 'bordercore.com', 'beta.bord
 
 INSTALLED_APPS = (
 
-    'celery',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -152,7 +160,6 @@ INSTALLED_APPS = (
     'music',
     'pygments',
     'quote',
-    'solrpy',
     'storages',
     'tastypie',
     'todo'
@@ -193,13 +200,9 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 LOGIN_URL = "/login/"
 
-# Set Redis as my Celery broker
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-
-# Solr config
-SOLR_HOST = 'localhost'
-SOLR_PORT = 8983
-SOLR_COLLECTION = 'solr/bordercore'
+# Elasticsearch config
+# See dev.py and prod.py for endpoint url
+ELASTICSEARCH_INDEX = "bordercore"
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

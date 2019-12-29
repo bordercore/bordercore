@@ -1,0 +1,61 @@
+{
+    "mappings": {
+        "properties": {
+            "uuid": {
+                "type":"text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword"
+                    }
+                }
+            },
+            "bordercore_id": { "type":"long" },
+            "sha1sum": {
+                "type":"text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword"
+                    }
+                }
+            },
+            "user_id": { "type":"integer" },
+            "is_private": { "type":"boolean" },
+            "date": {
+                "type":"date_range",
+                "format":"yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM||yyyy||epoch_second"
+            },
+            "title": { "type":"text" },
+            "contents": { "type":"text" },
+            "doctype": {
+                "type":"text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword"
+                    }
+                }
+            },
+            "content_type": {
+                "type":"text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword"
+                    }
+                }
+            },
+            "tags": {
+                "type":"text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword"
+                    }
+                }
+            },
+            "filename": { "type":"text" },
+            "note": { "type":"text" },
+            "url": { "type":"text" },
+            "importance": { "type":"integer" },
+            "date_unixtime": { "type":"long" },
+            "last_modified": { "type":"date" }
+        }
+    }
+}

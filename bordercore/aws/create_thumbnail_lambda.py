@@ -68,8 +68,15 @@ def handler(event, context):
     try:
 
         for record in event["Records"]:
-            bucket = record["s3"]["bucket"]["name"]
-            key = unquote_plus(record["s3"]["object"]["key"])
+            import json; log.info(json.dumps(record["Sns"]["Message"]))
+
+            sns_record = json.loads(record["Sns"]["Message"])["Records"][0]
+            bucket = sns_record["s3"]["bucket"]["name"]
+            log.info(f"bucket: {bucket}")
+            key = sns_record["s3"]["object"]["key"]
+            log.info(f"key: {key}")
+            # bucket = record["s3"]["bucket"]["name"]
+            # key = unquote_plus(record["s3"]["object"]["key"])
 
             log.info(f"Creating cover image for {key}")
             path, filename = os.path.split(key)

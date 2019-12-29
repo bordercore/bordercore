@@ -1,0 +1,6 @@
+{
+    "stored_fields" : ["id", "uuid", "title"],
+    "query" : {
+        "term" : { "sha1sum" : "679f47c2c33734016a2bfc3775a866c77e9210ba" }
+    }
+}

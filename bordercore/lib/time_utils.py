@@ -26,6 +26,12 @@ def get_relative_date(time=False):
     now = datetime.now(pytz.timezone('US/Eastern'))
     if type(time) is int:
         diff = now - datetime.fromtimestamp(time)
+    elif type(time) is str:
+        # Try with microseconds, then try without
+        try:
+            diff = now - datetime.strptime(time, '%Y-%m-%dT%H:%M:%S.%f%z')
+        except ValueError:
+            diff = now - datetime.strptime(time, '%Y-%m-%dT%H:%M:%S%z')
     elif isinstance(time, datetime):
         diff = now - time
     elif not time:
@@ -71,8 +77,8 @@ def get_date_from_pattern(date):
         return datetime.datetime.strptime(date, '%Y-%m').strftime('%B %Y')
     elif re.compile('^\d\d\d\d$').match(date):
         return date
-    elif re.compile('^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ').match(date):
-        return datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ').strftime('%B %d, %Y')
+    elif re.compile('^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d').match(date):
+        return datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%S').strftime('%B %d, %Y')
     elif re.compile('^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d').match(date):
         return datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%B %d, %Y, %I:%M %p').replace("PM", "p.m.").replace("AM", "a.m.")
     else:

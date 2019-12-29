@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseNotFound, HttpResponse, JsonResponse
 from django.shortcuts import render
+from elasticsearch import Elasticsearch
 
 from blob.models import Document
 from bookmark.models import Bookmark
@@ -18,7 +19,6 @@ from fitness.models import ExerciseUser
 from music.models import Listen
 from PyOrgMode import PyOrgMode
 from quote.models import Quote
-from solrpy.core import SolrConnection
 
 SECTION = 'Home'
 
@@ -57,12 +57,13 @@ def homepage(request):
         random_image = get_random_blob(request, 'image/*')
         if random_image:
             try:
-                random_image_info = {'uuid': random_image.uuid,
+                random_image_info = {'blob': random_image,
+                                     'uuid': random_image.uuid,
                                      'cover_info': Document.get_cover_info_s3(request.user, random_image.sha1sum, 'large', 500)}
             except ClientError as e:
                 messages.add_message(request, messages.ERROR, f"Error getting random image info: {e}")
     except ConnectionRefusedError as e:
-        messages.add_message(request, messages.ERROR, 'Cannot connect to Solr')
+        messages.add_message(request, messages.ERROR, 'Cannot connect to Elasticsearch')
 
     # Get the most recent untagged bookmarks
     bookmarks = Bookmark.objects.filter(user=request.user, tags__isnull=True).order_by('-created')[:10]
@@ -118,19 +119,51 @@ def get_calendar_events(request):
 
 def get_random_blob(request, content_type):
 
-    seed = random.randint(1, 10000)
-    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-    solr_args = {'q': 'content_type:%s' % (content_type),
-                 'sort': 'random_%s desc' % (seed),
-                 'wt': 'json',
-                 'fl': 'internal_id,sha1sum,uuid',
-                 'fq': '-is_private:true',
-                 'rows': 1}
-    solr_results = json.loads(conn.raw_query(**solr_args).decode('UTF-8'))['response']['docs'][0]
+    es = Elasticsearch(
+        [settings.ELASTICSEARCH_ENDPOINT],
+        verify_certs=False
+    )
+
+    search_object = {
+        'query': {
+            "function_score": {
+                "random_score": {
+                },
+                "query": {
+                    'bool': {
+                        'must': [
+                            {
+                                "wildcard": {
+                                    "content_type.keyword": {
+                                        "value": "*/pdf",
+                                    }
+                                }
+                            },
+                            {
+                                'term': {
+                                    'user_id': request.user.id
+                                }
+                            },
+                            {
+                                'term': {
+                                    'is_private': False
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        'from': 0,
+        'size': 1,
+        '_source': ['uuid']
+    }
+
+    results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 
     blob = None
     try:
-        blob = Document.objects.get(user=request.user, pk=solr_results['internal_id'])
+        blob = Document.objects.get(user=request.user, uuid=results["hits"]["hits"][0]["_source"]["uuid"])
     except ObjectDoesNotExist:
         pass
     return blob

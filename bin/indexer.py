@@ -1,47 +1,49 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import django
 import getopt
 import logging
 import os
 import sys
 
-from solrpy.core import SolrConnection
-
+from elasticsearch import Elasticsearch
+import django
 from django.conf import settings
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.prod'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.dev'
 
 django.setup()
 
 from bookmark.models import Bookmark
-from bookmark.tasks import index_bookmark
 
 from todo.models import Todo
-from todo.tasks import index_todo
 
 
-def index_bookmarks_all():
+def index_bookmarks_all(es):
 
     for b in Bookmark.objects.all():
-        print(b.url)
-        index_bookmark.delay(b.id, commit=False)
+        print(b.id)
+        b.index_bookmark()
 
 
 def index_todo_all():
 
     for t in Todo.objects.all():
         print(t.task)
-        index_todo.delay(t.id, commit=False)
+        t.index_todo()
 
 
 if __name__ == "__main__":
 
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(levelname)s: %(message)s')
 
+    es = Elasticsearch(
+        [settings.ELASTICSEARCH_ENDPOINT],
+        verify_certs=False
+    )
+
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hbt", ["ifile=","ofile="])
+        opts, args = getopt.getopt(sys.argv[1:], "hbt", ["ifile=", "ofile="])
     except getopt.GetoptError:
         print('indexer.py --help --bookmarks --todo')
         sys.exit(2)
@@ -51,12 +53,9 @@ if __name__ == "__main__":
             print('indexer.py --help --bookmarks')
             sys.exit()
         elif opt in ("-b", "--bookmarks"):
-            index_bookmarks_all()
+            index_bookmarks_all(es)
         elif opt in ("-t", "--todo"):
             index_todo_all()
         else:
             print('indexer.py --help --bookmarks')
             sys.exit()
-
-    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-    conn.commit()

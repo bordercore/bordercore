@@ -8,4 +8,4 @@ bordercore/static/blobs
 secrets.json
 
 bordercore/aws/.aws-sam/build/
-
+bordercore/aws/index_blobs/.aws-sam/build/

@@ -1,22 +1,18 @@
 import json
-import os
 import re
-import urllib
-from os.path import basename
 
 from django.conf import settings
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.templatetags.static import static
 from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
+from elasticsearch import Elasticsearch
 
 from blob.models import Document
-from search.solr import SolrResultSet
-from solrpy.core import SolrConnection, SolrException
 from tag.models import Tag
+
+from lib.time_utils import get_relative_date
 
 
 @method_decorator(login_required, name='dispatch')
@@ -24,7 +20,7 @@ class SearchListView(ListView):
 
     template_name = 'kb/search.html'
     SECTION = 'KB'
-    SOLR_COUNT_PER_PAGE = 100
+    RESULT_COUNT_PER_PAGE = 100
     context_object_name = 'info'
 
     def get_facet_query(self, facet, term):
@@ -48,133 +44,143 @@ class SearchListView(ListView):
 
     def get_queryset(self, **kwargs):
 
-        notes_search = True if self.kwargs.get('notes_search', '') else False
+        notes_search = True if self.kwargs.get("notes_search", "") else False
 
         if notes_search:
-            self.SOLR_COUNT_PER_PAGE = 10
+            self.RESULT_COUNT_PER_PAGE = 10
 
-        if 'search' in self.request.GET or notes_search:
+        if "search" in self.request.GET or notes_search:
 
             search_term = escape_solr_terms(self.request.GET.get("search", ""))
-            sort = self.request.GET.get("sort", "date_unixtime")
+            sort_field = self.request.GET.get("sort", "date_unixtime")
 
-            rows = self.request.GET.get('rows', None)
-            boolean_type = self.request.GET.get('boolean_search_type', 'AND')
+            hit_count = self.request.GET.get("rows", None)
+            boolean_type = self.request.GET.get("boolean_search_type", "AND")
 
-            if rows == 'No limit':
-                rows = 1000000
-            elif rows is None:
-                rows = self.SOLR_COUNT_PER_PAGE
+            if hit_count == "No limit":
+                hit_count = 1000000
+            elif hit_count is None:
+                hit_count = self.RESULT_COUNT_PER_PAGE
 
-            conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+            es = Elasticsearch(
+                [settings.ELASTICSEARCH_ENDPOINT],
+                verify_certs=False
+            )
 
-            search_terms = []
+            # search_terms = []
 
-            p = re.compile("^[0-9a-f]{40}$")
-            if p.search(search_term):
-                search_terms.append("sha1sum:{}".format(search_term))
-                search_term = ""
+            # if search_term:
+            #     search_terms.append(handle_quotes(self.request, search_term))
+            # else:
+            #     search_terms.insert(0, "''")
 
-            if search_term:
-                search_terms.append(handle_quotes(self.request, search_term))
-            else:
-                search_terms.insert(0, "''")
+            # search_term = " AND ".join(search_terms)
 
-            search_terms.append("user_id:{}".format(self.request.user.id))
-
-            if notes_search:
-                search_terms.append("doctype:note")
-                tagsearch = self.request.GET.get('tagsearch', '')
-                if tagsearch:
-                    search_terms.extend(['tags:"{}"'.format(urllib.parse.unquote(t),) for t in tagsearch.split(',')])
-
-            search_term = " AND ".join(search_terms)
-
-            solr_args = {
-                'q': search_term,
-                'q.op': boolean_type,
-                'rows': rows,
-                'sort': sort + ' desc',
-                'qf': 'text',
-                'boost': 'importance',
-                'defType': 'edismax',
-                'fl': 'author,bordercore_todo_task,date,date_unixtime,doctype,filepath,id,importance,internal_id,last_modified,sha1sum,tags,title,url,uuid',
-                'facet': 'on',
-                'facet.mincount': '1',
-                'hl': 'true',
-                'hl.fl': 'attr_content,bordercore_todo_task,title',
-                'hl.simple.pre': '<span class="search_bordercore_blogpost_snippet">',
-                'hl.simple.post': '</span>'
+            search_object = {
+                "query": {
+                    "bool": {
+                        "must": [
+                            {
+                                "term": {
+                                    "user_id": self.request.user.id
+                                }
+                            }
+                        ]
+                    }
+                },
+                "sort": {sort_field: {"order": "desc"}},
+                "from": 0, "size": hit_count,
+                "_source": ["author",
+                            "bordercore_todo_task",
+                            "date",
+                            "date_unixtime",
+                            "doctype",
+                            "filepath",
+                            "importance",
+                            "bordercore_id",
+                            "last_modified",
+                            "sha1sum",
+                            "tags",
+                            "title",
+                            "url",
+                            "uuid"]
             }
 
-            facet_queries = []
-            for facet in ['Blobs', 'Notes', 'Books', 'Titles', 'Documents', 'Links', 'Tags', 'Todos']:
-                facet_queries.append('{!key="%s" ex=dt}' % (facet) + self.get_facet_query(facet, search_term))
-                solr_args['facet.query'] = facet_queries
-
-            if self.request.GET.get('facets'):
-                solr_args['fq'] = '{!tag=dt}' + ' OR '.join([self.get_facet_query(x, search_term) for x in self.request.GET.get('facets').split(',')])
-
-            try:
-                results = conn.raw_query(**solr_args)
-                return json.loads(results.decode('UTF-8'))
-            except SolrException as e:
-                messages.add_message(
-                    self.request,
-                    messages.ERROR,
-                    "Solr error: {}".format(e)
+            if notes_search:
+                search_object["query"]["bool"]["must"].append(
+                    {
+                        "term": {
+                            "doctype": "note"
+                        }
+                    }
                 )
-            except ConnectionRefusedError as e:
-                messages.add_message(
-                    self.request,
-                    messages.ERROR,
-                    "Solr error: {}".format(e.strerror)
+
+                tagsearch = self.request.GET.get("tagsearch", "")
+                if tagsearch:
+                    search_object["query"]["bool"]["must"].append(
+                        {
+                            "term": {
+                                "tags.keyword": tagsearch
+                            }
+                        }
+                    )
+
+            if search_term:
+                search_object["query"]["bool"]["must"].append(
+                    {
+                        "multi_match": {
+                            "query": search_term,
+                            "fields": ["contents", "sha1sum", "title", "uuid"]
+                        }
+                    }
                 )
+
+            results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+            return results
 
     def get_context_data(self, **kwargs):
 
         context = super(SearchListView, self).get_context_data(**kwargs)
-        notes_search = True if self.kwargs.get('notes_search', '') else False
+        notes_search = True if self.kwargs.get("notes_search", "") else False
 
         if notes_search:
             self.SECTION = "Notes"
-            self.template_name = 'blob/note_list.html'
+            self.template_name = "blob/note_list.html"
 
         info = []
         facet_counts = {}
 
-        if self.request.GET.get('facets'):
-            context['filter_query'] = self.request.GET.get('facets').split(',')
+        if self.request.GET.get("facets"):
+            context["filter_query"] = self.request.GET.get("facets").split(",")
 
-        if context['info']:
+        if context["info"]:
 
-            for k, v in context['info']['facet_counts']['facet_queries'].items():
-                if v > 0:
-                    facet_counts[k] = v
+            # for k, v in context["info"]["facet_counts"]["facet_queries"].items():
+            #     if v > 0:
+            #         facet_counts[k] = v
 
             from lib.time_utils import get_date_from_pattern
 
-            for myobject in context['info']['response']['docs']:
-                solr_result_set = SolrResultSet(myobject)
-                note = ''
-                if myobject['doctype'] == 'note':
-                    if context['info']['highlighting'][myobject['id']].get('attr_content'):
-                        note = context['info']['highlighting'][myobject['id']]['attr_content'][0]
+            for myobject in context["info"]["hits"]["hits"]:
+                note = ""
+                # if myobject["_source"]["doctype"] == "note":
+                #     if context["info"]["highlighting"][myobject["id"]].get("document_body"):
+                #         note = context["info"]["highlighting"][myobject["id"]]["document_body"][0]
 
-                match = dict(title=solr_result_set.get_title(),
-                             author=myobject.get('author', ['']),
-                             date=get_date_from_pattern(myobject.get('date', '')),
-                             doctype=myobject['doctype'],
-                             sha1sum=myobject.get('sha1sum', ''),
-                             uuid=myobject.get('uuid', ''),
-                             id=myobject['id'],
-                             importance=myobject.get('importance', ''),
-                             internal_id=myobject.get('internal_id', ''),
-                             last_modified=solr_result_set.get_last_modified(),
-                             url=myobject.get('url', ''),
-                             filename=solr_result_set.get_filename(),
-                             tags=myobject.get('tags'),
-                             bordercore_todo_task=myobject.get('bordercore_todo_task', ''),
+                match = dict(title=myobject["_source"].get("title", "No Title"),
+                             author=myobject["_source"].get("author", [""]),
+                             date=get_date_from_pattern(myobject["_source"].get("date", "")["gte"]),
+                             doctype=myobject["_source"]["doctype"],
+                             sha1sum=myobject["_source"].get("sha1sum", ""),
+                             uuid=myobject["_source"].get("uuid", ""),
+                             id=myobject["_id"],
+                             importance=myobject["_source"].get("importance", ""),
+                             # internal_id=myobject.get("internal_id", ""),
+                             last_modified=get_relative_date(myobject["_source"]["last_modified"]),
+                             url=myobject["_source"].get("url", ""),
+                             filename=myobject["_source"].get("filename", ""),
+                             tags=myobject["_source"].get("tags"),
+                             # bordercore_todo_task=myobject.get("bordercore_todo_task", ""),
                              note=note
                 )
 
@@ -184,165 +190,234 @@ class SearchListView(ListView):
 
                 info.append(match)
 
-            context['numFound'] = context['info']['response']['numFound']
+            context["numFound"] = context["info"]["hits"]["total"]["value"]
 
             # Convert to a list of dicts.  This lets us use the dictsortreversed
             #  filter in our template to sort by count.
-            context['facet_counts'] = [{'doctype_purty': k, 'doctype': k, 'count': v} for k, v in facet_counts.items()]
+            # context["facet_counts"] = [{"doctype_purty": k, "doctype": k, "count": v} for k, v in facet_counts.items()]
 
-        context['info'] = info
-        context['section'] = self.SECTION
-        context['search_sort_by'] = self.request.session.get('search_sort_by', '')
-        context['title'] = 'Search'
+        context["info"] = info
+        context["section"] = self.SECTION
+        context["search_sort_by"] = self.request.session.get("search_sort_by", "")
+        context["title"] = "Search"
         return context
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class SearchTagDetailView(ListView):
 
-    template_name = 'kb/tag_detail.html'
-    SECTION = 'KB'
-    SOLR_COUNT_PER_PAGE = 100
-    context_object_name = 'info'
+    template_name = "kb/tag_detail.html"
+    SECTION = "KB"
+    RESULT_COUNT_PER_PAGE = 100
+    context_object_name = "info"
 
     def get_context_data(self, **kwargs):
 
         context = super(SearchTagDetailView, self).get_context_data(**kwargs)
         results = {}
-        for one_doc in context['info']['response']['docs']:
-            solr_result_set = SolrResultSet(one_doc)
-            if one_doc.get('sha1sum', ''):
-                one_doc['filename'] = solr_result_set.filename
-                one_doc['url'] = one_doc['filepath'].split(settings.MEDIA_ROOT)[1]
-                one_doc['cover_url'] = Document.get_cover_info_s3(
+        for myobject in context["info"]["hits"]["hits"]:
+
+            match = dict(
+                title=myobject["_source"].get("title", "No Title"),
+                uuid=myobject["_source"].get("uuid", "")
+            )
+            if myobject["_source"].get("sha1sum", ""):
+                match["sha1sum"] = myobject["_source"].get("sha1sum", "")
+                match["filename"] = myobject["_source"].get("filename", "")
+                # match["url"] = myobject["filepath"].split(settings.MEDIA_ROOT)[1]
+                match["url"] = Document.get_s3_key_from_sha1sum(match["sha1sum"], match["filename"])
+                match["cover_url"] = Document.get_cover_info_s3(
                     self.request.user,
-                    one_doc['sha1sum'],
-                    size='small'
-                    )['url']
-                if one_doc['content_type']:
-                    one_doc['content_type'] = Document.get_content_type(one_doc['content_type'][0])
-            one_doc['title'] = solr_result_set.get_title()
-            if results.get(one_doc['doctype'], ''):
-                results[one_doc['doctype']].append(one_doc)
+                    myobject["_source"]["sha1sum"],
+                    size="small"
+                    )["url"]
+                # if one_doc["content_type"]:
+                #     one_doc["content_type"] = Document.get_content_type(one_doc["content_type"][0])
+
+            if results.get(myobject["_source"]["doctype"], ""):
+                results[myobject["_source"]["doctype"]].append(match)
             else:
-                results[one_doc['doctype']] = [one_doc]
-        context['info']['matches'] = results
+                results[myobject["_source"]["doctype"]] = [match]
+        context["info"]["matches"] = results
 
         tag_counts = {}
-        tag_list = self.kwargs.get('taglist', '').split(',')
-        for x, y in grouped(context['info']['facet_counts']['facet_fields']['tags'], 2):
-            if x not in tag_list:
-                tag_counts[x] = y
+        tag_list = self.kwargs.get("taglist", "").split(",")
+        for buckets in context["info"]["aggregations"]["Tag Filter"]["buckets"]:
+            if buckets["key"] not in tag_list:
+                tag_counts[buckets["key"]] = buckets["doc_count"]
         doctype_counts = {}
-        for x, y in grouped(context['info']['facet_counts']['facet_fields']['doctype'], 2):
-            if x not in tag_list:
-                doctype_counts[x] = y
+        for buckets in context["info"]["aggregations"]["Doctype Filter"]["buckets"]:
+            if buckets["key"] not in tag_list:
+                doctype_counts[buckets["key"]] = buckets["doc_count"]
 
         meta_tags = [x for x in tag_counts if x in Tag.get_meta_tags(self.request.user)]
-        context['meta_tags'] = meta_tags
+        context["meta_tags"] = meta_tags
 
         import operator
         tag_counts_sorted = sorted(tag_counts.items(), key=operator.itemgetter(1), reverse=True)
-        context['tag_counts'] = tag_counts_sorted
+        context["tag_counts"] = tag_counts_sorted
         doctype_counts_sorted = sorted(doctype_counts.items(), key=operator.itemgetter(1), reverse=True)
-        context['doctype_counts'] = doctype_counts_sorted
+        context["doctype_counts"] = doctype_counts_sorted
 
         doctypes = {}
         for x in doctype_counts.keys():
             doctypes[x] = 1
-        context['doctypes'] = doctypes
+        context["doctypes"] = doctypes
 
         tag_list_js = []
         for tag in tag_list:
-            if tag != '':
-                tag_list_js.append({'name': tag, 'is_meta': 'true' if tag in Tag.get_meta_tags(self.request.user) else 'false'})
-        context['tag_list'] = tag_list_js
+            if tag != "":
+                tag_list_js.append({"name": tag, "is_meta": "true" if tag in Tag.get_meta_tags(self.request.user) else "false"})
+        context["tag_list"] = tag_list_js
 
-        context['kb_tag_detail_current_tab'] = self.request.session.get('kb_tag_detail_current_tab', '')
-        context['section'] = self.SECTION
+        context["kb_tag_detail_current_tab"] = self.request.session.get("kb_tag_detail_current_tab", "")
+        context["section"] = self.SECTION
 
-        if context['tag_list']:
-            context['title'] = 'Search :: Tag Detail :: {}'.format(', '.join(tag_list))
+        if context["tag_list"]:
+            context["title"] = "Search :: Tag Detail :: {}".format(", ".join(tag_list))
         else:
-            context['title'] = 'Tag Search'
+            context["title"] = "Tag Search"
 
         return context
 
     def get_queryset(self):
-        taglist = self.kwargs.get('taglist', '')
-        rows = 1000
+        taglist = self.kwargs.get("taglist", "").split(",")
+        hit_count = 1000
 
-        q = ' AND '.join(['tags:"%s"' % (urllib.parse.unquote(t),) for t in taglist.split(',')])
-        q = q + ' AND user_id:{}'.format(self.request.user.id)
+        es = Elasticsearch(
+            [settings.ELASTICSEARCH_ENDPOINT],
+            verify_certs=False
+        )
 
-        conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+        # Use the keyword field for an exact match
+        tag_query = [
+            {
+                "term": {
+                    "tags.keyword": x
+                }
+            }
+            for x in taglist
+        ]
 
-        solr_args = {'q': q,
-                     'boost': 'importance',
-                     'rows': rows,
-                     'fl': 'author,bordercore_todo_task,content_type,doctype,uuid,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url',
-                     'facet': 'on',
-                     'facet.mincount': '1',
-                     'facet.field': ['{!ex=tags}tags', '{!ex=doctype}doctype'],
-                     'sort': 'last_modified desc'
-                     }
-        results = conn.raw_query(**solr_args)
-        return json.loads(results.decode('UTF-8'))
+        tag_query.append(
+            {
+                "term": {
+                    "user_id": self.request.user.id
+                }
+            }
+        )
 
+        search_object = {
+            "query": {
+                "bool": {
+                    "must": tag_query
+                }
+            },
+            "aggs": {
+                "Doctype Filter": {
+                    "terms": {
+                        "field": "doctype.keyword",
+                        "size": 10
+                    }
+                },
+                "Tag Filter": {
+                    "terms": {
+                        "field": "tags.keyword",
+                        "size": 10
+                    }
+                }
+            },
+            "sort": {"last_modified": {"order": "desc"}},
+            "from": 0, "size": hit_count,
+            "_source": ["author",
+                        "bordercore_todo_task",
+                        "date",
+                        "date_unixtime",
+                        "doctype",
+                        "filename",
+                        "importance",
+                        "bordercore_id",
+                        "last_modified",
+                        "sha1sum",
+                        "tags",
+                        "title",
+                        "url",
+                        "uuid"]
+        }
 
-def grouped(iterable, n):
-    "s -> (s0,s1,s2,...sn-1), (sn,sn+1,sn+2,...s2n-1), (s2n,s2n+1,s2n+2,...s3n-1), ..."
-    return zip(*[iter(iterable)] * n)
-
-
-@login_required
-def search_book_title(request):
-
-    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-
-    title = request.GET['title']
-
-    solr_args = {'q': 'doctype:book AND filepath:*{}* AND user_id:{}'.format(title, request.user.id),
-                 'fl': 'id,score,title,author,filepath,uuid'}
-
-    results = conn.raw_query(**solr_args)
-
-    filtered_results = json.loads(results.decode('UTF-8'))
-
-    for match in filtered_results['response']['docs']:
-        # If the book doesn't have a title, use the filename
-        match['filename'] = os.path.basename(match.get('filepath'))
-        if not match.get('title'):
-            match['title'] = basename(os.path.splitext(match['filepath'])[0])
-
-    return JsonResponse(filtered_results['response']['docs'], safe=False)
+        results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+        return results
 
 
 @login_required
 def kb_search_tags_booktitles(request):
 
-    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
+    es = Elasticsearch(
+        [settings.ELASTICSEARCH_ENDPOINT],
+        verify_certs=False
+    )
 
-    term = escape_solr_terms(handle_quotes(request, request.GET['term']))
+    search_term = escape_solr_terms(handle_quotes(request, request.GET['term']))
 
-    solr_args = {'q': '(tags:{}* OR (doctype:book AND title:*{}*)) AND user_id:{}'.format(term, term, request.user.id),
-                 'fl': 'doctype,filepath,sha1sum,tags,title,uuid',
-                 'rows': 20}
+    search_object = {
+        'query': {
+            'bool': {
+                'must': [
+                    {
+                        'term': {
+                            'doctype': 'book'
+                        }
+                    },
+                    {
+                        "wildcard": {
+                            "title": {
+                                "value": f"*{search_term}*",
+                            }
+                        }
+                    },
+                    {
+                        'term': {
+                            'user_id': request.user.id
+                        }
+                    }
+                ]
+            }
+        },
+        "from": 0, "size": 20,
+        "_source": ["author",
+                    "date",
+                    "date_unixtime",
+                    "doctype",
+                    "filepath",
+                    "importance",
+                    "sha1sum",
+                    "tags",
+                    "title",
+                    "uuid"]
+    }
 
-    results = json.loads(conn.raw_query(**solr_args).decode('UTF-8'))
+    results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 
     tags = {}
     matches = []
 
-    for match in results['response']['docs']:
-        if match['doctype'] == 'book':
-            matches.append({'type': 'Book', 'value': match['title'][0], 'uuid': match.get('uuid')})
-        if match.get('tags', ''):
-            for tag in [x for x in match['tags'] if x.lower().startswith(term.lower())]:
+    for match in results["hits"]["hits"]:
+
+        if match["_source"]["doctype"] == "book":
+            matches.append(
+                {
+                    "type": "Book",
+                    "value": match["_source"]["title"],
+                    "uuid": match["_source"].get("uuid")
+                }
+            )
+
+        if match["_source"].get("tags", ""):
+            for tag in [x for x in match["_source"]["tags"] if x.lower().startswith(search_term.lower())]:
                 tags[tag] = 1
 
     for tag in tags:
-        matches.append({'type': 'Tag', 'value': tag})
+        matches.append({"type": "Tag", "value": tag})
 
     return JsonResponse(matches, safe=False)
 

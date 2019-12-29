@@ -1,5 +1,4 @@
 import json
-from solrpy.core import SolrConnection
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -7,8 +6,9 @@ from django.contrib.postgres.fields import ArrayField, JSONField
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models.signals import m2m_changed
+from elasticsearch import Elasticsearch
 
-from bookmark.tasks import index_bookmark, snarf_favicon
+from bookmark.tasks import snarf_favicon
 from lib.mixins import TimeStampedModel
 from tag.models import Tag
 
@@ -47,9 +47,31 @@ class Bookmark(TimeStampedModel):
         for x in TagBookmarkSortOrder.objects.filter(bookmark=self):
             x.delete()
 
-        conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-        conn.delete(queries=['id:bordercore_bookmark_%s' % (self.id)])
-        conn.commit()
+        es = Elasticsearch(
+            [settings.ELASTICSEARCH_ENDPOINT],
+            verify_certs=False
+        )
+
+        request_body = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "doctype": "bordercore_bookmark"
+                            }
+                        },
+                        {
+                            "term": {
+                                "bordercore_id": self.id
+                            }
+                        },
+                    ]
+                }
+            }
+        }
+
+        es.delete_by_query(index=settings.ELASTICSEARCH_INDEX, body=request_body)
 
         super(Bookmark, self).delete()
 
@@ -58,11 +80,39 @@ class Bookmark(TimeStampedModel):
         This should be called anytime a bookmark is added or updated.
         """
 
-        # Index the bookmark in Solr
-        index_bookmark.delay(self.id)
+        # Index the bookmark in Elasticsearch
+        self.index_bookmark()
 
         # Grab its favicon
-        snarf_favicon.delay(self.url)
+        # snarf_favicon.delay(self.url)
+
+    def index_bookmark(self):
+
+        es = Elasticsearch(
+            [settings.ELASTICSEARCH_ENDPOINT],
+            verify_certs=False
+        )
+
+        doc = {
+            "bordercore_id": self.id,
+            "title": self.title,
+            "bordercore_bookmark_note": self.note,
+            "tags": [tag.name for tag in self.tags.all()],
+            "url": self.url,
+            "note": self.note,
+            "importance": self.importance,
+            "last_modified": self.modified,
+            "doctype": "bordercore_bookmark",
+            "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
+            "date_unixtime": self.created.strftime("%s"),
+            "user_id": self.user.id
+        }
+
+        res = es.index(
+            index=settings.ELASTICSEARCH_INDEX,
+            id=f"bordercore_bookmark_{self.id}",
+            body=doc
+        )
 
 
 def tags_changed(sender, **kwargs):

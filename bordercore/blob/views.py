@@ -22,7 +22,6 @@ from amazonproduct import API
 from amazonproduct.errors import NoExactMatchesFound
 from blob.forms import DocumentForm
 from blob.models import Document, MetaData
-from blob.tasks import index_blob
 from collection.models import Collection
 
 SECTION = 'Blob'
@@ -93,7 +92,7 @@ class DocumentCreateView(CreateView):
 
         handle_linked_collection(obj, self.request)
 
-        index_blob.delay(obj.uuid, True)
+        # index_blob.delay(obj.uuid, True)
 
         return super(DocumentCreateView, self).form_valid(form)
 
@@ -153,9 +152,9 @@ class BlobDetailView(DetailView):
                     )
         try:
             query = 'uuid:%s' % self.object.uuid
-            context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
-            if context['solr_info'].get('content_type', ''):
-                context['content_type'] = Document.get_content_type(context['solr_info']['content_type'][0])
+            # context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
+            # if context['solr_info'].get('content_type', ''):
+            #     context['content_type'] = Document.get_content_type(context['solr_info']['content_type'][0])
         except IndexError:
             # Give Solr up to a minute to index the blob
             if int(datetime.datetime.now().strftime("%s")) - int(self.object.created.strftime("%s")) < 60:
@@ -264,7 +263,7 @@ class BlobUpdateView(UpdateView):
 
         self.object = form.save()
         messages.add_message(self.request, messages.INFO, 'Blob updated')
-        index_blob.delay(blob.uuid, file_changed)
+        # index_blob.delay(blob.uuid, file_changed)
 
         return HttpResponseRedirect(reverse('blob_detail', kwargs={'uuid': str(blob.uuid)}))
 
@@ -279,9 +278,9 @@ class BlobThumbnailView(UpdateView):
         context['cover_info'] = Document.get_cover_info_s3(self.request.user, self.object.sha1sum, max_cover_image_width=70, size='small')
         context['filename'] = self.object.file
         query = 'uuid:{}'.format(self.object.uuid)
-        context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
-        if context['solr_info'].get('content_type', ''):
-            context['content_type'] = Document.get_content_type(context['solr_info']['content_type'][0]).lower()
+        # context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
+        # if context['solr_info'].get('content_type', ''):
+        #     context['content_type'] = Document.get_content_type(context['solr_info']['content_type'][0]).lower()
         context['section'] = SECTION
         context['title'] = 'Blob Thumbnail :: {}'.format(self.object.get_title(remove_edition_string=True))
 

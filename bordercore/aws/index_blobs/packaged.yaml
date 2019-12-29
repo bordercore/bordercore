@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Index blobs into ElasticSearch
+Globals:
+  Function:
+    Timeout: 360
+Resources:
+  IndexBlobFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://bordercore-blobs/011b7dd9e7ecb3545a8edad3b7a99434
+      FunctionName: IndexBlob
+      Handler: index_blobs_lambda.handler
+      MemorySize: 1024
+      Runtime: python3.7
+      Role:
+        Fn::GetAtt:
+        - IndexBlobLambdaRole
+        - Arn
+  IndexBlobLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: IndexBlobFunction
+      Principal: s3.amazonaws.com
+      SourceArn:
+        Fn::Sub: arn:aws:s3:::bordercore-blobs
+      SourceAccount:
+        Ref: AWS::AccountId
+  IndexBlobLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName: LambdaWriteToLogs
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - logs:DescribeLogStreams
+            Resource:
+            - arn:aws:logs:*:*:*
+      - PolicyName: LambdaSearchElasticsearch
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - es:ESHttpPost
+            Resource:
+            - '*'
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+Outputs:
+  IndexBlobFunction:
+    Description: Index blobs into ElasticSearch
+    Value:
+      Fn::GetAtt:
+      - IndexBlobFunction
+      - Arn

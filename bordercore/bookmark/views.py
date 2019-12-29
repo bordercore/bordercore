@@ -14,7 +14,6 @@ from django.shortcuts import redirect, render
 from accounts.models import SortOrder
 from bookmark.models import Bookmark
 from bookmark.forms import BookmarkForm
-from bookmark.tasks import index_bookmark, snarf_favicon
 from tag.models import Tag, TagBookmark, TagBookmarkSortOrder
 
 SECTION = 'Bookmarks'
@@ -92,8 +91,7 @@ def snarf_link(request):
     except ObjectDoesNotExist:
         b = Bookmark(is_pinned=False, user=request.user, url=url, title=title)
         b.save()
-        index_bookmark.delay(b.id)
-        snarf_favicon.delay(url)
+        # index_bookmark.delay(b.id)
 
     return redirect('bookmark_edit', b.id)
 
@@ -127,7 +125,6 @@ def add_bookmarks_from_import(request, tag, bookmarks):
                 modified=link["created"]
             )
             b.save()
-            index_bookmark.delay(b.id)
 
             # Add the specified tag to the bookmark.
             # Create the tag if it doesn't exist.
@@ -143,7 +140,7 @@ def add_bookmarks_from_import(request, tag, bookmarks):
             #  Bookmark model's post_save signal.
             b.save()
 
-            snarf_favicon.delay(link["url"])
+            # snarf_favicon.delay(link["url"])
             added_count = added_count + 1
 
     messages.add_message(request, messages.INFO, "Bookmarks added: {}. Duplicates ignored: {}.".format(added_count, dupe_count))

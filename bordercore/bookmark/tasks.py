@@ -3,7 +3,6 @@ import logging
 import os.path
 import re
 import requests
-from solrpy.core import SolrConnection
 
 from django.conf import settings
 
@@ -52,33 +51,3 @@ def snarf_favicon(url, parse_domain=True):
     f = open("%s/%s.ico" % (FAVICON_DIR, domain), "wb")
     f.write(r.content)
     f.close()
-
-
-@task
-def index_bookmark(id, commit=True):
-
-    # Import Django models here rather than globally at the top to avoid circular dependencies
-    from bookmark.models import Bookmark
-    bookmark = Bookmark.objects.get(pk=id)
-
-    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-
-    doc = dict(
-        id="bordercore_bookmark_%s" % bookmark.id,
-        internal_id=bookmark.id,
-        title=bookmark.title,
-        bordercore_bookmark_note=bookmark.note,
-        tags=[tag.name for tag in bookmark.tags.all()],
-        url=bookmark.url,
-        note=bookmark.note,
-        importance=bookmark.importance,
-        last_modified=bookmark.modified,
-        doctype='bordercore_bookmark',
-        date=bookmark.created,
-        date_unixtime=bookmark.created.strftime("%s"),
-        user_id=bookmark.user.id
-    )
-    conn.add(doc)
-
-    if commit:
-        conn.commit()

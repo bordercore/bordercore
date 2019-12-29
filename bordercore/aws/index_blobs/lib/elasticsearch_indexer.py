@@ -1,0 +1,1 @@
+/home/jerrell/dev/django/bordercore_project/bordercore/blob/elasticsearch_indexer.py
