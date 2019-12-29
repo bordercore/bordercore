@@ -3,14 +3,14 @@
 # Based on http://michal.karzynski.pl/blog/2013/06/09/django-nginx-gunicorn-virtualenv-supervisor/
 
 NAME="django_app"
-DJANGODIR=/home/www/htdocs/bordercore-django
+DJANGODIR=/var/www/django
 HOST=127.0.0.1:9000
 USER=www-data
 GROUP=www-data
 NUM_WORKERS=3
 DJANGO_SETTINGS_MODULE=config.settings.prod
 DJANGO_WSGI_MODULE=config.wsgi
-PYTHONPATH=/home/www/htdocs/bordercore-django/bordercore
+PYTHONPATH=/var/www/django/bordercore
 
 echo "Starting $NAME as `whoami`"
 
