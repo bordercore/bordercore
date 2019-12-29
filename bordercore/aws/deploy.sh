@@ -12,5 +12,5 @@ $SAM package \
 
 $SAM deploy \
      --template-file $TEMPLATE_FILE \
-     --stack-name BordercoreStack \
+     --stack-name CreateThumbnailStack \
      --capabilities CAPABILITY_IAM
