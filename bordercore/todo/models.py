@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch.dispatcher import receiver
 from elasticsearch import Elasticsearch
 
 from lib.mixins import TimeStampedModel
@@ -44,7 +46,7 @@ class Todo(TimeStampedModel):
                             }
                         },
 
-                ]
+                    ]
                 }
             }
         }
@@ -52,14 +54,6 @@ class Todo(TimeStampedModel):
         es.delete_by_query(index=settings.ELASTICSEARCH_INDEX, body=request_body)
 
         super(Todo, self).delete()
-
-    def post_save_wrapper(self):
-        """
-        This should be called anytime a bookmark is added or updated.
-        """
-
-        # Index the todo item in Elasticsearch
-        self.index_todo()
 
     def index_todo(self):
 
@@ -86,3 +80,13 @@ class Todo(TimeStampedModel):
             id=f"bordercore_todo_{self.id}",
             body=doc
         )
+
+
+@receiver(post_save, sender=Todo)
+def post_save_wrapper(sender, instance, **kwargs):
+    """
+    This should be called anytime a todo task is added or updated.
+    """
+
+    # Index the todo item in Elasticsearch
+    instance.index_todo()

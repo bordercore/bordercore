@@ -2,13 +2,14 @@ import json
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import ArrayField, JSONField
+from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.db.models.signals import m2m_changed
+from django.db.models.signals import m2m_changed, post_save
+from django.dispatch.dispatcher import receiver
 from elasticsearch import Elasticsearch
 
-from bookmark.tasks import snarf_favicon
+# from bookmark.tasks import snarf_favicon
 from lib.mixins import TimeStampedModel
 from tag.models import Tag
 
@@ -75,17 +76,6 @@ class Bookmark(TimeStampedModel):
 
         super(Bookmark, self).delete()
 
-    def post_save_wrapper(self):
-        """
-        This should be called anytime a bookmark is added or updated.
-        """
-
-        # Index the bookmark in Elasticsearch
-        self.index_bookmark()
-
-        # Grab its favicon
-        # snarf_favicon.delay(self.url)
-
     def index_bookmark(self):
 
         es = Elasticsearch(
@@ -113,6 +103,19 @@ class Bookmark(TimeStampedModel):
             id=f"bordercore_bookmark_{self.id}",
             body=doc
         )
+
+
+@receiver(post_save, sender=Bookmark)
+def post_save_wrapper(sender, instance, **kwargs):
+    """
+    This should be called anytime a bookmark is added or updated.
+    """
+
+    # Index the bookmark in Elasticsearch
+    instance.index_bookmark()
+
+    # Grab its favicon
+    # snarf_favicon.delay(self.url)
 
 
 def tags_changed(sender, **kwargs):
