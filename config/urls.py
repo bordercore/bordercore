@@ -1,8 +1,7 @@
 from django.conf import settings
-from django.conf.urls import include
 from django.contrib import admin
 from django.contrib.auth.views import logout
-from django.urls import path, re_path
+from django.urls import include, path, re_path
 
 from accounts import views as accounts_views
 from accounts.api import UserResource

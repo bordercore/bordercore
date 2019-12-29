@@ -11,12 +11,12 @@ for t in TEMPLATES:
 
 INTERNAL_IPS = ('127.0.0.1', '10.3.2.2')
 
-MIDDLEWARE += (
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-)
 # Elasticsearch config
 ELASTICSEARCH_ENDPOINT = "http://localhost:9200"
 
+MIDDLEWARE += (
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+)
 
 INSTALLED_APPS += (
     'debug_toolbar',
@@ -26,15 +26,18 @@ INSTALLED_APPS += (
 )
 
 DEBUG_TOOLBAR_PANELS = (
-    'debug_toolbar.panels.versions.VersionsPanel',
-    'debug_toolbar.panels.timer.TimerPanel',
-    'debug_toolbar.panels.settings.SettingsPanel',
-    'debug_toolbar.panels.headers.HeadersPanel',
-    'debug_toolbar.panels.request.RequestPanel',
-    'debug_toolbar.panels.sql.SQLPanel',
-    'debug_toolbar.panels.templates.TemplatesPanel',
+    'template_timings_panel.panels.TemplateTimings.TemplateTimings',
     'debug_toolbar.panels.cache.CachePanel',
-    'debug_toolbar.panels.signals.SignalsPanel',
+    'debug_toolbar.panels.headers.HeadersPanel',
     'debug_toolbar.panels.logging.LoggingPanel',
-    'template_timings_panel.panels.TemplateTimings.TemplateTimings'
+    'debug_toolbar.panels.profiling.ProfilingPanel',
+    'debug_toolbar.panels.redirects.RedirectsPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.signals.SignalsPanel',
+    'debug_toolbar.panels.sql.SQLPanel',
+    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+    'debug_toolbar.panels.templates.TemplatesPanel',
+    'debug_toolbar.panels.timer.TimerPanel',
+    'debug_toolbar.panels.versions.VersionsPanel'
 )

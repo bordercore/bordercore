@@ -1,7 +1,7 @@
 # Importing from base.txt
 -r base.txt
 
-django-debug-toolbar==1.9.1
+django-debug-toolbar==2.0
 
 # The latest version of this package in PyPi isn't compatible with Django 1.10.
 # However, the master branch on Github is compatible, so use that instead.
