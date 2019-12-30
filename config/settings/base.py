@@ -108,8 +108,6 @@ STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{AWS_LOCATION}
 # Additional locations of static files
 STATICFILES_DIRS = (
     str(PROJECT_DIR / "static"),
-    '/home/media/music',
-    '/home/media'
 )
 
 # List of finder classes that know how to find static files in
