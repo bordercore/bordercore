@@ -1,57 +1,95 @@
-import django
-import json
 import os
-from solrpy.core import SolrConnection
 
+import django
 from django.conf import settings
+from elasticsearch import Elasticsearch
+import pytest
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.prod'
+os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings.dev"
 
 django.setup()
 
 from bookmark.models import Bookmark
 
 
-def test_bookmarks_in_db_exist_in_solr():
-    "Assert that all bookmarks in the database exist in Solr"
-    blobs = Bookmark.objects.all()
+@pytest.fixture()
+def es():
 
-    for b in blobs:
-        solr_args = {'q': 'id:bordercore_bookmark_%s' % (b.id),
-                     'fl': 'id',
-                     'wt': 'json'}
+    es = Elasticsearch(
+        [settings.ELASTICSEARCH_ENDPOINT],
+        timeout=120,
+        verify_certs=False
+    )
 
-        conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-        response = conn.raw_query(**solr_args)
-        data = json.loads(response.decode('UTF-8'))['response']['numFound']
-        assert data == 1, "bookmark %s found in the database but not in Solr" % b.id
+    yield es
 
 
-def test_bookmark_tags_match_solr():
-    "Assert that all bookmarks tags match those found in Solr"
-    blobs = Bookmark.objects.filter(tags__isnull=False)
+def test_bookmarks_in_db_exist_in_elasticsearch(es):
+    "Assert that all bookmarks in the database exist in Elasticsearch"
+    bookmarks = Bookmark.objects.all().only("id")
 
-    for b in blobs:
-        tags = " AND ".join(["\"{}\"".format(x.name) for x in b.tags.all()])
-        solr_args = {"q": "id:bordercore_bookmark_{} AND tags:({})".format(b.id, tags),
-                     "fl": "id,tags",
-                     "wt": "json"}
+    for b in bookmarks:
+        search_object = {
+            "query": {
+                "term": {
+                    "_id": f"bordercore_bookmark_{b.id}"
+                }
+            },
+            "_source": ["id"]
+        }
 
-        conn = SolrConnection("http://{}:{}/{}".format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-        response = conn.raw_query(**solr_args)
-        data = json.loads(response.decode("UTF-8"))["response"]["numFound"]
-        assert data == 1, "bookmark {} tags don't match those found in Solr".format(b.id)
+        found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["total"]["value"]
+        assert found == 1, f"bookmark found in the database but not in Elasticsearch, id={b.id}"
 
 
-def test_solr_bookmarks_exist_in_db():
-    "Assert that all bookmarks in Solr exist in the database"
-    solr_args = {'q': 'doctype:bordercore_bookmark',
-                 'fl': 'internal_id',
-                 'rows': 2147483647,
-                 'wt': 'json'}
+def test_bookmark_tags_match_elasticsearch(es):
+    "Assert that all bookmarks tags match those found in Elasticsearch"
+    bookmarks = Bookmark.objects.filter(tags__isnull=False).only("id", "tags")
 
-    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-    response = conn.raw_query(**solr_args)
-    data = json.loads(response.decode('UTF-8'))['response']
-    for result in data['docs']:
-        assert Bookmark.objects.filter(id=result['internal_id']).count() == 1, "bookmark %s exists in Solr but not in database" % result['internal_id']
+    for b in bookmarks:
+        tag_query = [
+            {
+                "term": {
+                    "tags.keyword": x.name
+                }
+            }
+            for x in b.tags.all()
+        ]
+
+        search_object = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "_id": f"bordercore_bookmark_{b.id}"
+                            }
+                        },
+                        tag_query
+                    ]
+                }
+            },
+            "_source": ["id"]
+        }
+
+        found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["total"]["value"]
+        assert found == 1, f"bookmark's tags don't match those found in Elasticsearch, id={b.id}"
+
+
+def test_elasticsearch_bookmarks_exist_in_db(es):
+    "Assert that all bookmarks in Elasticsearch exist in the database"
+
+    search_object = {
+        "query": {
+            "term": {
+                "doctype": f"bordercore_bookmark"
+            }
+        },
+        "from": 0, "size": 10000,
+        "_source": ["_id", "bordercore_id"]
+    }
+
+    found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["hits"]
+
+    for bookmark in found:
+        assert Bookmark.objects.filter(id=bookmark["_source"]["bordercore_id"]).count() == 1, f"bookmark exists in Elasticsearch but not in database, id={bookmark.id}"
