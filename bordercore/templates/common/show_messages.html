@@ -6,9 +6,9 @@
       $(document).ready(function() {
 
       {% for message in messages %}
-
+        console.log("{{ message}}");
       $.smkAlert({
-      text: '{{ message|safe }}',
+      text: '{{ message }}',
       type: '{% if message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}',
       position:'top-right',
       icon: 'glyphicon-time'
@@ -25,7 +25,7 @@
         <!-- <br /> -->
         <!-- <div class="col-lg-{{ width|default:7 }} offset-lg-{{ offset|default:2 }} alert alert-{% if class %}{{ class }}{% elif message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}"> -->
         <!--     {{ message|safe }} -->
-        <!-- </div> -->
-    {% endfor %}
+        <!--</div> -->
+{% endfor %}
     <!-- <br/><br/><br/> -->
 {% endif %}

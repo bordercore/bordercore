@@ -105,6 +105,15 @@ class BlobDeleteView(DeleteView):
     model = Document
     success_url = reverse_lazy('blob_add')
 
+    # Override delete() so that we can catch any exceptions, especially any
+    #  thrown by Elasticsearch
+    def delete(self, request, *args, **kwargs):
+        try:
+            return super(BlobDeleteView, self).delete(request, *args, **kwargs)
+        except Exception as e:
+            messages.add_message(request, messages.ERROR, f"Error deleting object: {e}")
+            return HttpResponseRedirect(reverse('blob_edit', kwargs={'uuid': str(self.get_object().uuid)}))
+
     def get_object(self, queryset=None):
         obj = Document.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
         return obj
