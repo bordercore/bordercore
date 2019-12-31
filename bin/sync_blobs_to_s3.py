@@ -21,7 +21,7 @@ s3_resource = boto3.resource("s3")
 
 bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 
-for blob in Document.objects.filter(~Q(file_s3="")).order_by('?'):
+for blob in Document.objects.filter(~Q(file="")).order_by('?'):
 
     # blob = Document.objects.get(sha1sum="6e0b5097b0925c6d9944f1c37c74d3a290a1e38b")
 

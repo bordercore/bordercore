@@ -307,14 +307,14 @@ def test_blobs_in_db_exist_in_elasticsearch(es):
 def test_images_have_thumbnails():
     "Assert that every image blob has a thumbnail"
 
-    for blob in Document.objects.filter(~Q(file_s3="")):
+    for blob in Document.objects.filter(~Q(file="")):
 
         if blob.is_image():
             key = "{}/{}/{}/cover.jpg".format(
                 settings.MEDIA_ROOT,
                 blob.sha1sum[0:2],
                 blob.sha1sum,
-                blob.file_s3
+                blob.file
             )
             try:
                 s3_client.head_object(Bucket=bucket_name, Key=key)
@@ -554,7 +554,7 @@ def test_blobs_have_proper_metadata():
 
     s3 = boto3.resource("s3")
 
-    for blob in Document.objects.filter(~Q(file_s3="")):
+    for blob in Document.objects.filter(~Q(file="")):
 
         if blob.uuid in blobs_to_skip:
             continue

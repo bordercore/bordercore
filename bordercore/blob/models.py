@@ -114,7 +114,7 @@ class Document(TimeStampedModel, AmazonMixin):
     content = models.TextField(null=True)
     title = models.TextField(null=True)
     sha1sum = models.CharField(max_length=40, unique=True, blank=True, null=True)
-    file_s3 = models.FileField(max_length=500, storage=DownloadableS3Boto3Storage())
+    file = models.FileField(max_length=500, storage=DownloadableS3Boto3Storage())
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     note = models.TextField(null=True)
     tags = models.ManyToManyField(Tag)
@@ -165,7 +165,7 @@ class Document(TimeStampedModel, AmazonMixin):
         return ", ".join([tag.name for tag in self.tags.all()])
 
     def get_url(self):
-        return f"{self.sha1sum[0:2]}/{self.sha1sum}/{self.file_s3}"
+        return f"{self.sha1sum[0:2]}/{self.sha1sum}/{self.file}"
 
     def get_title(self, remove_edition_string=False, use_filename_if_present=False):
         title = self.title
@@ -192,14 +192,14 @@ class Document(TimeStampedModel, AmazonMixin):
         return ""
 
     @staticmethod
-    def get_s3_key_from_sha1sum(sha1sum, file_s3):
+    def get_s3_key_from_sha1sum(sha1sum, file):
         print(f"sha1sum: {sha1sum}")
-        print(f"file_s3: {file_s3}")
-        return "{}/{}/{}/{}".format(settings.MEDIA_ROOT, sha1sum[0:2], sha1sum, file_s3)
+        print(f"file: {file}")
+        return "{}/{}/{}/{}".format(settings.MEDIA_ROOT, sha1sum[0:2], sha1sum, file)
 
     def get_s3_key(self):
-        if self.file_s3:
-            return "{}/{}/{}/{}".format(settings.MEDIA_ROOT, self.sha1sum[0:2], self.sha1sum, self.file_s3)
+        if self.file:
+            return "{}/{}/{}/{}".format(settings.MEDIA_ROOT, self.sha1sum[0:2], self.sha1sum, self.file)
         else:
             return None
 
@@ -220,25 +220,25 @@ class Document(TimeStampedModel, AmazonMixin):
         #  file, we don't have access to any file, so don't try
         #  to calculate the sha1sum.
 
-        if self.file_s3 and self.file_s3.readable():
+        if self.file and self.file.readable():
 
             hasher = hashlib.sha1()
-            for chunk in self.file_s3.chunks():
+            for chunk in self.file.chunks():
                 hasher.update(chunk)
             self.sha1sum = hasher.hexdigest()
 
         super(Document, self).save(*args, **kwargs)
 
-    #     if self.file_s3:
+    #     if self.file:
     #         old_sha1sum = self.sha1sum
     #         if old_sha1sum is not None:
     #             # We can only move files after super() is called to create the new file's directory structure
     #             # NOTE: the previous comment may not be relevant for storage in S3
     #             if self.sha1sum != old_sha1sum:
     #                 create_thumbnail.delay(self.uuid)
-    #                 self.change_file_s3(old_sha1sum)
+    #                 self.change_file(old_sha1sum)
 
-    def change_file_s3(self, old_sha1sum):
+    def change_file(self, old_sha1sum):
 
         dir_old = "{}/{}/{}".format(settings.MEDIA_ROOT, old_sha1sum[0:2], old_sha1sum)
 
@@ -288,21 +288,21 @@ class Document(TimeStampedModel, AmazonMixin):
 
     def has_thumbnail_url(self):
         try:
-            _ = Document.get_cover_info_s3(self.user, self.sha1sum, size='small')['url']
+            _ = Document.get_cover_info(self.user, self.sha1sum, size='small')['url']
             return True
         except Exception:
             return False
 
     def get_cover_url_small(self):
-        return Document.get_cover_info_s3(self.user, self.sha1sum, size='small')['url']
+        return Document.get_cover_info(self.user, self.sha1sum, size='small')['url']
 
     @staticmethod
-    def get_image_dimensions_s3(blob, max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
+    def get_image_dimensions(s3_key, max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
 
         info = {}
 
         s3 = boto3.resource("s3")
-        obj = s3.Object(bucket_name=settings.AWS_STORAGE_BUCKET_NAME, key=blob.get_s3_key())
+        obj = s3.Object(bucket_name=settings.AWS_STORAGE_BUCKET_NAME, key=s3_key)
 
         try:
 
@@ -328,14 +328,12 @@ class Document(TimeStampedModel, AmazonMixin):
             return False
 
     @staticmethod
-    def get_cover_info_s3(user, sha1sum, size="large", max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
+    def get_cover_info(user, sha1sum, size="large", max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
 
         if sha1sum is None:
             return {}
 
         info = {}
-
-        parent_dir = "{}/{}/{}".format(settings.MEDIA_ROOT, sha1sum[0:2], sha1sum)
 
         b = Document.objects.get(user=user, sha1sum=sha1sum)
 
@@ -347,13 +345,13 @@ class Document(TimeStampedModel, AmazonMixin):
         objects = [os.path.split(x.key)[1] for x in list(bucket.objects.filter(Delimiter="/", Prefix=f"{prefix}/"))]
 
         # Is the blob itself an image?
-        _, file_extension = os.path.splitext(b.file_s3.name)
+        _, file_extension = os.path.splitext(b.file.name)
         if file_extension[1:].lower() in ["gif", "jpg", "jpeg", "png"]:
             # If so, look for a thumbnail.  Otherwise return the image itself
             if "cover.jpg" in objects:
                 info["url"] = f"{prefix}/cover.jpg"
             else:
-                info = Document.get_image_dimensions_s3(b, max_cover_image_width)
+                info = Document.get_image_dimensions(b.get_s3_key(), max_cover_image_width)
                 info["url"] = b.get_s3_key()
 
         else:
@@ -476,7 +474,7 @@ def set_s3_metadata_file_modified(sender, instance, **kwargs):
     # instance.file_modified will be "None" if we're editing a blob's
     # information, but not changing the blob itself. In that case we
     # don't want to update its "file_modified" metadata.
-    if not instance.file_s3 or instance.file_modified is None:
+    if not instance.file or instance.file_modified is None:
         return
 
     s3 = boto3.resource("s3")
@@ -521,7 +519,7 @@ def index_blob(sender, instance, **kwargs):
 @receiver(pre_delete, sender=Document)
 def mymodel_delete_s3(sender, instance, **kwargs):
 
-    if instance.file_s3:
+    if instance.file:
 
         dir = "{}/{}/{}".format(settings.MEDIA_ROOT, instance.sha1sum[0:2], instance.sha1sum)
         s3 = boto3.resource("s3")
@@ -533,7 +531,7 @@ def mymodel_delete_s3(sender, instance, **kwargs):
             fn.delete()
 
         # Pass false so FileField doesn't save the model.
-        instance.file_s3.delete(False)
+        instance.file.delete(False)
 
 
 class MetaData(TimeStampedModel):

@@ -140,16 +140,14 @@ class BlobDetailView(DetailView):
         context['date'] = get_date_from_pattern(self.object.date)
 
         if self.object.sha1sum:
-            # TODO: Avoid calling this method twice
             try:
-                context['cover_info'] = Document.get_cover_info_s3(self.request.user, self.object.sha1sum)
-                context['cover_info_small'] = Document.get_cover_info_s3(self.request.user, self.object.sha1sum, 'small')
+                context['cover_info'] = Document.get_cover_info(self.request.user, self.object.sha1sum)
             except ClientError as e:
                 messages.add_message(
                     self.request,
                     messages.ERROR,
                     f"S3 error accessing cover info: {e}"
-                    )
+                )
         try:
             query = 'uuid:%s' % self.object.uuid
             # context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
@@ -200,7 +198,7 @@ class BlobUpdateView(UpdateView):
         context['sha1sum'] = self.kwargs.get('sha1sum')
 
         try:
-            context['cover_info'] = Document.get_cover_info_s3(self.request.user, self.object.sha1sum, max_cover_image_width=400)
+            context['cover_info'] = Document.get_cover_info(self.request.user, self.object.sha1sum, max_cover_image_width=400)
         except ClientError as e:
             messages.add_message(
                 self.request,
@@ -232,11 +230,11 @@ class BlobUpdateView(UpdateView):
     def form_valid(self, form):
         blob = form.instance
 
-        file_changed = False if 'file_s3' not in form.changed_data else True
+        file_changed = False if 'file' not in form.changed_data else True
 
         # Only check for a renamed file if the file itself hasn't changed
         if not file_changed:
-            old_filename = str(form.instance.file_s3)
+            old_filename = str(form.instance.file)
             new_filename = form.cleaned_data['filename']
 
             if (new_filename != old_filename):
@@ -247,7 +245,7 @@ class BlobUpdateView(UpdateView):
                     s3.Object(settings.AWS_STORAGE_BUCKET_NAME, f"{key_root}/{new_filename}").copy_from(CopySource=f"{settings.AWS_STORAGE_BUCKET_NAME}/{key_root}/{old_filename}")
                     s3.Object(settings.AWS_STORAGE_BUCKET_NAME, f"{key_root}/{old_filename}").delete()
 
-                    blob.file_s3 = new_filename
+                    blob.file = new_filename
                     blob.file_modified = None
                     blob.save()
                 except Exception as e:
@@ -275,7 +273,7 @@ class BlobThumbnailView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(BlobThumbnailView, self).get_context_data(**kwargs)
-        context['cover_info'] = Document.get_cover_info_s3(self.request.user, self.object.sha1sum, max_cover_image_width=70, size='small')
+        context['cover_info'] = Document.get_cover_info(self.request.user, self.object.sha1sum, max_cover_image_width=70, size='small')
         context['filename'] = self.object.file
         query = 'uuid:{}'.format(self.object.uuid)
         # context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
@@ -445,7 +443,7 @@ def create_thumbnail(request, uuid, page_number=None):
     except PdfReadError as e:
         return JsonResponse({'error': str(e)})
 
-    cover_info = Document.get_cover_info_s3(request.user,
+    cover_info = Document.get_cover_info(request.user,
                                             b.sha1sum,
                                             max_cover_image_width=70,
                                             size='small')

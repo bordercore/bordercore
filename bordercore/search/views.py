@@ -226,7 +226,7 @@ class SearchTagDetailView(ListView):
                 match["filename"] = myobject["_source"].get("filename", "")
                 # match["url"] = myobject["filepath"].split(settings.MEDIA_ROOT)[1]
                 match["url"] = Document.get_s3_key_from_sha1sum(match["sha1sum"], match["filename"])
-                match["cover_url"] = Document.get_cover_info_s3(
+                match["cover_url"] = Document.get_cover_info(
                     self.request.user,
                     myobject["_source"]["sha1sum"],
                     size="small"

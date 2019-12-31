@@ -59,7 +59,7 @@ def homepage(request):
             try:
                 random_image_info = {'blob': random_image,
                                      'uuid': random_image.uuid,
-                                     'cover_info': Document.get_cover_info_s3(request.user, random_image.sha1sum, 'large', 500)}
+                                     'cover_info': Document.get_cover_info(request.user, random_image.sha1sum, 'large', 500)}
             except ClientError as e:
                 messages.add_message(request, messages.ERROR, f"Error getting random image info: {e}")
     except ConnectionRefusedError as e:

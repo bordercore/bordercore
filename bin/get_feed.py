@@ -8,7 +8,7 @@ import sys
 
 from django.utils.timezone import utc
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.prod'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.dev'
 
 django.setup()
 

@@ -137,7 +137,7 @@ for blob_info in blobs:
                 break
             index_blob(uuid=blob_info.uuid)
 
-        print(f"{blob_info.uuid} {blob_info.file_s3} {blob_info.title}")
+        print(f"{blob_info.uuid} {blob_info.file} {blob_info.title}")
 
         with open(LAST_BLOB_FILE, "w") as file:
             file.write(str(blob_info.uuid))

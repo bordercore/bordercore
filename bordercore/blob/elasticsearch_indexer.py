@@ -146,7 +146,7 @@ def get_blob_metadata(uuid):
 def get_blob_contents_from_s3(blob):
 
     blob_contents = BytesIO()
-    s3_key = f'{S3_KEY_PREFIX}/{blob["sha1sum"][:2]}/{blob["sha1sum"]}/{blob["file_s3"]}'
+    s3_key = f'{S3_KEY_PREFIX}/{blob["sha1sum"][:2]}/{blob["sha1sum"]}/{blob["file"]}'
     s3client.download_fileobj(S3_BUCKET_NAME, s3_key, blob_contents)
 
     blob_contents.seek(0)
@@ -220,7 +220,7 @@ def index_blob(**kwargs):
         contents=blob_info["content"],
         doctype=get_doctype(blob_info, metadata),
         tags=blob_info["tags"],
-        filename=str(blob_info["file_s3"]),
+        filename=str(blob_info["file"]),
         note=blob_info["note"],
         importance=blob_info["importance"],
         date_unixtime=get_unixtime_from_string(blob_info["date"]),
@@ -231,7 +231,7 @@ def index_blob(**kwargs):
     if blob_info["date"] is not None:
         article.date = get_range_from_date(blob_info["date"])
 
-    if blob_info["sha1sum"] and is_ingestible_file(blob_info["file_s3"]):
+    if blob_info["sha1sum"] and is_ingestible_file(blob_info["file"]):
         contents = get_blob_contents_from_s3(blob_info)
         article.data = base64.b64encode(contents).decode("ascii")
         article.content_type = magic.from_buffer(contents, mime=True)
