@@ -43,6 +43,7 @@ def edit(request, bookmark_id=None):
                 newform.user = request.user
                 newform.save()
                 form.save_m2m()  # Save the many-to-many data for the form (eg tags).
+                form.instance.index_bookmark()
                 messages.add_message(request, messages.INFO, 'Bookmark edited')
                 return list(request)
         elif request.POST['Go'] == 'Delete':
@@ -90,6 +91,7 @@ def snarf_link(request):
     except ObjectDoesNotExist:
         b = Bookmark(is_pinned=False, user=request.user, url=url, title=title)
         b.save()
+        b.index_bookmark()
 
     return redirect('bookmark_edit', b.id)
 

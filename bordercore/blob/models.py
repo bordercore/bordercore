@@ -446,6 +446,34 @@ class Document(TimeStampedModel, AmazonMixin):
         for name in glob.glob(files):
             os.chmod(name, 0o664)
 
+    def index_blob(self):
+        """
+        Index the blob into Elasticsearch, but only if there is no
+        file associated with it. If there is, then a lambda will be
+        triggered once it's written to S3 to do the indexing
+        """
+        client = boto3.client("sns")
+
+        message = {
+            "Records": [
+                {
+                    "s3": {
+                        "bucket": {
+                            "name": settings.AWS_STORAGE_BUCKET_NAME
+                        },
+                        "uuid": str(self.uuid)
+                    }
+                }
+            ]
+        }
+
+        # if not self.file:
+        response = client.publish(
+            TopicArn="arn:aws:sns:us-east-1:192218769908:NewS3Blob",
+            Message=json.dumps(message),
+        )
+        # TODO: Handle response errors
+
     def delete(self):
 
         # Delete from Elasticsearch
@@ -486,34 +514,6 @@ def set_s3_metadata_file_modified(sender, instance, **kwargs):
     s3_object.copy_from(CopySource={"Bucket": settings.AWS_STORAGE_BUCKET_NAME, "Key": key}, Metadata=s3_object.metadata, MetadataDirective="REPLACE")
 
 
-@receiver(post_save, sender=Document)
-def index_blob(sender, instance, **kwargs):
-    """
-    Index the blob into Elasticsearch, but only if there is no
-    file associated with it. If there is, then a lambda will be
-    triggered once it's written to S3 to do the indexing
-    """
-    client = boto3.client("sns")
-
-    message = {
-        "Records": [
-            {
-                "s3": {
-                    "bucket": {
-                        "name": settings.AWS_STORAGE_BUCKET_NAME
-                    },
-                    "uuid": str(instance.uuid)
-                }
-            }
-        ]
-    }
-
-    if not instance.file_s3:
-        response = client.publish(
-            TopicArn="arn:aws:sns:us-east-1:192218769908:NewS3Blob",
-            Message=json.dumps(message),
-        )
-        # TODO: Handle response errors
 
 
 @receiver(pre_delete, sender=Document)
@@ -542,28 +542,3 @@ class MetaData(TimeStampedModel):
 
     class Meta:
         unique_together = ('name', 'value', 'blob')
-
-    def delete(self):
-
-        es = Elasticsearch(
-            [settings.ELASTICSEARCH_ENDPOINT],
-            verify_certs=False
-        )
-
-        request_body = {
-            "query": {
-                "ids": {
-                    "values": [
-                        self.blob.uuid
-                    ]
-                }
-            },
-            "script": {
-                "inline": f"ctx._source.remove('{self.name}')",
-                "lang": "painless"
-            },
-        }
-
-        es.update_by_query(index=settings.ELASTICSEARCH_INDEX, body=request_body)
-
-        super(MetaData, self).delete()

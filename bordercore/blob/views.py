@@ -92,7 +92,7 @@ class DocumentCreateView(CreateView):
 
         handle_linked_collection(obj, self.request)
 
-        # index_blob.delay(obj.uuid, True)
+        obj.index_blob()
 
         return super(DocumentCreateView, self).form_valid(form)
 
@@ -261,8 +261,10 @@ class BlobUpdateView(UpdateView):
         handle_metadata(blob, self.request)
 
         self.object = form.save()
+
+        self.object.index_blob()
+
         messages.add_message(self.request, messages.INFO, 'Blob updated')
-        # index_blob.delay(blob.uuid, file_changed)
 
         return HttpResponseRedirect(reverse('blob_detail', kwargs={'uuid': str(blob.uuid)}))
 

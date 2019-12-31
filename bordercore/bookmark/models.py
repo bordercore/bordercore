@@ -5,8 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.db.models.signals import m2m_changed, post_save
-from django.dispatch.dispatcher import receiver
+from django.db.models.signals import m2m_changed
 from elasticsearch import Elasticsearch
 
 # from bookmark.tasks import snarf_favicon
@@ -105,19 +104,6 @@ class Bookmark(TimeStampedModel):
         )
 
 
-@receiver(post_save, sender=Bookmark)
-def post_save_wrapper(sender, instance, **kwargs):
-    """
-    This should be called anytime a bookmark is added or updated.
-    """
-
-    # Index the bookmark in Elasticsearch
-    instance.index_bookmark()
-
-    # Grab its favicon
-    # snarf_favicon.delay(self.url)
-
-
 def tags_changed(sender, **kwargs):
 
     # Put the imports here to avoid circular dependencies
@@ -143,5 +129,6 @@ def tags_changed(sender, **kwargs):
         for tag_id in kwargs["pk_set"]:
             for x in TagBookmarkSortOrder.objects.filter(bookmark=bookmark).filter(tag_bookmark__tag__id=tag_id):
                 x.delete()
+
 
 m2m_changed.connect(tags_changed, sender=Bookmark.tags.through)
