@@ -56,11 +56,11 @@ class DocumentForm(ModelForm):
         if cleaned_data.get('sha1sum', '') == '':
             cleaned_data['sha1sum'] = None
 
-        old_filename = str(self.instance.file)
-        if (cleaned_data.get('filename', '') != os.path.basename(old_filename)):
-            new_file_path = '{}/{}/{}'.format(settings.MEDIA_ROOT, os.path.dirname(old_filename), cleaned_data['filename'])
-            if os.path.isfile(new_file_path):
-                self.add_error("file", ValidationError("Rename failed: file exists"))
+        # old_filename = str(self.instance.file)
+        # if (cleaned_data.get('filename', '') != os.path.basename(old_filename)):
+        #     new_file_path = '{}/{}/{}'.format(settings.MEDIA_ROOT, os.path.dirname(old_filename), cleaned_data['filename'])
+        #     if os.path.isfile(new_file_path):
+        #         self.add_error("file", ValidationError("Rename failed: file exists"))
 
         return cleaned_data
 

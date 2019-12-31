@@ -115,7 +115,6 @@ class Document(TimeStampedModel, AmazonMixin):
     title = models.TextField(null=True)
     sha1sum = models.CharField(max_length=40, unique=True, blank=True, null=True)
     file_s3 = models.FileField(max_length=500, storage=DownloadableS3Boto3Storage())
-    file = models.FileField(upload_to=blob_directory_path, storage=BlobFileSystemStorage(), max_length=500)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     note = models.TextField(null=True)
     tags = models.ManyToManyField(Tag)
