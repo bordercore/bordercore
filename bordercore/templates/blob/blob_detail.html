@@ -56,7 +56,7 @@
     {% if object.sha1sum %}
         <div>
             <strong>Sha1sum</strong><br />
-            <small>{{ object.sha1sum }}</small>
+            <small><a href="{{ aws_url }}">{{ object.sha1sum }}</a></small>
         </div>
     {% endif %}
 

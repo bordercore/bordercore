@@ -140,6 +140,7 @@ class BlobDetailView(DetailView):
         context['date'] = get_date_from_pattern(self.object.date)
 
         if self.object.sha1sum:
+            context["aws_url"] = f"https://s3.console.aws.amazon.com/s3/buckets/{settings.AWS_STORAGE_BUCKET_NAME}/blobs/{self.object.sha1sum[:2]}/{self.object.sha1sum}/"
             try:
                 context['cover_info'] = Document.get_cover_info(self.request.user, self.object.sha1sum)
             except ClientError as e:
