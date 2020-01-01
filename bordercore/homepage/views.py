@@ -1,6 +1,4 @@
 import datetime
-import json
-import random
 import re
 
 from botocore.errorfactory import ClientError
@@ -32,21 +30,19 @@ def homepage(request):
     pinned_bookmarks = Bookmark.objects.filter(user=request.user, is_pinned=True)
 
     tasks = []
-    if request.user.userprofile.orgmode_file:
-        try:
-            tree = PyOrgMode.OrgDataStructure()
-            tree.load_from_file(request.user.userprofile.orgmode_file)
-
-            startnode = PyOrgMode.OrgDataStructure.get_nodes_by_tag(tree.root, "todo", [])
-            nodes = PyOrgMode.OrgDataStructure.get_nodes_by_priority(startnode[0], "A", [])
-
-            for node in nodes:
-                tasks.append({'task': PyOrgMode.OrgDataStructure.parse_heading(node.heading)['heading'],
-                              'tag': node.tags,
-                              'date': get_date(node),
-                              'parent_category': PyOrgMode.OrgDataStructure.parse_heading(node.parent.heading)['heading']})
-        except AttributeError as e:
-            print("AttributeError: %s" % e)
+    # if request.user.userprofile.orgmode_file:
+    #     try:
+    #         tree = PyOrgMode.OrgDataStructure()
+    #         tree.load_from_file(request.user.userprofile.orgmode_file)
+    #         startnode = PyOrgMode.OrgDataStructure.get_nodes_by_tag(tree.root, "todo", [])
+    #         nodes = PyOrgMode.OrgDataStructure.get_nodes_by_priority(startnode[0], "A", [])
+    #         for node in nodes:
+    #             tasks.append({'task': PyOrgMode.OrgDataStructure.parse_heading(node.heading)['heading'],
+    #                           'tag': node.tags,
+    #                           'date': get_date(node),
+    #                           'parent_category': PyOrgMode.OrgDataStructure.parse_heading(node.parent.heading)['heading']})
+    #     except AttributeError as e:
+    #         log.info("AttributeError: %s" % e)
 
     # Get some recently played music
     music = Listen.objects.filter(user=request.user).select_related().distinct().order_by('-created')[:3]
