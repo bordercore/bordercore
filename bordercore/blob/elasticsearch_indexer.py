@@ -231,14 +231,20 @@ def index_blob(**kwargs):
     if blob_info["date"] is not None:
         article.date = get_range_from_date(blob_info["date"])
 
-    if blob_info["sha1sum"] and is_ingestible_file(blob_info["file"]):
+    pipeline_args = {}
+
+    if blob_info["sha1sum"]:
+
+        # Even if this is not an ingestible file, we need to download the blob
+        #  in order to determine the content type
         contents = get_blob_contents_from_s3(blob_info)
-        article.data = base64.b64encode(contents).decode("ascii")
         article.content_type = magic.from_buffer(contents, mime=True)
 
-        bulk(connections.get_connection(), (d.to_dict(True) for d in [article]), max_chunk_bytes=1268032, chunk_size=1, pipeline="attachment")
-    else:
-        bulk(connections.get_connection(), (d.to_dict(True) for d in [article]))
+        if is_ingestible_file(blob_info["file"]):
+            article.data = base64.b64encode(contents).decode("ascii")
+            pipeline_args = dict(max_chunk_bytes=1268032, chunk_size=1, pipeline="attachment")
+
+    bulk(connections.get_connection(), (d.to_dict(True) for d in [article]), pipeline_args)
 
     # Rollback to avoid idle transactions
     db_conn.rollback()
