@@ -140,7 +140,7 @@
         <div class="my-3">
         {% if random_image_info %}
             <a href="{% url 'blob_detail' random_image_info.uuid %}">
-                <img src="{{ MEDIA_URL }}blobs/{{ random_image_info.blob.get_url|safe }}" height="{{ random_image_info.cover_info.height_cropped }}" width="{{ random_image_info.cover_info.width_cropped }}" />
+                <img src="{{ MEDIA_URL }}{{ random_image_info.cover_info.url }}" height="{{ random_image_info.cover_info.height_cropped }}" width="{{ random_image_info.cover_info.width_cropped }}" />
             </a>
         {% else %}
             <a href="{% url 'blob_add' %}">Add a blob</a>

@@ -135,7 +135,7 @@ def get_random_blob(request, content_type):
                             {
                                 "wildcard": {
                                     "content_type.keyword": {
-                                        "value": "*/pdf",
+                                        "value": content_type,
                                     }
                                 }
                             },

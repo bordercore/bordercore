@@ -193,8 +193,6 @@ class Document(TimeStampedModel, AmazonMixin):
 
     @staticmethod
     def get_s3_key_from_sha1sum(sha1sum, file):
-        print(f"sha1sum: {sha1sum}")
-        print(f"file: {file}")
         return "{}/{}/{}/{}".format(settings.MEDIA_ROOT, sha1sum[0:2], sha1sum, file)
 
     def get_s3_key(self):
@@ -348,7 +346,7 @@ class Document(TimeStampedModel, AmazonMixin):
         _, file_extension = os.path.splitext(b.file.name)
         if file_extension[1:].lower() in ["gif", "jpg", "jpeg", "png"]:
             # If so, look for a thumbnail.  Otherwise return the image itself
-            if "cover.jpg" in objects:
+            if size == "small" and "cover.jpg" in objects:
                 info["url"] = f"{prefix}/cover.jpg"
             else:
                 info = Document.get_image_dimensions(b.get_s3_key(), max_cover_image_width)
@@ -359,6 +357,7 @@ class Document(TimeStampedModel, AmazonMixin):
             for image_type in ["jpg", "png"]:
                 for cover_image in ["cover.{}".format(image_type), "cover-{}.{}".format(size, image_type)]:
                     if cover_image in objects:
+                        info = Document.get_image_dimensions(f"{prefix}/{cover_image}", max_cover_image_width)
                         info["url"] = f"{prefix}/{cover_image}"
 
         # If we get this far, return the default image
