@@ -219,20 +219,20 @@ class SearchTagDetailView(ListView):
 
             match = dict(
                 title=myobject["_source"].get("title", "No Title"),
+                url=myobject["_source"].get("url", ""),
                 uuid=myobject["_source"].get("uuid", "")
             )
             if myobject["_source"].get("sha1sum", ""):
                 match["sha1sum"] = myobject["_source"].get("sha1sum", "")
                 match["filename"] = myobject["_source"].get("filename", "")
-                # match["url"] = myobject["filepath"].split(settings.MEDIA_ROOT)[1]
                 match["url"] = Document.get_s3_key_from_sha1sum(match["sha1sum"], match["filename"])
                 match["cover_url"] = Document.get_cover_info(
                     self.request.user,
                     myobject["_source"]["sha1sum"],
                     size="small"
-                    )["url"]
-                # if one_doc["content_type"]:
-                #     one_doc["content_type"] = Document.get_content_type(one_doc["content_type"][0])
+                )["url"]
+                if myobject["_source"].get("content_type", None):
+                    match["content_type"] = Document.get_content_type(myobject["_source"]["content_type"])
 
             if results.get(myobject["_source"]["doctype"], ""):
                 results[myobject["_source"]["doctype"]].append(match)
@@ -331,6 +331,7 @@ class SearchTagDetailView(ListView):
             "from": 0, "size": hit_count,
             "_source": ["author",
                         "bordercore_todo_task",
+                        "content_type",
                         "date",
                         "date_unixtime",
                         "doctype",

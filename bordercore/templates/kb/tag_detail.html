@@ -139,7 +139,7 @@
                             </a>
                         {% endif %}
                         {% if match.content_type == 'Image' %}
-                        <img width="32" height="32" src="{{ match.cover_url }}" />
+                        <img width="32" height="32" src="{{ MEDIA_URL }}{{ match.cover_url }}" />
                         {% endif %}
                         <a href="{% url 'blob_detail' match.uuid %}">{{ match.title|default:"No Title" }}</a>
                         {% if match.content_type and match.content_type != 'Image' %}
