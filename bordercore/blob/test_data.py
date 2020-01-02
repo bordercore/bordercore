@@ -564,6 +564,12 @@ def test_blobs_have_proper_metadata():
         except KeyError:
             assert False, f"blob uuid={blob.uuid} has no 'file-modified' S3 metadata"
 
+        if blob.is_image():
+            try:
+                obj.metadata["image-height"]
+            except KeyError:
+                assert False, f"image uuid={blob.uuid} has no 'image-height' S3 metadata"
+
 
 def test_all_notes_exist_in_elasticsearch(es):
     "Assert that all notes exist in Elasticsearch"
