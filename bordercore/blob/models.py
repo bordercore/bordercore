@@ -201,13 +201,37 @@ class Document(TimeStampedModel, AmazonMixin):
         else:
             return None
 
-    # def get_solr_info(self, query, **kwargs):
-    #     conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-    #     solr_args = {'q': query,
-    #                  'wt': 'json',
-    #                  'fl': 'author,bordercore_todo_task,content_type,doctype,note,filepath,id,internal_id,attr_is_book,last_modified,tags,title,sha1sum,url',
-    #                  'rows': 1000}
-    #     return json.loads(conn.raw_query(**solr_args).decode('UTF-8'))['response']
+    def get_elasticsearch_info(self, uuid, **kwargs):
+
+        es = Elasticsearch(
+            [settings.ELASTICSEARCH_ENDPOINT],
+            verify_certs=False
+        )
+
+        query = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "uuid.keyword": uuid
+                            }
+                        },
+                        {
+                            "term": {
+                                "user_id": self.user.id
+                            }
+                        }
+                    ]
+                }
+            },
+            "_source": ["author", "bordercore_todo_task", "content_type", "doctype", "note", "filename", "bordercore_id", "attr_is_book", "last_modified", "tags", "title", "sha1sum", "url"]
+        }
+
+        results = es.search(index=settings.ELASTICSEARCH_INDEX, body=query)["hits"]["hits"][0]
+
+        return {**results["_source"], "id": results["_id"]}
+
 
     def save(self, *args, **kwargs):
 

@@ -159,16 +159,15 @@ class BlobDetailView(DetailView):
                     f"S3 error accessing cover info: {e}"
                 )
         try:
-            query = 'uuid:%s' % self.object.uuid
-            # context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
-            # if context['solr_info'].get('content_type', ''):
-            #     context['content_type'] = Document.get_content_type(context['solr_info']['content_type'][0])
+            context["elasticsearch_info"] = self.object.get_elasticsearch_info(self.object.uuid)
+            if context["elasticsearch_info"].get("content_type", None):
+                context["content_type"] = Document.get_content_type(context["elasticsearch_info"]["content_type"])
         except IndexError:
             # Give Solr up to a minute to index the blob
             if int(datetime.datetime.now().strftime("%s")) - int(self.object.created.strftime("%s")) < 60:
-                messages.add_message(self.request, messages.INFO, 'New blob not yet indexed in Solr')
+                messages.add_message(self.request, messages.INFO, 'New blob not yet indexed in Elasticsearch')
             else:
-                messages.add_message(self.request, messages.ERROR, 'Blob not found in Solr')
+                messages.add_message(self.request, messages.ERROR, 'Blob not found in Elasticsearch')
         context['caption'] = self.object.get_title(remove_edition_string=True)
         context['title'] = 'Blob Detail :: {}'.format(self.object.get_title(remove_edition_string=True))
         context['fields_ignore'] = ['is_book', 'Url', 'Publication Date', 'Title', 'Author']
