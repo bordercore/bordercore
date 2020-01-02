@@ -80,18 +80,18 @@ def get_date_from_pattern(pattern):
     if date is None:
         return None
 
-    if re.compile('^\d\d\d\d-\d\d-\d\d$').match(date):
+    if re.compile(r'^\d\d\d\d-\d\d-\d\d$').match(date):
         return datetime.datetime.strptime(date, '%Y-%m-%d').strftime('%B %d, %Y')
-    elif re.compile('^\d\d\d\d-\d\d$').match(date):
+    elif re.compile(r'^\d\d\d\d-\d\d$').match(date):
         return datetime.datetime.strptime(date, '%Y-%m').strftime('%B %Y')
-    elif re.compile('^\d\d\d\d$').match(date):
+    elif re.compile(r'^\d\d\d\d$').match(date):
         return date
-    elif re.compile('^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d').match(date):
+    elif re.compile(r'^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d').match(date):
         return datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%S').strftime('%B %d, %Y')
-    elif re.compile('^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d').match(date):
+    elif re.compile(r'^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d').match(date):
         return datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S').strftime('%B %d, %Y, %I:%M %p').replace("PM", "p.m.").replace("AM", "a.m.")
     else:
-        matches = re.compile('^\[([-\d]*) TO ([-\d]*)\]$').match(date)
+        matches = re.compile(r'^\[([-\d]*) TO ([-\d]*)\]$').match(date)
         if matches:
             return "{} to {}".format(get_date_from_pattern(matches.group(1)), get_date_from_pattern(matches.group(2)))
 

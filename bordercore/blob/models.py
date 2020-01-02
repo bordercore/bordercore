@@ -171,7 +171,7 @@ class Document(TimeStampedModel, AmazonMixin):
         title = self.title
         if title:
             if remove_edition_string:
-                pattern = re.compile('(.*) (\d)E$')
+                pattern = re.compile(r'(.*) (\d)E$')
                 matches = pattern.match(title)
                 if matches and EDITIONS.get(matches.group(2), None):
                     return "%s" % (matches.group(1))
@@ -184,7 +184,7 @@ class Document(TimeStampedModel, AmazonMixin):
 
     def get_edition_string(self):
         if self.title:
-            pattern = re.compile('(.*) (\d)E$')
+            pattern = re.compile(r'(.*) (\d)E$')
             matches = pattern.match(self.title)
             if matches and EDITIONS.get(matches.group(2), None):
                 return "%s Edition" % (EDITIONS[matches.group(2)])

@@ -309,7 +309,7 @@ def handle_metadata(blob, request):
         i.delete()
 
     for key, value in request.POST.items():
-        p = re.compile("^\d+_(.*)")
+        p = re.compile(r"^\d+_(.*)")
         m = p.match(key)
         if m:
             new_metadata, created = MetaData.objects.get_or_create(user=request.user, name=m.group(1), value=value.strip(), blob=blob)
@@ -426,7 +426,7 @@ def get_amazon_metadata(request, title):
                 if amazon_metadata_dupe_check(dupes, 'Title', title):
                     return_data['data'].append(['Title', title])
                 author_raw = result.ItemAttributes.Author.text
-                matches = [x.strip() for x in re.split("\s?;\s?|\s?,\s?", author_raw)]
+                matches = [x.strip() for x in re.split(r"\s?;\s?|\s?,\s?", author_raw)]
                 for author in matches:
                     if amazon_metadata_dupe_check(dupes, 'Author', author):
                         return_data['data'].append(['Author', author])
@@ -538,16 +538,16 @@ def parse_date(request, input_date):
     pdict = OrderedDict()
 
     # 01/01/99
-    pdict["(\d+)/(\d+)/(\d\d)$"] = parse_date_format_1
+    pdict[r"(\d+)/(\d+)/(\d\d)$"] = parse_date_format_1
 
     # 01/01/1999
-    pdict["(\d+)/(\d+)/(\d\d\d\d)$"] = parse_date_format_2
+    pdict[r"(\d+)/(\d+)/(\d\d\d\d)$"] = parse_date_format_2
 
     # Jan 1, 1999
-    pdict["(\w\w\w)\.?\s+(\d+),?\s+(\d+)$"] = parse_date_format_3
+    pdict[r"(\w\w\w)\.?\s+(\d+),?\s+(\d+)$"] = parse_date_format_3
 
     # January 1, 1999
-    pdict["(\w+)\.?\s+(\d+),?\s+(\d+)$"] = parse_date_format_4
+    pdict[r"(\w+)\.?\s+(\d+),?\s+(\d+)$"] = parse_date_format_4
 
     # Remove extraneous characters
     # eg "August 12th, 2001" becomes "August 12, 2001"
