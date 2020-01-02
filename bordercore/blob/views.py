@@ -146,7 +146,7 @@ class BlobDetailView(DetailView):
                     context['metadata'][x.name] = x.value
 
         from lib.time_utils import get_date_from_pattern
-        context['date'] = get_date_from_pattern(self.object.date)
+        context['date'] = get_date_from_pattern({"gte": self.object.date})
 
         if self.object.sha1sum:
             context["aws_url"] = f"https://s3.console.aws.amazon.com/s3/buckets/{settings.AWS_STORAGE_BUCKET_NAME}/blobs/{self.object.sha1sum[:2]}/{self.object.sha1sum}/"

@@ -167,21 +167,22 @@ class SearchListView(ListView):
                 #     if context["info"]["highlighting"][myobject["id"]].get("document_body"):
                 #         note = context["info"]["highlighting"][myobject["id"]]["document_body"][0]
 
-                match = dict(title=myobject["_source"].get("title", "No Title"),
-                             author=myobject["_source"].get("author", [""]),
-                             date=get_date_from_pattern(myobject["_source"].get("date", "")["gte"]),
-                             doctype=myobject["_source"]["doctype"],
-                             sha1sum=myobject["_source"].get("sha1sum", ""),
-                             uuid=myobject["_source"].get("uuid", ""),
-                             id=myobject["_id"],
-                             importance=myobject["_source"].get("importance", ""),
-                             # internal_id=myobject.get("internal_id", ""),
-                             last_modified=get_relative_date(myobject["_source"]["last_modified"]),
-                             url=myobject["_source"].get("url", ""),
-                             filename=myobject["_source"].get("filename", ""),
-                             tags=myobject["_source"].get("tags"),
-                             # bordercore_todo_task=myobject.get("bordercore_todo_task", ""),
-                             note=note
+                match = dict(
+                    title=myobject["_source"].get("title", "No Title"),
+                    author=myobject["_source"].get("author", [""]),
+                    date=get_date_from_pattern(myobject["_source"].get("date", None)),
+                    doctype=myobject["_source"]["doctype"],
+                    sha1sum=myobject["_source"].get("sha1sum", ""),
+                    uuid=myobject["_source"].get("uuid", ""),
+                    id=myobject["_id"],
+                    importance=myobject["_source"].get("importance", ""),
+                    # internal_id=myobject.get("internal_id", ""),
+                    last_modified=get_relative_date(myobject["_source"]["last_modified"]),
+                    url=myobject["_source"].get("url", ""),
+                    filename=myobject["_source"].get("filename", ""),
+                    tags=myobject["_source"].get("tags"),
+                    # bordercore_todo_task=myobject.get("bordercore_todo_task", ""),
+                    note=note
                 )
 
                 if notes_search:

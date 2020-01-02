@@ -66,7 +66,16 @@ def get_relative_date(time=False):
     return cleanup(day_diff / 365, "year")
 
 
-def get_date_from_pattern(date):
+def get_date_from_pattern(pattern):
+    """
+    The input is expected to be an Elasticsearch date range
+    dictionary, eg {"gte": <date>, "lte": <date>}.
+    We only look at the "gte" part to get the date.
+    """
+    if pattern is None:
+        return None
+
+    date = pattern.get("gte", None)
 
     if date is None:
         return None
