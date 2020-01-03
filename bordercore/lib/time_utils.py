@@ -93,6 +93,6 @@ def get_date_from_pattern(pattern):
     else:
         matches = re.compile(r'^\[([-\d]*) TO ([-\d]*)\]$').match(date)
         if matches:
-            return "{} to {}".format(get_date_from_pattern(matches.group(1)), get_date_from_pattern(matches.group(2)))
+            return "{} to {}".format(matches.group(1), matches.group(2))
 
     return date
