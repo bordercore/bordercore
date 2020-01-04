@@ -79,6 +79,10 @@
         </div>
     </div>
 
+    {% if request.GET and not info %}
+        <div class="alert alert-info">No notes found</div>
+    {% endif %}
+
     <div class="row">
         <div class="col-lg-12">
 
@@ -111,19 +115,22 @@
         </div>
     </div>
 
-
-    {% if object_list and object_list.paginator.num_pages > 1 %}
-
-        <nav class="mb-5">
-            {% if object_list.has_previous %}
-                <a class="btn btn-primary" href="?page={{ object_list.previous_page_number }}&tagsearch={{ request.GET.tagsearch }}&search_item={{ request.GET.search_item }}">previous</a>
-            {% endif %}
-            Page <strong>{{ object_list.number }}</strong> of <strong>{{ object_list.paginator.num_pages }}</strong>
-            {% if object_list.has_next %}
-                <a class="btn btn-primary" href="?page={{ object_list.next_page_number }}&tagsearch={{ request.GET.tagsearch }}&search_item={{ request.GET.search_item }}">next</a>
-            {% endif %}
+    {% if object_list and paginator.num_pages > 1 %}
+        <nav class="mb-5 navigation">
+            <ul class="pagination">
+                <li class="page-item{% if not paginator.has_previous %} disabled{% endif %}">
+                    <a class="page-link" href="?page={{ paginator.previous_page_number }}&tagsearch={{ request.GET.tagsearch }}&search={{ request.GET.search }}">Previous</a>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link ">
+            Page <strong>{{ paginator.number }}</strong> of <strong>{{ paginator.num_pages }}</strong>
+                    </span>
+                </li>
+                <li class="page-item{% if not paginator.has_next %} disabled{% endif %}">
+                    <a class="page-link" href="?page={{ paginator.next_page_number }}&tagsearch={{ request.GET.tagsearch }}&search={{ request.GET.search }}">Next</a>
+                </li>
+            </ul>
         </nav>
-
     {% endif %}
 
 {% endblock %}

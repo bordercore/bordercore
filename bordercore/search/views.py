@@ -1,4 +1,4 @@
-import json
+import math
 import re
 
 from django.conf import settings
@@ -14,13 +14,32 @@ from tag.models import Tag
 
 from lib.time_utils import get_relative_date
 
+RESULT_COUNT_PER_PAGE = 100
+RESULT_COUNT_PER_PAGE_NOTE = 10
+
+
+def get_paginator(page, object_list):
+
+    paginator = {
+        "number": page,
+        "num_pages": int(math.ceil(object_list["hits"]["total"]["value"] / RESULT_COUNT_PER_PAGE_NOTE)),
+        "total_results": object_list["hits"]["total"]["value"]
+    }
+
+    paginator["has_previous"] = True if page != 1 else False
+    paginator["has_next"] = True if page != paginator["num_pages"] else False
+
+    paginator["previous_page_number"] = page - 1
+    paginator["next_page_number"] = page + 1
+
+    return paginator
+
 
 @method_decorator(login_required, name='dispatch')
 class SearchListView(ListView):
 
     template_name = 'kb/search.html'
     SECTION = 'KB'
-    RESULT_COUNT_PER_PAGE = 100
     context_object_name = 'info'
 
     def get_facet_query(self, facet, term):
@@ -44,10 +63,12 @@ class SearchListView(ListView):
 
     def get_queryset(self, **kwargs):
 
+        page = int(self.request.GET.get("page", 1))
+
         notes_search = True if self.kwargs.get("notes_search", "") else False
 
         if notes_search:
-            self.RESULT_COUNT_PER_PAGE = 10
+            RESULT_COUNT_PER_PAGE = RESULT_COUNT_PER_PAGE_NOTE
 
         if "search" in self.request.GET or notes_search:
 
@@ -60,7 +81,7 @@ class SearchListView(ListView):
             if hit_count == "No limit":
                 hit_count = 1000000
             elif hit_count is None:
-                hit_count = self.RESULT_COUNT_PER_PAGE
+                hit_count = RESULT_COUNT_PER_PAGE
 
             es = Elasticsearch(
                 [settings.ELASTICSEARCH_ENDPOINT],
@@ -107,6 +128,9 @@ class SearchListView(ListView):
             }
 
             if notes_search:
+
+                search_object["from"] = (page - 1) * RESULT_COUNT_PER_PAGE_NOTE
+
                 search_object["query"]["bool"]["must"].append(
                     {
                         "term": {
@@ -130,7 +154,8 @@ class SearchListView(ListView):
                     {
                         "multi_match": {
                             "query": search_term,
-                            "fields": ["contents", "sha1sum", "title", "uuid"]
+                            "fields": ["contents", "sha1sum", "title", "uuid"],
+                            "operator": boolean_type,
                         }
                     }
                 )
@@ -146,6 +171,8 @@ class SearchListView(ListView):
         if notes_search:
             self.SECTION = "Notes"
             self.template_name = "blob/note_list.html"
+            page = int(self.request.GET.get("page", 1))
+            context["paginator"] = get_paginator(page, context["info"])
 
         info = []
         facet_counts = {}
