@@ -15,7 +15,7 @@ Resources:
             CodeUri: .
             FunctionName: IndexBlob
             Handler: index_blobs_lambda.handler
-            MemorySize: 1024
+            MemorySize: 2048
             Runtime: python3.7
             Role: !GetAtt IndexBlobLambdaRole.Arn
             # Environment:
