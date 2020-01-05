@@ -201,7 +201,7 @@ class Document(TimeStampedModel, AmazonMixin):
         else:
             return None
 
-    def get_elasticsearch_info(self, uuid, **kwargs):
+    def get_elasticsearch_info(self):
 
         es = Elasticsearch(
             [settings.ELASTICSEARCH_ENDPOINT],
@@ -214,7 +214,7 @@ class Document(TimeStampedModel, AmazonMixin):
                     "must": [
                         {
                             "term": {
-                                "uuid.keyword": uuid
+                                "uuid.keyword": self.uuid
                             }
                         },
                         {

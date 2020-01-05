@@ -159,7 +159,7 @@ class BlobDetailView(DetailView):
                     f"S3 error accessing cover info: {e}"
                 )
         try:
-            context["elasticsearch_info"] = self.object.get_elasticsearch_info(self.object.uuid)
+            context["elasticsearch_info"] = self.object.get_elasticsearch_info()
             if context["elasticsearch_info"].get("content_type", None):
                 context["content_type"] = Document.get_content_type(context["elasticsearch_info"]["content_type"])
         except IndexError:
