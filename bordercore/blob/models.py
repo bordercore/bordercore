@@ -134,12 +134,14 @@ class Document(TimeStampedModel, AmazonMixin):
     def get_content_type(argument):
         switcher = {
             "application/mp4": "Video",
+            "application/octet-stream": "Video",
             "application/pdf": "PDF",
+            "application/x-mobipocket-ebook": "E-Book",
             "audio/mpeg": "Audio",
             "image/gif": "Image",
             "image/jpeg": "Image",
             "image/png": "Image",
-            "application/x-mobipocket-ebook": "E-Book",
+            "video/mp4": "Video"
         }
 
         return switcher.get(argument, "")

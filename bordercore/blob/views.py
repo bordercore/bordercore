@@ -405,8 +405,15 @@ def slideshow(request):
 
     blob = Document.objects.get(pk=random.choice(c.blob_list)["id"])
 
+    content_type = None
+    try:
+        content_type = Document.get_content_type(blob.get_elasticsearch_info()["content_type"])
+    except Exception:
+        print(f"Can't get content type for uuid={blob.uuid}")
+
     return render(request, "blob/slideshow.html",
                   {"section": SECTION,
+                   "content_type": content_type,
                    "blob": blob})
 
 @login_required
