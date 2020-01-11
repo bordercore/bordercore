@@ -22,7 +22,7 @@
 {% for row in data %}
 <tr>
 {% for col in cols %}
-<td> {{ row|dict_get:col }} </td>
+<td> {{ row|dict_get:col|default:"" }} </td>
 {% endfor %}
 </tr>
 {% endfor %}
