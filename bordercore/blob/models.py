@@ -477,6 +477,10 @@ class Document(TimeStampedModel, AmazonMixin):
         file associated with it. If there is, then a lambda will be
         triggered once it's written to S3 to do the indexing
         """
+
+        if self.sha1sum:
+            return
+
         client = boto3.client("sns")
 
         message = {
@@ -492,7 +496,6 @@ class Document(TimeStampedModel, AmazonMixin):
             ]
         }
 
-        # if not self.file:
         response = client.publish(
             TopicArn="arn:aws:sns:us-east-1:192218769908:NewS3Blob",
             Message=json.dumps(message),
