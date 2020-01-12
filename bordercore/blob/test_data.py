@@ -12,8 +12,6 @@ from elasticsearch import Elasticsearch
 
 logging.getLogger("elasticsearch").setLevel(logging.ERROR)
 
-os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings.dev"
-
 django.setup()
 
 from django.contrib.auth.models import User

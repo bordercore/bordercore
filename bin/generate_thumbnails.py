@@ -6,8 +6,6 @@ import os
 import django
 from django.db.models import Q
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.prod'
-
 django.setup()
 
 from blob.models import Document

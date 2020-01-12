@@ -3,7 +3,6 @@
 
 from lxml import html
 from lxml.etree import ParserError, XMLSyntaxError
-import os
 from random import randint
 import re
 import time
@@ -12,8 +11,6 @@ import django
 from django.db.models import Q
 from django.utils import timezone
 import requests
-
-os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.prod'
 
 django.setup()
 

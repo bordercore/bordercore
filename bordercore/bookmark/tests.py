@@ -5,8 +5,6 @@ from django.conf import settings
 from elasticsearch import Elasticsearch
 import pytest
 
-os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings.dev"
-
 django.setup()
 
 from bookmark.models import Bookmark

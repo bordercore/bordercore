@@ -3,14 +3,11 @@
 
 import getopt
 import logging
-import os
 import sys
 
 from elasticsearch import Elasticsearch
 import django
 from django.conf import settings
-
-os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.dev'
 
 django.setup()
 

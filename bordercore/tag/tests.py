@@ -3,8 +3,6 @@ import os
 import django
 from django.db.models import Count, Min, Max
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.prod'
-
 django.setup()
 
 from django.contrib.auth.models import User

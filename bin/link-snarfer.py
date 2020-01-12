@@ -11,8 +11,6 @@ import re
 import requests
 import sys
 
-os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings.dev"
-
 django.setup()
 
 from bookmark.models import Bookmark

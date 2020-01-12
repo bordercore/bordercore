@@ -15,8 +15,6 @@ from django.conf import settings
 
 from blob.elasticsearch_indexer import index_blob
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.prod'
-
 django.setup()
 
 from blob.models import Document

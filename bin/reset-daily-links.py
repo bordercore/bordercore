@@ -1,11 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import os
-
 import django
-
-os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.prod'
 
 django.setup()
 

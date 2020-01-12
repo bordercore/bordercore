@@ -3,13 +3,10 @@
 import datetime
 from datetime import timedelta
 import logging
-import os
 import time
 
 import django
 import requests
-
-os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings.prod"
 
 django.setup()
 

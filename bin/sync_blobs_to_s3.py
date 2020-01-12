@@ -7,8 +7,6 @@ import django
 from django.db.models import Q
 from django.conf import settings
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.prod'
-
 django.setup()
 
 from blob.models import Document
@@ -17,7 +15,6 @@ from blob.models import set_s3_metadata_file_modified
 walk_dir = "/home/media/blobs"
 
 s3_client = boto3.client("s3")
-s3_resource = boto3.resource("s3")
 
 bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 
