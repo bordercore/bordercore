@@ -57,7 +57,7 @@
             <form enctype="multipart/form-data" action="{{ request.path }}" method="post">
                 {% csrf_token %}
 
-                <input type="hidden" name="md5sum" value="{{ md5sum }}" />
+                <input type="hidden" name="sha1sum" value="{{ sha1sum }}" />
 
                 {% if action == 'Upload' %}
                     <div class="form-group">

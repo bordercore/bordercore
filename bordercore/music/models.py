@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
@@ -32,6 +34,7 @@ class SongSource(TimeStampedModel):
 
 
 class Song(TimeStampedModel):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     title = models.TextField()
     artist = models.TextField()
     album = models.ForeignKey(Album, null=True, on_delete=models.PROTECT)

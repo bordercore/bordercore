@@ -4,8 +4,8 @@
 
     <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap4.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}/js/jquery.jplayer.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}/js/jplayer.cleanskin.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.jplayer.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jplayer.cleanskin.js"></script>
 
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/dataTables.bootstrap4.min.css" />
@@ -33,7 +33,7 @@
 {% block left-block %}
     <div class="row">
         <div class="col-lg-12">
-            <img src="{{ STATIC_URL }}albums/{{ album.artist }}/{{ album.title|urlencode }}/artwork.jpg" height="400" width="400" />
+            <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ album.id }}" height="400" width="400" />
             {% if object.comment %}
                 <h5 class="mt-3">{{ object.get_comment|default:""|safe }}</h5>
             {% endif %}
@@ -79,7 +79,7 @@
                 },
                 name: $('#song_list').DataTable().cell(0, 2).data(),
                 "media": {
-                    "mp3": "{{ STATIC_URL }}albums/{{ album.artist|safe }}/{{ album.title|safe|urlencode }}/01 - " + $('#song_list').DataTable().cell(0, 2).data() + ".mp3"
+                    "mp3": "{{ MEDIA_URL_MUSIC }}songs/0350ee4a-61da-45fc-afab-65007a8049cd"
                 }
             });
 
@@ -110,9 +110,10 @@
 
                         $('.play-progress span').html(songTitleDisplay);
 
+                        console.log(info.url);
                         $("#uniqueContainer-1").jPlayer("setMedia", {
                             title: songTitle,
-                            mp3: "{{ STATIC_URL }}albums/{{ album.artist|safe }}/{{ album.title|safe|urlencode }}/" + trackNumber + " - " + encodeURIComponent(songTitle) + ".mp3"
+                            mp3: info.url
                         });
 
                         $("#uniqueContainer-1").jPlayer("play");

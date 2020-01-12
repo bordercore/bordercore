@@ -83,6 +83,7 @@ for env in ('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_ASSOCIATE_TAG'):
 
 USE_S3 = True
 AWS_STORAGE_BUCKET_NAME = "bordercore-blobs"
+AWS_BUCKET_NAME_MUSIC = "bordercore-music"
 AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
 AWS_LOCATION = "django"
 
@@ -125,6 +126,7 @@ MEDIA_ROOT = 'blobs'
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
 MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
+MEDIA_URL_MUSIC = f'https://{AWS_BUCKET_NAME_MUSIC}.s3.amazonaws.com/'
 
 ROOT_URLCONF = 'config.urls'
 

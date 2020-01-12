@@ -1,21 +1,21 @@
-import errno
+from datetime import datetime
+
+import boto3
 import hashlib
 import os
 import re
 import time
-from os import makedirs
-from os.path import isfile
-from shutil import move
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from django.db.models import Q
 from django.forms.utils import ErrorList
 from django.http import (HttpResponse, HttpResponseNotFound,
                          HttpResponseRedirect, JsonResponse)
-from django.shortcuts import redirect, render, render_to_response
+from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
@@ -51,7 +51,8 @@ def music_list(request):
                    'message': message,
                    'recent_songs': recent_songs,
                    'random_albums': random_albums,
-                   'title': 'Music List'
+                   'title': 'Music List',
+                   'MEDIA_URL_MUSIC': settings.MEDIA_URL_MUSIC
                    })
 
 
@@ -162,6 +163,7 @@ class AlbumDetailView(DetailView):
         context['song_list'] = song_list
         context['title'] = 'Album Detail :: {}'.format(self.object.title)
         context['cols'] = ['id', 'track', 'raw_title', 'title', 'length', 'length_seconds']
+        context['MEDIA_URL_MUSIC'] = settings.MEDIA_URL_MUSIC
 
         return context
 
@@ -187,13 +189,15 @@ def artist_detail(request, artist_name):
         song_list.append(dict(id=song.id, date=song.created.strftime("%b %d, %Y"), title=song.title, artist=song.artist, info=song.comment))
 
     return render(request, 'music/artist_detail.html',
-                  {'section': SECTION,
-                   'artist_name': artist_name,
-                   'album_list': a,
-                   'song_list': song_list,
-                   'compilation_album_list': c,
-                   'cols': ['date', 'artist', 'title', 'info', 'id'],
-                   'title': 'Artist Detail :: {}'.format(artist_name)
+                  {
+                      'section': SECTION,
+                      'artist_name': artist_name,
+                      'album_list': a,
+                      'song_list': song_list,
+                      'compilation_album_list': c,
+                      'cols': ['year', 'artist', 'title', 'length', 'length_seconds', 'info', 'id'],
+                      'title': 'Artist Detail :: {}'.format(artist_name),
+                      'MEDIA_URL_MUSIC': settings.MEDIA_URL_MUSIC
                   })
 
 
@@ -202,7 +206,7 @@ def add_song(request):
 
     info = {}
     notes = []
-    md5sum = None
+    sha1sum = None
     form = None
     action = 'Upload'
 
@@ -212,15 +216,15 @@ def add_song(request):
 
         action = 'Review'
         blob = request.FILES['song'].read()
-        md5sum = hashlib.md5(blob).hexdigest()
-        filename = "/tmp/{}".format(md5sum)
+        sha1sum = hashlib.sha1(blob).hexdigest()
+        filename = f"/tmp/{sha1sum}"
 
         try:
             f = open(filename, "wb")
             f.write(blob)
             f.close()
         except (IOError) as e:
-            messages.add_message(request, messages.ERROR, 'IOError: {}'.format(e))
+            messages.add_message(request, messages.ERROR, f'IOError: {e}')
 
         info = MP3(filename, ID3=EasyID3)
 
@@ -240,7 +244,7 @@ def add_song(request):
                 # Look for a fuzzy match
                 fuzzy_matches = Album.objects.filter(Q(user=request.user) & Q(title__icontains=info['title'][0].lower()))
                 if fuzzy_matches:
-                    notes.append('Found a fuzzy match on the album title: "{}" by {}'.format(fuzzy_matches[0].title, fuzzy_matches[0].artist))
+                    notes.append(f'Found a fuzzy match on the album title: "{fuzzy_matches[0].title}" by {fuzzy_matches[0].artist}')
 
             if Song.objects.filter(user=request.user, title=info['title'][0], artist=info['artist'][0]):
                 notes.append('You already have a song with this title by this artist')
@@ -255,12 +259,12 @@ def add_song(request):
         # This should initialize form._errors, used below
         form.full_clean()
 
-        if formdata.get('year') and not re.search('^\d+$', formdata['year']):
+        if formdata.get('year') and not re.search(r'^\d+$', formdata['year']):
             form._errors["year"] = ErrorList([u"Wrong format"])
 
     elif 'add' in request.POST:
 
-        md5sum = request.POST['md5sum']
+        sha1sum = request.POST['sha1sum']
 
         if request.POST['year']:
             try:
@@ -272,17 +276,13 @@ def add_song(request):
 
         form = SongForm(request.POST, instance=song)  # A form bound to the POST data
 
-        info = MP3("/tmp/{}".format(md5sum), ID3=EasyID3)
+        info = MP3(f"/tmp/{sha1sum}", ID3=EasyID3)
 
         if form.is_valid():
 
             album_id = None
 
-            album_title = None
-            try:
-                album_title = request.POST['album'].strip()
-            except:
-                pass
+            album_title = request.POST.get("album", "").strip()
 
             # If an album was specified, check if we have the album
             if album_title:
@@ -312,63 +312,47 @@ def add_song(request):
                 if a:
                     a.save()
                 form.cleaned_data['length'] = int(info.info.length)
-                newform = form.save(commit=False)
+                new_song = form.save(commit=False)
                 if a:
-                    newform.album = a
-                newform.user = request.user
-                newform.save()
+                    new_song.album = a
+                new_song.user = request.user
+                new_song.save()
 
             if a:
                 album_id = a.id
 
-            # First create the directory structure, if necessary.
-            # One directory for the artist and one for the album (if specified)
-            fulldirname = MUSIC_ROOT
-            if request.POST.get('compilation'):
-                fulldirname = "{}/{}/{}".format(fulldirname, "Various Artists", album_title)
-            else:
-                fulldirname = "{}/{}".format(fulldirname, form.cleaned_data['artist'])
-                if album_title:
-                    fulldirname = "{}/{}".format(fulldirname, album_title)
+            s3_client = boto3.client("s3")
+            key = f"songs/{new_song.uuid}"
 
-            try:
-                makedirs(fulldirname)
-            except OSError as e:
-                if not e.errno == errno.EEXIST:
-                    raise OSError(e)
+            s3_client.upload_file(
+                f"/tmp/{sha1sum}",
+                settings.AWS_BUCKET_NAME_MUSIC,
+                key,
+                ExtraArgs={"Metadata": {"artist": form.cleaned_data["artist"], "title": form.cleaned_data["title"]}})
 
-            # Move the song to the media drive
-            if len(str(form.cleaned_data['track'])) == 1:
-                form.cleaned_data['track'] = '0' + str(form.cleaned_data['track'])
+            audio = MP3(f"/tmp/{sha1sum}")
+            if audio and 'APIC:' in audio.tags:
 
-            # For album tracks, we want the filename to be in this format:  <track> - <song>.mp3
-            #   Check if the track number is already present
-            filename = form.cleaned_data['title'] + '.mp3'
-            if album_title:
-                p = re.compile("^(\d+) - ")
-                if not p.match(filename):
-                    filename = "{} - {}".format(form.cleaned_data['track'], filename)
+                artwork_file = f"/tmp/{sha1sum}-artwork.jpg"
 
-            destfilename = "{}/{}".format(fulldirname, filename)
+                artwork = audio.tags['APIC:']
+                fh = open(artwork_file, "wb")
+                fh.write(artwork.data)
+                fh.close()
 
-            if isfile(destfilename):
-                messages.add_message(request, messages.ERROR, 'File already exists: {}'.format(destfilename))
-            else:
-                move("/tmp/{}".format(md5sum), destfilename)
+                key = f"artwork/{album_id}"
+                s3_client.upload_file(
+                    artwork_file,
+                    settings.AWS_BUCKET_NAME_MUSIC,
+                    key)
 
-            # If album artwork is not found on the filesystem, extract it from the audio file itself
-            artwork_file = "{}/artwork.jpg".format(fulldirname)
-            if not isfile(artwork_file):
-                audio = MP3(destfilename)
-                if audio and 'APIC:' in audio.tags:
-                    artwork = audio.tags['APIC:']
-                    fh = open(artwork_file, "wb")
-                    fh.write(artwork.data)
-                    fh.close()
+                os.remove(artwork_file)
+
+            os.remove(f"/tmp/{sha1sum}")
 
             if not messages.get_messages(request):
                 action = 'Upload'
-                md5sum = None
+                sha1sum = None
                 if a:
                     listen_url = reverse('album_detail', args=[album_id])
                 else:
@@ -385,7 +369,7 @@ def add_song(request):
                    'action': action,
                    'info': info,
                    'notes': notes,
-                   'md5sum': md5sum,
+                   'sha1sum': sha1sum,
                    'form': form,
                    'title': 'Add Song'})
 
@@ -481,6 +465,8 @@ def search(request):
 
 def get_song_location(song):
 
+    song_title = song.title.replace("/", "FORWARDSLASH")
+
     # If the song is associated with an album, look for it in the album's directory
     if song.album:
         if song.album.compilation:
@@ -490,26 +476,23 @@ def get_song_location(song):
         tracknumber = str(song.track)
         if len(tracknumber) == 1:
             tracknumber = '0' + tracknumber
-        file_info = {'url': '/music/{}/{}/{} - {}.mp3'.format(artist_name, song.album.title, tracknumber, song.title)}
+        file_info = {'url': '/music/{}/{}/{} - {}.mp3'.format(artist_name, song.album.title, tracknumber, song_title)}
     else:
-        file_info = {'url': '/music/{}/{}.mp3'.format(song.artist, song.title)}
+        file_info = {'url': '/music/{}/{}.mp3'.format(song.artist, song_title)}
 
         if not os.path.isfile('/home/media/{}'.format(file_info['url'])):
             # Check this type of file path: /home/media/mp3/Primitives - Crash.mp3
-            file_info = {'url': '/mp3/{} - {}.mp3'.format(song.artist, song.title)}
+            file_info = {'url': '/mp3/{} - {}.mp3'.format(song.artist, song_title)}
 
             if not os.path.isfile('/home/media/{}'.format(file_info['url'])):
                 # Check this type of file path: /home/media/mp3/m/Motley Crue - She's Got Looks That Kill.mp3
-                file_info = {'url': '/mp3/{}/{} - {}.mp3'.format(song.artist[0].lower(), song.artist, song.title)}
+                file_info = {'url': '/mp3/{}/{} - {}.mp3'.format(song.artist[0].lower(), song.artist, song_title)}
 
     return file_info
 
 
 @login_required
 def get_song_info(request, id):
-
-    from datetime import datetime
-    from django.conf import settings
 
     song = Song.objects.get(user=request.user, pk=id)
 
@@ -523,13 +506,12 @@ def get_song_info(request, id):
         song.last_time_played = datetime.now()
         song.save()
 
-        l = Listen(song=song, user=request.user)
-        l.save()
+        Listen(song=song, user=request.user).save()
 
-    file_location = get_song_location(song)
+    file_location = f"{settings.MEDIA_URL_MUSIC}songs/{song.uuid}"
 
     results = {'title': song.title,
-               'url': file_location['url']}
+               'url': file_location}
 
     return JsonResponse(results)
 
