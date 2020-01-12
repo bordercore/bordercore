@@ -164,6 +164,7 @@ class AlbumDetailView(DetailView):
         context['title'] = 'Album Detail :: {}'.format(self.object.title)
         context['cols'] = ['id', 'track', 'raw_title', 'title', 'length', 'length_seconds']
         context['MEDIA_URL_MUSIC'] = settings.MEDIA_URL_MUSIC
+        context['section'] = SECTION
 
         return context
 
