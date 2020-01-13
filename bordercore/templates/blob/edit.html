@@ -257,6 +257,12 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                 multidate: false
             });
 
+            {% if not object %}
+            // If this is a new blob, the default date should be "now"
+            var nowDate = new Date();
+            $('.date').datepicker('setValue', nowDate);
+            {% endif %}
+
             $('#btn-ucfirst').click( function () {
                 // Transforms 'JERRELL SCHIVERS' to 'Jerrell Schivers'
                 $('#id_value').val( $('#id_value').val().toLowerCase().replace(/(\s+)(.)|^(.)/g, formatName) );
