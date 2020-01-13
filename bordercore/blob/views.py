@@ -531,6 +531,16 @@ def parse_date_format_4(input_date, matcher):
                                       '%B/%d/%Y')
 
 
+def parse_date_format_5(input_date, matcher):
+    """
+    Parse a date like '2020-01-12'
+    """
+    return datetime.datetime.strptime('{}/{}/{}'.format(matcher.group(2),
+                                                        matcher.group(3),
+                                                        matcher.group(1)),
+                                      '%m/%d/%Y')
+
+
 @login_required
 def parse_date(request, input_date):
 
@@ -554,6 +564,9 @@ def parse_date(request, input_date):
 
     # January 1, 1999
     pdict[r"(\w+)\.?\s+(\d+),?\s+(\d+)$"] = parse_date_format_4
+
+    # 1999-01-01
+    pdict[r"(\d\d\d\d)-(\d+)-(\d+)$"] = parse_date_format_5
 
     # Remove extraneous characters
     # eg "August 12th, 2001" becomes "August 12, 2001"
