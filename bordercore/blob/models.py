@@ -124,6 +124,13 @@ class Document(TimeStampedModel, AmazonMixin):
     is_note = models.BooleanField(default=False)
     documents = models.ManyToManyField("self")
 
+    def __init__(self, *args, **kwargs):
+        super(Document, self).__init__(*args, **kwargs)
+
+        # Save the sha1sum so that when it changes by a blob edit
+        #  in save() we know what the original was.
+        setattr(self, "__original_sha1sum", getattr(self, 'sha1sum'))
+
     def get_content(self):
         return markdown.markdown(self.content, extensions=['codehilite(guess_lang=False)', 'tables'])
 
@@ -234,7 +241,6 @@ class Document(TimeStampedModel, AmazonMixin):
 
         return {**results["_source"], "id": results["_id"]}
 
-
     def save(self, *args, **kwargs):
 
         # We rely on the readable() method to determine if we're
@@ -253,42 +259,32 @@ class Document(TimeStampedModel, AmazonMixin):
 
         super(Document, self).save(*args, **kwargs)
 
-    #     if self.file:
-    #         old_sha1sum = self.sha1sum
-    #         if old_sha1sum is not None:
-    #             # We can only move files after super() is called to create the new file's directory structure
-    #             # NOTE: the previous comment may not be relevant for storage in S3
-    #             if self.sha1sum != old_sha1sum:
-    #                 create_thumbnail.delay(self.uuid)
-    #                 self.change_file(old_sha1sum)
+        if self.sha1sum:
+
+            # This is set in __init__
+            sha1sum_orig = getattr(self, '__original_sha1sum')
+
+            sha1sum_new = self.sha1sum
+            if sha1sum_orig is not None and sha1sum_orig != sha1sum_new:
+                log.info(f"Updating file from sha1sum={sha1sum_orig} to sha1sum={sha1sum_new}")
+                self.change_file(sha1sum_orig)
 
     def change_file(self, old_sha1sum):
 
-        dir_old = "{}/{}/{}".format(settings.MEDIA_ROOT, old_sha1sum[0:2], old_sha1sum)
+        # Sanity check to prevent unwanted deletions
+        pattern = re.compile(r"\b[0-9a-f]{40}\b")
+        if not re.match(pattern, old_sha1sum):
+            log.error(f"Trying to update a sha1sum, but given invalid sha1sum: {old_sha1sum}")
+            return
 
-        # TODO Can we eliminate the client object and just use the s3 object?
-        client = boto3.client("s3")
+        dir_old = f"{settings.MEDIA_ROOT}/{old_sha1sum[:2]}/{old_sha1sum}"
+
         s3 = boto3.resource("s3")
         my_bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
 
-        # Delete the old file.  I don't have access to the old filename at this point,
-        #  so instead delete anything that doesn't look like a cover image
-        print("dir_old: {}".format(dir_old))
         for fn in my_bucket.objects.filter(Prefix=dir_old):
-            print("looking for old key to delete,  fn: {}".format(str(fn.key)))
-        # for fn in os.listdir(dir_old):
-            if not os.path.basename(str(fn)).startswith("cover-"):
-                print("Deleting key {}".format(fn.key))
-                client.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key="{}".format(fn.key))
-                # os.remove("{}/{}".format(dir_old, fn))
-
-        # Move any cover images for the old file to the new file's directory
-        # for file in os.listdir(dir_old):
-        #     _, file_extension = os.path.splitext(file)
-        #     if file_extension[1:] in ["jpg", "png"]:
-        #         pass
-        #         # TODO: Implement this in S3
-        #         # shutil.move("{}/{}".format(dir_old, file), dir_new)
+            log.info(f"Deleting key {fn.key}")
+            s3.Object(settings.AWS_STORAGE_BUCKET_NAME, fn.key).delete()
 
     def has_been_modified(self):
         """
