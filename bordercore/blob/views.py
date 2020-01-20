@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import datetime
+import logging
 import random
 import re
 from urllib.parse import urlparse
@@ -29,6 +30,8 @@ SECTION = 'Blob'
 # TODO: Move this to Django config file
 amazon_api_config = {
 }
+
+log = logging.getLogger(f"bordercore.{__name__}")
 
 
 @method_decorator(login_required, name='dispatch')
@@ -409,7 +412,7 @@ def slideshow(request):
     try:
         content_type = Document.get_content_type(blob.get_elasticsearch_info()["content_type"])
     except Exception:
-        print(f"Can't get content type for uuid={blob.uuid}")
+        log.warning(f"Can't get content type for uuid={blob.uuid}")
 
     return render(request, "blob/slideshow.html",
                   {"section": SECTION,
@@ -445,7 +448,7 @@ def get_amazon_metadata(request, title):
                 if amazon_metadata_dupe_check(dupes, 'Publication Date', publication_date):
                     return_data['data'].append(['Publication Date', publication_date])
             except AttributeError as e:
-                print("AttributeError: %s" % e)
+                log.error("AttributeError: %s" % e)
     except NoExactMatchesFound:
         return_data['error'] = "No Amazon matches found"
 

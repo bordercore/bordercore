@@ -41,3 +41,9 @@ DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.timer.TimerPanel',
     'debug_toolbar.panels.versions.VersionsPanel'
 )
+
+LOGGING['handlers']['bordercore'] = {
+    'level': 'INFO',
+    'class': 'logging.StreamHandler',
+    'formatter': 'standard'
+}

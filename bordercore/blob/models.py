@@ -48,9 +48,7 @@ FILE_TYPES_TO_INGEST = [
     'txt'
 ]
 
-logging.getLogger().setLevel(logging.INFO)
-log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
+log = logging.getLogger(f"bordercore.{__name__}")
 
 
 # Override FileSystemStorage to get better control of how files are named
@@ -334,7 +332,7 @@ class Document(TimeStampedModel, AmazonMixin):
                 info["width_cropped"] = max_cover_image_width
 
         except KeyError as e:
-            print(f"Warning: Object has no metadata {e}")
+            log.warning(f"Warning: Object has no metadata {e}")
 
         return info
 
@@ -410,7 +408,7 @@ class Document(TimeStampedModel, AmazonMixin):
             im.save(outfile)
             os.chmod(outfile, 0o664)
         except IOError as err:
-            print("cannot create thumbnail; error={}".format(err))
+            log.error("cannot create thumbnail; error={}".format(err))
 
     def create_thumbnail_from_pdf(self, page_number):
 
@@ -453,7 +451,7 @@ class Document(TimeStampedModel, AmazonMixin):
             im.thumbnail(size)
             im.save("cover-small.jpg".format(page_number), "JPEG")
         except IOError:
-            print("Cannot create thumbnail for {}".format(cover_large))
+            log.error("Cannot create thumbnail for {}".format(cover_large))
 
         os.remove(outfile)
 
@@ -551,7 +549,7 @@ def mymodel_delete_s3(sender, instance, **kwargs):
 
         # TODO: Add sanity check to prevent unwanted deletes?
         for fn in my_bucket.objects.filter(Prefix=dir):
-            print(f"Deleting blob {fn}")
+            log.info(f"Deleting blob {fn}")
             fn.delete()
 
         # Pass false so FileField doesn't save the model.
