@@ -334,7 +334,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
 
     {% if messages %}
         {% for message in messages %}
-        <div class="col-lg-{{ width|default:7 }} alert alert-{% if class %}{{ class }}{% elif message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}">
+        <div class="col-lg-{{ width|default:12 }} alert alert-{% if class %}{{ class }}{% elif message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}">
             {{ message|safe }}
         </div>
         {% endfor %}
