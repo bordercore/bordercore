@@ -10,3 +10,6 @@ secrets.json
 bordercore/aws/.aws-sam/build/
 bordercore/aws/index_blobs/.aws-sam/build/
 packaged.yaml
+**/.aws-sam/*
+**/htmlcov/*
+*.coverage
