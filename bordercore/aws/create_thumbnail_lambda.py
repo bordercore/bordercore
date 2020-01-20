@@ -34,13 +34,12 @@ as the original file.
 
 import boto3
 import glob
+import json
 import logging
 import os
-import sys
 from urllib.parse import unquote_plus
 import uuid
 from PIL import Image
-import PIL.Image
 
 from lib.thumbnails import create_thumbnail, is_image
 
@@ -68,15 +67,12 @@ def handler(event, context):
     try:
 
         for record in event["Records"]:
-            import json; log.info(json.dumps(record["Sns"]["Message"]))
-
+            log.info(json.dumps(record["Sns"]["Message"]))
             sns_record = json.loads(record["Sns"]["Message"])["Records"][0]
             bucket = sns_record["s3"]["bucket"]["name"]
-            log.info(f"bucket: {bucket}")
-            key = sns_record["s3"]["object"]["key"]
-            log.info(f"key: {key}")
-            # bucket = record["s3"]["bucket"]["name"]
-            # key = unquote_plus(record["s3"]["object"]["key"])
+
+            # Spaces are replaced with '+'s
+            key = unquote_plus(sns_record["s3"]["object"]["key"])
 
             log.info(f"Creating cover image for {key}")
             path, filename = os.path.split(key)
@@ -113,4 +109,6 @@ def handler(event, context):
             os.remove(download_path)
 
     except Exception as e:
+        import traceback
+        log.info(traceback.print_exc())
         log.error(f"Lambda Exception: {e}")
