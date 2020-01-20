@@ -1,4 +1,3 @@
-import glob
 import hashlib
 import json
 import logging
@@ -17,8 +16,6 @@ from django.db import models
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch.dispatcher import receiver
 from elasticsearch import Elasticsearch
-from PyPDF2 import PdfFileReader, PdfFileWriter
-from PIL import Image
 from storages.backends.s3boto3 import S3Boto3Storage
 
 from blob.amazon import AmazonMixin
@@ -68,23 +65,6 @@ class BlobFileSystemStorage(FileSystemStorage):
             return name
         # if the file is new, DO call it
         return super(BlobFileSystemStorage, self)._save(name, content)
-
-
-def blob_directory_path(instance, filename):
-
-    hasher = hashlib.sha1()
-    for chunk in instance.file.chunks():
-        hasher.update(chunk)
-
-    sha1sum = hasher.hexdigest()
-
-    dir = "{}/{}/{}".format(settings.MEDIA_ROOT, sha1sum[0:2], sha1sum)
-    if not os.path.exists(dir):
-        os.makedirs(dir)
-        os.chmod(dir, 0o2775)
-    filepath = "{}/{}/{}".format(sha1sum[0:2], sha1sum, filename)
-
-    return filepath
 
 
 class DownloadableS3Boto3Storage(S3Boto3Storage):
@@ -387,85 +367,7 @@ class Document(TimeStampedModel, AmazonMixin):
         info["url"] = urllib.parse.quote(info["url"])
         return info
 
-    def create_thumbnail(self, page_number=1):
-
-        if self.is_image():
-            self.create_thumbnail_from_image()
-        elif self.is_pdf():
-            self.create_thumbnail_from_pdf(page_number)
-        self.fix_permissions()
-
-    def create_thumbnail_from_image(self):
-
-        size = 128, 128
-
-        infile = "{}/{}".format(settings.MEDIA_ROOT, self.file.name)
-        outfile = "{}/{}/cover-small.jpg".format(settings.MEDIA_ROOT, os.path.dirname(self.file.name))
-        try:
-            # Convert images to RGB mode to avoid "cannot write mode P as JPEG" errors for PNGs
-            im = Image.open(infile).convert('RGB')
-            im.thumbnail(size)
-            im.save(outfile)
-            os.chmod(outfile, 0o664)
-        except IOError as err:
-            log.error("cannot create thumbnail; error={}".format(err))
-
-    def create_thumbnail_from_pdf(self, page_number):
-
-        page_number = page_number - 1
-
-        os.chdir("{}/{}".format(settings.MEDIA_ROOT, os.path.dirname(self.file.name)))
-
-        # Ex: d7/d77d08dd2e51680229adbf175101b8f65f3717fc/Comprehensive Report.pdf
-        input_file = os.path.basename(self.file.name)
-
-        # Ex: Comprehensive Report_p1.pdf
-        outfile = "{}_p{}.pdf".format(os.path.splitext(input_file)[0], page_number)
-
-        input_pdf = PdfFileReader(open(input_file, "rb"))
-
-        # Some documents are recognized as encrypted, even though they're not.
-        #  This is a workaround
-        if input_pdf.getIsEncrypted():
-            input_pdf.decrypt('')
-
-        output = PdfFileWriter()
-        output.addPage(input_pdf.getPage(page_number))
-        outputStream = open(outfile, "wb")
-        output.write(outputStream)
-        outputStream.close()
-
-        # Convert the pdf page to jpg
-        from pdf2image import convert_from_path
-        pages = convert_from_path(outfile, dpi=150)
-        cover_large = "cover-large.jpg"
-        pages[0].save(cover_large, "JPEG")
-
-        # Create small (thumbnail) jpg
-        from PIL import Image
-
-        size = 128, 128
-
-        try:
-            im = Image.open(cover_large)
-            im.thumbnail(size)
-            im.save("cover-small.jpg".format(page_number), "JPEG")
-        except IOError:
-            log.error("Cannot create thumbnail for {}".format(cover_large))
-
-        os.remove(outfile)
-
-    def fix_permissions(self):
-        """
-        Set all cover images to be chmod = 664
-        """
-
-        files = "{}/{}/cover-*".format(settings.MEDIA_ROOT,
-                                       os.path.dirname(self.file.name))
-        for name in glob.glob(files):
-            os.chmod(name, 0o664)
-
-    def index_blob(self):
+    def index_blob(self, file_changed=True):
         """
         Index the blob into Elasticsearch, but only if there is no
         file associated with it. If there is, then a lambda will be
