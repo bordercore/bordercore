@@ -44,6 +44,7 @@ def edit(request, bookmark_id=None):
                 newform.save()
                 form.save_m2m()  # Save the many-to-many data for the form (eg tags).
                 form.instance.index_bookmark()
+                form.instance.snarf_favicon()
                 messages.add_message(request, messages.INFO, 'Bookmark edited')
                 return list(request)
         elif request.POST['Go'] == 'Delete':
@@ -92,6 +93,7 @@ def snarf_link(request):
         b = Bookmark(is_pinned=False, user=request.user, url=url, title=title)
         b.save()
         b.index_bookmark()
+        b.snarf_favicon()
 
     return redirect('bookmark_edit', b.id)
 
@@ -140,7 +142,7 @@ def add_bookmarks_from_import(request, tag, bookmarks):
             #  Bookmark model's post_save signal.
             b.save()
 
-            # snarf_favicon.delay(link["url"])
+            b.snarf_favicon()
             added_count = added_count + 1
 
     messages.add_message(request, messages.INFO, "Bookmarks added: {}. Duplicates ignored: {}.".format(added_count, dupe_count))

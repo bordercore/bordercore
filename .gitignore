@@ -9,6 +9,7 @@ secrets.json
 
 bordercore/aws/.aws-sam/build/
 bordercore/aws/index_blobs/.aws-sam/build/
+bordercore/aws/snarf_favicon/.aws-sam/build/
 packaged.yaml
 **/.aws-sam/*
 **/htmlcov/*

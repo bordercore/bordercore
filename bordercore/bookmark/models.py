@@ -1,5 +1,6 @@
 import json
 
+import boto3
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
@@ -8,7 +9,6 @@ from django.db import models
 from django.db.models.signals import m2m_changed
 from elasticsearch import Elasticsearch
 
-# from bookmark.tasks import snarf_favicon
 from lib.mixins import TimeStampedModel
 from tag.models import Tag
 
@@ -101,6 +101,23 @@ class Bookmark(TimeStampedModel):
             index=settings.ELASTICSEARCH_INDEX,
             id=f"bordercore_bookmark_{self.id}",
             body=doc
+        )
+
+    def snarf_favicon(self):
+
+        client = boto3.client("lambda")
+
+        payload = {
+            "url": self.url,
+            "parse_domain": True
+        }
+
+        response = client.invoke(
+            ClientContext="MyApp",
+            FunctionName="SnarfFavicon",
+            InvocationType="Event",
+            LogType="Tail",
+            Payload=json.dumps(payload)
         )
 
 

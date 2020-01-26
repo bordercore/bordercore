@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Store Favicons in S3
+
+Globals:
+    Function:
+        Timeout: 360
+
+
+Resources:
+
+    SnarfFaviconFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: .
+            FunctionName: SnarfFavicon
+            Handler: snarf_favicon_lambda.handler
+            MemorySize: 1024
+            Runtime: python3.7
+            Role: !GetAtt SnarfFaviconLambdaRole.Arn
+            Environment:
+                Variables:
+                    BUCKET_NAME: bordercore-blobs
+
+    SnarfFaviconLambdaRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: 2012-10-17
+                Statement:
+                    - Effect: 'Allow'
+                      Principal:
+                          Service:
+                              - 'lambda.amazonaws.com'
+                      Action:
+                          - 'sts:AssumeRole'
+
+            Policies:
+            - PolicyName: LambdaWriteToLogs
+              PolicyDocument:
+                  Statement:
+                      - Effect: 'Allow'
+                        Action:
+                            - 'logs:CreateLogGroup'
+                            - 'logs:CreateLogStream'
+                            - 'logs:PutLogEvents'
+                            - 'logs:DescribeLogStreams'
+                        Resource:
+                            - 'arn:aws:logs:*:*:*'
+            - PolicyName: WriteToS3
+              PolicyDocument:
+                  Statement:
+                      - Effect: 'Allow'
+                        Action:
+                            - s3:PutObject
+                            - s3:PutObjectAcl
+                        Resource:
+                            - 'arn:aws:s3:::bordercore-blobs'
+                            - 'arn:aws:s3:::bordercore-blobs/*'
