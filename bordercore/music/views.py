@@ -187,7 +187,13 @@ def artist_detail(request, artist_name):
     song_list = []
 
     for song in s:
-        song_list.append(dict(id=song.id, year=song.year, title=song.title, artist=song.artist, info=song.comment))
+        song_list.append(dict(id=song.id,
+                              year=song.year,
+                              title=song.title,
+                              length_seconds=song.length,
+                              length=time.strftime('%M:%S', time.gmtime(song.length)),
+                              artist=song.artist,
+                              info=song.comment))
 
     return render(request, 'music/artist_detail.html',
                   {
