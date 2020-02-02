@@ -50,6 +50,7 @@ def get_last_blob():
     try:
         with open(LAST_BLOB_FILE, "r") as file:
             last_blob = file.read().strip()
+        print(f"Using {LAST_BLOB_FILE} to resume where we left off...")
     except FileNotFoundError:
         return ""
     return last_blob
@@ -76,19 +77,12 @@ def add_to_batch(blob, ingestible=False):
 
 es = Elasticsearch([settings.ELASTICSEARCH_ENDPOINT], verify_certs=False)
 
-blobs = Document.objects.filter(uuid="09dc76c7-3225-47cc-aa38-f36b072c1d05")
-
-# Text blob
-# blobs = Document.objects.filter(uuid="53f90c12-e90d-400f-ab5c-a4ae1bde9b2c")
-
-# Small pdf
-# blobs = Document.objects.filter(uuid="a446d1c3-8abd-49a9-a526-1986a78fb517")
-
-# Large pdf
-# blobs = Document.objects.filter(uuid="8bc309ba-d275-4f4c-8e3a-7687383df40b")
-
-# All blobs
-# blobs = Document.objects.all().order_by("created")
+if len(sys.argv) == 2:
+    # A single blob
+    blobs = Document.objects.filter(uuid=sys.argv[1])
+else:
+    # All blobs
+    blobs = Document.objects.all().order_by("created")
 
 last_blob = get_last_blob()
 blob = None
