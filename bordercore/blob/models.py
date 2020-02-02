@@ -374,9 +374,6 @@ class Document(TimeStampedModel, AmazonMixin):
         triggered once it's written to S3 to do the indexing
         """
 
-        if self.sha1sum:
-            return
-
         client = boto3.client("sns")
 
         message = {
@@ -386,7 +383,8 @@ class Document(TimeStampedModel, AmazonMixin):
                         "bucket": {
                             "name": settings.AWS_STORAGE_BUCKET_NAME
                         },
-                        "uuid": str(self.uuid)
+                        "uuid": str(self.uuid),
+                        "file_changed": file_changed
                     }
                 }
             ]
@@ -436,8 +434,6 @@ def set_s3_metadata_file_modified(sender, instance, **kwargs):
 
     s3_object.metadata.update({"file-modified": str(instance.file_modified)})
     s3_object.copy_from(CopySource={"Bucket": settings.AWS_STORAGE_BUCKET_NAME, "Key": key}, Metadata=s3_object.metadata, MetadataDirective="REPLACE")
-
-
 
 
 @receiver(pre_delete, sender=Document)

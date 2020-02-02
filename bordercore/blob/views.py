@@ -273,7 +273,7 @@ class BlobUpdateView(UpdateView):
 
         self.object = form.save()
 
-        self.object.index_blob()
+        self.object.index_blob(file_changed)
 
         messages.add_message(self.request, messages.INFO, 'Blob updated')
 

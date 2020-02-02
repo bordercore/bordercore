@@ -1,6 +1,7 @@
 import base64
 from datetime import datetime
 from io import BytesIO
+import logging
 import os
 import re
 
@@ -34,6 +35,9 @@ FILE_TYPES_TO_INGEST = [
     'pdf',
     'txt'
 ]
+
+logging.getLogger().setLevel(logging.INFO)
+log = logging.getLogger(__name__)
 
 s3client = boto3.client("s3")
 db_conn = psycopg2.connect("dbname=%s port=5432 host=%s user=%s password=%s" % (DB_DATABASE, DB_ENDPOINT, DB_USERNAME, DB_PASSWORD))
@@ -233,8 +237,14 @@ def index_blob(**kwargs):
 
     pipeline_args = {}
 
-    if blob_info["sha1sum"]:
+    # If only the metadata has changed and not the file itself,
+    #  don't bother re-indexing the file.
+    file_changed = kwargs.get("file_changed", True)
+    log.info(f"file_changed: {file_changed}")
 
+    if blob_info["sha1sum"] and file_changed:
+
+        log.info("ingesting the blob")
         # Even if this is not an ingestible file, we need to download the blob
         #  in order to determine the content type
         contents = get_blob_contents_from_s3(blob_info)
