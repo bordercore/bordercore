@@ -5,7 +5,7 @@ backports.ssl-match-hostname==3.5.0.1
 billiard==3.6.0.0
 boto3==1.9.156
 certifi==2019.6.16
-Django==2.0.13
+Django==2.2.9
 django-datatables-view==1.12.1
 django-storages==1.7.1
 https://github.com/bordercore/PyOrgMode/archive/master.zip
