@@ -8,7 +8,6 @@ certifi==2019.6.16
 Django==2.0.13
 django-datatables-view==1.12.1
 django-storages==1.7.1
-django-tastypie==0.14.1
 https://github.com/bordercore/PyOrgMode/archive/master.zip
 elasticsearch==7.0.5
 elasticsearch-dsl==7.1.0

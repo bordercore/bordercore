@@ -608,3 +608,11 @@ class WishListCreateView(CreateView):
 
     def get_success_url(self):
         return reverse('wishlist')
+
+
+@login_required
+def wishlist_delete(request, wishlist_id=None):
+    wishlist = WishList.objects.get(user=request.user, id=wishlist_id)
+    wishlist.delete()
+
+    return JsonResponse("OK", safe=False)

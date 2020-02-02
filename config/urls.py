@@ -1,17 +1,14 @@
 from django.conf import settings
 from django.contrib import admin
-from django.contrib.auth.views import logout
 from django.urls import include, path, re_path
 
 from accounts import views as accounts_views
-from accounts.api import UserResource
 from accounts.views import UserProfileDetailView
 from blob import views as blob_views
 from blob.views import (BlobDeleteView, BlobDetailView, BlobThumbnailView,
                         BlobUpdateView, DocumentCreateView)
 from book.views import BookListView
 from bookmark import views as bookmark_views
-from bookmark.api import BookmarkResource
 from collection import views as collection_views
 from collection.views import (CollectionCreateView, CollectionDeleteView, CollectionDetailView,
                               CollectionListView, CollectionUpdateView)
@@ -24,28 +21,19 @@ from fitness import views as fitness_views
 from fitness.views import ExerciseDetailView
 from homepage import views as homepage_views
 from music import views as music_views
-from music.api import MusicWishListResource
 from music.views import (AlbumDetailView, MusicListJson, WishListCreateView,
                          WishListDetailView, WishListView)
 from search import views as search_views
 from search.views import SearchListView, SearchTagDetailView
 from tag import views as tag_views
-from tastypie.api import Api
-from todo.api import TodoResource
 from todo.views import (TodoCreateView, TodoDeleteView, TodoDetailView,
                         TodoListView)
 
 admin.autodiscover()
 
-v1_api = Api(api_name='v1')
-v1_api.register(UserResource())
-v1_api.register(BookmarkResource())
-v1_api.register(TodoResource())
-v1_api.register(MusicWishListResource())
 
 urlpatterns = [
 
-    path('api/', include(v1_api.urls)),
     path('admin/', admin.site.urls),
 
     path('', homepage_views.homepage, name='homepage'),
@@ -136,6 +124,7 @@ urlpatterns = [
     path('music/song/<int:id>', music_views.get_song_info, name='get_song_info'),
     path('music/wishlistadd', WishListCreateView.as_view(), name='wishlist_add'),
     path('music/wishlist/edit/<int:pk>', WishListDetailView.as_view(), name='wishlist_edit'),
+    path('music/wishlist/delete/<int:wishlist_id>', music_views.wishlist_delete, name='wishlist_delete'),
     path('music/wishlist', WishListView.as_view(), name='wishlist'),
     path('music/', music_views.music_list, name='music_list'),
 

@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse, reverse_lazy
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, JsonResponse, Http404
 from django.utils.dateformat import format
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
@@ -130,6 +130,15 @@ class TodoCreateView(CreateView):
 
     def get_success_url(self):
         return reverse('todo_list')
+
+
+@login_required
+def delete(request, todo_id=None):
+
+    todo = Todo.objects.get(user=request.user, pk=todo_id)
+    todo.delete()
+
+    return JsonResponse("OK", safe=False)
 
 
 @method_decorator(login_required, name='dispatch')

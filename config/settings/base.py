@@ -161,7 +161,6 @@ INSTALLED_APPS = (
     'pygments',
     'quote',
     'storages',
-    'tastypie',
     'todo'
 
 )

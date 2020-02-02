@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.db.models import F
 from django.db.models.signals import post_save
-from tastypie.models import create_api_key
 
 from collection.models import Collection
 from tag.models import Tag
@@ -119,5 +118,3 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 
 post_save.connect(create_user_profile, sender=User)
-
-post_save.connect(create_api_key, sender=User)

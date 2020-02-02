@@ -178,7 +178,7 @@
                 var selectedBookmarkID = $("li.bookmark.selected").data("id");
 
                 $.ajax( { type: 'DELETE',
-                          url: '/api/v1/bookmark/' + selectedBookmarkID + '/',
+                          url: '{% url 'bookmark_delete' 666 %}'.replace(/666$/, selectedBookmarkID),
                           success: function() {
                         $("li.bookmark.selected").remove();
                         $('#btn-edit').attr("disabled", "disabled");

@@ -56,7 +56,7 @@
                 var selectedTodoID = $('#todo_list').DataTable().cell('.selected', 3).data();
 
                 $.ajax( { type: 'DELETE',
-                          url: '/api/v1/todo/' + selectedTodoID + '/',
+                          url: '{% url 'todo_delete' 666 %}'.replace(/666$/, selectedTodoID),
                           success: function() {
                               $('#feedback').fadeIn(1000).html("Task deleted.");
                               setTimeout( function() {

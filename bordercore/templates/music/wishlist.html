@@ -42,7 +42,7 @@
                 var selectedWishListID = $('#wishlist_list').DataTable().cell('.selected', 4).data();
 
                 $.ajax( { type: 'DELETE',
-                          url: '/api/v1/wishlist/' + selectedWishListID + '/',
+                          url: '{% url 'wishlist_delete' 666 %}'.replace(/666$/, selectedWishListID),
                           success: function() {
                               $('#feedback').fadeIn(1000).html("Item deleted.");
                               setTimeout( function() {
