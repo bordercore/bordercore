@@ -19,7 +19,7 @@ ES_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT", "localhost")
 ES_PORT = 9200
 ES_INDEX_NAME = "bordercore"
 
-DB_ENDPOINT = "bordercore.cvkm90zuldto.us-east-1.rds.amazonaws.com"
+DB_ENDPOINT = os.environ.get("DATABASE_ENDPOINT")
 DB_USERNAME = "bordercore"
 DB_PASSWORD = os.environ.get("DATABASE_PASSWORD")
 DB_DATABASE = "bordercore"
