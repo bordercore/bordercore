@@ -90,4 +90,4 @@ def test_elasticsearch_todo_tasks_exist_in_db(es):
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["hits"]
 
     for task in found:
-        assert Todo.objects.filter(id=task["_source"]["bordercore_id"]).count() == 1, f"todo exists in Elasticsearch but not in database, id={task.id}"
+        assert Todo.objects.filter(id=task["_source"]["bordercore_id"]).count() == 1, f"todo exists in Elasticsearch but not in database, id={task['_id']}"

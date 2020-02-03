@@ -90,4 +90,4 @@ def test_elasticsearch_bookmarks_exist_in_db(es):
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["hits"]
 
     for bookmark in found:
-        assert Bookmark.objects.filter(id=bookmark["_source"]["bordercore_id"]).count() == 1, f"bookmark exists in Elasticsearch but not in database, id={bookmark.id}"
+        assert Bookmark.objects.filter(id=bookmark["_source"]["bordercore_id"]).count() == 1, f"bookmark exists in Elasticsearch but not in database, id={bookmark['_id]}"
