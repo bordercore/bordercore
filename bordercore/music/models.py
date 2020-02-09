@@ -53,7 +53,7 @@ class Song(TimeStampedModel):
 
 class Listen(TimeStampedModel):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
-    song = models.ForeignKey(Song, on_delete=models.PROTECT)
+    song = models.ForeignKey(Song, on_delete=models.CASCADE)
 
 
 class WishList(TimeStampedModel):
