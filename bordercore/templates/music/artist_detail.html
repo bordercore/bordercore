@@ -40,7 +40,7 @@
                     { "targets": [1,4,6], "visible": false },
                 ],
             } );
-
+            {% if song_list %}
             $('.webPlayer').videoPlayer({
                 swfPath: "/js",
                 supplied: "mp3",
@@ -59,6 +59,7 @@
                     "mp3": ""
                 }
             });
+            {% endif %}
 
             $('#song_list tbody').on( 'click', 'tr', function () {
                 table.$('tr.selected').removeClass('selected');
