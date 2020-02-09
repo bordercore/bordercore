@@ -20,19 +20,6 @@
 
     $(document).ready(function() {
 
-        $('#song_list tbody').on( 'click', 'tr', function () {
-            if ( $(this).hasClass('selected') ) {
-                $(this).removeClass('selected');
-                $('#btn-edit').attr("disabled", "disabled");
-                $('#btn-delete').attr("disabled", "disabled");
-            } else {
-                oTable.$('tr.selected').removeClass('selected');
-                $(this).addClass('selected');
-                $('#btn-edit').removeAttr("disabled");
-                $('#btn-delete').removeAttr("disabled");
-            }
-        } );
-
         {% if messages %}
         {% for message in messages %}
         $('#feedback').fadeIn(1000).html('{{ message }}');
@@ -41,12 +28,6 @@
         }, 3000);
         {% endfor %}
         {% endif %}
-
-        $('#btn-edit').on('click', function() {
-            var selectedSongID = $('#song_list').DataTable().cell('.selected', 4).data();
-            window.location='{% url 'song_edit' 666 %}'.replace(/666$/, selectedSongID);
-            return false;
-        });
 
         function formatArtist( data, type, row ) {
             return '<a href="{% url 'artist_detail' 666 %}">'.replace(/666$/, row[1]) + row[1] + '</a>';
