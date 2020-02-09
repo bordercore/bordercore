@@ -106,12 +106,12 @@ def song_edit(request, song_id=None):
 
     if request.method == 'POST':
         if request.POST['Go'] in ['Edit', 'Add']:
-            form = SongForm(request.POST, instance=song)  # A form bound to the POST data
+            form = SongForm(request.POST, instance=song)
             if form.is_valid():
                 newform = form.save(commit=False)
                 newform.user = request.user
                 newform.save()
-                form.save_m2m()  # Save the many-to-many data for the form.
+                form.save_m2m()
                 messages.add_message(request, messages.INFO, 'Song edited')
                 return music_list(request)
         elif request.POST['Go'] == 'Delete':
@@ -323,7 +323,12 @@ def add_song(request):
                 if a:
                     new_song.album = a
                 new_song.user = request.user
+
                 new_song.save()
+
+                # Take care of the tags.  Create any that are new.
+                for tag in form.cleaned_data['tags']:
+                    new_song.tags.add(tag)
 
             if a:
                 album_id = a.id

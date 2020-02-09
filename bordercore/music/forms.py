@@ -1,8 +1,9 @@
 from django import forms
 from django.forms import (ModelChoiceField, ModelForm, Select, Textarea,
                           TextInput)
-
+from lib.fields import ModelCommaSeparatedChoiceField
 from music.models import Song, SongSource, WishList
+from tag.models import Tag
 
 
 # We need to create a custom class so that we can define what get's displayed in the select widget
@@ -19,6 +20,11 @@ class SongForm(ModelForm):
         self.fields['track'].required = False
         self.fields['comment'].required = False
         self.fields['year'].required = False
+        self.fields['tags'].required = False
+
+        # If this form has a model attached, get the tags and display them separated by commas
+        if self.instance.id:
+            self.initial['tags'] = self.instance.get_tags()
 
     def clean(self):
         cleaned_data = super(SongForm, self).clean()
@@ -36,9 +42,14 @@ class SongForm(ModelForm):
                                 widget=forms.Select(attrs={'class': 'form-control'}),
                                 empty_label='Select Source')
 
+    tags = ModelCommaSeparatedChoiceField(
+        required=False,
+        queryset=Tag.objects.filter(),
+        to_field_name='name')
+
     class Meta:
         model = Song
-        fields = ('title', 'artist', 'track', 'year', 'comment', 'source', 'times_played', 'length', 'id')
+        fields = ('title', 'artist', 'track', 'year', 'tags', 'comment', 'source', 'times_played', 'length', 'id')
         widgets = {
             'title': TextInput(attrs={'class': 'form-control'}),
             'artist': TextInput(attrs={'class': 'form-control'}),

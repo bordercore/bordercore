@@ -50,6 +50,9 @@ class Song(TimeStampedModel):
     tags = models.ManyToManyField(Tag)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 
+    def get_tags(self):
+        return ", ".join([tag.name for tag in self.tags.all()])
+
 
 class Listen(TimeStampedModel):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
