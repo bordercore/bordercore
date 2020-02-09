@@ -21,6 +21,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
 from django_datatables_view.base_datatable_view import BaseDatatableView
+from lib.util import remove_non_ascii_characters
 from music.forms import SongForm, WishListForm
 from music.models import Album, Listen, Song, SongSource, WishList
 from mutagen.easyid3 import EasyID3
@@ -330,11 +331,18 @@ def add_song(request):
             s3_client = boto3.client("s3")
             key = f"songs/{new_song.uuid}"
 
+            # Note: S3 Metadata cannot contain non ASCII characters
             s3_client.upload_file(
                 f"/tmp/{sha1sum}",
                 settings.AWS_BUCKET_NAME_MUSIC,
                 key,
-                ExtraArgs={"Metadata": {"artist": form.cleaned_data["artist"], "title": form.cleaned_data["title"]}})
+                ExtraArgs={
+                    "Metadata": {
+                        "artist": remove_non_ascii_characters(form.cleaned_data["artist"], default="Artist"),
+                        "title": remove_non_ascii_characters(form.cleaned_data["title"], default="Title")
+                    }
+                }
+            )
 
             audio = MP3(f"/tmp/{sha1sum}")
 
