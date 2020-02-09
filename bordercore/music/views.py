@@ -1,26 +1,25 @@
-from datetime import datetime
-
-import boto3
 import hashlib
 import os
 import re
 import time
+from datetime import datetime
 
+import boto3
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.urls import reverse
 from django.db.models import Q
 from django.forms.utils import ErrorList
 from django.http import (HttpResponse, HttpResponseNotFound,
                          HttpResponseRedirect, JsonResponse)
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
-
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from music.forms import SongForm, WishListForm
 from music.models import Album, Listen, Song, SongSource, WishList
@@ -338,22 +337,24 @@ def add_song(request):
                 ExtraArgs={"Metadata": {"artist": form.cleaned_data["artist"], "title": form.cleaned_data["title"]}})
 
             audio = MP3(f"/tmp/{sha1sum}")
-            if audio and 'APIC:' in audio.tags:
 
-                artwork_file = f"/tmp/{sha1sum}-artwork.jpg"
+            if audio:
+                artwork = audio.tags.getall("APIC")
+                if artwork:
 
-                artwork = audio.tags['APIC:']
-                fh = open(artwork_file, "wb")
-                fh.write(artwork.data)
-                fh.close()
+                    artwork_file = f"/tmp/{sha1sum}-artwork.jpg"
 
-                key = f"artwork/{album_id}"
-                s3_client.upload_file(
-                    artwork_file,
-                    settings.AWS_BUCKET_NAME_MUSIC,
-                    key)
+                    fh = open(artwork_file, "wb")
+                    fh.write(artwork[0].data)
+                    fh.close()
 
-                os.remove(artwork_file)
+                    key = f"artwork/{album_id}"
+                    s3_client.upload_file(
+                        artwork_file,
+                        settings.AWS_BUCKET_NAME_MUSIC,
+                        key)
+
+                    os.remove(artwork_file)
 
             os.remove(f"/tmp/{sha1sum}")
 
