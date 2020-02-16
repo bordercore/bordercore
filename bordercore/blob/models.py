@@ -45,6 +45,17 @@ FILE_TYPES_TO_INGEST = [
     'txt'
 ]
 
+# These blobs are too big to be indexed by Elasticsearch,
+# generating "Broken pip" errors.
+
+BLOBS_NOT_TO_INDEX = [
+    "0bc6586a-4e8b-4644-b863-374b9fc514fa",
+    "56ba664e-e918-4598-b198-8e01da064f75",
+    "95546f46-3842-49d4-93d3-82fad914e3ce",
+    "b9d3b971-682a-42ba-9db4-6b867edd60eb",
+    "ed124f8d-e5c1-4221-bad4-74b64bac152e"
+]
+
 log = logging.getLogger(f"bordercore.{__name__}")
 
 

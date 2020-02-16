@@ -17,19 +17,13 @@ django.setup()
 from django.contrib.auth.models import User
 
 from accounts.models import SortOrder
-from blob.models import Document, MetaData
+from blob.models import Document, MetaData, BLOBS_NOT_TO_INDEX
 from collection.models import Collection
 from tag.models import Tag
 
 bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 
 s3_client = boto3.client("s3")
-
-blobs_to_skip = [
-    "0bc6586a-4e8b-4644-b863-374b9fc514fa",
-    "56ba664e-e918-4598-b198-8e01da064f75",
-    "95546f46-3842-49d4-93d3-82fad914e3ce",
-]
 
 
 @pytest.fixture()
@@ -275,11 +269,9 @@ def test_favorite_tags_sort_order():
 def test_blobs_in_db_exist_in_elasticsearch(es):
     "Assert that all blobs in the database exist in Elasticsearch"
 
-    blobs = Document.objects.all()
+    blobs = Document.objects.exclude(uuid__in=BLOBS_NOT_TO_INDEX)
 
     for b in blobs:
-        if str(b.uuid) in blobs_to_skip:
-            continue
         search_object = {
             "query": {
                 "term": {
@@ -424,7 +416,7 @@ def test_collection_blobs_exists_in_elasticsearch(es):
         for blob_info in c.blob_list:
 
             blob = Document.objects.get(pk=blob_info["id"])
-            if str(blob.uuid) in blobs_to_skip:
+            if str(blob.uuid) in BLOBS_NOT_TO_INDEX:
                 continue
 
             search_object = {
@@ -443,16 +435,11 @@ def test_collection_blobs_exists_in_elasticsearch(es):
 def test_blob_metadata_exists_in_elasticsearch(es):
     "Assert that blob metadata exists in Elasticsearch"
 
-    metadata = MetaData.objects.all()
+    metadata = MetaData.objects.exclude(blob__uuid__in=BLOBS_NOT_TO_INDEX)
 
     for m in metadata:
-        if str(m.blob.uuid) in blobs_to_skip:
-            continue
         name = m.name.lower()
         if name == "is_book" or name == "":
-            continue
-        # TODO: Temporary
-        if name == "url" or name == "description" or name == "subtitle":
             continue
 
         search_object = {
@@ -500,12 +487,9 @@ def test_elasticsearch_search(es):
 def test_blob_tags_match_elasticsearch(es):
     "Assert that all blob tags match those found in Elasticsearch"
 
-    blobs = Document.objects.filter(tags__isnull=False)
+    blobs = Document.objects.filter(tags__isnull=False).exclude(uuid__in=BLOBS_NOT_TO_INDEX)
 
     for b in blobs:
-
-        if str(b.uuid) in blobs_to_skip:
-            continue
 
         tag_query = [
             {
@@ -545,8 +529,6 @@ def test_blobs_have_proper_metadata():
 
     for blob in Document.objects.filter(~Q(file="")):
 
-        if blob.uuid in blobs_to_skip:
-            continue
         obj = s3.Object(bucket_name=bucket_name, key=blob.get_s3_key())
         try:
             obj.metadata["file-modified"]

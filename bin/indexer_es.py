@@ -17,7 +17,7 @@ from blob.elasticsearch_indexer import index_blob
 
 django.setup()
 
-from blob.models import Document
+from blob.models import Document, BLOBS_NOT_TO_INDEX
 
 
 urllib3.disable_warnings()
@@ -82,7 +82,7 @@ if len(sys.argv) == 2:
     blobs = Document.objects.filter(uuid=sys.argv[1])
 else:
     # All blobs
-    blobs = Document.objects.all().order_by("created")
+    blobs = Document.objects.exclude(uuid__in=BLOBS_NOT_TO_INDEX).order_by("created")
 
 last_blob = get_last_blob()
 blob = None
@@ -91,19 +91,11 @@ go = False
 blob_count = 0
 limit = 10000
 
-blobs_to_skip = [
-    "0bc6586a-4e8b-4644-b863-374b9fc514fa",
-    "56ba664e-e918-4598-b198-8e01da064f75",
-    "95546f46-3842-49d4-93d3-82fad914e3ce",
-]
-
 blob_batch = []
 
 for blob_info in blobs:
 
     try:
-        if str(blob_info.uuid) in blobs_to_skip:
-            continue
 
         print(f"{blob_count} {blob_info.uuid}")
 
