@@ -1,10 +1,12 @@
 import logging
 import os
+import re
 
 import boto3
 from botocore.errorfactory import ClientError
 import django
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Min, Max, Q
 import pytest
 
@@ -283,6 +285,29 @@ def test_blobs_in_db_exist_in_elasticsearch(es):
 
         found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["total"]["value"]
         assert found == 1, f"blob found in the database but not in Elasticsearch, uuid={b.uuid}"
+
+
+def test_blobs_in_s3_exist_in_db():
+    "Assert that all blobs in S3 also exist in the database"
+
+    s3_resource = boto3.resource("s3")
+
+    unique_sha1sums = {}
+
+    paginator = s3_resource.meta.client.get_paginator("list_objects")
+    page_iterator = paginator.paginate(Bucket=bucket_name)
+
+    for page in page_iterator:
+        for key in page["Contents"]:
+            m = re.search(r"^blobs/\w{2}/(\w{40})/", str(key["Key"]))
+            if m:
+                unique_sha1sums[m.group(1)] = True
+
+    for key in unique_sha1sums.keys():
+        try:
+            Document.objects.get(sha1sum=key)
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist(f"Blob found in S3 but not in DB: {key}")
 
 
 def test_images_have_thumbnails():
