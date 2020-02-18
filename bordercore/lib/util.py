@@ -1,4 +1,14 @@
+import os
 import string
+
+
+def get_missing_ids(expected, found):
+
+    found_ids = [int(x["_id"].split("_")[-1]) for x in found["hits"]["hits"]]
+
+    missing = [str(x.id) for x in expected if x.id not in found_ids]
+
+    return ", ".join(missing)
 
 
 def remove_non_ascii_characters(input_string, default="Default"):

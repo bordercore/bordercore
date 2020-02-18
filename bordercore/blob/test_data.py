@@ -272,20 +272,40 @@ def test_favorite_tags_sort_order():
 def test_blobs_in_db_exist_in_elasticsearch(es):
     "Assert that all blobs in the database exist in Elasticsearch"
 
-    blobs = Document.objects.exclude(uuid__in=BLOBS_NOT_TO_INDEX)
+    blobs = Document.objects.exclude(uuid__in=BLOBS_NOT_TO_INDEX).only("uuid")
+    step_size = 100
+    blob_count = blobs.count()
 
-    for b in blobs:
+    for batch in range(0, blob_count, step_size):
+
+        # The batch_size will always be equal to "step_size", except probably
+        #  the last batch, which will be less.
+        batch_size = step_size if blob_count - batch > step_size else blob_count - batch
+
+        query = [
+            {
+                "term": {
+                    "_id": str(x.uuid)
+                }
+            }
+            for x
+            in blobs[batch:batch + step_size]
+        ]
+
         search_object = {
             "query": {
-                "term": {
-                    "uuid.keyword": b.uuid
+                "bool": {
+                    "should": query
                 }
             },
-            "_source": ["uuid"]
+            "size": batch_size,
+            "_source": [""]
         }
 
-        found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["total"]["value"]
-        assert found == 1, f"blob found in the database but not in Elasticsearch, uuid={b.uuid}"
+        found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+
+        assert found["hits"]["total"]["value"] == batch_size,\
+            "blobs found in the database but not in Elasticsearch: " + get_missing_ids(blobs[batch:batch + step_size], found)
 
 
 def test_blobs_in_s3_exist_in_db():
