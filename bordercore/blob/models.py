@@ -142,20 +142,6 @@ class Document(TimeStampedModel, AmazonMixin):
 
         return switcher.get(argument, "")
 
-    def is_image(self):
-        if self.file:
-            _, file_extension = os.path.splitext(str(self.file))
-            if file_extension[1:].lower() in ['gif', 'jpg', 'jpeg', 'png']:
-                return True
-        return False
-
-    def is_pdf(self):
-        if self.file:
-            _, file_extension = os.path.splitext(str(self.file))
-            if file_extension[1:].lower() in ['pdf']:
-                return True
-        return False
-
     def get_parent_dir(self):
         return "{}/{}/{}".format(settings.MEDIA_ROOT, self.sha1sum[0:2], self.sha1sum)
 

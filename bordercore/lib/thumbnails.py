@@ -5,26 +5,11 @@ from pdf2image import convert_from_path
 from PIL import Image
 from PyPDF2 import PdfFileReader, PdfFileWriter
 
+from .util import is_image, is_pdf
+
 logging.getLogger().setLevel(logging.INFO)
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
-
-
-def is_image(file):
-
-    if file:
-        _, file_extension = os.path.splitext(str(file))
-        if file_extension[1:].lower() in ["gif", "jpg", "jpeg", "png"]:
-            return True
-    return False
-
-
-def is_pdf(file):
-    if file:
-        _, file_extension = os.path.splitext(str(file))
-        if file_extension[1:].lower() in ["pdf"]:
-            return True
-    return False
 
 
 def create_thumbnail(infile, outdir):

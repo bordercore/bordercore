@@ -41,7 +41,8 @@ from urllib.parse import unquote_plus
 import uuid
 from PIL import Image
 
-from lib.thumbnails import create_thumbnail, is_image
+from lib.thumbnails import create_thumbnail
+from lib.util import is_image
 
 logging.getLogger().setLevel(logging.INFO)
 log = logging.getLogger(__name__)

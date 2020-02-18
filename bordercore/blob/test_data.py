@@ -11,6 +11,7 @@ from django.db.models import Count, Min, Max, Q
 import pytest
 
 from elasticsearch import Elasticsearch
+from lib.util import get_missing_ids, is_image
 
 logging.getLogger("elasticsearch").setLevel(logging.ERROR)
 
@@ -315,7 +316,7 @@ def test_images_have_thumbnails():
 
     for blob in Document.objects.filter(~Q(file="")):
 
-        if blob.is_image():
+        if is_image(blob.file):
             key = "{}/{}/{}/cover.jpg".format(
                 settings.MEDIA_ROOT,
                 blob.sha1sum[0:2],
@@ -560,7 +561,7 @@ def test_blobs_have_proper_metadata():
         except KeyError:
             assert False, f"blob uuid={blob.uuid} has no 'file-modified' S3 metadata"
 
-        if blob.is_image():
+        if is_image(blob.file):
             try:
                 obj.metadata["image-height"]
             except KeyError:
