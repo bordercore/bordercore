@@ -498,8 +498,11 @@ def test_blob_metadata_exists_in_elasticsearch(es):
                             }
                         },
                         {
-                            "term": {
-                                f"{name}.keyword": m.value
+                            "match": {
+                                f"{name}": {
+                                    "query": m.value,
+                                    "operator": "and"
+                                }
                             }
                         }
                     ]
