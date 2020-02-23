@@ -341,7 +341,6 @@ def test_images_have_thumbnails():
                 settings.MEDIA_ROOT,
                 blob.sha1sum[0:2],
                 blob.sha1sum,
-                blob.file
             )
             try:
                 s3_client.head_object(Bucket=bucket_name, Key=key)
