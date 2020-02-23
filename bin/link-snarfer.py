@@ -5,6 +5,7 @@ import email
 import logging
 import os
 import quopri
+from pathlib import Path
 import pprint
 import sys
 import re
@@ -57,7 +58,7 @@ def get_link_info(link):
 def store_email(title, lines):
 
     dir = "/tmp/link_snarfer"
-    if not os.path.isdir(dir):
+    if not Path(dir).isdir():
         os.makedirs(dir)
 
     filename = f"{title}-{time.time()}"

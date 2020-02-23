@@ -3,6 +3,7 @@ from datetime import datetime
 from io import BytesIO
 import logging
 import os
+from pathlib import PurePath
 import re
 
 import boto3
@@ -78,7 +79,7 @@ def get_doctype(blob, metadata):
 
 def is_ingestible_file(filename):
 
-    _, file_extension = os.path.splitext(filename)
+    file_extension = PurePath(str(filename)).suffix
     if file_extension[1:].lower() in FILE_TYPES_TO_INGEST:
         return True
     else:

@@ -1,4 +1,5 @@
 import os
+from pathlib import PurePath
 import string
 
 
@@ -31,7 +32,7 @@ def remove_non_ascii_characters(input_string, default="Default"):
 def is_image(file):
 
     if file:
-        _, file_extension = os.path.splitext(str(file))
+        file_extension = PurePath(str(file)).suffix
         if file_extension[1:].lower() in ["gif", "jpg", "jpeg", "png"]:
             return True
     return False
@@ -40,7 +41,7 @@ def is_image(file):
 def is_pdf(file):
 
     if file:
-        _, file_extension = os.path.splitext(str(file))
+        file_extension = PurePath(str(file)).suffix
         if file_extension[1:].lower() in ["pdf"]:
             return True
     return False

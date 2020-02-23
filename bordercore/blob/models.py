@@ -1,8 +1,7 @@
 import hashlib
 import json
 import logging
-import os
-import os.path
+from pathlib import PurePath
 import re
 import urllib.parse
 import uuid
@@ -162,7 +161,7 @@ class Document(TimeStampedModel, AmazonMixin):
             return title
         else:
             if use_filename_if_present:
-                return os.path.basename(str(self.file))
+                return PurePath(str(self.file)).name
             else:
                 return "No title"
 
@@ -316,7 +315,7 @@ class Document(TimeStampedModel, AmazonMixin):
     @staticmethod
     def is_ingestible_file(filename):
 
-        _, file_extension = os.path.splitext(filename)
+        file_extension = PurePath(str(filename)).suffix
         if file_extension[1:].lower() in FILE_TYPES_TO_INGEST:
             return True
         else:
@@ -332,15 +331,16 @@ class Document(TimeStampedModel, AmazonMixin):
 
         b = Document.objects.get(user=user, sha1sum=sha1sum)
 
-        prefix, filename = os.path.split(b.get_s3_key())
+        p = PurePath(b.get_s3_key())
+        prefix = p.parent
 
         s3 = boto3.resource("s3")
         bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
 
-        objects = [os.path.split(x.key)[1] for x in list(bucket.objects.filter(Delimiter="/", Prefix=f"{prefix}/"))]
+        objects = [PurePath(x.key).name for x in list(bucket.objects.filter(Delimiter="/", Prefix=f"{prefix}/"))]
 
         # Is the blob itself an image?
-        _, file_extension = os.path.splitext(b.file.name)
+        file_extension = PurePath(b.file.name).suffix
         if file_extension[1:].lower() in ["gif", "jpg", "jpeg", "png"]:
             # If so, look for a thumbnail.  Otherwise return the image itself
             if size == "small" and "cover.jpg" in objects:

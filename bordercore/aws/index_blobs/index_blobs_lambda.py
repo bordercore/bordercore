@@ -3,6 +3,7 @@ import logging
 import os
 import re
 from os.path import basename
+from pathlib import PurePath
 
 import boto3
 
@@ -50,7 +51,7 @@ def handler(event, context):
                     # TODO Throw more specific exception
                     raise Exception(f"Can't parse sha1sum from key: {key}")
 
-                if basename(key) == "cover.jpg" or basename(key).startswith("cover-"):
+                if PurePath(key).name == "cover.jpg" or PurePath(key).name.startswith("cover-"):
                     log.info(f"Skipping blob")
                     continue
 

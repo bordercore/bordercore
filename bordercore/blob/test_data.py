@@ -397,6 +397,7 @@ def test_elasticsearch_blobs_exist_in_s3(es):
 #     conn = SolrConnection("http://{}:{}/{}".format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
 #     response = conn.raw_query(**solr_args)
 #     data = json.loads(response.decode("UTF-8"))["response"]
+#     TODO: Use pathlib instead of os.path
 #     for result in data["docs"]:
 #         assert os.path.isfile(result.get("filepath", "")) is not False, "blob {} exists in Solr but not on the filesystem".format(result["sha1sum"])
 
@@ -443,7 +444,7 @@ def test_elasticsearch_blobs_exist_in_db(es):
 
 #     owners = ("celery", "www-data")
 #     walk_dir = "/home/media/blobs/"
-
+#     TODO: Use pathlib instead of os.path
 #     for root, subdirs, files in os.walk(walk_dir):
 #         for subdir in subdirs:
 #             dir_path = os.path.join(root, subdir)

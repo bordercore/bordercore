@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import PurePath
 
 from pdf2image import convert_from_path
 from PIL import Image
@@ -40,7 +41,7 @@ def create_thumbnail_from_pdf(infile, outdir, page_number=1):
     page_number = page_number - 1
 
     # Ex: Comprehensive Report_p1.pdf
-    outfile = "{}_p{}.pdf".format(os.path.splitext(infile)[0], page_number)
+    outfile = "{}_p{}.pdf".format(PurePath(infile).parent / PurePath(infile).stem, page_number)
 
     input_pdf = PdfFileReader(open(infile, "rb"))
 

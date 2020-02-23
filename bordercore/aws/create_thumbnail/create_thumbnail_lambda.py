@@ -37,6 +37,7 @@ import glob
 import json
 import logging
 import os
+from pathlib import PurePath
 from urllib.parse import unquote_plus
 import uuid
 from PIL import Image
@@ -92,7 +93,9 @@ def handler(event, context):
 
             log.info(f"Creating cover image for {key}")
 
-            path, filename = os.path.split(key)
+            p = PurePath(key)
+            path = p.parent
+            filename = p.name
 
             if is_cover_image(bucket, key):
                 log.info(f"Skipping cover image {filename}")
