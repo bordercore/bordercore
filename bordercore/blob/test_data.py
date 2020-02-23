@@ -351,6 +351,7 @@ def test_images_have_thumbnails():
 
 def test_elasticsearch_blobs_exist_in_s3(es):
     "Assert that all blobs in Elasticsearch exist in S3"
+
     search_object = {
         "query": {
             "bool": {
@@ -369,11 +370,21 @@ def test_elasticsearch_blobs_exist_in_s3(es):
 
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["hits"]
 
+    s3_resource = boto3.resource("s3")
+
+    unique_sha1sums = {}
+
+    paginator = s3_resource.meta.client.get_paginator("list_objects")
+    page_iterator = paginator.paginate(Bucket=bucket_name)
+
+    for page in page_iterator:
+        for key in page["Contents"]:
+            m = re.search(r"^blobs/\w{2}/(\w{40})/", str(key["Key"]))
+            if m:
+                unique_sha1sums[m.group(1)] = True
+
     for blob in found:
-        try:
-            key = f"{settings.MEDIA_ROOT}/{blob['_source']['sha1sum'][:2]}/{blob['_source']['sha1sum']}/{blob['_source']['filename']}"
-            s3_client.head_object(Bucket=bucket_name, Key=key)
-        except ClientError:
+        if not blob["_source"]["sha1sum"] in unique_sha1sums:
             assert False, f"blob {blob['_source']['sha1sum']} exists in Elasticsearch but not in S3"
 
 
