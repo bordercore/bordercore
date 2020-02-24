@@ -370,12 +370,4 @@ def record_result(request, question_id, result):
 
     question.save()
 
-    deck = Deck.objects.get(user=request.user, pk=question.deck.id)
-
-    return render(request, 'drill/question.html',
-                  {'section': SECTION,
-                   'deck': deck,
-                   'question': question,
-                   'state_name': Question.get_state_name(question.state),
-                   'learning_step_count': question.get_learning_step_count(),
-                   'title': 'Drill :: Question Detail'})
+    return redirect('deck_study', deck_id=question.deck.id)
