@@ -1,20 +1,21 @@
 import base64
-from datetime import datetime
-from io import BytesIO
 import logging
 import os
-from pathlib import PurePath
 import re
+from datetime import datetime
+from io import BytesIO
+from pathlib import PurePath
 
 import boto3
-from elasticsearch import RequestsHttpConnection
-from elasticsearch.helpers import bulk
-from elasticsearch_dsl import Boolean, Document as Document_ES, DateRange, Integer, Long, Range, Text
-from elasticsearch_dsl.connections import connections
-import magic
 import psycopg2
 import psycopg2.extras
 
+import magic
+from elasticsearch import RequestsHttpConnection
+from elasticsearch_dsl import Boolean, DateRange
+from elasticsearch_dsl import Document as Document_ES
+from elasticsearch_dsl import Integer, Long, Range, Text
+from elasticsearch_dsl.connections import connections
 
 ES_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT", "localhost")
 ES_PORT = 9200
@@ -252,10 +253,10 @@ def index_blob(**kwargs):
         article.content_type = magic.from_buffer(contents, mime=True)
 
         if is_ingestible_file(blob_info["file"]):
+            pipeline_args = dict(pipeline="attachment")
             article.data = base64.b64encode(contents).decode("ascii")
-            pipeline_args = dict(max_chunk_bytes=1268032, chunk_size=1, pipeline="attachment")
 
-    bulk(connections.get_connection(), (d.to_dict(True) for d in [article]), pipeline_args)
+    article.save(**pipeline_args)
 
     # Rollback to avoid idle transactions
     db_conn.rollback()
