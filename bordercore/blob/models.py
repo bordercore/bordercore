@@ -48,9 +48,10 @@ FILE_TYPES_TO_INGEST = [
 # generating "Broken pip" errors.
 
 BLOBS_NOT_TO_INDEX = [
-    "0bc6586a-4e8b-4644-b863-374b9fc514fa",
+    "50d894af-8dad-44ab-a15e-2435dd8f827a",
     "56ba664e-e918-4598-b198-8e01da064f75",
     "95546f46-3842-49d4-93d3-82fad914e3ce",
+    "9c461f7e-7a1b-4f44-a312-053184d803c0",
     "b9d3b971-682a-42ba-9db4-6b867edd60eb",
     "ed124f8d-e5c1-4221-bad4-74b64bac152e"
 ]
