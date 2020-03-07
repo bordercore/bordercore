@@ -4,9 +4,8 @@ from __future__ import absolute_import
 
 from .base import *
 
-
 # Elasticsearch config
-ELASTICSEARCH_ENDPOINT = "http://ec2-3-220-164-234.compute-1.amazonaws.com:9200"
+ELASTICSEARCH_ENDPOINT = "http://ec2-18-209-231-14.compute-1.amazonaws.com:9200"
 
 LOGGING['handlers']['bordercore'] = {
     'level': 'DEBUG',
