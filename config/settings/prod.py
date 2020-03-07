@@ -10,7 +10,9 @@ ELASTICSEARCH_ENDPOINT = "http://ec2-3-220-164-234.compute-1.amazonaws.com:9200"
 
 LOGGING['handlers']['bordercore'] = {
     'level': 'DEBUG',
-    'class': 'logging.FileHandler',
+    'class': 'logging.handlers.RotatingFileHandler',
+    'maxBytes': 1024 * 1024 * 10,  # 10MB
+    'backupCount': 5,
     'formatter': 'standard',
     'filename': '/var/log/django/bordercore.log'
 }
