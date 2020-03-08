@@ -1,23 +1,24 @@
+import argparse
 import os
+import signal
 import sys
 
 import boto3
-from elasticsearch import Elasticsearch
-from elasticsearch.helpers import bulk
-from elasticsearch_dsl.connections import connections
-import elasticsearch.exceptions
 import psycopg2
 import psycopg2.extras
 import urllib3
 
 import django
-from django.conf import settings
-
+import elasticsearch.exceptions
 from blob.elasticsearch_indexer import index_blob
+from django.conf import settings
+from elasticsearch import Elasticsearch
+from elasticsearch.helpers import bulk
+from elasticsearch_dsl.connections import connections
 
 django.setup()
 
-from blob.models import Document, BLOBS_NOT_TO_INDEX
+from blob.models import Document, BLOBS_NOT_TO_INDEX  # isort:skip
 
 
 urllib3.disable_warnings()
@@ -25,7 +26,7 @@ urllib3.disable_warnings()
 BATCH_SIZE = 10
 LAST_BLOB_FILE = "/tmp/indexer_es_last_blob.txt"
 
-# Use ssh tunnel to connect to VPC endpoint
+# Use ssh tunnel to connect to Elasticsearch endpoint
 s3_bucket_name = "bordercore-blobs"
 s3_key_prefix = "blobs"
 
@@ -44,6 +45,21 @@ db_database = "bordercore"
 
 db_conn = psycopg2.connect("dbname=%s port=5432 host=%s user=%s password=%s" % (db_database, db_endpoint, db_username, db_password))
 
+debug_count = 0
+
+
+def handler(signum, frame):
+    print(f"Count: {debug_count}")
+    sys.exit(0)
+
+
+signal.signal(signal.SIGINT, handler)
+
+
+def write_checkpoint(uuid):
+    with open(LAST_BLOB_FILE, "w") as file:
+        file.write(str(uuid))
+
 
 def get_last_blob():
 
@@ -58,6 +74,8 @@ def get_last_blob():
 
 def blob_exists_in_es(uuid):
 
+    global debug_count
+    debug_count += 1
     search_object = {"query": {"term": {"uuid.keyword": uuid}}, "_source": ["uuid"]}
     results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
     return int(results["hits"]["total"]["value"])
@@ -75,21 +93,43 @@ def add_to_batch(blob, ingestible=False):
         blob_batch = []
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--force", "-f",
+                    help="force indexing even if the blob exists",
+                    action="store_true")
+parser.add_argument("--limit", "-l", default=100000, type=int,
+                    help="limit the number of blobs indexed")
+parser.add_argument("--verbose", "-v",
+                    help="increase output verbosity",
+                    action="store_true")
+parser.add_argument("--uuid", "-u", type=str,
+                    help="the uuid of a single blob to index")
+
+args = parser.parse_args()
+
+force_index = args.force
+limit = args.limit
+verbose = args.verbose
+uuid = args.uuid
+
 es = Elasticsearch([settings.ELASTICSEARCH_ENDPOINT], verify_certs=False)
 
-if len(sys.argv) == 2:
+if uuid:
     # A single blob
-    blobs = Document.objects.filter(uuid=sys.argv[1])
+    blobs = Document.objects.filter(uuid=uuid)
 else:
     # All blobs
     blobs = Document.objects.exclude(uuid__in=BLOBS_NOT_TO_INDEX).order_by("created")
 
+    # Use this to only include "ingestible" file types
+    # blobs = Document.objects.exclude(uuid__in=BLOBS_NOT_TO_INDEX).filter(file__iregex=r".(azw3|chm|epub|html|pdf|txt)$").order_by("created")
+
 last_blob = get_last_blob()
 blob = None
 
-go = False
+go = True if uuid else False
+
 blob_count = 0
-limit = 10000
 
 blob_batch = []
 
@@ -97,9 +137,12 @@ for blob_info in blobs:
 
     try:
 
-        print(f"{blob_count} {blob_info.uuid}")
+        if verbose:
+            print(f"{blob_count} {blob_info.uuid}")
 
-        if go and blob_exists_in_es(blob_info.uuid):
+        if go and blob_exists_in_es(blob_info.uuid) and not force_index:
+            if verbose:
+                print(f"{blob_info.uuid} Blob already indexed. Not re-indexing")
             continue
 
         if last_blob != "" and not go:
@@ -114,8 +157,7 @@ for blob_info in blobs:
 
         print(f"{blob_info.uuid} {blob_info.file} {blob_info.title}")
 
-        with open(LAST_BLOB_FILE, "w") as file:
-            file.write(str(blob_info.uuid))
+        write_checkpoint(blob_info.uuid)
 
     except elasticsearch.exceptions.TransportError as e:
         print(f"{blob_info.uuid} Elasticsearch Error: {e}")
@@ -135,6 +177,5 @@ for blob_info in blobs:
 db_conn.commit()
 db_conn.close()
 
-# if blob:
-#     with open(LAST_BLOB_FILE, "w") as file:
-#         file.write(str(blob["uuid"]))
+if blob:
+    write_checkpoint(str(blob["uuid"]))
