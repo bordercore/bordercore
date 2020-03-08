@@ -1,14 +1,14 @@
 import hashlib
 import os
 
+from blob.models import ILLEGAL_FILENAMES, Document
 from django import forms
 from django.conf import settings
-from django.urls import reverse_lazy
-from django.forms import (ModelForm, Select, Textarea, TextInput, ValidationError)
+from django.forms import (ModelForm, Select, Textarea, TextInput,
+                          ValidationError)
 from django.forms.fields import CharField, IntegerField
+from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
-
-from blob.models import Document
 from lib.fields import ModelCommaSeparatedChoiceField
 from tag.models import Tag
 
@@ -63,6 +63,15 @@ class DocumentForm(ModelForm):
         #         self.add_error("file", ValidationError("Rename failed: file exists"))
 
         return cleaned_data
+
+    def clean_filename(self):
+
+        filename = str(self.cleaned_data.get("filename"))
+
+        if filename in ILLEGAL_FILENAMES:
+            self.add_error("filename", ValidationError(f"Error: Illegal filename: {filename}"))
+
+        return filename
 
     # def clean_file(self):
     #     file = self.cleaned_data.get("file")
