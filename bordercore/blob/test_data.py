@@ -4,25 +4,25 @@ import re
 
 import boto3
 from botocore.errorfactory import ClientError
+
 import django
+import pytest
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Count, Min, Max, Q
-import pytest
-
+from django.db.models import Count, Max, Min, Q
 from elasticsearch import Elasticsearch
-from lib.util import get_missing_ids, is_image
+from lib.util import get_missing_blob_ids, is_image
 
 logging.getLogger("elasticsearch").setLevel(logging.ERROR)
 
 django.setup()
 
-from django.contrib.auth.models import User
+from accounts.models import SortOrder  # isort:skip
+from django.contrib.auth.models import User  # isort:skip
+from blob.models import BLOBS_NOT_TO_INDEX, Document, MetaData   # isort:skip
+from collection.models import Collection  # isort:skip
+from tag.models import Tag  # isort:skip
 
-from accounts.models import SortOrder
-from blob.models import Document, MetaData, BLOBS_NOT_TO_INDEX
-from collection.models import Collection
-from tag.models import Tag
 
 bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 
@@ -305,7 +305,7 @@ def test_blobs_in_db_exist_in_elasticsearch(es):
         found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 
         assert found["hits"]["total"]["value"] == batch_size,\
-            "blobs found in the database but not in Elasticsearch: " + get_missing_ids(blobs[batch:batch + step_size], found)
+            "blobs found in the database but not in Elasticsearch: " + get_missing_blob_ids(blobs[batch:batch + step_size], found)
 
 
 def test_blobs_in_s3_exist_in_db():

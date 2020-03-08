@@ -1,13 +1,12 @@
 import django
+import pytest
 from django.conf import settings
 from elasticsearch import Elasticsearch
-import pytest
-
-from lib.util import get_missing_ids
+from lib.util import get_missing_bookmark_ids
 
 django.setup()
 
-from bookmark.models import Bookmark
+from bookmark.models import Bookmark  # isort:skip
 
 
 @pytest.fixture()
@@ -70,7 +69,7 @@ def test_bookmark_tags_match_elasticsearch_bulk(es):
 
         found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
         assert found["hits"]["total"]["value"] == batch_size, \
-            "bookmark's tags don't match those found in Elasticsearch: " + get_missing_ids(bookmarks[batch:batch + step], found)
+            "bookmark's tags don't match those found in Elasticsearch: " + get_missing_bookmark_ids(bookmarks[batch:batch + step], found)
 
 
 def test_elasticsearch_bookmarks_exist_in_db(es):

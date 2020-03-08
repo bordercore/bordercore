@@ -1,14 +1,20 @@
-import os
-from pathlib import PurePath
 import string
+from pathlib import PurePath
 
 
-def get_missing_ids(expected, found):
+def get_missing_blob_ids(expected, found):
 
-    found_ids = [int(x["_id"].split("_")[-1]) for x in found["hits"]["hits"]]
+    found_ids = [x["_id"] for x in found["hits"]["hits"]]
 
-    missing = [str(x.id) for x in expected if x.id not in found_ids]
+    missing = [str(x.uuid) for x in expected if str(x.uuid) not in found_ids]
+    return ", ".join(missing)
 
+
+def get_missing_bookmark_ids(expected, found):
+
+    found_ids = [x["_id"].split("_")[-1] for x in found["hits"]["hits"]]
+
+    missing = [str(x.id) for x in expected if str(x.id) not in found_ids]
     return ", ".join(missing)
 
 
