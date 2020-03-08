@@ -1,12 +1,19 @@
-from collections import OrderedDict
 import datetime
 import logging
 import random
 import re
+from collections import OrderedDict
 from urllib.parse import urlparse
 
 import boto3
 from botocore.errorfactory import ClientError
+
+import humanize
+from amazonproduct import API
+from amazonproduct.errors import NoExactMatchesFound
+from blob.forms import DocumentForm
+from blob.models import Document, MetaData
+from collection.models import Collection
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -18,12 +25,6 @@ from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from PyPDF2.utils import PdfReadError
-
-from amazonproduct import API
-from amazonproduct.errors import NoExactMatchesFound
-from blob.forms import DocumentForm
-from blob.models import Document, MetaData
-from collection.models import Collection
 
 SECTION = 'Blob'
 
@@ -163,6 +164,8 @@ class BlobDetailView(DetailView):
                 )
         try:
             context["elasticsearch_info"] = self.object.get_elasticsearch_info()
+            if self.object.sha1sum and context["elasticsearch_info"].get("size"):
+                context["size"] = humanize.naturalsize(context["elasticsearch_info"]["size"])
             if context["elasticsearch_info"].get("content_type", None):
                 context["content_type"] = Document.get_content_type(context["elasticsearch_info"]["content_type"])
         except IndexError:

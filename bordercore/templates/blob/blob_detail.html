@@ -58,6 +58,10 @@
             <strong>Sha1sum</strong><br />
             <small><a href="{{ aws_url }}">{{ object.sha1sum }}</a></small>
         </div>
+        <div>
+            <strong>Size</strong><br />
+            <small>{{ size }}</small>
+        </div>
     {% endif %}
 
     {% if solr_info.note %}

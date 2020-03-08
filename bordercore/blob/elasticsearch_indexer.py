@@ -250,6 +250,7 @@ def index_blob(**kwargs):
         # Even if this is not an ingestible file, we need to download the blob
         #  in order to determine the content type
         contents = get_blob_contents_from_s3(blob_info)
+        article.size = len(contents)
         article.content_type = magic.from_buffer(contents, mime=True)
 
         if is_ingestible_file(blob_info["file"]):

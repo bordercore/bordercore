@@ -15,6 +15,7 @@ feedparser==5.2.1
 futures==3.0.3
 google-api-python-client==1.6.2
 httplib2==0.10.3
+humanize==2.0.0
 lxml==4.3.3
 Markdown==2.6
 mutagen==1.28
