@@ -78,7 +78,15 @@ Easiness Factor: <strong>{{ question.efactor|floatformat:1 }}</strong>
 
     <h1>
         {{ question.get_question|safe }}
-        <hr />
+    </h1>
+    {% if question.tags.all %}
+            Tags:
+        {% for tag in question.tags.all %}
+            <a class="badge badge-primary" href="{% url 'kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
+        {% endfor %}
+        <br /><br />
+    {% endif %}
+    <h1>
         {{ question.get_answer|safe }}
     </h1>
 
