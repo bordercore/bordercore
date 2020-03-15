@@ -231,7 +231,7 @@ def list(request,
         # Bookmarks are guaranteed to be returned in sorted order
         #  because of the "ordering" field in TagBookmarkSortOrder's
         #  "Meta" inner class
-        bookmark_info = [(x.bookmark, x.note) for x in tagbookmark.tagbookmarksortorder_set.all()]
+        bookmark_info = [(x.bookmark, x.note) for x in tagbookmark.tagbookmarksortorder_set.all().select_related("bookmark")]
 
         # If there is an associated note, add it to the bookmark object
         sorted_bookmarks = []
