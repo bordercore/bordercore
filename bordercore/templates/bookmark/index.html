@@ -304,11 +304,11 @@
                                     <i class="fa fa-clipboard"></i>
                                 {% endif %}
                             </span>
-                            {% if link.tag_list %}
-                                {% for tag in link.tag_list %}
-                                    <a class="badge badge-info" href="{% url 'bookmark_list' tag %}">{{ tag }}</a>
-                                {% endfor %}
-                            {% endif %}
+                            {% for tag in link.tags.all %}
+                                {% if tag.name != tag_filter %}
+                                    <a class="badge badge-info" href="{% url 'bookmark_tag' tag.name %}">{{ tag.name }}</a>
+                                {% endif %}
+                            {% endfor %}
                         </div>
                     </li>
 
