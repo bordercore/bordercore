@@ -4,7 +4,7 @@
 
 {% endblock %}
 
-{% block title %} {{ section }} :: Deck List {% endblock %}
+{% block title %} {{ section }} :: {{ title }} {% endblock %}
 
 {% block content %}
 
@@ -24,25 +24,47 @@
 
         $(document).ready(function() {
 
+            var engine = new Bloodhound({
+                name: "tags",
+                remote: {
+                    url: "{% url 'drill_tag_search' %}?query=%QUERY",
+                    wildcard: "%QUERY"
+                },
+                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
+                queryTokenizer: Bloodhound.tokenizers.whitespace
+            });
+
+            engine.initialize();
+
+            $("#id_tags").typeahead({
+                autoselect: true
+            }, {
+                displayKey: "value",
+                source: engine,
+            });
+
+            $("#id_tags").bind("typeahead:selected", function(obj, datum, name) {
+                window.location="{% url 'study_tag' 666 %}".replace(/666$/, datum.value);
+            });
+
             function formatName( data, type, row ) {
-                return '<a href="{% url 'deck_detail' 666 %}">'.replace(/666/, row[5]) + row[0] + '</a>';
+                return '<a href="{% url 'study_tag' 666 %}">'.replace(/666/, row[0]) + row[0] + '</a>';
             }
 
             table = $('#deck_list').DataTable( {
                 "info": false,
                 "paginate": false,
-                "sorting": [[1, 'desc']],
+                "sorting": [[3, 'asc']],
                 "filter": true,
                 "language": {
-                    "emptyTable": "No decks created"
+                    "emptyTable": "No questions created"
                 },
                 "lengthChange": false,
                 "dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'float-right col-lg-4'p>>",
                 "searchable": false,
                 "columnDefs": [
                     { "targets": [0], "sorting": [ "desc", "asc" ], "render": formatName, "useRendered": false  },
-                    { "targets": [1], "class": "monospaced", "sorting": [ "desc", "asc" ] },
-                    { "targets": [2,5], "visible": false },
+                    { "targets": [3,4], "visible": false },
                 ],
             } );
 
@@ -59,67 +81,6 @@
                 }
             } );
 
-            $('#btn-adddeck').click( function() {
-
-                $.ajax( { type: 'GET',
-                          url: '{% url 'deck_get_info' %}',
-                          data: { name: $('#name').val() }
-                          }).done(function( json ) {
-                    if (!json || json.error != null) {
-                        console.log("Error: " + json);
-                    } else {
-                        if (json.length > 0) {
-                            $('#feedback').fadeIn(1000).html("Sorry, a deck with that name already exists");
-                            setTimeout( function() {
-                                $('#feedback').fadeOut(1000);
-                            }, 3000);
-                        }
-                    }
-
-                });
-
-            });
-
-            $('#btn-add').on('click', function() {
-                $('#action-type').html('Add');
-                $('#btn-action').val('Add');
-                $("#form-deck-edit").attr("action", "{% url 'deck_add' %}");
-                $('#modalAdd').modal('show');
-            });
-
-            $('#btn-edit').on('click', function() {
-                var selectedId = $('#deck_list').DataTable().cell('.selected', 5).data();
-                console.log(selectedId);
-
-                $.ajax( { type: 'GET',
-                          url: '{% url 'deck_get_info' %}',
-                          data: { id: selectedId,
-                                  query_type: 'id' }
-                          }).done(function( json ) {
-                    if (!json || json.error != null) {
-                        console.log("Error: " + json);
-                    } else {
-                        $('#id_title').val(json.title);
-                        $('#id_description').val(json.description);
-                        console.log(json);
-                    }
-
-                    $('#action-type').html('Edit');
-                    $('#btn-action').val('Edit');
-                    $("#form-deck-edit").attr("action", '{% url 'deck_edit' 666 %}'.replace(/666$/, selectedId));
-                    $('#modalAdd').modal('show');
-
-                });
-
-                return false;
-            });
-
-            $("input.btn[value='Delete']").click( function() {
-                var selectedId = $('#deck_list').DataTable().cell('.selected', 5).data();
-                $("#form-deck-delete").attr("action", '{% url 'deck_delete' 666 %}'.replace(/666$/, selectedId));
-                $('#form-deck-delete').submit();
-            })
-
             $('#search').on('keydown', function(event, selection) {
                 if (((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13))) {
                     $("#form-deck-delete").attr('action', '{% url 'deck_search' %}');
@@ -131,17 +92,12 @@
                 }
             });
 
-            $('#modalAdd').on('shown.bs.modal', function() {
-                $('#id_title').focus();
-            })
-            $('#modalAdd').on('hidden.bs.modal', function () {
-                $('#id_title').val('');
-                $('#id_description').val('');
-                $('#id_tags').tagsinput('removeAll');
-            })
 
-            {% include "common/common-typeaheadjs-tagsinput.js" %}
-
+            $('#id_tags').on('itemAdded', function(event) {
+                console.log('got here' + event.item);
+                window.location='{% url 'study_tag' 666 %}'.replace(/666$/, event.item);
+                // event.item: contains the item
+            });
         });
 
 </script>
@@ -149,7 +105,7 @@
 <div class="row">
     <div class="col-lg-7">
 
-        <h1>Deck List</h1>
+        <h1>{{ title }}</h1>
 
     </div>
 </div>
@@ -159,14 +115,9 @@
         <form class="form-inline" role="form" id="form-deck-delete" method="POST" autocomplete="off">
             {% csrf_token %}
 
-            <div class="btn-group">
-                <input type="button" class="btn btn-secondary" id="btn-add" value="Add" />
-                <input type="button" class="btn btn-secondary" id="btn-edit" value="Edit" disabled="disabled" />
-                <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" disabled="disabled" />
-            </div>
-
             <div class="form-group">
                 <input id="search" name="search_term" type="text" style="width: 200px" class="form-control ml-3" placeholder="Search">
+                <input id="id_tags" name="tag" type="text" style="width: 200px" class="form-control ml-3" placeholder="Study by Tag">
             </div>
 
         </form>
@@ -178,41 +129,5 @@
         {% include "common/datatable.html" with data=info cols=cols id="deck_list" %}
     </div>
 </div>
-
-<form action="{% url 'deck_list' %}" method="post" id="form-deck-edit">
-    <div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel"><span id="action-type">Add</span> Deck</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                </div>
-                <div class="modal-body">
-                    {% csrf_token %}
-                    {% for field in form %}
-                        <div class="form-group{% if field.errors %} error{% endif %} row">
-                            <label class="col-lg-2 col-form-label" for="inputTitle">{{ field.label }}</label>
-
-                            <div class="col-lg-7">
-                                {{ field }}
-                                {% for error in field.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-
-                        </div>
-                    {% endfor %}
-
-                </div>
-                <div class="modal-footer">
-                    <label id="feedback" _class="alert alert-success"></label>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <input id="btn-action" class="btn btn-primary" type="submit" name="Go" value="Add" />
-                </div>
-
-            </div>
-        </div>
-    </div>
-</form>
 
 {% endblock %}

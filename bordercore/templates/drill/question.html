@@ -40,8 +40,8 @@ Easiness Factor: <strong>{{ question.efactor|floatformat:1 }}</strong>
 
             {% block breadcrumbs %}
                 <ul class="breadcrumb">
-                    <li class="breadcrumb-item"> <a href="{% url 'deck_list' %}">Deck List</a> </li>
-                    <li class="breadcrumb-item active">{{ deck.title }}</li>
+                    <li class="breadcrumb-item"> <a href="{% url 'deck_list' %}">Tag Categories</a> </li>
+                    <li class="breadcrumb-item active">{{ tag_list }}</li>
                 </ul>
             {% endblock %}
 
@@ -58,7 +58,7 @@ Easiness Factor: <strong>{{ question.efactor|floatformat:1 }}</strong>
     {% if object.tags.all %}
             Tags:
         {% for tag in object.tags.all %}
-            <a class="badge badge-primary" href="{% url 'kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
+            <a class="badge badge-primary" href="{% url 'study_tag' tag.name %}">{{ tag.name }}</a>
         {% endfor %}
         <br /><br />
     {% endif %}

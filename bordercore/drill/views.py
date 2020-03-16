@@ -1,17 +1,20 @@
+import time
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Max, Q
 from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.shortcuts import render, redirect
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, DeleteView, FormMixin, UpdateView
+from django.views.generic.edit import (CreateView, DeleteView, FormMixin,
+                                       UpdateView)
 from django.views.generic.list import ListView
-
 from drill.forms import DeckForm, QuestionForm
 from drill.models import Deck, Question
+from tag.models import Tag
 
 SECTION = "Drill"
 
@@ -75,41 +78,44 @@ class DeckDetailView(DetailView):
 
 
 @method_decorator(login_required, name='dispatch')
-class DeckListView(FormMixin, ListView):
+class DeckListView(ListView):
 
     context_object_name = "info"
-    form_class = DeckForm
-    model = Deck
+    template_name = "drill/deck_list.html"
 
     def get_context_data(self, **kwargs):
         context = super(DeckListView, self).get_context_data(**kwargs)
 
         info = []
 
-        for deck in context['object_list']:
-            if deck['max']:
-                last_reviewed = deck['max'].strftime('%b %d, %Y')
-                last_reviewed_sort = format(deck['max'], 'U')
+        for deck in self.object_list:
+            if deck["max"]:
+                last_reviewed = deck["max"].strftime("%b %d, %Y")
+                last_reviewed_sort = time.mktime(deck["max"].timetuple())
             else:
-                last_reviewed = ''
-                last_reviewed_sort = ''
-            info.append(dict(name=deck['title'],
-                             created=format(deck['created'].strftime('%b %d, %Y')),
-                             unixtime=format(deck['created'], 'U'),
-                             questioncount=deck['count'],
-                             lastreviewed=last_reviewed,
+                last_reviewed = ""
+                last_reviewed_sort = ""
+            info.append(dict(tag_name=deck["name"],
+                             question_count=deck["count"],
+                             last_reviewed=last_reviewed,
                              lastreviewed_sort=last_reviewed_sort,
-                             id=deck['id']))
+                             id=deck["id"]))
 
-        context['cols'] = ['name', 'created', 'unixtime', 'questioncount', 'lastreviewed', 'id']
-        context['section'] = SECTION
-        context['info'] = info
-        context['title'] = 'Deck List'
+        context["cols"] = ["tag_name", "question_count", "last_reviewed", "lastreviewed_sort", "id"]
+        context["section"] = SECTION
+        context["info"] = info
+        context["title"] = "Tag Categories"
 
         return context
 
     def get_queryset(self):
-        return Deck.objects.values('id', 'title', 'created').annotate(max=Max('question__last_reviewed')).annotate(count=Count('question')).filter(user=self.request.user)
+        # TODO: This query joins on drill_question_tags *twice*, which is
+        #  obviously inefficient. The "distinct=True" saves us for now
+        #  from returning duplicate rows
+        return Tag.objects.values("id", "name") \
+                          .annotate(count=Count("question", distinct=True)) \
+                          .annotate(max=Max("question__last_reviewed")) \
+                          .filter(question__user=self.request.user)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -238,6 +244,8 @@ class QuestionDetailView(DetailView):
         context['state_name'] = Question.get_state_name(self.object.state)
         context['learning_step_count'] = self.object.get_learning_step_count()
         context['title'] = 'Drill :: Question Detail'
+        context['tag_list'] = ", ".join([x.name for x in self.object.tags.all()])
+
         return context
 
 
@@ -319,6 +327,33 @@ def study_deck(request, deck_id):
 
 
 @login_required
+def study_tag(request, tag):
+
+    # Criteria for selecting a question:
+    #  The question hasn't been reviewed within its interval
+    #  The question is new (last_reviewed is null)
+    #  The question is still being learned
+
+    try:
+        question = Question.objects.raw("""
+ select * from drill_question dq
+ left join drill_question_tags dqt on (dq.id = dqt.question_id)
+ left join tag_tag tt on (dqt.tag_id = tt.id)
+ where (date_part('day', now() - last_reviewed) > interval
+        or last_reviewed is null
+        or state='L')
+ and tt.name = %s
+ and user_id = %s
+ order by random()
+    limit 1""", [tag, request.user.id])[0]
+    except IndexError:
+        question = Question.objects.filter(user=request.user, tags__name=tag).order_by('?')[0]
+        messages.add_message(request, messages.INFO, 'Nothing to drill. Here''s a random question.')
+
+    return redirect('question_detail', question_id=question.id)
+
+
+@login_required
 def show_answer(request, question_id):
 
     question = Question.objects.get(user=request.user, pk=question_id)
@@ -371,3 +406,10 @@ def record_result(request, question_id, result):
     question.save()
 
     return redirect('deck_study', deck_id=question.deck.id)
+
+
+def tag_search(request):
+
+    tags = Tag.objects.filter(question__user=request.user, name__icontains=request.GET.get("query", ""), question__isnull=False).distinct("name")
+
+    return JsonResponse([{"value": x.name, "is_meta": x.is_meta} for x in tags], safe=False)

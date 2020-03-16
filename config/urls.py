@@ -99,6 +99,8 @@ urlpatterns = [
     path('drill/study/<int:deck_id>/', drill_views.study_deck, name='deck_study'),
     path('drill/answer/<int:question_id>/', drill_views.show_answer, name='answer'),
     path('drill/result/<int:question_id>/<str:result>', drill_views.record_result, name='record_result'),
+    path('drill/study/tag/<str:tag>', drill_views.study_tag, name='study_tag'),
+    path('drill/tagsearch/', drill_views.tag_search, name='drill_tag_search'),
 
     path('feed/sort_feed/', feed_views.sort_feed, name='sort_feed'),
     path('feed/edit/<int:feed_id>', feed_views.feed_edit, name='feed_edit'),
