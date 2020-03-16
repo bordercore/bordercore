@@ -1,4 +1,5 @@
 {% load dict_get %}
+{% load title_custom %}
 
 {% if caption %}
 
@@ -10,7 +11,7 @@
     <thead>
       <tr>
 {% for col in cols %}
-<th>{{ col|title }}</th>
+<th>{{ col|title_custom }}</th>
 {% endfor %}
 </tr>
 </thead>
