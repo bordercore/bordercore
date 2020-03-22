@@ -1,6 +1,6 @@
 import logging
-import os
 import re
+from pathlib import Path
 
 import boto3
 from botocore.errorfactory import ClientError
@@ -19,10 +19,12 @@ django.setup()
 
 from accounts.models import SortOrder  # isort:skip
 from django.contrib.auth.models import User  # isort:skip
-from blob.models import BLOBS_NOT_TO_INDEX, Document, MetaData   # isort:skip
+from blob.models import BLOBS_NOT_TO_INDEX, Document, ILLEGAL_FILENAMES, MetaData   # isort:skip
 from collection.models import Collection  # isort:skip
 from tag.models import Tag  # isort:skip
 
+
+BLOB_DIR = "/home/media"
 
 bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 
@@ -259,16 +261,6 @@ def test_favorite_tags_sort_order():
     assert len(q) == 0, "Multiple sort_order values found"
 
 
-# def test_blobs_on_filesystem_exist_in_db():
-#     "Assert that all blobs found on the filesystem exist in the database"
-#     p = re.compile(settings.MEDIA_ROOT + "/\w\w/(\w{40})")
-
-#     for root, subdirs, files in os.walk(settings.MEDIA_ROOT):
-#         matches = p.match(root)
-#         if matches:
-#             assert Document.objects.filter(sha1sum=matches.group(1)).count() == 1, "blob {} exists on filesystem but not in database".format(matches.group(1))
-
-
 def test_blobs_in_db_exist_in_elasticsearch(es):
     "Assert that all blobs in the database exist in Elasticsearch"
 
@@ -387,19 +379,22 @@ def test_elasticsearch_blobs_exist_in_s3(es):
             assert False, f"blob {blob['_source']['sha1sum']} exists in Elasticsearch but not in S3"
 
 
-# def test_solr_blobs_exist_on_filesystem():
-#     "Assert that all blobs in Solr exist on the filesystem"
-#     solr_args = {"q": "sha1sum:[* TO *]",
-#                  "fl": "filepath,sha1sum",
-#                  "rows": 2147483647,
-#                  "wt": "json"}
+def test_blobs_in_s3_exist_on_filesystem():
+    "Assert that all blobs in S3 exist on the filesystem"
 
-#     conn = SolrConnection("http://{}:{}/{}".format(settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-#     response = conn.raw_query(**solr_args)
-#     data = json.loads(response.decode("UTF-8"))["response"]
-#     TODO: Use pathlib instead of os.path
-#     for result in data["docs"]:
-#         assert os.path.isfile(result.get("filepath", "")) is not False, "blob {} exists in Solr but not on the filesystem".format(result["sha1sum"])
+    s3_resource = boto3.resource("s3")
+
+    paginator = s3_resource.meta.client.get_paginator("list_objects")
+    page_iterator = paginator.paginate(Bucket=bucket_name)
+
+    for page in page_iterator:
+        for key in page["Contents"]:
+            m = re.search(r"^(blobs/\w{2}/\w{40})/(.+)", str(key["Key"]))
+            if m:
+                file_path = f"{BLOB_DIR}/{key['Key']}"
+                filename = m.group(2)
+                if not Path(file_path).exists() and filename not in ILLEGAL_FILENAMES:
+                    assert False, f"blob {key['Key']} exists in S3 but not on the filesystem"
 
 
 def test_elasticsearch_blobs_exist_in_db(es):
