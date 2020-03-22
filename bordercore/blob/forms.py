@@ -73,7 +73,18 @@ class DocumentForm(ModelForm):
 
         return filename
 
-    # def clean_file(self):
+    def clean_file_modified(self):
+        """
+        The "file modified" timestamp is set by Javacript in milliseconds.
+        We don't need that much precision, so convert to seconds.
+        """
+        data = self.cleaned_data.get("file_modified")
+        if data:
+            return int(data / 1000)
+        else:
+            return data
+
+     # def clean_file(self):
     #     file = self.cleaned_data.get("file")
     #     if file:
     #         hasher = hashlib.sha1()
