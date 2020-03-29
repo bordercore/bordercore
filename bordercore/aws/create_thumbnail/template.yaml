@@ -24,6 +24,13 @@ Resources:
                 Variables:
                     BUCKET_NAME: bordercore-blobs
 
+    LambdaFunctionLogGroup:
+        Type: "AWS::Logs::LogGroup"
+        DependsOn: "CreateThumbnailFunction"
+        Properties:
+            RetentionInDays: 90
+            LogGroupName: !Join ["", ["/aws/lambda/", !Ref CreateThumbnailFunction]]
+
     # Add a permission for the lambda to be invoked by S3
     CreateThumbnailLambdaPermission:
         Type: AWS::Lambda::Permission

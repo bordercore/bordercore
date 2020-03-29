@@ -18,9 +18,14 @@ Resources:
             MemorySize: 2048
             Runtime: python3.7
             Role: !GetAtt IndexBlobLambdaRole.Arn
-            # Environment:
-            #     Variables:
-            #         BUCKET_NAME: bordercore-blobs
+
+    LambdaFunctionLogGroup:
+        Type: "AWS::Logs::LogGroup"
+        DependsOn: "IndexBlobFunction"
+        Properties:
+            RetentionInDays: 90
+            LogGroupName: !Join ["", ["/aws/lambda/", !Ref IndexBlobFunction]]
+
 
     # Add a permission for the lambda to be invoked by S3
     IndexBlobLambdaPermission:
