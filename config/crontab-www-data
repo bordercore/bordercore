@@ -37,6 +37,6 @@ DJANGO_SETTINGS_MODULE=config.settings.prod
 # Submit new urls to the Wayback Machine for archiving
 30 2 * * * $VIRTUALENV/bin/python $BIN_DIR/archive_urls.py
 
-# Run tests once a day
-57 7 * * * $VIRTUALENV/bin/pytest --disable-warnings $BORDERCORE_HOME/blob/test_data.py $BORDERCORE_HOME/todo/tests.py $BORDERCORE_HOME/bookmark/tests.py $BORDERCORE_HOME/music/test_data.py
+# Run data tests once a day
+57 7 * * * $VIRTUALENV/bin/pytest --disable-warnings $BORDERCORE_HOME/blob/test_data.py -k "not test_blobs_in_s3_exist_on_filesystem" $BORDERCORE_HOME/todo/tests.py $BORDERCORE_HOME/bookmark/tests.py $BORDERCORE_HOME/music/test_data.py
 
