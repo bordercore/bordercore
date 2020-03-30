@@ -1,6 +1,7 @@
 import math
 import re
 
+from blob.models import Document
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -8,11 +9,8 @@ from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 from elasticsearch import Elasticsearch
-
-from blob.models import Document
-from tag.models import Tag
-
 from lib.time_utils import get_relative_date
+from tag.models import Tag
 
 RESULT_COUNT_PER_PAGE = 100
 RESULT_COUNT_PER_PAGE_NOTE = 10
@@ -33,6 +31,21 @@ def get_paginator(page, object_list):
     paginator["next_page_number"] = page + 1
 
     return paginator
+
+
+def get_creators(matches):
+    """
+    Return all "creator" related fields
+    """
+
+    creators = [
+        matches[x][0]
+        for x
+        in matches.keys()
+        if x in ["author", "artist", "photographer"]
+    ]
+
+    return ", ".join(creators)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -111,7 +124,8 @@ class SearchListView(ListView):
                 },
                 "sort": {sort_field: {"order": "desc"}},
                 "from": 0, "size": hit_count,
-                "_source": ["author",
+                "_source": ["artist",
+                            "author",
                             "bordercore_todo_task",
                             "date",
                             "date_unixtime",
@@ -154,7 +168,7 @@ class SearchListView(ListView):
                     {
                         "multi_match": {
                             "query": search_term,
-                            "fields": ["author", "attachment.content", "sha1sum", "title", "uuid"],
+                            "fields": ["artist", "author", "attachment.content", "sha1sum", "title", "uuid"],
                             "operator": boolean_type,
                         }
                     }
@@ -196,7 +210,7 @@ class SearchListView(ListView):
 
                 match = dict(
                     title=myobject["_source"].get("title", "No Title"),
-                    author=myobject["_source"].get("author", [""]),
+                    creators=get_creators(myobject["_source"]),
                     date=get_date_from_pattern(myobject["_source"].get("date", None)),
                     doctype=myobject["_source"]["doctype"],
                     sha1sum=myobject["_source"].get("sha1sum", ""),

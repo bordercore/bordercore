@@ -114,7 +114,7 @@
             <a href="{% url 'blob_detail' match.uuid %}">{{ match.title }}</a>
         </span>
         <span class="search_book_author">
-            {% if match.author.0 %} - {{ match.author.0 }}{% endif %}
+            {% if match.creators %} - {{ match.creators }}{% endif %}
         </span>
     </h4>
 {% endif %}
