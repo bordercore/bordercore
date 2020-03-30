@@ -1,10 +1,11 @@
-from django.contrib.auth.models import User
-from django.db import models
-
-from lib.mixins import TimeStampedModel
-from tag.models import Tag
+from datetime import timedelta
 
 import markdown
+
+from django.contrib.auth.models import User
+from django.db import models
+from lib.mixins import TimeStampedModel
+from tag.models import Tag
 
 
 class Deck(TimeStampedModel):
@@ -50,7 +51,7 @@ class Question(TimeStampedModel):
     tags = models.ManyToManyField(Tag, blank=True)
     last_reviewed = models.DateTimeField(null=True)
     times_failed = models.IntegerField(default=0, null=False)
-    interval = models.FloatField(default=1.0, blank=False, null=False)
+    interval = models.DurationField(default=timedelta(days=1), blank=False, null=False)
     efactor = models.FloatField(blank=False, null=False)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 

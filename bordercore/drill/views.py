@@ -1,8 +1,9 @@
 import time
+from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Max, Q
+from django.db.models import Count, F, Max, Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
@@ -310,15 +311,14 @@ def study_deck(request, deck_id):
     #  The question is still being learned
 
     try:
-        question = Question.objects.raw("""
- select * from drill_question
- where (date_part('day', now() - last_reviewed) > interval
-        or last_reviewed is null
-        or state='L')
- and deck_id = %s
- and user_id = %s
- order by random()
-    limit 1""", [deck_id, request.user.id])[0]
+        question = Question.objects.filter(
+            Q(user=request.user),
+            Q(deck__id=deck_id),
+            Q(interval__lte=timezone.now() - F("last_reviewed"))
+            | Q(last_reviewed__isnull=True)
+            | Q(state="L")
+        ).order_by("?")[0]
+
     except IndexError:
         question = Question.objects.filter(user=request.user, deck=deck_id).order_by('?')[0]
         messages.add_message(request, messages.INFO, 'Nothing to drill. Here''s a random question.')
@@ -335,17 +335,14 @@ def study_tag(request, tag):
     #  The question is still being learned
 
     try:
-        question = Question.objects.raw("""
- select * from drill_question dq
- left join drill_question_tags dqt on (dq.id = dqt.question_id)
- left join tag_tag tt on (dqt.tag_id = tt.id)
- where (date_part('day', now() - last_reviewed) > interval
-        or last_reviewed is null
-        or state='L')
- and tt.name = %s
- and user_id = %s
- order by random()
-    limit 1""", [tag, request.user.id])[0]
+        question = Question.objects.filter(
+            Q(user=request.user),
+            Q(tags__name=tag),
+            Q(interval__lte=timezone.now() - F("last_reviewed"))
+            | Q(last_reviewed__isnull=True)
+            | Q(state="L")
+        ).order_by("?")[0]
+
     except IndexError:
         question = Question.objects.filter(user=request.user, tags__name=tag).order_by('?')[0]
         messages.add_message(request, messages.INFO, 'Nothing to drill. Here''s a random question.')
@@ -400,7 +397,7 @@ def record_result(request, question_id, result):
             question.learning_step = 1
         else:
             question.state = 'L'
-        question.interval = 1
+        question.interval = timedelta(days=1)
         question.efactor = question.efactor - (question.efactor * 0.2)
 
     question.save()
