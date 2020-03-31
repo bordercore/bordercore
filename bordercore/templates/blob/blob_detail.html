@@ -83,7 +83,7 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
                         {% for blob in collection.blob_list %}
                             <li class="list-group-item">
                                 {% if blob.has_thumbnail_url %}
-                                    <img src="{{ STATIC_URL }}{{ blob.get_cover_url_small }}" />
+                                    <img src="{{ MEDIA_URL }}{{ blob.get_cover_url_small }}" />
                                 {% endif %}
                                 <a href="{% url 'blob_detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
                             </li>
