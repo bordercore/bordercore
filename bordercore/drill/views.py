@@ -13,6 +13,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import (CreateView, DeleteView, FormMixin,
                                        UpdateView)
 from django.views.generic.list import ListView
+
 from drill.forms import DeckForm, QuestionForm
 from drill.models import Deck, Question
 from tag.models import Tag

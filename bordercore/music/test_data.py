@@ -1,14 +1,16 @@
-import boto3
-from botocore.errorfactory import ClientError
-import django
 import os
 import sys
 
+import boto3
+from botocore.errorfactory import ClientError
+
+import django
 from django.conf import settings
+
+from music.models import Song
 
 django.setup()
 
-from music.models import Song
 
 
 bucket_name = settings.AWS_BUCKET_NAME_MUSIC

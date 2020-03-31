@@ -8,18 +8,19 @@ from pathlib import PurePath
 
 import boto3
 import markdown
+from elasticsearch import Elasticsearch
+from storages.backends.s3boto3 import S3Boto3Storage
 
-from blob.amazon import AmazonMixin
-from collection.models import Collection
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch.dispatcher import receiver
-from elasticsearch import Elasticsearch
+
+from blob.amazon import AmazonMixin
+from collection.models import Collection
 from lib.mixins import TimeStampedModel
-from storages.backends.s3boto3 import S3Boto3Storage
 from tag.models import Tag
 
 EDITIONS = {'1': 'First',

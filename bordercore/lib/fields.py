@@ -1,4 +1,4 @@
-from django.forms import TextInput, ModelMultipleChoiceField
+from django.forms import ModelMultipleChoiceField, TextInput
 
 from tag.models import Tag
 

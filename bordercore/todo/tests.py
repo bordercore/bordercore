@@ -1,13 +1,12 @@
-import os
+import pytest
+from elasticsearch import Elasticsearch
 
 import django
 from django.conf import settings
-from elasticsearch import Elasticsearch
-import pytest
 
 django.setup()
 
-from todo.models import Todo
+from todo.models import Todo  # isort:skip
 
 
 @pytest.fixture()

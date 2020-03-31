@@ -1,7 +1,9 @@
-import django
 import pytest
-from django.conf import settings
 from elasticsearch import Elasticsearch
+
+import django
+from django.conf import settings
+
 from lib.util import get_missing_bookmark_ids
 
 django.setup()

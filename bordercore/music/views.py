@@ -1,11 +1,14 @@
 import hashlib
 import os
-from pathlib import Path
 import re
 import time
 from datetime import datetime
+from pathlib import Path
 
 import boto3
+from django_datatables_view.base_datatable_view import BaseDatatableView
+from mutagen.easyid3 import EasyID3
+from mutagen.mp3 import MP3
 
 from django.conf import settings
 from django.contrib import messages
@@ -21,12 +24,10 @@ from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
-from django_datatables_view.base_datatable_view import BaseDatatableView
+
 from lib.util import remove_non_ascii_characters
 from music.forms import SongForm, WishListForm
 from music.models import Album, Listen, Song, SongSource, WishList
-from mutagen.easyid3 import EasyID3
-from mutagen.mp3 import MP3
 
 SECTION = 'Music'
 MUSIC_ROOT = "/home/media/music"

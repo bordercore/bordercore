@@ -1,8 +1,9 @@
-from django.forms import CheckboxInput, ModelForm, Select, Textarea, TextInput, ValidationError
+from django.forms import (CheckboxInput, ModelForm, Select, Textarea,
+                          TextInput, ValidationError)
 
 from bookmark.models import Bookmark
-from tag.models import Tag
 from lib.fields import ModelCommaSeparatedChoiceField
+from tag.models import Tag
 
 
 def daily_check_test(value):

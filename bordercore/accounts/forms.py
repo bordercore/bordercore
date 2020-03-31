@@ -1,8 +1,8 @@
 from django.forms import ModelChoiceField, ModelForm, Select, TextInput
 
 from accounts.models import UserProfile
-from lib.fields import ModelCommaSeparatedChoiceField
 from collection.models import Collection
+from lib.fields import ModelCommaSeparatedChoiceField
 from tag.models import Tag
 
 

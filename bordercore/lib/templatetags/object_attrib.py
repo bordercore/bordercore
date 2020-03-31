@@ -7,4 +7,3 @@ register = template.Library()
 def object_attrib(object, attrib):
 #    return object.get(attrib)
     return getattr(object, attrib)
-

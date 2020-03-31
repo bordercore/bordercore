@@ -1,21 +1,21 @@
 import datetime
 import re
 
-from botocore.errorfactory import ClientError
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponseNotFound, HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.shortcuts import render
+
+from botocore.errorfactory import ClientError
 from elasticsearch import Elasticsearch
+from PyOrgMode import PyOrgMode
 
 from blob.models import Document
 from bookmark.models import Bookmark
 from cal.models import Calendar
 from fitness.models import ExerciseUser
 from music.models import Listen
-from PyOrgMode import PyOrgMode
 from quote.models import Quote
 
 SECTION = 'Home'

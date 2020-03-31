@@ -1,10 +1,13 @@
-from accounts.models import UserProfile
-from oauth2client.client import OAuth2Credentials
 from datetime import datetime, timedelta
-from rfc3339 import now as now_rfc3339, datetimetostr
-from apiclient.discovery import build
-import httplib2
+
 import dateutil.parser
+import httplib2
+from apiclient.discovery import build
+from oauth2client.client import OAuth2Credentials
+
+from accounts.models import UserProfile
+from rfc3339 import datetimetostr
+from rfc3339 import now as now_rfc3339
 
 api_key = ""
 

@@ -1,14 +1,16 @@
 import math
 import re
 
-from blob.models import Document
+from elasticsearch import Elasticsearch
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
-from elasticsearch import Elasticsearch
+
+from blob.models import Document
 from lib.time_utils import get_relative_date
 from tag.models import Tag
 

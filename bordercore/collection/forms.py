@@ -26,11 +26,3 @@ class CollectionForm(ModelForm):
             'description': Textarea(attrs={'class': 'form-control'}),
             'name': TextInput(attrs={'class': 'form-control'})
         }
-
-
-
-
-
-
-
-

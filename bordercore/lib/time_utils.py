@@ -2,8 +2,9 @@
 # http://stackoverflow.com/questions/1551382/user-friendly-time-format-in-python
 
 import datetime
-import pytz
 import re
+
+import pytz
 
 
 def cleanup(interval, time_unit):

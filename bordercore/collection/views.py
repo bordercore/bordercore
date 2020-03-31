@@ -1,11 +1,12 @@
-from django.db.models import Case, CharField, Value, When
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Case, CharField, Value, When
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
-from django.http import HttpResponseRedirect, JsonResponse
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, DeleteView, FormMixin, UpdateView
+from django.views.generic.edit import (CreateView, DeleteView, FormMixin,
+                                       UpdateView)
 from django.views.generic.list import ListView
 
 from blob.models import Document

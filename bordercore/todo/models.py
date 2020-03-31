@@ -1,9 +1,10 @@
+from elasticsearch import Elasticsearch
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch.dispatcher import receiver
-from elasticsearch import Elasticsearch
 
 from lib.mixins import TimeStampedModel
 from tag.models import Tag

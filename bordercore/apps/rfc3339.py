@@ -94,8 +94,10 @@ Here's an excerpt from RFC 3339 itself:
       (say) a space character.
 """
 
-import datetime, time, calendar
+import calendar
+import datetime
 import re
+import time
 
 __all__ = ["tzinfo", "UTC_TZ", "parse_date", "parse_datetime", "now", "utcfromtimestamp", "utctotimestamp", "datetimetostr", "timestamptostr", "strtotimestamp"]
 

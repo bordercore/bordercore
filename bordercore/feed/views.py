@@ -1,10 +1,9 @@
 import json
 import urllib
 
+import feedparser
 import requests
 
-import feedparser
-from accounts.models import UserProfile
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
@@ -12,6 +11,8 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
+
+from accounts.models import UserProfile
 from feed.forms import FeedForm
 from feed.models import Feed, FeedItem
 

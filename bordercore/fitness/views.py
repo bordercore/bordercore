@@ -1,11 +1,11 @@
+import datetime
+import json
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
-
-import datetime
-import json
 
 from fitness.models import Data, Exercise, ExerciseUser
 

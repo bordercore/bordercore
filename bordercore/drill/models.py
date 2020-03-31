@@ -4,6 +4,7 @@ import markdown
 
 from django.contrib.auth.models import User
 from django.db import models
+
 from lib.mixins import TimeStampedModel
 from tag.models import Tag
 

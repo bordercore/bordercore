@@ -1,8 +1,8 @@
 from django.forms import ModelForm, Textarea, TextInput
 
-from todo.models import Todo
 from lib.fields import ModelCommaSeparatedChoiceField
 from tag.models import Tag
+from todo.models import Todo
 
 
 class TodoForm(ModelForm):

@@ -6,14 +6,12 @@ from collections import OrderedDict
 from urllib.parse import urlparse
 
 import boto3
-from botocore.errorfactory import ClientError
-
 import humanize
 from amazonproduct import API
 from amazonproduct.errors import NoExactMatchesFound
-from blob.forms import DocumentForm
-from blob.models import Document, MetaData
-from collection.models import Collection
+from botocore.errorfactory import ClientError
+from PyPDF2.utils import PdfReadError
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -24,7 +22,10 @@ from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from PyPDF2.utils import PdfReadError
+
+from blob.forms import DocumentForm
+from blob.models import Document, MetaData
+from collection.models import Collection
 
 SECTION = 'Blob'
 

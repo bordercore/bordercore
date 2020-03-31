@@ -1,12 +1,13 @@
+import xml.sax.saxutils as saxutils
 from datetime import datetime
 
-from django.db import models
-from django.utils.timezone import utc
 import feedparser
 import psycopg2
 import psycopg2.extras
 import requests
-import xml.sax.saxutils as saxutils
+
+from django.db import models
+from django.utils.timezone import utc
 
 from accounts.models import UserProfile
 from lib.mixins import TimeStampedModel

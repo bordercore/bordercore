@@ -1,6 +1,7 @@
 import base64
 import datetime
 import json
+
 import lxml.html as lh
 
 from django.contrib import messages
@@ -12,8 +13,8 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 
 from accounts.models import SortOrder
-from bookmark.models import Bookmark
 from bookmark.forms import BookmarkForm
+from bookmark.models import Bookmark
 from tag.models import Tag, TagBookmark, TagBookmarkSortOrder
 
 SECTION = 'Bookmarks'

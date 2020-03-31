@@ -1,14 +1,13 @@
 from django.contrib.auth.decorators import login_required
+from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
-from django.http import HttpResponseRedirect, JsonResponse, Http404
 from django.utils.dateformat import format
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
-from todo.forms import TodoForm
-
 from tag.models import Tag
+from todo.forms import TodoForm
 from todo.models import Todo
 
 SECTION = 'Todo'

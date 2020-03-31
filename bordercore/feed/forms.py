@@ -1,6 +1,8 @@
-from django.forms import ModelForm, Textarea, TextInput, ValidationError, ModelMultipleChoiceField
+from django.forms import (ModelForm, ModelMultipleChoiceField, Textarea,
+                          TextInput, ValidationError)
 
 from feed.models import Feed
+
 
 class FeedForm(ModelForm):
     def __init__(self, *args, **kwargs):

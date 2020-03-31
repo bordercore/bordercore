@@ -1,9 +1,10 @@
 import uuid
 
+import markdown
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
-import markdown
 
 from lib.mixins import TimeStampedModel
 from tag.models import Tag
