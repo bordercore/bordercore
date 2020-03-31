@@ -157,12 +157,10 @@ def get_random_blob(request, content_type):
 
     results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 
-    blob = None
-    try:
-        blob = Document.objects.get(user=request.user, uuid=results["hits"]["hits"][0]["_source"]["uuid"])
-    except ObjectDoesNotExist:
-        pass
-    return blob
+    if results["hits"]["hits"]:
+        return Document.objects.get(user=request.user, uuid=results["hits"]["hits"][0]["_source"]["uuid"])
+    else:
+        return None
 
 
 def get_date(node):
