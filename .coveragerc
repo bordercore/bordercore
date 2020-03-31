@@ -1,0 +1,24 @@
+[run]
+omit = *test*
+
+[_run]
+omit =
+    #
+    */__init__.py*
+    #
+    *test*
+    #
+    */migrations/*
+    bordercore/blob/test_data.py
+    */env/*
+
+[report]
+omit =
+    #
+    */__init__.py*
+    #
+    *test*
+    #
+    */migrations/*
+    bordercore/blob/test_data.py
+    */env/*
