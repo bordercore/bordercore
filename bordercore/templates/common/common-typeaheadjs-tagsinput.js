@@ -1,7 +1,7 @@
 var engine = new Bloodhound({
     name: 'tags',
     remote: {
-        url: '{% url 'tag_search' %}?query=%QUERY',
+        url: '{% url url|default:"tag_search" %}?query=%QUERY',
         wildcard: '%QUERY'
     },
     datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
