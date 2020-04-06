@@ -21,6 +21,7 @@ from accounts.models import SortOrder  # isort:skip
 from django.contrib.auth.models import User  # isort:skip
 from blob.models import BLOBS_NOT_TO_INDEX, Document, ILLEGAL_FILENAMES, MetaData   # isort:skip
 from collection.models import Collection  # isort:skip
+from drill.models import Question  # isort:skip
 from tag.models import Tag  # isort:skip
 
 
@@ -626,3 +627,9 @@ def test_all_notes_exist_in_elasticsearch(es):
 
         found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["total"]["value"]
         assert found == 1, f"note uuid={note.uuid} does not exist in Elasticsearch"
+
+
+def test_questions_no_tags():
+    "Assert that all drill questions have at least one tag"
+    t = Question.objects.filter(Q(tags__isnull=True))
+    assert len(t) == 0, f"{len(t)} questions have no tags; example: {t[0].question}"

@@ -1,14 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %} Deck Detail :: Question {% endblock %}
+{% block title %} Drill :: Question {% endblock %}
 
 {% block extra_head %}
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/code_style.css" />
 {% endblock %}
 
 {% block left-block %}
-
-    <h2>{{ deck.description }}</h2>
 
     <br />
 
@@ -40,7 +38,7 @@ Easiness Factor: <strong>{{ question.efactor|floatformat:1 }}</strong>
 
             {% block breadcrumbs %}
                 <ul class="breadcrumb">
-                    <li class="breadcrumb-item"> <a href="{% url 'deck_list' %}">Tag Categories</a> </li>
+                    <li class="breadcrumb-item"> <a href="{% url 'drill_list' %}">Tag Categories</a> </li>
                     <li class="breadcrumb-item active">{{ tag_list }}</li>
                 </ul>
             {% endblock %}

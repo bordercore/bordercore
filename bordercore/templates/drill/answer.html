@@ -1,13 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %} Deck Detail :: Answer {% endblock %}
+{% block title %} Drill :: Answer {% endblock %}
 
 {% block extra_head %}
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/code_style.css" />
 {% endblock %}
 
 {% block left-block %}
-    <h2>{{ deck.description }}</h2>
 
     State: <strong>{{ state_name  }}</strong>
     <br />
@@ -67,8 +66,8 @@ Easiness Factor: <strong>{{ question.efactor|floatformat:1 }}</strong>
 
             {% block breadcrumbs %}
                 <ul class="breadcrumb">
-                    <li class="breadcrumb-item"> <a href="{% url 'deck_list' %}">Deck List</a> </li>
-                    <li class="breadcrumb-item active">{{ deck.title }}</li>
+                    <li class="breadcrumb-item"> <a href="{% url 'drill_list' %}">Tag Categories</a> </li>
+                    <li class="breadcrumb-item active">{{ tag_list }}</li>
                 </ul>
             {% endblock %}
 
@@ -82,7 +81,7 @@ Easiness Factor: <strong>{{ question.efactor|floatformat:1 }}</strong>
     {% if question.tags.all %}
             Tags:
         {% for tag in question.tags.all %}
-            <a class="badge badge-primary" href="{% url 'kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
+            <a class="badge badge-primary" href="{% url 'study_tag' tag.name %}">{{ tag.name }}</a>
         {% endfor %}
         <br /><br />
     {% endif %}

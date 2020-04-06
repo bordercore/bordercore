@@ -16,10 +16,6 @@
 
         $(document).ready(function() {
 
-            function formatTitle( data, type, row ) {
-                return '<a href="{% url 'deck_detail' 666 %}">'.replace(/666/, row[4]) + row[0] + '</a>';
-            }
-
             function formatQuestion( data, type, row ) {
                 return '<a href="{% url 'question_detail' 666 %}">'.replace(/666/, row[1]) + row[2] + '</a>';
             }
@@ -36,9 +32,9 @@
                 "dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'float-right col-lg-4'p>>",
                 "searchable": false,
                 "columnDefs": [
-                    { "targets": [0], "sorting": [ "desc", "asc" ], "render": formatTitle, "useRendered": false  },
+                    { "targets": [0], "sorting": [ "desc", "asc" ], "useRendered": false  },
                     { "targets": [2], "sorting": [ "desc", "asc" ], "render": formatQuestion, "useRendered": false  },
-                    { "targets": [1,4], "visible": false },
+                    { "targets": [1], "visible": false },
                 ],
             } );
 
@@ -53,7 +49,7 @@
         </div>
     </div>
     {% else %}
-    <div class="alert alert-warning">Nothing found. <a href="{% url 'deck_list' %}">Go back</a></div>
+    <div class="alert alert-warning">Nothing found. <a href="{% url 'drill_list' %}">Go back</a></div>
     {% endif %}
 
 {% endblock %}

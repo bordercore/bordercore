@@ -4,6 +4,14 @@
 
 {% endblock %}
 
+{% block left-block %}
+
+    <div class="mt-5">
+        <a href="{% url 'question_add' %}" class="btn btn-primary" role="button">Add</a>
+    </div>
+
+{% endblock %}
+
 {% block title %} {{ section }} :: {{ title }} {% endblock %}
 
 {% block content %}
@@ -24,24 +32,7 @@
 
         $(document).ready(function() {
 
-            var engine = new Bloodhound({
-                name: "tags",
-                remote: {
-                    url: "{% url 'drill_tag_search' %}?query=%QUERY",
-                    wildcard: "%QUERY"
-                },
-                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
-                queryTokenizer: Bloodhound.tokenizers.whitespace
-            });
-
-            engine.initialize();
-
-            $("#id_tags").typeahead({
-                autoselect: true
-            }, {
-                displayKey: "value",
-                source: engine,
-            });
+            {% include "common/common-typeaheadjs-tagsinput.js" with url="drill_tag_search" %}
 
             $("#id_tags").bind("typeahead:selected", function(obj, datum, name) {
                 window.location="{% url 'study_tag' 666 %}".replace(/666$/, datum.value);
@@ -51,7 +42,7 @@
                 return '<a href="{% url 'study_tag' 666 %}">'.replace(/666/, row[0]) + row[0] + '</a>';
             }
 
-            table = $('#deck_list').DataTable( {
+            table = $('#drill_list').DataTable( {
                 "info": false,
                 "paginate": false,
                 "sorting": [[3, 'asc']],
@@ -68,7 +59,7 @@
                 ],
             } );
 
-            $('#deck_list tbody').on( 'click', 'tr', function () {
+            $('#drill_list tbody').on( 'click', 'tr', function () {
                 if ( $(this).hasClass('selected') ) {
                     $(this).removeClass('selected');
                     $('#btn-edit').attr("disabled", "disabled");
@@ -83,9 +74,9 @@
 
             $('#search').on('keydown', function(event, selection) {
                 if (((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13))) {
-                    $("#form-deck-delete").attr('action', '{% url 'deck_search' %}');
-                    $("#form-deck-delete").attr('method', 'GET');
-                    $('#form-deck-delete').submit();
+                    $("#form-drill-delete").attr('action', '{% url 'drill_search' %}');
+                    $("#form-drill-delete").attr('method', 'GET');
+                    $('#form-drill-delete').submit();
                     return false;
                 } else {
                     return true;
@@ -112,12 +103,18 @@
 
 <div class="row">
     <div class="col-lg-7">
-        <form class="form-inline" role="form" id="form-deck-delete" method="POST" autocomplete="off">
+        <form _class="form-inline" role="form" id="form-drill-delete" method="POST" autocomplete="off">
             {% csrf_token %}
 
-            <div class="form-group">
-                <input id="search" name="search_term" type="text" style="width: 200px" class="form-control ml-3" placeholder="Search">
-                <input id="id_tags" name="tag" type="text" style="width: 200px" class="form-control ml-3" placeholder="Study by Tag">
+            <div class="form-row">
+
+                <div class="col-auto">
+                    <input id="search" name="search_term" type="text" style="width: 300px" class="form-control ml-3" placeholder="General Search">
+                </div>
+
+                <div class="col-auto">
+                    <input id="id_tags" name="tag" type="text" style="width: 200px" class="typeahead form-control ml-3" placeholder="Tag Search">
+                </div>
             </div>
 
         </form>
@@ -126,7 +123,7 @@
 
 <div class="row">
     <div class="col-lg-12">
-        {% include "common/datatable.html" with data=info cols=cols id="deck_list" %}
+        {% include "common/datatable.html" with data=info cols=cols id="drill_list" %}
     </div>
 </div>
 

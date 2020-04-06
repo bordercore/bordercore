@@ -13,8 +13,9 @@ from collection import views as collection_views
 from collection.views import (CollectionCreateView, CollectionDeleteView, CollectionDetailView,
                               CollectionListView, CollectionUpdateView)
 from drill import views as drill_views
-from drill.views import (DeckCreateView, DeckDeleteView, DeckDetailView, DeckListView, DeckSearchListView, DeckUpdateView,
-                         QuestionCreateView, QuestionDeleteView, QuestionDetailView, QuestionUpdateView)
+from drill.views import (DrillListView, DrillSearchListView,
+                         QuestionCreateView, QuestionDeleteView,
+                         QuestionDetailView, QuestionUpdateView)
 from feed import views as feed_views
 from feed.views import FeedListView, FeedSubscriptionListView
 from fitness import views as fitness_views
@@ -85,18 +86,12 @@ urlpatterns = [
     path('collection/sort', collection_views.sort_collection, name='sort_collection'),
     path('collection/', CollectionListView.as_view(), name='collection_list'),
 
-    path('drill/', DeckListView.as_view(), name='deck_list'),
-    path('drill/deck/<int:deck_id>/', DeckDetailView.as_view(), name='deck_detail'),
-    path('drill/deck/add', DeckCreateView.as_view(), name='deck_add'),
-    path('drill/delete/<int:pk>', DeckDeleteView.as_view(), name='deck_delete'),
+    path('drill/', DrillListView.as_view(), name='drill_list'),
     path('drill/question/delete/<int:pk>', QuestionDeleteView.as_view(), name='question_delete'),
-    path('drill/edit/<int:pk>', DeckUpdateView.as_view(), name='deck_edit'),
-    path('drill/deck/get_info', drill_views.get_info, name='deck_get_info'),
     path('drill/question/<int:question_id>/', QuestionDetailView.as_view(), name='question_detail'),
-    path('drill/question/add/<int:deck_id>/', QuestionCreateView.as_view(), name='question_add'),
+    path('drill/question/add/', QuestionCreateView.as_view(), name='question_add'),
     path('drill/question/edit/<int:pk>/', QuestionUpdateView.as_view(), name='question_edit'),
-    path('drill/search/', DeckSearchListView.as_view(), name='deck_search'),
-    path('drill/study/<int:deck_id>/', drill_views.study_deck, name='deck_study'),
+    path('drill/search/', DrillSearchListView.as_view(), name='drill_search'),
     path('drill/answer/<int:question_id>/', drill_views.show_answer, name='answer'),
     path('drill/result/<int:question_id>/<str:result>', drill_views.record_result, name='record_result'),
     path('drill/study/tag/<str:tag>', drill_views.study_tag, name='study_tag'),

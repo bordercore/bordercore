@@ -6,16 +6,15 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count, F, Max, Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import (CreateView, DeleteView, FormMixin,
-                                       UpdateView)
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
-from drill.forms import DeckForm, QuestionForm
-from drill.models import Deck, Question
+from drill.forms import QuestionForm
+from drill.models import Question
 from tag.models import Tag
 
 SECTION = "Drill"
@@ -33,75 +32,28 @@ INTERVAL_MODIFIER = 1.0
 
 
 @method_decorator(login_required, name='dispatch')
-class DeckCreateView(CreateView):
-    template_name = "drill/deck_list.html"
-    form_class = DeckForm
-
-    def get_context_data(self, **kwargs):
-        context = super(DeckCreateView, self).get_context_data(**kwargs)
-        context["action"] = "Add"
-        return context
-
-    def form_valid(self, form):
-
-        obj = form.save(commit=False)
-        obj.user = self.request.user
-        obj.save()
-
-        obj.save()
-
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return reverse("deck_list")
-
-
-@method_decorator(login_required, name='dispatch')
-class DeckDetailView(DetailView):
-
-    model = Deck
-    slug_field = "id"
-    slug_url_kwarg = "deck_id"
-
-    def get_context_data(self, **kwargs):
-        context = super(DeckDetailView, self).get_context_data(**kwargs)
-
-        context["section"] = SECTION
-        context["count"] = Question.objects.filter(user=self.request.user, deck_id=self.object.id).count()
-        state_counts = []
-        for state in Question.objects.filter(user=self.request.user, deck=self.object).values("state").annotate(state_count=Count("state")).order_by("state_count"):
-            state_counts.append([Question.get_state_name(state["state"]), state["state_count"]])
-        context["state_counts"] = state_counts
-        context["title"] = "Deck Detail :: {}".format(self.object.title)
-        return context
-
-    def get_queryset(self):
-        return Deck.objects.filter(user=self.request.user)
-
-
-@method_decorator(login_required, name='dispatch')
-class DeckListView(ListView):
+class DrillListView(ListView):
 
     context_object_name = "info"
-    template_name = "drill/deck_list.html"
+    template_name = "drill/drill_list.html"
 
     def get_context_data(self, **kwargs):
-        context = super(DeckListView, self).get_context_data(**kwargs)
+        context = super(DrillListView, self).get_context_data(**kwargs)
 
         info = []
 
-        for deck in self.object_list:
-            if deck["max"]:
-                last_reviewed = deck["max"].strftime("%b %d, %Y")
-                last_reviewed_sort = time.mktime(deck["max"].timetuple())
+        for tag in self.object_list:
+            if tag["max"]:
+                last_reviewed = tag["max"].strftime("%b %d, %Y")
+                last_reviewed_sort = time.mktime(tag["max"].timetuple())
             else:
                 last_reviewed = ""
                 last_reviewed_sort = ""
-            info.append(dict(tag_name=deck["name"],
-                             question_count=deck["count"],
+            info.append(dict(tag_name=tag["name"],
+                             question_count=tag["count"],
                              last_reviewed=last_reviewed,
                              lastreviewed_sort=last_reviewed_sort,
-                             id=deck["id"]))
+                             id=tag["id"]))
 
         context["cols"] = ["tag_name", "question_count", "last_reviewed", "lastreviewed_sort", "id"]
         context["section"] = SECTION
@@ -121,7 +73,7 @@ class DeckListView(ListView):
 
 
 @method_decorator(login_required, name='dispatch')
-class DeckSearchListView(ListView):
+class DrillSearchListView(ListView):
 
     template_name = 'drill/search.html'
 
@@ -132,48 +84,21 @@ class DeckSearchListView(ListView):
                                        Q(answer__icontains=search_term))
 
     def get_context_data(self, **kwargs):
-        context = super(DeckSearchListView, self).get_context_data(**kwargs)
+        context = super(DrillSearchListView, self).get_context_data(**kwargs)
 
         info = []
 
-        for myobject in context['object_list']:
-            info.append(dict(deck_title=myobject.deck.title,
-                             id=myobject.id,
-                             question=myobject.question,
-                             answer=myobject.answer,
-                             deck_id=myobject.deck.id))
+        for question in context['object_list']:
+            info.append(dict(tags=", ".join([x.name for x in question.tags.all()]),
+                             id=question.id,
+                             question=question.question,
+                             answer=question.answer))
 
-        context['cols'] = ['deck_title', 'id', 'question', 'answer', 'deck_id']
+        context['cols'] = ['tags', 'id', 'question', 'answer']
         context['section'] = SECTION
         context['info'] = info
         context['title'] = 'Drill Search'
         return context
-
-
-@method_decorator(login_required, name='dispatch')
-class DeckUpdateView(UpdateView):
-    model = Deck
-    form_class = DeckForm
-    success_url = reverse_lazy('deck_list')
-
-    def form_valid(self, form):
-
-        obj = form.save(commit=False)
-        obj.user = self.request.user
-
-        obj.save()
-
-        return HttpResponseRedirect(self.get_success_url())
-
-
-@method_decorator(login_required, name='dispatch')
-class DeckDeleteView(DeleteView):
-
-    def get_object(self, queryset=None):
-        return Deck.objects.get(user=self.request.user, id=self.kwargs.get("pk"))
-
-    def get_success_url(self):
-        return reverse("deck_list")
 
 
 @method_decorator(login_required, name='dispatch')
@@ -183,18 +108,16 @@ class QuestionCreateView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(QuestionCreateView, self).get_context_data(**kwargs)
+
+        context['section'] = SECTION
         context['action'] = 'Add'
-        context['deck'] = Deck.objects.get(user=self.request.user, pk=self.kwargs['deck_id'])
         context['title'] = 'Drill :: Add Question'
         return context
 
     def form_valid(self, form):
 
-        self.deck_id = self.request.POST['deck_id']
-
         obj = form.save(commit=False)
         obj.user = self.request.user
-        obj.deck_id = self.deck_id
         obj.efactor = EFACTOR_DEFAULT
         obj.save()
 
@@ -207,7 +130,7 @@ class QuestionCreateView(CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('deck_detail', kwargs={'deck_id': self.deck_id})
+        return reverse('question_add')
 
 
 @method_decorator(login_required, name='dispatch')
@@ -218,11 +141,10 @@ class QuestionDeleteView(DeleteView):
 
     def get_object(self, queryset=None):
         question = Question.objects.get(user=self.request.user, id=self.kwargs.get('pk'))
-        self.deck_id = question.deck_id
         return question
 
     def get_success_url(self):
-        return reverse('deck_detail', kwargs={'deck_id': self.deck_id})
+        return reverse('question_add')
 
 
 @method_decorator(login_required, name='dispatch')
@@ -241,7 +163,6 @@ class QuestionDetailView(DetailView):
         context = super(QuestionDetailView, self).get_context_data(**kwargs)
 
         context['section'] = SECTION
-        context['deck'] = self.object.deck
         context['question'] = self.object
         context['state_name'] = Question.get_state_name(self.object.state)
         context['learning_step_count'] = self.object.get_learning_step_count()
@@ -260,13 +181,10 @@ class QuestionUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super(QuestionUpdateView, self).get_context_data(**kwargs)
         context['action'] = 'Edit'
-        context['deck'] = Deck.objects.get(user=self.request.user, pk=context['question'].deck_id)
         context['title'] = 'Drill :: Question Edit'
         return context
 
     def form_valid(self, form):
-
-        self.deck_id = self.request.POST['deck_id']
 
         obj = form.save(commit=False)
 
@@ -278,53 +196,7 @@ class QuestionUpdateView(UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('deck_detail', kwargs={'deck_id': self.deck_id})
-
-
-@login_required
-def get_info(request):
-
-    from django.core.exceptions import ObjectDoesNotExist
-
-    info = ''
-
-    try:
-        if request.GET.get('query_type', '') == 'id':
-            match = Deck.objects.get(user=request.user, pk=request.GET['id'])
-        else:
-            match = Deck.objects.get(user=request.user, title=request.GET['title'])
-        if match:
-            info = {'title': match.title,
-                    'description': match.description,
-                    'id': match.id}
-    except ObjectDoesNotExist:
-        pass
-
-    return JsonResponse(info)
-
-
-@login_required
-def study_deck(request, deck_id):
-
-    # Criteria for selecting a question:
-    #  The question hasn't been reviewed within its interval
-    #  The question is new (last_reviewed is null)
-    #  The question is still being learned
-
-    try:
-        question = Question.objects.filter(
-            Q(user=request.user),
-            Q(deck__id=deck_id),
-            Q(interval__lte=timezone.now() - F("last_reviewed"))
-            | Q(last_reviewed__isnull=True)
-            | Q(state="L")
-        ).order_by("?")[0]
-
-    except IndexError:
-        question = Question.objects.filter(user=request.user, deck=deck_id).order_by('?')[0]
-        messages.add_message(request, messages.INFO, 'Nothing to drill. Here''s a random question.')
-
-    return redirect('question_detail', question_id=question.id)
+        return reverse('drill_list')
 
 
 @login_required
@@ -358,13 +230,12 @@ def show_answer(request, question_id):
 
     question.last_reviewed = timezone.now()
     question.save()
-    deck = Deck.objects.get(user=request.user, pk=question.deck.id)
 
     return render(request, 'drill/answer.html',
                   {'section': SECTION,
-                   'deck': deck,
                    'question': question,
                    'state_name': Question.get_state_name(question.state),
+                   'tag_list': ", ".join([x.name for x in question.tags.all()]),
                    'learning_step_count': question.get_learning_step_count(),
                    'title': 'Drill :: Show Answer'})
 
@@ -403,7 +274,7 @@ def record_result(request, question_id, result):
 
     question.save()
 
-    return redirect('deck_study', deck_id=question.deck.id)
+    return redirect('study_tag', tag=question.tags.all()[0].name)
 
 
 def tag_search(request):

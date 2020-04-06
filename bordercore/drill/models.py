@@ -8,32 +8,6 @@ from django.db import models
 from lib.mixins import TimeStampedModel
 from tag.models import Tag
 
-
-class Deck(TimeStampedModel):
-    """
-    A collection of questions and answers
-    """
-
-    title = models.TextField(null=True)
-    description = models.TextField(null=True)
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
-
-    def get_created(self):
-        return self.created.strftime('%b %d, %Y')
-
-    def __unicode__(self):
-        return self.title
-
-    def __str__(self):
-        return self.title
-
-    def is_empty(self):
-        if Question.objects.filter(user=self.user, deck=self).count() == 0:
-            return True
-        else:
-            return False
-
-
 QUESTION_STATES = (
     ('N', 'New'),
     ('L', 'Learning'),
@@ -46,7 +20,6 @@ class Question(TimeStampedModel):
     One question and its answer
     """
 
-    deck = models.ForeignKey(Deck, on_delete=models.PROTECT)
     question = models.TextField()
     answer = models.TextField()
     tags = models.ManyToManyField(Tag, blank=True)

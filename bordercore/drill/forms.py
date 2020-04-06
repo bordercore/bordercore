@@ -1,27 +1,8 @@
 from django.forms import ModelForm, Textarea, TextInput
 
-from drill.models import Deck, Question
+from drill.models import Question
 from lib.fields import ModelCommaSeparatedChoiceField
 from tag.models import Tag
-
-
-class DeckForm(ModelForm):
-    def __init__(self, *args, **kwargs):
-
-        super(DeckForm, self).__init__(*args, **kwargs)
-
-    tags = ModelCommaSeparatedChoiceField(
-        required=False,
-        queryset=Tag.objects.filter(),
-        to_field_name='name')
-
-    class Meta:
-        model = Deck
-        fields = ('title', 'description')
-        widgets = {
-            'description': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-            'title': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'})
-        }
 
 
 class QuestionForm(ModelForm):

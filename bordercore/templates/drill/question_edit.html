@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %} Deck Detail :: {{ deck.title }}{% endblock %}
+{% block title %} Dril :: {{ action }} question {% endblock %}
 
 {% block left-block %}
     <h2>{{ object.description }}</h2>
@@ -37,7 +37,6 @@
     <p class="lead offset-lg-2">{{ action }} question and answer</p>
 
     <form id="todo-form" action="{{ request.path }}" method="post">
-        <input type="hidden" name="deck_id" value="{{ deck.id }}" />
         {% csrf_token %}
 
         {% for field in form %}
@@ -60,7 +59,7 @@
                 {% if object.id %}
                     <input class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
                 {% endif %}
-                <a class="btn btn-secondary" href="{% url 'deck_detail' deck.id %}">Cancel</a>
+                <a class="btn btn-secondary" href="{% url 'drill_list' %}">Cancel</a>
             </div>
         </div>
 
