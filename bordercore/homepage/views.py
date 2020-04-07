@@ -1,15 +1,17 @@
-import datetime
 import re
-
-from django.conf import settings
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
-from django.shortcuts import render
+from datetime import timedelta
 
 from botocore.errorfactory import ClientError
 from elasticsearch import Elasticsearch
 from PyOrgMode import PyOrgMode
+
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db.models import F, Max, Q
+from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
+from django.shortcuts import render
+from django.utils import timezone
 
 from blob.models import Document
 from bookmark.models import Bookmark
@@ -19,6 +21,34 @@ from music.models import Listen
 from quote.models import Quote
 
 SECTION = 'Home'
+
+
+def get_overdue_exercise(request):
+
+    exercises = ExerciseUser.objects.annotate(
+        max=Max("exercise__data__date")) \
+        .filter(Q(interval__lt=(timezone.now() - F("max")) + timedelta(days=1))) \
+        .filter(user=request.user) \
+        .order_by(F("max")) \
+        .select_related()
+
+    overdue_exercises = []
+
+    for exercise in exercises:
+        delta = timezone.now() - exercise.max
+
+        # Round up to the nearest day
+        if delta.seconds // 3600 >= 12:
+            delta = delta + timedelta(days=1)
+
+        overdue_exercises.append(
+            {
+                "exercise": exercise,
+                "lag": delta.days
+            }
+        )
+
+    return overdue_exercises
 
 
 @login_required
@@ -77,14 +107,7 @@ def homepage(request):
     except AttributeError:
         pass
 
-    # Get overdue exercises
-    overdue_exercises = []
-    active_exercises = ExerciseUser.objects.filter(user=request.user)
-    for exercise in active_exercises:
-        lag = int((int(datetime.datetime.now().strftime("%s")) - int(exercise.exercise.data_set.order_by('-date')[0].date.strftime("%s"))) / 86400) + 1
-        if (lag >= exercise.frequency):
-            overdue_exercises.append({'exercise': exercise,
-                                      'lag': lag})
+    overdue_exercises = get_overdue_exercise(request)
 
     return render(request, 'homepage/index.html',
                   {'section': SECTION,

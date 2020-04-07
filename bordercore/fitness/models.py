@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -51,7 +53,7 @@ class ExerciseUser(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     exercise = models.ForeignKey(Exercise, on_delete=models.PROTECT)
     started = models.DateTimeField(auto_now_add=True)
-    frequency = models.IntegerField(blank=False, default=7)
+    interval = models.DurationField(default=timedelta(days=1), blank=False, null=False)
 
     class Meta:
         unique_together = ('user', 'exercise')
