@@ -2,7 +2,6 @@ import json
 import logging
 import os
 import re
-from os.path import basename
 from pathlib import PurePath
 
 import boto3
@@ -42,7 +41,7 @@ def handler(event, context):
                 log.info(f"key: {key}")
 
                 # blobs/d9/d941cfc33c4b40a8c3e576a33343b7adfb7bac69/
-                pattern = re.compile(f"^blobs/\w\w/([0-9a-f]{{40}})/")
+                pattern = re.compile(rf"^blobs/\w\w/([0-9a-f]{{40}})/")
 
                 matches = pattern.match(key)
                 if matches and matches.group(1):

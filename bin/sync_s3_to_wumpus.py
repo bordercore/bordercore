@@ -5,10 +5,12 @@
 
 import email
 import json
+import logging
 import os
 import re
 import sys
 from os import makedirs
+from pathlib import Path, PurePath
 
 import boto3
 
@@ -19,50 +21,94 @@ django.setup()
 
 from blob.models import ILLEGAL_FILENAMES  # isort:skip
 
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
+                    datefmt="%m-%d %H:%M:%S",
+                    filename=f"{os.environ['HOME']}/logs/s3-procmail.log",
+                    filemode="a")
+
+logger = logging.getLogger("bordercore.sync_s3_to_wumpus")
 
 BLOB_DIR = "/home/media"
 
 s3_client = boto3.client("s3")
 
 
-def get_key_from_message(buffer):
+def get_info_from_message(buffer):
 
     msg = email.message_from_string(buffer)
     payload = json.loads(msg.get_payload())
     event = json.loads(payload["Message"])
 
     bucket = event["Records"][0]["s3"]["bucket"]["name"]
-    object = event["Records"][0]["s3"]["object"]
+    object = event["Records"][0]["s3"].get("object", None)
 
-    return (bucket, object)
+    return {
+        "bucket": bucket,
+        "object": object,
+        "eventName": event["Records"][0].get("eventName", None)
+    }
 
 
-def copy_object_to_wumpus(bucket, object):
+def delete_object_from_wumpus(info):
 
-    file_path = f"{BLOB_DIR}/{object['key']}"
+    # Amazon replaces spaces with plus signs, so we must change them back
+    key = Path(f"{BLOB_DIR}/{info['object']['key']}".replace("+", " "))
+
+    if key.name in ILLEGAL_FILENAMES:
+        logger.info("  Skipping. File is cover image.")
+        return
+
+    # Remove the file
+    if key.exists():
+        key.unlink()
+
+    # Remove any old cover files
+    for cover in ILLEGAL_FILENAMES:
+        cover_path = key.parent / cover
+        if cover_path.exists():
+            cover_path.unlink()
+
+    # Remove the parent directory
+    key.parent.rmdir()
+
+
+def copy_object_to_wumpus(info):
+
+    file_path = f"{BLOB_DIR}/{info['object']['key']}"
 
     # First check if it already exists
     if os.path.isfile(file_path):
-        print("  Skipping. File already exists.")
+        logger.info("  Skipping. File already exists.")
     else:
-        print(file_path)
+        logger.info(file_path)
         matches = re.compile(r".*/(blobs/\w\w/[0-9a-f]{40})/(.*)").match(file_path)
         dirs = matches.group(1)
         filename = matches.group(2)
 
         if filename in ILLEGAL_FILENAMES:
-            print("  Skipping. File is cover image.")
+            logger.info("  Skipping. File is cover image.")
         else:
             makedirs(f"{BLOB_DIR}/{dirs}", exist_ok=True)
-            s3_client.download_file(bucket, object["key"], file_path)
+            # Amazon replaces spaces with plus signs, so we must change them back
+            s3_client.download_file(info["bucket"], info["object"]["key"].replace("+", " "), file_path.replace("+", " "))
 
 
 buffer = ""
 for line in sys.stdin:
     buffer += line
 
-bucket, object = get_key_from_message(buffer)
+logger.info(buffer)
 
-print(f"Downloading new object: {object['key']}")
+info = get_info_from_message(buffer)
 
-copy_object_to_wumpus(bucket, object)
+if not info["object"]:
+    # There is no S3 object associated with this blob, so
+    #  there is nothing for us to do.
+    sys.exit(0)
+
+if info["eventName"] == "ObjectRemoved:Delete":
+    delete_object_from_wumpus(info)
+else:
+    logger.info(f"Downloading new object: {info['object']['key']}")
+    copy_object_to_wumpus(info)

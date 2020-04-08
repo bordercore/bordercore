@@ -32,14 +32,15 @@ All cover images are then uploaded to S3 in the same directory
 as the original file.
 """
 
-import boto3
 import glob
 import json
 import logging
 import os
+import uuid
 from pathlib import PurePath
 from urllib.parse import unquote_plus
-import uuid
+
+import boto3
 from PIL import Image
 
 from lib.thumbnails import create_thumbnail
@@ -87,6 +88,10 @@ def handler(event, context):
             log.info(json.dumps(record["Sns"]["Message"]))
             sns_record = json.loads(record["Sns"]["Message"])["Records"][0]
             bucket = sns_record["s3"]["bucket"]["name"]
+
+            # Ignore object delete events
+            if sns_record["eventName"] == "ObjectRemoved:Delete":
+                continue
 
             # Spaces are replaced with '+'s
             key = unquote_plus(sns_record["s3"]["object"]["key"])
