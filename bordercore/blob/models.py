@@ -396,7 +396,7 @@ class Document(TimeStampedModel, AmazonMixin):
         }
 
         response = client.publish(
-            TopicArn="arn:aws:sns:us-east-1:192218769908:NewBlob",
+            TopicArn="arn:aws:sns:us-east-1:192218769908:NewS3Blob",
             Message=json.dumps(message),
         )
         # TODO: Handle response errors
