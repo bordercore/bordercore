@@ -176,7 +176,6 @@ class BlobDetailView(DetailView):
             else:
                 messages.add_message(self.request, messages.ERROR, 'Blob not found in Elasticsearch')
         context['caption'] = self.object.get_title(remove_edition_string=True)
-        context['title'] = 'Blob Detail :: {}'.format(self.object.get_title(remove_edition_string=True))
         context['fields_ignore'] = ['is_book', 'Url', 'Publication Date', 'Title', 'Author']
 
         context['current_collections'] = Collection.objects.filter(user=self.request.user, blob_list__contains=[{'id': self.object.id}])
