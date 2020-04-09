@@ -51,27 +51,27 @@
             </tr>
         </thead>
 
-    {% for key, values in active_exercises.items %}
+    {% for exercise in active_exercises %}
 
         <tr>
-            <td><a href="{% url 'exercise_detail' values.id %}">{{ key }}</a></td>
-            <td>{{ values.muscle.muscle_group.muscle_group }}</td>
-            {% if values.date %}
-                <td>{{ values.date|date:"N j, Y" }} - {{ values.delta_days }} day{{ values.delta_days|pluralize:"s" }} ago</td>
+            <td><a href="{% url 'exercise_detail' exercise.id %}">{{ exercise.exercise }}</a></td>
+            <td>{{ exercise.muscle.muscle_group }}</td>
+            {% if exercise.last_active %}
+                <td>{{ exercise.last_active|date:"N j, Y" }} - {{ exercise.delta_days }} day{{ exercise.delta_days|pluralize:"s" }} ago</td>
             {% else %}
                 <td>Never</td>
             {% endif %}
-            <td>{{ values.date|date:"U" }}</td>
-            <td>{{ values.delta_days }}</td>
+            <td>{{ exercise.last_active|date:"U" }}</td>
+            <td>{{ exercise.delta_days }}</td>
         </tr>
 
     {% endfor %}
 
     </table>
 
-        <h1>Inactive Exercises</h1>
+    <h1>Inactive Exercises</h1>
 
-    <table class="table" id="inactive_exercises">
+    <table class="table" id="active_exercises" style="display:none" width="100%">
 
         <thead>
             <tr>
@@ -83,18 +83,18 @@
             </tr>
         </thead>
 
-    {% for key, values in inactive_exercises.items %}
+    {% for exercise in inactive_exercises %}
 
         <tr>
-            <td><a href="{% url 'exercise_detail' values.id %}">{{ key }}</a></td>
-            <td>{{ values.muscle.muscle_group.muscle_group }}</td>
-            {% if values.date %}
-                <td>{{ values.date|date:"N j, Y" }} - {{ values.delta_days }} day{{ values.delta_days|pluralize:"s" }} ago</td>
+            <td><a href="{% url 'exercise_detail' exercise.id %}">{{ exercise.exercise }}</a></td>
+            <td>{{ exercise.muscle.muscle_group }}</td>
+            {% if exercise.last_active %}
+                <td>{{ exercise.last_active|date:"N j, Y" }} - {{ exercise.delta_days }} day{{ exercise.delta_days|pluralize:"s" }} ago</td>
             {% else %}
                 <td>Never</td>
             {% endif %}
-            <td>{{ values.date|date:"U" }}</td>
-            <td>{{ values.delta_days }}</td>
+            <td>{{ exercise.last_active|date:"U" }}</td>
+            <td>{{ exercise.delta_days }}</td>
         </tr>
 
     {% endfor %}

@@ -1,9 +1,12 @@
 import datetime
 import json
+from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import F, Max, OuterRef, Subquery
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 
@@ -73,34 +76,40 @@ def fitness_add(request, exercise_id):
     return redirect('fitness_summary')
 
 
-def add_exercise_info(user, exercise_list, exercise):
-
-    try:
-        exercise_list[exercise.exercise] = exercise
-        exercise_list[exercise.exercise].date = exercise.data_set.filter(user=user).order_by('-date')[0].date
-        exercise_list[exercise.exercise].delta_days = int((int(datetime.datetime.now().strftime("%s")) - int(exercise_list[exercise.exercise].date.strftime("%s"))) / 86400) + 1
-    except IndexError:
-        pass
-
-
 @login_required
 def fitness_summary(request):
 
-    exercises = Exercise.objects.all()
+    newest = ExerciseUser.objects.filter(exercise=OuterRef("pk")) \
+        .filter(user=request.user)
 
-    active_exercises = {}
-    inactive_exercises = {}
+    # TODO: The following queries is not performant. Optimize!
+    exercises = Exercise.objects.annotate(
+        last_active=Max("data__date"), is_active=Subquery(newest.values("started")[:1])) \
+        .filter(data__user=request.user) \
+        .order_by(F("last_active")) \
+        .select_related()
+
+    active_exercises = []
+    inactive_exercises = []
 
     for e in exercises:
-        if e.exerciseuser_set.filter(user=request.user):
-            add_exercise_info(request.user, active_exercises, e)
-        else:
-            add_exercise_info(request.user, inactive_exercises, e)
+        delta = timezone.now() - e.last_active
 
-    return render(request, 'fitness/summary.html', {'active_exercises': active_exercises,
-                                                    'inactive_exercises': inactive_exercises,
-                                                    'section': SECTION,
-                                                    'title': 'Fitness Summary'})
+        # Round up to the nearest day
+        if delta.seconds // 3600 >= 12:
+            delta = delta + timedelta(days=1)
+
+        e.delta_days = delta.days
+
+        if e.is_active is not None:
+            active_exercises.append(e)
+        else:
+            inactive_exercises.append(e)
+
+    return render(request, "fitness/summary.html", {"active_exercises": active_exercises,
+                                                    "inactive_exercises": inactive_exercises,
+                                                    "section": SECTION,
+                                                    "title": "Fitness Summary"})
 
 
 @login_required
