@@ -10,13 +10,13 @@
 
 {% block left-block %}
 
-    <h1>{{ caption }}</h1>
+    <h1 id="title" class="pl-0">{{ caption }}</h1>
 
     <h5>{{ object.get_edition_string }}</h5>
 
     <br />
 
-    {% if metadata.Author %}by {{ metadata.Author }}<br />{% endif %}
+    {% if metadata.Author %}by <span id="author">{{ metadata.Author }}</span><br />{% endif %}
 
     {% if date %}{{ date }}<br /><br />{% endif  %}
 
@@ -42,8 +42,8 @@
     {% for key, values in metadata.items %}
         {% if not key in fields_ignore %}
             <div>
-                <strong>{{ key }}</strong><br />
-                {{ values }}
+                <strong class="metadata_name">{{ key }}</strong><br />
+                <span class="metadata_value">{{ values }}</span>
             </div>
             {% endif %}
     {% endfor %}
@@ -56,7 +56,7 @@
     {% if object.sha1sum %}
         <div>
             <strong>Sha1sum</strong><br />
-            <small><a href="{{ aws_url }}">{{ object.sha1sum }}</a></small>
+            <small id="sha1sum"><a href="{{ aws_url }}">{{ object.sha1sum }}</a></small>
         </div>
         <div>
             <strong>Size</strong><br />
@@ -64,7 +64,7 @@
         </div>
     {% endif %}
 
-    {% if solr_info.note %}
+    {% if object.note %}
         <div id="blob_note">{{ object.get_note|safe }}</div>
     {% endif %}
 
@@ -179,7 +179,7 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
                     size: {
                         "width": "600px"
                     },
-                    name: "{{ title }}",
+                    name: "{{ object.title }}",
                     "media": {
                         "mp3": "{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}"
                     }
@@ -222,7 +222,9 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
           {% else %}
 
                 {% if object.content %}
-                    {{ object.get_content|safe }}
+                    <div id="content">
+                        {{ object.get_content|safe }}
+                    </div>
                 {% endif %}
 
                 {% if cover_info %}
