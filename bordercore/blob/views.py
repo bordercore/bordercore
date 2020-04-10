@@ -3,7 +3,6 @@ import logging
 import random
 import re
 from collections import OrderedDict
-from urllib.parse import urlparse
 
 import boto3
 import humanize
@@ -138,17 +137,8 @@ class BlobDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(BlobDetailView, self).get_context_data(**kwargs)
         context['id'] = self.object.id
-        context['metadata'] = {}
-        context['urls'] = []
-        for x in self.object.metadata_set.filter(user=self.request.user):
-            if x.name == 'Url':
-                parsed_uri = urlparse(x.value)
-                context['urls'].append({'url': x.value, 'domain': parsed_uri.netloc})
-            else:
-                if context['metadata'].get(x.name, ''):
-                    context['metadata'][x.name] = ', '.join([context['metadata'][x.name], x.value])
-                else:
-                    context['metadata'][x.name] = x.value
+        context['metadata'] = self.object.get_metadata()
+        context['urls'] = self.object.get_urls()
 
         from lib.time_utils import get_date_from_pattern
         context['date'] = get_date_from_pattern({"gte": self.object.date})

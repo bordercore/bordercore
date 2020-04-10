@@ -18,7 +18,6 @@ from tag.models import Tag  # isort:skip
 from blob.models import Document  # isort:skip
 
 
-
 @pytest.fixture(scope="module")
 def aws_credentials():
     """Mocked AWS Credentials for moto."""
@@ -130,6 +129,5 @@ def test_get_cover_info(s3_resource, blob_image, blob_pdf):
 
     cover_info_pdf = Document.get_cover_info(blob_pdf.user, blob_pdf.sha1sum)
     assert cover_info_pdf["url"] == f"{blob_pdf.get_parent_dir()}/cover-large.jpg"
-    print(cover_info_pdf)
 
     assert Document.get_cover_info(blob_pdf.user, None) == {}

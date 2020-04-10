@@ -5,6 +5,7 @@ import re
 import urllib.parse
 import uuid
 from pathlib import PurePath
+from urllib.parse import urlparse
 
 import boto3
 import markdown
@@ -191,6 +192,29 @@ class Document(TimeStampedModel, AmazonMixin):
             return "{}/{}/{}/{}".format(settings.MEDIA_ROOT, self.sha1sum[0:2], self.sha1sum, self.file)
         else:
             return None
+
+    def get_urls(self):
+
+        return [
+            {
+                "url": x.value,
+                "domain": urlparse(x.value).netloc
+            }
+            for x
+            in self.metadata_set.filter(name="Url")
+        ]
+
+    def get_metadata(self):
+
+        metadata = {}
+
+        for x in self.metadata_set.all():
+            if metadata.get(x.name, None):
+                metadata[x.name] = ", ".join([metadata[x.name], x.value])
+            else:
+                metadata[x.name] = x.value
+
+        return metadata
 
     def get_elasticsearch_info(self):
 
