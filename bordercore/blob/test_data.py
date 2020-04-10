@@ -3,14 +3,15 @@ import re
 from pathlib import Path
 
 import boto3
+import pytest
 from botocore.errorfactory import ClientError
+from elasticsearch import Elasticsearch
 
 import django
-import pytest
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, Max, Min, Q
-from elasticsearch import Elasticsearch
+
 from lib.util import get_missing_blob_ids, is_image
 
 logging.getLogger("elasticsearch").setLevel(logging.ERROR)
@@ -396,6 +397,29 @@ def test_blobs_in_s3_exist_on_filesystem():
                 filename = m.group(2)
                 if not Path(file_path).exists() and filename not in ILLEGAL_FILENAMES:
                     assert False, f"blob {key['Key']} exists in S3 but not on the filesystem"
+
+
+def test_blobs_on_filesystem_exist_in_s3():
+    "Assert that all blobs on the filesystem exist in S3"
+
+    s3_resource = boto3.resource("s3")
+
+    paginator = s3_resource.meta.client.get_paginator("list_objects")
+    page_iterator = paginator.paginate(Bucket=bucket_name)
+
+    blobs = {}
+
+    # Create a hash of all blobs in S3 for later lookup
+    for page in page_iterator:
+        for key in page["Contents"]:
+            m = re.search(r"^(blobs/\w{2}/\w{40})/(.+)", str(key["Key"]))
+            if m:
+                file_path = f"{BLOB_DIR}/{key['Key']}"
+                blobs[file_path] = True
+
+    for x in Path(f"{BLOB_DIR}/blobs").rglob("*"):
+        if x.is_file() and blobs.get(str(x), None) is None and x.name not in ILLEGAL_FILENAMES:
+            assert False, f"{x} found on the filesystem but not in S3"
 
 
 def test_elasticsearch_blobs_exist_in_db(es):
