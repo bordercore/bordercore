@@ -143,6 +143,7 @@ def add_bookmarks_from_import(request, tag, bookmarks):
             #  Bookmark model's post_save signal.
             b.save()
 
+            b.index_bookmark()
             b.snarf_favicon()
             added_count = added_count + 1
 
