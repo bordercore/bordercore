@@ -170,7 +170,7 @@ class SearchListView(ListView):
                     {
                         "multi_match": {
                             "query": search_term,
-                            "fields": ["artist", "author", "attachment.content", "sha1sum", "title", "uuid"],
+                            "fields": ["artist", "author", "attachment.content", "contents", "sha1sum", "title", "uuid"],
                             "operator": boolean_type,
                         }
                     }
