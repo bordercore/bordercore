@@ -381,6 +381,7 @@ def test_elasticsearch_blobs_exist_in_s3(es):
             assert False, f"blob {blob['_source']['sha1sum']} exists in Elasticsearch but not in S3"
 
 
+@pytest.mark.wumpus
 def test_blobs_in_s3_exist_on_filesystem():
     "Assert that all blobs in S3 exist on the filesystem"
 
@@ -399,6 +400,7 @@ def test_blobs_in_s3_exist_on_filesystem():
                     assert False, f"blob {key['Key']} exists in S3 but not on the filesystem"
 
 
+@pytest.mark.wumpus
 def test_blobs_on_filesystem_exist_in_s3():
     "Assert that all blobs on the filesystem exist in S3"
 
