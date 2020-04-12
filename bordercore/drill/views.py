@@ -14,21 +14,11 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
 from drill.forms import QuestionForm
-from drill.models import Question
+from drill.models import (EASY_BONUS, EFACTOR_DEFAULT, INTERVAL_MODIFIER,
+                          Question)
 from tag.models import Tag
 
 SECTION = "Drill"
-
-EASY_BONUS = 1.3
-
-# Starting "easiness" factor
-# Answering "Good" will increase the delay by approximately this amount
-EFACTOR_DEFAULT = 2.5
-
-# Multiplication factor for interval
-# 1.0 does nothing
-# 0.8 sets the interval at 80% their normal size
-INTERVAL_MODIFIER = 1.0
 
 
 @method_decorator(login_required, name='dispatch')

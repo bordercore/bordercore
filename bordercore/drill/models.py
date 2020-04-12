@@ -14,6 +14,17 @@ QUESTION_STATES = (
     ('R', 'To Review'),
 )
 
+EASY_BONUS = 1.3
+
+# Starting "easiness" factor
+# Answering "Good" will increase the delay by approximately this amount
+EFACTOR_DEFAULT = 2.5
+
+# Multiplication factor for interval
+# 1.0 does nothing
+# 0.8 sets the interval at 80% their normal size
+INTERVAL_MODIFIER = 1.0
+
 
 class Question(TimeStampedModel):
     """
