@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Note: This script runs as the ubuntu user
+
+# Force git to use PWD when pulling changes
+unset GIT_DIR
+
+cd /var/www/django/bordercore
+git pull origin master
+
+echo "Restarting Gunicorn..."
+sudo supervisorctl restart gunicorn
