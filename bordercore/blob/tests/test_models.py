@@ -8,9 +8,6 @@ from moto import mock_s3
 import django
 from django.conf import settings
 
-from .fixtures import blob_image, blob_pdf
-
-os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings.dev"
 django.setup()
 
 from django.contrib.auth.models import User  # isort:skip

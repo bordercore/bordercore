@@ -11,11 +11,6 @@ import django
 from django import urls
 from django.conf import settings
 
-from .fixtures import blob_image
-
-# from django_dynamic_fixture import G
-
-os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings.dev"
 django.setup()
 
 from django.contrib.auth.models import User  # isort:skip

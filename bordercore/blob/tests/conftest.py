@@ -9,7 +9,6 @@ import django
 from django.conf import settings
 from django.core.files import File
 
-os.environ["DJANGO_SETTINGS_MODULE"] = "config.settings.dev"
 django.setup()
 
 from django.contrib.auth.models import User  # isort:skip
