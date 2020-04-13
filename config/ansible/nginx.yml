@@ -1,0 +1,12 @@
+- name: Configure webserver with nginx
+  hosts: ec2
+  become: True
+  tasks:
+    - name: install nginx
+      apt: name=nginx update_cache=yes
+    - name: copy nginx config file
+      copy: src=files/nginx.conf dest=/etc/nginx/nginx.conf
+    - name: copy nginx config file
+      copy: src=files/bordercore.com dest=/etc/nginx/sites-available/bordercore.com
+    - name: restart nginx
+      service: name=nginx state=restarted
