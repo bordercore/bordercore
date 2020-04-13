@@ -1,3 +1,5 @@
+from pathlib import PurePath
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Case, CharField, Value, When
@@ -85,7 +87,7 @@ class CollectionDetailView(DetailView):
                 )).order_by(order)
 
             for blob in blob_list:
-                blob.cover_info = Document.get_cover_info(self.request.user, blob.sha1sum, max_cover_image_width=70, size='small')
+                blob.cover_url = f"{PurePath(blob.get_s3_key()).parent}/cover.jpg"
                 blob.title = blob.get_title(use_filename_if_present=True)
 
             context['blob_list'] = blob_list
