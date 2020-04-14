@@ -76,20 +76,14 @@ class Question(TimeStampedModel):
         return len(self.LEARNING_STEPS)
 
     def is_final_learning_step(self):
-        count = 0
-        for state in self.LEARNING_STEPS:
-            if state[0] == self.learning_step:
-                if count == len(self.LEARNING_STEPS) - 1:
-                    return True
-                else:
-                    return False
-            count = count + 1
+        return True if self.learning_step == self.LEARNING_STEPS[-1][0] else False
 
     def learning_step_increase(self):
-        count = 0
-        for step in self.LEARNING_STEPS:
-            if step[0] == self.learning_step:
-                print("Match: {}".format(step[0]))
-                self.learning_step = self.LEARNING_STEPS[count + 1][0]
-                break
-            count = count + 1
+        """
+        Increment to the next learning step in the LEARNING_STEPS sequence,
+        stopping if we've reached the final one
+        """
+
+        for i, step in enumerate(self.LEARNING_STEPS):
+            if step[0] == self.learning_step and step[0] != self.LEARNING_STEPS[-1][0]:
+                self.learning_step = self.LEARNING_STEPS[i + 1][0]
