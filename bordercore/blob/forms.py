@@ -1,7 +1,6 @@
 import hashlib
-import os
+import re
 
-from blob.models import ILLEGAL_FILENAMES, Document
 from django import forms
 from django.conf import settings
 from django.forms import (ModelForm, Select, Textarea, TextInput,
@@ -9,6 +8,8 @@ from django.forms import (ModelForm, Select, Textarea, TextInput,
 from django.forms.fields import CharField, IntegerField
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
+
+from blob.models import ILLEGAL_FILENAMES, Document
 from lib.fields import ModelCommaSeparatedChoiceField
 from tag.models import Tag
 
@@ -97,6 +98,21 @@ class DocumentForm(ModelForm):
     #             if existing_file:
     #                 raise forms.ValidationError(mark_safe('This file <a href="{}">already exists.</a>'.format(reverse_lazy('blob_detail', kwargs={"uuid": existing_file[0].uuid}))))
     #         return file
+
+    def clean_date(self):
+        date = self.cleaned_data.get("date")
+
+        regex1 = r"^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$"
+        regex2 = r"^\d\d\d\d-\d\d-\d\d$"
+        regex3 = r"^\d\d\d\d-\d\d$"
+        regex4 = r"^\d\d\d\d$"
+        regex5 = r"^\[(\d\d\d\d-\d\d) TO \d\d\d\d-\d\d\]$"
+        regex6 = r"^$"  # Empty dates are fine
+
+        if not re.match("|".join([regex1, regex2, regex3, regex4, regex5, regex6]), date):
+            raise forms.ValidationError("Error: invalid date format")
+
+        return date
 
     class Meta:
         model = Document
