@@ -93,7 +93,7 @@ urlpatterns = [
     path('drill/question/edit/<int:pk>/', QuestionUpdateView.as_view(), name='question_edit'),
     path('drill/search/', DrillSearchListView.as_view(), name='drill_search'),
     path('drill/answer/<int:question_id>/', drill_views.show_answer, name='answer'),
-    path('drill/result/<int:question_id>/<str:result>', drill_views.record_result, name='record_result'),
+    path('drill/response/<int:question_id>/<str:response>', drill_views.record_response, name='record_response'),
     path('drill/study/tag/<str:tag>', drill_views.study_tag, name='study_tag'),
     path('drill/tagsearch/', drill_views.tag_search, name='drill_tag_search'),
 

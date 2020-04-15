@@ -87,3 +87,38 @@ class Question(TimeStampedModel):
         for i, step in enumerate(self.LEARNING_STEPS):
             if step[0] == self.learning_step and step[0] != self.LEARNING_STEPS[-1][0]:
                 self.learning_step = self.LEARNING_STEPS[i + 1][0]
+
+    def record_response(self, response):
+        """
+        Modify the question's parameters based on the user's
+        self-reported answer.
+        """
+
+        if response == "good":
+            if self.state == "L":
+                if self.is_final_learning_step():
+                    self.state = "R"
+                else:
+                    self.learning_step_increase()
+            else:
+                self.interval = self.interval * self.efactor
+        elif response == "easy":
+            # An "easy" answer to a "Learning" question is
+            #  graduated to "To Review"
+            if self.state == "L":
+                self.state = "R"
+            self.interval = self.interval * EASY_BONUS * INTERVAL_MODIFIER
+            self.efactor = self.efactor + (self.efactor * 0.15)
+        elif response == "hard":
+            self.times_failed = self.times_failed + 1
+            self.interval = self.interval * 1.2 * INTERVAL_MODIFIER
+            self.efactor = self.efactor - (self.efactor * 0.15)
+        elif response == "again":
+            if self.state == "L":
+                self.learning_step = 1
+            else:
+                self.state = "L"
+            self.interval = timedelta(days=1)
+            self.efactor = self.efactor - (self.efactor * 0.2)
+
+        self.save()

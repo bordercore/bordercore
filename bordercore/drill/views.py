@@ -14,8 +14,7 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
 from drill.forms import QuestionForm
-from drill.models import (EASY_BONUS, EFACTOR_DEFAULT, INTERVAL_MODIFIER,
-                          Question)
+from drill.models import EFACTOR_DEFAULT, Question
 from tag.models import Tag
 
 SECTION = "Drill"
@@ -231,40 +230,12 @@ def show_answer(request, question_id):
 
 
 @login_required
-def record_result(request, question_id, result):
+def record_response(request, question_id, response):
 
     question = Question.objects.get(user=request.user, pk=question_id)
+    question.record_response(response)
 
-    if result == 'good':
-        if question.state == 'L':
-            if question.is_final_learning_step():
-                question.state = 'R'
-            else:
-                question.learning_step_increase()
-        else:
-            question.interval = question.interval * question.efactor
-    elif result == 'easy':
-        # An "easy" answer to a "Learning" question is
-        #  graduated to "To Review"
-        if question.state == 'L':
-            question.state = 'R'
-        question.interval = question.interval * EASY_BONUS * INTERVAL_MODIFIER
-        question.efactor = question.efactor + (question.efactor * 0.15)
-    elif result == 'hard':
-        question.times_failed = question.times_failed + 1
-        question.interval = question.interval * 1.2 * INTERVAL_MODIFIER
-        question.efactor = question.efactor - (question.efactor * 0.15)
-    elif result == 'again':
-        if question.state == 'L':
-            question.learning_step = 1
-        else:
-            question.state = 'L'
-        question.interval = timedelta(days=1)
-        question.efactor = question.efactor - (question.efactor * 0.2)
-
-    question.save()
-
-    return redirect('study_tag', tag=question.tags.all()[0].name)
+    return redirect("study_tag", tag=question.tags.all()[0].name)
 
 
 def tag_search(request):
