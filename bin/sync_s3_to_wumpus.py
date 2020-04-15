@@ -10,7 +10,8 @@ import os
 import re
 import sys
 from os import makedirs
-from pathlib import Path, PurePath
+from pathlib import Path
+from urllib.parse import unquote
 
 import boto3
 
@@ -53,8 +54,7 @@ def get_info_from_message(buffer):
 def delete_object_from_wumpus(info):
 
     # Amazon replaces spaces with plus signs, so we must change them back
-    key = Path(f"{BLOB_DIR}/{info['object']['key']}".replace("+", " "))
-
+    key = Path(f"{BLOB_DIR}/{unquote(info['object']['key'])}".replace("+", " "))
     if key.name in ILLEGAL_FILENAMES:
         logger.info("  Skipping. File is cover image.")
         return
@@ -75,7 +75,8 @@ def delete_object_from_wumpus(info):
 
 def copy_object_to_wumpus(info):
 
-    file_path = f"{BLOB_DIR}/{info['object']['key']}"
+    key = unquote(info["object"]["key"].replace("+", " "))
+    file_path = f"{BLOB_DIR}/{key}"
 
     # First check if it already exists
     if os.path.isfile(file_path):
@@ -91,7 +92,7 @@ def copy_object_to_wumpus(info):
         else:
             makedirs(f"{BLOB_DIR}/{dirs}", exist_ok=True)
             # Amazon replaces spaces with plus signs, so we must change them back
-            s3_client.download_file(info["bucket"], info["object"]["key"].replace("+", " "), file_path.replace("+", " "))
+            s3_client.download_file(info["bucket"], key, file_path)
 
 
 buffer = ""
