@@ -2,13 +2,11 @@
 
 {% block extra_head %}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap4.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.jplayer.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/jplayer.cleanskin.js"></script>
 
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/dataTables.bootstrap4.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.css"/>
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jplayer.clean.player.light.css" />
 
     <style>
@@ -55,6 +53,7 @@
                     $("#song_list").show();
                     api.columns.adjust();
                 },
+                "select": true,
                 "info": false,
                 "filter": false,
                 "paginate": false,
@@ -88,9 +87,7 @@
                 }
             });
 
-            $('#song_list tbody').on( 'click', 'tr', function () {
-                table.$('tr.selected').removeClass('selected');
-                $(this).addClass('selected');
+            table.on('select', function () {
 
                 var songId = $('#song_list').DataTable().cell('.selected', 0).data();
 

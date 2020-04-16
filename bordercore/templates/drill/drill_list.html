@@ -18,13 +18,11 @@
 
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/typeahead-bootstrap3.css" />
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/dataTables.bootstrap4.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.css"/>
 
     <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/dataTables.bootstrap4.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.js"></script>
 
         <script type="text/javascript" charset="utf-8">
 
@@ -64,19 +62,6 @@
                 ],
             } );
 
-            $('#drill_list tbody').on( 'click', 'tr', function () {
-                if ( $(this).hasClass('selected') ) {
-                    $(this).removeClass('selected');
-                    $('#btn-edit').attr("disabled", "disabled");
-                    $('#btn-delete').attr("disabled", "disabled");
-                } else {
-                    table.$('tr.selected').removeClass('selected');
-                    $(this).addClass('selected');
-                    $('#btn-edit').removeAttr("disabled");
-                    $('#btn-delete').removeAttr("disabled");
-                }
-            } );
-
             $('#search').on('keydown', function(event, selection) {
                 if (((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13))) {
                     $("#form-drill-delete").attr('action', '{% url 'drill_search' %}');
@@ -88,11 +73,8 @@
                 }
             });
 
-
             $('#id_tags').on('itemAdded', function(event) {
-                console.log('got here' + event.item);
                 window.location='{% url 'study_tag' 666 %}'.replace(/666$/, event.item);
-                // event.item: contains the item
             });
         });
 
