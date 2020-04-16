@@ -49,7 +49,12 @@
 
         $(document).ready(function() {
 
-            table = $('#song_list').dataTable( {
+            table = $('#song_list').DataTable( {
+                initComplete: function () {
+                    var api = this.api();
+                    $("#song_list").show();
+                    api.columns.adjust();
+                },
                 "info": false,
                 "filter": false,
                 "paginate": false,

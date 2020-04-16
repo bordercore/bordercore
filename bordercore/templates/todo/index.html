@@ -79,6 +79,11 @@
             });
 
             oTable = $('#todo_list').DataTable( {
+                initComplete: function () {
+                    var api = this.api();
+                    $('#todo_list').show();
+                    api.columns.adjust();
+                },
                 "info": false,
                 "paginate": false,
                 "sorting": [[1, 'desc']],

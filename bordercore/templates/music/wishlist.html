@@ -65,6 +65,11 @@
             });
 
             oTable = $('#wishlist_list').DataTable( {
+                initComplete: function () {
+                    var api = this.api();
+                    $("#wishlist_list").show();
+                    api.columns.adjust();
+                },
                 "info": false,
                 "paginate": false,
                 "sorting": [[3, 'desc']],

@@ -24,9 +24,16 @@
 
     <script type="text/javascript" charset="utf-8">
 
+        var oTable;
+
         $(document).ready(function() {
 
-            table = $('#song_list').dataTable( {
+            oTable = $("#song_list").DataTable( {
+                initComplete: function () {
+                    var api = this.api();
+                    $("#song_list").show();
+                    api.columns.adjust();
+                },
                 "paginate": false,
                 "info": false,
                 "sorting": [[0, 'desc']],

@@ -21,6 +21,11 @@
             }
 
             table = $('#search_results').DataTable( {
+                initComplete: function () {
+                    var api = this.api();
+                    $('#search_results').show();
+                    api.columns.adjust();
+                },
                 "info": false,
                 "paginate": false,
                 "sorting": [[1, 'desc']],

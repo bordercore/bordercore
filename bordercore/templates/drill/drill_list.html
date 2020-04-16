@@ -43,6 +43,11 @@
             }
 
             table = $('#drill_list').DataTable( {
+                initComplete: function () {
+                    var api = this.api();
+                    $('#drill_list').show();
+                    api.columns.adjust();
+                },
                 "info": false,
                 "paginate": false,
                 "sorting": [[3, 'asc']],

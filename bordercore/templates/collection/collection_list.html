@@ -29,6 +29,11 @@
             }
 
             table = $('#collection_list').DataTable( {
+                initComplete: function () {
+                    var api = this.api();
+                    $('#collection_list').show();
+                    api.columns.adjust();
+                },
                 "info": false,
                 "paginate": false,
                 "sorting": [[2, 'desc']],
