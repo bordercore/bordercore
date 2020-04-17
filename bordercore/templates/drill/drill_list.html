@@ -80,6 +80,10 @@
 
 </script>
 
+{% for message in messages %}
+    <div class="alert alert-{{ message.tags|lower }}">{{ message|safe }}</div>
+{% endfor %}
+
 <div class="row">
     <div class="col-lg-7">
 

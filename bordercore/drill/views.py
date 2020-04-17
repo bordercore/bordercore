@@ -116,6 +116,7 @@ class QuestionCreateView(CreateView):
 
         obj.save()
 
+        messages.add_message(self.request, messages.INFO, "Question added")
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
@@ -124,9 +125,13 @@ class QuestionCreateView(CreateView):
 
 @method_decorator(login_required, name='dispatch')
 class QuestionDeleteView(DeleteView):
-    template_name = 'todo/edit.html'
+
     form_class = QuestionForm
     model = Question
+
+    def delete(self, request, *args, **kwargs):
+        messages.add_message(self.request, messages.INFO, "Question deleted")
+        return super(QuestionDeleteView, self).delete(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
         question = Question.objects.get(user=self.request.user, id=self.kwargs.get('pk'))
@@ -182,6 +187,7 @@ class QuestionUpdateView(UpdateView):
             obj.tags.add(tag)
         obj.save()
 
+        messages.add_message(self.request, messages.INFO, "Question edited")
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):

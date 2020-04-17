@@ -30,9 +30,9 @@
 
     </script>
 
-    {% if message %}
-        <div class="alert alert-success">{{ message }}</div>
-    {% endif %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags|lower }}">{{ message|safe }}</div>
+    {% endfor %}
 
     <p class="lead offset-lg-2">{{ action }} question and answer</p>
 

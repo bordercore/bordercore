@@ -22,6 +22,10 @@ Interval: <strong>{{ question.interval|floatformat:1 }}</strong>
     <br />
 Easiness Factor: <strong>{{ question.efactor|floatformat:1 }}</strong>
 
+    <form action="{% url 'question_edit' question.id %}" class="mt-5">
+        <input type="submit" class="btn btn-primary" value="Edit">
+    </form>
+
 {% if state_name == 'Learning' %}
 
     <div class="mt-5">
