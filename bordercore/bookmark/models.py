@@ -76,12 +76,13 @@ class Bookmark(TimeStampedModel):
 
         super(Bookmark, self).delete()
 
-    def index_bookmark(self):
+    def index_bookmark(self, es=None):
 
-        es = Elasticsearch(
-            [settings.ELASTICSEARCH_ENDPOINT],
-            verify_certs=False
-        )
+        if not es:
+            es = Elasticsearch(
+                [settings.ELASTICSEARCH_ENDPOINT],
+                verify_certs=False
+            )
 
         doc = {
             "bordercore_id": self.id,

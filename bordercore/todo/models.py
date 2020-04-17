@@ -56,12 +56,13 @@ class Todo(TimeStampedModel):
 
         super(Todo, self).delete()
 
-    def index_todo(self):
+    def index_todo(self, es=None):
 
-        es = Elasticsearch(
-            [settings.ELASTICSEARCH_ENDPOINT],
-            verify_certs=False
-        )
+        if not es:
+            es = Elasticsearch(
+                [settings.ELASTICSEARCH_ENDPOINT],
+                verify_certs=False
+            )
 
         doc = {
             "bordercore_id": self.id,

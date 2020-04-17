@@ -153,7 +153,7 @@ for blob_info in blobs:
             blob_count = blob_count + 1
             if blob_count > limit:
                 break
-            index_blob(uuid=blob_info.uuid)
+            index_blob(uuid=blob_info.uuid, create_connection=False)
 
         print(f"{blob_info.uuid} {blob_info.file} {blob_info.title}")
 

@@ -199,13 +199,14 @@ def get_range_from_date(date):
 
 def index_blob(**kwargs):
 
-    connections.create_connection(
-        hosts=[{"host": ES_ENDPOINT, "port": ES_PORT}],
-        use_ssl=False,
-        timeout=1200,
-        verify_certs=True,
-        connection_class=RequestsHttpConnection
-    )
+    if kwargs.get("create_connection", True):
+        connections.create_connection(
+            hosts=[{"host": ES_ENDPOINT, "port": ES_PORT}],
+            use_ssl=False,
+            timeout=1200,
+            verify_certs=True,
+            connection_class=RequestsHttpConnection,
+        )
 
     blob_info = get_blob_info(**kwargs)
     metadata = get_blob_metadata(blob_info["uuid"])
