@@ -143,19 +143,6 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
 
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
 
-    <script type="text/javascript" charset="utf-8">
-
-        $(document).ready(function() {
-
-            // Dynamically set the width of the modal dialog based on the width of the image.
-            //  Add 32 to account for the modal dialog border.
-            $('.modal-dialog').css('width', {{ cover_info.width}} + 32);
-
-        });
-
-    </script>
-
-
     {% if content_type == 'Audio' %}
 
         <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jplayer.clean.player.light.css" />
@@ -192,13 +179,11 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
     {% endif %}
 
     <div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-dialog-centered w-75 mw-100" role="document">
             <div class="modal-content">
                 <div class="modal-body">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <img src="{{ MEDIA_URL }}{{ cover_info.url }}" height="{{ cover_info.height }}" width="{{ cover_info.width }}"/>
-                        </div>
+                    <div>
+                        <img src="{{ MEDIA_URL }}{{ cover_info.url }}" style="width: 100%"/>
                     </div>
                 </div>
             </div>
