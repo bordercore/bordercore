@@ -1,16 +1,32 @@
-"""
-This file demonstrates writing tests using the unittest module. These will pass
-when you run "manage.py test".
 
-Replace this with more appropriate tests for your application.
-"""
-
-from django.test import TestCase
+from lib.util import is_image, is_pdf
 
 
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
-        """
-        Tests that 1 + 1 always equals 2.
-        """
-        self.assertEqual(1 + 1, 2)
+def test_util_is_image():
+
+    file = "path/to/file.png"
+    assert is_image(file) is True
+
+    file = "path/to/file.gif"
+    assert is_image(file) is True
+
+    file = "path/to/file.jpg"
+    assert is_image(file) is True
+
+    file = "path/to/file.jpeg"
+    assert is_image(file) is True
+
+    file = "file.png"
+    assert is_image(file) is True
+
+    file = "path/to/file.pdf"
+    assert is_image(file) is False
+
+
+def test_util_is_pdf():
+
+    file = "path/to/file.pdf"
+    assert is_pdf(file) is True
+
+    file = "path/to/file.gif"
+    assert is_pdf(file) is False
