@@ -180,6 +180,9 @@ class QuestionUpdateView(UpdateView):
 
     def form_valid(self, form):
 
+        # Delete all existing tags
+        form.instance.tags.clear()
+
         obj = form.save(commit=False)
 
         # Take care of the tags.  Create any that are new.
