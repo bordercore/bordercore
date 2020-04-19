@@ -1,7 +1,5 @@
-import os
-import sys
-
 import boto3
+import pytest
 from botocore.errorfactory import ClientError
 
 import django
@@ -9,8 +7,9 @@ from django.conf import settings
 
 from music.models import Song
 
-django.setup()
+pytestmark = pytest.mark.data_quality
 
+django.setup()
 
 
 bucket_name = settings.AWS_BUCKET_NAME_MUSIC

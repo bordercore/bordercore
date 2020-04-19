@@ -15,7 +15,7 @@ from tag.models import Tag  # isort:skip
 from blob.models import Document  # isort:skip
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def aws_credentials():
     """Mocked AWS Credentials for moto."""
     os.environ["AWS_ACCESS_KEY_ID"] = "testing"
@@ -24,7 +24,7 @@ def aws_credentials():
     os.environ["AWS_SESSION_TOKEN"] = "testing"
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def s3_resource(aws_credentials):
     """Mocked S3 Fixture."""
 
@@ -32,7 +32,7 @@ def s3_resource(aws_credentials):
         yield boto3.resource(service_name="s3")
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def s3_bucket(s3_resource):
 
     # Verify that the S3 mock is working
@@ -45,12 +45,6 @@ def s3_bucket(s3_resource):
         raise EnvironmentError(err)
 
     s3_resource.create_bucket(Bucket=settings.AWS_STORAGE_BUCKET_NAME)
-
-
-@pytest.fixture(scope="function")
-def user(db):
-    user = User.objects.create(username="testuser")
-    yield user
 
 
 def test_get_s3_key_from_sha1sum(blob_image):
@@ -115,7 +109,7 @@ def test_is_ingestible_file(blob_image):
     assert Document.is_ingestible_file("file.pdf") is True
 
 
-def test_get_cover_info(s3_resource, blob_image, blob_pdf):
+def test_get_cover_info(blob_image, blob_pdf):
 
     cover_info = Document.get_cover_info(blob_image.user, blob_image.sha1sum)
     assert cover_info["height"] == 1689

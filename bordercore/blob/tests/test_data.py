@@ -16,6 +16,8 @@ from lib.util import get_missing_blob_ids, is_image
 
 logging.getLogger("elasticsearch").setLevel(logging.ERROR)
 
+pytestmark = pytest.mark.data_quality
+
 django.setup()
 
 from accounts.models import SortOrder  # isort:skip
@@ -29,8 +31,6 @@ from tag.models import Tag  # isort:skip
 BLOB_DIR = "/home/media"
 
 bucket_name = settings.AWS_STORAGE_BUCKET_NAME
-
-s3_client = boto3.client("s3")
 
 
 @pytest.fixture()
@@ -154,7 +154,6 @@ def test_dates_with_unixtimes(es):
     }
 
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["total"]["value"]
-    # print(json.dumps(es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]))
     assert found == 0, f"{found} documents fail this test"
 
 
@@ -327,6 +326,10 @@ def test_blobs_in_s3_exist_in_db():
 
 def test_images_have_thumbnails():
     "Assert that every image blob has a thumbnail"
+
+    # Create the client here rather than at the top of the module
+    #  to avoid interfering with moto mocks in other tests.
+    s3_client = boto3.client("s3")
 
     for blob in Document.objects.filter(~Q(file="")):
 

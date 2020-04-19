@@ -21,7 +21,6 @@ def blob_image(s3_resource, s3_bucket, user, db):
 
     # TODO: Is there a way to only have this fixture called once, eg "module" scope?
     #  I can't use "module" scope because it conflicts with the "db" fixture scope
-    print("blob fixture called")
 
     filepath = Path(__file__).parent / "resources/test_blob.jpg"
     filename = Path(filepath).name

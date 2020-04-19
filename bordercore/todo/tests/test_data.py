@@ -4,6 +4,8 @@ from elasticsearch import Elasticsearch
 import django
 from django.conf import settings
 
+pytestmark = pytest.mark.data_quality
+
 django.setup()
 
 from todo.models import Todo  # isort:skip

@@ -6,6 +6,8 @@ from django.conf import settings
 
 from lib.util import get_missing_bookmark_ids
 
+pytestmark = pytest.mark.data_quality
+
 django.setup()
 
 from bookmark.models import Bookmark  # isort:skip
