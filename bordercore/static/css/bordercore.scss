@@ -127,6 +127,24 @@ ul.pagination {
   height: 400px;
 }
 
+/* The "has-search" rules provide space for a
+  search icon on the left for forms */
+.has-search .form-control {
+  padding-left: 2.375rem;
+}
+
+.has-search .form-control-feedback {
+  position: absolute;
+  z-index: 2;
+  display: block;
+  width: 2.375rem;
+  height: 2.375rem;
+  line-height: 2.375rem;
+  text-align: center;
+  pointer-events: none;
+  color: #aaa;
+}
+
 .search_book_title {
   color: $table_row_background_color;
 }
