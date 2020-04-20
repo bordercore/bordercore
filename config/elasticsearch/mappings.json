@@ -24,7 +24,15 @@
                 "type":"date_range",
                 "format":"yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM||yyyy||epoch_second"
             },
-            "title": { "type":"text" },
+            "title": {
+                "type":"text",
+                "fields": {
+                    "raw": {
+                        "type": "text",
+                        "analyzer": "no_tokenization"
+                    }
+                }
+            },
             "contents": { "type":"text" },
             "doctype": {
                 "type":"text",

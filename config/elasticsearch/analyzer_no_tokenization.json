@@ -1,0 +1,19 @@
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "no_tokenization": {
+          "type": "custom",
+          "tokenizer": "keyword",
+          "char_filter": [
+            "html_strip"
+          ],
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  }
+}

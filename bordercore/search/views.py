@@ -415,7 +415,7 @@ def kb_search_tags_booktitles(request):
                     },
                     {
                         "wildcard": {
-                            "title": {
+                            "title.raw": {
                                 "value": f"*{search_term}*",
                             }
                         }
