@@ -1,0 +1,260 @@
+$table_row_background_color : #007BFF;
+$table_row_color : #ffffff;
+
+[hidden] {
+  display: none !important;
+}
+
+#title {
+  padding: 5px 0 0 15px;
+}
+
+#left-block {
+  padding: 17px;
+}
+
+.hidden {
+  display: none;
+}
+
+.list_annotation {
+  color: #C76257;
+  font-size: 80%;
+}
+
+/* Don't display the '*' for required fields */
+.asteriskField {
+  display: none;
+}
+
+#row_selected, #row_selected a {
+   background-color: $table_row_background_color;
+   color: $table_row_color;
+}
+
+.selected, .selected a {
+   background-color: $table_row_background_color;
+   color: $table_row_color;
+}
+
+/* Use this to center content */
+.center {
+  float: none;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.alert-margin {
+  margin-left: 0px;
+}
+
+/* Animated buttons */
+
+.glyphicon-refresh-animate {
+  -animation: spin .7s infinite linear;
+  -webkit-animation: spin2 .7s infinite linear;
+}
+
+@-webkit-keyframes spin2 {
+  from { -webkit-transform: rotate(0deg);}
+  to { -webkit-transform: rotate(360deg);}
+}
+
+@keyframes spin {
+  from { transform: scale(1) rotate(0deg);}
+  to { transform: scale(1) rotate(360deg);}
+}
+
+.form-error {
+  color: #b94a48;
+}
+
+/*** Bookmarks ***/
+
+.bookmark-list {
+  list-style-type: none;
+}
+
+.bookmark-tag-filter-input {
+  width: 260px;
+}
+
+ul.bookmark-list li {
+  padding: 4px;
+}
+
+ul.bookmark-list span:nth-child(1) {
+  color: #999999;
+  display: inline-block;
+  width: 80px;
+}
+
+ul.bookmark-list span:nth-child(2) {
+  color: #999999;
+}
+
+ul.bookmark-list span:nth-child(3) {
+  width: 20px;
+}
+
+#bookmark-sidebar {
+  background-color: #ffffff;
+  border: 1px solid #999999;
+  display:none;
+  height: 400px;
+  padding: 5px;
+  position:fixed!important;
+  width: 300px;
+  z-index:20;
+}
+
+.monospaced {
+  font-family: Courier
+}
+
+/* The default margin for the pagination controls at the bottom
+   of a datatables table is 20px -- why is this? */
+ul.pagination {
+  margin: 0px;
+}
+
+#exerciseDetailChart {
+  width: 800px;
+  height: 400px;
+}
+
+.search_book_title {
+  color: $table_row_background_color;
+}
+
+.search_book_author {
+  font-size: smaller;
+}
+
+.important {
+  background-color: #eeeeee;
+  padding: 3px;
+}
+
+.search_book_title #edit_link{
+  font-size: 8px;
+}
+
+.search_todo_date {
+  font-weight: normal;
+  color: #C76257;
+  font-size: 10px;
+}
+
+.search_note_snippet {
+  font-weight: bold;
+}
+
+#kbsearch {
+  width: 330px;
+}
+
+#kb_blob_search {
+  width: 340px;
+}
+
+.blob_edit_amazon_name_field {
+  width: 100px;
+}
+
+#blob_collection_list {
+  font-size: 18px;
+  margin-botoom: 10px;
+}
+
+/* We need this because the "input-group" class ruins the field alignment */
+#blob_edit_file {
+  padding-left: 15px;
+}
+
+#blob_note {
+  border: 1px solid #999999;
+  padding: 5px;
+}
+
+#myModal #title {
+  width: 300px;
+}
+
+li.active a {
+  color: #ffffff
+}
+
+a.tag:link {
+  color: white;
+}
+/* visited link */
+a.tag:visited {
+  color: white;
+}
+
+/* mouse over link */
+a.tag:hover {
+  color: white;
+}
+
+/* selected link */
+a.tag:active {
+  color: yellow;
+}
+
+.voffset {
+   margin-top: 5px;
+}
+
+.top-buffer {
+   margin-top: 20px;
+}
+
+.random-image-card {
+   border: 0px;
+}
+
+.random-image-card .card-header {
+   margin-bottom: 15px;
+}
+
+.random-image-card .list-group {
+   width: 90%;
+   margin: 0 auto;
+}
+
+#tag-detail-tab-content {
+  padding-left: 10px;
+}
+
+.table-borderless td,
+.table-borderless th {
+   border: 0;
+   padding: 10px;
+}
+
+.collection_sortable {
+   list-style-type: none;
+   margin: 0;
+   padding: 0;
+}
+
+.collection_sortable li {
+   margin: 3px 3px 3px 0;
+   padding: 15px 15px 130px 15px;
+   float: left;
+   width: 200px;
+   height: 110px;
+   text-align: center;
+}
+
+#document_note {
+   background-color: $table_row_background_color;
+   color: #ffffff;
+   padding: 10px;
+}

@@ -1,257 +1,223 @@
 [hidden] {
-  display: none !important;
-           }
+  display: none !important; }
 
 #title {
-  padding: 5px 0 0 15px;
-}
+  padding: 5px 0 0 15px; }
 
 #left-block {
-    padding: 17px;
-}
+  padding: 17px; }
 
 .hidden {
-   display: none;
-}
+  display: none; }
 
 .list_annotation {
   color: #C76257;
-  font-size: 80%;
-}
+  font-size: 80%; }
 
 /* Don't display the '*' for required fields */
 .asteriskField {
-    display: none;
-}
+  display: none; }
 
 #row_selected, #row_selected a {
-   background-color: #0173bc;
-   color: #ffffff;
-}
+  background-color: #007BFF;
+  color: #ffffff; }
 
 .selected, .selected a {
-   background-color: #0173bc;
-   color: #ffffff;
-}
+  background-color: #007BFF;
+  color: #ffffff; }
 
 /* Use this to center content */
 .center {
-     float: none;
-     margin-left: auto;
-     margin-right: auto;
-}
+  float: none;
+  margin-left: auto;
+  margin-right: auto; }
 
 .bold {
-   font-weight: bold;
-}
+  font-weight: bold; }
 
 .alert-margin {
-   margin-left: 0px;
-}
+  margin-left: 0px; }
 
 /* Animated buttons */
-
 .glyphicon-refresh-animate {
-    -animation: spin .7s infinite linear;
-    -webkit-animation: spin2 .7s infinite linear;
-}
+  -animation: spin .7s infinite linear;
+  -webkit-animation: spin2 .7s infinite linear; }
 
 @-webkit-keyframes spin2 {
-    from { -webkit-transform: rotate(0deg);}
-    to { -webkit-transform: rotate(360deg);}
-}
+  from {
+    -webkit-transform: rotate(0deg); }
+  to {
+    -webkit-transform: rotate(360deg); } }
 
 @keyframes spin {
-    from { transform: scale(1) rotate(0deg);}
-    to { transform: scale(1) rotate(360deg);}
-}
+  from {
+    transform: scale(1) rotate(0deg); }
+  to {
+    transform: scale(1) rotate(360deg); } }
 
 .form-error {
-  color: #b94a48;
-}
+  color: #b94a48; }
 
 /*** Bookmarks ***/
-
 .bookmark-list {
-    list-style-type: none;
-}
+  list-style-type: none; }
 
 .bookmark-tag-filter-input {
-    width: 260px;
-}
+  width: 260px; }
 
 ul.bookmark-list li {
-   padding: 4px;
-}
+  padding: 4px; }
 
 ul.bookmark-list span:nth-child(1) {
-    color: #999999;
-    display: inline-block;
-    width: 80px;
-}
+  color: #999999;
+  display: inline-block;
+  width: 80px; }
 
 ul.bookmark-list span:nth-child(2) {
-    color: #999999;
-}
+  color: #999999; }
 
 ul.bookmark-list span:nth-child(3) {
-    width: 20px;
-}
+  width: 20px; }
 
 #bookmark-sidebar {
-    background-color: #ffffff;
-    border: 1px solid #999999;
-    display:none;
-    height: 400px;
-    padding: 5px;
-    position:fixed!important;
-    width: 300px;
-    z-index:20;
-}
+  background-color: #ffffff;
+  border: 1px solid #999999;
+  display: none;
+  height: 400px;
+  padding: 5px;
+  position: fixed !important;
+  width: 300px;
+  z-index: 20; }
 
 .monospaced {
-    font-family: Courier
- }
+  font-family: Courier; }
 
 /* The default margin for the pagination controls at the bottom
    of a datatables table is 20px -- why is this? */
 ul.pagination {
-    margin: 0px;
-                }
+  margin: 0px; }
 
 #exerciseDetailChart {
-   width: 800px;
-   height: 400px;
-}
+  width: 800px;
+  height: 400px; }
+
+/* The "has-search" rules provide space for a
+  search icon on the left for forms */
+.has-search .form-control {
+  padding-left: 2.375rem; }
+
+.has-search .form-control-feedback {
+  position: absolute;
+  z-index: 2;
+  display: block;
+  width: 2.375rem;
+  height: 2.375rem;
+  line-height: 2.375rem;
+  text-align: center;
+  pointer-events: none;
+  color: #aaa; }
 
 .search_book_title {
-                    color: #0173bc;
- }
+  color: #007BFF; }
 
 .search_book_author {
-   font-size: smaller;
- }
+  font-size: smaller; }
 
 .important {
-   background-color: #eeeeee;
-   padding: 3px;
-}
+  background-color: #eeeeee;
+  padding: 3px; }
 
-.search_book_title #edit_link{
-                    font-size: 8px;
- }
+.search_book_title #edit_link {
+  font-size: 8px; }
 
 .search_todo_date {
-                    font-weight: normal;
-                    color: #C76257;
-                    font-size: 10px;
- }
+  font-weight: normal;
+  color: #C76257;
+  font-size: 10px; }
 
 .search_note_snippet {
-    font-weight: bold;
-}
+  font-weight: bold; }
 
 #kbsearch {
-    width: 330px;
-}
+  width: 330px; }
 
 #kb_blob_search {
-   width: 340px;
-}
+  width: 340px; }
 
 .blob_edit_amazon_name_field {
-   width: 100px;
-}
+  width: 100px; }
 
 #blob_collection_list {
-   font-size: 18px;
-   margin-botoom: 10px;
-}
+  font-size: 18px;
+  margin-botoom: 10px; }
 
 /* We need this because the "input-group" class ruins the field alignment */
 #blob_edit_file {
-   padding-left: 15px;
-}
+  padding-left: 15px; }
 
 #blob_note {
-             border: 1px solid #999999;
-             padding: 5px;
-}
+  border: 1px solid #999999;
+  padding: 5px; }
 
 #myModal #title {
-    width: 300px;
-}
+  width: 300px; }
 
 li.active a {
-    color: #ffffff
-}
+  color: #ffffff; }
 
 a.tag:link {
-    color: white;
-}
+  color: white; }
+
 /* visited link */
 a.tag:visited {
-    color: white;
-}
+  color: white; }
 
 /* mouse over link */
 a.tag:hover {
-    color: white;
-}
+  color: white; }
 
 /* selected link */
 a.tag:active {
-    color: yellow;
-               }
+  color: yellow; }
 
 .voffset {
-   margin-top: 5px;
-}
+  margin-top: 5px; }
 
 .top-buffer {
-   margin-top: 20px;
-}
+  margin-top: 20px; }
 
 .random-image-card {
-   border: 0px;
-}
+  border: 0px; }
 
 .random-image-card .card-header {
-   margin-bottom: 15px;
-}
+  margin-bottom: 15px; }
 
 .random-image-card .list-group {
-   width: 90%;
-   margin: 0 auto;
-}
+  width: 90%;
+  margin: 0 auto; }
 
 #tag-detail-tab-content {
-    padding-left: 10px;
-}
+  padding-left: 10px; }
 
 .table-borderless td,
 .table-borderless th {
-   border: 0;
-   padding: 10px;
-}
+  border: 0;
+  padding: 10px; }
 
 .collection_sortable {
-   list-style-type: none;
-   margin: 0;
-   padding: 0;
-}
+  list-style-type: none;
+  margin: 0;
+  padding: 0; }
 
 .collection_sortable li {
-   margin: 3px 3px 3px 0;
-   padding: 15px 15px 130px 15px;
-   float: left;
-   width: 200px;
-   height: 110px;
-   text-align: center;
-}
+  margin: 3px 3px 3px 0;
+  padding: 15px 15px 130px 15px;
+  float: left;
+  width: 200px;
+  height: 110px;
+  text-align: center; }
 
 #document_note {
-   background-color: #0173bc;
-   color: #ffffff;
-   padding: 10px;
-}
+  background-color: #007BFF;
+  color: #ffffff;
+  padding: 10px; }
