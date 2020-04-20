@@ -16,11 +16,16 @@
 
 $(document).ready(function() {
 
-        {% include "common/common-typeaheadjs-tagsinput.js" %}
+        {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" %}
 
         {% if action == 'Edit' %}
         $('#id_tags').tagsinput('focus');
         {% endif %}
+
+        {% for tag in bookmark.tags.all %}
+        console.log("{{ tag.name }}");
+        $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
+        {% endfor %}
 
 });
 

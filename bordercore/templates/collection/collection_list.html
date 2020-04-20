@@ -85,7 +85,6 @@
 
             $('#btn-edit').on('click', function() {
                 var selectedId = $('#collection_list').DataTable().cell('.selected', 5).data();
-                console.log(selectedId);
 
                 $.ajax( { type: 'GET',
                           url: '{% url 'collection_get_info' %}',
@@ -99,10 +98,8 @@
                         $('#id_description').val(json.description);
                         var tags = json.tags.split(",")
                         for (var i = 0; i < tags.length; i++) {
-                            console.log(tags[i]);
-                            $('#id_tags').tagsinput('add', tags[i]);
+                            $('#id_tags').tagsinput('add', {value: tags[i], name: tags[i]});
                         }
-                        console.log(json);
                     }
 
                     $('#action-type').html('Edit');
@@ -131,7 +128,7 @@
                 $('#id_tags').tagsinput('removeAll');
             })
 
-            {% include "common/common-typeaheadjs-tagsinput.js" %}
+            {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" %}
 
         });
 

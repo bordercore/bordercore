@@ -13,7 +13,13 @@
 <script type="text/javascript">
 
     $(document).ready(function() {
-        {% include "common/common-typeaheadjs-tagsinput.js" %}
+
+        {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" %}
+
+        {% for tag in object.favorite_tags.all %}
+        $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
+        {% endfor %}
+
     });
 
 </script>

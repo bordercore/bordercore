@@ -14,13 +14,17 @@
 
 $(document).ready(function() {
 
-        {% include "common/common-typeaheadjs-tagsinput.js" %}
+        {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" %}
 
         {% if action == 'Edit' %}
         $("input.btn[value='Delete']").click( function() {
             $("form#todo-form").attr("action", "{% url 'todo_delete' pk %}");
         })
         {% endif %}
+
+        {% for tag in object.tags.all %}
+        $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
+        {% endfor %}
 
 });
 

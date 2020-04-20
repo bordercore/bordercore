@@ -64,7 +64,8 @@ def edit(request, bookmark_id=None):
     return render(request, 'bookmark/edit.html',
                   {'section': SECTION,
                    'action': action,
-                   'form': form})
+                   'form': form,
+                   'bookmark': b})
 
 
 @login_required
