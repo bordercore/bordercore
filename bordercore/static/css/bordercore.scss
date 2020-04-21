@@ -17,6 +17,12 @@ $table_row_color : #ffffff;
   display: none;
 }
 
+blockquote {
+  border-left: 10px solid #ccc;
+  margin: 1.5em 10px;
+  padding: 0.5em 10px;
+}
+
 .list_annotation {
   color: #C76257;
   font-size: 80%;
