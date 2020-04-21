@@ -68,7 +68,7 @@ def create_thumbnail_from_pdf(infile, outdir, page_number=1):
     try:
         im = Image.open(cover_large)
         im.thumbnail(size)
-        im.save(f"{outdir}-cover-small.jpg", "JPEG")
+        im.save(f"{outdir}-cover.jpg", "JPEG")
     except IOError:
         print(f"Cannot create small thumbnail for {cover_large}")
 

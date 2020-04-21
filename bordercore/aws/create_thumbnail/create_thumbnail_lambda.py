@@ -18,7 +18,7 @@ For pdfs, one page is extracted and saved. Eg, if the first page
 Then this page is converted into a large and small cover images
 and stored here:
 
-/tmp/covers/<uuid>-cover-small.jpg
+/tmp/covers/<uuid>-cover.jpg
 /tmp/covers/<uuid>-cover-large.jpg
 
 If the original uploaded file is an image, then its cover image will

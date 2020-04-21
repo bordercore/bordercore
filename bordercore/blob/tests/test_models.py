@@ -120,5 +120,7 @@ def test_get_cover_info(blob_image, blob_pdf):
 
     cover_info_pdf = Document.get_cover_info(blob_pdf.user, blob_pdf.sha1sum)
     assert cover_info_pdf["url"] == f"{blob_pdf.get_parent_dir()}/cover-large.jpg"
+    cover_info_pdf = Document.get_cover_info(blob_pdf.user, blob_pdf.sha1sum, size="small")
+    assert cover_info_pdf["url"] == f"{blob_pdf.get_parent_dir()}/cover.jpg"
 
     assert Document.get_cover_info(blob_pdf.user, None) == {}

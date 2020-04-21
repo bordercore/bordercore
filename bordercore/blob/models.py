@@ -355,45 +355,32 @@ class Document(TimeStampedModel, AmazonMixin):
 
     @staticmethod
     def get_cover_info(user, sha1sum, size="large", max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
-
         if sha1sum is None:
             return {}
 
         info = {}
+        url = None
 
         b = Document.objects.get(user=user, sha1sum=sha1sum)
 
-        p = PurePath(b.get_s3_key())
-        prefix = p.parent
+        prefix = PurePath(b.get_s3_key()).parent
 
-        s3 = boto3.resource("s3")
-        bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
-
-        objects = [PurePath(x.key).name for x in list(bucket.objects.filter(Delimiter="/", Prefix=f"{prefix}/"))]
-
-        # Is the blob itself an image?
         file_extension = PurePath(b.file.name).suffix
-        if file_extension[1:].lower() in ["gif", "jpg", "jpeg", "png"]:
-            # If so, look for a thumbnail.  Otherwise return the image itself
-            if size == "small" and "cover.jpg" in objects:
-                info["url"] = f"{prefix}/cover.jpg"
-            else:
-                info = Document.get_image_dimensions(b.get_s3_key(), max_cover_image_width)
-                info["url"] = b.get_s3_key()
 
+        if size != "large":
+            url = f"{prefix}/cover.jpg"
         else:
-            # Nope. Look for a cover image
-            for image_type in ["jpg", "png"]:
-                for cover_image in ["cover.{}".format(image_type), "cover-{}.{}".format(size, image_type)]:
-                    if cover_image in objects:
-                        info = Document.get_image_dimensions(f"{prefix}/{cover_image}", max_cover_image_width)
-                        info["url"] = f"{prefix}/{cover_image}"
+            # Is the blob itself an image?
+            if file_extension[1:].lower() in ["gif", "jpg", "jpeg", "png"]:
+                # For the large version, use the image itself
+                url = b.get_s3_key()
+                info = Document.get_image_dimensions(url, max_cover_image_width)
+            else:
+                url = f"{prefix}/cover-{size}.jpg"
+                info = Document.get_image_dimensions(url, max_cover_image_width)
 
-        # If we get this far, return the default image
-        if not info.get("url"):
-            info = {"url": "django/img/book.png", "height_cropped": 128, "width_cropped": 128}
+        info["url"] = urllib.parse.quote(url)
 
-        info["url"] = urllib.parse.quote(info["url"])
         return info
 
     def index_blob(self, file_changed=True):
