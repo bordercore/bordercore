@@ -38,4 +38,4 @@ DJANGO_SETTINGS_MODULE=config.settings.prod
 30 2 * * * $VIRTUALENV/bin/python $BIN_DIR/archive_urls.py
 
 # Run data tests once a day
-57 7 * * * $VIRTUALENV/bin/pytest --disable-warnings -m "not wumpus and data_quality" $BORDERCORE_HOME/
+57 7 * * * $VIRTUALENV/bin/pytest --disable-warnings -n 3 -m "not wumpus and data_quality" $BORDERCORE_HOME/
