@@ -15,3 +15,9 @@ LOGGING['handlers']['bordercore'] = {
     'formatter': 'standard',
     'filename': '/var/log/django/bordercore.log'
 }
+
+LOGGING['loggers']['django.request'] = {
+    'handlers': ['file', 'mail_admins'],
+    'level': 'ERROR',
+    'propagate': False,
+}
