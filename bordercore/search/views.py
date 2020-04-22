@@ -478,29 +478,3 @@ def handle_quotes(request, search_term):
     if request.GET.get('exact_match'):
         search_term = "\"{}\"".format(search_term)
     return search_term
-
-
-@login_required
-def search_admin(request):
-
-    # Get some document count stats.  Any way to do this with just one query?
-    stats = {}
-
-    conn = SolrConnection('http://%s:%d/%s' % (settings.SOLR_HOST, settings.SOLR_PORT, settings.SOLR_COLLECTION))
-    for doctype in ['blob', 'note', 'book', 'bordercore_todo', 'bordercore_bookmark', 'document']:
-        solr_args = {'q': 'doctype:{}'.format(doctype), 'rows': 1}
-        r = json.loads(conn.raw_query(**solr_args).decode('UTF-8'))
-        stats[doctype] = r['response']['numFound']
-
-    if request.method == 'POST':
-
-        if request.POST['Go'] in ['Delete']:
-            conn.delete_query('doctype:%s' % request.POST['doc_type'])
-            conn.commit()
-        elif request.POST['Go'] in ['Commit']:
-            conn.commit()
-
-    return render(request, 'kb/admin.html',
-                  {'section': 'KB',
-                   'stats': stats,
-                   'title': 'Search Admin'})

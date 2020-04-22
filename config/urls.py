@@ -130,7 +130,6 @@ urlpatterns = [
     path('login/', accounts_views.bc_login, name="login"),
     path('logout', accounts_views.bc_logout, name="logout"),
 
-    path('kb/search/admin', search_views.search_admin, name='search_admin'),
     path('kb/search/tagstitle', search_views.kb_search_tags_booktitles, name='kb_search_tags_booktitles'),
     re_path(r'^kb/search/tagdetail/(?P<taglist>.*)', SearchTagDetailView.as_view(), name='kb_search_tag_detail'),
     path('kb/search/tagdetail/', SearchTagDetailView.as_view(), name='kb_search_tag_detail_search'),
