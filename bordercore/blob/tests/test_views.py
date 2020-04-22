@@ -4,12 +4,17 @@ from urllib.parse import urlparse
 import boto3
 import botocore
 import pytest
-from bs4 import BeautifulSoup
-from moto import mock_s3
 
 import django
 from django import urls
 from django.conf import settings
+
+try:
+    from bs4 import BeautifulSoup
+    from moto import mock_s3
+except ModuleNotFoundError:
+    pass
+
 
 django.setup()
 

@@ -3,10 +3,15 @@ import os
 import boto3
 import botocore
 import pytest
-from moto import mock_s3
 
 import django
 from django.conf import settings
+
+try:
+    from moto import mock_s3
+except ModuleNotFoundError:
+    pass
+
 
 django.setup()
 
