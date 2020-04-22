@@ -25,3 +25,21 @@ class Collection(TimeStampedModel):
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
+
+    def sort(self, blob_id, new_position):
+
+        # First remove the blob from the existing list
+        saved_blob = []
+        new_blob_list = []
+
+        for blob in self.blob_list:
+            if blob['id'] == blob_id:
+                saved_blob = blob
+            else:
+                new_blob_list.append(blob)
+
+        # Then re-insert it in its new position
+        new_blob_list.insert(new_position - 1, saved_blob)
+        self.blob_list = new_blob_list
+
+        self.save()
