@@ -9,6 +9,17 @@ Globals:
 
 Resources:
 
+    PDFUtilsLayer:
+        Type: AWS::Lambda::LayerVersion
+        Properties:
+            CompatibleRuntimes:
+                - python3.7
+            Content:
+                S3Bucket: bordercore-blobs
+                S3Key: pdfinfo_layer.zip
+            Description: "PDF Utils"
+            LayerName: "pdfinfo"
+
     CreateThumbnailFunction:
         Type: AWS::Serverless::Function
         Properties:
@@ -16,7 +27,7 @@ Resources:
             FunctionName: CreateThumbnail
             Handler: create_thumbnail_lambda.handler
             Layers:
-                - arn:aws:lambda:us-east-1:192218769908:layer:pdfinfo:6
+                - !Ref PDFUtilsLayer
             MemorySize: 256
             Runtime: python3.7
             Role: !GetAtt CreateThumbnailLambdaRole.Arn
