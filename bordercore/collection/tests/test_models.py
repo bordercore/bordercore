@@ -9,30 +9,7 @@ from blob.models import Document  # isort:skip
 from collection.models import Collection  # isort:skip
 
 
-def test_sort_collection(user):
-
-    blobs = [
-        Document.objects.create(
-            id=1,
-            user=user),
-        Document.objects.create(
-            id=2,
-            user=user),
-        Document.objects.create(
-            id=3,
-            user=user)
-    ]
-
-    collection = Collection.objects.create(
-        blob_list=[
-            {
-                "id": x.id,
-                "added": int(datetime.datetime.now().strftime("%s"))
-            }
-            for x in blobs
-        ],
-        user=user
-    )
+def test_sort_collection(user, collection):
 
     collection.sort(1, 2)
     assert collection.blob_list[0]["id"] == 2
@@ -51,3 +28,13 @@ def test_sort_collection(user):
     assert collection.blob_list[1]["id"] == 2
     assert collection.blob_list[2]["id"] == 3
     assert len(collection.blob_list) == 3
+
+
+def test_get_created(collection):
+
+    assert collection.get_created() == datetime.datetime.now().strftime('%b %d, %Y')
+
+
+def test_get_tags(collection):
+
+    assert collection.get_tags() == "django, linux"
