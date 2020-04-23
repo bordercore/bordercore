@@ -1,15 +1,14 @@
-import os
+import pytest
 
 import django
-from django.db.models import Count, Min, Max
-
-django.setup()
-
-from django.contrib.auth.models import User
-
-from tag.models import TagBookmark, TagBookmarkSortOrder
+from django.db.models import Count, Max, Min
 
 from bookmark.models import Bookmark
+from tag.models import TagBookmark, TagBookmarkSortOrder
+
+pytestmark = pytest.mark.data_quality
+
+django.setup()
 
 
 def test_tag_bookmark_sort_order():
