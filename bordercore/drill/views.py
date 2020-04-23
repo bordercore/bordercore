@@ -249,6 +249,6 @@ def record_response(request, question_id, response):
 
 def tag_search(request):
 
-    tags = Tag.objects.filter(question__user=request.user, name__icontains=request.GET.get("query", ""), question__isnull=False).distinct("name")
+    tags = Tag.objects.filter(question__user=request.user, name__icontains=request.GET.get("term", ""), question__isnull=False).distinct("name")
 
     return JsonResponse([{"value": x.name, "is_meta": x.is_meta} for x in tags], safe=False)
