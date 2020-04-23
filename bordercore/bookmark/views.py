@@ -220,7 +220,7 @@ def list(request,
          random=False,
          tag_filter="",
          page_number=1,
-         search=None):
+         search=""):
 
     sorted_bookmarks = []
     tag_counts = {}
@@ -247,7 +247,7 @@ def list(request,
 
     else:
 
-        if search is not None:
+        if search != "":
             bookmarks = Bookmark.objects.filter(user=request.user, title__icontains=search)
         else:
             bookmarks = Bookmark.objects.filter(user=request.user, tags__isnull=True)
@@ -285,6 +285,7 @@ def list(request,
                    'bookmarks': sorted_bookmarks,
                    'page_number': page_number,
                    'range': range(1, bookmark_range + 1),
+                   'search': search,
                    'tag_filter': tag_filter,
                    'tag_counts': tag_counts,
                    'favorite_tags': favorite_tags})

@@ -137,15 +137,37 @@
 
             engine.initialize();
 
-            $('#tag-filter').typeahead({
+            $('#search').typeahead({
                 autoselect: true
             }, {
                 displayKey: 'value',
                 source: engine,
             });
 
-            $('#tag-filter').bind('typeahead:selected', function(obj, datum, name) {
+            $('#search').bind('typeahead:selected', function(obj, datum, name) {
+                autocomplete_selected = true;
                 window.location='{% url 'bookmark_tag' 666 %}'.replace(/666$/, datum.value);
+            });
+
+            // This is set when an item from the autocomplete options is selected.  Otherwise there would be
+            //  a race between the window.open() in $('#search').bind('typeahead:selected',...) and the form
+            //  submission from the $('#search').on('keydown', ...)
+            var autocomplete_selected = false;
+
+            $('#search').on('keydown', function(event, selection) {
+                if (((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) && !autocomplete_selected) {
+
+                    search_term = $("#search").val();
+                    if (search_term) {
+                        window.location='{% url 'bookmark_search' 666 %}'.replace(/666$/, $("#search").val());
+                    } else {
+                        // If nothing is selected, refresh the page with no filters
+                        window.location='{% url 'bookmark_list' %}';
+                    }
+                    return false;
+                } else {
+                    return true;
+                }
             });
 
             var selectedId;
@@ -237,12 +259,6 @@
                 }
             } );
 
-            $("#search").on('keypress', function(e) {
-                if (e.which == 13) {
-                    window.location='{% url 'bookmark_search' 666 %}'.replace(/666$/, $("#search").val());
-                }
-            });
-
         });
 
     </script>
@@ -251,29 +267,19 @@
 
     <div class="row">
 
-        <div class="col-lg-12">
+        <div class="col-lg-12 bookmark-search">
 
             <form class="form-inline" role="form" name="nav_form" id="tag-search-form" method="get">
 
-                <span class="ml-5 mr-3"><strong>Tag filter</strong></span>
-
-                <div class="form-group col-auto">
-                    <input id="tag-filter" type="text" value="{{ tag_filter }}" class="bookmark-tag-filter-input form-control" autocomplete="off" placeholder="Tag Name" />
+                <div class="form-group col-auto has-search">
+                    <span class="fa fa-search form-control-feedback"></span>
+                    <input id="search" type="text" value="{{ search }}" class="bookmark-tag-filter-input form-control" autocomplete="off" placeholder="Search" />
                 </div>
 
                 <div class="btn-group">
                     <a class="btn btn-secondary" id="btn-add" href="{% url 'bookmark_add' %}">Add</a>
                     <button class="btn btn-secondary" id="btn-edit" disabled>Edit</button>
                     <button class="btn btn-secondary" id="btn-delete" disabled>Delete</button>
-                </div>
-
-                <div class="input-group ml-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="basic-addon1">
-                            <i class="fa fa-search"></i>
-                        </span>
-                    </div>
-                    <input autocomplete="off" id="search" type="text" class="form-control" placeholder="Search" />
                 </div>
 
             </form>
