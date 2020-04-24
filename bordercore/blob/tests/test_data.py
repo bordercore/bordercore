@@ -108,9 +108,9 @@ def test_documents_with_dates(es):
         "_source": ["uuid"]
     }
 
-    found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["total"]["value"]
+    found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]
 
-    assert found == 0, f"{found} documents fail this test"
+    assert found["total"]["value"] == 0, f"{found['total']['value']} documents fail this test, uuid={found['hits'][0]['_id']}"
 
 
 def test_dates_with_unixtimes(es):
