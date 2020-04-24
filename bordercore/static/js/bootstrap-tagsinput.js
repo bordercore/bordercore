@@ -29,11 +29,12 @@
     delimiterRegex: null,
     cancelConfirmKeysOnEmpty: false,
     onTagExists: function(item, $tag) {
-      $tag.addClass('sr-only');
+      $tag.hide().fadeIn();
     },
     trimValue: false,
     allowDuplicates: false,
-    triggerChange: true
+    triggerChange: true,
+    editOnBackspace: false
   };
 
   /**
@@ -140,15 +141,14 @@
 
       // add a tag element
 
-      var $tag = $('<span class="badge ' + htmlEncode(tagClass) + (itemTitle !== null ? ('" title="' + itemTitle) : '') + '">' + htmlEncode(itemText) + '<span data-role="remove"></span></span>');
+      var $tag = $('<span class="' + htmlEncode(tagClass) + (itemTitle !== null ? ('" title="' + itemTitle) : '') + '">' + htmlEncode(itemText) + '<span data-role="remove"></span></span>');
       $tag.data('item', item);
       self.findInputWrapper().before($tag);
-      $tag.after(' ');
 
       // Check to see if the tag exists in its raw or uri-encoded form
       var optionExists = (
-        $('option[value="' + encodeURIComponent(itemValue) + '"]', self.$element).length ||
-        $('option[value="' + htmlEncode(itemValue) + '"]', self.$element).length
+        $('option[value="' + encodeURIComponent(itemValue).replace(/"/g, '\\"') + '"]', self.$element).length ||
+        $('option[value="' + htmlEncode(itemValue).replace(/"/g, '\\"') + '"]', self.$element).length
       );
 
       // add <option /> if item represents a value not present in one of the <select />'s options
@@ -420,6 +420,9 @@
             if (doGetCaretPosition($input[0]) === 0) {
               var prev = $inputWrapper.prev();
               if (prev.length) {
+                if (self.options.editOnBackspace === true) {
+                  $input.val(prev.data('item'));
+                }
                 self.remove(prev.data('item'));
               }
             }
