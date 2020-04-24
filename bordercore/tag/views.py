@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 
 from accounts.models import SortOrder
-from tag.models import Tag
+from tag.models import Tag, TagAlias
 
 
 @login_required
@@ -17,7 +17,7 @@ def tag_search(request):
         args['document__is_note'] = True
 
     query = request.GET.get('query', '')
-    tag_list = [{'value': x.name, 'is_meta': x.is_meta} for x in
+    tag_list = [{'name': x.name, 'value': x.name, 'is_meta': x.is_meta} for x in
                 Tag.objects.filter(Q((Q(bookmark__user=request.user) & Q(name__icontains=query))) |
                                    Q((Q(document__user=request.user) & Q(name__icontains=query))) |
                                    Q((Q(collection__user=request.user) & Q(name__icontains=query))) |
@@ -25,7 +25,11 @@ def tag_search(request):
                                    Q((Q(song__user=request.user) & Q(name__icontains=query))) |
                                    Q((Q(todo__user=request.user) & Q(name__icontains=query))), **args).distinct('name')]
 
-    return JsonResponse(tag_list, safe=False)
+    tag_alias_list = [{"name": f"{x.name} ({x.tag.name})", "value": x.tag.name, "is_alias": True} for x in
+                      TagAlias.objects.filter(Q(user=request.user) & Q(name__icontains=query))]
+
+    tag_alias_list.extend(tag_list)
+    return JsonResponse(tag_alias_list, safe=False)
 
 
 @login_required

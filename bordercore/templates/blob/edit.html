@@ -195,7 +195,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
 
         $(document).ready(function() {
 
-            {% include "common/common-typeaheadjs-tagsinput.js" %}
+            {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" fieldName="name" %}
 
             var metadata_count = {{ metadata|length }};
 
@@ -325,6 +325,10 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                 }
             })
 
+            {% for tag in object.tags.all %}
+            $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
+            {% endfor %}
+
         });
 
         function formatName(match, capture1, capture2) {
@@ -400,6 +404,10 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                         </span>
                     </div>
 
+            {% elif field.label == 'Tags' %}
+                    <div class="col-lg-10 col-sm-10">
+                        <input type="text" name="tags" value="" class="form-control typeahead" autocomplete="off" id="id_tags">
+                    </div>
             {% else %}
                 <div class="col-lg-10 col-sm-10">
                     {{ field }}

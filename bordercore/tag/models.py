@@ -112,3 +112,15 @@ class TagBookmarkSortOrder(models.Model):
 
         )
         ordering = ('sort_order',)
+
+
+class TagAlias(models.Model):
+    name = models.TextField(unique=True)
+    tag = models.OneToOneField(Tag, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    def __unicode__(self):
+        return self.name
+
+    def __str__(self):
+        return self.name

@@ -10,6 +10,8 @@ var engine = new Bloodhound({
 
 engine.initialize();
 
+field_name = '{{ fieldName|default:"value" }}';
+
 $('#id_tags').tagsinput({
     confirmKeys: [13, 188],
     tagClass: function(item) {
@@ -19,6 +21,9 @@ $('#id_tags').tagsinput({
             return 'badge badge-primary';
         }
     },
+    {% if fieldName %}
+    itemText: field_name,
+    {% endif %}
     {% if itemValue %}
     itemValue: 'value',
     {% endif %}
@@ -28,13 +33,13 @@ $('#id_tags').tagsinput({
         limit: 10,
         source: engine,
         displayKey: function (data) {
-            return data.value;
+            return data[field_name];
         },
         valueKey: 'value',
         options: {'autoselect': true},
         templates: {
             suggestion: function(data) {
-                return '<div class="tt-suggest-page">' + data.value.replace(data._query, '<strong>' + data._query+ '</strong>') + '</div>';
+                return '<div class="tt-suggest-page">' + data[field_name].replace(data._query, '<strong>' + data._query+ '</strong>') + '</div>';
             }
         }
     }]
