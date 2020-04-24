@@ -15,8 +15,8 @@ field_name = '{{ fieldName|default:"value" }}';
 $('#id_tags').tagsinput({
     confirmKeys: [13, 188],
     tagClass: function(item) {
-        if (item.is_meta == 'true') {
-            return 'badge badge-success';
+        if (item.is_meta) {
+            return 'badge badge-info';
         } else {
             return 'badge badge-primary';
         }

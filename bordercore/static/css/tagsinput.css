@@ -40,12 +40,15 @@
   border: none;
   box-shadow: none;
 }
+/* Comment out two selectors which prevent you from
+   dynamically changing the class name on badges
+   via JavaScript */
 .bootstrap-tagsinput .badge {
   margin-right: 2px;
   color: white;
-  background-color:#0275d8;
+  /* background-color:#0275d8; */
   padding:5px 8px;border-radius:3px;
-  border:1px solid #01649e
+  /* border:1px solid #01649e */
 }
 .bootstrap-tagsinput .badge [data-role="remove"] {
   margin-left: 8px;
