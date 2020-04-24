@@ -175,6 +175,7 @@ class QuestionUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super(QuestionUpdateView, self).get_context_data(**kwargs)
         context['action'] = 'Edit'
+        context['section'] = SECTION
         context['title'] = 'Drill :: Question Edit'
         return context
 
