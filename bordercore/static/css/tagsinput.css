@@ -8,7 +8,7 @@
   border: 1px solid #ccc;
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   display: inline-block;
-  padding: 5px 6px;
+  padding: 4px 6px;
   color: #555;
   vertical-align: middle;
   border-radius: 4px;
@@ -40,15 +40,9 @@
   border: none;
   box-shadow: none;
 }
-/* Comment out two selectors which prevent you from
-   dynamically changing the class name on badges
-   via JavaScript */
 .bootstrap-tagsinput .badge {
-  margin-right: 2px;
-  color: white;
-  /* background-color:#0275d8; */
-  padding:5px 8px;border-radius:3px;
-  /* border:1px solid #01649e */
+  margin: 2px 2px;
+  padding:5px 8px;
 }
 .bootstrap-tagsinput .badge [data-role="remove"] {
   margin-left: 8px;
@@ -59,11 +53,51 @@
   padding: 0px 4px;
   background-color:rgba(0, 0, 0, 0.1);
   border-radius:50%;
-  font-size:14px
+  font-size:13px
 }
 .bootstrap-tagsinput .badge [data-role="remove"]:hover:after {
-  background-color:rgba(0, 0, 0, 0.62);
-}
+
+  background-color:rgba(0, 0, 0, 0.62);}
 .bootstrap-tagsinput .badge [data-role="remove"]:hover:active {
   box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+
+.tt-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    min-width: 160px;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    list-style: none;
+    font-size: 14px;
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+    background-clip: padding-box;
+    cursor: pointer;
+}
+
+.tt-suggestion {
+    display: block;
+    padding: 3px 20px;
+    clear: both;
+    font-weight: normal;
+    line-height: 1.428571429;
+    color: #333333;
+    white-space: nowrap;
+}
+
+.tt-suggestion:hover,
+.tt-suggestion:focus {
+  color: #ffffff;
+  text-decoration: none;
+  outline: 0;
+  background-color: #428bca;
 }
