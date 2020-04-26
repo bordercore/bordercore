@@ -42,4 +42,4 @@ def test_tagbookmarksortorder_exists():
                 tb = TagBookmark.objects.get(tag=tag, user=b.user)
                 tbso = TagBookmarkSortOrder(tag_bookmark=tb, bookmark=b)
                 tbso.save()
-            assert TagBookmarkSortOrder.objects.filter(bookmark=b, tag_bookmark__tag=tag).exists() == True, "bookmark={}, tag={}".format(b.id, tag.name)
+            assert TagBookmarkSortOrder.objects.filter(bookmark=b, tag_bookmark__tag=tag).exists() is True, "bookmark={}, tag={}".format(b.id, tag.name)

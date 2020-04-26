@@ -83,7 +83,7 @@ class TagBookmarkSortOrder(models.Model):
                     TagBookmarkSortOrder.objects.filter(
                         tag_bookmark=self.tag_bookmark,
                         sort_order__gte=new_position,
-                        sort_order__lte=self.sort_order
+                        sort_order__lt=self.sort_order
                     ).update(
                         sort_order=F('sort_order') + 1
                     )
@@ -95,7 +95,7 @@ class TagBookmarkSortOrder(models.Model):
                     TagBookmarkSortOrder.objects.filter(
                         tag_bookmark=self.tag_bookmark,
                         sort_order__lte=new_position,
-                        sort_order__gte=self.sort_order
+                        sort_order__gt=self.sort_order
                     ).update(
                         sort_order=F('sort_order') - 1
                     )
