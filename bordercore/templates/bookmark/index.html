@@ -32,6 +32,10 @@
 
             $('#sort-container-tags').sortable( {
                 connectWith: '.list-group',
+
+                // The 'Untagged' item is not sortable -- it's always on top
+                items: "li:not(#untagged)",
+
                 stop: function(event, ui) {
 
                     var tag_id = $(ui.item).data('id');
@@ -66,7 +70,7 @@
     </h2>
 
     <ul class="list-group" id="sort-container-tags">
-        <li class="list-group-item{% if not tag_filter %} active{% endif %}">
+        <li id="untagged" class="list-group-item{% if not tag_filter %} active{% endif %}">
             <a href="{% url "bookmark_list" %}">Untagged</a>
             <span class="ml-2 badge {% if not tag_filter %}badge-light{% else %}badge-primary{% endif %}">{{ tag_counts|dict_get:"Untagged" }}</span>
         </li>
