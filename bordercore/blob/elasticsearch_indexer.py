@@ -1,4 +1,5 @@
 import base64
+import io
 import logging
 import os
 import re
@@ -16,6 +17,10 @@ from elasticsearch_dsl import Boolean, DateRange
 from elasticsearch_dsl import Document as Document_ES
 from elasticsearch_dsl import Integer, Long, Range, Text
 from elasticsearch_dsl.connections import connections
+from PyPDF2 import PdfFileReader
+from PyPDF2.utils import PdfReadError
+
+from lib.util import is_pdf
 
 ES_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT", "localhost")
 ES_PORT = 9200
@@ -197,6 +202,13 @@ def get_range_from_date(date):
     return range
 
 
+def get_num_pages(content):
+
+    input_pdf = PdfFileReader(io.BytesIO(content), strict=False)
+
+    return input_pdf.getNumPages()
+
+
 def index_blob(**kwargs):
 
     if kwargs.get("create_connection", True):
@@ -253,6 +265,15 @@ def index_blob(**kwargs):
         contents = get_blob_contents_from_s3(blob_info)
         article.size = len(contents)
         article.content_type = magic.from_buffer(contents, mime=True)
+
+        if is_pdf(blob_info["file"]):
+            try:
+                article.num_pages = get_num_pages(contents)
+                print(f"Number of pages: {article.num_pages}")
+            except (PdfReadError, TypeError, ValueError):
+                # A pdf read failure can be caused by many
+                #  things. Ignore any such failures.
+                pass
 
         if is_ingestible_file(blob_info["file"]):
             pipeline_args = dict(pipeline="attachment")

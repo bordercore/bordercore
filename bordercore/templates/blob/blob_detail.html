@@ -62,6 +62,12 @@
             <strong>Size</strong><br />
             <small>{{ size }}</small>
         </div>
+        {% if elasticsearch_info.num_pages %}
+        <div>
+            <strong>Pages</strong><br />
+            <small>{{ elasticsearch_info.num_pages }}</small>
+        </div>
+        {% endif %}
     {% endif %}
 
     {% if object.note %}
