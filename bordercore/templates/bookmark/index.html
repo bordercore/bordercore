@@ -89,7 +89,7 @@
             <form action="{% url 'add_favorite_tag' %}" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="tag" value="{{ tag_filter }}" />
-                <button type="submit" class="btn">
+                <button type="submit" class="btn btn-secondary">
             Add To Favorites
                 </button>
             </form>
@@ -97,7 +97,7 @@
             <form action="{% url 'remove_favorite_tag' %}" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="tag" value="{{ tag_filter }}" />
-                <button type="submit" class="btn">
+                <button type="submit" class="btn btn-secondary">
             Remove From Favorites
                 </button>
             </form>
