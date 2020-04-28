@@ -20,29 +20,22 @@ def cleanup(interval, time_unit):
 
 def get_relative_date(time=False):
     """
-    Get a datetime object or a int() Epoch timestamp and return a
-    pretty string like 'an hour ago', 'Yesterday', '3 months ago',
-    'just now', etc
+    Get a datetime string and return a pretty string like 'an hour ago',
+    'Yesterday', '3 months ago', 'just now', etc
     """
-    from datetime import datetime
-    now = datetime.now(pytz.timezone('US/Eastern'))
-    if type(time) is int:
-        diff = now - datetime.fromtimestamp(time)
-    elif type(time) is str:
-        # Try with microseconds, then try without
-        try:
-            diff = now - datetime.strptime(time, '%Y-%m-%dT%H:%M:%S.%f%z')
-        except ValueError:
-            diff = now - datetime.strptime(time, '%Y-%m-%dT%H:%M:%S%z')
-    elif isinstance(time, datetime):
-        diff = now - time
-    elif not time:
-        diff = now - now
+
+    now = datetime.datetime.now(pytz.timezone("US/Eastern"))
+
+    # Try with microseconds, then try without
+    try:
+        diff = now - datetime.datetime.strptime(time, "%Y-%m-%dT%H:%M:%S.%f%z")
+    except ValueError:
+        diff = now - datetime.datetime.strptime(time, "%Y-%m-%dT%H:%M:%S%z")
     second_diff = diff.seconds
     day_diff = diff.days
 
     if day_diff < 0:
-        return ''
+        return ""
 
     if day_diff == 0:
         if second_diff < 10:
