@@ -159,14 +159,12 @@ def parse_date_from_string(input_date):
     # 1999-01-01
     pdict[r"(\d\d\d\d)-(\d+)-(\d+)$"] = parse_date_format_5
 
-    response = ''
-
     # Remove extraneous characters
     # eg "August 12th, 2001" becomes "August 12, 2001"
     input_date = re.sub(r"(\d+)(?:nd|rd|st|th)", r"\1", input_date)
     for key, value in pdict.items():
         m = re.compile(key).match(input_date)
         if m:
-            response = value(input_date, m).strftime("%Y-%m-%d")
+            return value(input_date, m).strftime("%Y-%m-%d")
 
-    return response
+    return ""

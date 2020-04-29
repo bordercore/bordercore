@@ -43,6 +43,9 @@ def test_parse_date_from_string():
     date_string = "01/01/1999"
     assert parse_date_from_string(date_string) == "1999-01-01"
 
+    date_string = "Jan 01, 1999"
+    assert parse_date_from_string(date_string) == "1999-01-01"
+
     date_string = "January 1, 1999"
     assert parse_date_from_string(date_string) == "1999-01-01"
 
