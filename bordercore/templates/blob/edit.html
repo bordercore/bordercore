@@ -296,6 +296,14 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                 }
             });
 
+            // Prevent the enter key from submitting the form for any text fields.
+            $("input").keydown(function(event) {
+                if (event.keyCode == 13) {
+                    event.preventDefault();
+                    return false;
+                }
+            });
+
             // Expand the content for editing, but only do it once.
             var isExpanded = false;
             $('#id_content').focus(function () {
