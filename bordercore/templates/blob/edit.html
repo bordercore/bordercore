@@ -260,7 +260,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
             {% if not object %}
             // If this is a new blob, the default date should be "now"
             var nowDate = new Date();
-            $('.date').datepicker('setValue', nowDate);
+            $('.date').datepicker('setDate', nowDate);
             {% endif %}
 
             $('#btn-ucfirst').click( function () {
