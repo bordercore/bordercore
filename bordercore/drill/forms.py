@@ -1,4 +1,4 @@
-from django.forms import ModelForm, Textarea, TextInput
+from django.forms import ModelForm, Textarea, ValidationError
 
 from drill.models import Question
 from lib.fields import ModelCommaSeparatedChoiceField
@@ -22,6 +22,14 @@ class QuestionForm(ModelForm):
         required=False,
         queryset=Tag.objects.filter(),
         to_field_name='name')
+
+    def clean_tags(self):
+
+        tags = self.cleaned_data["tags"]
+        if not tags:
+            self.add_error("tags", ValidationError("You must add at least one tag"))
+
+        return tags
 
     class Meta:
         model = Question
