@@ -4,7 +4,8 @@ from unittest.mock import Mock, patch
 import pytest
 import pytz
 
-from lib.time_utils import cleanup, get_relative_date, parse_date_from_string
+from lib.time_utils import (cleanup, get_date_from_pattern, get_relative_date,
+                            parse_date_from_string)
 
 
 def test_cleanup():
@@ -33,6 +34,33 @@ def test_get_relative_date():
         assert get_relative_date("2020-04-13T08:00:00-0400") == "2 weeks ago"
         assert get_relative_date("2020-03-13T08:00:00-0400") == "1 month ago"
         assert get_relative_date("2017-03-13T08:00:00-0400") == "3 years ago"
+
+
+def test_get_date_from_pattern():
+
+    assert get_date_from_pattern(None) is None
+
+    assert get_date_from_pattern({"gte": None}) is None
+
+    date_string = {"gte": "1999-01-01"}
+    assert get_date_from_pattern(date_string) == "January 01, 1999"
+
+    date_string = {"gte": "1999-01"}
+    assert get_date_from_pattern(date_string) == "January 1999"
+
+    date_string = {"gte": "1999"}
+    assert get_date_from_pattern(date_string) == "1999"
+
+    date_string = {"gte": "1999-01-01T08:00:00"}
+    assert get_date_from_pattern(date_string) == "January 01, 1999"
+
+    date_string = {"gte": "1999-01-01 08:00:00"}
+    assert get_date_from_pattern(date_string) == "January 01, 1999, 08:00 a.m."
+
+    date_string = {"gte": "[1999-01 TO 1999-02]"}
+    assert get_date_from_pattern(date_string) == "1999-01 to 1999-02"
+
+    assert get_date_from_pattern({"gte": "Not a date"}) == "Not a date"
 
 
 def test_parse_date_from_string():
