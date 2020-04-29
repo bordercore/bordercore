@@ -9,6 +9,12 @@ class Tag(models.Model):
     is_meta = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
 
+    def __unicode__(self):
+        return self.name
+
+    def __str__(self):
+        return self.name
+
     @staticmethod
     def get_meta_tags(user):
         tags = cache.get('meta_tags')
