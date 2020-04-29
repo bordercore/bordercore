@@ -147,12 +147,8 @@ class BlobDetailView(DetailView):
             context["aws_url"] = f"https://s3.console.aws.amazon.com/s3/buckets/{settings.AWS_STORAGE_BUCKET_NAME}/blobs/{self.object.sha1sum[:2]}/{self.object.sha1sum}/"
             try:
                 context['cover_info'] = Document.get_cover_info(self.request.user, self.object.sha1sum)
-            except ClientError as e:
-                messages.add_message(
-                    self.request,
-                    messages.ERROR,
-                    f"S3 error accessing cover info: {e}"
-                )
+            except ClientError:
+                log.warn(f"No S3 cover image found for id={self.object.id}")
         try:
             context["elasticsearch_info"] = self.object.get_elasticsearch_info()
             if self.object.sha1sum and context["elasticsearch_info"].get("size"):
@@ -204,12 +200,8 @@ class BlobUpdateView(UpdateView):
 
         try:
             context['cover_info'] = Document.get_cover_info(self.request.user, self.object.sha1sum, max_cover_image_width=400)
-        except ClientError as e:
-            messages.add_message(
-                self.request,
-                messages.ERROR,
-                f"S3 error accessing cover info: {e}"
-            )
+        except ClientError:
+            log.warn(f"No S3 cover image found for id={self.object.id}")
 
         context['metadata'] = preprocess_metadata(self.object.metadata_set.all())
         if True in [True for x in self.object.metadata_set.all() if x.name == 'is_book']:
