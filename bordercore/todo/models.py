@@ -17,13 +17,36 @@ class Todo(TimeStampedModel):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     due_date = models.DateTimeField(null=True, blank=True)
     tags = models.ManyToManyField(Tag)
-    is_urgent = models.BooleanField(default=False)
+
+    PRIORITY_CHOICES = [
+        (1, "High"),
+        (2, "Medium"),
+        (3, "Low"),
+    ]
+    priority = models.IntegerField(
+        choices=PRIORITY_CHOICES,
+        default=2
+    )
 
     def get_modified(self):
         return self.modified.strftime('%b %d, %Y')
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
+
+    @staticmethod
+    def get_priority_name(priority_value):
+        for priority in Todo.PRIORITY_CHOICES:
+            if priority[0] == priority_value:
+                return priority[1]
+        return None
+
+    @staticmethod
+    def get_priority_value(priority_name):
+        for priority in Todo.PRIORITY_CHOICES:
+            if priority[1] == priority_name:
+                return priority[0]
+        return None
 
     def delete(self):
 

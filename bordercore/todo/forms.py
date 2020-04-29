@@ -1,4 +1,4 @@
-from django.forms import ModelForm, Textarea, TextInput
+from django.forms import ModelForm, Select, Textarea, TextInput
 
 from lib.fields import ModelCommaSeparatedChoiceField
 from tag.models import Tag
@@ -15,8 +15,6 @@ class TodoForm(ModelForm):
 
         super(TodoForm, self).__init__(*args, **kwargs)
 
-        self.fields['is_urgent'].label = "Urgent"
-
         # If this form has a model attached, get the tags and display them separated by commas
         if self.instance.id:
             self.initial['tags'] = self.instance.get_tags()
@@ -31,8 +29,9 @@ class TodoForm(ModelForm):
 
     class Meta:
         model = Todo
-        fields = ('task', 'note', 'url', 'due_date', 'is_urgent')
+        fields = ('task', 'priority', 'note', 'url', 'due_date')
         widgets = {
+            'priority': Select(attrs={'class': 'form-control'}),
             'task': TextInput(attrs={'class': 'form-control'}),
             'note': Textarea(attrs={'class': 'form-control', 'rows': 2}),
             'url': TextInput(attrs={'class': 'form-control'}),

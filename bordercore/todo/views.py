@@ -45,11 +45,15 @@ class TodoListView(ListView):
         info = []
 
         for myobject in context['object_list']:
-            info.append(dict(task=myobject.task, modified=myobject.get_modified(), unixtime=format(myobject.modified, 'U'), todoid=myobject.id))
+            info.append(dict(task=myobject.task,
+                             priority=Todo.get_priority_name(myobject.priority),
+                             modified=myobject.get_modified(),
+                             unixtime=format(myobject.modified, 'U'),
+                             todoid=myobject.id))
 
         context['tags'] = Tag.objects.filter(todo__user=self.request.user, todo__isnull=False).distinct('name')
         context['tagsearch'] = self.tagsearch
-        context['cols'] = ['task', 'modified', 'unixtime', 'todoid']
+        context['cols'] = ['task', 'priority', 'modified', 'unixtime', 'todoid']
         context['section'] = SECTION
         context['info'] = info
         context['title'] = 'Todo List'
