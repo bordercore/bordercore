@@ -19,6 +19,7 @@ from cal.models import Calendar
 from fitness.models import ExerciseUser
 from music.models import Listen
 from quote.models import Quote
+from todo.models import Todo
 
 SECTION = 'Home'
 
@@ -59,7 +60,6 @@ def homepage(request):
     # Get any 'pinned' bookmarks
     pinned_bookmarks = Bookmark.objects.filter(user=request.user, is_pinned=True)
 
-    tasks = []
     # if request.user.userprofile.orgmode_file:
     #     try:
     #         tree = PyOrgMode.OrgDataStructure()
@@ -73,6 +73,8 @@ def homepage(request):
     #                           'parent_category': PyOrgMode.OrgDataStructure.parse_heading(node.parent.heading)['heading']})
     #     except AttributeError as e:
     #         log.info("AttributeError: %s" % e)
+
+    tasks = Todo.objects.filter(user=request.user, priority=Todo.get_priority_value("High")).prefetch_related("tags")
 
     # Get some recently played music
     music = Listen.objects.filter(user=request.user).select_related().distinct().order_by('-created')[:3]
