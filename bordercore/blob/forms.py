@@ -2,7 +2,6 @@ import hashlib
 import re
 
 from django import forms
-from django.conf import settings
 from django.forms import (ModelForm, Select, Textarea, TextInput,
                           ValidationError)
 from django.forms.fields import CharField, IntegerField
@@ -57,12 +56,6 @@ class DocumentForm(ModelForm):
         if cleaned_data.get('sha1sum', '') == '':
             cleaned_data['sha1sum'] = None
 
-        # old_filename = str(self.instance.file)
-        # if (cleaned_data.get('filename', '') != os.path.basename(old_filename)):
-        #     new_file_path = '{}/{}/{}'.format(settings.MEDIA_ROOT, os.path.dirname(old_filename), cleaned_data['filename'])
-        #     if os.path.isfile(new_file_path):
-        #         self.add_error("file", ValidationError("Rename failed: file exists"))
-
         return cleaned_data
 
     def clean_filename(self):
@@ -85,19 +78,27 @@ class DocumentForm(ModelForm):
         else:
             return data
 
-     # def clean_file(self):
-    #     file = self.cleaned_data.get("file")
-    #     if file:
-    #         hasher = hashlib.sha1()
-    #         for chunk in file.chunks():
-    #             hasher.update(chunk)
+    def clean_file(self):
+        file = self.cleaned_data.get("file")
 
-    #         # If the sha1sum changed (or didn't exist because this is a new object), check for a dupe
-    #         if self.instance.sha1sum != hasher.hexdigest():
-    #             existing_file = Document.objects.filter(sha1sum=hasher.hexdigest())
-    #             if existing_file:
-    #                 raise forms.ValidationError(mark_safe('This file <a href="{}">already exists.</a>'.format(reverse_lazy('blob_detail', kwargs={"uuid": existing_file[0].uuid}))))
-    #         return file
+        # This insures that we only check for a dupe if the user
+        #  added a file via file upload rather than simply edit the
+        #  metadata for a file. Without this check the actual file
+        #  can't be found to compute the sha1sum.
+        if self.files.get("file", None):
+
+            hasher = hashlib.sha1()
+            for chunk in file.chunks():
+                hasher.update(chunk)
+
+            # If the sha1sum changed (or didn't exist because this is a new object), check for a dupe
+            if self.instance.sha1sum != hasher.hexdigest():
+                existing_file = Document.objects.filter(sha1sum=hasher.hexdigest())
+                if existing_file:
+                    url = reverse_lazy("blob_detail", kwargs={"uuid": existing_file[0].uuid})
+                    raise forms.ValidationError(mark_safe(f'This file <a href="{url}">already exists.</a>'))
+
+        return file
 
     def clean_date(self):
         date = self.cleaned_data.get("date")
