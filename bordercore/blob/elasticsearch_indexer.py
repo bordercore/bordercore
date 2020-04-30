@@ -263,13 +263,16 @@ def index_blob(**kwargs):
         # Even if this is not an ingestible file, we need to download the blob
         #  in order to determine the content type
         contents = get_blob_contents_from_s3(blob_info)
+
         article.size = len(contents)
+        log.info(f"Size: {article.size}")
+
         article.content_type = magic.from_buffer(contents, mime=True)
 
         if is_pdf(blob_info["file"]):
             try:
                 article.num_pages = get_num_pages(contents)
-                print(f"Number of pages: {article.num_pages}")
+                log.info(f"Number of pages: {article.num_pages}")
             except (PdfReadError, TypeError, ValueError):
                 # A pdf read failure can be caused by many
                 #  things. Ignore any such failures.
