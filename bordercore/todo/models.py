@@ -1,3 +1,5 @@
+import uuid
+
 from elasticsearch import Elasticsearch
 
 from django.conf import settings
@@ -11,6 +13,7 @@ from tag.models import Tag
 
 
 class Todo(TimeStampedModel):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     task = models.TextField()
     note = models.TextField(null=True, blank=True)
     url = models.TextField(null=True, blank=True)
@@ -66,7 +69,7 @@ class Todo(TimeStampedModel):
                         },
                         {
                             "term": {
-                                "bordercore_id": self.id
+                                "uuid": self.uuid
                             }
                         },
 
@@ -89,7 +92,8 @@ class Todo(TimeStampedModel):
 
         doc = {
             "bordercore_id": self.id,
-            "bordercore_todo_task": self.task,
+            "uuid": self.uuid,
+            "task": self.task,
             "tags": [tag.name for tag in self.tags.all()],
             "url": self.url,
             "note": self.note,
@@ -102,7 +106,7 @@ class Todo(TimeStampedModel):
 
         res = es.index(
             index=settings.ELASTICSEARCH_INDEX,
-            id=f"bordercore_todo_{self.id}",
+            id=self.uuid,
             body=doc
         )
 

@@ -128,7 +128,8 @@ class SearchListView(ListView):
                 "from": 0, "size": hit_count,
                 "_source": ["artist",
                             "author",
-                            "bordercore_todo_task",
+                            "bordercore_id",
+                            "task",
                             "date",
                             "date_unixtime",
                             "doctype",
@@ -170,7 +171,7 @@ class SearchListView(ListView):
                     {
                         "multi_match": {
                             "query": search_term,
-                            "fields": ["artist", "author", "attachment.content", "contents", "sha1sum", "title", "uuid"],
+                            "fields": ["artist", "author", "attachment.content", "contents", "sha1sum", "task", "title", "uuid"],
                             "operator": boolean_type,
                         }
                     }
@@ -219,12 +220,12 @@ class SearchListView(ListView):
                     uuid=myobject["_source"].get("uuid", ""),
                     id=myobject["_id"],
                     importance=myobject["_source"].get("importance", ""),
-                    # internal_id=myobject.get("internal_id", ""),
                     last_modified=get_relative_date(myobject["_source"]["last_modified"]),
                     url=myobject["_source"].get("url", ""),
                     filename=myobject["_source"].get("filename", ""),
                     tags=myobject["_source"].get("tags"),
-                    # bordercore_todo_task=myobject.get("bordercore_todo_task", ""),
+                    task=myobject["_source"].get("task", ""),
+                    bordercore_id=myobject["_source"].get("bordercore_id", None),
                     note=note
                 )
 
@@ -263,6 +264,7 @@ class SearchTagDetailView(ListView):
 
             match = dict(
                 title=myobject["_source"].get("title", "No Title"),
+                task=myobject["_source"].get("task", ""),
                 url=myobject["_source"].get("url", ""),
                 uuid=myobject["_source"].get("uuid", "")
             )
@@ -374,7 +376,7 @@ class SearchTagDetailView(ListView):
             "sort": {"last_modified": {"order": "desc"}},
             "from": 0, "size": hit_count,
             "_source": ["author",
-                        "bordercore_todo_task",
+                        "task",
                         "content_type",
                         "date",
                         "date_unixtime",

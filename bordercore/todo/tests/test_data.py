@@ -25,13 +25,13 @@ def es():
 
 def test_todo_tasks_in_db_exist_in_elasticsearch(es):
     "Assert that all todo tasks in the database exist in Elasticsearch"
-    todo = Todo.objects.all().only("id")
+    todo = Todo.objects.all().only("uuid")
 
     for task in todo:
         search_object = {
             "query": {
                 "term": {
-                    "_id": f"bordercore_todo_{task.id}"
+                    "uuid.keyword": task.uuid
                 }
             },
             "_source": ["id"]
@@ -43,7 +43,7 @@ def test_todo_tasks_in_db_exist_in_elasticsearch(es):
 
 def test_todo_tags_match_elasticsearch(es):
     "Assert that all todo tags match those found in Elasticsearch"
-    todo = Todo.objects.filter(tags__isnull=False).only("id", "tags")
+    todo = Todo.objects.filter(tags__isnull=False).only("uuid", "tags")
 
     for task in todo:
         tag_query = [
@@ -61,7 +61,7 @@ def test_todo_tags_match_elasticsearch(es):
                     "must": [
                         {
                             "term": {
-                                "_id": f"bordercore_todo_{task.id}"
+                                "uuid.keyword": task.uuid
                             }
                         },
                         tag_query

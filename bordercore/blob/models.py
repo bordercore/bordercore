@@ -240,7 +240,7 @@ class Document(TimeStampedModel, AmazonMixin):
                     ]
                 }
             },
-            "_source": ["author", "bordercore_todo_task", "content_type", "doctype", "note", "filename", "bordercore_id", "attr_is_book", "last_modified", "num_pages", "tags", "title", "sha1sum", "size", "url"]
+            "_source": ["author", "task", "content_type", "doctype", "note", "filename", "bordercore_id", "attr_is_book", "last_modified", "num_pages", "tags", "title", "sha1sum", "size", "url"]
         }
 
         results = es.search(index=settings.ELASTICSEARCH_INDEX, body=query)["hits"]["hits"][0]
