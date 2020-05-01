@@ -69,7 +69,7 @@ class Todo(TimeStampedModel):
                         },
                         {
                             "term": {
-                                "uuid": self.uuid
+                                "uuid.keyword": self.uuid
                             }
                         },
 
