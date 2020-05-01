@@ -66,7 +66,7 @@ class SearchListView(ListView):
         elif facet == 'Documents':
             return 'doctype:document'
         elif facet == 'Todos':
-            return 'doctype:bordercore_todo'
+            return 'doctype:todo'
         elif facet == 'Notes':
             return 'doctype:note'
         elif facet == 'Links':

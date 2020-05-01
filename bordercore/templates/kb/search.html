@@ -81,7 +81,7 @@
 
     <tr>
         <td{% if match.importance == 10 %} class="important"{% endif %}>
-{% if match.doctype == 'bordercore_todo' %}
+{% if match.doctype == 'todo' %}
 
     <h4 class="search_book_title">Todo: <a href="{% url 'todo_edit' match.bordercore_id %}">{{ match.task }}</a></h4>
 

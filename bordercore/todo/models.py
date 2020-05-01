@@ -64,7 +64,7 @@ class Todo(TimeStampedModel):
                     "must": [
                         {
                             "term": {
-                                "doctype": "bordercore_todo"
+                                "doctype": "todo"
                             }
                         },
                         {
@@ -98,7 +98,7 @@ class Todo(TimeStampedModel):
             "url": self.url,
             "note": self.note,
             "last_modified": self.modified,
-            "doctype": "bordercore_todo",
+            "doctype": "todo",
             "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
             "date_unixtime": self.created.strftime("%s"),
             "user_id": self.user.id

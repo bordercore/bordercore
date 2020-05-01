@@ -81,7 +81,7 @@ def test_elasticsearch_todo_tasks_exist_in_db(es):
     search_object = {
         "query": {
             "term": {
-                "doctype": f"bordercore_todo"
+                "doctype": f"todo"
             }
         },
         "from": 0, "size": 10000,
