@@ -44,3 +44,26 @@ $('#id_tags').tagsinput({
         }
     }]
 });
+
+// This handles tags which are not returned by typeahead's
+//  source, ie tags that don't already exist. This usually is
+//  handled by the "freeInput" Bootstrap Tags option, but
+//  that doesn't work when using objects as tags.
+$(".tt-input").keydown(function (e) {
+    if (e.keyCode === 13) {
+        e.preventDefault();
+
+        tag = $(".tt-input").val();
+
+        // If a value exists, then this is a new tag not
+        //  found by the typeahead. Add it. If it is found
+        //  by the typeahead, it will automatically be added.
+        if (tag) {
+            $("#id_tags").tagsinput("add", {
+                value: tag,
+                [field_name]: tag,
+            });
+        }
+
+    }
+});
