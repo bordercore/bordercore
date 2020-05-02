@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 
 import boto3
 import markdown
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, NotFoundError
 from storages.backends.s3boto3 import S3Boto3Storage
 
 from django.conf import settings
@@ -421,7 +421,10 @@ class Document(TimeStampedModel, AmazonMixin):
             verify_certs=False
         )
 
-        es.delete(index=settings.ELASTICSEARCH_INDEX, id=self.uuid)
+        try:
+            es.delete(index=settings.ELASTICSEARCH_INDEX, id=self.uuid)
+        except NotFoundError:
+            log.warning(f"Tried to delete blob, but can't find it in elasticsearch: {self.uuid}")
 
         # Delete from any collections
         for collection in Collection.objects.filter(user=self.user, blob_list__contains=[{'id': self.id}]):
