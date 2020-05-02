@@ -140,7 +140,7 @@ for blob_info in blobs:
         if verbose:
             print(f"{blob_count} {blob_info.uuid}")
 
-        if go and blob_exists_in_es(blob_info.uuid) and not force_index:
+        if go and not force_index and blob_exists_in_es(blob_info.uuid):
             if verbose:
                 print(f"{blob_info.uuid} Blob already indexed. Not re-indexing")
             continue
