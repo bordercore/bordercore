@@ -89,8 +89,8 @@ def homepage(request):
                                      'uuid': random_image.uuid,
                                      'cover_info': Document.get_cover_info(request.user, random_image.sha1sum, 'large', 500)}
             except ClientError as e:
-                messages.add_message(request, messages.ERROR, f"Error getting random image info: {e}")
-    except ConnectionRefusedError as e:
+                messages.add_message(request, messages.ERROR, f"Error getting random image info for uuid={random_image.uuid}: {e}")
+    except ConnectionRefusedError:
         messages.add_message(request, messages.ERROR, 'Cannot connect to Elasticsearch')
 
     # Get the most recent untagged bookmarks
