@@ -10,8 +10,9 @@ from blob.views import (BlobDeleteView, BlobDetailView, BlobThumbnailView,
 from book.views import BookListView
 from bookmark import views as bookmark_views
 from collection import views as collection_views
-from collection.views import (CollectionCreateView, CollectionDeleteView, CollectionDetailView,
-                              CollectionListView, CollectionUpdateView)
+from collection.views import (CollectionCreateView, CollectionDeleteView,
+                              CollectionDetailView, CollectionListView,
+                              CollectionUpdateView)
 from drill import views as drill_views
 from drill.views import (DrillListView, DrillSearchListView,
                          QuestionCreateView, QuestionDeleteView,
@@ -43,6 +44,8 @@ urlpatterns = [
     path('blob/add', DocumentCreateView.as_view(), name='blob_add'),
     path('blob/<uuid:uuid>/delete', BlobDeleteView.as_view(), name='blob_delete'),
     path('blob/metadata_name_search/', blob_views.metadata_name_search, name='metadata_name_search'),
+    path('blob/favorites/add/<uuid:uuid>', accounts_views.add_to_favorites, name='blob_favorites_add'),
+    path('blob/favorites/remove/<uuid:uuid>', accounts_views.remove_from_favorites, name='blob_favorites_remove'),
     path('blob/get_amazon_metadata/<str:title>', blob_views.get_amazon_metadata, name='get_amazon_metadata'),
     path('blob/get_amazon_image_info/<str:sha1sum>/<int:index>', blob_views.get_amazon_image_info, name='get_amazon_image_info'),
     path('blob/get_amazon_image_info/<str:sha1sum>', blob_views.get_amazon_image_info, name='get_amazon_image_info'),
@@ -51,6 +54,7 @@ urlpatterns = [
     path('blob/mutate', blob_views.collection_mutate, name='collection_mutate'),
     path('blob/parse_date/<path:input_date>', blob_views.parse_date, name='parse_date'),
     path('blob/slideshow', blob_views.slideshow, name='blob_slideshow'),
+    path('blob/note/sort', accounts_views.sort_favorite_notes, name='sort_favorite_notes'),
     path('blob/<uuid:uuid>', BlobDetailView.as_view(), name='blob_detail'),
     path('blob/<uuid:uuid>/edit', BlobUpdateView.as_view(), name='blob_edit'),
     path('blob/<uuid:uuid>/thumbnail', BlobThumbnailView.as_view(), name='blob_thumbnail'),

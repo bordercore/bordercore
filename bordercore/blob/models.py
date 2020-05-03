@@ -309,6 +309,9 @@ class Document(TimeStampedModel, AmazonMixin):
             related_blobs.append({'uuid': blob.uuid, 'title': blob.title})
         return related_blobs
 
+    def is_favorite_note(self):
+        return self in self.user.userprofile.favorite_notes.all()
+
     def get_collection_info(self):
         return Collection.objects.filter(user=self.user, blob_list__contains=[{'id': self.id}])
 

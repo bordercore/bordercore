@@ -126,6 +126,18 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
 
     </form>
 
+    {% if object.is_note %}
+        {% if is_favorite_note %}
+            <form action="{% url 'blob_favorites_remove' object.uuid %}">
+                <input type="submit" class="btn btn-primary" value="Remove from Favorites">
+            </form>
+        {% else %}
+            <form action="{% url 'blob_favorites_add' object.uuid %}">
+                <input type="submit" class="btn btn-primary" value="Add to Favorites">
+            </form>
+        {% endif %}
+    {% endif %}
+
     <br /><br />
 
     <a href="{% url 'blob_add' %}?linked_blob={{ object.id }}">Link to New Blob</a> <strong>|</strong>

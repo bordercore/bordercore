@@ -2,6 +2,58 @@
 
 {% block title %} Notes {% endblock %}
 
+{% block left-block %}
+
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/smoke.min.css" />
+    <script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            $('#sort-container-notes').sortable( {
+                connectWith: '.list-group',
+
+                // The 'Untagged' item is not sortable -- it's always on top
+                items: "li:not(#untagged)",
+
+                stop: function(event, ui) {
+
+                    var note_uuid = $(ui.item).data("uuid");
+
+                    $.ajax( {
+                        type: 'POST',
+                        url: '{% url 'sort_favorite_notes' %}',
+                        data: {
+                            note_uuid: note_uuid,
+                            new_position: ui.item.index()
+                        },
+                        error: function (xhr, ajaxOptions, error) {
+                            $.smkAlert({text: 'Error reordering tags: ' + error, type: 'error', position:'top-right'});
+                        }
+                    } );
+                }
+            })
+        });
+
+    </script>
+
+    <div class="h3">
+        Favorite Notes
+    </div>
+
+    <ul class="list-group" id="sort-container-notes">
+        {% for note in favorite_notes %}
+            <li class="list-group-item" data-uuid="{{ note.uuid }}">
+                <a href="{% url 'blob_detail' note.uuid %}">{{ note.title }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}
+
 {% block content %}
 
     <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>

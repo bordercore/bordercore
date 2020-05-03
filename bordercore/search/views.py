@@ -190,6 +190,7 @@ class SearchListView(ListView):
             self.template_name = "blob/note_list.html"
             page = int(self.request.GET.get("page", 1))
             context["paginator"] = get_paginator(page, context["info"])
+            context["favorite_notes"] = self.request.user.userprofile.favorite_notes.all().only("title", "uuid").order_by("sortordernote__sort_order")
 
         info = []
         facet_counts = {}

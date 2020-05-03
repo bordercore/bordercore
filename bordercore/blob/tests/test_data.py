@@ -20,7 +20,7 @@ pytestmark = pytest.mark.data_quality
 
 django.setup()
 
-from accounts.models import SortOrder  # isort:skip
+from accounts.models import SortOrder, SortOrderNote  # isort:skip
 from django.contrib.auth.models import User  # isort:skip
 from blob.models import BLOBS_NOT_TO_INDEX, Document, ILLEGAL_FILENAMES, MetaData   # isort:skip
 from collection.models import Collection  # isort:skip
@@ -259,6 +259,24 @@ def test_favorite_tags_sort_order():
             assert SortOrder.objects.filter(user_profile__user=user).aggregate(Max("sort_order"))["sort_order__max"] == count, "Max(sort_order) does not equal total count for user={}".format(user)
 
     q = SortOrder.objects.values("sort_order", "user_profile_id").order_by().annotate(dcount=Count("sort_order")).filter(dcount__gt=1)
+    assert len(q) == 0, "Multiple sort_order values found"
+
+
+def test_favorite_notes_sort_order():
+    """
+    This test checks for three things:
+
+    For every user, min(sort_order) = 1
+    For every user, max(sort_order) should equal the total count
+    No duplicate sort_order values for each user
+    """
+    for user in User.objects.all():
+        count = SortOrderNote.objects.filter(user_profile__user=user).count()
+        if count > 0:
+            assert SortOrderNote.objects.filter(user_profile__user=user).aggregate(Min("sort_order"))["sort_order__min"] == 1, "Min(sort_order) is not 1 for user={}".format(user)
+            assert SortOrderNote.objects.filter(user_profile__user=user).aggregate(Max("sort_order"))["sort_order__max"] == count, "Max(sort_order) does not equal total count for user={}".format(user)
+
+    q = SortOrderNote.objects.values("sort_order", "user_profile_id").order_by().annotate(dcount=Count("sort_order")).filter(dcount__gt=1)
     assert len(q) == 0, "Multiple sort_order values found"
 
 

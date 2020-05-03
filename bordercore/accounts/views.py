@@ -1,15 +1,18 @@
 import json
 
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView
 
 from accounts.forms import UserProfileForm
-from accounts.models import UserProfile
+from accounts.models import SortOrderNote, UserProfile
+from blob.models import Document
 
 SECTION = 'Prefs'
 
@@ -41,6 +44,51 @@ class UserProfileDetailView(UpdateView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(UserProfileDetailView, self).dispatch(*args, **kwargs)
+
+@login_required
+def sort_favorite_notes(request):
+    """
+    Move a given tag to a new position in a sorted list
+    """
+
+    note_uuid = request.POST["note_uuid"]
+    new_position = int(request.POST["new_position"])
+
+    note = Document.objects.get(user=request.user, uuid=note_uuid)
+
+    SortOrderNote.reorder(request.user, note.id, new_position)
+
+    return HttpResponse(json.dumps("OK"), content_type="application/json")
+
+
+@login_required
+def add_to_favorites(request, uuid):
+
+    note = Document.objects.get(user=request.user, uuid=uuid)
+
+    if note.is_favorite_note():
+        messages.add_message(request, messages.WARNING, "This is already a favorite")
+    else:
+        sort_order = SortOrderNote(user_profile=request.user.userprofile, note=note)
+        sort_order.save()
+        messages.add_message(request, messages.WARNING, "Added to favorites")
+
+    return HttpResponseRedirect(reverse('blob_detail', args=(uuid,)))
+
+
+@login_required
+def remove_from_favorites(request, uuid):
+
+    note = Document.objects.get(user=request.user, uuid=uuid)
+
+    if not note.is_favorite_note():
+        messages.add_message(request, messages.WARNING, "This is not a favorite")
+    else:
+        sort_order = SortOrderNote.objects.get(user_profile=request.user.userprofile, note=note)
+        sort_order.delete()
+        messages.add_message(request, messages.WARNING, "Removed from favorites")
+
+    return HttpResponseRedirect(reverse('blob_detail', args=(uuid,)))
 
 
 @login_required

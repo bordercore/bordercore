@@ -149,6 +149,8 @@ class BlobDetailView(DetailView):
                 context['cover_info'] = Document.get_cover_info(self.request.user, self.object.sha1sum)
             except ClientError:
                 log.warn(f"No S3 cover image found for id={self.object.id}")
+        if self.object.is_note:
+            context["is_favorite_note"] = self.object.is_favorite_note()
         try:
             context["elasticsearch_info"] = self.object.get_elasticsearch_info()
             if self.object.sha1sum and context["elasticsearch_info"].get("size"):
