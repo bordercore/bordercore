@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.db import models
+from django.utils import timezone
 
 from lib.mixins import TimeStampedModel
 from tag.models import Tag
@@ -21,7 +22,8 @@ class Collection(TimeStampedModel):
     is_private = models.BooleanField(default=False)
 
     def get_created(self):
-        return self.created.strftime('%b %d, %Y')
+        to_tz = timezone.get_default_timezone()
+        return self.created.astimezone(to_tz).strftime("%b %d, %Y")
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
