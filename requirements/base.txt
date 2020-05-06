@@ -7,6 +7,7 @@ boto3==1.9.156
 certifi==2019.6.16
 Django==2.2.10
 django-datatables-view==1.12.1
+djangorestframework==3.11.0
 django-storages==1.7.1
 https://github.com/bordercore/PyOrgMode/archive/master.zip
 elasticsearch==7.0.5
@@ -17,7 +18,7 @@ google-api-python-client==1.6.2
 httplib2==0.10.3
 humanize==2.0.0
 lxml==4.3.3
-Markdown==2.6
+Markdown==3.2.1
 mutagen==1.28
 oauth2client==4.0.0
 pdf2image==0.1.14

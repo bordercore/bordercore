@@ -1,0 +1,90 @@
+from rest_framework import serializers
+
+from accounts.models import User
+from blob.models import Document
+from bookmark.models import Bookmark
+from collection.models import Collection
+from drill.models import Question
+from feed.models import Feed
+from music.models import Album, Song, SongSource, WishList
+from tag.models import Tag
+from todo.models import Todo
+
+
+class AlbumSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Album
+        fields = ["artist", "comment", "compilation", "original_release_year",
+                  "title", "year"]
+
+
+class BlobSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Document
+        fields = ["content", "date", "documents", "file", "importance",
+                  "is_private", "is_note", "note", "sha1sum",
+                  "tags", "title", "user", "uuid"]
+
+
+class BookmarkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bookmark
+        fields = ["daily", "importance", "is_pinned", "last_check",
+                  "last_response_code", "note", "title", "url", "user"]
+
+
+class CollectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Collection
+        fields = ["blob_list", "description", "is_private", "name", "tags"]
+
+
+class FeedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Feed
+        fields = ["homepage", "last_check", "last_response_code", "name", "url"]
+
+
+class QuestionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = ["answer", "efactor", "interval", "last_reviewed",
+                  "question", "tags", "times_failed", "user"]
+
+
+class SongSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Song
+        fields = ["album", "artist", "comment", "last_time_played", "length",
+                  "original_album", "original_year", "source", "tags",
+                  "times_played", "title", "track", "uuid", "year"]
+
+
+class SongSourceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SongSource
+        fields = ["description", "name"]
+
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ["id", "is_meta", "name", "url"]
+
+
+class TodoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Todo
+        fields = ["id", "due_date", "note", "tags", "task", "url", "user", "uuid"]
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "url", "username", "email", "is_staff"]
+
+
+class WishListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WishList
+        fields = ["album", "artist", "note", "song"]

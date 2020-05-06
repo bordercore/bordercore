@@ -1,9 +1,16 @@
+from rest_framework import routers
+
 from django.conf import settings
+from django.conf.urls import include, url
 from django.contrib import admin
 from django.urls import include, path, re_path
 
 from accounts import views as accounts_views
 from accounts.views import UserProfileDetailView
+from api.views import (AlbumViewSet, BlobViewSet, BookmarkViewSet,
+                       CollectionViewSet, FeedViewSet, QuestionViewSet,
+                       SongSourceViewSet, SongViewSet, TagViewSet, TodoViewSet,
+                       UserViewSet, WishListViewSet)
 from blob import views as blob_views
 from blob.views import (BlobDeleteView, BlobDetailView, BlobThumbnailView,
                         BlobUpdateView, DocumentCreateView)
@@ -157,3 +164,23 @@ if settings.DEBUG:
     ]
 
 handler404 = 'homepage.views.handler404'
+
+
+router = routers.DefaultRouter()
+router.register(r"albums", AlbumViewSet, "Album")
+router.register(r"blobs", BlobViewSet, "Document")
+router.register(r"bookmarks", BookmarkViewSet, "Bookmark")
+router.register(r"collections", CollectionViewSet, "Collection")
+router.register(r"feeds", FeedViewSet, "Feed")
+router.register(r"questions", QuestionViewSet, "Question")
+router.register(r"songs", SongViewSet, "Song")
+router.register(r"songsources", SongSourceViewSet, "SongSource")
+router.register(r"tags", TagViewSet, "Tag")
+router.register(r"todos", TodoViewSet, "Todo")
+router.register(r"users", UserViewSet, "User")
+router.register(r"wishlists", WishListViewSet, "WishList")
+
+urlpatterns += [
+    url(r"^api/", include(router.urls)),
+    path("", include("rest_framework.urls", namespace="rest_framework"))
+]

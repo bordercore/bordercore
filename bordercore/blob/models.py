@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 import boto3
 import markdown
 from elasticsearch import Elasticsearch, NotFoundError
+from markdown.extensions.codehilite import CodeHiliteExtension
 from storages.backends.s3boto3 import S3Boto3Storage
 
 from django.conf import settings
@@ -129,10 +130,10 @@ class Document(TimeStampedModel, AmazonMixin):
         setattr(self, "__original_sha1sum", getattr(self, 'sha1sum'))
 
     def get_content(self):
-        return markdown.markdown(self.content, extensions=['codehilite(guess_lang=False)', 'tables'])
+        return markdown.markdown(self.content, extensions=[CodeHiliteExtension(guess_lang=False), "tables"])
 
     def get_note(self):
-        return markdown.markdown(self.note, extensions=['codehilite(guess_lang=False)', 'tables'])
+        return markdown.markdown(self.note, extensions=[CodeHiliteExtension(guess_lang=False), "tables"])
 
     @staticmethod
     def get_content_type(argument):

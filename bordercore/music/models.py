@@ -1,6 +1,7 @@
 import uuid
 
 import markdown
+from markdown.extensions.codehilite import CodeHiliteExtension
 
 from django.contrib.auth.models import User
 from django.db import models
@@ -20,7 +21,7 @@ class Album(TimeStampedModel):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     def get_comment(self):
-        return markdown.markdown(self.comment, extensions=['codehilite(guess_lang=False)', 'tables'])
+        return markdown.markdown(self.comment, extensions=[CodeHiliteExtension(guess_lang=False), "tables"])
 
     class Meta:
         unique_together = ("title", "artist")
