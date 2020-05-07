@@ -416,7 +416,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                         <input type="text" name="tags" value="" class="form-control typeahead" autocomplete="off" id="id_tags">
                     </div>
             {% else %}
-                <div class="col-lg-10 col-sm-10">
+                <div class="col-lg-10 col-sm-10 align-self-center">
                     {{ field }}
                 </div>
             {% endif %}
@@ -428,7 +428,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
 
     <div class="form-group {% if field.errors %}error{% endif %} row">
         <label class="bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">Is book</label>
-        <div class="col-lg-10 col-sm-10">
+        <div class="col-lg-10 col-sm-10 align-self-center">
             <input type="checkbox"{% if is_book %} checked="checked"{% endif %} name="is_book" id="id_is_book" />
         </div>
     </div>
