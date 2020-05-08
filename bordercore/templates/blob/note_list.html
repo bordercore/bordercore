@@ -4,6 +4,8 @@
 
 {% block left-block %}
 
+    <script src="https://use.fontawesome.com/4a95cb196f.js"></script>
+
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/smoke.min.css" />
     <script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
 
@@ -76,8 +78,7 @@
 
             engine.initialize();
 
-            $('#tag-filter').typeahead({
-                autoselect: true,
+            $('#search').typeahead({
                 minLength: 2
             }, {
                     display: 'value',
@@ -88,23 +89,25 @@
                         }
                     }
                 }
-                                       );
+                                        );
 
-            $('#tag-filter').bind('typeahead:selected', function(obj, datum, name) {
-                window.location='{% url 'notes_list' %}?tagsearch=' + datum.value;
-            }).bind('focus', function(obj) {
-                $('#blog-search').val('');
-            });
+            // This is set when an item from the autocomplete options is selected.  Otherwise there would be
+            //  a race between the window.open() in $('#kbsearch').bind(...) and the form submission from the
+            //  $('#kbsearch').on('keyup', ...)
+            var autocomplete_selected = false;
 
-            $('#blog-search').bind('keyup', function(event, selection) {
-                if ((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) {
-                    $('form#blog-search-form').submit();
+            $('#search').on('keyup', function(event, selection) {
+                if (((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) && !autocomplete_selected) {
+                    $('#search-form').submit();
                     return false;
                 } else {
                     return true;
                 }
-            }).bind('focus', function(obj) {
-                $('#tag-filter').val('');
+            });
+
+            $('#search').bind('typeahead:selected', function(obj, datum, name) {
+                autocomplete_selected = true;
+                window.location='{% url 'notes_list' %}?tagsearch=' + datum.value;
             });
 
         });
@@ -115,19 +118,16 @@
 
     <div class="row mb-3">
         <div class="col-lg-12">
-
-            <form class="form-inline" name="nav_form" id="blog-search-form" action="{% url 'notes_list' %}" method="get">
-                <input name="is-notes-search" value="true" type="hidden" />
-                <label class="mr-2">Search</label>
-                <input autocomplete="off" class="mr-2 form-control" id="blog-search" type="text" name="search" value="{{ request.GET.search_item }}" accesskey="s" />
-
-                <label class="mr-2">Tag Filter</label>
-                <input class="form-control" id="tag-filter" type="text" value="{{ request.GET.tagsearch }}" autocomplete="off" />
-
+            <form class="form-inline" name="nav_form" id="search-form" action="{% url 'notes_list' %}" method="get" autocomplete="off">
+                <div class="form-row">
+                    <div class="col-auto has-search">
+                        <span class="fa fa-search form-control-feedback"></span>
+                        <input class="form-control" id="search" type="text" name="search" value="{{ request.GET.search_item }}" accesskey="s" style="width: 300px" placeholder="Search"/>
+                        <input name="is-notes-search" value="true" type="hidden" />
+                    </div>
+                </div>
                 <a class="btn btn-primary ml-2" href="{% url 'blob_add' %}?is_note=true">Add note</a>
-
             </form>
-
         </div>
     </div>
 
