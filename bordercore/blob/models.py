@@ -112,7 +112,7 @@ class Document(TimeStampedModel, AmazonMixin):
     content = models.TextField(null=True)
     title = models.TextField(null=True)
     sha1sum = models.CharField(max_length=40, unique=True, blank=True, null=True)
-    file = models.FileField(max_length=500, storage=DownloadableS3Boto3Storage())
+    file = models.FileField(max_length=500, storage=DownloadableS3Boto3Storage(), blank=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     note = models.TextField(null=True)
     tags = models.ManyToManyField(Tag)
@@ -120,7 +120,7 @@ class Document(TimeStampedModel, AmazonMixin):
     importance = models.IntegerField(default=1)
     is_private = models.BooleanField(default=False)
     is_note = models.BooleanField(default=False)
-    documents = models.ManyToManyField("self")
+    documents = models.ManyToManyField("self", blank=True)
 
     def __init__(self, *args, **kwargs):
         super(Document, self).__init__(*args, **kwargs)
