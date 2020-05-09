@@ -30,7 +30,7 @@ def handler(event, context):
             if sns_record.get("eventName", None) == "ObjectRemoved:Delete":
                 continue
 
-            file_changed = sns_record["s3"]["file_changed"]
+            file_changed = sns_record["s3"].get("file_changed", True)
 
             # If this was triggered by S3, then parse the sha1sum from the S3 key.
             # Otherwise this must have been called from Django, in which case the
@@ -67,5 +67,6 @@ def handler(event, context):
 
     except Exception as e:
         log.error(f"{type(e)} exception: {e}")
+        log.error(sns_record)
         import traceback
         print(traceback.format_exc())
