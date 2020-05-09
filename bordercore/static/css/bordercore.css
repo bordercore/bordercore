@@ -229,3 +229,8 @@ a.tag:active {
   background-color: #007BFF;
   color: #ffffff;
   padding: 10px; }
+
+/* Used to keep the tag search input field
+   from shrinking after you start typing */
+.form-inline .bootstrap-tagsinput {
+  width: 400px !important; }
