@@ -46,11 +46,13 @@
 
             $( ".date" ).on( "paste", function() {
                 var clipText = event.clipboardData.getData('Text');
+                $("#date-response").empty();
                 $.ajax( { type: 'GET',
                           url: '{% url 'parse_date' 666 %}'.replace(/666$/, encodeURIComponent($.trim(clipText))),
                           }).done(function( json ) {
-                    if (!json || json.error != null) {
-                        console.log("Date error: " + json.error);
+                    if (!json || json.output_date == "") {
+                        $("#date-response").append("Invalid date format");
+                        console.log("Invalid date format error: " + json.error);
                     } else {
                         $('.date').datepicker('update', json.output_date);
                     }
@@ -410,6 +412,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                             </div>
                         </span>
                     </div>
+                    <div class="col-lg-3 align-self-center form-error" id="date-response"></div>
 
             {% elif field.label == 'Tags' %}
                     <div class="col-lg-10 col-sm-10">
