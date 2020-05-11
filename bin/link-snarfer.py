@@ -1,27 +1,20 @@
-#!/usr/bin/env python
-
-import django
 import email
+import json
 import logging
 import os
 import quopri
-from pathlib import Path
-import pprint
-import sys
 import re
-import requests
+import sys
 import time
+from pathlib import Path
+
+import requests
 from lxml import html
 
-os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings.dev'
-
-django.setup()
-
-from bookmark.models import Bookmark
+from django.conf import settings
 
 link_dict = {}  # Store links in a dict to avoid duplication
 
-pp = pprint.PrettyPrinter()
 p = re.compile(r"(https?://[^\">\s\n]*)[\">\s\n]")
 ignore = re.compile("doubleclick|https://twitter.com|tapbots.com|tapbots.net|search.twitter.com|www.youtube.com/subscription_manager")
 
@@ -55,10 +48,17 @@ def get_link_info(link):
         return (r.url, "No title")
 
 
+def get_drf_token():
+
+    with open(f"{settings.BASE_DIR}/config/settings/secrets.json") as f:
+        secrets = json.loads(f.read())
+    return secrets["DRF_TOKEN"]
+
+
 def store_email(title, lines):
 
     dir = "/tmp/link_snarfer"
-    if not Path(dir).isdir():
+    if not Path(dir).is_dir():
         os.makedirs(dir)
 
     filename = f"{title}-{time.time()}"
@@ -94,9 +94,7 @@ def get_youtube_content(msg):
     content = content.decode('UTF-8', 'ignore')
     lines = content.split('\n')
     info['uploader'] = lines[0]
-    # info['title'] = lines[1]
     info['title'] = get_title(lines)
-    # info['url'] = lines[2]
     info['url'] = find_first_link(lines)
 
     if logger.level == "DEBUG":
@@ -113,9 +111,36 @@ def get_youtube_content(msg):
         info['subject'] = "%s: %s" % (m.group(1), info['title'])
     else:
         info['subject'] = info['title']
-        # return None
 
     return info
+
+
+def add_to_bordercore(link_info):
+
+    payload = {
+        "url": link_info["url"],
+        "title": link_info["subject"],
+        "user": 1
+    }
+
+    url = "https://www.bordercore.com/api/bookmarks/"
+
+    token = get_drf_token()
+
+    headers = {
+        "Authorization": f"Token {token}",
+        "Content-Type": "application/json"
+    }
+
+    # We use a session so that we can set trust_env = None (see below)
+    s = requests.Session()
+
+    # Set this so that the ~/.netrc file is ignored for authentication
+    s.trust_env = None
+
+    r = s.post(url, data=json.dumps(payload), headers=headers)
+    print(r.status_code)
+    print(r.text)
 
 
 buffer = ''
@@ -127,9 +152,7 @@ if msg.get('From', '').startswith('YouTube'):
     link_info = get_youtube_content(msg)
     logger.info('YouTube email: %s' % link_info['subject'])
     if link_info:
-        b = Bookmark(url=link_info['url'], title=link_info['subject'] or 'No Label', user_id=1)
-        b.save()
-        b.index_bookmark()
+        add_to_bordercore(link_info)
     sys.exit(0)
 
 # Decode quoted-printable contents
@@ -146,6 +169,8 @@ if link_dict:
 
     for label in link_dict.keys():
         logger.info(u"%s - %s" % (link_dict[label], label))
-        b = Bookmark(url=link_dict[label], title=label or 'No Label', user_id=1)
-        b.save()
-        b.index_bookmark()
+        link_info = {
+            "url": link_dict[label],
+            "subject": label or "No Title"
+        }
+        add_to_bordercore(link_info)
