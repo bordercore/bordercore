@@ -323,17 +323,6 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                 $(this).parents('.form-group').remove();
             } );
 
-            // If something that looks like a url is in the clipboard,
-            //  pre-populate a "Url" metadata field with it.
-            navigator.clipboard.readText()
-                               .then(text => {
-                if (text.startsWith("http")) {
-                    $("#id_name").val("Url");
-                    $("#id_value").val(text);
-                    addMetadata();
-                }
-            })
-
             {% for tag in object.tags.all %}
             $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
             {% endfor %}
