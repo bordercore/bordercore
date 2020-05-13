@@ -23,7 +23,7 @@
 {% for row in data %}
 <tr>
 {% for col in cols %}
-<td> {{ row|dict_get:col|default:"" }} </td>
+<td> {{ row|dict_get:col|default:""|safe }} </td>
 {% endfor %}
 </tr>
 {% endfor %}
