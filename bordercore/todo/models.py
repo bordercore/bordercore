@@ -1,10 +1,12 @@
 import uuid
+from functools import cmp_to_key
 
 from elasticsearch import Elasticsearch
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Count
 from django.db.models.signals import post_save
 from django.dispatch.dispatcher import receiver
 
@@ -50,6 +52,24 @@ class Todo(TimeStampedModel):
             if priority[1] == priority_name:
                 return priority[0]
         return None
+
+    @staticmethod
+    def get_todo_counts(user, first_tag):
+
+        # Get the list of tags, initially sorted by count per tag
+        tags = Tag.objects.values("id", "name") \
+                          .annotate(count=Count("todo", distinct=True)) \
+                          .filter(todo__user=user) \
+                          .order_by("-count")
+
+        # Convert from queryset to list of dicts so we can further sort them
+        counts = [{"name": x["name"], "count": x["count"]} for x in tags]
+
+        # Use a custom sort function to insure that the tag matching first_tag
+        #  always comes out first.
+        counts.sort(key=cmp_to_key(lambda x, y: -1 if x["name"] == first_tag else 1))
+
+        return counts
 
     def delete(self):
 

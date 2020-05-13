@@ -167,6 +167,9 @@ ul.pagination {
   border: 1px solid #999999;
   padding: 5px; }
 
+#todo_tag_list {
+  padding: 5px; }
+
 #myModal #title {
   width: 300px; }
 

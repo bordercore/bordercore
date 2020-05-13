@@ -43,6 +43,7 @@ class TodoListView(ListView):
         context = super(TodoListView, self).get_context_data(**kwargs)
 
         info = []
+        context["tags"] = Todo.get_todo_counts(self.request.user, self.tagsearch)
 
         for myobject in context['object_list']:
             info.append(dict(task=myobject.task,
@@ -51,7 +52,6 @@ class TodoListView(ListView):
                              unixtime=format(myobject.modified, 'U'),
                              todoid=myobject.id))
 
-        context['tags'] = Tag.objects.filter(todo__user=self.request.user, todo__isnull=False).distinct('name')
         context['tagsearch'] = self.tagsearch
         context['cols'] = ['task', 'priority', 'modified', 'unixtime', 'todoid']
         context['section'] = SECTION

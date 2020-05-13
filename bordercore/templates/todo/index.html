@@ -6,6 +6,23 @@
 
 {% block title %} {{ section }} {% endblock %}
 
+{% block left-block %}
+
+    <h2>
+        Todo tags
+    </h2>
+
+    {% for tag in tags %}
+        <div id="todo_tag_list">
+            <a class="btn {% ifequal tagsearch tag.name %}btn-primary{% else %}btn-info{% endifequal %}" href="{% url 'todo_list' %}?tagsearch={{ tag.name }}">
+                {{ tag.name }} <span class="badge {% ifequal tagsearch tag.name %}badge-light{% else %}badge-light{% endifequal %}">{{ tag.count }}</span>
+            </a>
+        </div>
+    {% endfor %}
+
+
+{% endblock %}
+
 {% block content %}
 
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.css"/>
@@ -16,11 +33,6 @@
         var oTable;
 
         $(document).ready(function() {
-
-            $('#tags').change( function(e) {
-                var tag = $('#tags').val();
-                window.location='{% url 'todo_list' %}?tagsearch=' + tag;
-            });
 
             {% if messages %}
             {% for message in messages %}
@@ -117,17 +129,6 @@
                 </div>
 
             </form>
-
-        </div>
-
-        <div class="offset-lg-1 col-lg-2">
-
-            <select id="tags" class="form-control float-right">
-                <option>Tag filter</option>
-                {% for tag in tags %}
-                    <option value="{{ tag.name }}"{% ifequal tagsearch tag.name %} selected="selected"{% endifequal %}>{{ tag.name }}</option>
-                {% endfor %}
-            </select>
 
         </div>
 
