@@ -1,11 +1,10 @@
 from django.contrib import admin
 
-from music.models import Album, Listen, Song, SongSource, WishList
+from music.models import Album, Listen, Song, SongSource
 
 admin.site.register(Listen)
 admin.site.register(Song)
 admin.site.register(SongSource)
-admin.site.register(WishList)
 
 def album_and_artist_names(obj):
     return ("{} by {}".format(obj.title, obj.artist))

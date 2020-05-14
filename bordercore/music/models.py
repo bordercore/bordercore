@@ -59,17 +59,3 @@ class Song(TimeStampedModel):
 class Listen(TimeStampedModel):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     song = models.ForeignKey(Song, on_delete=models.CASCADE)
-
-
-class WishList(TimeStampedModel):
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
-    song = models.TextField(null=True, blank=True)
-    artist = models.TextField(null=True)
-    album = models.TextField(null=True, blank=True)
-    note = models.TextField(null=True)
-
-    def get_created(self):
-        return self.created.strftime('%b %d, %Y')
-
-    def get_absolute_url(self):
-        return reverse('wishlist_edit', args=[self.id])

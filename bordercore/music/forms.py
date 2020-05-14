@@ -3,7 +3,7 @@ from django.forms import (ModelChoiceField, ModelForm, Select, Textarea,
                           TextInput)
 
 from lib.fields import ModelCommaSeparatedChoiceField
-from music.models import Song, SongSource, WishList
+from music.models import Song, SongSource
 from tag.models import Tag
 
 
@@ -60,24 +60,4 @@ class SongForm(ModelForm):
             'year': TextInput(attrs={'class': 'form-control'}),
             'length': TextInput(attrs={'readonly': True, 'class': 'form-control'}),
             'times_played': TextInput(attrs={'readonly': True, 'class': 'form-control'})
-        }
-
-
-class WishListForm(ModelForm):
-    def __init__(self, *args, **kwargs):
-
-        # In case one of our views passed in the request object (eg from get_form_kwargs()),
-        #  save it and remove it from kwargs before calling super()
-        if kwargs.get('request'):
-            request = kwargs.pop("request")
-
-        super(WishListForm, self).__init__(*args, **kwargs)
-
-    class Meta:
-        model = WishList
-        fields = ('artist', 'song', 'album')
-        widgets = {
-            'artist': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-            'song': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-            'album': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
         }

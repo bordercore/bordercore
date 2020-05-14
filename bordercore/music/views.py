@@ -26,8 +26,8 @@ from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
 
 from lib.util import remove_non_ascii_characters
-from music.forms import SongForm, WishListForm
-from music.models import Album, Listen, Song, SongSource, WishList
+from music.forms import SongForm
+from music.models import Album, Listen, Song, SongSource
 
 SECTION = 'Music'
 MUSIC_ROOT = "/home/media/music"
@@ -537,98 +537,3 @@ def get_song_info(request, id):
                'url': file_location}
 
     return JsonResponse(results)
-
-
-@method_decorator(login_required, name='dispatch')
-class WishListView(ListView):
-
-    model = WishList
-    template_name = "music/wishlist.html"
-    context_object_name = "info"
-
-    def get_queryset(self):
-        return WishList.objects.filter(user=self.request.user).order_by('-created')
-
-    def get_context_data(self, **kwargs):
-        context = super(WishListView, self).get_context_data(**kwargs)
-
-        info = []
-
-        for myobject in context['object_list']:
-            info.append(dict(
-                artist=myobject.artist,
-                song=myobject.song,
-                album=myobject.album,
-                created=myobject.get_created(),
-                unixtime=format(myobject.created, 'U'),
-                wishlistid=myobject.id))
-
-        context['cols'] = ['artist', 'song', 'album', 'created', 'wishlistid']
-        context['section'] = SECTION
-        context['info'] = info
-        context['title'] = 'Wishlist'
-        return context
-
-
-@method_decorator(login_required, name='dispatch')
-class WishListDetailView(UpdateView):
-    template_name = 'music/wishlist_edit.html'
-    form_class = WishListForm
-
-    def get_context_data(self, **kwargs):
-        context = super(WishListDetailView, self).get_context_data(**kwargs)
-        context['section'] = SECTION
-        context['pk'] = self.kwargs.get('pk')
-        context['action'] = 'Edit'
-        context['title'] = 'Wishlist Detail :: {} - {}'.format(self.object.artist, self.object.song)
-        return context
-
-    def get_object(self, queryset=None):
-        obj = WishList.objects.get(user=self.request.user, id=self.kwargs.get('pk'))
-        return obj
-
-    def form_valid(self, form):
-        self.object = form.save()
-        messages.add_message(self.request, messages.INFO, 'Wishlist edited')
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return reverse('wishlist')
-
-
-@method_decorator(login_required, name='dispatch')
-class WishListCreateView(CreateView):
-    template_name = 'music/wishlist_edit.html'
-    form_class = WishListForm
-
-    def get_context_data(self, **kwargs):
-        context = super(WishListCreateView, self).get_context_data(**kwargs)
-        context['section'] = SECTION
-        context['action'] = 'Add'
-        context['title'] = 'Wishlist Edit'
-        return context
-
-    def get_form_kwargs(self):
-        # pass the request object to the form so that we have access to the session
-        kwargs = super(WishListCreateView, self).get_form_kwargs()
-        kwargs['request'] = self.request
-        return kwargs
-
-    def form_valid(self, form):
-
-        obj = form.save(commit=False)
-        obj.user = self.request.user
-        obj.save()
-
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return reverse('wishlist')
-
-
-@login_required
-def wishlist_delete(request, wishlist_id=None):
-    wishlist = WishList.objects.get(user=request.user, id=wishlist_id)
-    wishlist.delete()
-
-    return JsonResponse("OK", safe=False)

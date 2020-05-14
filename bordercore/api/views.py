@@ -7,7 +7,7 @@ from bookmark.models import Bookmark
 from collection.models import Collection
 from drill.models import Question
 from feed.models import Feed
-from music.models import Album, Song, SongSource, WishList
+from music.models import Album, Song, SongSource
 from tag.models import Tag
 from todo.models import Todo
 
@@ -15,7 +15,7 @@ from .serializers import (AlbumSerializer, BlobSerializer, BookmarkSerializer,
                           CollectionSerializer, FeedSerializer,
                           QuestionSerializer, SongSerializer,
                           SongSourceSerializer, TagSerializer, TodoSerializer,
-                          UserSerializer, WishListSerializer)
+                          UserSerializer)
 
 
 class AlbumViewSet(viewsets.ModelViewSet):
@@ -125,11 +125,3 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return User.objects.all()
-
-
-class WishListViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
-    serializer_class = WishListSerializer
-
-    def get_queryset(self):
-        return WishList.objects.filter(user=self.request.user)

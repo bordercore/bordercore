@@ -6,7 +6,7 @@ from bookmark.models import Bookmark
 from collection.models import Collection
 from drill.models import Question
 from feed.models import Feed
-from music.models import Album, Song, SongSource, WishList
+from music.models import Album, Song, SongSource
 from tag.models import Tag
 from todo.models import Todo
 
@@ -82,9 +82,3 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "url", "username", "email", "is_staff"]
-
-
-class WishListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = WishList
-        fields = ["album", "artist", "note", "song"]

@@ -10,7 +10,7 @@ from accounts.views import UserProfileDetailView
 from api.views import (AlbumViewSet, BlobViewSet, BookmarkViewSet,
                        CollectionViewSet, FeedViewSet, QuestionViewSet,
                        SongSourceViewSet, SongViewSet, TagViewSet, TodoViewSet,
-                       UserViewSet, WishListViewSet)
+                       UserViewSet)
 from blob import views as blob_views
 from blob.views import (BlobDeleteView, BlobDetailView, BlobThumbnailView,
                         BlobUpdateView, DocumentCreateView)
@@ -30,8 +30,7 @@ from fitness import views as fitness_views
 from fitness.views import ExerciseDetailView
 from homepage import views as homepage_views
 from music import views as music_views
-from music.views import (AlbumDetailView, MusicListJson, WishListCreateView,
-                         WishListDetailView, WishListView)
+from music.views import AlbumDetailView, MusicListJson
 from search import views as search_views
 from search.views import SearchListView, SearchTagDetailView
 from tag import views as tag_views
@@ -130,10 +129,6 @@ urlpatterns = [
     path('music/album_artwork/<int:song_id>', music_views.album_artwork, name='album_artwork'),
     path('music/search.json', music_views.search, name='music_search'),
     path('music/song/<int:id>', music_views.get_song_info, name='get_song_info'),
-    path('music/wishlistadd', WishListCreateView.as_view(), name='wishlist_add'),
-    path('music/wishlist/edit/<int:pk>', WishListDetailView.as_view(), name='wishlist_edit'),
-    path('music/wishlist/delete/<int:wishlist_id>', music_views.wishlist_delete, name='wishlist_delete'),
-    path('music/wishlist', WishListView.as_view(), name='wishlist'),
     path('music/', music_views.music_list, name='music_list'),
 
     path('prefs/store_in_session/', accounts_views.store_in_session, name='store_in_session'),
@@ -178,7 +173,6 @@ router.register(r"songsources", SongSourceViewSet, "SongSource")
 router.register(r"tags", TagViewSet, "Tag")
 router.register(r"todos", TodoViewSet, "Todo")
 router.register(r"users", UserViewSet, "User")
-router.register(r"wishlists", WishListViewSet, "WishList")
 
 urlpatterns += [
     url(r"^api/", include(router.urls)),
