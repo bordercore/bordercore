@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.dateformat import format
@@ -43,17 +44,41 @@ class TodoListView(ListView):
         context = super(TodoListView, self).get_context_data(**kwargs)
 
         info = []
+        fields = []
+
         context["tags"] = Todo.get_todo_counts(self.request.user, self.tagsearch)
 
-        for myobject in context['object_list']:
-            info.append(dict(task=myobject.task,
-                             priority=Todo.get_priority_name(myobject.priority),
-                             modified=myobject.get_modified(),
-                             unixtime=format(myobject.modified, 'U'),
-                             todoid=myobject.id))
+        for todo in context['object_list']:
+
+            data = dict(task=todo.task,
+                        priority=Todo.get_priority_name(todo.priority),
+                        modified=todo.get_modified(),
+                        unixtime=format(todo.modified, 'U'),
+                        id=todo.id)
+
+            if todo.data:
+                fields.extend(list(todo.data.keys()))
+                data = {**data, **todo.data}
+
+            info.append(data)
+
+        fields = list(set(fields))
 
         context['tagsearch'] = self.tagsearch
-        context['cols'] = ['task', 'priority', 'modified', 'unixtime', 'todoid']
+
+        # These fields go first so we can easily reference
+        #  them in the template by index
+        context['cols'] = ['unixtime', 'id']
+
+        # Add the optional "data" JSONField fields
+        context['cols'].extend(fields)
+
+        context['cols'].extend(['task', 'priority', 'modified'])
+
+        # Sort by "modified" by default. It's assumed to be
+        #  the last column
+        context['sort_by_col'] = len(context['cols']) - 1
+
         context['section'] = SECTION
         context['info'] = info
         context['title'] = 'Todo List'

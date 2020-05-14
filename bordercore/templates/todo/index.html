@@ -49,7 +49,7 @@
 
             $('#btn-delete').on('click', function() {
 
-                var selectedTodoID = $('#todo_list').DataTable().cell('.selected', 4).data();
+                var selectedTodoID = $('#todo_list').DataTable().cell('.selected', 1).data();
 
                 $.ajax( { type: 'DELETE',
                           url: '{% url 'todo_delete' 666 %}'.replace(/666$/, selectedTodoID),
@@ -69,7 +69,7 @@
             });
 
             $('#btn-edit').on('click', function() {
-                var selectedTodoID = $('#todo_list').DataTable().cell('.selected', 4).data();
+                var selectedTodoID = $('#todo_list').DataTable().cell('.selected', 1).data();
                 window.location='{% url 'todo_edit' 666 %}'.replace(/666$/, selectedTodoID);
                 return false;
             });
@@ -83,7 +83,7 @@
                 "select": true,
                 "info": false,
                 "paginate": false,
-                "sorting": [[1, 'asc']],
+                "sorting": [[{{ sort_by_col }}, 'desc']],
                 "filter": true,
                 "language": {
                     "emptyTable": "Nothing to do"
@@ -93,8 +93,8 @@
                 "searchable": false,
                 "columnDefs": [
                     { "targets": [0], "sorting": [ "desc", "asc" ] },
-                    { "targets": [2], "class": "monospaced", "dataSort": 3, "sorting": [ "desc", "asc" ] },
-                    { "targets": [3,4], "visible": false },
+                    { "targets": [-1], "dataSort": 0, "sorting": [ "desc", "asc" ] },
+                    { "targets": [0,1], "visible": false },
                 ],
             } );
 

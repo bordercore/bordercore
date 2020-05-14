@@ -5,6 +5,7 @@ from elasticsearch import Elasticsearch
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models import Count
 from django.db.models.signals import post_save
@@ -22,6 +23,7 @@ class Todo(TimeStampedModel):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     due_date = models.DateTimeField(null=True, blank=True)
     tags = models.ManyToManyField(Tag)
+    data = JSONField(null=True, blank=True)
 
     PRIORITY_CHOICES = [
         (1, "High"),
