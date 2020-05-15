@@ -54,7 +54,7 @@ class TodoListView(ListView):
                         priority=Todo.get_priority_name(todo.priority),
                         modified=todo.get_modified(),
                         unixtime=format(todo.modified, 'U'),
-                        id=todo.id)
+                        uuid=todo.uuid)
 
             if todo.data:
                 fields.extend(list(todo.data.keys()))
@@ -68,7 +68,7 @@ class TodoListView(ListView):
 
         # These fields go first so we can easily reference
         #  them in the template by index
-        context['cols'] = ['unixtime', 'id']
+        context['cols'] = ['unixtime', 'uuid']
 
         # Add the optional "data" JSONField fields
         context['cols'].extend(fields)
@@ -158,15 +158,6 @@ class TodoCreateView(CreateView):
 
     def get_success_url(self):
         return reverse('todo_list')
-
-
-@login_required
-def delete(request, todo_id=None):
-
-    todo = Todo.objects.get(user=request.user, pk=todo_id)
-    todo.delete()
-
-    return JsonResponse("OK", safe=False)
 
 
 @method_decorator(login_required, name='dispatch')

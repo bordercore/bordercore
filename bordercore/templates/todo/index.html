@@ -36,14 +36,14 @@
 
             {% if messages %}
             {% for message in messages %}
-            $('#feedback').fadeIn(1000).html('{{ message }}');
+            $('#todo_feedback').fadeIn(1000).html('{{ message }}');
             setTimeout( function() {
-                $('#feedback').fadeOut(1000);
+                $('#todo_feedback').fadeOut(1000);
             }, 3000);
             {% endfor %}
             {% endif %}
 
-            $('#myfilter').on( 'keyup', function () {
+            $('#todo_search').on( 'keyup', function () {
                 oTable.search($(this).val()).draw();
             });
 
@@ -52,20 +52,21 @@
                 var selectedTodoID = $('#todo_list').DataTable().cell('.selected', 1).data();
 
                 $.ajax( { type: 'DELETE',
-                          url: '{% url 'todo_delete' 666 %}'.replace(/666$/, selectedTodoID),
+                          url: '{% url 'Todo-list' %}' + selectedTodoID,
                           success: function() {
-                              $('#feedback').fadeIn(1000).html("Task deleted.");
-                              setTimeout( function() {
-                                  $('#feedback').fadeOut(1000);
-                              }, 3000);
+                        $('#todo_feedback').removeClass("d-none").html("Task deleted.");
 
-                              oTable.draw();
+                        $('#todo_list').DataTable().row('.selected').remove();
+                        oTable.draw();
 
-                              $('#btn-edit').attr("disabled", "disabled");
-                              $('#btn-delete').attr("disabled", "disabled");
+                        $('#btn-edit').attr("disabled", "disabled");
+                        $('#btn-delete').attr("disabled", "disabled");
 
-                          }
-                });
+                    }
+                          });
+
+                return false;
+
             });
 
             $('#btn-edit').on('click', function() {
@@ -121,11 +122,11 @@
                 </div>
 
                 <div class="form-group">
-                    <input id="myfilter" type="text" style="width: 200px" class="form-control" placeholder="Search">
+                    <input id="todo_search" type="text" class="form-control" placeholder="Search">
                 </div>
 
                 <div class="form-group">
-                    <label id="feedback" _class="alert alert-success _hide"></label>
+                    <label id="todo_feedback" class="alert alert-success d-none"></label>
                 </div>
 
             </form>

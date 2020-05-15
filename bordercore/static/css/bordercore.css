@@ -167,8 +167,17 @@ ul.pagination {
   border: 1px solid #999999;
   padding: 5px; }
 
+/* Todo */
 #todo_tag_list {
   padding: 5px; }
+
+#todo_search {
+  margin-left: 10px;
+  width: 300px; }
+
+#todo_feedback.alert {
+  padding: 0.37rem 1.25rem;
+  margin-left: 1rem; }
 
 #myModal #title {
   width: 300px; }
