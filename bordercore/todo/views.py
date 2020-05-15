@@ -91,11 +91,13 @@ class TodoDetailView(UpdateView):
     template_name = 'todo/edit.html'
     form_class = TodoForm
     success_url = reverse_lazy('todo_list')
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
 
     def get_context_data(self, **kwargs):
         context = super(TodoDetailView, self).get_context_data(**kwargs)
         context['section'] = SECTION
-        context['pk'] = self.kwargs.get('pk')
+        context['uuid'] = self.kwargs.get('uuid')
         context['action'] = 'Edit'
         context['title'] = 'Todo Edit :: {}'.format(self.object.task)
         return context
@@ -118,10 +120,6 @@ class TodoDetailView(UpdateView):
         context = self.get_context_data(form=form)
         context["message"] = "Task updated"
         return HttpResponseRedirect(self.get_success_url())
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(TodoDetailView, self).dispatch(*args, **kwargs)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -165,6 +163,8 @@ class TodoDeleteView(DeleteView):
     template_name = 'todo/edit.html'
     form_class = TodoForm
     model = Todo
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
 
     # Verify that the user is the owner of the task
     def get_object(self, queryset=None):

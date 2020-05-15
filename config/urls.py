@@ -146,8 +146,8 @@ urlpatterns = [
     path('tag/remove_favorite', tag_views.remove_favorite_tag, name='remove_favorite_tag'),
 
     path('todo/add', TodoCreateView.as_view(), name='todo_add'),
-    path('todo/edit/<int:pk>', TodoDetailView.as_view(), name='todo_edit'),
-    path('todo/delete/<int:pk>', TodoDeleteView.as_view(), name='todo_delete'),
+    path('todo/edit/<uuid:uuid>', TodoDetailView.as_view(), name='todo_edit'),
+    path('todo/delete/<uuid:uuid>', TodoDeleteView.as_view(), name='todo_delete'),
     path('todo/', TodoListView.as_view(), name='todo_list'),
 
 ]
