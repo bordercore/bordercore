@@ -75,6 +75,8 @@ class DrillSearchListView(ListView):
     def get_context_data(self, **kwargs):
         context = super(DrillSearchListView, self).get_context_data(**kwargs)
 
+        search_term = self.request.GET['search_term']
+
         info = []
 
         for question in context['object_list']:
@@ -84,6 +86,7 @@ class DrillSearchListView(ListView):
                              answer=question.answer))
 
         context['cols'] = ['tags', 'id', 'question', 'answer']
+        context['search_term'] = search_term
         context['section'] = SECTION
         context['info'] = info
         context['title'] = 'Drill Search'

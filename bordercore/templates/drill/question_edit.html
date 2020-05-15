@@ -37,7 +37,20 @@
         <div class="alert alert-{{ message.tags|lower }}">{{ message|safe }}</div>
     {% endfor %}
 
-    <p class="lead offset-lg-2">{{ action }} question and answer</p>
+    <div class="row">
+
+        <div class="col-lg-12">
+
+            {% block breadcrumbs %}
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"> <a href="{% url 'drill_list' %}">Tag Categories</a> </li>
+                    <li class="breadcrumb-item active">{{ action }} question</li>
+                </ul>
+            {% endblock %}
+
+        </div>
+
+    </div>
 
     <form id="todo-form" action="{{ request.path }}" method="post">
         {% csrf_token %}

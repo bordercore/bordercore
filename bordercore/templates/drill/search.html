@@ -44,6 +44,21 @@
 
     </script>
 
+    <div class="row">
+
+        <div class="col-lg-12">
+
+            {% block breadcrumbs %}
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"> <a href="{% url 'drill_list' %}">Tag Categories</a> </li>
+                    <li class="breadcrumb-item active">Search results: <strong>{{ search_term }}</strong></li>
+                </ul>
+            {% endblock %}
+
+        </div>
+
+    </div>
+
     {% if info %}
     <div class="row">
         <div class="col-lg-12">
