@@ -4,7 +4,7 @@ from django.db import models
 from django.db.models import F
 from django.db.models.signals import post_save
 
-from blob.models import Document
+from blob.models import Blob
 from collection.models import Collection
 from tag.models import Tag
 
@@ -13,7 +13,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT)
     rss_feeds = ArrayField(models.IntegerField(), null=True)
     favorite_tags = models.ManyToManyField(Tag, through='SortOrder')
-    favorite_notes = models.ManyToManyField(Document, through='SortOrderNote')
+    favorite_notes = models.ManyToManyField(Blob, through='SortOrderNote')
     todo_default_tag = models.OneToOneField(Tag, related_name='default_tag', null=True, on_delete=models.PROTECT)
     orgmode_file = models.TextField(null=True)
     google_calendar = JSONField(blank=True, null=True)
@@ -114,7 +114,7 @@ class SortOrder(models.Model):
 
 class SortOrderNote(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    note = models.ForeignKey(Document, on_delete=models.CASCADE)
+    note = models.ForeignKey(Blob, on_delete=models.CASCADE)
     sort_order = models.IntegerField()
 
     def delete(self):

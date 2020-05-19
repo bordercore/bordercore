@@ -21,8 +21,8 @@ from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
-from blob.forms import DocumentForm
-from blob.models import Document, MetaData
+from blob.forms import BlobForm
+from blob.models import Blob, MetaData
 from collection.models import Collection
 from lib.time_utils import parse_date_from_string
 
@@ -36,22 +36,22 @@ log = logging.getLogger(f"bordercore.{__name__}")
 
 
 @method_decorator(login_required, name='dispatch')
-class DocumentCreateView(CreateView):
+class BlobCreateView(CreateView):
     template_name = 'blob/edit.html'
-    form_class = DocumentForm
+    form_class = BlobForm
 
     def get_context_data(self, **kwargs):
-        context = super(DocumentCreateView, self).get_context_data(**kwargs)
+        context = super(BlobCreateView, self).get_context_data(**kwargs)
         context['action'] = 'Add'
         if self.request.GET.get('linked_blob', ''):
-            linked_blob = Document.objects.get(user=self.request.user, id=self.request.GET['linked_blob'])
+            linked_blob = Blob.objects.get(user=self.request.user, id=self.request.GET['linked_blob'])
             context['linked_blob'] = linked_blob
             # Grab the initial metadata from the linked blob
             context['metadata'] = linked_blob.metadata_set.all()
         if self.request.GET.get('linked_collection', ''):
             collection_id = self.request.GET['linked_collection']
             context['linked_collection_info'] = Collection.objects.get(user=self.request.user, id=collection_id)
-            context['linked_collection_blob_list'] = [Document.objects.get(user=self.request.user, pk=x['id']) for x in Collection.objects.get(user=self.request.user, id=collection_id).blob_list]
+            context['linked_collection_blob_list'] = [Blob.objects.get(user=self.request.user, pk=x['id']) for x in Collection.objects.get(user=self.request.user, id=collection_id).blob_list]
             # Grab the initial metadata from one of the other blobs in the collection
             context['metadata'] = context['linked_collection_blob_list'][0].metadata_set.all()
         context['section'] = SECTION
@@ -59,19 +59,19 @@ class DocumentCreateView(CreateView):
         return context
 
     def get_form(self, form_class=None):
-        form = super(DocumentCreateView, self).get_form(form_class)
+        form = super(BlobCreateView, self).get_form(form_class)
 
         if self.request.GET.get('is_note', False):
             form.initial['is_note'] = True
         if self.request.GET.get('linked_blob', False):
-            blob = Document.objects.get(user=self.request.user, pk=int(self.request.GET.get('linked_blob')))
+            blob = Blob.objects.get(user=self.request.user, pk=int(self.request.GET.get('linked_blob')))
             form.initial['tags'] = ','.join([x.name for x in blob.tags.all()])
             form.initial['date'] = blob.date
             form.initial['title'] = blob.title
         if self.request.GET.get('linked_collection', False):
             collection_id = self.request.GET['linked_collection']
             blob_id = Collection.objects.get(user=self.request.user, id=collection_id).blob_list[0]['id']
-            blob = Document.objects.get(user=self.request.user, pk=blob_id)
+            blob = Blob.objects.get(user=self.request.user, pk=blob_id)
             form.initial['tags'] = ','.join([x.name for x in blob.tags.all()])
             form.initial['date'] = blob.date
             form.initial['title'] = blob.title
@@ -98,7 +98,7 @@ class DocumentCreateView(CreateView):
 
         obj.index_blob()
 
-        return super(DocumentCreateView, self).form_valid(form)
+        return super(BlobCreateView, self).form_valid(form)
 
     def get_success_url(self):
         return reverse_lazy('blob_detail', kwargs={'uuid': self.object.uuid})
@@ -106,7 +106,7 @@ class DocumentCreateView(CreateView):
 
 @method_decorator(login_required, name='dispatch')
 class BlobDeleteView(DeleteView):
-    model = Document
+    model = Blob
     success_url = reverse_lazy('blob_add')
 
     # Override delete() so that we can catch any exceptions, especially any
@@ -119,14 +119,14 @@ class BlobDeleteView(DeleteView):
             return HttpResponseRedirect(reverse('blob_edit', kwargs={'uuid': str(self.get_object().uuid)}))
 
     def get_object(self, queryset=None):
-        obj = Document.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
+        obj = Blob.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
         return obj
 
 
 @method_decorator(login_required, name='dispatch')
 class BlobDetailView(DetailView):
 
-    model = Document
+    model = Blob
     slug_field = 'uuid'
     slug_url_kwarg = 'uuid'
 
@@ -146,7 +146,7 @@ class BlobDetailView(DetailView):
         if self.object.sha1sum:
             context["aws_url"] = f"https://s3.console.aws.amazon.com/s3/buckets/{settings.AWS_STORAGE_BUCKET_NAME}/blobs/{self.object.sha1sum[:2]}/{self.object.sha1sum}/"
             try:
-                context['cover_info'] = Document.get_cover_info(self.request.user, self.object.sha1sum)
+                context['cover_info'] = Blob.get_cover_info(self.request.user, self.object.sha1sum)
             except ClientError:
                 log.warn(f"No S3 cover image found for id={self.object.id}")
         if self.object.is_note:
@@ -156,7 +156,7 @@ class BlobDetailView(DetailView):
             if self.object.sha1sum and context["elasticsearch_info"].get("size"):
                 context["size"] = humanize.naturalsize(context["elasticsearch_info"]["size"])
             if context["elasticsearch_info"].get("content_type", None):
-                context["content_type"] = Document.get_content_type(context["elasticsearch_info"]["content_type"])
+                context["content_type"] = Blob.get_content_type(context["elasticsearch_info"]["content_type"])
         except IndexError:
             # Give Solr up to a minute to index the blob
             if int(datetime.datetime.now().strftime("%s")) - int(self.object.created.strftime("%s")) < 60:
@@ -172,7 +172,7 @@ class BlobDetailView(DetailView):
         linked_blobs = []
 
         for collection in Collection.objects.filter(user=self.request.user, blob_list__contains=[{'id': self.object.id}]):
-            blob_list = Document.objects.filter(user=self.request.user, pk__in=[x['id'] for x in collection.blob_list if x['id'] != self.object.id])
+            blob_list = Blob.objects.filter(user=self.request.user, pk__in=[x['id'] for x in collection.blob_list if x['id'] != self.object.id])
             if collection.is_private:
                 linked_blobs.append({'id': collection.id,
                                      'name': collection.name,
@@ -187,13 +187,13 @@ class BlobDetailView(DetailView):
         return context
 
     def get_queryset(self):
-        return Document.objects.filter(user=self.request.user)
+        return Blob.objects.filter(user=self.request.user)
 
 
 @method_decorator(login_required, name='dispatch')
 class BlobUpdateView(UpdateView):
     template_name = 'blob/edit.html'
-    form_class = DocumentForm
+    form_class = BlobForm
 
     def get_context_data(self, **kwargs):
         context = super(BlobUpdateView, self).get_context_data(**kwargs)
@@ -201,7 +201,7 @@ class BlobUpdateView(UpdateView):
         context['sha1sum'] = self.kwargs.get('sha1sum')
 
         try:
-            context['cover_info'] = Document.get_cover_info(self.request.user, self.object.sha1sum, max_cover_image_width=400)
+            context['cover_info'] = Blob.get_cover_info(self.request.user, self.object.sha1sum, max_cover_image_width=400)
         except ClientError:
             log.warn(f"No S3 cover image found for id={self.object.id}")
 
@@ -216,14 +216,14 @@ class BlobUpdateView(UpdateView):
         return context
 
     def get(self, request, **kwargs):
-        self.object = Document.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
+        self.object = Blob.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         context = self.get_context_data(object=self.object, form=form)
         return render(request, self.template_name, context)
 
     def get_object(self, queryset=None):
-        obj = Document.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
+        obj = Blob.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
         return obj
 
     def form_valid(self, form):
@@ -270,23 +270,23 @@ class BlobUpdateView(UpdateView):
 @method_decorator(login_required, name='dispatch')
 class BlobThumbnailView(UpdateView):
     template_name = 'blob/thumbnail.html'
-    form_class = DocumentForm
+    form_class = BlobForm
 
     def get_context_data(self, **kwargs):
         context = super(BlobThumbnailView, self).get_context_data(**kwargs)
-        context['cover_info'] = Document.get_cover_info(self.request.user, self.object.sha1sum, max_cover_image_width=70, size='small')
+        context['cover_info'] = Blob.get_cover_info(self.request.user, self.object.sha1sum, max_cover_image_width=70, size='small')
         context['filename'] = self.object.file
         query = 'uuid:{}'.format(self.object.uuid)
         # context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
         # if context['solr_info'].get('content_type', ''):
-        #     context['content_type'] = Document.get_content_type(context['solr_info']['content_type'][0]).lower()
+        #     context['content_type'] = Blob.get_content_type(context['solr_info']['content_type'][0]).lower()
         context['section'] = SECTION
         context['title'] = 'Blob Thumbnail :: {}'.format(self.object.get_title(remove_edition_string=True))
 
         return context
 
     def get_object(self, queryset=None):
-        obj = Document.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
+        obj = Blob.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
         return obj
 
 
@@ -356,7 +356,7 @@ def metadata_name_search(request):
 @login_required
 def get_amazon_image_info(request, sha1sum, index=0):
 
-    b = Document.objects.get(user=request.user, sha1sum=sha1sum)
+    b = Blob.objects.get(user=request.user, sha1sum=sha1sum)
     result = b.get_amazon_cover_url(index)
 
     return JsonResponse(result)
@@ -365,7 +365,7 @@ def get_amazon_image_info(request, sha1sum, index=0):
 @login_required
 def set_amazon_image_info(request, sha1sum, index=0):
 
-    b = Document.objects.get(user=request.user, sha1sum=sha1sum)
+    b = Blob.objects.get(user=request.user, sha1sum=sha1sum)
     try:
         b.set_amazon_cover_url('small', request.POST['small'])
         b.set_amazon_cover_url('large', request.POST['large'])
@@ -393,11 +393,11 @@ def slideshow(request):
 
     c = Collection.objects.filter(name="To Display")[0]
 
-    blob = Document.objects.get(pk=random.choice(c.blob_list)["id"])
+    blob = Blob.objects.get(pk=random.choice(c.blob_list)["id"])
 
     content_type = None
     try:
-        content_type = Document.get_content_type(blob.get_elasticsearch_info()["content_type"])
+        content_type = Blob.get_content_type(blob.get_elasticsearch_info()["content_type"])
     except Exception:
         log.warning(f"Can't get content type for uuid={blob.uuid}")
 
@@ -444,14 +444,14 @@ def get_amazon_metadata(request, title):
 
 @login_required
 def create_thumbnail(request, uuid, page_number=None):
-    b = Document.objects.get(user=request.user, uuid=uuid)
+    b = Blob.objects.get(user=request.user, uuid=uuid)
 
     try:
         b.create_thumbnail(page_number)
     except PdfReadError as e:
         return JsonResponse({'error': str(e)})
 
-    cover_info = Document.get_cover_info(request.user,
+    cover_info = Blob.get_cover_info(request.user,
                                             b.sha1sum,
                                             max_cover_image_width=70,
                                             size='small')

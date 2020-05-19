@@ -6,12 +6,13 @@ import os
 import django
 from django.db.models import Q
 
-django.setup()
-
-from blob.models import Document
+from blob.models import Blob
 from blob.tasks import create_thumbnail
 
-images = Document.objects.filter(~Q(file=''))
+django.setup()
+
+
+images = Blob.objects.filter(~Q(file=''))
 for blob in images:
     _, file_extension = os.path.splitext(str(blob.file))
     if blob.is_image():

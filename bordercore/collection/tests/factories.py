@@ -5,7 +5,7 @@ import factory
 from django.contrib.auth.models import User
 from django.db.models import signals
 
-from blob.models import Document
+from blob.models import Blob
 from collection.models import Collection
 
 
@@ -33,13 +33,13 @@ class CollectionFactory(factory.DjangoModelFactory):
             return
 
         blobs = [
-            Document.objects.create(
+            Blob.objects.create(
                 id=1,
                 user=obj.user),
-            Document.objects.create(
+            Blob.objects.create(
                 id=2,
                 user=obj.user),
-            Document.objects.create(
+            Blob.objects.create(
                 id=3,
                 user=obj.user)
         ]

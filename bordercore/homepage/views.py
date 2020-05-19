@@ -13,7 +13,7 @@ from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 
-from blob.models import Document
+from blob.models import Blob
 from bookmark.models import Bookmark
 from cal.models import Calendar
 from fitness.models import ExerciseUser
@@ -87,7 +87,7 @@ def homepage(request):
             try:
                 random_image_info = {'blob': random_image,
                                      'uuid': random_image.uuid,
-                                     'cover_info': Document.get_cover_info(request.user, random_image.sha1sum, 'large', 500)}
+                                     'cover_info': Blob.get_cover_info(request.user, random_image.sha1sum, 'large', 500)}
             except ClientError as e:
                 messages.add_message(request, messages.ERROR, f"Error getting random image info for uuid={random_image.uuid}: {e}")
     except ConnectionRefusedError:
@@ -183,7 +183,7 @@ def get_random_blob(request, content_type):
     results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 
     if results["hits"]["hits"]:
-        return Document.objects.get(user=request.user, uuid=results["hits"]["hits"][0]["_source"]["uuid"])
+        return Blob.objects.get(user=request.user, uuid=results["hits"]["hits"][0]["_source"]["uuid"])
     else:
         return None
 

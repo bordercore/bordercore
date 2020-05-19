@@ -3,7 +3,7 @@ import factory
 import django
 from django.contrib.auth.models import User
 
-from blob.models import Document, MetaData
+from blob.models import Blob, MetaData
 from tag.tests.factories import TagFactory
 
 django.setup()
@@ -24,10 +24,10 @@ class MetaDataFactory(factory.DjangoModelFactory):
         model = MetaData
 
 
-class DocumentFactory(factory.DjangoModelFactory):
+class BlobFactory(factory.DjangoModelFactory):
 
     class Meta:
-        model = Document
+        model = Blob
 
     user = factory.SubFactory(UserFactory)
 

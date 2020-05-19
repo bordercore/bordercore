@@ -8,7 +8,7 @@ django.setup()
 
 from django.contrib.auth.models import User  # isort:skip
 from collection.models import Collection  # isort:skip
-from blob.models import Document  # isort:skip
+from blob.models import Blob  # isort:skip
 from tag.models import Tag  # isort:skip
 
 
@@ -16,13 +16,13 @@ from tag.models import Tag  # isort:skip
 def collection(user):
 
     blobs = [
-        Document.objects.create(
+        Blob.objects.create(
             id=1,
             user=user),
-        Document.objects.create(
+        Blob.objects.create(
             id=2,
             user=user),
-        Document.objects.create(
+        Blob.objects.create(
             id=3,
             user=user)
     ]

@@ -22,7 +22,7 @@ django.setup()
 
 from accounts.models import SortOrder, SortOrderNote  # isort:skip
 from django.contrib.auth.models import User  # isort:skip
-from blob.models import BLOBS_NOT_TO_INDEX, Document, ILLEGAL_FILENAMES, MetaData   # isort:skip
+from blob.models import BLOBS_NOT_TO_INDEX, Blob, ILLEGAL_FILENAMES, MetaData   # isort:skip
 from collection.models import Collection  # isort:skip
 from drill.models import Question  # isort:skip
 from tag.models import Tag  # isort:skip
@@ -233,7 +233,7 @@ def test_tags_all_lowercase():
 def test_tags_no_orphans():
     "Assert that all tags are used by some object"
     t = Tag.objects.filter(Q(todo__isnull=True) &
-                           Q(document__isnull=True) &
+                           Q(blob__isnull=True) &
                            Q(bookmark__isnull=True) &
                            Q(collection__isnull=True) &
                            Q(question__isnull=True) &
@@ -283,7 +283,7 @@ def test_favorite_notes_sort_order():
 def test_blobs_in_db_exist_in_elasticsearch(es):
     "Assert that all blobs in the database exist in Elasticsearch"
 
-    blobs = Document.objects.exclude(uuid__in=BLOBS_NOT_TO_INDEX).only("uuid")
+    blobs = Blob.objects.exclude(uuid__in=BLOBS_NOT_TO_INDEX).only("uuid")
     step_size = 100
     blob_count = blobs.count()
 
@@ -337,7 +337,7 @@ def test_blobs_in_s3_exist_in_db():
 
     for key in unique_sha1sums.keys():
         try:
-            Document.objects.get(sha1sum=key)
+            Blob.objects.get(sha1sum=key)
         except ObjectDoesNotExist:
             raise ObjectDoesNotExist(f"Blob found in S3 but not in DB: {key}")
 
@@ -349,7 +349,7 @@ def test_images_have_thumbnails():
     #  to avoid interfering with moto mocks in other tests.
     s3_client = boto3.client("s3")
 
-    for blob in Document.objects.filter(~Q(file="")):
+    for blob in Blob.objects.filter(~Q(file="")):
 
         if is_image(blob.file):
             key = "{}/{}/{}/cover.jpg".format(
@@ -476,7 +476,7 @@ def test_elasticsearch_blobs_exist_in_db(es):
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["hits"]
 
     for blob in found:
-        assert Document.objects.filter(uuid=blob["_source"]["uuid"]).count() == 1, f"blob {blob['_source']['uuid']} exists in Elasticsearch but not in database"
+        assert Blob.objects.filter(uuid=blob["_source"]["uuid"]).count() == 1, f"blob {blob['_source']['uuid']} exists in Elasticsearch but not in database"
 
 
 # def test_blob_permissions():
@@ -504,7 +504,7 @@ def test_collection_blobs_exists_in_db():
 
     for c in collections:
         for blob in c.blob_list:
-            assert Document.objects.filter(pk=blob["id"]).count() > 0, "blob_id {} does not exist in the database".format(blob["id"])
+            assert Blob.objects.filter(pk=blob["id"]).count() > 0, "blob_id {} does not exist in the database".format(blob["id"])
 
 
 def test_collection_blobs_exists_in_elasticsearch(es):
@@ -515,7 +515,7 @@ def test_collection_blobs_exists_in_elasticsearch(es):
     for c in collections:
         for blob_info in c.blob_list:
 
-            blob = Document.objects.get(pk=blob_info["id"])
+            blob = Blob.objects.get(pk=blob_info["id"])
             if str(blob.uuid) in BLOBS_NOT_TO_INDEX:
                 continue
 
@@ -590,7 +590,7 @@ def test_elasticsearch_search(es):
 def test_blob_tags_match_elasticsearch(es):
     "Assert that all blob tags match those found in Elasticsearch"
 
-    blobs = Document.objects.filter(tags__isnull=False).exclude(uuid__in=BLOBS_NOT_TO_INDEX)
+    blobs = Blob.objects.filter(tags__isnull=False).exclude(uuid__in=BLOBS_NOT_TO_INDEX)
 
     for b in blobs:
 
@@ -630,7 +630,7 @@ def test_blobs_have_proper_metadata():
 
     s3 = boto3.resource("s3")
 
-    for blob in Document.objects.filter(~Q(file="")):
+    for blob in Blob.objects.filter(~Q(file="")):
 
         obj = s3.Object(bucket_name=bucket_name, key=blob.get_s3_key())
         try:
@@ -681,7 +681,7 @@ def test_blobs_have_size_field(es):
 def test_all_notes_exist_in_elasticsearch(es):
     "Assert that all notes exist in Elasticsearch"
 
-    notes = Document.objects.filter(is_note=True)
+    notes = Blob.objects.filter(is_note=True)
 
     for note in notes:
 

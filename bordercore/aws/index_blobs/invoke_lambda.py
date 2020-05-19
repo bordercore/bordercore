@@ -8,14 +8,14 @@ import django
 
 django.setup()
 
-from blob.models import Document  # isort:skip
+from blob.models import Blob  # isort:skip
 
 client = boto3.client("lambda")
 
 
 def invoke(uuid, file_changed):
 
-    blob = Document.objects.get(uuid=uuid)
+    blob = Blob.objects.get(uuid=uuid)
 
     message = {
         "Records": [

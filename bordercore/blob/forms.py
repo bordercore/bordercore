@@ -8,15 +8,15 @@ from django.forms.fields import CharField, IntegerField
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 
-from blob.models import ILLEGAL_FILENAMES, Document
+from blob.models import ILLEGAL_FILENAMES, Blob
 from lib.fields import ModelCommaSeparatedChoiceField
 from tag.models import Tag
 
 
-class DocumentForm(ModelForm):
+class BlobForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
-        super(DocumentForm, self).__init__(*args, **kwargs)
+        super(BlobForm, self).__init__(*args, **kwargs)
         self.fields['file'].required = False
         self.fields['file'].label = "File"
         self.fields['date'].required = False
@@ -46,7 +46,7 @@ class DocumentForm(ModelForm):
     # TODO: Should I (can I) use separate clean_<field> functions
     #  rather than one clean() function?
     def clean(self):
-        cleaned_data = super(DocumentForm, self).clean()
+        cleaned_data = super(BlobForm, self).clean()
 
         try:
             cleaned_data['author'] = [x.strip() for x in ''.join(cleaned_data['author']).split(',')]
@@ -93,7 +93,7 @@ class DocumentForm(ModelForm):
 
             # If the sha1sum changed (or didn't exist because this is a new object), check for a dupe
             if self.instance.sha1sum != hasher.hexdigest():
-                existing_file = Document.objects.filter(sha1sum=hasher.hexdigest())
+                existing_file = Blob.objects.filter(sha1sum=hasher.hexdigest())
                 if existing_file:
                     url = reverse_lazy("blob_detail", kwargs={"uuid": existing_file[0].uuid})
                     raise forms.ValidationError(mark_safe(f'This file <a href="{url}">already exists.</a>'))
@@ -116,7 +116,7 @@ class DocumentForm(ModelForm):
         return date
 
     class Meta:
-        model = Document
+        model = Blob
         # fields = ('file', 'title', 'filename', 'file_modified', 'date', 'tags', 'content', 'note', 'importance', 'is_note', 'is_private', 'id')
         fields = ('file', 'title', 'filename', 'file_modified', 'date', 'tags', 'content', 'note', 'importance', 'is_note', 'is_private', 'id')
         widgets = {

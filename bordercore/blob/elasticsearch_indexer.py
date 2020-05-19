@@ -8,10 +8,9 @@ from io import BytesIO
 from pathlib import PurePath
 
 import boto3
+import magic
 import psycopg2
 import psycopg2.extras
-
-import magic
 from elasticsearch import RequestsHttpConnection
 from elasticsearch_dsl import Boolean, DateRange
 from elasticsearch_dsl import Document as Document_ES
@@ -104,7 +103,7 @@ def get_blob_info(**kwargs):
     else:
         raise Exception("Must pass in uuid or sha1sum")
 
-    sql = f"SELECT * FROM blob_document bd {predicate}"
+    sql = f"SELECT * FROM blob_blob bd {predicate}"
 
     cursor = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -112,8 +111,8 @@ def get_blob_info(**kwargs):
     results = cursor.fetchone()
 
     sql = f"""
-    SELECT tt.name FROM blob_document bd
-    JOIN blob_document_tags bdt ON (bd.id = bdt.document_id)
+    SELECT tt.name FROM blob_blob bd
+    JOIN blob_blob_tags bdt ON (bd.id = bdt.blob_id)
     JOIN tag_tag tt ON (bdt.tag_id = tt.id)
     {predicate}
     """
@@ -131,7 +130,7 @@ def get_blob_info(**kwargs):
 def get_blob_metadata(uuid):
 
     sql = """
-    SELECT bd.uuid,bm.name,bm.value FROM blob_document bd
+    SELECT bd.uuid,bm.name,bm.value FROM blob_blob bd
     JOIN blob_metadata bm ON (bd.id = bm.blob_id)
     WHERE bd.uuid=%s
     """

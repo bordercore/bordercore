@@ -10,7 +10,7 @@ from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
-from blob.models import Document
+from blob.models import Blob
 from lib.time_utils import get_relative_date
 from tag.models import Tag
 
@@ -231,7 +231,7 @@ class SearchListView(ListView):
                 )
 
                 if notes_search:
-                    obj = Document.objects.get(uuid=match["uuid"])
+                    obj = Blob.objects.get(uuid=match["uuid"])
                     match["content"] = obj.get_content()
 
                 info.append(match)
@@ -272,14 +272,14 @@ class SearchTagDetailView(ListView):
             if myobject["_source"].get("sha1sum", ""):
                 match["sha1sum"] = myobject["_source"].get("sha1sum", "")
                 match["filename"] = myobject["_source"].get("filename", "")
-                match["url"] = Document.get_s3_key_from_sha1sum(match["sha1sum"], match["filename"])
-                match["cover_url"] = Document.get_cover_info(
+                match["url"] = Blob.get_s3_key_from_sha1sum(match["sha1sum"], match["filename"])
+                match["cover_url"] = Blob.get_cover_info(
                     self.request.user,
                     myobject["_source"]["sha1sum"],
                     size="small"
                 )["url"]
                 if myobject["_source"].get("content_type", None):
-                    match["content_type"] = Document.get_content_type(myobject["_source"]["content_type"])
+                    match["content_type"] = Blob.get_content_type(myobject["_source"]["content_type"])
 
             if results.get(myobject["_source"]["doctype"], ""):
                 results[myobject["_source"]["doctype"]].append(match)

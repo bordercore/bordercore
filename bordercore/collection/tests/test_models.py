@@ -6,7 +6,7 @@ from .factories import CollectionFactory
 
 django.setup()
 
-from blob.models import Document  # isort:skip
+from blob.models import Blob  # isort:skip
 from collection.models import Collection  # isort:skip
 
 

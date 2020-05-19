@@ -1,16 +1,16 @@
 import django
 
-from .factories import DocumentFactory
+from .factories import BlobFactory
 
 django.setup()
 
 from django.contrib.auth.models import User  # isort:skip
 from tag.models import Tag  # isort:skip
-from blob.models import Document  # isort:skip
+from blob.models import Blob  # isort:skip
 
 
 def test_get_s3_key_from_sha1sum(blob_image_factory):
-    s3_key = Document.get_s3_key_from_sha1sum(blob_image_factory.sha1sum, blob_image_factory.file)
+    s3_key = Blob.get_s3_key_from_sha1sum(blob_image_factory.sha1sum, blob_image_factory.file)
     assert s3_key == f"blobs/{blob_image_factory.sha1sum[:2]}/{blob_image_factory.sha1sum}/{blob_image_factory.file}"
 
 
@@ -22,7 +22,7 @@ def test_get_urls(blob_image_factory):
 
 def test_get_edition_string(blob_image_factory):
 
-    blob_image_factory = DocumentFactory(title="Vaporwave Wallpaper 2E")
+    blob_image_factory = BlobFactory(title="Vaporwave Wallpaper 2E")
 
     assert blob_image_factory.get_edition_string() == "Second Edition"
 
@@ -37,8 +37,8 @@ def test_get_metadata(blob_image_factory):
 
 
 def test_get_content_type():
-    assert Document.get_content_type("application/octet-stream") == "Video"
-    assert Document.get_content_type("text/css") == ""
+    assert Blob.get_content_type("application/octet-stream") == "Video"
+    assert Blob.get_content_type("text/css") == ""
 
 
 def test_get_parent_dir(blob_image_factory):
@@ -66,22 +66,22 @@ def test_get_tags(blob_image_factory):
 
 
 def test_is_ingestible_file(blob_image_factory):
-    assert Document.is_ingestible_file("file.png") is False
-    assert Document.is_ingestible_file("file.pdf") is True
+    assert Blob.is_ingestible_file("file.png") is False
+    assert Blob.is_ingestible_file("file.pdf") is True
 
 
 def test_get_cover_info(blob_image_factory, blob_pdf_factory):
 
-    cover_info = Document.get_cover_info(blob_image_factory.user, blob_image_factory.sha1sum)
+    cover_info = Blob.get_cover_info(blob_image_factory.user, blob_image_factory.sha1sum)
     assert cover_info["height"] == 1689
     assert cover_info["width"] == 1600
 
-    cover_info = Document.get_cover_info(blob_image_factory.user, blob_image_factory.sha1sum, size="small")
+    cover_info = Blob.get_cover_info(blob_image_factory.user, blob_image_factory.sha1sum, size="small")
     assert cover_info["url"] == f"{blob_image_factory.get_parent_dir()}/cover.jpg"
 
-    cover_info_pdf = Document.get_cover_info(blob_pdf_factory.user, blob_pdf_factory.sha1sum)
+    cover_info_pdf = Blob.get_cover_info(blob_pdf_factory.user, blob_pdf_factory.sha1sum)
     assert cover_info_pdf["url"] == f"{blob_pdf_factory.get_parent_dir()}/cover-large.jpg"
-    cover_info_pdf = Document.get_cover_info(blob_pdf_factory.user, blob_pdf_factory.sha1sum, size="small")
+    cover_info_pdf = Blob.get_cover_info(blob_pdf_factory.user, blob_pdf_factory.sha1sum, size="small")
     assert cover_info_pdf["url"] == f"{blob_pdf_factory.get_parent_dir()}/cover.jpg"
 
-    assert Document.get_cover_info(blob_pdf_factory.user, None) == {}
+    assert Blob.get_cover_info(blob_pdf_factory.user, None) == {}

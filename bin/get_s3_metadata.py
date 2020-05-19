@@ -10,7 +10,7 @@ s3 = boto3.resource("s3")
 
 django.setup()
 
-from blob.models import Document  # isort:skip
+from blob.models import Blob  # isort:skip
 
 
 parser = argparse.ArgumentParser()
@@ -35,7 +35,7 @@ elif uuid:
 elif sha1sum:
     kwargs = {"sha1sum": sha1sum}
 
-b = Document.objects.get(**kwargs)
+b = Blob.objects.get(**kwargs)
 
 obj = s3.Object(bucket_name='bordercore-blobs', key=b.get_s3_key())
 

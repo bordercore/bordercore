@@ -50,16 +50,16 @@ class Collection(TimeStampedModel):
     def get_blob(self, position):
 
         # import here to avoid circular dependency
-        from blob.models import Document
+        from blob.models import Blob
 
         if (position >= len(self.blob_list) or position < 0):
             return {}
 
-        blob = Document.objects.get(pk=self.blob_list[position]["id"])
+        blob = Blob.objects.get(pk=self.blob_list[position]["id"])
 
         return {
             "blob_id": blob.id,
-            "cover_info": Document.get_cover_info(
+            "cover_info": Blob.get_cover_info(
                 user=self.user,
                 sha1sum=blob.sha1sum
             )

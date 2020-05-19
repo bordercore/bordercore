@@ -14,7 +14,7 @@ import boto3
 import django
 from django.conf import settings
 
-from blob.models import Document, set_s3_metadata_file_modified
+from blob.models import Blob, set_s3_metadata_file_modified
 
 django.setup()
 
@@ -32,7 +32,7 @@ except IndexError:
     print("Specify the uuid")
     sys.exit(1)
 
-blob = Document.objects.get(uuid=uuid)
+blob = Blob.objects.get(uuid=uuid)
 
 try:
     file_modified = sys.argv[2]

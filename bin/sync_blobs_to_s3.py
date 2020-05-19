@@ -3,14 +3,15 @@ import os
 
 import boto3
 from botocore.errorfactory import ClientError
+
 import django
-from django.db.models import Q
 from django.conf import settings
+from django.db.models import Q
+
+from blob.models import Blob, set_s3_metadata_file_modified
 
 django.setup()
 
-from blob.models import Document
-from blob.models import set_s3_metadata_file_modified
 
 walk_dir = "/home/media/blobs"
 
@@ -18,9 +19,9 @@ s3_client = boto3.client("s3")
 
 bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 
-for blob in Document.objects.filter(~Q(file="")).order_by('?'):
+for blob in Blob.objects.filter(~Q(file="")).order_by('?'):
 
-    # blob = Document.objects.get(sha1sum="6e0b5097b0925c6d9944f1c37c74d3a290a1e38b")
+    # blob = Blob.objects.get(sha1sum="6e0b5097b0925c6d9944f1c37c74d3a290a1e38b")
 
     if blob.file == "":
         print(f" Skipping {blob.title}")

@@ -107,7 +107,7 @@ class DownloadableS3Boto3Storage(S3Boto3Storage):
         return super()._save(name, content)
 
 
-class Document(TimeStampedModel, AmazonMixin):
+class Blob(TimeStampedModel, AmazonMixin):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     content = models.TextField(null=True)
     title = models.TextField(null=True)
@@ -123,7 +123,7 @@ class Document(TimeStampedModel, AmazonMixin):
     documents = models.ManyToManyField("self", blank=True)
 
     def __init__(self, *args, **kwargs):
-        super(Document, self).__init__(*args, **kwargs)
+        super(Blob, self).__init__(*args, **kwargs)
 
         # Save the sha1sum so that when it changes by a blob edit
         #  in save() we know what the original was.
@@ -264,7 +264,7 @@ class Document(TimeStampedModel, AmazonMixin):
                 hasher.update(chunk)
             self.sha1sum = hasher.hexdigest()
 
-        super(Document, self).save(*args, **kwargs)
+        super(Blob, self).save(*args, **kwargs)
 
         if self.sha1sum:
 
@@ -318,13 +318,13 @@ class Document(TimeStampedModel, AmazonMixin):
 
     def has_thumbnail_url(self):
         try:
-            _ = Document.get_cover_info(self.user, self.sha1sum, size='small')['url']
+            _ = Blob.get_cover_info(self.user, self.sha1sum, size='small')['url']
             return True
         except Exception:
             return False
 
     def get_cover_url_small(self):
-        return Document.get_cover_info(self.user, self.sha1sum, size='small')['url']
+        return Blob.get_cover_info(self.user, self.sha1sum, size='small')['url']
 
     @staticmethod
     def get_image_dimensions(s3_key, max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
@@ -365,7 +365,7 @@ class Document(TimeStampedModel, AmazonMixin):
         info = {}
         url = None
 
-        b = Document.objects.get(user=user, sha1sum=sha1sum)
+        b = Blob.objects.get(user=user, sha1sum=sha1sum)
 
         prefix = PurePath(b.get_s3_key()).parent
 
@@ -378,10 +378,10 @@ class Document(TimeStampedModel, AmazonMixin):
             if file_extension[1:].lower() in ["gif", "jpg", "jpeg", "png"]:
                 # For the large version, use the image itself
                 url = b.get_s3_key()
-                info = Document.get_image_dimensions(url, max_cover_image_width)
+                info = Blob.get_image_dimensions(url, max_cover_image_width)
             else:
                 url = f"{prefix}/cover-{size}.jpg"
-                info = Document.get_image_dimensions(url, max_cover_image_width)
+                info = Blob.get_image_dimensions(url, max_cover_image_width)
 
         info["url"] = urllib.parse.quote(url)
 
@@ -435,10 +435,10 @@ class Document(TimeStampedModel, AmazonMixin):
             collection.blob_list = [x for x in collection.blob_list if x['id'] != self.id]
             collection.save()
 
-        super(Document, self).delete()
+        super(Blob, self).delete()
 
 
-@receiver(post_save, sender=Document)
+@receiver(post_save, sender=Blob)
 def set_s3_metadata_file_modified(sender, instance, **kwargs):
     """
     Store a file's modification time as S3 metadata after it's saved.
@@ -459,7 +459,7 @@ def set_s3_metadata_file_modified(sender, instance, **kwargs):
     s3_object.copy_from(CopySource={"Bucket": settings.AWS_STORAGE_BUCKET_NAME, "Key": key}, Metadata=s3_object.metadata, MetadataDirective="REPLACE")
 
 
-@receiver(pre_delete, sender=Document)
+@receiver(pre_delete, sender=Blob)
 def mymodel_delete_s3(sender, instance, **kwargs):
 
     if instance.file:
@@ -480,7 +480,7 @@ def mymodel_delete_s3(sender, instance, **kwargs):
 class MetaData(TimeStampedModel):
     name = models.TextField()
     value = models.TextField()
-    blob = models.ForeignKey(Document, on_delete=models.CASCADE)
+    blob = models.ForeignKey(Blob, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     class Meta:

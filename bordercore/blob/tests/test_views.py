@@ -20,7 +20,7 @@ django.setup()
 
 from django.contrib.auth.models import User  # isort:skip
 from tag.models import Tag  # isort:skip
-from blob.models import Document  # isort:skip
+from blob.models import Blob  # isort:skip
 
 
 @pytest.fixture(scope="module")

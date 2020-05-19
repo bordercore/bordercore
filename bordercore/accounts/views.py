@@ -12,7 +12,7 @@ from django.views.generic.edit import UpdateView
 
 from accounts.forms import UserProfileForm
 from accounts.models import SortOrderNote, UserProfile
-from blob.models import Document
+from blob.models import Blob
 
 SECTION = 'Prefs'
 
@@ -54,7 +54,7 @@ def sort_favorite_notes(request):
     note_uuid = request.POST["note_uuid"]
     new_position = int(request.POST["new_position"])
 
-    note = Document.objects.get(user=request.user, uuid=note_uuid)
+    note = Blob.objects.get(user=request.user, uuid=note_uuid)
 
     SortOrderNote.reorder(request.user, note.id, new_position)
 
@@ -64,7 +64,7 @@ def sort_favorite_notes(request):
 @login_required
 def add_to_favorites(request, uuid):
 
-    note = Document.objects.get(user=request.user, uuid=uuid)
+    note = Blob.objects.get(user=request.user, uuid=uuid)
 
     if note.is_favorite_note():
         messages.add_message(request, messages.WARNING, "This is already a favorite")
@@ -79,7 +79,7 @@ def add_to_favorites(request, uuid):
 @login_required
 def remove_from_favorites(request, uuid):
 
-    note = Document.objects.get(user=request.user, uuid=uuid)
+    note = Blob.objects.get(user=request.user, uuid=uuid)
 
     if not note.is_favorite_note():
         messages.add_message(request, messages.WARNING, "This is not a favorite")

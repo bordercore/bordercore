@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from accounts.models import User
-from blob.models import Document
+from blob.models import Blob
 from bookmark.models import Bookmark
 from collection.models import Collection
 from drill.models import Question
@@ -20,7 +20,7 @@ class AlbumSerializer(serializers.ModelSerializer):
 
 class BlobSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Document
+        model = Blob
         fields = ["content", "date", "documents", "file", "importance",
                   "is_private", "is_note", "note", "sha1sum",
                   "tags", "title", "user", "uuid"]

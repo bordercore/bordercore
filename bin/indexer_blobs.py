@@ -4,21 +4,22 @@ import signal
 import sys
 
 import boto3
+import elasticsearch.exceptions
 import psycopg2
 import psycopg2.extras
 import urllib3
-
-import django
-import elasticsearch.exceptions
-from blob.elasticsearch_indexer import index_blob
-from django.conf import settings
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 from elasticsearch_dsl.connections import connections
 
+import django
+from django.conf import settings
+
+from blob.elasticsearch_indexer import index_blob
+
 django.setup()
 
-from blob.models import Document, BLOBS_NOT_TO_INDEX  # isort:skip
+from blob.models import Blob, BLOBS_NOT_TO_INDEX  # isort:skip
 
 
 urllib3.disable_warnings()
@@ -116,13 +117,13 @@ es = Elasticsearch([settings.ELASTICSEARCH_ENDPOINT], verify_certs=False)
 
 if uuid:
     # A single blob
-    blobs = Document.objects.filter(uuid=uuid)
+    blobs = Blob.objects.filter(uuid=uuid)
 else:
     # All blobs
-    blobs = Document.objects.exclude(uuid__in=BLOBS_NOT_TO_INDEX).order_by("created")
+    blobs = Blob.objects.exclude(uuid__in=BLOBS_NOT_TO_INDEX).order_by("created")
 
     # Use this to only include "ingestible" file types
-    # blobs = Document.objects.exclude(uuid__in=BLOBS_NOT_TO_INDEX).filter(file__iregex=r".(azw3|chm|epub|html|pdf|txt)$").order_by("created")
+    # blobs = Blob.objects.exclude(uuid__in=BLOBS_NOT_TO_INDEX).filter(file__iregex=r".(azw3|chm|epub|html|pdf|txt)$").order_by("created")
 
 last_blob = get_last_blob()
 blob = None

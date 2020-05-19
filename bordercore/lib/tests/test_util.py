@@ -6,7 +6,7 @@ from lib.util import (get_missing_blob_ids, get_missing_bookmark_ids, is_image,
 django.setup()
 
 from bookmark.models import Bookmark  # isort:skip
-from blob.models import Document  # isort:skip
+from blob.models import Blob  # isort:skip
 
 
 def test_get_missing_blob_ids(user):
@@ -35,10 +35,10 @@ def test_get_missing_blob_ids(user):
     }
 
     expected = [
-        Document.objects.create(
+        Blob.objects.create(
             uuid="68568bae-5d53-41e2-ac64-3016e9c96fe1",
             user=user),
-        Document.objects.create(
+        Blob.objects.create(
             uuid="d77befd1-9172-4872-b527-628217f25d89",
             user=user)
     ]

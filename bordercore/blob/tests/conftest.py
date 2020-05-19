@@ -11,7 +11,7 @@ import django
 from django.conf import settings
 from django.core.files import File
 
-from .factories import DocumentFactory
+from .factories import BlobFactory
 
 try:
     from moto import mock_s3
@@ -22,7 +22,7 @@ django.setup()
 
 from django.contrib.auth.models import User  # isort:skip
 from tag.models import Tag  # isort:skip
-from blob.models import Document, MetaData  # isort:skip
+from blob.models import Blob, MetaData  # isort:skip
 
 
 @pytest.fixture(scope="function")
@@ -60,7 +60,7 @@ def s3_bucket(s3_resource):
 @pytest.fixture(scope="function")
 def blob_image_factory(db, s3_resource, s3_bucket):
 
-    blob = DocumentFactory(
+    blob = BlobFactory(
         title="Vaporwave Wallpaper 2E",
         tags=("django", "linux"),
     )
@@ -75,7 +75,7 @@ def blob_image_factory(db, s3_resource, s3_bucket):
 @pytest.fixture(scope="function")
 def blob_pdf_factory(db, s3_resource, s3_bucket):
 
-    blob = DocumentFactory(
+    blob = BlobFactory(
         title="Bleached Album Notes",
         tags=("django", "linux"),
     )

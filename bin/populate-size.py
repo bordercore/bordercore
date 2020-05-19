@@ -11,7 +11,7 @@ import django
 
 django.setup()
 
-from blob.models import Document  # isort:skip
+from blob.models import Blob  # isort:skip
 
 
 BLOB_DIR = "/home/media"
@@ -105,7 +105,7 @@ for x in Path(f"{BLOB_DIR}/blobs").rglob("*"):
             if has_size_field(sha1sum):
                 continue
 
-            blob = Document.objects.get(sha1sum=sha1sum)
+            blob = Blob.objects.get(sha1sum=sha1sum)
             with open(x, 'rb') as content_file:
                 content = content_file.read()
 

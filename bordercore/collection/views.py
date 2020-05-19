@@ -13,7 +13,7 @@ from django.views.generic.edit import (CreateView, DeleteView, FormMixin,
                                        UpdateView)
 from django.views.generic.list import ListView
 
-from blob.models import Document
+from blob.models import Blob
 from collection.forms import CollectionForm
 from collection.models import Collection
 
@@ -82,7 +82,7 @@ class CollectionDetailView(DetailView):
                 When(id=x['id'], then=Value(x.get('note', ''))) for x in self.object.blob_list
             ]
 
-            blob_list = Document.objects.filter(id__in=ids).annotate(
+            blob_list = Blob.objects.filter(id__in=ids).annotate(
                 collection_note=Case(
                     *whens,
                     output_field=CharField()
@@ -95,7 +95,7 @@ class CollectionDetailView(DetailView):
             context['blob_list'] = blob_list
 
             try:
-                context['first_blob_cover_info'] = Document.get_cover_info(user=self.request.user, sha1sum=blob_list[0].sha1sum)
+                context['first_blob_cover_info'] = Blob.get_cover_info(user=self.request.user, sha1sum=blob_list[0].sha1sum)
             except ClientError:
                 pass
         context['section'] = SECTION

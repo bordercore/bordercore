@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
 from accounts.models import User
-from blob.models import Document
+from blob.models import Blob
 from bookmark.models import Bookmark
 from collection.models import Collection
 from drill.models import Question
@@ -32,7 +32,7 @@ class BlobViewSet(viewsets.ModelViewSet):
     lookup_field = "uuid"
 
     def get_queryset(self):
-        return Document.objects.filter(user=self.request.user)
+        return Blob.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         instance = serializer.save()

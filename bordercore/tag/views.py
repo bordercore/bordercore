@@ -14,12 +14,12 @@ def tag_search(request):
 
     # Only retrieve tags which have been applied to at least one note
     if request.GET.get('type') == 'note':
-        args['document__is_note'] = True
+        args['blob__is_note'] = True
 
     query = request.GET.get('query', '')
     tag_list = [{'name': x.name, 'value': x.name, 'is_meta': x.is_meta} for x in
                 Tag.objects.filter(Q((Q(bookmark__user=request.user) & Q(name__icontains=query))) |
-                                   Q((Q(document__user=request.user) & Q(name__icontains=query))) |
+                                   Q((Q(blob__user=request.user) & Q(name__icontains=query))) |
                                    Q((Q(collection__user=request.user) & Q(name__icontains=query))) |
                                    Q((Q(collection__user=request.user) & Q(name__icontains=query))) |
                                    Q((Q(song__user=request.user) & Q(name__icontains=query))) |

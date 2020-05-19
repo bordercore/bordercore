@@ -14,7 +14,7 @@ urllib3.disable_warnings()
 
 django.setup()
 
-from blob.models import Document  # isort:skip
+from blob.models import Blob  # isort:skip
 
 
 client = boto3.client("lambda")
@@ -69,7 +69,7 @@ print(f"Total: {found['total']['value']}")
 for hit in found["hits"]:
     print(f"Re-indexing {hit['_source']['uuid']} {hit['_source']['filename']}")
 
-    blob = Document.objects.get(uuid=hit["_source"]["uuid"])
+    blob = Blob.objects.get(uuid=hit["_source"]["uuid"])
     try:
 
         event = {

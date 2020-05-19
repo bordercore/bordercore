@@ -12,8 +12,8 @@ from api.views import (AlbumViewSet, BlobViewSet, BookmarkViewSet,
                        SongSourceViewSet, SongViewSet, TagViewSet, TodoViewSet,
                        UserViewSet)
 from blob import views as blob_views
-from blob.views import (BlobDeleteView, BlobDetailView, BlobThumbnailView,
-                        BlobUpdateView, DocumentCreateView)
+from blob.views import (BlobCreateView, BlobDeleteView, BlobDetailView,
+                        BlobThumbnailView, BlobUpdateView)
 from book.views import BookListView
 from bookmark import views as bookmark_views
 from collection import views as collection_views
@@ -47,7 +47,7 @@ urlpatterns = [
     path('', homepage_views.homepage, name='homepage'),
     path('homepage/get_calendar_events.json', homepage_views.get_calendar_events, name='get_calendar_events'),
 
-    path('blob/add', DocumentCreateView.as_view(), name='blob_add'),
+    path('blob/add', BlobCreateView.as_view(), name='blob_add'),
     path('blob/<uuid:uuid>/delete', BlobDeleteView.as_view(), name='blob_delete'),
     path('blob/metadata_name_search/', blob_views.metadata_name_search, name='metadata_name_search'),
     path('blob/favorites/add/<uuid:uuid>', accounts_views.add_to_favorites, name='blob_favorites_add'),
@@ -164,7 +164,7 @@ handler404 = 'homepage.views.handler404'
 
 router = routers.DefaultRouter()
 router.register(r"albums", AlbumViewSet, "Album")
-router.register(r"blobs", BlobViewSet, "Document")
+router.register(r"blobs", BlobViewSet, "Blob")
 router.register(r"bookmarks", BookmarkViewSet, "Bookmark")
 router.register(r"collections", CollectionViewSet, "Collection")
 router.register(r"feeds", FeedViewSet, "Feed")
