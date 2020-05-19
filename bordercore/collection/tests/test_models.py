@@ -2,14 +2,17 @@ import datetime
 
 import django
 
+from .factories import CollectionFactory
+
 django.setup()
 
-# from django.contrib.auth.models import User  # isort:skip
 from blob.models import Document  # isort:skip
 from collection.models import Collection  # isort:skip
 
 
-def test_sort_collection(user, collection):
+def test_sort_collection(user):
+
+    collection = CollectionFactory()
 
     collection.sort(1, 2)
     assert collection.blob_list[0]["id"] == 2
@@ -38,3 +41,12 @@ def test_get_created(collection):
 def test_get_tags(collection):
 
     assert collection.get_tags() == "django, linux"
+
+
+def test_get_blob(collection):
+
+    assert collection.get_blob(-1) == {}
+    assert collection.get_blob(0)["blob_id"] == 1
+    assert collection.get_blob(1)["blob_id"] == 2
+    assert collection.get_blob(2)["blob_id"] == 3
+    assert collection.get_blob(3) == {}

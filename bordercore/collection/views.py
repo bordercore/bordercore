@@ -1,5 +1,7 @@
 from pathlib import PurePath
 
+from botocore.errorfactory import ClientError
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Case, CharField, Value, When
@@ -92,6 +94,10 @@ class CollectionDetailView(DetailView):
 
             context['blob_list'] = blob_list
 
+            try:
+                context['first_blob_cover_info'] = Document.get_cover_info(user=self.request.user, sha1sum=blob_list[0].sha1sum)
+            except ClientError:
+                pass
         context['section'] = SECTION
         context['title'] = 'Collection Detail :: {}'.format(self.object.name)
 
@@ -189,3 +195,11 @@ def sort_collection(request):
     collection.sort(blob_id, new_position)
 
     return JsonResponse('OK', safe=False)
+
+
+@login_required
+def get_blob(request, collection_id, blob_position):
+
+    collection = Collection.objects.get(pk=collection_id)
+
+    return JsonResponse(collection.get_blob(blob_position))

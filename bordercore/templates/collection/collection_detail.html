@@ -8,6 +8,11 @@
 
 {% block left-block %}
     <h2>{{ object.description }}</h2>
+
+    <br />
+
+    <input type="submit" class="btn btn-primary" value="Gallery" id="show-gallery" data-toggle="modal" data-target="#gallery">
+
 {% endblock %}
 
 {% block content %}
@@ -33,6 +38,41 @@
             });
 
             $( "#collection_sortable" ).disableSelection();
+
+            current_index = 0;
+            size_of_collection = {{ blob_list|length }};
+
+            $(document).keydown(function(e) {
+
+                if (e.which == 37 || e.which == 39) {
+
+                    if (e.which == 39) { /* Right arrow */
+
+                        if (current_index == size_of_collection - 1) {
+                            return;
+                        }
+                        current_index++;
+
+                    }
+
+                    if (e.which == 37) { /* Left arrow */
+
+                        if (current_index == 0) {
+                            return;
+                        }
+                        current_index--;
+
+                    }
+
+                    $.ajax( { type: 'GET',
+                              url: '{% url 'get_blob' object.id 666 %}'.replace(/666/, current_index),
+                              }).done(function( json ) {
+                        $("#gallery_image").attr("src", "{{ MEDIA_URL }}" + json.cover_info.url);
+                    })
+
+                }
+
+            });
 
         });
 
@@ -70,6 +110,18 @@
                     <div class="alert alert-warning" role="alert">Nothing in this collection</div>
                 {% endfor %}
             </ul>
+        </div>
+    </div>
+
+    <div class="modal fade" id="gallery" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered w-75 mw-100" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div>
+                        <img id="gallery_image" src="{{ MEDIA_URL }}{{ first_blob_cover_info.url }}" style="width: 100%"/>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

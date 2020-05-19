@@ -93,6 +93,7 @@ urlpatterns = [
     path('collection/edit/<int:pk>', CollectionUpdateView.as_view(), name='collection_edit'),
     path('collection/<int:collection_id>/', CollectionDetailView.as_view(), name='collection_detail'),
     path('collection/get_info', collection_views.get_info, name='collection_get_info'),
+    path('collection/get_blob/<int:collection_id>/<int:blob_position>/', collection_views.get_blob, name='get_blob'),
     path('collection/sort', collection_views.sort_collection, name='sort_collection'),
     path('collection/', CollectionListView.as_view(), name='collection_list'),
 

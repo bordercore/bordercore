@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.db import models
+from django.http import JsonResponse
 from django.utils import timezone
 
 from lib.mixins import TimeStampedModel
@@ -45,3 +46,21 @@ class Collection(TimeStampedModel):
         self.blob_list = new_blob_list
 
         self.save()
+
+    def get_blob(self, position):
+
+        # import here to avoid circular dependency
+        from blob.models import Document
+
+        if (position >= len(self.blob_list) or position < 0):
+            return {}
+
+        blob = Document.objects.get(pk=self.blob_list[position]["id"])
+
+        return {
+            "blob_id": blob.id,
+            "cover_info": Document.get_cover_info(
+                user=self.user,
+                sha1sum=blob.sha1sum
+            )
+        }
