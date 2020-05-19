@@ -3,7 +3,6 @@ import factory
 from django.contrib.auth.models import User
 from django.db.models import signals
 
-from tag.models import Tag
 from todo.models import Todo
 
 
@@ -15,14 +14,6 @@ class UserFactory(factory.DjangoModelFactory):
 
     username = "testuser"
     # username = factory.Faker("user_name")
-
-
-class TagFactory(factory.DjangoModelFactory):
-
-    class Meta:
-        model = Tag
-
-    name = factory.Sequence(lambda n: f"tag_{n}")
 
 
 @factory.django.mute_signals(signals.post_save)
@@ -37,5 +28,4 @@ class TodoFactory(factory.DjangoModelFactory):
     @factory.post_generation
     def tags(self, create, extracted, **kwargs):
         if not create:
-            # Simple build, do nothing.
             return

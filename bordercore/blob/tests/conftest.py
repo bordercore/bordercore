@@ -2,12 +2,21 @@ import hashlib
 import os
 from pathlib import Path
 
+import boto3
+import botocore
 import pytest
 from PIL import Image
 
 import django
 from django.conf import settings
 from django.core.files import File
+
+from .factories import DocumentFactory
+
+try:
+    from moto import mock_s3
+except ModuleNotFoundError:
+    pass
 
 django.setup()
 
@@ -17,16 +26,73 @@ from blob.models import Document, MetaData  # isort:skip
 
 
 @pytest.fixture(scope="function")
-def blob_image(s3_resource, s3_bucket, user, db):
+def aws_credentials():
+    """Mocked AWS Credentials for moto."""
+    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
+    os.environ["AWS_SECURITY_TOKEN"] = "testing"
+    os.environ["AWS_SESSION_TOKEN"] = "testing"
 
-    # TODO: Is there a way to only have this fixture called once, eg "module" scope?
-    #  I can't use "module" scope because it conflicts with the "db" fixture scope
 
-    filepath = Path(__file__).parent / "resources/test_blob.jpg"
+@pytest.fixture(scope="function")
+def s3_resource(aws_credentials):
+    """Mocked S3 Fixture."""
+
+    with mock_s3():
+        yield boto3.resource(service_name="s3")
+
+
+@pytest.fixture(scope="function")
+def s3_bucket(s3_resource):
+
+    # Verify that the S3 mock is working
+    try:
+        s3_resource.meta.client.head_bucket(Bucket=settings.AWS_STORAGE_BUCKET_NAME)
+    except botocore.exceptions.ClientError:
+        pass
+    else:
+        err = f"Bucket {settings.AWS_STORAGE_BUCKET_NAME} should not exist."
+        raise EnvironmentError(err)
+
+    s3_resource.create_bucket(Bucket=settings.AWS_STORAGE_BUCKET_NAME)
+
+
+@pytest.fixture(scope="function")
+def blob_image_factory(db, s3_resource, s3_bucket):
+
+    blob = DocumentFactory(
+        title="Vaporwave Wallpaper 2E",
+        tags=("django", "linux"),
+    )
+
+    file_path = "resources/test_blob.jpg"
+    cover_filename = "cover.jpg"
+    handle_file_info(blob, file_path, cover_filename)
+    handle_s3_info_image(s3_resource, s3_bucket, blob, file_path, cover_filename)
+    yield blob
+
+
+@pytest.fixture(scope="function")
+def blob_pdf_factory(db, s3_resource, s3_bucket):
+
+    blob = DocumentFactory(
+        title="Bleached Album Notes",
+        tags=("django", "linux"),
+    )
+
+    file_path = "resources/test_blob.pdf"
+    cover_filename = "cover-large.jpg"
+    handle_file_info(blob, file_path, cover_filename)
+    handle_s3_info_pdf(s3_resource, s3_bucket, blob, file_path, cover_filename)
+    yield blob
+
+
+def handle_file_info(blob, file_path, cover_filename):
+
+    filepath = Path(__file__).parent / file_path
     filename = Path(filepath).name
-    width, height = Image.open(filepath).size
 
-    filepath_cover = Path(__file__).parent / "resources/cover.jpg"
+    filepath_cover = Path(__file__).parent / f"resources/{cover_filename}"
     width_cover, height_cover = Image.open(filepath_cover).size
 
     hasher = hashlib.sha1()
@@ -35,19 +101,22 @@ def blob_image(s3_resource, s3_bucket, user, db):
         hasher.update(buf)
         sha1sum = hasher.hexdigest()
 
-    blob = Document.objects.create(
-        sha1sum=sha1sum,
-        title="Vaporwave Wallpaper 2E",
-        content="This is sample content",
-        note="This is a sample note",
-        user=user)
-
-    key = f"{settings.MEDIA_ROOT}/{sha1sum[:2]}/{sha1sum}/{filename}"
-
+    blob.sha1sum = sha1sum
     blob.file_modified = int(os.path.getmtime(str(filepath)))
 
     f = open(filepath, "rb")
     blob.file.save(filename, File(f))
+
+
+def handle_s3_info_image(s3_resource, s3_bucket, blob, file_path, cover_filename):
+
+    filepath = Path(__file__).parent / file_path
+    width, height = Image.open(filepath).size
+
+    filepath_cover = Path(__file__).parent / f"resources/{cover_filename}"
+    width_cover, height_cover = Image.open(filepath_cover).size
+
+    key = blob.get_s3_key()
 
     s3_object = s3_resource.Object(settings.AWS_STORAGE_BUCKET_NAME, key)
     s3_object.metadata.update({"image-width": str(width), "image-height": str(height)})
@@ -57,84 +126,24 @@ def blob_image(s3_resource, s3_bucket, user, db):
     s3_resource.meta.client.upload_file(
         str(filepath_cover),
         settings.AWS_STORAGE_BUCKET_NAME,
-        f"{settings.MEDIA_ROOT}/{sha1sum[:2]}/{sha1sum}/cover.jpg",
+        f"{settings.MEDIA_ROOT}/{blob.sha1sum[:2]}/{blob.sha1sum}/{cover_filename}",
         ExtraArgs={'Metadata': {"image-width": str(width_cover),
                                 "image-height": str(height_cover),
                                 "cover-image": "Yes"}}
     )
 
-    tag1, created = Tag.objects.get_or_create(name="django")
-    tag2, created = Tag.objects.get_or_create(name="linux")
-    blob.tags.add(tag1, tag2)
 
-    MetaData.objects.create(
-        user=user,
-        name="Url",
-        value="https://www.bordercore.com",
-        blob=blob)
+def handle_s3_info_pdf(s3_resource, s3_bucket, blob, file_path, cover_filename):
 
-    MetaData.objects.create(
-        user=user,
-        name="Author",
-        value="John Smith",
-        blob=blob)
-
-    MetaData.objects.create(
-        user=user,
-        name="Artist",
-        value="John Smith",
-        blob=blob)
-
-    MetaData.objects.create(
-        user=user,
-        name="Artist",
-        value="Jane Doe",
-        blob=blob)
-
-    yield blob
-
-
-@pytest.fixture(scope="function")
-def blob_pdf(s3_resource, s3_bucket, user, db):
-
-    # TODO: Is there a way to only have this fixture called once, eg "module" scope?
-    #  I can't use "module" scope because it conflicts with the "db" fixture scope
-    print("blob fixture called")
-
-    filepath = Path(__file__).parent / "resources/test_blob.pdf"
-    filename = Path(filepath).name
-
-    filepath_cover_large = Path(__file__).parent / "resources/cover-large.jpg"
-    width_cover, height_cover = Image.open(filepath_cover_large).size
-
-    hasher = hashlib.sha1()
-    with open(filepath, "rb") as f:
-        buf = f.read()
-        hasher.update(buf)
-        sha1sum = hasher.hexdigest()
-
-    blob = Document.objects.create(
-        sha1sum=sha1sum,
-        title="Bleached Album Notes",
-        user=user)
-
-    blob.file_modified = int(os.path.getmtime(str(filepath)))
-
-    f = open(filepath, "rb")
-    blob.file.save(filename, File(f))
+    filepath_cover = Path(__file__).parent / f"resources/{cover_filename}"
+    width_cover, height_cover = Image.open(filepath_cover).size
 
     # "Upload" a cover for the image to S3
     s3_resource.meta.client.upload_file(
-        str(filepath_cover_large),
+        str(filepath_cover),
         settings.AWS_STORAGE_BUCKET_NAME,
-        f"{settings.MEDIA_ROOT}/{sha1sum[:2]}/{sha1sum}/cover-large.jpg",
+        f"{settings.MEDIA_ROOT}/{blob.sha1sum[:2]}/{blob.sha1sum}/{cover_filename}",
         ExtraArgs={'Metadata': {"image-width": str(width_cover),
                                 "image-height": str(height_cover),
                                 "cover-image": "Yes"}}
     )
-
-    tag1, created = Tag.objects.get_or_create(name="django")
-    tag2, created = Tag.objects.get_or_create(name="linux")
-    blob.tags.add(tag1, tag2)
-
-    yield blob

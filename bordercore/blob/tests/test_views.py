@@ -68,10 +68,10 @@ def user(db, client, django_user_model):
 
 
 @pytest.mark.django_db
-def test_blob_detail(user, blob_image, client):
+def test_blob_detail(user, blob_image_factory, client):
     """Verify we redirect to the memes page when a user is logged in"""
 
-    url = urls.reverse("blob_detail", args=(blob_image.uuid,))
+    url = urls.reverse("blob_detail", args=(blob_image_factory.uuid,))
     resp = client.get(url)
 
     assert resp.status_code == 200
@@ -79,18 +79,18 @@ def test_blob_detail(user, blob_image, client):
     soup = BeautifulSoup(resp.content, "html.parser")
 
     sha1sum = soup.select("small#sha1sum")[0].text
-    assert sha1sum == blob_image.sha1sum
+    assert sha1sum == blob_image_factory.sha1sum
 
-    assert soup.select("div#left-block h1#title")[0].text == blob_image.get_title(remove_edition_string=True)
+    assert soup.select("div#left-block h1#title")[0].text == blob_image_factory.get_title(remove_edition_string=True)
 
-    url = [x.value for x in blob_image.metadata_set.all() if x.name == "Url"][0]
+    url = [x.value for x in blob_image_factory.metadata_set.all() if x.name == "Url"][0]
     assert soup.select("strong a")[0].text == urlparse(url).netloc
 
-    author = [x.value for x in blob_image.metadata_set.all() if x.name == "Author"][0]
+    author = [x.value for x in blob_image_factory.metadata_set.all() if x.name == "Author"][0]
     assert soup.select("span#author")[0].text == author
 
-    assert soup.select("div#content")[0].text.strip() == blob_image.content
+    assert soup.select("div#content")[0].text.strip() == blob_image_factory.content
 
-    assert soup.select("div#blob_note")[0].text.strip() == blob_image.note
+    assert soup.select("div#blob_note")[0].text.strip() == blob_image_factory.note
 
     assert soup.select("span.metadata_value")[0].text == "John Smith, Jane Doe"

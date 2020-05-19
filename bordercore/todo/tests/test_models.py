@@ -1,8 +1,9 @@
 import pytest
 
+from tag.tests.factories import TagFactory
 from todo.models import Todo
 
-from .factories import TagFactory, TodoFactory
+from .factories import TodoFactory
 
 
 @pytest.mark.django_db
