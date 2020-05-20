@@ -115,7 +115,7 @@ def bc_login(request):
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    response = redirect('homepage')
+                    response = redirect(request.POST.get("next", "homepage"))
                     # Remember the username for a month
                     response.set_cookie('bordercore_username', username, max_age=2592000)
                     return response
@@ -127,7 +127,10 @@ def bc_login(request):
                 message = 'Invalid login'
                 # Return an 'invalid login' error message.
 
-    return render(request, 'login.html', {'message': message})
+    return render(request, 'login.html', {
+        'message': message,
+        'next': request.GET.get('next')
+    })
 
 
 @login_required

@@ -52,7 +52,7 @@
                         </button>
                     </div>
 
-                    <input type="hidden" name="next" value="{{ next|escape }}" />
+                    <input type="hidden" name="next" value="{% firstof next '/' %}" />
 
                 </form>
 
