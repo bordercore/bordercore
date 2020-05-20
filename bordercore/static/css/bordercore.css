@@ -246,3 +246,11 @@ a.tag:active {
    from shrinking after you start typing */
 .form-inline .bootstrap-tagsinput {
   width: 400px !important; }
+
+/* Audio player controls */
+audio {
+  outline: none;
+  width: 600px; }
+
+#audio_player audio {
+  width: 400px; }

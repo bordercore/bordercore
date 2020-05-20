@@ -3,18 +3,22 @@
 {% block extra_head %}
 
     <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.jplayer.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jplayer.cleanskin.js"></script>
 
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.css"/>
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jplayer.clean.player.light.css" />
 
 {% endblock %}
 
 {% block title %} Music {% endblock %}
 
 {% block left-block %}
-    {% include "common/jplayer.html" %}
+    {% if song_list %}
+        <div id="audio_player">
+            <audio controls controlsList="nodownload" id="player">
+                <source src="" type="audio/mpeg">
+  Your browser does not support the audio tag.
+            </audio>
+        </div>
+    {% endif %}
 {% endblock %}
 
 
@@ -46,26 +50,6 @@
                     { "targets": [1,4,6], "visible": false },
                 ],
             } );
-            {% if song_list %}
-            $('.webPlayer').videoPlayer({
-                swfPath: "/js",
-                supplied: "mp3",
-                useStateClassSkin: true,
-                autoBlur: false,
-                smoothPlayBar: true,
-                keyEnabled: true,
-                remainingDuration: true,
-                toggleDuration: true,
-                volume: 1.0,
-                size: {
-                    "width": "400px"
-                },
-                name: $('#song_list').DataTable().cell(0, 2).data(),
-                "media": {
-                    "mp3": ""
-                }
-            });
-            {% endif %}
 
             oTable.on('select', function () {
 
@@ -78,13 +62,8 @@
                         info = json;
                         $('.play-progress span').html(info.title);
 
-                        $("#uniqueContainer-1").jPlayer("setMedia", {
-                            title: info.title,
-                            mp3: info.url
-                        });
-
-                        $("#uniqueContainer-1").jPlayer("play");
-
+                        $("#player").get(0).src = info.url;
+                        $("#player").get(0).play()
                     }
                           });
 
@@ -130,7 +109,7 @@
 
             {% for album in album_list %}
 
-                {% if forloop.counter0|divisibleby:"3" %}
+                {% if forloop.counter0|divisibleby:"4" %}
 
         </tr>
         <tr>

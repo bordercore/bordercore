@@ -161,41 +161,6 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
 
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
 
-    {% if content_type == 'Audio' %}
-
-        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/jplayer.clean.player.light.css" />
-        <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.jplayer.min.js"></script>
-        <script type="text/javascript" src="{{ STATIC_URL }}js/jplayer.cleanskin.js"></script>
-
-        <script type="text/javascript" charset="utf-8">
-
-            $(document).ready(function() {
-
-                $('.webPlayer').videoPlayer({
-                    swfPath: "/js",
-                    supplied: "mp3",
-                    useStateClassSkin: true,
-                    autoBlur: false,
-                    smoothPlayBar: true,
-                    keyEnabled: true,
-                    remainingDuration: true,
-                    toggleDuration: true,
-                    volume: 1.0,
-                    size: {
-                        "width": "600px"
-                    },
-                    name: "{{ object.title }}",
-                    "media": {
-                        "mp3": "{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}"
-                    }
-                });
-
-            });
-
-        </script>
-
-    {% endif %}
-
     {% if cover_info %}
     <div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog modal-dialog-centered w-75 mw-100" role="document">
@@ -239,7 +204,10 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
                 <br /><br />
 
                 {% if content_type == 'Audio' %}
-                    {% include "common/jplayer.html" %}
+                <audio controls controlsList="nodownload">
+                    <source src="{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}" type="audio/mpeg">
+  Your browser does not support the audio tag.
+                </audio>
                 {% endif %}
 
           {% endif %}
