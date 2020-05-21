@@ -48,7 +48,6 @@ class DrillListView(ListView):
         context["section"] = SECTION
         context["info"] = info
         context["title"] = "Tag Categories"
-
         return context
 
     def get_queryset(self):
@@ -202,13 +201,22 @@ class QuestionUpdateView(UpdateView):
 
 
 @login_required
+def study_random(request):
+
+    request.session["drill_mode"] = "random"
+    question = Question.objects.filter(user=request.user).order_by("?")[0]
+    return redirect("question_detail", question_id=question.id)
+
+
+@login_required
 def study_tag(request, tag):
+
+    request.session.pop("drill_mode", None)
 
     # Criteria for selecting a question:
     #  The question hasn't been reviewed within its interval
     #  The question is new (last_reviewed is null)
     #  The question is still being learned
-
     try:
         question = Question.objects.filter(
             Q(user=request.user),
@@ -248,7 +256,10 @@ def record_response(request, question_id, response):
     question = Question.objects.get(user=request.user, pk=question_id)
     question.record_response(response)
 
-    return redirect("study_tag", tag=question.tags.all()[0].name)
+    if request.session.get("drill_mode") == "random":
+        return redirect("study_random")
+    else:
+        return redirect("study_tag", tag=question.tags.all()[0].name)
 
 
 def tag_search(request):

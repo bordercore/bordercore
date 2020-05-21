@@ -6,7 +6,21 @@
 
 {% block left-block %}
 
-    <div class="mt-5">
+    <div>
+    Click the Start button to drill on random questions or select a tag on the right to drill on a specific category.
+    </div>
+
+    <br />
+
+    <div>
+        <form action="{% url 'study_random' %}">
+            <input class="btn btn-primary" type="submit" value="Start" id="random_mode" />
+        </form>
+    </div>
+
+    <hr />
+
+    <div>
         <a href="{% url 'question_add' %}" class="btn btn-primary" role="button">Add Question</a>
     </div>
 
