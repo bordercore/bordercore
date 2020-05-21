@@ -208,6 +208,8 @@ class BlobUpdateView(UpdateView):
         context['metadata'] = preprocess_metadata(self.object.metadata_set.all())
         if True in [True for x in self.object.metadata_set.all() if x.name == 'is_book']:
             context['is_book'] = True
+        context['is_private'] = self.object.is_private
+        context['is_note'] = self.object.is_note
         context['collections_other'] = Collection.objects.filter(Q(user=self.request.user)
                                                                  & ~Q(blob_list__contains=[{'id': self.object.id}])
                                                                  & Q(is_private=False))

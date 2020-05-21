@@ -374,7 +374,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
     {% csrf_token %}
 
     {% for field in form.visible_fields %}
-        {% if field.label != 'Filename' %}
+        {% if field.label != 'Filename' and field.name != 'is_private' and field.name != 'is_note' %}
         <div class="form-group {% if field.errors %}error{% endif %} row">
             <label class="bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">{{ field.label }}</label>
 
@@ -418,11 +418,29 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
         {% endif %}
     {% endfor %}
 
-    <div class="form-group {% if field.errors %}error{% endif %} row">
-        <label class="bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">Is book</label>
-        <div class="col-lg-10 col-sm-10 align-self-center">
-            <input type="checkbox"{% if is_book %} checked="checked"{% endif %} name="is_book" id="id_is_book" />
+    <div class="row form-group offset-lg-2 form-inline {% if field.errors %}error{% endif %}">
+
+        <div class="col-lg-3 form-group">
+            <div class="form-check">
+                <label class="form-check-label bold">Is note</label>
+                <input class="form-control form-check-input ml-3" type="checkbox"{% if form.is_note.value == True %} checked="checked"{% endif %} name="is_note" id="id_is_note" />
+            </div>
         </div>
+
+        <div class="col-lg-3 form-group">
+            <div class="form-check">
+                <label class="form-check-label bold">Is private</label>
+                <input class="form-control form-check-input ml-3" type="checkbox"{% if is_private %} checked="checked"{% endif %} name="is_private" id="id_is_private" />
+            </div>
+        </div>
+
+        <div class="col-lg-3 form-group">
+            <div class="form-check">
+                <label class="form-check-label bold">Is book</label>
+                <input class="form-check-input ml-3" type="checkbox"{% if is_book %} checked="checked"{% endif %} name="is_book" id="id_is_book" />
+            </div>
+        </div>
+
     </div>
 
     <div id="new_metadata" class="form-group row">
