@@ -12,6 +12,72 @@
 
 {% block content %}
 
+<div class="row">
+    <div class="col-lg-8">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'blob_detail' object.uuid %}">Blob Detail</a></li>
+            <li class="breadcrumb-item active">Blob Thumbnail</li>
+        </ol>
+    </div>
+</div>
+
+{% if content_type == 'pdf' or content_type == 'e-book' %}
+
+    <div class="row">
+        <div class="col-lg-6">
+
+            <h2>Amazon Image Search</h2>
+
+            <div id="update-cover-div">
+                <input id="update-cover" class="btn btn-secondary" type="button" value="Choose Image" />
+            </div>
+
+            <div id="set-cover-div" class="hidden">
+                <span id="progress" class="glyphicon glyphicon-refresh glyphicon-refresh-animate hidden"></span>
+                <input id="next-cover" class="btn btn-secondary" type="button" value="Next Image" />
+                <span id="amazon-feedback"></span>
+                <br /><br />
+                <input id="set-cover" class="btn btn-primary" type="button" value="Set Thumbnail" />
+            </div>
+
+            <br />
+
+        </div>
+    </div>
+
+        <div class="row">
+        <div class="col-lg-6">
+
+            <h2>Extract Image from PDF</h2>
+
+            <div _id="set-cover-div" _class="hidden">
+                <span id="progress" class="glyphicon glyphicon-refresh glyphicon-refresh-animate hidden"></span>
+    Page Number: <input id="page-number" type="text" size="2" value="1" />
+                <input id="set-thumbnail-from-pdf" class="btn btn-primary" type="button" value="Set Thumbnail" />
+            </div>
+
+            <br />
+
+            <div class="alert" id="feedback"></div>
+
+        </div>
+        </div>
+
+{% else %}
+
+        <div class="alert alert-info" role="alert">
+Thumbnail editing is not supported for this document type.
+        </div>
+
+{% endif %}
+
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
     <script type="text/javascript">
 
         $(document).ready(function() {
@@ -99,66 +165,6 @@
 
         });
 
-</script>
-
-<div class="row">
-    <div class="col-lg-8">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'blob_detail' object.uuid %}">Blob Detail</a></li>
-            <li class="breadcrumb-item active">Blob Thumbnail</li>
-        </ol>
-    </div>
-</div>
-
-{% if content_type == 'pdf' or content_type == 'e-book' %}
-
-    <div class="row">
-        <div class="col-lg-6">
-
-            <h2>Amazon Image Search</h2>
-
-            <div id="update-cover-div">
-                <input id="update-cover" class="btn btn-secondary" type="button" value="Choose Image" />
-            </div>
-
-            <div id="set-cover-div" class="hidden">
-                <span id="progress" class="glyphicon glyphicon-refresh glyphicon-refresh-animate hidden"></span>
-                <input id="next-cover" class="btn btn-secondary" type="button" value="Next Image" />
-                <span id="amazon-feedback"></span>
-                <br /><br />
-                <input id="set-cover" class="btn btn-primary" type="button" value="Set Thumbnail" />
-            </div>
-
-            <br />
-
-        </div>
-    </div>
-
-        <div class="row">
-        <div class="col-lg-6">
-
-            <h2>Extract Image from PDF</h2>
-
-            <div _id="set-cover-div" _class="hidden">
-                <span id="progress" class="glyphicon glyphicon-refresh glyphicon-refresh-animate hidden"></span>
-    Page Number: <input id="page-number" type="text" size="2" value="1" />
-                <input id="set-thumbnail-from-pdf" class="btn btn-primary" type="button" value="Set Thumbnail" />
-            </div>
-
-            <br />
-
-            <div class="alert" id="feedback"></div>
-
-        </div>
-        </div>
-
-{% else %}
-
-        <div class="alert alert-info" role="alert">
-Thumbnail editing is not supported for this document type.
-        </div>
-
-{% endif %}
-
+    </script>
 
 {% endblock %}

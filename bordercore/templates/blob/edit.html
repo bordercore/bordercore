@@ -2,77 +2,14 @@
 
 {% block title %} KB :: Documents {% endblock %}
 
-{% block left-block %}
-
+{% block extra_head %}
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/smoke.min.css" />
-    <script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-datepicker3.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/smoke.min.css" />
+{% endblock %}
 
-    <script type="text/javascript">
-
-        $(document).ready(function() {
-
-            {% if object %}
-            $('#collections_other, #collections_current').change( function(e) {
-                var collection_id = $(this).val();
-
-                var mutation = 'add';
-                if ($(this).attr('id') == 'collections_current') {
-                    mutation = 'delete';
-                }
-
-                $.ajax( { type: 'POST',
-                          url: '{% url 'collection_mutate' %}',
-                          data: {'mutation': mutation,
-                                 'blob_id': {{ object.id }},
-                                 'collection_id': collection_id}
-                          }).done(function( json ) {
-                    if (json) {
-                        $.smkAlert({text: json.message, type: 'success', position:'top-right'});
-                    } else {
-                        $.smkAlert({text: 'Error changing collection status', type: 'error', position:'top-right'});
-                    }
-                })
-
-            });
-            {% endif %}
-
-            function parseFilename() {
-                var fileName = $('#id_filename').val();
-                var match = /(.*)(\..*?)$/.exec(fileName);
-                if (match) {
-                    return {'base': match[1], 'extension': match[2]};
-                }
-            }
-
-            $( ".date" ).on( "paste", function() {
-                var clipText = event.clipboardData.getData('Text');
-                $("#date-response").empty();
-                $.ajax( { type: 'GET',
-                          url: '{% url 'parse_date' 666 %}'.replace(/666$/, encodeURIComponent($.trim(clipText))),
-                          }).done(function( json ) {
-                    if (!json || json.output_date == "") {
-                        $("#date-response").append("Invalid date format");
-                        console.log("Invalid date format error: " + json.error);
-                    } else {
-                        $('.date').datepicker('update', json.output_date);
-                    }
-                })
-            });
-
-            $('#btn-cleanupfilename').click( function () {
-                var title = $('#id_title').val();
-                if (title) {
-                    parsedFileName = parseFilename();
-                    if (parsedFileName) {
-                        $('#id_filename').val(title + parsedFileName.extension);
-                        $('#id_filename').css( 'color', 'red' ).animate( { color: '#666666' }, 2000 );
-                    }
-                }
-            });
-
-        });
-
-    </script>
+{% block left-block %}
 
     {% if object %}
 
@@ -180,160 +117,6 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
 {% endblock %}
 
 {% block content %}
-
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-datepicker3.css" />
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/smoke.min.css" />
-
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.color-2.1.2.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.field_selection.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
-
-    <script type="text/javascript">
-
-        $(document).ready(function() {
-
-            {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" fieldName="name" %}
-
-            var metadata_count = {{ metadata|length }};
-
-            var engineMetadata = new Bloodhound({
-                name: 'metadata',
-                remote: {
-                    url: '{% url 'metadata_name_search' %}?query=%QUERY',
-                    wildcard: '%QUERY'
-                },
-                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
-                queryTokenizer: Bloodhound.tokenizers.whitespace
-            });
-
-            engineMetadata.initialize();
-
-            $('#btn-add').click( function () {
-                $('#id_name').focus();
-            } );
-
-            $('#id_name').typeahead({
-                autoselect: true
-            }, {
-                display: 'value',
-                source: engineMetadata,
-            });
-
-            $('#id_name').bind('typeahead:selected', function(obj, datum, name) {
-                $('#id_value').focus();
-            });
-
-            $('#markdown-support').change( function(event) {
-                var value = $(this).val();
-                var range = $('#id_content').getSelection();
-                var text = $('#id_content').val();
-                if (value == 'Bold') {
-                    $('#id_content').val( text.substr(0, range.start) + '**' + range.text + '**' +  text.substr(range.end, text.length - range.end));
-                } else if (value == 'Insert link') {
-                    $('#id_content').val( text.substr(0, range.start) + '[text](url)' + range.text + text.substr(range.end, text.length - range.end));
-                } else if (value == 'Insert list') {
-                    $('#id_content').val( text.substr(0, range.start) + '\n - List item\n' + text.substr(range.end, text.length - range.end));
-                } else if (value == 'Indent Code') {
-                    var newtext = '    ' + range.text.replace(/\n/g, "\n    ");
-                    $('#id_content').val( text.substr(0, range.start) + newtext  + text.substr(range.end, text.length - range.end));
-                } else if (value == 'Escape HTML') {
-                    var escapedText = range.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                    $('textarea').val( text.substr(0, range.start) + escapedText +  text.substr(range.end, text.length - range.end));
-                } else if (value == 'Table') {
-                    $('#id_content').val( text.substr(0, range.start) + '\nFirst Header  | Second Header\n------------- | -------------\nContent Cell  | Content Cell\nContent Cell  | Content Cell\n' + text.substr(range.end, text.length - range.end));
-                }
-                // Reset the dropdown
-                $('#markdown-support')[0].selectedIndex = 0
-            } );
-
-            $('.date').datepicker({
-                autoclose: true,
-                todayBtn: "linked",
-                forceParse: false,
-                format: "yyyy-mm-dd",
-                multidate: false,
-                orientation: "bottom auto"
-            });
-
-            {% if not object %}
-            // If this is a new blob, the default date should be "now"
-            var nowDate = new Date();
-            $('.date').datepicker('setDate', nowDate);
-            {% endif %}
-
-            $('#btn-ucfirst').click( function () {
-                // Transforms 'JERRELL SCHIVERS' to 'Jerrell Schivers'
-                $('#id_value').val( $('#id_value').val().toLowerCase().replace(/(\s+)(.)|^(.)/g, formatName) );
-                $('#id_value').css( 'color', 'red' ).animate( { color: '#4A5158' }, 2000 );
-            });
-
-            $("#id_file").on('change', function() {
-                $('#id_filename').val($(this)[0].files[0].name);
-                $('#id_file_modified').val($('#id_file')[0].files[0].lastModified);
-            });
-
-            function addMetadata() {
-                metadata_count++;
-                var name = $('#id_name').val();
-                var value = $('#id_value').val();
-                $('.metadata_hidden:first').clone(true).insertAfter("#new_metadata");
-                $('.metadata_hidden:eq(1)').find('input').val(value).attr('name', metadata_count.toString() + '_' + name);
-                $('.metadata_hidden:eq(1)').find('label').html(name);
-                $('#id_name').val('');
-                $('#id_value').val('');
-                $('#id_name').typeahead('val', '').focus();
-                $('.metadata_hidden:eq(1)').removeClass('hidden');
-            }
-
-            $('#id_value').keydown(function(event) {
-                // If the enter key is pressed...
-                if (event.keyCode == 13) {
-                    addMetadata();
-                    event.preventDefault();
-                    return false;
-                }
-            });
-
-            // Prevent the enter key from submitting the form for any text fields.
-            $("input").keydown(function(event) {
-                if (event.keyCode == 13) {
-                    event.preventDefault();
-                    return false;
-                }
-            });
-
-            // Expand the content for editing, but only do it once.
-            var isExpanded = false;
-            $('#id_content').focus(function () {
-                if (! isExpanded) {
-                    $(this).animate({ height: "30em" }, 500);
-                    isExpanded = true;
-                }
-            })
-
-            $('.btn-add').click( function () {
-                addMetadata();
-            } );
-
-            $('.btn-remove').click( function () {
-                $(this).parents('.form-group').remove();
-            } );
-
-            {% for tag in object.tags.all %}
-            $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
-            {% endfor %}
-
-        });
-
-        function formatName(match, capture1, capture2) {
-            return capture2 ? capture1 + capture2.toUpperCase() : match.toUpperCase();
-        }
-
-    </script>
 
     {% if messages %}
         {% for message in messages %}
@@ -499,5 +282,228 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
 
     </div>
 </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.color-2.1.2.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.field_selection.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            {% if object %}
+            $('#collections_other, #collections_current').change( function(e) {
+                var collection_id = $(this).val();
+
+                var mutation = 'add';
+                if ($(this).attr('id') == 'collections_current') {
+                    mutation = 'delete';
+                }
+
+                $.ajax( { type: 'POST',
+                          url: '{% url 'collection_mutate' %}',
+                          data: {'mutation': mutation,
+                                 'blob_id': {{ object.id }},
+                                 'collection_id': collection_id}
+                          }).done(function( json ) {
+                    if (json) {
+                        $.smkAlert({text: json.message, type: 'success', position:'top-right'});
+                    } else {
+                        $.smkAlert({text: 'Error changing collection status', type: 'error', position:'top-right'});
+                    }
+                })
+
+            });
+            {% endif %}
+
+            function parseFilename() {
+                var fileName = $('#id_filename').val();
+                var match = /(.*)(\..*?)$/.exec(fileName);
+                if (match) {
+                    return {'base': match[1], 'extension': match[2]};
+                }
+            }
+
+            $( ".date" ).on( "paste", function() {
+                var clipText = event.clipboardData.getData('Text');
+                $("#date-response").empty();
+                $.ajax( { type: 'GET',
+                          url: '{% url 'parse_date' 666 %}'.replace(/666$/, encodeURIComponent($.trim(clipText))),
+                          }).done(function( json ) {
+                    if (!json || json.output_date == "") {
+                        $("#date-response").append("Invalid date format");
+                        console.log("Invalid date format error: " + json.error);
+                    } else {
+                        $('.date').datepicker('update', json.output_date);
+                    }
+                })
+            });
+
+            $('#btn-cleanupfilename').click( function () {
+                var title = $('#id_title').val();
+                if (title) {
+                    parsedFileName = parseFilename();
+                    if (parsedFileName) {
+                        $('#id_filename').val(title + parsedFileName.extension);
+                        $('#id_filename').css( 'color', 'red' ).animate( { color: '#666666' }, 2000 );
+                    }
+                }
+            });
+
+        });
+
+    </script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" fieldName="name" %}
+
+            var metadata_count = {{ metadata|length }};
+
+            var engineMetadata = new Bloodhound({
+                name: 'metadata',
+                remote: {
+                    url: '{% url 'metadata_name_search' %}?query=%QUERY',
+                    wildcard: '%QUERY'
+                },
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('value'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace
+            });
+
+            engineMetadata.initialize();
+
+            $('#btn-add').click( function () {
+                $('#id_name').focus();
+            } );
+
+            $('#id_name').typeahead({
+                autoselect: true
+            }, {
+                display: 'value',
+                source: engineMetadata,
+            });
+
+            $('#id_name').bind('typeahead:selected', function(obj, datum, name) {
+                $('#id_value').focus();
+            });
+
+            $('#markdown-support').change( function(event) {
+                var value = $(this).val();
+                var range = $('#id_content').getSelection();
+                var text = $('#id_content').val();
+                if (value == 'Bold') {
+                    $('#id_content').val( text.substr(0, range.start) + '**' + range.text + '**' +  text.substr(range.end, text.length - range.end));
+                } else if (value == 'Insert link') {
+                    $('#id_content').val( text.substr(0, range.start) + '[text](url)' + range.text + text.substr(range.end, text.length - range.end));
+                } else if (value == 'Insert list') {
+                    $('#id_content').val( text.substr(0, range.start) + '\n - List item\n' + text.substr(range.end, text.length - range.end));
+                } else if (value == 'Indent Code') {
+                    var newtext = '    ' + range.text.replace(/\n/g, "\n    ");
+                    $('#id_content').val( text.substr(0, range.start) + newtext  + text.substr(range.end, text.length - range.end));
+                } else if (value == 'Escape HTML') {
+                    var escapedText = range.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    $('textarea').val( text.substr(0, range.start) + escapedText +  text.substr(range.end, text.length - range.end));
+                } else if (value == 'Table') {
+                    $('#id_content').val( text.substr(0, range.start) + '\nFirst Header  | Second Header\n------------- | -------------\nContent Cell  | Content Cell\nContent Cell  | Content Cell\n' + text.substr(range.end, text.length - range.end));
+                }
+                // Reset the dropdown
+                $('#markdown-support')[0].selectedIndex = 0
+            } );
+
+            $('.date').datepicker({
+                autoclose: true,
+                todayBtn: "linked",
+                forceParse: false,
+                format: "yyyy-mm-dd",
+                multidate: false,
+                orientation: "bottom auto"
+            });
+
+            {% if not object %}
+            // If this is a new blob, the default date should be "now"
+            var nowDate = new Date();
+            $('.date').datepicker('setDate', nowDate);
+            {% endif %}
+
+            $('#btn-ucfirst').click( function () {
+                // Transforms 'JERRELL SCHIVERS' to 'Jerrell Schivers'
+                $('#id_value').val( $('#id_value').val().toLowerCase().replace(/(\s+)(.)|^(.)/g, formatName) );
+                $('#id_value').css( 'color', 'red' ).animate( { color: '#4A5158' }, 2000 );
+            });
+
+            $("#id_file").on('change', function() {
+                $('#id_filename').val($(this)[0].files[0].name);
+                $('#id_file_modified').val($('#id_file')[0].files[0].lastModified);
+            });
+
+            function addMetadata() {
+                metadata_count++;
+                var name = $('#id_name').val();
+                var value = $('#id_value').val();
+                $('.metadata_hidden:first').clone(true).insertAfter("#new_metadata");
+                $('.metadata_hidden:eq(1)').find('input').val(value).attr('name', metadata_count.toString() + '_' + name);
+                $('.metadata_hidden:eq(1)').find('label').html(name);
+                $('#id_name').val('');
+                $('#id_value').val('');
+                $('#id_name').typeahead('val', '').focus();
+                $('.metadata_hidden:eq(1)').removeClass('hidden');
+            }
+
+            $('#id_value').keydown(function(event) {
+                // If the enter key is pressed...
+                if (event.keyCode == 13) {
+                    addMetadata();
+                    event.preventDefault();
+                    return false;
+                }
+            });
+
+            // Prevent the enter key from submitting the form for any text fields.
+            $("input").keydown(function(event) {
+                if (event.keyCode == 13) {
+                    event.preventDefault();
+                    return false;
+                }
+            });
+
+            // Expand the content for editing, but only do it once.
+            var isExpanded = false;
+            $('#id_content').focus(function () {
+                if (! isExpanded) {
+                    $(this).animate({ height: "30em" }, 500);
+                    isExpanded = true;
+                }
+            })
+
+            $('.btn-add').click( function () {
+                addMetadata();
+            } );
+
+            $('.btn-remove').click( function () {
+                $(this).parents('.form-group').remove();
+            } );
+
+            {% for tag in object.tags.all %}
+            $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
+            {% endfor %}
+
+        });
+
+        function formatName(match, capture1, capture2) {
+            return capture2 ? capture1 + capture2.toUpperCase() : match.toUpperCase();
+        }
+
+    </script>
 
 {% endblock %}

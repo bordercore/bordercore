@@ -62,31 +62,6 @@
 
 {% block content %}
 
-<script type="text/javascript">
-
-    $(document).ready(function() {
-        var request = $.ajax({
-            url: '{% url 'get_calendar_events' %}',
-            type: "GET",
-            dataType: "json",
-            success: function( data, textStatus ) {
-                html = '';
-                for (i = 0; i < data.length; i++) {
-                    html += '<li class="list-group-item">' + data[i]['start_pretty'] + ': <strong>' + data[i]['summary'] + '</strong></li>';
-                }
-                if (!html) {
-                    html = '<li class="list-group-item">Your calendar is empty</li>';
-                }
-                $('#events').html(html);
-            },
-            error: function( data, textStatus ) {
-                $('#events').html('<div class="alert alert-danger">Error retrieving events</div>');
-            }
-        });
-    });
-
-</script>
-
 {% include "common/show_messages_inline.html" %}
 
 <div class="row">
@@ -177,5 +152,36 @@
     </div>
   </div>
 </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+            var request = $.ajax({
+                url: '{% url 'get_calendar_events' %}',
+                type: "GET",
+                dataType: "json",
+                success: function( data, textStatus ) {
+                    html = '';
+                    for (i = 0; i < data.length; i++) {
+                        html += '<li class="list-group-item">' + data[i]['start_pretty'] + ': <strong>' + data[i]['summary'] + '</strong></li>';
+                    }
+                    if (!html) {
+                        html = '<li class="list-group-item">Your calendar is empty</li>';
+                    }
+                    $('#events').html(html);
+                },
+                error: function( data, textStatus ) {
+                    $('#events').html('<div class="alert alert-danger">Error retrieving events</div>');
+                }
+            });
+        });
+
+    </script>
 
 {% endblock %}

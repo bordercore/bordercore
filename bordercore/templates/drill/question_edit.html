@@ -2,36 +2,15 @@
 
 {% block title %} Dril :: {{ action }} question {% endblock %}
 
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
+{% endblock %}
+
 {% block left-block %}
     <h2>{{ object.description }}</h2>
 {% endblock %}
 
 {% block content %}
-
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
-
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
-
-    <script type="text/javascript">
-
-        $(document).ready(function() {
-
-            {% include "common/common-typeaheadjs-tagsinput.js" with url="tag_search" itemValue="value" %}
-
-            {% if object.id %}
-            $("input.btn[value='Delete']").click( function() {
-                $("form#todo-form").attr("action", "{% url 'question_delete' object.id %}");
-            })
-            {% endif %}
-
-            {% for tag in object.tags.all %}
-            $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
-            {% endfor %}
-
-        });
-
-    </script>
 
     {% for message in messages %}
         <div class="alert alert-{{ message.tags|lower }}">{{ message|safe }}</div>
@@ -80,5 +59,34 @@
         </div>
 
     </form>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            {% include "common/common-typeaheadjs-tagsinput.js" with url="tag_search" itemValue="value" %}
+
+            {% if object.id %}
+            $("input.btn[value='Delete']").click( function() {
+                $("form#todo-form").attr("action", "{% url 'question_delete' object.id %}");
+            })
+            {% endif %}
+
+            {% for tag in object.tags.all %}
+            $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
+            {% endfor %}
+
+        });
+
+    </script>
 
 {% endblock %}

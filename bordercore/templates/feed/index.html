@@ -2,86 +2,7 @@
 
 {% block title %} Feeds {% endblock %}
 
-{% block extra_head %}
-<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
-{% endblock %}
-
 {% block content %}
-
-<script type="text/javascript">
-
-    $(document).ready(function() {
-
-        var feed_json_text = {{ json|safe }};
-
-        $("a[id^='link_']").click( function(e) {
-            var myMatches = this.getAttribute('id').match(/link_(.*)$/);
-            var feed_id = myMatches[1];
-            showFeed(feed_id)
-        })
-
-        function showFeed(feed_id) {
-
-            $('#feed-title').html( '<a href="' + feed_json_text[ feed_id ]['feed_homepage']+ '">' + feed_json_text[ feed_id ]['name'] + '</a>');
-
-            myText = '';
-
-            for ( var i = 0; i < feed_json_text[ feed_id ]['links'].length; i++) {
-                myText += "<a href=\"" + feed_json_text[ feed_id ]['links'][ i ]['link'] + "\">" + feed_json_text[ feed_id ]['links'][ i ]['title'] + "</a><br />";
-            }
-
-            $('#feed-item-list').html( myText );
-
-            $.ajax( { type: 'POST',
-                      url: '{% url 'store_in_session' %}',
-                      data: { current_feed: feed_id },
-                      success: function() {
-                }
-                      });
-
-        }
-
-        // Get the user's default feed and display it first
-        showFeed( {{ current_feed }} );
-
-        $('#sort-container').sortable( {
-            connectWith: '.feed-list',
-            stop: function(event, ui) {
-
-                var myMatches = $(ui.item).find('a').attr('id').match(/link_(.*)$/);
-                var feed_id = myMatches[1];
-
-                // If the destination is the 'all feeds' list on the right and the feed is from the
-                //  'current feeds' list on the left, then we're deleting the feed
-                if ( ui.item.parent().attr('id') === 'sort-container-all' ) {
-                    url = 'feed_delete.json?feed_id=' + feed_id;
-                } else {
-                    url = '{% url 'sort_feed' %}'
-                }
-
-                console.log(url)
-
-                var request = $.ajax({
-                    url: url,
-                    type: "POST",
-                    data: { feed_id : feed_id, position:  (ui.item.index() + 1) },
-                    dataType: "text"
-                });
-
-                request.done(function(msg) {
-                    console.log("ALL GOOD")
-                });
-
-                request.fail(function(jqXHR, textStatus) {
-                    alert( "Request failed: " + textStatus );
-                });
-
-            }
-        } );
-
-    });
-
-</script>
 
 <div class="row">
 
@@ -108,5 +29,88 @@
     </div>
 
 </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            var feed_json_text = {{ json|safe }};
+
+            $("a[id^='link_']").click( function(e) {
+                var myMatches = this.getAttribute('id').match(/link_(.*)$/);
+                var feed_id = myMatches[1];
+                showFeed(feed_id)
+            })
+
+            function showFeed(feed_id) {
+
+                $('#feed-title').html( '<a href="' + feed_json_text[ feed_id ]['feed_homepage']+ '">' + feed_json_text[ feed_id ]['name'] + '</a>');
+
+                myText = '';
+
+                for ( var i = 0; i < feed_json_text[ feed_id ]['links'].length; i++) {
+                    myText += "<a href=\"" + feed_json_text[ feed_id ]['links'][ i ]['link'] + "\">" + feed_json_text[ feed_id ]['links'][ i ]['title'] + "</a><br />";
+                }
+
+                $('#feed-item-list').html( myText );
+
+                $.ajax( { type: 'POST',
+                          url: '{% url 'store_in_session' %}',
+                          data: { current_feed: feed_id },
+                          success: function() {
+                    }
+                          });
+
+            }
+
+            // Get the user's default feed and display it first
+            showFeed( {{ current_feed }} );
+
+            $('#sort-container').sortable( {
+                connectWith: '.feed-list',
+                stop: function(event, ui) {
+
+                    var myMatches = $(ui.item).find('a').attr('id').match(/link_(.*)$/);
+                    var feed_id = myMatches[1];
+
+                    // If the destination is the 'all feeds' list on the right and the feed is from the
+                    //  'current feeds' list on the left, then we're deleting the feed
+                    if ( ui.item.parent().attr('id') === 'sort-container-all' ) {
+                        url = 'feed_delete.json?feed_id=' + feed_id;
+                    } else {
+                        url = '{% url 'sort_feed' %}'
+                    }
+
+                    console.log(url)
+
+                    var request = $.ajax({
+                        url: url,
+                        type: "POST",
+                        data: { feed_id : feed_id, position:  (ui.item.index() + 1) },
+                        dataType: "text"
+                    });
+
+                    request.done(function(msg) {
+                        console.log("ALL GOOD")
+                    });
+
+                    request.fail(function(jqXHR, textStatus) {
+                        alert( "Request failed: " + textStatus );
+                    });
+
+                }
+            } );
+
+        });
+
+    </script>
 
 {% endblock %}

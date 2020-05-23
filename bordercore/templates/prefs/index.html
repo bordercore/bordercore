@@ -2,26 +2,12 @@
 
 {% block title %} Preferences {% endblock %}
 
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
+{% endblock %}
+
 {% block content %}
 
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
-
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
-
-<script type="text/javascript">
-
-    $(document).ready(function() {
-
-        {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" %}
-
-        {% for tag in object.favorite_tags.all %}
-        $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
-        {% endfor %}
-
-    });
-
-</script>
 
 {% if message %}
     <div class="alert alert-success">{{ message }}</div>
@@ -62,5 +48,28 @@
     </div>
 
 </form>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" %}
+
+            {% for tag in object.favorite_tags.all %}
+            $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
+            {% endfor %}
+
+        });
+
+    </script>
 
 {% endblock %}

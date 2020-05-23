@@ -2,22 +2,11 @@
 
 {% block title %} Music {% endblock %}
 
-{% block content %}
-
+{% block extra_head %}
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
+{% endblock %}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
-
-    <script type="text/javascript">
-
-        $(document).ready(function() {
-
-            {% include "common/common-typeaheadjs-tagsinput.js" %}
-
-        });
-
-    </script>
+{% block content %}
 
 {% include "common/show_messages.html" %}
 
@@ -84,5 +73,24 @@
     </div>
 
 {% endif %}
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            {% include "common/common-typeaheadjs-tagsinput.js" %}
+
+        });
+
+    </script>
 
 {% endblock %}

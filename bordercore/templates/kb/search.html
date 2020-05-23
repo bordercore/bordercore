@@ -28,37 +28,6 @@
 
 {% include "kb/header.html" %}
 
-<script type="text/javascript" charset="utf-8">
-
-   $(document).ready(function() {
-
-        $('.facet').on('click', function(e) {
-
-            // For all faceting categories checked, all that list to a
-            // hidden field in the search form, then submit the form
-
-            facets = [];
-
-            $('.facet').each(function(index) {
-                if (this.checked) {
-                    facets.push(this.id)
-                }
-            });
-
-            $('#facets').val(facets);
-
-            $('#search').submit();
-
-        });
-
-        if ($('#kbsearch').val() == '') {
-            $('#kbsearch').focus();
-        }
-
-    });
-
-</script>
-
 <br />
 
 {% if request.GET %}
@@ -141,5 +110,115 @@ Tags: {% if not match.tags%}None{% endif %}
 
         </div>
     </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+
+    <script type="text/javascript" charset="utf-8">
+
+        $(document).ready(function() {
+
+            $('.facet').on('click', function(e) {
+
+                // For all faceting categories checked, all that list to a
+                // hidden field in the search form, then submit the form
+
+                facets = [];
+
+                $('.facet').each(function(index) {
+                    if (this.checked) {
+                        facets.push(this.id)
+                    }
+                });
+
+                $('#facets').val(facets);
+
+                $('#search').submit();
+
+            });
+
+                        {% if search_sort_by %}
+            $("#search-sort-by").val('{{ search_sort_by }}');
+            {% endif %}
+
+            $('#search-sort-by').change( function(event) {
+                var value = $(this).val();
+                $.ajax( { type: 'POST',
+                          url: '{% url 'store_in_session' %}',
+                          data: { search_sort_by: value },
+                          success: function() {
+                    }
+                          });
+
+            })
+
+            var myengine = new Bloodhound({
+                remote: {
+                    url: '{% url 'kb_search_tags_booktitles' %}?term=%QUERY',
+                    wildcard: '%QUERY'
+                },
+                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                limit: 20
+            });
+
+            myengine.initialize();
+
+            var template_source = $("#entry-template-what").html()
+
+            $('#kbsearch').typeahead(
+                {
+                    hint: true,
+                    highlight: true,
+                    minLength: 3
+                }, {
+                    limit: 20,
+                    display: 'value',
+                    source: myengine,
+                    templates: {
+                        suggestion: function(data) {
+                            return '<div class="tt-suggest-page"><em>' + data.type + '</em> - ' + data.value + '</div>';
+                        }
+                    }
+                }
+            );
+
+            // This is set when an item from the autocomplete options is selected.  Otherwise there would be
+            //  a race between the window.open() in $('#kbsearch').bind(...) and the form submission from the
+            //  $('#kbsearch').on('keyup', ...)
+            var autocomplete_selected = false;
+
+            $('#kbsearch').on('keyup', function(event, selection) {
+                if (((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) && !autocomplete_selected) {
+                    $('#search').submit();
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+
+            $('#kbsearch').bind('typeahead:selected', function(obj, datum, name) {
+                var url = null;
+                if (datum.type == 'Tag') {
+                    url = '{% url 'kb_search_tag_detail' 666 %}'.replace(/666$/, datum.value);
+                } else {
+                    url = '{% url 'blob_detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', datum.uuid);
+                }
+                autocomplete_selected = true;
+                window.open(url, '_self');
+            });
+
+            if ($('#kbsearch').val() == '') {
+                $('#kbsearch').focus();
+            }
+
+        });
+
+    </script>
 
 {% endblock %}

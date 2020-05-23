@@ -1,26 +1,7 @@
 {% extends "base.html" %}
 
 {% block extra_head %}
-
-    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.js"></script>
-
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.css"/>
-
-    <style>
-        /* Bootstrap Style Overrides */
-        .webPlayer .controls {
-            box-sizing: content-box;
-        }
-        .progressbar {
-            background-image: none;
-            background-color: transparent;
-            border-radius: 0px;
-            height: auto;
-            margin-bottom: auto;
-            overflow: visible;
-        }
-    </style>
-
 {% endblock %}
 
 {% block title %} Music {% endblock %}
@@ -47,6 +28,47 @@
 {% endblock %}
 
 {% block content %}
+
+<div class="row">
+    <div class="col-lg-8">
+        {% block breadcrumbs %}
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"> <a href="{% url 'music_list' %}">Music</a> </li>
+                <li class="breadcrumb-item"> <a href="{% url 'artist_detail' album.artist %}">{{ album.artist }} </li></a> </li>
+                <li class="breadcrumb-item active"> {{ album.title }} </li>
+            </ol>
+        {% endblock %}
+
+    </div>
+    {% include "music/header.html" %}
+</div>
+
+<div class="row">
+
+    <div class="col-lg-8">
+        <h2>{{ album.title }}</h2>
+        <h3>{{ album.artist }}</h3>
+        <h5>{{ album.year }}</h5>
+        {% if album.original_release_year != album.year %}
+            <h5>Originally released {{ album.original_release_year }}</h5>
+        {% endif %}
+    </div>
+
+</div>
+
+<div class="row">
+    <div class="col-lg-11">
+        {% include "common/datatable.html" with data=song_list cols=cols id="song_list" %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.js"></script>
 
     <script type="text/javascript" charset="utf-8">
 
@@ -110,39 +132,6 @@
 
         });
 
-</script>
-
-<div class="row">
-    <div class="col-lg-8">
-        {% block breadcrumbs %}
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"> <a href="{% url 'music_list' %}">Music</a> </li>
-                <li class="breadcrumb-item"> <a href="{% url 'artist_detail' album.artist %}">{{ album.artist }} </li></a> </li>
-                <li class="breadcrumb-item active"> {{ album.title }} </li>
-            </ol>
-        {% endblock %}
-
-    </div>
-    {% include "music/header.html" %}
-</div>
-
-<div class="row">
-
-    <div class="col-lg-8">
-        <h2>{{ album.title }}</h2>
-        <h3>{{ album.artist }}</h3>
-        <h5>{{ album.year }}</h5>
-        {% if album.original_release_year != album.year %}
-            <h5>Originally released {{ album.original_release_year }}</h5>
-        {% endif %}
-    </div>
-
-</div>
-
-<div class="row">
-    <div class="col-lg-11">
-        {% include "common/datatable.html" with data=song_list cols=cols id="song_list" %}
-    </div>
-</div>
+    </script>
 
 {% endblock %}

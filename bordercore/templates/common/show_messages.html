@@ -1,22 +1,17 @@
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/smoke.min.css" />
-<script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
 
 <script type="text/javascript">
 
-      $(document).ready(function() {
+    {% for message in messages %}
 
-      {% for message in messages %}
-        console.log("{{ message}}");
-      $.smkAlert({
-      text: '{{ message }}',
-      type: '{% if message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}',
-      position:'top-right',
-      icon: 'glyphicon-time'
-      });
+    $.smkAlert({
+        text: '{{ message }}',
+        type: '{% if message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}',
+        position:'top-right',
+        icon: 'glyphicon-time'
+    });
 
-      {% endfor %}
-
-      });
+    {% endfor %}
 
     </script>
 

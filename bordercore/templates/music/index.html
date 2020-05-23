@@ -1,65 +1,12 @@
 {% extends "base.html" %}
 
-{% block extra_head %}
-
-    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.css"/>
-
-{% endblock %}
-
 {% block title %} Music {% endblock %}
 
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.css"/>
+{% endblock %}
+
 {% block content %}
-
-<script type="text/javascript" charset="utf-8">
-
-    var oTable;
-
-    $(document).ready(function() {
-
-        {% if messages %}
-        {% for message in messages %}
-        $('#feedback').fadeIn(1000).html('{{ message }}');
-        setTimeout( function() {
-            $('#feedback').fadeOut(1000);
-        }, 3000);
-        {% endfor %}
-        {% endif %}
-
-        function formatArtist( data, type, row ) {
-            return '<a href="{% url 'artist_detail' 666 %}">'.replace(/666$/, row[1]) + row[1] + '</a>';
-        }
-
-        oTable = $('#song_list').DataTable( {
-            initComplete: function () {
-                var api = this.api();
-                $('#song_list').show();
-                api.columns.adjust();
-            },
-            "serverSide": true,
-            "ajaxSource": "{% url 'get_song_list' %}",
-            "paginate": true,
-            "info": false,
-            "displayLength": 50,
-            "sorting": [[0, 'desc']],
-            "filter": true,
-            "lengthChange": false,
-            "language": {
-                "zeroRecords": "No songs found",
-                "search": "Filter",
-            },
-            "dom": "<'row'<'span6'<'toolbar'>l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
-            "searchable": false,
-            "columnDefs": [
-                { "targets": [0], "sorting": [ "desc", "asc" ] },
-                { "targets": [1], "render": formatArtist, "useRendered": false },
-                { "targets": [3], "visible": false },
-            ],
-        } );
-
-    });
-
-</script>
 
 {% include "music/header.html" %}
 
@@ -102,5 +49,66 @@
 <br />
 
 {% include "common/datatable.html" with id="song_list" %}
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+
+    <script type="text/javascript" charset="utf-8">
+
+        var oTable;
+
+        $(document).ready(function() {
+
+            {% include "music/search.js" %}
+
+            {% if messages %}
+            {% for message in messages %}
+            $('#feedback').fadeIn(1000).html('{{ message }}');
+            setTimeout( function() {
+                $('#feedback').fadeOut(1000);
+            }, 3000);
+            {% endfor %}
+            {% endif %}
+
+            function formatArtist( data, type, row ) {
+                return '<a href="{% url 'artist_detail' 666 %}">'.replace(/666$/, row[1]) + row[1] + '</a>';
+            }
+
+            oTable = $('#song_list').DataTable( {
+                initComplete: function () {
+                    var api = this.api();
+                    $('#song_list').show();
+                    api.columns.adjust();
+                },
+                "serverSide": true,
+                "ajaxSource": "{% url 'get_song_list' %}",
+                "paginate": true,
+                "info": false,
+                "displayLength": 50,
+                "sorting": [[0, 'desc']],
+                "filter": true,
+                "lengthChange": false,
+                "language": {
+                    "zeroRecords": "No songs found",
+                    "search": "Filter",
+                },
+                "dom": "<'row'<'span6'<'toolbar'>l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+                "searchable": false,
+                "columnDefs": [
+                    { "targets": [0], "sorting": [ "desc", "asc" ] },
+                    { "targets": [1], "render": formatArtist, "useRendered": false },
+                    { "targets": [3], "visible": false },
+                ],
+            } );
+
+        });
+
+    </script>
 
 {% endblock %}

@@ -7,51 +7,11 @@
 {% block title %} Bookmarks {% endblock %}
 
 {% block extra_head %}
-
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/smoke.min.css" />
-    <script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
-
-    <script src="https://use.fontawesome.com/4a95cb196f.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
-
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
 {% endblock %}
 
 {% block left-block %}
-
-    <script type="text/javascript">
-
-        // Create a hash of bookmark ids and their attributes
-        var link_info = {};
-        {% for link in bookmarks %}
-          {% if link.note != None %}
-        link_info[{{ link.id }}] = "{{ link.note }}";
-          {% endif %}
-        {% endfor %}
-
-        $(document).ready(function() {
-
-            $('#sort-container-tags').sortable( {
-                connectWith: '.list-group',
-
-                // The 'Untagged' item is not sortable -- it's always on top
-                items: "li:not(#untagged)",
-
-                stop: function(event, ui) {
-
-                    var tag_id = $(ui.item).data('id');
-
-                    $.ajax( { type: 'POST',
-                              url: '{% url 'sort_favorite_tags' %}',
-                              data: { tag_id: tag_id, new_position: ui.item.index() },
-                              error: function (xhr, ajaxOptions, error) {
-                            $.smkAlert({text: 'Error reordering tags: ' + error, type: 'error', position:'top-right'});
-                        }
-                              } )
-                }
-            })
-        })
-
-    </script>
 
     <div id="bookmark-sidebar">
 
@@ -118,12 +78,145 @@
 
 {% endblock %}
 
-
 {% block content %}
 
+    <div class="row">
+
+        <div class="col-lg-12 bookmark-search">
+
+            <form class="form-inline" role="form" name="nav_form" id="tag-search-form" method="get">
+
+                <div class="form-group col-auto has-search">
+                    <span class="fa fa-search form-control-feedback"></span>
+                    <input id="search" type="text" value="{{ search }}" class="bookmark-tag-filter-input form-control" autocomplete="off" placeholder="Search" />
+                </div>
+
+                <div class="btn-group">
+                    <a class="btn btn-secondary" id="btn-add" href="{% url 'bookmark_add' %}">Add</a>
+                    <button class="btn btn-secondary" id="btn-edit" disabled>Edit</button>
+                    <button class="btn btn-secondary" id="btn-delete" disabled>Delete</button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <br />
+
+    {% if bookmarks %}
+
+        <div class="row">
+            <div class="col-lg-12">
+                <ul id="sort-container" class="bookmark-list">
+                {% for link in bookmarks %}
+
+                    <tr class="bookmark" data-id="{{ link.id }}">
+                        <li class="bookmark" data-id="{{ link.id }}">
+                            <div>
+                                <span class="ml-1">{{ link.created|date:"N j," }}</span>
+                                <span class="">{{ link.created|date:"Y" }}</span>
+                                <span class="ml-2">{{ link.url|favicon:16|safe }} </span>
+                                <span>
+                                    <a class="one-tag _ml-2" href="{{ link.url }}" id="link_{{ link.id }}" target="_blank">{{ link.title }}</a>
+                                {% if link.last_response_code != None and link.last_response_code != 200 %}
+                                    <a class="form-error ml-3" target="wayback" href="https://web.archive.org/web/1000/{{ link.url }}">{{ link.last_response_code }}</a>
+                                {% endif %}
+                                {% if link.note %}
+                                    <i class="fa fa-clipboard"></i>
+                                {% endif %}
+                            </span>
+                            {% for tag in link.tags.all %}
+                                {% if tag.name != tag_filter %}
+                                    <a class="badge badge-info" href="{% url 'bookmark_tag' tag.name %}">{{ tag.name }}</a>
+                                {% endif %}
+                            {% endfor %}
+                            </div>
+                            </li>
+
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        {% if bookmarks.has_other_pages %}
+        <div class="row">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if bookmarks.has_previous %}
+                        <li class="page-item"><a class="page-link" href="{% url 'bookmark_list' bookmarks.previous_page_number %}">Previous</a></li>
+                    {% else %}
+                        <li class="disabled page-item"><a class="page-link" href="#">Previous</a></li>
+                    {% endif %}
+                    {% for i in range %}
+                        {% if page_number == i %}
+                            <li class="disabled page-item"><a class="page-link" href="#">{{ i }}</a></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="{% url 'bookmark_list' i %}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if bookmarks.paginator.num_pages > 5 %}
+                        <li class="disabled page-item"><a class="page-link" href="#">...</a></li>
+                        <li class="page-item"><a class="page-link" href="{% url 'bookmark_list' bookmarks.paginator.num_pages %}">{{ bookmarks.paginator.num_pages }}</a></li>
+                    {% endif %}
+                    {% if bookmarks.has_next %}
+                        <li class="page-item"><a class="page-link" href="{% url 'bookmark_list' bookmarks.next_page_number %}">Next</a></li>
+                    {% else %}
+                        <li class="disabled page-item"><a class="page-link" href="#">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+
+    {% endif %}
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
+    <script type="text/javascript" src="https://use.fontawesome.com/4a95cb196f.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
+
+    <script type="text/javascript">
+
+        // Create a hash of bookmark ids and their attributes
+        var link_info = {};
+        {% for link in bookmarks %}
+          {% if link.note != None %}
+        link_info[{{ link.id }}] = "{{ link.note }}";
+          {% endif %}
+        {% endfor %}
+
+        $(document).ready(function() {
+
+            $('#sort-container-tags').sortable( {
+                connectWith: '.list-group',
+
+                // The 'Untagged' item is not sortable -- it's always on top
+                items: "li:not(#untagged)",
+
+                stop: function(event, ui) {
+
+                    var tag_id = $(ui.item).data('id');
+
+                    $.ajax( { type: 'POST',
+                              url: '{% url 'sort_favorite_tags' %}',
+                              data: { tag_id: tag_id, new_position: ui.item.index() },
+                              error: function (xhr, ajaxOptions, error) {
+                            $.smkAlert({text: 'Error reordering tags: ' + error, type: 'error', position:'top-right'});
+                        }
+                              } )
+                }
+            })
+        })
+
+    </script>
 
     <script type="text/javascript">
 
@@ -268,98 +361,5 @@
     </script>
 
     {% include "common/show_messages.html" with offset="0" width="12" %}
-
-    <div class="row">
-
-        <div class="col-lg-12 bookmark-search">
-
-            <form class="form-inline" role="form" name="nav_form" id="tag-search-form" method="get">
-
-                <div class="form-group col-auto has-search">
-                    <span class="fa fa-search form-control-feedback"></span>
-                    <input id="search" type="text" value="{{ search }}" class="bookmark-tag-filter-input form-control" autocomplete="off" placeholder="Search" />
-                </div>
-
-                <div class="btn-group">
-                    <a class="btn btn-secondary" id="btn-add" href="{% url 'bookmark_add' %}">Add</a>
-                    <button class="btn btn-secondary" id="btn-edit" disabled>Edit</button>
-                    <button class="btn btn-secondary" id="btn-delete" disabled>Delete</button>
-                </div>
-
-            </form>
-
-        </div>
-
-    </div>
-
-    <br />
-
-    {% if bookmarks %}
-
-        <div class="row">
-            <div class="col-lg-12">
-            <ul id="sort-container" class="bookmark-list">
-
-                {% for link in bookmarks %}
-
-                    <li class="bookmark" data-id="{{ link.id }}">
-                        <div>
-                            <span class="ml-1">{{ link.created|date:"N j," }}</span>
-                            <span class="">{{ link.created|date:"Y" }}</span>
-                            <span class="ml-2">{{ link.url|favicon:16|safe }} </span>
-                            <span>
-                                <a class="one-tag ml-2" href="{{ link.url }}" id="link_{{ link.id }}" target="_blank">{{ link.title }}</a>
-                                {% if link.last_response_code != None and link.last_response_code != 200 %}
-                                    <a class="form-error ml-3" target="wayback" href="https://web.archive.org/web/1000/{{ link.url }}">{{ link.last_response_code }}</a>
-                                {% endif %}
-                                {% if link.note %}
-                                    <i class="fa fa-clipboard"></i>
-                                {% endif %}
-                            </span>
-                            {% for tag in link.tags.all %}
-                                {% if tag.name != tag_filter %}
-                                    <a class="badge badge-info" href="{% url 'bookmark_tag' tag.name %}">{{ tag.name }}</a>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    </li>
-
-                {% endfor %}
-
-            </ul>
-            </div>
-        </div>
-
-        {% if bookmarks.has_other_pages %}
-        <div class="row">
-            <nav aria-label="Page navigation">
-                <ul class="pagination">
-                    {% if bookmarks.has_previous %}
-                        <li class="page-item"><a class="page-link" href="{% url 'bookmark_list' bookmarks.previous_page_number %}">Previous</a></li>
-                    {% else %}
-                        <li class="disabled page-item"><a class="page-link" href="#">Previous</a></li>
-                    {% endif %}
-                    {% for i in range %}
-                        {% if page_number == i %}
-                            <li class="disabled page-item"><a class="page-link" href="#">{{ i }}</a></li>
-                        {% else %}
-                            <li class="page-item"><a class="page-link" href="{% url 'bookmark_list' i %}">{{ i }}</a></li>
-                        {% endif %}
-                    {% endfor %}
-                    {% if bookmarks.paginator.num_pages > 5 %}
-                        <li class="disabled page-item"><a class="page-link" href="#">...</a></li>
-                        <li class="page-item"><a class="page-link" href="{% url 'bookmark_list' bookmarks.paginator.num_pages %}">{{ bookmarks.paginator.num_pages }}</a></li>
-                    {% endif %}
-                    {% if bookmarks.has_next %}
-                        <li class="page-item"><a class="page-link" href="{% url 'bookmark_list' bookmarks.next_page_number %}">Next</a></li>
-                    {% else %}
-                        <li class="disabled page-item"><a class="page-link" href="#">Next</a></li>
-                    {% endif %}
-                </ul>
-            </nav>
-        </div>
-        {% endif %}
-
-    {% endif %}
 
 {% endblock %}

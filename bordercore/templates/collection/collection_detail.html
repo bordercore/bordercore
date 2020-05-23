@@ -2,10 +2,6 @@
 
 {% block title %} Collection {% endblock %}
 
-{% block extra_head %}
-<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
-{% endblock %}
-
 {% block left-block %}
     <h2>{{ object.description }}</h2>
 
@@ -17,7 +13,62 @@
 
 {% block content %}
 
-    <script>
+    <div class="row">
+
+        <div class="col-lg-12">
+
+            {% block breadcrumbs %}
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"> <a href="{% url 'collection_list' %}">Collection List</a> </li>
+                    <li class="breadcrumb-item active">{{ object.name }}</li>
+                </ul>
+            {% endblock %}
+
+        </div>
+
+    </div>
+
+    {% include "common/show_messages_inline.html" %}
+
+<div class="row">
+        <div class="col-lg-12">
+
+            <h3>{{ object.name }}</h3>
+            <ul class="collection_sortable">
+                {% for blob in blob_list %}
+                    <li id="{{ blob.id }}">
+                        <a href="{% url 'blob_detail' blob.uuid %}"><img src="{{ MEDIA_URL }}{{ blob.cover_url }}" /></a>
+                        <br/>
+                        <a href="{% url 'blob_detail' blob.uuid %}">{{ blob.title }}</a> {% if blob.collection_note %}<img src="{{ STATIC_URL }}img/note.png" height="16" width="16" data-toggle="popover" data-content="{{ blob.collection_note }}"/>{% endif %}
+                    </li>
+                {% empty %}
+                    <div class="alert alert-warning" role="alert">Nothing in this collection</div>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="modal fade" id="gallery" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered w-75 mw-100" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div>
+                        <img id="gallery_image" src="{{ MEDIA_URL }}{{ first_blob_cover_info.url }}" style="width: 100%"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+
+    <script type="text/javascript">
 
         $(document).ready(function() {
 
@@ -77,52 +128,5 @@
         });
 
     </script>
-
-    <div class="row">
-
-        <div class="col-lg-12">
-
-            {% block breadcrumbs %}
-                <ul class="breadcrumb">
-                    <li class="breadcrumb-item"> <a href="{% url 'collection_list' %}">Collection List</a> </li>
-                    <li class="breadcrumb-item active">{{ object.name }}</li>
-                </ul>
-            {% endblock %}
-
-        </div>
-
-    </div>
-
-    {% include "common/show_messages_inline.html" %}
-
-<div class="row">
-        <div class="col-lg-12">
-
-            <h3>{{ object.name }}</h3>
-            <ul class="collection_sortable">
-                {% for blob in blob_list %}
-                    <li id="{{ blob.id }}">
-                        <a href="{% url 'blob_detail' blob.uuid %}"><img src="{{ MEDIA_URL }}{{ blob.cover_url }}" /></a>
-                        <br/>
-                        <a href="{% url 'blob_detail' blob.uuid %}">{{ blob.title }}</a> {% if blob.collection_note %}<img src="{{ STATIC_URL }}img/note.png" height="16" width="16" data-toggle="popover" data-content="{{ blob.collection_note }}"/>{% endif %}
-                    </li>
-                {% empty %}
-                    <div class="alert alert-warning" role="alert">Nothing in this collection</div>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-
-    <div class="modal fade" id="gallery" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered w-75 mw-100" role="document">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <div>
-                        <img id="gallery_image" src="{{ MEDIA_URL }}{{ first_blob_cover_info.url }}" style="width: 100%"/>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
 {% endblock %}

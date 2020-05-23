@@ -2,40 +2,11 @@
 
 {% block title %} Fitness :: Summary {% endblock %}
 
-{% block content %}
-
-    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.js"></script>
+{% block extra_head %}
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.css"/>
+{% endblock %}
 
-    <script type="text/javascript">
-
-        var metadata = []
-        var table;
-
-        $(document).ready(function() {
-
-            table = $('#active_exercises, #inactive_exercises').DataTable( {
-                initComplete: function () {
-                    var api = this.api();
-                    $('#active_exercises, #inactive_exercises').show();
-                    api.columns.adjust();
-                },
-                "columnDefs": [
-                    { "targets": [2], "dataSort": 4 },
-                    { "targets": [3,4], "visible": false },
-                ],
-                info: false,
-                language: {
-                    'emptyTable': 'No exercises found'
-                },
-                paging: false,
-                searching: false,
-                "sorting": [[3, 'asc']],
-            });
-
-        });
-
-    </script>
+{% block content %}
 
     {% include "common/show_messages.html" %}
 
@@ -102,5 +73,43 @@
     {% endfor %}
 
     </table>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.js"></script>
+
+    <script type="text/javascript">
+
+        var metadata = []
+        var table;
+
+        $(document).ready(function() {
+
+            table = $('#active_exercises, #inactive_exercises').DataTable( {
+                initComplete: function () {
+                    var api = this.api();
+                    $('#active_exercises, #inactive_exercises').show();
+                    api.columns.adjust();
+                },
+                "columnDefs": [
+                    { "targets": [2], "dataSort": 4 },
+                    { "targets": [3,4], "visible": false },
+                ],
+                info: false,
+                language: {
+                    'emptyTable': 'No exercises found'
+                },
+                paging: false,
+                searching: false,
+                "sorting": [[3, 'asc']],
+            });
+
+        });
+
+    </script>
 
 {% endblock %}

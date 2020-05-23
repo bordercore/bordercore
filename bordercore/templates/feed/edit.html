@@ -6,44 +6,6 @@
 
 {% block content %}
 
-    <script type="text/javascript">
-
-        $(document).ready(function() {
-
-            $('#id_url').blur( function(event) {
-
-                var feed_url = $('#id_url').val();
-                if (!feed_url) {
-                    return;
-                }
-
-                if ( !$('#id_homepage').val() ) {
-                    var baseUrl = $('#id_url').val().match(/^(http:\/\/.*?)\//);
-                    if (baseUrl) {
-                        $('#id_homepage').val( baseUrl[1] );
-                    }
-                }
-
-                feed_url = encodeURIComponent(feed_url).replace(/%/g, "%25")
-
-                $.ajax( { type: 'GET',
-                          url: '{% url 'check_url' 666 %}'.replace(/666$/, feed_url),
-                          }).done(function( json ) {
-                    if (!json || json.status != 200) {
-                        $('#feed-status').fadeIn(1000).addClass("alert-danger").removeClass("alert-success").html("Feed error.  Status: " + json.status);
-                    } else if (json.entry_count == 0){
-                        $('#feed-status').fadeIn(1000).addClass("alert-danger").removeClass("alert-success").html("Feed error.  Found no feed items.");
-                    } else {
-                        $('#feed-status').fadeIn(1000).addClass("alert-success").removeClass("alert-danger").html("Feed OK.  Found " + json.entry_count + " feed items.");
-                    }
-                });
-
-            })
-
-        });
-
-    </script>
-
     <div class="row">
         <div id="feed-status" class="alert offset-lg-2 col-lg-6" style="display: none">OK</div>
     </div>
@@ -97,5 +59,49 @@ Please correct the errors below.
 The following users are currently subscribed to this feed: <strong>{{ subscribers }}</strong>
         </div>
     {% endif %}
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            $('#id_url').blur( function(event) {
+
+                var feed_url = $('#id_url').val();
+                if (!feed_url) {
+                    return;
+                }
+
+                if ( !$('#id_homepage').val() ) {
+                    var baseUrl = $('#id_url').val().match(/^(http:\/\/.*?)\//);
+                    if (baseUrl) {
+                        $('#id_homepage').val( baseUrl[1] );
+                    }
+                }
+
+                feed_url = encodeURIComponent(feed_url).replace(/%/g, "%25")
+
+                $.ajax( { type: 'GET',
+                          url: '{% url 'check_url' 666 %}'.replace(/666$/, feed_url),
+                          }).done(function( json ) {
+                    if (!json || json.status != 200) {
+                        $('#feed-status').fadeIn(1000).addClass("alert-danger").removeClass("alert-success").html("Feed error.  Status: " + json.status);
+                    } else if (json.entry_count == 0){
+                        $('#feed-status').fadeIn(1000).addClass("alert-danger").removeClass("alert-success").html("Feed error.  Found no feed items.");
+                    } else {
+                        $('#feed-status').fadeIn(1000).addClass("alert-success").removeClass("alert-danger").html("Feed OK.  Found " + json.entry_count + " feed items.");
+                    }
+                });
+
+            })
+
+        });
+
+    </script>
 
 {% endblock %}

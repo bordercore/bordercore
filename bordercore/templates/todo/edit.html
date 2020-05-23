@@ -2,32 +2,11 @@
 
 {% block title %} Todo {% endblock %}
 
-{% block content %}
-
+{% block extra_head %}
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
+{% endblock %}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
-
-<script type="text/javascript">
-
-$(document).ready(function() {
-
-        {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" %}
-
-        {% if action == 'Edit' %}
-        $("input.btn[value='Delete']").click( function() {
-            $("form#todo-form").attr("action", "{% url 'todo_delete' uuid %}");
-        })
-        {% endif %}
-
-        {% for tag in object.tags.all %}
-        $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
-        {% endfor %}
-
-});
-
-</script>
+{% block content %}
 
 {% if message %}
     <div class="alert alert-success">{{ message }}</div>
@@ -61,5 +40,35 @@ $(document).ready(function() {
     </div>
 
 </form>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" %}
+
+            {% if action == 'Edit' %}
+            $("input.btn[value='Delete']").click( function() {
+                $("form#todo-form").attr("action", "{% url 'todo_delete' uuid %}");
+            })
+            {% endif %}
+
+            {% for tag in object.tags.all %}
+            $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
+            {% endfor %}
+
+        });
+
+</script>
+
 
 {% endblock %}

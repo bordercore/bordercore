@@ -5,7 +5,7 @@
 {% block title %} Blob :: Detail {% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/code_style.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/code_style.css" />
 {% endblock %}
 
 {% block left-block %}
@@ -159,8 +159,6 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
 
 {% block content %}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
-
     {% if cover_info %}
     <div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog modal-dialog-centered w-75 mw-100" role="document">
@@ -215,5 +213,14 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
         </div>
 
     </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
 
 {% endblock %}

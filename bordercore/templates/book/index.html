@@ -1,44 +1,12 @@
 {% extends "base.html" %}
 
-{% block extra_head %}
-
-{% endblock %}
-
 {% block title %} {{ section }} {% endblock %}
 
-{% block content %}
-
-    <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
-
+{% block extra_head %}
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/datatables.min.css" />
+{% endblock %}
 
-    <script type="text/javascript" charset="utf-8">
-
-        var oTable;
-
-        $(document).ready(function() {
-
-            {% if messages %}
-            {% for message in messages %}
-	        $('#feedback').fadeIn(1000).html('{{ message }}');
-	        setTimeout( function() {
-		        $('#feedback').fadeOut(1000);
-	        }, 3000);
-            {% endfor %}
-            {% endif %}
-
-	        oTable = $('#book_list').dataTable( {
-		        "bInfo": false,
-		        "bPaginate": false,
-		        "aaSorting": [[0, 'asc']],
-		        "bFilter": true,
-		        "bLengthChange": false,
-		        "bSearchable": false,
-	        } );
-
-        });
-
-</script>
+{% block content %}
 
 <ul class="nav nav-pills">
     {% for letter in alphabet %}
@@ -52,3 +20,39 @@
 
 {% endblock %}
 
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/datatables.min.js"></script>
+
+    <script type="text/javascript" charset="utf-8">
+
+        var oTable;
+
+        $(document).ready(function() {
+
+            {% if messages %}
+            {% for message in messages %}
+            $('#feedback').fadeIn(1000).html('{{ message }}');
+            setTimeout( function() {
+                $('#feedback').fadeOut(1000);
+            }, 3000);
+            {% endfor %}
+            {% endif %}
+
+            oTable = $('#book_list').dataTable( {
+                "bInfo": false,
+                "bPaginate": false,
+                "aaSorting": [[0, 'asc']],
+                "bFilter": true,
+                "bLengthChange": false,
+                "bSearchable": false,
+            } );
+
+        });
+
+    </script>
+
+{% endblock %}

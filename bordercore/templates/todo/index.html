@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block extra_head %}
-
-{% endblock %}
-
 {% block title %} {{ section }} {% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.css"/>
+{% endblock %}
 
 {% block left-block %}
 
@@ -25,7 +25,38 @@
 
 {% block content %}
 
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.css"/>
+    <div class="row">
+        <div class="col-lg-7">
+            <form class="form-inline" role="form">
+
+                <div class="btn-group">
+                    <a class="btn btn-secondary" id="btn-add" href="{% url 'todo_add' %}">Add</a>
+                    <button class="btn btn-secondary" id="btn-edit" disabled>Edit</button>
+                    <button class="btn btn-secondary" id="btn-delete" disabled>Delete</button>
+                </div>
+
+                <div class="form-group">
+                    <input id="todo_search" type="text" class="form-control" placeholder="Search">
+                </div>
+
+                <div class="form-group">
+                    <label id="todo_feedback" class="alert alert-success d-none"></label>
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+{% include "common/datatable.html" with data=info cols=cols id="todo_list" %}
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
     <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.js"></script>
 
     <script type="text/javascript" charset="utf-8">
@@ -109,32 +140,6 @@
 
         });
 
-</script>
-
-    <div class="row">
-        <div class="col-lg-7">
-            <form class="form-inline" role="form">
-
-                <div class="btn-group">
-                    <a class="btn btn-secondary" id="btn-add" href="{% url 'todo_add' %}">Add</a>
-                    <button class="btn btn-secondary" id="btn-edit" disabled>Edit</button>
-                    <button class="btn btn-secondary" id="btn-delete" disabled>Delete</button>
-                </div>
-
-                <div class="form-group">
-                    <input id="todo_search" type="text" class="form-control" placeholder="Search">
-                </div>
-
-                <div class="form-group">
-                    <label id="todo_feedback" class="alert alert-success d-none"></label>
-                </div>
-
-            </form>
-
-        </div>
-
-    </div>
-
-{% include "common/datatable.html" with data=info cols=cols id="todo_list" %}
+    </script>
 
 {% endblock %}

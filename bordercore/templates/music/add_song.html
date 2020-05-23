@@ -4,6 +4,10 @@
 
 {% block title %} Music {% endblock %}
 
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
+{% endblock %}
+
 {% block left-block %}
 
     {% if info.id %}
@@ -29,24 +33,6 @@
 {% endblock %}
 
 {% block content %}
-
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
-
-    <script type="text/javascript">
-
-        $(document).ready(function() {
-
-            {% include "common/common-typeaheadjs-tagsinput.js" %}
-
-            $("input[type='file']").change( function(){
-                $("button[type='submit']").removeAttr("disabled");
-            });
-
-        });
-
-    </script>
 
     {% for message in messages %}
         <div class="alert alert-{{ message.tags|lower }}">{{ message|safe }}</div>
@@ -130,5 +116,28 @@
         </div>
 
     </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+
+            {% include "common/common-typeaheadjs-tagsinput.js" %}
+
+            $("input[type='file']").change( function(){
+                $("button[type='submit']").removeAttr("disabled");
+            });
+
+        });
+
+    </script>
 
 {% endblock %}
