@@ -16,14 +16,11 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.forms.utils import ErrorList
-from django.http import (HttpResponse, HttpResponseNotFound,
-                         HttpResponseRedirect, JsonResponse)
+from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, UpdateView
-from django.views.generic.list import ListView
 
 from lib.util import remove_non_ascii_characters
 from music.forms import SongForm
@@ -244,7 +241,9 @@ def add_song(request):
         formdata['length'] = int(info.info.length)
 
         # I usually buy my music from Amazon, so set that as the default
-        formdata['source'] = SongSource.objects.get(name='Amazon').id
+        #  if the song source is not set in the session
+        song_source = request.session.get('song_source', 'Amazon')
+        formdata['source'] = SongSource.objects.get(name=song_source).id
 
         if info.get('album') and info.get('artist'):
             if info.get('album'):
@@ -372,6 +371,10 @@ def add_song(request):
                     os.remove(artwork_file)
 
             os.remove(f"/tmp/{sha1sum}")
+
+            # Save the song source in the session in case we're adding
+            #  multiple songs from the same source.
+            request.session['song_source'] = form.cleaned_data['source'].name
 
             if not messages.get_messages(request):
                 action = 'Upload'
