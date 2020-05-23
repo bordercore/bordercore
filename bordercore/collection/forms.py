@@ -24,5 +24,5 @@ class CollectionForm(ModelForm):
         fields = ('name', 'description')
         widgets = {
             'description': Textarea(attrs={'class': 'form-control'}),
-            'name': TextInput(attrs={'class': 'form-control'})
+            'name': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'})
         }
