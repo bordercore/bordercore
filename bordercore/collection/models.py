@@ -19,7 +19,7 @@ class Collection(TimeStampedModel):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     blob_list = JSONField(blank=True, null=True)
     tags = models.ManyToManyField(Tag)
-    description = models.TextField(null=True)
+    description = models.TextField(null=True, blank=True)
     is_private = models.BooleanField(default=False)
 
     def get_created(self):
