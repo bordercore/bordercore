@@ -1,0 +1,28 @@
+{
+    "query": {
+        "bool": {
+            "must": [
+                {
+                    "term": {
+                        "doctype": "book"
+                    }
+                },
+                {
+                    "wildcard": {
+                        "title.raw": {
+                            "value": "*serious python*"
+                        }
+                    }
+                },
+                {
+                    "term": {
+                        "user_id": 1
+                    }
+                }
+            ]
+        }
+    },
+    "from": 0,
+    "size": 20,
+    "_source": ["author", "date", "date_unixtime", "doctype", "filepath", "importance", "sha1sum", "tags", "title", "uuid"]
+}

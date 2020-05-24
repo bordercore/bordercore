@@ -1,0 +1,39 @@
+{
+    "query": {
+        "function_score": {
+            "random_score": {
+            },
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "doctype": "book"
+                            }
+                        },
+                        {
+                            "wildcard": {
+                                "content_type.keyword": {
+                                    "value": "*/pdf"
+                                }
+                            }
+                        },
+                        {
+                            "term": {
+                                "user_id": 1
+                            }
+                        },
+                        {
+                            "term": {
+                                "is_private": false
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "from": 0,
+    "size": 1,
+    "_source": ["author", "date", "date_unixtime", "doctype", "content_type", "filename", "importance", "sha1sum", "tags", "title", "uuid"]
+}

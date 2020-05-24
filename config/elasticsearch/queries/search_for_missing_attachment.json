@@ -1,0 +1,45 @@
+{
+    "query": {
+        "function_score": {
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "user_id": 1
+                            }
+                        },
+                        {
+                            "bool": {
+                                "must": [
+                                    {
+                                        "exists": {
+                                            "field": "data"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "term": {
+                                "doctype": "blob"
+                            }
+                        }
+                    ]
+                }
+            },
+            "random_score": {}
+        }
+    },
+    "from": 0, "size": 1,
+    "_source": ["date",
+                "date_unixtime",
+                "doctype",
+                "filepath",
+                "bordercore_id",
+                "last_modified",
+                "sha1sum",
+                "tags",
+                "title",
+                "uuid"]
+}

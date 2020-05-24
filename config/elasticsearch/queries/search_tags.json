@@ -1,0 +1,31 @@
+{
+    "query": {
+        "bool": {
+            "must": [
+                {
+                    "match": {
+                        "tags": "spring"
+                    }
+                },
+                {
+                    "match": {
+                        "tags": "java"
+                    }
+                },
+                {
+                    "term": {
+                        "user_id": 1
+                    }
+                }
+
+            ]
+        }
+    },
+    "_source": [
+        "uuid",
+        "title",
+        "tags",
+        "sha1sum",
+        "filename"
+    ]
+}

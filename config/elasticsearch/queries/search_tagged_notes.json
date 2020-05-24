@@ -1,0 +1,43 @@
+{
+    "query": {
+        "bool": {
+            "must": [
+                {
+                    "multi_match": {
+                        "query": "hyper",
+                        "fields": ["contents", "title", "uuid"]
+                    }
+                },
+                {
+                    "term": {
+                        "user_id": 1
+                    }
+                },
+                {
+                    "term": {
+                        "tags.keyword": "*inux*"
+                    }
+                },
+                {
+                    "term": {
+                        "doctype": "note"
+                    }
+                }
+            ]
+        }
+    },
+    "from": 0, "size": 1,
+    "_source": ["author",
+                "date",
+                "date_unixtime",
+                "doctype",
+                "filepath",
+                "importance",
+                "bordercore_id",
+                "last_modified",
+                "sha1sum",
+                "tags",
+                "title",
+                "url",
+                "uuid"]
+}

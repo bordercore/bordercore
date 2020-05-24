@@ -1,0 +1,44 @@
+{
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "term": {
+                            "user_id": 1
+                        }
+                    },
+                    {
+                        "bool": {
+                            "must_not": [
+                                {
+                                    "exists": {
+                                        "field": "size"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "term": {
+                            "doctype": "blob"
+                        }
+                    }
+                ]
+            }
+        },
+        "from": 0, "size": 10,
+        "_source": ["author",
+                    "bordercore_todo_task",
+                    "date",
+                    "date_unixtime",
+                    "doctype",
+                    "filepath",
+                    "importance",
+                    "bordercore_id",
+                    "last_modified",
+                    "sha1sum",
+                    "tags",
+                    "title",
+                    "url",
+                    "uuid"]
+    }

@@ -1,0 +1,27 @@
+{
+    "query": {
+        "function_score": {
+            "random_score": {
+            },
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "doctype": "book"
+                            }
+                        },
+                        {
+                            "term": {
+                                "user_id": 1
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "from": 0,
+    "size": 1,
+    "_source": ["author", "date", "date_unixtime", "content_type", "doctype", "filepath", "importance", "is_private", "sha1sum", "tags", "title", "uuid"]
+}

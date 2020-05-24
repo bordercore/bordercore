@@ -1,0 +1,23 @@
+{
+    "query": {
+        "bool": {
+            "must": [
+                {
+                    "term": {
+                        "uuid.keyword": "a337cd3b-52c7-46d6-b971-e44669a7eb1f"
+                    }
+                },
+                {
+                    "match": {
+                        "author": {
+                            "query": "Victoria Wasylak",
+                            "operator": "and"
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "from": 0, "size": 10000,
+    "_source": ["filename", "sha1sum", "uuid"]
+}
