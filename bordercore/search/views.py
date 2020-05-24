@@ -6,33 +6,12 @@ from elasticsearch import Elasticsearch
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
 from blob.models import Blob
 from lib.time_utils import get_relative_date
 from tag.models import Tag
-
-RESULT_COUNT_PER_PAGE = 100
-RESULT_COUNT_PER_PAGE_NOTE = 10
-
-
-def get_paginator(page, object_list):
-
-    paginator = {
-        "number": page,
-        "num_pages": int(math.ceil(object_list["hits"]["total"]["value"] / RESULT_COUNT_PER_PAGE_NOTE)),
-        "total_results": object_list["hits"]["total"]["value"]
-    }
-
-    paginator["has_previous"] = True if page != 1 else False
-    paginator["has_next"] = True if page != paginator["num_pages"] else False
-
-    paginator["previous_page_number"] = page - 1
-    paginator["next_page_number"] = page + 1
-
-    return paginator
 
 
 def get_creators(matches):
@@ -56,6 +35,24 @@ class SearchListView(ListView):
     template_name = 'kb/search.html'
     SECTION = 'KB'
     context_object_name = 'info'
+    RESULT_COUNT_PER_PAGE = 100
+    RESULT_COUNT_PER_PAGE_NOTE = 10
+
+    def get_paginator(self, page, object_list):
+
+        paginator = {
+            "number": page,
+            "num_pages": int(math.ceil(object_list["hits"]["total"]["value"] / self.RESULT_COUNT_PER_PAGE_NOTE)),
+            "total_results": object_list["hits"]["total"]["value"]
+        }
+
+        paginator["has_previous"] = True if page != 1 else False
+        paginator["has_next"] = True if page != paginator["num_pages"] else False
+
+        paginator["previous_page_number"] = page - 1
+        paginator["next_page_number"] = page + 1
+
+        return paginator
 
     def get_facet_query(self, facet, term):
 
@@ -83,7 +80,7 @@ class SearchListView(ListView):
         notes_search = True if self.kwargs.get("notes_search", "") else False
 
         if notes_search:
-            RESULT_COUNT_PER_PAGE = RESULT_COUNT_PER_PAGE_NOTE
+            self.RESULT_COUNT_PER_PAGE = self.RESULT_COUNT_PER_PAGE_NOTE
 
         if "search" in self.request.GET or notes_search:
 
@@ -96,7 +93,7 @@ class SearchListView(ListView):
             if hit_count == "No limit":
                 hit_count = 1000000
             elif hit_count is None:
-                hit_count = RESULT_COUNT_PER_PAGE
+                hit_count = self.RESULT_COUNT_PER_PAGE
 
             es = Elasticsearch(
                 [settings.ELASTICSEARCH_ENDPOINT],
@@ -146,7 +143,7 @@ class SearchListView(ListView):
 
             if notes_search:
 
-                search_object["from"] = (page - 1) * RESULT_COUNT_PER_PAGE_NOTE
+                search_object["from"] = (page - 1) * self.RESULT_COUNT_PER_PAGE_NOTE
 
                 search_object["query"]["bool"]["must"].append(
                     {
@@ -189,7 +186,7 @@ class SearchListView(ListView):
             self.SECTION = "Notes"
             self.template_name = "blob/note_list.html"
             page = int(self.request.GET.get("page", 1))
-            context["paginator"] = get_paginator(page, context["info"])
+            context["paginator"] = self.get_paginator(page, context["info"])
             context["favorite_notes"] = self.request.user.userprofile.favorite_notes.all().only("title", "uuid").order_by("sortordernote__sort_order")
 
         info = []
