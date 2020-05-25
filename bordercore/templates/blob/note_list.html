@@ -35,7 +35,6 @@
                     <div class="col-auto has-search">
                         <span class="fa fa-search form-control-feedback"></span>
                         <input class="form-control" id="search" type="text" name="search" value="{{ request.GET.search_item }}" accesskey="s" style="width: 300px" placeholder="Search"/>
-                        <input name="is-notes-search" value="true" type="hidden" />
                     </div>
                 </div>
                 <a class="btn btn-primary ml-2" href="{% url 'blob_add' %}?is_note=true">Add note</a>
@@ -52,27 +51,25 @@
 
             {% for note in info %}
 
-                <h2>
-                    <a href="{% url 'blob_detail' note.uuid %}">{{ note.title|default:"Note Title" }}</a>
-                </h2>
+                <div id="note">
+                    <h2>
+                        <a href="{% url 'blob_detail' note.uuid %}">{{ note.title|default:"Note Title" }}</a>
+                    </h2>
 
-                <span class="glyphicon glyphicon-time"></span> <span class="muted"> {{ note.date }} </span>
+                    <span class="glyphicon glyphicon-time"></span> <span class="muted"> {{ note.date }} </span>
 
-                <br /><br />
+                    <br /><br />
 
-                <div>
-                    {{ note.content|safe }}
-                </div>
-
-                {% if note.tags %}
+                    <div>
+                        {{ note.content|safe }}
+                    </div>
 
                     {% for tag in note.tags %}
-                        <a class="badge badge-primary" href="{% url 'notes_list' %}?tagsearch={{ tag }}">{{ tag }}</a>
+                        <a id="tag" class="badge badge-primary" href="{% url 'notes_list' %}?tagsearch={{ tag }}">{{ tag }}</a>
                     {% endfor %}
 
-                {% endif %}
-
-                <br /><br />
+                    <br /><br />
+                </div>
 
             {% endfor %}
 

@@ -1,7 +1,9 @@
 import math
 import re
 
+import markdown
 from elasticsearch import Elasticsearch
+from markdown.extensions.codehilite import CodeHiliteExtension
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -100,15 +102,6 @@ class SearchListView(ListView):
                 verify_certs=False
             )
 
-            # search_terms = []
-
-            # if search_term:
-            #     search_terms.append(handle_quotes(self.request, search_term))
-            # else:
-            #     search_terms.insert(0, "''")
-
-            # search_term = " AND ".join(search_terms)
-
             search_object = {
                 "query": {
                     "bool": {
@@ -144,6 +137,10 @@ class SearchListView(ListView):
             if notes_search:
 
                 search_object["from"] = (page - 1) * self.RESULT_COUNT_PER_PAGE_NOTE
+
+                # Only retrieve the contents for notes, which should be
+                #  relatively small
+                search_object["_source"].append("contents")
 
                 search_object["query"]["bool"]["must"].append(
                     {
@@ -228,8 +225,7 @@ class SearchListView(ListView):
                 )
 
                 if notes_search:
-                    obj = Blob.objects.get(uuid=match["uuid"])
-                    match["content"] = obj.get_content()
+                    match["content"] = markdown.markdown(myobject["_source"]["contents"], extensions=[CodeHiliteExtension(guess_lang=False), "tables"])
 
                 info.append(match)
 
