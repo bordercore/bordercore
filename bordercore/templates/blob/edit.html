@@ -407,7 +407,12 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                 if (value == 'Bold') {
                     $('#id_content').val( text.substr(0, range.start) + '**' + range.text + '**' +  text.substr(range.end, text.length - range.end));
                 } else if (value == 'Insert link') {
-                    $('#id_content').val( text.substr(0, range.start) + '[text](url)' + range.text + text.substr(range.end, text.length - range.end));
+                    if (range.text.startsWith("http")) {
+                        newText = '[text](' + range.text+ ')';
+                    } else {
+                        newText = '[' + range.text + '](url)';
+                    }
+                    $('#id_content').val( text.substr(0, range.start) + newText + text.substr(range.end, text.length - range.end));
                 } else if (value == 'Insert list') {
                     $('#id_content').val( text.substr(0, range.start) + '\n - List item\n' + text.substr(range.end, text.length - range.end));
                 } else if (value == 'Indent Code') {
