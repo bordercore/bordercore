@@ -257,19 +257,21 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
     </div>
 
     {% for m in metadata %}
-        <div class="form-group {% if field.errors %}error{% endif %} row">
-            <label class="bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">{{ m.0 }}</label>
-            <div class="col-lg-10 col-sm-10">
-                <div class="col-lg-10 input-group">
-                    <input type="text" name="{{ forloop.counter }}_{{ m.0 }}" id="id_new" value="{{ m.1 }}" class="form-control" autocomplete="off" />
-                    <span class="input-group-append">
-                        <button class="btn btn-danger btn-remove" type="button">
-                            <span class="glyphicon glyphicon-minus"></span>
-                        </button>
-                    </span>
+        {% if m.name != "is_book" %}
+            <div class="form-group {% if field.errors %}error{% endif %} row">
+                <label class="bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">{{ m.name }}</label>
+                <div class="col-lg-10 col-sm-10">
+                    <div class="col-lg-10 input-group">
+                        <input type="text" name="{{ forloop.counter }}_{{ m.name }}" id="id_new" value="{{ m.value }}" class="form-control" autocomplete="off" />
+                        <span class="input-group-append">
+                            <button class="btn btn-danger btn-remove" type="button">
+                                <span class="glyphicon glyphicon-minus"></span>
+                            </button>
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
+        {% endif %}
     {% endfor %}
 
     <div class="form-group">
@@ -495,6 +497,14 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
             } );
 
             {% for tag in object.tags.all %}
+            $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
+            {% endfor %}
+
+            {% for tag in linked_blob.tags.all %}
+            $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
+            {% endfor %}
+
+            {% for tag in linked_collection_blob_list.0.tags.all %}
             $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
             {% endfor %}
 

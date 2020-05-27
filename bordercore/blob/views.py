@@ -205,7 +205,7 @@ class BlobUpdateView(UpdateView):
         except ClientError:
             log.warn(f"No S3 cover image found for id={self.object.id}")
 
-        context['metadata'] = preprocess_metadata(self.object.metadata_set.all())
+        context['metadata'] = self.object.metadata_set.all()
         if True in [True for x in self.object.metadata_set.all() if x.name == 'is_book']:
             context['is_book'] = True
         context['is_private'] = self.object.is_private
@@ -310,21 +310,6 @@ def handle_metadata(blob, request):
     if request.POST.get('is_book', ''):
         new_metadata = MetaData(user=request.user, name='is_book', value='true', blob=blob)
         new_metadata.save()
-
-
-def preprocess_metadata(metadata_in):
-
-    metadata_out = []
-
-    metadata_count = 0
-
-    for m in metadata_in:
-        if m.name == 'is_book':
-            continue
-        metadata_count = metadata_count + 1
-        metadata_out.append((m.name, m.value))
-
-    return metadata_out
 
 
 def handle_linked_blob(blob, request):
