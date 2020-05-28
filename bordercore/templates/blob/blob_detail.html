@@ -189,6 +189,13 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
 
           {% else %}
 
+                {% if content_type == 'Audio' %}
+                <audio controls controlsList="nodownload">
+                    <source src="{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}" type="audio/mpeg">
+  Your browser does not support the audio tag.
+                </audio>
+                {% endif %}
+
                 {% if object.content %}
                     <div id="content">
                         {{ object.get_content|safe }}
@@ -200,13 +207,6 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
                 {% endif %}
 
                 <br /><br />
-
-                {% if content_type == 'Audio' %}
-                <audio controls controlsList="nodownload">
-                    <source src="{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}" type="audio/mpeg">
-  Your browser does not support the audio tag.
-                </audio>
-                {% endif %}
 
           {% endif %}
 
