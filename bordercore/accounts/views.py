@@ -27,6 +27,7 @@ class UserProfileDetailView(UpdateView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         context = self.get_context_data(object=self.object, form=form)
+        context['groups'] = ', '.join([x.name for x in request.user.groups.all()])
         context['section'] = SECTION
         context['title'] = 'Preferences'
         return self.render_to_response(context)

@@ -21,6 +21,13 @@
         <div class="col-lg-5 align-self-center">{{ user.auth_token }}</div>
     </div>
 
+    {% if user.groups.all %}
+        <div class="form-group row">
+            <label class="bold col-lg-2 col-form-label text-right" for="inputTitle">Groups</label>
+            <div class="col-lg-5 align-self-center">{{ groups }}</div>
+        </div>
+    {% endif %}
+
     <div class="form-group row">
         <label class="bold col-lg-2 col-form-label text-right" for="inputTitle">RSS Feeds</label>
         <div class="col-lg-5 align-self-center"><a href="{% url 'feed_subscriptions' %}">Edit</a></div>
