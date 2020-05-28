@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -45,3 +46,23 @@ def fix_file_modified(uuid, force=True):
             logger.warn("File modification timestamp exists and matches filesystem. Nothing to do.")
     else:
         logger.error(f"File not found on file system: {file_path}")
+
+
+def get_s3_metadata(sha1sum, uuid):
+
+    s3 = boto3.resource("s3")
+
+    if not uuid and not sha1sum:
+        raise Exception("Specify the sha1sum or uuid")
+    elif uuid and sha1sum:
+        raise Exception("You must not specify both the sha1sum and uuid")
+    elif uuid:
+        kwargs = {"uuid": uuid}
+    elif sha1sum:
+        kwargs = {"sha1sum": sha1sum}
+
+    b = Blob.objects.get(**kwargs)
+
+    obj = s3.Object(bucket_name='bordercore-blobs', key=b.get_s3_key())
+
+    logger.info(json.dumps(obj.metadata))
