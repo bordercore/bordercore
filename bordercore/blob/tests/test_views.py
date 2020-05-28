@@ -78,7 +78,7 @@ def test_blob_detail(user, blob_image_factory, client):
 
     soup = BeautifulSoup(resp.content, "html.parser")
 
-    sha1sum = soup.select("small#sha1sum")[0].text
+    sha1sum = soup.select("small#sha1sum")[0].text.strip()
     assert sha1sum == blob_image_factory.sha1sum
 
     assert soup.select("div#left-block h1#title")[0].text == blob_image_factory.get_title(remove_edition_string=True)
