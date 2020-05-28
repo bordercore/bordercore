@@ -1,5 +1,6 @@
+import json
+
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.dateformat import format
@@ -9,7 +10,7 @@ from django.views.generic.list import ListView
 
 from tag.models import Tag
 from todo.forms import TodoForm
-from todo.models import Todo
+from todo.models import TagTodo, TagTodoSortOrder, Todo
 
 SECTION = 'Todo'
 
@@ -38,7 +39,8 @@ class TodoListView(ListView):
             if tag_info:
                 tag = tag_info[0].name
         self.tagsearch = tag
-        return Todo.objects.filter(user=self.request.user, tags__name=tag)
+
+        return TagTodo.objects.get(tag__name=tag).tagtodosortorder_set.all().select_related("todo")
 
     def get_context_data(self, **kwargs):
         context = super(TodoListView, self).get_context_data(**kwargs)
@@ -50,15 +52,17 @@ class TodoListView(ListView):
 
         for todo in context['object_list']:
 
-            data = dict(task=todo.task,
-                        priority=Todo.get_priority_name(todo.priority),
-                        modified=todo.get_modified(),
-                        unixtime=format(todo.modified, 'U'),
-                        uuid=todo.uuid)
+            data = dict(manual_order="",
+                        sort_order=todo.sort_order,
+                        task=todo.todo.task,
+                        priority=Todo.get_priority_name(todo.todo.priority),
+                        modified=todo.todo.get_modified(),
+                        unixtime=format(todo.todo.modified, 'U'),
+                        uuid=todo.todo.uuid)
 
-            if todo.data:
-                fields.extend(list(todo.data.keys()))
-                data = {**data, **todo.data}
+            if todo.todo.data:
+                fields.extend(list(todo.todo.data.keys()))
+                data = {**data, **todo.todo.data}
 
             info.append(data)
 
@@ -68,16 +72,12 @@ class TodoListView(ListView):
 
         # These fields go first so we can easily reference
         #  them in the template by index
-        context['cols'] = ['unixtime', 'uuid']
+        context['cols'] = ['Manual', 'sort_order', 'unixtime', 'uuid']
 
         # Add the optional "data" JSONField fields
         context['cols'].extend(fields)
 
         context['cols'].extend(['task', 'priority', 'modified'])
-
-        # Sort by "modified" by default. It's assumed to be
-        #  the last column
-        context['sort_by_col'] = len(context['cols']) - 1
 
         context['section'] = SECTION
         context['info'] = info
@@ -175,3 +175,22 @@ class TodoDeleteView(DeleteView):
 
     def get_success_url(self):
         return reverse('todo_list')
+
+
+@login_required
+def sort_todo(request):
+    """
+    Given an ordered list of bookmarks with a specified tag, move a
+    bookmark to a new position within that list
+    """
+
+    tag = request.POST["tag"]
+    todo_uuid = request.POST["todo_uuid"]
+    position = int(request.POST["position"])
+
+    tt = TagTodo.objects.get(tag__name=tag)
+    todo = Todo.objects.get(uuid=todo_uuid)
+    tbso = TagTodoSortOrder.objects.get(tag_todo=tt, todo=todo)
+    tbso.reorder(position)
+
+    return JsonResponse(json.dumps("OK"), safe=False)

@@ -3,13 +3,14 @@ from elasticsearch import Elasticsearch
 
 import django
 from django.conf import settings
+from django.db.models import Count, Max, Min, Q
 
 pytestmark = pytest.mark.data_quality
 
 django.setup()
 
-from todo.models import Todo  # isort:skip
-
+from todo.models import Todo, TagTodoSortOrder  # isort:skip
+from tag.models import Tag  # isort:skip
 
 @pytest.fixture()
 def es():
@@ -92,3 +93,24 @@ def test_elasticsearch_todo_tasks_exist_in_db(es):
 
     for task in found:
         assert Todo.objects.filter(id=task["_source"]["bordercore_id"]).count() == 1, f"todo exists in Elasticsearch but not in database, id={task['_id']}"
+
+
+def test_todo_sort_order():
+    """
+    This test checks for three things:
+
+    For every user, min(sort_order) = 1
+    For every user, max(sort_order) should equal the total count
+    No duplicate sort_order values for each user
+    """
+    tags = Tag.objects.filter(Q(todo__isnull=False)).distinct("name")
+
+    for tag in tags:
+
+        count = TagTodoSortOrder.objects.filter(tag_todo__tag=tag).count()
+        if count > 0:
+            assert TagTodoSortOrder.objects.filter(tag_todo__tag=tag).aggregate(Min("sort_order"))["sort_order__min"] == 1, f"Min(sort_order) is not 1 for todo tag={tag}"
+            assert TagTodoSortOrder.objects.filter(tag_todo__tag=tag).aggregate(Max("sort_order"))["sort_order__max"] == count, f"Max(sort_order) does not equal total count for todo tag={tag}"
+
+            q = TagTodoSortOrder.objects.values("sort_order", "tag_todo").order_by().annotate(dcount=Count("sort_order")).filter(dcount__gt=1)
+            assert len(q) == 0, f"Multiple sort_order values found for tag={tag}"

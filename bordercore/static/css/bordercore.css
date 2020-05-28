@@ -179,6 +179,10 @@ ul.pagination {
   padding: 0.37rem 1.25rem;
   margin-left: 1rem; }
 
+.cursor_grab {
+  cursor: -webkit-grab;
+  cursor: -moz-grab; }
+
 #myModal #title {
   width: 300px; }
 

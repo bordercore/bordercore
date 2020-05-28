@@ -34,6 +34,7 @@ from music.views import AlbumDetailView, MusicListJson
 from search import views as search_views
 from search.views import SearchListView, SearchTagDetailView
 from tag import views as tag_views
+from todo import views as todo_views
 from todo.views import (TodoCreateView, TodoDeleteView, TodoDetailView,
                         TodoListView)
 
@@ -150,6 +151,7 @@ urlpatterns = [
     path('todo/add', TodoCreateView.as_view(), name='todo_add'),
     path('todo/edit/<uuid:uuid>', TodoDetailView.as_view(), name='todo_edit'),
     path('todo/delete/<uuid:uuid>', TodoDeleteView.as_view(), name='todo_delete'),
+    path('todo/sort_todo', todo_views.sort_todo, name='sort_todo'),
     path('todo/', TodoListView.as_view(), name='todo_list'),
 
 ]
