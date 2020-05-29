@@ -40,7 +40,10 @@ class TodoListView(ListView):
                 tag = tag_info[0].name
         self.tagsearch = tag
 
-        return TagTodo.objects.get(tag__name=tag).tagtodosortorder_set.all().select_related("todo")
+        if tag:
+            return TagTodo.objects.get(tag__name=tag).tagtodosortorder_set.all().select_related("todo")
+        else:
+            return []
 
     def get_context_data(self, **kwargs):
         context = super(TodoListView, self).get_context_data(**kwargs)
