@@ -12,6 +12,7 @@ django.setup()
 from todo.models import Todo, TagTodoSortOrder  # isort:skip
 from tag.models import Tag  # isort:skip
 
+
 @pytest.fixture()
 def es():
 
@@ -39,7 +40,7 @@ def test_todo_tasks_in_db_exist_in_elasticsearch(es):
         }
 
         found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["total"]["value"]
-        assert found == 1, f"todo task found in the database but not in Elasticsearch, id={task.id}"
+        assert found == 1, f"todo task found in the database but not in Elasticsearch, id={task.uuid}"
 
 
 def test_todo_tags_match_elasticsearch(es):

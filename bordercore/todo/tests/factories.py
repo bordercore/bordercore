@@ -13,7 +13,6 @@ class UserFactory(factory.DjangoModelFactory):
         django_get_or_create = ("username",)
 
     username = "testuser"
-    # username = factory.Faker("user_name")
 
 
 @factory.django.mute_signals(signals.post_save)

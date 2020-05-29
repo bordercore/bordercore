@@ -33,7 +33,6 @@ class TodoListView(ListView):
         elif self.request.user.userprofile.todo_default_tag:
             tag = self.request.user.userprofile.todo_default_tag.name
         else:
-            # TODO: get a random tag
             tag_info = Tag.objects.filter(todo__user=self.request.user, todo__isnull=False).distinct('name')
             tag = None
             if tag_info:

@@ -5,8 +5,9 @@ from todo.models import Todo
 
 from .factories import TodoFactory
 
+pytestmark = pytest.mark.django_db
 
-@pytest.mark.django_db
+
 def test_get_todo_counts():
 
     task_1 = TodoFactory()
