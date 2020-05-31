@@ -54,7 +54,7 @@
 
         $(document).ready(function() {
 
-            {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" %}
+            {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" fieldName="name" %}
 
             {% if action == 'Edit' %}
             $("input.btn[value='Delete']").click( function() {

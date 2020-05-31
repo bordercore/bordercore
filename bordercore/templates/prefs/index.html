@@ -69,7 +69,7 @@
 
         $(document).ready(function() {
 
-            {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" %}
+            {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" fieldName="name" %}
 
             {% for tag in object.favorite_tags.all %}
             $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});

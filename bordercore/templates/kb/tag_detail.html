@@ -150,7 +150,7 @@
 
         $(document).ready(function() {
 
-            {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" %}
+            {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" fieldName="name" %}
 
             // Tags are stored by tagsinput as objects which look like this:
             //
@@ -158,7 +158,7 @@
 
             // Add the initial list of tags in the search box
             {% for tag in tag_list %}
-            $('#id_tags').tagsinput('add',{'value':'{{ tag.name }}', 'text':'{{ tag.name }}', 'is_meta': '{{ tag.is_meta }}'});
+            $('#id_tags').tagsinput('add',{'value':'{{ tag.name }}', 'name':'{{ tag.name }}', 'is_meta': '{{ tag.is_meta }}'});
             {% if forloop.last %}
             $('.bootstrap-tagsinput input').attr('placeholder', '')
             {% endif %}
