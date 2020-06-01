@@ -40,41 +40,49 @@
 
     {% endif %}
 
-    {% for key, values in metadata.items %}
-        {% if not key in fields_ignore %}
-            <div>
-                <strong class="metadata_name">{{ key }}</strong><br />
-                <span class="metadata_value">{{ values }}</span>
-            </div>
-            {% endif %}
-    {% endfor %}
-    {% if content_type %}
-        <div>
-            <strong>Object Type</strong><br />
-            {{ content_type }}
-        </div>
-    {% endif %}
-    {% if object.sha1sum %}
-        <div>
-            <strong>Sha1sum</strong><br />
-            <small id="sha1sum">
-                {% if request.user|is_in_group:"Admin" %}
-                    <a href="{{ aws_url }}">{{ object.sha1sum }}</a>
-                {% else %}
-                    {{ object.sha1sum }}
+    {% if metadata.items or content_type or object.sha1sum %}
+
+        <div id="meta-box">
+
+            {% for key, values in metadata.items %}
+                {% if not key in fields_ignore %}
+                    <div>
+                        <strong class="metadata_name">{{ key }}</strong><br />
+                        <span class="metadata_value">{{ values }}</span>
+                    </div>
                 {% endif %}
-            </small>
+            {% endfor %}
+            {% if content_type %}
+                <div>
+                    <strong>Object Type</strong><br />
+                    {{ content_type }}
+                </div>
+            {% endif %}
+            {% if object.sha1sum %}
+                <div>
+                    <strong>Sha1sum</strong><br />
+                    <small id="sha1sum">
+                        {% if request.user|is_in_group:"Admin" %}
+                            <a href="{{ aws_url }}">{{ object.sha1sum }}</a>
+                        {% else %}
+                            {{ object.sha1sum }}
+                        {% endif %}
+                    </small>
+                </div>
+                <div>
+                    <strong>Size</strong><br />
+                    <small>{{ size }}</small>
+                </div>
+                {% if elasticsearch_info.num_pages %}
+                    <div>
+                        <strong>Pages</strong><br />
+                        <small>{{ elasticsearch_info.num_pages }}</small>
+                    </div>
+                {% endif %}
+            {% endif %}
+
         </div>
-        <div>
-            <strong>Size</strong><br />
-            <small>{{ size }}</small>
-        </div>
-        {% if elasticsearch_info.num_pages %}
-        <div>
-            <strong>Pages</strong><br />
-            <small>{{ elasticsearch_info.num_pages }}</small>
-        </div>
-        {% endif %}
+
     {% endif %}
 
     {% if object.note %}
