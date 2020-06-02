@@ -14,7 +14,7 @@ from accounts.forms import UserProfileForm
 from accounts.models import SortOrderNote, UserProfile
 from blob.models import Blob
 
-SECTION = 'Prefs'
+SECTION = 'prefs'
 
 
 @method_decorator(login_required, name='dispatch')
@@ -29,6 +29,7 @@ class UserProfileDetailView(UpdateView):
         context = self.get_context_data(object=self.object, form=form)
         context['groups'] = ', '.join([x.name for x in request.user.groups.all()])
         context['section'] = SECTION
+        context['nav'] = 'prefs'
         context['title'] = 'Preferences'
         return self.render_to_response(context)
 

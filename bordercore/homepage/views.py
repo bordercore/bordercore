@@ -21,7 +21,7 @@ from music.models import Listen
 from quote.models import Quote
 from todo.models import Todo
 
-SECTION = 'Home'
+SECTION = 'homepage'
 
 
 def get_overdue_exercise(request):
@@ -113,6 +113,7 @@ def homepage(request):
 
     return render(request, 'homepage/index.html',
                   {'section': SECTION,
+                   'nav': 'homepage',
                    'quote': quote,
                    'tasks': tasks,
                    'music': music,

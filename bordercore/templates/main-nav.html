@@ -3,43 +3,43 @@
 
         <div class="navbar navbar-dark navbar-expand-lg bg-dark main-navbar">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item"><a class="nav-link" href="{% url 'homepage' %}"><i class="glyphicon glyphicon-home"></i> Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'bookmark_list' %}">Bookmarks</a></li>
+                <li v-bind:class="[activeClass]" id="nav-homepage" class="nav-item"><a class="nav-link" href="{% url 'homepage' %}"><i class="glyphicon glyphicon-home"></i> Home</a></li>
+                <li v-bind:class="[activeClass]" id="nav-bookmarks" class="nav-item"><a class="nav-link" href="{% url 'bookmark_list' %}">Bookmarks</a></li>
 
                 <li class="dropdown nav-item">
-                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Feeds</a>
+                    <a v-bind:class="[activeClass]" id="nav-feed" href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Feeds</a>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" href="{% url 'feed_list' %}">Browse</a>
-                        <a class="dropdown-item" href="{% url 'feed_add' %}">Add a Feed</a>
-                        <a class="dropdown-item" href="{% url 'feed_subscriptions' %}">Manage Subscriptions</a>
+                        <a v-bind:class="[activeClass]" id="nav-feed-home" class="dropdown-item" href="{% url 'feed_list' %}">Browse</a>
+                        <a v-bind:class="[activeClass]" id="nav-feed-add" class="dropdown-item" href="{% url 'feed_add' %}">Add a Feed</a>
+                        <a v-bind:class="[activeClass]" id="nav-feed-manage" class="dropdown-item" href="{% url 'feed_subscriptions' %}">Manage Subscriptions</a>
                     </div>
                 </li>
 
-                <li class="nav-item"><a class="nav-link" href="{% url 'notes_list' %}">Notes</a></li>
+                <li v-bind:class="[activeClass]" id="nav-notes" class="nav-item"><a class="nav-link" href="{% url 'notes_list' %}">Notes</a></li>
 
                 <li class="dropdown nav-item">
-                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">KB</a>
+                    <a v-bind:class="[activeClass]" id="nav-kb" href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">KB</a>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" href="{% url 'search' %}">Search</a>
-                        <a class="dropdown-item" href="{% url 'kb_search_tag_detail_search' %}">Tag Search</a>
-                        <a class="dropdown-item" href="{% url 'collection_list' %}">Collections</a>
-                        <a class="dropdown-item" href="{% url 'blob_add' %}">Add Blob</a>
+                        <a v-bind:class="[activeClass]" id="nav-search-home" class="dropdown-item" href="{% url 'search' %}">Search</a>
+                        <a v-bind:class="[activeClass]" id="nav-search-tag" class="dropdown-item" href="{% url 'kb_search_tag_detail_search' %}">Tag Search</a>
+                        <a v-bind:class="[activeClass]" id="nav-collection" class="dropdown-item" href="{% url 'collection_list' %}">Collections</a>
+                        <a v-bind:class="[activeClass]" id="nav-blob" class="dropdown-item" href="{% url 'blob_add' %}">Add Blob</a>
                     </div>
                 </li>
 
-                <li class="nav-item"><a class="nav-link" href="{% url 'drill_list' %}">Drill</a></li>
+                <li v-bind:class="[activeClass]" id="nav-drill" class="nav-item"><a class="nav-link" href="{% url 'drill_list' %}">Drill</a></li>
 
                 <li class="dropdown nav-item">
-                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Music</a>
+                    <a v-bind:class="[activeClass]" id="nav-music" href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Music</a>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" href="{% url 'music_list' %}">Browse</a>
-                        <a class="dropdown-item" href="{% url 'add_song' %}">Add a Song</a>
+                        <a v-bind:class="[activeClass]" id="nav-music-browse" class="dropdown-item" href="{% url 'music_list' %}">Browse</a>
+                        <a v-bind:class="[activeClass]" id="nav-music-add" class="dropdown-item" href="{% url 'add_song' %}">Add a Song</a>
                     </div>
                 </li>
 
-                <li class="nav-item"><a class="nav-link" href="{% url 'todo_list' %}">Todo</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'fitness_summary' %}">Fitness</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'prefs' %}">Prefs</a></li>
+                <li v-bind:class="[activeClass]" id="nav-todo" class="nav-item"><a class="nav-link" href="{% url 'todo_list' %}">Todo</a></li>
+                <li v-bind:class="[activeClass]" id="nav-fitness" class="nav-item"><a class="nav-link" href="{% url 'fitness_summary' %}">Fitness</a></li>
+                <li v-bind:class="[activeClass]" id="nav-prefs" class="nav-item"><a class="nav-link" href="{% url 'prefs' %}">Prefs</a></li>
 
             </ul>
 

@@ -35,7 +35,7 @@ def get_creators(matches):
 class SearchListView(ListView):
 
     template_name = 'kb/search.html'
-    SECTION = 'KB'
+    SECTION = 'kb'
     context_object_name = 'info'
     RESULT_COUNT_PER_PAGE = 100
     RESULT_COUNT_PER_PAGE_NOTE = 10
@@ -180,7 +180,7 @@ class SearchListView(ListView):
         notes_search = True if self.kwargs.get("notes_search", "") else False
 
         if notes_search:
-            self.SECTION = "Notes"
+            self.SECTION = "notes"
             self.template_name = "blob/note_list.html"
             page = int(self.request.GET.get("page", 1))
             context["paginator"] = self.get_paginator(page, context["info"])
@@ -237,6 +237,7 @@ class SearchListView(ListView):
 
         context["info"] = info
         context["section"] = self.SECTION
+        context["nav"] = "search-home"
         context["search_sort_by"] = self.request.session.get("search_sort_by", "")
         context["title"] = "Search"
         return context
@@ -246,7 +247,7 @@ class SearchListView(ListView):
 class SearchTagDetailView(ListView):
 
     template_name = "kb/tag_detail.html"
-    SECTION = "KB"
+    SECTION = "kb"
     RESULT_COUNT_PER_PAGE = 100
     context_object_name = "info"
 
@@ -312,6 +313,7 @@ class SearchTagDetailView(ListView):
 
         context["kb_tag_detail_current_tab"] = self.request.session.get("kb_tag_detail_current_tab", "")
         context["section"] = self.SECTION
+        context["nav"] = "search-tag"
 
         if context["tag_list"]:
             context["title"] = "Search :: Tag Detail :: {}".format(", ".join(tag_list))

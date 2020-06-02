@@ -17,7 +17,7 @@ from bookmark.forms import BookmarkForm
 from bookmark.models import Bookmark
 from tag.models import Tag, TagBookmark, TagBookmarkSortOrder
 
-SECTION = 'Bookmarks'
+SECTION = 'bookmarks'
 BOOKMARKS_PER_PAGE = 50
 
 

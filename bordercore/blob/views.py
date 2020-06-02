@@ -26,7 +26,7 @@ from blob.models import Blob, MetaData
 from collection.models import Collection
 from lib.time_utils import parse_date_from_string
 
-SECTION = 'Blob'
+SECTION = 'kb'
 
 # TODO: Move this to Django config file
 amazon_api_config = {
@@ -55,6 +55,7 @@ class BlobCreateView(CreateView):
             # Grab the initial metadata from one of the other blobs in the collection
             context['metadata'] = context['linked_collection_blob_list'][0].metadata_set.all()
         context['section'] = SECTION
+        context['nav'] = 'blob'
         context['title'] = 'Add Blob'
         return context
 
@@ -183,7 +184,10 @@ class BlobDetailView(DetailView):
                                         'name': collection.name})
         context['collection_info'] = collection_info
         context['linked_blobs'] = linked_blobs
-        context['section'] = SECTION
+        if self.object.is_note:
+            context["section"] = "notes"
+        else:
+            context['section'] = SECTION
         return context
 
     def get_queryset(self):

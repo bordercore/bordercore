@@ -18,7 +18,7 @@ from collection.forms import CollectionForm
 from collection.models import Collection
 
 IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
-SECTION = 'Collections'
+SECTION = 'kb'
 
 
 @method_decorator(login_required, name='dispatch')
@@ -44,6 +44,7 @@ class CollectionListView(FormMixin, ListView):
 
         context['cols'] = ['name', 'tags', 'created', 'unixtime', 'objectcount', 'id']
         context['section'] = SECTION
+        context['nav'] = 'collection'
         context['info'] = info
         context['title'] = 'Collection List'
 
@@ -99,6 +100,7 @@ class CollectionDetailView(DetailView):
             except ClientError:
                 pass
         context['section'] = SECTION
+        context['nav'] = 'collection'
         context['title'] = 'Collection Detail :: {}'.format(self.object.name)
 
         return context

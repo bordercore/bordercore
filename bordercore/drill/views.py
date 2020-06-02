@@ -17,7 +17,7 @@ from drill.forms import QuestionForm
 from drill.models import EFACTOR_DEFAULT, Question
 from tag.models import Tag
 
-SECTION = "Drill"
+SECTION = "drill"
 
 
 @method_decorator(login_required, name='dispatch')

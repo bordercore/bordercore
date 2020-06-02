@@ -26,7 +26,7 @@ from lib.util import remove_non_ascii_characters
 from music.forms import SongForm
 from music.models import Album, Listen, Song, SongSource
 
-SECTION = 'Music'
+SECTION = 'music'
 MUSIC_ROOT = "/home/media/music"
 
 
@@ -46,6 +46,7 @@ def music_list(request):
 
     return render(request, 'music/index.html',
                   {'section': SECTION,
+                   'nav': 'music-browse',
                    'cols': ['Date', 'artist', 'title', 'id'],
                    'message': message,
                    'recent_songs': recent_songs,
@@ -128,6 +129,7 @@ def song_edit(request, song_id=None):
 
     return render(request, 'music/edit.html',
                   {'section': SECTION,
+                   'nav': 'music-add',
                    'action': action,
                    'form': form,
                    'file_info': file_info,
@@ -164,6 +166,7 @@ class AlbumDetailView(DetailView):
         context['cols'] = ['id', 'track', 'raw_title', 'title', 'length', 'length_seconds']
         context['MEDIA_URL_MUSIC'] = settings.MEDIA_URL_MUSIC
         context['section'] = SECTION
+        context['nav'] = 'music-browse'
 
         return context
 
@@ -197,6 +200,7 @@ def artist_detail(request, artist_name):
     return render(request, 'music/artist_detail.html',
                   {
                       'section': SECTION,
+                      'nav': 'music-browse',
                       'artist_name': artist_name,
                       'album_list': a,
                       'song_list': song_list,
@@ -392,6 +396,7 @@ def add_song(request):
 
     return render(request, 'music/add_song.html',
                   {'section': SECTION,
+                   'nav': 'music-add',
                    'action': action,
                    'info': info,
                    'notes': notes,

@@ -18,7 +18,7 @@ from feed.models import Feed, FeedItem
 
 # from feed.tasks import update_feed
 
-SECTION = 'Feeds'
+SECTION = 'feed'
 
 
 @method_decorator(login_required, name='dispatch')
@@ -63,6 +63,7 @@ class FeedListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(FeedListView, self).get_context_data(**kwargs)
+        context['nav'] = 'feed-home'
         context['section'] = SECTION
         context['current_feed'] = self.current_feed
         context['json'] = json.dumps(self.feed_all)
@@ -87,6 +88,7 @@ class FeedSubscriptionListView(FeedListView):
 
     def get_context_data(self, **kwargs):
         context = super(FeedSubscriptionListView, self).get_context_data(**kwargs)
+        context['nav'] = 'feed-manage'
         context['feeds_not_subscribed'] = self.feeds_not_subscribed
         context['title'] = 'Feeds :: Manage Subscriptions'
         return context
@@ -185,6 +187,7 @@ def feed_edit(request, feed_id=None):
 
     return render(request, 'feed/edit.html',
                   {'section': SECTION,
+                   'nav': 'feed-add',
                    'action': action,
                    'form': form,
                    'subscribers': subscribers,
