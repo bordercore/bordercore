@@ -11,6 +11,8 @@
         <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bordercore.css" />
         <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/sticky-footer-navbar.css" />
 
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.0/{{ request.user.userprofile.theme }}/bootstrap.min.css" />
+
         {% block extra_head %}{% endblock %}
 
     </head>

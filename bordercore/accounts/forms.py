@@ -1,4 +1,5 @@
-from django.forms import ModelChoiceField, ModelForm, Select, TextInput
+from django.forms import (ModelChoiceField, ModelForm, Select, Textarea,
+                          TextInput)
 
 from accounts.models import UserProfile
 from collection.models import Collection
@@ -37,7 +38,9 @@ class UserProfileForm(ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('favorite_tags', 'todo_default_tag', 'homepage_default_collection', 'orgmode_file', 'google_calendar')
+        fields = ('theme', 'favorite_tags', 'todo_default_tag', 'homepage_default_collection', 'orgmode_file', 'google_calendar')
         widgets = {
-            'orgmode_file': TextInput(attrs={'class': 'form-control'})
+            'google_calendar': Textarea(attrs={'class': 'form-control'}),
+            'orgmode_file': TextInput(attrs={'class': 'form-control'}),
+            'theme': Select(attrs={'class': 'form-control'})
         }

@@ -19,6 +19,31 @@ class UserProfile(models.Model):
     google_calendar = JSONField(blank=True, null=True)
     homepage_default_collection = models.OneToOneField(Collection, related_name='default_collection', null=True, on_delete=models.PROTECT)
 
+    THEMES = [
+        ("cerulean", "cerulean"),
+        ("cosmo", "cosmo"),
+        ("darkly", "darkly"),
+        ("flatly", "flatly"),
+        ("journal", "journal"),
+        ("litera", "litera"),
+        ("minty", "minty"),
+        ("pulse", "pulse"),
+        ("slate", "slate"),
+        ("sandstone", "sandstone"),
+        ("simplex", "simplex"),
+        ("solar", "solar"),
+        ("spacelab", "spacelab"),
+        ("superhero", "superhero"),
+        ("united", "united"),
+        ("yeti", "yeti"),
+    ]
+
+    theme = models.CharField(
+        max_length=20,
+        choices=THEMES,
+        default="flatly",
+    )
+
     def get_tags(self):
         return ", ".join([tag.name for tag in self.favorite_tags.all()])
 
