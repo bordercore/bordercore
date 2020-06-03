@@ -54,9 +54,13 @@ class BlobCreateView(CreateView):
             context['linked_collection_blob_list'] = [Blob.objects.get(user=self.request.user, pk=x['id']) for x in Collection.objects.get(user=self.request.user, id=collection_id).blob_list]
             # Grab the initial metadata from one of the other blobs in the collection
             context['metadata'] = context['linked_collection_blob_list'][0].metadata_set.all()
+        collection_id = self.request.GET.get('collection_id', '')
+        if collection_id:
+            context['collection_info'] = Collection.objects.get(user=self.request.user, id=collection_id)
         context['section'] = SECTION
         context['nav'] = 'blob'
         context['title'] = 'Add Blob'
+
         return context
 
     def get_form(self, form_class=None):
@@ -96,6 +100,8 @@ class BlobCreateView(CreateView):
         handle_linked_blob(obj, self.request)
 
         handle_linked_collection(obj, self.request)
+
+        handle_add_collection(obj, self.request)
 
         obj.index_blob()
 
@@ -331,6 +337,18 @@ def handle_linked_collection(blob, request):
         collection = Collection.objects.get(user=request.user, id=int(request.POST['linked_collection']))
         blob = {'id': blob.id, 'added': int(datetime.datetime.now().strftime("%s"))}
         collection.blob_list.append(blob)
+        collection.save()
+
+
+def handle_add_collection(blob, request):
+
+    if request.POST.get('collection_id', ''):
+        collection = Collection.objects.get(user=request.user, id=int(request.POST['collection_id']))
+        blob = {'id': blob.id, 'added': int(datetime.datetime.now().strftime("%s"))}
+        if collection.blob_list:
+            collection.blob_list.append(blob)
+        else:
+            collection.blob_list = [blob]
         collection.save()
 
 

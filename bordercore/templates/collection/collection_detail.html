@@ -3,11 +3,19 @@
 {% block title %} Collection {% endblock %}
 
 {% block left-block %}
+
     <h2>{{ object.description }}</h2>
 
     <br />
 
     <input type="submit" class="btn btn-primary" value="Gallery" id="show-gallery" data-toggle="modal" data-target="#gallery">
+
+    <br /><br />
+
+    <form action="{% url 'blob_add' %}" method="GET">
+        <input type="hidden" name="collection_id" value="{{ collection.id }}" />
+        <input type="submit" class="btn btn-primary" value="Add">
+    </form>
 
 {% endblock %}
 

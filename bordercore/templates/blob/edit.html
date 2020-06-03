@@ -99,6 +99,13 @@
         </div>
     </div>
 
+    {% if collection_info %}
+        <div>
+            <br />
+        Adding to collection <strong><a href="{% url 'collection_detail' collection_info.id %}">{{ collection_info.name }}</a></strong>
+        </div>
+    {% endif %}
+
     {% if linked_blob %}
         <br /><br />
 Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.title|default:"Blob" }}</a>
@@ -154,6 +161,9 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
     <input type="hidden" name="metadata" id="input-metadata" />
     <input type="hidden" name="linked_blob" value="{{ linked_blob.id }}" />
     <input type="hidden" name="linked_collection" value="{{ linked_collection_info.id }}" />
+    {% if collection_info %}
+        <input type="hidden" name="collection_id" value="{{ collection_info.id }}" />
+    {% endif %}
     {% csrf_token %}
 
     {% for field in form.visible_fields %}
