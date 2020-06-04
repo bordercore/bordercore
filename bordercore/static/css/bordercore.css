@@ -257,6 +257,10 @@ a.tag:active {
 .form-inline .bootstrap-tagsinput {
   width: 400px !important; }
 
+/* Music */
+#music-search {
+  width: 400px; }
+
 /* Audio player controls */
 audio {
   outline: none;

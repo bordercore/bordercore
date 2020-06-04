@@ -21,10 +21,12 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
+from django.views.generic.list import ListView
 
 from lib.util import remove_non_ascii_characters
 from music.forms import SongForm
 from music.models import Album, Listen, Song, SongSource
+from tag.models import Tag
 
 SECTION = 'music'
 MUSIC_ROOT = "/home/media/music"
@@ -36,7 +38,7 @@ def music_list(request):
     message = ''
 
     # Get a list of recently played songs
-    recent_songs = Listen.objects.filter(user=request.user).select_related().distinct().order_by('-created')[:5]
+    recent_songs = Listen.objects.filter(user=request.user).select_related().distinct().order_by('-created')[:10]
 
     # Get a random album
     random_albums = None
@@ -464,6 +466,9 @@ def search(request):
     albums = Album.objects.filter(user=request.user, title__icontains=request.GET['query'])
     artists = Song.objects.filter(user=request.user, artist__icontains=request.GET['query']).distinct('artist').order_by('artist')
     songs = Song.objects.filter(user=request.user, title__icontains=request.GET['query']).order_by('title')
+    tags = Tag.objects.filter(song__user=request.user, name__icontains=request.GET['query'], song__isnull=False).distinct("name")
+
+    print(tags)
 
     results = []
 
@@ -490,6 +495,11 @@ def search(request):
             results.append({'name': '{} - {}'.format(song.title, song.artist),
                             'value': '{}'.format(song.artist),
                             'type': 'artist'})
+
+    for tag in tags:
+        results.append({'name': 'Tag: {}'.format(tag.name),
+                        'value': tag.name,
+                        'type': 'tag'})
 
     return JsonResponse(results, safe=False)
 
@@ -545,3 +555,38 @@ def get_song_info(request, id):
                'url': file_location}
 
     return JsonResponse(results)
+
+
+@method_decorator(login_required, name="dispatch")
+class SearchTagListView(ListView):
+
+    template_name = "music/tag_search.html"
+
+    def get_queryset(self):
+        tag_name = self.request.GET["tag"]
+
+        return Song.objects.filter(user=self.request.user, tags__name=tag_name)
+
+    def get_context_data(self, **kwargs):
+
+        context = super(SearchTagListView, self).get_context_data(**kwargs)
+
+        results = []
+
+        for match in context["object_list"]:
+            results.append(
+                {
+                    "title": match.title,
+                    "artist": match.artist,
+                    "year": match.year,
+                    "id": match.id,
+                }
+            )
+
+        return {
+            "cols": ["title", "artist", "year", "id"],
+            "tag_name": self.request.GET["tag"],
+            "results": results,
+            "section": SECTION,
+            "nav": "music-browse"
+        }

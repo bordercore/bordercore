@@ -30,8 +30,10 @@ $('#music-search').bind('typeahead:selected', function(obj, datum, name) {
     var url = null;
     if (datum.type == 'album') {
         url = '{% url 'album_detail' 666 %}'.replace(/666$/, datum.id);
-    } else {
+    } else if (datum.type == 'artist') {
         url = '{% url 'artist_detail' 666 %}'.replace(/666$/, datum.value);
+    } else {
+        url = '{% url 'music_search_tag' %}?tag=' + datum.value;
     }
     window.location = url;
 });

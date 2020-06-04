@@ -30,7 +30,7 @@ from fitness import views as fitness_views
 from fitness.views import ExerciseDetailView
 from homepage import views as homepage_views
 from music import views as music_views
-from music.views import AlbumDetailView, MusicListJson
+from music.views import AlbumDetailView, MusicListJson, SearchTagListView
 from search import views as search_views
 from search.views import SearchListView, SearchTagDetailView
 from tag import views as tag_views
@@ -132,6 +132,7 @@ urlpatterns = [
     path('music/album_artwork/<int:song_id>', music_views.album_artwork, name='album_artwork'),
     path('music/search.json', music_views.search, name='music_search'),
     path('music/song/<int:id>', music_views.get_song_info, name='get_song_info'),
+    path('music/tag/', SearchTagListView.as_view(), name='music_search_tag'),
     path('music/', music_views.music_list, name='music_list'),
 
     path('prefs/store_in_session/', accounts_views.store_in_session, name='store_in_session'),
