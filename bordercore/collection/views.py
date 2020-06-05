@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Case, CharField, Value, When
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
+from django.utils.dateformat import format
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import (CreateView, DeleteView, FormMixin,
@@ -38,11 +39,11 @@ class CollectionListView(FormMixin, ListView):
         for myobject in context['object_list']:
             info.append(dict(name=myobject.name,
                              tags=myobject.get_tags(),
-                             created=myobject.get_created(),
-                             unixtime=format(myobject.created, 'U'),
+                             updated=myobject.get_modified(),
+                             unixtime=format(myobject.modified, 'U'),
                              objectcount=len(myobject.blob_list) if myobject.blob_list else 0, id=myobject.id))
 
-        context['cols'] = ['name', 'tags', 'created', 'unixtime', 'objectcount', 'id']
+        context['cols'] = ['name', 'tags', 'updated', 'unixtime', 'objectcount', 'id']
         context['section'] = SECTION
         context['nav'] = 'collection'
         context['info'] = info

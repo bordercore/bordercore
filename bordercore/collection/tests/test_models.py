@@ -33,9 +33,9 @@ def test_sort_collection(user):
     assert len(collection.blob_list) == 3
 
 
-def test_get_created(collection):
+def test_get_modified(collection):
 
-    assert collection.get_created() == datetime.datetime.now().strftime('%b %d, %Y')
+    assert collection.get_modified() == datetime.datetime.now().strftime('%b %d, %Y')
 
 
 def test_get_tags(collection):
