@@ -41,7 +41,7 @@ def handler(event, context):
                 log.info(f"key: {key}")
 
                 # blobs/d9/d941cfc33c4b40a8c3e576a33343b7adfb7bac69/
-                pattern = re.compile(rf"^blobs/\w\w/([0-9a-f]{{40}})/")
+                pattern = re.compile(r"^blobs/\w\w/([0-9a-f]{40})/")
 
                 matches = pattern.match(key)
                 if matches and matches.group(1):
@@ -51,7 +51,7 @@ def handler(event, context):
                     raise Exception(f"Can't parse sha1sum from key: {key}")
 
                 if PurePath(key).name == "cover.jpg" or PurePath(key).name.startswith("cover-"):
-                    log.info(f"Skipping blob")
+                    log.info("Skipping blob")
                     continue
 
                 index_blob_es(sha1sum=sha1sum, file_changed=file_changed)

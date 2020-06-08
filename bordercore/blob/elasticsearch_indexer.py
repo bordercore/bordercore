@@ -227,8 +227,7 @@ def index_blob(**kwargs):
     if blob_info["date"] == "":
         blob_info["date"] = None
 
-    article = ESBlob(
-        meta={"id": blob_info["uuid"]},
+    fields = dict(
         uuid=blob_info["uuid"],
         bordercore_id=blob_info["id"],
         sha1sum=blob_info["sha1sum"],
@@ -246,13 +245,16 @@ def index_blob(**kwargs):
         **metadata
     )
 
+    article = ESBlob(**fields)
+    article.meta.id = blob_info["uuid"]
+
     if blob_info["date"] is not None:
         article.date = get_range_from_date(blob_info["date"])
 
     pipeline_args = {}
 
     # If only the metadata has changed and not the file itself,
-    #  don't bother re-indexing the file.
+    #  don't bother re-indexing the file. Upsert the metadata.
     file_changed = kwargs.get("file_changed", True)
     log.info(f"file_changed: {file_changed}")
 
@@ -281,7 +283,10 @@ def index_blob(**kwargs):
             pipeline_args = dict(pipeline="attachment")
             article.data = base64.b64encode(contents).decode("ascii")
 
-    article.save(**pipeline_args)
+        article.save(**pipeline_args)
+
+    else:
+        article.update(doc_as_upsert=True, **fields)
 
     # Rollback to avoid idle transactions
     db_conn.rollback()
