@@ -4,7 +4,7 @@ BUCKET=bordercore-blobs
 TEMPLATE_FILE=packaged.yaml
 SAM=~/.local/bin/sam
 
-$SAM build
+$SAM build &&
 
 $SAM package \
      --s3-bucket $BUCKET \
