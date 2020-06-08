@@ -11,3 +11,6 @@ packaged.yaml
 **/.aws-sam/*
 **/htmlcov/*
 *.coverage
+
+bordercore/aws/create_thumbnail/lib/*
+bordercore/aws/index_blobs/lib/*

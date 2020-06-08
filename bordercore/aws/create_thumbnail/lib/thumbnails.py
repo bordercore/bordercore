@@ -1,1 +1,0 @@
-../../../lib/thumbnails.py
