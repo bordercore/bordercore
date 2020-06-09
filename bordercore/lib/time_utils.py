@@ -3,6 +3,7 @@
 
 import datetime
 import re
+import time
 from collections import OrderedDict
 
 import pytz
@@ -91,6 +92,22 @@ def get_date_from_pattern(pattern):
             return "{} to {}".format(matches.group(1), matches.group(2))
 
     return date
+
+
+def convert_seconds(seconds):
+    """
+    Convert a number in seconds into a human-readable interval string,
+    eg 339 would return "05:39", or 5 minutes and 39 seconds.
+    """
+
+    time_string = time.strftime("%H:%M:%S", time.gmtime(seconds))
+    pattern = re.compile(r"00:(\d\d:\d\d)")
+    matches = pattern.match(time_string)
+
+    if matches:
+        return matches.group(1)
+    else:
+        return time_string
 
 
 def parse_date_format_1(input_date, matcher):

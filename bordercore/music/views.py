@@ -23,6 +23,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
+from lib.time_utils import convert_seconds
 from lib.util import remove_non_ascii_characters
 from music.forms import SongForm
 from music.models import Album, Listen, Song, SongSource
@@ -102,7 +103,7 @@ def song_edit(request, song_id=None):
             id3_info = MP3(filename)
             file_info = {'id3_info': id3_info,
                          'filesize': os.stat(filename).st_size,
-                         'length': time.strftime('%M:%S', time.gmtime(id3_info.info.length))}
+                         'length': convert_seconds(id3_info.info.length)}
         except IOError as e:
             messages.add_message(request, messages.ERROR, 'IOError: {}'.format(e))
 
@@ -161,7 +162,7 @@ class AlbumDetailView(DetailView):
                                   raw_title=song.title.replace('/', 'FORWARDSLASH'),
                                   title=display_title,
                                   length_seconds=song.length,
-                                  length=time.strftime('%M:%S', time.gmtime(song.length))))
+                                  length=convert_seconds(song.length)))
 
         context['song_list'] = song_list
         context['title'] = 'Album Detail :: {}'.format(self.object.title)
@@ -195,7 +196,7 @@ def artist_detail(request, artist_name):
                               year=song.year,
                               title=song.title,
                               length_seconds=song.length,
-                              length=time.strftime('%M:%S', time.gmtime(song.length)),
+                              length=convert_seconds(song.length),
                               artist=song.artist,
                               info=song.comment))
 
@@ -468,8 +469,6 @@ def search(request):
     songs = Song.objects.filter(user=request.user, title__icontains=request.GET['query']).order_by('title')
     tags = Tag.objects.filter(song__user=request.user, name__icontains=request.GET['query'], song__isnull=False).distinct("name")
 
-    print(tags)
-
     results = []
 
     for album in albums:
@@ -579,12 +578,13 @@ class SearchTagListView(ListView):
                     "title": match.title,
                     "artist": match.artist,
                     "year": match.year,
+                    "length": convert_seconds(match.length),
                     "id": match.id,
                 }
             )
 
         return {
-            "cols": ["title", "artist", "year", "id"],
+            "cols": ["title", "artist", "year", "length", "id"],
             "tag_name": self.request.GET["tag"],
             "results": results,
             "section": SECTION,

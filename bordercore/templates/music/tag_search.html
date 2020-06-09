@@ -70,13 +70,13 @@
                 "searchable": false,
                 "columnDefs": [
                     { "targets": [1], "sorting": [ "asc", "desc" ] },
-                    { "targets": [3], "visible": false },
+                    { "targets": [4], "visible": false },
                 ],
             } );
 
             table.on("select", function () {
 
-                var songId = $("#song_list").DataTable().cell(".selected", 3).data();
+                var songId = $("#song_list").DataTable().cell(".selected", 4).data();
 
                 var info;
                 $.ajax( { type: "GET",

@@ -4,8 +4,8 @@ from unittest.mock import Mock, patch
 import pytest
 import pytz
 
-from lib.time_utils import (cleanup, get_date_from_pattern, get_relative_date,
-                            parse_date_from_string)
+from lib.time_utils import (cleanup, convert_seconds, get_date_from_pattern,
+                            get_relative_date, parse_date_from_string)
 
 
 def test_cleanup():
@@ -34,6 +34,12 @@ def test_get_relative_date():
         assert get_relative_date("2020-04-13T08:00:00-0400") == "2 weeks ago"
         assert get_relative_date("2020-03-13T08:00:00-0400") == "1 month ago"
         assert get_relative_date("2017-03-13T08:00:00-0400") == "3 years ago"
+
+
+def test_convert_seconds():
+
+    assert convert_seconds(339) == "05:39"
+    assert convert_seconds(7200) == "02:00:00"
 
 
 def test_get_date_from_pattern():
