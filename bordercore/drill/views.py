@@ -105,6 +105,11 @@ class QuestionCreateView(CreateView):
         context['title'] = 'Drill :: Add Question'
         return context
 
+    def get_initial(self):
+        tag = self.kwargs.get('tag')
+        if tag:
+            return {"tags": tag}
+
     def form_valid(self, form):
 
         obj = form.save(commit=False)

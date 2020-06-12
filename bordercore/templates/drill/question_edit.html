@@ -85,6 +85,11 @@
             $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
             {% endfor %}
 
+            // If we're adding a question with an initial tag value,
+            //  pre-populate the form with this tag.
+            {% if form.tags.value %}
+            $("#id_tags").tagsinput("add", {value: "{{ form.tags.value }}", name: "{{ form.tags.value }}"});
+            {% endif %}
         });
 
     </script>
