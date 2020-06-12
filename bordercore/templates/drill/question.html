@@ -28,6 +28,11 @@ Easiness Factor: <strong>{{ question.efactor|floatformat:1 }}</strong>
         <input type="submit" class="btn btn-primary" value="Edit">
     </form>
 
+    <br />
+    <div>
+        <a href="{% url 'question_add_with_tag' object.tags.all.0 %}" class="btn btn-primary" role="button">Add Question</a>
+    </div>
+
 {% endblock %}
 
 {% block content %}

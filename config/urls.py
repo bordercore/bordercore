@@ -102,6 +102,7 @@ urlpatterns = [
     path('drill/question/delete/<int:pk>', QuestionDeleteView.as_view(), name='question_delete'),
     path('drill/question/<int:question_id>/', QuestionDetailView.as_view(), name='question_detail'),
     path('drill/question/add/', QuestionCreateView.as_view(), name='question_add'),
+    path('drill/question/add/<str:tag>', QuestionCreateView.as_view(), name='question_add_with_tag'),
     path('drill/question/edit/<int:pk>/', QuestionUpdateView.as_view(), name='question_edit'),
     path('drill/question/skip/<int:question_id>/', drill_views.skip_question, name='question_skip'),
     path('drill/search/', DrillSearchListView.as_view(), name='drill_search'),
