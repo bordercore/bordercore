@@ -103,6 +103,7 @@ urlpatterns = [
     path('drill/question/<int:question_id>/', QuestionDetailView.as_view(), name='question_detail'),
     path('drill/question/add/', QuestionCreateView.as_view(), name='question_add'),
     path('drill/question/edit/<int:pk>/', QuestionUpdateView.as_view(), name='question_edit'),
+    path('drill/question/skip/<int:question_id>/', drill_views.skip_question, name='question_skip'),
     path('drill/search/', DrillSearchListView.as_view(), name='drill_search'),
     path('drill/answer/<int:question_id>/', drill_views.show_answer, name='answer'),
     path('drill/response/<int:question_id>/<str:response>', drill_views.record_response, name='record_response'),

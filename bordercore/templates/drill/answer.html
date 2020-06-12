@@ -98,5 +98,6 @@ Easiness Factor: <strong>{{ question.efactor|floatformat:1 }}</strong>
     {% endif %}
     <a href="{% url 'record_response' question.id 'good' %}" class="btn btn-primary btn-lg" role="button">Good</a>
     <a href="{% url 'record_response' question.id 'easy' %}" class="btn btn-primary btn-lg" role="button">Easy</a>
+    &nbsp; &nbsp; <a href="{% url 'question_skip' question.id %}" class="btn btn-primary btn-lg" role="button">Skip</a>
 
 {% endblock %}

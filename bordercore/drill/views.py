@@ -260,6 +260,17 @@ def record_response(request, question_id, response):
         return redirect("study_tag", tag=question.tags.all()[0].name)
 
 
+@login_required
+def skip_question(request, question_id):
+
+    question = Question.objects.get(user=request.user, pk=question_id)
+
+    if request.session.get("drill_mode") == "random":
+        return redirect("study_random")
+    else:
+        return redirect("study_tag", tag=question.tags.all()[0].name)
+
+
 def tag_search(request):
 
     tags = Tag.objects.filter(question__user=request.user, name__icontains=request.GET.get("term", ""), question__isnull=False).distinct("name")
