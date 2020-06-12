@@ -224,6 +224,42 @@ def test_books_with_author(es):
     assert found["total"]["value"] == 0, f"{found['total']['value']} books fail this test, uuid={found['hits'][0]['_id']}"
 
 
+def test_books_with_contents(es):
+    "Assert that all books have contents"
+    search_object = {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "bool": {
+                            "must_not": [
+                                {
+                                    "exists": {
+                                        "field": "attachment"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "term": {
+                            "doctype": "book"
+                        }
+                    }
+                ]
+            }
+        },
+        "from": 0, "size": 10000,
+        "_source": ["filename", "uuid"]
+    }
+
+    found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]
+
+    for match in found["hits"]:
+        if match["_source"]["filename"].endswith("pdf") and match["_id"] not in BLOBS_NOT_TO_INDEX:
+            assert False, f"Book fails this test, uuid={match['_id']}"
+
+
 def test_tags_all_lowercase():
     "Assert that all tags are lowercase"
     t = Tag.objects.filter(name__regex=r"[[:upper:]]+")
