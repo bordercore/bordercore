@@ -102,13 +102,13 @@
 
     <div class="col-lg-5">
 
-        <div class="card bg-info">
+        <div v-model="events" class="card bg-info">
             <div class="card-header text-white">Upcoming Calendar Events</div>
             <ul class="list-group" id="events">
-                <li class="list-group-item">Retrieving...</li>
-                {% for event in calendar %}
-                    <li class="list-group-item">{{ event.start_pretty }}: <strong>{{ event.summary }}</strong> </li>
-                {% endfor %}
+                <li v-if="waiting" :class="errorClass" class="list-group-item">[[ msg ]]</li>
+                <div v-for="event in events" :key="event.count">
+                    <li class="list-group-item">[[ event.start_pretty ]]: <strong>[[ event.summary ]]</strong> </li>
+                </div>
             </ul>
         </div>
 
@@ -161,25 +161,40 @@
 
     <script type="text/javascript">
 
-        $(document).ready(function() {
-            var request = $.ajax({
-                url: '{% url 'get_calendar_events' %}',
-                type: "GET",
-                dataType: "json",
-                success: function( data, textStatus ) {
-                    html = '';
-                    for (i = 0; i < data.length; i++) {
-                        html += '<li class="list-group-item">' + data[i]['start_pretty'] + ': <strong>' + data[i]['summary'] + '</strong></li>';
-                    }
-                    if (!html) {
-                        html = '<li class="list-group-item">Your calendar is empty</li>';
-                    }
-                    $('#events').html(html);
-                },
-                error: function( data, textStatus ) {
-                    $('#events').html('<div class="alert alert-danger">Error retrieving events</div>');
+        new Vue({
+            delimiters: ["[[", "]]"],
+            el: '#events',
+            data() {
+                return {
+                    errorClass: "",
+                    events: [],
+                    msg: "Retrieving...",
+                    waiting: true
                 }
-            });
+            },
+            mounted() {
+                fetch("{% url 'get_calendar_events' %}")
+                       .then(response => {
+                    if (!response.ok) {
+                        throw Error("Received '" + response.statusText + "' from server");
+                    } else {
+                        return response.json();
+                    }
+                })
+                                       .then(data => {
+                    this.events = data;
+
+                    if (data.length == 0) {
+                        this.msg = "Your calendar is empty";
+                    } else {
+                        this.waiting = false;
+                        this.msg = "";
+                    };
+                }).catch(error => {
+                    this.msg = error;
+                    this.errorClass = "alert alert-danger";
+                })
+            }
         });
 
     </script>

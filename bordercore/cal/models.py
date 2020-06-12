@@ -50,8 +50,9 @@ class Calendar():
                                        timeMin=str(now_rfc3339()).replace(' ', 'T'),
                                        timeMax=datetimetostr(timeMax)).execute()
         event_list = []
+        count = 1
         for e in events['items']:
-            one_event = {}
+            one_event = {'count': count}
             for field in ['description', 'location', 'summary']:
                 try:
                     one_event[field] = e[field]
@@ -68,5 +69,6 @@ class Calendar():
                 one_event['end_raw'] = e['end']['date']
                 one_event['end_pretty'] = dateutil.parser.parse(e['end']['date']).strftime('%a %I:%M%p')
             event_list.append(one_event)
+            count = count + 1
 
         return event_list
