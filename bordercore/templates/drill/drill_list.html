@@ -137,7 +137,7 @@
                 },
                 "info": false,
                 "paginate": false,
-                "sorting": [[3, 'asc']],
+                "sorting": [[2, 'asc']],
                 "filter": true,
                 "language": {
                     "emptyTable": "No questions created"
@@ -147,6 +147,7 @@
                 "searchable": false,
                 "columnDefs": [
                     { "targets": [0], "sorting": [ "desc", "asc" ], "render": formatName, "useRendered": false  },
+                    { "targets": [2], "dataSort": 3 },
                     { "targets": [3,4], "visible": false },
                 ],
             } );
