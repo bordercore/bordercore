@@ -238,9 +238,6 @@ def show_answer(request, question_id):
 
     question = Question.objects.get(user=request.user, pk=question_id)
 
-    question.last_reviewed = timezone.now()
-    question.save()
-
     return render(request, 'drill/answer.html',
                   {'section': SECTION,
                    'question': question,
@@ -254,6 +251,7 @@ def show_answer(request, question_id):
 def record_response(request, question_id, response):
 
     question = Question.objects.get(user=request.user, pk=question_id)
+    question.last_reviewed = timezone.now()
     question.record_response(response)
 
     if request.session.get("drill_mode") == "random":
