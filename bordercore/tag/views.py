@@ -1,3 +1,5 @@
+import urllib
+
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import JsonResponse
@@ -16,14 +18,15 @@ def tag_search(request):
     if request.GET.get('type') == 'note':
         args['blob__is_note'] = True
 
-    query = request.GET.get('query', '')
+    query = urllib.parse.unquote(request.GET.get('query', ''))
+
     tag_list = [{'name': x.name, 'value': x.name, 'is_meta': x.is_meta} for x in
-                Tag.objects.filter(Q((Q(bookmark__user=request.user) & Q(name__icontains=query))) |
-                                   Q((Q(blob__user=request.user) & Q(name__icontains=query))) |
-                                   Q((Q(collection__user=request.user) & Q(name__icontains=query))) |
-                                   Q((Q(collection__user=request.user) & Q(name__icontains=query))) |
-                                   Q((Q(song__user=request.user) & Q(name__icontains=query))) |
-                                   Q((Q(todo__user=request.user) & Q(name__icontains=query))), **args).distinct('name')]
+                Tag.objects.filter(Q((Q(bookmark__user=request.user) & Q(name__icontains=query)))
+                                   | Q((Q(blob__user=request.user) & Q(name__icontains=query)))
+                                   | Q((Q(collection__user=request.user) & Q(name__icontains=query)))
+                                   | Q((Q(question__user=request.user) & Q(name__icontains=query)))
+                                   | Q((Q(song__user=request.user) & Q(name__icontains=query)))
+                                   | Q((Q(todo__user=request.user) & Q(name__icontains=query))), **args).distinct('name')]
 
     tag_alias_list = [{"name": f"{x.name} ({x.tag.name})", "value": x.tag.name, "is_alias": True} for x in
                       TagAlias.objects.filter(Q(user=request.user) & Q(name__icontains=query))]

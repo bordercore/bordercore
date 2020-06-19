@@ -102,6 +102,19 @@ class QuestionCreateView(CreateView):
         context['section'] = SECTION
         context['action'] = 'Add'
         context['title'] = 'Drill :: Add Question'
+
+        # If we're adding a question with an initial tag value,
+        # pre-populate the form with this tag.
+        if context['form']['tags'].value():
+            tag = Tag.objects.get(name=context['form']['tags'].value())
+            context['tags'] = [
+                {
+                    "text": tag.name,
+                    "is_meta": tag.is_meta,
+                    "classes": "badge badge-primary",
+                }
+            ]
+
         return context
 
     def get_initial(self):
@@ -183,6 +196,7 @@ class QuestionUpdateView(UpdateView):
         context['action'] = 'Edit'
         context['section'] = SECTION
         context['title'] = 'Drill :: Question Edit'
+        context['tags'] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
 
     def form_valid(self, form):

@@ -2,10 +2,6 @@
 
 {% block title %} Dril :: {{ action }} question {% endblock %}
 
-{% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
-{% endblock %}
-
 {% block left-block %}
     <h2>{{ object.description }}</h2>
 {% endblock %}
@@ -31,28 +27,57 @@
 
     </div>
 
-    <form id="todo-form" action="{{ request.path }}" method="post">
+    <form id="question-form" action="{{ request.path }}" method="post">
         {% csrf_token %}
 
         {% for field in form %}
-            <div class="form-group{% if field.errors %} error{% endif %} row">
-                <label class="col-lg-2 col-form-label" for="inputTitle">{{ field.label }}</label>
+            {% if field.label == "Tags" %}
 
-                <div class="col-lg-5">
-                    {{ field }}
-                    {% for error in field.errors %}
-                        <span class="form-error">{{ error }}</span>
-                    {% endfor %}
+                <div id="tagsearch">
+                    <div class="form-group row{% if field.errors %} error{% endif %}">
+                        <label class="col-lg-2 col-form-label" for="inputTitle">Tags</label>
+
+                        <input type="hidden" name="tags" v-model="tagsHidden" />
+
+                        <div class="col-lg-5" id="vue-wrapper">
+                            <vue-tags-input
+                              ref="tagsInputComponent"
+                              v-model="tag"
+                              :tags="tags"
+                              @tags-changed=tagsChanged
+                              :autocomplete-items="filteredItems"
+                              :add-only-from-autocomplete="false"
+                              placeholder=""
+                            />
+                        </div>
+                        {% for error in field.errors %}
+                            <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
                 </div>
 
-            </div>
+            {% else %}
+
+                <div class="form-group{% if field.errors %} error{% endif %} row">
+                    <label class="col-lg-2 col-form-label" for="inputTitle">{{ field.label }}</label>
+
+                    <div class="col-lg-5">
+                        {{ field }}
+                        {% for error in field.errors %}
+                            <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                </div>
+
+            {% endif %}
         {% endfor %}
 
         <div class="form-group">
-            <div class="col-lg-3 offset-lg-2">
+            <div class="col-lg-3 offset-lg-2" id="button-wrapper">
                 <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}" />
                 {% if object.id %}
-                    <input class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
+                    <input @click="handleClick" class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
                 {% endif %}
                 <a class="btn btn-secondary" href="{% url 'drill_list' %}">Cancel</a>
             </div>
@@ -66,31 +91,74 @@
 
     {{ block.super }}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+    {{ tags|json_script:"initial-tags"|default:"" }}
+
+    <script src="https://unpkg.com/@johmun/vue-tags-input/dist/vue-tags-input.js"></script>
 
     <script type="text/javascript">
 
-        $(document).ready(function() {
+        new Vue({
+            delimiters: ["[[", "]]"],
+            el: "#tagsearch",
+            data() {
+                return {
+                    tag: "",
+                    tags: [],
+                    autocompleteItems: [],
+                    tagsHidden: ""
+                }
+            },
+            watch: {
+                "tag": "initItems",
+            },
+            methods: {
+                tagsChanged(newTags) {
+                    this.tagsHidden=newTags.map(x => x.text).join(",")
+                },
+                initItems() {
 
-            {% include "common/common-typeaheadjs-tagsinput.js" with url="tag_search" itemValue="value" %}
+                    // Set a minimum character count to trigger the ajax call
+                    if (this.tag.length < 3) return;
 
-            {% if object.id %}
-            $("input.btn[value='Delete']").click( function() {
-                $("form#todo-form").attr("action", "{% url 'question_delete' object.id %}");
-            })
-            {% endif %}
-
-            {% for tag in object.tags.all %}
-            $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
-            {% endfor %}
-
-            // If we're adding a question with an initial tag value,
-            //  pre-populate the form with this tag.
-            {% if form.tags.value %}
-            $("#id_tags").tagsinput("add", {value: "{{ form.tags.value }}", name: "{{ form.tags.value }}"});
-            {% endif %}
+                    return fetch("{% url 'tag_search' %}?query=" + this.tag)
+                                                                       .then(response => {
+                        return response.json();
+                    })
+                                       .then(data => {
+                        this.autocompleteItems = data.map(a => {
+                            return { text: a.value };
+                        }
+                                                                  )
+                })
+                }
+            },
+            mounted() {
+                initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
+                if (initialTags) {
+                    this.tags = initialTags;
+                    this.tagsHidden=initialTags.map(x => x.text).join(",")
+                }
+            },
+            computed: {
+                filteredItems() {
+                    return this.autocompleteItems.filter(i => {
+                        return i.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1;
+                    });
+                }
+            }
         });
+
+        {% if object.id %}
+        new Vue({
+            delimiters: ["[[", "]]"],
+            el: "#button-wrapper",
+            methods: {
+                handleClick: function() {
+                    document.getElementById("question-form").action = "{% url 'question_delete' object.id %}";
+                }
+            }
+        });
+        {% endif %}
 
     </script>
 
