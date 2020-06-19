@@ -5,7 +5,6 @@
 {% block extra_head %}
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/smoke.min.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/code_style.css" />
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
 {% endblock %}
 
 {% block left-block %}
@@ -15,11 +14,15 @@
     </div>
 
     <ul class="list-group" id="sort-container-notes">
-        {% for note in favorite_notes %}
-            <li class="list-group-item" data-uuid="{{ note.uuid }}">
-                <a href="{% url 'blob_detail' note.uuid %}">{{ note.title }}</a>
-            </li>
-        {% endfor %}
+        <draggable v-model="notes" @change="onChange" ghost-class="sortable-ghost">
+            <transition-group type="transition">
+                <div v-for="note in notes" :key="note.uuid">
+                    <li class="list-group-item" :data-uuid="note.uuid">
+                        <a :href="note.url">[[ note.title ]]</a>
+                    </li>
+                </div>
+            </transition-group>
+        </draggable>
     </ul>
 
 {% endblock %}
@@ -28,17 +31,32 @@
 
     {% include "common/show_messages.html" with offset="0" width="12" %}
 
-    <div class="row mb-3">
-        <div class="col-lg-12">
-            <form class="form-inline" name="nav_form" id="search-form" action="{% url 'notes_list' %}" method="get" autocomplete="off">
-                <div class="form-row">
-                    <div class="col-auto has-search">
-                        <span class="fa fa-search form-control-feedback"></span>
-                        <input class="form-control" id="search" type="text" name="search" value="{{ request.GET.search_item }}" accesskey="s" style="width: 300px" placeholder="Search"/>
+    <div id="search">
+        <div class="row mb-3">
+            <div class="col-lg-12">
+                <form class="form-inline" name="nav_form" id="search-form" action="{% url 'notes_list' %}" method="get" autocomplete="off">
+                    <div class="form-row">
+                        <div class="col-auto has-search">
+                            <span class="fa fa-search form-control-feedback"></span>
+
+                            <vue-simple-suggest
+                              v-model="query"
+                              display-attribute="name"
+                              value-attribute="name"
+                              :list="tagSearch"
+                              :filter-by-query=true
+                              :debounce=200
+                              :name="inputName"
+                              placeholder="Search"
+                              @select="select"
+                              :styles="autoCompleteStyle"
+                            ></vue-simple-suggest>
+
+                        </div>
                     </div>
-                </div>
-                <a class="btn btn-primary ml-2" href="{% url 'blob_add' %}?is_note=true">Add note</a>
-            </form>
+                    <a class="btn btn-primary ml-2" href="{% url 'blob_add' %}?is_note=true">Add note</a>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -72,6 +90,8 @@
                 </div>
 
             {% endfor %}
+                </transition-group>
+            </draggable>
 
         </div>
     </div>
@@ -102,81 +122,88 @@
 
     <script src="https://use.fontawesome.com/4a95cb196f.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+
+    <script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
+
+    <script type="text/javascript" src="https://unpkg.com/vue-simple-suggest@1.10.1"></script>
 
     <script type="text/javascript">
 
-        $(document).ready(function() {
-
-            $('#sort-container-notes').sortable( {
-                connectWith: '.list-group',
-
-                // The 'Untagged' item is not sortable -- it's always on top
-                items: "li:not(#untagged)",
-
-                stop: function(event, ui) {
-
-                    var note_uuid = $(ui.item).data("uuid");
-
-                    $.ajax( {
-                        type: 'POST',
-                        url: '{% url 'sort_favorite_notes' %}',
-                        data: {
-                            note_uuid: note_uuid,
-                            new_position: ui.item.index()
-                        },
-                        error: function (xhr, ajaxOptions, error) {
-                            $.smkAlert({text: 'Error reordering tags: ' + error, type: 'error', position:'top-right'});
-                        }
-                    } );
-                }
-            })
-
-            var engine = new Bloodhound({
-                name: 'tags',
-                remote: {
-                    url: '{% url 'tag_search' %}?query=%QUERY' + '&type=note',
-                    wildcard: '%QUERY'
-                },
-                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
-                queryTokenizer: Bloodhound.tokenizers.whitespace
-            });
-
-            engine.initialize();
-
-            $('#search').typeahead({
-                minLength: 2
-            }, {
-                    display: 'value',
-                    source: engine,
-                    templates: {
-                        suggestion: function(data) {
-                            return '<div class="tt-suggest-page">' + data.value.replace(data._query, '<strong>' + data._query+ '</strong>') + '</div>';
-                        }
+        new Vue({
+            delimiters: ["[[", "]]"],
+            el: "#search",
+            data() {
+                return {
+                    inputName: "search",
+                    query: "",
+                    tags: [],
+                    autoCompleteStyle: {
+                        vueSimpleSuggest: "position-relative",
+                        inputWrapper: "drill_search",
+                        defaultInput: "form-control search-box",
+                        suggestions: "position-absolute list-group z-1000",
+                        suggestItem: "list-group-item"
                     }
                 }
-                                   );
-
-            // This is set when an item from the autocomplete options is selected.  Otherwise there would be
-            //  a race between the window.open() in $('#kbsearch').bind(...) and the form submission from the
-            //  $('#kbsearch').on('keyup', ...)
-            var autocomplete_selected = false;
-
-            $('#search').on('keyup', function(event, selection) {
-                if (((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) && !autocomplete_selected) {
-                    $('#search-form').submit();
-                    return false;
-                } else {
-                    return true;
+            },
+            methods: {
+                tagSearch(query) {
+                    return fetch("{% url 'tag_search' %}?query=" + query + "&type=note")
+                               .then(response => {
+                        return response.json();
+                    })
+                                       .then(data => data)
+                },
+                select(tag) {
+                    window.location='{% url 'notes_list' %}?tagsearch=' + tag.name;
                 }
-            });
+            }
+        });
 
-            $('#search').bind('typeahead:selected', function(obj, datum, name) {
-                autocomplete_selected = true;
-                window.location='{% url 'notes_list' %}?tagsearch=' + datum.value;
-            });
+        new Vue({
+            delimiters: ["[[", "]]"],
+            el: '#sort-container-notes',
+            data: {
+                notes: [
+                    {% for note in favorite_notes %}
+                    {
+                        url: "{% url 'blob_detail' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000$/, "{{ note.uuid }}"),
+                        uuid: "{{ note.uuid }}",
+                        title: "{{ note.title }}"
+                    },
+                    {% endfor %}
+                ]
+            },
+            methods: {
+                onChange(evt) {
 
+                    note_uuid = evt.moved.element.uuid;
+
+                    // The backend expects the ordering to begin
+                    // with 1, not 0, so add 1.
+                    new_position = evt.moved.newIndex + 1;
+
+                    const data = new URLSearchParams();
+                    data.append("note_uuid", note_uuid);
+                    data.append("new_position", new_position);
+
+                    fetch("{% url "sort_favorite_notes" %}", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: data,
+                    }).then(response => response.json())
+                                                .then(data => {
+                        console.log("Success:", data);
+                    })
+                               .catch((error) => {
+                        console.error("Error:", error);
+                        $.smkAlert({text: "Error reordering notes: " + error, type: "error", position:"top-right"});
+                    });
+                }
+            }
         });
 
     </script>

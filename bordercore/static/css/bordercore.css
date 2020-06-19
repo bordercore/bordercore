@@ -149,9 +149,6 @@ ul.pagination {
 #kbsearch {
   width: 330px; }
 
-#kb_blob_search {
-  width: 340px; }
-
 /* Blobs */
 #meta-box {
   background: #f6f6f6;
@@ -261,6 +258,12 @@ a.tag:active {
 .form-inline .bootstrap-tagsinput {
   width: 400px !important; }
 
+/* Sortable */
+.sortable-ghost {
+  border-left: 6px solid #00b7ff;
+  box-shadow: 10px 10px 5px -1px rgba(0, 0, 0, 0.14);
+  opacity: .7; }
+
 /* Music */
 #music-search {
   width: 400px; }
@@ -330,6 +333,7 @@ audio {
   color: #fff; }
 
 /* Styles for Vue Tags Input VUE */
+/* These apply Bootstrap-like styles to the tags */
 .vue-tags-input .ti-input .ti-tag {
   background-color: #2FA4E7 !important;
   font-size: 75%;

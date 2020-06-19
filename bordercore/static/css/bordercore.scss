@@ -186,10 +186,6 @@ ul.pagination {
   width: 330px;
 }
 
-#kb_blob_search {
-  width: 340px;
-}
-
 /* Blobs */
 
 #meta-box {
@@ -315,15 +311,22 @@ a.tag:active {
    padding: 10px;
 }
 
-/* Drill */
-.drill_search {
-  width: 300px !important;
+/* Search */
+.search-box {
+  width: 330px !important;
 }
 
 /* Used to keep the tag search input field
    from shrinking after you start typing */
 .form-inline .bootstrap-tagsinput {
    width: 400px !important;
+}
+
+/* Sortable */
+.sortable-ghost {
+  border-left: 6px solid rgb(0, 183, 255);
+  box-shadow: 10px 10px 5px -1px rgba(0, 0, 0, 0.14);
+  opacity: .7;
 }
 
 /* Music */
