@@ -1,14 +1,28 @@
-{% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
-{% endblock %}
-
 <form id="search" action="{% url 'search' %}" method="get" autocomplete="off">
     <input type="hidden" id="facets" name="facets" value="" />
 
     <div class="form-row align-items-center">
 
-        <div class="col-auto">
-            <input id="kbsearch" class="form-control" type="text" name="search" value="{{ request.GET.search }}" placeholder="Search" />
+        <div class="form-row">
+            <div class="col-auto">
+                <vue-simple-suggest ref="suggestComponent"
+                          v-model="query"
+                          display-attribute="value"
+                          value-attribute="value"
+                          :list="tagSearch"
+                          :filter-by-query=true
+                          :debounce=200
+                          :name="inputName"
+                          placeholder="Search"
+                          autofocus
+                          @select="select"
+                          :styles="autoCompleteStyle"
+                          >
+                    <div slot="suggestion-item" slot-scope="scope">
+                        <span v-html="boldenSuggestion(scope)"></span>
+                    </div>
+                </vue-simple-suggest>
+            </div>
         </div>
 
         <div class="col-auto">
@@ -29,8 +43,8 @@
 
         <div class="col-auto">
             <select id="search-sort-by" name="sort" class="form-control">
-                <option value="_score">Rank</option>
-                <option value="date_unixtime">Date</option>
+                <option value="_score"{% if request.session.search_sort_by == "_score" %} selected="selected"{% endif %}>Rank</option>
+                <option value="date_unixtime"{% if request.session.search_sort_by == "date_unixtime" %} selected="selected"{% endif %}>Date</option>
             </select>
         </div>
         <div class="col-auto">

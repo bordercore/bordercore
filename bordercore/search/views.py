@@ -86,6 +86,10 @@ class SearchListView(ListView):
 
         if "search" in self.request.GET or notes_search:
 
+            if not notes_search:
+                # Store the "sort" field in the user's session
+                self.request.session["search_sort_by"] = self.request.GET.get("sort", None)
+
             search_term = escape_solr_terms(self.request.GET.get("search", ""))
             sort_field = self.request.GET.get("sort", "date_unixtime")
 
@@ -238,7 +242,6 @@ class SearchListView(ListView):
         context["info"] = info
         context["section"] = self.SECTION
         context["nav"] = "search-home"
-        context["search_sort_by"] = self.request.session.get("search_sort_by", "")
         context["title"] = "Search"
         return context
 
