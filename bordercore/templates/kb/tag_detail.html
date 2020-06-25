@@ -5,10 +5,6 @@
 
 {% block title %} KB :: Tag Detail {% endblock %}
 
-{% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
-{% endblock %}
-
 {% block content %}
 
 {% include "kb/header.html" %}
@@ -19,12 +15,30 @@
         <div class="col-lg-10">
 
             <form id="tag-filter-form" class="form-inline" action="{% url 'kb_search_tag_detail' tag %}" method="get" autocomplete="off">
-                <div class="form-group">
-                    <input id="id_tags" class="form-control" type="text" name="taglist" placeholder="Tag List" />
+                <div id="tagsearch">
+                    <div class="form-group">
+
+                        <input type="hidden" name="tags" v-model="tagsHidden" />
+
+                        <div id="vue-wrapper">
+                            <vue-tags-input
+                              ref="tagsInputComponent"
+                              v-model="tag"
+                              :tags="tags"
+                              @tags-changed=tagsChanged
+                              :autocomplete-items="filteredItems"
+                              :add-only-from-autocomplete="false"
+                              placeholder="Tags"
+                              autofocus
+                              />
+                        </div>
+
+                    </div>
                 </div>
+
                 {% if tag_counts %}
-                <div class="form-group ml-2">
-                    <select id="other_tags" class="form-control">
+                <div class="form-group ml-2" id="other_tags">
+                    <select _id="other_tags" class="form-control" @change="onChange">
                         <option value="-1">Other tags</option>
                         {% for tag, count in tag_counts %}
                             <option value="{{ tag }}">{{ tag }} ({{ count }})</option>
@@ -32,12 +46,12 @@
                     </select>
                 </div>
                 {% endif %}
-                <div class="form-group">
+                <div class="form-group" id="meta_tag_list">
                 {% for tag in meta_tags %}
                     {% if forloop.first %}
                         <label class="ml-3">Meta Tags: </label>
                     {% endif %}
-                    <span class="badge badge-success ml-2"><a class="meta_tag tag" href="">{{ tag }}</a></span>
+                    <span class="badge badge-success ml-2"><a class="meta_tag tag" href="" @click="onClick">{{ tag }}</a></span>
                 {% endfor %}
                 </div>
             </form>
@@ -46,7 +60,7 @@
 
     <br />
 
-    <ul class="nav nav-tabs" id="myTab">
+    <ul class="nav nav-tabs" id="myTab" @click="onClick">
         {% for doctype in doctype_counts %}
             <li class="nav-item"><a class="nav-link" id="tab_{{ doctype.0 }}" href="#{{ doctype.0 }}">{{ doctype_mapping|get_doctype:doctype.0 }} <span class="badge alert-info">{{ doctype.1 }}</span></a></li>
         {% endfor %}
@@ -143,150 +157,135 @@
 
     {{ block.super }}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+    {{ tag_list|json_script:"initial-tags"|default:"" }}
+
+    <script src="https://unpkg.com/@johmun/vue-tags-input/dist/vue-tags-input.js"></script>
 
     <script type="text/javascript">
 
-        $(document).ready(function() {
+        function get_tag_list_string() {
+            initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
+            return initialTags.map(x => x.text).join(",")
+        }
 
-            {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" fieldName="name" %}
+        Vue.mixin({ delimiters: ["[[", "]]"] });
 
-            // Tags are stored by tagsinput as objects which look like this:
-            //
-            // { 'text': 'emacs', 'value': 'emacs', 'is_meta': 'false' }
-
-            // Add the initial list of tags in the search box
-            {% for tag in tag_list %}
-            $('#id_tags').tagsinput('add',{'value':'{{ tag.name }}', 'name':'{{ tag.name }}', 'is_meta': '{{ tag.is_meta }}'});
-            {% if forloop.last %}
-            $('.bootstrap-tagsinput input').attr('placeholder', '')
-            {% endif %}
-            {% endfor %}
-
-            $('#id_tags').on('beforeItemAdd', function(event) {
-                var tags = get_tag_list_string();
-                if (tags) {
-                    tags = tags + ',' + event.item.value;
-                } else {
-                    tags = event.item.value;
+        new Vue({
+            el: "#tagsearch",
+            data() {
+                return {
+                    tag: "",
+                    tags: [],
+                    autocompleteItems: [],
+                    tagsHidden: ""
                 }
-                event.cancel = true;
-                window.location='{% url 'kb_search_tag_detail' 666 %}'.replace('666', tags);
-            });
-
-            $('#id_tags').on('itemRemoved', function(event) {
-                var tags = get_tag_list_string();
-                event.cancel = true;
-                window.location='{% url 'kb_search_tag_detail' 666 %}'.replace('666', tags);
-            });
-
-            $('#other_tags').change( function(event) {
-                var tags = get_tag_list_string() + ',' + $(this).val();
-                window.location='{% url 'kb_search_tag_detail' 666 %}'.replace('666', tags);
-            });
-
-            $('#myTab a').click(function (event) {
-                $.ajax( { type: 'POST',
-                          url: '{% url 'store_in_session' %}',
-                          data: { kb_tag_detail_current_tab:  $(this).attr('id').replace('tab_', '') },
-                          success: function() {
-                    }
-                          });
-                event.preventDefault();
-                $(this).tab('show');
-            });
-
-            $('.meta_tag').click(function (event) {
-                event.preventDefault();
-                var tags = get_tag_list_string() + ',' + event.target.innerHTML;
-                window.location='{% url 'kb_search_tag_detail' 666 %}'.replace('666', tags);
-            });
-
-            function get_tag_list_string() {
-                return $.map( $('#id_tags').tagsinput('items'), function( element ) { return element.value } ).join();
-            }
-
-            // Try to select the tab based on what's stored in the user's session
-            {% if kb_tag_detail_current_tab and doctypes|dict_get:kb_tag_detail_current_tab %}
-            $('#myTab a#tab_{{ kb_tag_detail_current_tab }}').tab('show');
-            {% else %}
-            $('#myTab a:first').tab('show');
-            {% endif %}
-
-            $('#id_tags').tagsinput('focus');
-
-            {% if search_sort_by %}
-            $("#search-sort-by").val('{{ search_sort_by }}');
-            {% endif %}
-
-            $('#search-sort-by').change( function(event) {
-                var value = $(this).val();
-                $.ajax( { type: 'POST',
-                          url: '{% url 'store_in_session' %}',
-                          data: { search_sort_by: value },
-                          success: function() {
-                    }
-                          });
-
-            })
-
-            var myengine = new Bloodhound({
-                remote: {
-                    url: '{% url 'kb_search_tags_booktitles' %}?term=%QUERY',
-                    wildcard: '%QUERY'
+            },
+            watch: {
+                "tag": "initItems",
+            },
+            methods: {
+                tagsChanged(newTags) {
+                    var tags = newTags.map(x => x.text).join(",");
+                    window.location="{% url 'kb_search_tag_detail' 666 %}".replace("666", tags);
                 },
-                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
-                queryTokenizer: Bloodhound.tokenizers.whitespace,
-                limit: 20
-            });
+                initItems() {
 
-            myengine.initialize();
+                    // Set a minimum character count to trigger the ajax call
+                    if (this.tag.length < 3) return;
 
-            var template_source = $("#entry-template-what").html()
-
-            $('#kbsearch').typeahead(
-                {
-                    hint: true,
-                    highlight: true,
-                    minLength: 3
-                }, {
-                    limit: 20,
-                    display: 'value',
-                    source: myengine,
-                    templates: {
-                        suggestion: function(data) {
-                            return '<div class="tt-suggest-page"><em>' + data.type + '</em> - ' + data.value + '</div>';
+                    return fetch("{% url 'tag_search' %}?query=" + this.tag)
+                                                                       .then(response => {
+                        return response.json();
+                    })
+                                       .then(data => {
+                        this.autocompleteItems = data.map(a => {
+                            return { text: a.value };
                         }
+                                                                  )
+                })
+                }
+            },
+            mounted() {
+                initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
+                if (initialTags) {
+                    this.tags = initialTags;
+                    this.tagsHidden=initialTags.map(x => x.text).join(",")
+                }
+            },
+            computed: {
+                filteredItems() {
+                    return this.autocompleteItems.filter(i => {
+                        return i.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1;
+                    });
+                }
+            }
+        });
+
+        {% if tag_counts %}
+        new Vue({
+            el: "#other_tags",
+            methods: {
+                onChange(evt) {
+                    tag_list = get_tag_list_string() + "," + evt.srcElement.value;
+                    window.location="{% url 'kb_search_tag_detail' 666 %}".replace("666", tag_list);
+                }
+            }
+        });
+        {% endif %}
+
+        new Vue({
+            el: "#meta_tag_list",
+            methods: {
+                onClick(evt) {
+                    evt.preventDefault();
+                    tag_list = get_tag_list_string() + "," + evt.srcElement.innerHTML;
+                    window.location="{% url 'kb_search_tag_detail' 666 %}".replace(/666$/, tag_list);
+                }
+            }
+        });
+
+        new Vue({
+            el: "#myTab",
+            methods: {
+                onClick(evt) {
+                    id = evt.srcElement.id;
+
+                    data = {
+                        "kb_tag_detail_current_tab": id.replace("tab_", "")
                     }
+
+                    const formBody = Object.keys(data).map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key])).join('&');
+
+                    $("#myTab a#tab_" + data.kb_tag_detail_current_tab).tab("show");
+
+                    fetch("{% url 'store_in_session' %}", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": "{{ csrf_token }}",
+                            "Content-Type": "application/x-www-form-urlencoded",
+                        },
+                        body: formBody,
+                    }).then(response => response.json())
+                                                .then(data => {
+                        console.log("Success:", data);
+                        evt.preventDefault();
+                    })
+                               .catch((error) => {
+                        console.error("Error:", error);
+                        $.smkAlert({text: "Error reordering notes: " + error, type: "error", position:"top-right"});
+                    });
                 }
-            );
+            },
+            mounted() {
+                {% if kb_tag_detail_current_tab and doctypes|dict_get:kb_tag_detail_current_tab %}
+                $("#myTab a#tab_{{ kb_tag_detail_current_tab }}").tab("show");
+                {% else %}
+                // If the tab stored in the session doesn't match any current tab categories,
+                //  show the first tab.
+                $("#myTab a").tab("show");
+                {% endif %}
 
-            // This is set when an item from the autocomplete options is selected.  Otherwise there would be
-            //  a race between the window.open() in $('#kbsearch').bind(...) and the form submission from the
-            //  $('#kbsearch').on('keyup', ...)
-            var autocomplete_selected = false;
-
-            $('#kbsearch').on('keyup', function(event, selection) {
-                if (((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) && !autocomplete_selected) {
-                    $('#search').submit();
-                    return false;
-                } else {
-                    return true;
-                }
-            });
-
-            $('#kbsearch').bind('typeahead:selected', function(obj, datum, name) {
-                var url = null;
-                if (datum.type == 'Tag') {
-                    url = '{% url 'kb_search_tag_detail' 666 %}'.replace(/666$/, datum.value);
-                } else {
-                    url = '{% url 'blob_detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', datum.uuid);
-                }
-                autocomplete_selected = true;
-                window.open(url, '_self');
-            });
-
+            }
         });
 
     </script>

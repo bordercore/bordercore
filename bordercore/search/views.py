@@ -311,7 +311,13 @@ class SearchTagDetailView(ListView):
         tag_list_js = []
         for tag in tag_list:
             if tag != "":
-                tag_list_js.append({"name": tag, "is_meta": "true" if tag in Tag.get_meta_tags(self.request.user) else "false"})
+                tag_list_js.append(
+                    {
+                        "text": tag,
+                        "is_meta": "true" if tag in Tag.get_meta_tags(self.request.user) else "false",
+                        "classes": "badge badge-primary",
+                    }
+                )
         context["tag_list"] = tag_list_js
 
         context["kb_tag_detail_current_tab"] = self.request.session.get("kb_tag_detail_current_tab", "")

@@ -439,7 +439,13 @@ audio {
   padding: 4px 6px;
 }
 
+/* Use this for forms */
 #vue-wrapper .vue-tags-input {
   max-width: none;
   width: 100%;
+}
+
+/* Use this for inputs of arbitrary length */
+#tag-filter-form input {
+  width: 400px;
 }
