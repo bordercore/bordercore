@@ -1,6 +1,8 @@
 $table_row_background_color : #007BFF;
 $table_row_color : #ffffff;
 
+$search_box_width: 330px;
+
 [hidden] {
   display: none !important;
 }
@@ -318,7 +320,11 @@ a.tag:active {
 
 /* Search */
 .search-box {
-  width: 330px !important;
+  width: $search_box_width !important;
+}
+
+div .search-box .search-box-input {
+  width: $search_box_width;
 }
 
 /* Used to keep the tag search input field

@@ -136,6 +136,7 @@ def song_edit(request, song_id=None):
                    'action': action,
                    'form': form,
                    'file_info': file_info,
+                   'tags': [{"text": x.name, "is_meta": x.is_meta} for x in song.tags.all()],
                    'song': song})
 
 

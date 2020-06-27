@@ -74,7 +74,7 @@
         {% endfor %}
 
         <div class="form-group">
-            <div class="col-lg-3 offset-lg-2" id="button-wrapper">
+            <div class="col-lg-5 offset-lg-2" id="button-wrapper">
                 <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}" />
                 {% if object.id %}
                     <input @click="handleClick" class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />

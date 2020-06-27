@@ -1,9 +1,26 @@
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
+<div class="col-lg-5">
 
-<div class="col-lg-6">
+    <form id="search" class="form-inline float-right" name="nav_form" action="{{ request.path }}" method="get">
 
-    <form class="form-inline float-right" name="nav_form" action="{{ request.path }}" method="get">
-        <input id="music-search" type="text" class="form-control" name="search_item" value="{{ request.GET.search_item }}" autocomplete="off" placeholder="Search" />
+        <vue-simple-suggest ref="suggestComponent"
+                            v-model="query"
+                            display-attribute="value"
+                            value-attribute="value"
+                            :list="tagSearch"
+                            :filter-by-query=true
+                            :debounce=200
+                            :name="inputName"
+                            placeholder="Search"
+                            autofocus
+                            autocomplete="off"
+                            @select="select"
+                            :styles="autoCompleteStyle"
+                            >
+            <div slot="suggestion-item" slot-scope="scope">
+                <span v-html="boldenSuggestion(scope)"></span>
+            </div>
+        </vue-simple-suggest>
+
     </form>
 
 </div>

@@ -35,8 +35,8 @@
 </div>
 
 <div class="row">
-    <div class="col-lg-11">
-        {% include "common/datatable.html" with data=results cols=cols id="song_list" %}
+    <div class="col-lg-11" id="song_list" @click="onClick">
+        {% include "common/datatable.html" with data=results cols=cols %}
     </div>
 </div>
 
@@ -50,14 +50,43 @@
 
     <script type="text/javascript" charset="utf-8">
 
+        new Vue({
+            delimiters: ["[[", "]]"],
+            el: "#song_list",
+            methods: {
+                onClick(evt) {
+
+                    // If we clicked on column title to sort, ignore this event. We don't
+                    //  actually want to play a song
+                    if (evt.target.tagName == "TH") {
+                        return;
+                    }
+
+                    var songId = table.cell(".selected", 4).data();
+
+                    fetch("{% url 'get_song_info' 666 %}".replace(/666$/, songId))
+                                      .then(response => {
+                        if (!response.ok) {
+                            throw Error("Received '" + response.statusText + "' from server");
+                        } else {
+                            return response.json();
+                        }
+                    }).then(data => {
+                        $("#player").get(0).src = data.url;
+                        $("#player").get(0).play()
+                    })
+                }
+            }
+        });
+
         var table;
 
         $(document).ready(function() {
 
-            table = $("#song_list").DataTable( {
+            table = $("#song_list table").DataTable( {
                 initComplete: function () {
                     var api = this.api();
-                    $("#song_list").show();
+                    $("#song_list table").show();
                     api.columns.adjust();
                 },
                 "select": true,
@@ -72,32 +101,6 @@
                     { "targets": [1], "sorting": [ "asc", "desc" ] },
                     { "targets": [4], "visible": false },
                 ],
-            } );
-
-            table.on("select", function () {
-
-                var songId = $("#song_list").DataTable().cell(".selected", 4).data();
-
-                var info;
-                $.ajax( { type: "GET",
-                          url: "{% url 'get_song_info' 666%}".replace(/666$/, songId),
-                          success: function(json) {
-
-                        info = json;
-
-                        var songTitle = $("#song_list").DataTable().cell(".selected", 0).data();
-
-                        // Unescape any HTML entities (eg translate "&amp;" to "&")
-                        // http://stackoverflow.com/questions/1912501/unescape-html-entities-in-javascript
-                        songTitle = new DOMParser().parseFromString(songTitle, "text/html").documentElement.textContent;
-
-                        $(".play-progress span").html(songTitle);
-                        $("#player").get(0).src = info.url;
-                        $("#player").get(0).play()
-
-                    }
-                          });
-
             } );
 
         });

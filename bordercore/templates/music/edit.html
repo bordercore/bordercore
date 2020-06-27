@@ -2,10 +2,6 @@
 
 {% block title %} Music {% endblock %}
 
-{% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
-{% endblock %}
-
 {% block content %}
 
 {% include "common/show_messages.html" %}
@@ -20,15 +16,44 @@
     {% csrf_token %}
 
     {% for field in form %}
-        <div class="form-group{% if field.errors %} error{% endif %} row">
-            <label class="col-lg-2 col-form-label" for="inputTitle">{{ field.label }}</label>
-            <div class="col-lg-5">
-                {{ field }}
+        {% if field.label == "Tags" %}
+
+            <div id="tagsearch">
+                <div class="form-group{% if field.errors %} error{% endif %} row">
+                    <label class="col-lg-2 col-form-label" for="inputTitle">Tags</label>
+                <input type="hidden" name="tags" v-model="tagsHidden" />
+
+                <div class="col-lg-5" id="vue-wrapper">
+                    <vue-tags-input
+                          ref="tagsInputComponent"
+                          v-model="tag"
+                          :tags="tags"
+                          @tags-changed=tagsChanged
+                          :autocomplete-items="filteredItems"
+                          :add-only-from-autocomplete="false"
+                          placeholder=""
+                          />
+                </div>
                 {% for error in field.errors %}
                     <span class="form-error">{{ error }}</span>
                 {% endfor %}
             </div>
-        </div>
+
+        {% else %}
+
+            <div class="form-group{% if field.errors %} error{% endif %} row">
+                <label class="col-lg-2 col-form-label" for="inputTitle">{{ field.label }}</label>
+
+                <div class="col-lg-5">
+                    {{ field }}
+                    {% for error in field.errors %}
+                        <span class="form-error">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+        {% endif %}
     {% endfor %}
 
     <div class="form-group row">
@@ -49,7 +74,7 @@
         </div>
     </div>
 
-</form>
+    </form>
 
 {% if file_info %}
 
@@ -62,7 +87,7 @@
         <div class="col-lg-4">
 
             <table class="table table-striped">
-                <tr><td><strong>length</strong></td><td>{{ file_info.length }}</td></tr>
+1                <tr><td><strong>length</strong></td><td>{{ file_info.length }}</td></tr>
                 <tr><td><strong>bit rate</strong></td><td>{{ file_info.id3_info.info.bitrate }}</td></tr>
                 <tr><td><strong>sample rate</strong></td><td>{{ file_info.id3_info.info.sample_rate }}</td></tr>
                 <tr><td><strong>file size</strong></td><td>{{ file_info.filesize }}</td></tr>
@@ -80,15 +105,61 @@
 
     {{ block.super }}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+    {{ tags|json_script:"initial-tags"|default:"" }}
+
+    <script src="https://unpkg.com/@johmun/vue-tags-input/dist/vue-tags-input.js"></script>
 
     <script type="text/javascript">
 
-        $(document).ready(function() {
+        new Vue({
+            delimiters: ["[[", "]]"],
+            el: "#tagsearch",
+            data() {
+                return {
+                    tag: "",
+                    tags: [],
+                    autocompleteItems: [],
+                    tagsHidden: ""
+                }
+            },
+            watch: {
+                "tag": "initItems",
+            },
+            methods: {
+                tagsChanged(newTags) {
+                    this.tagsHidden=newTags.map(x => x.text).join(",")
+                },
+                initItems() {
 
-            {% include "common/common-typeaheadjs-tagsinput.js" %}
+                    // Set a minimum character count to trigger the ajax call
+                    if (this.tag.length < 3) return;
 
+                    return fetch("{% url 'tag_search' %}?query=" + this.tag)
+                                                                       .then(response => {
+                        return response.json();
+                    })
+                                       .then(data => {
+                        this.autocompleteItems = data.map(a => {
+                            return { text: a.value };
+                        }
+                                                                  )
+                })
+                }
+            },
+            mounted() {
+                initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
+                if (initialTags) {
+                    this.tags = initialTags;
+                    this.tagsHidden=initialTags.map(x => x.text).join(",")
+                }
+            },
+            computed: {
+                filteredItems() {
+                    return this.autocompleteItems.filter(i => {
+                        return i.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1;
+                    });
+                }
+            }
         });
 
     </script>

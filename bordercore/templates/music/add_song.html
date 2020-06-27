@@ -4,10 +4,6 @@
 
 {% block title %} Music {% endblock %}
 
-{% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
-{% endblock %}
-
 {% block left-block %}
 
     {% if info.id %}
@@ -53,11 +49,11 @@
 
                 {% if action == 'Upload' %}
                     <div class="form-group">
-                        <div class="controls">
+                        <div class="controls" id="file-upload">
 
-                            <input type="file" name="song" class="form-control col-lg-6 my-3" accept="audio/*" />
+                            <input type="file" name="song" class="form-control col-lg-6 my-3" accept="audio/*" @change="onChange" />
 
-                            <button type="submit" class="btn btn-secondary" name="upload" disabled="true">Upload</button>
+                            <button type="submit" class="btn btn-secondary" name="upload" disabled="true" ref="submitButton">Upload</button>
 
                             <a class="btn btn-secondary" href="{% url 'music_list' %}">Cancel</a>
 
@@ -68,16 +64,41 @@
                 {% if action == 'Review' %}
 
                     {% for field in form %}
-                        <div class="form-group{% if field.errors %} error{% endif %}">
-                            <label class="col-lg-2 col-form-label" for="inputTitle">{{ field.label }}</label>
-                            <div class="col-lg-5 controls">
-                                {{ field }}
-                                {% for error in field.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
+
+                        {% if field.label == "Tags" %}
+
+                            <div id="tagsearch">
+                                <div class="form-group {% if field.errors %} error{% endif %}">
+                                    <label class="col-lg-2 col-form-label" for="inputTitle">Tags</label>
+
+                                    <input type="hidden" name="tags" v-model="tagsHidden" />
+
+                                    <div class="col-lg-5 controls" id="vue-wrapper">
+                                        <vue-tags-input
+                                         ref="tagsInputComponent"
+                                         v-model="tag"
+                                         :tags="tags"
+                                         @tags-changed=tagsChanged
+                                         :autocomplete-items="filteredItems"
+                                         :add-only-from-autocomplete="false"
+                                         placeholder=""
+                                         />
+                                    </div>
+                                    {% for error in field.errors %}
+                                        <span class="form-error">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
                             </div>
-                        </div>
-                        {% if field.label == 'Year' %}
+
+                        {% elif field.label == 'Year' %}
+
+                            <div class="form-group{% if field.errors %} error{% endif %}">
+                                <label class="col-lg-2 col-form-label" for="inputTitle">Year</label>
+                                <div class="col-lg-5">
+                                    <input class="form-control" id="id_year" name="year" type="text" value="{{ info.year }}" />
+                                </div>
+                            </div>
+
                             <div class="form-group{% if field.errors %} error{% endif %}">
                                 <label class="col-lg-2 col-form-label" for="inputTitle">Album</label>
                                 <div class="col-lg-5">
@@ -96,6 +117,18 @@
                                 <label class="col-lg-2 col-form-label" for="inputTitle">Original Release Year</label>
                                 <div class="col-lg-5">
                                     <input class="form-control" id="id_original_release_year" name="original_release_year" type="text" />
+                                </div>
+                            </div>
+
+                        {% else %}
+
+                            <div class="form-group{% if field.errors %} error{% endif %}">
+                                <label class="col-lg-2 col-form-label" for="inputTitle">{{ field.label }}</label>
+                                <div class="col-lg-5 controls">
+                                    {{ field }}
+                                    {% for error in field.errors %}
+                                        <span class="form-error">{{ error }}</span>
+                                    {% endfor %}
                                 </div>
                             </div>
 
@@ -123,20 +156,76 @@
 
     {{ block.super }}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+    {{ tags|json_script:"initial-tags"|default:"" }}
+
+    <script src="https://unpkg.com/@johmun/vue-tags-input/dist/vue-tags-input.js"></script>
 
     <script type="text/javascript">
 
-        $(document).ready(function() {
+        Vue.mixin({ delimiters: ["[[", "]]"] });
 
-            {% include "common/common-typeaheadjs-tagsinput.js" %}
-
-            $("input[type='file']").change( function(){
-                $("button[type='submit']").removeAttr("disabled");
-            });
-
+        {% if action == 'Upload' %}
+        new Vue({
+            el: "#file-upload",
+            methods: {
+                onChange(evt) {
+                    this.$refs.submitButton.removeAttribute("disabled");
+                }
+            },
         });
+        {% endif %}
+
+        {% if action == 'Review' %}
+        new Vue({
+            el: "#tagsearch",
+            data() {
+                return {
+                    tag: "",
+                    tags: [],
+                    autocompleteItems: [],
+                    tagsHidden: ""
+                }
+            },
+            watch: {
+                "tag": "initItems",
+            },
+            methods: {
+                tagsChanged(newTags) {
+                    this.tagsHidden=newTags.map(x => x.text).join(",")
+                },
+                initItems() {
+
+                    // Set a minimum character count to trigger the ajax call
+                    if (this.tag.length < 3) return;
+
+                    return fetch("{% url 'tag_search' %}?query=" + this.tag)
+                                                                       .then(response => {
+                        return response.json();
+                    })
+                                       .then(data => {
+                        this.autocompleteItems = data.map(a => {
+                            return { text: a.value };
+                        }
+                                                                  )
+                })
+                }
+            },
+            mounted() {
+                initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
+                if (initialTags) {
+                    this.tags = initialTags;
+                    this.tagsHidden=initialTags.map(x => x.text).join(",")
+                }
+            },
+            computed: {
+                filteredItems() {
+                    return this.autocompleteItems.filter(i => {
+                        return i.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1;
+                    });
+                }
+            }
+        });
+        {% endif %}
 
     </script>
 
