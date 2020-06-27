@@ -117,7 +117,6 @@ class BlobForm(ModelForm):
 
     class Meta:
         model = Blob
-        # fields = ('file', 'title', 'filename', 'file_modified', 'date', 'tags', 'content', 'note', 'importance', 'is_note', 'is_private', 'id')
         fields = ('file', 'title', 'filename', 'file_modified', 'date', 'tags', 'content', 'note', 'importance', 'is_note', 'is_private', 'id')
         widgets = {
             'content': Textarea(attrs={'rows': 5, 'class': 'form-control'}),

@@ -21,8 +21,6 @@ bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 
 for blob in Blob.objects.filter(~Q(file="")).order_by('?'):
 
-    # blob = Blob.objects.get(sha1sum="6e0b5097b0925c6d9944f1c37c74d3a290a1e38b")
-
     if blob.file == "":
         print(f" Skipping {blob.title}")
         continue
