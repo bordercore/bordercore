@@ -1,5 +1,4 @@
 import requests
-
 from amazonproduct import API
 from amazonproduct.errors import NoExactMatchesFound
 
@@ -22,7 +21,7 @@ class AmazonMixin(object):
             author = self.metadata_set.filter(name='Author')
             if not author:
                 return {'error': 'Error: Amazon API lookup requires an author'}
-            results = self.api.item_search('Books', Title=title, Author=author[0].value, ResponseGroup='Images', Sort='-publication_date')
+            results = self.api.item_search('Books', Title=title, Author=author.first().value, ResponseGroup='Images', Sort='-publication_date')
         except NoExactMatchesFound:
             return {'error': 'Error: no matches found from Amazon API'}
 

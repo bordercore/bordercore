@@ -55,7 +55,7 @@ def get_overdue_exercise(request):
 @login_required
 def homepage(request):
 
-    quote = Quote.objects.order_by('?')[0]
+    quote = Quote.objects.order_by('?').first()
 
     # Get any 'pinned' bookmarks
     pinned_bookmarks = Bookmark.objects.filter(user=request.user, is_pinned=True)

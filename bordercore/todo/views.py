@@ -33,10 +33,10 @@ class TodoListView(ListView):
         elif self.request.user.userprofile.todo_default_tag:
             tag = self.request.user.userprofile.todo_default_tag.name
         else:
-            tag_info = Tag.objects.filter(todo__user=self.request.user, todo__isnull=False).distinct('name')
+            tag_info = Tag.objects.filter(todo__user=self.request.user, todo__isnull=False).first()
             tag = None
             if tag_info:
-                tag = tag_info[0].name
+                tag = tag_info.name
         self.tagsearch = tag
 
         if tag:

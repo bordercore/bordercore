@@ -277,7 +277,7 @@ def test_tags_no_orphans():
                            Q(sortorder__isnull=True) &
                            Q(tagbookmark__isnull=True) &
                            Q(userprofile__isnull=True))
-    assert len(t) == 0, "{} tags fail this test; example: name={}".format(len(t), t[0].name)
+    assert len(t) == 0, "{} tags fail this test; example: name={}".format(len(t), t.first().name)
 
 
 def test_favorite_tags_sort_order():
@@ -748,4 +748,4 @@ def test_all_notes_exist_in_elasticsearch(es):
 def test_questions_no_tags():
     "Assert that all drill questions have at least one tag"
     t = Question.objects.filter(Q(tags__isnull=True))
-    assert len(t) == 0, f"{len(t)} questions have no tags; example: {t[0].question}"
+    assert len(t) == 0, f"{len(t)} questions have no tags; example: {t.first().question}"

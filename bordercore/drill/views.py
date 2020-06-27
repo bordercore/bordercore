@@ -222,7 +222,7 @@ class QuestionUpdateView(UpdateView):
 def study_random(request):
 
     request.session["drill_mode"] = "random"
-    question = Question.objects.filter(user=request.user).order_by("?")[0]
+    question = Question.objects.filter(user=request.user).order_by("?").first()
     return redirect("question_detail", question_id=question.id)
 
 
@@ -242,10 +242,10 @@ def study_tag(request, tag):
             Q(interval__lte=timezone.now() - F("last_reviewed"))
             | Q(last_reviewed__isnull=True)
             | Q(state="L")
-        ).order_by("?")[0]
+        ).order_by("?").first()
 
     except IndexError:
-        question = Question.objects.filter(user=request.user, tags__name=tag).order_by('?')[0]
+        question = Question.objects.filter(user=request.user, tags__name=tag).order_by('?').first()
         messages.add_message(request, messages.INFO, 'Nothing to drill. Here''s a random question.')
 
     return redirect('question_detail', question_id=question.id)
@@ -275,7 +275,7 @@ def record_response(request, question_id, response):
     if request.session.get("drill_mode") == "random":
         return redirect("study_random")
     else:
-        return redirect("study_tag", tag=question.tags.all()[0].name)
+        return redirect("study_tag", tag=question.tags.all().first().name)
 
 
 @login_required
@@ -286,7 +286,7 @@ def skip_question(request, question_id):
     if request.session.get("drill_mode") == "random":
         return redirect("study_random")
     else:
-        return redirect("study_tag", tag=question.tags.all()[0].name)
+        return redirect("study_tag", tag=question.tags.all().first().name)
 
 
 def tag_search(request):

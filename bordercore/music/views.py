@@ -45,7 +45,7 @@ def music_list(request):
     random_albums = None
     random_album_info = Album.objects.filter(user=request.user).order_by('?')
     if random_album_info:
-        random_albums = random_album_info[0]
+        random_albums = random_album_info.first()
 
     return render(request, 'music/index.html',
                   {'section': SECTION,
@@ -259,7 +259,7 @@ def add_song(request):
                 # Look for a fuzzy match
                 fuzzy_matches = Album.objects.filter(Q(user=request.user) & Q(title__icontains=info['title'][0].lower()))
                 if fuzzy_matches:
-                    notes.append(f'Found a fuzzy match on the album title: "{fuzzy_matches[0].title}" by {fuzzy_matches[0].artist}')
+                    notes.append(f'Found a fuzzy match on the album title: "{fuzzy_matches.first().title}" by {fuzzy_matches.first().artist}')
 
             if Song.objects.filter(user=request.user, title=info['title'][0], artist=info['artist'][0]):
                 notes.append('You already have a song with this title by this artist')

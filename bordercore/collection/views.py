@@ -97,7 +97,7 @@ class CollectionDetailView(DetailView):
             context['blob_list'] = blob_list
 
             try:
-                context['first_blob_cover_info'] = Blob.get_cover_info(user=self.request.user, sha1sum=blob_list[0].sha1sum)
+                context['first_blob_cover_info'] = Blob.get_cover_info(user=self.request.user, sha1sum=blob_list.first().sha1sum)
             except ClientError:
                 pass
         context['section'] = SECTION

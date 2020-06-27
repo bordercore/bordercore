@@ -400,7 +400,7 @@ def slideshow(request):
     to display in a slideshow
     """
 
-    c = Collection.objects.filter(name="To Display")[0]
+    c = Collection.objects.filter(name="To Display").first()
 
     blob = Blob.objects.get(pk=random.choice(c.blob_list)["id"])
 
