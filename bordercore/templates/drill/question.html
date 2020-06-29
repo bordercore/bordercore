@@ -30,7 +30,11 @@ Easiness Factor: <strong>{{ question.efactor|floatformat:1 }}</strong>
 
     <br />
     <div>
-        <a href="{% url 'question_add_with_tag' object.tags.all.0 %}" class="btn btn-primary" role="button">Add Question</a>
+        {% if object.tags.all %}
+            <a href="{% url 'question_add_with_tag' object.tags.all.0 %}" class="btn btn-primary" role="button">Add Question</a>
+        {% else %}
+            <a href="{% url 'question_add' %}" class="btn btn-primary" role="button">Add Question</a>
+        {% endif %}
     </div>
 
 {% endblock %}
