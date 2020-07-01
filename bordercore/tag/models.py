@@ -26,7 +26,7 @@ class Tag(models.Model):
 
 # Add the import here to avoid a circular dependency
 #  between Tag and Bookmark
-from bookmark.models import Bookmark
+from bookmark.models import Bookmark  # isort:skip
 
 
 class TagBookmark(models.Model):
@@ -124,6 +124,9 @@ class TagAlias(models.Model):
     name = models.TextField(unique=True)
     tag = models.OneToOneField(Tag, on_delete=models.PROTECT)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    class Meta:
+        verbose_name_plural = "Tag Aliases"
 
     def __unicode__(self):
         return self.name
