@@ -3,7 +3,8 @@
     "processors" : [
         {
             "attachment" : {
-                "field" : "data"
+                "field" : "data",
+                "indexed_chars": -1
             }
         },
         {
