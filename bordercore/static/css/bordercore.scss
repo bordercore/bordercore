@@ -82,8 +82,24 @@ blockquote {
   to { transform: scale(1) rotate(360deg);}
 }
 
+/* Forms */
 .form-error {
   color: #b94a48;
+}
+
+.input-group .highlight-changed-field {
+  color: #ff0000;
+}
+
+.highlight-changed-field.color-transition {
+  color: #495057;
+  transition: 2s;
+  transition-delay: 1s;
+}
+
+#id_content.foobar {
+  height: 30em;
+  transition: height 1s ease-out;
 }
 
 /*** Bookmarks ***/
@@ -208,11 +224,6 @@ ul.pagination {
 #blob_collection_list {
   font-size: 18px;
   margin-botoom: 10px;
-}
-
-/* We need this because the "input-group" class ruins the field alignment */
-#blob_edit_file {
-  padding-left: 15px;
 }
 
 #blob_note {

@@ -1,26 +1,9 @@
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/smoke.min.css" />
-
-<script type="text/javascript">
-
-    {% for message in messages %}
-
-    $.smkAlert({
-        text: '{{ message }}',
-        type: '{% if message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}',
-        position:'top-right',
-        icon: 'glyphicon-time'
-    });
-
-    {% endfor %}
-
-    </script>
-
 {% if messages %}
 {% for message in messages %}
-        <!-- <br /> -->
-        <!-- <div class="col-lg-{{ width|default:7 }} offset-lg-{{ offset|default:2 }} alert alert-{% if class %}{{ class }}{% elif message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}"> -->
-        <!--     {{ message|safe }} -->
-        <!--</div> -->
+    <br />
+    <div class="col-lg-{{ width|default:7 }} offset-lg-{{ offset|default:2 }} alert alert-{% if class %}{{ class }}{% elif message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}">
+            {{ message|safe }}
+    </div>
 {% endfor %}
-    <!-- <br/><br/><br/> -->
+<br/><br/><br/>
 {% endif %}

@@ -215,7 +215,7 @@ class BlobUpdateView(UpdateView):
         except ClientError:
             log.warn(f"No S3 cover image found for id={self.object.id}")
 
-        context['metadata'] = self.object.metadata_set.all()
+        context['metadata'] = self.object.metadata_set.exclude(name="is_book")
         if True in [True for x in self.object.metadata_set.all() if x.name == 'is_book']:
             context['is_book'] = True
         context['is_private'] = self.object.is_private
@@ -225,6 +225,7 @@ class BlobUpdateView(UpdateView):
                                                                  & Q(is_private=False))
         context['action'] = 'Edit'
         context['title'] = 'Blob Edit :: {}'.format(self.object.get_title(remove_edition_string=True))
+        context['tags'] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
 
     def get(self, request, **kwargs):
