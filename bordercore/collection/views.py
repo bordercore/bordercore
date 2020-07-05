@@ -176,10 +176,12 @@ def get_info(request):
         else:
             match = Collection.objects.get(user=request.user, name=request.GET['name'])
         if match:
-            info = {'name': match.name,
-                    'description': match.description,
-                    'id': match.id,
-                    'tags': ','.join([tag.name for tag in match.tags.all()])}
+            info = {
+                'name': match.name,
+                'description': match.description,
+                'id': match.id,
+                'tags': [{"text": x.name, "is_meta": x.is_meta} for x in match.tags.all()]
+            }
     except ObjectDoesNotExist:
         pass
 
