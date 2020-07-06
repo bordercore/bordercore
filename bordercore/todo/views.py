@@ -104,6 +104,7 @@ class TodoDetailView(UpdateView):
         context['uuid'] = self.kwargs.get('uuid')
         context['action'] = 'Edit'
         context['title'] = 'Todo Edit :: {}'.format(self.object.task)
+        context['tags'] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
 
     def get_queryset(self):

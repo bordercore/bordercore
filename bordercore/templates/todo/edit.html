@@ -2,10 +2,6 @@
 
 {% block title %} Todo {% endblock %}
 
-{% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
-{% endblock %}
-
 {% block content %}
 
 {% if message %}
@@ -22,10 +18,20 @@
             <label class="col-lg-2 col-form-label" for="inputTitle">{{ field.label }}</label>
 
             <div class="col-lg-5">
+
+            {% if field.label == 'Tags' %}
+
+                <tags-input></tags-input>
+
+            {% else %}
+
                 {{ field }}
                 {% for error in field.errors %}
                     <span class="form-error">{{ error }}</span>
                 {% endfor %}
+
+            {% endif %}
+
             </div>
 
         </div>
@@ -34,7 +40,7 @@
     <div class="form-group">
         <div class="col-lg-5 offset-lg-2">
             <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}" />
-            <input class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
+            <input id="btn-delete" class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
             <a class="btn btn-secondary" href="{% url 'todo_list' %}">Cancel</a>
         </div>
     </div>
@@ -47,28 +53,90 @@
 
     {{ block.super }}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+    {{ tags|json_script:"initial-tags"|default:"" }}
+
+    <script type="text/javascript" src="https://unpkg.com/@johmun/vue-tags-input/dist/vue-tags-input.js"></script>
 
     <script type="text/javascript">
 
-        $(document).ready(function() {
+        Vue.mixin({ delimiters: ["[[", "]]"] });
 
-            {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" fieldName="name" %}
+        const TagsInput = {
+            template: `
+                <div>
+                    <vue-tags-input
+                        ref="tagsInputComponent"
+                        v-model="tag"
+                        :tags="tags"
+                        @tags-changed="newTags => tags = newTags"
+                        :autocomplete-items="filteredItems"
+                        :add-only-from-autocomplete="false"
+                        placeholder=""
+                    />
+                        <input type="hidden" name="tags" :value="tagsCommaSeparated" />
+                </div>
+            `,
+            data() {
+                return {
+                    tag: "",
+                    tags: [],
+                    autocompleteItems: [],
+                }
+            },
+            watch: {
+                "tag": "initItems",
+            },
+            methods: {
+                initItems() {
 
-            {% if action == 'Edit' %}
-            $("input.btn[value='Delete']").click( function() {
-                $("form#todo-form").attr("action", "{% url 'todo_delete' uuid %}");
-            })
-            {% endif %}
+                    // Set a minimum character count to trigger the ajax call
+                    if (this.tag.length < 3) return;
 
-            {% for tag in object.tags.all %}
-            $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
-            {% endfor %}
+                    return fetch("{% url 'tag_search' %}?query=" + this.tag)
+                        .then(response => {
+                            return response.json();
+                        })
+                        .then(data => {
+                            this.autocompleteItems = data.map(a => {
+                                return { text: a.value };
+                            }
+                            )
+                        })
+                }
+            },
+            mounted() {
+                initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
+                if (initialTags) {
+                    this.tags = initialTags;
+                }
+            },
+            computed: {
+                tagsCommaSeparated: function() {
+                    return this.tags.map(x => x.text).join(",")
+                },
+                filteredItems() {
+                    return this.autocompleteItems.filter(i => {
+                        return i.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1;
+                    });
+                }
+            }
+        }
 
+        new Vue({
+            el: "#todo-form",
+            components: {
+                TagsInput
+            }
         });
 
-</script>
+        {% if object %}
+        document.getElementById("btn-delete").addEventListener("click", function(evt) {
+            var formEl = document.getElementById("todo-form");
+            formEl.setAttribute("action", "{% url 'todo_delete' uuid %}");
+        });
+        {% endif %}
+
+    </script>
 
 
 {% endblock %}
