@@ -38,21 +38,15 @@
 
     {% include "common/show_messages_inline.html" %}
 
-<div class="row">
+    <div class="row" id="vue-app">
         <div class="col-lg-12">
 
             <h3>{{ object.name }}</h3>
-            <ul class="collection_sortable">
-                {% for blob in blob_list %}
-                    <li id="{{ blob.id }}">
-                        <a href="{% url 'blob_detail' blob.uuid %}"><img src="{{ MEDIA_URL }}{{ blob.cover_url }}" /></a>
-                        <br/>
-                        <a href="{% url 'blob_detail' blob.uuid %}">{{ blob.title }}</a> {% if blob.collection_note %}<img src="{{ STATIC_URL }}img/note.png" height="16" width="16" data-toggle="popover" data-content="{{ blob.collection_note }}"/>{% endif %}
-                    </li>
-                {% empty %}
+
+            <blob-list></blob-list>
+                {% if not blob_list %}
                     <div class="alert alert-warning" role="alert">Nothing in this collection</div>
-                {% endfor %}
-            </ul>
+                {% endif %}
         </div>
     </div>
 
@@ -74,65 +68,115 @@
 
     {{ block.super }}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
 
     <script type="text/javascript">
 
-        $(document).ready(function() {
+        current_index = 0;
+        size_of_collection = {{ blob_list|length }};
 
-            $('[data-toggle="popover"]').popover({});
+        Vue.mixin({ delimiters: ["[[", "]]"] });
 
-            $('.collection_sortable').sortable(           {
-                connectWith: '.collection_sortable',
-                stop: function(event, ui) {
-                    $.ajax({
-                        url: '{% url 'sort_collection' %}',
-                        type: "POST",
-                        data: { collection_id : {{ collection.id }},
-                                blob_id : ui.item.attr('id'),
-                                position:  (ui.item.index() + 1) }
-                    });
-
+        const BlobList = {
+            template: `
+                <div>
+                    <ul style="list-style-type:none" class="collection_sortable borderless">
+                        <draggable v-model="blob_list" @change="onChange" ghost-class="collection_ghost_class" animation="500" forceFallback="true">
+                                <li v-for="blob in blob_list" :key="blob.id">
+                                    <a :href="[[ blob.url ]]"><img :src="[[ blob.cover_url ]]" /></a>
+                                    <br/>
+                                    <a :href="[[ blob.url ]]">[[ blob.title ]]</a> {% if blob.collection_note %}<img src="{{ STATIC_URL }}img/note.png" height="16" width="16" data-toggle="popover" data-content="[[ blob.collection_note ]]"/>{% endif %}
+                                </li>
+                        </draggable>
+                    </ul>
+                </div>
+            `,
+            data() {
+                return {
+                    blob_list: [
+                        {% for blob in blob_list %}
+                        {
+                            id: {{ blob.id }},
+                            cover_url: "{{ blob.cover_url}}",
+                            uuid: "{{ blob.uuid }}",
+                            title: "{{ blob.title }}",
+                            collection_note: "{{ blob.collection_note }}",
+                            url: "{% url 'blob_detail' blob.uuid %}",
+                            cover_url: "{{ MEDIA_URL }}{{ blob.cover_url }}"
+                        },
+                        {% endfor %}
+                    ]
                 }
-            });
+            },
+            methods: {
+                onChange(evt) {
 
-            $( "#collection_sortable" ).disableSelection();
+                    // The backend expects the ordering to begin
+                    // with 1, not 0, so add 1.
+                    new_position = evt.moved.newIndex + 1;
 
-            current_index = 0;
-            size_of_collection = {{ blob_list|length }};
+                    const data = new URLSearchParams();
+                    data.append("collection_id", {{ collection.id }});
+                    data.append("blob_id", evt.moved.element.id);
+                    data.append("position", new_position);
 
-            $(document).keydown(function(e) {
-
-                if (e.which == 37 || e.which == 39) {
-
-                    if (e.which == 39) { /* Right arrow */
-
-                        if (current_index == size_of_collection - 1) {
-                            return;
-                        }
-                        current_index++;
-
-                    }
-
-                    if (e.which == 37) { /* Left arrow */
-
-                        if (current_index == 0) {
-                            return;
-                        }
-                        current_index--;
-
-                    }
-
-                    $.ajax( { type: 'GET',
-                              url: '{% url 'get_blob' object.id 666 %}'.replace(/666/, current_index),
-                              }).done(function( json ) {
-                        $("#gallery_image").attr("src", "{{ MEDIA_URL }}" + json.cover_info.url);
-                    })
-
+                    fetch("{% url "sort_collection" %}", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: data,
+                    }).then(response => response.json())
+                      .then(data => {
+                          console.log("Success:", data);
+                      })
+                      .catch((error) => {
+                          console.error("Error:", error);
+                          $.smkAlert({text: "Error reordering notes: " + error, type: "error", position:"top-right"});
+                      });
                 }
+            }
+        }
 
-            });
+        new Vue({
+            el: "#vue-app",
+            components: {
+                BlobList
+            },
+            mounted() {
 
+                window.addEventListener("keydown", function(e) {
+
+                    if (e.which == 37 || e.which == 39) {
+
+                        if (e.which == 39) { /* Right arrow */
+
+                            if (current_index == size_of_collection - 1) {
+                                return;
+                            }
+                            current_index++;
+
+                        }
+
+                        if (e.which == 37) { /* Left arrow */
+
+                            if (current_index == 0) {
+                                return;
+                            }
+                            current_index--;
+
+                        }
+
+                        fetch("{% url "get_blob" object.id 666 %}".replace(/666/, current_index))
+                            .then(response => {
+                                return response.json();
+                            }).then(data => {
+                                document.getElementById("gallery_image").setAttribute("src", "{{ MEDIA_URL }}" + data.cover_info.url);
+                            })
+                    }
+                });
+            }
         });
 
     </script>

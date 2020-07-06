@@ -323,6 +323,11 @@ a.tag:active {
    text-align: center;
 }
 
+.collection_ghost_class {
+  border-left: 0;
+  opacity: 0;
+}
+
 #document_note {
    background-color: $table_row_background_color;
    color: #ffffff;

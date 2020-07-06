@@ -257,6 +257,10 @@ a.tag:active {
   height: 110px;
   text-align: center; }
 
+.collection_ghost_class {
+  border-left: 0;
+  opacity: 0; }
+
 #document_note {
   background-color: #007BFF;
   color: #ffffff;
