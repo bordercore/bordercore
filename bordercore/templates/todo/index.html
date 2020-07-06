@@ -27,22 +27,18 @@
 
 {% block content %}
 
-    <div class="row">
+    <div class="row" id="vue-app">
         <div class="col-lg-10">
             <form class="form-inline" role="form">
 
-                <div class="btn-group">
-                    <a class="btn btn-secondary" id="btn-add" href="{% url 'todo_add' %}">Add</a>
-                    <button class="btn btn-secondary" id="btn-edit" disabled>Edit</button>
-                    <button class="btn btn-secondary" id="btn-delete" disabled>Delete</button>
-                </div>
+                <button-group></button-group>
 
                 <div class="form-group">
                     <input id="todo_search" type="text" class="form-control" placeholder="Search">
                 </div>
 
                 <div class="form-group">
-                    <label id="todo_feedback" class="alert alert-success d-none"></label>
+                    <label id="todo_feedback" class="alert alert-success d-none">{{ messages.0.message }}</label>
                 </div>
 
             </form>
@@ -61,63 +57,112 @@
 
     <script type="text/javascript" charset="utf-8">
 
-        var oTable;
+        Vue.mixin({ delimiters: ["[[", "]]"] });
 
-        $(document).ready(function() {
+        const EventBus = new Vue();
 
-            {% if messages %}
-            {% for message in messages %}
-            $('#todo_feedback').fadeIn(1000).html('{{ message }}');
-            setTimeout( function() {
-                $('#todo_feedback').fadeOut(1000);
-            }, 3000);
-            {% endfor %}
-            {% endif %}
+        window.addEventListener("keyup", function(e) {
+            var value = document.getElementById("todo_search").value;
+            table.search(value).draw();
+        });
 
-            $('#todo_search').on( 'keyup', function () {
-                oTable.search($(this).val()).draw();
-            });
+        const ButtonGroup = {
+            template: `
+                <div class="btn-group">
+                    <a class="btn btn-secondary" id="btn-add" href="{% url 'todo_add' %}">Add</a>
+                    <input type="button" class="btn btn-secondary" id="btn-edit" value="Edit" :disabled="isDisabledEdit" @click="onClickEdit" />
+                    <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="isDisabledDelete" @click="onClickDelete" />
+                </div>
+            `,
+            methods: {
+                onClickDelete(evt) {
 
-            $('#btn-delete').on('click', function() {
+                    var selectedId = table.cell(".selected", 3).data();
 
-                var selectedTodoID = $('#todo_list').DataTable().cell('.selected', 3).data();
+                    this.isDisabledEdit = true;
+                    this.isDisabledDelete = true;
 
-                $.ajax( { type: 'DELETE',
-                          url: '{% url 'Todo-list' %}' + selectedTodoID,
-                          success: function() {
-                        $('#todo_feedback').removeClass("d-none").html("Task deleted.");
+                    fetch("{% url 'Todo-list' %}" + selectedId,
+                          {
+                              method: "DELETE",
+                              headers: {
+                                  "X-CSRFToken": "{{ csrf_token }}"
+                              }
+                          }
+                    ).then(response => {
+                        return response;
+                    }).then(() => {
 
-                        $('#todo_list').DataTable().row('.selected').remove();
-                        oTable.draw();
+                        var element = document.getElementById("todo_feedback");
+                        element.classList.remove("d-none");
+                        element.innerHTML = "Task Deleted.";
 
-                        $('#btn-edit').attr("disabled", "disabled");
-                        $('#btn-delete').attr("disabled", "disabled");
+                        table.row(".selected").remove();
+                        table.draw();
+
+                        this.isDisabledEdit = true;
+                        this.isDisabledDelete = true;
 
                         // Now that we've deleted a row, re-order the "sort_order" column
                         //  to eliminate the new gap, so that rows range from 1 to <table size>
                         sort_order = 1;
-                        oTable.rows().every( function ( index ) {
-                            oTable.cell(index,1).data(sort_order++).draw();
+                        table.rows().every( function ( index ) {
+                            table.cell(index,1).data(sort_order++).draw();
                         });
 
+                    })
+                },
+                onClickEdit(evt) {
+
+                    var selectedId = table.cell(".selected", 3).data();
+                    window.location="{% url 'todo_edit' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000$/, selectedId);
+
+                },
+            },
+            data() {
+                return {
+                    isDisabledEdit: true,
+                    isDisabledDelete: true
+                }
+            },
+            mounted() {
+
+                EventBus.$on("toggleDisabledEdit", payload => {
+                    if (payload == "disable") {
+                        this.isDisabledEdit = true;
+                    } else if (payload == "enable") {
+                        this.isDisabledEdit = false;
                     }
-                          });
+                });
 
-                return false;
+                EventBus.$on("toggleDisabledDelete", payload => {
+                    if (payload == "disable") {
+                        this.isDisabledDelete = true;
+                    } else if (payload == "enable") {
+                        this.isDisabledDelete = false;
+                    }
+                });
 
-            });
+            }
+        };
 
-            $('#btn-edit').on('click', function() {
-                var selectedTodoID = $('#todo_list').DataTable().cell('.selected', 3).data();
-                window.location='{% url 'todo_edit' '00000000-0000-0000-0000-000000000000' %}'.replace(/00000000-0000-0000-0000-000000000000$/, selectedTodoID);
-                return false;
-            });
+        new Vue({
+            el: "#vue-app",
+            components: {
+                ButtonGroup
+            }
+        });
+
+
+        var table;
+
+        $(document).ready(function() {
 
             function formatDragHandle( data, type, row ) {
                 return "<img width='20' height='16' src='{{ STATIC_URL }}img/drag_and_drop_handle.png' />"
             }
 
-            oTable = $('#todo_list').DataTable( {
+            table = $('#todo_list').DataTable( {
                 initComplete: function () {
                     var api = this.api();
                     $('#todo_list').show();
@@ -148,13 +193,12 @@
 
             var uuid = null;
 
-            oTable.on('select', function () {
-
-                $('#btn-edit').removeAttr("disabled");
-                $('#btn-delete').removeAttr("disabled");
-            } ).on( 'deselect', function () {
-                $('#btn-edit').attr("disabled", "disabled");
-                $('#btn-delete').attr("disabled", "disabled");
+            table.on( "select", function () {
+                EventBus.$emit("toggleDisabledEdit", "enable");
+                EventBus.$emit("toggleDisabledDelete", "enable");
+            } ).on( "deselect", function () {
+                EventBus.$emit("toggleDisabledEdit", "disable");
+                EventBus.$emit("toggleDisabledDelete", "disable");
             }).on('row-reorder', function(e, diff, edit) {
 
                 // edit.triggerRow is the row the drag was initiated on
@@ -166,7 +210,7 @@
                 // Iterate through this array, looking for the row
                 // we've moved and record its new position
                 for ( var i=0, ien=diff.length ; i<ien ; i++ ) {
-                    var rowData = oTable.row( diff[i].node ).data();
+                    var rowData = table.row( diff[i].node ).data();
 
                     if (rowData[3] == uuid) {
                         new_position = diff[i].newData;
@@ -175,32 +219,43 @@
                 }
 
                 if (new_position != null) {
-                    $.ajax( { type: 'POST',
-                              url: '{% url 'sort_todo' %}',
-                              data: { tag: '{{ tagsearch }}', todo_uuid: uuid, position: new_position },
-                              success: function() {
-                        }
-                              });
+
+                    const data = new URLSearchParams();
+                    data.append("tag", "{{ tagsearch }}");
+                    data.append("todo_uuid", uuid);
+                    data.append("position", new_position);
+
+                    fetch("{% url 'sort_todo' %}", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: data,
+                    }
+                    ).then(data => {
+                        console.log("Success");
+                    });
+
                 }
             }).on( 'order.dt', function ( e, settings, details ) {
-                var order = oTable.order();
+                var order = table.order();
                 colNumber = order[0][0];
                 if( colNumber == 0 ) {
                     // If we're sorting on the "Manual" column (index=0),
                     // enable row reordering and switch to the "grab" cursor.
 
-                    oTable.rowReorder.enable();
+                    table.rowReorder.enable();
 
-                    oTable.rows().every( function ( index ) {
-                        $(oTable.cell(index,0).node()).addClass("cursor_grab");
+                    table.rows().every( function ( index ) {
+                        $(table.cell(index,0).node()).addClass("cursor_grab");
                     });
                 } else {
                     // If we're sorting on any column other than "Manual",
                     // disable row reordering and switch away from the "grab" cursor.
-                    oTable.rowReorder.disable();
+                    table.rowReorder.disable();
 
-                    oTable.rows().every( function ( index ) {
-                        $(oTable.cell(index,0).node()).removeClass("cursor_grab");
+                    table.rows().every( function ( index ) {
+                        $(table.cell(index,0).node()).removeClass("cursor_grab");
                     });
                 }
             });

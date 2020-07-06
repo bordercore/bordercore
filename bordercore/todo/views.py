@@ -12,7 +12,7 @@ from tag.models import Tag
 from todo.forms import TodoForm
 from todo.models import TagTodo, TagTodoSortOrder, Todo
 
-SECTION = 'Todo'
+SECTION = 'todo'
 
 
 @method_decorator(login_required, name='dispatch')
