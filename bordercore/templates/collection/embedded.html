@@ -1,51 +1,99 @@
 <base target="_parent">
 
-<ul class="collection_sortable">
-    {% for blob in blob_list %}
-        <li id="{{ blob.id }}">
-            <a href="{% url 'blob_detail' blob.uuid %}"><img src="{{ MEDIA_URL }}{{ blob.cover_url }}"/></a>
-            <br/>
-            <a href="{% url 'blob_detail' blob.uuid %}">{{ blob.title }}</a> {% if blob.collection_note %}<img src="{{ STATIC_URL }}/img/note.png" height="16" width="16" data-toggle="popover" data-content="{{ blob.collection_note }}"/>{% endif %}
-        </li>
-    {% empty %}
-        <div class="alert alert-warning" role="alert">Nothing in this collection</div>
-    {% endfor %}
-</ul>
+<div id="vue-app">
+    <blob-list></blob-list>
+</div>
+{% if not blob_list %}
+    <div class="alert alert-warning" role="alert">Nothing in this collection</div>
+{% endif %}
 
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
 
-<script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}js/jquery_csrf_setup.js"></script>
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-glyphicons.css" />
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bordercore.css" />
 
-<script>
+{% if debug %}
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+{% else %}
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+{% endif %}
 
-    $(document).ready(function() {
+<script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
 
-        $('[data-toggle="popover"]').popover({});
+<script type="text/javascript">
 
-        $('.collection_sortable').sortable(           {
-            connectWith: '.collection_sortable',
-            stop: function(event, ui) {
-                $.ajax({
-                    url: '{% url 'sort_collection' %}',
-                    type: "POST",
-                    data: { collection_id : {{ collection.id }},
-                            blob_id : ui.item.attr('id'),
-                            position:  (ui.item.index() + 1) }
-                });
+    Vue.mixin({ delimiters: ["[[", "]]"] });
 
+    const BlobList = {
+        template: `
+            <div>
+                <ul style="list-style-type:none" class="collection_sortable borderless">
+                    <draggable v-model="blob_list" @change="onChange" ghost-class="collection_ghost_class" animation="500" forceFallback="true">
+                        <li v-for="blob in blob_list" :key="blob.id">
+                            <a :href="[[ blob.url ]]"><img :src="[[ blob.cover_url ]]" /></a>
+                            <br/>
+                            <a :href="[[ blob.url ]]">[[ blob.title ]]</a> {% if blob.collection_note %}<img src="{{ STATIC_URL }}img/note.png" height="16" width="16" data-toggle="popover" data-content="[[ blob.collection_note ]]"/>{% endif %}
+                        </li>
+                    </draggable>
+                </ul>
+            </div>
+        `,
+        data() {
+            return {
+                blob_list: [
+                    {% for blob in blob_list %}
+                    {
+                        id: {{ blob.id }},
+                        cover_url: "{{ blob.cover_url}}",
+                        uuid: "{{ blob.uuid }}",
+                        title: "{{ blob.title }}",
+                        collection_note: "{{ blob.collection_note }}",
+                        url: "{% url 'blob_detail' blob.uuid %}",
+                        cover_url: "{{ MEDIA_URL }}{{ blob.cover_url }}"
+                    },
+                    {% endfor %}
+                ]
             }
-        });
+        },
+        methods: {
+            onChange(evt) {
 
-        $( "#collection_sortable" ).disableSelection();
+                // The backend expects the ordering to begin
+                // with 1, not 0, so add 1.
+                new_position = evt.moved.newIndex + 1;
 
+                const data = new URLSearchParams();
+                data.append("collection_id", {{ collection.id }});
+                data.append("blob_id", evt.moved.element.id);
+                data.append("position", new_position);
+
+                fetch("{% url "sort_collection" %}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: data,
+                }).then(response => response.json())
+                  .then(data => {
+                      console.log("Success:", data);
+                  })
+                  .catch((error) => {
+                      console.error("Error:", error);
+                      $.smkAlert({text: "Error reordering notes: " + error, type: "error", position:"top-right"});
+                  });
+            }
+        }
+    }
+
+    new Vue({
+        el: "#vue-app",
+        components: {
+            BlobList
+        }
     });
 
 </script>
-
