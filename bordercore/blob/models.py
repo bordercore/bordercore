@@ -57,6 +57,7 @@ ILLEGAL_FILENAMES = [
 # generating "Broken pip" errors.
 
 BLOBS_NOT_TO_INDEX = [
+    "17722112-9653-40ee-8380-c2e9bcbcaee2",
     "50d894af-8dad-44ab-a15e-2435dd8f827a",
     "56ba664e-e918-4598-b198-8e01da064f75",
     "95546f46-3842-49d4-93d3-82fad914e3ce",
