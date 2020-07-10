@@ -4,10 +4,6 @@
 
 {% block title %} Bookmarks {% endblock %}
 
-{% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
-{% endblock %}
-
 {% block content %}
 
 {% for message in messages %}
@@ -18,17 +14,21 @@
     {{ form.instance.url|favicon|safe }} {{ action }} Bookmark
 </p>
 
-<form action="{{ request.path }}" method="post">
+<form id="bookmark-form" action="{{ request.path }}" method="post">
     {% csrf_token %}
 
     {% for field in form %}
         <div class="form-group {% if field.errors %}error{% endif %} row">
             <label class="col-lg-2 col-form-label" for="inputTitle">{{ field.label }}</label>
             <div class="col-lg-7">
-                {{ field }}
-                {% for error in field.errors %}
-                    <span class="form-error">{{ error }}</span>
-                {% endfor %}
+                {% if field.label == 'Tags' %}
+                    <tags-input></tags-input>
+                {% else %}
+                  {{ field }}
+                  {% for error in field.errors %}
+                      <span class="form-error">{{ error }}</span>
+                  {% endfor %}
+                {% endif %}
             </div>
         </div>
     {% endfor %}
@@ -49,24 +49,80 @@
 
     {{ block.super }}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+    {{ tags|json_script:"initial-tags"|default:"" }}
+
+    <script type="text/javascript" src="https://unpkg.com/@johmun/vue-tags-input/dist/vue-tags-input.js"></script>
 
     <script type="text/javascript">
 
-        $(document).ready(function() {
+        Vue.mixin({ delimiters: ["[[", "]]"] });
 
-            {% include "common/common-typeaheadjs-tagsinput.js" with itemValue="value" fieldName="name" %}
+        const TagsInput = {
+            template: `
+                <div>
+                    <vue-tags-input
+                        ref="tagsInputComponent"
+                        v-model="tag"
+                        :tags="tags"
+                        @tags-changed="newTags => tags = newTags"
+                        :autocomplete-items="filteredItems"
+                        :add-only-from-autocomplete="false"
+                        placeholder=""
+                    />
+                        <input type="hidden" name="tags" :value="tagsCommaSeparated" />
+                </div>
+            `,
+            data() {
+                return {
+                    tag: "",
+                    tags: [],
+                    autocompleteItems: [],
+                }
+            },
+            watch: {
+                "tag": "initItems",
+            },
+            methods: {
+                initItems() {
 
-            {% if action == 'Edit' %}
-            $('#id_tags').tagsinput('focus');
-            {% endif %}
+                    // Set a minimum character count to trigger the ajax call
+                    if (this.tag.length < 3) return;
 
-            {% for tag in bookmark.tags.all %}
-            console.log("{{ tag.name }}");
-            $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
-            {% endfor %}
+                    return fetch("{% url 'tag_search' %}?query=" + this.tag)
+                        .then(response => {
+                            return response.json();
+                        })
+                        .then(data => {
+                            this.autocompleteItems = data.map(a => {
+                                return { text: a.value };
+                            }
+                            )
+                        })
+                }
+            },
+            mounted() {
+                initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
+                if (initialTags) {
+                    this.tags = initialTags;
+                }
+            },
+            computed: {
+                tagsCommaSeparated: function() {
+                    return this.tags.map(x => x.text).join(",")
+                },
+                filteredItems() {
+                    return this.autocompleteItems.filter(i => {
+                        return i.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1;
+                    });
+                }
+            }
+        }
 
+        new Vue({
+            el: "#bookmark-form",
+            components: {
+                TagsInput
+            }
         });
 
     </script>

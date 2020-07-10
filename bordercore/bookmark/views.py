@@ -37,6 +37,8 @@ def edit(request, bookmark_id=None):
     action = 'Edit'
     b = Bookmark.objects.get(user=request.user, pk=bookmark_id) if bookmark_id else None
 
+    tags = []
+
     if request.method == 'POST':
         if request.POST['Go'] in ['Edit', 'Add']:
             form = BookmarkForm(request.POST, instance=b, request=request)  # A form bound to the POST data
@@ -57,6 +59,7 @@ def edit(request, bookmark_id=None):
     elif bookmark_id:
         action = 'Edit'
         form = BookmarkForm(instance=b, request=request)
+        tags = [{"text": x.name, "is_meta": x.is_meta} for x in b.tags.all()]
 
     else:
         action = 'Add'
@@ -66,6 +69,7 @@ def edit(request, bookmark_id=None):
                   {'section': SECTION,
                    'action': action,
                    'form': form,
+                   'tags': tags,
                    'bookmark': b})
 
 
@@ -214,6 +218,7 @@ def get_random_bookmarks(request):
 @login_required
 def search(request, search):
     return list(request, search=search)
+
 
 @login_required
 def list(request,
