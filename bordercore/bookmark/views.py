@@ -166,7 +166,7 @@ def do_import(request):
     if request.method == 'POST':
 
         start = request.POST.get('start_folder', '')
-        tag = request.POST.get('tag', '')
+        tag = request.POST.get('tags', '')
 
         links = []
 

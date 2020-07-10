@@ -2,15 +2,11 @@
 
 {% block title %} Import Bookmarks {% endblock %}
 
-{% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
-{% endblock %}
-
 {% block content %}
 
         {% include "common/show_messages_inline.html" %}
 
-        <form id="form-blob" action="{{ request.path }}" method="post" enctype="multipart/form-data">
+        <form id="import-form" action="{{ request.path }}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
             <div class="form-group row">
@@ -29,8 +25,8 @@
 
             <div class="form-group row">
                 <label class="bold col-lg-2 col-sm-2 col-form-label text-right">Tag</label>
-                <div class="col-lg-4 input-group">
-                    <input id="id_tags" class="form-control" type="text" name="tag" />
+                <div class="col-lg-4">
+                    <tags-input></tags-input>
                 </div>
             </div>
 
@@ -48,13 +44,72 @@
 
     {{ block.super }}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap-tagsinput.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@johmun/vue-tags-input/dist/vue-tags-input.js"></script>
 
     <script type="text/javascript">
 
-        $(document).ready(function() {
-            {% include "common/common-typeaheadjs-tagsinput.js" %}
+        Vue.mixin({ delimiters: ["[[", "]]"] });
+
+        const TagsInput = {
+            template: `
+                <div>
+                    <vue-tags-input
+                        ref="tagsInputComponent"
+                        v-model="tag"
+                        :tags="tags"
+                        @tags-changed="newTags => tags = newTags"
+                        :autocomplete-items="filteredItems"
+                        :add-only-from-autocomplete="false"
+                        placeholder=""
+                    />
+                        <input type="hidden" name="tags" :value="tagsCommaSeparated" />
+                </div>
+            `,
+            data() {
+                return {
+                    tag: "",
+                    tags: [],
+                    autocompleteItems: [],
+                }
+            },
+            watch: {
+                "tag": "initItems",
+            },
+            methods: {
+                initItems() {
+
+                    // Set a minimum character count to trigger the ajax call
+                    if (this.tag.length < 3) return;
+
+                    return fetch("{% url 'tag_search' %}?query=" + this.tag)
+                        .then(response => {
+                            return response.json();
+                        })
+                        .then(data => {
+                            this.autocompleteItems = data.map(a => {
+                                return { text: a.value };
+                            }
+                            )
+                        })
+                }
+            },
+            computed: {
+                tagsCommaSeparated: function() {
+                    return this.tags.map(x => x.text).join(",")
+                },
+                filteredItems() {
+                    return this.autocompleteItems.filter(i => {
+                        return i.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1;
+                    });
+                }
+            }
+        }
+
+        new Vue({
+            el: "#import-form",
+            components: {
+                TagsInput
+            }
         });
 
     </script>
