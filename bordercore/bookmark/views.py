@@ -1,6 +1,7 @@
 import base64
 import datetime
 import json
+import re
 
 import lxml.html as lh
 
@@ -214,7 +215,6 @@ def get_random_bookmarks(request):
 def search(request, search):
     return list(request, search=search)
 
-
 @login_required
 def list(request,
          random=False,
@@ -256,6 +256,10 @@ def list(request,
             bookmarks = bookmarks.order_by("?")
         else:
             bookmarks = bookmarks.order_by("-created")
+
+        # Sanitize the titles by removing newlines and carriage returns
+        for x in bookmarks:
+            x.title = re.sub("[\n\r]", "", x.title)
 
         paginator = Paginator(bookmarks, BOOKMARKS_PER_PAGE)
         bookmark_range = 5 if paginator.num_pages > 5 else paginator.num_pages

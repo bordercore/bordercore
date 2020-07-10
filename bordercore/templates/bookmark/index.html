@@ -1,46 +1,34 @@
 {% extends "base.html" %}
 
 {% load dict_get %}
+{% load jsonify %}
 
 {% load favicon %}
 
 {% block title %} Bookmarks {% endblock %}
 
-{% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/smoke.min.css" />
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/tagsinput.css" />
-{% endblock %}
-
 {% block left-block %}
 
-    <div id="bookmark-sidebar">
+    <div id="vue-app-left">
 
-        <form>
-            <div class="form-group">
-                <label class="col-form-label">Note</label>
-                <textarea class="form-control" id="note" rows="9"></textarea>
+        <add-note inline-template>
+            <div id="bookmark-sidebar" >
+                <form>
+                    <div class="form-group">
+                        <label class="col-form-label">Note</label>
+                        <textarea class="form-control" id="note" rows="9" v-model="note"></textarea>
+                    </div>
+                    <button id="btn-add-note" type="button" class="btn btn-primary" @click="onClick">Add</button>
+                </form>
             </div>
-            <button id="btn-add-note" type="button" class="btn btn-primary">Add</button>
-        </form>
+        </add-note>
 
+        <h2>Favorite Tags</h2>
+
+        <ul class="list-group" id="sort-container-tags">
+            <tag-list></tag-list>
+        </ul>
     </div>
-
-    <h2>
-    Favorite Tags
-    </h2>
-
-    <ul class="list-group" id="sort-container-tags">
-        <li id="untagged" class="list-group-item{% if not tag_filter %} active{% endif %}">
-            <a href="{% url "bookmark_list" %}">Untagged</a>
-            <span class="ml-2 badge {% if not tag_filter %}badge-light{% else %}badge-primary{% endif %}">{{ tag_counts|dict_get:"Untagged" }}</span>
-        </li>
-        {% for tag in favorite_tags %}
-            <li class="list-group-item{% if tag.name == tag_filter %} active{% endif %}" data-id="{{ tag.id }}">
-                <a href="{% url 'bookmark_tag' tag.name %}">{{ tag.name }}</a>
-                <span class="ml-2 badge {% if tag.name == tag_filter %}badge-light{% else %}badge-primary{% endif %}">{{ tag_counts|dict_get:tag.name }}</span>
-            </li>
-        {% endfor %}
-    </ul>
 
     <br />
 
@@ -80,70 +68,59 @@
 
 {% block content %}
 
-    <div class="row">
+    <div id="vue-app-right">
 
-        <div class="col-lg-12 bookmark-search">
+        <div class="row">
 
-            <form class="form-inline" role="form" name="nav_form" id="tag-search-form" method="get">
+            <div class="col-lg-12 bookmark-search">
 
-                <div class="form-group col-auto has-search">
-                    <span class="fa fa-search form-control-feedback"></span>
-                    <input id="search" type="text" value="{{ search }}" class="bookmark-tag-filter-input form-control" autocomplete="off" placeholder="Search" />
-                </div>
+                <form class="form-inline" role="form" name="nav_form" id="search" method="get">
 
-                <div class="btn-group">
-                    <a class="btn btn-secondary" id="btn-add" href="{% url 'bookmark_add' %}">Add</a>
-                    <button class="btn btn-secondary" id="btn-edit" disabled>Edit</button>
-                    <button class="btn btn-secondary" id="btn-delete" disabled>Delete</button>
-                </div>
+                    <div class="form-group col-auto has-search">
+                        <span class="fa fa-search form-control-feedback"></span>
+                        <search></search>
+                    </div>
 
-            </form>
+                    <button-group></button-group>
+
+                </form>
+
+            </div>
 
         </div>
 
-    </div>
-
-    <br />
+        <br />
 
     {% if bookmarks %}
 
-        <div class="row">
-            <div class="col-lg-12">
-                <ul id="sort-container" class="bookmark-list">
-                {% for link in bookmarks %}
-
-                    <tr class="bookmark" data-id="{{ link.id }}">
-                        <li class="bookmark" data-id="{{ link.id }}">
-                            <div>
-                                <span class="ml-1">{{ link.created|date:"N j," }}</span>
-                                <span class="">{{ link.created|date:"Y" }}</span>
-                                <span class="ml-2">{{ link.url|favicon:16|safe }} </span>
-                                <span>
-                                    <a class="one-tag _ml-2" href="{{ link.url }}" id="link_{{ link.id }}" target="_blank">{{ link.title }}</a>
-                                {% if link.last_response_code != None and link.last_response_code != 200 %}
-                                    <a class="form-error ml-3" target="wayback" href="https://web.archive.org/web/1000/{{ link.url }}">{{ link.last_response_code }}</a>
-                                {% endif %}
-                                {% if link.note %}
-                                    <i class="fa fa-clipboard"></i>
-                                {% endif %}
-                            </span>
-                            {% for tag in link.tags.all %}
-                                {% if tag.name != tag_filter %}
-                                    <a class="badge badge-info" href="{% url 'bookmark_tag' tag.name %}">{{ tag.name }}</a>
-                                {% endif %}
-                            {% endfor %}
-                            </div>
-                            </li>
-
-                {% endfor %}
-                </ul>
+        <bookmark-list inline-template>
+            <div class="row">
+                <div class="col-lg-12">
+                    <ul>
+                        <draggable v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost"{% if not tag_filter %} disabled="true"{% endif %}>
+                            <transition-group type="transition">
+                                <li v-for="bookmark in bookmarkList" :data-id="bookmark.id" :key="bookmark.id" class="bookmark-list" @click="onClick">
+                                    <span class="ml-1">[[ bookmark.created ]]</span>
+                                    <span class="">[[ bookmark.createdYear ]]</span>
+                                    <span v-html="bookmark.faviconUrl" class="ml-2"></span>
+                                    <span>
+                                        <a class="one-tag" :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.title) ]]</a>
+                                        <a v-if="bookmark.lastResponseCode != 200" class="form-error ml-3" target="wayback" :href="'https://web.archive.org/web/1000/' + bookmark.url">[[ bookmark.lastResponseCode ]]</a>
+                                        <i v-if="bookmark.note != '' && bookmark.note != 'None'" class="fa fa-clipboard"></i>
+                                    </span>
+                                    <a v-for="tag in bookmark.tags" v-if="tag.fields.name != '{{ tag_filter }}'" class="badge badge-info m-2" :href="'{% url 'bookmark_tag' 666 %}'.replace(/666$/, tag.fields.name)">[[ tag.fields.name ]]</a>
+                                </li>
+                            </transition-group>
+                        </draggable>
+                    </ul>
+                </div>
             </div>
-        </div>
+        </bookmark-list>
 
         {% if bookmarks.has_other_pages %}
-        <div class="row">
-            <nav aria-label="Page navigation">
-                <ul class="pagination">
+            <div class="row">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
                     {% if bookmarks.has_previous %}
                         <li class="page-item"><a class="page-link" href="{% url 'bookmark_list' bookmarks.previous_page_number %}">Previous</a></li>
                     {% else %}
@@ -165,12 +142,14 @@
                     {% else %}
                         <li class="disabled page-item"><a class="page-link" href="#">Next</a></li>
                     {% endif %}
-                </ul>
-            </nav>
-        </div>
+                    </ul>
+                </nav>
+            </div>
         {% endif %}
 
     {% endif %}
+
+    </div>
 
 {% endblock %}
 
@@ -178,184 +157,395 @@
 
     {{ block.super }}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
     <script type="text/javascript" src="https://use.fontawesome.com/4a95cb196f.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/typeahead.bundle.min.js"></script>
+
+    <script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
+
+    <script type="text/javascript" src="https://unpkg.com/vue-simple-suggest@1.10.1"></script>
 
     <script type="text/javascript">
 
-        // Create a hash of bookmark ids and their attributes
-        var link_info = {};
-        {% for link in bookmarks %}
-          {% if link.note != None %}
-        link_info[{{ link.id }}] = "{{ link.note }}";
-          {% endif %}
-        {% endfor %}
+        Vue.mixin({ delimiters: ["[[", "]]"] });
 
-        $(document).ready(function() {
+        const EventBus = new Vue();
 
-            $('#sort-container-tags').sortable( {
-                connectWith: '.list-group',
-
-                // The 'Untagged' item is not sortable -- it's always on top
-                items: "li:not(#untagged)",
-
-                stop: function(event, ui) {
-
-                    var tag_id = $(ui.item).data('id');
-
-                    $.ajax( { type: 'POST',
-                              url: '{% url 'sort_favorite_tags' %}',
-                              data: { tag_id: tag_id, new_position: ui.item.index() },
-                              error: function (xhr, ajaxOptions, error) {
-                            $.smkAlert({text: 'Error reordering tags: ' + error, type: 'error', position:'top-right'});
-                        }
-                              } )
+        const BookmarkList = {
+            data() {
+                return {
+                    bookmarkList: [
+                        {% for bookmark in bookmarks %}
+                        {
+                            id: {{ bookmark.id }},
+                            created: "{{ bookmark.created|date:"N j," }}",
+                            createdYear: "{{ bookmark.created|date:"Y" }}",
+                            url: "{{ bookmark.url }}",
+                            faviconUrl: '{{ bookmark.url|favicon:16|safe }}',
+                            title: "{{ bookmark.title }}".replace(/\r/g, ""),
+                            lastResponseCode: "{{ bookmark.last_response_code|default:"" }}",
+                            note: "{{ bookmark.note|default:"" }}",
+                            tags: {{ bookmark.tags.all|jsonify|safe }}
+                        },
+                        {% endfor %}
+                    ]
                 }
-            })
-        })
+            },
+            methods: {
+                onClick(evt) {
 
-    </script>
+                    element = evt.currentTarget;
 
-    <script type="text/javascript">
+                    if (element.classList.contains("selected")) {
 
-        $(document).ready(function() {
+                        {% if tag_filter %}
+                        document.getElementById("bookmark-sidebar").classList.remove("show");
+                        {% endif %}
 
-            var engine = new Bloodhound({
-                name: 'tags',
-                remote: {
-                    url: '{% url 'bookmark_tag_search' %}?query=%QUERY',
-                    wildcard: '%QUERY'
+                        element.classList.remove("selected");
+
+                        EventBus.$emit("toggleDisabledEdit", "disable")
+                        EventBus.$emit("toggleDisabledDelete", "disable");
+
+                    } else {
+
+                        {% if tag_filter %}
+
+                        noteValue = "";
+
+                        var selectedId = parseInt(element.dataset.id, 10);
+
+                        const found = this.bookmarkList.find(element => element.id == selectedId);
+
+                        if (found) {
+                            noteValue = atob(found.note);
+                        }
+
+                        EventBus.$emit("setNoteValue", noteValue);
+
+                        document.getElementById("bookmark-sidebar").classList.add("show");
+
+                        {% endif %}
+
+                        const currentlySelected = document.querySelector("li.bookmark-list.selected");
+                        if (currentlySelected) {
+                            currentlySelected.classList.remove("selected");
+                        }
+                        element.classList.add("selected");
+
+                        EventBus.$emit("toggleDisabledEdit", "enable");
+                        EventBus.$emit("toggleDisabledDelete", "enable");
+
+                    }
+
                 },
-                datumTokenizer: function(d) { return Bloodhound.tokenizers.whitespace(d.val); },
-                queryTokenizer: Bloodhound.tokenizers.whitespace
-            });
+                onChange(evt) {
 
-            engine.initialize();
+                    linkId = evt.moved.element.id;
 
-            $('#search').typeahead({
-                autoselect: true
-            }, {
-                displayKey: 'value',
-                source: engine,
-            });
+                    // The backend expects the ordering to begin
+                    // with 1, not 0, so add 1.
+                    newPosition = evt.moved.newIndex + 1;
 
-            $('#search').bind('typeahead:selected', function(obj, datum, name) {
-                autocomplete_selected = true;
-                window.location='{% url 'bookmark_tag' 666 %}'.replace(/666$/, datum.value);
-            });
+                    const data = new URLSearchParams();
+                    data.append("tag", "{{ tag_filter }}");
+                    data.append("link_id", linkId);
+                    data.append("position", newPosition);
 
-            // This is set when an item from the autocomplete options is selected.  Otherwise there would be
-            //  a race between the window.open() in $('#search').bind('typeahead:selected',...) and the form
-            //  submission from the $('#search').on('keydown', ...)
-            var autocomplete_selected = false;
+                    fetch("{% url "sort_bookmarks" %}", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: data,
+                    }).then(response => response.json())
+                      .then(data => {
+                          console.log("Success:", data);
+                      })
+                      .catch((error) => {
+                          console.error("Error:", error);
+                          $.smkAlert({text: "Error reordering notes: " + error, type: "error", position:"top-right"});
+                      });
+                },
+                unescapeHtml(html) {
+                    // Source: https://stackoverflow.com/a/46851765/378256
+                    var el = document.createElement('div');
+                    return html.replace(/\&[#0-9a-z]+;/gi, function (enc) {
+                        el.innerHTML = enc;
+                        return el.innerText
+                    });
+                }
+            },
+            mounted() {
 
-            $('#search').on('keydown', function(event, selection) {
-                if (((event.which && event.which == 13) || (event.keyCode && event.keyCode == 13)) && !autocomplete_selected) {
+                EventBus.$on("foobar", payload => {
 
-                    search_term = $("#search").val();
-                    if (search_term) {
-                        window.location='{% url 'bookmark_search' 666 %}'.replace(/666$/, $("#search").val());
+                    this.bookmarkList.forEach( bookmark => {
+                        if( bookmark.id == payload.id ) {
+                            bookmark.note = btoa(payload.noteValue);
+                        }
+                    });
+
+                });
+            }
+        };
+
+        const AddNote = {
+            data() {
+                return {
+                    note: ""
+                }
+            },
+            methods: {
+                onClick(evt) {
+
+                    const note = document.getElementById("note").value;
+                    var selectedId = document.querySelector("li.bookmark-list.selected").dataset.id;
+
+                    const data = new URLSearchParams();
+                    data.append("tag", "{{ tag_filter }}");
+                    data.append("link_id", selectedId);
+                    data.append("note", note);
+
+                    fetch("{% url 'bookmark_add_note' %}",
+                          {
+                              method: "POST",
+                              headers: {
+                                  "X-CSRFToken": "{{ csrf_token }}"
+                              },
+                              body: data
+                          }
+                    ).then(response => {
+                        return response;
+                    }).then(() => {
+
+                        payload = {
+                            id: selectedId,
+                            noteValue: note
+                        }
+                        EventBus.$emit("foobar", payload);
+
+                    })
+
+                }
+            },
+            mounted() {
+
+                EventBus.$on("setNoteValue", payload => {
+                    this.note = payload;
+                });
+
+            }
+        }
+
+        const Search = {
+            template: `
+                <div>
+                    <span class="fa fa-search form-control-feedback"></span>
+                    <vue-simple-suggest ref="suggestComponent"
+                        v-model="query"
+                        display-attribute="value"
+                        value-attribute="value"
+                        :list="tagSearch"
+                        :filter-by-query=true
+                        :debounce=200
+                        :name="inputName"
+                        placeholder="Search"
+                        autofocus
+                        autocomplete="off"
+                        @select="select"
+                        @keydown.native.enter.prevent="onKeyDown"
+                        :styles="autoCompleteStyle"
+                        >
+                    </vue-simple-suggest>
+                </div>
+            `,
+            data() {
+                return {
+                    inputName: "search",
+                    query: "",
+                    tags: [],
+                    autoCompleteStyle: {
+                        vueSimpleSuggest: "position-relative",
+                        inputWrapper: "search-box",
+                        defaultInput: "form-control",
+                        suggestions: "position-absolute list-group z-1000",
+                        suggestItem: "list-group-item"
+                    }
+                }
+            },
+            methods: {
+                tagSearch(query) {
+                    return fetch("{% url 'bookmark_tag_search' %}?query=" + query)
+                        .then(response => {
+                            return response.json();
+                        })
+                        .then(data => data)
+                },
+                select(tag) {
+
+                    window.location = '{% url 'bookmark_tag' 666 %}'.replace(/666$/, tag.value);
+
+                },
+                onKeyDown(evt) {
+                    searchTerm = evt.srcElement.value;
+                    if (searchTerm) {
+                        window.location='{% url 'bookmark_search' 666 %}'.replace(/666$/, searchTerm);
                     } else {
                         // If nothing is selected, refresh the page with no filters
                         window.location='{% url 'bookmark_list' %}';
                     }
-                    return false;
-                } else {
-                    return true;
                 }
-            });
+            }
+        };
 
-            var selectedId;
+        const ButtonGroup = {
+            template: `
+                <div class="btn-group">
+                    <a class="btn btn-secondary" id="btn-add" href="{% url 'bookmark_add' %}">Add</a>
+                    <input type="button" class="btn btn-secondary" id="btn-edit" value="Edit" :disabled="isDisabledEdit" @click="onClickEdit" />
+                    <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="isDisabledDelete" @click="onClickDelete" />
+                </div>
+            `,
+            methods: {
+                onClickDelete(evt) {
 
-            {% if tag_filter %}
-            $('#sort-container').sortable( {
-                connectWith: '.bookmark-list',
-                stop: function(event, ui) {
-                    var myMatches = $(ui.item).find('a').attr('id').match(/link_(.*)$/);
-                    var link_id = myMatches[1];
+                    var bookmarkEl = document.querySelector("li.bookmark-list.selected");
+                    var selectedId = bookmarkEl.dataset.id;
 
-                    $.ajax( { type: 'POST',
-                              url: '{% url 'sort_bookmarks' %}',
-                              data: { tag: '{{ tag_filter }}', link_id: link_id, position: ui.item.index() + 1 },
-                              success: function() {
-                        }
-                              });
+                    fetch("{% url 'bookmark_delete' 666 %}".replace(/666$/, selectedId),
+                          {
+                              method: "DELETE",
+                              headers: {
+                                  "X-CSRFToken": "{{ csrf_token }}"
+                              }
+                          }
+                    ).then(response => {
+                        return response;
+                    }).then(() => {
 
-                }
-            });
-            {% endif %}
+                        bookmarkEl.remove();
 
-            $('#btn-edit').click( function() {
-                var selectedBookmarkID = $("li.bookmark.selected").data("id");
-                window.location='{% url 'bookmark_edit' 666 %}'.replace(/666$/, selectedBookmarkID)
-                return false;
-            });
+                        this.isDisabledEdit = true;
+                        this.isDisabledDelete = true;
 
-            $('#btn-delete').on('click', function() {
-                var selectedBookmarkID = $("li.bookmark.selected").data("id");
-
-                $.ajax( { type: 'DELETE',
-                          url: '{% url 'bookmark_delete' 666 %}'.replace(/666$/, selectedBookmarkID),
-                          success: function() {
-                        $("li.bookmark.selected").remove();
-                        $('#btn-edit').attr("disabled", "disabled");
-                        $('#btn-delete').attr("disabled", "disabled");
                         {% if tag_filter %}
-                        $("#bookmark-sidebar").hide( "slide", { direction: "left" } );
+                        document.getElementById("bookmark-sidebar").classList.remove("show");
                         {% endif %}
-                    }
-                          });
 
-                return false;
+                    })
+                },
+                onClickEdit(evt) {
 
-            });
+                    var selectedId = document.querySelector("li.bookmark-list.selected").dataset.id;
+                    window.location="{% url 'bookmark_edit' 666 %}".replace(/666$/, selectedId);
 
-            $("#btn-add-note").click( function() {
-
-                var note = $("#note").val();
-                var selectedBookmarkID = $("li.bookmark.selected").data("id");
-
-                $.ajax( { type: "POST",
-                          url: "{% url "bookmark_add_note" %}",
-                          data: { tag: "{{ tag_filter }}", link_id: selectedBookmarkID, note: note },
-                          success: function() {
-                        link_info[selectedBookmarkID] = btoa(note);
-                    }
-                          });
-
-                return false;
-            });
-
-            $("li.bookmark").click( function () {
-                if ( $(this).hasClass("selected") ) {
-                    {% if tag_filter %}
-                    $("#bookmark-sidebar").hide( "slide", { direction: "left" } );
-                    {% endif %}
-                    $(this).removeClass("selected");
-                    $('#btn-edit').attr("disabled", "disabled");
-                    $('#btn-delete').attr("disabled", "disabled");
-                } else {
-                    {% if tag_filter %}
-                    $("#note").val("");
-                    var selectedBookmarkID = $(this).data("id");
-                    if (link_info[selectedBookmarkID]) {
-                        try {
-                            $("#note").val(atob(link_info[selectedBookmarkID]));
-                        } catch(err) {
-                            console.log(err);
-                        };
-                    }
-                    $("#bookmark-sidebar").show( "slide", { direction: "left" } );
-                    {% endif %}
-                    $("li.bookmark.selected").removeClass("selected");
-                    $(this).addClass("selected");
-                    $('#btn-edit').removeAttr("disabled");
-                    $('#btn-delete').removeAttr("disabled");
+                },
+            },
+            data() {
+                return {
+                    isDisabledEdit: true,
+                    isDisabledDelete: true
                 }
-            } );
+            },
+            mounted() {
 
+                EventBus.$on("toggleDisabledEdit", payload => {
+                    if (payload == "disable") {
+                        this.isDisabledEdit = true;
+                    } else if (payload == "enable") {
+                        this.isDisabledEdit = false;
+                    }
+                });
+
+                EventBus.$on("toggleDisabledDelete", payload => {
+                    if (payload == "disable") {
+                        this.isDisabledDelete = true;
+                    } else if (payload == "enable") {
+                        this.isDisabledDelete = false;
+                    }
+                });
+
+            }
+        };
+
+        new Vue({
+            el: "#vue-app-right",
+            components: {
+                BookmarkList,
+                ButtonGroup,
+                Search
+            }
+        });
+
+        const TagList = {
+            template: `
+                <div>
+                    <draggable v-model="favoriteTags" @change="onChange" ghost-class="sortable-ghost" filter="#untagged">
+                        <transition-group type="transition">
+                            <li id="untagged" class="list-group-item{% if not tag_filter %} active{% endif %}" key="-1">
+                                <a href="{% url "bookmark_list" %}">Untagged</a>
+                                <span class="ml-2 badge {% if not tag_filter %}badge-light{% else %}badge-primary{% endif %}">{{ tag_counts|dict_get:"Untagged" }}</span>
+                            </li>
+                            <li v-for="tag in favoriteTags" :class="'list-group-item' + (tag.name == '{{ tag_filter }}' ? ' active' : '')" :data-id="tag.id" :key="tag.id">
+                                <a :href="tag.url">[[ tag.name ]]</a>
+                                <span :class="'ml-2 badge ' + tag.className">[[ tag.count ]]</span>
+                            </li>
+                        </transition-group>
+                    </draggable>
+                </div>
+            `,
+            data() {
+                return {
+                    favoriteTags: [
+                        {% for tag in favorite_tags %}
+                        {
+                            id: {{ tag.id }},
+                            name: "{{ tag.name }}",
+                            className: "{% if tag.name == tag_filter %}badge-light{% else %}badge-primary{% endif %}",
+                            count: {{ tag_counts|dict_get:tag.name }},
+                            url: "{% url 'bookmark_tag' tag.name %}"
+                        },
+                        {% endfor %}
+                    ]
+                }
+            },
+            methods: {
+                onChange(evt) {
+
+                    tagId = evt.moved.element.id;
+
+                    // The backend expects the ordering to begin
+                    // with 1, not 0, so add 1.
+                    newPosition = evt.moved.newIndex + 1;
+
+                    const data = new URLSearchParams();
+                    data.append("tag_id", tagId);
+                    data.append("new_position", newPosition);
+
+                    fetch("{% url "sort_favorite_tags" %}", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: data,
+                    }).then(response => response.json())
+                      .then(data => {
+                          console.log("Success:", data);
+                      })
+                      .catch((error) => {
+                          console.error("Error:", error);
+                          $.smkAlert({text: "Error reordering notes: " + error, type: "error", position:"top-right"});
+                      });
+                }
+            }
+        };
+
+        new Vue({
+            el: "#vue-app-left",
+            components: {
+                AddNote,
+                TagList
+            }
         });
 
     </script>
