@@ -1,7 +1,6 @@
 import hashlib
 import os
 import re
-import time
 from datetime import datetime
 from pathlib import Path
 
@@ -474,32 +473,39 @@ def search(request):
 
     for album in albums:
         results.append({'name': '{} - {}'.format(album.artist, album.title),
-                        'value': '{} - {}'.format(album.artist, album.title),
+                        'value': f'album_{album.id}',
                         'id': album.id,
-                        'type': 'album'})
+                        'link_type': 'album',
+                        'object_type': 'album'})
 
     for artist in artists:
         results.append({'name': '{}'.format(artist.artist),
-                        'value': '{}'.format(artist.artist),
-                        'type': 'artist'})
+                        'value': f'artist_{artist.id}',
+                        'artist': artist.artist,
+                        'link_type': 'artist',
+                        'object_type': 'artist'})
 
     for song in songs:
         # If we don't have the album for the song (eg it's a "loose" song), return an 'artist' result,
         #  otherwise return the 'album' result
         if song.album_id:
             results.append({'name': '{} - {}'.format(song.title, song.artist),
-                            'value': '{} - {}'.format(song.title, song.artist),
+                            'value': f'song_{song.id}',
                             'id': song.album_id,
-                            'type': 'album'})
+                            'link_type': 'album',
+                            'object_type': 'song'})
         else:
             results.append({'name': '{} - {}'.format(song.title, song.artist),
-                            'value': '{}'.format(song.artist),
-                            'type': 'artist'})
+                            'value': f'song_{song.id}',
+                            'artist': song.artist,
+                            'link_type': 'artist',
+                            'object_type': 'song'})
 
     for tag in tags:
-        results.append({'name': 'Tag: {}'.format(tag.name),
-                        'value': tag.name,
-                        'type': 'tag'})
+        results.append({'name': tag.name,
+                        'value': f'tag_{tag.id}',
+                        'link_type': 'tag',
+                        'object_type': 'tag'})
 
     return JsonResponse(results, safe=False)
 

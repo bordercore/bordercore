@@ -25,12 +25,12 @@ new Vue({
         },
         select(datum) {
 
-            if (datum.type == 'album') {
+            if (datum.link_type == 'album') {
                 url = '{% url 'album_detail' 666 %}'.replace(/666$/, datum.id);
-            } else if (datum.type == 'artist') {
-                url = '{% url 'artist_detail' 666 %}'.replace(/666$/, datum.value);
+            } else if (datum.link_type == 'artist') {
+                url = '{% url 'artist_detail' 666 %}'.replace(/666$/, datum.artist);
             } else {
-                url = '{% url 'music_search_tag' %}?tag=' + datum.value;
+                url = '{% url 'music_search_tag' %}?tag=' + datum.name;
             }
             window.location=url;
 
@@ -42,7 +42,7 @@ new Vue({
             const { suggestion, query } = scope;
 
             let result = this.$refs.suggestComponent.displayProperty(suggestion);
-            result = "<em>" + suggestion.type + "</em> - " + result
+            result = "<em>" + suggestion.object_type + "</em> - " + result
 
             if (!query) return result;
 
