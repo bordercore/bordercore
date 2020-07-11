@@ -4,12 +4,23 @@
 
 {% block content %}
 
-<div class="row">
+<div class="row" id="vue-app">
 
     <div class="col-lg-4">
         <h3>Feed List</h3>
         <hr />
         <ul id="sort-container" class="feed-list">
+            <feed-list inline-template>
+                <div>
+                    <draggable v-model="feedList" @change="onChange" ghost-class="collection_sortable-ghost" animation="500" forceFallback="true">
+                        <transition-group type="transition">
+                            <li v-for="feed in feedList" :key="feed.id">
+                                <a href="#" :data-id="feed.id" @click="onClick">[[ feed.name ]]</a>
+                            </li>
+                        </transition-group>
+                    </draggable>
+                </div>
+            </feed-list>
             {% for feed in feed_info %}
                 <li>
                     <a href="#" id="link_{{ feed.feed.id }}">{{ feed.feed.name }}</a>
@@ -22,11 +33,17 @@
 
     </div>
 
-    <div class="col-lg-6">
-        <h3 id="feed-title"></h3>
-        <hr />
-        <span id="feed-item-list"></span>
-    </div>
+    <url-list inline-template>
+        <div class="col-lg-6">
+            <h3 id="feed-title"><a :href="links.feed_homepage">[[ links.name ]]</a></h3>
+            <hr />
+            <ul>
+                <li v-for="url in links.links">
+                    <a :href="url.link">[[ url.title ]]</a>
+                </li>
+            </ul>
+        </div>
+    </url-list>
 
 </div>
 
@@ -36,80 +53,106 @@
 
     {{ block.super }}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
 
     <script type="text/javascript">
 
-        $(document).ready(function() {
+        var feed_json_text = {{ json|safe }};
 
-            var feed_json_text = {{ json|safe }};
+        Vue.mixin({ delimiters: ["[[", "]]"] });
 
-            $("a[id^='link_']").click( function(e) {
-                var myMatches = this.getAttribute('id').match(/link_(.*)$/);
-                var feed_id = myMatches[1];
-                showFeed(feed_id)
-            })
+        const EventBus = new Vue();
 
-            function showFeed(feed_id) {
-
-                $('#feed-title').html( '<a href="' + feed_json_text[ feed_id ]['feed_homepage']+ '">' + feed_json_text[ feed_id ]['name'] + '</a>');
-
-                myText = '';
-
-                for ( var i = 0; i < feed_json_text[ feed_id ]['links'].length; i++) {
-                    myText += "<a href=\"" + feed_json_text[ feed_id ]['links'][ i ]['link'] + "\">" + feed_json_text[ feed_id ]['links'][ i ]['title'] + "</a><br />";
+        const FeedList = {
+            data() {
+                return {
+                    feedList: [
+                        {% for feed in feed_info %}
+                        {
+                            id: {{ feed.feed.id }},
+                            name: "{{ feed.feed.name }}",
+                            lastResponseCode: {{ feed.feed.last_response_code }}
+                        },
+                        {% endfor %}
+                    ]
                 }
+            },
+            methods: {
+                onClick(evt) {
+                    const feedId = evt.srcElement.dataset.id;
+                    EventBus.$emit("showFeed", feedId);
 
-                $('#feed-item-list').html( myText );
+                    const data = new URLSearchParams();
+                    data.append("current_feed", feedId);
 
-                $.ajax( { type: 'POST',
-                          url: '{% url 'store_in_session' %}',
-                          data: { current_feed: feed_id },
-                          success: function() {
+                    fetch("{% url 'store_in_session' %}", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: data,
                     }
-                          });
+                    ).then(data => {
+                        console.log("Success");
+                    });
+
+                },
+                onChange(evt) {
+
+                    const feedId = evt.moved.element.id;
+
+                    // The backend expects the ordering to begin
+                    // with 1, not 0, so add 1.
+                    newPosition = evt.moved.newIndex + 1;
+
+                    const data = new URLSearchParams();
+                    data.append("feed_id", feedId);
+                    data.append("position", newPosition);
+
+                    fetch("{% url "sort_feed" %}", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: data,
+                    }).then(response => response.json())
+                      .then(data => {
+                          console.log("Success:", data);
+                      })
+
+                }
+            }
+        };
+
+        const UrlList = {
+            data() {
+                return {
+                    currentFeed: {{ current_feed }},
+                }
+            },
+            computed: {
+                links() {
+                    return feed_json_text[this.currentFeed];
+                }
+            },
+            mounted() {
+
+                EventBus.$on("showFeed", feedId => {
+                    this.currentFeed = feedId;
+                });
 
             }
+        }
 
-            // Get the user's default feed and display it first
-            showFeed( {{ current_feed }} );
-
-            $('#sort-container').sortable( {
-                connectWith: '.feed-list',
-                stop: function(event, ui) {
-
-                    var myMatches = $(ui.item).find('a').attr('id').match(/link_(.*)$/);
-                    var feed_id = myMatches[1];
-
-                    // If the destination is the 'all feeds' list on the right and the feed is from the
-                    //  'current feeds' list on the left, then we're deleting the feed
-                    if ( ui.item.parent().attr('id') === 'sort-container-all' ) {
-                        url = 'feed_delete.json?feed_id=' + feed_id;
-                    } else {
-                        url = '{% url 'sort_feed' %}'
-                    }
-
-                    console.log(url)
-
-                    var request = $.ajax({
-                        url: url,
-                        type: "POST",
-                        data: { feed_id : feed_id, position:  (ui.item.index() + 1) },
-                        dataType: "text"
-                    });
-
-                    request.done(function(msg) {
-                        console.log("ALL GOOD")
-                    });
-
-                    request.fail(function(jqXHR, textStatus) {
-                        alert( "Request failed: " + textStatus );
-                    });
-
-                }
-            } );
-
+        new Vue({
+            el: "#vue-app",
+            components: {
+                FeedList,
+                UrlList
+            }
         });
+
 
     </script>
 
