@@ -4,38 +4,50 @@
 
 {% block content %}
 
-<div class="row">
+    <div class="row" id="vue-app">
 
-    <div class="col-lg-4">
-        <h3>Subscribed Feeds</h3>
-        <hr />
-        <ul id="sort-container" class="feed-list">
-            {% for feed in feed_info %}
-                <li>
-                    <a href="{% url 'feed_edit' feed.id %}" id="link_{{ feed.id }}">{{ feed.name }}</a>
-                    {% if feed.feed.last_response_code != 200 %}<span class="list_annotation">{{ feed.feed.last_response_code }}</span>{% endif %}
-                </li>
-            {% empty %}
-                Drag here to add new subscriptions.
-            {% endfor %}
-        </ul>
+        <div class="col-lg-4">
+            <h3>Subscribed Feeds</h3>
+            <hr />
+            <ul class="feed-list">
+                <feed-list-subscribed inline-template>
+                    <div>
+                        <draggable v-model="feedList" @change="onChange" ghost-class="collection_sortable-ghost" animation="500" forceFallback="true" group="feeds">
+                            <transition-group type="transition">
+                                <li v-for="feed in feedList" :key="feed.id">
+                                    <a :href="feed.url" :data-id="feed.id">[[ feed.name ]]</a>
+                                    <span v-if="feed.lastResponseCode != 200" class="list_annotation">[[ feed.lastResponseCode ]]</span>
+                                </li>
+                            </transition-group>
+                        </draggable>
+                        {% if not feed_info %}
+                        Drag here to add new subscriptions.
+                        {% endif %}
+                    </div>
+                </feed-list-subscribed>
+            </ul>
+        </div>
+
+        <div class="col-lg-4">
+            <h3>Available Feeds</h3>
+            <hr />
+            <ul class="feed-list">
+                <feed-list-not-subscribed inline-template>
+                    <div>
+                        <draggable v-model="feedList" @change="onChange" ghost-class="collection_sortable-ghost" animation="500" forceFallback="true" group="feeds">
+                            <transition-group type="transition">
+                                <li v-for="feed in feedList" :key="feed.id">
+                                    <a :href="feed.url" :data-id="feed.id">[[ feed.name ]]</a>
+                                    <span v-if="feed.lastResponseCode != 200" class="list_annotation">[[ feed.lastResponseCode ]]</span>
+                                </li>
+                            </transition-group>
+                        </draggable>
+                    </div>
+                </feed-list-not-subscribed>
+            </ul>
+        </div>
 
     </div>
-
-    <div class="col-lg-6">
-        <h3 id="feed-title">Available Feeds</h3>
-        <hr />
-        <ul id="sort-container-all" class="feed-list">
-            {% for feed in feeds_not_subscribed %}
-                <li>
-                    <a href="{% url 'feed_edit' feed.id %}" id="link_{{ feed.id }}">{{ feed.name }}</a>
-                    {% if feed.feed.last_response_code != 200 %}<span class="feed_not_200 small">{{ feed.feed.last_response_code }}</span>{% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-    </div>
-
-</div>
 
 {% endblock %}
 
@@ -43,63 +55,133 @@
 
     {{ block.super }}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-ui.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
 
     <script type="text/javascript">
 
-        $(document).ready(function() {
+        var feed_json_text = {{ json|safe }};
 
-            var feed_json_text = {{ json|safe }};
+        Vue.mixin({ delimiters: ["[[", "]]"] });
 
-            $("a[id^='link_']").click( function(e) {
-                var myMatches = this.getAttribute('id').match(/link_(.*)$/);
-                var feed_id = myMatches[1];
-            })
+        const FeedListSubscribed = {
+            data() {
+                return {
+                    feedList: [
+                        {% for feed in feed_info %}
+                        {
+                            id: {{ feed.feed.id }},
+                            name: "{{ feed.feed.name }}",
+                            url: "{% url 'feed_edit' feed.feed.id %}",
+                            lastResponseCode: {{ feed.feed.last_response_code }}
+                        },
+                        {% endfor %}
+                    ]
+                }
+            },
+            methods: {
+                onChange(evt) {
 
-            $('#sort-container').sortable( {
-                connectWith: '.feed-list',
-                stop: function(event, ui) {
+                    if (evt.added) {
 
-                    // If the destination is the 'all feeds' list on the right and the feed is from the
-                    //  'current feeds' list on the left, then we're deleting the feed
-                    if ( ui.item.parent().attr('id') === 'sort-container-all' ) {
-                        url = '{% url 'feed_unsubscribe' %}'
-                    } else {
-                        url = '{% url 'sort_feed' %}'
+                        const feedId = evt.added.element.id;
+
+                        // The backend expects the ordering to begin
+                        // with 1, not 0, so add 1.
+                        newPosition = evt.added.newIndex + 1;
+
+                        const data = new URLSearchParams();
+                        data.append("feed_id", feedId);
+                        data.append("position", newPosition);
+
+                        fetch("{% url "feed_subscribe" %}", {
+                            method: "POST",
+                            headers: {
+                                "X-CSRFToken": "{{ csrf_token }}"
+                            },
+                            body: data,
+                        }).then(response => response.json())
+                          .then(data => {
+                              console.log("Success:", data);
+                          })
+
+                    } else if (evt.moved) {
+
+                        const feedId = evt.moved.element.id;
+
+                        // The backend expects the ordering to begin
+                        // with 1, not 0, so add 1.
+                        newPosition = evt.moved.newIndex + 1;
+
+                        const data = new URLSearchParams();
+                        data.append("feed_id", feedId);
+                        data.append("position", newPosition);
+
+                        fetch("{% url "sort_feed" %}", {
+                            method: "POST",
+                            headers: {
+                                "X-CSRFToken": "{{ csrf_token }}"
+                            },
+                            body: data,
+                        }).then(response => response.json())
+                          .then(data => {
+                              console.log("Success:", data);
+                          })
+
                     }
 
-                    var request = $.ajax({
-                        url: url,
-                        type: "POST",
-                        data: { feed_id : ui.item.find('a').attr('id').split('_')[1], position:  (ui.item.index() + 1) },
-                        dataType: "text"
-                    });
-
                 }
-            } );
+            }
+        };
 
-            $('#sort-container-all').sortable( {
+        const FeedListNotSubscribed = {
+            data() {
+                return {
+                    feedList: [
+                        {% for feed in feeds_not_subscribed %}
+                        {
+                            id: {{ feed.id }},
+                            name: "{{ feed.name }}",
+                            url: "{% url 'feed_edit' feed.id %}",
+                            lastResponseCode: {{ feed.last_response_code }}
+                        },
+                        {% endfor %}
+                    ]
+                }
+            },
+            methods: {
+                onChange(evt) {
 
-                connectWith: '.feed-list',
-                stop: function(event, ui) {
+                    if (evt.added) {
 
-                    // If the destination is the 'all feeds' list on the right and the feed is also from the
-                    //  right, then the user is trying to sort this list, which isn't allowed.  Bail.
-                    if ( ui.item.parent().attr('id') === 'sort-container-all' ) {
-                        return;
+                        const feedId = evt.added.element.id;
+
+                        const data = new URLSearchParams();
+                        data.append("feed_id", feedId);
+
+                        fetch("{% url "feed_unsubscribe" %}", {
+                            method: "POST",
+                            headers: {
+                                "X-CSRFToken": "{{ csrf_token }}"
+                            },
+                            body: data,
+                        }).then(response => response.json())
+                          .then(data => {
+                              console.log("Success:", data);
+                          })
+
                     }
 
-                    var request = $.ajax({
-                        url: '{% url 'feed_subscribe' %}',
-                        type: "POST",
-                        data: { feed_id : ui.item.find('a').attr('id').split('_')[1], position:  (ui.item.index() + 1) },
-                        dataType: "text"
-                    });
-
                 }
+            }
+        }
 
-            } );
-
+        new Vue({
+            el: "#vue-app",
+            components: {
+                FeedListNotSubscribed,
+                FeedListSubscribed
+            }
         });
 
     </script>
