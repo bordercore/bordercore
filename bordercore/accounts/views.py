@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView
 
@@ -31,6 +31,7 @@ class UserProfileDetailView(UpdateView):
         context['section'] = SECTION
         context['nav'] = 'prefs'
         context['title'] = 'Preferences'
+        context['tags'] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.favorite_tags.all()]
         return self.render_to_response(context)
 
     def get_object(self, queryset=None):
@@ -46,6 +47,7 @@ class UserProfileDetailView(UpdateView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(UserProfileDetailView, self).dispatch(*args, **kwargs)
+
 
 @login_required
 def sort_favorite_notes(request):
