@@ -6,9 +6,11 @@
 
 {% block content %}
 
-    <div class="row">
-        <div id="feed-status" class="alert offset-lg-2 col-lg-6" style="display: none">OK</div>
-    </div>
+    <div id="vue-app">
+
+        <div class="row">
+            <feed-status></feed-status>
+        </div>
 
     {% if form.errors %}
         <div class="alert alert-danger offset-lg-2 col-lg-10">
@@ -25,17 +27,25 @@ Please correct the errors below.
     <form action="{{ request.path }}" method="post">
         {% csrf_token %}
 
+        <url-form inline-template>
+            <div>
         {% for field in form %}
             <div class="form-group{% if field.errors %} error{% endif %} row">
                 <label class="col-lg-2 col-form-label" for="inputTitle">{{ field.label }}</label>
                 <div class="col-lg-5">
+                    {% if field.label == "Url" %}
+                        <input type="text" name="url" value="{{ field.value }}" class="form-control" required id="id_url" @blur="onBlur">
+                    {% else %}
                     {{ field }}
+                    {% endif %}
                     {% for error in field.errors %}
                         <span class="form-error">{{ error }}</span>
                     {% endfor %}
                 </div>
             </div>
         {% endfor %}
+            </div>
+        </url-form>
 
         <div class="form-group{% if field.errors %} error{% endif %} row">
             <label class="col-lg-2 col-form-label" for="inputTitle">Subscribe</label>
@@ -60,6 +70,8 @@ The following users are currently subscribed to this feed: <strong>{{ subscriber
         </div>
     {% endif %}
 
+    </div>
+
 {% endblock %}
 
 {% block javascript %}
@@ -68,9 +80,97 @@ The following users are currently subscribed to this feed: <strong>{{ subscriber
 
     <script type="text/javascript">
 
+        Vue.mixin({ delimiters: ["[[", "]]"] });
+
+        const EventBus = new Vue();
+
+        const FeedStatus = {
+            template: `
+                <div id="feed-status" class="alert offset-lg-2 col-lg-6" _style="display: none" ref="status">[[ status ]]</div>
+            `,
+            data() {
+                return {
+                    status: ""
+                }
+            },
+            mounted() {
+
+                EventBus.$on("showStatus", payload => {
+
+                    this.status = payload.msg;
+                    this.$refs.status.classList.add(payload.classNameAdd)
+
+                })
+
+            }
+
+        }
+
+        const UrlForm = {
+            data() {
+                return {
+                    feed_url: "",
+                    feed_homepage: ""
+                }
+            },
+            methods: {
+                onBlur(evt) {
+
+                    var feedUrl = document.getElementById("id_url").value;
+                    if ( !feedUrl ) {
+                        return;
+                    }
+
+                    var homepage = document.getElementById("id_homepage").value;
+                    if ( !homepage ) {
+                        const baseUrl = document.getElementById("id_url").value.match(/^(http:\/\/.*?)\//);
+                        if (baseUrl) {
+                            document.getElementById("id_homepage").value = baseUrl[1];
+                        }
+                    }
+
+                    feedUrl = encodeURIComponent(feedUrl).replace(/%/g, "%25")
+
+                    fetch("{% url "check_url" 666 %}".replace(/666$/, feedUrl))
+                                                         .then(response => {
+                                                             return response.json();
+                                                         }).then(data => {
+
+                                                             if (!data || data.status != 200) {
+                                                                 classNameAdd = "alert-danger";
+                                                                 msg = "Feed error. Status: " + data.status;
+                                                             } else if (data.entry_count == 0){
+                                                                 classNameAdd = "alert-danger";
+                                                                 msg = "Feed error. Found no feed items.";
+                                                             } else {
+                                                                 classNameAdd = "alert-success";
+                                                                 msg = "Feed OK. Found " + data.entry_count + " feed items.";
+                                                             }
+
+                                                             const payLoad = {
+                                                                 statusCode: data.status,
+                                                                 msg: msg,
+                                                                 classNameAdd: classNameAdd
+                                                             }
+
+                                                             EventBus.$emit("showStatus", payLoad);
+
+                                                         })
+                }
+            }
+        }
+
+        new Vue({
+            el: "#vue-app",
+            components: {
+                FeedStatus,
+                UrlForm
+            }
+        });
+
         $(document).ready(function() {
 
-            $('#id_url').blur( function(event) {
+            $('#__id_url').blur( function(event) {
 
                 var feed_url = $('#id_url').val();
                 if (!feed_url) {
@@ -88,7 +188,7 @@ The following users are currently subscribed to this feed: <strong>{{ subscriber
 
                 $.ajax( { type: 'GET',
                           url: '{% url 'check_url' 666 %}'.replace(/666$/, feed_url),
-                          }).done(function( json ) {
+                }).done(function( json ) {
                     if (!json || json.status != 200) {
                         $('#feed-status').fadeIn(1000).addClass("alert-danger").removeClass("alert-success").html("Feed error.  Status: " + json.status);
                     } else if (json.entry_count == 0){
