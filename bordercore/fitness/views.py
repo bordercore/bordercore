@@ -40,27 +40,31 @@ class ExerciseDetailView(DetailView):
 
     def set_plot_data(self, context, data):
 
-        plotdata = []
-        current_workout = None
-        reps = []
-        labels = []
+        # A workout is defined as all the data recorded for a specific date,
+        #  regardless of time of day.
 
-        for d in data:
-            day = int(int(d.date.strftime("%s")) / 86400)
-            if current_workout is not None:
-                if day != int(int(current_workout.date.strftime("%s")) / 86400):
-                    labels.append(current_workout.date.strftime("%b %d"))
-                    plotdata.append(current_workout.weight)
-                    if not context.get('reps', ''):
-                        context['first_reps'] = reps[-1]
-                        context['reps'] = ", ".join(str(x) for x in reversed(reps))
-                    reps = []
-                    current_workout = d
-            else:
-                current_workout = d
-            reps.append(d.reps)
-        context['labels'] = json.dumps(labels[::-1])
-        context['plotdata'] = json.dumps(plotdata[::-1])
+        # Find the date of the most recent workout data
+        max_date = max(data, key=lambda item: item.date)
+
+        # Find all the reps for all sets recorded on that day
+        context["reps_latest_workout"] = [x.reps for x in data if x.date.strftime("%Y-%m-%d") == max_date.date.strftime("%Y-%m-%d")]
+
+        # Create a unique collection of workout data based on date,
+        #  so only one set will be extracted for each workout.
+
+        seen = set()
+        unique_workout_data = [
+            x
+            for x
+            in data
+            if x.date.strftime("Y-%m-%d") not in seen
+            and not seen.add(x.date.strftime("Y-%m-%d"))
+        ]
+        plotdata = [x.weight for x in unique_workout_data]
+        labels = [x.date.strftime("%b %d") for x in unique_workout_data]
+
+        context["labels"] = json.dumps(labels[::-1])
+        context["plotdata"] = json.dumps(plotdata[::-1])
 
 
 @login_required
