@@ -235,16 +235,15 @@ def study_tag(request, tag):
     #  The question hasn't been reviewed within its interval
     #  The question is new (last_reviewed is null)
     #  The question is still being learned
-    try:
-        question = Question.objects.filter(
-            Q(user=request.user),
-            Q(tags__name=tag),
-            Q(interval__lte=timezone.now() - F("last_reviewed"))
-            | Q(last_reviewed__isnull=True)
-            | Q(state="L")
-        ).order_by("?").first()
+    question = Question.objects.filter(
+        Q(user=request.user),
+        Q(tags__name=tag),
+        Q(interval__lte=timezone.now() - F("last_reviewed"))
+        | Q(last_reviewed__isnull=True)
+        | Q(state="L")
+    ).order_by("?").first()
 
-    except IndexError:
+    if question is None:
         question = Question.objects.filter(user=request.user, tags__name=tag).order_by('?').first()
         messages.add_message(request, messages.INFO, 'Nothing to drill. Here''s a random question.')
 
