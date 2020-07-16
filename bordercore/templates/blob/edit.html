@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 
+{% load escape_backticks %}
+
+{% block extra_head %}
 {% block title %} KB :: Documents {% endblock %}
 
 {% block left-block %}
@@ -437,7 +440,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
             delimiters: [noDelimiter, noDelimiter],
             template: `
                 <div class="col-lg-10 col-sm-10 align-self-center">
-                    <textarea name="content" cols="40" rows="5" class="form-control" id="id_content" @focus="onFocus">{{ form.content }}</textarea>
+                    <textarea name="content" cols="40" rows="5" class="form-control" id="id_content" @focus="onFocus">{{ form.content.value|escape_backticks }}</textarea>
                 </div>
             `,
             methods: {
