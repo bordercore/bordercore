@@ -3,6 +3,9 @@
 {% load escape_backticks %}
 
 {% block extra_head %}
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+{% endblock %}
+
 {% block title %} KB :: Documents {% endblock %}
 
 {% block left-block %}
@@ -62,13 +65,7 @@
     {% endif %}
 
     <div class="row">
-        <div class="col-lg-7">
-            <markdown-dropdown></markdown-dropdown>
-        </div>
-    </div>
-
-    <div class="row">
-    <div class="col-lg-4 mt-3">
+        <div class="col-lg-4 mt-3">
             <cleanup-filename-button></cleanup-filename-button>
         </div>
     </div>
@@ -233,6 +230,8 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
     <!-- Use date-fns.js for date formatting -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/1.9.0/date_fns.min.js"></script>
 
+    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+
     <script type="text/javascript">
 
         function formatName(match, capture1, capture2) {
@@ -253,13 +252,13 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                 },
                 body: data,
             }).then(response => response.json())
-                                        .then(data => {
-                console.log("Success:", data);
-            })
-                       .catch((error) => {
-                console.error("Error:", error);
-                $.smkAlert({text: "Error during collection mutation: " + error, type: "error", position:"top-right"});
-            });
+              .then(data => {
+                  console.log("Success:", data);
+              })
+              .catch((error) => {
+                  console.error("Error:", error);
+                  $.smkAlert({text: "Error during collection mutation: " + error, type: "error", position:"top-right"});
+              });
 
         }
 
@@ -323,53 +322,6 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
         }
         {% endif %}
 
-        const MarkdownDropdown = {
-            template: `
-                <select class="form-control" @change="onChange">
-                    <option>Markdown</option>
-                    <option>Insert link</option>
-                    <option>Bold</option>
-                    <option>Indent Code</option>
-                    <option>Insert list</option>
-                    <option>Escape HTML</option>
-                    <option>Table</option>
-                </select>
-            `,
-            methods: {
-                onChange(evt) {
-                    var value = this.$el.value;
-                    var contentEl = document.getElementById("id_content");
-                    var selectedText = (contentEl.value).substring(contentEl.selectionStart, contentEl.selectionEnd);
-                    var text = contentEl.value;
-                    var selectionStart = contentEl.selectionStart;
-                    var selectionEnd = contentEl.selectionEnd;
-
-                    if (value == "Bold") {
-                        contentEl.value = text.substr(0, selectionStart) + "**" + selectedText + "**" +  text.substr(selectionEnd, text.length - selectionEnd);
-                    } else if (value == "Insert link") {
-                        if (selectedText.startsWith("http")) {
-                            newText = "[text](" + selectedText+ ")";
-                        } else {
-                            newText = "[" + selectedText + "](url)";
-                        }
-                        contentEl.value = text.substr(0, selectionStart) + newText + text.substr(selectionEnd, text.length - selectionEnd);
-                    } else if (value == "Insert list") {
-                        contentEl.value = text.substr(0, selectionStart) + "\n - List item\n" + text.substr(selectionEnd, text.length - selectionEnd);
-                    } else if (value == "Indent Code") {
-                        var newtext = "    " + selectedText.replace(/\n/g, "\n    ");
-                        contentEl.value = text.substr(0, selectionStart) + newtext  + text.substr(selectionEnd, text.length - selectionEnd);
-                    } else if (value == "Escape HTML") {
-                        var escapedText = selectedText.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                        contentEl.value = text.substr(0, selectionStart) + escapedText +  text.substr(selectionEnd, text.length - selectionEnd);
-                    } else if (value == "Table") {
-                        contentEl.value = text.substr(0, selectionStart) + "\nFirst Header  | Second Header\n------------- | -------------\nContent Cell  | Content Cell\nContent Cell  | Content Cell\n" + text.substr(selectionEnd, text.length - selectionEnd);
-                    }
-                    // Reset the dropdown
-                    this.$el.selectedIndex = 0
-                }
-            }
-        };
-
         const CleanupFilenameButton = {
             template: '<input type="button" class="btn btn-secondary" value="Cleanup Filename" @click="onClick" />',
             methods: {
@@ -427,7 +379,6 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
             },
             methods: {
                 onChange(evt) {
-                    console.log("change");
                     this.filename = evt.target.files[0].name;
                     this.lastModified = evt.target.files[0].lastModified;
                 }
@@ -775,7 +726,6 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                 RemoveFromCollectionDropdown,
                 {% endif %}
                 CleanupFilenameButton,
-                MarkdownDropdown,
                 UpperCaseFirstButton
             }
         });
@@ -790,6 +740,58 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                 SimpleSuggest,
                 TagsInput
             }
+        });
+
+        var easyMDE = new EasyMDE({
+            element: document.getElementById("id_content"),
+            toolbar: [
+                "bold",
+                "italic",
+                "heading",
+                "|",
+                "quote",
+                "unordered-list",
+                "ordered-list",
+                {
+                    name: "table",
+                    action: function customFunction(editor) {
+                        editor.codemirror.replaceSelection("\nFirst Header  | Second Header\n------------- | -------------\nContent Cell  | Content Cell\nContent Cell  | Content Cell\n");
+                    },
+                    className: "fa fa-table",
+                    title: "Insert Table"
+                },
+                "|",
+                "link",
+                "code",
+                {
+                    name: "code-block",
+                    action: function customFunction(editor) {
+
+                        replacedText = editor.codemirror.getSelection().replace(/\n/g, "\n    ").replace(/>/g, "&gt;");
+
+                        editor.codemirror.replaceSelection("    " + replacedText);
+
+                    },
+                    className: "fa fa-indent",
+                    title: "Code Block",
+                },
+                {
+                    name: "escape-html",
+                    action: function customFunction(editor) {
+
+                        replacedText = editor.codemirror.getSelection().replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+                        editor.codemirror.replaceSelection(replacedText);
+
+                    },
+                    className: "fa fa-html5",
+                    title: "Escape HTML",
+                },
+                "|",
+                "preview",
+                "side-by-side",
+                "fullscreen",
+            ]
         });
 
     </script>
