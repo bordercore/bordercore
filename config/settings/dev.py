@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import
 
+import logging
+
 from .base import *
 
 DEBUG = True
@@ -16,12 +18,14 @@ ELASTICSEARCH_ENDPOINT = "http://localhost:9200"
 
 MIDDLEWARE += (
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'nplusone.ext.django.NPlusOneMiddleware'
 )
 
 INSTALLED_APPS += (
     'debug_toolbar',
     'django_extensions',
     'notebook',
+    'nplusone.ext.django',
     'template_timings_panel',
 )
 
@@ -42,10 +46,19 @@ DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.versions.VersionsPanel'
 )
 
+NPLUSONE_LOGGER = logging.getLogger('nplusone')
+NPLUSONE_LOG_LEVEL = logging.WARN
+
+
 LOGGING['handlers']['bordercore'] = {
     'level': 'DEBUG',
     'class': 'logging.StreamHandler',
     'formatter': 'standard'
+}
+
+LOGGING['loggers']['nplusone'] = {
+    'handlers': ['bordercore'],
+    'level': 'WARN'
 }
 
 # Un-comment the following to log all SQL commands
