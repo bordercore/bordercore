@@ -3,6 +3,7 @@ from elasticsearch import Elasticsearch
 
 import django
 from django.conf import settings
+from django.db.models import Q
 
 from lib.util import get_missing_bookmark_ids
 
@@ -82,7 +83,7 @@ def test_elasticsearch_bookmarks_exist_in_db(es):
     search_object = {
         "query": {
             "term": {
-                "doctype": f"bordercore_bookmark"
+                "doctype": "bordercore_bookmark"
             }
         },
         "from": 0, "size": 10000,
@@ -94,3 +95,17 @@ def test_elasticsearch_bookmarks_exist_in_db(es):
     for bookmark in found:
         assert Bookmark.objects.filter(id=bookmark["_source"]["bordercore_id"]).count() == 1, \
             f"bookmark exists in Elasticsearch but not in database, id={bookmark['_id']}"
+
+
+def test_bookmark_fields_are_trimmed():
+    "Assert that bookmark fields have no leading or trailing whitespace"
+
+    bookmarks = Bookmark.objects.filter(
+        Q(url__iregex=r"\s$")
+        | Q(url__iregex=r"^\s")
+        | Q(title__iregex=r"\s$")
+        | Q(title__iregex=r"^\s")
+        | Q(note__iregex=r"\s$")
+        | Q(note__iregex=r"^\s")
+    )
+    assert len(bookmarks) == 0, f"{len(bookmarks)} fail this test; example: id={bookmarks[0].id}"
