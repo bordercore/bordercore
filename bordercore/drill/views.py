@@ -1,5 +1,6 @@
 import time
 
+from django import urls
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, F, Max, Q
@@ -57,7 +58,6 @@ class DrillListView(ListView):
                           .annotate(count=Count("question", distinct=True)) \
                           .annotate(max=Max("question__last_reviewed")) \
                           .filter(question__user=self.request.user)
-
 
 @method_decorator(login_required, name='dispatch')
 class DrillSearchListView(ListView):
@@ -135,7 +135,11 @@ class QuestionCreateView(CreateView):
 
         obj.save()
 
-        messages.add_message(self.request, messages.INFO, "Question added")
+        review_url = urls.reverse("question_detail", kwargs={"question_id": obj.id})
+        messages.add_message(
+            self.request,
+            messages.INFO, f"Question added. <a href='{review_url}'>Review it here</a>"
+        )
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
@@ -211,7 +215,12 @@ class QuestionUpdateView(UpdateView):
             obj.tags.add(tag)
         obj.save()
 
-        messages.add_message(self.request, messages.INFO, "Question edited")
+        review_url = urls.reverse("question_detail", kwargs={"question_id": obj.id})
+        messages.add_message(
+            self.request,
+            messages.INFO, f"Question edited. <a href='{review_url}'>Review it here</a>"
+        )
+
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
