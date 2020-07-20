@@ -50,6 +50,16 @@ blockquote {
    color: $table_row_color;
 }
 
+.table-borders table, .table-borders td {
+  border: 1px solid #cccccc;
+  padding: 10px;
+}
+
+.table-borders th {
+  border-bottom: 3px solid black;
+  padding: 10px;
+}
+
 /* Use this to center content */
 .center {
   float: none;

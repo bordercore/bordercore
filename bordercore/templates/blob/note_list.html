@@ -69,7 +69,7 @@
 
             {% for note in info %}
 
-                <div id="note">
+                <div id="note" class="table-borders">
                     <h2>
                         <a href="{% url 'blob_detail' note.uuid %}">{{ note.title|default:"Note Title" }}</a>
                     </h2>

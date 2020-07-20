@@ -84,7 +84,7 @@ Easiness Factor: <strong>{{ question.efactor|floatformat:1 }}</strong>
 
     </div>
 
-    <h1>
+    <h1 class="table-borders">
         {{ question.get_question|safe }}
     </h1>
     {% if question.tags.all %}
@@ -94,7 +94,7 @@ Easiness Factor: <strong>{{ question.efactor|floatformat:1 }}</strong>
         {% endfor %}
         <br /><br />
     {% endif %}
-    <h1>
+    <h1 class="table-borders">
         {{ question.get_answer|safe }}
     </h1>
 
