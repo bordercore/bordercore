@@ -188,8 +188,8 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
     </div>
     {% endif %}
 
-    <div class="row alert-margin">
-        {% include "common/show_messages.html" with width="10" offset="0" %}
+    <div id="vue-app">
+        {% include "common/show_messages.html" %}
     </div>
 
     <div class="row">
@@ -235,6 +235,12 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
 
     {{ block.super }}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
+    <script type="text/javascript">
+
+        new Vue({
+            el: "#vue-app",
+        });
+
+    </script>
 
 {% endblock %}

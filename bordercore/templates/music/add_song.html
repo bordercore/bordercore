@@ -30,9 +30,9 @@
 
 {% block content %}
 
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags|lower }}">{{ message|safe }}</div>
-    {% endfor %}
+    <div id="vue-messages">
+        {% include "common/show_messages.html" with width=6 %}
+    </div>
 
     <div class="row">
 
@@ -226,6 +226,10 @@
             }
         });
         {% endif %}
+
+        new Vue({
+            el: "#vue-messages",
+        });
 
     </script>
 

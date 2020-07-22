@@ -18,7 +18,9 @@
         </div>
     </div>
 
+    <div id="vue-message">
     {% include "common/show_messages.html" %}
+    </div>
 
     <h1>{{ object.exercise }}</h1>
 
@@ -158,6 +160,10 @@
             components: {
                 AddWorkoutForm
             }
+        });
+
+        new Vue({
+            el: "#vue-message",
         });
 
         var data = [

@@ -8,7 +8,9 @@
 
 {% block content %}
 
-{% include "common/show_messages_inline.html" %}
+    <div id="vue-messages">
+        {% include "common/show_messages.html" %}
+    </div>
 
     <div class="row">
         <div class="col-lg-7">
@@ -259,6 +261,10 @@
                 ButtonGroup,
                 TagsInput
             }
+        });
+
+        new Vue({
+            el: "#vue-messages",
         });
 
         var table;

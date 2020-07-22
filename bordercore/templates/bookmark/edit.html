@@ -6,9 +6,9 @@
 
 {% block content %}
 
-{% for message in messages %}
-    <div class="alert alert-{{ message.tags|lower }}">{{ message|safe }}</div>
-{% endfor %}
+    <div id="vue-messages">
+       {% include "common/show_messages.html" %}
+    </div>
 
 <p class="lead offset-lg-2">
     {{ form.instance.url|favicon|safe }} {{ action }} Bookmark
@@ -123,6 +123,10 @@
             components: {
                 TagsInput
             }
+        });
+
+        new Vue({
+            el: "#vue-messages",
         });
 
     </script>

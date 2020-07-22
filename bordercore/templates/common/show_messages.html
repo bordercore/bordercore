@@ -1,9 +1,39 @@
-{% if messages %}
+{% load get_message_level %}
+
 {% for message in messages %}
-    <br />
-    <div class="col-lg-{{ width|default:7 }} offset-lg-{{ offset|default:2 }} alert alert-{% if class %}{{ class }}{% elif message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}">
-            {{ message|safe }}
+
+    <div class="row">
+        <div class="col-lg-{{ width|default:12 }} offset-lg-{{ offset|default:0 }} mb-2">
+
+    {% if message.tags == "error" or "show_in_dom" in message.tags %}
+
+        <b-alert
+            :show=true
+            :variant="'{{ message.tags|get_message_level }}'"
+        >
+          {{ message|safe }}
+        </b-alert>
+
+    {% else %}
+
+        <b-toast
+            toaster="b-toaster-top-right"
+            title="Alert"
+            {% if message.tags == "error" %}
+                :static=true
+                auto-hide=false
+            {% else %}
+                auto-hide-delay=5000
+            {% endif %}
+            :visible=true
+            :variant="'{{ message.tags|get_message_level }}'"
+        >
+          {{ message|safe }}
+        </b-toast>
+
+    {% endif %}
+
+        </div>
     </div>
+
 {% endfor %}
-<br/><br/><br/>
-{% endif %}

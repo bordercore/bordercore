@@ -4,7 +4,9 @@
 
 {% block content %}
 
-{% include "common/show_messages.html" %}
+    <div id="vue-messages">
+        {% include "common/show_messages.html" %}
+    </div>
 
 {% if request.POST.Go and not form.errors %}
     <div class="alert alert-success offset-lg-2">Post {{ action }}ed</div>
@@ -160,6 +162,10 @@
                     });
                 }
             }
+        });
+
+        new Vue({
+            el: "#vue-messages",
         });
 
     </script>

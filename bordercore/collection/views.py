@@ -61,7 +61,11 @@ class CollectionDeleteView(DeleteView):
         return Collection.objects.get(user=self.request.user, id=self.kwargs.get('pk'))
 
     def get_success_url(self):
-        messages.add_message(self.request, messages.INFO, "Collection <strong>{}</strong> deleted".format(self.object.name))
+        messages.add_message(
+            self.request,
+            messages.INFO, f"Collection <strong>{self.object.name}</strong> deleted",
+            extra_tags="show_in_dom"
+        )
         return reverse('collection_list')
 
 

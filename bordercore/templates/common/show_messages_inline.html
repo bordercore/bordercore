@@ -1,7 +1,0 @@
-{% if messages %}
-    {% for message in messages %}
-        <div class="col-lg-{{ width|default:12 }} offset-lg-{{ offset|default:0 }} alert alert-{% if class %}{{ class }}{% elif message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% else %}success{% endif %}">
-            {{ message|safe }}
-        </div>
-    {% endfor %}
-{% endif %}

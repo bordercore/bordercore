@@ -62,7 +62,9 @@
 
 {% block content %}
 
-{% include "common/show_messages_inline.html" %}
+    <div id="vue-messages">
+        {% include "common/show_messages.html" %}
+    </div>
 
 <div class="row">
 
@@ -195,6 +197,10 @@
                     this.errorClass = "alert alert-danger";
                 })
             }
+        });
+
+        new Vue({
+            el: "#vue-messages",
         });
 
     </script>

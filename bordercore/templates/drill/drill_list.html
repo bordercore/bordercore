@@ -30,11 +30,8 @@
 
 {% block content %}
 
-{% for message in messages %}
-    <div class="alert alert-{{ message.tags|lower }}">{{ message|safe }}</div>
-{% endfor %}
-
 <div id="search">
+    {% include "common/show_messages.html" %}
     <div class="row">
         <div class="col-lg-7">
             <form role="form" action="{% url 'drill_search' %}" method="get" autocomplete="off">

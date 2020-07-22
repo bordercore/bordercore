@@ -26,6 +26,10 @@
 
 {% block content %}
 
+    <div id="vue-messages">
+        {% include "common/show_messages.html" %}
+    </div>
+
     <div class="row">
 
         {% if random_albums %}
@@ -76,18 +80,13 @@
 
         {% include "music/search.js" %}
 
+        new Vue({
+            el: "#vue-messages",
+        });
+
         var oTable;
 
         $(document).ready(function() {
-
-            {% if messages %}
-            {% for message in messages %}
-            $('#feedback').fadeIn(1000).html('{{ message }}');
-            setTimeout( function() {
-                $('#feedback').fadeOut(1000);
-            }, 3000);
-            {% endfor %}
-            {% endif %}
 
             function formatArtist( data, type, row ) {
                 return '<a href="{% url 'artist_detail' 666 %}">'.replace(/666/, row[1]) + row[1] + '</a>';
