@@ -1,16 +1,16 @@
-#!/usr/bin/env python3
-
 import datetime
-from datetime import timedelta
 import logging
 import time
+from datetime import timedelta
+
+import requests
 
 import django
-import requests
 
 django.setup()
 
-from bookmark.models import Bookmark
+from bookmark.models import Bookmark  # isort:skip
+
 
 # Remove existing handlers added by Django
 for handler in logging.root.handlers[:]:
@@ -36,7 +36,11 @@ for url in new_urls:
 
     logger.info("Archiving {}".format(url.url))
     wayback_url = "https://web.archive.org/save/{}".format(url.url)
-    r = requests.get(wayback_url)
-    if r.status_code != 200:
-        logger.warning(" Error, status code={}".format(r.status_code))
+
+    try:
+        r = requests.get(wayback_url)
+        if r.status_code != 200:
+            logger.warning(" Error, status code={}".format(r.status_code))
+    except requests.TooManyRedirects as e:
+        logger.error(f" Error when archiving {wayback_url}: {e}")
     time.sleep(10)
