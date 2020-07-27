@@ -48,7 +48,7 @@ def music_list(request):
 
     return render(request, 'music/index.html',
                   {'section': SECTION,
-                   'nav': 'music-browse',
+                   'subsection': 'home',
                    'cols': ['Date', 'artist', 'title', 'id'],
                    'message': message,
                    'recent_songs': recent_songs,
@@ -131,7 +131,7 @@ def song_edit(request, song_id=None):
 
     return render(request, 'music/edit.html',
                   {'section': SECTION,
-                   'nav': 'music-add',
+                   'subsection': 'home',
                    'action': action,
                    'form': form,
                    'file_info': file_info,
@@ -169,7 +169,7 @@ class AlbumDetailView(DetailView):
         context['cols'] = ['id', 'track', 'raw_title', 'title', 'length', 'length_seconds']
         context['MEDIA_URL_MUSIC'] = settings.MEDIA_URL_MUSIC
         context['section'] = SECTION
-        context['nav'] = 'music-browse'
+        context['subsection'] = 'home'
 
         return context
 
@@ -203,7 +203,7 @@ def artist_detail(request, artist_name):
     return render(request, 'music/artist_detail.html',
                   {
                       'section': SECTION,
-                      'nav': 'music-browse',
+                      'subsection': 'home',
                       'artist_name': artist_name,
                       'album_list': a,
                       'song_list': song_list,
@@ -399,7 +399,7 @@ def add_song(request):
 
     return render(request, 'music/add_song.html',
                   {'section': SECTION,
-                   'nav': 'music-add',
+                   'subsection': 'add',
                    'action': action,
                    'info': info,
                    'notes': notes,
@@ -595,5 +595,5 @@ class SearchTagListView(ListView):
             "tag_name": self.request.GET["tag"],
             "results": results,
             "section": SECTION,
-            "nav": "music-browse"
+            "subsection": "home"
         }

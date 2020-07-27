@@ -241,7 +241,8 @@ class SearchListView(ListView):
 
         context["info"] = info
         context["section"] = self.SECTION
-        context["nav"] = "search-home"
+        if not notes_search:
+            context["subsection"] = "home"
         context["title"] = "Search"
         return context
 
@@ -322,7 +323,7 @@ class SearchTagDetailView(ListView):
 
         context["kb_tag_detail_current_tab"] = self.request.session.get("kb_tag_detail_current_tab", "")
         context["section"] = self.SECTION
-        context["nav"] = "search-tag"
+        context["subsection"] = "search-tag"
 
         if context["tag_list"]:
             context["title"] = "Search :: Tag Detail :: {}".format(", ".join(tag_list))

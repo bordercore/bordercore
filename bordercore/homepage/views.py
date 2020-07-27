@@ -113,7 +113,6 @@ def homepage(request):
 
     return render(request, 'homepage/index.html',
                   {'section': SECTION,
-                   'nav': 'homepage',
                    'quote': quote,
                    'tasks': tasks,
                    'music': music,

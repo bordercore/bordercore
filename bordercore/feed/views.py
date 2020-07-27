@@ -63,8 +63,8 @@ class FeedListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(FeedListView, self).get_context_data(**kwargs)
-        context['nav'] = 'feed-home'
         context['section'] = SECTION
+        context['subsection'] = 'home'
         context['current_feed'] = self.current_feed
         context['json'] = json.dumps(self.feed_all)
         context['title'] = 'Feed List'
@@ -88,7 +88,7 @@ class FeedSubscriptionListView(FeedListView):
 
     def get_context_data(self, **kwargs):
         context = super(FeedSubscriptionListView, self).get_context_data(**kwargs)
-        context['nav'] = 'feed-manage'
+        context['subsection'] = 'edit'
         context['feeds_not_subscribed'] = self.feeds_not_subscribed
         context['title'] = 'Feeds :: Manage Subscriptions'
         return context
@@ -187,7 +187,7 @@ def feed_edit(request, feed_id=None):
 
     return render(request, 'feed/edit.html',
                   {'section': SECTION,
-                   'nav': 'feed-add',
+                   'subsection': 'add',
                    'action': action,
                    'form': form,
                    'subscribers': subscribers,

@@ -35,7 +35,7 @@
                 <form class="form-inline" name="nav_form" id="search-form" action="{% url 'notes_list' %}" method="get" autocomplete="off">
                     <div class="form-row">
                         <div class="col-auto has-search">
-                            <span class="fa fa-search form-control-feedback"></span>
+                            <span class="fas fa-search form-control-feedback"></span>
 
                             <vue-simple-suggest
                               v-model="query"
@@ -118,7 +118,6 @@
 
     {{ block.super }}
 
-    <script src="https://use.fontawesome.com/4a95cb196f.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
 
     <script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>

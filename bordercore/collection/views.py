@@ -47,7 +47,7 @@ class CollectionListView(FormMixin, ListView):
 
         context['cols'] = ['name', 'tags', 'updated', 'unixtime', 'objectcount', 'id']
         context['section'] = SECTION
-        context['nav'] = 'collection'
+        context['subsection'] = 'collection'
         context['info'] = info
         context['title'] = 'Collection List'
 

@@ -58,7 +58,7 @@ class BlobCreateView(CreateView):
         if collection_id:
             context['collection_info'] = Collection.objects.get(user=self.request.user, id=collection_id)
         context['section'] = SECTION
-        context['nav'] = 'blob'
+        context['subsection'] = 'blob-add'
         context['title'] = 'Add Blob'
 
         return context

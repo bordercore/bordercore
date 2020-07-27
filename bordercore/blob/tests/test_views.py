@@ -89,7 +89,7 @@ def test_blob_detail(user, blob_image_factory, client):
     author = [x.value for x in blob_image_factory.metadata_set.all() if x.name == "Author"][0]
     assert soup.select("span#author")[0].text == author
 
-    assert soup.select("div#content")[0].text.strip() == blob_image_factory.content
+    assert soup.select("div#blob_detail_content")[0].text.strip() == blob_image_factory.content
 
     assert soup.select("div#blob_note")[0].text.strip() == blob_image_factory.note
 

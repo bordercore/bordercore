@@ -79,7 +79,7 @@
                 <form class="form-inline" role="form" name="nav_form" id="search" method="get">
 
                     <div class="form-group col-auto has-search">
-                        <span class="fa fa-search form-control-feedback"></span>
+                        <span class="fas fa-search form-control-feedback"></span>
                         <search></search>
                     </div>
 
@@ -158,8 +158,6 @@
 {% block javascript %}
 
     {{ block.super }}
-
-    <script type="text/javascript" src="https://use.fontawesome.com/4a95cb196f.js"></script>
 
     <script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
@@ -342,7 +340,6 @@
         const Search = {
             template: `
                 <div>
-                    <span class="fa fa-search form-control-feedback"></span>
                     <vue-simple-suggest ref="suggestComponent"
                         v-model="query"
                         display-attribute="value"
