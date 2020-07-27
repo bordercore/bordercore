@@ -9,7 +9,7 @@
 {% block left-block %}
     <div class="row">
         <div class="col-lg-12">
-            <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ album.id }}" height="400" width="400" />
+            <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ album.id }}" class="mw-100" height="400" width="400" />
             {% if object.comment %}
                 <h5 class="mt-3">{{ object.get_comment|default:""|safe }}</h5>
             {% endif %}
@@ -19,7 +19,7 @@
     <br /><br />
 
     <div id="audio_player">
-        <audio controls controlsList="nodownload" id="player">
+        <audio controls controlsList="nodownload" id="player" class="mw-100">
             <source src="" type="audio/mpeg">
   Your browser does not support the audio tag.
         </audio>
@@ -45,7 +45,7 @@
 
 <div class="row">
 
-    <div class="col-lg-8">
+    <div class="col-lg-11">
         <h2>{{ album.title }}</h2>
         <h3>{{ album.artist }}</h3>
         <h5>{{ album.year }}</h5>
