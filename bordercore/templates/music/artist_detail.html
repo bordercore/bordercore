@@ -9,7 +9,7 @@
 {% block left-block %}
     {% if song_list %}
         <div id="audio_player">
-            <audio controls controlsList="nodownload" id="player">
+            <audio controls controlsList="nodownload" id="player" class="mw-100">
                 <source src="" type="audio/mpeg">
   Your browser does not support the audio tag.
             </audio>
@@ -25,7 +25,11 @@
 
             {% block breadcrumbs %}
                 <ul class="breadcrumb">
-                    <li class="breadcrumb-item"> <a href="{% url 'music_list' %}">Music</a> </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'music_list' %}">
+                            <span class="fas fa-home"></span>
+                        </a>
+                    </li>
                     <li class="breadcrumb-item active">{{ artist_name }}</li>
                 </ul>
             {% endblock %}

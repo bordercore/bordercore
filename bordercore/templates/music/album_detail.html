@@ -33,7 +33,11 @@
     <div class="col-lg-6">
         {% block breadcrumbs %}
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"> <a href="{% url 'music_list' %}">Music</a> </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'music_list' %}">
+                        <span class="fas fa-home"></span>
+                    </a>
+                </li>
                 <li class="breadcrumb-item"> <a href="{% url 'artist_detail' album.artist %}">{{ album.artist }} </li></a> </li>
                 <li class="breadcrumb-item active"> {{ album.title }} </li>
             </ol>
