@@ -204,6 +204,7 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
+                'context_processors.get_counts'
             ]
         },
     },
