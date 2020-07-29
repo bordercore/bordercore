@@ -35,7 +35,7 @@
 
                     <nav-bar inline-template>
                         <div>
-                            <li v-for="item in items">
+                            <li v-for="item in items" v-cloak>
                                 <div v-if="item.subitems">
                                     <a :href="'#' + subMenuId(item.id)" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle" :id="getSectionId(item.id)">
                                         <span class="nav-icon text-center"><i class="fas fa-newspaper"></i></span>

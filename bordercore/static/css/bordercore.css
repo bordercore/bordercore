@@ -28,6 +28,10 @@ a {
 .hidden {
   display: none; }
 
+/* Used to hide mustached content before Vue has loaded */
+[v-cloak] {
+  display: none; }
+
 /* login page */
 html.login, body.login {
   height: 100%; }

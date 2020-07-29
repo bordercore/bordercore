@@ -14,7 +14,7 @@
                 <div>
                     <draggable v-model="feedList" @change="onChange" ghost-class="collection_sortable-ghost" animation="500" forceFallback="true">
                         <transition-group type="transition">
-                            <li v-for="feed in feedList" :key="feed.id">
+                            <li v-for="feed in feedList" :key="feed.id" v-cloak>
                                 <a href="#" :data-id="feed.id" @click="onClick">[[ feed.name ]]</a>
                             </li>
                         </transition-group>
@@ -35,10 +35,10 @@
 
     <url-list inline-template>
         <div class="col-lg-6">
-            <h3 id="feed-title"><a :href="links.feed_homepage">[[ links.name ]]</a></h3>
+            <h3 id="feed-title" v-cloak><a :href="links.feed_homepage">[[ links.name ]]</a></h3>
             <hr />
             <ul>
-                <li v-for="url in links.links">
+                <li v-for="url in links.links" v-cloak>
                     <a :href="url.link">[[ url.title ]]</a>
                 </li>
             </ul>

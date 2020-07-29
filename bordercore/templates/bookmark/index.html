@@ -101,7 +101,7 @@
                     <ul>
                         <draggable v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost"{% if not tag_filter %} disabled="true"{% endif %}>
                             <transition-group type="transition">
-                                <li v-for="bookmark in bookmarkList" :data-id="bookmark.id" :key="bookmark.id" class="bookmark-list" @click="onClick">
+                                <li v-for="bookmark in bookmarkList" :data-id="bookmark.id" :key="bookmark.id" class="bookmark-list" @click="onClick" v-cloak>
                                     <span class="ml-1">[[ bookmark.created ]]</span>
                                     <span class="">[[ bookmark.createdYear ]]</span>
                                     <span v-html="bookmark.faviconUrl" class="ml-2"></span>

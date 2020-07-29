@@ -108,7 +108,7 @@
             <div class="card-header text-white">Upcoming Calendar Events</div>
             <ul class="list-group" id="events">
                 <li v-if="waiting" :class="errorClass" class="list-group-item">[[ msg ]]</li>
-                <div v-for="event in events" :key="event.count">
+                <div v-for="event in events" :key="event.count" v-cloak>
                     <li class="list-group-item">[[ event.start_pretty ]]: <strong>[[ event.summary ]]</strong> </li>
                 </div>
             </ul>

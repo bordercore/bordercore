@@ -16,7 +16,7 @@
     <ul class="list-group" id="sort-container-notes">
         <draggable v-model="notes" @change="onChange" ghost-class="sortable-ghost">
             <transition-group type="transition">
-                <div v-for="note in notes" :key="note.uuid">
+                <div v-for="note in notes" :key="note.uuid" v-cloak>
                     <li class="list-group-item" :data-uuid="note.uuid">
                         <a :href="note.url">[[ note.title ]]</a>
                     </li>
