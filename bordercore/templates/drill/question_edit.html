@@ -30,6 +30,9 @@
             {% if field.label == "Tags" %}
 
                 <div id="tagsearch">
+
+                    {% include "common/show_messages.html" %}
+
                     <div class="form-group row{% if field.errors %} error{% endif %}">
                         <label class="col-lg-2 col-form-label" for="inputTitle">Tags</label>
 
