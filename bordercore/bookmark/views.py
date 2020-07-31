@@ -340,7 +340,6 @@ def sort_bookmarks(request):
 
 @login_required
 def add_note(request):
-    print(request.POST)
 
     t = TagBookmark.objects.get(tag__name=request.POST.get("tag"))
     TagBookmarkSortOrder.objects.filter(
@@ -348,3 +347,15 @@ def add_note(request):
         bookmark_id=request.POST.get("link_id")).update(note=request.POST.get("note"))
 
     return JsonResponse("OK", safe=False)
+
+
+@login_required
+def get_new_bookmarks_count(request, timestamp):
+    """
+    Get a count of all bookmarks created after the specified timestamp
+    """
+
+    time = datetime.datetime.fromtimestamp(timestamp / 1000)
+    count = Bookmark.objects.filter(user=request.user, created__gte=time).count()
+
+    return JsonResponse({"count": count})

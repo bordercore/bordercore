@@ -50,7 +50,7 @@
                                 <a v-else :href="item.url" :id="getSectionId(item.id)">
                                     <span class="nav-icon text-center "><i :class="item.icon"></i></span>
                                     <span>[[ item.name ]]</span>
-                                    <span class="badge badge-info float-right">[[ item.badge ]]</span>
+                                    <span v-if="item.badge > 0" class="badge badge-info float-right">[[ item.badge ]]</span>
                                 </a>
                             </li>
                         </div>
@@ -136,6 +136,8 @@
             <script defer src="https://use.fontawesome.com/releases/v5.14.0/js/solid.js" integrity="sha384-4RG3cEPIlCBy6VNzxM9ZoEwZW+65ed5JDOfaJAnQqwV6ha/jZDJTXjFmvjFM4bk4" crossorigin="anonymous"></script>
             <script defer src="https://use.fontawesome.com/releases/v5.14.0/js/fontawesome.js" integrity="sha384-DNo9bmYZCHLtp0n0l0XA2UsoRHX1nx38aRP+p9yoP5A8kVTfeWG3aySMOq5FD/v3" crossorigin="anonymous"></script>
 
+            <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
             <script type="text/javascript">
 
                 document.getElementById("sidebarCollapse").addEventListener("click", function(evt) {
@@ -143,6 +145,8 @@
                 });
 
                 Vue.mixin({ delimiters: ["[[", "]]"] });
+
+                const timestamp = new Date().getTime()
 
                 const NavBar = {
                     data() {
@@ -158,7 +162,8 @@
                                     id: "bookmarks",
                                     name: "Bookmarks",
                                     url: "{% url 'bookmark_list' %}",
-                                    icon: "fas fa-bookmark"
+                                    icon: "fas fa-bookmark",
+                                    badge: 0
                                 },
                                 {
                                     id: "feed",
@@ -246,13 +251,18 @@
                                     name: "Todo",
                                     url: "{% url 'todo_list' %}",
                                     icon: "fas fa-tasks",
+                                    {% if todo_count %}
                                     badge: {{ todo_count|default:0 }}
+                                    {% endif %}
                                 },
                                 {
                                     id: "fitness",
                                     name: "Fitness",
                                     url: "{% url 'fitness_summary' %}",
-                                    icon: "fas fa-running"
+                                    icon: "fas fa-running",
+                                    {% if exercise_count %}
+                                    badge: {{ exercise_count|default:0 }}
+                                    {% endif %}
                                 },
                                 {
                                     id: "prefs",
@@ -274,6 +284,23 @@
                         },
                         subMenuId(id) {
                             return `${id}Submenu`;
+                        },
+                        getUntaggedBookmarkCount() {
+                            let self = this;
+
+                            axios.get("{% url 'bookmark_get_new_bookmarks_count' 666 %}".replace(/666$/, timestamp))
+                                                        .then(function (response) {
+
+                                                            count = response.data.count;
+                                                            // TODO: Lookup item by "id=bookmark" rather than the index number of "1"
+                                                            self.items[1].badge = count;
+
+                                                        })
+                                      .catch(function (error) {
+                                          console.log("Error getting new bookmarks count: " + error);
+                                      })
+                                      .finally(function () {
+                                      });
                         }
                     },
                     mounted() {
@@ -285,6 +312,7 @@
                         $("#{{ section }}Submenu").collapse("show");
                         {% endif %}
 
+                        window.setInterval(this.getUntaggedBookmarkCount, 60000);
                     }
                 }
 
