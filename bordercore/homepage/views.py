@@ -8,10 +8,8 @@ from PyOrgMode import PyOrgMode
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import F, Max, Q
 from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.shortcuts import render
-from django.utils import timezone
 
 from blob.models import Blob
 from bookmark.models import Bookmark
@@ -22,34 +20,6 @@ from quote.models import Quote
 from todo.models import Todo
 
 SECTION = 'homepage'
-
-
-def get_overdue_exercise(request):
-
-    exercises = ExerciseUser.objects.annotate(
-        max=Max("exercise__data__date")) \
-        .filter(Q(interval__lt=(timezone.now() - F("max")) + timedelta(days=1))) \
-        .filter(user=request.user) \
-        .order_by(F("max")) \
-        .select_related()
-
-    overdue_exercises = []
-
-    for exercise in exercises:
-        delta = timezone.now() - exercise.max
-
-        # Round up to the nearest day
-        if delta.seconds // 3600 >= 12:
-            delta = delta + timedelta(days=1)
-
-        overdue_exercises.append(
-            {
-                "exercise": exercise,
-                "lag": delta.days
-            }
-        )
-
-    return overdue_exercises
 
 
 @login_required
@@ -109,7 +79,7 @@ def homepage(request):
     except AttributeError:
         pass
 
-    overdue_exercises = get_overdue_exercise(request)
+    overdue_exercises = ExerciseUser.get_overdue_exercises(request.user)
 
     return render(request, 'homepage/index.html',
                   {'section': SECTION,
