@@ -16,6 +16,7 @@ from blob.views import (BlobCreateView, BlobDeleteView, BlobDetailView,
                         BlobThumbnailView, BlobUpdateView)
 from book.views import BookListView
 from bookmark import views as bookmark_views
+from bookmark.views import BookmarkListTagView, BookmarkListView
 from collection import views as collection_views
 from collection.views import (CollectionCreateView, CollectionDeleteView,
                               CollectionDetailView, CollectionListView,
@@ -77,17 +78,17 @@ urlpatterns = [
     path('bookmarks/random/', bookmark_views.get_random_bookmarks, name='get_random_bookmarks'),
     path('bookmarks/search/<str:search>', bookmark_views.search, name='bookmark_search'),
     path('bookmarks/snarf_link.html', bookmark_views.snarf_link),
-
-    path('bookmarks/list/', bookmark_views.list, name='bookmark_list'),
-    path('bookmarks/list/<int:page_number>', bookmark_views.list, name='bookmark_list'),
-
+    path('bookmarks/list/', bookmark_views.list, name="bookmark_list"),
+    path('bookmarks/list/<int:page_number>', BookmarkListView.as_view(), name="bookmark_list"),
+    path('bookmarks/list/<str:search>', BookmarkListView.as_view(), name="bookmark_list"),
     path('bookmarks/tag/sort', bookmark_views.sort_favorite_tags, name='sort_favorite_tags'),
-    path('bookmarks/tag/<str:tag_filter>', bookmark_views.list, name='bookmark_tag'),
+    path('bookmarks/tag/<str:tag_filter>', BookmarkListTagView.as_view(), name='bookmark_tag'),
+
     path('bookmarks/tagsearch/', bookmark_views.tag_search, name='bookmark_tag_search'),
     path('bookmarks/sort_bookmarks.json', bookmark_views.sort_bookmarks, name='sort_bookmarks'),
     path('bookmarks/delete/<int:bookmark_id>', bookmark_views.delete, name='bookmark_delete'),
 
-    path('books/(\w+)?', BookListView.as_view(), name="book_list"),
+    path(r'books/(\w+)?', BookListView.as_view(), name="book_list"),
 
     path('collection/embedded/<int:collection_id>', CollectionDetailView.as_view(), {'embedded': True}, name='collection_embedded'),
     path('collection/add', CollectionCreateView.as_view(), name='collection_add'),

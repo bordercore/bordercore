@@ -1,4 +1,6 @@
+import base64
 import json
+import re
 
 import boto3
 from elasticsearch import Elasticsearch
@@ -121,6 +123,48 @@ class Bookmark(TimeStampedModel):
             LogType="Tail",
             Payload=json.dumps(payload)
         )
+
+    def get_favicon_url(self, size=32):
+
+        if not self.url:
+            return ""
+
+        p = re.compile("https?://([^/]*)")
+
+        m = p.match(self.url)
+
+        if m:
+            domain = m.group(1)
+            parts = domain.split(".")
+            # We want the domain part of the hostname (eg npr.org instead of www.npr.org)
+            if len(parts) == 3:
+                domain = ".".join(parts[1:])
+            return f"<img src=\"https://www.bordercore.com/favicons/{domain}.ico\" width=\"{size}\" height=\"{size}\" />"
+        else:
+            return ""
+
+    @staticmethod
+    def get_tagged_bookmarks(user, tag_name):
+
+        # Put the imports here to avoid circular dependencies
+        from tag.models import TagBookmark
+
+        tag = Tag.objects.get(name=tag_name)
+        tagbookmark = TagBookmark.objects.get(user=user, tag=tag)
+
+        # Bookmarks are guaranteed to be returned in sorted order
+        #  because of the "ordering" field in TagBookmarkSortOrder's
+        #  "Meta" inner class
+        bookmark_info = [(x.bookmark, x.note) for x in tagbookmark.tagbookmarksortorder_set.all().select_related("bookmark")]
+
+        # If there is an associated note, add it to the bookmark object
+        sorted_bookmarks = []
+        for bookmarks in bookmark_info:
+            if bookmarks[1]:
+                bookmarks[0].note = base64.b64encode(bookmarks[1].encode()).decode()
+            sorted_bookmarks.append(bookmarks[0])
+
+        return sorted_bookmarks
 
 
 def tags_changed(sender, **kwargs):

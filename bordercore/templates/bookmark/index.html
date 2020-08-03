@@ -26,7 +26,18 @@
         <h2>Favorite Tags</h2>
 
         <ul class="list-group" id="sort-container-tags">
-            <tag-list></tag-list>
+            <tag-list inline-template>
+                <div>
+                    <draggable v-model="favoriteTags" @change="onChange" ghost-class="sortable-ghost" filter="#untagged">
+                        <transition-group type="transition">
+                            <li v-for="tag in favoriteTags" :class="'list-group-item ' + tag.className" :data-id="tag.id" :key="tag.id">
+                                <a href="" @click.prevent="onClick" :data-tag="tag.name">[[ tag.name ]]</a>
+                                <span :class="'ml-2 badge ' + tag.badgeClassName">[[ tag.count ]]</span>
+                            </li>
+                        </transition-group>
+                    </draggable>
+                </div>
+            </tag-list>
         </ul>
     </div>
 
@@ -76,14 +87,14 @@
 
             <div class="col-lg-12 bookmark-search">
 
-                <form class="form-inline" role="form" name="nav_form" id="search" method="get">
+                <form class="form-inline" role="form" name="nav_form" id="search" method="get" @submit.prevent>
 
                     <div class="form-group col-auto has-search">
                         <span class="fas fa-search form-control-feedback"></span>
-                        <search></search>
+                        <search @search-term="searchTerm" @search-tag="searchTag" @get-page="getPage"></search>
                     </div>
 
-                    <button-group></button-group>
+                    <button-group @get-page="getPage"></button-group>
 
                 </form>
 
@@ -93,63 +104,65 @@
 
         <br />
 
-    {% if bookmarks %}
-
-        <bookmark-list inline-template>
+        <bookmark-list inline-template @paginate="paginate" ref="bookmarkList">
             <div class="row">
                 <div class="col-lg-12">
-                    <ul>
-                        <draggable v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost"{% if not tag_filter %} disabled="true"{% endif %}>
+                    <table>
+                        <tbody is="draggable" v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" :disabled="disableSort">
                             <transition-group type="transition">
-                                <li v-for="bookmark in bookmarkList" :data-id="bookmark.id" :key="bookmark.id" class="bookmark-list" @click="onClick" v-cloak>
-                                    <span class="ml-1">[[ bookmark.created ]]</span>
-                                    <span class="">[[ bookmark.createdYear ]]</span>
-                                    <span v-html="bookmark.faviconUrl" class="ml-2"></span>
-                                    <span>
+                                <tr v-for="bookmark in bookmarkList" :data-id="bookmark.id" :key="bookmark.id" class="bookmark-list" @click="onClick" v-cloak>
+                                    <td class="bookmark-list-date p-2">
+                                        <span>[[ bookmark.created ]]</span>
+                                    </td>
+                                    <td class="bookmark-list-favicon p-2">
+                                        <span v-html="bookmark.favicon_url"></span>
+                                    </td>
+                                    <td class="bookmark-list-link p-2">
                                         <a class="one-tag" :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.title) ]]</a>
                                         <a v-if="bookmark.lastResponseCode != 200" class="form-error ml-3" target="wayback" :href="'https://web.archive.org/web/1000/' + bookmark.url">[[ bookmark.lastResponseCode ]]</a>
-                                        <i v-if="bookmark.note != '' && bookmark.note != 'None'" class="fa fa-clipboard"></i>
-                                    </span>
-                                    <a v-for="tag in bookmark.tags" v-if="tag.fields.name != '{{ tag_filter }}'" class="badge badge-info m-2" :href="'{% url 'bookmark_tag' 666 %}'.replace(/666$/, tag.fields.name)">[[ tag.fields.name ]]</a>
-                                </li>
+                                        <i v-if="bookmark.note != null && bookmark.note != ''" class="fa fa-clipboard"></i>
+                                        <a v-for="tag in bookmark.tags" v-if="tag.fields.name != '{{ tag_filter }}'" class="badge badge-info m-2" :href="'{% url 'bookmark_tag' 666 %}'.replace(/666$/, tag.fields.name)">[[ tag.fields.name ]]</a>
+                                    </td>
+                                </tr>
                             </transition-group>
-                        </draggable>
-                    </ul>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </bookmark-list>
 
-        {% if bookmarks.has_other_pages %}
-            <div class="row">
+        <pagination inline-template :pagination="pagination" @get-page="getPage">
+            <div class="row" v-if="pagination.num_pages > 1">
                 <nav aria-label="Page navigation">
                     <ul class="pagination">
-                    {% if bookmarks.has_previous %}
-                        <li class="page-item"><a class="page-link" href="{% url 'bookmark_list' bookmarks.previous_page_number %}">Previous</a></li>
-                    {% else %}
-                        <li class="disabled page-item"><a class="page-link" href="#">Previous</a></li>
-                    {% endif %}
-                    {% for i in range %}
-                        {% if page_number == i %}
-                            <li class="disabled page-item"><a class="page-link" href="#">{{ i }}</a></li>
-                        {% else %}
-                            <li class="page-item"><a class="page-link" href="{% url 'bookmark_list' i %}">{{ i }}</a></li>
-                        {% endif %}
-                    {% endfor %}
-                    {% if bookmarks.paginator.num_pages > 5 %}
-                        <li class="disabled page-item"><a class="page-link" href="#">...</a></li>
-                        <li class="page-item"><a class="page-link" href="{% url 'bookmark_list' bookmarks.paginator.num_pages %}">{{ bookmarks.paginator.num_pages }}</a></li>
-                    {% endif %}
-                    {% if bookmarks.has_next %}
-                        <li class="page-item"><a class="page-link" href="{% url 'bookmark_list' bookmarks.next_page_number %}">Next</a></li>
-                    {% else %}
-                        <li class="disabled page-item"><a class="page-link" href="#">Next</a></li>
-                    {% endif %}
+                        <li v-if="pagination.previous_page_number" class="page-item"><a class="page-link" @click.prevent="$emit('get-page', pagination.previous_page_number)" href="">Previous</a></li>
+                        <li v-else class="disabled page-item"><a class="page-link" href="">Previous</a></li>
+                        <template v-for="page in pagination.range">
+
+                            <template v-if="pagination.page_number == page">
+                                <li class="disabled page-item">
+                                    <a class="page-link" href="">[[ page ]]</a>
+                                </li>
+                            </template>
+                            <template v-else>
+                                <li class="page-item">
+                                    <a class="page-link" @click.prevent="$emit('get-page', page)" href="">[[ page ]]</a>
+                                </li>
+                            </template>
+
+                        </template>
+
+                        <template v-if="pagination.num_pages > 5">
+                            <li class="disabled page-item"><a class="page-link" href="">...</a></li>
+                            <li class="page-item"><a class="page-link" @click.prevent="$emit('get-page', pagination.num_pages)" href="">[[ pagination.num_pages ]]</a></li>
+                        </template>
+
+                        <li v-if="pagination.next_page_number" class="page-item"><a class="page-link" @click.prevent="$emit('get-page', pagination.next_page_number)" href="">Next</a></li>
+                        <li v-else class="disabled page-item"><a class="page-link" href="">Next</a></li>
                     </ul>
                 </nav>
             </div>
-        {% endif %}
-
-    {% endif %}
+        </pagination>
 
     </div>
 
@@ -166,6 +179,14 @@
 
     <script type="text/javascript">
 
+        tagFilter = null;
+        isFiltered = false;
+
+        // When this is set to true, then hitting "Enter" will NOT
+        //  execute a general term search, but instead fire the event
+        //  that initiates a tag search.
+        disableTermSearch = false;
+
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
         const EventBus = new Vue();
@@ -173,21 +194,8 @@
         const BookmarkList = {
             data() {
                 return {
-                    bookmarkList: [
-                        {% for bookmark in bookmarks %}
-                        {
-                            id: {{ bookmark.id }},
-                            created: "{{ bookmark.created|date:"N j," }}",
-                            createdYear: "{{ bookmark.created|date:"Y" }}",
-                            url: "{{ bookmark.url }}",
-                            faviconUrl: '{{ bookmark.url|favicon:16|safe }}',
-                            title: "{{ bookmark.title }}".replace(/\r/g, ""),
-                            lastResponseCode: "{{ bookmark.last_response_code|default:"" }}",
-                            note: "{{ bookmark.note|default:"" }}",
-                            tags: {{ bookmark.tags.all|jsonify|safe }}
-                        },
-                        {% endfor %}
-                    ]
+                    bookmarkList: [],
+                    disableSort: true
                 }
             },
             methods: {
@@ -197,9 +205,9 @@
 
                     if (element.classList.contains("selected")) {
 
-                        {% if tag_filter %}
-                        document.getElementById("bookmark-sidebar").classList.remove("show");
-                        {% endif %}
+                        if (tagFilter) {
+                            document.getElementById("bookmark-sidebar").classList.remove("show");
+                        }
 
                         element.classList.remove("selected");
 
@@ -208,25 +216,23 @@
 
                     } else {
 
-                        {% if tag_filter %}
+                        if (tagFilter) {
+                            noteValue = "";
 
-                        noteValue = "";
+                            var selectedId = parseInt(element.dataset.id, 10);
 
-                        var selectedId = parseInt(element.dataset.id, 10);
+                            const found = this.bookmarkList.find(element => element.id == selectedId);
 
-                        const found = this.bookmarkList.find(element => element.id == selectedId);
+                            if (found) {
+                                noteValue = atob(found.note);
+                            }
 
-                        if (found) {
-                            noteValue = atob(found.note);
+                            EventBus.$emit("setNoteValue", noteValue);
+
+                            document.getElementById("bookmark-sidebar").classList.add("show");
                         }
 
-                        EventBus.$emit("setNoteValue", noteValue);
-
-                        document.getElementById("bookmark-sidebar").classList.add("show");
-
-                        {% endif %}
-
-                        const currentlySelected = document.querySelector("li.bookmark-list.selected");
+                        const currentlySelected = document.querySelector("tr.bookmark-list.selected");
                         if (currentlySelected) {
                             currentlySelected.classList.remove("selected");
                         }
@@ -247,7 +253,7 @@
                     newPosition = evt.moved.newIndex + 1;
 
                     const data = new URLSearchParams();
-                    data.append("tag", "{{ tag_filter }}");
+                    data.append("tag", tagFilter);
                     data.append("link_id", linkId);
                     data.append("position", newPosition);
 
@@ -273,7 +279,55 @@
                         el.innerHTML = enc;
                         return el.innerText
                     });
-                }
+                },
+                getBookmarkList({ pageNumber=null, searchTerm=null, searchTag=null } = {}) {
+                    var self = this;
+
+                    this.disableSort = true;
+                    if (searchTerm != null) {
+                        url = "{% url 'bookmark_search' 666 %}".replace(/666$/, searchTerm);
+                        isFiltered = true;
+                    } else if (searchTag != null) {
+                        url = "{% url 'bookmark_tag' 666 %}".replace(/666$/, searchTag);
+                        isFiltered = true;
+                        this.disableSort = false;
+                        tagFilter = searchTag;
+                    } else {
+
+                        // If we've executed a search, ignore the automatic timed bookmarks refresh
+                        if (isFiltered) {
+                            return;
+                        }
+
+                        url = "{% url 'bookmark_list' 666 %}".replace(/666$/, pageNumber);
+                    }
+
+                    axios.get(url)
+                         .then(function (response) {
+
+                             var bookmarks = []
+                             var lastDate = null;
+                             for (bookmark of response.data.bookmarks) {
+                                 if (bookmark.created == lastDate) {
+                                     lastDate = bookmark.created;
+                                     bookmark.created = null;
+                                 } else {
+                                     lastDate = bookmark.created;
+                                 }
+                                 bookmarks.push(bookmark);
+                             }
+                             /* self.bookmarkList = response.data.bookmarks; */
+                             self.bookmarkList = bookmarks;
+
+                             self.$emit("paginate", response.data.pagination);
+
+                         })
+                         .catch(function (error) {
+                             console.log("Error getting new bookmarks list: " + error);
+                         })
+                         .finally(function () {
+                         });
+                },
             },
             mounted() {
 
@@ -286,8 +340,19 @@
                     });
 
                 });
+
+                this.getBookmarkList({pageNumber: 1});
+
+                window.setInterval(this.getBookmarkList, 60000, {pageNumber: 1});
+
             }
         };
+
+        const Pagination = {
+            props: {
+                pagination: ""
+            }
+        }
 
         const AddNote = {
             data() {
@@ -299,7 +364,7 @@
                 onClick(evt) {
 
                     const note = document.getElementById("note").value;
-                    var selectedId = document.querySelector("li.bookmark-list.selected").dataset.id;
+                    var selectedId = document.querySelector("tr.bookmark-list.selected").dataset.id;
 
                     const data = new URLSearchParams();
                     data.append("tag", "{{ tag_filter }}");
@@ -351,9 +416,12 @@
                         placeholder="Search"
                         autofocus
                         autocomplete="off"
-                        @select="select"
-                        @keydown.native.enter.prevent="onKeyDown"
+                        id="searchInput"
+                        @select="onSelect"
+                        @keydown.native.enter="onEnter"
                         :styles="autoCompleteStyle"
+                        @hide-list="onHideList"
+                        @hover="onHover"
                         >
                     </vue-simple-suggest>
                 </div>
@@ -380,19 +448,31 @@
                         })
                         .then(data => data)
                 },
-                select(tag) {
-
-                    window.location = '{% url 'bookmark_tag' 666 %}'.replace(/666$/, tag.value);
-
+                onSelect(tag) {
+                    this.$emit("search-tag", tag.value);
+                    disableTermSearch = false;
                 },
-                onKeyDown(evt) {
-                    searchTerm = evt.srcElement.value;
-                    if (searchTerm) {
-                        window.location='{% url 'bookmark_search' 666 %}'.replace(/666$/, searchTerm);
-                    } else {
-                        // If nothing is selected, refresh the page with no filters
-                        window.location='{% url 'bookmark_list' %}';
+                onHideList() {
+                    disableTermSearch = false;
+                },
+                onHover() {
+                    disableTermSearch = true;
+                },
+                onEnter(evt) {
+
+                    if (disableTermSearch) {
+                        return;
                     }
+                    searchTerm = evt.srcElement.value;
+
+                    if (searchTerm) {
+                        this.$emit("search-term", searchTerm);
+                    } else {
+                        // If the search box is empty, refresh the list with no filters
+                        isFiltered = false;
+                        this.$emit("get-page", 1);
+                    }
+
                 }
             }
         };
@@ -408,8 +488,10 @@
             methods: {
                 onClickDelete(evt) {
 
-                    var bookmarkEl = document.querySelector("li.bookmark-list.selected");
+                    var bookmarkEl = document.querySelector("tr.bookmark-list.selected");
                     var selectedId = bookmarkEl.dataset.id;
+
+                    var self = this;
 
                     fetch("{% url 'bookmark_delete' 666 %}".replace(/666$/, selectedId),
                           {
@@ -422,8 +504,6 @@
                         return response;
                     }).then(() => {
 
-                        bookmarkEl.remove();
-
                         this.isDisabledEdit = true;
                         this.isDisabledDelete = true;
 
@@ -431,11 +511,13 @@
                         document.getElementById("bookmark-sidebar").classList.remove("show");
                         {% endif %}
 
+                        self.$emit("get-page", 1);
+
                     })
                 },
                 onClickEdit(evt) {
 
-                    var selectedId = document.querySelector("li.bookmark-list.selected").dataset.id;
+                    var selectedId = document.querySelector("tr.bookmark-list.selected").dataset.id;
                     window.location="{% url 'bookmark_edit' 666 %}".replace(/666$/, selectedId);
 
                 },
@@ -472,43 +554,95 @@
             components: {
                 BookmarkList,
                 ButtonGroup,
+                Pagination,
                 Search
+            },
+            data() {
+                return {
+                    pagination: ""
+                }
+            },
+            methods: {
+                paginate(payload) {
+                    this.pagination = payload;
+                },
+                getPage(pageNumber) {
+                    this.$refs.bookmarkList.getBookmarkList({pageNumber: pageNumber});
+                },
+                searchTerm(searchTerm) {
+                    this.$refs.bookmarkList.getBookmarkList({searchTerm: searchTerm});
+                },
+                searchTag(searchTag) {
+                    this.$refs.bookmarkList.getBookmarkList({searchTag: searchTag});
+                }
+            },
+            mounted() {
+
+                EventBus.$on("search-tag", tagName => {
+                    this.$refs.bookmarkList.getBookmarkList({searchTag: tagName});
+                })
+
+                EventBus.$on("get-page", pageNumber => {
+                    this.$refs.bookmarkList.getBookmarkList({pageNumber: pageNumber});
+                })
+
             }
         });
 
         const TagList = {
-            template: `
-                <div>
-                    <draggable v-model="favoriteTags" @change="onChange" ghost-class="sortable-ghost" filter="#untagged">
-                        <transition-group type="transition">
-                            <li id="untagged" class="list-group-item{% if not tag_filter %} active{% endif %}" key="-1">
-                                <a href="{% url "bookmark_list" %}">Untagged</a>
-                                <span class="ml-2 badge {% if not tag_filter %}badge-light{% else %}badge-primary{% endif %}">{{ tag_counts|dict_get:"Untagged" }}</span>
-                            </li>
-                            <li v-for="tag in favoriteTags" :class="'list-group-item' + (tag.name == '{{ tag_filter }}' ? ' active' : '')" :data-id="tag.id" :key="tag.id">
-                                <a :href="tag.url">[[ tag.name ]]</a>
-                                <span :class="'ml-2 badge ' + tag.className">[[ tag.count ]]</span>
-                            </li>
-                        </transition-group>
-                    </draggable>
-                </div>
-            `,
             data() {
                 return {
                     favoriteTags: [
+                        {
+                            id: -1,
+                            name: "Untagged",
+                            className: "active",
+                            count: {{ tag_counts|dict_get:"Untagged" }},
+                            badgeClassName: "badge-light"
+                        },
                         {% for tag in favorite_tags %}
                         {
                             id: {{ tag.id }},
                             name: "{{ tag.name }}",
-                            className: "{% if tag.name == tag_filter %}badge-light{% else %}badge-primary{% endif %}",
+                            className: "{% if tag.name == tag_filter %}active{% else %}{% endif %}",
                             count: {{ tag_counts|dict_get:tag.name }},
-                            url: "{% url 'bookmark_tag' tag.name %}"
+                            badgeClassName: "{% if tag.name == tag_filter %}badge-light{% else %}badge-primary{% endif %}",
                         },
                         {% endfor %}
-                    ]
+                    ],
+                    selectedTag: null
                 }
             },
             methods: {
+                onClick(evt) {
+                    const tagName = evt.srcElement.dataset.tag;
+                    this.selectedTag = tagName;
+
+                    for (tag of this.favoriteTags) {
+                        if (tag.name == tagName) {
+                            tag.className = "list-group-item active";
+                            tag.badgeClassName = "badge-light";
+                        } else {
+                            tag.className = "list-group-item";
+                            tag.badgeClassName = "badge-primary";
+                        }
+                    }
+
+                    if (tagName == "Untagged") {
+                        isFiltered = false;
+                        EventBus.$emit("get-page", 1);
+                    } else {
+                        EventBus.$emit("search-tag", tagName);
+                    }
+                },
+                getClassName(tagName) {
+
+                    if (tagName == this.selectedTag) {
+                        return "badge-light";
+                    } else {
+                        return "badge-primary";
+                    }
+                },
                 onChange(evt) {
 
                     tagId = evt.moved.element.id;
@@ -536,7 +670,7 @@
                           $.smkAlert({text: "Error reordering notes: " + error, type: "error", position:"top-right"});
                       });
                 }
-            }
+            },
         };
 
         new Vue({

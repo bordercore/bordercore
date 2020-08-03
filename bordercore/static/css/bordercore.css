@@ -114,25 +114,23 @@ blockquote {
 .bookmark-search {
   padding-left: 40px; }
 
-.bookmark-list {
-  list-style-type: none; }
-
-.bookmark-tag-filter-input {
-  width: 260px; }
-
-li.bookmark-list span {
-  padding: 4px; }
-
-li.bookmark-list span:nth-child(1) {
+.bookmark-created {
   color: #999999;
-  display: inline-block;
-  width: 80px; }
+  width: 90px; }
 
-li.bookmark-list span:nth-child(2) {
-  color: #999999; }
+.bookmark-list-date {
+  /* padding: 4px; */
+  text-align: right;
+  vertical-align: text-bottom;
+  white-space: nowrap; }
 
-li.bookmark-list span:nth-child(3) {
-  width: 20px; }
+.bookmark-list-favicon {
+  /* padding: 4px; */
+  vertical-align: text-bottom; }
+
+.bookmark-list-link {
+  /* padding: 4px; */
+  vertical-align: text-bottom; }
 
 #bookmark-sidebar {
   background-color: #ffffff;

@@ -8,10 +8,13 @@ import lxml.html as lh
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.core.paginator import Paginator
 from django.db.models import Count
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
+from django.urls import reverse
+from django.utils.decorators import method_decorator
+from django.views.generic import ListView
 
 from accounts.models import SortOrder
 from bookmark.forms import BookmarkForm
@@ -41,15 +44,15 @@ def edit(request, bookmark_id=None):
 
     if request.method == 'POST':
         if request.POST['Go'] in ['Edit', 'Add']:
-            form = BookmarkForm(request.POST, instance=b, request=request)  # A form bound to the POST data
+            form = BookmarkForm(request.POST, instance=b, request=request)
             if form.is_valid():
                 newform = form.save(commit=False)
                 newform.user = request.user
                 newform.save()
-                form.save_m2m()  # Save the many-to-many data for the form (eg tags).
+                form.save_m2m()
                 form.instance.index_bookmark()
                 form.instance.snarf_favicon()
-                messages.add_message(request, messages.INFO, 'Bookmark edited')
+                messages.add_message(request, messages.INFO, f'Bookmark {request.POST["Go"].lower()}ed')
                 return list(request)
         elif request.POST['Go'] == 'Delete':
             b.delete()
@@ -63,7 +66,7 @@ def edit(request, bookmark_id=None):
 
     else:
         action = 'Add'
-        form = BookmarkForm(request=request)  # An unbound form
+        form = BookmarkForm(request=request)
 
     return render(request, 'bookmark/edit.html',
                   {'section': SECTION,
@@ -222,7 +225,7 @@ def get_random_bookmarks(request):
 
 @login_required
 def search(request, search):
-    return list(request, search=search)
+    return HttpResponseRedirect(reverse("bookmark_list", kwargs={"search": search}))
 
 
 @login_required
@@ -235,53 +238,12 @@ def list(request,
     sorted_bookmarks = []
     tag_counts = {}
 
-    if tag_filter:
-        request.session['bookmark_tag_filter'] = tag_filter
+    #     bookmarks = bookmarks.prefetch_related("tags")
 
-        tag = Tag.objects.get(name=tag_filter)
-        tagbookmark = TagBookmark.objects.get(tag=tag)
-
-        # Bookmarks are guaranteed to be returned in sorted order
-        #  because of the "ordering" field in TagBookmarkSortOrder's
-        #  "Meta" inner class
-        bookmark_info = [(x.bookmark, x.note) for x in tagbookmark.tagbookmarksortorder_set.all().select_related("bookmark")]
-
-        # If there is an associated note, add it to the bookmark object
-        sorted_bookmarks = []
-        for bookmarks in bookmark_info:
-            if bookmarks[1]:
-                bookmarks[0].note = base64.b64encode(bookmarks[1].encode()).decode()
-            sorted_bookmarks.append(bookmarks[0])
-
-        bookmark_range = 1  # Not used in this case
-
-    else:
-
-        if search != "":
-            bookmarks = Bookmark.objects.filter(user=request.user, title__icontains=search)
-        else:
-            bookmarks = Bookmark.objects.filter(user=request.user, tags__isnull=True)
-
-        if random is True:
-            bookmarks = bookmarks.order_by("?")
-        else:
-            bookmarks = bookmarks.order_by("-created")
-
-        # Sanitize the titles by removing newlines and carriage returns
-        for x in bookmarks:
-            x.title = re.sub("[\n\r]", "", x.title)
-
-        paginator = Paginator(bookmarks, BOOKMARKS_PER_PAGE)
-        bookmark_range = 5 if paginator.num_pages > 5 else paginator.num_pages
-
-        try:
-            sorted_bookmarks = paginator.page(page_number)
-        except PageNotAnInteger:
-            # If page is not an integer, deliver first page.
-            sorted_bookmarks = paginator.page(1)
-        except EmptyPage:
-            # If page is out of range (e.g. 9999), deliver last page of results.
-            sorted_bookmarks = paginator.page(paginator.num_pages)
+    #     if random is True:
+    #         bookmarks = bookmarks.order_by("?")
+    #     else:
+    #         bookmarks = bookmarks.order_by("-created")
 
     tag_counts["Untagged"] = Bookmark.objects.filter(user=request.user, tags__isnull=True).count()
 
@@ -298,11 +260,121 @@ def list(request,
                   {'section': SECTION,
                    'bookmarks': sorted_bookmarks,
                    'page_number': page_number,
-                   'range': range(1, bookmark_range + 1),
                    'search': search,
                    'tag_filter': tag_filter,
                    'tag_counts': tag_counts,
                    'favorite_tags': favorite_tags})
+
+
+@method_decorator(login_required, name="dispatch")
+class BookmarkListView(ListView):
+    paginate_by = 2
+    pagination_range = 5
+    model = Bookmark
+
+    def get_queryset(self):
+
+        query = Bookmark.objects.filter(user=self.request.user)
+        if self.kwargs.get("search", None):
+            query = query.filter(title__icontains=self.kwargs.get("search"))
+        elif self.kwargs.get("tag_filter", None):
+            query = query.filter(title__icontains=self.kwargs.get("tag_filter"))
+        else:
+            query = query.filter(tags__isnull=True)
+
+        query = query.only("id", "created", "url", "title", "last_response_code", "note") \
+                     .order_by("-created")
+
+        page_number = self.kwargs.get("page_number", 1)
+        paginator = Paginator(query, BOOKMARKS_PER_PAGE)
+        page_obj = paginator.get_page(page_number)
+
+        return page_obj
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        pagination = {}
+
+        if queryset.paginator.num_pages > 1:
+
+            pagination = {
+                "num_pages": queryset.paginator.num_pages,
+                "page_number": self.kwargs.get("page_number", 1)
+            }
+
+            pagination["range"] = self.pagination_range \
+                if queryset.paginator.num_pages > self.pagination_range \
+                else queryset.paginator.num_pages
+
+            if queryset.has_next():
+                pagination["next_page_number"] = queryset.next_page_number()
+            if queryset.has_previous():
+                pagination["previous_page_number"] = queryset.previous_page_number()
+
+        bookmarks = []
+
+        for x in queryset:
+            bookmarks.append(
+                {
+                    "id": x.id,
+                    "created": x.created.strftime("%B %d, %Y"),
+                    "createdYear": x.created.strftime("%Y"),
+                    "url": x.url,
+                    "title": re.sub("[\n\r]", "", x.title),
+                    "last_response_code": x.last_response_code,
+                    "note": x.note,
+                    "favicon_url": x.get_favicon_url(size=16)
+                }
+            )
+
+        return JsonResponse(
+            {
+                "bookmarks": bookmarks,
+                "pagination": pagination
+            },
+            safe=False
+        )
+
+
+@method_decorator(login_required, name="dispatch")
+class BookmarkListTagView(BookmarkListView):
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        pagination = {
+            "num_pages": 1
+        }
+
+        bookmarks = []
+
+        for x in queryset:
+            bookmarks.append(
+                {
+                    "id": x.id,
+                    "created": x.created.strftime("%B %d, %Y"),
+                    "createdYear": x.created.strftime("%Y"),
+                    "url": x.url,
+                    "title": re.sub("[\n\r]", "", x.title),
+                    "last_response_code": x.last_response_code,
+                    "note": x.note,
+                    "favicon_url": x.get_favicon_url(size=16)
+                }
+            )
+
+        return JsonResponse(
+            {
+                "bookmarks": bookmarks,
+                "pagination": pagination
+            },
+            safe=False
+        )
+
+    def get_queryset(self):
+
+        bookmarks = Bookmark.get_tagged_bookmarks(self.request.user, self.kwargs.get("tag_filter"))
+        return bookmarks
 
 
 @login_required
