@@ -1,7 +1,8 @@
 import django
 
-from lib.util import (get_missing_blob_ids, get_missing_bookmark_ids, is_image,
-                      is_pdf, remove_non_ascii_characters)
+from lib.util import (get_missing_blob_ids, get_missing_bookmark_ids,
+                      get_pagination_range, is_image, is_pdf,
+                      remove_non_ascii_characters)
 
 django.setup()
 
@@ -173,3 +174,15 @@ def test_util_is_pdf():
 
     file = "path/to/file.gif"
     assert is_pdf(file) is False
+
+
+def test_get_pagination_range():
+
+    x = get_pagination_range(1, 60, 2)
+    assert x == [1, 2, 3, 4, 5]
+
+    x = get_pagination_range(5, 60, 2)
+    assert x == [3, 4, 5, 6, 7]
+
+    x = get_pagination_range(60, 60, 2)
+    assert x == [56, 57, 58, 59, 60]

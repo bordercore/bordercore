@@ -51,3 +51,22 @@ def is_pdf(file):
         if file_extension[1:].lower() in ["pdf"]:
             return True
     return False
+
+
+def get_pagination_range(current_page_num, num_pages, paginate_by):
+    """
+    Get a range of pages based on the current page and the maximum number
+    of pages, used for a navigation UI.
+    """
+
+    max_pagination_range = 5
+
+    x = range(current_page_num - paginate_by, current_page_num + paginate_by + 1)
+
+    if x[0] <= 0:
+        x = range(1, min(max_pagination_range, num_pages) + 1)
+
+    if x[-1] - (paginate_by - 1) >= num_pages:
+        x = range(x[0] - paginate_by, max(max_pagination_range, num_pages) + 1)
+
+    return list(x)

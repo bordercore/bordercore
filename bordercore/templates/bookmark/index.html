@@ -137,6 +137,12 @@
                     <ul class="pagination">
                         <li v-if="pagination.previous_page_number" class="page-item"><a class="page-link" @click.prevent="$emit('get-page', pagination.previous_page_number)" href="">Previous</a></li>
                         <li v-else class="disabled page-item"><a class="page-link" href="">Previous</a></li>
+
+                        <template v-if="pagination.page_number - pagination.paginate_by > 1">
+                            <li class="page-item"><a class="page-link" @click.prevent="$emit('get-page', 1)" href="">1</a></li>
+                            <li v-if="pagination.page_number != pagination.paginate_by + 2" class="disabled page-item"><a class="page-link" href="">...</a></li>
+                        </template>
+
                         <template v-for="page in pagination.range">
 
                             <template v-if="pagination.page_number == page">
@@ -152,8 +158,8 @@
 
                         </template>
 
-                        <template v-if="pagination.num_pages > 5">
-                            <li class="disabled page-item"><a class="page-link" href="">...</a></li>
+                        <template v-if="pagination.num_pages - pagination.page_number > pagination.paginate_by">
+                            <li v-if="pagination.num_pages - pagination.page_number != pagination.paginate_by + 1"  class="disabled page-item"><a class="page-link" href="">...</a></li>
                             <li class="page-item"><a class="page-link" @click.prevent="$emit('get-page', pagination.num_pages)" href="">[[ pagination.num_pages ]]</a></li>
                         </template>
 

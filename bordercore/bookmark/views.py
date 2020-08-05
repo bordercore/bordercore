@@ -19,6 +19,7 @@ from django.views.generic import ListView
 from accounts.models import SortOrder
 from bookmark.forms import BookmarkForm
 from bookmark.models import Bookmark
+from lib.util import get_pagination_range
 from tag.models import Tag, TagBookmark, TagBookmarkSortOrder
 
 SECTION = 'bookmarks'
@@ -53,11 +54,11 @@ def edit(request, bookmark_id=None):
                 form.instance.index_bookmark()
                 form.instance.snarf_favicon()
                 messages.add_message(request, messages.INFO, f'Bookmark {request.POST["Go"].lower()}ed')
-                return list(request)
+                return list_bookmarks(request)
         elif request.POST['Go'] == 'Delete':
             b.delete()
             messages.add_message(request, messages.INFO, 'Bookmark deleted')
-            return list(request)
+            return list_bookmarks(request)
 
     elif bookmark_id:
         action = 'Edit'
@@ -220,7 +221,7 @@ def do_import(request):
 
 @login_required
 def get_random_bookmarks(request):
-    return list(request, random=True)
+    return list_bookmarks(request, random=True)
 
 
 @login_required
@@ -229,11 +230,11 @@ def search(request, search):
 
 
 @login_required
-def list(request,
-         random=False,
-         tag_filter="",
-         page_number=1,
-         search=""):
+def list_bookmarks(request,
+                   random=False,
+                   tag_filter="",
+                   page_number=1,
+                   search=""):
 
     sorted_bookmarks = []
     tag_counts = {}
@@ -269,7 +270,6 @@ def list(request,
 @method_decorator(login_required, name="dispatch")
 class BookmarkListView(ListView):
     paginate_by = 2
-    pagination_range = 5
     model = Bookmark
 
     def get_queryset(self):
@@ -298,14 +298,19 @@ class BookmarkListView(ListView):
 
         if queryset.paginator.num_pages > 1:
 
+            page_number = self.kwargs.get("page_number", 1)
+
             pagination = {
                 "num_pages": queryset.paginator.num_pages,
-                "page_number": self.kwargs.get("page_number", 1)
+                "page_number": page_number,
+                "paginate_by": self.paginate_by
             }
 
-            pagination["range"] = self.pagination_range \
-                if queryset.paginator.num_pages > self.pagination_range \
-                else queryset.paginator.num_pages
+            pagination["range"] = get_pagination_range(
+                page_number,
+                queryset.paginator.num_pages,
+                self.paginate_by
+            )
 
             if queryset.has_next():
                 pagination["next_page_number"] = queryset.next_page_number()

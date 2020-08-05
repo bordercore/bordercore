@@ -78,7 +78,7 @@ urlpatterns = [
     path('bookmarks/random/', bookmark_views.get_random_bookmarks, name='get_random_bookmarks'),
     path('bookmarks/search/<str:search>', bookmark_views.search, name='bookmark_search'),
     path('bookmarks/snarf_link.html', bookmark_views.snarf_link),
-    path('bookmarks/list/', bookmark_views.list, name="bookmark_list"),
+    path('bookmarks/list/', bookmark_views.list_bookmarks, name="bookmark_list"),
     path('bookmarks/list/<int:page_number>', BookmarkListView.as_view(), name="bookmark_list"),
     path('bookmarks/list/<str:search>', BookmarkListView.as_view(), name="bookmark_list"),
     path('bookmarks/tag/sort', bookmark_views.sort_favorite_tags, name='sort_favorite_tags'),
