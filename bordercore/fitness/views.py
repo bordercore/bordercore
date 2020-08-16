@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import F, Max, OuterRef, Subquery
+from django.db.models import F, Max, OuterRef, Q, Subquery
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -87,10 +87,9 @@ def fitness_summary(request):
     newest = ExerciseUser.objects.filter(exercise=OuterRef("pk")) \
         .filter(user=request.user)
 
-    # TODO: The following queries is not performant. Optimize!
     exercises = Exercise.objects.annotate(
-        last_active=Max("data__date"), is_active=Subquery(newest.values("started")[:1])) \
-        .filter(data__user=request.user) \
+        last_active=Max("data__date", filter=Q(data__user=request.user)),
+        is_active=Subquery(newest.values("started")[:1])) \
         .order_by(F("last_active")) \
         .select_related()
 
@@ -98,13 +97,16 @@ def fitness_summary(request):
     inactive_exercises = []
 
     for e in exercises:
-        delta = timezone.now() - e.last_active
 
-        # Round up to the nearest day
-        if delta.seconds // 3600 >= 12:
-            delta = delta + timedelta(days=1)
+        if e.last_active:
 
-        e.delta_days = delta.days
+            delta = timezone.now() - e.last_active
+
+            # Round up to the nearest day
+            if delta.seconds // 3600 >= 12:
+                delta = delta + timedelta(days=1)
+
+            e.delta_days = delta.days
 
         if e.is_active is not None:
             active_exercises.append(e)
