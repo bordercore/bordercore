@@ -58,4 +58,4 @@ def remove_favorite_tag(request):
 
     old_position.delete()
 
-    return redirect('bookmark_list')
+    return redirect('bookmark_overview')

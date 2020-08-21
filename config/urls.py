@@ -1,7 +1,7 @@
 from rest_framework import routers
 
 from django.conf import settings
-from django.conf.urls import include, url
+from django.conf.urls import url
 from django.contrib import admin
 from django.urls import include, path, re_path
 
@@ -75,16 +75,16 @@ urlpatterns = [
     path('bookmarks/edit', bookmark_views.edit, name='bookmark_add'),
     path('bookmarks/get_new_bookmarks_count/<int:timestamp>', bookmark_views.get_new_bookmarks_count, name='bookmark_get_new_bookmarks_count'),
     path('bookmarks/import', bookmark_views.do_import, name='bookmark_import'),
-    path('bookmarks/random/', bookmark_views.get_random_bookmarks, name='get_random_bookmarks'),
-    path('bookmarks/search/<str:search>', bookmark_views.search, name='bookmark_search'),
     path('bookmarks/snarf_link.html', bookmark_views.snarf_link),
-    path('bookmarks/list/', bookmark_views.list_bookmarks, name="bookmark_list"),
-    path('bookmarks/list/<int:page_number>', BookmarkListView.as_view(), name="bookmark_list"),
-    path('bookmarks/list/<str:search>', BookmarkListView.as_view(), name="bookmark_list"),
-    path('bookmarks/tag/sort', bookmark_views.sort_favorite_tags, name='sort_favorite_tags'),
+    path('bookmarks/overview/', bookmark_views.overview, name="bookmark_overview"),
+    path('bookmarks/list/page/<int:page_number>', BookmarkListView.as_view(), name="get_bookmarks_by_page"),
+    path('bookmarks/list/keyword/<str:search>', BookmarkListView.as_view(), name='get_bookmarks_by_keyword'),
+    path('bookmarks/list/tag/<str:tag_filter>', BookmarkListTagView.as_view(), name='get_bookmarks_by_tag'),
+    # Remove this once links to tags use AJAX rather than refresh the page
     path('bookmarks/tag/<str:tag_filter>', BookmarkListTagView.as_view(), name='bookmark_tag'),
-
-    path('bookmarks/tagsearch/', bookmark_views.tag_search, name='bookmark_tag_search'),
+    # path('bookmarks/list/random/', BookmarkListView.as_view(), name='bookmark_list_random'),
+    path('bookmarks/tag/sort', bookmark_views.sort_favorite_tags, name='sort_favorite_tags'),
+    path('bookmarks/tag/search/', bookmark_views.get_tags_used_by_bookmarks, name='get_tags_used_by_bookmarks'),
     path('bookmarks/sort_bookmarks.json', bookmark_views.sort_bookmarks, name='sort_bookmarks'),
     path('bookmarks/delete/<int:bookmark_id>', bookmark_views.delete, name='bookmark_delete'),
 

@@ -4,7 +4,7 @@
         <div class="navbar navbar-dark navbar-expand-lg bg-dark main-navbar">
             <ul class="navbar-nav mr-auto">
                 <li v-bind:class="[activeClass]" id="nav-homepage" class="nav-item"><a class="nav-link" href="{% url 'homepage' %}"><i class="glyphicon glyphicon-home"></i> Home</a></li>
-                <li v-bind:class="[activeClass]" id="nav-bookmarks" class="nav-item"><a class="nav-link" href="{% url 'bookmark_list' %}">Bookmarks</a></li>
+                <li v-bind:class="[activeClass]" id="nav-bookmarks" class="nav-item"><a class="nav-link" href="{% url 'bookmark_overview' %}">Bookmarks</a></li>
 
                 <li class="dropdown nav-item">
                     <a v-bind:class="[activeClass]" id="nav-feed" href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Feeds</a>

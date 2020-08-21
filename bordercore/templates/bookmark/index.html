@@ -63,7 +63,7 @@
         {% endif %}
     {% endif %}
 
-    <form role="form" action="{% url 'get_random_bookmarks' %}" method="get">
+    <form role="form" action="{ % url 'get_random_bookmarks' %}" method="get">
         <div class="btn-group mt-5">
             <button class="btn btn-secondary" id="btn-random">Randomize</button>
         </div>
@@ -121,7 +121,7 @@
                                         <a class="one-tag" :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.title) ]]</a>
                                         <a v-if="bookmark.lastResponseCode != 200" class="form-error ml-3" target="wayback" :href="'https://web.archive.org/web/1000/' + bookmark.url">[[ bookmark.lastResponseCode ]]</a>
                                         <i v-if="bookmark.note != null && bookmark.note != ''" class="fa fa-clipboard"></i>
-                                        <a v-for="tag in bookmark.tags" v-if="tag.fields.name != '{{ tag_filter }}'" class="badge badge-info m-2" :href="'{% url 'bookmark_tag' 666 %}'.replace(/666$/, tag.fields.name)">[[ tag.fields.name ]]</a>
+                                        <a v-for="tag in bookmark.tags" v-if="tag != $tagFilter" class="badge badge-info ml-2" @click.prevent="onClick" href="">[[ tag ]]</a>
                                     </td>
                                 </tr>
                             </transition-group>
@@ -185,8 +185,8 @@
 
     <script type="text/javascript">
 
-        tagFilter = null;
-        isFiltered = false;
+        Vue.prototype.$tagFilter = null;
+        var isFiltered = false;
 
         // When this is set to true, then hitting "Enter" will NOT
         //  execute a general term search, but instead fire the event
@@ -201,7 +201,7 @@
             data() {
                 return {
                     bookmarkList: [],
-                    disableSort: true
+                    disableSort: true,
                 }
             },
             methods: {
@@ -209,9 +209,12 @@
 
                     element = evt.currentTarget;
 
-                    if (element.classList.contains("selected")) {
+                    if (evt.srcElement.classList.contains("badge")) {
+                        const tagName = evt.srcElement.innerHTML;
+                        EventBus.$emit("search-tag", tagName);
+                    } else if (element.classList.contains("selected")) {
 
-                        if (tagFilter) {
+                        if (this.$tagFilter) {
                             document.getElementById("bookmark-sidebar").classList.remove("show");
                         }
 
@@ -222,7 +225,7 @@
 
                     } else {
 
-                        if (tagFilter) {
+                        if (this.$tagFilter) {
                             noteValue = "";
 
                             var selectedId = parseInt(element.dataset.id, 10);
@@ -259,7 +262,7 @@
                     newPosition = evt.moved.newIndex + 1;
 
                     const data = new URLSearchParams();
-                    data.append("tag", tagFilter);
+                    data.append("tag", this.$tagFilter);
                     data.append("link_id", linkId);
                     data.append("position", newPosition);
 
@@ -291,13 +294,13 @@
 
                     this.disableSort = true;
                     if (searchTerm != null) {
-                        url = "{% url 'bookmark_search' 666 %}".replace(/666$/, searchTerm);
+                        url = "{% url 'get_bookmarks_by_keyword' 666 %}".replace(/666$/, searchTerm);
                         isFiltered = true;
                     } else if (searchTag != null) {
-                        url = "{% url 'bookmark_tag' 666 %}".replace(/666$/, searchTag);
+                        url = "{% url 'get_bookmarks_by_tag' 666 %}".replace(/666$/, searchTag);
                         isFiltered = true;
                         this.disableSort = false;
-                        tagFilter = searchTag;
+                        this.$tagFilter = searchTag;
                     } else {
 
                         // If we've executed a search, ignore the automatic timed bookmarks refresh
@@ -305,7 +308,7 @@
                             return;
                         }
 
-                        url = "{% url 'bookmark_list' 666 %}".replace(/666$/, pageNumber);
+                        url = "{% url 'get_bookmarks_by_page' 666 %}".replace(/666$/, pageNumber);
                     }
 
                     axios.get(url)
@@ -322,7 +325,6 @@
                                  }
                                  bookmarks.push(bookmark);
                              }
-                             /* self.bookmarkList = response.data.bookmarks; */
                              self.bookmarkList = bookmarks;
 
                              self.$emit("paginate", response.data.pagination);
@@ -448,7 +450,7 @@
             },
             methods: {
                 tagSearch(query) {
-                    return fetch("{% url 'bookmark_tag_search' %}?query=" + query)
+                    return fetch("{% url 'get_tags_used_by_bookmarks' %}?query=" + query)
                         .then(response => {
                             return response.json();
                         })

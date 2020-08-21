@@ -10,9 +10,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.db.models import Count
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
-from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 
@@ -54,11 +53,11 @@ def edit(request, bookmark_id=None):
                 form.instance.index_bookmark()
                 form.instance.snarf_favicon()
                 messages.add_message(request, messages.INFO, f'Bookmark {request.POST["Go"].lower()}ed')
-                return list_bookmarks(request)
+                return overview(request)
         elif request.POST['Go'] == 'Delete':
             b.delete()
             messages.add_message(request, messages.INFO, 'Bookmark deleted')
-            return list_bookmarks(request)
+            return overview(request)
 
     elif bookmark_id:
         action = 'Edit'
@@ -115,7 +114,7 @@ def snarf_link(request):
 
 
 @login_required
-def tag_search(request):
+def get_tags_used_by_bookmarks(request):
 
     tags = Tag.objects.filter(bookmark__user=request.user, name__icontains=request.GET.get("query", ""), bookmark__isnull=False).distinct("name")
 
@@ -214,27 +213,18 @@ def do_import(request):
         except ValueError:
             pass
 
-    return render(request, 'bookmark/import.html',
-                  {'section': SECTION
-                  })
+    return render(request, 'bookmark/import.html', {'section': SECTION})
 
 
 @login_required
 def get_random_bookmarks(request):
-    return list_bookmarks(request, random=True)
+    return overview(request, random=True)
 
 
 @login_required
-def search(request, search):
-    return HttpResponseRedirect(reverse("bookmark_list", kwargs={"search": search}))
-
-
-@login_required
-def list_bookmarks(request,
-                   random=False,
-                   tag_filter="",
-                   page_number=1,
-                   search=""):
+def overview(request,
+             random=False,
+             tag_filter=""):
 
     sorted_bookmarks = []
     tag_counts = {}
@@ -260,8 +250,6 @@ def list_bookmarks(request,
     return render(request, 'bookmark/index.html',
                   {'section': SECTION,
                    'bookmarks': sorted_bookmarks,
-                   'page_number': page_number,
-                   'search': search,
                    'tag_filter': tag_filter,
                    'tag_counts': tag_counts,
                    'favorite_tags': favorite_tags})
@@ -282,6 +270,7 @@ class BookmarkListView(ListView):
         else:
             query = query.filter(tags__isnull=True)
 
+        query = query.prefetch_related("tags")
         query = query.only("id", "created", "url", "title", "last_response_code", "note") \
                      .order_by("-created")
 
@@ -329,7 +318,8 @@ class BookmarkListView(ListView):
                     "title": re.sub("[\n\r]", "", x.title),
                     "last_response_code": x.last_response_code,
                     "note": x.note,
-                    "favicon_url": x.get_favicon_url(size=16)
+                    "favicon_url": x.get_favicon_url(size=16),
+                    "tags": [x.name for x in x.tags.all()]
                 }
             )
 
@@ -364,7 +354,8 @@ class BookmarkListTagView(BookmarkListView):
                     "title": re.sub("[\n\r]", "", x.title),
                     "last_response_code": x.last_response_code,
                     "note": x.note,
-                    "favicon_url": x.get_favicon_url(size=16)
+                    "favicon_url": x.get_favicon_url(size=16),
+                    "tags": [x.name for x in x.tags.all()]
                 }
             )
 

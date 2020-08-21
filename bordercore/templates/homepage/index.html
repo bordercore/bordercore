@@ -16,7 +16,7 @@
                             {{ task.date }}
                         {% endif %}
                         {% for tag in task.tags.all %}
-                            <a class="badge badge-info" href="{% url 'bookmark_tag' tag.name %}">{{ tag.name }}</a>
+                            <span class="badge badge-info">{{ tag.name }}</span>
                         {% endfor %}
                     </li>
                 {% empty %}
