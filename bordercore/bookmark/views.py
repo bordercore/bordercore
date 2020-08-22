@@ -263,16 +263,20 @@ class BookmarkListView(ListView):
     def get_queryset(self):
 
         query = Bookmark.objects.filter(user=self.request.user)
-        if self.kwargs.get("search", None):
+        if "search" in self.kwargs:
             query = query.filter(title__icontains=self.kwargs.get("search"))
-        elif self.kwargs.get("tag_filter", None):
+        elif "tag_filter" in self.kwargs:
             query = query.filter(title__icontains=self.kwargs.get("tag_filter"))
         else:
             query = query.filter(tags__isnull=True)
 
         query = query.prefetch_related("tags")
-        query = query.only("id", "created", "url", "title", "last_response_code", "note") \
-                     .order_by("-created")
+        query = query.only("id", "created", "url", "title", "last_response_code", "note")
+
+        if "random" in self.kwargs:
+            query = query.order_by("?")
+        else:
+            query = query.order_by("-created")
 
         page_number = self.kwargs.get("page_number", 1)
         paginator = Paginator(query, BOOKMARKS_PER_PAGE)

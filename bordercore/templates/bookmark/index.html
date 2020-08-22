@@ -39,9 +39,6 @@
                 </div>
             </tag-list>
         </ul>
-    </div>
-
-    <br />
 
     {% if tag_filter %}
         {% if tag_filter not in tag_counts %}
@@ -63,17 +60,24 @@
         {% endif %}
     {% endif %}
 
-    <form role="form" action="{ % url 'get_random_bookmarks' %}" method="get">
-        <div class="btn-group mt-5">
-            <button class="btn btn-secondary" id="btn-random">Randomize</button>
-        </div>
+    <randomize-button inline-template>
+        <form role="form" action="" method="get">
+            <div class="btn-group mt-5">
+                <button class="btn btn-secondary" @click.prevent="onClick" id="btn-random">Randomize</button>
+            </div>
 
-        <br />
+            <br />
 
-        <div class="btn-group mt-5">
-            <a class="btn btn-secondary" href="{% url 'bookmark_import' %}">Import</a>
-        </div>
-    </form>
+            <div class="btn-group mt-5">
+                <a class="btn btn-secondary" href="{% url 'bookmark_import' %}">Import</a>
+            </div>
+        </form>
+    </randomize-button>
+
+    </div>
+
+    <br />
+
 
 {% endblock %}
 
@@ -289,7 +293,7 @@
                         return el.innerText
                     });
                 },
-                getBookmarkList({ pageNumber=null, searchTerm=null, searchTag=null } = {}) {
+                getBookmarkList({ pageNumber=null, searchTerm=null, searchTag=null, randomize=false } = {}) {
                     var self = this;
 
                     this.disableSort = true;
@@ -301,6 +305,9 @@
                         isFiltered = true;
                         this.disableSort = false;
                         this.$tagFilter = searchTag;
+                    } else if (randomize == true) {
+                        isFiltered = true;
+                        url = "{% url 'get_bookmarks_by_random' %}";
                     } else {
 
                         // If we've executed a search, ignore the automatic timed bookmarks refresh
@@ -588,11 +595,15 @@
 
                 EventBus.$on("search-tag", tagName => {
                     this.$refs.bookmarkList.getBookmarkList({searchTag: tagName});
-                })
+                });
 
                 EventBus.$on("get-page", pageNumber => {
                     this.$refs.bookmarkList.getBookmarkList({pageNumber: pageNumber});
-                })
+                });
+
+                EventBus.$on("randomize", () => {
+                    this.$refs.bookmarkList.getBookmarkList({randomize: true});
+                });
 
             }
         });
@@ -681,11 +692,20 @@
             },
         };
 
+        const RandomizeButton = {
+            methods: {
+                onClick(evt) {
+                    EventBus.$emit("randomize");
+                }
+            }
+        }
+
         new Vue({
             el: "#vue-app-left",
             components: {
                 AddNote,
-                TagList
+                TagList,
+                RandomizeButton
             }
         });
 
