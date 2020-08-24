@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% load escape_backticks %}
+{% load escape_characters %}
 
 {% block extra_head %}
     <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
@@ -383,7 +383,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
             delimiters: [noDelimiter, noDelimiter],
             template: `
                 <div class="col-lg-10 col-sm-10 align-self-center">
-                    <textarea name="content" cols="40" rows="5" class="form-control" id="id_content" @focus="onFocus">{{ form.content.value|escape_backticks }}</textarea>
+                    <textarea name="content" cols="40" rows="5" class="form-control" id="id_content" @focus="onFocus">{{ form.content.value|escape_characters }}</textarea>
                 </div>
             `,
             methods: {
