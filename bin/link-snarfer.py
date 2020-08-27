@@ -16,32 +16,32 @@ from django.conf import settings
 link_dict = {}  # Store links in a dict to avoid duplication
 
 p = re.compile(r"(https?://[^\">\s\n]*)[\">\s\n]")
-ignore = re.compile("doubleclick|https://twitter.com|tapbots.com|tapbots.net|search.twitter.com|www.youtube.com/subscription_manager")
+ignore = re.compile("doubleclick|https://twitter.com|tapbots.com|tapbots.net|search.twitter.com|www.youtube.com/subscription_manager|blogtrottr")
 
 # Remove existing handlers added by Django
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
 
 logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-                    datefmt='%m-%d %H:%M:%S',
-                    filename=os.environ['HOME'] + '/logs/link-snarfer.log',
-                    filemode='a')
+                    format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
+                    datefmt="%m-%d %H:%M:%S",
+                    filename=os.environ["HOME"] + "/logs/link-snarfer.log",
+                    filemode="a")
 
-logger = logging.getLogger('bordercore.linksnarfer')
+logger = logging.getLogger("bordercore.linksnarfer")
 
 # Only let requests log at level WARNING or higher
 requests_log = logging.getLogger("requests").setLevel(logging.WARNING)
 
 
 def get_link_info(link):
-    headers = {'user-agent': 'Bordercore/1.0'}
+    headers = {"user-agent": "Bordercore/1.0"}
     r = requests.get(link, headers=headers)
-    http_content = r.text.encode('utf-8')
+    http_content = r.text.encode("utf-8")
 
     # http://stackoverflow.com/questions/15830421/xml-unicode-strings-with-encoding-declaration-are-not-supported
     doc = html.fromstring(http_content)
-    title = doc.xpath('.//title')
+    title = doc.xpath(".//title")
     if title:
         return (r.url, title[0].text)
     else:
@@ -87,30 +87,24 @@ def get_youtube_content(msg):
     info = {}
 
     for i, part in enumerate(msg.walk(), 1):
-        if part.get_content_type() == 'text/plain':
+        if part.get_content_type() == "text/plain":
             content = part.get_payload(decode=True)
 
-    p = re.compile('^Content-Type: text/plain')
-    content = content.decode('UTF-8', 'ignore')
-    lines = content.split('\n')
-    info['uploader'] = lines[0]
-    info['title'] = get_title(lines)
-    info['url'] = find_first_link(lines)
+    content = content.decode("UTF-8", "ignore")
+    lines = content.split("\n")
+    info["uploader"] = lines[0]
+    info["title"] = get_title(lines)
+    info["url"] = find_first_link(lines)
 
     if logger.level == "DEBUG":
         store_email(info["title"], content)
 
     # Sometimes the title takes up two lines
-    if not info['url'].startswith('http'):
-        info['url'] = lines[3]
-        info['title'] = info['title'] + lines[2]
+    if not info["url"].startswith("http"):
+        info["url"] = lines[3]
+        info["title"] = info["title"] + lines[2]
 
-    p = re.compile('(.*) just uploaded a video')
-    m = p.match(info['uploader'])
-    if m:
-        info['subject'] = "%s: %s" % (m.group(1), info['title'])
-    else:
-        info['subject'] = info['title']
+    info["subject"] = f"{info['uploader']}: {info['title']}"
 
     return info
 
@@ -138,26 +132,24 @@ def add_to_bordercore(link_info):
     # Set this so that the ~/.netrc file is ignored for authentication
     s.trust_env = None
 
-    r = s.post(url, data=json.dumps(payload), headers=headers)
-    print(r.status_code)
-    print(r.text)
+    s.post(url, data=json.dumps(payload), headers=headers)
 
 
-buffer = ''
+buffer = ""
 for line in sys.stdin:
     buffer += line
 
 msg = email.message_from_string(buffer)
-if msg.get('From', '').startswith('YouTube'):
+if "Blogtrottr" in msg.get("From", ""):
     link_info = get_youtube_content(msg)
-    logger.info('YouTube email: %s' % link_info['subject'])
+    logger.info("YouTube email: %s" % link_info["subject"])
     if link_info:
         add_to_bordercore(link_info)
     sys.exit(0)
 
 # Decode quoted-printable contents
 buffer = quopri.decodestring(buffer)
-matches = p.findall(buffer.decode('UTF-8', 'ignore'))
+matches = p.findall(buffer.decode("UTF-8", "ignore"))
 
 for link in matches:
 
