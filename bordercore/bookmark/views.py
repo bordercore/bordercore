@@ -223,18 +223,10 @@ def get_random_bookmarks(request):
 
 @login_required
 def overview(request,
-             random=False,
-             tag_filter=""):
+             random=False):
 
     sorted_bookmarks = []
     tag_counts = {}
-
-    #     bookmarks = bookmarks.prefetch_related("tags")
-
-    #     if random is True:
-    #         bookmarks = bookmarks.order_by("?")
-    #     else:
-    #         bookmarks = bookmarks.order_by("-created")
 
     tag_counts["Untagged"] = Bookmark.objects.filter(user=request.user, tags__isnull=True).count()
 
@@ -248,11 +240,14 @@ def overview(request,
         tag_counts[x["tag__name"]] = x["bookmark_count"]
 
     return render(request, 'bookmark/index.html',
-                  {'section': SECTION,
-                   'bookmarks': sorted_bookmarks,
-                   'tag_filter': tag_filter,
-                   'tag_counts': tag_counts,
-                   'favorite_tags': favorite_tags})
+                  {
+                      'section': SECTION,
+                      'bookmarks': sorted_bookmarks,
+                      'tag_counts': tag_counts,
+                      'favorite_tags': favorite_tags,
+                      'col_left': "bogus",
+                      'col_content': "col-lg-12"
+                  })
 
 
 @method_decorator(login_required, name="dispatch")
@@ -386,9 +381,18 @@ def sort_favorite_tags(request):
     tag_id = request.POST['tag_id']
     new_position = int(request.POST['new_position'])
 
-    SortOrder.reorder(request.user, tag_id, new_position)
+    if new_position < 1:
+        response = {
+            "status": "Error",
+            "message": f"Position cannot be < 1: {new_position}"
+        }
+    else:
+        SortOrder.reorder(request.user, tag_id, new_position)
+        response = {
+            "status": "OK"
+        }
 
-    return HttpResponse(json.dumps('OK'), content_type="application/json")
+    return HttpResponse(json.dumps(response), content_type="application/json")
 
 
 @login_required

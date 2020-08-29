@@ -81,8 +81,6 @@ urlpatterns = [
     path('bookmarks/list/keyword/<str:search>', BookmarkListView.as_view(), name='get_bookmarks_by_keyword'),
     path('bookmarks/list/random/', BookmarkListView.as_view(), {'random': True}, name='get_bookmarks_by_random'),
     path('bookmarks/list/tag/<str:tag_filter>', BookmarkListTagView.as_view(), name='get_bookmarks_by_tag'),
-    # Remove this once links to tags use AJAX rather than refresh the page
-    path('bookmarks/tag/<str:tag_filter>', BookmarkListTagView.as_view(), name='bookmark_tag'),
     path('bookmarks/tag/sort', bookmark_views.sort_favorite_tags, name='sort_favorite_tags'),
     path('bookmarks/tag/search/', bookmark_views.get_tags_used_by_bookmarks, name='get_tags_used_by_bookmarks'),
     path('bookmarks/sort_bookmarks.json', bookmark_views.sort_bookmarks, name='sort_bookmarks'),

@@ -67,7 +67,7 @@
 
             <div class="container-fluid" id="content">
 
-                <div class="row">
+                <div class="row" style="background-image: linear-gradient(to right, #a3a9cc, #ffffff);">
 
                     <div class="col-lg-10">
                         <div class="p-2">
@@ -96,12 +96,12 @@
 
                 <div class="row content-non-nav">
 
-                    <div class="col-lg-3" {% if not left_block_nohighlight %}id="left-block"{% endif %}>
+                    <div class="{{ col_left|default:"col-lg-3" }}" {% if not left_block_nohighlight %}id="left-block"{% endif %}>
                         {% block left-block %}
                         {% endblock %}
                     </div>
 
-                    <div class="col-lg-9">
+                    <div class="{{ col_content|default:"col-lg-9" }}">
                         {% block content %}
                         {% endblock %}
                     </div>

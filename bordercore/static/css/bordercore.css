@@ -119,18 +119,20 @@ blockquote {
   width: 90px; }
 
 .bookmark-list-date {
-  /* padding: 4px; */
   text-align: right;
   vertical-align: text-bottom;
   white-space: nowrap; }
 
 .bookmark-list-favicon {
-  /* padding: 4px; */
   vertical-align: text-bottom; }
 
 .bookmark-list-link {
-  /* padding: 4px; */
   vertical-align: text-bottom; }
+
+.bookmark-tag-list-header {
+  background-color: #33393e;
+  color: #ffffff;
+  text-align: center; }
 
 #bookmark-sidebar {
   background-color: #ffffff;

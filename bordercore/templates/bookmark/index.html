@@ -8,82 +8,11 @@
 {% block title %} Bookmarks {% endblock %}
 
 {% block left-block %}
-
-    <div id="vue-app-left">
-
-        <add-note inline-template>
-            <div id="bookmark-sidebar" >
-                <form>
-                    <div class="form-group">
-                        <label class="col-form-label">Note</label>
-                        <textarea class="form-control" id="note" rows="9" v-model="note"></textarea>
-                    </div>
-                    <button id="btn-add-note" type="button" class="btn btn-primary" @click="onClick">Add</button>
-                </form>
-            </div>
-        </add-note>
-
-        <h2>Favorite Tags</h2>
-
-        <ul class="list-group" id="sort-container-tags">
-            <tag-list inline-template>
-                <div>
-                    <draggable v-model="favoriteTags" @change="onChange" ghost-class="sortable-ghost" filter="#untagged">
-                        <transition-group type="transition">
-                            <li v-for="tag in favoriteTags" :class="'list-group-item ' + tag.className" :data-id="tag.id" :key="tag.id">
-                                <a href="" @click.prevent="onClick" :data-tag="tag.name">[[ tag.name ]]</a>
-                                <span :class="'ml-2 badge ' + tag.badgeClassName">[[ tag.count ]]</span>
-                            </li>
-                        </transition-group>
-                    </draggable>
-                </div>
-            </tag-list>
-        </ul>
-
-    {% if tag_filter %}
-        {% if tag_filter not in tag_counts %}
-            <form action="{% url 'add_favorite_tag' %}" method="post">
-                {% csrf_token %}
-                <input type="hidden" name="tag" value="{{ tag_filter }}" />
-                <button type="submit" class="btn btn-secondary">
-            Add To Favorites
-                </button>
-            </form>
-        {% else %}
-            <form action="{% url 'remove_favorite_tag' %}" method="post">
-                {% csrf_token %}
-                <input type="hidden" name="tag" value="{{ tag_filter }}" />
-                <button type="submit" class="btn btn-secondary">
-            Remove From Favorites
-                </button>
-            </form>
-        {% endif %}
-    {% endif %}
-
-    <randomize-button inline-template>
-        <form role="form" action="" method="get">
-            <div class="btn-group mt-5">
-                <button class="btn btn-secondary" @click.prevent="onClick" id="btn-random">Randomize</button>
-            </div>
-
-            <br />
-
-            <div class="btn-group mt-5">
-                <a class="btn btn-secondary" href="{% url 'bookmark_import' %}">Import</a>
-            </div>
-        </form>
-    </randomize-button>
-
-    </div>
-
-    <br />
-
-
 {% endblock %}
 
 {% block content %}
 
-    <div id="vue-app-right">
+    <div id="vue-app-top">
 
         {% include "common/show_messages.html" %}
 
@@ -91,14 +20,46 @@
 
             <div class="col-lg-12 bookmark-search">
 
-                <form class="form-inline" role="form" name="nav_form" id="search" method="get" @submit.prevent>
+                <form class="form-inline" role="form" id="search-form" method="get" @submit.prevent>
+                    {% csrf_token %}
+                    <input type="hidden" id="add-to-remote-from-favorite-tagname" name="tag" />
 
                     <div class="form-group col-auto has-search">
                         <span class="fas fa-search form-control-feedback"></span>
-                        <search @search-term="searchTerm" @search-tag="searchTag" @get-page="getPage"></search>
+                        <search inline-template @search-term="searchTerm" @search-tag="searchTag" @get-page="getPage" ref="search">
+                            <div>
+                                <vue-simple-suggest ref="suggestComponent"
+                                                    v-model="query"
+                                                    display-attribute="value"
+                                                    value-attribute="value"
+                                                    :list="tagSearch"
+                                                    :filter-by-query=true
+                                                    :debounce=200
+                                                    :name="inputName"
+                                                    placeholder="Search"
+                                                    autofocus
+                                                    autocomplete="off"
+                                                    id="searchInput"
+                                                    @select="onSelect"
+                                                    @keydown.native.enter="onEnter"
+                                                    :styles="autoCompleteStyle"
+                                                    @hide-list="onHideList"
+                                                    @hover="onHover"
+                                >
+                                </vue-simple-suggest>
+                            </div>
+                        </search>
                     </div>
 
-                    <button-group @get-page="getPage"></button-group>
+                    <button-group inline-template @get-page="getPage">
+                        <div class="btn-group">
+                            <a class="btn btn-secondary" id="btn-add" href="{% url 'bookmark_add' %}">Add</a>
+                            <input type="button" class="btn btn-secondary" id="btn-edit" value="Edit" :disabled="isDisabledEdit" @click="onClickEdit" />
+                            <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="isDisabledDelete" @click="onClickDelete" />
+                            <input v-if="showRemoveFavorite" type="button" class="btn btn-secondary ml-2" value="Remove from Favorites" @click="removeFromFavorites" v-cloak />
+                            <input v-if="showAddFavorite" type="button" class="btn btn-secondary ml-2" value="Add to Favorites" @click="addToFavorites" v-cloak />
+                        </div>
+                    </button-group>
 
                 </form>
 
@@ -106,75 +67,135 @@
 
         </div>
 
-        <br />
-
-        <bookmark-list inline-template @paginate="paginate" ref="bookmarkList">
-            <div class="row">
-                <div class="col-lg-12">
-                    <table>
-                        <tbody is="draggable" v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" :disabled="disableSort">
-                            <transition-group type="transition">
-                                <tr v-for="bookmark in bookmarkList" :data-id="bookmark.id" :key="bookmark.id" class="bookmark-list" @click="onClick" v-cloak>
-                                    <td class="bookmark-list-date p-2">
-                                        <span>[[ bookmark.created ]]</span>
-                                    </td>
-                                    <td class="bookmark-list-favicon p-2">
-                                        <span v-html="bookmark.favicon_url"></span>
-                                    </td>
-                                    <td class="bookmark-list-link p-2">
-                                        <a class="one-tag" :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.title) ]]</a>
-                                        <a v-if="bookmark.lastResponseCode != 200" class="form-error ml-3" target="wayback" :href="'https://web.archive.org/web/1000/' + bookmark.url">[[ bookmark.lastResponseCode ]]</a>
-                                        <i v-if="bookmark.note != null && bookmark.note != ''" class="fa fa-clipboard"></i>
-                                        <a v-for="tag in bookmark.tags" v-if="tag != $tagFilter" class="badge badge-info ml-2" @click.prevent="onClick" href="">[[ tag ]]</a>
-                                    </td>
-                                </tr>
-                            </transition-group>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </bookmark-list>
-
-        <pagination inline-template :pagination="pagination" @get-page="getPage">
-            <div class="row" v-if="pagination.num_pages > 1">
-                <nav aria-label="Page navigation">
-                    <ul class="pagination">
-                        <li v-if="pagination.previous_page_number" class="page-item"><a class="page-link" @click.prevent="$emit('get-page', pagination.previous_page_number)" href="">Previous</a></li>
-                        <li v-else class="disabled page-item"><a class="page-link" href="">Previous</a></li>
-
-                        <template v-if="pagination.page_number - pagination.paginate_by > 1">
-                            <li class="page-item"><a class="page-link" @click.prevent="$emit('get-page', 1)" href="">1</a></li>
-                            <li v-if="pagination.page_number != pagination.paginate_by + 2" class="disabled page-item"><a class="page-link" href="">...</a></li>
-                        </template>
-
-                        <template v-for="page in pagination.range">
-
-                            <template v-if="pagination.page_number == page">
-                                <li class="disabled page-item">
-                                    <a class="page-link" href="">[[ page ]]</a>
-                                </li>
-                            </template>
-                            <template v-else>
-                                <li class="page-item">
-                                    <a class="page-link" @click.prevent="$emit('get-page', page)" href="">[[ page ]]</a>
-                                </li>
-                            </template>
-
-                        </template>
-
-                        <template v-if="pagination.num_pages - pagination.page_number > pagination.paginate_by">
-                            <li v-if="pagination.num_pages - pagination.page_number != pagination.paginate_by + 1"  class="disabled page-item"><a class="page-link" href="">...</a></li>
-                            <li class="page-item"><a class="page-link" @click.prevent="$emit('get-page', pagination.num_pages)" href="">[[ pagination.num_pages ]]</a></li>
-                        </template>
-
-                        <li v-if="pagination.next_page_number" class="page-item"><a class="page-link" @click.prevent="$emit('get-page', pagination.next_page_number)" href="">Next</a></li>
-                        <li v-else class="disabled page-item"><a class="page-link" href="">Next</a></li>
-                    </ul>
-                </nav>
-            </div>
-        </pagination>
-
     </div>
+
+    <div class="row ml-3 mt-3">
+
+        <div class="col-lg-3">
+
+            <div id="vue-app-left">
+
+                <add-note inline-template>
+                    <div id="bookmark-sidebar" >
+                        <form>
+                            <div class="form-group">
+                                <label class="col-form-label">Note</label>
+                                <textarea class="form-control" id="note" rows="9" v-model="note"></textarea>
+                            </div>
+                            <button id="btn-add-note" type="button" class="btn btn-primary" @click="onClick">Add</button>
+                        </form>
+                    </div>
+                </add-note>
+
+                <ul class="list-group" id="sort-container-tags">
+                    <tag-list inline-template>
+                        <div>
+                            <draggable v-model="favoriteTags" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
+                                <transition-group type="transition">
+                                    <li v-for="tag in favoriteTags" class="list-group-item" :class="{ active: tag.isActive, draggable: tag.isDraggable, 'bookmark-tag-list-header': tag.isHeader }" :data-id="tag.id" :key="tag.id" v-cloak>
+                                        <template v-if="tag.isHeader">
+                                            [[ tag.name ]]
+                                        </template>
+                                        <template v-else>
+                                            <a href="" @click.prevent="onClick" :data-tag="tag.name">[[ tag.name ]]</a>
+                                        </template>
+                                        <span v-if="tag.count" class="ml-2 badge" :class="{ 'badge-light': tag.isActive, 'badge-primary': !tag.isActive }">[[ tag.count ]]</span>
+                                    </li>
+                                </transition-group>
+                            </draggable>
+                        </div>
+                    </tag-list>
+                </ul>
+
+                <randomize-button inline-template>
+                    <form role="form" action="" method="get">
+                        <div class="btn-group mt-5">
+                            <button class="btn btn-secondary" @click.prevent="onClick" id="btn-random">Randomize</button>
+                        </div>
+
+                        <div class="btn-group mt-5">
+                            <a class="btn btn-secondary" href="{% url 'bookmark_import' %}">Import</a>
+                        </div>
+                    </form>
+                </randomize-button>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-9">
+
+            <div id="vue-app-right">
+
+                <bookmark-list inline-template @paginate="paginate" ref="bookmarkList">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <table>
+                                <tbody is="draggable" v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" :disabled="disableSort">
+                                    <transition-group type="transition">
+                                        <tr v-for="bookmark in bookmarkList" :data-id="bookmark.id" :key="bookmark.id" class="bookmark-list" @click="onClick" v-cloak>
+                                            <td class="bookmark-list-date p-2">
+                                                <span>[[ bookmark.created ]]</span>
+                                            </td>
+                                            <td class="bookmark-list-favicon p-2">
+                                                <span v-html="bookmark.favicon_url"></span>
+                                            </td>
+                                            <td class="bookmark-list-link p-2">
+                                                <a class="one-tag" :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.title) ]]</a>
+                                                <a v-if="bookmark.lastResponseCode != 200" class="form-error ml-3" target="wayback" :href="'https://web.archive.org/web/1000/' + bookmark.url">[[ bookmark.lastResponseCode ]]</a>
+                                                <i v-if="bookmark.note != null && bookmark.note != ''" class="fa fa-clipboard"></i>
+                                                <a v-for="tag in bookmark.tags" v-if="tag != $tagFilter" class="badge badge-info ml-2" @click.prevent="onClick" href="">[[ tag ]]</a>
+                                            </td>
+                                        </tr>
+                                    </transition-group>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </bookmark-list>
+
+                <pagination inline-template :pagination="pagination" @get-page="getPage">
+                    <div class="row" v-if="pagination.num_pages > 1">
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination">
+                                <li v-if="pagination.previous_page_number" class="page-item"><a class="page-link" @click.prevent="$emit('get-page', pagination.previous_page_number)" href="">Previous</a></li>
+                                <li v-else class="disabled page-item"><a class="page-link" href="">Previous</a></li>
+
+                                <template v-if="pagination.page_number - pagination.paginate_by > 1">
+                                    <li class="page-item"><a class="page-link" @click.prevent="$emit('get-page', 1)" href="">1</a></li>
+                                    <li v-if="pagination.page_number != pagination.paginate_by + 2" class="disabled page-item"><a class="page-link" href="">...</a></li>
+                                </template>
+
+                                <template v-for="page in pagination.range">
+
+                                    <template v-if="pagination.page_number == page">
+                                        <li class="disabled page-item">
+                                            <a class="page-link" href="">[[ page ]]</a>
+                                        </li>
+                                    </template>
+                                    <template v-else>
+                                        <li class="page-item">
+                                            <a class="page-link" @click.prevent="$emit('get-page', page)" href="">[[ page ]]</a>
+                                        </li>
+                                    </template>
+
+                                </template>
+
+                                <template v-if="pagination.num_pages - pagination.page_number > pagination.paginate_by">
+                                    <li v-if="pagination.num_pages - pagination.page_number != pagination.paginate_by + 1"  class="disabled page-item"><a class="page-link" href="">...</a></li>
+                                    <li class="page-item"><a class="page-link" @click.prevent="$emit('get-page', pagination.num_pages)" href="">[[ pagination.num_pages ]]</a></li>
+                                </template>
+
+                                <li v-if="pagination.next_page_number" class="page-item"><a class="page-link" @click.prevent="$emit('get-page', pagination.next_page_number)" href="">Next</a></li>
+                                <li v-else class="disabled page-item"><a class="page-link" href="">Next</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </pagination>
+
+            </div>
+
+        </div>
 
 {% endblock %}
 
@@ -189,6 +210,8 @@
 
     <script type="text/javascript">
 
+        var theTagName = null;
+
         Vue.prototype.$tagFilter = null;
         var isFiltered = false;
 
@@ -200,6 +223,180 @@
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
         const EventBus = new Vue();
+
+        const ButtonGroup = {
+            methods: {
+                onClickDelete(evt) {
+
+                    var bookmarkEl = document.querySelector("tr.bookmark-list.selected");
+                    var selectedId = bookmarkEl.dataset.id;
+
+                    var self = this;
+
+                    fetch("{% url 'bookmark_delete' 666 %}".replace(/666$/, selectedId),
+                          {
+                              method: "DELETE",
+                              headers: {
+                                  "X-CSRFToken": "{{ csrf_token }}"
+                              }
+                          }
+                    ).then(response => {
+                        return response;
+                    }).then(() => {
+
+                        this.isDisabledEdit = true;
+                        this.isDisabledDelete = true;
+
+                        if (theTagName) {
+                            document.getElementById("bookmark-sidebar").classList.remove("show");
+                        }
+
+                        self.$emit("get-page", 1);
+
+                    })
+                },
+                onClickEdit(evt) {
+                    var selectedId = document.querySelector("tr.bookmark-list.selected").dataset.id;
+                    window.location="{% url 'bookmark_edit' 666 %}".replace(/666$/, selectedId);
+                },
+                addToFavorites(evt) {
+                    const tagName = this.$parent.$refs.search.$refs.suggestComponent.text
+                    document.getElementById("add-to-remote-from-favorite-tagname").value = tagName;
+                    const form = document.querySelector("#search-form");
+                    form.method = "post";
+                    form.action = "{% url 'add_favorite_tag' %}";
+                    form.submit();
+                },
+                removeFromFavorites(evt) {
+                    document.getElementById("add-to-remote-from-favorite-tagname").value = theTagName;
+                    const form = document.querySelector("#search-form");
+                    form.method = "post";
+                    form.action = "{% url 'remove_favorite_tag' %}";
+                    form.submit();
+                }
+
+            },
+            data() {
+                return {
+                    isDisabledEdit: true,
+                    isDisabledDelete: true,
+                    showRemoveFavorite: false,
+                    showAddFavorite: false
+                }
+            },
+            mounted() {
+
+                EventBus.$on("toggleDisabledEdit", payload => {
+                    if (payload == "disable") {
+                        this.isDisabledEdit = true;
+                    } else if (payload == "enable") {
+                        this.isDisabledEdit = false;
+                    }
+                });
+
+                EventBus.$on("toggleDisabledDelete", payload => {
+                    if (payload == "disable") {
+                        this.isDisabledDelete = true;
+                    } else if (payload == "enable") {
+                        this.isDisabledDelete = false;
+                    }
+                });
+
+                EventBus.$on("show-add-favorite-button", value => {
+                    this.showAddFavorite = value;
+                });
+
+                EventBus.$on("show-remove-favorite-button", value => {
+                    this.showRemoveFavorite = value;
+                });
+
+                EventBus.$on("selected-favorite-tag", value => {
+                    this.showRemoveFavorite = value;
+                });
+
+            }
+        };
+
+        const Search = {
+            data() {
+                return {
+                    inputName: "search",
+                    query: "",
+                    tags: [],
+                    autoCompleteStyle: {
+                        vueSimpleSuggest: "position-relative",
+                        inputWrapper: "search-box",
+                        defaultInput: "form-control",
+                        suggestions: "position-absolute list-group z-1000",
+                        suggestItem: "list-group-item"
+                    }
+                }
+            },
+            methods: {
+                tagSearch(query) {
+                    return fetch("{% url 'get_tags_used_by_bookmarks' %}?query=" + query)
+                        .then(response => {
+                            return response.json();
+                        })
+                        .then(data => data)
+                },
+                onSelect(tag) {
+                    this.$emit("search-tag", tag.value);
+                    EventBus.$emit("select-favorite-tag", tag.value);
+                    disableTermSearch = false;
+                },
+                onHideList() {
+                    disableTermSearch = false;
+                },
+                onHover() {
+                    disableTermSearch = true;
+                },
+                onEnter(evt) {
+
+                    if (disableTermSearch) {
+                        return;
+                    }
+
+                    searchTerm = evt.srcElement.value;
+
+                    if (searchTerm) {
+                        theTagName = searchTerm;
+                        this.$emit("search-term", searchTerm);
+                        EventBus.$emit("select-favorite-tag", null);
+                        EventBus.$emit("show-add-favorite-button", false);
+                        EventBus.$emit("show-remove-favorite-button", false);
+                    } else {
+                        // If the search box is empty, refresh the list with no filters
+                        theTagName = "";
+                        isFiltered = false;
+                        this.$emit("get-page", 1);
+                        EventBus.$emit("select-favorite-tag", "Untagged");
+                        EventBus.$emit("show-add-favorite-button", false);
+                        EventBus.$emit("show-remove-favorite-button", false);
+                    }
+
+                }
+            }
+        };
+
+        new Vue({
+            el: "#vue-app-top",
+            components: {
+                ButtonGroup,
+                Search
+            },
+            methods: {
+                getPage(pageNumber) {
+                    EventBus.$emit("get-page", pageNumber);
+                },
+                searchTerm(searchTerm) {
+                    EventBus.$emit("search-term", searchTerm);
+                },
+                searchTag(searchTag) {
+                    EventBus.$emit("search-tag", searchTag);
+                }
+            }
+        });
 
         const BookmarkList = {
             data() {
@@ -216,6 +413,7 @@
                     if (evt.srcElement.classList.contains("badge")) {
                         const tagName = evt.srcElement.innerHTML;
                         EventBus.$emit("search-tag", tagName);
+                        EventBus.$emit("select-favorite-tag", tag.value);
                     } else if (element.classList.contains("selected")) {
 
                         if (this.$tagFilter) {
@@ -278,11 +476,23 @@
                         body: data,
                     }).then(response => response.json())
                       .then(data => {
-                          console.log("Success:", data);
+                          if (data.status != "OK") {
+                              this.$bvToast.toast(data.message, {
+                                  title: 'Error',
+                                  autoHideDelay: 5000,
+                              })
+                              console.log("Error: ", data.message);
+                          } else {
+                              console.log("Success!:", data);
+                          }
                       })
                       .catch((error) => {
+                          this.$bvToast.toast(error, {
+                              title: "Error",
+                              noAutoHide: true,
+                              variant: "danger"
+                          })
                           console.error("Error:", error);
-                          $.smkAlert({text: "Error reordering notes: " + error, type: "error", position:"top-right"});
                       });
                 },
                 unescapeHtml(html) {
@@ -304,7 +514,6 @@
                         url = "{% url 'get_bookmarks_by_tag' 666 %}".replace(/666$/, searchTag);
                         isFiltered = true;
                         this.disableSort = false;
-                        this.$tagFilter = searchTag;
                     } else if (randomize == true) {
                         isFiltered = true;
                         url = "{% url 'get_bookmarks_by_random' %}";
@@ -315,6 +524,13 @@
                             return;
                         }
 
+                        // A null pageNumber is passed in from the setInterval timer, so in that
+                        // case use the current page number. We can't pass in the current page
+                        // number directly from setInterval, since that gets set at page load
+                        // time and can later change if the page number changes.
+                        if (pageNumber == null) {
+                            pageNumber = this.$parent.pageNumber;
+                        }
                         url = "{% url 'get_bookmarks_by_page' 666 %}".replace(/666$/, pageNumber);
                     }
 
@@ -331,6 +547,11 @@
                                      lastDate = bookmark.created;
                                  }
                                  bookmarks.push(bookmark);
+                             }
+                             if (searchTag != null) {
+                                 // Only update the tagFilter here, *after* we have a new set of
+                                 // updated bookmarks that's appropriate for this tagFilter
+                                 self.$tagFilter = searchTag;
                              }
                              self.bookmarkList = bookmarks;
 
@@ -358,7 +579,7 @@
 
                 this.getBookmarkList({pageNumber: 1});
 
-                window.setInterval(this.getBookmarkList, 60000, {pageNumber: 1});
+                window.setInterval(this.getBookmarkList, 60000, {pageNumber: null});
 
             }
         };
@@ -368,6 +589,48 @@
                 pagination: ""
             }
         }
+
+        new Vue({
+            el: "#vue-app-right",
+            components: {
+                BookmarkList,
+                Pagination,
+            },
+            data() {
+                return {
+                    pagination: "",
+                    pageNumber: 1
+                }
+            },
+            methods: {
+                paginate(payload) {
+                    this.pagination = payload;
+                },
+                getPage(pageNumber) {
+                    this.pageNumber = pageNumber;
+                    this.$refs.bookmarkList.getBookmarkList({pageNumber: pageNumber});
+                },
+            },
+            mounted() {
+
+                EventBus.$on("search-tag", tagName => {
+                    this.$refs.bookmarkList.getBookmarkList({searchTag: tagName});
+                });
+
+                EventBus.$on("search-term", searchTerm => {
+                    this.$refs.bookmarkList.getBookmarkList({searchTerm: searchTerm});
+                });
+
+                EventBus.$on("get-page", pageNumber => {
+                    this.$refs.bookmarkList.getBookmarkList({pageNumber: pageNumber});
+                });
+
+                EventBus.$on("randomize", () => {
+                    this.$refs.bookmarkList.getBookmarkList({randomize: true});
+                });
+
+            }
+        });
 
         const AddNote = {
             data() {
@@ -382,7 +645,7 @@
                     var selectedId = document.querySelector("tr.bookmark-list.selected").dataset.id;
 
                     const data = new URLSearchParams();
-                    data.append("tag", "{{ tag_filter }}");
+                    data.append("tag", theTagName);
                     data.append("link_id", selectedId);
                     data.append("note", note);
 
@@ -417,215 +680,31 @@
             }
         }
 
-        const Search = {
-            template: `
-                <div>
-                    <vue-simple-suggest ref="suggestComponent"
-                        v-model="query"
-                        display-attribute="value"
-                        value-attribute="value"
-                        :list="tagSearch"
-                        :filter-by-query=true
-                        :debounce=200
-                        :name="inputName"
-                        placeholder="Search"
-                        autofocus
-                        autocomplete="off"
-                        id="searchInput"
-                        @select="onSelect"
-                        @keydown.native.enter="onEnter"
-                        :styles="autoCompleteStyle"
-                        @hide-list="onHideList"
-                        @hover="onHover"
-                        >
-                    </vue-simple-suggest>
-                </div>
-            `,
-            data() {
-                return {
-                    inputName: "search",
-                    query: "",
-                    tags: [],
-                    autoCompleteStyle: {
-                        vueSimpleSuggest: "position-relative",
-                        inputWrapper: "search-box",
-                        defaultInput: "form-control",
-                        suggestions: "position-absolute list-group z-1000",
-                        suggestItem: "list-group-item"
-                    }
-                }
-            },
-            methods: {
-                tagSearch(query) {
-                    return fetch("{% url 'get_tags_used_by_bookmarks' %}?query=" + query)
-                        .then(response => {
-                            return response.json();
-                        })
-                        .then(data => data)
-                },
-                onSelect(tag) {
-                    this.$emit("search-tag", tag.value);
-                    disableTermSearch = false;
-                },
-                onHideList() {
-                    disableTermSearch = false;
-                },
-                onHover() {
-                    disableTermSearch = true;
-                },
-                onEnter(evt) {
-
-                    if (disableTermSearch) {
-                        return;
-                    }
-                    searchTerm = evt.srcElement.value;
-
-                    if (searchTerm) {
-                        this.$emit("search-term", searchTerm);
-                    } else {
-                        // If the search box is empty, refresh the list with no filters
-                        isFiltered = false;
-                        this.$emit("get-page", 1);
-                    }
-
-                }
-            }
-        };
-
-        const ButtonGroup = {
-            template: `
-                <div class="btn-group">
-                    <a class="btn btn-secondary" id="btn-add" href="{% url 'bookmark_add' %}">Add</a>
-                    <input type="button" class="btn btn-secondary" id="btn-edit" value="Edit" :disabled="isDisabledEdit" @click="onClickEdit" />
-                    <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="isDisabledDelete" @click="onClickDelete" />
-                </div>
-            `,
-            methods: {
-                onClickDelete(evt) {
-
-                    var bookmarkEl = document.querySelector("tr.bookmark-list.selected");
-                    var selectedId = bookmarkEl.dataset.id;
-
-                    var self = this;
-
-                    fetch("{% url 'bookmark_delete' 666 %}".replace(/666$/, selectedId),
-                          {
-                              method: "DELETE",
-                              headers: {
-                                  "X-CSRFToken": "{{ csrf_token }}"
-                              }
-                          }
-                    ).then(response => {
-                        return response;
-                    }).then(() => {
-
-                        this.isDisabledEdit = true;
-                        this.isDisabledDelete = true;
-
-                        {% if tag_filter %}
-                        document.getElementById("bookmark-sidebar").classList.remove("show");
-                        {% endif %}
-
-                        self.$emit("get-page", 1);
-
-                    })
-                },
-                onClickEdit(evt) {
-
-                    var selectedId = document.querySelector("tr.bookmark-list.selected").dataset.id;
-                    window.location="{% url 'bookmark_edit' 666 %}".replace(/666$/, selectedId);
-
-                },
-            },
-            data() {
-                return {
-                    isDisabledEdit: true,
-                    isDisabledDelete: true
-                }
-            },
-            mounted() {
-
-                EventBus.$on("toggleDisabledEdit", payload => {
-                    if (payload == "disable") {
-                        this.isDisabledEdit = true;
-                    } else if (payload == "enable") {
-                        this.isDisabledEdit = false;
-                    }
-                });
-
-                EventBus.$on("toggleDisabledDelete", payload => {
-                    if (payload == "disable") {
-                        this.isDisabledDelete = true;
-                    } else if (payload == "enable") {
-                        this.isDisabledDelete = false;
-                    }
-                });
-
-            }
-        };
-
-        new Vue({
-            el: "#vue-app-right",
-            components: {
-                BookmarkList,
-                ButtonGroup,
-                Pagination,
-                Search
-            },
-            data() {
-                return {
-                    pagination: ""
-                }
-            },
-            methods: {
-                paginate(payload) {
-                    this.pagination = payload;
-                },
-                getPage(pageNumber) {
-                    this.$refs.bookmarkList.getBookmarkList({pageNumber: pageNumber});
-                },
-                searchTerm(searchTerm) {
-                    this.$refs.bookmarkList.getBookmarkList({searchTerm: searchTerm});
-                },
-                searchTag(searchTag) {
-                    this.$refs.bookmarkList.getBookmarkList({searchTag: searchTag});
-                }
-            },
-            mounted() {
-
-                EventBus.$on("search-tag", tagName => {
-                    this.$refs.bookmarkList.getBookmarkList({searchTag: tagName});
-                });
-
-                EventBus.$on("get-page", pageNumber => {
-                    this.$refs.bookmarkList.getBookmarkList({pageNumber: pageNumber});
-                });
-
-                EventBus.$on("randomize", () => {
-                    this.$refs.bookmarkList.getBookmarkList({randomize: true});
-                });
-
-            }
-        });
-
         const TagList = {
             data() {
                 return {
                     favoriteTags: [
                         {
                             id: -1,
+                            name: "Favorite Tags",
+                            isHeader: true,
+                            isActive: false,
+                            isDraggable: false,
+                        },
+                        {
+                            id: -2,
                             name: "Untagged",
-                            className: "active",
+                            isActive: true,
+                            isDraggable: false,
                             count: {{ tag_counts|dict_get:"Untagged" }},
-                            badgeClassName: "badge-light"
                         },
                         {% for tag in favorite_tags %}
                         {
                             id: {{ tag.id }},
                             name: "{{ tag.name }}",
-                            className: "{% if tag.name == tag_filter %}active{% else %}{% endif %}",
+                            isActive: false,
+                            isDraggable: true,
                             count: {{ tag_counts|dict_get:tag.name }},
-                            badgeClassName: "{% if tag.name == tag_filter %}badge-light{% else %}badge-primary{% endif %}",
                         },
                         {% endfor %}
                     ],
@@ -639,19 +718,23 @@
 
                     for (tag of this.favoriteTags) {
                         if (tag.name == tagName) {
-                            tag.className = "list-group-item active";
-                            tag.badgeClassName = "badge-light";
+                            tag.isActive = true;
                         } else {
-                            tag.className = "list-group-item";
-                            tag.badgeClassName = "badge-primary";
+                            tag.isActive = false;
                         }
                     }
 
                     if (tagName == "Untagged") {
+                        theTagName = "";
                         isFiltered = false;
                         EventBus.$emit("get-page", 1);
+                        EventBus.$emit("show-add-favorite-button", false);
+                        EventBus.$emit("show-remove-favorite-button", false);
                     } else {
+                        theTagName = tagName;
                         EventBus.$emit("search-tag", tagName);
+                        EventBus.$emit("show-add-favorite-button", false);
+                        EventBus.$emit("show-remove-favorite-button", true);
                     }
                 },
                 getClassName(tagName) {
@@ -668,7 +751,8 @@
 
                     // The backend expects the ordering to begin
                     // with 1, not 0, so add 1.
-                    newPosition = evt.moved.newIndex + 1;
+                    /* newPosition = evt.moved.newIndex + 1; */
+                    newPosition = evt.moved.newIndex - 1;
 
                     const data = new URLSearchParams();
                     data.append("tag_id", tagId);
@@ -682,19 +766,62 @@
                         body: data,
                     }).then(response => response.json())
                       .then(data => {
-                          console.log("Success:", data);
+                          if (data.status != "OK") {
+                              this.$bvToast.toast(data.message, {
+                                  title: "Error",
+                                  noAutoHide: true,
+                                  variant: "danger"
+                              })
+                              console.log("Error: ", data.message);
+                          } else {
+                              console.log("Success: ", data);
+                          }
                       })
                       .catch((error) => {
+                          this.$bvToast.toast(error, {
+                              title: "Error",
+                              noAutoHide: true,
+                              variant: "danger"
+                          })
                           console.error("Error:", error);
-                          $.smkAlert({text: "Error reordering notes: " + error, type: "error", position:"top-right"});
                       });
                 }
             },
+            mounted() {
+
+                EventBus.$on("search-tag", tagName => {
+
+                    if (!this.favoriteTags.find(element => element.name == tagName)) {
+                        EventBus.$emit("show-remove-favorite-button", false);
+                        EventBus.$emit("show-add-favorite-button", true);
+                    } else {
+                        EventBus.$emit("show-remove-favorite-button", true);
+                        EventBus.$emit("show-add-favorite-button", false);
+                    }
+
+                });
+
+                EventBus.$on("select-favorite-tag", tagName => {
+
+                    for (tag of this.favoriteTags) {
+                        if (tag.name == tagName) {
+                            tag.isActive = true;
+                        } else {
+                            tag.isActive = false;
+                        }
+                    }
+
+                });
+
+            }
         };
 
         const RandomizeButton = {
             methods: {
                 onClick(evt) {
+                    EventBus.$emit("select-favorite-tag", null);
+                    EventBus.$emit("show-add-favorite-button", false);
+                    EventBus.$emit("show-remove-favorite-button", false);
                     EventBus.$emit("randomize");
                 }
             }

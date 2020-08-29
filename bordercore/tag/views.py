@@ -38,24 +38,23 @@ def tag_search(request):
 @login_required
 def add_favorite_tag(request):
 
-    tag = request.POST['tag']
+    tag = request.POST["tag"]
 
     tag_object = Tag.objects.get(name=tag)
     c = SortOrder(user_profile=request.user.userprofile, tag=tag_object)
     c.save()
 
-    return redirect('bookmark_tag', tag_filter=tag)
+    return redirect("bookmark_overview")
 
 
 @login_required
 def remove_favorite_tag(request):
 
-    tag = request.POST['tag']
+    tag = request.POST["tag"]
 
     tag_object = Tag.objects.get(name=tag)
 
     old_position = SortOrder.objects.get(user_profile=request.user.userprofile, tag=tag_object)
-
     old_position.delete()
 
-    return redirect('bookmark_overview')
+    return redirect("bookmark_overview")
