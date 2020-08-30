@@ -47,7 +47,7 @@ def homepage(request):
     tasks = Todo.objects.filter(user=request.user, priority=Todo.get_priority_value("High")).prefetch_related("tags")
 
     # Get some recently played music
-    music = Listen.objects.filter(user=request.user).select_related().distinct().order_by('-created')[:3]
+    music = Listen.objects.filter(user=request.user).select_related("song").distinct().order_by('-created')[:3]
 
     # Choose a random image
     random_image_info = None
