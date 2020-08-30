@@ -266,14 +266,18 @@
                         },
                         body: formBody,
                     }).then(response => response.json())
-                                                .then(data => {
-                        console.log("Success:", data);
-                        evt.preventDefault();
-                    })
-                               .catch((error) => {
-                        console.error("Error:", error);
-                        $.smkAlert({text: "Error reordering notes: " + error, type: "error", position:"top-right"});
-                    });
+                      .then(data => {
+                          console.log("Success:", data);
+                          evt.preventDefault();
+                      })
+                      .catch((error) => {
+                          this.$bvToast.toast(error, {
+                              title: "Error",
+                              noAutoHide: true,
+                              variant: "danger"
+                          })
+                          console.error("Error:", error);
+                      });
                 }
             },
             mounted() {

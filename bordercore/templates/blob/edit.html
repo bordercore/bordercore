@@ -248,8 +248,12 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                   console.log("Success:", data);
               })
               .catch((error) => {
+                  this.$bvToast.toast(error, {
+                      title: "Error",
+                      noAutoHide: true,
+                      variant: "danger"
+                  })
                   console.error("Error:", error);
-                  $.smkAlert({text: "Error during collection mutation: " + error, type: "error", position:"top-right"});
               });
 
         }

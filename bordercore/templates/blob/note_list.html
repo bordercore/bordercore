@@ -195,9 +195,13 @@
                                                 .then(data => {
                         console.log("Success:", data);
                     })
-                               .catch((error) => {
+                      .catch((error) => {
+                          this.$bvToast.toast(error, {
+                              title: "Error",
+                              noAutoHide: true,
+                              variant: "danger"
+                          })
                         console.error("Error:", error);
-                        $.smkAlert({text: "Error reordering notes: " + error, type: "error", position:"top-right"});
                     });
                 }
             }
