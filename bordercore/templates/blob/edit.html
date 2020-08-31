@@ -34,7 +34,7 @@
 
     <div class="form-group">
         <div class="row">
-            <div class="col-lg-7">
+            <div class="col-lg-9">
                 <add-to-collection-dropdown></add-to-collection-dropdown>
             </div>
         </div>
@@ -43,7 +43,7 @@
 {% if object.get_collection_info %}
     <div class="form-group">
         <div class="row">
-            <div class="col-lg-7">
+            <div class="col-lg-9">
                 <remove-from-collection-dropdown></remove-from-collection-dropdown>
             </div>
         </div>
@@ -230,34 +230,6 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
             return capture2 ? capture1 + capture2.toUpperCase() : match.toUpperCase();
         }
 
-        function mutateCollection(collection_id, mutation_type) {
-
-            const data = new URLSearchParams();
-            data.append("blob_id", {{ object.id }});
-            data.append("collection_id", collection_id);
-            data.append("mutation", mutation_type);
-
-            fetch("{% url "collection_mutate" %}", {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": "{{ csrf_token }}"
-                },
-                body: data,
-            }).then(response => response.json())
-              .then(data => {
-                  console.log("Success:", data);
-              })
-              .catch((error) => {
-                  this.$bvToast.toast(error, {
-                      title: "Error",
-                      noAutoHide: true,
-                      variant: "danger"
-                  })
-                  console.error("Error:", error);
-              });
-
-        }
-
         var isExpanded = false;
 
         var metadata_count = {{ metadata|length }};
@@ -285,7 +257,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
             },
             methods: {
                 onChange(evt) {
-                    mutateCollection(this.$el.value, "add");
+                    this.$parent.mutateCollection(this.$el.value, "add");
                 }
             }
         }
@@ -312,7 +284,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
             },
             methods: {
                 onChange(evt) {
-                    mutateCollection(this.$el.value, "delete");
+                    this.$parent.mutateCollection(this.$el.value, "delete");
                 }
             }
         }
@@ -421,7 +393,6 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                             </span>
                         </vuejs-datepicker>
                     </div>
-                    <div class="col-lg-3 align-self-center form-error" id="date-response"></div>
                 </div>
             `,
             data() {
@@ -441,26 +412,24 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                     return dateFns.format(new Date(date), "YYYY-MM-DD")
                 },
                 handlePaste(evt) {
-                    dateResponseEl = document.getElementById("date-response");
-                    dateResponseEl.innerHTML = "";
 
                     var clipText = encodeURIComponent(evt.clipboardData.getData("Text").trim());
 
-                    fetch("{% url "parse_date" 666 %}".replace(/666$/, clipText))
-                        .then(response => {
-                            var payLoad = response.json();
-                            if (payLoad.output_date == "") {
-                                var errorString = "Invalid date format";
-                                console.error(errorString + " :" + json.error);
-                                dateResponseEl.innerHTML = errorString;
-                                throw Error(errorString);
-                            } else {
-                                return payLoad;
-                            }
-                        }).then(data => {
-                            console.log("Success:", data);
-                            this.date = new Date(data.output_date);
-                        })
+                    axios.get("{% url "parse_date" 666 %}".replace(/666$/, clipText))
+                         .then(response => {
+                             var payLoad = response.data;
+                             if (payLoad.output_date == "") {
+                                 var errorString = "Invalid date format";
+                                 console.error(errorString + " :" + payLoad.error);
+                                 this.$bvToast.toast(errorString, {
+                                     title: "Error",
+                                     noAutoHide: true,
+                                     variant: "danger"
+                                 })
+                             } else {
+                                 this.date = new Date(payLoad.output_date);
+                             }
+                         })
                 }
             },
             mounted() {
@@ -527,11 +496,10 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
             },
             methods: {
                 metadataSearch(query) {
-                    return fetch("{% url 'metadata_name_search' %}?query=" + query)
+                    return axios.get("{% url 'metadata_name_search' %}?query=" + query)
                         .then(response => {
-                            return response.json();
+                            return response.data;
                         })
-                        .then(data => data)
                 },
                 select(datum) {
                     document.getElementById("id_value").focus();
@@ -684,15 +652,11 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                     // Set a minimum character count to trigger the ajax call
                     if (this.tag.length < 3) return;
 
-                    return fetch("{% url 'tag_search' %}?query=" + this.tag)
+                    return axios.get("{% url 'tag_search' %}?query=" + this.tag)
                         .then(response => {
-                            return response.json();
-                        })
-                        .then(data => {
-                            this.autocompleteItems = data.map(a => {
+                            this.autocompleteItems = response.data.map(a => {
                                 return { text: a.value };
-                            }
-                            )
+                            })
                         })
                 }
             },
@@ -723,6 +687,37 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                 {% endif %}
                 CleanupFilenameButton,
                 UpperCaseFirstButton
+            },
+            methods: {
+
+                mutateCollection(collection_id, mutation_type) {
+
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("blob_id", {{ object.id }});
+                    bodyFormData.append("collection_id", collection_id);
+                    bodyFormData.append("mutation", mutation_type);
+
+                    axios("{% url "collection_mutate" %}", {
+                        method: "POST",
+                        data: bodyFormData
+                    }).then(response => {
+                        this.$bvToast.toast(`Collection change: ${mutation_type}`, {
+                            title: "Success",
+                            variant: "success"
+                        })
+                        console.log("Success:", response);
+                    })
+                      .catch(error => {
+                          this.$bvToast.toast(String(error), {
+                              title: "Error",
+                              noAutoHide: true,
+                              variant: "danger"
+                          })
+                          console.error("Error:", error);
+                      });
+
+                }
+
             }
         });
 

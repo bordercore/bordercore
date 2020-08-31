@@ -129,24 +129,22 @@ The following users are currently subscribed to this feed: <strong>{{ subscriber
 
                     feedUrl = encodeURIComponent(feedUrl).replace(/%/g, "%25")
 
-                    fetch("{% url "check_url" 666 %}".replace(/666$/, feedUrl))
+                    axios.get("{% url "check_url" 666 %}".replace(/666$/, feedUrl))
                                                          .then(response => {
-                                                             return response.json();
-                                                         }).then(data => {
 
-                                                             if (!data || data.status != 200) {
+                                                             if (!response || response.data.status != 200) {
                                                                  classNameAdd = "alert-danger";
-                                                                 msg = "Feed error. Status: " + data.status;
-                                                             } else if (data.entry_count == 0){
+                                                                 msg = "Feed error. Status: " + response.data.status;
+                                                             } else if (response.data.entry_count == 0){
                                                                  classNameAdd = "alert-danger";
                                                                  msg = "Feed error. Found no feed items.";
                                                              } else {
                                                                  classNameAdd = "alert-success";
-                                                                 msg = "Feed OK. Found " + data.entry_count + " feed items.";
+                                                                 msg = "Feed OK. Found " + response.data.entry_count + " feed items.";
                                                              }
 
                                                              const payLoad = {
-                                                                 statusCode: data.status,
+                                                                 statusCode: response.data.status,
                                                                  msg: msg,
                                                                  classNameAdd: classNameAdd
                                                              }

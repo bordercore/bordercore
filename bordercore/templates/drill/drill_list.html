@@ -96,11 +96,10 @@
             },
             methods: {
                 tagSearch(query) {
-                    return fetch("{% url 'drill_tag_search' %}?term=" + query)
-                               .then(response => {
-                        return response.json();
-                    })
-                                       .then(data => data)
+                    return axios.get("{% url 'drill_tag_search' %}?term=" + query)
+                                .then(response => {
+                                    return response.data;
+                                })
                 },
                 select(tag) {
                     window.location='{% url 'study_tag' 666 %}'.replace(/666$/, tag.value);

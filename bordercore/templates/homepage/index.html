@@ -156,18 +156,11 @@
                 }
             },
             mounted() {
-                fetch("{% url 'get_calendar_events' %}")
-                       .then(response => {
-                    if (!response.ok) {
-                        throw Error("Received '" + response.statusText + "' from server");
-                    } else {
-                        return response.json();
-                    }
-                })
-                                       .then(data => {
-                    this.events = data;
+                axios.get("{% url 'get_calendar_events' %}")
+                     .then(response => {
+                    this.events = response.data;
 
-                    if (data.length == 0) {
+                    if (response.data.length == 0) {
                         this.msg = "Your calendar is empty";
                     } else {
                         this.waiting = false;

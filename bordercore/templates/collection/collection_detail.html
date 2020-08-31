@@ -114,20 +114,16 @@
                     // with 1, not 0, so add 1.
                     new_position = evt.moved.newIndex + 1;
 
-                    const data = new URLSearchParams();
-                    data.append("collection_id", {{ collection.id }});
-                    data.append("blob_id", evt.moved.element.id);
-                    data.append("position", new_position);
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("collection_id", {{ collection.id }});
+                    bodyFormData.append("blob_id", evt.moved.element.id);
+                    bodyFormData.append("position", new_position);
 
-                    fetch("{% url "sort_collection" %}", {
+                    axios("{% url "sort_collection" %}", {
                         method: "POST",
-                        headers: {
-                            "X-CSRFToken": "{{ csrf_token }}"
-                        },
-                        body: data,
-                    }).then(response => response.json())
-                      .then(data => {
-                          console.log("Success:", data);
+                        data: bodyFormData
+                    }).then(response => {
+                          console.log("Success:", response.data);
                       })
                       .catch((error) => {
                           this.$bvToast.toast(error, {
@@ -170,12 +166,10 @@
 
                         }
 
-                        fetch("{% url "get_blob" object.id 666 %}".replace(/666/, current_index))
-                            .then(response => {
-                                return response.json();
-                            }).then(data => {
-                                document.getElementById("gallery_image").setAttribute("src", "{{ MEDIA_URL }}" + data.cover_info.url);
-                            })
+                        axios.get("{% url "get_blob" object.id 666 %}".replace(/666/, current_index))
+                             .then(response => {
+                                 document.getElementById("gallery_image").setAttribute("src", "{{ MEDIA_URL }}" + response.data.cover_info.url);
+                             })
                     }
                 });
             }

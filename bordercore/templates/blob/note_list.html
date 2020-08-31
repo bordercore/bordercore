@@ -146,11 +146,10 @@
             },
             methods: {
                 tagSearch(query) {
-                    return fetch("{% url 'tag_search' %}?query=" + query + "&type=note")
-                               .then(response => {
-                        return response.json();
-                    })
-                                       .then(data => data)
+                    return axios.get("{% url 'tag_search' %}?query=" + query + "&type=note")
+                                .then(response => {
+                                    return response.data;
+                                })
                 },
                 select(tag) {
                     window.location='{% url 'notes_list' %}?tagsearch=' + tag.name;
@@ -181,19 +180,15 @@
                     // with 1, not 0, so add 1.
                     new_position = evt.moved.newIndex + 1;
 
-                    const data = new URLSearchParams();
-                    data.append("note_uuid", note_uuid);
-                    data.append("new_position", new_position);
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("note_uuid", note_uuid);
+                    bodyFormData.append("new_position", new_position);
 
-                    fetch("{% url "sort_favorite_notes" %}", {
+                    axios("{% url "sort_favorite_notes" %}", {
                         method: "POST",
-                        headers: {
-                            "X-CSRFToken": "{{ csrf_token }}"
-                        },
-                        body: data,
-                    }).then(response => response.json())
-                                                .then(data => {
-                        console.log("Success:", data);
+                        data: bodyFormData,
+                    }).then(response =>  {
+                        console.log("Success:", response.data);
                     })
                       .catch((error) => {
                           this.$bvToast.toast(error, {

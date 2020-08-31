@@ -193,16 +193,13 @@
                     // Set a minimum character count to trigger the ajax call
                     if (this.tag.length < 3) return;
 
-                    return fetch("{% url 'tag_search' %}?query=" + this.tag)
-                                                                       .then(response => {
-                        return response.json();
-                    })
-                                       .then(data => {
-                        this.autocompleteItems = data.map(a => {
-                            return { text: a.value };
-                        }
+                    return axios.get("{% url 'tag_search' %}?query=" + this.tag)
+                                .then(response => {
+                                    this.autocompleteItems = response.data.map(a => {
+                                        return { text: a.value };
+                                    }
                                                                   )
-                })
+                                })
                 }
             },
             mounted() {
@@ -254,22 +251,17 @@
                         "kb_tag_detail_current_tab": id.replace("tab_", "")
                     }
 
-                    const formBody = Object.keys(data).map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key])).join('&');
+                    const bodyformData = Object.keys(data).map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key])).join('&');
 
                     $("#myTab a#tab_" + data.kb_tag_detail_current_tab).tab("show");
 
-                    fetch("{% url 'store_in_session' %}", {
+                    axios("{% url 'store_in_session' %}", {
                         method: "POST",
-                        headers: {
-                            "X-CSRFToken": "{{ csrf_token }}",
-                            "Content-Type": "application/x-www-form-urlencoded",
-                        },
-                        body: formBody,
-                    }).then(response => response.json())
-                      .then(data => {
-                          console.log("Success:", data);
-                          evt.preventDefault();
-                      })
+                        data: bodyformData
+                    }).then(response => {
+                        console.log("Success:", response.data);
+                        evt.preventDefault();
+                    })
                       .catch((error) => {
                           this.$bvToast.toast(error, {
                               title: "Error",

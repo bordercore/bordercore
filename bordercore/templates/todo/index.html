@@ -82,35 +82,30 @@
                     this.isDisabledEdit = true;
                     this.isDisabledDelete = true;
 
-                    fetch("{% url 'Todo-list' %}" + selectedId,
-                          {
-                              method: "DELETE",
-                              headers: {
-                                  "X-CSRFToken": "{{ csrf_token }}"
-                              }
-                          }
-                    ).then(response => {
-                        return response;
-                    }).then(() => {
+                    axios.delete("{% url 'Todo-list' %}" + selectedId)
+                         .then((response) => {
+                             var element = document.getElementById("todo_feedback");
+                             element.classList.remove("d-none");
+                             element.innerHTML = "Task Deleted.";
 
-                        var element = document.getElementById("todo_feedback");
-                        element.classList.remove("d-none");
-                        element.innerHTML = "Task Deleted.";
+                             table.row(".selected").remove();
+                             table.draw();
 
-                        table.row(".selected").remove();
-                        table.draw();
+                             this.isDisabledEdit = true;
+                             this.isDisabledDelete = true;
 
-                        this.isDisabledEdit = true;
-                        this.isDisabledDelete = true;
+                             // Now that we've deleted a row, re-order the "sort_order" column
+                             //  to eliminate the new gap, so that rows range from 1 to <table size>
+                             sort_order = 1;
+                             table.rows().every( function ( index ) {
+                                 table.cell(index,1).data(sort_order++).draw();
+                             });
 
-                        // Now that we've deleted a row, re-order the "sort_order" column
-                        //  to eliminate the new gap, so that rows range from 1 to <table size>
-                        sort_order = 1;
-                        table.rows().every( function ( index ) {
-                            table.cell(index,1).data(sort_order++).draw();
-                        });
+                             console.log("Success");
+                         }, (error) => {
+                             console.log(error);
+                         });
 
-                    })
                 },
                 onClickEdit(evt) {
 
@@ -220,21 +215,20 @@
 
                 if (new_position != null) {
 
-                    const data = new URLSearchParams();
-                    data.append("tag", "{{ tagsearch }}");
-                    data.append("todo_uuid", uuid);
-                    data.append("position", new_position);
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("tag", "{{ tagsearch }}");
+                    bodyFormData.append("todo_uuid", uuid);
+                    bodyFormData.append("position", new_position);
 
-                    fetch("{% url 'sort_todo' %}", {
+                    axios("{% url 'sort_todo' %}", {
                         method: "POST",
-                        headers: {
-                            "X-CSRFToken": "{{ csrf_token }}"
-                        },
-                        body: data,
-                    }
-                    ).then(data => {
-                        console.log("Success");
-                    });
+                        data: bodyFormData,
+                    })
+                        .then((response) => {
+                            console.log("Success");
+                        }, (error) => {
+                            console.log(error);
+                        });
 
                 }
             }).on( 'order.dt', function ( e, settings, details ) {

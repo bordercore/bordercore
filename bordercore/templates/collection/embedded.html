@@ -24,7 +24,14 @@
 <script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
 
+<script src="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
 <script type="text/javascript">
+
+    axios.defaults.xsrfCookieName = "csrftoken"
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
 
     Vue.mixin({ delimiters: ["[[", "]]"] });
 
@@ -66,28 +73,24 @@
                 // with 1, not 0, so add 1.
                 new_position = evt.moved.newIndex + 1;
 
-                const data = new URLSearchParams();
-                data.append("collection_id", {{ collection.id }});
-                data.append("blob_id", evt.moved.element.id);
-                data.append("position", new_position);
+                const bodyFormData = new URLSearchParams();
+                bodyFormData.append("collection_id", {{ collection.id }});
+                bodyFormData.append("blob_id", evt.moved.element.id);
+                bodyFormData.append("position", new_position);
 
-                fetch("{% url "sort_collection" %}", {
+                axios("{% url "sort_collection" %}", {
                     method: "POST",
-                    headers: {
-                        "X-CSRFToken": "{{ csrf_token }}"
-                    },
-                    body: data,
-                }).then(response => response.json())
-                  .then(data => {
-                      console.log("Success:", data);
-                  })
+                    data: bodyFormData
+                }).then(response => {
+                    console.log("Success:", response.data);
+                })
                   .catch((error) => {
-                      this.$bvToast.toast(error, {
+                      this.$bvToast.toast(String(error), {
                           title: "Error",
                           noAutoHide: true,
                           variant: "danger"
                       })
-                      console.error("Error:", error);
+                      console.error(error);
                   });
             }
         }

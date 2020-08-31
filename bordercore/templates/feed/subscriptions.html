@@ -90,20 +90,16 @@
                         // with 1, not 0, so add 1.
                         newPosition = evt.added.newIndex + 1;
 
-                        const data = new URLSearchParams();
-                        data.append("feed_id", feedId);
-                        data.append("position", newPosition);
+                        const bodyFormData = new URLSearchParams();
+                        bodyFormData.append("feed_id", feedId);
+                        bodyFormData.append("position", newPosition);
 
-                        fetch("{% url "feed_subscribe" %}", {
+                        axios("{% url "feed_subscribe" %}", {
                             method: "POST",
-                            headers: {
-                                "X-CSRFToken": "{{ csrf_token }}"
-                            },
-                            body: data,
-                        }).then(response => response.json())
-                          .then(data => {
-                              console.log("Success:", data);
-                          })
+                            data: bodyFormData
+                        }).then(data => {
+                            console.log("Success:", data);
+                        })
 
                     } else if (evt.moved) {
 
@@ -113,20 +109,16 @@
                         // with 1, not 0, so add 1.
                         newPosition = evt.moved.newIndex + 1;
 
-                        const data = new URLSearchParams();
-                        data.append("feed_id", feedId);
-                        data.append("position", newPosition);
+                        const bodyFormData = new URLSearchParams();
+                        bodyFormData.append("feed_id", feedId);
+                        bodyFormData.append("position", newPosition);
 
-                        fetch("{% url "sort_feed" %}", {
+                        axios("{% url "sort_feed" %}", {
                             method: "POST",
-                            headers: {
-                                "X-CSRFToken": "{{ csrf_token }}"
-                            },
-                            body: data,
-                        }).then(response => response.json())
-                          .then(data => {
-                              console.log("Success:", data);
-                          })
+                            data: bodyFormData
+                        }).then(data => {
+                            console.log("Success:", data);
+                        })
 
                     }
 
@@ -156,19 +148,15 @@
 
                         const feedId = evt.added.element.id;
 
-                        const data = new URLSearchParams();
-                        data.append("feed_id", feedId);
+                        const bodyFormData = new URLSearchParams();
+                        bodyFormData.append("feed_id", feedId);
 
-                        fetch("{% url "feed_unsubscribe" %}", {
+                        axios("{% url "feed_unsubscribe" %}", {
                             method: "POST",
-                            headers: {
-                                "X-CSRFToken": "{{ csrf_token }}"
-                            },
-                            body: data,
-                        }).then(response => response.json())
-                          .then(data => {
-                              console.log("Success:", data);
-                          })
+                            data: bodyFormData
+                        }).then(response => {
+                            console.log("Success:", response);
+                        })
 
                     }
 

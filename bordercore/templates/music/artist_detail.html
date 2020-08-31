@@ -161,17 +161,11 @@
 
                     var songId = table.cell(".selected", 6).data();
 
-                    fetch("{% url 'get_song_info' 666 %}".replace(/666$/, songId))
-                                      .then(response => {
-                        if (!response.ok) {
-                            throw Error("Received '" + response.statusText + "' from server");
-                        } else {
-                            return response.json();
-                        }
-                    }).then(data => {
-                        $("#player").get(0).src = data.url;
-                        $("#player").get(0).play()
-                    })
+                    axios.get("{% url 'get_song_info' 666 %}".replace(/666$/, songId))
+                         .then(response => {
+                             $("#player").get(0).src = response.data.url;
+                             $("#player").get(0).play()
+                         })
                 }
             }
         });

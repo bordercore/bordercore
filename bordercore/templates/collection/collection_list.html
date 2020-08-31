@@ -144,26 +144,28 @@
 
                     var selectedId = table.cell(".selected", 5).data();
 
-                    fetch("{% url 'collection_get_info' %}?id=" + selectedId + "&query_type=id"
-                    )
-                        .then(response => {
-                            if (!response.ok) {
-                                throw Error("Received '" + response.statusText + "' from server");
-                            } else {
-                                return response.json();
-                            }
-                        }).then(data => {
-                            nameEl = document.getElementById("id_name");
-                            nameEl.value = data.name;
-                            document.getElementById("id_description").value = data.description;
-                            EventBus.$emit("addTags", data.tags);
-                            document.getElementById("action-type").innerHTML = "Edit";
-                            document.getElementById("btn-action").value = "Edit";
-                            document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection_edit' 666 %}".replace(/666$/, selectedId));
+                    axios.get("{% url 'collection_get_info' %}?id=" + selectedId + "&query_type=id")
+                         .then(response => {
+                             if (!response.data.id) {
+                                 const error = `Received ${response.data} from server`;
+                                 this.$bvToast.toast(error, {
+                                     title: "Error",
+                                     noAutoHide: true,
+                                     variant: "danger"
+                                 })
+                             } else {
+                                 nameEl = document.getElementById("id_name");
+                                 nameEl.value = response.data.name;
+                                 document.getElementById("id_description").value = response.data.description;
+                                 EventBus.$emit("addTags", response.data.tags);
+                                 document.getElementById("action-type").innerHTML = "Edit";
+                                 document.getElementById("btn-action").value = "Edit";
+                                 document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection_edit' 666 %}".replace(/666$/, selectedId));
 
-                            $("#modalAdd").modal("show");
+                                 $("#modalAdd").modal("show");
+                             }
 
-                        })
+                         })
 
                 }
             },
@@ -224,16 +226,13 @@
                     // Set a minimum character count to trigger the ajax call
                     if (this.tag.length < 3) return;
 
-                    return fetch("{% url 'tag_search' %}?query=" + this.tag)
-                        .then(response => {
-                            return response.json();
-                        })
-                        .then(data => {
-                            this.autocompleteItems = data.map(a => {
-                                return { text: a.value };
-                            }
-                            )
-                        })
+                    return axios.get("{% url 'tag_search' %}?query=" + this.tag)
+                                .then(data => {
+                                    this.autocompleteItems = response.data.map(a => {
+                                        return { text: a.value };
+                                    }
+                                    )
+                                })
                 }
             },
             mounted() {

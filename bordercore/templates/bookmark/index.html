@@ -233,27 +233,19 @@
 
                     var self = this;
 
-                    fetch("{% url 'bookmark_delete' 666 %}".replace(/666$/, selectedId),
-                          {
-                              method: "DELETE",
-                              headers: {
-                                  "X-CSRFToken": "{{ csrf_token }}"
-                              }
-                          }
-                    ).then(response => {
-                        return response;
-                    }).then(() => {
+                    axios.delete("{% url 'bookmark_delete' 666 %}".replace(/666$/, selectedId))
+                         .then(() => {
 
-                        this.isDisabledEdit = true;
-                        this.isDisabledDelete = true;
+                             this.isDisabledEdit = true;
+                             this.isDisabledDelete = true;
 
-                        if (theTagName) {
-                            document.getElementById("bookmark-sidebar").classList.remove("show");
-                        }
+                             if (theTagName) {
+                                 document.getElementById("bookmark-sidebar").classList.remove("show");
+                             }
 
-                        self.$emit("get-page", 1);
+                             self.$emit("get-page", 1);
 
-                    })
+                         })
                 },
                 onClickEdit(evt) {
                     var selectedId = document.querySelector("tr.bookmark-list.selected").dataset.id;
@@ -334,11 +326,10 @@
             },
             methods: {
                 tagSearch(query) {
-                    return fetch("{% url 'get_tags_used_by_bookmarks' %}?query=" + query)
-                        .then(response => {
-                            return response.json();
-                        })
-                        .then(data => data)
+                    return axios.get("{% url 'get_tags_used_by_bookmarks' %}?query=" + query)
+                                .then(response => {
+                                    return response.data;
+                                })
                 },
                 onSelect(tag) {
                     this.$emit("search-tag", tag.value);
@@ -463,29 +454,25 @@
                     // with 1, not 0, so add 1.
                     newPosition = evt.moved.newIndex + 1;
 
-                    const data = new URLSearchParams();
-                    data.append("tag", this.$tagFilter);
-                    data.append("link_id", linkId);
-                    data.append("position", newPosition);
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("tag", this.$tagFilter);
+                    bodyFormData.append("link_id", linkId);
+                    bodyFormData.append("position", newPosition);
 
-                    fetch("{% url "sort_bookmarks" %}", {
+                    axios("{% url "sort_bookmarks" %}", {
                         method: "POST",
-                        headers: {
-                            "X-CSRFToken": "{{ csrf_token }}"
-                        },
-                        body: data,
-                    }).then(response => response.json())
-                      .then(data => {
-                          if (data.status != "OK") {
-                              this.$bvToast.toast(data.message, {
-                                  title: 'Error',
-                                  autoHideDelay: 5000,
-                              })
-                              console.log("Error: ", data.message);
-                          } else {
-                              console.log("Success!:", data);
-                          }
-                      })
+                        data: bodyFormData,
+                    }).then(response => {
+                        if (response.data != "OK") {
+                            this.$bvToast.toast("Sort error", {
+                                title: 'Error',
+                                autoHideDelay: 5000,
+                            })
+                            console.log("Sort error");
+                        } else {
+                            console.log("Success");
+                        }
+                    })
                       .catch((error) => {
                           this.$bvToast.toast(error, {
                               title: "Error",
@@ -644,21 +631,14 @@
                     const note = document.getElementById("note").value;
                     var selectedId = document.querySelector("tr.bookmark-list.selected").dataset.id;
 
-                    const data = new URLSearchParams();
-                    data.append("tag", theTagName);
-                    data.append("link_id", selectedId);
-                    data.append("note", note);
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("tag", theTagName);
+                    bodyFormData.append("link_id", selectedId);
+                    bodyFormData.append("note", note);
 
-                    fetch("{% url 'bookmark_add_note' %}",
-                          {
-                              method: "POST",
-                              headers: {
-                                  "X-CSRFToken": "{{ csrf_token }}"
-                              },
-                              body: data
-                          }
-                    ).then(response => {
-                        return response;
+                    axios("{% url 'bookmark_add_note' %}", {
+                        method: "POST",
+                        data: bodyFormData
                     }).then(() => {
 
                         payload = {
@@ -667,8 +647,14 @@
                         }
                         EventBus.$emit("foobar", payload);
 
+                    }, (error) => {
+                        this.$bvToast.toast(String(error), {
+                            title: "Error",
+                            noAutoHide: true,
+                            variant: "danger"
+                        })
+                        console.log(error);
                     })
-
                 }
             },
             mounted() {
@@ -754,27 +740,23 @@
                     /* newPosition = evt.moved.newIndex + 1; */
                     newPosition = evt.moved.newIndex - 1;
 
-                    const data = new URLSearchParams();
-                    data.append("tag_id", tagId);
-                    data.append("new_position", newPosition);
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("tag_id", tagId);
+                    bodyFormData.append("new_position", newPosition);
 
-                    fetch("{% url "sort_favorite_tags" %}", {
+                    axios("{% url "sort_favorite_tags" %}", {
                         method: "POST",
-                        headers: {
-                            "X-CSRFToken": "{{ csrf_token }}"
-                        },
-                        body: data,
-                    }).then(response => response.json())
-                      .then(data => {
-                          if (data.status != "OK") {
-                              this.$bvToast.toast(data.message, {
+                        data: bodyFormData,
+                    }).then(response => {
+                          if (response.data.status != "OK") {
+                              this.$bvToast.toast(response.data.message, {
                                   title: "Error",
                                   noAutoHide: true,
                                   variant: "danger"
                               })
-                              console.log("Error: ", data.message);
+                              console.log("Error: ", response.data.message);
                           } else {
-                              console.log("Success: ", data);
+                              console.log("Success: ", response.data);
                           }
                       })
                       .catch((error) => {

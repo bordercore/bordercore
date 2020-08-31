@@ -119,16 +119,12 @@
                     // Set a minimum character count to trigger the ajax call
                     if (this.tag.length < 3) return;
 
-                    return fetch("{% url 'tag_search' %}?query=" + this.tag)
-                                                                       .then(response => {
-                        return response.json();
-                    })
-                                       .then(data => {
-                        this.autocompleteItems = data.map(a => {
-                            return { text: a.value };
-                        }
-                                                                  )
-                })
+                    return axios.get("{% url 'tag_search' %}?query=" + this.tag)
+                                .then(response => {
+                                    this.autocompleteItems = response.data.map(a => {
+                                        return { text: a.value };
+                                    })
+                                })
                 }
             },
             mounted() {

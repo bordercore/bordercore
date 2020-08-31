@@ -17,11 +17,10 @@ new Vue({
     },
     methods: {
         tagSearch(query) {
-            return fetch("{% url 'music_search' %}?query=" + query)
+            return axios.get("{% url 'music_search' %}?query=" + query)
                 .then(response => {
-                    return response.json();
+                    return response.data;
                 })
-                .then(data => data)
         },
         select(datum) {
 

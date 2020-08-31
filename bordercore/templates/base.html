@@ -140,6 +140,9 @@
 
             <script type="text/javascript">
 
+                axios.defaults.xsrfCookieName = "csrftoken"
+                axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+
                 document.getElementById("sidebarCollapse").addEventListener("click", function(evt) {
                     document.getElementById("sidebar").classList.toggle("active");
                 });
@@ -289,18 +292,18 @@
                             let self = this;
 
                             axios.get("{% url 'bookmark_get_new_bookmarks_count' 666 %}".replace(/666$/, timestamp))
-                                                        .then(function (response) {
+                                 .then(function (response) {
 
-                                                            count = response.data.count;
-                                                            // TODO: Lookup item by "id=bookmark" rather than the index number of "1"
-                                                            self.items[1].badge = count;
+                                     count = response.data.count;
+                                     // TODO: Lookup item by "id=bookmark" rather than the index number of "1"
+                                     self.items[1].badge = count;
 
-                                                        })
-                                      .catch(function (error) {
-                                          console.log("Error getting new bookmarks count: " + error);
-                                      })
-                                      .finally(function () {
-                                      });
+                                 })
+                                 .catch(function (error) {
+                                     console.log("Error getting new bookmarks count: " + error);
+                                 })
+                                 .finally(function () {
+                                 });
                         }
                     },
                     mounted() {

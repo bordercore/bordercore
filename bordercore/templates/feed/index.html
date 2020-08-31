@@ -83,17 +83,13 @@
                     const feedId = evt.srcElement.dataset.id;
                     EventBus.$emit("showFeed", feedId);
 
-                    const data = new URLSearchParams();
-                    data.append("current_feed", feedId);
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("current_feed", feedId);
 
-                    fetch("{% url 'store_in_session' %}", {
+                    axios("{% url 'store_in_session' %}", {
                         method: "POST",
-                        headers: {
-                            "X-CSRFToken": "{{ csrf_token }}"
-                        },
-                        body: data,
-                    }
-                    ).then(data => {
+                        data: bodyFormData
+                    }).then(response => {
                         console.log("Success");
                     });
 
@@ -106,20 +102,16 @@
                     // with 1, not 0, so add 1.
                     newPosition = evt.moved.newIndex + 1;
 
-                    const data = new URLSearchParams();
-                    data.append("feed_id", feedId);
-                    data.append("position", newPosition);
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("feed_id", feedId);
+                    bodyFormData.append("position", newPosition);
 
-                    fetch("{% url "sort_feed" %}", {
+                    axios("{% url "sort_feed" %}", {
                         method: "POST",
-                        headers: {
-                            "X-CSRFToken": "{{ csrf_token }}"
-                        },
-                        body: data,
-                    }).then(response => response.json())
-                      .then(data => {
-                          console.log("Success:", data);
-                      })
+                        data: bodyFormData
+                    }).then(response => {
+                        console.log("Success:", response);
+                    })
 
                 }
             }
