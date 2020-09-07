@@ -155,6 +155,7 @@ INSTALLED_APPS = (
     'feed',
     'fitness',
     'lib',
+    'node',
     'tag',
     'bookmark',
     'music',

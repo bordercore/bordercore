@@ -11,7 +11,7 @@
 
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.0/{{ request.user.userprofile.theme }}/bootstrap.min.css" />
 
-        <link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
+        <link rel="stylesheet" type="text/css" href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
 
         <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bordercore.css" />
 
@@ -165,6 +165,13 @@
                                     id: "bookmarks",
                                     name: "Bookmarks",
                                     url: "{% url 'bookmark_overview' %}",
+                                    icon: "fas fa-bookmark",
+                                    badge: 0
+                                },
+                                {
+                                    id: "nodes",
+                                    name: "Nodes",
+                                    url: "{% url 'node_overview' %}",
                                     icon: "fas fa-bookmark",
                                     badge: 0
                                 },

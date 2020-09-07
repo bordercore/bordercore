@@ -1,0 +1,842 @@
+{% extends "base.html" %}
+
+{% load dict_get %}
+
+{% load favicon %}
+
+{% block title %} Node {% endblock %}
+
+{% block left-block %}
+{% endblock %}
+
+{% block content %}
+
+    <h2>{{ node.name }}</h2>
+
+    <div id="vue-app">
+
+        <div class="row">
+
+            <div class="col-lg-4">
+                <blob-list inline-template ref="blobList">
+                    <div class="card">
+                        <div class="card-header">
+                            Reference
+                            <span class="float-right" @click="chooseBlob()">
+                                <i class="fas fa-plus"></i>
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush" id="sort-container-tags">
+                            <draggable v-model="blobList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
+                                <transition-group type="transition">
+                                    <li v-for="(blob, index) in blobList" class="list-group-item draggable" :data-uuid="blob.uuid" :key="blob.uuid" v-cloak v-b-hover="handleHover">
+                                        <div class="dropdownmenu hidden">
+
+                                            <dropdown-menu v-model="show">
+                                                <i style="width: 22px" class="fas fa-ellipsis-v"></i>
+                                                <div slot="dropdown">
+                                                    <a class="dropdown-item" href="#" @click="removeBlob(blob.uuid)">Remove</a>
+                                                    <a v-if="!blob.note" class="dropdown-item" href="#" @click="addNote(blob.uuid, index)">Add note</a>
+                                                </div>
+                                            </dropdown-menu>
+                                        </div>
+
+                                        <div style="display:table">
+                                            <div style="display:table-row">
+
+                                                <div style="display:table-cell" class="pr-2">
+                                                    <img :src="[[ blob.cover_url ]]" height="75" width="70" />
+                                                </div>
+
+                                                <div style="display:table-cell; vertical-align: top">
+
+                                                    <a :href="blob.url">[[ blob.title ]]</a>
+                                                    <div v-if="blob.note" @click="activateInEditMode(blob, $event.target)" v-show="!blob.noteIsEditable" class="node-note">[[ blob.note ]]</div>
+                                                    <span v-show="blob.noteIsEditable">
+                                                        <input type="text" class="form-control form-control-sm" :value="blob.note" ref="input" placeholder="Add Note" @blur="editNote(blob.uuid, $event.target.value)" @keydown.enter="editNote(blob.uuid, $event.target.value)" >
+                                                    </span>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </li>
+                                    <div v-if="blobList.length == 0" :key="1" v-cloak>
+                                      Nothing to show
+                                    </div>
+                                </transition-group>
+                            </draggable>
+                            </ul>
+                        </div>
+                    </div>
+                </blob-list>
+            </div>
+
+            <div class="col-lg-4">
+                <bookmark-list inline-template ref="bookmarkList">
+                    <div class="card">
+                        <div class="card-header">
+                            Links
+                            <span class="float-right" @click="chooseBookmark()">
+                                <i class="fas fa-plus"></i>
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush" id="sort-container-tags">
+                                <draggable v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
+                                    <transition-group type="transition">
+                                        <li v-for="(bookmark, index) in bookmarkList" class="list-group-item draggable" :data-uuid="bookmark.id" :key="bookmark.id" v-cloak  v-b-hover="handleHover">
+                                            <div class="dropdownmenu hidden">
+                                                <dropdown-menu v-model="show">
+                                                    <i style="width: 22px" class="fas fa-ellipsis-v"></i>
+                                                    <div slot="dropdown">
+                                                        <a class="dropdown-item" href="#" @click="removeBookmark(bookmark.id)">Remove</a>
+                                                        <a v-if="!bookmark.note" class="dropdown-item" href="#" @click="addNote(bookmark.id, index)">Add note</a>
+                                                    </div>
+                                                </dropdown-menu>
+                                            </div>
+                                            <div style="display:table">
+                                                <div style="display:table-row">
+                                                    <div v-html="bookmark.favicon_url" class="float-left pr-2" style="display:table-cell"></div>
+                                                    <div style="display:table-cell; vertical-align: top">
+                                                        <a :href="bookmark.url">[[ bookmark.title ]]</a>
+
+                                                        <div v-if="bookmark.note" v-on:click="activateInEditMode(bookmark, $event.target)" v-show="!bookmark.noteIsEditable" class="node-note">[[ bookmark.note ]]</div>
+                                                        <span v-show="bookmark.noteIsEditable">
+                                                            <input type="text" class="form-control form-control-sm" :value="bookmark.note" ref="input" placeholder="Add Bookmark" @blur="editNote(bookmark.id, $event.target.value)" @keydown.enter="editNote(bookmark.id, $event.target.value)" >
+                                                        </span>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li v-if="!bookmarkList" v-cloak>
+                                      No links
+                                        </li>
+                                    </transition-group>
+                                </draggable>
+                            </ul>
+                        </div>
+                    </div>
+                </bookmark-list>
+            </div>
+
+        </div>
+
+        <blob-search inline-template ref="blobSearch">
+            <div class="modal fade" id="modalAddBlob" tabindex="-1" role="dialog">
+
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="myModalLabel">Add blob</h4>
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body">
+
+                            <form id="search" action="{% url 'search' %}" method="get" autocomplete="off">
+                                <input type="hidden" id="facets" name="facets" value="" />
+
+                                <div class="form-row align-items-center">
+
+                                    <div class="form-row">
+                                        <div class="col-auto">
+                                            <vue-simple-suggest ref="suggestComponent"
+                                                                v-model="query"
+                                                                display-attribute="title"
+                                                                value-attribute="title"
+                                                                :list="searchBlob"
+                                                                :filter-by-query=true
+                                                                :debounce=200
+                                                                :name="inputName"
+                                                                placeholder="Search"
+                                                                autofocus
+                                                                @select="select"
+                                                                :styles="autoCompleteStyle"
+                                            >
+                                                <div slot="suggestion-item" slot-scope="scope">
+                                                    <span v-html="boldenSuggestion(scope)"></span>
+                                                </div>
+                                            </vue-simple-suggest>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </blob-search>
+
+        <bookmark-search inline-template ref="bookmarkSearch">
+            <div class="modal fade" id="modalAddBookmark" tabindex="-1" role="dialog">
+
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="myModalLabel">Add bookmark</h4>
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body">
+
+                            <form id="search" action="{% url 'search' %}" method="get" autocomplete="off">
+                                <input type="hidden" id="facets" name="facets" value="" />
+
+                                <div class="form-row align-items-center">
+
+                                    <div class="form-row">
+                                        <div class="col-auto">
+                                            <vue-simple-suggest ref="suggestComponent"
+                                                                v-model="query"
+                                                                display-attribute="title"
+                                                                value-attribute="title"
+                                                                :list="searchBookmark"
+                                                                :filter-by-query=true
+                                                                :debounce=200
+                                                                :name="inputName"
+                                                                placeholder="Search"
+                                                                autofocus
+                                                                @select="select"
+                                                                :styles="autoCompleteStyle"
+                                            >
+                                                <div slot="suggestion-item" slot-scope="scope">
+                                                    <span v-html="boldenSuggestion(scope)"></span>
+                                                </div>
+                                            </vue-simple-suggest>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </bookmark-search>
+
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" src="{{ STATIC_URL }}js/index-bundle.js"></script>
+
+    <script type="text/javascript">
+
+        axios.defaults.xsrfCookieName = "csrftoken"
+        axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
+
+        Vue.mixin({ delimiters: ["[[", "]]"] });
+
+        const EventBus = new Vue();
+
+        const store = new Vuex.Store({
+            state: {
+                nodeUuid: "{{ node_uuid }}",
+            },
+            getters: {},
+            mutations: {},
+        });
+
+        const BlobList = {
+            data() {
+                return {
+                    blobList: [],
+                    show: false
+                }
+            },
+            methods: {
+                getBlobList() {
+
+                    axios.get("{% url "node_get_blob_list" object.uuid %}")
+                         .then(response => {
+                             if (response.data.status != "OK") {
+                                 this.$bvToast.toast("Error getting blob list", {
+                                     title: 'Error',
+                                     autoHideDelay: 5000,
+                                     variant: "danger"
+                                 })
+                                 console.log("Error getting blob list");
+                             } else {
+                                 this.blobList = response.data.blob_list;
+
+                                 // Let Vue know that each blob's "noteIsEditable" property is reactive
+                                 for (blob of this.blobList) {
+                                     this.$set(blob, "noteIsEditable", false);
+                                 }
+                                 console.log("Success");
+                             }
+                         })
+                         .catch((error) => {
+                             this.$bvToast.toast("Unable to retrieve blob list " + error.message, {
+                                 title: "Error",
+                                 noAutoHide: true,
+                                 variant: "danger"
+                             })
+                             console.error(error);
+                         });
+                },
+                chooseBlob() {
+                    $("#modalAddBlob").modal("show");
+                    setTimeout( () => { this.$parent.$refs.blobSearch.$refs.suggestComponent.input.focus(); }, 500)
+                },
+                onChange(evt) {
+
+                    blobUuid = evt.moved.element.uuid;
+
+                    // The backend expects the ordering to begin
+                    // with 1, not 0, so add 1.
+                    newPosition = evt.moved.newIndex + 1;
+
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("node_uuid", this.$store.state.nodeUuid);
+                    bodyFormData.append("blob_uuid", blobUuid);
+                    bodyFormData.append("new_position", newPosition);
+
+                    axios("{% url "node_sort_blobs" %}", {
+                        method: "POST",
+                        data: bodyFormData,
+                    }).then(response => {
+                        if (response.data.status != "OK") {
+                            this.$bvToast.toast(response.data.message, {
+                                title: "Error",
+                                noAutoHide: true,
+                                variant: "danger"
+                            })
+                            console.log("Error: ", response.data.message);
+                        } else {
+                            console.log("Success: ", response.data);
+                        }
+                    })
+                      .catch((error) => {
+                          this.$bvToast.toast(error.message, {
+                              title: "Error",
+                              noAutoHide: true,
+                              variant: "danger"
+                          })
+                          console.error(error);
+                      });
+                },
+                handleHover(hovered, evt) {
+                    evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
+                    if (hovered == true) {
+                        evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
+                    } else {
+                        evt.currentTarget.querySelector(".dropdownmenu").classList.add("hidden");
+                    };
+                },
+                activateInEditMode(blob, event) {
+
+                    const isUuid = (value) => value.uuid == blob.uuid;
+                    const index = this.blobList.findIndex(isUuid);
+
+                    this.$set(this.blobList[index], "noteIsEditable", true);
+
+                    setTimeout( () => { event.nextElementSibling.querySelector("input").focus() }, 100)
+
+                },
+                addNote(blob_uuid, index) {
+
+                    for (blob of this.blobList) {
+                        if (blob.uuid == blob_uuid) {
+                            blob.noteIsEditable = true;
+                        }
+                    }
+
+                    this.$nextTick(() => {
+                        this.$refs.input[index].focus();
+                    })
+
+                },
+                addBlob(blob_uuid) {
+
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("node_uuid", this.$store.state.nodeUuid);
+                    bodyFormData.append("blob_uuid", blob_uuid);
+
+                    axios("{% url "node_add_blob" %}", {
+                        method: "POST",
+                        data: bodyFormData,
+                    }).then(response => {
+                        if (response.data.status != "OK") {
+                            this.$bvToast.toast(response.data.message, {
+                                title: "Error",
+                                noAutoHide: true,
+                                variant: "danger"
+                            })
+                            console.log("Error: ", response.data.message);
+                        } else {
+                            this.$bvToast.toast("Blob added", {
+                                title: "Success",
+                                variant: "success"
+                            })
+                            console.log("Success: ", response.data);
+                            this.getBlobList();
+                        }
+                    })
+                      .catch((error) => {
+                          this.$bvToast.toast(error.message, {
+                              title: "Error",
+                              noAutoHide: true,
+                              variant: "danger"
+                          })
+                          console.error(error);
+                      })
+
+                },
+                removeBlob(blob_uuid) {
+
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("node_uuid", this.$store.state.nodeUuid);
+                    bodyFormData.append("blob_uuid", blob_uuid);
+
+                    axios("{% url "node_remove_blob" %}", {
+                        method: "POST",
+                        data: bodyFormData,
+                    }).then(response => {
+                        if (response.data.status != "OK") {
+                            this.$bvToast.toast(response.data.message, {
+                                title: "Error",
+                                noAutoHide: true,
+                                variant: "danger"
+                            })
+                            console.log("Error: ", response.data.message);
+                        } else {
+                            this.$bvToast.toast("Blob removed", {
+                                title: "Success",
+                                variant: "success"
+                            })
+                            console.log("Success: ", response.data);
+                            this.getBlobList();
+                        }
+                    })
+                      .catch((error) => {
+                          this.$bvToast.toast(error.message, {
+                              title: "Error",
+                              noAutoHide: true,
+                              variant: "danger"
+                          })
+                          console.error(error);
+                      })
+
+                },
+                editNote(blob_uuid, note) {
+
+                    if (this.editingNote) {
+                        return;
+                    }
+                    this.editingNote = true;
+
+                    for (blob of this.blobList) {
+                        if (blob.uuid == blob_uuid) {
+
+                            // If the note hasn't changed, abort
+                            if (note == blob.note) {
+                                blob.noteIsEditable = false;
+                                this.editingNote = false;
+                                return;
+                            }
+
+                            const bodyFormData = new URLSearchParams();
+                            bodyFormData.append("node_uuid", this.$store.state.nodeUuid);
+                            bodyFormData.append("blob_uuid", blob.uuid);
+                            bodyFormData.append("note", note);
+
+                            axios("{% url "node_edit_blob_note" %}", {
+                                method: "POST",
+                                data: bodyFormData,
+                            }).then(response => {
+                                if (response.data.status != "OK") {
+                                    this.$bvToast.toast(response.data.message, {
+                                        title: "Error",
+                                        noAutoHide: true,
+                                        variant: "danger"
+                                    })
+                                    console.log("Error: ", response.data.message);
+                                } else {
+                                    console.log("Success: ", response.data);
+                                    this.getBlobList();
+                                }
+                            })
+                              .catch((error) => {
+                                  this.$bvToast.toast(error.message, {
+                                      title: "Error",
+                                      noAutoHide: true,
+                                      variant: "danger"
+                                  })
+                                  console.error(error);
+                              })
+
+                            this.editingNote = false;
+
+                        }
+                    }
+                }
+            },
+            mounted() {
+
+                this.getBlobList();
+
+            }
+        }
+
+        const BlobSearch = {
+            data() {
+                return {
+                    inputName: "search",
+                    query: "",
+                    tags: [],
+                    autoCompleteStyle: {
+                        vueSimpleSuggest: "position-relative",
+                        inputWrapper: "search-box",
+                        defaultInput: "form-control",
+                        suggestions: "position-absolute list-group z-1000",
+                        suggestItem: "list-group-item"
+                    }
+                }
+            },
+            methods: {
+                searchBlob(query) {
+                    return axios.get("{% url 'search_blob_titles' %}?term=" + query)
+                                .then(response => {
+                                    return response.data;
+                                })
+                },
+                select(selection) {
+
+                    EventBus.$emit("add-blob", selection.uuid);
+                    $("#modalAddBlob").modal("hide");
+
+                },
+                boldenSuggestion(scope) {
+
+                    if (!scope) return scope;
+
+                    const { suggestion, query } = scope;
+
+                    let result = this.$refs.suggestComponent.displayProperty(suggestion);
+                    result = "<em>" + suggestion.doctype + "</em> - " + result
+
+                    if (!query) return result;
+
+                    const texts = query.split(/[\s-_/\\|\.]/gm).filter(t => !!t) || [''];
+                    return result.replace(new RegExp('(.*?)(' + texts.join('|') + ')(.*?)','gi'), '$1<b>$2</b>$3');
+                }
+            }
+        };
+
+        const BookmarkList = {
+            data() {
+                return {
+                    bookmarkList: [],
+                    show: false
+                }
+            },
+            methods: {
+                getBookmarkList() {
+
+                    axios.get("{% url "node_get_bookmark_list" object.uuid %}")
+                         .then(response => {
+                             if (response.data.status != "OK") {
+                                 this.$bvToast.toast("Error getting bookmark list", {
+                                     title: "Error!",
+                                     autoHideDelay: 5000,
+                                     variant: "danger"
+                                 })
+                                 console.log("Error getting bookmark list");
+                             } else {
+                                 this.bookmarkList = response.data.bookmark_list;
+
+                                 // Let Vue know that each blob's "noteIsEditable" property is reactive
+                                 for (bookmark of this.bookmarkList) {
+                                     this.$set(bookmark, "noteIsEditable", false);
+                                 }
+
+                                 console.log("Success");
+                             }
+                         })
+                         .catch((error) => {
+                             this.$bvToast.toast("Unable to retrieve bookmark list " + error.message, {
+                                 title: "Error!",
+                                 noAutoHide: true,
+                                 variant: "danger"
+                             })
+                             console.error(error);
+                         });
+                },
+                chooseBookmark() {
+                    $("#modalAddBookmark").modal("show");
+                    setTimeout( () => { this.$parent.$refs.bookmarkSearch.$refs.suggestComponent.input.focus(); }, 500)
+                },
+                onChange(evt) {
+
+                    bookmarkId = evt.moved.element.id;
+
+                    // The backend expects the ordering to begin
+                    // with 1, not 0, so add 1.
+                    newPosition = evt.moved.newIndex + 1;
+
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("node_uuid", this.$store.state.nodeUuid);
+                    bodyFormData.append("bookmark_id", bookmarkId);
+                    bodyFormData.append("new_position", newPosition);
+
+                    axios("{% url "node_sort_bookmarks" %}", {
+                        method: "POST",
+                        data: bodyFormData,
+                    }).then(response => {
+                        if (response.data.status != "OK") {
+                            this.$bvToast.toast(response.data.message, {
+                                title: "Error",
+                                noAutoHide: true,
+                                variant: "danger"
+                            })
+                            console.log("Error: ", response.data.message);
+                        } else {
+                            console.log("Success: ", response.data);
+                        }
+                    })
+                      .catch((error) => {
+                          this.$bvToast.toast(error.message, {
+                              title: "Error",
+                              noAutoHide: true,
+                              variant: "danger"
+                          })
+                          console.error(error);
+                      });
+                },
+                activateInEditMode(bookmark, event) {
+
+                    const isId = (value) => value.id == bookmark.id;
+                    const index = this.bookmarkList.findIndex(isId);
+
+                    this.$set(this.bookmarkList[index], "noteIsEditable", true);
+
+                    setTimeout( () => { event.nextElementSibling.querySelector("input").focus() }, 100)
+
+                },
+                addNote(bookmark_id, index) {
+
+                    for (bookmark of this.bookmarkList) {
+                        if (bookmark.id == bookmark_id) {
+                            bookmark.noteIsEditable = true;
+                        }
+                    }
+
+                    this.$nextTick(() => {
+                        this.$refs.input[index].focus();
+                    })
+
+                },
+                addBookmark(bookmark_id) {
+
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("node_uuid", this.$store.state.nodeUuid);
+                    bodyFormData.append("bookmark_id", bookmark_id);
+
+                    axios("{% url "node_add_bookmark" %}", {
+                        method: "POST",
+                        data: bodyFormData,
+                    }).then(response => {
+                        if (response.data.status != "OK") {
+                            this.$bvToast.toast(response.data.message, {
+                                title: "Error",
+                                noAutoHide: true,
+                                variant: "danger"
+                            })
+                            console.log("Error: ", response.data.message);
+                        } else {
+                            this.$bvToast.toast("Bookmark added", {
+                                title: "Success",
+                                variant: "success"
+                            })
+                            console.log("Success: ", response.data);
+                            this.getBookmarkList();
+                        }
+                    })
+                      .catch((error) => {
+                          this.$bvToast.toast(error.message, {
+                              title: "Error",
+                              noAutoHide: true,
+                              variant: "danger"
+                          })
+                          console.error(error);
+                      })
+
+                },
+                handleHover(hovered, evt) {
+                    evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
+                    if (hovered == true) {
+                        evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
+                    } else {
+                        evt.currentTarget.querySelector(".dropdownmenu").classList.add("hidden");
+                    };
+                },
+                removeBookmark(bookmark_id) {
+
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("node_uuid", this.$store.state.nodeUuid);
+                    bodyFormData.append("bookmark_id", bookmark_id);
+
+                    axios("{% url "node_remove_bookmark" %}", {
+                        method: "POST",
+                        data: bodyFormData,
+                    }).then(response => {
+                        if (response.data.status != "OK") {
+                            this.$bvToast.toast(response.data.message, {
+                                title: "Error",
+                                noAutoHide: true,
+                                variant: "danger"
+                            })
+                            console.log("Error: ", response.data.message);
+                        } else {
+                            this.$bvToast.toast("Bookmark removed", {
+                                title: "Success",
+                                variant: "success"
+                            })
+                            console.log("Success: ", response.data);
+                            this.getBookmarkList();
+                        }
+                    })
+                      .catch((error) => {
+                          this.$bvToast.toast(error.message, {
+                              title: "Error",
+                              noAutoHide: true,
+                              variant: "danger"
+                          })
+                          console.error(error);
+                      })
+
+                },
+                editNote(bookmark_id, note) {
+
+                    if (this.editingNote) {
+                        return;
+                    }
+                    this.editingNote = true;
+
+                    for (bookmark of this.bookmarkList) {
+                        if (bookmark.id == bookmark_id) {
+
+                            // If the note hasn't changed, abort
+                            if (note == bookmark.note) {
+                                bookmark.noteIsEditable = false;
+                                this.editingNote = false;
+                                return;
+                            }
+
+                            const bodyFormData = new URLSearchParams();
+                            bodyFormData.append("node_uuid", this.$store.state.nodeUuid);
+                            bodyFormData.append("bookmark_id", bookmark.id);
+                            bodyFormData.append("note", note);
+
+                            axios("{% url "node_edit_bookmark_note" %}", {
+                                method: "POST",
+                                data: bodyFormData,
+                            }).then(response => {
+                                if (response.data.status != "OK") {
+                                    this.$bvToast.toast(response.data.message, {
+                                        title: "Error",
+                                        noAutoHide: true,
+                                        variant: "danger"
+                                    })
+                                    console.log("Error: ", response.data.message);
+                                } else {
+                                    console.log("Success: ", response.data);
+                                    this.getBookmarkList();
+                                }
+                            })
+                              .catch((error) => {
+                                  this.$bvToast.toast(error.message, {
+                                      title: "Error",
+                                      noAutoHide: true,
+                                      variant: "danger"
+                                  })
+                                  console.error(error);
+                              })
+
+                            this.editingNote = false;
+
+                        }
+                    }
+                }
+            },
+            mounted() {
+                this.getBookmarkList();
+            }
+        }
+
+        const BookmarkSearch = {
+            data() {
+                return {
+                    inputName: "search",
+                    query: "",
+                    tags: [],
+                    autoCompleteStyle: {
+                        vueSimpleSuggest: "position-relative",
+                        inputWrapper: "search-box",
+                        defaultInput: "form-control",
+                        suggestions: "position-absolute list-group z-1000",
+                        suggestItem: "list-group-item"
+                    }
+                }
+            },
+            methods: {
+                searchBookmark(query) {
+                    return axios.get("{% url 'search_bookmarks' %}?term=" + query)
+                                .then(response => {
+                                    return response.data;
+                                })
+                },
+                select(selection) {
+
+                    EventBus.$emit("add-bookmark", selection.id);
+                    $("#modalAddBookmark").modal("hide");
+
+                },
+                boldenSuggestion(scope) {
+
+                    if (!scope) return scope;
+
+                    const { suggestion, query } = scope;
+
+                    let result = this.$refs.suggestComponent.displayProperty(suggestion);
+
+                    if (!query) return result;
+
+                    const texts = query.split(/[\s-_/\\|\.]/gm).filter(t => !!t) || [''];
+                    return result.replace(new RegExp('(.*?)(' + texts.join('|') + ')(.*?)','gi'), '$1<b>$2</b>$3');
+                }
+            }
+        };
+
+        new Vue({
+            el: "#vue-app",
+            store,
+            components: {
+                BlobList,
+                BookmarkList,
+                BlobSearch,
+                BookmarkSearch
+            },
+            mounted() {
+
+                EventBus.$on("add-blob", payload => {
+                    this.$refs.blobList.addBlob(payload);
+                });
+
+                EventBus.$on("add-bookmark", payload => {
+                    this.$refs.bookmarkList.addBookmark(payload);
+                });
+
+            }
+        });
+
+    </script>
+
+{% endblock %}

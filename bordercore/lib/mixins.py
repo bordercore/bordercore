@@ -1,4 +1,6 @@
-from django.db import models
+from django.apps import apps
+from django.db import models, transaction
+from django.db.models import F
 
 
 class TimeStampedModel(models.Model):
@@ -11,4 +13,70 @@ class TimeStampedModel(models.Model):
     class Meta:
         get_latest_by = 'modified'
         ordering = ('-modified', '-created',)
+        abstract = True
+
+
+class SortOrderMixin(models.Model):
+
+    sort_order = models.IntegerField(default=1)
+    note = models.TextField(blank=True, null=True)
+
+    def delete(self):
+
+        super().delete()
+
+        self.get_queryset().filter(
+            sort_order__gte=self.sort_order
+        ).update(
+            sort_order=F("sort_order") - 1
+        )
+
+    def save(self, *args, **kwargs):
+
+        # Don't do this for new objects
+        if self.pk is None:
+            self.get_queryset().all().update(sort_order=F("sort_order") + 1)
+
+        super().save(*args, **kwargs)
+
+    def reorder(self, new_order):
+
+        qs = self.get_queryset()
+
+        # Equivalent to, say, node=self.node
+        kwargs = {self.field_name: getattr(self, self.field_name)}
+
+        if self.sort_order == new_order:
+            return
+
+        with transaction.atomic():
+            if self.sort_order > int(new_order):
+                qs.filter(
+                    **kwargs,
+                    sort_order__lt=self.sort_order,
+                    sort_order__gte=new_order,
+                ).exclude(
+                    pk=self.pk
+                ).update(
+                    sort_order=F("sort_order") + 1,
+                )
+            else:
+                qs.filter(
+                    **kwargs,
+                    sort_order__lte=new_order,
+                    sort_order__gt=self.sort_order,
+                ).exclude(
+                    pk=self.pk,
+                ).update(
+                    sort_order=F("sort_order") - 1,
+                )
+
+            self.sort_order = new_order
+            self.save()
+
+    def get_queryset(self):
+        model = apps.get_model(self.field_name, type(self).__name__)
+        return model.objects.get_queryset()
+
+    class Meta:
         abstract = True

@@ -32,6 +32,8 @@ from fitness.views import ExerciseDetailView
 from homepage import views as homepage_views
 from music import views as music_views
 from music.views import AlbumDetailView, MusicListJson, SearchTagListView
+from node import views as node_views
+from node.views import NodeDetailView, NodeOverviewView
 from search import views as search_views
 from search.views import SearchListView, SearchTagDetailView
 from tag import views as tag_views
@@ -136,6 +138,21 @@ urlpatterns = [
     path('music/song/<int:id>', music_views.get_song_info, name='get_song_info'),
     path('music/tag/', SearchTagListView.as_view(), name='music_search_tag'),
     path('music/', music_views.music_list, name='music_list'),
+
+    path('node/', NodeOverviewView.as_view(), name='node_overview'),
+    path('node/<uuid:uuid>', NodeDetailView.as_view(), name='node_detail'),
+    path('node/<uuid:uuid>/blob_list', node_views.get_blob_list, name='node_get_blob_list'),
+    path('node/<uuid:uuid>/bookmark_list', node_views.get_bookmark_list, name='node_get_bookmark_list'),
+    path('node/blob/add', node_views.add_blob, name='node_add_blob'),
+    path('node/blob/edit_note', node_views.edit_blob_note, name='node_edit_blob_note'),
+    path('node/blob/remove', node_views.remove_blob, name='node_remove_blob'),
+    path('node/blob/search', node_views.search_blob_titles, name='search_blob_titles'),
+    path('node/blob/sort', node_views.sort_blobs, name='node_sort_blobs'),
+    path('node/bookmark/add', node_views.add_bookmark, name='node_add_bookmark'),
+    path('node/bookmark/edit_note', node_views.edit_bookmark_note, name='node_edit_bookmark_note'),
+    path('node/bookmark/remove', node_views.remove_bookmark, name='node_remove_bookmark'),
+    path('node/bookmark/sort', node_views.sort_bookmarks, name='node_sort_bookmarks'),
+    path('node/bookmark/search', node_views.search_bookmarks, name='search_bookmarks'),
 
     path('prefs/store_in_session/', accounts_views.store_in_session, name='store_in_session'),
     path('prefs/', UserProfileDetailView.as_view(), name='prefs'),

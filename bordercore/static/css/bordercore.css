@@ -330,6 +330,28 @@ div .search-box .search-box-input {
   box-shadow: 10px 10px 5px -1px rgba(0, 0, 0, 0.14);
   opacity: .7; }
 
+/* Node */
+.dropdownmenu {
+  float: right;
+  color: #666;
+  font-size: 0.75rem;
+  position: absolute;
+  right: 7px;
+  padding: 2px;
+  width: 26px;
+  height: 24px;
+  background-color: #fff; }
+
+.dropdownmenu:hover {
+  background-color: #eee;
+  border-radius: 100%; }
+
+/* div.dropdownmenu i { */
+/*   width: 22px; */
+/* } */
+.node-note {
+  font-size: small; }
+
 /* Music */
 #music-search {
   width: 400px; }

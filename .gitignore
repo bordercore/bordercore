@@ -7,6 +7,7 @@ bordercore/static/img/favicons/*
 bordercore/static/blobs
 secrets.json
 .projectile
+node_modules/
 
 packaged.yaml
 **/.aws-sam/*
