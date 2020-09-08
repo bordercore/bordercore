@@ -54,10 +54,10 @@
                     <button-group inline-template @get-page="getPage">
                         <div class="btn-group">
                             <a class="btn btn-secondary" id="btn-add" href="{% url 'bookmark_add' %}">Add</a>
-                            <input type="button" class="btn btn-secondary" id="btn-edit" value="Edit" :disabled="isDisabledEdit" @click="onClickEdit" />
-                            <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="isDisabledDelete" @click="onClickDelete" />
-                            <input v-if="showRemoveFavorite" type="button" class="btn btn-secondary ml-2" value="Remove from Favorites" @click="removeFromFavorites" v-cloak />
-                            <input v-if="showAddFavorite" type="button" class="btn btn-secondary ml-2" value="Add to Favorites" @click="addToFavorites" v-cloak />
+                            <input type="button" class="btn btn-secondary" id="btn-edit" value="Edit" :disabled="buttonsDisabled" @click="onClickEdit" />
+                            <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="buttonsDisabled" @click="onClickDelete" />
+                            <input v-if="removeFavoriteButtonVisible" type="button" class="btn btn-secondary ml-2" value="Remove from Favorites" @click="removeFromFavorites" v-cloak />
+                            <input v-if="addFavoriteButtonVisible" type="button" class="btn btn-secondary ml-2" value="Add to Favorites" @click="addToFavorites" v-cloak />
                         </div>
                     </button-group>
 
@@ -144,7 +144,7 @@
                                                 <a class="one-tag" :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.title) ]]</a>
                                                 <a v-if="bookmark.lastResponseCode != 200" class="form-error ml-3" target="wayback" :href="'https://web.archive.org/web/1000/' + bookmark.url">[[ bookmark.lastResponseCode ]]</a>
                                                 <i v-if="bookmark.note != null && bookmark.note != ''" class="fa fa-clipboard"></i>
-                                                <a v-for="tag in bookmark.tags" v-if="tag != $tagFilter" class="badge badge-info ml-2" @click.prevent="onClick" href="">[[ tag ]]</a>
+                                                <a v-for="tag in bookmark.tags" v-if="tag != selectedTagName" class="badge badge-info ml-2" @click.prevent="onClick" href="">[[ tag ]]</a>
                                             </td>
                                         </tr>
                                     </transition-group>
@@ -205,14 +205,11 @@
 
     <script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
-
     <script type="text/javascript" src="https://unpkg.com/vue-simple-suggest@1.10.1"></script>
+    <script type="text/javascript" src="https://unpkg.com/vuex@3.5.1"></script>
 
     <script type="text/javascript">
 
-        var theTagName = null;
-
-        Vue.prototype.$tagFilter = null;
         var isFiltered = false;
 
         // When this is set to true, then hitting "Enter" will NOT
@@ -224,7 +221,47 @@
 
         const EventBus = new Vue();
 
+        const mapGetters = Vuex.mapGetters
+
+        const store = new Vuex.Store({
+            state: {
+                addFavoriteButtonVisible: false,
+                buttonsDisabled: true,
+                selectedTagName: null,
+                removeFavoriteButtonVisible: false
+            },
+            getters: {
+                addFavoriteButtonVisible: state => {
+                    return state.addFavoriteButtonVisible
+                },
+                buttonsDisabled: state => {
+                    return state.buttonsDisabled
+                },
+                removeFavoriteButtonVisible: state => {
+                    return state.removeFavoriteButtonVisible
+                },
+                selectedTagName: state => {
+                    return state.selectedTagName
+                },
+            },
+            mutations: {
+                addFavoriteButtonVisible (state, payload) {
+                    state.addFavoriteButtonVisible = payload
+                },
+                changeButtonsDisabled (state, payload) {
+                    state.buttonsDisabled = payload
+                },
+                removeFavoriteButtonVisible (state, payload) {
+                    state.removeFavoriteButtonVisible = payload
+                },
+                selectedTagName (state, payload) {
+                    state.selectedTagName = payload
+                }
+            },
+        });
+
         const ButtonGroup = {
+            computed: mapGetters(["addFavoriteButtonVisible", "buttonsDisabled", "removeFavoriteButtonVisible"]),
             methods: {
                 onClickDelete(evt) {
 
@@ -236,10 +273,9 @@
                     axios.delete("{% url 'bookmark_delete' 666 %}".replace(/666$/, selectedId))
                          .then(() => {
 
-                             this.isDisabledEdit = true;
-                             this.isDisabledDelete = true;
+                             this.$store.commit("changeButtonsDisabled", true)
 
-                             if (theTagName) {
+                             if (this.$store.getters.selectedTagName) {
                                  document.getElementById("bookmark-sidebar").classList.remove("show");
                              }
 
@@ -260,7 +296,7 @@
                     form.submit();
                 },
                 removeFromFavorites(evt) {
-                    document.getElementById("add-to-remote-from-favorite-tagname").value = theTagName;
+                    document.getElementById("add-to-remote-from-favorite-tagname").value = this.$store.getters.selectedTagName;
                     const form = document.querySelector("#search-form");
                     form.method = "post";
                     form.action = "{% url 'remove_favorite_tag' %}";
@@ -268,39 +304,7 @@
                 }
 
             },
-            data() {
-                return {
-                    isDisabledEdit: true,
-                    isDisabledDelete: true,
-                    showRemoveFavorite: false,
-                    showAddFavorite: false
-                }
-            },
             mounted() {
-
-                EventBus.$on("toggleDisabledEdit", payload => {
-                    if (payload == "disable") {
-                        this.isDisabledEdit = true;
-                    } else if (payload == "enable") {
-                        this.isDisabledEdit = false;
-                    }
-                });
-
-                EventBus.$on("toggleDisabledDelete", payload => {
-                    if (payload == "disable") {
-                        this.isDisabledDelete = true;
-                    } else if (payload == "enable") {
-                        this.isDisabledDelete = false;
-                    }
-                });
-
-                EventBus.$on("show-add-favorite-button", value => {
-                    this.showAddFavorite = value;
-                });
-
-                EventBus.$on("show-remove-favorite-button", value => {
-                    this.showRemoveFavorite = value;
-                });
 
                 EventBus.$on("selected-favorite-tag", value => {
                     this.showRemoveFavorite = value;
@@ -351,19 +355,19 @@
                     searchTerm = evt.srcElement.value;
 
                     if (searchTerm) {
-                        theTagName = searchTerm;
+                        this.$store.commit("selectedTagName", searchTerm);
                         this.$emit("search-term", searchTerm);
                         EventBus.$emit("select-favorite-tag", null);
-                        EventBus.$emit("show-add-favorite-button", false);
-                        EventBus.$emit("show-remove-favorite-button", false);
+                        this.$store.commit("addFavoriteButtonVisible", false)
+                        this.$store.commit("removeFavoriteButtonVisible", false)
                     } else {
                         // If the search box is empty, refresh the list with no filters
-                        theTagName = "";
                         isFiltered = false;
                         this.$emit("get-page", 1);
                         EventBus.$emit("select-favorite-tag", "Untagged");
-                        EventBus.$emit("show-add-favorite-button", false);
-                        EventBus.$emit("show-remove-favorite-button", false);
+                        this.$store.commit("addFavoriteButtonVisible", false)
+                        this.$store.commit("removeFavoriteButtonVisible", false)
+                        this.$store.commit("selectedTagName", "");
                     }
 
                 }
@@ -372,6 +376,7 @@
 
         new Vue({
             el: "#vue-app-top",
+            store,
             components: {
                 ButtonGroup,
                 Search
@@ -390,6 +395,7 @@
         });
 
         const BookmarkList = {
+            computed: mapGetters(["selectedTagName"]),
             data() {
                 return {
                     bookmarkList: [],
@@ -407,18 +413,17 @@
                         EventBus.$emit("select-favorite-tag", tag.value);
                     } else if (element.classList.contains("selected")) {
 
-                        if (this.$tagFilter) {
+                        if (this.$store.getters.selectedTagName) {
                             document.getElementById("bookmark-sidebar").classList.remove("show");
                         }
 
                         element.classList.remove("selected");
 
-                        EventBus.$emit("toggleDisabledEdit", "disable")
-                        EventBus.$emit("toggleDisabledDelete", "disable");
+                        this.$store.commit("changeButtonsDisabled", true)
 
                     } else {
 
-                        if (this.$tagFilter) {
+                        if (this.$store.getters.selectedTagName) {
                             noteValue = "";
 
                             var selectedId = parseInt(element.dataset.id, 10);
@@ -440,8 +445,7 @@
                         }
                         element.classList.add("selected");
 
-                        EventBus.$emit("toggleDisabledEdit", "enable");
-                        EventBus.$emit("toggleDisabledDelete", "enable");
+                        this.$store.commit("changeButtonsDisabled", false)
 
                     }
 
@@ -455,7 +459,7 @@
                     newPosition = evt.moved.newIndex + 1;
 
                     const bodyFormData = new URLSearchParams();
-                    bodyFormData.append("tag", this.$tagFilter);
+                    bodyFormData.append("tag", this.$store.getters.selectedTagName);
                     bodyFormData.append("link_id", linkId);
                     bodyFormData.append("position", newPosition);
 
@@ -538,8 +542,9 @@
                              if (searchTag != null) {
                                  // Only update the tagFilter here, *after* we have a new set of
                                  // updated bookmarks that's appropriate for this tagFilter
-                                 self.$tagFilter = searchTag;
+                                 self.$store.commit("selectedTagName", searchTag);
                              }
+
                              self.bookmarkList = bookmarks;
 
                              self.$emit("paginate", response.data.pagination);
@@ -579,6 +584,7 @@
 
         new Vue({
             el: "#vue-app-right",
+            store,
             components: {
                 BookmarkList,
                 Pagination,
@@ -632,7 +638,7 @@
                     var selectedId = document.querySelector("tr.bookmark-list.selected").dataset.id;
 
                     const bodyFormData = new URLSearchParams();
-                    bodyFormData.append("tag", theTagName);
+                    bodyFormData.append("tag", this.$store.getters.selectedTagName);
                     bodyFormData.append("link_id", selectedId);
                     bodyFormData.append("note", note);
 
@@ -711,16 +717,15 @@
                     }
 
                     if (tagName == "Untagged") {
-                        theTagName = "";
+                        this.$store.commit("selectedTagName", "");
                         isFiltered = false;
                         EventBus.$emit("get-page", 1);
-                        EventBus.$emit("show-add-favorite-button", false);
-                        EventBus.$emit("show-remove-favorite-button", false);
+                        this.$store.commit("addFavoriteButtonVisible", false)
+                        this.$store.commit("removeFavoriteButtonVisible", false)
                     } else {
-                        theTagName = tagName;
                         EventBus.$emit("search-tag", tagName);
-                        EventBus.$emit("show-add-favorite-button", false);
-                        EventBus.$emit("show-remove-favorite-button", true);
+                        this.$store.commit("addFavoriteButtonVisible", false)
+                        this.$store.commit("removeFavoriteButtonVisible", true)
                     }
                 },
                 getClassName(tagName) {
@@ -737,7 +742,6 @@
 
                     // The backend expects the ordering to begin
                     // with 1, not 0, so add 1.
-                    /* newPosition = evt.moved.newIndex + 1; */
                     newPosition = evt.moved.newIndex - 1;
 
                     const bodyFormData = new URLSearchParams();
@@ -748,17 +752,17 @@
                         method: "POST",
                         data: bodyFormData,
                     }).then(response => {
-                          if (response.data.status != "OK") {
-                              this.$bvToast.toast(response.data.message, {
-                                  title: "Error",
-                                  noAutoHide: true,
-                                  variant: "danger"
-                              })
-                              console.log("Error: ", response.data.message);
-                          } else {
-                              console.log("Success: ", response.data);
-                          }
-                      })
+                        if (response.data.status != "OK") {
+                            this.$bvToast.toast(response.data.message, {
+                                title: "Error",
+                                noAutoHide: true,
+                                variant: "danger"
+                            })
+                            console.log("Error: ", response.data.message);
+                        } else {
+                            console.log("Success: ", response.data);
+                        }
+                    })
                       .catch((error) => {
                           this.$bvToast.toast(error, {
                               title: "Error",
@@ -774,11 +778,11 @@
                 EventBus.$on("search-tag", tagName => {
 
                     if (!this.favoriteTags.find(element => element.name == tagName)) {
-                        EventBus.$emit("show-remove-favorite-button", false);
-                        EventBus.$emit("show-add-favorite-button", true);
+                        this.$store.commit("addFavoriteButtonVisible", true)
+                        this.$store.commit("removeFavoriteButtonVisible", false)
                     } else {
-                        EventBus.$emit("show-remove-favorite-button", true);
-                        EventBus.$emit("show-add-favorite-button", false);
+                        this.$store.commit("addFavoriteButtonVisible", false)
+                        this.$store.commit("removeFavoriteButtonVisible", true)
                     }
 
                 });
@@ -802,8 +806,8 @@
             methods: {
                 onClick(evt) {
                     EventBus.$emit("select-favorite-tag", null);
-                    EventBus.$emit("show-add-favorite-button", false);
-                    EventBus.$emit("show-remove-favorite-button", false);
+                    this.$store.commit("addFavoriteButtonVisible", false)
+                    this.$store.commit("removeFavoriteButtonVisible", false)
                     EventBus.$emit("randomize");
                 }
             }
@@ -811,6 +815,7 @@
 
         new Vue({
             el: "#vue-app-left",
+            store,
             components: {
                 AddNote,
                 TagList,
