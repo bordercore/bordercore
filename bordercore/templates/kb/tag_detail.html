@@ -11,64 +11,71 @@
 
     <br />
 
-    <div class="row">
-        <div class="col-lg-10">
+    <div id="vue-app">
 
-            <form id="tag-filter-form" class="form-inline" action="{% url 'kb_search_tag_detail' tag %}" method="get" autocomplete="off">
-                <div id="tagsearch">
-                    <div class="form-group">
+        <div class="row">
+            <div class="col-lg-10">
 
-                        <input type="hidden" name="tags" v-model="tagsHidden" />
+                <form id="tag-filter-form" class="form-inline" action="{% url 'kb_search_tag_detail' tag %}" method="get" autocomplete="off">
+                    <tag-search inline-template>
+                        <div class="form-group">
 
-                        <div id="vue-wrapper">
-                            <vue-tags-input
-                              ref="tagsInputComponent"
-                              v-model="tag"
-                              :tags="tags"
-                              @tags-changed=tagsChanged
-                              :autocomplete-items="filteredItems"
-                              :add-only-from-autocomplete="false"
-                              placeholder="Tags"
-                              autofocus
-                              />
+                            <input type="hidden" name="tags" v-model="tagsHidden" />
+
+                            <div id="vue-wrapper">
+                                <vue-tags-input
+                                    ref="tagsInputComponent"
+                                    v-model="tag"
+                                    :tags="tags"
+                                    @tags-changed=tagsChanged
+                                    :autocomplete-items="filteredItems"
+                                    :add-only-from-autocomplete="false"
+                                    placeholder="Tags"
+                                    autofocus
+                                />
+                            </div>
+
                         </div>
-
-                    </div>
-                </div>
-
+                    </tag-search>
                 {% if tag_counts %}
-                <div class="form-group ml-2" id="other_tags">
-                    <select _id="other_tags" class="form-control" @change="onChange">
-                        <option value="-1">Other tags</option>
+                    <other-tag-counts inline-template>
+                        <div class="form-group ml-2">
+                            <select class="form-control" @change="onChange">
+                                <option value="-1">Other tags</option>
                         {% for tag, count in tag_counts %}
                             <option value="{{ tag }}">{{ tag }} ({{ count }})</option>
                         {% endfor %}
-                    </select>
-                </div>
+                            </select>
+                        </div>
+                    </other-tag-counts>
                 {% endif %}
-                <div class="form-group" id="meta_tag_list">
+                <meta-tag-list inline-template>
+                    <div class="form-group">
                 {% for tag in meta_tags %}
                     {% if forloop.first %}
                         <label class="ml-3">Meta Tags: </label>
                     {% endif %}
                     <span class="badge badge-success ml-2"><a class="meta_tag tag" href="" @click="onClick">{{ tag }}</a></span>
                 {% endfor %}
-                </div>
-            </form>
+                    </div>
+                </meta-tag-list>
+                </form>
+            </div>
         </div>
-    </div>
 
-    <br />
+        <br />
 
-    <ul class="nav nav-tabs" id="myTab" @click="onClick">
+        <tab-list inline-template>
+            <ul class="nav nav-tabs" id="myTab" @click="onClick">
         {% for doctype in doctype_counts %}
             <li class="nav-item"><a class="nav-link" id="tab_{{ doctype.0 }}" href="#{{ doctype.0 }}">{{ doctype_mapping|get_doctype:doctype.0 }} <span class="badge alert-info">{{ doctype.1 }}</span></a></li>
         {% endfor %}
-    </ul>
+            </ul>
+        </tab-list>
 
-    <div class="tab-content" id="tag-detail-tab-content">
+        <div class="tab-content" id="tag-detail-tab-content">
 
-        <div id="blob" class="tab-pane fade">
+            <div id="blob" class="tab-pane fade">
             {% for match in info.matches.blob %}
                 <div class="row voffset">
                     <div class="col-lg-12">
@@ -78,7 +85,7 @@
                             </a>
                         {% endif %}
                         {% if match.content_type == 'Image' %}
-                        <img width="32" height="32" src="{{ MEDIA_URL }}{{ match.cover_url }}" />
+                            <img width="32" height="32" src="{{ MEDIA_URL }}{{ match.cover_url }}" />
                         {% endif %}
                         <a href="{% url 'blob_detail' match.uuid %}">{{ match.title|default:"No Title" }}</a>
                         {% if match.content_type and match.content_type != 'Image' %}
@@ -87,15 +94,15 @@
                     </div>
                 </div>
             {% endfor %}
-        </div>
+            </div>
 
-        <div id="book" class="tab-pane fade">
-            <table class="table-borderless">
-                <tr>
+            <div id="book" class="tab-pane fade">
+                <table class="table-borderless">
+                    <tr>
 
             {% for match in info.matches.book %}
                 {% if forloop.counter0|divisibleby:"3" %}
-                </tr><tr>
+                    </tr><tr>
                 {% endif %}
                 <td>
                     <img src="{{ MEDIA_URL }}{{ match.cover_url }}" height="75" width="70"/>
@@ -106,10 +113,10 @@
                     <a href="{% url 'blob_detail' match.uuid %}">{{ match.title }}</a>
                 </td>
             {% endfor %}
-            </table>
-        </div>
+                </table>
+            </div>
 
-        <div id="bordercore_bookmark" class="tab-pane fade">
+            <div id="bordercore_bookmark" class="tab-pane fade">
             {% for match in info.matches.bordercore_bookmark %}
                 <div class="row voffset">
                     <div class="col-lg-12">
@@ -117,9 +124,9 @@
                     </div>
                 </div>
             {% endfor %}
-        </div>
+            </div>
 
-        <div id="document" class="tab-pane fade">
+            <div id="document" class="tab-pane fade">
             {% for match in info.matches.document %}
                 <div class="row voffset">
                     <div class="col-lg-12">
@@ -127,9 +134,9 @@
                     </div>
                 </div>
             {% endfor %}
-        </div>
+            </div>
 
-        <div id="note" class="tab-pane fade">
+            <div id="note" class="tab-pane fade">
             {% for match in info.matches.note %}
                 <div class="row voffset">
                     <div class="col-lg-12">
@@ -137,9 +144,9 @@
                     </div>
                 </div>
             {% endfor %}
-        </div>
+            </div>
 
-        <div id="todo" class="tab-pane fade">
+            <div id="todo" class="tab-pane fade">
             {% for match in info.matches.todo %}
                 <div class="row voffset">
                     <div class="col-lg-12">
@@ -147,9 +154,11 @@
                     </div>
                 </div>
             {% endfor %}
+            </div>
+
         </div>
 
-     </div>
+    </div>
 
 {% endblock %}
 
@@ -170,8 +179,7 @@
 
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
-        new Vue({
-            el: "#tagsearch",
+        const TagSearch = {
             data() {
                 return {
                     tag: "",
@@ -198,7 +206,7 @@
                                     this.autocompleteItems = response.data.map(a => {
                                         return { text: a.value };
                                     }
-                                                                  )
+                                    )
                                 })
                 }
             },
@@ -216,22 +224,20 @@
                     });
                 }
             }
-        });
+        };
 
         {% if tag_counts %}
-        new Vue({
-            el: "#other_tags",
+        const OtherTagCounts = {
             methods: {
                 onChange(evt) {
                     tag_list = get_tag_list_string() + "," + evt.srcElement.value;
                     window.location="{% url 'kb_search_tag_detail' 666 %}".replace("666", tag_list);
                 }
             }
-        });
+        };
         {% endif %}
 
-        new Vue({
-            el: "#meta_tag_list",
+        const MetaTagList = {
             methods: {
                 onClick(evt) {
                     evt.preventDefault();
@@ -239,10 +245,9 @@
                     window.location="{% url 'kb_search_tag_detail' 666 %}".replace(/666$/, tag_list);
                 }
             }
-        });
+        };
 
-        new Vue({
-            el: "#myTab",
+        const TabList = {
             methods: {
                 onClick(evt) {
                     id = evt.srcElement.id;
@@ -281,6 +286,18 @@
                 $("#myTab a").tab("show");
                 {% endif %}
 
+            }
+        };
+
+        new Vue({
+            el: "#vue-app",
+            components: {
+                TagSearch,
+                {% if tag_counts %}
+                OtherTagCounts,
+                {% endif %}
+                TabList,
+                MetaTagList
             }
         });
 
