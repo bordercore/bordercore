@@ -227,7 +227,7 @@
                     if (this.tag.length < 3) return;
 
                     return axios.get("{% url 'tag_search' %}?query=" + this.tag)
-                                .then(data => {
+                                .then(response => {
                                     this.autocompleteItems = response.data.map(a => {
                                         return { text: a.value };
                                     }
