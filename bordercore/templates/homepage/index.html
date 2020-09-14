@@ -62,28 +62,28 @@
 
 {% block content %}
 
-    <div id="vue-messages">
+    <div id="vue-app">
+
         {% include "common/show_messages.html" %}
-    </div>
 
-<div class="row">
+        <div class="row">
 
-    <div class="col-lg-7">
+            <div class="col-lg-7">
 
-        <div class="card bg-info">
-            <div class="card-header text-white">Recent Bookmarks</div>
+                <div class="card bg-info">
+                    <div class="card-header text-white">Recent Bookmarks</div>
             {% if bookmarks %}
-            <ul class="list-group">
+                <ul class="list-group">
                 {% for bookmark in bookmarks %}
                     <li class="list-group-item">{{ bookmark.url|favicon:16|safe }} <a class="ml-2" href="{{ bookmark.url }}">{{ bookmark.title }}</a> </li>
                 {% endfor %}
-            </ul>
+                </ul>
             {% else %}
-            <li class="list-group-item">
-                <a class="ml-2" href="{% url 'bookmark_add' %}">Add a bookmark</a>
-            </li>
+                <li class="list-group-item">
+                    <a class="ml-2" href="{% url 'bookmark_add' %}">Add a bookmark</a>
+                </li>
             {% endif %}
-        </div>
+                </div>
 
         {% if default_collection %}
             <iframe src="{% url 'collection_embedded' default_collection %}" frameborder=0 scrolling="no" width="100%"></iframe>
@@ -100,21 +100,21 @@
             </ul>
         </div>
 
-    </div>
+            </div>
 
-    <div class="col-lg-5">
+            <div class="col-lg-5">
 
-        <div v-model="events" class="card bg-info">
-            <div class="card-header text-white">Upcoming Calendar Events</div>
-            <ul class="list-group" id="events">
-                <li v-if="waiting" :class="errorClass" class="list-group-item">[[ msg ]]</li>
-                <div v-for="event in events" :key="event.count" v-cloak>
-                    <li class="list-group-item">[[ event.start_pretty ]]: <strong>[[ event.summary ]]</strong> </li>
+                <div class="card bg-info">
+                    <div class="card-header text-white">Upcoming Calendar Events</div>
+                    <ul class="list-group" id="events">
+                        <li v-if="waiting" :class="errorClass" class="list-group-item">[[ msg ]]</li>
+                        <div v-for="event in events" :key="event.count" v-cloak>
+                            <li class="list-group-item">[[ event.start_pretty ]]: <strong>[[ event.summary ]]</strong> </li>
+                        </div>
+                    </ul>
                 </div>
-            </ul>
-        </div>
 
-        <div class="my-3">
+                <div class="my-3">
         {% if random_image_info %}
             <a href="{% url 'blob_detail' random_image_info.uuid %}">
                 <img src="{{ MEDIA_URL }}{{ random_image_info.cover_info.url }}" class="mw-100" height="{{ random_image_info.cover_info.height_cropped }}" width="{{ random_image_info.cover_info.width_cropped }}" />
@@ -122,19 +122,21 @@
         {% else %}
             <a href="{% url 'blob_add' %}">Add a blob</a>
         {% endif %}
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="alert alert-info">
+      {{ quote.quote }}<br /><strong>{{ quote.source }}</strong>
+                </div>
+            </div>
         </div>
 
     </div>
-
-</div>
-
-<div class="row">
-  <div class="col-lg-12">
-    <div class="alert alert-info">
-      {{ quote.quote }}<br /><strong>{{ quote.source }}</strong>
-    </div>
-  </div>
-</div>
 
 {% endblock %}
 
@@ -144,9 +146,10 @@
 
     <script type="text/javascript">
 
+        Vue.mixin({ delimiters: ["[[", "]]"] });
+
         new Vue({
-            delimiters: ["[[", "]]"],
-            el: '#events',
+            el: "#vue-app",
             data() {
                 return {
                     errorClass: "",
@@ -158,23 +161,19 @@
             mounted() {
                 axios.get("{% url 'get_calendar_events' %}")
                      .then(response => {
-                    this.events = response.data;
+                         this.events = response.data;
 
-                    if (response.data.length == 0) {
-                        this.msg = "Your calendar is empty";
-                    } else {
-                        this.waiting = false;
-                        this.msg = "";
-                    };
-                }).catch(error => {
-                    this.msg = error;
-                    this.errorClass = "alert alert-danger";
-                })
+                         if (response.data.length == 0) {
+                             this.msg = "Your calendar is empty";
+                         } else {
+                             this.waiting = false;
+                             this.msg = "";
+                         };
+                     }).catch(error => {
+                         this.msg = error;
+                         this.errorClass = "alert alert-danger";
+                     })
             }
-        });
-
-        new Vue({
-            el: "#vue-messages",
         });
 
     </script>
