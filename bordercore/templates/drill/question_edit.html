@@ -29,7 +29,7 @@
         {% for field in form %}
             {% if field.label == "Tags" %}
 
-                <div id="tagsearch">
+                <search inline-template>
 
                     {% include "common/show_messages.html" %}
 
@@ -53,7 +53,7 @@
                             <span class="form-error">{{ error }}</span>
                         {% endfor %}
                     </div>
-                </div>
+                </search>
 
             {% else %}
 
@@ -75,9 +75,7 @@
         <div class="form-group">
             <div class="col-lg-5 offset-lg-2" id="button-wrapper">
                 <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}" />
-                {% if object.id %}
-                    <input @click="handleClick" class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
-                {% endif %}
+                <input v-if="enableDeleteButton" @click="handleClick" class="btn btn-secondary" type="submit" name="Go" value="Delete" />
                 <a class="btn btn-secondary" href="{% url 'drill_list' %}">Cancel</a>
             </div>
         </div>
@@ -96,15 +94,15 @@
 
     <script type="text/javascript">
 
-        new Vue({
-            delimiters: ["[[", "]]"],
-            el: "#tagsearch",
+        Vue.mixin({ delimiters: ["[[", "]]"] });
+
+        const Search = {
             data() {
                 return {
                     tag: "",
                     tags: [],
                     autocompleteItems: [],
-                    tagsHidden: ""
+                    tagsHidden: "",
                 }
             },
             watch: {
@@ -125,7 +123,7 @@
                                         return { text: a.value };
                                     })
                                 })
-                }
+                },
             },
             mounted() {
                 initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
@@ -141,19 +139,26 @@
                     });
                 }
             }
-        });
+        };
 
-        {% if object.id %}
         new Vue({
-            delimiters: ["[[", "]]"],
-            el: "#button-wrapper",
+            el: "#question-form",
+            data() {
+                return {
+                    enableDeleteButton: {% if object.id %}true{% else %}false{% endif %}
+                }
+            },
             methods: {
                 handleClick: function() {
+                    {% if object.id %}
                     document.getElementById("question-form").action = "{% url 'question_delete' object.id %}";
+                    {% endif %}
                 }
+            },
+            components: {
+                Search
             }
         });
-        {% endif %}
 
     </script>
 
