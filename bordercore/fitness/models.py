@@ -81,7 +81,7 @@ class ExerciseUser(models.Model):
             delta = timezone.now() - exercise.max
 
             # Round up to the nearest day
-            if delta.seconds // 3600 >= 12:
+            if delta.total_seconds() // 3600 >= 12:
                 delta = delta + timedelta(days=1)
 
                 overdue_exercises.append(
