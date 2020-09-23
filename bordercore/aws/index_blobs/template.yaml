@@ -6,6 +6,16 @@ Globals:
     Function:
         Timeout: 360
 
+Parameters:
+  DatabaseEndpointParameter:
+    Type: String
+    Description: The RDS database endpoint
+  DatabasePasswordParameter:
+    Type: String
+    Description: The RDS database password
+  ElasticsearchEndpointParameter:
+    Type: String
+    Description: The Elasticsearch endpoint
 
 Resources:
 
@@ -18,6 +28,16 @@ Resources:
             MemorySize: 2048
             Runtime: python3.7
             Role: !GetAtt IndexBlobLambdaRole.Arn
+            VpcConfig:
+              SecurityGroupIds:
+                - sg-bfa013fe
+              SubnetIds:
+                - subnet-2ff16448
+            Environment:
+                Variables:
+                    ELASTICSEARCH_ENDPOINT: !Ref ElasticsearchEndpointParameter
+                    DATABASE_ENDPOINT: !Ref DatabaseEndpointParameter
+                    DATABASE_PASSWORD: !Ref DatabasePasswordParameter
 
     LambdaFunctionLogGroup:
         Type: "AWS::Logs::LogGroup"
