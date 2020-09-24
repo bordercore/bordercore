@@ -98,7 +98,7 @@ class CollectionDetailView(DetailView):
 
             for blob in blob_list:
                 blob.cover_url = f"{PurePath(blob.get_s3_key()).parent}/cover.jpg"
-                blob.title = blob.get_title(use_filename_if_present=True)
+                blob.title = blob.get_title(use_filename_if_present=True).replace("\"", "\\\"")
 
             context['blob_list'] = blob_list
 

@@ -96,9 +96,8 @@
                         {% for blob in blob_list %}
                         {
                             id: {{ blob.id }},
-                            cover_url: "{{ blob.cover_url}}",
                             uuid: "{{ blob.uuid }}",
-                            title: "{{ blob.title }}",
+                            title: "{{ blob.title|safe }}",
                             collection_note: "{{ blob.collection_note }}",
                             url: "{% url 'blob_detail' blob.uuid %}",
                             cover_url: "{{ MEDIA_URL }}{{ blob.cover_url }}"
