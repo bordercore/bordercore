@@ -131,6 +131,8 @@
                     document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection_add' %}");
                     $("#modalAdd").modal("show");
 
+                    window.setTimeout(() => { document.getElementById("id_name").focus() }, 500);
+
                 },
                 onClickDelete(evt) {
 
