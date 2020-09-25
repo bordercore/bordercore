@@ -474,7 +474,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                     :list="metadataSearch"
                     :filter-by-query=true
                     :debounce=200
-                    placeholder="New Metadata Name"
+                    placeholder="Name"
                     autofocus
                     autocomplete="off"
                     :styles="autoCompleteStyle"
@@ -497,9 +497,9 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
             methods: {
                 metadataSearch(query) {
                     return axios.get("{% url 'metadata_name_search' %}?query=" + query)
-                        .then(response => {
-                            return response.data;
-                        })
+                                .then(response => {
+                                    return response.data;
+                                })
                 },
                 select(datum) {
                     document.getElementById("id_value").focus();
@@ -515,26 +515,15 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
             methods: {
                 onClick(evt) {
                     this.$emit("add-metadata");
-                    this.$nextTick(() => {
-                        this.$parent.$refs.simpleSuggest.$refs.suggestComponent.$el.querySelector("input").blur();
-                        this.$parent.$refs.simpleSuggest.$refs.suggestComponent.setText("");
-                    });
-                    this.$parent.$refs.simpleSuggest.$refs.suggestComponent.input.focus();
                 }
             }
         }
 
         const MetadataInput = {
-            template: '<input type="text" id="id_value" class="form-control" placeholder="New Metadata Value" autocomplete="off" @keydown.enter.prevent="onKeyDown" />',
+            template: '<input type="text" id="id_value" class="form-control" placeholder="Value" autocomplete="off" @keydown.enter.prevent="onKeyDown" />',
             methods: {
                 onKeyDown(evt) {
                     this.$emit("add-metadata");
-                    this.$nextTick(() => {
-                        this.$parent.$refs.simpleSuggest.$refs.suggestComponent.$el.querySelector("input").blur();
-                        this.$parent.$refs.simpleSuggest.$refs.suggestComponent.setText("");
-                    });
-                    this.$parent.$refs.simpleSuggest.$refs.suggestComponent.input.focus();
-                    /* document.getElementById("id_name").focus(); */
                 }
             }
         };
@@ -587,11 +576,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                     valueEl = document.getElementById("id_value");
 
                     if (nameEl.value == "" || valueEl.value == "") {
-                        /* this.$parent.$refs.simpleSuggest.$refs.suggestComponent.input.focus(); */
-                        /* document.getElementById("id_name").focus(); */
-                        /* this.$refs.simpleSuggest.$refs.suggestComponent.$refs.inputSlot.inputElement.focus(); */
                         this.$refs.simpleSuggest.$refs.suggestComponent.$refs.inputSlot.focus();
-
                         return;
                     }
 
@@ -605,6 +590,10 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                     valueEl.value = "";
 
                     this.metadata.unshift(payload);
+
+                    // Clear the autocomplete and give it focus so that another name can be added
+                    this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
+                    window.setTimeout(() => { this.$refs.simpleSuggest.$refs.suggestComponent.inputElement.focus() }, 100);
 
                 },
                 deleteMetadata(counter) {
@@ -653,11 +642,11 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                     if (this.tag.length < 3) return;
 
                     return axios.get("{% url 'tag_search' %}?query=" + this.tag)
-                        .then(response => {
-                            this.autocompleteItems = response.data.map(a => {
-                                return { text: a.value };
-                            })
-                        })
+                                .then(response => {
+                                    this.autocompleteItems = response.data.map(a => {
+                                        return { text: a.value };
+                                    })
+                                })
                 }
             },
             mounted() {
