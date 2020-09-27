@@ -527,11 +527,11 @@ def get_song_location(song):
     else:
         file_info = {'url': '/music/{}/{}.mp3'.format(song.artist, song_title)}
 
-        if not Path('/home/media/{}'.format(file_info['url'])).isfile():
+        if not Path('/home/media/{}'.format(file_info['url'])).is_file():
             # Check this type of file path: /home/media/mp3/Primitives - Crash.mp3
             file_info = {'url': '/mp3/{} - {}.mp3'.format(song.artist, song_title)}
 
-            if not Path('/home/media/{}'.format(file_info['url'])).isfile():
+            if not Path('/home/media/{}'.format(file_info['url'])).is_file():
                 # Check this type of file path: /home/media/mp3/m/Motley Crue - She's Got Looks That Kill.mp3
                 file_info = {'url': '/mp3/{}/{} - {}.mp3'.format(song.artist[0].lower(), song.artist, song_title)}
 
