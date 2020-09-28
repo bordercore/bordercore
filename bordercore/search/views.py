@@ -315,6 +315,7 @@ class SearchTagDetailView(ListView):
                 tag_list_js.append(
                     {
                         "text": tag,
+                        "value": tag,
                         "is_meta": "true" if tag in Tag.get_meta_tags(self.request.user) else "false",
                         "classes": "badge badge-primary",
                     }

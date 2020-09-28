@@ -62,7 +62,7 @@ def edit(request, bookmark_id=None):
     elif bookmark_id:
         action = 'Edit'
         form = BookmarkForm(instance=b, request=request)
-        tags = [{"text": x.name, "is_meta": x.is_meta} for x in b.tags.all()]
+        tags = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in b.tags.all()]
 
     else:
         action = 'Add'

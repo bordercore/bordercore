@@ -67,9 +67,12 @@
                         @tags-changed="newTags => tags = newTags"
                         :autocomplete-items="filteredItems"
                         :add-only-from-autocomplete="false"
-                        placeholder=""
-                    />
-                        <input type="hidden" name="tags" :value="tagsCommaSeparated" />
+                        placeholder="">
+                        <div slot="autocomplete-item" slot-scope="scope" @click="scope.performAdd(scope.item)">
+                            <div>[[ scope.item.text ]]</div>
+                        </div>
+                    </vue-tags-input>
+                    <input type="hidden" name="tags" :value="tagsCommaSeparated" />
                 </div>
             `,
             data() {
@@ -91,7 +94,7 @@
                     return axios.get("{% url 'tag_search' %}?query=" + this.tag)
                         .then(response => {
                             this.autocompleteItems = response.data.map(a => {
-                                return { text: a.value };
+                                return { text: a.text, value: a.value };
                             })
                         })
                 }
@@ -104,7 +107,7 @@
             },
             computed: {
                 tagsCommaSeparated: function() {
-                    return this.tags.map(x => x.text).join(",")
+                    return this.tags.map(x => x.value).join(",")
                 },
                 filteredItems() {
                     return this.autocompleteItems.filter(i => {

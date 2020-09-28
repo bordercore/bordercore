@@ -200,7 +200,7 @@ class QuestionUpdateView(UpdateView):
         context['action'] = 'Edit'
         context['section'] = SECTION
         context['title'] = 'Drill :: Question Edit'
-        context['tags'] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
+        context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
 
     def form_valid(self, form):

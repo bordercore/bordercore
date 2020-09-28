@@ -225,7 +225,7 @@ class BlobUpdateView(UpdateView):
                                                                  & Q(is_private=False))
         context['action'] = 'Edit'
         context['title'] = 'Blob Edit :: {}'.format(self.object.get_title(remove_edition_string=True))
-        context['tags'] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
+        context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
 
     def get(self, request, **kwargs):

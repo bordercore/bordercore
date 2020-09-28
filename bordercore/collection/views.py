@@ -186,7 +186,7 @@ def get_info(request):
                 'name': match.name,
                 'description': match.description,
                 'id': match.id,
-                'tags': [{"text": x.name, "is_meta": x.is_meta} for x in match.tags.all()]
+                'tags': [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in match.tags.all()]
             }
     except ObjectDoesNotExist:
         pass

@@ -31,8 +31,11 @@
                                     :autocomplete-items="filteredItems"
                                     :add-only-from-autocomplete="false"
                                     placeholder="Tags"
-                                    autofocus
-                                />
+                                    autofocus>
+                                    <div slot="autocomplete-item" slot-scope="scope" @click="scope.performAdd(scope.item)">
+                                        <div>[[ scope.item.text ]]</div>
+                                    </div>
+                                </vue-tags-input>
                             </div>
 
                         </div>
@@ -193,7 +196,7 @@
             },
             methods: {
                 tagsChanged(newTags) {
-                    var tags = newTags.map(x => x.text).join(",");
+                    var tags = newTags.map(x => x.value).join(",");
                     window.location="{% url 'kb_search_tag_detail' 666 %}".replace("666", tags);
                 },
                 initItems() {
@@ -204,7 +207,7 @@
                     return axios.get("{% url 'tag_search' %}?query=" + this.tag)
                                 .then(response => {
                                     this.autocompleteItems = response.data.map(a => {
-                                        return { text: a.value };
+                                        return { text: a.text, value: a.value };
                                     }
                                     )
                                 })
@@ -214,7 +217,7 @@
                 initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
                 if (initialTags) {
                     this.tags = initialTags;
-                    this.tagsHidden=initialTags.map(x => x.text).join(",")
+                    this.tagsHidden=initialTags.map(x => x.value).join(",")
                 }
             },
             computed: {
