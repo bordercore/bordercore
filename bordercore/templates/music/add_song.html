@@ -36,8 +36,8 @@
 
     <div class="row">
 
-        <div class="col-lg-7">
-            <p class="lead">{{ action }} Song</p>
+        <div class="col-lg-12">
+            <p class="lead offset-lg-3">{{ action }} Song</p>
         </div>
 
         <div class="col-lg-12">
@@ -46,6 +46,8 @@
                 {% csrf_token %}
 
                 <input type="hidden" name="sha1sum" value="{{ sha1sum }}" />
+
+                {{ form.length.as_hidden }}
 
                 {% if action == 'Upload' %}
                     <div class="form-group">
@@ -68,12 +70,12 @@
                         {% if field.label == "Tags" %}
 
                             <div id="tagsearch">
-                                <div class="form-group {% if field.errors %} error{% endif %}">
-                                    <label class="col-lg-2 col-form-label" for="inputTitle">Tags</label>
+                                <div class="form-group {% if field.errors %} error{% endif %} row">
+                                    <label class="bold col-lg-3 col-form-label text-right" for="inputTitle">Tags</label>
 
                                     <input type="hidden" name="tags" v-model="tagsHidden" />
 
-                                    <div class="col-lg-5 controls" id="vue-wrapper">
+                                    <div class="col-lg-5 controls" id="vue-wrapper" v-cloak>
                                         <vue-tags-input
                                             ref="tagsInputComponent"
                                             v-model="tag"
@@ -95,38 +97,45 @@
 
                         {% elif field.label == 'Year' %}
 
-                            <div class="form-group{% if field.errors %} error{% endif %}">
-                                <label class="col-lg-2 col-form-label" for="inputTitle">Year</label>
+                            <div class="form-group{% if field.errors %} error{% endif %} row">
+                                <label class="bold col-lg-3 col-form-label text-right" for="inputTitle">Year</label>
                                 <div class="col-lg-5">
-                                    <input class="form-control" id="id_year" name="year" type="text" value="{{ info.date.0 }}" />
+                                    <input class="form-control" id="id_year" name="year" type="text" value="{{ info.date.0 }}" autocomplete="off" />
                                 </div>
                             </div>
 
-                            <div class="form-group{% if field.errors %} error{% endif %}">
-                                <label class="col-lg-2 col-form-label" for="inputTitle">Album</label>
+                            <div class="form-group{% if field.errors %} error{% endif %} row">
+                                <label class="bold col-lg-3 col-form-label text-right" for="inputTitle">Album</label>
                                 <div class="col-lg-5">
-                                    <input class="form-control" id="id_album" name="album" type="text" value="{{ info.album.0 }}" />
+                                    <input class="form-control" id="id_album" name="album" type="text" value="{{ info.album.0 }}" autocomplete="off" />
                                 </div>
                             </div>
 
-                            <div class="form-group{% if field.errors %} error{% endif %}">
-                                <label class="col-lg-2 col-form-label" for="inputTitle">Compilation</label>
-                                <div class="col-lg-5">
-                                    <input type="checkbox" name="compilation" id="id_compilation" />
+                            <div class="form-group{% if field.errors %} error{% endif %} row">
+                                <label class="bold col-lg-3 col-form-label text-right" for="inputTitle">Compilation</label>
+                                <div class="col-lg-5 form-inline">
+                                    <input type="checkbox" name="compilation" id="id_compilation" onclick="handleCheckbox(this)" />
                                 </div>
                             </div>
 
-                            <div class="form-group{% if field.errors %} error{% endif %}">
-                                <label class="col-lg-2 col-form-label" for="inputTitle">Original Release Year</label>
+                            <div class="form-group{% if field.errors %} error{% endif %} row hidden" id="album_artist_field">
+                                <label class="bold col-lg-3 col-form-label text-right" for="inputTitle">Album Artist</label>
                                 <div class="col-lg-5">
-                                    <input class="form-control" id="id_original_release_year" name="original_release_year" type="text" />
+                                    <input class="form-control" id="id_album_artist" name="album_artist" type="text" value="Various Artists" autocomplete="off" />
                                 </div>
                             </div>
 
-                        {% else %}
+                            <div class="form-group{% if field.errors %} error{% endif %} row">
+                                <label class="bold col-lg-3 col-form-label text-right" for="inputTitle">Original Release Year</label>
+                                <div class="col-lg-5">
+                                    <input class="form-control" id="id_original_release_year" name="original_release_year" type="text" autocomplete="off" />
+                                </div>
+                            </div>
 
-                            <div class="form-group{% if field.errors %} error{% endif %}">
-                                <label class="col-lg-2 col-form-label" for="inputTitle">{{ field.label }}</label>
+                        {% elif field.label != 'Length' %}
+
+                            <div class="form-group{% if field.errors %} error{% endif %} row">
+                                <label class="bold col-lg-3 col-form-label text-right" for="inputTitle">{{ field.label }}</label>
                                 <div class="col-lg-5 controls">
                                     {{ field }}
                                     {% for error in field.errors %}
@@ -164,6 +173,14 @@
     <script src="https://unpkg.com/@johmun/vue-tags-input/dist/vue-tags-input.js"></script>
 
     <script type="text/javascript">
+
+        function handleCheckbox(element) {
+            if (element.checked) {
+                document.getElementById("album_artist_field").classList.remove("hidden");
+            } else {
+                document.getElementById("album_artist_field").classList.add("hidden");
+            }
+        }
 
         Vue.mixin({ delimiters: ["[[", "]]"] });
 

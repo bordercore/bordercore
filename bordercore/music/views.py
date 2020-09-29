@@ -303,7 +303,7 @@ def add_song(request):
             if album_title:
                 album_artist = form.cleaned_data['artist']
                 if request.POST.get('compilation'):
-                    album_artist = "Various Artists"
+                    album_artist = request.POST['album_artist']
                 try:
                     a = Album.objects.get(user=request.user, title=album_title, artist=album_artist)
                 except ObjectDoesNotExist:

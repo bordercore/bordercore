@@ -50,14 +50,12 @@ class SongForm(ModelForm):
 
     class Meta:
         model = Song
-        fields = ('title', 'artist', 'track', 'year', 'tags', 'comment', 'source', 'times_played', 'length', 'id')
+        fields = ('title', 'artist', 'track', 'year', 'tags', 'comment', 'source', 'length', 'id')
         widgets = {
-            'title': TextInput(attrs={'class': 'form-control'}),
-            'artist': TextInput(attrs={'class': 'form-control'}),
+            'title': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'artist': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'comment': Textarea(attrs={'rows': 2, 'class': 'form-control'}),
             'source': Select(),
-            'track': TextInput(attrs={'class': 'form-control'}),
-            'year': TextInput(attrs={'class': 'form-control'}),
-            'length': TextInput(attrs={'readonly': True, 'class': 'form-control'}),
-            'times_played': TextInput(attrs={'readonly': True, 'class': 'form-control'})
+            'track': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'year': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
         }
