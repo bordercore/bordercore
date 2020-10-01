@@ -74,9 +74,9 @@ def test_books_with_tags(es):
         "_source": ["uuid"]
     }
 
-    found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["total"]["value"]
-
-    assert found == 0, f"{found} books fail this test"
+    found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)['hits']
+    print(found)
+    assert found['total']['value'] == 0, f"{found}['total']['value'] books fail this test, uuid={found['hits'][0]['_id']}"
 
 
 def test_documents_with_dates(es):
