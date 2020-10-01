@@ -215,15 +215,6 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
 
     {{ tags|json_script:"initial-tags"|default:"" }}
 
-    <script type="text/javascript" src="https://unpkg.com/@johmun/vue-tags-input/dist/vue-tags-input.js"></script>
-    <script type="text/javascript" src="https://unpkg.com/vue-simple-suggest@1.10.1"></script>
-    <script src="https://unpkg.com/vuejs-datepicker"></script>
-
-    <!-- Use date-fns.js for date formatting -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/1.9.0/date_fns.min.js"></script>
-
-    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
-
     <script type="text/javascript">
 
         function formatName(match, capture1, capture2) {
@@ -405,11 +396,11 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                 }
             },
             components: {
-                vuejsDatepicker
+                Datepicker
             },
             methods: {
                 customFormatter(date) {
-                    return dateFns.format(new Date(date), "YYYY-MM-DD")
+                    return format(new Date(date), "YYYY-MM-DD")
                 },
                 handlePaste(evt) {
 
@@ -625,8 +616,8 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                     <div slot="autocomplete-item" slot-scope="scope" @click="scope.performAdd(scope.item)">
                         <div>[[ scope.item.text ]]</div>
                     </div>
-                    </vue-tags-input>
-                    <input type="hidden" name="tags" :value="tagsCommaSeparated" />
+                </vue-tags-input>
+                <input type="hidden" name="tags" :value="tagsCommaSeparated" />
             </div>`,
             data() {
                 return {

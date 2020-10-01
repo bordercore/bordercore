@@ -3,7 +3,6 @@
 {% block title %} Notes {% endblock %}
 
 {% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/smoke.min.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/code_style.css" />
 {% endblock %}
 
@@ -39,8 +38,8 @@
 
                             <vue-simple-suggest
                               v-model="query"
-                              display-attribute="name"
-                              value-attribute="name"
+                              display-attribute="text"
+                              value-attribute="text"
                               :list="tagSearch"
                               :filter-by-query=true
                               :debounce=200
@@ -118,13 +117,6 @@
 
     {{ block.super }}
 
-    <script type="text/javascript" src="{{ STATIC_URL }}js/smoke.min.js"></script>
-
-    <script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
-
-    <script type="text/javascript" src="https://unpkg.com/vue-simple-suggest@1.10.1"></script>
-
     <script type="text/javascript">
 
         new Vue({
@@ -152,7 +144,7 @@
                                 })
                 },
                 select(tag) {
-                    window.location='{% url 'notes_list' %}?tagsearch=' + tag.name;
+                    window.location='{% url 'notes_list' %}?tagsearch=' + tag.value;
                 }
             }
         });
