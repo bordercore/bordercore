@@ -38,19 +38,19 @@
 
                 <div class="form-row">
                     <div class="col-auto has-search">
-                        <span class="fas fa-search form-control-feedback"></span>
+                        <font-awesome-icon icon="search" class="form-control-feedback"></font-awesome-icon>
                         <vue-simple-suggest
-                          v-model="query"
-                          display-attribute="value"
-                          value-attribute="value"
-                          :list="tagSearch"
-                          :filter-by-query=true
-                          :debounce=200
-                          :name="inputName"
-                          placeholder="Search"
-                          @select="select"
-                          :styles="autoCompleteStyle"
-                          ></vue-simple-suggest>
+                            v-model="query"
+                            display-attribute="value"
+                            value-attribute="value"
+                            :list="tagSearch"
+                            :filter-by-query=true
+                            :debounce=200
+                            :name="inputName"
+                            placeholder="Search"
+                            @select="select"
+                            :styles="autoCompleteStyle"
+                        ></vue-simple-suggest>
                     </div>
                 </div>
 

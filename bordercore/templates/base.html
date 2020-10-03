@@ -38,7 +38,9 @@
                             <li v-for="item in items" v-cloak>
                                 <div v-if="item.subitems">
                                     <a :href="'#' + subMenuId(item.id)" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle" :id="getSectionId(item.id)">
-                                        <span class="nav-icon text-center"><i class="fas fa-newspaper"></i></span>
+                                        <span class="nav-icon text-center">
+                                            <font-awesome-icon :icon="item.icon"></font-awesome-icon>
+                                        </span>
                                         [[ item.name ]]
                                     </a>
                                     <ul class="collapse list-unstyled" :id="subMenuId(item.id)">
@@ -48,7 +50,9 @@
                                     </ul>
                                 </div>
                                 <a v-else :href="item.url" :id="getSectionId(item.id)">
-                                    <span class="nav-icon text-center "><i :class="item.icon"></i></span>
+                                    <span class="nav-icon text-center">
+                                        <font-awesome-icon :icon="item.icon"></font-awesome-icon>
+                                    </span>
                                     <span>[[ item.name ]]</span>
                                     <span v-if="item.badge > 0" class="badge badge-info float-right">[[ item.badge ]]</span>
                                 </a>
@@ -69,16 +73,17 @@
 
                 <div class="row" style="background-image: linear-gradient(to right, #a3a9cc, #ffffff);">
 
-                    <div class="col-lg-10">
+                    <div class="col-lg-10" id="top-search">
                         <div class="p-2">
                             <form class="form-inline">
-                                <button type="button" id="sidebarCollapse" class="btn btn-info mr-3">
+                                <button type="button" id="sidebarCollapse" class="btn btn-info mr-3" @click="handleSidebarCollapse()">
                                     <i class="fas fa-align-left"></i>
+                                    <font-awesome-icon icon="align-left"></font-awesome-icon>
                                 </button>
                                 <div class="position-relative">
                                     <div class="has-search">
                                         <input type="text" class="form-control" placeholder="Search" />
-                                        <span class="fas fa-search form-control-feedback"></span>
+                                        <font-awesome-icon icon="search" class="form-control-feedback"></font-awesome-icon>
                                     </div>
                                 </div>
                             </form>
@@ -90,6 +95,7 @@
                             <span class="align-text-bottom" id="greeting">Hello <strong>{{ user.get_username }}</strong></span>
                         </div>
                     </div>
+
                 </div>
 
                 <hr class="m-0" />
@@ -126,10 +132,6 @@
                 axios.defaults.xsrfCookieName = "csrftoken"
                 axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
 
-                document.getElementById("sidebarCollapse").addEventListener("click", function(evt) {
-                    document.getElementById("sidebar").classList.toggle("active");
-                });
-
                 Vue.mixin({ delimiters: ["[[", "]]"] });
 
                 const timestamp = new Date().getTime()
@@ -142,27 +144,27 @@
                                     id: "homepage",
                                     name: "Home",
                                     url: "{% url 'homepage' %}",
-                                    icon: "fas fa-home"
+                                    icon: "home"
                                 },
                                 {
                                     id: "bookmarks",
                                     name: "Bookmarks",
                                     url: "{% url 'bookmark_overview' %}",
-                                    icon: "fas fa-bookmark",
+                                    icon: "bookmark",
                                     badge: 0
                                 },
                                 {
                                     id: "nodes",
                                     name: "Nodes",
                                     url: "{% url 'node_overview' %}",
-                                    icon: "fas fa-bookmark",
+                                    icon: "bookmark",
                                     badge: 0
                                 },
                                 {
                                     id: "feed",
                                     name: "Feeds",
                                     url: "",
-                                    icon: "fas fa-newspaper",
+                                    icon: "newspaper",
                                     subitems: [
                                         {
                                             id: "home",
@@ -186,12 +188,12 @@
                                     id: "notes",
                                     name: "Notes",
                                     url: "{% url 'notes_list' %}",
-                                    icon: "fas fa-sticky-note"
+                                    icon: "sticky-note"
                                 },
                                 {
                                     id: "kb",
                                     name: "KB",
-                                    icon: "fas fa-copy",
+                                    icon: "copy",
                                     subitems: [
                                         {
                                             id: "home",
@@ -220,12 +222,12 @@
                                     id: "drill",
                                     name: "Drill",
                                     url: "{% url 'drill_list' %}",
-                                    icon: "fas fa-graduation-cap"
+                                    icon: "graduation-cap"
                                 },
                                 {
                                     id: "music",
                                     name: "Music",
-                                    icon: "fas fa-music",
+                                    icon: "music",
                                     subitems: [
                                         {
                                             id: "home",
@@ -243,7 +245,7 @@
                                     id: "todo",
                                     name: "Todo",
                                     url: "{% url 'todo_list' %}",
-                                    icon: "fas fa-tasks",
+                                    icon: "tasks",
                                     {% if todo_count %}
                                     badge: {{ todo_count|default:0 }}
                                     {% endif %}
@@ -252,7 +254,7 @@
                                     id: "fitness",
                                     name: "Fitness",
                                     url: "{% url 'fitness_summary' %}",
-                                    icon: "fas fa-running",
+                                    icon: "running",
                                     {% if exercise_count %}
                                     badge: {{ exercise_count|default:0 }}
                                     {% endif %}
@@ -261,7 +263,7 @@
                                     id: "prefs",
                                     name: "Prefs",
                                     url: "{% url 'prefs' %}",
-                                    icon: "fas fa-briefcase"
+                                    icon: "briefcase"
                                 },
 
                             ],
@@ -308,6 +310,15 @@
                         window.setInterval(this.getUntaggedBookmarkCount, 60000);
                     }
                 }
+
+                new Vue({
+                    el: "#top-search",
+                    methods: {
+                        handleSidebarCollapse() {
+                            document.getElementById("sidebar").classList.toggle("active");
+                        }
+                    },
+                });
 
                 new Vue({
                     el: "#navbar",

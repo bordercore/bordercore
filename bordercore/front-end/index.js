@@ -35,8 +35,24 @@ window.jQuery= jQuery;
 
 import "bootstrap";
 
-import "@fortawesome/fontawesome-free/js/fontawesome"
-import "@fortawesome/fontawesome-free/js/solid"
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faAlignLeft, faBookmark, faBriefcase, faCopy, faEllipsisV, faHome, faGraduationCap, faMusic, faNewspaper, faPlus, faRunning, faSearch, faStickyNote, faTasks } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+library.add(faAlignLeft);
+library.add(faBookmark);
+library.add(faBriefcase);
+library.add(faCopy);
+library.add(faEllipsisV);
+library.add(faHome);
+library.add(faGraduationCap);
+library.add(faMusic);
+library.add(faNewspaper);
+library.add(faPlus);
+library.add(faRunning);
+library.add(faSearch);
+library.add(faStickyNote);
+library.add(faTasks);
+Vue.component("font-awesome-icon", FontAwesomeIcon);
 
 import { format } from "date-fns";
 window.format = format;

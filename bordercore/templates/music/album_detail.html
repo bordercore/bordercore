@@ -29,21 +29,24 @@
 
 {% block content %}
 
-<div class="row">
-    <div class="col-lg-6">
+    <div class="row">
+        <div class="col-lg-6">
         {% block breadcrumbs %}
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item">
-                    <a href="{% url 'music_list' %}">
-                        <span class="fas fa-home"></span>
-                    </a>
-                </li>
-                <li class="breadcrumb-item"> <a href="{% url 'artist_detail' album.artist %}">{{ album.artist }} </li></a> </li>
-                <li class="breadcrumb-item active"> {{ album.title }} </li>
-            </ol>
+            <div id="subnavbar">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'music_list' %}">
+                            <font-awesome-icon icon="home"></font-awesome-icon>
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'artist_detail' album.artist %}">{{ album.artist }}</a>
+                    </li>
+                    <li class="breadcrumb-item active"> {{ album.title }} </li>
+                </ol>
+            </div>
         {% endblock %}
-
-    </div>
+        </div>
     {% include "music/header.html" %}
 </div>
 
@@ -76,8 +79,13 @@
 
     <script type="text/javascript" charset="utf-8">
 
+        Vue.mixin({ delimiters: ["[[", "]]"] });
+
         new Vue({
-            delimiters: ["[[", "]]"],
+            el: "#subnavbar",
+        });
+
+        new Vue({
             el: "#song_list",
             methods: {
                 onClick(evt) {
