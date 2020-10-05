@@ -25,7 +25,10 @@ class SortOrderMixin(models.Model):
 
         super().delete()
 
+        filter_kwargs = {self.field_name: getattr(self, self.field_name)}
+
         self.get_queryset().filter(
+            **filter_kwargs,
             sort_order__gte=self.sort_order
         ).update(
             sort_order=F("sort_order") - 1
@@ -33,9 +36,15 @@ class SortOrderMixin(models.Model):
 
     def save(self, *args, **kwargs):
 
+        filter_kwargs = {self.field_name: getattr(self, self.field_name)}
+
         # Don't do this for new objects
         if self.pk is None:
-            self.get_queryset().all().update(sort_order=F("sort_order") + 1)
+            self.get_queryset().filter(
+                **filter_kwargs
+            ).update(
+                sort_order=F("sort_order") + 1
+            )
 
         super().save(*args, **kwargs)
 
@@ -44,7 +53,7 @@ class SortOrderMixin(models.Model):
         qs = self.get_queryset()
 
         # Equivalent to, say, node=self.node
-        kwargs = {self.field_name: getattr(self, self.field_name)}
+        filter_kwargs = {self.field_name: getattr(self, self.field_name)}
 
         if self.sort_order == new_order:
             return
@@ -52,7 +61,7 @@ class SortOrderMixin(models.Model):
         with transaction.atomic():
             if self.sort_order > int(new_order):
                 qs.filter(
-                    **kwargs,
+                    **filter_kwargs,
                     sort_order__lt=self.sort_order,
                     sort_order__gte=new_order,
                 ).exclude(
@@ -62,7 +71,7 @@ class SortOrderMixin(models.Model):
                 )
             else:
                 qs.filter(
-                    **kwargs,
+                    **filter_kwargs,
                     sort_order__lte=new_order,
                     sort_order__gt=self.sort_order,
                 ).exclude(
