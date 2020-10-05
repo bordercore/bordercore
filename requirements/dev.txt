@@ -9,6 +9,7 @@ nplusone==1.0.0
 pytest-django==3.9.0
 notebook==6.0.2
 tornado==5.0
+Werkzeug==0.16.0
 
 # The latest version of this package in PyPi isn't compatible with Django 1.10.
 # However, the master branch on Github is compatible, so use that instead.
