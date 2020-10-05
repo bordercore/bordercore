@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from django.apps import apps
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.db import models
@@ -48,8 +49,7 @@ class Collection(TimeStampedModel):
 
     def get_blob(self, position):
 
-        # import here to avoid circular dependency
-        from blob.models import Blob
+        Blob = apps.get_model("blob", "Blob")
 
         if (position >= len(self.blob_list) or position < 0):
             return {}

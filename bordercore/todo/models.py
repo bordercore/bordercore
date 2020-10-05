@@ -3,6 +3,7 @@ from functools import cmp_to_key
 
 from elasticsearch import Elasticsearch
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
@@ -76,8 +77,8 @@ class Todo(TimeStampedModel):
 
     def delete(self):
 
-        # Put the imports here to avoid circular dependencies
-        from todo.models import TagTodoSortOrder
+        TagTodoSortOrder = apps.get_model("todo", "TagTodoSortOrder")
+
         for x in TagTodoSortOrder.objects.filter(todo=self):
             x.delete()
 
@@ -151,8 +152,8 @@ def post_save_wrapper(sender, instance, **kwargs):
 
 def tags_changed(sender, **kwargs):
 
-    # Put the imports here to avoid circular dependencies
-    from todo.models import TagTodo, TagTodoSortOrder
+    TagTodoSortOrder = apps.get_model("todo", "TagTodoSortOrder")
+    TagTodo = apps.get_model("todo", "TagTodo")
 
     if kwargs["action"] == "post_add":
 

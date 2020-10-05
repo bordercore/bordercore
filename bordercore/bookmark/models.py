@@ -5,6 +5,7 @@ import re
 import boto3
 from elasticsearch import Elasticsearch
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
@@ -27,7 +28,6 @@ class DailyBookmarkJSONField(JSONField):
         else:
             return None
 
-
 class Bookmark(TimeStampedModel):
     url = models.TextField()
     title = models.TextField()
@@ -45,8 +45,8 @@ class Bookmark(TimeStampedModel):
 
     def delete(self):
 
-        # Put the imports here to avoid circular dependencies
-        from tag.models import TagBookmarkSortOrder
+        TagBookmarkSortOrder = apps.get_model("tag", "TagBookmarkSortOrder")
+
         for x in TagBookmarkSortOrder.objects.filter(bookmark=self):
             x.delete()
 
@@ -146,8 +146,7 @@ class Bookmark(TimeStampedModel):
     @staticmethod
     def get_tagged_bookmarks(user, tag_name):
 
-        # Put the imports here to avoid circular dependencies
-        from tag.models import TagBookmark
+        TagBookmark = apps.get_model("tag", "TagBookmark")
 
         tag = Tag.objects.get(name=tag_name)
         tagbookmark = TagBookmark.objects.get(user=user, tag=tag)
@@ -169,8 +168,8 @@ class Bookmark(TimeStampedModel):
 
 def tags_changed(sender, **kwargs):
 
-    # Put the imports here to avoid circular dependencies
-    from tag.models import TagBookmark, TagBookmarkSortOrder
+    TagBookmarkSortOrder = apps.get_model("tag", "TagBookmarkSortOrder")
+    TagBookmark = apps.get_model("tag", "TagBookmark")
 
     if kwargs["action"] == "post_add":
 

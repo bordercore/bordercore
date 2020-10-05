@@ -24,8 +24,7 @@ class Tag(models.Model):
         return [x.name for x in tags]
 
 
-# Add the import here to avoid a circular dependency
-#  between Tag and Bookmark
+# Add the import here to avoid a circular dependency between Tag and Bookmark
 from bookmark.models import Bookmark  # isort:skip
 
 
