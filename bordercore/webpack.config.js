@@ -1,7 +1,7 @@
 const path = require("path");
 // const webpack = require("webpack")
-
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+const CompressionPlugin = require('compression-webpack-plugin');
 
 config = {
     entry: "./front-end/index.js",
@@ -15,9 +15,10 @@ config = {
             vue$: "vue/dist/vue.esm.js"
         }
     },
-    // plugins: [
-    //     new BundleAnalyzerPlugin({analyzerPort: 9999})
-    // ]
+    plugins: [
+        // new BundleAnalyzerPlugin({analyzerPort: 9999}),
+        new CompressionPlugin()
+    ]
 };
 
 module.exports = (env, argv) => {

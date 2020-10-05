@@ -121,9 +121,9 @@
         {% block javascript %}
 
             {% if debug %}
-                <script type="text/javascript" src="{{ STATIC_URL }}js/index-bundle-dev.js"></script>
+                <script type="text/javascript" src="{{ STATIC_URL }}js/index-bundle-dev.js.gz"></script>
             {% else %}
-                <script type="text/javascript" src="{{ STATIC_URL }}js/index-bundle.js"></script>
+                <script type="text/javascript" src="{{ STATIC_URL }}js/index-bundle.js.gz"></script>
             {% endif %}
 
 
