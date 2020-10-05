@@ -1,0 +1,46 @@
+import pytest
+
+import django
+from django.apps import apps
+from django.db.models import Count, Max, Min
+
+pytestmark = pytest.mark.data_quality
+
+django.setup()
+
+
+def test_sort_order_mixin():
+    """
+    This test checks for three things for each model that inherits from "SortOrderMixin"
+
+    min(sort_order) = 1
+    max(sort_order) should equal the total count
+    No duplicate sort_order values
+    """
+
+    models = apps.get_models()
+
+    for model in models:
+        if "SortOrderMixin" in [x.__name__ for x in model.__bases__]:
+
+            field_names = model.objects.order_by(model.field_name).distinct(model.field_name)
+
+            for field_name in field_names:
+
+                filter_kwargs = {field_name.field_name: getattr(field_name, field_name.field_name)}
+                count = model.objects.filter(**filter_kwargs).count()
+
+                assert model.objects.filter(
+                    **filter_kwargs
+                ).aggregate(
+                    Min("sort_order")
+                )["sort_order__min"] == 1, f"Min(sort_order) is not 1 for {model}, {getattr(field_name, field_name.field_name)}"
+
+                assert model.objects.filter(
+                    **filter_kwargs
+                ).aggregate(
+                    Max("sort_order")
+                )["sort_order__max"] == count, f"Max(sort_order) != total count for {model}, {getattr(field_name, field_name.field_name)}"
+
+                q = model.objects.values("sort_order", field_name.field_name).order_by().annotate(dcount=Count("sort_order")).filter(dcount__gt=1)
+                assert len(q) == 0, "Multiple sort_order values found for {model}, {getattr(field_name, field_name.field_name)}"
