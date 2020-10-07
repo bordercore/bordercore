@@ -3,6 +3,7 @@
 #  parse the sha1sum and download it from S3 to a
 #  corresponding location on local file storage.
 
+import datetime
 import email
 import json
 import logging
@@ -33,6 +34,7 @@ logger = logging.getLogger("bordercore.sync_s3_to_wumpus")
 BLOB_DIR = "/home/media"
 
 s3_client = boto3.client("s3")
+s3_resource = boto3.resource("s3")
 
 
 def get_info_from_message(buffer):
@@ -91,8 +93,16 @@ def copy_object_to_wumpus(info):
             logger.info("  Skipping. File is cover image.")
         else:
             makedirs(f"{BLOB_DIR}/{dirs}", exist_ok=True)
+
             # Amazon replaces spaces with plus signs, so we must change them back
             s3_client.download_file(info["bucket"], key, file_path)
+
+            # Modify the file's mtime to match what's stored in S3 metadata
+            obj = s3_resource.Object(bucket_name=info["bucket"], key=key)
+            s3_modified = int(obj.metadata.get("file-modified", None))
+            atime = os.stat(file_path).st_atime
+            mtime = datetime.datetime.fromtimestamp(s3_modified)
+            os.utime(file_path, times=(atime, mtime.timestamp()))
 
 
 buffer = ""
