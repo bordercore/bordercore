@@ -77,11 +77,12 @@ def test_get_cover_info(blob_image_factory, blob_pdf_factory):
     assert cover_info["width"] == 1600
 
     cover_info = Blob.get_cover_info(blob_image_factory.user, blob_image_factory.sha1sum, size="small")
-    assert cover_info["url"] == f"{blob_image_factory.get_parent_dir()}/cover.jpg"
+    assert cover_info["url"] == "https://blobs.bordercore.com/1c/1ce691807b81b83c89c157f89de08da3815bb550/cover.jpg"
 
     cover_info_pdf = Blob.get_cover_info(blob_pdf_factory.user, blob_pdf_factory.sha1sum)
-    assert cover_info_pdf["url"] == f"{blob_pdf_factory.get_parent_dir()}/cover-large.jpg"
+    assert cover_info_pdf["url"] == "https://blobs.bordercore.com/c3/c315bac6f171d8e9cf52613d89a950b5161d8c16/cover-large.jpg"
+
     cover_info_pdf = Blob.get_cover_info(blob_pdf_factory.user, blob_pdf_factory.sha1sum, size="small")
-    assert cover_info_pdf["url"] == f"{blob_pdf_factory.get_parent_dir()}/cover.jpg"
+    assert cover_info_pdf["url"] == "https://blobs.bordercore.com/c3/c315bac6f171d8e9cf52613d89a950b5161d8c16/cover.jpg"
 
     assert Blob.get_cover_info(blob_pdf_factory.user, None) == {}

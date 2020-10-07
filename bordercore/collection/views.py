@@ -97,7 +97,13 @@ class CollectionDetailView(DetailView):
                 )).order_by(order)
 
             for blob in blob_list:
-                blob.cover_url = f"{PurePath(blob.get_s3_key()).parent}/cover.jpg"
+                # blob.cover_url = f"{PurePath(blob.get_s3_key()).parent}/cover.jpg"
+                blob.cover_url = Blob.get_cover_info(
+                    self.request.user,
+                    blob.sha1sum,
+                    size="small"
+                )["url"]
+
                 blob.title = blob.get_title(use_filename_if_present=True).replace("\"", "\\\"")
 
             context['blob_list'] = blob_list

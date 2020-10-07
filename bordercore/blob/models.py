@@ -368,7 +368,7 @@ class Blob(TimeStampedModel, AmazonMixin):
 
         b = Blob.objects.get(user=user, sha1sum=sha1sum)
 
-        prefix = PurePath(b.get_s3_key()).parent
+        prefix = settings.COVER_URL + f"{sha1sum[:2]}/{sha1sum}"
 
         file_extension = PurePath(b.file.name).suffix
 
@@ -378,13 +378,13 @@ class Blob(TimeStampedModel, AmazonMixin):
             # Is the blob itself an image?
             if file_extension[1:].lower() in ["gif", "jpg", "jpeg", "png"]:
                 # For the large version, use the image itself
-                url = b.get_s3_key()
-                info = Blob.get_image_dimensions(url, max_cover_image_width)
+                url = f"{settings.MEDIA_URL}{b.get_s3_key()}"
+                info = Blob.get_image_dimensions(b.get_s3_key(), max_cover_image_width)
             else:
                 url = f"{prefix}/cover-{size}.jpg"
-                info = Blob.get_image_dimensions(url, max_cover_image_width)
+                info = Blob.get_image_dimensions(f"{PurePath(b.get_s3_key()).parent}/cover-{size}.jpg", max_cover_image_width)
 
-        info["url"] = urllib.parse.quote(url)
+        info["url"] = url
 
         return info
 

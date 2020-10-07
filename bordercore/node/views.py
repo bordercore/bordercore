@@ -61,7 +61,7 @@ def get_blob_list(request, uuid):
                 "url": reverse('blob_detail', kwargs={"uuid": str(x.uuid)}),
                 "uuid": x.uuid,
                 "note": x.sortordernodeblob_set.get(node=node).note,
-                "cover_url": settings.MEDIA_URL + Blob.get_cover_info(
+                "cover_url": Blob.get_cover_info(
                     request.user,
                     x.sha1sum,
                     size="small"

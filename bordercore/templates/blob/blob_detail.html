@@ -104,7 +104,7 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
                         {% for blob in collection.blob_list %}
                             <li class="list-group-item">
                                 {% if blob.has_thumbnail_url %}
-                                    <img src="{{ MEDIA_URL }}{{ blob.get_cover_url_small }}" />
+                                    <img src="{{ blob.get_cover_url_small }}" />
                                 {% endif %}
                                 <a href="{% url 'blob_detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
                             </li>
@@ -180,7 +180,7 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
             <div class="modal-content">
                 <div class="modal-body">
                     <div>
-                        <img src="{{ MEDIA_URL }}{{ cover_info.url }}" style="width: 100%"/>
+                        <img src="{{ cover_info.url }}" style="width: 100%"/>
                     </div>
                 </div>
             </div>
@@ -218,7 +218,7 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
                 {% endif %}
 
                 {% if cover_info %}
-                    <img src="{{ MEDIA_URL }}{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" data-toggle="modal" data-target="#myModal3" />
+                    <img src="{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" data-toggle="modal" data-target="#myModal3" />
                 {% endif %}
 
                 <br /><br />

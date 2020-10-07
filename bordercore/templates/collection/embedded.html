@@ -51,7 +51,7 @@
                         title: "{{ blob.title }}",
                         collection_note: "{{ blob.collection_note }}",
                         url: "{% url 'blob_detail' blob.uuid %}",
-                        cover_url: "{{ MEDIA_URL }}{{ blob.cover_url }}"
+                        cover_url: "{{ blob.cover_url }}"
                     },
                     {% endfor %}
                 ]

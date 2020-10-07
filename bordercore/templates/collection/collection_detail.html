@@ -53,7 +53,7 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <div>
-                        <img id="gallery_image" src="{{ MEDIA_URL }}{{ first_blob_cover_info.url }}" style="width: 100%"/>
+                        <img id="gallery_image" src="{{ first_blob_cover_info.url }}" style="width: 100%"/>
                     </div>
                 </div>
             </div>
@@ -97,7 +97,7 @@
                             title: "{{ blob.title|safe }}",
                             collection_note: "{{ blob.collection_note }}",
                             url: "{% url 'blob_detail' blob.uuid %}",
-                            cover_url: "{{ MEDIA_URL }}{{ blob.cover_url }}"
+                            cover_url: "{{ blob.cover_url }}"
                         },
                         {% endfor %}
                     ]
@@ -164,7 +164,7 @@
 
                         axios.get("{% url "get_blob" object.id 666 %}".replace(/666/, current_index))
                              .then(response => {
-                                 document.getElementById("gallery_image").setAttribute("src", "{{ MEDIA_URL }}" + response.data.cover_info.url);
+                                 document.getElementById("gallery_image").setAttribute("src", response.data.cover_info.url);
                              })
                     }
                 });

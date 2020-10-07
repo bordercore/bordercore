@@ -15,7 +15,7 @@
     {% if object %}
 
         {% if cover_info %}
-            <img id="amazon-cover-image" src="{{ MEDIA_URL }}{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" class="mw-100" />
+            <img id="amazon-cover-image" src="{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" class="mw-100" />
             <br /><br />
         {% endif %}
 

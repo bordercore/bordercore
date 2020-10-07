@@ -126,6 +126,7 @@ MEDIA_ROOT = 'blobs'
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
 MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
+COVER_URL = 'https://blobs.bordercore.com/'
 MEDIA_URL_MUSIC = f'https://{AWS_BUCKET_NAME_MUSIC}.s3.amazonaws.com/'
 
 ROOT_URLCONF = 'config.urls'
