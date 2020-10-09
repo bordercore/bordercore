@@ -17,7 +17,7 @@
 
     <br />
 
-    {% if metadata.Author %}by <span id="author">{{ metadata.Author }}</span><br />{% endif %}
+    {% if author %}by <span id="author">{{ author }}</span><br />{% endif %}
 
     {% if date %}{{ date }}<br /><br />{% endif  %}
 
@@ -40,17 +40,14 @@
 
     {% endif %}
 
-    {% if metadata.items or content_type or object.sha1sum %}
-
-        <div id="meta-box">
+{% if show_metabox %}
+    <div id="meta-box">
 
             {% for key, values in metadata.items %}
-                {% if not key in fields_ignore %}
-                    <div>
-                        <strong class="metadata_name">{{ key }}</strong><br />
-                        <span class="metadata_value">{{ values }}</span>
-                    </div>
-                {% endif %}
+                <div>
+                    <strong class="metadata_name">{{ key }}</strong><br />
+                    <span class="metadata_value">{{ values }}</span>
+                </div>
             {% endfor %}
             {% if content_type %}
                 <div>
@@ -83,7 +80,7 @@
 
         </div>
 
-    {% endif %}
+{% endif %}
 
     {% if object.note %}
         <div id="blob_note">{{ object.get_note|safe }}</div>

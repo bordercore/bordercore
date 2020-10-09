@@ -144,7 +144,11 @@ class BlobDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(BlobDetailView, self).get_context_data(**kwargs)
         context['id'] = self.object.id
-        context['metadata'] = self.object.get_metadata()
+
+        context["metadata"] = {key: value for (key, value) in self.object.get_metadata().items()
+                               if key not in ["is_book", "Url", "Publication Date", "Title", "Author"]}
+
+        context['author'] = self.object.get_metadata().get("Author", None)
         context['urls'] = self.object.get_urls()
 
         from lib.time_utils import get_date_from_pattern
@@ -171,7 +175,6 @@ class BlobDetailView(DetailView):
             else:
                 messages.add_message(self.request, messages.ERROR, 'Blob not found in Elasticsearch')
         context['caption'] = self.object.get_title(remove_edition_string=True)
-        context['fields_ignore'] = ['is_book', 'Url', 'Publication Date', 'Title', 'Author']
 
         context['current_collections'] = Collection.objects.filter(user=self.request.user, blob_list__contains=[{'id': self.object.id}])
 
@@ -194,6 +197,12 @@ class BlobDetailView(DetailView):
             context["section"] = "notes"
         else:
             context['section'] = SECTION
+
+        if "content_type" in context or self.object.sha1sum or context["metadata"]:
+            context["show_metabox"] = True
+        else:
+            context["show_metabox"] = False
+
         return context
 
     def get_queryset(self):
