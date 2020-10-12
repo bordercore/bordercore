@@ -25,7 +25,7 @@
                     <input type="hidden" id="add-to-remote-from-favorite-tagname" name="tag" />
 
                     <div class="form-group col-auto has-search">
-                        <font-awesome-icon icon="search" class="form-control-feedback"></font-awesome-icon>
+                        <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
                         <search inline-template @search-term="searchTerm" @search-tag="searchTag" @get-page="getPage" ref="search">
                             <div>
                                 <vue-simple-suggest ref="suggestComponent"
@@ -52,7 +52,7 @@
                     </div>
 
                     <button-group inline-template @get-page="getPage">
-                        <div class="btn-group">
+                        <div class="btn-group ml-5">
                             <a class="btn btn-secondary" id="btn-add" href="{% url 'bookmark_add' %}">Add</a>
                             <input type="button" class="btn btn-secondary" id="btn-edit" value="Edit" :disabled="buttonsDisabled" @click="onClickEdit" />
                             <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="buttonsDisabled" @click="onClickDelete" />
@@ -92,7 +92,7 @@
                         <div>
                             <draggable v-model="favoriteTags" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
                                 <transition-group type="transition">
-                                    <li v-for="tag in favoriteTags" class="list-group-item" :class="{ active: tag.isActive, draggable: tag.isDraggable, 'bookmark-tag-list-header': tag.isHeader }" :data-id="tag.id" :key="tag.id" v-cloak>
+                                    <li v-for="tag in favoriteTags" class="list-group-item list-group-item-secondary" :class="{ active: tag.isActive, draggable: tag.isDraggable, 'bookmark-tag-list-header': tag.isHeader }" :data-id="tag.id" :key="tag.id" v-cloak>
                                         <template v-if="tag.isHeader">
                                             [[ tag.name ]]
                                         </template>
@@ -134,7 +134,7 @@
                                 <tbody is="draggable" v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" :disabled="disableSort">
                                     <transition-group type="transition">
                                         <tr v-for="bookmark in bookmarkList" :data-id="bookmark.id" :key="bookmark.id" class="bookmark-list" @click="onClick" v-cloak>
-                                            <td class="bookmark-list-date p-2">
+                                            <td class="bookmark-list-date p-2 text-info">
                                                 <span>[[ bookmark.created ]]</span>
                                             </td>
                                             <td class="bookmark-list-favicon p-2">

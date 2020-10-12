@@ -1,0 +1,25 @@
+// Bootstrap variables
+
+$gray-900: #212529;
+
+$gray-700: #495057;
+
+@import "../../node_modules/bootswatch/dist/cerulean/variables";
+
+// Import the Bootstrap core
+// (This file imports all Bootstrap core's variables and components from the Bootstrap core package installed via npm)
+@import "../../node_modules/bootstrap/scss/bootstrap.scss";
+
+@import "../../node_modules/bootswatch/dist/cerulean/bootswatch";
+
+// My variables
+$form-background-color: $gray-300;
+$light-blue: #212132;
+$list-group-item-secondary: $white;
+$markdown-background-color: $gray-200;
+$markdown-border-color: $black;
+$modal-background-color: $white;
+$selected-background-color: $cyan;
+
+// Import core SCSS
+@import "./bordercore.scss";

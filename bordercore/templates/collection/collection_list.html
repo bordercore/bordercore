@@ -59,7 +59,7 @@
                     {% csrf_token %}
                     {% for field in form %}
                         <div class="form-group{% if field.errors %} error{% endif %} row">
-                            <label class="col-lg-2 col-form-label" for="inputTitle">{{ field.label }}</label>
+                            <label class="col-lg-3 col-form-label" for="inputTitle">{{ field.label }}</label>
 
                             <div class="col-lg-7">
 

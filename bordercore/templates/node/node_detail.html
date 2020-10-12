@@ -30,7 +30,7 @@
                             <ul class="list-group list-group-flush" id="sort-container-tags">
                             <draggable v-model="blobList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
                                 <transition-group type="transition">
-                                    <li v-for="(blob, index) in blobList" class="list-group-item draggable" :data-uuid="blob.uuid" :key="blob.uuid" v-cloak v-b-hover="handleHover">
+                                    <li v-for="(blob, index) in blobList" class="list-group-item list-group-item-secondary text-info draggable" :data-uuid="blob.uuid" :key="blob.uuid" v-cloak v-b-hover="handleHover">
                                         <div class="dropdownmenu hidden">
 
                                             <dropdown-menu v-model="show">
@@ -62,7 +62,7 @@
                                         </div>
 
                                     </li>
-                                    <div v-if="blobList.length == 0" :key="1" v-cloak>
+                                    <div class="text-light" v-if="blobList.length == 0" :key="1" v-cloak>
                                       Nothing to show
                                     </div>
                                 </transition-group>
@@ -86,12 +86,12 @@
                             <ul class="list-group list-group-flush" id="sort-container-tags">
                                 <draggable v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
                                     <transition-group type="transition">
-                                        <li v-for="(bookmark, index) in bookmarkList" class="list-group-item draggable" :data-uuid="bookmark.id" :key="bookmark.id" v-cloak  v-b-hover="handleHover">
+                                        <li v-for="(bookmark, index) in bookmarkList" class="list-group-item list-group-item-secondary text-info draggable" :data-uuid="bookmark.id" :key="bookmark.id" v-cloak  v-b-hover="handleHover">
                                             <div class="dropdownmenu hidden">
                                                 <dropdown-menu v-model="show">
                                                     <font-awesome-icon icon="ellipsis-v" style="width: 22px"></font-awesome-icon>
                                                     <div slot="dropdown">
-                                                        <a class="dropdown-item" href="#" @click="removeBookmark(bookmark.id)">Remove</a>
+                                                        <a class="dropdown-item text-success" href="#" @click="removeBookmark(bookmark.id)">Remove</a>
                                                         <a v-if="!bookmark.note" class="dropdown-item" href="#" @click="addNote(bookmark.id, index)">Add note</a>
                                                     </div>
                                                 </dropdown-menu>
@@ -111,7 +111,7 @@
                                                 </div>
                                             </div>
                                         </li>
-                                        <div v-if="bookmarkList.length == 0" :key="1" v-cloak>
+                                        <div class="text-light" v-if="bookmarkList.length == 0" :key="1" v-cloak>
                                           No links
                                         </div>
                                     </transition-group>
@@ -130,7 +130,7 @@
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h4 class="modal-title" id="myModalLabel">Add blob</h4>
+                            <h4 class="modal-title _text-light" id="myModalLabel">Add blob</h4>
                             <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
                         </div>
                         <div class="modal-body">

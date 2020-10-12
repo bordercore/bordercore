@@ -20,28 +20,14 @@ class UserProfile(models.Model):
     homepage_default_collection = models.OneToOneField(Collection, related_name='default_collection', null=True, on_delete=models.PROTECT)
 
     THEMES = [
-        ("cerulean", "cerulean"),
-        ("cosmo", "cosmo"),
-        ("darkly", "darkly"),
-        ("flatly", "flatly"),
-        ("journal", "journal"),
-        ("litera", "litera"),
-        ("minty", "minty"),
-        ("pulse", "pulse"),
-        ("slate", "slate"),
-        ("sandstone", "sandstone"),
-        ("simplex", "simplex"),
-        ("solar", "solar"),
-        ("spacelab", "spacelab"),
-        ("superhero", "superhero"),
-        ("united", "united"),
-        ("yeti", "yeti"),
+        ("light", "light"),
+        ("dark", "dark"),
     ]
 
     theme = models.CharField(
         max_length=20,
         choices=THEMES,
-        default="flatly",
+        default="light",
     )
 
     def get_tags(self):

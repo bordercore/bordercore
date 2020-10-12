@@ -6,14 +6,11 @@
         <meta charset="utf-8" />
         <title>Bordercore :: {{ title|default:"Bordercore" }}</title>
 
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-glyphicons.css" />
-
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.0/{{ request.user.userprofile.theme }}/bootstrap.min.css" />
 
         <link rel="stylesheet" type="text/css" href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
 
-        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bordercore.css" />
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bordercore-{{ request.user.userprofile.theme }}.css" />
 
         {% block extra_head %}{% endblock %}
 
@@ -71,7 +68,7 @@
 
             <div class="container-fluid" id="content">
 
-                <div class="row" style="background-image: linear-gradient(to right, #a3a9cc, #ffffff);">
+                <div class="row">
 
                     <div class="col-lg-10" id="top-search">
                         <div class="p-2">
@@ -83,7 +80,7 @@
                                 <div class="position-relative">
                                     <div class="has-search">
                                         <input type="text" class="form-control" placeholder="Search" />
-                                        <font-awesome-icon icon="search" class="form-control-feedback"></font-awesome-icon>
+                                        <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
                                     </div>
                                 </div>
                             </form>

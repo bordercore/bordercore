@@ -16,7 +16,7 @@
         <draggable v-model="notes" @change="onChange" ghost-class="sortable-ghost">
             <transition-group type="transition">
                 <div v-for="note in notes" :key="note.uuid" v-cloak>
-                    <li class="list-group-item" :data-uuid="note.uuid">
+                    <li class="list-group-item list-group-item-secondary" :data-uuid="note.uuid">
                         <a :href="note.url">[[ note.title ]]</a>
                     </li>
                 </div>
@@ -35,7 +35,7 @@
                     <div class="form-row">
 
                         <div class="col-auto has-search">
-                            <font-awesome-icon icon="search" class="form-control-feedback"></font-awesome-icon>
+                            <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
 
                             <vue-simple-suggest
                               v-model="query"
@@ -72,7 +72,7 @@
                         <a href="{% url 'blob_detail' note.uuid %}">{{ note.title|default:"Note Title" }}</a>
                     </h2>
 
-                    <span class="glyphicon glyphicon-time"></span> <span class="muted"> {{ note.date }} </span>
+                    <span class="glyphicon glyphicon-time"></span> <span> {{ note.date }} </span>
 
                     <br /><br />
 
@@ -81,7 +81,7 @@
                     </div>
 
                     {% for tag in note.tags %}
-                        <a id="tag" class="badge badge-primary" href="{% url 'notes_list' %}?tagsearch={{ tag }}">{{ tag }}</a>
+                        <a id="tag" class="badge badge-info" href="{% url 'notes_list' %}?tagsearch={{ tag }}">{{ tag }}</a>
                     {% endfor %}
 
                     <br /><br />

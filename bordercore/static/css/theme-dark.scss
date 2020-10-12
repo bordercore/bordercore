@@ -1,0 +1,27 @@
+// Bootstrap variables
+
+$gray-900: #1e1e2e;
+
+$gray-700: #27293d;
+
+@import "../../node_modules/bootswatch/dist/darkly/variables";
+
+$secondary: $gray-500;
+
+// Import the Bootstrap core
+// (This file imports all Bootstrap core's variables and components from the Bootstrap core package installed via npm)
+@import "../../node_modules/bootstrap/scss/bootstrap.scss";
+
+@import "../../node_modules/bootswatch/dist/darkly/bootswatch";
+
+// My variables
+$form-background-color: $gray-500;
+$light-blue: #212132;
+$list-group-item-secondary: #212132;
+$markdown-background-color: $gray-700;
+$markdown-border-color: $gray-600;
+$modal-background-color: $gray-900;
+$selected-background-color: $blue;
+
+// Import core SCSS
+@import "./bordercore.scss";

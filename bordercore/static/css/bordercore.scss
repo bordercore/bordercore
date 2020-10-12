@@ -1,16 +1,7 @@
-$table_row_background_color : #007BFF;
-$table_row_color : #ffffff;
-
 $search_box_width: 330px;
-
-/* Temp -- override Bootstrap theme */
-a {
-  color: #dddddd;
-}
 
 /* The overflow:hidden eliminates the horizontal scrollbar when
    setting the padding to 0px on the main fluid container
-
    https://stackoverflow.com/questions/37978307/bootstrap-container-fluid-padding/50005919
 
  */
@@ -65,14 +56,21 @@ blockquote {
   display: none;
 }
 
-#row_selected, #row_selected a {
-   background-color: $table_row_background_color;
-   color: $table_row_color;
+/* Tables */
+
+tr.selected {
+  background-color: $selected-background-color !important;
+  color: $white;
 }
 
-.selected, .selected a {
-   background-color: $table_row_background_color;
-   color: $table_row_color;
+#row_selected, #row_selected a, #row_selected a:active {
+   background-color: $selected-background-color;
+   color: $white;
+}
+
+.selected, .selected a, .selected a:visited {
+   background-color: $selected-background-color;
+   color: $white;
 }
 
 .table-borders table, .table-borders td {
@@ -117,6 +115,21 @@ blockquote {
   to { transform: scale(1) rotate(360deg);}
 }
 
+/* Bootstrap modifications */
+
+.card-body {
+  background-color: $list-group-item-secondary;
+}
+
+.list-group-item-secondary {
+  background-color: $list-group-item-secondary;
+}
+
+.modal-content {
+  background-color: $modal-background-color;
+
+}
+
 /* Forms */
 .form-error {
   color: #b94a48;
@@ -140,9 +153,9 @@ blockquote {
 /*** Markdown ***/
 
 pre {
-  background: #f8f8f8;
-  border-top: 5px solid #f0f0f0;
-  border-bottom: 5px solid #f0f0f0;
+  background: $markdown-background-color;
+  border-top: 5px solid $markdown-border-color;
+  border-bottom: 5px solid $markdown-border-color;
   padding: 1rem;
   padding-left: 1.44rem;
 }
@@ -231,10 +244,6 @@ ul.pagination {
   color: #aaa;
 }
 
-.search_book_title {
-  color: $table_row_background_color;
-}
-
 .search_book_author {
   font-size: smaller;
 }
@@ -265,7 +274,7 @@ ul.pagination {
 /* Blobs */
 
 #meta-box {
-  background: #f6f6f6;
+  background: $markdown-background-color;
   padding: 1em;
   border-radius: 11px;
 }
@@ -285,6 +294,7 @@ ul.pagination {
 }
 
 /* Todo */
+
 #todo_tag_list {
   padding: 5px;
 }
@@ -315,17 +325,16 @@ li.active a {
 a.tag:link {
   color: white;
 }
-/* visited link */
+
 a.tag:visited {
   color: white;
 }
 
-/* mouse over link */
+
 a.tag:hover {
   color: white;
 }
 
-/* selected link */
 a.tag:active {
   color: yellow;
 }
@@ -381,13 +390,8 @@ a.tag:active {
   opacity: 0;
 }
 
-#document_note {
-   background-color: $table_row_background_color;
-   color: #ffffff;
-   padding: 10px;
-}
-
 /* Search */
+
 .search-box {
   width: $search_box_width !important;
 }
@@ -398,11 +402,13 @@ div .search-box .search-box-input {
 
 /* Used to keep the tag search input field
    from shrinking after you start typing */
+
 .form-inline .bootstrap-tagsinput {
    width: 400px !important;
 }
 
 /* Sortable */
+
 .sortable-ghost {
   border-left: 6px solid rgb(0, 183, 255);
   box-shadow: 10px 10px 5px -1px rgba(0, 0, 0, 0.14);
@@ -413,35 +419,32 @@ div .search-box .search-box-input {
 
 .dropdownmenu {
   float: right;
-  color: #666;
+  color: $cyan;
   font-size: 0.75rem;
   position: absolute;
   right: 7px;
   padding: 2px;
   width: 26px;
   height: 24px;
-  background-color: #fff;
 }
 
 .dropdownmenu:hover {
-  background-color: #eee;
+  /* background-color: $blue; */
   border-radius: 100%;
 }
-
-/* div.dropdownmenu i { */
-/*   width: 22px; */
-/* } */
 
 .node-note {
   font-size: small;
 }
 
 /* Music */
+
 #music-search {
   width: 400px;
 }
 
 /* Audio player controls */
+
 audio {
   outline: none;
   width: 600px;
@@ -451,8 +454,19 @@ audio {
   width: 400px;
 }
 
-/* Styles for vue-simple-suggest VUE typeahead component */
+/* CodeMirror */
 
+div.CodeMirror {
+  color: $gray-900;
+  background-color: $form-background-color;
+}
+
+div.CodeMirror-focused {
+  background-color: $white;
+  color: $gray-900;
+}
+
+/* Styles for vue-simple-suggest VUE typeahead component */
 /* Original: https://unpkg.com/vue-simple-suggest/dist/styles.css */
 
 .vue-simple-suggest > ul {
@@ -468,19 +482,6 @@ audio {
 .vue-simple-suggest.designed, .vue-simple-suggest.designed * {
   box-sizing: border-box;
 }
-
-/* .vue-simple-suggest.designed .input-wrapper input { */
-/*   display: block; */
-/*   width: 100%; */
-/*   padding: 10px; */
-/*   border: 1px solid #cde; */
-/*   border-radius: 3px; */
-/*   color: black; */
-/*   background: white; */
-/*   outline:none; */
-/*   transition: all .1s; */
-/*   transition-delay: .05s */
-/* } */
 
 .vue-simple-suggest.designed.focus .input-wrapper input {
   border: 1px solid #aaa;
@@ -519,7 +520,7 @@ audio {
   color: #fff;
 }
 
-/* Styles for Vue Tags Input VUE */
+/* Vue Tags Input VUE */
 
 /* These apply Bootstrap-like styles to the tags */
 .vue-tags-input .ti-input .ti-tag {
@@ -533,18 +534,36 @@ audio {
   padding: 5px 8px;
 }
 
-#vue-wrapper .vue-tags-input .ti-input {
+.vue-tags-input .ti-new-tag-input {
+  background: transparent;
+  color: $gray-900;
+}
+
+.vue-tags-input .ti-input {
+  background-color: $form-background-color;
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
-  padding: 4px 6px;
+  padding: 6px 12px;
+}
+
+.vue-tags-input.ti-focus .ti-input {
+  background-color: $white;
+
+  /* Mimic Bootstrap's default focus behavior */
+  border-color: lighten($primary, 25%);
+  box-shadow: 0 0 0 0.2rem rgba($primary, 0.25)
+}
+
+.vue-tags-input .ti-autocomplete {
+  color: $gray-900;
 }
 
 /* Use this for forms */
-#vue-wrapper .vue-tags-input {
-  max-width: none;
-  width: 100%;
+.vue-tags-input {
+  background-color: $modal-background-color !important;
+  min-width: 100%;
 }
 
 /* Use this for inputs of arbitrary length */
@@ -552,30 +571,16 @@ audio {
   width: 400px;
 }
 
-/* Sidebar */
-
-/* My Custom CSS */
-
-.nav-icon {
-  display: inline-block;
-  width: 30px;
-}
-
-.section-active {
-  background-color: #007bff !important;
-}
-
-.subsection-active {
-  color: #343a40 !important;
-  background-color: #ebecec !important;
+/* vuejs-datepicker */
+.calendar {
+  color: $black;
 }
 
 /* Stock CSS */
 
 @import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
 body {
-    font-family: 'Poppins', sans-serif;
-    background: #fafafa;
+  font-family: 'Poppins', sans-serif;
 }
 
 p {
@@ -583,15 +588,14 @@ p {
     font-size: 1.1em;
     font-weight: 300;
     line-height: 1.7em;
-    color: #000000;
 }
 
-a,
-a:hover,
-a:focus,
-a:visited {
-    color: #00538b;
-    transition: all 0.3s;
+.form-control {
+  background-color: $form-background-color;
+}
+
+.form-control::placeholder {
+  color: $gray-700;
 }
 
 .navbar {
@@ -629,9 +633,21 @@ span {
     display: inline-block;
 }
 
-/* ---------------------------------------------------
-    SIDEBAR STYLE
------------------------------------------------------ */
+/* Sidebar */
+
+.nav-icon {
+  display: inline-block;
+  width: 30px;
+}
+
+.section-active {
+  background-color: $blue !important;
+}
+
+.subsection-active {
+  color: #343a40 !important;
+  background-color: #ebecec !important;
+}
 
 .wrapper {
   display: flex;
@@ -695,7 +711,7 @@ span {
 
 #sidebar .sidebar-header {
   padding: 20px;
-  background: #343A40;
+  background: $gray-900;
 }
 
 #sidebar .sidebar-header strong {
