@@ -321,7 +321,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
         const FileUpload = {
             template: `
                 <div class="col-lg-4 input-group">
-                    <input type="text" name="filename" :value="filename" class="form-control" id="id_filename" />
+                    <input type="text" name="filename" :value="filename" class="form-control" id="id_filename" autocomplete="off" />
                     <input type="hidden" name="file_modified" :value="lastModified" />
                     <span class="input-group-append">
                         <label class="btn btn-primary">Choose file
