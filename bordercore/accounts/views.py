@@ -27,12 +27,16 @@ class UserProfileDetailView(UpdateView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         context = self.get_context_data(object=self.object, form=form)
-        context['groups'] = ', '.join([x.name for x in request.user.groups.all()])
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super(UserProfileDetailView, self).get_context_data(**kwargs)
+        context['groups'] = ', '.join([x.name for x in self.request.user.groups.all()])
         context['section'] = SECTION
         context['nav'] = 'prefs'
         context['title'] = 'Preferences'
         context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.favorite_tags.all()]
-        return self.render_to_response(context)
+        return context
 
     def get_object(self, queryset=None):
         obj = UserProfile.objects.get(user=self.request.user)
