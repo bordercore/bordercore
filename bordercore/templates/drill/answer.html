@@ -8,19 +8,19 @@
 
 {% block left-block %}
 
-    State: <strong>{{ state_name  }}</strong>
+    State: <strong class="text-info">{{ state_name  }}</strong>
     <br />
 {% if state_name == 'Learning' %}
-        Learning step: <strong>{{ question.learning_step }}</strong> out of {{ learning_step_count  }}
-        <br />
+        Learning step: <strong class="text-info">{{ question.learning_step }}</strong> out of {{ learning_step_count  }}
+    <br />
 {% endif %}
 {% if state_name != 'New' %}
-Last Reviewed: <strong>{{ question.last_reviewed|default:"Never" }}</strong>
+Last Reviewed: <strong class="text-info">{{ question.last_reviewed|default:"Never" }}</strong>
     <br />
 {% endif %}
-Interval: <strong>{{ question.interval }}</strong>
-    <br />
-Easiness Factor: <strong>{{ question.efactor|floatformat:1 }}</strong>
+Interval: <strong class="text-info">{{ question.interval }}</strong>
+<br />
+Easiness Factor: <strong class="text-info">{{ question.efactor|floatformat:1 }}</strong>
 
     <form action="{% url 'question_edit' question.id %}" class="mt-5">
         <input type="submit" class="btn btn-primary" value="Edit">
