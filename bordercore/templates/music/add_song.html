@@ -37,7 +37,7 @@
     <div class="row">
 
         <div class="col-lg-12">
-            <p class="lead offset-lg-3">{{ action }} Song</p>
+            <p class="lead">{{ action }} Song</p>
         </div>
 
         <div class="col-lg-12">
@@ -50,17 +50,25 @@
                 {{ form.length.as_hidden }}
 
                 {% if action == 'Upload' %}
-                    <div class="form-group">
-                        <div class="controls" id="file-upload">
 
-                            <input type="file" name="song" class="form-control col-lg-6 my-3" accept="audio/*" @change="onChange" />
+                    <div id="vue-file-upload">
+                        <div class="form-group row">
+                            <div class="col-lg-6 input-group">
+                                <input type="text" name="filename" :value="filename" class="form-control" id="id_filename" autocomplete="off" />
 
+                                <span class="input-group-append">
+                                    <label class="btn btn-primary">Choose song
+                                        <input type="file" id="customFile" name="song" hidden accept="audio/*" @change="onChange" />
+                                    </label>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-lg-6 pl-0">
                             <button type="submit" class="btn btn-secondary" name="upload" disabled="true" ref="submitButton">Upload</button>
-
                             <a class="btn btn-secondary" href="{% url 'music_list' %}">Cancel</a>
-
                         </div>
                     </div>
+
                 {% endif %}
 
                 {% if action == 'Review' %}
@@ -184,10 +192,16 @@
 
         {% if action == 'Upload' %}
         new Vue({
-            el: "#file-upload",
+            el: "#vue-file-upload",
+            data() {
+                return {
+                    filename: null
+                }
+            },
             methods: {
                 onChange(evt) {
                     this.$refs.submitButton.removeAttribute("disabled");
+                    this.filename = evt.target.files[0].name;
                 }
             },
         });
