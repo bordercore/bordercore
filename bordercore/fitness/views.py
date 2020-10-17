@@ -35,7 +35,9 @@ class ExerciseDetailView(DetailView):
         context['section'] = SECTION
         context['nav'] = 'fitness'
         context['title'] = 'Exercise Detail :: {}'.format(self.object.exercise)
-        self.set_plot_data(context, workout_data)
+
+        if workout_data:
+            self.set_plot_data(context, workout_data)
         return context
 
     def set_plot_data(self, context, data):

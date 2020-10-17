@@ -133,8 +133,10 @@
         const AddWorkoutForm = {
             data() {
                 return {
+                    {% if recent_data %}
                     weight: {{ recent_data.weight }},
                     reps: {{ reps_latest_workout|last }},
+                    {% endif %}
                     workoutData: [
                     ],
                     submitIsDisabled: true
