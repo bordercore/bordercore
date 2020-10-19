@@ -34,6 +34,14 @@ $search_box_width: 330px;
   display: none;
 }
 
+/* Common components */
+
+.highlight-box {
+  background: $markdown-background-color;
+  padding: 1em;
+  border-radius: 11px;
+}
+
 /* login page */
 html.login, body.login {
   height: 100%;
@@ -271,12 +279,6 @@ ul.pagination {
 }
 
 /* Blobs */
-
-#meta-box {
-  background: $markdown-background-color;
-  padding: 1em;
-  border-radius: 11px;
-}
 
 .blob_edit_amazon_name_field {
   width: 100px;
