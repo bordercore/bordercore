@@ -10,7 +10,11 @@
 
         <link rel="stylesheet" type="text/css" href="https://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
 
-        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bordercore-{{ request.user.userprofile.theme }}.css" />
+        {% if debug %}
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/theme-{{ request.user.userprofile.theme }}.css" />
+        {% else %}
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/theme-{{ request.user.userprofile.theme }}.min.css" />
+        {% endif %}
 
         {% block extra_head %}{% endblock %}
 
@@ -118,9 +122,9 @@
         {% block javascript %}
 
             {% if debug %}
-                <script type="text/javascript" src="{{ STATIC_URL }}js/index-bundle-dev.js.gz"></script>
+                <script type="text/javascript" src="{{ STATIC_URL }}js/javascript-bundle.js.gz"></script>
             {% else %}
-                <script type="text/javascript" src="{{ STATIC_URL }}js/index-bundle.js.gz"></script>
+                <script type="text/javascript" src="{{ STATIC_URL }}js/javascript-bundle.min.js.gz"></script>
             {% endif %}
 
 

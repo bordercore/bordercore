@@ -16,3 +16,10 @@ packaged.yaml
 
 bordercore/aws/create_thumbnail/lib/*
 bordercore/aws/index_blobs/lib/*
+
+**/css/theme-dark.css
+**/css/theme-dark.min.css
+**/css/theme-light.css
+**/css/theme-light.min.css
+**/javascript-bundle.js.gz
+**/javascript-bundle.min.js.gz

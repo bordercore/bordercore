@@ -7,15 +7,18 @@
     <div class="alert alert-warning" role="alert">Nothing in this collection</div>
 {% endif %}
 
-<script type="text/javascript" src="{{ STATIC_URL }}js/index-bundle.js"></script>
-
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-glyphicons.css" />
-<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bordercore-{{ request.user.userprofile.theme }}.css" />
 
 {% if debug %}
-    <script type="text/javascript" src="{{ STATIC_URL }}js/index-bundle-dev.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/theme-{{ request.user.userprofile.theme }}.css" />
 {% else %}
-    <script type="text/javascript" src="{{ STATIC_URL }}js/index-bundle.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/theme-{{ request.user.userprofile.theme }}.min.css" />
+{% endif %}
+
+{% if debug %}
+    <script type="text/javascript" src="{{ STATIC_URL }}js/javascript-bundle.js.gz"></script>
+{% else %}
+    <script type="text/javascript" src="{{ STATIC_URL }}js/javascript-bundle.min.js.gz"></script>
 {% endif %}
 
 <script type="text/javascript">
