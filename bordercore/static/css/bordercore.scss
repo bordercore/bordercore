@@ -3,7 +3,6 @@ $search_box_width: 330px;
 /* The overflow:hidden eliminates the horizontal scrollbar when
    setting the padding to 0px on the main fluid container
    https://stackoverflow.com/questions/37978307/bootstrap-container-fluid-padding/50005919
-
  */
 .container-fluid {
   overflow: hidden;
@@ -150,7 +149,7 @@ tr.selected {
   transition: height 1s ease-out;
 }
 
-/*** Markdown ***/
+/* Markdown */
 
 pre {
   background: $markdown-background-color;
@@ -160,7 +159,7 @@ pre {
   padding-left: 1.44rem;
 }
 
-/*** Bookmarks ***/
+/* Bookmarks */
 
 .bookmark-search {
   padding-left: 40px;
@@ -579,8 +578,13 @@ div.CodeMirror-focused {
 /* Stock CSS */
 
 @import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
+
 body {
   font-family: 'Poppins', sans-serif;
+}
+
+a:hover {
+   color: $link-hover-color;
 }
 
 p {

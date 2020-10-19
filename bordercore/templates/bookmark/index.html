@@ -141,7 +141,7 @@
                                                 <span v-html="bookmark.favicon_url"></span>
                                             </td>
                                             <td class="bookmark-list-link p-2">
-                                                <a class="one-tag" :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.title) ]]</a>
+                                                <a :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.title) ]]</a>
                                                 <a v-if="bookmark.lastResponseCode != 200" class="form-error ml-3" target="wayback" :href="'https://web.archive.org/web/1000/' + bookmark.url">[[ bookmark.lastResponseCode ]]</a>
                                                 <i v-if="bookmark.note != null && bookmark.note != ''" class="fa fa-clipboard"></i>
                                                 <a v-for="tag in bookmark.tags" v-if="tag != selectedTagName" class="badge badge-info ml-2" @click.prevent="onClick" href="">[[ tag ]]</a>
