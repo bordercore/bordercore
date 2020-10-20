@@ -21,6 +21,7 @@
         "mini-css-extract-plugin": "^1.0.0",
         "sass": "^1.27.0",
         "sass-loader": "^10.0.3",
+        "stylelint-webpack-plugin": "^2.1.1",
         "webpack": "^4.44.2",
         "webpack-bundle-analyzer": "^3.9.0",
         "webpack-cli": "^3.3.12",
@@ -45,5 +46,21 @@
         "vuedraggable": "^2.24.1",
         "vuejs-datepicker": "^1.6.2",
         "vuex": "^3.5.1"
+    },
+    "stylelint": {
+        "extends": "stylelint-config-standard",
+        "rules": {
+            "no-descending-specificity": null,
+            "property-no-unknown": [
+                true,
+                {
+                    "ignoreProperties": [
+                        "/^-animation$/",
+                        "/^webkit-transform$/",
+                        "/^ms-transform$/"
+                    ]
+                }
+            ]
+        }
     }
 }

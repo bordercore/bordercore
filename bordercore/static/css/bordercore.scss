@@ -6,7 +6,7 @@ $search_box_width: 330px;
  */
 .container-fluid {
   overflow: hidden;
-  padding: 0px;
+  padding: 0;
 }
 
 .content-non-nav {
@@ -43,7 +43,8 @@ $search_box_width: 330px;
 }
 
 /* login page */
-html.login, body.login {
+html.login,
+body.login {
   height: 100%;
 }
 
@@ -54,7 +55,7 @@ blockquote {
 }
 
 .list_annotation {
-  color: #C76257;
+  color: #c76257;
   font-size: 80%;
 }
 
@@ -70,18 +71,23 @@ tr.selected {
   color: $white;
 }
 
-#row_selected, #row_selected a, #row_selected a:active {
-   background-color: $selected-background-color;
-   color: $white;
+.selected,
+.selected a,
+.selected a:visited {
+  background-color: $selected-background-color;
+  color: $white;
 }
 
-.selected, .selected a, .selected a:visited {
-   background-color: $selected-background-color;
-   color: $white;
+#row_selected,
+#row_selected a,
+#row_selected a:active {
+  background-color: $selected-background-color;
+  color: $white;
 }
 
-.table-borders table, .table-borders td {
-  border: 1px solid #cccccc;
+.table-borders table,
+.table-borders td {
+  border: 1px solid #ccc;
   padding: 10px;
 }
 
@@ -102,24 +108,24 @@ tr.selected {
 }
 
 .alert-margin {
-  margin-left: 0px;
+  margin-left: 0;
 }
 
 /* Animated buttons */
 
 .glyphicon-refresh-animate {
-  -animation: spin .7s infinite linear;
-  -webkit-animation: spin2 .7s infinite linear;
+  -animation: spin 0.7s infinite linear;
+  -webkit-animation: spin2 0.7s infinite linear;
 }
 
 @-webkit-keyframes spin2 {
-  from { -webkit-transform: rotate(0deg);}
-  to { -webkit-transform: rotate(360deg);}
+  from { -webkit-transform: rotate(0deg); }
+  to { -webkit-transform: rotate(360deg); }
 }
 
 @keyframes spin {
-  from { transform: scale(1) rotate(0deg);}
-  to { transform: scale(1) rotate(360deg);}
+  from { transform: scale(1) rotate(0deg); }
+  to { transform: scale(1) rotate(360deg); }
 }
 
 /* Bootstrap modifications */
@@ -134,7 +140,6 @@ tr.selected {
 
 .modal-content {
   background-color: $modal-background-color;
-
 }
 
 /* Forms */
@@ -143,7 +148,7 @@ tr.selected {
 }
 
 .input-group .highlight-changed-field {
-  color: #ff0000;
+  color: #f00;
 }
 
 .highlight-changed-field.color-transition {
@@ -173,8 +178,8 @@ pre {
   padding-left: 40px;
 }
 
-.bookmark-created  {
-  color: #999999;
+.bookmark-created {
+  color: #999;
   width: 90px;
 }
 
@@ -194,16 +199,16 @@ pre {
 
 .bookmark-tag-list-header {
   background-color: #33393e;
-  color: #ffffff;
+  color: #fff;
   text-align: center;
 }
 
 #bookmark-sidebar {
-  background-color: #ffffff;
+  background-color: #fff;
   position: fixed;
   overflow: hidden;
   left: -300px;
-  border: 1px solid #999999;
+  border: 1px solid #999;
   height: 400px;
   width: 300px;
   z-index: 200;
@@ -217,13 +222,13 @@ pre {
 }
 
 .monospaced {
-  font-family: Courier
+  font-family: Courier, sans-serif;
 }
 
 /* The default margin for the pagination controls at the bottom
    of a datatables table is 20px -- why is this? */
 ul.pagination {
-  margin: 0px;
+  margin: 0;
 }
 
 #exerciseDetailChart {
@@ -243,8 +248,8 @@ ul.pagination {
   position: absolute;
   z-index: 2;
   display: block;
-  top: .7rem;
-  left: 1.0rem;
+  top: 0.7rem;
+  left: 1rem;
   line-height: 2.375rem;
   text-align: center;
   pointer-events: none;
@@ -256,17 +261,17 @@ ul.pagination {
 }
 
 .important {
-  background-color: #eeeeee;
+  background-color: #eee;
   padding: 3px;
 }
 
-.search_book_title #edit_link{
+.search_book_title #edit_link {
   font-size: 8px;
 }
 
 .search_todo_date {
   font-weight: normal;
-  color: #C76257;
+  color: #c76257;
   font-size: 10px;
 }
 
@@ -286,11 +291,11 @@ ul.pagination {
 
 #blob_collection_list {
   font-size: 18px;
-  margin-botoom: 10px;
+  margin-bottom: 10px;
 }
 
 #blob_note {
-  border: 1px solid #999999;
+  border: 1px solid #999;
   padding: 5px;
 }
 
@@ -320,7 +325,7 @@ ul.pagination {
 }
 
 li.active a {
-  color: #ffffff
+  color: #fff;
 }
 
 a.tag:link {
@@ -331,7 +336,6 @@ a.tag:visited {
   color: white;
 }
 
-
 a.tag:hover {
   color: white;
 }
@@ -341,24 +345,24 @@ a.tag:active {
 }
 
 .voffset {
-   margin-top: 5px;
+  margin-top: 5px;
 }
 
 .top-buffer {
-   margin-top: 20px;
+  margin-top: 20px;
 }
 
 .random-image-card {
-   border: 0px;
+  border: 0;
 }
 
 .random-image-card .card-header {
-   margin-bottom: 15px;
+  margin-bottom: 15px;
 }
 
 .random-image-card .list-group {
-   width: 90%;
-   margin: 0 auto;
+  width: 90%;
+  margin: 0 auto;
 }
 
 #tag-detail-tab-content {
@@ -367,23 +371,23 @@ a.tag:active {
 
 .table-borderless td,
 .table-borderless th {
-   border: 0;
-   padding: 10px;
+  border: 0;
+  padding: 10px;
 }
 
 .collection_sortable {
-   list-style-type: none;
-   margin: 0;
-   padding: 0;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
 }
 
 .collection_sortable li {
-   margin: 3px 3px 3px 0;
-   padding: 15px 15px 130px 15px;
-   float: left;
-   width: 200px;
-   height: 110px;
-   text-align: center;
+  margin: 3px 3px 3px 0;
+  padding: 15px 15px 130px 15px;
+  float: left;
+  width: 200px;
+  height: 110px;
+  text-align: center;
 }
 
 .collection_ghost_class {
@@ -405,7 +409,7 @@ div .search-box .search-box-input {
    from shrinking after you start typing */
 
 .form-inline .bootstrap-tagsinput {
-   width: 400px !important;
+  width: 400px !important;
 }
 
 /* Sortable */
@@ -413,7 +417,7 @@ div .search-box .search-box-input {
 .sortable-ghost {
   border-left: 6px solid rgb(0, 183, 255);
   box-shadow: 10px 10px 5px -1px rgba(0, 0, 0, 0.14);
-  opacity: .7;
+  opacity: 0.7;
 }
 
 /* Node */
@@ -468,6 +472,7 @@ div.CodeMirror-focused {
 }
 
 /* Styles for vue-simple-suggest VUE typeahead component */
+
 /* Original: https://unpkg.com/vue-simple-suggest/dist/styles.css */
 
 .vue-simple-suggest > ul {
@@ -480,7 +485,8 @@ div.CodeMirror-focused {
   position: relative;
 }
 
-.vue-simple-suggest.designed, .vue-simple-suggest.designed * {
+.vue-simple-suggest.designed,
+.vue-simple-suggest.designed * {
   box-sizing: border-box;
 }
 
@@ -512,12 +518,12 @@ div.CodeMirror-focused {
 }
 
 .vue-simple-suggest.designed .suggestions .suggest-item.hover {
-  background-color: #2874D5 !important;
+  background-color: #2874d5 !important;
   color: #fff !important;
 }
 
 .vue-simple-suggest.designed .suggestions .suggest-item.selected {
-  background-color: #2832D5;
+  background-color: #2832d5;
   color: #fff;
 }
 
@@ -525,7 +531,7 @@ div.CodeMirror-focused {
 
 /* These apply Bootstrap-like styles to the tags */
 .vue-tags-input .ti-input .ti-tag {
-  background-color: #2FA4E7 !important;
+  background-color: #2fa4e7 !important;
   font-size: 75%;
   font-weight: 700;
   border-top-left-radius: 4px;
@@ -554,7 +560,7 @@ div.CodeMirror-focused {
 
   /* Mimic Bootstrap's default focus behavior */
   border-color: lighten($primary, 25%);
-  box-shadow: 0 0 0 0.2rem rgba($primary, 0.25)
+  box-shadow: 0 0 0 0.2rem rgba($primary, 0.25);
 }
 
 .vue-tags-input .ti-autocomplete {
@@ -586,14 +592,14 @@ body {
 }
 
 a:hover {
-   color: $link-hover-color;
+  color: $link-hover-color;
 }
 
 p {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.1em;
-    font-weight: 300;
-    line-height: 1.7em;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.1em;
+  font-weight: 300;
+  line-height: 1.7em;
 }
 
 .form-control {
@@ -605,38 +611,38 @@ p {
 }
 
 .navbar {
-    padding: 15px 10px;
-    background: #fff;
-    border: none;
-    border-radius: 0;
-    margin-bottom: 40px;
-    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 15px 10px;
+  background: #fff;
+  border: none;
+  border-radius: 0;
+  margin-bottom: 40px;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-btn {
-    box-shadow: none;
-    outline: none !important;
-    border: none;
+  box-shadow: none;
+  outline: none !important;
+  border: none;
 }
 
 #navbar a,
 #navbar a:hover,
 #navbar a:focus {
-    color: inherit;
-    text-decoration: none;
-    transition: all 0.3s;
+  color: inherit;
+  text-decoration: none;
+  transition: all 0.3s;
 }
 
 .line {
-    width: 100%;
-    height: 1px;
-    border-bottom: 1px dashed #ddd;
-    margin: 40px 0;
+  width: 100%;
+  height: 1px;
+  border-bottom: 1px dashed #ddd;
+  margin: 40px 0;
 }
 
 i,
 span {
-    display: inline-block;
+  display: inline-block;
 }
 
 /* Sidebar */
@@ -663,7 +669,7 @@ span {
 #sidebar {
   min-width: 250px;
   max-width: 250px;
-  background: #343A40;
+  background: #343a40;
   color: #fff;
   transition: all 0.3s;
   background-image: url("https://bordercore-blobs.s3.amazonaws.com/django/img/sidebar-5.jpg");
@@ -683,10 +689,6 @@ span {
 
 #sidebar.active .sidebar-header strong {
   display: block;
-}
-
-#sidebar ul li a {
-  text-align: left;
 }
 
 #sidebar.active ul li a {
@@ -735,6 +737,7 @@ span {
   padding: 10px;
   font-size: 1.1em;
   display: block;
+  text-align: left;
 }
 
 #sidebar ul li a:hover {
@@ -745,7 +748,7 @@ span {
   margin-right: 10px;
 }
 
-#sidebar ul li.active>a,
+#sidebar ul li.active > a,
 a[aria-expanded="true"] {
   color: #fff;
 }
@@ -782,46 +785,44 @@ ul.CTAs a {
 
 a.download {
   background: #fff;
-  color: #7386D5;
+  color: #7386d5;
 }
 
 a.article,
 a.article:hover {
   background: #343a40 !important;
-  color: #ffffff !important;
+  color: #fff !important;
 }
 
 #sidebarCollapse {
   color: #343a40;
-  background: #ffffff;
-  border: 0px;
-  box-shadow: none
+  background: #fff;
+  border: 0;
+  box-shadow: none;
 }
 
 #below-nav {
   padding-left: 10px;
 }
-/* ---------------------------------------------------
-   CONTENT STYLE
-   */
+
+/* CONTENT STYLE */
 
 #content {
-    width: 100%;
-    min-height: 100vh;
-    transition: all 0.3s;
+  width: 100%;
+  min-height: 100vh;
+  transition: all 0.3s;
 }
 
-/* ---------------------------------------------------
-   MEDIAQUERIES
-   */
+/* MEDIAQUERIES */
 
 @media (max-width: 768px) {
   #sidebar {
     min-width: 80px;
     max-width: 80px;
     text-align: center;
-    margin-left: -80px !important;
+    margin-left: 0;
   }
+
   .dropdown-toggle::after {
     top: auto;
     bottom: 10px;
@@ -830,35 +831,38 @@ a.article:hover {
     ms-transform: translateX(50%);
     transform: translateX(50%);
   }
+
   #sidebar.active {
     margin-left: 0 !important;
   }
+
   #sidebar .sidebar-header h3,
   #sidebar .CTAs {
     display: none;
   }
+
   #sidebar .sidebar-header strong {
     display: block;
   }
+
   #sidebar ul li a {
     padding: 20px 10px;
   }
+
   #sidebar ul li a span {
     font-size: 0.85em;
   }
+
   #sidebar ul li a i {
     margin-right: 0;
     display: block;
+    font-size: 1.3em;
   }
+
   #sidebar ul ul a {
     padding: 10px !important;
   }
-  #sidebar ul li a i {
-    font-size: 1.3em;
-  }
-  #sidebar {
-    margin-left: 0;
-  }
+
   #sidebarCollapse span {
     display: none;
   }

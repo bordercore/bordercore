@@ -3,6 +3,7 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPl
 const CompressionPlugin = require("compression-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const FixStyleOnlyEntriesPlugin = require("webpack-fix-style-only-entries");
+const StylelintPlugin = require("stylelint-webpack-plugin");
 
 module.exports = (env, argv) => {
 
@@ -26,6 +27,11 @@ module.exports = (env, argv) => {
         },
         plugins: [
             // new BundleAnalyzerPlugin({analyzerPort: 9999}),
+
+            // Lint my SCSS
+            new StylelintPlugin({
+                files: "**/bordercore.scss"
+            }),
 
             // Remove the boilerplate JS files from chunks of CSS only entries
             new FixStyleOnlyEntriesPlugin(),
