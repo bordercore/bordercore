@@ -392,7 +392,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                     {% if not object or form.date.value == "" %}
                     date: new Date()
                     {% else %}
-                    date: new Date("{{ form.date.value }}")
+                    date: new Date("{{ form.date.value }}T00:00")
                     {% endif %}
                 }
             },
@@ -425,9 +425,6 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                 }
             },
             mounted() {
-                // Set timezone
-                this.date.setTime( this.date.getTime() + this.date.getTimezoneOffset()*60*1000 );
-
                 document.getElementById("id_date").addEventListener("paste", this.handlePaste);
             }
         }

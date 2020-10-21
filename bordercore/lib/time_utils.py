@@ -182,6 +182,7 @@ def parse_date_from_string(input_date):
     for key, value in pdict.items():
         m = re.compile(key).match(input_date)
         if m:
-            return value(input_date, m).strftime("%Y-%m-%d")
+            # Add hour and minute to force JavaScript to use localtime rather than UTC
+            return value(input_date, m).strftime("%Y-%m-%dT00:00")
 
     return ""
