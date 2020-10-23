@@ -29,7 +29,7 @@
                         <div class="card-body">
                             <ul class="list-group list-group-flush" id="sort-container-tags">
                             <draggable v-model="blobList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
-                                <transition-group type="transition">
+                                <transition-group type="transition" id="node-note">
                                     <li v-for="(blob, index) in blobList" class="list-group-item list-group-item-secondary text-info draggable" :data-uuid="blob.uuid" :key="blob.uuid" v-cloak v-b-hover="handleHover">
                                         <div class="dropdownmenu hidden">
 
@@ -62,7 +62,7 @@
                                         </div>
 
                                     </li>
-                                    <div class="text-light" v-if="blobList.length == 0" :key="1" v-cloak>
+                                    <div class="text-secondary" v-if="blobList.length == 0" :key="1" v-cloak>
                                       Nothing to show
                                     </div>
                                 </transition-group>
@@ -91,7 +91,7 @@
                                                 <dropdown-menu v-model="show">
                                                     <font-awesome-icon icon="ellipsis-v" style="width: 22px"></font-awesome-icon>
                                                     <div slot="dropdown">
-                                                        <a class="dropdown-item text-success" href="#" @click="removeBookmark(bookmark.id)">Remove</a>
+                                                        <a class="dropdown-item" href="#" @click="removeBookmark(bookmark.id)">Remove</a>
                                                         <a v-if="!bookmark.note" class="dropdown-item" href="#" @click="addNote(bookmark.id, index)">Add note</a>
                                                     </div>
                                                 </dropdown-menu>
@@ -111,7 +111,7 @@
                                                 </div>
                                             </div>
                                         </li>
-                                        <div class="text-light" v-if="bookmarkList.length == 0" :key="1" v-cloak>
+                                        <div class="text-secondary" v-if="bookmarkList.length == 0" :key="1" v-cloak>
                                           No links
                                         </div>
                                     </transition-group>
@@ -120,6 +120,33 @@
                         </div>
                     </div>
                 </bookmark-list>
+            </div>
+
+        </div>
+
+        <div class="row mt-2">
+
+            <div class="col-lg-4">
+                <note inline-template ref="note">
+                    <div class="card">
+                        <div class="card-header">
+                            Notes
+                        </div>
+                        <div class="card-body text-info" :class="{editing: isEditing}" v-cloak v-b-hover="handleHover">
+                            <div class="dropdownmenu hidden">
+                                <dropdown-menu v-model="show">
+                                    <font-awesome-icon icon="ellipsis-v" style="width: 22px"></font-awesome-icon>
+                                    <div slot="dropdown">
+                                        <a v-if="note" class="dropdown-item" href="#" @click="editNote()">Edit note</a>
+                                    </div>
+                                </dropdown-menu>
+                            </div>
+                            <label @dblclick="editNote()" v-html="noteHtml"></label>
+                            <span v-if="note === null"><a href="#" @click="editNote()">Add a note</a></span>
+                            <textarea class="node-note-edit" v-model="note" rows="5" @blur="doneEdit()"></textarea>
+                        </div>
+                    </div>
+                </note>
             </div>
 
         </div>
@@ -813,6 +840,100 @@
             }
         };
 
+        const Note = {
+            data() {
+                return {
+                    isEditing: false,
+                    note: null,
+                    noteHtml: null,
+                    show: false
+                }
+            },
+            methods: {
+                getNote() {
+                    axios.get("{% url "node_get_note" object.uuid %}")
+                         .then(response => {
+                             if (response.data.status != "OK") {
+                                 this.$bvToast.toast("Error getting note", {
+                                     title: "Error!",
+                                     autoHideDelay: 5000,
+                                     variant: "danger"
+                                 })
+                                 console.log("Error getting note");
+                             } else {
+                                 this.note = response.data.note;
+                                 this.noteHtml = response.data.noteHtml;
+                                 console.log("Success");
+                             }
+                         })
+                         .catch((error) => {
+                             this.$bvToast.toast("Unable to retrieve note " + error.message, {
+                                 title: "Error!",
+                                 noAutoHide: true,
+                                 variant: "danger"
+                             })
+                             console.error(error);
+                         });
+                },
+                editNote() {
+                    this.beforeEditCache = this.note;
+                    this.isEditing = true;
+                },
+                doneEdit() {
+
+                    // If the note hasn't changed, abort
+                    if (this.beforeEditCache == this.note) {
+                        console.log("no change detected");
+                        this.isEditing = false;
+                        return;
+                    }
+
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("node_uuid", this.$store.state.nodeUuid);
+                    bodyFormData.append("note", this.note);
+
+                    axios("{% url "node_edit_note" %}", {
+                        method: "POST",
+                        data: bodyFormData,
+                    }).then(response => {
+                        if (response.data.status != "OK") {
+                            this.$bvToast.toast(response.data.message, {
+                                title: "Error",
+                                noAutoHide: true,
+                                variant: "danger"
+                            })
+                            console.log("Error: ", response.data.message);
+                        } else {
+                            console.log("Success: ", response.data);
+                            this.getNote();
+                        }
+                    })
+                      .catch((error) => {
+                          this.$bvToast.toast(error.message, {
+                              title: "Error",
+                              noAutoHide: true,
+                              variant: "danger"
+                          })
+                          console.error(error);
+                      })
+
+                    this.isEditing = false;
+
+                },
+                handleHover(hovered, evt) {
+                    evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
+                    if (hovered == true) {
+                        evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
+                    } else {
+                        evt.currentTarget.querySelector(".dropdownmenu").classList.add("hidden");
+                    };
+                }
+            },
+            mounted() {
+                this.getNote();
+            }
+        }
+
         new Vue({
             el: "#vue-app",
             store,
@@ -820,7 +941,8 @@
                 BlobList,
                 BookmarkList,
                 BlobSearch,
-                BookmarkSearch
+                BookmarkSearch,
+                Note
             },
             mounted() {
 

@@ -143,6 +143,7 @@ urlpatterns = [
     path('node/<uuid:uuid>', NodeDetailView.as_view(), name='node_detail'),
     path('node/<uuid:uuid>/blob_list', node_views.get_blob_list, name='node_get_blob_list'),
     path('node/<uuid:uuid>/bookmark_list', node_views.get_bookmark_list, name='node_get_bookmark_list'),
+    path('node/<uuid:uuid>/note', node_views.get_note, name='node_get_note'),
     path('node/blob/add', node_views.add_blob, name='node_add_blob'),
     path('node/blob/edit_note', node_views.edit_blob_note, name='node_edit_blob_note'),
     path('node/blob/remove', node_views.remove_blob, name='node_remove_blob'),
@@ -153,6 +154,7 @@ urlpatterns = [
     path('node/bookmark/remove', node_views.remove_bookmark, name='node_remove_bookmark'),
     path('node/bookmark/sort', node_views.sort_bookmarks, name='node_sort_bookmarks'),
     path('node/bookmark/search', node_views.search_bookmarks, name='search_bookmarks'),
+    path('node/edit_note', node_views.edit_note, name='node_edit_note'),
 
     path('prefs/store_in_session/', accounts_views.store_in_session, name='store_in_session'),
     path('prefs/', UserProfileDetailView.as_view(), name='prefs'),

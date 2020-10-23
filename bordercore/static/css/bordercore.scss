@@ -442,6 +442,20 @@ div .search-box .search-box-input {
   font-size: small;
 }
 
+#node-note {
+  width: 100%;
+}
+
+.node-note-edit {
+  display: none;
+}
+
+.editing .node-note-edit {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+}
+
 /* Music */
 
 #music-search {

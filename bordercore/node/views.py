@@ -1,4 +1,6 @@
+import markdown
 from elasticsearch import Elasticsearch
+from markdown.extensions.codehilite import CodeHiliteExtension
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -362,6 +364,39 @@ def search_blob_titles(request):
         )
 
     return JsonResponse(matches, safe=False)
+
+
+@login_required
+def get_note(request, uuid):
+
+    node = Node.objects.get(uuid=uuid, user=request.user)
+
+    node_html = markdown.markdown(node.note, extensions=[CodeHiliteExtension(guess_lang=False), "tables"]) if node.note else None
+
+    response = {
+        "status": "OK",
+        "note": node.note,
+        "noteHtml": node_html
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def edit_note(request):
+
+    node_uuid = request.POST["node_uuid"]
+    note = request.POST["note"]
+
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    node.note = note
+    node.save()
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
 
 # TODO: Move these to a neutral location
 
