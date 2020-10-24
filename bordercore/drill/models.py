@@ -68,10 +68,10 @@ class Question(TimeStampedModel):
         return None
 
     def get_question(self):
-        return markdown.markdown(self.question, extensions=[CodeHiliteExtension(guess_lang=False), "tables"])
+        return markdown.markdown(self.question, extensions=[CodeHiliteExtension(guess_lang=False), "tables", "pymdownx.arithmatex"])
 
     def get_answer(self):
-        return markdown.markdown(self.answer, extensions=[CodeHiliteExtension(guess_lang=False), "tables"])
+        return markdown.markdown(self.answer, extensions=[CodeHiliteExtension(guess_lang=False), "tables", "pymdownx.arithmatex"])
 
     def get_learning_step_count(self):
         return len(self.LEARNING_STEPS)
