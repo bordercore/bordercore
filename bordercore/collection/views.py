@@ -210,7 +210,7 @@ def sort_collection(request):
 
     collection.sort(blob_id, new_position)
 
-    return JsonResponse('OK', safe=False)
+    return JsonResponse({"status": "OK"}, safe=False)
 
 
 @login_required

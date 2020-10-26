@@ -633,12 +633,17 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                     // Set a minimum character count to trigger the ajax call
                     if (this.tag.length < 3) return;
 
-                    return axios.get("{% url 'tag_search' %}?query=" + this.tag)
-                                .then(response => {
-                                    this.autocompleteItems = response.data.map(a => {
-                                        return { text: a.text, value: a.value };
-                                    })
-                                })
+                    return doGet(
+                        this,
+                        "{% url "tag_search" %}?query=" + this.tag,
+                        (response) => {
+                            this.autocompleteItems = response.data.map(a => {
+                                return { text: a.text, value: a.value };
+                            })
+                        },
+                        ""
+                    );
+
                 }
             },
             mounted() {
@@ -677,29 +682,18 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
 
                 mutateCollection(collection_id, mutation_type) {
 
-                    const bodyFormData = new URLSearchParams();
-                    bodyFormData.append("blob_id", {{ object.id }});
-                    bodyFormData.append("collection_id", collection_id);
-                    bodyFormData.append("mutation", mutation_type);
-
-                    axios("{% url "collection_mutate" %}", {
-                        method: "POST",
-                        data: bodyFormData
-                    }).then(response => {
-                        this.$bvToast.toast(`Collection change: ${mutation_type}`, {
-                            title: "Success",
-                            variant: "success"
-                        })
-                        console.log("Success:", response);
-                    })
-                      .catch(error => {
-                          this.$bvToast.toast(String(error), {
-                              title: "Error",
-                              noAutoHide: true,
-                              variant: "danger"
-                          })
-                          console.error("Error:", error);
-                      });
+                    doPost(
+                        this,
+                        "{% url "collection_mutate" %}",
+                        {
+                            "blob_id": {{ object.id|default:0 }},
+                            "collection_id": collection_id,
+                            "mutation": mutation_type
+                        },
+                        (response) => {},
+                        `Collection change: ${mutation_type}`,
+                        ""
+                    );
 
                 }
 

@@ -283,20 +283,18 @@
                         },
                         getUntaggedBookmarkCount() {
                             let self = this;
+                            doGet(
+                                self,
+                                "{% url "bookmark_get_new_bookmarks_count" 666 %}".replace(/666$/, timestamp),
+                                (response) => {
+                                    count = response.data.count;
+                                    // TODO: Lookup item by "id=bookmark" rather than the index number of "1"
+                                    self.items[1].badge = count;
 
-                            axios.get("{% url 'bookmark_get_new_bookmarks_count' 666 %}".replace(/666$/, timestamp))
-                                 .then(function (response) {
+                                },
+                                "Error getting new bookmarks count"
+                            );
 
-                                     count = response.data.count;
-                                     // TODO: Lookup item by "id=bookmark" rather than the index number of "1"
-                                     self.items[1].badge = count;
-
-                                 })
-                                 .catch(function (error) {
-                                     console.log("Error getting new bookmarks count: " + error);
-                                 })
-                                 .finally(function () {
-                                 });
                         }
                     },
                     mounted() {

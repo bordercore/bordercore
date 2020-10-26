@@ -144,28 +144,21 @@
 
                     var selectedId = table.cell(".selected", 5).data();
 
-                    axios.get("{% url 'collection_get_info' %}?id=" + selectedId + "&query_type=id")
-                         .then(response => {
-                             if (!response.data.id) {
-                                 const error = `Received ${response.data} from server`;
-                                 this.$bvToast.toast(error, {
-                                     title: "Error",
-                                     noAutoHide: true,
-                                     variant: "danger"
-                                 })
-                             } else {
-                                 nameEl = document.getElementById("id_name");
-                                 nameEl.value = response.data.name;
-                                 document.getElementById("id_description").value = response.data.description;
-                                 EventBus.$emit("addTags", response.data.tags);
-                                 document.getElementById("action-type").innerHTML = "Edit";
-                                 document.getElementById("btn-action").value = "Edit";
-                                 document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection_edit' 666 %}".replace(/666$/, selectedId));
-
-                                 $("#modalAdd").modal("show");
-                             }
-
-                         })
+                    doGet(
+                        this,
+                        "{% url 'collection_get_info' %}?id=" + selectedId + "&query_type=id",
+                        (response) => {
+                            nameEl = document.getElementById("id_name");
+                            nameEl.value = response.data.name;
+                            document.getElementById("id_description").value = response.data.description;
+                            EventBus.$emit("addTags", response.data.tags);
+                            document.getElementById("action-type").innerHTML = "Edit";
+                            document.getElementById("btn-action").value = "Edit";
+                            document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection_edit' 666 %}".replace(/666$/, selectedId));
+                            $("#modalAdd").modal("show");
+                        },
+                        ""
+                    );
 
                 }
             },

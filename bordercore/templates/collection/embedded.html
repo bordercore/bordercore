@@ -66,25 +66,19 @@
                 // with 1, not 0, so add 1.
                 new_position = evt.moved.newIndex + 1;
 
-                const bodyFormData = new URLSearchParams();
-                bodyFormData.append("collection_id", {{ collection.id }});
-                bodyFormData.append("blob_id", evt.moved.element.id);
-                bodyFormData.append("position", new_position);
+                doPost(
+                    this,
+                    "{% url "sort_collection" %}",
+                    {
+                        "collection_id": {{ collection.id }},
+                        "blob_id": evt.moved.element.id,
+                        "position": new_position
+                    },
+                    () => {},
+                    "",
+                    ""
+                );
 
-                axios("{% url "sort_collection" %}", {
-                    method: "POST",
-                    data: bodyFormData
-                }).then(response => {
-                    console.log("Success:", response.data);
-                })
-                  .catch((error) => {
-                      this.$bvToast.toast(String(error), {
-                          title: "Error",
-                          noAutoHide: true,
-                          variant: "danger"
-                      })
-                      console.error(error);
-                  });
             }
         }
     }

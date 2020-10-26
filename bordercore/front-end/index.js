@@ -62,3 +62,7 @@ window.format = format;
 
 import EasyMDE from "easymde";
 window.EasyMDE = EasyMDE;
+
+import { doGet, doPost } from "./util.js";
+window.doGet = doGet;
+window.doPost = doPost;

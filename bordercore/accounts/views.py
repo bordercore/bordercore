@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -104,7 +104,7 @@ def store_in_session(request):
 
     for key in request.POST:
         request.session[key] = request.POST[key]
-    return HttpResponse(json.dumps('OK'), content_type="application/json")
+    return JsonResponse({"status": "OK"}, safe=False)
 
 
 def bc_login(request):

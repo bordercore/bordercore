@@ -202,13 +202,17 @@
                     // Set a minimum character count to trigger the ajax call
                     if (this.tag.length < 3) return;
 
-                    return axios.get("{% url 'tag_search' %}?query=" + this.tag)
-                                .then(response => {
-                                    this.autocompleteItems = response.data.map(a => {
-                                        return { text: a.text, value: a.value };
-                                    }
-                                    )
-                                })
+                    return doGet(
+                        this,
+                        "{% url "tag_search" %}?query=" + this.tag,
+                        (response) => {
+                            this.autocompleteItems = response.data.map(a => {
+                                return { text: a.text, value: a.value };
+                            })
+                        },
+                        ""
+                    );
+
                 }
             },
             mounted() {
@@ -261,21 +265,17 @@
 
                     $("#myTab a#tab_" + data.kb_tag_detail_current_tab).tab("show");
 
-                    axios("{% url 'store_in_session' %}", {
-                        method: "POST",
-                        data: bodyformData
-                    }).then(response => {
-                        console.log("Success:", response.data);
-                        evt.preventDefault();
-                    })
-                      .catch((error) => {
-                          this.$bvToast.toast(error, {
-                              title: "Error",
-                              noAutoHide: true,
-                              variant: "danger"
-                          })
-                          console.error("Error:", error);
-                      });
+                    doPost(
+                        this,
+                        "{% url "store_in_session" %}",
+                        data,
+                        (response) => {
+                            evt.preventDefault();
+                        },
+                        "",
+                        ""
+                    );
+
                 }
             },
             mounted() {

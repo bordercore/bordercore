@@ -453,33 +453,19 @@
                     // with 1, not 0, so add 1.
                     newPosition = evt.moved.newIndex + 1;
 
-                    const bodyFormData = new URLSearchParams();
-                    bodyFormData.append("tag", this.$store.getters.selectedTagName);
-                    bodyFormData.append("link_id", linkId);
-                    bodyFormData.append("position", newPosition);
+                    doPost(
+                        this,
+                        "{% url "sort_bookmarks" %}",
+                        {
+                            "tag": this.$store.getters.selectedTagName,
+                            "link_id": linkId,
+                            "position": newPosition
+                        },
+                        (response) => {},
+                        "",
+                        "Sort error"
+                    );
 
-                    axios("{% url "sort_bookmarks" %}", {
-                        method: "POST",
-                        data: bodyFormData,
-                    }).then(response => {
-                        if (response.data != "OK") {
-                            this.$bvToast.toast("Sort error", {
-                                title: 'Error',
-                                autoHideDelay: 5000,
-                            })
-                            console.log("Sort error");
-                        } else {
-                            console.log("Success");
-                        }
-                    })
-                      .catch((error) => {
-                          this.$bvToast.toast(error, {
-                              title: "Error",
-                              noAutoHide: true,
-                              variant: "danger"
-                          })
-                          console.error("Error:", error);
-                      });
                 },
                 unescapeHtml(html) {
                     // Source: https://stackoverflow.com/a/46851765/378256
@@ -632,30 +618,25 @@
                     const note = document.getElementById("note").value;
                     var selectedId = document.querySelector("tr.bookmark-list.selected").dataset.id;
 
-                    const bodyFormData = new URLSearchParams();
-                    bodyFormData.append("tag", this.$store.getters.selectedTagName);
-                    bodyFormData.append("link_id", selectedId);
-                    bodyFormData.append("note", note);
+                    doPost(
+                        this,
+                        "{% url "bookmark_add_note" %}",
+                        {
+                            "tag": this.$store.getters.selectedTagName,
+                            "link_id": selectedId,
+                            "note": note
+                        },
+                        (response) => {
+                            payload = {
+                                id: selectedId,
+                                noteValue: note
+                            }
+                            EventBus.$emit("foobar", payload);
+                        },
+                        "",
+                        "Error adding note"
+                    );
 
-                    axios("{% url 'bookmark_add_note' %}", {
-                        method: "POST",
-                        data: bodyFormData
-                    }).then(() => {
-
-                        payload = {
-                            id: selectedId,
-                            noteValue: note
-                        }
-                        EventBus.$emit("foobar", payload);
-
-                    }, (error) => {
-                        this.$bvToast.toast(String(error), {
-                            title: "Error",
-                            noAutoHide: true,
-                            variant: "danger"
-                        })
-                        console.log(error);
-                    })
                 }
             },
             mounted() {
@@ -739,33 +720,18 @@
                     // with 1, not 0, so add 1.
                     newPosition = evt.moved.newIndex - 1;
 
-                    const bodyFormData = new URLSearchParams();
-                    bodyFormData.append("tag_id", tagId);
-                    bodyFormData.append("new_position", newPosition);
+                    doPost(
+                        this,
+                        "{% url "sort_favorite_tags" %}",
+                        {
+                            "tag_id": tagId,
+                            "new_position": newPosition
+                        },
+                        () => {},
+                        "",
+                        "Error sorting tags"
+                    );
 
-                    axios("{% url "sort_favorite_tags" %}", {
-                        method: "POST",
-                        data: bodyFormData,
-                    }).then(response => {
-                        if (response.data.status != "OK") {
-                            this.$bvToast.toast(response.data.message, {
-                                title: "Error",
-                                noAutoHide: true,
-                                variant: "danger"
-                            })
-                            console.log("Error: ", response.data.message);
-                        } else {
-                            console.log("Success: ", response.data);
-                        }
-                    })
-                      .catch((error) => {
-                          this.$bvToast.toast(error, {
-                              title: "Error",
-                              noAutoHide: true,
-                              variant: "danger"
-                          })
-                          console.error("Error:", error);
-                      });
                 }
             },
             mounted() {

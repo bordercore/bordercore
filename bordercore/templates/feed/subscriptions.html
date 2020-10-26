@@ -87,16 +87,18 @@
                         // with 1, not 0, so add 1.
                         newPosition = evt.added.newIndex + 1;
 
-                        const bodyFormData = new URLSearchParams();
-                        bodyFormData.append("feed_id", feedId);
-                        bodyFormData.append("position", newPosition);
-
-                        axios("{% url "feed_subscribe" %}", {
-                            method: "POST",
-                            data: bodyFormData
-                        }).then(data => {
-                            console.log("Success:", data);
-                        })
+                        doPost(
+                            this,
+                            "{% url "feed_subscribe" %}",
+                            {
+                                "feed_id": feedId,
+                                "position": newPosition
+                            }
+                            ,
+                            (response) => {},
+                            "",
+                            ""
+                        );
 
                     } else if (evt.moved) {
 
@@ -106,16 +108,18 @@
                         // with 1, not 0, so add 1.
                         newPosition = evt.moved.newIndex + 1;
 
-                        const bodyFormData = new URLSearchParams();
-                        bodyFormData.append("feed_id", feedId);
-                        bodyFormData.append("position", newPosition);
-
-                        axios("{% url "sort_feed" %}", {
-                            method: "POST",
-                            data: bodyFormData
-                        }).then(data => {
-                            console.log("Success:", data);
-                        })
+                        doPost(
+                            this,
+                            "{% url "sort_feed" %}",
+                            {
+                                "feed_id": feedId,
+                                "position": newPosition
+                            }
+                            ,
+                            (response) => {},
+                            "",
+                            ""
+                        );
 
                     }
 

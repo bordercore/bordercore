@@ -1,5 +1,3 @@
-import json
-
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
@@ -199,4 +197,4 @@ def sort_todo(request):
     tbso = TagTodoSortOrder.objects.get(tag_todo=tt, todo=todo)
     tbso.reorder(position)
 
-    return JsonResponse(json.dumps("OK"), safe=False)
+    return JsonResponse({"status": "OK"}, safe=False)

@@ -503,7 +503,7 @@ def collection_mutate(request):
 
     collection.save()
 
-    return JsonResponse({'message': message})
+    return JsonResponse({"status": "OK", "message": message}, safe=False)
 
 
 @login_required

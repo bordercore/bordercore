@@ -392,7 +392,7 @@ def sort_favorite_tags(request):
             "status": "OK"
         }
 
-    return HttpResponse(json.dumps(response), content_type="application/json")
+    return JsonResponse(response, safe=False)
 
 
 @login_required
@@ -411,7 +411,7 @@ def sort_bookmarks(request):
     tbso = TagBookmarkSortOrder.objects.get(tag_bookmark=tb, bookmark=bookmark)
     tbso.reorder(position)
 
-    return HttpResponse(json.dumps('OK'), content_type="application/json")
+    return JsonResponse({"status": "OK"}, safe=False)
 
 
 @login_required
@@ -422,7 +422,7 @@ def add_note(request):
         tag_bookmark=t,
         bookmark_id=request.POST.get("link_id")).update(note=request.POST.get("note"))
 
-    return JsonResponse("OK", safe=False)
+    return JsonResponse({"status": "OK"}, safe=False)
 
 
 @login_required
@@ -434,4 +434,9 @@ def get_new_bookmarks_count(request, timestamp):
     time = datetime.datetime.fromtimestamp(timestamp / 1000)
     count = Bookmark.objects.filter(user=request.user, created__gte=time).count()
 
-    return JsonResponse({"count": count})
+    return JsonResponse(
+        {
+            "status": "OK",
+            "count": count
+        }
+    )

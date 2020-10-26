@@ -277,34 +277,18 @@
             },
             methods: {
                 getBlobList() {
-
-                    axios.get("{% url "node_get_blob_list" object.uuid %}")
-                         .then(response => {
-                             if (response.data.status != "OK") {
-                                 this.$bvToast.toast("Error getting blob list", {
-                                     title: 'Error',
-                                     autoHideDelay: 5000,
-                                     variant: "danger"
-                                 })
-                                 console.log("Error getting blob list");
-                             } else {
-                                 this.blobList = response.data.blob_list;
-
-                                 // Let Vue know that each blob's "noteIsEditable" property is reactive
-                                 for (blob of this.blobList) {
-                                     this.$set(blob, "noteIsEditable", false);
-                                 }
-                                 console.log("Success");
-                             }
-                         })
-                         .catch((error) => {
-                             this.$bvToast.toast("Unable to retrieve blob list " + error.message, {
-                                 title: "Error",
-                                 noAutoHide: true,
-                                 variant: "danger"
-                             })
-                             console.error(error);
-                         });
+                    doGet(
+                        this,
+                        "{% url "node_get_blob_list" object.uuid %}",
+                        (response) => {
+                            this.blobList = response.data.blob_list;
+                            // Let Vue know that each blob's "noteIsEditable" property is reactive
+                            for (blob of this.blobList) {
+                                this.$set(blob, "noteIsEditable", false);
+                            }
+                        },
+                        "Error getting blob list"
+                    );
                 },
                 chooseBlob() {
                     $("#modalAddBlob").modal("show");
@@ -318,34 +302,18 @@
                     // with 1, not 0, so add 1.
                     newPosition = evt.moved.newIndex + 1;
 
-                    const bodyFormData = new URLSearchParams();
-                    bodyFormData.append("node_uuid", this.$store.state.nodeUuid);
-                    bodyFormData.append("blob_uuid", blobUuid);
-                    bodyFormData.append("new_position", newPosition);
+                    doPost(
+                        this,
+                        "{% url "node_sort_blobs" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                            "blob_uuid": blobUuid,
+                            "new_position": newPosition
+                        },
+                        () => {},
+                        ""
+                    );
 
-                    axios("{% url "node_sort_blobs" %}", {
-                        method: "POST",
-                        data: bodyFormData,
-                    }).then(response => {
-                        if (response.data.status != "OK") {
-                            this.$bvToast.toast(response.data.message, {
-                                title: "Error",
-                                noAutoHide: true,
-                                variant: "danger"
-                            })
-                            console.log("Error: ", response.data.message);
-                        } else {
-                            console.log("Success: ", response.data);
-                        }
-                    })
-                      .catch((error) => {
-                          this.$bvToast.toast(error.message, {
-                              title: "Error",
-                              noAutoHide: true,
-                              variant: "danger"
-                          })
-                          console.error(error);
-                      });
                 },
                 handleHover(hovered, evt) {
                     evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
@@ -380,74 +348,36 @@
                 },
                 addBlob(blob_uuid) {
 
-                    const bodyFormData = new URLSearchParams();
-                    bodyFormData.append("node_uuid", this.$store.state.nodeUuid);
-                    bodyFormData.append("blob_uuid", blob_uuid);
-
-                    axios("{% url "node_add_blob" %}", {
-                        method: "POST",
-                        data: bodyFormData,
-                    }).then(response => {
-                        if (response.data.status != "OK") {
-                            this.$bvToast.toast(response.data.message, {
-                                title: "Error",
-                                noAutoHide: true,
-                                variant: "danger"
-                            })
-                            console.log("Error: ", response.data.message);
-                        } else {
-                            this.$bvToast.toast("Blob added", {
-                                title: "Success",
-                                variant: "success"
-                            })
-                            console.log("Success: ", response.data);
+                    doPost(
+                        this,
+                        "{% url "node_add_blob" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                            "blob_uuid": blob_uuid,
+                        },
+                        (response) => {
                             this.getBlobList();
-                        }
-                    })
-                      .catch((error) => {
-                          this.$bvToast.toast(error.message, {
-                              title: "Error",
-                              noAutoHide: true,
-                              variant: "danger"
-                          })
-                          console.error(error);
-                      })
+                        },
+                        "Blob added",
+                        ""
+                    );
 
                 },
                 removeBlob(blob_uuid) {
 
-                    const bodyFormData = new URLSearchParams();
-                    bodyFormData.append("node_uuid", this.$store.state.nodeUuid);
-                    bodyFormData.append("blob_uuid", blob_uuid);
-
-                    axios("{% url "node_remove_blob" %}", {
-                        method: "POST",
-                        data: bodyFormData,
-                    }).then(response => {
-                        if (response.data.status != "OK") {
-                            this.$bvToast.toast(response.data.message, {
-                                title: "Error",
-                                noAutoHide: true,
-                                variant: "danger"
-                            })
-                            console.log("Error: ", response.data.message);
-                        } else {
-                            this.$bvToast.toast("Blob removed", {
-                                title: "Success",
-                                variant: "success"
-                            })
-                            console.log("Success: ", response.data);
+                    doPost(
+                        this,
+                        "{% url "node_remove_blob" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                            "blob_uuid": blob_uuid,
+                        },
+                        (response) => {
                             this.getBlobList();
-                        }
-                    })
-                      .catch((error) => {
-                          this.$bvToast.toast(error.message, {
-                              title: "Error",
-                              noAutoHide: true,
-                              variant: "danger"
-                          })
-                          console.error(error);
-                      })
+                        },
+                        "Blob removed",
+                        ""
+                    );
 
                 },
                 editNote(blob_uuid, note) {
@@ -467,35 +397,20 @@
                                 return;
                             }
 
-                            const bodyFormData = new URLSearchParams();
-                            bodyFormData.append("node_uuid", this.$store.state.nodeUuid);
-                            bodyFormData.append("blob_uuid", blob.uuid);
-                            bodyFormData.append("note", note);
-
-                            axios("{% url "node_edit_blob_note" %}", {
-                                method: "POST",
-                                data: bodyFormData,
-                            }).then(response => {
-                                if (response.data.status != "OK") {
-                                    this.$bvToast.toast(response.data.message, {
-                                        title: "Error",
-                                        noAutoHide: true,
-                                        variant: "danger"
-                                    })
-                                    console.log("Error: ", response.data.message);
-                                } else {
-                                    console.log("Success: ", response.data);
+                            doPost(
+                                this,
+                                "{% url "node_edit_blob_note" %}",
+                                {
+                                    "node_uuid": this.$store.state.nodeUuid,
+                                    "blob_uuid": blob.uuid,
+                                    "note": note
+                                },
+                                (response) => {
                                     this.getBlobList();
-                                }
-                            })
-                              .catch((error) => {
-                                  this.$bvToast.toast(error.message, {
-                                      title: "Error",
-                                      noAutoHide: true,
-                                      variant: "danger"
-                                  })
-                                  console.error(error);
-                              })
+                                },
+                                "",
+                                ""
+                            );
 
                             this.editingNote = false;
 
@@ -564,35 +479,19 @@
             },
             methods: {
                 getBookmarkList() {
+                    doGet(
+                        this,
+                        "{% url "node_get_bookmark_list" object.uuid %}",
+                        (response) => {
+                            this.bookmarkList = response.data.bookmark_list;
 
-                    axios.get("{% url "node_get_bookmark_list" object.uuid %}")
-                         .then(response => {
-                             if (response.data.status != "OK") {
-                                 this.$bvToast.toast("Error getting bookmark list", {
-                                     title: "Error!",
-                                     autoHideDelay: 5000,
-                                     variant: "danger"
-                                 })
-                                 console.log("Error getting bookmark list");
-                             } else {
-                                 this.bookmarkList = response.data.bookmark_list;
-
-                                 // Let Vue know that each blob's "noteIsEditable" property is reactive
-                                 for (bookmark of this.bookmarkList) {
-                                     this.$set(bookmark, "noteIsEditable", false);
-                                 }
-
-                                 console.log("Success");
-                             }
-                         })
-                         .catch((error) => {
-                             this.$bvToast.toast("Unable to retrieve bookmark list " + error.message, {
-                                 title: "Error!",
-                                 noAutoHide: true,
-                                 variant: "danger"
-                             })
-                             console.error(error);
-                         });
+                            // Let Vue know that each blob's "noteIsEditable" property is reactive
+                            for (bookmark of this.bookmarkList) {
+                                this.$set(bookmark, "noteIsEditable", false);
+                            }
+                        },
+                        "Error getting bookmark list"
+                    );
                 },
                 chooseBookmark() {
                     $("#modalAddBookmark").modal("show");
@@ -606,34 +505,19 @@
                     // with 1, not 0, so add 1.
                     newPosition = evt.moved.newIndex + 1;
 
-                    const bodyFormData = new URLSearchParams();
-                    bodyFormData.append("node_uuid", this.$store.state.nodeUuid);
-                    bodyFormData.append("bookmark_id", bookmarkId);
-                    bodyFormData.append("new_position", newPosition);
+                    doPost(
+                        this,
+                        "{% url "node_sort_bookmarks" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                            "bookmark_id": bookmarkId,
+                            "new_position": newPosition
+                        },
+                        () => {},
+                        "",
+                        ""
+                    );
 
-                    axios("{% url "node_sort_bookmarks" %}", {
-                        method: "POST",
-                        data: bodyFormData,
-                    }).then(response => {
-                        if (response.data.status != "OK") {
-                            this.$bvToast.toast(response.data.message, {
-                                title: "Error",
-                                noAutoHide: true,
-                                variant: "danger"
-                            })
-                            console.log("Error: ", response.data.message);
-                        } else {
-                            console.log("Success: ", response.data);
-                        }
-                    })
-                      .catch((error) => {
-                          this.$bvToast.toast(error.message, {
-                              title: "Error",
-                              noAutoHide: true,
-                              variant: "danger"
-                          })
-                          console.error(error);
-                      });
                 },
                 activateInEditMode(bookmark, event) {
 
@@ -660,38 +544,19 @@
                 },
                 addBookmark(bookmark_id) {
 
-                    const bodyFormData = new URLSearchParams();
-                    bodyFormData.append("node_uuid", this.$store.state.nodeUuid);
-                    bodyFormData.append("bookmark_id", bookmark_id);
-
-                    axios("{% url "node_add_bookmark" %}", {
-                        method: "POST",
-                        data: bodyFormData,
-                    }).then(response => {
-                        if (response.data.status != "OK") {
-                            this.$bvToast.toast(response.data.message, {
-                                title: "Error",
-                                noAutoHide: true,
-                                variant: "danger"
-                            })
-                            console.log("Error: ", response.data.message);
-                        } else {
-                            this.$bvToast.toast("Bookmark added", {
-                                title: "Success",
-                                variant: "success"
-                            })
-                            console.log("Success: ", response.data);
+                    doPost(
+                        this,
+                        "{% url "node_add_bookmark" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                            "bookmark_id": bookmark_id,
+                        },
+                        (response) => {
                             this.getBookmarkList();
-                        }
-                    })
-                      .catch((error) => {
-                          this.$bvToast.toast(error.message, {
-                              title: "Error",
-                              noAutoHide: true,
-                              variant: "danger"
-                          })
-                          console.error(error);
-                      })
+                        },
+                        "Bookmark added",
+                        ""
+                    );
 
                 },
                 handleHover(hovered, evt) {
@@ -704,38 +569,19 @@
                 },
                 removeBookmark(bookmark_id) {
 
-                    const bodyFormData = new URLSearchParams();
-                    bodyFormData.append("node_uuid", this.$store.state.nodeUuid);
-                    bodyFormData.append("bookmark_id", bookmark_id);
-
-                    axios("{% url "node_remove_bookmark" %}", {
-                        method: "POST",
-                        data: bodyFormData,
-                    }).then(response => {
-                        if (response.data.status != "OK") {
-                            this.$bvToast.toast(response.data.message, {
-                                title: "Error",
-                                noAutoHide: true,
-                                variant: "danger"
-                            })
-                            console.log("Error: ", response.data.message);
-                        } else {
-                            this.$bvToast.toast("Bookmark removed", {
-                                title: "Success",
-                                variant: "success"
-                            })
-                            console.log("Success: ", response.data);
+                    doPost(
+                        this,
+                        "{% url "node_remove_bookmark" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                            "bookmark_id": bookmark_id
+                        },
+                        (response) => {
                             this.getBookmarkList();
-                        }
-                    })
-                      .catch((error) => {
-                          this.$bvToast.toast(error.message, {
-                              title: "Error",
-                              noAutoHide: true,
-                              variant: "danger"
-                          })
-                          console.error(error);
-                      })
+                        },
+                        "Bookmark removed",
+                        ""
+                    );
 
                 },
                 editNote(bookmark_id, note) {
@@ -755,35 +601,20 @@
                                 return;
                             }
 
-                            const bodyFormData = new URLSearchParams();
-                            bodyFormData.append("node_uuid", this.$store.state.nodeUuid);
-                            bodyFormData.append("bookmark_id", bookmark.id);
-                            bodyFormData.append("note", note);
-
-                            axios("{% url "node_edit_bookmark_note" %}", {
-                                method: "POST",
-                                data: bodyFormData,
-                            }).then(response => {
-                                if (response.data.status != "OK") {
-                                    this.$bvToast.toast(response.data.message, {
-                                        title: "Error",
-                                        noAutoHide: true,
-                                        variant: "danger"
-                                    })
-                                    console.log("Error: ", response.data.message);
-                                } else {
-                                    console.log("Success: ", response.data);
+                            doPost(
+                                this,
+                                "{% url "node_edit_bookmark_note" %}",
+                                {
+                                    "node_uuid": this.$store.state.nodeUuid,
+                                    "bookmark_id": bookmark.id,
+                                    "note": note
+                                },
+                                (response) => {
                                     this.getBookmarkList();
-                                }
-                            })
-                              .catch((error) => {
-                                  this.$bvToast.toast(error.message, {
-                                      title: "Error",
-                                      noAutoHide: true,
-                                      variant: "danger"
-                                  })
-                                  console.error(error);
-                              })
+                                },
+                                "",
+                                ""
+                            );
 
                             this.editingNote = false;
 
@@ -851,29 +682,15 @@
             },
             methods: {
                 getNote() {
-                    axios.get("{% url "node_get_note" object.uuid %}")
-                         .then(response => {
-                             if (response.data.status != "OK") {
-                                 this.$bvToast.toast("Error getting note", {
-                                     title: "Error!",
-                                     autoHideDelay: 5000,
-                                     variant: "danger"
-                                 })
-                                 console.log("Error getting note");
-                             } else {
-                                 this.note = response.data.note;
-                                 this.noteHtml = response.data.noteHtml;
-                                 console.log("Success");
-                             }
-                         })
-                         .catch((error) => {
-                             this.$bvToast.toast("Unable to retrieve note " + error.message, {
-                                 title: "Error!",
-                                 noAutoHide: true,
-                                 variant: "danger"
-                             })
-                             console.error(error);
-                         });
+                    doGet(
+                        this,
+                        "{% url "node_get_note" object.uuid %}",
+                        (response) => {
+                            this.note = response.data.note;
+                            this.noteHtml = response.data.noteHtml;
+                        },
+                        "Error getting note"
+                    );
                 },
                 editNote() {
                     this.beforeEditCache = this.note;
@@ -883,39 +700,23 @@
 
                     // If the note hasn't changed, abort
                     if (this.beforeEditCache == this.note) {
-                        console.log("no change detected");
                         this.isEditing = false;
                         return;
                     }
 
-                    const bodyFormData = new URLSearchParams();
-                    bodyFormData.append("node_uuid", this.$store.state.nodeUuid);
-                    bodyFormData.append("note", this.note);
-
-                    axios("{% url "node_edit_note" %}", {
-                        method: "POST",
-                        data: bodyFormData,
-                    }).then(response => {
-                        if (response.data.status != "OK") {
-                            this.$bvToast.toast(response.data.message, {
-                                title: "Error",
-                                noAutoHide: true,
-                                variant: "danger"
-                            })
-                            console.log("Error: ", response.data.message);
-                        } else {
-                            console.log("Success: ", response.data);
+                    doPost(
+                        this,
+                        "{% url "node_edit_note" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                            "note": this.note
+                        },
+                        (response) => {
                             this.getNote();
-                        }
-                    })
-                      .catch((error) => {
-                          this.$bvToast.toast(error.message, {
-                              title: "Error",
-                              noAutoHide: true,
-                              variant: "danger"
-                          })
-                          console.error(error);
-                      })
+                        },
+                        "",
+                        ""
+                    );
 
                     this.isEditing = false;
 

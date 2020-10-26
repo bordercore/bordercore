@@ -6,7 +6,7 @@ import requests
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -111,7 +111,7 @@ def sort_feed(request):
     request.user.userprofile.rss_feeds = feeds
     request.user.userprofile.save()
 
-    return HttpResponse(json.dumps('OK'), content_type="application/json")
+    return JsonResponse({"status": "OK"}, safe=False)
 
 
 @login_required
@@ -123,7 +123,7 @@ def feed_subscribe(request):
     feed = Feed.objects.get(pk=feed_id)
     feed.subscribe_user(request.user, position)
 
-    return HttpResponse(json.dumps('OK'), content_type="application/json")
+    return JsonResponse({"status": "OK"}, safe=False)
 
 
 @login_required
@@ -134,7 +134,7 @@ def feed_unsubscribe(request):
     feed = Feed.objects.get(pk=feed_id)
     feed.unsubscribe_user(request.user)
 
-    return HttpResponse(json.dumps('OK'), content_type="application/json")
+    return JsonResponse({"status": "OK"}, safe=False)
 
 
 @login_required

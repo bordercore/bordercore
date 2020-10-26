@@ -80,15 +80,17 @@
                     const feedId = evt.srcElement.dataset.id;
                     EventBus.$emit("showFeed", feedId);
 
-                    const bodyFormData = new URLSearchParams();
-                    bodyFormData.append("current_feed", feedId);
-
-                    axios("{% url 'store_in_session' %}", {
-                        method: "POST",
-                        data: bodyFormData
-                    }).then(response => {
-                        console.log("Success");
-                    });
+                    doPost(
+                        this,
+                        "{% url "store_in_session" %}",
+                        {
+                            "current_feed": feedId
+                        }
+                        ,
+                        (response) => {},
+                        "",
+                        ""
+                    );
 
                 },
                 onChange(evt) {
