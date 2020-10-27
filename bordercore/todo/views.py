@@ -6,9 +6,9 @@ from django.utils.decorators import method_decorator
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
-from tag.models import Tag
+from tag.models import SortOrderTagTodo, Tag
 from todo.forms import TodoForm
-from todo.models import TagTodo, TagTodoSortOrder, Todo
+from todo.models import Todo
 
 SECTION = 'todo'
 
@@ -23,22 +23,22 @@ class TodoListView(ListView):
 
     def get_queryset(self):
         if 'tagsearch' in self.request.GET:
-            tag = self.request.GET.get('tagsearch')
-            self.request.session['current_todo_tag'] = tag
+            tag_name = self.request.GET.get('tagsearch')
+            self.request.session['current_todo_tag'] = tag_name
         elif 'current_todo_tag' in self.request.session:
             # Use the last tag accessed
-            tag = Tag.objects.get(name=self.request.session.get('current_todo_tag')).name
+            tag_name = self.request.session.get('current_todo_tag')
         elif self.request.user.userprofile.todo_default_tag:
-            tag = self.request.user.userprofile.todo_default_tag.name
+            tag_name = self.request.user.userprofile.todo_default_tag
         else:
             tag_info = Tag.objects.filter(todo__user=self.request.user, todo__isnull=False).first()
-            tag = None
+            tag_name = None
             if tag_info:
-                tag = tag_info.name
-        self.tagsearch = tag
+                tag_name = tag_info.name
+        self.tagsearch = tag_name
 
-        if tag:
-            return TagTodo.objects.get(tag__name=tag).tagtodosortorder_set.all().select_related("todo")
+        if tag_name:
+            return Tag.objects.get(name=tag_name).todos.all().order_by("sortordertagtodo__sort_order")
         else:
             return []
 
@@ -50,19 +50,19 @@ class TodoListView(ListView):
 
         context["tags"] = Todo.get_todo_counts(self.request.user, self.tagsearch)
 
-        for todo in context['object_list']:
+        for sort_order, todo in enumerate(context['object_list'], 1):
 
             data = dict(manual_order="",
-                        sort_order=todo.sort_order,
-                        task=todo.todo.task,
-                        priority=Todo.get_priority_name(todo.todo.priority),
-                        modified=todo.todo.get_modified(),
-                        unixtime=format(todo.todo.modified, 'U'),
-                        uuid=todo.todo.uuid)
+                        sort_order=sort_order,
+                        task=todo.task,
+                        priority=Todo.get_priority_name(todo.priority),
+                        modified=todo.get_modified(),
+                        unixtime=format(todo.modified, 'U'),
+                        uuid=todo.uuid)
 
-            if todo.todo.data:
-                fields.extend(list(todo.todo.data.keys()))
-                data = {**data, **todo.todo.data}
+            if todo.data:
+                fields.extend(list(todo.data.keys()))
+                data = {**data, **todo.data}
 
             info.append(data)
 
@@ -188,13 +188,11 @@ def sort_todo(request):
     bookmark to a new position within that list
     """
 
-    tag = request.POST["tag"]
+    tag_name = request.POST["tag"]
     todo_uuid = request.POST["todo_uuid"]
-    position = int(request.POST["position"])
+    new_position = int(request.POST["position"])
 
-    tt = TagTodo.objects.get(tag__name=tag)
-    todo = Todo.objects.get(uuid=todo_uuid)
-    tbso = TagTodoSortOrder.objects.get(tag_todo=tt, todo=todo)
-    tbso.reorder(position)
+    s = SortOrderTagTodo.objects.get(tag__name=tag_name, todo__uuid=todo_uuid)
+    SortOrderTagTodo.reorder(s, new_position)
 
     return JsonResponse({"status": "OK"}, safe=False)

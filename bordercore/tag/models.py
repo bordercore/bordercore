@@ -2,12 +2,18 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models, transaction
 from django.db.models import F
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
+
+from lib.mixins import SortOrderMixin
 
 
 class Tag(models.Model):
     name = models.TextField(unique=True)
     is_meta = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
+
+    todos = models.ManyToManyField("todo.Todo", through="SortOrderTagTodo")
 
     def __unicode__(self):
         return self.name
@@ -26,6 +32,25 @@ class Tag(models.Model):
 
 # Add the import here to avoid a circular dependency between Tag and Bookmark
 from bookmark.models import Bookmark  # isort:skip
+
+
+class SortOrderTagTodo(SortOrderMixin):
+
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    todo = models.ForeignKey("todo.Todo", on_delete=models.CASCADE)
+
+    field_name = "tag"
+
+    class Meta:
+        ordering = ("sort_order",)
+        unique_together = (
+            ("tag", "todo")
+        )
+
+
+@receiver(pre_delete, sender=SortOrderTagTodo)
+def remove_todo(sender, instance, **kwargs):
+    instance.handle_delete()
 
 
 class TagBookmark(models.Model):

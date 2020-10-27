@@ -3,18 +3,16 @@ from functools import cmp_to_key
 
 from elasticsearch import Elasticsearch
 
-from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
-from django.core.exceptions import ObjectDoesNotExist
-from django.db import models, transaction
-from django.db.models import Count, F
+from django.db import models
+from django.db.models import Count
 from django.db.models.signals import m2m_changed, post_save
 from django.dispatch.dispatcher import receiver
 
 from lib.mixins import TimeStampedModel
-from tag.models import Tag
+from tag.models import SortOrderTagTodo, Tag
 
 
 class Todo(TimeStampedModel):
@@ -76,11 +74,6 @@ class Todo(TimeStampedModel):
         return counts
 
     def delete(self):
-
-        TagTodoSortOrder = apps.get_model("todo", "TagTodoSortOrder")
-
-        for x in TagTodoSortOrder.objects.filter(todo=self):
-            x.delete()
 
         es = Elasticsearch(
             [settings.ELASTICSEARCH_ENDPOINT],
@@ -152,119 +145,12 @@ def post_save_wrapper(sender, instance, **kwargs):
 
 def tags_changed(sender, **kwargs):
 
-    TagTodoSortOrder = apps.get_model("todo", "TagTodoSortOrder")
-    TagTodo = apps.get_model("todo", "TagTodo")
-
     if kwargs["action"] == "post_add":
-
         todo = kwargs["instance"]
+
         for tag_id in kwargs["pk_set"]:
-
-            try:
-                tt = TagTodo.objects.get(tag_id=tag_id, user=todo.user)
-            except ObjectDoesNotExist:
-                # If the tag is new, create a new instance
-                tt = TagTodo(tag_id=tag_id, user=todo.user)
-                tt.save()
-
-            tbso = TagTodoSortOrder(tag_todo=tt, todo=todo)
-            tbso.save()
-
-    elif kwargs["action"] == "post_remove":
-        todo = kwargs["instance"]
-        for tag_id in kwargs["pk_set"]:
-            for x in TagTodoSortOrder.objects.filter(todo=todo).filter(tag_todo__tag__id=tag_id):
-                x.delete()
+            so = SortOrderTagTodo(tag=Tag.objects.get(pk=tag_id), todo=todo)
+            so.save()
 
 
 m2m_changed.connect(tags_changed, sender=Todo.tags.through)
-
-
-class TagTodo(models.Model):
-    tag = models.OneToOneField(Tag, on_delete=models.PROTECT)
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
-    todos = models.ManyToManyField(Todo, through="TagTodoSortOrder")
-
-    def __unicode__(self):
-        return self.tag.name
-
-    def __str__(self):
-        return self.tag.name
-
-
-class TagTodoSortOrder(models.Model):
-    tag_todo = models.ForeignKey(TagTodo, on_delete=models.CASCADE)
-    todo = models.ForeignKey(Todo, on_delete=models.CASCADE)
-    sort_order = models.IntegerField(default=1)
-
-    def delete(self):
-
-        # Get all tags below this one
-        # Move them up by decreasing their sort order
-
-        TagTodoSortOrder.objects.filter(
-            tag_todo=self.tag_todo,
-            sort_order__gte=self.sort_order,
-        ).update(
-            sort_order=F("sort_order") - 1
-        )
-
-        super(TagTodoSortOrder, self).delete()
-
-    def save(self, *args, **kwargs):
-
-        # Don't do this for new objects
-        if self.pk is None:
-            TagTodoSortOrder.objects.filter(
-                tag_todo=self.tag_todo
-            ).update(
-                sort_order=F("sort_order") + 1
-            )
-
-        super(TagTodoSortOrder, self).save(*args, **kwargs)
-
-    def reorder(self, new_position):
-        """
-        Move a given todo to a new position in a sorted list
-        """
-
-        if self.sort_order != new_position:
-
-            with transaction.atomic():
-                if self.sort_order > new_position:
-                    # Move the tag up the list
-                    # All tags between the old position and the new position
-                    #  need to be re-ordered by increasing their sort order
-
-                    TagTodoSortOrder.objects.filter(
-                        tag_todo=self.tag_todo,
-                        sort_order__gte=new_position,
-                        sort_order__lt=self.sort_order
-                    ).update(
-                        sort_order=F("sort_order") + 1
-                    )
-                else:
-                    # Move the tag down the list
-                    # All tags between the old position and the new position
-                    #  need to be re-ordered by decreasing their sort order
-
-                    TagTodoSortOrder.objects.filter(
-                        tag_todo=self.tag_todo,
-                        sort_order__lte=new_position,
-                        sort_order__gt=self.sort_order
-                    ).update(
-                        sort_order=F("sort_order") - 1
-                    )
-
-                # Finally, update the sort order for the tag in question
-                self.sort_order = new_position
-                self.save()
-
-    class Meta:
-        unique_together = (
-
-            # For a given tag, avoid duplicate todos
-            ("tag_todo", "todo"),
-
-        )
-        ordering = ("sort_order",)
