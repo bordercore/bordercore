@@ -24,6 +24,9 @@ class SortOrderMixin(models.Model):
     def delete(self):
 
         super().delete()
+        self.handle_delete()
+
+    def handle_delete(self):
 
         filter_kwargs = {self.field_name: getattr(self, self.field_name)}
 

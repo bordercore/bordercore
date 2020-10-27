@@ -2,6 +2,8 @@ import uuid
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 
 from blob.models import Blob
 from bookmark.models import Bookmark
@@ -35,6 +37,11 @@ class SortOrderNodeBookmark(SortOrderMixin):
         )
 
 
+@receiver(pre_delete, sender=SortOrderNodeBookmark)
+def remove_bookmark(sender, instance, **kwargs):
+    instance.handle_delete()
+
+
 class SortOrderNodeBlob(SortOrderMixin):
 
     node = models.ForeignKey(Node, on_delete=models.CASCADE)
@@ -47,3 +54,8 @@ class SortOrderNodeBlob(SortOrderMixin):
         unique_together = (
             ("node", "blob")
         )
+
+
+@receiver(pre_delete, sender=SortOrderNodeBlob)
+def remove_blob(sender, instance, **kwargs):
+    instance.handle_delete()
