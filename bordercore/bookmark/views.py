@@ -4,6 +4,7 @@ import json
 import re
 
 import lxml.html as lh
+import pytz
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -431,7 +432,7 @@ def get_new_bookmarks_count(request, timestamp):
     Get a count of all bookmarks created after the specified timestamp
     """
 
-    time = datetime.datetime.fromtimestamp(timestamp / 1000)
+    time = datetime.datetime.fromtimestamp(timestamp / 1000, pytz.timezone("US/Eastern"))
     count = Bookmark.objects.filter(user=request.user, created__gte=time).count()
 
     return JsonResponse(

@@ -72,8 +72,11 @@ class ExerciseUser(models.Model):
             max=Max("exercise__data__date")) \
             .filter(Q(interval__lt=(timezone.now() - F("max")) + timedelta(days=1))) \
             .filter(user=user) \
-            .order_by(F("max")) \
-            .select_related("exercise")
+            .order_by(F("max"))
+
+        # Avoid an unnecessary join if we only want the count
+        if not count_only:
+            exercises = exercises.select_related("exercise")
 
         overdue_exercises = []
 
