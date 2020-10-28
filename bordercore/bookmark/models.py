@@ -5,16 +5,14 @@ import re
 import boto3
 from elasticsearch import Elasticsearch
 
-from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
-from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models.signals import m2m_changed
 
 from lib.mixins import TimeStampedModel
-from tag.models import Tag
+from tag.models import SortOrderTagBookmark, Tag
 
 
 # This custom field lets us use a checkbox on the form, which, if checked,
@@ -28,12 +26,13 @@ class DailyBookmarkJSONField(JSONField):
         else:
             return None
 
+
 class Bookmark(TimeStampedModel):
     url = models.TextField()
     title = models.TextField()
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     note = models.TextField(null=True)
-    tags = models.ManyToManyField(Tag)
+    tags = models.ManyToManyField("tag.Tag")
     is_pinned = models.BooleanField(default=False)
     daily = DailyBookmarkJSONField(blank=True, null=True)
     last_check = models.DateTimeField(null=True)
@@ -44,11 +43,6 @@ class Bookmark(TimeStampedModel):
         return ", ".join([tag.name for tag in self.tags.all()])
 
     def delete(self):
-
-        TagBookmarkSortOrder = apps.get_model("tag", "TagBookmarkSortOrder")
-
-        for x in TagBookmarkSortOrder.objects.filter(bookmark=self):
-            x.delete()
 
         es = Elasticsearch(
             [settings.ELASTICSEARCH_ENDPOINT],
@@ -146,15 +140,7 @@ class Bookmark(TimeStampedModel):
     @staticmethod
     def get_tagged_bookmarks(user, tag_name):
 
-        TagBookmark = apps.get_model("tag", "TagBookmark")
-
-        tag = Tag.objects.get(name=tag_name)
-        tagbookmark = TagBookmark.objects.get(user=user, tag=tag)
-
-        # Bookmarks are guaranteed to be returned in sorted order
-        #  because of the "ordering" field in TagBookmarkSortOrder's
-        #  "Meta" inner class
-        bookmark_info = [(x.bookmark, x.note) for x in tagbookmark.tagbookmarksortorder_set.all().select_related("bookmark")]
+        bookmark_info = [(x.bookmark, x.note) for x in SortOrderTagBookmark.objects.filter(tag__name=tag_name)]
 
         # If there is an associated note, add it to the bookmark object
         sorted_bookmarks = []
@@ -168,29 +154,13 @@ class Bookmark(TimeStampedModel):
 
 def tags_changed(sender, **kwargs):
 
-    TagBookmarkSortOrder = apps.get_model("tag", "TagBookmarkSortOrder")
-    TagBookmark = apps.get_model("tag", "TagBookmark")
-
     if kwargs["action"] == "post_add":
+        if kwargs["action"] == "post_add":
+            bookmark = kwargs["instance"]
 
-        bookmark = kwargs["instance"]
-        for tag_id in kwargs["pk_set"]:
-
-            try:
-                tb = TagBookmark.objects.get(tag_id=tag_id, user=bookmark.user)
-            except ObjectDoesNotExist:
-                # If the tag is new, create a new instance
-                tb = TagBookmark(tag_id=tag_id, user=bookmark.user)
-                tb.save()
-
-            tbso = TagBookmarkSortOrder(tag_bookmark=tb, bookmark=bookmark)
-            tbso.save()
-
-    elif kwargs["action"] == "post_remove":
-        bookmark = kwargs["instance"]
-        for tag_id in kwargs["pk_set"]:
-            for x in TagBookmarkSortOrder.objects.filter(bookmark=bookmark).filter(tag_bookmark__tag__id=tag_id):
-                x.delete()
+            for tag_id in kwargs["pk_set"]:
+                so = SortOrderTagBookmark(tag=Tag.objects.get(pk=tag_id), bookmark=bookmark)
+                so.save()
 
 
 m2m_changed.connect(tags_changed, sender=Bookmark.tags.through)

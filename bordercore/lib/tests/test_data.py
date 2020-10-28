@@ -43,4 +43,4 @@ def test_sort_order_mixin():
                 )["sort_order__max"] == count, f"Max(sort_order) != total count for {model}, {getattr(field_name, field_name.field_name)}"
 
                 q = model.objects.values("sort_order", field_name.field_name).order_by().annotate(dcount=Count("sort_order")).filter(dcount__gt=1)
-                assert len(q) == 0, "Multiple sort_order values found for {model}, {getattr(field_name, field_name.field_name)}"
+                assert len(q) == 0, f"Multiple sort_order values found for {model}, {getattr(field_name, field_name.field_name)}"

@@ -1,4 +1,3 @@
-import datetime
 
 import pytest
 
@@ -6,24 +5,19 @@ import django
 
 django.setup()
 
-from django.contrib.auth.models import User  # isort:skip
-from collection.models import Collection  # isort:skip
 from bookmark.models import Bookmark  # isort:skip
-from tag.models import Tag, TagBookmark, TagBookmarkSortOrder  # isort:skip
+from tag.models import Tag, SortOrderTagBookmark  # isort:skip
 
 
 @pytest.fixture(scope="function")
-def tagbookmark(user):
+def tag(user):
 
     tag = Tag.objects.create(name="django")
-
-    tagbookmark = TagBookmark.objects.create(tag_id=tag.id, user=user)
-
-    yield tagbookmark
+    yield tag
 
 
 @pytest.fixture(scope="function")
-def bookmarks(user, tagbookmark):
+def bookmarks(user, tag):
 
     bookmark1 = Bookmark.objects.create(
         id=1,
@@ -44,8 +38,8 @@ def bookmarks(user, tagbookmark):
         user=user
     )
 
-    TagBookmarkSortOrder.objects.create(tag_bookmark=tagbookmark, bookmark=bookmark3)
-    TagBookmarkSortOrder.objects.create(tag_bookmark=tagbookmark, bookmark=bookmark2)
-    TagBookmarkSortOrder.objects.create(tag_bookmark=tagbookmark, bookmark=bookmark1)
+    SortOrderTagBookmark.objects.create(tag=tag, bookmark=bookmark3)
+    SortOrderTagBookmark.objects.create(tag=tag, bookmark=bookmark2)
+    SortOrderTagBookmark.objects.create(tag=tag, bookmark=bookmark1)
 
     yield [bookmark1, bookmark2, bookmark3]

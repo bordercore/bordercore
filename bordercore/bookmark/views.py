@@ -20,7 +20,7 @@ from accounts.models import SortOrder
 from bookmark.forms import BookmarkForm
 from bookmark.models import Bookmark
 from lib.util import get_pagination_range
-from tag.models import Tag, TagBookmark, TagBookmarkSortOrder
+from tag.models import SortOrderTagBookmark, Tag
 
 SECTION = 'bookmarks'
 BOOKMARKS_PER_PAGE = 50
@@ -233,12 +233,13 @@ def overview(request,
 
     favorite_tags = request.user.userprofile.favorite_tags.all().order_by('sortorder__sort_order')
 
-    t = TagBookmark.objects\
-                   .filter(tag__id__in=[x.id for x in favorite_tags])\
-                   .values('tag__id', 'tag__name')\
-                   .annotate(bookmark_count=Count('bookmarks'))
+    t = Tag.objects\
+           .filter(id__in=[x.id for x in favorite_tags])\
+           .values('id', 'name')\
+           .annotate(bookmark_count=Count('bookmarks__sortordertagbookmark__bookmark'))
+
     for x in t:
-        tag_counts[x["tag__name"]] = x["bookmark_count"]
+        tag_counts[x["name"]] = x["bookmark_count"]
 
     return render(request, 'bookmark/index.html',
                   {
@@ -403,14 +404,12 @@ def sort_bookmarks(request):
     bookmark to a new position within that list
     """
 
-    tag = request.POST['tag']
-    link_id = int(request.POST['link_id'])
-    position = int(request.POST['position'])
+    tag_name = request.POST["tag"]
+    link_id = int(request.POST["link_id"])
+    new_position = int(request.POST["position"])
 
-    tb = TagBookmark.objects.get(tag__name=tag)
-    bookmark = Bookmark.objects.get(id=link_id)
-    tbso = TagBookmarkSortOrder.objects.get(tag_bookmark=tb, bookmark=bookmark)
-    tbso.reorder(position)
+    s = SortOrderTagBookmark.objects.get(tag__name=tag_name, bookmark__id=link_id)
+    SortOrderTagBookmark.reorder(s, new_position)
 
     return JsonResponse({"status": "OK"}, safe=False)
 
@@ -418,10 +417,15 @@ def sort_bookmarks(request):
 @login_required
 def add_note(request):
 
-    t = TagBookmark.objects.get(tag__name=request.POST.get("tag"))
-    TagBookmarkSortOrder.objects.filter(
-        tag_bookmark=t,
-        bookmark_id=request.POST.get("link_id")).update(note=request.POST.get("note"))
+    tag_name = request.POST["tag"]
+    link_id = int(request.POST["link_id"])
+
+    note = request.POST["note"]
+
+    SortOrderTagBookmark.objects.filter(
+        tag__name=tag_name,
+        bookmark__id=link_id
+    ).update(note=note)
 
     return JsonResponse({"status": "OK"}, safe=False)
 

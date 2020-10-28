@@ -275,7 +275,6 @@ def test_tags_no_orphans():
                            Q(question__isnull=True) &
                            Q(song__isnull=True) &
                            Q(sortorder__isnull=True) &
-                           Q(tagbookmark__isnull=True) &
                            Q(userprofile__isnull=True))
     assert len(t) == 0, "{} tags fail this test; example: name={}".format(len(t), t.first().name)
 
