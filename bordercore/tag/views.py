@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import redirect
 
-from accounts.models import SortOrder
+from accounts.models import SortOrderUserTag
 from tag.models import Tag, TagAlias
 
 
@@ -36,7 +36,7 @@ def add_favorite_tag(request):
     tag = request.POST["tag"]
 
     tag_object = Tag.objects.get(name=tag)
-    c = SortOrder(user_profile=request.user.userprofile, tag=tag_object)
+    c = SortOrderUserTag(userprofile=request.user.userprofile, tag=tag_object)
     c.save()
 
     return redirect("bookmark_overview")
@@ -49,7 +49,7 @@ def remove_favorite_tag(request):
 
     tag_object = Tag.objects.get(name=tag)
 
-    old_position = SortOrder.objects.get(user_profile=request.user.userprofile, tag=tag_object)
+    old_position = SortOrderUserTag.objects.get(userprofile=request.user.userprofile, tag=tag_object)
     old_position.delete()
 
     return redirect("bookmark_overview")

@@ -35,7 +35,7 @@ class UserProfileDetailView(UpdateView):
         context['section'] = SECTION
         context['nav'] = 'prefs'
         context['title'] = 'Preferences'
-        context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.favorite_tags.all()]
+        context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.favorite_tags.all()[::-1]]
         return context
 
     def get_object(self, queryset=None):

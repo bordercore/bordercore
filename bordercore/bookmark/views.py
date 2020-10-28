@@ -1,4 +1,3 @@
-import base64
 import datetime
 import json
 import re
@@ -16,7 +15,7 @@ from django.shortcuts import redirect, render
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 
-from accounts.models import SortOrder
+from accounts.models import SortOrderUserTag
 from bookmark.forms import BookmarkForm
 from bookmark.models import Bookmark
 from lib.util import get_pagination_range
@@ -231,7 +230,7 @@ def overview(request,
 
     tag_counts["Untagged"] = Bookmark.objects.filter(user=request.user, tags__isnull=True).count()
 
-    favorite_tags = request.user.userprofile.favorite_tags.all().order_by('sortorder__sort_order')
+    favorite_tags = request.user.userprofile.favorite_tags.all().order_by('sortorderusertag__sort_order')
 
     t = Tag.objects\
            .filter(id__in=[x.id for x in favorite_tags])\
@@ -380,16 +379,23 @@ def sort_favorite_tags(request):
     Move a given tag to a new position in a sorted list
     """
 
-    tag_id = request.POST['tag_id']
-    new_position = int(request.POST['new_position'])
+    tag_id = request.POST["tag_id"]
+    new_position = int(request.POST["new_position"])
 
     if new_position < 1:
+
         response = {
             "status": "Error",
             "message": f"Position cannot be < 1: {new_position}"
         }
+
     else:
-        SortOrder.reorder(request.user, tag_id, new_position)
+
+        tag = Tag.objects.get(id=tag_id)
+
+        s = SortOrderUserTag.objects.get(userprofile=request.user.userprofile, tag=tag)
+        SortOrderUserTag.reorder(s, new_position)
+
         response = {
             "status": "OK"
         }
