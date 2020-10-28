@@ -53,8 +53,6 @@ class SortOrderMixin(models.Model):
 
     def reorder(self, new_order):
 
-        qs = self.get_queryset()
-
         # Equivalent to, say, node=self.node
         filter_kwargs = {self.field_name: getattr(self, self.field_name)}
 
@@ -63,7 +61,7 @@ class SortOrderMixin(models.Model):
 
         with transaction.atomic():
             if self.sort_order > int(new_order):
-                qs.filter(
+                self.get_queryset().filter(
                     **filter_kwargs,
                     sort_order__lt=self.sort_order,
                     sort_order__gte=new_order,
@@ -73,7 +71,7 @@ class SortOrderMixin(models.Model):
                     sort_order=F("sort_order") + 1,
                 )
             else:
-                qs.filter(
+                self.get_queryset().filter(
                     **filter_kwargs,
                     sort_order__lte=new_order,
                     sort_order__gt=self.sort_order,
@@ -87,7 +85,7 @@ class SortOrderMixin(models.Model):
             self.save()
 
     def get_queryset(self):
-        model = apps.get_model(self.field_name, type(self).__name__)
+        model = apps.get_model(self._meta.app_label, type(self).__name__)
         return model.objects.get_queryset()
 
     class Meta:
