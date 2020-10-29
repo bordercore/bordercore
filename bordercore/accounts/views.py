@@ -11,7 +11,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView
 
 from accounts.forms import UserProfileForm
-from accounts.models import SortOrderNote, UserProfile
+from accounts.models import SortOrderUserNote, UserProfile
 from blob.models import Blob
 
 SECTION = 'prefs'
@@ -62,9 +62,8 @@ def sort_favorite_notes(request):
     note_uuid = request.POST["note_uuid"]
     new_position = int(request.POST["new_position"])
 
-    note = Blob.objects.get(user=request.user, uuid=note_uuid)
-
-    SortOrderNote.reorder(request.user, note.id, new_position)
+    s = SortOrderUserNote.objects.get(userprofile=request.user.userprofile, note__uuid=note_uuid)
+    SortOrderUserNote.reorder(s, new_position)
 
     return HttpResponse(json.dumps("OK"), content_type="application/json")
 
@@ -77,8 +76,10 @@ def add_to_favorites(request, uuid):
     if note.is_favorite_note():
         messages.add_message(request, messages.WARNING, "This is already a favorite")
     else:
-        sort_order = SortOrderNote(user_profile=request.user.userprofile, note=note)
-        sort_order.save()
+
+        c = SortOrderUserNote(userprofile=request.user.userprofile, note=note)
+        c.save()
+
         messages.add_message(request, messages.WARNING, "Added to favorites")
 
     return HttpResponseRedirect(reverse('blob_detail', args=(uuid,)))
@@ -92,7 +93,7 @@ def remove_from_favorites(request, uuid):
     if not note.is_favorite_note():
         messages.add_message(request, messages.WARNING, "This is not a favorite")
     else:
-        sort_order = SortOrderNote.objects.get(user_profile=request.user.userprofile, note=note)
+        sort_order = SortOrderUserNote.objects.get(userprofile=request.user.userprofile, note=note)
         sort_order.delete()
         messages.add_message(request, messages.WARNING, "Removed from favorites")
 
