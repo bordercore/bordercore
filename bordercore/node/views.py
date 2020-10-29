@@ -86,10 +86,7 @@ def sort_blobs(request):
     blob_uuid = request.POST["blob_uuid"]
     new_position = int(request.POST["new_position"])
 
-    node = Node.objects.get(uuid=node_uuid, user=request.user)
-    blob = Blob.objects.get(uuid=blob_uuid)
-
-    s = SortOrderNodeBlob.objects.get(node=node, blob=blob)
+    s = SortOrderNodeBlob.objects.get(node__uuid=node_uuid, blob__uuid=blob_uuid)
     SortOrderNodeBlob.reorder(s, new_position)
 
     response = {
@@ -106,7 +103,7 @@ def add_blob(request):
     blob_uuid = request.POST["blob_uuid"]
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
-    blob = Blob.objects.get(uuid=blob_uuid)
+    blob = Blob.objects.get(uuid=blob_uuid, user=request.user)
 
     so = SortOrderNodeBlob(node=node, blob=blob)
     so.save()
@@ -124,10 +121,7 @@ def remove_blob(request):
     node_uuid = request.POST["node_uuid"]
     blob_uuid = request.POST["blob_uuid"]
 
-    node = Node.objects.get(uuid=node_uuid, user=request.user)
-    blob = Blob.objects.get(uuid=blob_uuid)
-
-    s = SortOrderNodeBlob.objects.get(node=node, blob=blob)
+    s = SortOrderNodeBlob.objects.get(node__uuid=node_uuid, blob__uuid=blob_uuid)
     s.delete()
 
     response = {
@@ -144,10 +138,7 @@ def edit_blob_note(request):
     blob_uuid = request.POST["blob_uuid"]
     note = request.POST["note"]
 
-    node = Node.objects.get(uuid=node_uuid, user=request.user)
-    blob = Blob.objects.get(uuid=blob_uuid)
-
-    s = SortOrderNodeBlob.objects.get(node=node, blob=blob)
+    s = SortOrderNodeBlob.objects.get(node__uuid=node_uuid, blob__uuid=blob_uuid)
     s.note = note
     s.save()
 
@@ -191,10 +182,7 @@ def sort_bookmarks(request):
     bookmark_id = request.POST["bookmark_id"]
     new_position = int(request.POST["new_position"])
 
-    node = Node.objects.get(uuid=node_uuid, user=request.user)
-    bookmark = Bookmark.objects.get(id=bookmark_id)
-
-    s = SortOrderNodeBookmark.objects.get(node=node, bookmark=bookmark)
+    s = SortOrderNodeBookmark.objects.get(node__uuid=node_uuid, bookmark__id=bookmark_id)
     SortOrderNodeBookmark.reorder(s, new_position)
 
     response = {
@@ -229,10 +217,7 @@ def remove_bookmark(request):
     node_uuid = request.POST["node_uuid"]
     bookmark_id = request.POST["bookmark_id"]
 
-    node = Node.objects.get(uuid=node_uuid, user=request.user)
-    bookmark = Bookmark.objects.get(id=bookmark_id)
-
-    s = SortOrderNodeBookmark.objects.get(node=node, bookmark=bookmark)
+    s = SortOrderNodeBookmark.objects.get(node__uuid=node_uuid, bookmark__id=bookmark_id)
     s.delete()
 
     response = {
@@ -249,10 +234,7 @@ def edit_bookmark_note(request):
     bookmark_id = int(request.POST["bookmark_id"])
     note = request.POST["note"]
 
-    node = Node.objects.get(uuid=node_uuid, user=request.user)
-    bookmark = Bookmark.objects.get(id=bookmark_id)
-
-    s = SortOrderNodeBookmark.objects.get(node=node, bookmark=bookmark)
+    s = SortOrderNodeBookmark.objects.get(node__uuid=node_uuid, bookmark__id=bookmark_id)
     s.note = note
     s.save()
 
