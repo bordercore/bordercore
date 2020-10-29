@@ -24,7 +24,6 @@ class SortOrderMixin(models.Model):
     def delete(self):
 
         super().delete()
-        self.handle_delete()
 
     def handle_delete(self):
 
