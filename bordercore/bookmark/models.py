@@ -39,6 +39,8 @@ class Bookmark(TimeStampedModel):
     last_response_code = models.IntegerField(null=True)
     importance = models.IntegerField(default=1)
 
+    created = models.DateTimeField(db_index=True, auto_now_add=True)
+
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
 
