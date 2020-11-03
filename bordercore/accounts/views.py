@@ -5,12 +5,16 @@ import boto3
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import (authenticate, login, logout,
+                                 update_session_auth_hash)
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
+from django.contrib.auth.views import PasswordChangeView
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView
 
@@ -86,6 +90,36 @@ class UserProfileUpdateView(UpdateView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(UserProfileUpdateView, self).dispatch(*args, **kwargs)
+
+
+@method_decorator(login_required, name='dispatch')
+class ChangePasswordView(PasswordChangeView):
+    template_name = "prefs/password.html"
+    success_url = reverse_lazy("password")
+
+    def get_context_data(self, **kwargs):
+        context = super(ChangePasswordView, self).get_context_data(**kwargs)
+        context["section"] = SECTION
+        context["nav"] = "prefs"
+        context["title"] = "Preferences"
+        return context
+
+    def get_object(self, queryset=None):
+        return UserProfile.objects.get(user=self.request.user)
+
+    def post(self, request, *args, **kwargs):
+
+        if not check_password(request.POST["old_password"], request.user.password):
+            messages.add_message(request, messages.ERROR, "Incorrect password")
+        elif request.POST["new_password1"] != request.POST["new_password2"]:
+            messages.add_message(request, messages.ERROR, "New passwords do not match")
+        else:
+            request.user.set_password(request.POST["new_password1"])
+            request.user.save()
+            update_session_auth_hash(request, request.user)
+            messages.add_message(request, messages.INFO, "Password updated", extra_tags="show_in_dom")
+
+        return HttpResponseRedirect(self.get_success_url())
 
 
 @login_required
