@@ -6,7 +6,7 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 
 from accounts import views as accounts_views
-from accounts.views import UserProfileDetailView
+from accounts.views import UserProfileUpdateView
 from api.views import (AlbumViewSet, BlobViewSet, BookmarkViewSet,
                        CollectionViewSet, FeedViewSet, QuestionViewSet,
                        SongSourceViewSet, SongViewSet, TagViewSet, TodoViewSet,
@@ -157,7 +157,7 @@ urlpatterns = [
     path('node/edit_note', node_views.edit_note, name='node_edit_note'),
 
     path('prefs/store_in_session/', accounts_views.store_in_session, name='store_in_session'),
-    path('prefs/', UserProfileDetailView.as_view(), name='prefs'),
+    path('prefs/', UserProfileUpdateView.as_view(), name='prefs'),
     path('login/', accounts_views.bc_login, name="login"),
     path('logout', accounts_views.bc_logout, name="logout"),
 

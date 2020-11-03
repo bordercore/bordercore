@@ -1,5 +1,9 @@
+import io
 import json
 
+import boto3
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -18,19 +22,12 @@ SECTION = 'prefs'
 
 
 @method_decorator(login_required, name='dispatch')
-class UserProfileDetailView(UpdateView):
+class UserProfileUpdateView(UpdateView):
     template_name = 'prefs/index.html'
     form_class = UserProfileForm
 
-    def get(self, request, **kwargs):
-        self.object = UserProfile.objects.get(user=self.request.user)
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        context = self.get_context_data(object=self.object, form=form)
-        return self.render_to_response(context)
-
     def get_context_data(self, **kwargs):
-        context = super(UserProfileDetailView, self).get_context_data(**kwargs)
+        context = super(UserProfileUpdateView, self).get_context_data(**kwargs)
         context['groups'] = ', '.join([x.name for x in self.request.user.groups.all()])
         context['section'] = SECTION
         context['nav'] = 'prefs'
@@ -39,18 +36,56 @@ class UserProfileDetailView(UpdateView):
         return context
 
     def get_object(self, queryset=None):
-        obj = UserProfile.objects.get(user=self.request.user)
-        return obj
+        return UserProfile.objects.get(user=self.request.user)
 
     def form_valid(self, form):
+        self.handle_sidebar(form)
         self.object = form.save()
         context = self.get_context_data(form=form)
         context["message"] = "Preferences updated"
         return self.render_to_response(context)
 
+    def handle_sidebar(self, form):
+        sidebar_image_old = form.initial["sidebar_image"]
+        sidebar_image_new = self.request.FILES.get("sidebar_image_file", None)
+
+        s3_client = boto3.client("s3")
+
+        if self.request.POST.get("delete_sidebar") == "on":
+
+            # Delete the image from S3
+            s3_client.delete_object(
+                Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                Key=f"sidebar/{self.request.user.userprofile.uuid}/{sidebar_image_old}"
+            )
+
+            # Delete it from the model
+            self.object.sidebar_image = None
+            self.object.save()
+
+        elif sidebar_image_new and "sidebar_image" in form.changed_data:
+
+            # Delete the old image from S3
+            s3_client.delete_object(
+                Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                Key=f"sidebar/{self.request.user.userprofile.uuid}/{sidebar_image_old}"
+            )
+
+            # Upload the new image to S3
+            key = f"sidebar/{self.request.user.userprofile.uuid}/{sidebar_image_new}"
+            fo = io.BytesIO(self.request.FILES["sidebar_image_file"].read())
+            s3_client.upload_fileobj(fo, settings.AWS_STORAGE_BUCKET_NAME, key)
+
+            self.object.sidebar_image = sidebar_image_new
+            self.object.save()
+
+            # Update the user's profile immediately so the new sidebage image
+            #  will appear as soon as this view returns the response
+            self.request.user.userprofile.sidebar_image = sidebar_image_new
+
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        return super(UserProfileDetailView, self).dispatch(*args, **kwargs)
+        return super(UserProfileUpdateView, self).dispatch(*args, **kwargs)
 
 
 @login_required

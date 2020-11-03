@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField, JSONField
 from django.db import models
@@ -11,6 +13,7 @@ from tag.models import Tag
 
 
 class UserProfile(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.PROTECT)
     rss_feeds = ArrayField(models.IntegerField(), null=True)
     favorite_tags = models.ManyToManyField(Tag, through="SortOrderUserTag")
@@ -19,6 +22,7 @@ class UserProfile(models.Model):
     orgmode_file = models.TextField(null=True)
     google_calendar = JSONField(blank=True, null=True)
     homepage_default_collection = models.OneToOneField(Collection, related_name='default_collection', null=True, on_delete=models.PROTECT)
+    sidebar_image = models.TextField(blank=True, null=True)
 
     THEMES = [
         ("light", "light"),

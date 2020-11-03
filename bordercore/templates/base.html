@@ -137,6 +137,11 @@
 
                 const timestamp = new Date().getTime()
 
+                {% if user.userprofile.sidebar_image %}
+                const sidebar = document.getElementById("sidebar");
+                sidebar.style.backgroundImage = "url('https://bordercore-blobs.s3.amazonaws.com/sidebar/{{ user.userprofile.uuid }}/{{ user.userprofile.sidebar_image }}')";
+                {% endif %}
+
                 const NavBar = {
                     data() {
                         return {
