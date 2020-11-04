@@ -6,18 +6,19 @@
         <div class="form-row">
             <div class="col-auto">
                 <vue-simple-suggest ref="suggestComponent"
-                          v-model="query"
-                          display-attribute="value"
-                          value-attribute="value"
-                          :list="tagSearch"
-                          :filter-by-query=true
-                          :debounce=200
-                          :name="inputName"
-                          placeholder="Search"
-                          autofocus
-                          @select="select"
-                          :styles="autoCompleteStyle"
-                          >
+                                    v-model="query"
+                                    display-attribute="value"
+                                    value-attribute="value"
+                                    :list="tagSearch"
+                                    :filter-by-query=true
+                                    :debounce=200
+                                    :min-length=2
+                                    :name="inputName"
+                                    placeholder="Search"
+                                    autofocus
+                                    @select="select"
+                                    :styles="autoCompleteStyle"
+                >
                     <div slot="suggestion-item" slot-scope="scope">
                         <span v-html="boldenSuggestion(scope)"></span>
                     </div>

@@ -463,6 +463,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
                     :list="metadataSearch"
                     :filter-by-query=true
                     :debounce=200
+                    :min-length=2
                     placeholder="Name"
                     autofocus
                     autocomplete="off"

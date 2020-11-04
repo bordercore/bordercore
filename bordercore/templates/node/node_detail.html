@@ -157,7 +157,7 @@
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h4 class="modal-title _text-light" id="myModalLabel">Add blob</h4>
+                            <h4 class="modal-title" id="myModalLabel">Add blob</h4>
                             <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
                         </div>
                         <div class="modal-body">
@@ -172,10 +172,11 @@
                                             <vue-simple-suggest ref="suggestComponent"
                                                                 v-model="query"
                                                                 display-attribute="title"
-                                                                value-attribute="title"
+                                                                value-attribute="uuid"
                                                                 :list="searchBlob"
                                                                 :filter-by-query=true
                                                                 :debounce=200
+                                                                :min-length=2
                                                                 :name="inputName"
                                                                 placeholder="Search"
                                                                 autofocus
@@ -222,6 +223,7 @@
                                                                 :list="searchBookmark"
                                                                 :filter-by-query=true
                                                                 :debounce=200
+                                                                :min-length=2
                                                                 :name="inputName"
                                                                 placeholder="Search"
                                                                 autofocus
@@ -452,6 +454,11 @@
                     EventBus.$emit("add-blob", selection.uuid);
                     $("#modalAddBlob").modal("hide");
 
+                    this.$nextTick(() => {
+                        this.$refs.suggestComponent.$el.querySelector("input").blur();
+                        this.$refs.suggestComponent.setText("");
+                    });
+
                 },
                 boldenSuggestion(scope) {
 
@@ -653,6 +660,12 @@
 
                     EventBus.$emit("add-bookmark", selection.id);
                     $("#modalAddBookmark").modal("hide");
+
+                    this.$nextTick(() => {
+                        this.$refs.suggestComponent.$el.querySelector("input").blur();
+                        this.$refs.suggestComponent.setText("");
+                    });
+
 
                 },
                 boldenSuggestion(scope) {

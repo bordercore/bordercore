@@ -38,16 +38,17 @@
                             <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
 
                             <vue-simple-suggest
-                              v-model="query"
-                              display-attribute="text"
-                              value-attribute="text"
-                              :list="tagSearch"
-                              :filter-by-query=true
-                              :debounce=200
-                              :name="inputName"
-                              placeholder="Search"
-                              @select="select"
-                              :styles="autoCompleteStyle"
+                                v-model="query"
+                                display-attribute="text"
+                                value-attribute="text"
+                                :list="tagSearch"
+                                :filter-by-query=true
+                                :debounce=200
+                                :min-length=2
+                                :name="inputName"
+                                placeholder="Search"
+                                @select="select"
+                                :styles="autoCompleteStyle"
                             ></vue-simple-suggest>
 
                         </div>

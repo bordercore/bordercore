@@ -9,13 +9,14 @@
                             :list="tagSearch"
                             :filter-by-query=true
                             :debounce=200
+                            :min-length=2
                             :name="inputName"
                             placeholder="Search"
                             autofocus
                             autocomplete="off"
                             @select="select"
                             :styles="autoCompleteStyle"
-                            >
+        >
             <div slot="suggestion-item" slot-scope="scope">
                 <span v-html="boldenSuggestion(scope)"></span>
             </div>
