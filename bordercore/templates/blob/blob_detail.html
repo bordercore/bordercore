@@ -125,12 +125,12 @@ Linked with: <a href="{% url 'blob_add' %}?linked_collection={{ collection.id }}
         </div>
     {% endif %}
 
-    <hr />
+    <hr class="divider" />
 
     <form action="{% url 'blob_edit' object.uuid %}">
 
     {% if object.sha1sum %}
-        <a style="padding-right: 3px;" href="{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}"><img src="{{ STATIC_URL }}img/icons8-download-from-cloud-50.png" /></a>
+        <a href="{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}" class="btn btn-primary" role="button">Download</a>
     {% endif %}
         <input type="submit" class="btn btn-primary" value="Edit">
 
