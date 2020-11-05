@@ -389,11 +389,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
             `,
             data() {
                 return {
-                    {% if not object or form.date.value == "" %}
-                    date: new Date()
-                    {% else %}
-                    date: new Date("{{ form.date.value }}T00:00")
-                    {% endif %}
+                    date: "{{ form.date.value }}"
                 }
             },
             components: {

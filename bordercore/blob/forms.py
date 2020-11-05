@@ -1,3 +1,4 @@
+import datetime
 import hashlib
 import re
 
@@ -32,8 +33,12 @@ class BlobForm(ModelForm):
 
             # If this form has a model attached, get the tags and display them separated by commas
             self.initial['tags'] = self.instance.get_tags()
+
+            self.initial['date'] = self.instance.get_cleaned_date(self.instance.date)
         else:
             self.fields['filename'].disabled = True
+            self.initial['date'] = datetime.date.today().strftime("%Y-%m-%dT00:00")
+
 
     filename = CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
     file_modified = IntegerField(required=False, widget=forms.HiddenInput())

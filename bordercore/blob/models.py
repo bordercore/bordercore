@@ -1,3 +1,4 @@
+import datetime
 import hashlib
 import json
 import logging
@@ -184,6 +185,22 @@ class Blob(TimeStampedModel, AmazonMixin):
                 return "%s Edition" % (EDITIONS[matches.group(2)])
 
         return ""
+
+    def get_cleaned_date(self, date):
+        """
+        Return a sanitized version of the date for display by the vuejs-datepicker widget.
+        Add "T00:00" so that JavaScript will use localtime rather than UTC.
+        """
+
+        if date is None:
+            return ""
+
+        if re.compile(r"^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d").match(date):
+            # If the date has a time, remove it. The vuejs-datepicker widget will reject it.
+            return datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S").strftime("%Y-%m-%dT00:00")
+        else:
+            return f"{date}T00:00"
+
 
     @staticmethod
     def get_s3_key_from_sha1sum(sha1sum, file):
