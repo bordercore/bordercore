@@ -378,7 +378,7 @@ class Blob(TimeStampedModel, AmazonMixin):
     @staticmethod
     def get_cover_info(user, sha1sum, size="large", max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
         if sha1sum is None:
-            return {}
+            return {"url": ""}
 
         info = {}
         url = None
