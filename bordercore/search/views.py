@@ -34,8 +34,8 @@ def get_creators(matches):
 @method_decorator(login_required, name='dispatch')
 class SearchListView(ListView):
 
-    template_name = 'kb/search.html'
-    SECTION = 'kb'
+    template_name = 'search/search.html'
+    SECTION = 'search'
     context_object_name = 'info'
     RESULT_COUNT_PER_PAGE = 100
     RESULT_COUNT_PER_PAGE_NOTE = 10
@@ -250,8 +250,8 @@ class SearchListView(ListView):
 @method_decorator(login_required, name="dispatch")
 class SearchTagDetailView(ListView):
 
-    template_name = "kb/tag_detail.html"
-    SECTION = "kb"
+    template_name = "search/tag_detail.html"
+    SECTION = "search"
     RESULT_COUNT_PER_PAGE = 100
     context_object_name = "info"
 
