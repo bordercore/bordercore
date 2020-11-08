@@ -44,7 +44,7 @@ def test_search(mock_elasticsearch, user, client):
     instance = mock_elasticsearch.return_value
     instance.search.return_value = data
 
-    url = urls.reverse("search")
+    url = urls.reverse("search:search")
     resp = client.get(f"{url}?search=carl+sagan")
 
     assert resp.status_code == 200
@@ -73,7 +73,7 @@ def test_search_notes(mock_elasticsearch, user, client):
     instance = mock_elasticsearch.return_value
     instance.search.return_value = data
 
-    url = urls.reverse("notes_list")
+    url = urls.reverse("search:notes")
     resp = client.get(f"{url}?search=linux", kwargs={"notes_search": True})
 
     assert resp.status_code == 200

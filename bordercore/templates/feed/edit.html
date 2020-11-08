@@ -56,7 +56,7 @@ Please correct the errors below.
             <div class="col-lg-5 offset-lg-2">
                 <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}">
                 <input class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete">
-                <a class="btn btn-secondary" href="{% url 'feed_subscriptions' %}">Cancel</a>
+                <a class="btn btn-secondary" href="{% url 'feed:subscriptions' %}">Cancel</a>
             </div>
         </div>
 
@@ -129,7 +129,7 @@ The following users are currently subscribed to this feed: <strong>{{ subscriber
 
                     feedUrl = encodeURIComponent(feedUrl).replace(/%/g, "%25")
 
-                    axios.get("{% url "check_url" 666 %}".replace(/666$/, feedUrl))
+                    axios.get("{% url "feed:check_url" 666 %}".replace(/666/, feedUrl))
                                                          .then(response => {
 
                                                              if (!response || response.data.status != 200) {
@@ -183,7 +183,7 @@ The following users are currently subscribed to this feed: <strong>{{ subscriber
                 feed_url = encodeURIComponent(feed_url).replace(/%/g, "%25")
 
                 $.ajax( { type: 'GET',
-                          url: '{% url 'check_url' 666 %}'.replace(/666$/, feed_url),
+                          url: '{% url 'feed:check_url' 666 %}'.replace(/666/, feed_url),
                 }).done(function( json ) {
                     if (!json || json.status != 200) {
                         $('#feed-status').fadeIn(1000).addClass("alert-danger").removeClass("alert-success").html("Feed error.  Status: " + json.status);

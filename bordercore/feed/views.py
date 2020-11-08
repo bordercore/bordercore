@@ -172,7 +172,7 @@ def feed_edit(request, feed_id=None):
         elif request.POST['Go'] == 'Delete':
             f.delete()
             messages.add_message(request, messages.INFO, 'Feed deleted')
-            return HttpResponseRedirect(reverse('feed_subscriptions'))
+            return HttpResponseRedirect(reverse('feed:subscriptions'))
 
     else:
         form = FeedForm()  # An unbound form

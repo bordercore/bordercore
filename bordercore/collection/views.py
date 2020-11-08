@@ -66,7 +66,7 @@ class CollectionDeleteView(DeleteView):
             messages.INFO, f"Collection <strong>{self.object.name}</strong> deleted",
             extra_tags="show_in_dom"
         )
-        return reverse('collection_list')
+        return reverse('collection:list')
 
 
 @method_decorator(login_required, name='dispatch')
@@ -144,14 +144,14 @@ class CollectionCreateView(CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('collection_list')
+        return reverse('collection:list')
 
 
 @method_decorator(login_required, name='dispatch')
 class CollectionUpdateView(UpdateView):
     model = Collection
     form_class = CollectionForm
-    success_url = reverse_lazy('collection_list')
+    success_url = reverse_lazy('collection:list')
 
     def get_queryset(self):
         base_qs = super(CollectionUpdateView, self).get_queryset()

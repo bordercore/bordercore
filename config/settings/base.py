@@ -214,7 +214,7 @@ TEMPLATES = [
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
-LOGIN_URL = "/login/"
+LOGIN_URL = "/accounts/login/"
 
 # Elasticsearch config
 # See dev.py and prod.py for endpoint url

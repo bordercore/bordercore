@@ -151,7 +151,7 @@ def add_to_favorites(request, uuid):
 
         messages.add_message(request, messages.WARNING, "Added to favorites")
 
-    return HttpResponseRedirect(reverse('blob_detail', args=(uuid,)))
+    return HttpResponseRedirect(reverse('blob:detail', args=(uuid,)))
 
 
 @login_required
@@ -166,7 +166,7 @@ def remove_from_favorites(request, uuid):
         sort_order.delete()
         messages.add_message(request, messages.WARNING, "Removed from favorites")
 
-    return HttpResponseRedirect(reverse('blob_detail', args=(uuid,)))
+    return HttpResponseRedirect(reverse('blob:detail', args=(uuid,)))
 
 
 @login_required
@@ -214,4 +214,4 @@ def bc_login(request):
 @login_required
 def bc_logout(request):
     logout(request)
-    return redirect('login')
+    return redirect('accounts:login')

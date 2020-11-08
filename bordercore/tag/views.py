@@ -39,7 +39,7 @@ def add_favorite_tag(request):
     c = SortOrderUserTag(userprofile=request.user.userprofile, tag=tag_object)
     c.save()
 
-    return redirect("bookmark_overview")
+    return redirect("bookmark:overview")
 
 
 @login_required
@@ -52,4 +52,4 @@ def remove_favorite_tag(request):
     old_position = SortOrderUserTag.objects.get(userprofile=request.user.userprofile, tag=tag_object)
     old_position.delete()
 
-    return redirect("bookmark_overview")
+    return redirect("bookmark:overview")

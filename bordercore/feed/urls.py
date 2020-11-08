@@ -1,0 +1,48 @@
+from django.urls import path
+
+from . import views
+
+app_name = "feed"
+
+urlpatterns = [
+    path(
+        route="sort/",
+        view=views.sort_feed,
+        name="sort"
+    ),
+    path(
+        route="edit/<int:feed_id>/",
+        view=views.feed_edit,
+        name="edit"
+    ),
+    path(
+        route="edit/",
+        view=views.feed_edit,
+        name="add"
+    ),
+    path(
+        route="subscriptions/",
+        view=views.FeedSubscriptionListView.as_view(),
+        name="subscriptions"
+    ),
+    path(
+        route="check_url/<str:url>/",
+        view=views.check_url,
+        name="check_url"
+    ),
+    path(
+        route="subscribe/",
+        view=views.feed_subscribe,
+        name="subscribe"
+    ),
+    path(
+        route="unsubscribe/",
+        view=views.feed_unsubscribe,
+        name="unsubscribe"
+    ),
+    path(
+        route="",
+        view=views.FeedListView.as_view(),
+        name="list"
+    ),
+]

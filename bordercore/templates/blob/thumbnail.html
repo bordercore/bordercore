@@ -15,7 +15,7 @@
 <div class="row">
     <div class="col-lg-8">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'blob_detail' object.uuid %}">Blob Detail</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'blob:detail' object.uuid %}">Blob Detail</a></li>
             <li class="breadcrumb-item active">Blob Thumbnail</li>
         </ol>
     </div>
@@ -88,7 +88,7 @@ Thumbnail editing is not supported for this document type.
             function get_amazon_cover_image() {
 
                 $.ajax( { type: 'GET',
-                          url: '{% url 'get_amazon_image_info' object.sha1sum 666 %}'.replace(/666$/, amazon_cover_image_index),
+                          url: '{% url 'get_amazon_image_info' object.sha1sum 666 %}'.replace(/666/, amazon_cover_image_index),
                           }).done(function( json ) {
                     if (!json || json.error != null) {
                         $('#feedback').addClass('alert-danger').html(json.error);
@@ -114,7 +114,7 @@ Thumbnail editing is not supported for this document type.
             function set_amazon_cover_image() {
 
                 $.ajax( { type: 'POST',
-                          url: '{% url 'set_amazon_image_info' object.sha1sum 666 %}'.replace(/666$/, amazon_cover_image_index),
+                          url: '{% url 'set_amazon_image_info' object.sha1sum 666 %}'.replace(/666/, amazon_cover_image_index),
                           data: amazon_cover_image_info
                           }).done(function( json ) {
                     if (!json || json.error != null) {
@@ -130,7 +130,7 @@ Thumbnail editing is not supported for this document type.
                 var page_number = $('#page-number').val();
 
                 $.ajax( { type: 'GET',
-                          url: '{% url 'create_thumbnail' object.uuid 666 %}'.replace(/666$/, page_number),
+                          url: '{% url 'create_thumbnail' object.uuid 666 %}'.replace(/666/, page_number),
                           }).done(function( json ) {
                     if (!json || json.error != null) {
                         $('#feedback').addClass('alert-danger').html(json.error);

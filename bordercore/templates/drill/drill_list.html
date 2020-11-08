@@ -13,7 +13,7 @@
     <br />
 
     <div>
-        <form action="{% url 'study_random' %}">
+        <form action="{% url 'drill:study_random' %}">
             <input class="btn btn-primary" type="submit" value="Start" id="random_mode" />
         </form>
     </div>
@@ -21,7 +21,7 @@
     <hr />
 
     <div>
-        <a href="{% url 'question_add' %}" class="btn btn-primary" role="button">Add Question</a>
+        <a href="{% url 'drill:add' %}" class="btn btn-primary" role="button">Add Question</a>
     </div>
 
 {% endblock %}
@@ -34,7 +34,7 @@
     {% include "common/show_messages.html" %}
     <div class="row">
         <div class="col-lg-7">
-            <form role="form" action="{% url 'drill_search' %}" method="get" autocomplete="off">
+            <form role="form" action="{% url 'drill:search' %}" method="get" autocomplete="off">
 
                 <div class="form-row">
                     <div class="col-auto has-search">
@@ -95,13 +95,13 @@
             },
             methods: {
                 tagSearch(query) {
-                    return axios.get("{% url 'drill_tag_search' %}?term=" + query)
+                    return axios.get("{% url 'drill:tag_search' %}?term=" + query)
                                 .then(response => {
                                     return response.data;
                                 })
                 },
                 select(tag) {
-                    window.location='{% url 'study_tag' 666 %}'.replace(/666$/, tag.value);
+                    window.location='{% url 'drill:study_tag' 666 %}'.replace(/666/, tag.value);
                 }
             }
         });
@@ -111,7 +111,7 @@
         $(document).ready(function() {
 
             function formatName( data, type, row ) {
-                return '<a href="{% url 'study_tag' 666 %}">'.replace(/666/, row[0]) + row[0] + '</a>';
+                return '<a href="{% url 'drill:study_tag' 666 %}">'.replace(/666/, row[0]) + row[0] + '</a>';
             }
 
             table = $('#drill_list').DataTable( {

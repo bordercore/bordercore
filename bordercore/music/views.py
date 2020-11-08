@@ -387,9 +387,9 @@ def add_song(request):
                 action = 'Upload'
                 sha1sum = None
                 if a:
-                    listen_url = reverse('album_detail', args=[album_id])
+                    listen_url = reverse('music:album_detail', args=[album_id])
                 else:
-                    listen_url = reverse('artist_detail', args=[form.cleaned_data['artist']])
+                    listen_url = reverse('music:artist_detail', args=[form.cleaned_data['artist']])
                 messages.add_message(request, messages.INFO, 'Song successfully added.  <a href="' + listen_url + '">Listen to it here.</a>')
             else:
                 action = 'Review'

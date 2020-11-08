@@ -69,7 +69,7 @@
                         {
                             id: {{ feed.feed.id }},
                             name: "{{ feed.feed.name }}",
-                            url: "{% url 'feed_edit' feed.feed.id %}",
+                            url: "{% url 'feed:edit' feed.feed.id %}",
                             lastResponseCode: {{ feed.feed.last_response_code }}
                         },
                         {% endfor %}
@@ -89,7 +89,7 @@
 
                         doPost(
                             this,
-                            "{% url "feed_subscribe" %}",
+                            "{% url "feed:subscribe" %}",
                             {
                                 "feed_id": feedId,
                                 "position": newPosition
@@ -110,7 +110,7 @@
 
                         doPost(
                             this,
-                            "{% url "sort_feed" %}",
+                            "{% url "feed:sort" %}",
                             {
                                 "feed_id": feedId,
                                 "position": newPosition
@@ -135,7 +135,7 @@
                         {
                             id: {{ feed.id }},
                             name: "{{ feed.name }}",
-                            url: "{% url 'feed_edit' feed.id %}",
+                            url: "{% url 'feed:edit' feed.id %}",
                             lastResponseCode: {{ feed.last_response_code }}
                         },
                         {% endfor %}
@@ -152,7 +152,7 @@
                         const bodyFormData = new URLSearchParams();
                         bodyFormData.append("feed_id", feedId);
 
-                        axios("{% url "feed_unsubscribe" %}", {
+                        axios("{% url "feed:unsubscribe" %}", {
                             method: "POST",
                             data: bodyFormData
                         }).then(response => {

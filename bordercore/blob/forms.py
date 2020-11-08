@@ -100,7 +100,7 @@ class BlobForm(ModelForm):
             if self.instance.sha1sum != hasher.hexdigest():
                 existing_file = Blob.objects.filter(sha1sum=hasher.hexdigest())
                 if existing_file:
-                    url = reverse_lazy("blob_detail", kwargs={"uuid": existing_file[0].uuid})
+                    url = reverse_lazy("blob:detail", kwargs={"uuid": existing_file[0].uuid})
                     raise forms.ValidationError(mark_safe(f'This file <a href="{url}">already exists.</a>'))
 
         return file

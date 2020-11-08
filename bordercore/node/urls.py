@@ -1,0 +1,93 @@
+from django.urls import path
+
+from . import views
+
+app_name = "node"
+
+urlpatterns = [
+    path(
+        route="",
+        view=views.NodeOverviewView.as_view(),
+        name="list"
+    ),
+    path(
+        route="<uuid:uuid>/",
+        view=views.NodeDetailView.as_view(),
+        name="detail"
+    ),
+    path(
+        route="<uuid:uuid>/blob_list/",
+        view=views.get_blob_list,
+        name="get_blob_list"
+    ),
+    path(
+        route="<uuid:uuid>/bookmark_list/",
+        view=views.get_bookmark_list,
+        name="get_bookmark_list"
+    ),
+    path(
+        route="<uuid:uuid>/note/",
+        view=views.get_note,
+        name="get_note"
+    ),
+    path(
+        route="blob/edit_note/",
+        view=views.edit_blob_note,
+        name="edit_blob_note"
+    ),
+    path(
+        route="blob/remove/",
+        view=views.remove_blob,
+        name="remove_blob"
+    ),
+    path(
+        route="blob/search/",
+        view=views.search_blob_titles,
+        name="search_blob_titles"
+    ),
+    path(
+        route="blob/sort/",
+        view=views.sort_blobs,
+        name="sort_blobs"
+    ),
+    path(
+        route="bookmark/add/",
+        view=views.add_bookmark,
+        name="add_bookmark"
+    ),
+    path(
+        route="bookmark/edit_note/",
+        view=views.edit_bookmark_note,
+        name="edit_bookmark_note"
+    ),
+    path(
+        route="bookmark/remove/",
+        view=views.remove_bookmark,
+        name="remove_bookmark"
+    ),
+    path(
+        route="<int:pk>/note/",
+        view=views.get_note,
+        name="get_note"
+    ),
+    path(
+        route="blob/add/",
+        view=views.add_blob,
+        name="add_blob"
+    ),
+    path(
+        route="bookmark/sort/",
+        view=views.sort_bookmarks,
+        name="sort_bookmarks"
+    ),
+    path(
+        route="bookmark/search/",
+        view=views.search_bookmarks,
+        name="search_bookmarks"
+    ),
+    path(
+        route="edit_note/",
+        view=views.edit_note,
+        name="edit_note"
+    )
+]

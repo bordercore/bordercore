@@ -26,7 +26,7 @@ def user(db, client, django_user_model):
 
 def test_todo_list_empty(user, client):
 
-    url = urls.reverse("todo_list")
+    url = urls.reverse("todo:list")
     resp = client.get(url)
 
     assert resp.status_code == 200
@@ -34,7 +34,7 @@ def test_todo_list_empty(user, client):
 
 def test_todo_list(user, client, todo_factory):
 
-    url = urls.reverse("todo_list")
+    url = urls.reverse("todo:list")
     resp = client.get(url)
 
     assert resp.status_code == 200

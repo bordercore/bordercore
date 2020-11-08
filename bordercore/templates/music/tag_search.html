@@ -25,7 +25,7 @@
     <div class="col-lg-12">
         {% block breadcrumbs %}
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"> <a href="{% url 'music_list' %}">Music</a> </li>
+                <li class="breadcrumb-item"> <a href="{% url 'music:list' %}">Music</a> </li>
                 <li class="breadcrumb-item active"> Tag: <strong>{{ tag_name }}</strong> </li>
             </ol>
         {% endblock %}
@@ -64,7 +64,7 @@
 
                     var songId = table.cell(".selected", 4).data();
 
-                    axios.get("{% url 'get_song_info' 666 %}".replace(/666$/, songId))
+                    axios.get("{% url 'music:get_song_info' 666 %}".replace(/666/, songId))
                          .then(response => {
                              $("#player").get(0).src = response.data.url;
                              $("#player").get(0).play()

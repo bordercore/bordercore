@@ -91,7 +91,7 @@ class TodoDetailView(UpdateView):
     model = Todo
     template_name = 'todo/edit.html'
     form_class = TodoForm
-    success_url = reverse_lazy('todo_list')
+    success_url = reverse_lazy('todo:list')
     slug_field = 'uuid'
     slug_url_kwarg = 'uuid'
 
@@ -159,7 +159,7 @@ class TodoCreateView(CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('todo_list')
+        return reverse('todo:list')
 
 
 @method_decorator(login_required, name='dispatch')
@@ -178,7 +178,7 @@ class TodoDeleteView(DeleteView):
         return obj
 
     def get_success_url(self):
-        return reverse('todo_list')
+        return reverse('todo:list')
 
 
 @login_required

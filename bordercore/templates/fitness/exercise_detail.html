@@ -18,7 +18,7 @@
         <div class="col-lg-12">
             {% block breadcrumbs %}
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"> <a href="{% url 'fitness_summary' %}">Exercises</a> </li>
+                    <li class="breadcrumb-item"> <a href="{% url 'fitness:summary' %}">Exercises</a> </li>
                     <li class="breadcrumb-item active"> {{ object.exercise }} </li>
                 </ol>
             {% endblock %}
@@ -39,7 +39,7 @@
 
             <br /><br />
 
-            <form action="{% url 'change_active_status' %}" method="post">
+            <form action="{% url 'fitness:change_active_status' %}" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="exercise_id" value="{{ object.id }}" />
                 {% if activity_info %}
@@ -75,7 +75,7 @@
                 <div class="card-header bg-info text-white">Add a new workout</div>
                 <div class="card-body">
 
-                    <form id="form-workout" class="form-inline" action="{% url 'fitness_add' exercise.id %}" method="post" autocomplete="off">
+                    <form id="form-workout" class="form-inline" action="{% url 'fitness:add' exercise.id %}" method="post" autocomplete="off">
                         <input type="hidden" name="workout-data" :value="workoutDataJson" />
                         {% csrf_token %}
 

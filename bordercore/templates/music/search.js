@@ -17,7 +17,7 @@ new Vue({
     },
     methods: {
         tagSearch(query) {
-            return axios.get("{% url 'music_search' %}?query=" + query)
+            return axios.get("{% url 'music:search' %}?query=" + query)
                 .then(response => {
                     return response.data;
                 })
@@ -25,11 +25,11 @@ new Vue({
         select(datum) {
 
             if (datum.link_type == 'album') {
-                url = '{% url 'album_detail' 666 %}'.replace(/666$/, datum.id);
+                url = '{% url 'music:album_detail' 666 %}'.replace(/666/, datum.id);
             } else if (datum.link_type == 'artist') {
-                url = '{% url 'artist_detail' 666 %}'.replace(/666$/, datum.artist);
+                url = '{% url 'music:artist_detail' 666 %}'.replace(/666/, datum.artist);
             } else {
-                url = '{% url 'music_search_tag' %}?tag=' + datum.name;
+                url = '{% url 'music:search_tag' %}?tag=' + datum.name;
             }
             window.location=url;
 

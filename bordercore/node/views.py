@@ -60,7 +60,7 @@ def get_blob_list(request, uuid):
         "blob_list": [
             {
                 "title": x.title,
-                "url": reverse('blob_detail', kwargs={"uuid": str(x.uuid)}),
+                "url": reverse('blob:detail', kwargs={"uuid": str(x.uuid)}),
                 "uuid": x.uuid,
                 "note": x.sortordernodeblob_set.get(node=node).note,
                 "cover_url": Blob.get_cover_info(
@@ -336,7 +336,7 @@ def search_blob_titles(request):
                 "note": match["_source"].get("note", ""),
                 "title": match["_source"]["title"],
                 "uuid": match["_source"].get("uuid"),
-                "url": reverse('blob_detail', kwargs={"uuid": str(match["_source"].get("uuid"))}),
+                "url": reverse('blob:detail', kwargs={"uuid": str(match["_source"].get("uuid"))}),
                 "cover_url": settings.MEDIA_URL + Blob.get_cover_info(
                     request.user,
                     match["_source"].get("sha1sum"),

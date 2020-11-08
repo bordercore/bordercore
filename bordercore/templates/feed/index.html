@@ -27,7 +27,7 @@
                     {% if feed.feed.last_response_code != 200 %}<span class="list_annotation">{{ feed.feed.last_response_code }}</span>{% endif %}
                 </li>
             {% empty %}
-                No feed subscriptions found. <a href="{% url 'feed_subscriptions' %}">Subscribe here.</a>
+                No feed subscriptions found. <a href="{% url 'feed:subscriptions' %}">Subscribe here.</a>
             {% endfor %}
         </ul>
 
@@ -82,7 +82,7 @@
 
                     doPost(
                         this,
-                        "{% url "store_in_session" %}",
+                        "{% url "accounts:store_in_session" %}",
                         {
                             "current_feed": feedId
                         }
@@ -105,7 +105,7 @@
                     bodyFormData.append("feed_id", feedId);
                     bodyFormData.append("position", newPosition);
 
-                    axios("{% url "sort_feed" %}", {
+                    axios("{% url "feed:sort" %}", {
                         method: "POST",
                         data: bodyFormData
                     }).then(response => {

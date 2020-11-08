@@ -50,7 +50,7 @@
         <td{% if match.importance == 10 %} class="important"{% endif %}>
 {% if match.doctype == 'todo' %}
 
-    <h4 class="search_book_title">Todo: <a href="{% url 'todo_edit' match.uuid %}">{{ match.task }}</a></h4>
+    <h4 class="search_book_title">Todo: <a href="{% url 'todo:edit' match.uuid %}">{{ match.task }}</a></h4>
 
 {% elif match.doctype == 'bordercore_bookmark' %}
 
@@ -61,14 +61,14 @@
 
 {% elif match.doctype == 'note' %}
 
-    <h4 class="search_book_title"><a href="{% url 'blob_detail' match.uuid %}">{{ match.title|default:"Note" }}</a></h4>
+    <h4 class="search_book_title"><a href="{% url 'blob:detail' match.uuid %}">{{ match.title|default:"Note" }}</a></h4>
 
     <h5>{{ match.note|safe }}</h5>
 
 {% elif match.doctype == 'document' %}
 
     <h4 class="search_book_title">
-        <a href="{% url 'blob_detail' match.uuid %}">{{ match.title|default:"Title" }}</a>
+        <a href="{% url 'blob:detail' match.uuid %}">{{ match.title|default:"Title" }}</a>
     </h4>
 
     <h5>{{ match.note|safe }}</h5>
@@ -78,7 +78,7 @@
     <h4>
         <img src="{{ STATIC_URL }}img/kb_book.png" />
         <span class="search_book_title">
-            <a href="{% url 'blob_detail' match.uuid %}">{{ match.title|default:"No title" }}</a>
+            <a href="{% url 'blob:detail' match.uuid %}">{{ match.title|default:"No title" }}</a>
         </span>
         <span class="search_book_author">
             {% if match.creators %} - {{ match.creators }}{% endif %}
@@ -90,7 +90,7 @@
 
 Tags: {% if not match.tags%}None{% endif %}
 {% for tag in match.tags %}
-    <strong><a href="{% url 'kb_search_tag_detail' tag %}">{{ tag }}</a></strong>{% if not forloop.last %}, {% endif %}
+    <strong><a href="{% url 'search:kb_search_tag_detail' tag %}">{{ tag }}</a></strong>{% if not forloop.last %}, {% endif %}
 {% endfor %}
 
         </td>
@@ -136,7 +136,7 @@ Tags: {% if not match.tags%}None{% endif %}
             },
             methods: {
                 tagSearch(query) {
-                    return axios.get("{% url 'kb_search_tags_booktitles' %}?term=" + query)
+                    return axios.get("{% url 'search:kb_search_tags_booktitles' %}?term=" + query)
                                 .then(response => {
                                     return response.data;
                                 })
@@ -144,9 +144,9 @@ Tags: {% if not match.tags%}None{% endif %}
                 select(tag) {
 
                     if (tag.type == 'Tag') {
-                        url = '{% url 'kb_search_tag_detail' 666 %}'.replace(/666$/, tag.value);
+                        url = '{% url 'search:kb_search_tag_detail' 666 %}'.replace(/666/, tag.value);
                     } else {
-                        url = '{% url 'blob_detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', tag.uuid);
+                        url = '{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', tag.uuid);
                     }
                     window.location=url;
 

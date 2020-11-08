@@ -103,14 +103,14 @@ def snarf_link(request):
             f"Bookmark already exists and was added on {b.created.strftime('%B %d, %Y')}",
             extra_tags="show_in_dom"
         )
-        return redirect('bookmark_edit', b.id)
+        return redirect('bookmark:edit', b.id)
     except ObjectDoesNotExist:
         b = Bookmark(is_pinned=False, user=request.user, url=url, title=title)
         b.save()
         b.index_bookmark()
         b.snarf_favicon()
 
-    return redirect('bookmark_edit', b.id)
+    return redirect('bookmark:edit', b.id)
 
 
 @login_required
@@ -262,6 +262,7 @@ class BookmarkListView(ListView):
         if "search" in self.kwargs:
             query = query.filter(title__icontains=self.kwargs.get("search"))
         elif "tag_filter" in self.kwargs:
+            print("GOT HERE")
             query = query.filter(title__icontains=self.kwargs.get("tag_filter"))
         else:
             query = query.filter(tags__isnull=True)
@@ -273,7 +274,7 @@ class BookmarkListView(ListView):
             query = query.order_by("?")
         else:
             query = query.order_by("-created")
-
+        print(query.query)
         page_number = self.kwargs.get("page_number", 1)
         paginator = Paginator(query, BOOKMARKS_PER_PAGE)
         page_obj = paginator.get_page(page_number)

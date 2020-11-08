@@ -29,7 +29,7 @@
     {% for exercise in active_exercises %}
 
         <tr>
-            <td><a href="{% url 'exercise_detail' exercise.id %}">{{ exercise.exercise }}</a></td>
+            <td><a href="{% url 'fitness:exercise_detail' exercise.id %}">{{ exercise.exercise }}</a></td>
             <td>{{ exercise.muscle.muscle_group }}</td>
             {% if exercise.last_active %}
                 <td>{{ exercise.last_active|date:"N j, Y" }} - {{ exercise.delta_days }} day{{ exercise.delta_days|pluralize:"s" }} ago</td>
@@ -61,7 +61,7 @@
     {% for exercise in inactive_exercises %}
 
         <tr>
-            <td><a href="{% url 'exercise_detail' exercise.id %}">{{ exercise.exercise }}</a></td>
+            <td><a href="{% url 'fitness:exercise_detail' exercise.id %}">{{ exercise.exercise }}</a></td>
             <td>{{ exercise.muscle.muscle_group }}</td>
             {% if exercise.last_active %}
                 <td>{{ exercise.last_active|date:"N j, Y" }} - {{ exercise.delta_days }} day{{ exercise.delta_days|pluralize:"s" }} ago</td>

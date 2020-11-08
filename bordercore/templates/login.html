@@ -22,7 +22,7 @@
                     <p class="alert alert-danger">{{ message }}</p>
                 {% endif %}
 
-                <form action="/login/" method="post">
+                <form action="{% url 'accounts:login' %}" method="post">
                     {% csrf_token %}
 
                     <div class="form-group row">

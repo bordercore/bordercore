@@ -16,7 +16,7 @@
 
     {% for tag in tags %}
         <div id="todo_tag_list">
-            <a class="btn {% ifequal tagsearch tag.name %}btn-primary{% else %}btn-info{% endifequal %}" href="{% url 'todo_list' %}?tagsearch={{ tag.name }}">
+            <a class="btn {% ifequal tagsearch tag.name %}btn-primary{% else %}btn-info{% endifequal %}" href="{% url 'todo:list' %}?tagsearch={{ tag.name }}">
                 {{ tag.name }} <span class="badge {% ifequal tagsearch tag.name %}badge-light{% else %}badge-light{% endifequal %}">{{ tag.count }}</span>
             </a>
         </div>
@@ -69,7 +69,7 @@
         const ButtonGroup = {
             template: `
                 <div class="btn-group">
-                    <a class="btn btn-secondary" id="btn-add" href="{% url 'todo_add' %}">Add</a>
+                    <a class="btn btn-secondary" id="btn-add" href="{% url 'todo:add' %}">Add</a>
                     <input type="button" class="btn btn-secondary" id="btn-edit" value="Edit" :disabled="isDisabledEdit" @click="onClickEdit" />
                     <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="isDisabledDelete" @click="onClickDelete" />
                 </div>
@@ -110,7 +110,7 @@
                 onClickEdit(evt) {
 
                     var selectedId = table.cell(".selected", 3).data();
-                    window.location="{% url 'todo_edit' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000$/, selectedId);
+                    window.location="{% url 'todo:edit' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, selectedId);
 
                 },
             },
@@ -220,7 +220,7 @@
                     bodyFormData.append("todo_uuid", uuid);
                     bodyFormData.append("position", new_position);
 
-                    axios("{% url 'sort_todo' %}", {
+                    axios("{% url 'todo:sort' %}", {
                         method: "POST",
                         data: bodyFormData,
                     })

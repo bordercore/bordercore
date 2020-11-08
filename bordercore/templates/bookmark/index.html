@@ -54,7 +54,7 @@
 
                     <button-group inline-template @get-page="getPage">
                         <div class="btn-group ml-5">
-                            <a class="btn btn-secondary" id="btn-add" href="{% url 'bookmark_add' %}">Add</a>
+                            <a class="btn btn-secondary" id="btn-add" href="{% url 'bookmark:add' %}">Add</a>
                             <input type="button" class="btn btn-secondary" id="btn-edit" value="Edit" :disabled="buttonsDisabled" @click="onClickEdit" />
                             <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="buttonsDisabled" @click="onClickDelete" />
                             <input v-if="removeFavoriteButtonVisible" type="button" class="btn btn-secondary ml-2" value="Remove from Favorites" @click="removeFromFavorites" v-cloak />
@@ -115,7 +115,7 @@
                         </div>
 
                         <div class="btn-group mt-5">
-                            <a class="btn btn-secondary" href="{% url 'bookmark_import' %}">Import</a>
+                            <a class="btn btn-secondary" href="{% url 'bookmark:import' %}">Import</a>
                         </div>
                     </form>
                 </randomize-button>
@@ -266,7 +266,7 @@
 
                     var self = this;
 
-                    axios.delete("{% url 'bookmark_delete' 666 %}".replace(/666$/, selectedId))
+                    axios.delete("{% url 'bookmark:delete' 666 %}".replace(/666/, selectedId))
                          .then(() => {
 
                              this.$store.commit("changeButtonsDisabled", true)
@@ -281,21 +281,21 @@
                 },
                 onClickEdit(evt) {
                     var selectedId = document.querySelector("tr.bookmark-list.selected").dataset.id;
-                    window.location="{% url 'bookmark_edit' 666 %}".replace(/666$/, selectedId);
+                    window.location="{% url 'bookmark:edit' 666 %}".replace(/666/, selectedId);
                 },
                 addToFavorites(evt) {
                     const tagName = this.$parent.$refs.search.$refs.suggestComponent.text
                     document.getElementById("add-to-remote-from-favorite-tagname").value = tagName;
                     const form = document.querySelector("#search-form");
                     form.method = "post";
-                    form.action = "{% url 'add_favorite_tag' %}";
+                    form.action = "{% url 'tag:add_favorite_tag' %}";
                     form.submit();
                 },
                 removeFromFavorites(evt) {
                     document.getElementById("add-to-remote-from-favorite-tagname").value = this.$store.getters.selectedTagName;
                     const form = document.querySelector("#search-form");
                     form.method = "post";
-                    form.action = "{% url 'remove_favorite_tag' %}";
+                    form.action = "{% url 'tag:remove_favorite_tag' %}";
                     form.submit();
                 }
 
@@ -326,7 +326,7 @@
             },
             methods: {
                 tagSearch(query) {
-                    return axios.get("{% url 'get_tags_used_by_bookmarks' %}?query=" + query)
+                    return axios.get("{% url 'bookmark:get_tags_used_by_bookmarks' %}?query=" + query)
                                 .then(response => {
                                     return response.data;
                                 })
@@ -456,7 +456,7 @@
 
                     doPost(
                         this,
-                        "{% url "sort_bookmarks" %}",
+                        "{% url "bookmark:sort" %}",
                         {
                             "tag": this.$store.getters.selectedTagName,
                             "link_id": linkId,
@@ -481,15 +481,15 @@
 
                     this.disableSort = true;
                     if (searchTerm != null) {
-                        url = "{% url 'get_bookmarks_by_keyword' 666 %}".replace(/666$/, searchTerm);
+                        url = "{% url 'bookmark:get_bookmarks_by_keyword' 666 %}".replace(/666/, searchTerm);
                         isFiltered = true;
                     } else if (searchTag != null) {
-                        url = "{% url 'get_bookmarks_by_tag' 666 %}".replace(/666$/, searchTag);
+                        url = "{% url 'bookmark:get_bookmarks_by_tag' 666 %}".replace(/666/, searchTag);
                         isFiltered = true;
                         this.disableSort = false;
                     } else if (randomize == true) {
                         isFiltered = true;
-                        url = "{% url 'get_bookmarks_by_random' %}";
+                        url = "{% url 'bookmark:get_bookmarks_by_random' %}";
                     } else {
 
                         // If we've executed a search, ignore the automatic timed bookmarks refresh
@@ -504,7 +504,7 @@
                         if (pageNumber == null) {
                             pageNumber = this.$parent.pageNumber;
                         }
-                        url = "{% url 'get_bookmarks_by_page' 666 %}".replace(/666$/, pageNumber);
+                        url = "{% url 'bookmark:get_bookmarks_by_page' 666 %}".replace(/666/, pageNumber);
                     }
 
                     axios.get(url)
@@ -621,7 +621,7 @@
 
                     doPost(
                         this,
-                        "{% url "bookmark_add_note" %}",
+                        "{% url "bookmark:add_note" %}",
                         {
                             "tag": this.$store.getters.selectedTagName,
                             "link_id": selectedId,
@@ -723,7 +723,7 @@
 
                     doPost(
                         this,
-                        "{% url "sort_favorite_tags" %}",
+                        "{% url "bookmark:sort_favorite_tags" %}",
                         {
                             "tag_id": tagId,
                             "new_position": newPosition

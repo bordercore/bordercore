@@ -71,7 +71,7 @@ def user(db, client, django_user_model):
 def test_blob_detail(user, blob_image_factory, client):
     """Verify we redirect to the memes page when a user is logged in"""
 
-    url = urls.reverse("blob_detail", args=(blob_image_factory.uuid,))
+    url = urls.reverse("blob:detail", args=(blob_image_factory.uuid,))
     resp = client.get(url)
 
     assert resp.status_code == 200

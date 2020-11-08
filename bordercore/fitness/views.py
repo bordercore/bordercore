@@ -80,7 +80,7 @@ def fitness_add(request, exercise_id):
             new_data.save()
         messages.add_message(request, messages.INFO, 'Added workout data for exercise <strong>%s</strong>' % exercise)
 
-    return redirect('fitness_summary')
+    return redirect('fitness:summary')
 
 
 @login_required
@@ -138,4 +138,4 @@ def change_active_status(request):
         eu.save()
         messages.add_message(request, messages.INFO, 'This exercise is now active for you')
 
-    return redirect('exercise_detail', exercise_id)
+    return redirect('fitness:exercise_detail', exercise_id)

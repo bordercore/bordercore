@@ -47,7 +47,7 @@
             </div>
         </div>
 
-        <form action="{% url 'collection_list' %}" method="post" id="form-collection-edit">
+        <form action="{% url 'collection:list' %}" method="post" id="form-collection-edit">
             <div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
@@ -126,7 +126,7 @@
                     EventBus.$emit("addTags", []);
                     document.getElementById("action-type").innerHTML = "Add";
                     document.getElementById("btn-action").value = "Add";
-                    document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection_add' %}");
+                    document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection:add' %}");
                     $("#modalAdd").modal("show");
 
                     window.setTimeout(() => { document.getElementById("id_name").focus() }, 500);
@@ -136,7 +136,7 @@
 
                     var selectedId = table.cell(".selected", 5).data();
                     var formEl = document.getElementById("form-edit");
-                    formEl.setAttribute("action", "{% url 'collection_delete' 666 %}".replace(/666$/, selectedId));
+                    formEl.setAttribute("action", "{% url 'collection:delete' 666 %}".replace(/666/, selectedId));
                     formEl.submit();
 
                 },
@@ -146,7 +146,7 @@
 
                     doGet(
                         this,
-                        "{% url 'collection_get_info' %}?id=" + selectedId + "&query_type=id",
+                        "{% url 'collection:get_info' %}?id=" + selectedId + "&query_type=id",
                         (response) => {
                             nameEl = document.getElementById("id_name");
                             nameEl.value = response.data.name;
@@ -154,7 +154,7 @@
                             EventBus.$emit("addTags", response.data.tags);
                             document.getElementById("action-type").innerHTML = "Edit";
                             document.getElementById("btn-action").value = "Edit";
-                            document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection_edit' 666 %}".replace(/666$/, selectedId));
+                            document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection:edit' 666 %}".replace(/666/, selectedId));
                             $("#modalAdd").modal("show");
                         },
                         ""
@@ -222,7 +222,7 @@
                     // Set a minimum character count to trigger the ajax call
                     if (this.tag.length < 3) return;
 
-                    return axios.get("{% url 'tag_search' %}?query=" + this.tag)
+                    return axios.get("{% url 'tag:search' %}?query=" + this.tag)
                                 .then(response => {
                                     this.autocompleteItems = response.data.map(a => {
                                         return { text: a.text, value: a.value };
@@ -271,7 +271,7 @@
         $(document).ready(function() {
 
             function formatName( data, type, row ) {
-                return '<a href="{% url 'collection_detail' 666 %}">'.replace(/666/, row[5]) + row[0] + '</a>';
+                return '<a href="{% url 'collection:detail' 666 %}">'.replace(/666/, row[5]) + row[0] + '</a>';
             }
 
             table = $('#collection_list').DataTable( {

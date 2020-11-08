@@ -162,7 +162,7 @@
                         </div>
                         <div class="modal-body">
 
-                            <form id="search" action="{% url 'search' %}" method="get" autocomplete="off">
+                            <form id="search" action="" method="get" autocomplete="off">
                                 <input type="hidden" id="facets" name="facets" value="" />
 
                                 <div class="form-row align-items-center">
@@ -209,7 +209,7 @@
                         </div>
                         <div class="modal-body">
 
-                            <form id="search" action="{% url 'search' %}" method="get" autocomplete="off">
+                            <form id="search" action="" method="get" autocomplete="off">
                                 <input type="hidden" id="facets" name="facets" value="" />
 
                                 <div class="form-row align-items-center">
@@ -281,7 +281,7 @@
                 getBlobList() {
                     doGet(
                         this,
-                        "{% url "node_get_blob_list" object.uuid %}",
+                        "{% url "node:get_blob_list" object.uuid %}",
                         (response) => {
                             this.blobList = response.data.blob_list;
                             // Let Vue know that each blob's "noteIsEditable" property is reactive
@@ -306,7 +306,7 @@
 
                     doPost(
                         this,
-                        "{% url "node_sort_blobs" %}",
+                        "{% url "node:sort_blobs" %}",
                         {
                             "node_uuid": this.$store.state.nodeUuid,
                             "blob_uuid": blobUuid,
@@ -352,7 +352,7 @@
 
                     doPost(
                         this,
-                        "{% url "node_add_blob" %}",
+                        "{% url "node:add_blob" %}",
                         {
                             "node_uuid": this.$store.state.nodeUuid,
                             "blob_uuid": blob_uuid,
@@ -369,7 +369,7 @@
 
                     doPost(
                         this,
-                        "{% url "node_remove_blob" %}",
+                        "{% url "node:remove_blob" %}",
                         {
                             "node_uuid": this.$store.state.nodeUuid,
                             "blob_uuid": blob_uuid,
@@ -401,7 +401,7 @@
 
                             doPost(
                                 this,
-                                "{% url "node_edit_blob_note" %}",
+                                "{% url "node:edit_blob_note" %}",
                                 {
                                     "node_uuid": this.$store.state.nodeUuid,
                                     "blob_uuid": blob.uuid,
@@ -444,7 +444,7 @@
             },
             methods: {
                 searchBlob(query) {
-                    return axios.get("{% url 'search_blob_titles' %}?term=" + query)
+                    return axios.get("{% url 'node:search_blob_titles' %}?term=" + query)
                                 .then(response => {
                                     return response.data;
                                 })
@@ -488,7 +488,7 @@
                 getBookmarkList() {
                     doGet(
                         this,
-                        "{% url "node_get_bookmark_list" object.uuid %}",
+                        "{% url "node:get_bookmark_list" object.uuid %}",
                         (response) => {
                             this.bookmarkList = response.data.bookmark_list;
 
@@ -514,7 +514,7 @@
 
                     doPost(
                         this,
-                        "{% url "node_sort_bookmarks" %}",
+                        "{% url "node:sort_bookmarks" %}",
                         {
                             "node_uuid": this.$store.state.nodeUuid,
                             "bookmark_id": bookmarkId,
@@ -553,7 +553,7 @@
 
                     doPost(
                         this,
-                        "{% url "node_add_bookmark" %}",
+                        "{% url "node:add_bookmark" %}",
                         {
                             "node_uuid": this.$store.state.nodeUuid,
                             "bookmark_id": bookmark_id,
@@ -578,7 +578,7 @@
 
                     doPost(
                         this,
-                        "{% url "node_remove_bookmark" %}",
+                        "{% url "node:remove_bookmark" %}",
                         {
                             "node_uuid": this.$store.state.nodeUuid,
                             "bookmark_id": bookmark_id
@@ -610,7 +610,7 @@
 
                             doPost(
                                 this,
-                                "{% url "node_edit_bookmark_note" %}",
+                                "{% url "node:edit_bookmark_note" %}",
                                 {
                                     "node_uuid": this.$store.state.nodeUuid,
                                     "bookmark_id": bookmark.id,
@@ -651,7 +651,7 @@
             },
             methods: {
                 searchBookmark(query) {
-                    return axios.get("{% url 'search_bookmarks' %}?term=" + query)
+                    return axios.get("{% url 'node:search_bookmarks' %}?term=" + query)
                                 .then(response => {
                                     return response.data;
                                 })
@@ -697,7 +697,7 @@
                 getNote() {
                     doGet(
                         this,
-                        "{% url "node_get_note" object.uuid %}",
+                        "{% url "node:get_note" object.uuid %}",
                         (response) => {
                             this.note = response.data.note;
                             this.noteHtml = response.data.noteHtml;
@@ -719,7 +719,7 @@
 
                     doPost(
                         this,
-                        "{% url "node_edit_note" %}",
+                        "{% url "node:edit_note" %}",
                         {
                             "node_uuid": this.$store.state.nodeUuid,
                             "note": this.note

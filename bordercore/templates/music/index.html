@@ -36,7 +36,7 @@
             <div class="col-lg-4">
                 <table class="table table-borderless">
                     <tr><td style="padding: 0">
-                        <a href="{% url 'album_detail' random_albums.id %}">
+                        <a href="{% url 'music:album_detail' random_albums.id %}">
                             <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ random_albums.id }}" height="150" width="150" />
                         </a>
 
@@ -87,7 +87,7 @@
         $(document).ready(function() {
 
             function formatArtist( data, type, row ) {
-                return '<a href="{% url 'artist_detail' 666 %}">'.replace(/666/, row[1]) + row[1] + '</a>';
+                return '<a href="{% url 'music:artist_detail' 666 %}">'.replace(/666/, row[1]) + row[1] + '</a>';
             }
 
             oTable = $('#song_list').DataTable( {
@@ -97,7 +97,7 @@
                     api.columns.adjust();
                 },
                 "serverSide": true,
-                "ajaxSource": "{% url 'get_song_list' %}",
+                "ajaxSource": "{% url 'music:get_song_list' %}",
                 "paginate": true,
                 "info": false,
                 "displayLength": 50,

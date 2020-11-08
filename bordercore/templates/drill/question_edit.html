@@ -14,7 +14,7 @@
 
             {% block breadcrumbs %}
                 <ul class="breadcrumb">
-                    <li class="breadcrumb-item"> <a href="{% url 'drill_list' %}">Tag Categories</a> </li>
+                    <li class="breadcrumb-item"> <a href="{% url 'drill:list' %}">Tag Categories</a> </li>
                     <li class="breadcrumb-item active">{{ action }} question</li>
                 </ul>
             {% endblock %}
@@ -79,7 +79,7 @@
             <div class="col-lg-5 offset-lg-2" id="button-wrapper">
                 <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}" />
                 <input v-if="enableDeleteButton" @click="handleClick" class="btn btn-secondary" type="submit" name="Go" value="Delete" />
-                <a class="btn btn-secondary" href="{% url 'drill_list' %}">Cancel</a>
+                <a class="btn btn-secondary" href="{% url 'drill:list' %}">Cancel</a>
             </div>
         </div>
 
@@ -124,7 +124,7 @@
 
                     return doGet(
                         this,
-                        "{% url "tag_search" %}?query=" + this.tag,
+                        "{% url "tag:search" %}?query=" + this.tag,
                         (response) => {
                             this.autocompleteItems = response.data.map(a => {
                                 return { text: a.text, value: a.value };
@@ -161,7 +161,7 @@
             methods: {
                 handleClick: function() {
                     {% if object.id %}
-                    document.getElementById("question-form").action = "{% url 'question_delete' object.id %}";
+                    document.getElementById("question-form").action = "{% url 'drill:delete' object.id %}";
                     {% endif %}
                 }
             },

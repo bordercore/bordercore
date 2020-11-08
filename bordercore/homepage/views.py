@@ -1,5 +1,4 @@
 import re
-from datetime import timedelta
 
 from botocore.errorfactory import ClientError
 from elasticsearch import Elasticsearch

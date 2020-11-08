@@ -14,7 +14,7 @@
 
             {% block breadcrumbs %}
                 <ul class="breadcrumb">
-                    <li class="breadcrumb-item"> <a href="{% url 'drill_list' %}">Tag Categories</a> </li>
+                    <li class="breadcrumb-item"> <a href="{% url 'drill:list' %}">Tag Categories</a> </li>
                     <li class="breadcrumb-item active">Search results: <strong>{{ search_term }}</strong></li>
                 </ul>
             {% endblock %}
@@ -30,7 +30,7 @@
         </div>
     </div>
     {% else %}
-    <div class="alert alert-warning">Nothing found. <a href="{% url 'drill_list' %}">Go back</a></div>
+    <div class="alert alert-warning">Nothing found. <a href="{% url 'drill:list' %}">Go back</a></div>
     {% endif %}
 
 {% endblock %}
@@ -48,7 +48,7 @@
         $(document).ready(function() {
 
             function formatQuestion( data, type, row ) {
-                return '<a href="{% url 'question_detail' 666 %}">'.replace(/666/, row[1]) + row[2] + '</a>';
+                return '<a href="{% url 'drill:detail' 666 %}">'.replace(/666/, row[1]) + row[2] + '</a>';
             }
 
             table = $('#search_results').DataTable( {

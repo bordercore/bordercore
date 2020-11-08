@@ -135,7 +135,7 @@ class QuestionCreateView(CreateView):
 
         obj.save()
 
-        review_url = urls.reverse("question_detail", kwargs={"question_id": obj.id})
+        review_url = urls.reverse("drill:detail", kwargs={"question_id": obj.id})
         messages.add_message(
             self.request,
             messages.INFO, f"Question added. <a href='{review_url}'>Review it here</a>"
@@ -143,7 +143,7 @@ class QuestionCreateView(CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('question_add')
+        return reverse('drill:add')
 
 
 @method_decorator(login_required, name='dispatch')
@@ -161,7 +161,7 @@ class QuestionDeleteView(DeleteView):
         return question
 
     def get_success_url(self):
-        return reverse('question_add')
+        return reverse('drill:add')
 
 
 @method_decorator(login_required, name='dispatch')
@@ -215,7 +215,7 @@ class QuestionUpdateView(UpdateView):
             obj.tags.add(tag)
         obj.save()
 
-        review_url = urls.reverse("question_detail", kwargs={"question_id": obj.id})
+        review_url = urls.reverse("drill:detail", kwargs={"question_id": obj.id})
         messages.add_message(
             self.request,
             messages.INFO, f"Question edited. <a href='{review_url}'>Review it here</a>",
@@ -225,7 +225,7 @@ class QuestionUpdateView(UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('drill_list')
+        return reverse('drill:list')
 
 
 @login_required
@@ -233,7 +233,7 @@ def study_random(request):
 
     request.session["drill_mode"] = "random"
     question = Question.objects.filter(user=request.user).order_by("?").first()
-    return redirect("question_detail", question_id=question.id)
+    return redirect("drill:detail", question_id=question.id)
 
 
 @login_required
@@ -257,7 +257,7 @@ def study_tag(request, tag):
         question = Question.objects.filter(user=request.user, tags__name=tag).order_by('?').first()
         messages.add_message(request, messages.INFO, 'Nothing to drill. Here''s a random question.')
 
-    return redirect('question_detail', question_id=question.id)
+    return redirect('drill:detail', question_id=question.id)
 
 
 @login_required
@@ -282,9 +282,9 @@ def record_response(request, question_id, response):
     question.record_response(response)
 
     if request.session.get("drill_mode") == "random":
-        return redirect("study_random")
+        return redirect("drill:study_random")
     else:
-        return redirect("study_tag", tag=question.tags.all().first().name)
+        return redirect("drill:study_tag", tag=question.tags.all().first().name)
 
 
 @login_required
@@ -293,9 +293,9 @@ def skip_question(request, question_id):
     question = Question.objects.get(user=request.user, pk=question_id)
 
     if request.session.get("drill_mode") == "random":
-        return redirect("study_random")
+        return redirect("drill:study_random")
     else:
-        return redirect("study_tag", tag=question.tags.all().first().name)
+        return redirect("drill:study_tag", tag=question.tags.all().first().name)
 
 
 def tag_search(request):

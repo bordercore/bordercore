@@ -22,14 +22,14 @@ Interval: <strong class="text-info">{{ question.interval }}</strong>
 <br />
 Easiness Factor: <strong class="text-info">{{ question.efactor|floatformat:1 }}</strong>
 
-    <form action="{% url 'question_edit' question.id %}" class="mt-5">
+    <form action="{% url 'drill:edit' question.id %}" class="mt-5">
         <input type="submit" class="btn btn-primary" value="Edit">
     </form>
 
     <br />
 
     <div>
-        <a href="{% url 'question_add_with_tag' question.tags.all.0 %}" class="btn btn-primary" role="button">Add Question</a>
+        <a href="{% url 'drill:add_with_tag' question.tags.all.0 %}" class="btn btn-primary" role="button">Add Question</a>
     </div>
 
 {% if state_name == 'Learning' %}
@@ -76,7 +76,7 @@ Easiness Factor: <strong class="text-info">{{ question.efactor|floatformat:1 }}<
 
             {% block breadcrumbs %}
                 <ul class="breadcrumb">
-                    <li class="breadcrumb-item"> <a href="{% url 'drill_list' %}">Drill Home</a> </li>
+                    <li class="breadcrumb-item"> <a href="{% url 'drill:list' %}">Drill Home</a> </li>
                 </ul>
             {% endblock %}
 
@@ -90,7 +90,7 @@ Easiness Factor: <strong class="text-info">{{ question.efactor|floatformat:1 }}<
     {% if question.tags.all %}
             Tags:
         {% for tag in question.tags.all %}
-            <a class="badge badge-primary" href="{% url 'study_tag' tag.name %}">{{ tag.name }}</a>
+            <a class="badge badge-primary" href="{% url 'drill:study_tag' tag.name %}">{{ tag.name }}</a>
         {% endfor %}
         <br /><br />
     {% endif %}
@@ -98,13 +98,13 @@ Easiness Factor: <strong class="text-info">{{ question.efactor|floatformat:1 }}<
         {{ question.get_answer|safe }}
     </h1>
 
-    <a href="{% url 'record_response' question.id 'again' %}" class="btn btn-primary btn-lg" role="button">Again</a>
+    <a href="{% url 'drill:record_response' question.id 'again' %}" class="btn btn-primary btn-lg" role="button">Again</a>
     {% if state_name == 'To Review' %}
-        <a href="{% url 'record_response' question.id 'hard' %}" class="btn btn-primary btn-lg" role="button">Hard</a>
+        <a href="{% url 'drill:record_response' question.id 'hard' %}" class="btn btn-primary btn-lg" role="button">Hard</a>
     {% endif %}
-    <a href="{% url 'record_response' question.id 'good' %}" class="btn btn-primary btn-lg" role="button">Good</a>
-    <a href="{% url 'record_response' question.id 'easy' %}" class="btn btn-primary btn-lg" role="button">Easy</a>
-    &nbsp; &nbsp; <a href="{% url 'question_skip' question.id %}" class="btn btn-primary btn-lg" role="button">Skip</a>
+    <a href="{% url 'drill:record_response' question.id 'good' %}" class="btn btn-primary btn-lg" role="button">Good</a>
+    <a href="{% url 'drill:record_response' question.id 'easy' %}" class="btn btn-primary btn-lg" role="button">Easy</a>
+    &nbsp; &nbsp; <a href="{% url 'drill:skip' question.id %}" class="btn btn-primary btn-lg" role="button">Skip</a>
 
 {% endblock %}
 

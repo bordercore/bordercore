@@ -52,7 +52,7 @@
 
     </form>
 
-    <form action="{% url 'blob_delete' object.uuid %}" method="post">
+    <form action="{% url 'blob:delete' object.uuid %}" method="post">
         {% csrf_token %}
         <input type="hidden" name="uuid" value="{{ object.uuid }}" />
         <button type="submit" class="btn btn-warning">
@@ -79,13 +79,13 @@
     {% if collection_info %}
         <div>
             <br />
-        Adding to collection <strong><a href="{% url 'collection_detail' collection_info.id %}">{{ collection_info.name }}</a></strong>
+        Adding to collection <strong><a href="{% url 'collection:detail' collection_info.id %}">{{ collection_info.name }}</a></strong>
         </div>
     {% endif %}
 
     {% if linked_blob %}
         <br /><br />
-Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.title|default:"Blob" }}</a>
+Linking to <a href="{% url 'blob:detail' linked_blob.uuid %}">{{ linked_blob.title|default:"Blob" }}</a>
     {% endif %}
     {% if linked_collection_blob_list %}
         <br /><br />
@@ -93,7 +93,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
         <ul class="list-group">
             {% for blob in linked_collection_blob_list %}
                 <li class="list-group-item">
-                    <a href="{% url 'blob_detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
+                    <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
                 </li>
         {% endfor %}
     {% endif %}
@@ -108,7 +108,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
 <div class="row">
     <div class="col-lg-12">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'blob_detail' object.uuid %}">Blob Detail</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'blob:detail' object.uuid %}">Blob Detail</a></li>
             <li class="breadcrumb-item active">Edit Blob</li>
         </ol>
     </div>
@@ -403,7 +403,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
 
                     var clipText = encodeURIComponent(evt.clipboardData.getData("Text").trim());
 
-                    axios.get("{% url "parse_date" 666 %}".replace(/666$/, clipText))
+                    axios.get("{% url "blob:parse_date" 666 %}".replace(/666/, clipText))
                          .then(response => {
                              var payLoad = response.data;
                              if (payLoad.output_date == "") {
@@ -482,7 +482,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
             },
             methods: {
                 metadataSearch(query) {
-                    return axios.get("{% url 'metadata_name_search' %}?query=" + query)
+                    return axios.get("{% url 'blob:metadata_name_search' %}?query=" + query)
                                 .then(response => {
                                     return response.data;
                                 })
@@ -632,7 +632,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
 
                     return doGet(
                         this,
-                        "{% url "tag_search" %}?query=" + this.tag,
+                        "{% url "tag:search" %}?query=" + this.tag,
                         (response) => {
                             this.autocompleteItems = response.data.map(a => {
                                 return { text: a.text, value: a.value };
@@ -681,7 +681,7 @@ Linking to <a href="{% url 'blob_detail' linked_blob.uuid %}">{{ linked_blob.tit
 
                     doPost(
                         this,
-                        "{% url "collection_mutate" %}",
+                        "{% url "blob:collection_mutate" %}",
                         {
                             "blob_id": {{ object.id|default:0 }},
                             "collection_id": collection_id,

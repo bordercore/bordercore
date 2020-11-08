@@ -52,7 +52,7 @@
                         uuid: "{{ blob.uuid }}",
                         title: "{{ blob.title }}",
                         collection_note: "{{ blob.collection_note }}",
-                        url: "{% url 'blob_detail' blob.uuid %}",
+                        url: "{% url 'blob:detail' blob.uuid %}",
                         cover_url: "{{ blob.cover_url }}"
                     },
                     {% endfor %}
@@ -68,7 +68,7 @@
 
                 doPost(
                     this,
-                    "{% url "sort_collection" %}",
+                    "{% url "collection:sort" %}",
                     {
                         "collection_id": {{ collection.id }},
                         "blob_id": evt.moved.element.id,

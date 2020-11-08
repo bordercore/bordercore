@@ -35,12 +35,12 @@
             <div id="subnavbar">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item">
-                        <a href="{% url 'music_list' %}">
+                        <a href="{% url 'music:list' %}">
                             <font-awesome-icon icon="home"></font-awesome-icon>
                         </a>
                     </li>
                     <li class="breadcrumb-item">
-                        <a href="{% url 'artist_detail' album.artist %}">{{ album.artist }}</a>
+                        <a href="{% url 'music:artist_detail' album.artist %}">{{ album.artist }}</a>
                     </li>
                     <li class="breadcrumb-item active"> {{ album.title }} </li>
                 </ol>
@@ -98,7 +98,7 @@
 
                     var songId = table.cell(".selected", 0).data();
 
-                    axios.get("{% url 'get_song_info' 666 %}".replace(/666$/, songId))
+                    axios.get("{% url 'music:get_song_info' 666 %}".replace(/666/, songId))
                          .then(response => {
                              $("#player").get(0).src = response.data.url;
                              $("#player").get(0).play()

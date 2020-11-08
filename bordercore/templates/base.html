@@ -65,7 +65,7 @@
                 </ul>
 
                 <div id="below-nav">
-                    <a href="{% url 'logout' %}">Logout</a>
+                    <a href="{% url 'accounts:logout' %}">Logout</a>
                 </div>
 
             </nav>
@@ -149,20 +149,20 @@
                                 {
                                     id: "homepage",
                                     name: "Home",
-                                    url: "{% url 'homepage' %}",
+                                    url: "{% url 'homepage:homepage' %}",
                                     icon: "home"
                                 },
                                 {
                                     id: "bookmarks",
                                     name: "Bookmarks",
-                                    url: "{% url 'bookmark_overview' %}",
+                                    url: "{% url 'bookmark:overview' %}",
                                     icon: "bookmark",
                                     badge: 0
                                 },
                                 {
                                     id: "nodes",
                                     name: "Nodes",
-                                    url: "{% url 'node_overview' %}",
+                                    url: "{% url 'node:list' %}",
                                     icon: "bookmark",
                                     badge: 0
                                 },
@@ -175,17 +175,17 @@
                                         {
                                             id: "home",
                                             name: "Browse",
-                                            url: "{% url 'feed_list' %}"
+                                            url: "{% url 'feed:list' %}"
                                         },
                                         {
                                             id: "add",
                                             name: "Add a Feed",
-                                            url: "{% url 'feed_add' %}"
+                                            url: "{% url 'feed:add' %}"
                                         },
                                         {
                                             id: "edit",
                                             name: "Manage Subscriptions",
-                                            url: "{% url 'feed_subscriptions' %}"
+                                            url: "{% url 'feed:subscriptions' %}"
                                         },
 
                                     ]
@@ -193,7 +193,7 @@
                                 {
                                     id: "notes",
                                     name: "Notes",
-                                    url: "{% url 'notes_list' %}",
+                                    url: "{% url 'search:notes' %}",
                                     icon: "sticky-note"
                                 },
                                 {
@@ -204,22 +204,22 @@
                                         {
                                             id: "home",
                                             name: "Search",
-                                            url: "{% url 'search' %}"
+                                            url: "{% url 'search:search' %}"
                                         },
                                         {
                                             id: "search-tag",
                                             name: "Tag Search",
-                                            url: "{% url 'kb_search_tag_detail_search' %}"
+                                            url: "{% url 'search:kb_search_tag_detail_search' %}"
                                         },
                                         {
                                             id: "collection",
                                             name: "Collections",
-                                            url: "{% url 'collection_list' %}"
+                                            url: "{% url 'collection:list' %}"
                                         },
                                         {
                                             id: "blob-add",
                                             name: "Add Blob",
-                                            url: "{% url 'blob_add' %}"
+                                            url: "{% url 'blob:add' %}"
                                         },
 
                                     ]
@@ -227,7 +227,7 @@
                                 {
                                     id: "drill",
                                     name: "Drill",
-                                    url: "{% url 'drill_list' %}",
+                                    url: "{% url 'drill:list' %}",
                                     icon: "graduation-cap"
                                 },
                                 {
@@ -238,19 +238,19 @@
                                         {
                                             id: "home",
                                             name: "Browse",
-                                            url: "{% url 'music_list' %}"
+                                            url: "{% url 'music:list' %}"
                                         },
                                         {
                                             id: "add",
                                             name: "Add a Song",
-                                            url: "{% url 'add_song' %}"
+                                            url: "{% url 'music:add_song' %}"
                                         },
                                     ]
                                 },
                                 {
                                     id: "todo",
                                     name: "Todo",
-                                    url: "{% url 'todo_list' %}",
+                                    url: "{% url 'todo:list' %}",
                                     icon: "tasks",
                                     {% if todo_count %}
                                     badge: {{ todo_count|default:0 }}
@@ -259,7 +259,7 @@
                                 {
                                     id: "fitness",
                                     name: "Fitness",
-                                    url: "{% url 'fitness_summary' %}",
+                                    url: "{% url 'fitness:summary' %}",
                                     icon: "running",
                                     {% if exercise_count %}
                                     badge: {{ exercise_count|default:0 }}
@@ -268,7 +268,7 @@
                                 {
                                     id: "prefs",
                                     name: "Prefs",
-                                    url: "{% url 'prefs' %}",
+                                    url: "{% url 'accounts:prefs' %}",
                                     icon: "briefcase"
                                 },
 
@@ -290,7 +290,7 @@
                             let self = this;
                             doGet(
                                 self,
-                                "{% url "bookmark_get_new_bookmarks_count" 666 %}".replace(/666$/, timestamp),
+                                "{% url "bookmark:get_new_bookmarks_count" 666 %}".replace(/666/, timestamp),
                                 (response) => {
                                     count = response.data.count;
                                     // TODO: Lookup item by "id=bookmark" rather than the index number of "1"

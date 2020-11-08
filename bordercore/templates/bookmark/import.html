@@ -86,7 +86,7 @@
 
                     return doGet(
                         this,
-                        "{% url "tag_search" %}?query=" + this.tag,
+                        "{% url "tag:search" %}?query=" + this.tag,
                         (response) => {
                             this.autocompleteItems = response.data.map(a => {
                                 return { text: a.text, value: a.value };

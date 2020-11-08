@@ -37,7 +37,7 @@
         <div class="col-lg-5 offset-lg-2">
             <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}" />
             <input class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" />
-            <a class="btn btn-secondary" href="{% url 'bookmark_overview' %}">Cancel</a>
+            <a class="btn btn-secondary" href="{% url 'bookmark:overview' %}">Cancel</a>
         </div>
     </div>
 
@@ -91,7 +91,7 @@
 
                     return doGet(
                         this,
-                        "{% url "tag_search" %}?query=" + this.tag,
+                        "{% url "tag:search" %}?query=" + this.tag,
                         (response) => {
                             this.autocompleteItems = response.data.map(a => {
                                 return { text: a.text, value: a.value };
