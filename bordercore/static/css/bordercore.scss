@@ -134,6 +134,29 @@ tr.selected {
 
 /* Bootstrap modifications */
 
+$nav-tabs-link-active-border-color: $nav-tabs-border-color $nav-tabs-border-color $nav-tabs-link-active-bg;
+$nav-tabs-link-hover-border-color: $nav-tabs-border-color;
+
+/* Modified from bootstrap/scss/_nav.scss */
+.nav-tabs {
+  border-bottom: $nav-tabs-border-width solid $nav-tabs-border-color;
+
+  .nav-link {
+    border: $nav-tabs-border-width solid transparent;
+
+    @include border-top-radius($nav-tabs-border-radius);
+
+    @include hover-focus() {
+      border-color: $nav-tabs-link-hover-border-color;
+    }
+  }
+
+  .nav-link.active,
+  .nav-item.show .nav-link {
+    border-color: $nav-tabs-link-active-border-color;
+  }
+}
+
 .card-body {
   background-color: $list-group-item-secondary;
 }

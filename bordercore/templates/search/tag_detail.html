@@ -69,9 +69,11 @@
         <br />
 
         <tab-list inline-template>
-            <ul class="nav nav-tabs" id="myTab" @click="onClick">
+            <ul class="nav nav-tabs" id="myTab">
         {% for doctype in doctype_counts %}
-            <li class="nav-item"><a class="nav-link" id="tab_{{ doctype.0 }}" href="#{{ doctype.0 }}">{{ doctype_mapping|get_doctype:doctype.0 }} <span class="badge alert-info">{{ doctype.1 }}</span></a></li>
+            <li class="nav-item" data-type="{{ doctype.0 }}" @click="onClick">
+                <a class="nav-link" data-toggle="tab" href="#{{ doctype.0 }}">{{ doctype_mapping|get_doctype:doctype.0 }} <span class="badge alert-info">{{ doctype.1 }}</span></a>
+            </li>
         {% endfor %}
             </ul>
         </tab-list>
@@ -255,20 +257,15 @@
         const TabList = {
             methods: {
                 onClick(evt) {
-                    id = evt.srcElement.id;
 
-                    data = {
-                        "kb_tag_detail_current_tab": id.replace("tab_", "")
-                    }
-
-                    const bodyformData = Object.keys(data).map(key => encodeURIComponent(key) + '=' + encodeURIComponent(data[key])).join('&');
-
-                    $("#myTab a#tab_" + data.kb_tag_detail_current_tab).tab("show");
+                    evt.srcElement.parentElement.classList.add("active");
 
                     doPost(
                         this,
                         "{% url "accounts:store_in_session" %}",
-                        data,
+                        {
+                            "kb_tag_detail_current_tab": evt.srcElement.parentElement.getAttribute("data-type")
+                        },
                         (response) => {
                             evt.preventDefault();
                         },
@@ -280,7 +277,7 @@
             },
             mounted() {
                 {% if kb_tag_detail_current_tab and doctypes|dict_get:kb_tag_detail_current_tab %}
-                $("#myTab a#tab_{{ kb_tag_detail_current_tab }}").tab("show");
+                $("li[data-type='{{ kb_tag_detail_current_tab }}'] a").tab("show");
                 {% else %}
                 // If the tab stored in the session doesn't match any current tab categories,
                 //  show the first tab.
