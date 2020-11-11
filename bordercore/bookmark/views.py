@@ -9,11 +9,14 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Count
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
-from django.views.generic import ListView
+from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+from django.views.generic.edit import ModelFormMixin
 
 from accounts.models import SortOrderUserTag
 from bookmark.forms import BookmarkForm
@@ -34,46 +37,83 @@ def click(request, bookmark_id=None):
     return redirect(b.url)
 
 
-@login_required
-def edit(request, bookmark_id=None):
+class FormValidMixin(ModelFormMixin):
+    """
+    A mixin to encapsulate common logic used in Update and Create views
+    """
 
-    action = 'Edit'
-    b = Bookmark.objects.get(user=request.user, pk=bookmark_id) if bookmark_id else None
+    def form_valid(self, form):
 
-    tags = []
+        bookmark = form.instance
+        bookmark.user = self.request.user
+        bookmark.save()
 
-    if request.method == 'POST':
-        if request.POST['Go'] in ['Edit', 'Add']:
-            form = BookmarkForm(request.POST, instance=b, request=request)
-            if form.is_valid():
-                newform = form.save(commit=False)
-                newform.user = request.user
-                newform.save()
-                form.save_m2m()
-                form.instance.index_bookmark()
-                form.instance.snarf_favicon()
-                messages.add_message(request, messages.INFO, f'Bookmark {request.POST["Go"].lower()}ed')
-                return overview(request)
-        elif request.POST['Go'] == 'Delete':
-            b.delete()
-            messages.add_message(request, messages.INFO, 'Bookmark deleted')
-            return overview(request)
+        with transaction.atomic():
 
-    elif bookmark_id:
-        action = 'Edit'
-        form = BookmarkForm(instance=b, request=request)
-        tags = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in b.tags.all()]
+            for tag in bookmark.tags.all():
+                s = SortOrderTagBookmark.objects.get(tag=tag, bookmark=bookmark)
+                s.delete()
 
-    else:
-        action = 'Add'
-        form = BookmarkForm(request=request)
+            # Delete all existing tags
+            bookmark.tags.clear()
 
-    return render(request, 'bookmark/edit.html',
-                  {'section': SECTION,
-                   'action': action,
-                   'form': form,
-                   'tags': tags,
-                   'bookmark': b})
+            # Then add the tags specified in the form
+            for tag in form.cleaned_data["tags"]:
+                bookmark.tags.add(tag)
+
+        bookmark.index_bookmark()
+        bookmark.snarf_favicon()
+
+        messages.add_message(self.request, messages.INFO, "Bookmark Updated")
+
+        return super().form_valid(form)
+
+
+class BookmarkUpdateView(UpdateView, FormValidMixin):
+    model = Bookmark
+    template_name = "bookmark/update.html"
+    form_class = BookmarkForm
+    success_url = reverse_lazy("bookmark:overview")
+
+    def get_context_data(self, **kwargs):
+        context = super(BookmarkUpdateView, self).get_context_data(**kwargs)
+        context["action"] = "Update"
+        context["section"] = SECTION
+        context["tags"] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
+        return context
+
+    def get_form_kwargs(self):
+        # Pass the request object to the form so that we have access to it
+        #  in a clean_* method
+        kwargs = super(BookmarkUpdateView, self).get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
+
+
+@method_decorator(login_required, name="dispatch")
+class BookmarkCreateView(CreateView, FormValidMixin):
+    template_name = "bookmark/update.html"
+    form_class = BookmarkForm
+    success_url = reverse_lazy("bookmark:overview")
+
+    def get_context_data(self, **kwargs):
+        context = super(BookmarkCreateView, self).get_context_data(**kwargs)
+        context["action"] = "Create"
+        context["section"] = SECTION
+        return context
+
+    def get_form_kwargs(self):
+        # Pass the request object to the form so that we have access to it
+        #  in a clean_* method
+        kwargs = super(BookmarkCreateView, self).get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
+
+
+@method_decorator(login_required, name="dispatch")
+class BookmarkDeleteView(DeleteView):
+    model = Bookmark
+    success_url = reverse_lazy("bookmark:overview")
 
 
 @login_required
@@ -103,14 +143,14 @@ def snarf_link(request):
             f"Bookmark already exists and was added on {b.created.strftime('%B %d, %Y')}",
             extra_tags="show_in_dom"
         )
-        return redirect('bookmark:edit', b.id)
+        return redirect('bookmark:update', b.id)
     except ObjectDoesNotExist:
         b = Bookmark(is_pinned=False, user=request.user, url=url, title=title)
         b.save()
         b.index_bookmark()
         b.snarf_favicon()
 
-    return redirect('bookmark:edit', b.id)
+    return redirect('bookmark:update', b.id)
 
 
 @login_required

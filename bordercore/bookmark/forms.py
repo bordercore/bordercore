@@ -16,7 +16,11 @@ def daily_check_test(value):
 class BookmarkForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
+
+        # This is passed in from BookmarkUpdateView.get_form_kwargs(), to be used
+        #  in a clean_* method.
         self.request = kwargs.pop('request', None)
+
         super(BookmarkForm, self).__init__(*args, **kwargs)
 
         self.fields['note'].required = False
@@ -32,10 +36,6 @@ class BookmarkForm(ModelForm):
         b = Bookmark.objects.filter(user=self.request.user, url=data).exclude(id=self.instance.id)
         if b:
             raise ValidationError("Error: this bookmark already exists")
-        return data
-
-    def clean_daily(self):
-        data = self.cleaned_data['daily']
         return data
 
     tags = ModelCommaSeparatedChoiceField(

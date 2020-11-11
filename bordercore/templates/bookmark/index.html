@@ -54,8 +54,8 @@
 
                     <button-group inline-template @get-page="getPage">
                         <div class="btn-group ml-5">
-                            <a class="btn btn-secondary" id="btn-add" href="{% url 'bookmark:add' %}">Add</a>
-                            <input type="button" class="btn btn-secondary" id="btn-edit" value="Edit" :disabled="buttonsDisabled" @click="onClickEdit" />
+                            <a class="btn btn-secondary" id="btn-add" href="{% url 'bookmark:create' %}">Create</a>
+                            <input type="button" class="btn btn-secondary" id="btn-update" value="Update" :disabled="buttonsDisabled" @click="onClickUpdate" />
                             <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="buttonsDisabled" @click="onClickDelete" />
                             <input v-if="removeFavoriteButtonVisible" type="button" class="btn btn-secondary ml-2" value="Remove from Favorites" @click="removeFromFavorites" v-cloak />
                             <input v-if="addFavoriteButtonVisible" type="button" class="btn btn-secondary ml-2" value="Add to Favorites" @click="addToFavorites" v-cloak />
@@ -279,9 +279,9 @@
 
                          })
                 },
-                onClickEdit(evt) {
+                onClickUpdate(evt) {
                     var selectedId = document.querySelector("tr.bookmark-list.selected").dataset.id;
-                    window.location="{% url 'bookmark:edit' 666 %}".replace(/666/, selectedId);
+                    window.location="{% url 'bookmark:update' 666 %}".replace(/666/, selectedId);
                 },
                 addToFavorites(evt) {
                     const tagName = this.$parent.$refs.search.$refs.suggestComponent.text
@@ -427,7 +427,7 @@
                             const found = this.bookmarkList.find(element => element.id == selectedId);
 
                             if (found) {
-                                noteValue = atob(found.note);
+                                noteValue = found.note;
                             }
 
                             EventBus.$emit("setNoteValue", noteValue);
