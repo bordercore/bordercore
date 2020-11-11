@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.dateformat import format
@@ -112,12 +113,18 @@ class TodoDetailView(UpdateView):
 
         task = form.instance
 
-        # Delete all existing tags
-        task.tags.clear()
+        with transaction.atomic():
 
-        # Then add the tags specified in the form
-        for tag in form.cleaned_data['tags']:
-            task.tags.add(tag)
+            for tag in task.tags.all():
+                s = SortOrderTagTodo.objects.get(tag=tag, todo=task)
+                s.delete()
+
+            # Delete all existing tags
+            task.tags.clear()
+
+            # Then add the tags specified in the form
+            for tag in form.cleaned_data['tags']:
+                task.tags.add(tag)
 
         self.object = form.save()
         context = self.get_context_data(form=form)
