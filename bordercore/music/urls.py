@@ -6,14 +6,14 @@ app_name = "collection"
 
 urlpatterns = [
     path(
-        route="edit/<int:song_id>/",
-        view=views.song_edit,
-        name="song_edit"
+        route="update/<int:song_id>/",
+        view=views.song_update,
+        name="song_update"
     ),
     path(
-        route="add/",
-        view=views.add_song,
-        name="add_song"
+        route="create/",
+        view=views.create_song,
+        name="create_song"
     ),
     path(
         route="album/<int:pk>/",

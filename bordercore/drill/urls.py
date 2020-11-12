@@ -31,9 +31,9 @@ urlpatterns = [
         name="add"
     ),
     path(
-        route="question/edit/<int:pk>/",
+        route="question/update/<int:pk>/",
         view=views.QuestionUpdateView.as_view(),
-        name="edit"
+        name="update"
     ),
     path(
         route="question/skip/<int:question_id>/",

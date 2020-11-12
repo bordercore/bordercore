@@ -21,9 +21,9 @@ urlpatterns = [
         name="thumbnail"
     ),
     path(
-        route="add/",
+        route="create/",
         view=views.BlobCreateView.as_view(),
-        name="add"
+        name="create"
     ),
     path(
         route="<uuid:uuid>/delete/",

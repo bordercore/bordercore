@@ -178,12 +178,12 @@
                                             url: "{% url 'feed:list' %}"
                                         },
                                         {
-                                            id: "add",
-                                            name: "Add a Feed",
-                                            url: "{% url 'feed:add' %}"
+                                            id: "create",
+                                            name: "Create a Feed",
+                                            url: "{% url 'feed:create' %}"
                                         },
                                         {
-                                            id: "edit",
+                                            id: "update",
                                             name: "Manage Subscriptions",
                                             url: "{% url 'feed:subscriptions' %}"
                                         },
@@ -217,9 +217,9 @@
                                             url: "{% url 'collection:list' %}"
                                         },
                                         {
-                                            id: "blob-add",
-                                            name: "Add Blob",
-                                            url: "{% url 'blob:add' %}"
+                                            id: "blob-create",
+                                            name: "Create Blob",
+                                            url: "{% url 'blob:create' %}"
                                         },
 
                                     ]
@@ -243,7 +243,7 @@
                                         {
                                             id: "add",
                                             name: "Add a Song",
-                                            url: "{% url 'music:add_song' %}"
+                                            url: "{% url 'music:create_song' %}"
                                         },
                                     ]
                                 },

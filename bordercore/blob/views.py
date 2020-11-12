@@ -26,7 +26,7 @@ from blob.models import Blob, MetaData
 from collection.models import Collection
 from lib.time_utils import parse_date_from_string
 
-SECTION = 'kb'
+SECTION = 'search'
 
 # TODO: Move this to Django config file
 amazon_api_config = {
@@ -37,12 +37,12 @@ log = logging.getLogger(f"bordercore.{__name__}")
 
 @method_decorator(login_required, name='dispatch')
 class BlobCreateView(CreateView):
-    template_name = 'blob/edit.html'
+    template_name = 'blob/update.html'
     form_class = BlobForm
 
     def get_context_data(self, **kwargs):
         context = super(BlobCreateView, self).get_context_data(**kwargs)
-        context['action'] = 'Add'
+        context['action'] = 'Create'
         if self.request.GET.get('linked_blob', ''):
             linked_blob = Blob.objects.get(user=self.request.user, id=self.request.GET['linked_blob'])
             context['linked_blob'] = linked_blob
@@ -58,8 +58,8 @@ class BlobCreateView(CreateView):
         if collection_id:
             context['collection_info'] = Collection.objects.get(user=self.request.user, id=collection_id)
         context['section'] = SECTION
-        context['subsection'] = 'blob-add'
-        context['title'] = 'Add Blob'
+        context['subsection'] = 'blob-create'
+        context['title'] = 'Create Blob'
 
         return context
 
@@ -114,7 +114,7 @@ class BlobCreateView(CreateView):
 @method_decorator(login_required, name='dispatch')
 class BlobDeleteView(DeleteView):
     model = Blob
-    success_url = reverse_lazy('blob:add')
+    success_url = reverse_lazy('blob:create')
 
     # Override delete() so that we can catch any exceptions, especially any
     #  thrown by Elasticsearch
@@ -123,7 +123,7 @@ class BlobDeleteView(DeleteView):
             return super(BlobDeleteView, self).delete(request, *args, **kwargs)
         except Exception as e:
             messages.add_message(request, messages.ERROR, f"Error deleting object: {e}")
-            return HttpResponseRedirect(reverse('blob:edit', kwargs={'uuid': str(self.get_object().uuid)}))
+            return HttpResponseRedirect(reverse('blob:update', kwargs={'uuid': str(self.get_object().uuid)}))
 
     def get_object(self, queryset=None):
         obj = Blob.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
@@ -211,7 +211,7 @@ class BlobDetailView(DetailView):
 
 @method_decorator(login_required, name='dispatch')
 class BlobUpdateView(UpdateView):
-    template_name = 'blob/edit.html'
+    template_name = 'blob/update.html'
     form_class = BlobForm
 
     def get_context_data(self, **kwargs):
@@ -232,8 +232,8 @@ class BlobUpdateView(UpdateView):
         context['collections_other'] = Collection.objects.filter(Q(user=self.request.user)
                                                                  & ~Q(blob_list__contains=[{'id': self.object.id}])
                                                                  & Q(is_private=False))
-        context['action'] = 'Edit'
-        context['title'] = 'Blob Edit :: {}'.format(self.object.get_title(remove_edition_string=True))
+        context['action'] = 'Update'
+        context['title'] = 'Blob Update :: {}'.format(self.object.get_title(remove_edition_string=True))
         context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
 

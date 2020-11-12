@@ -197,9 +197,9 @@ class QuestionUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(QuestionUpdateView, self).get_context_data(**kwargs)
-        context['action'] = 'Edit'
+        context['action'] = 'Update'
         context['section'] = SECTION
-        context['title'] = 'Drill :: Question Edit'
+        context['title'] = 'Drill :: Question Update'
         context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
 

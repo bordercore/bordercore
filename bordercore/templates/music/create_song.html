@@ -64,7 +64,7 @@
                             </div>
                         </div>
                         <div class="col-lg-6 pl-0">
-                            <button type="submit" class="btn btn-secondary" name="upload" disabled="true" ref="submitButton">Upload</button>
+                            <button type="submit" class="btn btn-primary" name="upload" disabled="true" ref="submitButton">Upload</button>
                             <a class="btn btn-secondary" href="{% url 'music:list' %}">Cancel</a>
                         </div>
                     </div>
@@ -156,9 +156,9 @@
                     {% endfor %}
 
                     <div class="form-group">
-                        <div class="col-lg-3 offset-lg-2">
-                            <button type="submit" class="btn btn-secondary" name="add">Add</button>
-                            <a class="btn btn-secondary" href="{% url 'music:add_song' %}">Cancel</a>
+                        <div class="col-lg-3 offset-lg-3">
+                            <button type="submit" class="btn btn-primary" name="create">Create</button>
+                            <a class="btn btn-secondary" href="{% url 'music:create_song' %}">Cancel</a>
                         </div>
                     </div>
 

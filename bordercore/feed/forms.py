@@ -1,5 +1,4 @@
-from django.forms import (ModelForm, ModelMultipleChoiceField, Textarea,
-                          TextInput, ValidationError)
+from django.forms import ModelForm, TextInput
 
 from feed.models import Feed
 
@@ -12,7 +11,7 @@ class FeedForm(ModelForm):
         model = Feed
         fields = ('name', 'url', 'homepage')
         widgets = {
-            'name': TextInput(attrs={'class': 'form-control'}),
-            'url': TextInput(attrs={'class': 'form-control'}),
-            'homepage': TextInput(attrs={'class': 'form-control'}),
+            'name': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'url': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'homepage': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
         }

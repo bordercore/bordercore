@@ -17,9 +17,9 @@ urlpatterns = [
         name="embedded"
     ),
     path(
-        route="add/",
+        route="create/",
         view=views.CollectionCreateView.as_view(),
-        name="add"
+        name="create"
     ),
     path(
         route="delete/<int:pk>/",
@@ -27,9 +27,9 @@ urlpatterns = [
         name="delete"
     ),
     path(
-        route="edit/<int:pk>/",
+        route="update/<int:pk>/",
         view=views.CollectionUpdateView.as_view(),
-        name="edit"
+        name="update"
     ),
     path(
         route="<int:collection_id>/",

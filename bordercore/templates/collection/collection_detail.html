@@ -12,7 +12,7 @@
 
     <br /><br />
 
-    <form action="{% url 'blob:add' %}" method="GET">
+    <form action="{% url 'blob:create' %}" method="GET">
         <input type="hidden" name="collection_id" value="{{ collection.id }}" />
         <input type="submit" class="btn btn-primary" value="Add">
     </form>

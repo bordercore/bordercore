@@ -95,7 +95,7 @@
             <div class="col-lg-12">
                 {% for collection in linked_blobs %}
                     <div id="blob_collection_list">
-Linked with: <a href="{% url 'blob:add' %}?linked_collection={{ collection.id }}"></a>
+Linked with: <a href="{% url 'blob:create' %}?linked_collection={{ collection.id }}"></a>
                     </div>
                     <ul class="list-group">
                         {% for blob in collection.blob_list %}
@@ -107,7 +107,7 @@ Linked with: <a href="{% url 'blob:add' %}?linked_collection={{ collection.id }}
                             </li>
                         {% endfor %}
                         <li class="list-group-item">
-                            <a class="btn btn-secondary" href="{% url 'blob:add' %}?linked_collection={{ collection.id }}">Add Blob</a>
+                            <a class="btn btn-secondary" href="{% url 'blob:create' %}?linked_collection={{ collection.id }}">Create Blob</a>
                         </li>
                         <br />
                 {% endfor %}
@@ -132,7 +132,7 @@ Linked with: <a href="{% url 'blob:add' %}?linked_collection={{ collection.id }}
     {% if object.sha1sum %}
         <a href="{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}" class="btn btn-primary" role="button">Download</a>
     {% endif %}
-        <input type="submit" class="btn btn-primary" value="Edit">
+        <input type="submit" class="btn btn-primary" value="Update">
 
         <br /><br />
 
@@ -152,8 +152,8 @@ Linked with: <a href="{% url 'blob:add' %}?linked_collection={{ collection.id }}
 
     <br /><br />
 
-    <a href="{% url 'blob:add' %}?linked_blob={{ object.id }}">Link to New Blob</a> <strong>|</strong>
-    <a href="{% url 'blob:thumbnail' object.uuid %}">Edit Thumbnail</a>
+    <a href="{% url 'blob:create' %}?linked_blob={{ object.id }}">Link to New Blob</a> <strong>|</strong>
+    <a href="{% url 'blob:thumbnail' object.uuid %}">Update Thumbnail</a>
     <br /><br />
 
     {% for blob in object.get_related_blobs %}

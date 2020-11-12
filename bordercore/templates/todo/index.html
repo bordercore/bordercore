@@ -69,8 +69,8 @@
         const ButtonGroup = {
             template: `
                 <div class="btn-group">
-                    <a class="btn btn-secondary" id="btn-add" href="{% url 'todo:add' %}">Add</a>
-                    <input type="button" class="btn btn-secondary" id="btn-edit" value="Edit" :disabled="isDisabledEdit" @click="onClickEdit" />
+                    <a class="btn btn-secondary" id="btn-create" href="{% url 'todo:create' %}">Create</a>
+                    <input type="button" class="btn btn-secondary" id="btn-update" value="Update" :disabled="isDisabledUpdate" @click="onClickEdit" />
                     <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="isDisabledDelete" @click="onClickDelete" />
                 </div>
             `,
@@ -79,7 +79,7 @@
 
                     var selectedId = table.cell(".selected", 3).data();
 
-                    this.isDisabledEdit = true;
+                    this.isDisabledUpdate = true;
                     this.isDisabledDelete = true;
 
                     axios.delete("{% url 'Todo-list' %}" + selectedId)
@@ -91,7 +91,7 @@
                              table.row(".selected").remove();
                              table.draw();
 
-                             this.isDisabledEdit = true;
+                             this.isDisabledUpdate = true;
                              this.isDisabledDelete = true;
 
                              // Now that we've deleted a row, re-order the "sort_order" column
@@ -110,13 +110,13 @@
                 onClickEdit(evt) {
 
                     var selectedId = table.cell(".selected", 3).data();
-                    window.location="{% url 'todo:edit' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, selectedId);
+                    window.location="{% url 'todo:update' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, selectedId);
 
                 },
             },
             data() {
                 return {
-                    isDisabledEdit: true,
+                    isDisabledUpdate: true,
                     isDisabledDelete: true
                 }
             },
@@ -124,9 +124,9 @@
 
                 EventBus.$on("toggleDisabledEdit", payload => {
                     if (payload == "disable") {
-                        this.isDisabledEdit = true;
+                        this.isDisabledUpdate = true;
                     } else if (payload == "enable") {
-                        this.isDisabledEdit = false;
+                        this.isDisabledUpdate = false;
                     }
                 });
 

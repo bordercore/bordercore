@@ -6,14 +6,14 @@ app_name = "todo"
 
 urlpatterns = [
     path(
-        route="add/",
+        route="create/",
         view=views.TodoCreateView.as_view(),
-        name="add"
+        name="create"
     ),
     path(
-        route="edit/<uuid:uuid>/",
+        route="update/<uuid:uuid>/",
         view=views.TodoDetailView.as_view(),
-        name="edit"
+        name="update"
     ),
     path(
         route="delete/<uuid:uuid>/",

@@ -85,9 +85,9 @@ def album_artwork(request, song_id):
 
 
 @login_required
-def song_edit(request, song_id=None):
+def song_update(request, song_id=None):
 
-    action = 'Edit'
+    action = 'Update'
     file_info = None
 
     song = Song.objects.get(user=request.user, pk=song_id) if song_id else None
@@ -107,14 +107,14 @@ def song_edit(request, song_id=None):
             messages.add_message(request, messages.ERROR, 'IOError: {}'.format(e))
 
     if request.method == 'POST':
-        if request.POST['Go'] in ['Edit', 'Add']:
+        if request.POST['Go'] in ['Update', 'Create']:
             form = SongForm(request.POST, instance=song)
             if form.is_valid():
                 newform = form.save(commit=False)
                 newform.user = request.user
                 newform.save()
                 form.save_m2m()
-                messages.add_message(request, messages.INFO, 'Song edited')
+                messages.add_message(request, messages.INFO, 'Song updated')
                 return music_list(request)
         elif request.POST['Go'] == 'Delete':
             song.delete()
@@ -122,14 +122,14 @@ def song_edit(request, song_id=None):
             return music_list(request)
 
     elif song_id:
-        action = 'Edit'
+        action = 'Update'
         form = SongForm(instance=song)
 
     else:
-        action = 'Add'
+        action = 'Create'
         form = SongForm()  # An unbound form
 
-    return render(request, 'music/edit.html',
+    return render(request, 'music/update.html',
                   {'section': SECTION,
                    'subsection': 'home',
                    'action': action,
@@ -215,7 +215,7 @@ def artist_detail(request, artist_name):
 
 
 @login_required
-def add_song(request):
+def create_song(request):
 
     info = {}
     notes = []
@@ -277,7 +277,7 @@ def add_song(request):
         if formdata.get('year') and not re.search(r'^\d+$', formdata['year']):
             form._errors["year"] = ErrorList([u"Wrong format"])
 
-    elif 'add' in request.POST:
+    elif 'create' in request.POST:
 
         sha1sum = request.POST['sha1sum']
 
@@ -390,22 +390,22 @@ def add_song(request):
                     listen_url = reverse('music:album_detail', args=[album_id])
                 else:
                     listen_url = reverse('music:artist_detail', args=[form.cleaned_data['artist']])
-                messages.add_message(request, messages.INFO, 'Song successfully added.  <a href="' + listen_url + '">Listen to it here.</a>')
+                messages.add_message(request, messages.INFO, 'Song successfully created.  <a href="' + listen_url + '">Listen to it here.</a>')
             else:
                 action = 'Review'
 
         else:
             action = 'Review'
 
-    return render(request, 'music/add_song.html',
+    return render(request, 'music/create_song.html',
                   {'section': SECTION,
-                   'subsection': 'add',
+                   'subsection': 'create',
                    'action': action,
                    'info': info,
                    'notes': notes,
                    'sha1sum': sha1sum,
                    'form': form,
-                   'title': 'Add Song'})
+                   'title': 'Create Song'})
 
 
 @method_decorator(login_required, name='dispatch')

@@ -24,8 +24,8 @@ Interval: <strong class="text-info">{{ question.interval }}</strong>
 <br />
 Easiness Factor: <strong class="text-info">{{ question.efactor|floatformat:1 }}</strong>
 
-    <form action="{% url 'drill:edit' question.id %}" class="mt-5">
-        <input type="submit" class="btn btn-primary" value="Edit">
+    <form action="{% url 'drill:update' question.id %}" class="mt-5">
+        <input type="submit" class="btn btn-primary" value="Update">
     </form>
 
     <br />

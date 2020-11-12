@@ -38,7 +38,7 @@
 
     <div class="form-group row">
         <label class="bold col-lg-2 col-form-label text-right" for="inputTitle">RSS Feeds</label>
-        <div class="col-lg-5 align-self-center"><a href="{% url 'feed:subscriptions' %}">Edit</a></div>
+        <div class="col-lg-5 align-self-center"><a href="{% url 'feed:subscriptions' %}">Update</a></div>
     </div>
 
     {% for field in form %}
@@ -88,7 +88,7 @@
 
     <div class="form-group">
         <div class="col-lg-3 offset-lg-2">
-            <input class="btn btn-secondary" type="submit" name="Go" value="Edit">
+            <input class="btn btn-secondary" type="submit" name="Go" value="Update">
         </div>
     </div>
 

@@ -19,7 +19,7 @@ from collection.forms import CollectionForm
 from collection.models import Collection
 
 IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
-SECTION = 'kb'
+SECTION = 'search'
 
 
 @method_decorator(login_required, name='dispatch')
@@ -125,8 +125,8 @@ class CollectionCreateView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(CollectionCreateView, self).get_context_data(**kwargs)
-        context['action'] = 'Add'
-        context['title'] = 'Add Collection'
+        context['action'] = 'Create'
+        context['title'] = 'Create Collection'
         return context
 
     def form_valid(self, form):

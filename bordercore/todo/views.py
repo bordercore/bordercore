@@ -90,7 +90,7 @@ class TodoListView(ListView):
 @method_decorator(login_required, name='dispatch')
 class TodoDetailView(UpdateView):
     model = Todo
-    template_name = 'todo/edit.html'
+    template_name = 'todo/update.html'
     form_class = TodoForm
     success_url = reverse_lazy('todo:list')
     slug_field = 'uuid'
@@ -101,8 +101,8 @@ class TodoDetailView(UpdateView):
         context['section'] = SECTION
         context['nav'] = 'todo'
         context['uuid'] = self.kwargs.get('uuid')
-        context['action'] = 'Edit'
-        context['title'] = 'Todo Edit :: {}'.format(self.object.task)
+        context['action'] = 'Update'
+        context['title'] = 'Todo Update :: {}'.format(self.object.task)
         context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
 
@@ -134,15 +134,15 @@ class TodoDetailView(UpdateView):
 
 @method_decorator(login_required, name='dispatch')
 class TodoCreateView(CreateView):
-    template_name = 'todo/edit.html'
+    template_name = 'todo/update.html'
     form_class = TodoForm
 
     def get_context_data(self, **kwargs):
         context = super(TodoCreateView, self).get_context_data(**kwargs)
         context['section'] = SECTION
         context['nav'] = 'todo'
-        context['action'] = 'Add'
-        context['title'] = 'Todo Add'
+        context['action'] = 'Create'
+        context['title'] = 'Todo Create'
         return context
 
     def get_form_kwargs(self):
@@ -171,7 +171,7 @@ class TodoCreateView(CreateView):
 
 @method_decorator(login_required, name='dispatch')
 class TodoDeleteView(DeleteView):
-    template_name = 'todo/edit.html'
+    template_name = 'todo/update.html'
     form_class = TodoForm
     model = Todo
     slug_field = 'uuid'

@@ -88,7 +88,7 @@ class FeedSubscriptionListView(FeedListView):
 
     def get_context_data(self, **kwargs):
         context = super(FeedSubscriptionListView, self).get_context_data(**kwargs)
-        context['subsection'] = 'edit'
+        context['subsection'] = 'update'
         context['feeds_not_subscribed'] = self.feeds_not_subscribed
         context['title'] = 'Feeds :: Manage Subscriptions'
         return context
@@ -138,21 +138,21 @@ def feed_unsubscribe(request):
 
 
 @login_required
-def feed_edit(request, feed_id=None):
+def feed_update(request, feed_id=None):
 
     f = None
     subscribers = None
 
     if feed_id:
         f = Feed.objects.get(pk=feed_id)
-        action = 'Edit'
-        title = 'Feed Edit :: {}'.format(f.name)
+        action = 'Update'
+        title = 'Feed Update :: {}'.format(f.name)
     else:
-        action = 'Add'
-        title = 'Feed Add'
+        action = 'Create'
+        title = 'Feed Create'
 
     if request.method == 'POST':
-        if request.POST['Go'] in ['Edit', 'Add']:
+        if request.POST['Go'] in ['Update', 'Create']:
             form = FeedForm(request.POST, instance=f)  # A form bound to the POST data
             if form.is_valid():
                 newform = form.save(commit=False)
@@ -161,7 +161,7 @@ def feed_edit(request, feed_id=None):
                 form.save_m2m()  # Save the many-to-many data for the form.
 
                 # If this is a new feed, download the feed items
-                if request.POST['Go'] == 'Add':
+                if request.POST['Go'] == 'Create':
                     # update_feed.delay(newform.id)
                     # If the user clicked the 'subscribe' checkbox, subscribe her
                     if request.POST.get('subscribe', ''):
@@ -185,7 +185,7 @@ def feed_edit(request, feed_id=None):
         if subscribers:
             subscribers = ', '.join([x.user.username for x in subscribers])
 
-    return render(request, 'feed/edit.html',
+    return render(request, 'feed/update.html',
                   {'section': SECTION,
                    'subsection': 'add',
                    'action': action,

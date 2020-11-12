@@ -11,14 +11,14 @@ urlpatterns = [
         name="sort"
     ),
     path(
-        route="edit/<int:feed_id>/",
-        view=views.feed_edit,
-        name="edit"
+        route="update/<int:feed_id>/",
+        view=views.feed_update,
+        name="update"
     ),
     path(
-        route="edit/",
-        view=views.feed_edit,
-        name="add"
+        route="update/",
+        view=views.feed_update,
+        name="create"
     ),
     path(
         route="subscriptions/",

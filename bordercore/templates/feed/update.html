@@ -32,7 +32,7 @@ Please correct the errors below.
                 <label class="col-lg-2 col-form-label" for="inputTitle">{{ field.label }}</label>
                 <div class="col-lg-5">
                     {% if field.label == "Url" %}
-                        <input type="text" name="url" value="{{ field.value }}" class="form-control" required id="id_url" @blur="onBlur">
+                        <input type="text" name="url" value="{{ field.value|default:'' }}" class="form-control" required id="id_url" @blur="onBlur" , autocomplete="off">
                     {% else %}
                     {{ field }}
                     {% endif %}
