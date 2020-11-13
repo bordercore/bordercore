@@ -30,6 +30,7 @@
             {% if field.label == "Tags" %}
 
                 <search inline-template>
+                    <div>
 
                     {% include "common/show_messages.html" %}
 
@@ -55,6 +56,8 @@
                         {% for error in field.errors %}
                             <span class="form-error">{{ error }}</span>
                         {% endfor %}
+                    </div>
+
                     </div>
                 </search>
 

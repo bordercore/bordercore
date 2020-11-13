@@ -110,6 +110,7 @@ class QuestionCreateView(CreateView):
             context['tags'] = [
                 {
                     "text": tag.name,
+                    "value": tag.name,
                     "is_meta": tag.is_meta,
                     "classes": "badge badge-primary",
                 }
