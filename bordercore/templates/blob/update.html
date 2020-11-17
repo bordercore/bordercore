@@ -126,6 +126,7 @@ Linking to <a href="{% url 'blob:detail' linked_blob.uuid %}">{{ linked_blob.tit
 {% endif %}
 
 <div class="row" id="vue-app-right">
+
     <div class="col-lg-12">
 
 <form id="form-blob" action="{{ request.path }}" method="post" enctype="multipart/form-data">
@@ -449,50 +450,6 @@ Linking to <a href="{% url 'blob:detail' linked_blob.uuid %}">{{ linked_blob.tit
             props: ['metadata']
         }
 
-        const SimpleSuggest = {
-            template: `
-                <vue-simple-suggest ref="suggestComponent"
-                    id="id_name"
-                    v-model="query"
-                    display-attribute="value"
-                    value-attribute="value"
-                    :list="metadataSearch"
-                    :filter-by-query=true
-                    :debounce=200
-                    :min-length=2
-                    placeholder="Name"
-                    autofocus
-                    autocomplete="off"
-                    :styles="autoCompleteStyle"
-                    @select="select"
-                    >
-                </vue-simple-suggest>
-            `,
-            data() {
-                return {
-                    query: "",
-                    autoCompleteStyle: {
-                        vueSimpleSuggest: "position-relative",
-                        inputWrapper: "",
-                        defaultInput: "form-control search-box-input",
-                        suggestions: "position-absolute list-group z-1000",
-                        suggestItem: "list-group-item"
-                    }
-                }
-            },
-            methods: {
-                metadataSearch(query) {
-                    return axios.get("{% url 'blob:metadata_name_search' %}?query=" + query)
-                                .then(response => {
-                                    return response.data;
-                                })
-                },
-                select(datum) {
-                    document.getElementById("id_value").focus();
-                }
-            }
-        }
-
         const AddMetadataButton = {
             template: `<button class="btn btn-success" type="button" @click="onClick">
                 <span class="glyphicon glyphicon-plus"></span>
@@ -520,7 +477,12 @@ Linking to <a href="{% url 'blob:detail' linked_blob.uuid %}">{{ linked_blob.tit
                     <div class="form-group row">
 
                         <div class="col-lg-2 col-sm-2">
-                            <simple-suggest ref="simpleSuggest"></simple-suggest>
+                            <simple-suggest
+                                   ref="simpleSuggest"
+                                   id="simple-suggest"
+                                   search-url="{% url 'blob:metadata_name_search' %}?query="
+                                >
+                            </simple-suggest>
                         </div>
 
                         <div class="col-lg-10 col-sm-10">
@@ -558,7 +520,7 @@ Linking to <a href="{% url 'blob:detail' linked_blob.uuid %}">{{ linked_blob.tit
                 addMetadata(payload) {
                     metadata_count++;
 
-                    nameEl = document.getElementById("id_name");
+                    nameEl = document.getElementById("simple-suggest");
                     valueEl = document.getElementById("id_value");
 
                     if (nameEl.value == "" || valueEl.value == "") {
@@ -588,6 +550,9 @@ Linking to <a href="{% url 'blob:detail' linked_blob.uuid %}">{{ linked_blob.tit
                             this.metadata.splice(i, 1);
                         }
                     }
+                },
+                select(datum) {
+                    document.getElementById("id_value").focus();
                 }
             },
             components: {
@@ -704,7 +669,6 @@ Linking to <a href="{% url 'blob:detail' linked_blob.uuid %}">{{ linked_blob.tit
                 DateInput,
                 ContentTextArea,
                 MetadataWrapper,
-                SimpleSuggest,
                 TagsInput
             }
         });

@@ -2,26 +2,14 @@
 
     <form id="search" class="form-inline float-right" name="nav_form" action="{{ request.path }}" method="get">
 
-        <vue-simple-suggest ref="suggestComponent"
-                            v-model="query"
-                            display-attribute="name"
-                            value-attribute="value"
-                            :list="tagSearch"
-                            :filter-by-query=true
-                            :debounce=200
-                            :min-length=2
-                            :name="inputName"
-                            placeholder="Search"
-                            autofocus
-                            autocomplete="off"
-                            @select="select"
-                            :styles="autoCompleteStyle"
+        <simple-suggest
+            ref="simpleSuggest"
+            display-attribute="name"
+            place-holder="Search"
+            search-url="{% url 'music:search' %}?query="
         >
-            <div slot="suggestion-item" slot-scope="scope">
-                <span v-html="boldenSuggestion(scope)"></span>
-            </div>
-        </vue-simple-suggest>
+        </simple-suggest>
 
-    </form>
+   </form>
 
 </div>

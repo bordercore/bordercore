@@ -4,6 +4,7 @@ const CompressionPlugin = require("compression-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const FixStyleOnlyEntriesPlugin = require("webpack-fix-style-only-entries");
 const StylelintPlugin = require("stylelint-webpack-plugin");
+const VueLoaderPlugin = require("vue-loader/lib/plugin")
 
 module.exports = (env, argv) => {
 
@@ -45,7 +46,11 @@ module.exports = (env, argv) => {
             // Extract generated CSS into separate files
             new MiniCssExtractPlugin({
                 filename: devMode ? "[name].css" : "[name].min.css",
-            })
+            }),
+
+            // Responsible for cloning any other rules you have defined and applying them
+            //  to the corresponding language blocks in .vue files
+            new VueLoaderPlugin()
         ],
         module: {
             rules: [
@@ -58,6 +63,10 @@ module.exports = (env, argv) => {
                         // Compiles Sass to CSS
                         "sass-loader",
                     ],
+                },
+                {
+                    test: /\.vue$/,
+                    loader: "vue-loader"
                 }
             ]
         }

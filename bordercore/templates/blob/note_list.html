@@ -37,20 +37,12 @@
                         <div class="col-auto has-search">
                             <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
 
-                            <vue-simple-suggest
-                                v-model="query"
-                                display-attribute="text"
-                                value-attribute="text"
-                                :list="tagSearch"
-                                :filter-by-query=true
-                                :debounce=200
-                                :min-length=2
-                                :name="inputName"
-                                placeholder="Search"
-                                @select="select"
-                                :styles="autoCompleteStyle"
-                            ></vue-simple-suggest>
-
+                            <simple-suggest
+                                ref="simpleSuggest"
+                                place-holder="Search"
+                                search-url="{% url 'tag:search' %}?type=note&query="
+                            >
+                            </simple-suggest>
                         </div>
                     </div>
                     <a class="btn btn-primary ml-2" href="{% url 'blob:create' %}?is_note=true">Add note</a>
@@ -121,38 +113,21 @@
 
     <script type="text/javascript">
 
+        Vue.mixin({ delimiters: ["[[", "]]"] });
+
         new Vue({
-            delimiters: ["[[", "]]"],
             el: "#search",
-            data() {
-                return {
-                    inputName: "search",
-                    query: "",
-                    tags: [],
-                    autoCompleteStyle: {
-                        vueSimpleSuggest: "position-relative",
-                        inputWrapper: "drill_search",
-                        defaultInput: "form-control search-box",
-                        suggestions: "position-absolute list-group z-1000",
-                        suggestItem: "list-group-item"
-                    }
-                }
-            },
             methods: {
-                tagSearch(query) {
-                    return axios.get("{% url 'tag:search' %}?query=" + query + "&type=note")
-                                .then(response => {
-                                    return response.data;
-                                })
-                },
                 select(tag) {
                     window.location='{% url 'search:notes' %}?tagsearch=' + tag.value;
                 }
+            },
+            components: {
+                SimpleSuggest
             }
         });
 
         new Vue({
-            delimiters: ["[[", "]]"],
             el: '#sort-container-notes',
             data: {
                 notes: [
@@ -190,8 +165,8 @@
                               noAutoHide: true,
                               variant: "danger"
                           })
-                        console.error("Error:", error);
-                    });
+                          console.error("Error:", error);
+                      });
                 }
             }
         });

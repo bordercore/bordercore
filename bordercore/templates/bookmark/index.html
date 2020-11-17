@@ -28,26 +28,12 @@
                         <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
                         <search inline-template @search-term="searchTerm" @search-tag="searchTag" @get-page="getPage" ref="search">
                             <div>
-                                <vue-simple-suggest ref="suggestComponent"
-                                                    v-model="query"
-                                                    display-attribute="value"
-                                                    value-attribute="value"
-                                                    :list="tagSearch"
-                                                    :filter-by-query=true
-                                                    :debounce=200
-                                                    :min-length=2
-                                                    :name="inputName"
-                                                    placeholder="Search"
-                                                    autofocus
-                                                    autocomplete="off"
-                                                    id="searchInput"
-                                                    @select="onSelect"
-                                                    @keydown.native.enter="onEnter"
-                                                    :styles="autoCompleteStyle"
-                                                    @hide-list="onHideList"
-                                                    @hover="onHover"
+                                <simple-suggest
+                                    ref="simpleSuggest"
+                                    place-holder="Search"
+                                    search-url="{% url 'bookmark:get_tags_used_by_bookmarks' %}?query="
                                 >
-                                </vue-simple-suggest>
+                                </simple-suggest>
                             </div>
                         </search>
                     </div>
@@ -310,28 +296,8 @@
         };
 
         const Search = {
-            data() {
-                return {
-                    inputName: "search",
-                    query: "",
-                    tags: [],
-                    autoCompleteStyle: {
-                        vueSimpleSuggest: "position-relative",
-                        inputWrapper: "search-box",
-                        defaultInput: "form-control",
-                        suggestions: "position-absolute list-group z-1000",
-                        suggestItem: "list-group-item"
-                    }
-                }
-            },
             methods: {
-                tagSearch(query) {
-                    return axios.get("{% url 'bookmark:get_tags_used_by_bookmarks' %}?query=" + query)
-                                .then(response => {
-                                    return response.data;
-                                })
-                },
-                onSelect(tag) {
+                select(tag) {
                     this.$emit("search-tag", tag.value);
                     EventBus.$emit("select-favorite-tag", tag.value);
                     disableTermSearch = false;
@@ -367,6 +333,9 @@
                     }
 
                 }
+            },
+            components: {
+                SimpleSuggest
             }
         };
 

@@ -460,7 +460,7 @@ def kb_search_tags_booktitles(request):
         if match["_source"]["doctype"] == "book":
             matches.append(
                 {
-                    "type": "Book",
+                    "object_type": "Book",
                     "value": match["_source"]["title"],
                     "uuid": match["_source"].get("uuid")
                 }
@@ -471,7 +471,7 @@ def kb_search_tags_booktitles(request):
                 tags[tag] = 1
 
     for tag in tags:
-        matches.append({"type": "Tag", "value": tag})
+        matches.append({"object_type": "Tag", "value": tag})
 
     return JsonResponse(matches, safe=False)
 

@@ -5,24 +5,12 @@
 
         <div class="form-row">
             <div class="col-auto">
-                <vue-simple-suggest ref="suggestComponent"
-                                    v-model="query"
-                                    display-attribute="value"
-                                    value-attribute="value"
-                                    :list="tagSearch"
-                                    :filter-by-query=true
-                                    :debounce=200
-                                    :min-length=2
-                                    :name="inputName"
-                                    placeholder="Search"
-                                    autofocus
-                                    @select="select"
-                                    :styles="autoCompleteStyle"
+                <simple-suggest
+                    ref="simpleSuggest"
+                    place-holder="Search"
+                    search-url="{% url 'search:kb_search_tags_booktitles' %}?term="
                 >
-                    <div slot="suggestion-item" slot-scope="scope">
-                        <span v-html="boldenSuggestion(scope)"></span>
-                    </div>
-                </vue-simple-suggest>
+                </simple-suggest>
             </div>
         </div>
 

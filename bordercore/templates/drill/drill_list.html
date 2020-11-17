@@ -39,19 +39,14 @@
                 <div class="form-row">
                     <div class="col-auto has-search">
                         <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
-                        <vue-simple-suggest
-                            v-model="query"
-                            display-attribute="value"
-                            value-attribute="value"
-                            :list="tagSearch"
-                            :filter-by-query=true
-                            :debounce=200
-                            :min-length=2
-                            :name="inputName"
-                            placeholder="Search"
-                            @select="select"
-                            :styles="autoCompleteStyle"
-                        ></vue-simple-suggest>
+
+                        <simple-suggest
+                            ref="simpleSuggest"
+                            place-holder="Search"
+                            search-url="{% url 'drill:tag_search' %}?term="
+                        >
+                        </simple-suggest>
+
                     </div>
                 </div>
 
@@ -79,30 +74,13 @@
         new Vue({
             delimiters: ["[[", "]]"],
             el: "#search",
-            data() {
-                return {
-                    inputName: "search_term",
-                    query: "",
-                    tags: [],
-                    autoCompleteStyle: {
-                        vueSimpleSuggest: "position-relative",
-                        inputWrapper: "search-box",
-                        defaultInput: "form-control",
-                        suggestions: "position-absolute list-group z-1000",
-                        suggestItem: "list-group-item"
-                    }
-                }
-            },
             methods: {
-                tagSearch(query) {
-                    return axios.get("{% url 'drill:tag_search' %}?term=" + query)
-                                .then(response => {
-                                    return response.data;
-                                })
-                },
                 select(tag) {
                     window.location='{% url 'drill:study_tag' 666 %}'.replace(/666/, tag.value);
                 }
+            },
+            components: {
+                SimpleSuggest
             }
         });
 

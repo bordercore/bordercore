@@ -16,9 +16,6 @@ import Vuex from "vuex";
 window.Vuex = Vuex;
 Vue.use(Vuex);
 
-import VueSimpleSuggest from "vue-simple-suggest";
-Vue.component("vue-simple-suggest", VueSimpleSuggest);
-
 import VueTagsInput from "@johmun/vue-tags-input";
 Vue.component("vue-tags-input", VueTagsInput);
 
@@ -66,3 +63,7 @@ window.EasyMDE = EasyMDE;
 import { doGet, doPost } from "./util.js";
 window.doGet = doGet;
 window.doPost = doPost;
+
+import SimpleSuggest from "./vue/common/SimpleSuggest.vue";
+Vue.component("SimpleSuggest", SimpleSuggest);
+window.SimpleSuggest = SimpleSuggest;

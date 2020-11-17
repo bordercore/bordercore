@@ -169,24 +169,13 @@
 
                                     <div class="form-row">
                                         <div class="col-auto">
-                                            <vue-simple-suggest ref="suggestComponent"
-                                                                v-model="query"
-                                                                display-attribute="title"
-                                                                value-attribute="uuid"
-                                                                :list="searchBlob"
-                                                                :filter-by-query=true
-                                                                :debounce=200
-                                                                :min-length=2
-                                                                :name="inputName"
-                                                                placeholder="Search"
-                                                                autofocus
-                                                                @select="select"
-                                                                :styles="autoCompleteStyle"
+                                            <simple-suggest
+                                                ref="simpleSuggest"
+                                                display-attribute="title"
+                                                value-attribute="uuid"
+                                                search-url="{% url 'node:search_blob_titles' %}?term="
                                             >
-                                                <div slot="suggestion-item" slot-scope="scope">
-                                                    <span v-html="boldenSuggestion(scope)"></span>
-                                                </div>
-                                            </vue-simple-suggest>
+                                            </simple-suggest>
                                         </div>
                                     </div>
                                 </div>
@@ -216,24 +205,13 @@
 
                                     <div class="form-row">
                                         <div class="col-auto">
-                                            <vue-simple-suggest ref="suggestComponent"
-                                                                v-model="query"
-                                                                display-attribute="title"
-                                                                value-attribute="title"
-                                                                :list="searchBookmark"
-                                                                :filter-by-query=true
-                                                                :debounce=200
-                                                                :min-length=2
-                                                                :name="inputName"
-                                                                placeholder="Search"
-                                                                autofocus
-                                                                @select="select"
-                                                                :styles="autoCompleteStyle"
+                                            <simple-suggest
+                                                ref="simpleSuggest"
+                                                display-attribute="title"
+                                                value-attribute="title"
+                                                search-url="{% url 'node:search_bookmarks' %}?term="
                                             >
-                                                <div slot="suggestion-item" slot-scope="scope">
-                                                    <span v-html="boldenSuggestion(scope)"></span>
-                                                </div>
-                                            </vue-simple-suggest>
+                                            </simple-suggest>
                                         </div>
                                     </div>
                                 </div>
@@ -294,7 +272,7 @@
                 },
                 chooseBlob() {
                     $("#modalAddBlob").modal("show");
-                    setTimeout( () => { this.$parent.$refs.blobSearch.$refs.suggestComponent.input.focus(); }, 500)
+                    setTimeout( () => { this.$parent.$refs.blobSearch.$refs.simpleSuggest.$refs.suggestComponent.input.focus(); }, 500)
                 },
                 onChange(evt) {
 
@@ -428,35 +406,15 @@
         }
 
         const BlobSearch = {
-            data() {
-                return {
-                    inputName: "search",
-                    query: "",
-                    tags: [],
-                    autoCompleteStyle: {
-                        vueSimpleSuggest: "position-relative",
-                        inputWrapper: "search-box",
-                        defaultInput: "form-control",
-                        suggestions: "position-absolute list-group z-1000",
-                        suggestItem: "list-group-item"
-                    }
-                }
-            },
             methods: {
-                searchBlob(query) {
-                    return axios.get("{% url 'node:search_blob_titles' %}?term=" + query)
-                                .then(response => {
-                                    return response.data;
-                                })
-                },
                 select(selection) {
 
                     EventBus.$emit("add-blob", selection.uuid);
                     $("#modalAddBlob").modal("hide");
 
                     this.$nextTick(() => {
-                        this.$refs.suggestComponent.$el.querySelector("input").blur();
-                        this.$refs.suggestComponent.setText("");
+                        this.$refs.simpleSuggest.$refs.suggestComponent.$el.querySelector("input").blur();
+                        this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
                     });
 
                 },
@@ -466,7 +424,7 @@
 
                     const { suggestion, query } = scope;
 
-                    let result = this.$refs.suggestComponent.displayProperty(suggestion);
+                    let result = this.$refs.simpleSuggest.$refs.suggestComponent.displayProperty(suggestion);
                     result = "<em>" + suggestion.doctype + "</em> - " + result
 
                     if (!query) return result;
@@ -474,6 +432,9 @@
                     const texts = query.split(/[\s-_/\\|\.]/gm).filter(t => !!t) || [''];
                     return result.replace(new RegExp('(.*?)(' + texts.join('|') + ')(.*?)','gi'), '$1<b>$2</b>$3');
                 }
+            },
+            components: {
+                SimpleSuggest
             }
         };
 
@@ -502,7 +463,7 @@
                 },
                 chooseBookmark() {
                     $("#modalAddBookmark").modal("show");
-                    setTimeout( () => { this.$parent.$refs.bookmarkSearch.$refs.suggestComponent.input.focus(); }, 500)
+                    setTimeout( () => { this.$parent.$refs.bookmarkSearch.$refs.simpleSuggest.$refs.suggestComponent.input.focus(); }, 500)
                 },
                 onChange(evt) {
 
@@ -635,35 +596,15 @@
         }
 
         const BookmarkSearch = {
-            data() {
-                return {
-                    inputName: "search",
-                    query: "",
-                    tags: [],
-                    autoCompleteStyle: {
-                        vueSimpleSuggest: "position-relative",
-                        inputWrapper: "search-box",
-                        defaultInput: "form-control",
-                        suggestions: "position-absolute list-group z-1000",
-                        suggestItem: "list-group-item"
-                    }
-                }
-            },
             methods: {
-                searchBookmark(query) {
-                    return axios.get("{% url 'node:search_bookmarks' %}?term=" + query)
-                                .then(response => {
-                                    return response.data;
-                                })
-                },
                 select(selection) {
 
                     EventBus.$emit("add-bookmark", selection.id);
                     $("#modalAddBookmark").modal("hide");
 
                     this.$nextTick(() => {
-                        this.$refs.suggestComponent.$el.querySelector("input").blur();
-                        this.$refs.suggestComponent.setText("");
+                        this.$refs.simpleSuggest.$refs.suggestComponent.$el.querySelector("input").blur();
+                        this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
                     });
 
 
@@ -674,7 +615,7 @@
 
                     const { suggestion, query } = scope;
 
-                    let result = this.$refs.suggestComponent.displayProperty(suggestion);
+                    let result = this.$refs.simpleSuggest.$refs.suggestComponent.displayProperty(suggestion);
 
                     if (!query) return result;
 
