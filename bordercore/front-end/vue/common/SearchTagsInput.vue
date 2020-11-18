@@ -1,0 +1,21 @@
+<script>
+
+    import TagsInput from "./TagsInput.vue";
+
+    export default {
+
+        extends: TagsInput,
+        props: {
+            tagsChangedUrl: {
+                type: String
+            }
+        },
+        methods: {
+            tagsChanged(newTags) {
+                var tags = newTags.map(x => x.value).join(",");
+                window.location=this.tagsChangedUrl.replace("666", tags);
+            }
+        }
+    }
+
+</script>

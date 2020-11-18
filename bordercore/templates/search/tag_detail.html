@@ -17,29 +17,15 @@
             <div class="col-lg-10">
 
                 <form id="tag-filter-form" class="form-inline" action="{% url 'search:kb_search_tag_detail' tag %}" method="get" autocomplete="off">
-                    <tag-search inline-template>
-                        <div class="form-group">
+                    <div class="form-group">
 
-                            <input type="hidden" name="tags" v-model="tagsHidden" />
+                        <search-tags-input
+                            search-url="{% url 'tag:search' %}?query="
+                            tags-changed-url="{% url 'search:kb_search_tag_detail' 666 %}"
+                        >
+                        </search-tags-input>
 
-                            <div id="vue-wrapper">
-                                <vue-tags-input
-                                    ref="tagsInputComponent"
-                                    v-model="tag"
-                                    :tags="tags"
-                                    @tags-changed=tagsChanged
-                                    :autocomplete-items="filteredItems"
-                                    :add-only-from-autocomplete="false"
-                                    placeholder="Tags"
-                                    autofocus>
-                                    <div slot="autocomplete-item" slot-scope="scope" @click="scope.performAdd(scope.item)">
-                                        <div>[[ scope.item.text ]]</div>
-                                    </div>
-                                </vue-tags-input>
-                            </div>
-
-                        </div>
-                    </tag-search>
+                    </div>
                 {% if tag_counts %}
                     <other-tag-counts inline-template>
                         <div class="form-group ml-2">
@@ -182,57 +168,6 @@
 
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
-        const TagSearch = {
-            data() {
-                return {
-                    tag: "",
-                    tags: [],
-                    autocompleteItems: [],
-                    tagsHidden: ""
-                }
-            },
-            watch: {
-                "tag": "initItems",
-            },
-            methods: {
-                tagsChanged(newTags) {
-                    var tags = newTags.map(x => x.value).join(",");
-                    window.location="{% url 'search:kb_search_tag_detail' 666 %}".replace("666", tags);
-                },
-                initItems() {
-
-                    // Set a minimum character count to trigger the ajax call
-                    if (this.tag.length < 3) return;
-
-                    return doGet(
-                        this,
-                        "{% url "tag:search" %}?query=" + this.tag,
-                        (response) => {
-                            this.autocompleteItems = response.data.map(a => {
-                                return { text: a.text, value: a.value };
-                            })
-                        },
-                        ""
-                    );
-
-                }
-            },
-            mounted() {
-                initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
-                if (initialTags) {
-                    this.tags = initialTags;
-                    this.tagsHidden=initialTags.map(x => x.value).join(",")
-                }
-            },
-            computed: {
-                filteredItems() {
-                    return this.autocompleteItems.filter(i => {
-                        return i.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1;
-                    });
-                }
-            }
-        };
-
         {% if tag_counts %}
         const OtherTagCounts = {
             methods: {
@@ -290,12 +225,12 @@
         new Vue({
             el: "#vue-app",
             components: {
-                TagSearch,
                 {% if tag_counts %}
                 OtherTagCounts,
                 {% endif %}
                 TabList,
-                MetaTagList
+                MetaTagList,
+                SearchTagsInput
             }
         });
 

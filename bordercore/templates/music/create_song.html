@@ -73,34 +73,25 @@
 
                 {% if action == 'Review' %}
 
+                    <div id="vue-review">
+
                     {% for field in form %}
 
                         {% if field.label == "Tags" %}
 
-                            <div id="tagsearch">
-                                <div class="form-group {% if field.errors %} error{% endif %} row">
-                                    <label class="bold col-lg-3 col-form-label text-right" for="inputTitle">Tags</label>
+                            <div class="form-group {% if field.errors %} error{% endif %} row">
+                                <label class="bold col-lg-3 col-form-label text-right" for="inputTitle">Tags</label>
 
-                                    <input type="hidden" name="tags" v-model="tagsHidden" />
+                                <div class="col-lg-5 controls" v-cloak>
+                                    <tags-input
+                                        search-url="{% url 'tag:search' %}?query="
+                                    >
+                                    </tags-input>
 
-                                    <div class="col-lg-5 controls" id="vue-wrapper" v-cloak>
-                                        <vue-tags-input
-                                            ref="tagsInputComponent"
-                                            v-model="tag"
-                                            :tags="tags"
-                                            @tags-changed=tagsChanged
-                                            :autocomplete-items="filteredItems"
-                                            :add-only-from-autocomplete="false"
-                                            placeholder="">
-                                            <div slot="autocomplete-item" slot-scope="scope" @click="scope.performAdd(scope.item)">
-                                                <div>[[ scope.item.text ]]</div>
-                                            </div>
-                                        </vue-tags-input>
-                                    </div>
+                                </div>
                                     {% for error in field.errors %}
                                         <span class="form-error">{{ error }}</span>
                                     {% endfor %}
-                                </div>
                             </div>
 
                         {% elif field.label == 'Year' %}
@@ -122,11 +113,11 @@
                             <div class="form-group{% if field.errors %} error{% endif %} row">
                                 <label class="bold col-lg-3 col-form-label text-right" for="inputTitle">Compilation</label>
                                 <div class="col-lg-5 form-inline">
-                                    <input type="checkbox" name="compilation" id="id_compilation" onclick="handleCheckbox(this)" />
+                                    <input type="checkbox" name="compilation" id="id_compilation" v-model="isCompilation" />
                                 </div>
                             </div>
 
-                            <div class="form-group{% if field.errors %} error{% endif %} row hidden" id="album_artist_field">
+                            <div v-if="isCompilation" class="form-group{% if field.errors %} error{% endif %} row" id="album_artist_field">
                                 <label class="bold col-lg-3 col-form-label text-right" for="inputTitle">Album Artist</label>
                                 <div class="col-lg-5">
                                     <input class="form-control" id="id_album_artist" name="album_artist" type="text" value="Various Artists" autocomplete="off" />
@@ -164,6 +155,8 @@
 
             </form>
 
+                    </div>
+
                 {% endif %}
 
         </div>
@@ -180,14 +173,6 @@
 
     <script type="text/javascript">
 
-        function handleCheckbox(element) {
-            if (element.checked) {
-                document.getElementById("album_artist_field").classList.remove("hidden");
-            } else {
-                document.getElementById("album_artist_field").classList.add("hidden");
-            }
-        }
-
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
         {% if action == 'Upload' %}
@@ -202,61 +187,22 @@
                 onChange(evt) {
                     this.$refs.submitButton.removeAttribute("disabled");
                     this.filename = evt.target.files[0].name;
-                }
+                },
             },
         });
         {% endif %}
 
         {% if action == 'Review' %}
         new Vue({
-            el: "#tagsearch",
+            el: "#vue-review",
             data() {
                 return {
-                    tag: "",
-                    tags: [],
-                    autocompleteItems: [],
-                    tagsHidden: ""
+                    isCompilation: false
                 }
             },
-            watch: {
-                "tag": "initItems",
+            components: {
+                TagsInput
             },
-            methods: {
-                tagsChanged(newTags) {
-                    this.tagsHidden=newTags.map(x => x.value).join(",")
-                },
-                initItems() {
-
-                    // Set a minimum character count to trigger the ajax call
-                    if (this.tag.length < 3) return;
-
-                    return doGet(
-                        this,
-                        "{% url "tag:search" %}?query=" + this.tag,
-                        (response) => {
-                            this.autocompleteItems = response.data.map(a => {
-                                return { text: a.text, value: a.value };
-                            })
-                        },
-                        ""
-                    );
-
-                }
-            },
-            mounted() {
-                initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
-                if (initialTags) {
-                    this.tags = initialTags;
-                    this.tagsHidden=initialTags.map(x => x.value).join(",")
-                }
-            },
-            computed: {
-                filteredItems() {
-                    return this.autocompleteItems.filter(i => {
-                        return i.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1;
-                    });
-                }
-            }
         });
         {% endif %}
 

@@ -37,21 +37,11 @@
                     <div class="form-group row{% if field.errors %} error{% endif %}">
                         <label class="col-lg-2 col-form-label" for="inputTitle">Tags</label>
 
-                        <input type="hidden" name="tags" v-model="tagsHidden" />
-
-                        <div class="col-lg-5" id="vue-wrapper">
-                            <vue-tags-input
-                                ref="tagsInputComponent"
-                                v-model="tag"
-                                :tags="tags"
-                                @tags-changed=tagsChanged
-                                :autocomplete-items="filteredItems"
-                                :add-only-from-autocomplete="false"
-                                placeholder="">
-                                <div slot="autocomplete-item" slot-scope="scope" @click="scope.performAdd(scope.item)">
-                                    <div>[[ scope.item.text ]]</div>
-                                </div>
-                            </vue-tags-input>
+                        <div class="col-lg-5">
+                            <tags-input
+                                search-url="{% url 'tag:search' %}?query="
+                            >
+                        </tags-input>
                         </div>
                         {% for error in field.errors %}
                             <span class="form-error">{{ error }}</span>
@@ -101,57 +91,6 @@
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
         const Search = {
-            data() {
-                return {
-                    tag: "",
-                    tags: [],
-                    autocompleteItems: [],
-                    tagsHidden: "",
-                }
-            },
-            watch: {
-                "tag": "initItems",
-            },
-            methods: {
-                tagsChanged(newTags) {
-                    // Be sure to use the 'text' field rather than 'value'.
-                    //  The 'value' field only exists for existing tags that
-                    //  are added by autocomplete, not new tags typed in
-                    //  by the user.
-                    this.tagsHidden=newTags.map(x => x.text).join(",")
-                },
-                initItems() {
-
-                    // Set a minimum character count to trigger the ajax call
-                    if (this.tag.length < 3) return;
-
-                    return doGet(
-                        this,
-                        "{% url "tag:search" %}?query=" + this.tag,
-                        (response) => {
-                            this.autocompleteItems = response.data.map(a => {
-                                return { text: a.text, value: a.value };
-                            })
-                        },
-                        ""
-                    );
-
-                },
-            },
-            mounted() {
-                initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
-                if (initialTags) {
-                    this.tags = initialTags;
-                    this.tagsHidden=initialTags.map(x => x.value).join(",")
-                }
-            },
-            computed: {
-                filteredItems() {
-                    return this.autocompleteItems.filter(i => {
-                        return i.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1;
-                    });
-                }
-            }
         };
 
         new Vue({
@@ -169,7 +108,8 @@
                 }
             },
             components: {
-                Search
+                Search,
+                TagsInput
             }
         });
 

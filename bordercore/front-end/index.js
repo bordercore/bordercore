@@ -16,9 +16,6 @@ import Vuex from "vuex";
 window.Vuex = Vuex;
 Vue.use(Vuex);
 
-import VueTagsInput from "@johmun/vue-tags-input";
-Vue.component("vue-tags-input", VueTagsInput);
-
 import Datepicker from "vuejs-datepicker";
 Vue.component("vuejs-datepicker", Datepicker);
 window.Datepicker = Datepicker;
@@ -67,3 +64,11 @@ window.doPost = doPost;
 import SimpleSuggest from "./vue/common/SimpleSuggest.vue";
 Vue.component("SimpleSuggest", SimpleSuggest);
 window.SimpleSuggest = SimpleSuggest;
+
+import TagsInput from "./vue/common/TagsInput.vue";
+Vue.component("TagsInput", TagsInput);
+window.TagsInput = TagsInput;
+
+import SearchTagsInput from "./vue/common/SearchTagsInput.vue";
+Vue.component("SearchTagsInput", SearchTagsInput);
+window.SearchTagsInput = SearchTagsInput;

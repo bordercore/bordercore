@@ -65,7 +65,11 @@
 
                             {% if field.label == 'Tags' %}
 
-                                <tags-input></tags-input>
+                                <tags-input
+                                    search-url="{% url 'tag:search' %}?query="
+                                    :get-tags-from-event="true"
+                                >
+                                </tags-input>
 
                             {% else %}
 
@@ -190,76 +194,12 @@
 
         };
 
-        const TagsInput = {
-            template: `<div>
-                <vue-tags-input
-                    ref="tagsInputComponent"
-                    v-model="tag"
-                    :tags="tags"
-                    @tags-changed="newTags => tags = newTags"
-                    :autocomplete-items="filteredItems"
-                    :add-only-from-autocomplete="false"
-                    placeholder="">
-                    <div slot="autocomplete-item" slot-scope="scope" @click="scope.performAdd(scope.item)">
-                        <div>[[ scope.item.text ]]</div>
-                    </div>
-                </vue-tags-input>
-                <input type="hidden" name="tags" :value="tagsCommaSeparated" />
-            </div>`,
-            data() {
-                return {
-                    tag: "",
-                    tags: [],
-                    autocompleteItems: [],
-                }
-            },
-            watch: {
-                "tag": "initItems",
-            },
-            methods: {
-                initItems() {
-
-                    // Set a minimum character count to trigger the ajax call
-                    if (this.tag.length < 3) return;
-
-                    return axios.get("{% url 'tag:search' %}?query=" + this.tag)
-                                .then(response => {
-                                    this.autocompleteItems = response.data.map(a => {
-                                        return { text: a.text, value: a.value };
-                                    }
-                                    )
-                                })
-                }
-            },
-            mounted() {
-
-                EventBus.$on("addTags", payload => {
-                    this.tags = payload;
-                });
-
-            },
-            computed: {
-                tagsCommaSeparated: function() {
-                    // Be sure to use the 'text' field rather than 'value'.
-                    //  The 'value' field only exists for existing tags that
-                    //  are added by autocomplete, not new tags typed in
-                    //  by the user.
-                    return this.tags.map(x => x.text).join(",")
-                },
-                filteredItems() {
-                    return this.autocompleteItems.filter(i => {
-                        return i.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1;
-                    });
-                }
-            }
-        }
-
         new Vue({
             el: "#vue-app",
             components: {
                 ButtonGroup,
                 TagsInput
-            }
+            },
         });
 
         new Vue({
