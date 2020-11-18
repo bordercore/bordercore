@@ -31,6 +31,11 @@ urlpatterns = [
         name="get_new_bookmarks_count"
     ),
     path(
+        route="get_title_from_url/",
+        view=views.get_title_from_url,
+        name="get_title_from_url"
+    ),
+    path(
         route="import/",
         view=views.do_import,
         name="import"

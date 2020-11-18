@@ -1,6 +1,7 @@
 import datetime
 import json
 import re
+import urllib
 
 import lxml.html as lh
 import pytz
@@ -21,7 +22,7 @@ from django.views.generic.edit import ModelFormMixin
 from accounts.models import SortOrderUserTag
 from bookmark.forms import BookmarkForm
 from bookmark.models import Bookmark
-from lib.util import get_pagination_range
+from lib.util import get_pagination_range, parse_title_from_url
 from tag.models import SortOrderTagBookmark, Tag
 
 SECTION = 'bookmarks'
@@ -490,5 +491,23 @@ def get_new_bookmarks_count(request, timestamp):
         {
             "status": "OK",
             "count": count
+        }
+    )
+
+
+@login_required
+def get_title_from_url(request):
+    """
+    Parse the title from the HTML page pointed to by a url
+    """
+
+    url = urllib.parse.unquote(request.GET["url"])
+
+    title = parse_title_from_url(url)
+
+    return JsonResponse(
+        {
+            "status": "OK",
+            "title": title[1]
         }
     )

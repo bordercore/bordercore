@@ -9,9 +9,10 @@ import time
 from pathlib import Path
 
 import requests
-from lxml import html
 
 from django.conf import settings
+
+from lib.util import parse_title_from_url
 
 link_dict = {}  # Store links in a dict to avoid duplication
 
@@ -32,20 +33,6 @@ logger = logging.getLogger("bordercore.linksnarfer")
 
 # Only let requests log at level WARNING or higher
 requests_log = logging.getLogger("requests").setLevel(logging.WARNING)
-
-
-def get_link_info(link):
-    headers = {"user-agent": "Bordercore/1.0"}
-    r = requests.get(link, headers=headers)
-    http_content = r.text.encode("utf-8")
-
-    # http://stackoverflow.com/questions/15830421/xml-unicode-strings-with-encoding-declaration-are-not-supported
-    doc = html.fromstring(http_content)
-    title = doc.xpath(".//title")
-    if title:
-        return (r.url, title[0].text)
-    else:
-        return (r.url, "No title")
 
 
 def get_drf_token():
@@ -154,7 +141,7 @@ matches = p.findall(buffer.decode("UTF-8", "ignore"))
 for link in matches:
 
     if not ignore.search(link):
-        url, label = get_link_info(link)
+        url, label = parse_title_from_url(link)
         link_dict[label] = url
 
 if link_dict:

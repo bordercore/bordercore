@@ -19,13 +19,26 @@
 
     {% for field in form %}
         <div class="form-group {% if field.errors %}error{% endif %} row">
-            <label class="col-lg-2 col-form-label" for="inputTitle">{{ field.label }}</label>
+            <label class="col-lg-2 col-form-label">{{ field.label }}</label>
             <div class="col-lg-7">
                 {% if field.label == 'Tags' %}
                     <tags-input
                         search-url="{% url 'tag:search' %}?query="
                     >
                     </tags-input>
+                {% elif field.label == "Url" %}
+                    <input
+                        type="text"
+                        name="url"
+                        value="{{ field.value|default:'' }}"
+                        class="form-control"
+                        required
+                        id="id_url"
+                        {% if action == "Create" %}
+                            @blur="onBlur"
+                        {% endif %}
+                        autocomplete="off"
+                    />
                 {% else %}
                   {{ field }}
                   {% for error in field.errors %}
@@ -72,10 +85,35 @@
             },
             methods: {
                 onClickDelete(evt) {
-                    var formEl = document.getElementById("bookmark-form");
+                    const formEl = document.getElementById("bookmark-form");
                     formEl.setAttribute("action", "{% url 'bookmark:delete' 666 %}".replace(/666/, this.id));
                     formEl.submit();
                 },
+                onBlur(evt) {
+
+                    // If the title has already been filled-in, abort
+                    const title = document.getElementById("id_title");
+                    if ( title.value ) {
+                        return;
+                    }
+
+                    let url = document.getElementById("id_url").value;
+                    if ( !url ) {
+                        return;
+                    }
+
+                    url = encodeURIComponent(url).replace(/%/g, "%25");
+
+                    doGet(
+                        this,
+                        "{% url "bookmark:get_title_from_url" %}?url=" + url,
+                        (response) => {
+                            title.value = response.data.title;
+                        },
+                        "Error getting title from url"
+                    );
+
+                }
             }
         });
 

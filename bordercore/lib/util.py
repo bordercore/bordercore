@@ -1,6 +1,9 @@
 import string
 from pathlib import PurePath
 
+import requests
+from lxml import html
+
 
 def get_missing_blob_ids(expected, found):
 
@@ -70,3 +73,18 @@ def get_pagination_range(current_page_num, num_pages, paginate_by):
         x = range(x[0] - paginate_by, max(max_pagination_range, num_pages) + 1)
 
     return list(x)
+
+
+def parse_title_from_url(url):
+
+    headers = {"user-agent": "Bordercore/1.0"}
+    r = requests.get(url, headers=headers)
+    http_content = r.text.encode("utf-8")
+
+    # http://stackoverflow.com/questions/15830421/xml-unicode-strings-with-encoding-declaration-are-not-supported
+    doc = html.fromstring(http_content)
+    title = doc.xpath(".//title")
+    if title:
+        return (r.url, title[0].text)
+    else:
+        return (r.url, "No title")
