@@ -168,6 +168,7 @@ class SearchListView(ListView):
                 search_object["query"]["bool"]["must"].append(
                     {
                         "multi_match": {
+                            "type": "best_fields" if not self.request.GET.get("exact_match", None) else "phrase",
                             "query": search_term,
                             "fields": ["artist", "author", "attachment.content", "contents", "sha1sum", "task", "title", "uuid"],
                             "operator": boolean_type,
