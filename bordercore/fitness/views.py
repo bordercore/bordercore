@@ -91,7 +91,8 @@ def fitness_summary(request):
 
     exercises = Exercise.objects.annotate(
         last_active=Max("data__date", filter=Q(data__user=request.user)),
-        is_active=Subquery(newest.values("started")[:1])) \
+        is_active=Subquery(newest.values("started")[:1]),
+        interval=Subquery(newest.values("interval")[:1])) \
         .order_by(F("last_active")) \
         .select_related()
 
@@ -100,7 +101,9 @@ def fitness_summary(request):
 
     for e in exercises:
 
-        if e.last_active:
+        if e.is_active and e.last_active:
+            if timezone.now() - e.last_active + timedelta(days=1) > e.interval:
+                e.overdue = True
 
             delta = timezone.now() - e.last_active
 

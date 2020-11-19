@@ -20,7 +20,8 @@
             <tr>
                 <th>Exercise</th>
                 <th>Muscle Group</th>
-                <th>Date</th>
+                <th>Interval</th>
+                <th>Last Workout</th>
                 <th></th>
                 <th></th>
             </tr>
@@ -28,9 +29,10 @@
 
     {% for exercise in active_exercises %}
 
-        <tr>
+        <tr{% if exercise.overdue %} class="selected"{% endif %}>
             <td><a href="{% url 'fitness:exercise_detail' exercise.id %}">{{ exercise.exercise }}</a></td>
             <td>{{ exercise.muscle.muscle_group }}</td>
+            <td>{{ exercise.interval.days }} day{{ exercise.interval.days|pluralize:"s" }}</td>
             {% if exercise.last_active %}
                 <td>{{ exercise.last_active|date:"N j, Y" }} - {{ exercise.delta_days }} day{{ exercise.delta_days|pluralize:"s" }} ago</td>
             {% else %}
@@ -55,6 +57,7 @@
                 <th>Date</th>
                 <th></th>
                 <th></th>
+                <th></th>
             </tr>
         </thead>
 
@@ -63,6 +66,7 @@
         <tr>
             <td><a href="{% url 'fitness:exercise_detail' exercise.id %}">{{ exercise.exercise }}</a></td>
             <td>{{ exercise.muscle.muscle_group }}</td>
+            <td></td>
             {% if exercise.last_active %}
                 <td>{{ exercise.last_active|date:"N j, Y" }} - {{ exercise.delta_days }} day{{ exercise.delta_days|pluralize:"s" }} ago</td>
             {% else %}
@@ -102,8 +106,8 @@
                     api.columns.adjust();
                 },
                 "columnDefs": [
-                    { "targets": [2], "dataSort": 4 },
-                    { "targets": [3,4], "visible": false },
+                    { "targets": [3], "dataSort": 4 },
+                    { "targets": [4,5], "visible": false },
                 ],
                 info: false,
                 language: {
