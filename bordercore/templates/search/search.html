@@ -6,7 +6,7 @@
 
 {% block left-block %}
 
-    {% if request.GET and info %}
+    {% if request.GET and search_results %}
 
         <div class="card bg-info">
             <div class="card-header text-white">Match Categories</div>
@@ -18,6 +18,10 @@
                 <br/>
 {% endfor %}
             </div>
+        </div>
+
+        <div class="pt-5 ml-3">
+    Matches: <strong>{{ object_list.hits.total.value }}</strong>
         </div>
 
     {% endif %}
@@ -35,7 +39,7 @@
     <div class="row">
         <div class="col-lg-12">
 
-{% if not info and not messages %}
+{% if not search_results and not messages %}
 
     <br />
     <div class="alert alert-info">Nothing found</div>
@@ -44,52 +48,52 @@
 
     <table>
 
-{% for match in info %}
+{% for match in search_results.hits.hits %}
 
     <tr>
-        <td{% if match.importance == 10 %} class="important"{% endif %}>
-{% if match.doctype == 'todo' %}
+        <td{% if match.source.importance == 10 %} class="important"{% endif %}>
+{% if match.source.doctype == 'todo' %}
 
     <h4 class="search_book_title">Todo: <a href="{% url 'todo:update' match.source.uuid %}">{{ match.source.task }}</a></h4>
 
-{% elif match.doctype == 'bordercore_bookmark' %}
+{% elif match.source.doctype == 'bordercore_bookmark' %}
 
     <h4 class="search_book_title">
         <img src="{{ STATIC_URL }}img/kb_link.png" />
-        <a href="{{ match.url }}">{{ match.title }}</a>
+        <a href="{{ match.source.url }}">{{ match.source.title }}</a>
     </h4>
 
-{% elif match.doctype == 'note' %}
+{% elif match.source.doctype == 'note' %}
 
-    <h4 class="search_book_title"><a href="{% url 'blob:detail' match.uuid %}">{{ match.title|default:"Note" }}</a></h4>
+    <h4 class="search_book_title"><a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.title|default:"Note" }}</a></h4>
 
-    <h5>{{ match.note|safe }}</h5>
+    <h5>{{ match.source.note|safe }}</h5>
 
-{% elif match.doctype == 'document' %}
+{% elif match.source.doctype == 'document' %}
 
     <h4 class="search_book_title">
-        <a href="{% url 'blob:detail' match.uuid %}">{{ match.title|default:"Title" }}</a>
+        <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.title|default:"Title" }}</a>
     </h4>
 
-    <h5>{{ match.note|safe }}</h5>
+    <h5>{{ match.source.note|safe }}</h5>
 
 {% else %}
 
     <h4>
         <img src="{{ STATIC_URL }}img/kb_book.png" />
         <span class="search_book_title">
-            <a href="{% url 'blob:detail' match.uuid %}">{{ match.title|default:"No title" }}</a>
+            <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.title|default:"No title" }}</a>
         </span>
         <span class="search_book_author">
-            {% if match.creators %} - {{ match.creators }}{% endif %}
+            {% if match.source.creators %} - {{ match.source.creators }}{% endif %}
         </span>
     </h4>
 {% endif %}
 
-    <strong class="ml-3">{{ match.date }}</strong>
+    <strong class="ml-3">{{ match.source.date }}</strong>
 
-Tags: {% if not match.tags%}None{% endif %}
-{% for tag in match.tags %}
+Tags: {% if not match.source.tags %}None{% endif %}
+{% for tag in match.source.tags %}
     <strong><a href="{% url 'search:kb_search_tag_detail' tag %}">{{ tag }}</a></strong>{% if not forloop.last %}, {% endif %}
 {% endfor %}
 

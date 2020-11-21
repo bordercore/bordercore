@@ -58,7 +58,7 @@ def test_search(mock_elasticsearch, user, client):
     assert len(matches) == 5
 
     match = soup.select("h4.search_book_title a")[0].text
-    assert data["hits"]["hits"][0]["_source"]["title"] == match
+    assert data["hits"]["hits"][0]["source"]["title"] == match
 
 
 @pytest.mark.django_db
@@ -74,7 +74,7 @@ def test_search_notes(mock_elasticsearch, user, client):
     instance.search.return_value = data
 
     url = urls.reverse("search:notes")
-    resp = client.get(f"{url}?search=linux", kwargs={"notes_search": True})
+    resp = client.get(f"{url}?search=linux")
 
     assert resp.status_code == 200
 
@@ -84,8 +84,8 @@ def test_search_notes(mock_elasticsearch, user, client):
     assert len(matches) == 10
 
     match = soup.select("div#note h2")[0].text.strip()
-    assert data["hits"]["hits"][0]["_source"]["title"] == match
+    assert data["hits"]["hits"][0]["source"]["title"] == match
 
     matches = soup.select("div#note:nth-child(1) a#tag")
     for tag in matches:
-        assert tag.text in data["hits"]["hits"][0]["_source"]["tags"]
+        assert tag.text in data["hits"]["hits"][0]["source"]["tags"]

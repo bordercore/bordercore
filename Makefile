@@ -1,6 +1,30 @@
+S3=s3://bordercore-blobs/django
 
 install:
 	pip install --upgrade pip && pip install -r requirements.txt
+
+.ONESHELL:
+.SILENT:
+webpack: webpack_build webpack_aws
+
+webpack_build: check-env
+	cd $(BORDERCORE_HOME)
+	npm run dev &&
+	npm run build
+
+webpack_aws: check-env
+	cd $(BORDERCORE_HOME)
+	aws s3 cp static/css/theme-dark.css $(S3)/css/ &&
+	aws s3 cp static/css/theme-dark.min.css $(S3)/css/ &&
+	aws s3 cp static/css/theme-light.css $(S3)/css/ &&
+	aws s3 cp static/css/theme-light.min.css $(S3)/css/ &&
+	aws s3 cp static/js/javascript-bundle.js.gz $(S3)/js/ --content-encoding gzip &&
+	aws s3 cp static/js/javascript-bundle.min.js.gz $(S3)/js/ --content-encoding gzip
+
+check-env:
+ifndef BORDERCORE_HOME
+	$(error BORDERCORE_HOME is undefined)
+endif
 
 test:
 	python -m pytest -vv --cov=lib --cov=cli tests/*.py

@@ -27,8 +27,7 @@ urlpatterns = [
     ),
     path(
         route="notes",
-        view=views.SearchListView.as_view(),
-        kwargs={"notes_search": True},
+        view=views.NoteListView.as_view(),
         name="notes"
     ),
 ]

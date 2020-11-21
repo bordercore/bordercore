@@ -1,5 +1,4 @@
 import math
-import re
 
 import markdown
 from elasticsearch import Elasticsearch
@@ -12,7 +11,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
 from blob.models import Blob
-from lib.time_utils import get_relative_date
+from lib.time_utils import get_date_from_pattern, get_relative_date
 from tag.models import Tag
 
 
@@ -34,17 +33,17 @@ def get_creators(matches):
 @method_decorator(login_required, name='dispatch')
 class SearchListView(ListView):
 
-    template_name = 'search/search.html'
     SECTION = 'search'
-    context_object_name = 'info'
+    SUB_SECTION = 'home'
+    template_name = 'search/search.html'
+    context_object_name = 'search_results'
     RESULT_COUNT_PER_PAGE = 100
-    RESULT_COUNT_PER_PAGE_NOTE = 10
 
     def get_paginator(self, page, object_list):
 
         paginator = {
             "number": page,
-            "num_pages": int(math.ceil(object_list["hits"]["total"]["value"] / self.RESULT_COUNT_PER_PAGE_NOTE)),
+            "num_pages": int(math.ceil(object_list["hits"]["total"]["value"] / self.RESULT_COUNT_PER_PAGE)),
             "total_results": object_list["hits"]["total"]["value"]
         }
 
@@ -56,195 +55,196 @@ class SearchListView(ListView):
 
         return paginator
 
-    def get_facet_query(self, facet, term):
+    # def get_facet_query(self, facet, term):
 
-        if facet == 'Blobs':
-            return 'doctype:blob'
-        elif facet == 'Books':
-            return 'doctype:book'
-        elif facet == 'Documents':
-            return 'doctype:document'
-        elif facet == 'Todos':
-            return 'doctype:todo'
-        elif facet == 'Notes':
-            return 'doctype:note'
-        elif facet == 'Links':
-            return 'doctype:bordercore_bookmark'
-        elif facet == 'Titles':
-            return '(title:{})'.format(term)
-        elif facet == 'Tags':
-            return 'tags:{}'.format(term)
+    #     if facet == 'Blobs':
+    #         return 'doctype:blob'
+    #     elif facet == 'Books':
+    #         return 'doctype:book'
+    #     elif facet == 'Documents':
+    #         return 'doctype:document'
+    #     elif facet == 'Todos':
+    #         return 'doctype:todo'
+    #     elif facet == 'Notes':
+    #         return 'doctype:note'
+    #     elif facet == 'Links':
+    #         return 'doctype:bordercore_bookmark'
+    #     elif facet == 'Titles':
+    #         return '(title:{})'.format(term)
+    #     elif facet == 'Tags':
+    #         return 'tags:{}'.format(term)
+
+    def get_hit_count(self):
+
+        hit_count = self.request.GET.get("rows", None)
+
+        if hit_count == "No limit":
+            hit_count = 1000000
+        elif hit_count is None:
+            hit_count = self.RESULT_COUNT_PER_PAGE
+
+        return hit_count
 
     def get_queryset(self, **kwargs):
 
-        page = int(self.request.GET.get("page", 1))
+        # Store the "sort" field in the user's session
+        self.request.session["search_sort_by"] = self.request.GET.get("sort", None)
 
-        notes_search = True if self.kwargs.get("notes_search", "") else False
+        search_term = self.request.GET.get("search", None)
+        sort_field = self.request.GET.get("sort", "date_unixtime")
+        hit_count = self.get_hit_count()
+        boolean_type = self.request.GET.get("boolean_search_type", "AND")
 
-        if notes_search:
-            self.RESULT_COUNT_PER_PAGE = self.RESULT_COUNT_PER_PAGE_NOTE
+        es = Elasticsearch(
+            [settings.ELASTICSEARCH_ENDPOINT],
+            verify_certs=False
+        )
 
-        if "search" in self.request.GET or notes_search:
-
-            if not notes_search:
-                # Store the "sort" field in the user's session
-                self.request.session["search_sort_by"] = self.request.GET.get("sort", None)
-
-            search_term = escape_solr_terms(self.request.GET.get("search", ""))
-            sort_field = self.request.GET.get("sort", "date_unixtime")
-
-            hit_count = self.request.GET.get("rows", None)
-            boolean_type = self.request.GET.get("boolean_search_type", "AND")
-
-            if hit_count == "No limit":
-                hit_count = 1000000
-            elif hit_count is None:
-                hit_count = self.RESULT_COUNT_PER_PAGE
-
-            es = Elasticsearch(
-                [settings.ELASTICSEARCH_ENDPOINT],
-                verify_certs=False
-            )
-
-            search_object = {
-                "query": {
-                    "bool": {
-                        "must": [
-                            {
-                                "term": {
-                                    "user_id": self.request.user.id
-                                }
-                            }
-                        ]
-                    }
-                },
-                "sort": {sort_field: {"order": "desc"}},
-                "from": 0, "size": hit_count,
-                "_source": ["artist",
-                            "author",
-                            "bordercore_id",
-                            "task",
-                            "date",
-                            "date_unixtime",
-                            "doctype",
-                            "filepath",
-                            "importance",
-                            "bordercore_id",
-                            "last_modified",
-                            "sha1sum",
-                            "tags",
-                            "title",
-                            "url",
-                            "uuid"]
-            }
-
-            if notes_search:
-
-                search_object["from"] = (page - 1) * self.RESULT_COUNT_PER_PAGE_NOTE
-
-                # Only retrieve the contents for notes, which should be
-                #  relatively small
-                search_object["_source"].append("contents")
-
-                search_object["query"]["bool"]["must"].append(
-                    {
-                        "term": {
-                            "doctype": "note"
-                        }
-                    }
-                )
-
-                tagsearch = self.request.GET.get("tagsearch", "")
-                if tagsearch:
-                    search_object["query"]["bool"]["must"].append(
+        search_object = {
+            "query": {
+                "bool": {
+                    "must": [
                         {
                             "term": {
-                                "tags.keyword": tagsearch
+                                "user_id": self.request.user.id
                             }
                         }
-                    )
+                    ]
+                }
+            },
+            "sort": {sort_field: {"order": "desc"}},
+            "from": 0, "size": hit_count,
+            "_source": ["artist",
+                        "author",
+                        "bordercore_id",
+                        "task",
+                        "date",
+                        "date_unixtime",
+                        "doctype",
+                        "filepath",
+                        "importance",
+                        "bordercore_id",
+                        "last_modified",
+                        "sha1sum",
+                        "tags",
+                        "title",
+                        "url",
+                        "uuid"]
+        }
 
-            if search_term:
-                search_object["query"]["bool"]["must"].append(
-                    {
-                        "multi_match": {
-                            "type": "best_fields" if not self.request.GET.get("exact_match", None) else "phrase",
-                            "query": search_term,
-                            "fields": ["artist", "author", "attachment.content", "contents", "sha1sum", "task", "title", "uuid"],
-                            "operator": boolean_type,
-                        }
+        # Let subclasses modify the query
+        search_object = self.refine_search(search_object)
+
+        if search_term:
+            search_object["query"]["bool"]["must"].append(
+                {
+                    "multi_match": {
+                        "type": "best_fields" if not self.request.GET.get("exact_match", None) else "phrase",
+                        "query": search_term,
+                        "fields": ["artist", "author", "attachment.content", "contents", "sha1sum", "task", "title", "uuid"],
+                        "operator": boolean_type,
                     }
-                )
+                }
+            )
 
-            results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
-            return results
+        results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+
+        # Django templates don't allow variables with underscores, so
+        #  change the "_source" key to "source"
+        for index, x in enumerate(results["hits"]["hits"]):
+            t = results["hits"]["hits"][index]
+            t["source"] = t.pop("_source")
+
+        return results
+
+    def refine_search(self, search_object):
+        return search_object
 
     def get_context_data(self, **kwargs):
 
         context = super(SearchListView, self).get_context_data(**kwargs)
-        notes_search = True if self.kwargs.get("notes_search", "") else False
 
-        if notes_search:
-            self.SECTION = "notes"
-            self.template_name = "blob/note_list.html"
-            page = int(self.request.GET.get("page", 1))
-            context["paginator"] = self.get_paginator(page, context["info"])
-            context["favorite_notes"] = self.request.user.userprofile.favorite_notes.all().only("title", "uuid").order_by("sortorderusernote__sort_order")
+        # facet_counts = {}
 
-        info = []
-        facet_counts = {}
+        # if self.request.GET.get("facets"):
+        #     context["filter_query"] = self.request.GET.get("facets").split(",")
 
-        if self.request.GET.get("facets"):
-            context["filter_query"] = self.request.GET.get("facets").split(",")
-
-        if context["info"]:
+        if context["search_results"]:
 
             # for k, v in context["info"]["facet_counts"]["facet_queries"].items():
             #     if v > 0:
             #         facet_counts[k] = v
 
-            from lib.time_utils import get_date_from_pattern
+            for match in context["search_results"]["hits"]["hits"]:
 
-            for myobject in context["info"]["hits"]["hits"]:
-                note = ""
-                # if myobject["_source"]["doctype"] == "note":
-                #     if context["info"]["highlighting"][myobject["id"]].get("document_body"):
-                #         note = context["info"]["highlighting"][myobject["id"]]["document_body"][0]
+                # if match["source"]["doctype"] == "note":
+                #     if context["info"]["highlighting"][match["id"]].get("document_body"):
+                #         note = context["info"]["highlighting"][match["id"]]["document_body"][0]
 
-                match = dict(
-                    title=myobject["_source"].get("title", "No Title"),
-                    creators=get_creators(myobject["_source"]),
-                    date=get_date_from_pattern(myobject["_source"].get("date", None)),
-                    doctype=myobject["_source"]["doctype"],
-                    sha1sum=myobject["_source"].get("sha1sum", ""),
-                    uuid=myobject["_source"].get("uuid", ""),
-                    id=myobject["_id"],
-                    importance=myobject["_source"].get("importance", ""),
-                    last_modified=get_relative_date(myobject["_source"]["last_modified"]),
-                    url=myobject["_source"].get("url", ""),
-                    filename=myobject["_source"].get("filename", ""),
-                    tags=myobject["_source"].get("tags"),
-                    task=myobject["_source"].get("task", ""),
-                    bordercore_id=myobject["_source"].get("bordercore_id", None),
-                    note=note
-                )
-
-                if notes_search:
-                    match["content"] = markdown.markdown(myobject["_source"]["contents"], extensions=[CodeHiliteExtension(guess_lang=False), "tables"])
-
-                info.append(match)
-
-            context["numFound"] = context["info"]["hits"]["total"]["value"]
+                match["source"]["creators"] = get_creators(match["source"])
+                match["source"]["date"] = get_date_from_pattern(match["source"].get("date", None))
+                match["source"]["last_modified"] = get_relative_date(match["source"]["last_modified"])
 
             # Convert to a list of dicts.  This lets us use the dictsortreversed
             #  filter in our template to sort by count.
             # context["facet_counts"] = [{"doctype_purty": k, "doctype": k, "count": v} for k, v in facet_counts.items()]
 
-        context["info"] = info
         context["section"] = self.SECTION
-        if not notes_search:
-            context["subsection"] = "home"
+        context["subsection"] = self.SUB_SECTION
         context["title"] = "Search"
+        return context
+
+
+@method_decorator(login_required, name="dispatch")
+class NoteListView(SearchListView):
+
+    SECTION = "notes"
+    SUB_SECTION = None
+    template_name = "blob/note_list.html"
+    RESULT_COUNT_PER_PAGE_NOTE = 10
+
+    def refine_search(self, search_object):
+
+        page = int(self.request.GET.get("page", 1))
+        search_object["from"] = (page - 1) * self.RESULT_COUNT_PER_PAGE
+
+        search_object["_source"].append("contents")
+
+        search_object["query"]["bool"]["must"].append(
+            {
+                "term": {
+                    "doctype": "note"
+                }
+            }
+        )
+
+        tagsearch = self.request.GET.get("tagsearch", None)
+        if tagsearch:
+            search_object["query"]["bool"]["must"].append(
+                {
+                    "term": {
+                        "tags.keyword": tagsearch
+                    }
+                }
+            )
+
+        return search_object
+
+    def get_context_data(self, **kwargs):
+
+        context = super(NoteListView, self).get_context_data(**kwargs)
+
+        page = int(self.request.GET.get("page", 1))
+        context["paginator"] = self.get_paginator(page, context["search_results"])
+        context["favorite_notes"] = self.request.user.userprofile.favorite_notes.all().only("title", "uuid").order_by("sortorderusernote__sort_order")
+
+        for match in context["search_results"]["hits"]["hits"]:
+
+            match["source"]["content"] = markdown.markdown(
+                match["source"]["contents"],
+                extensions=[CodeHiliteExtension(guess_lang=False), "tables"]
+            )
+
         return context
 
 
@@ -296,8 +296,7 @@ class SearchTagDetailView(ListView):
             if buckets["key"] not in tag_list:
                 doctype_counts[buckets["key"]] = buckets["doc_count"]
 
-        meta_tags = [x for x in tag_counts if x in Tag.get_meta_tags(self.request.user)]
-        context["meta_tags"] = meta_tags
+        context["meta_tags"] = [x for x in tag_counts if x in Tag.get_meta_tags(self.request.user)]
 
         import operator
         tag_counts_sorted = sorted(tag_counts.items(), key=operator.itemgetter(1), reverse=True)
@@ -412,7 +411,7 @@ def kb_search_tags_booktitles(request):
         verify_certs=False
     )
 
-    search_term = escape_solr_terms(handle_quotes(request, request.GET['term']))
+    search_term = request.GET['term']
 
     search_object = {
         'query': {
@@ -475,16 +474,3 @@ def kb_search_tags_booktitles(request):
         matches.append({"object_type": "Tag", "value": tag})
 
     return JsonResponse(matches, safe=False)
-
-
-def escape_solr_terms(term):
-    """Escape special characters used by Solr with a backslash"""
-    return re.sub(r"([:\[\]\{\}\(\)-])", r"\\\1", term)
-
-
-def handle_quotes(request, search_term):
-    """Remove quotes to avoid Solr errors. Support the 'Exact Match' search option."""
-    search_term = search_term.replace("\"", "")
-    if request.GET.get('exact_match'):
-        search_term = "\"{}\"".format(search_term)
-    return search_term

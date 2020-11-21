@@ -274,7 +274,7 @@ def search_blob_titles(request):
         verify_certs=False
     )
 
-    search_term = handle_quotes(request, request.GET["term"].lower())
+    search_term = request.GET["term"].lower()
 
     search_object = {
         "query": {
@@ -292,7 +292,12 @@ def search_blob_titles(request):
                                     "term": {
                                         "doctype": "blob"
                                     }
-                                }
+                                },
+                                {
+                                    "term": {
+                                        "doctype": "document"
+                                    }
+                                },
                             ]
                         }
                     },
@@ -379,13 +384,3 @@ def edit_note(request):
     }
 
     return JsonResponse(response)
-
-# TODO: Move these to a neutral location
-
-
-def handle_quotes(request, search_term):
-    """Remove quotes to avoid Solr errors. Support the 'Exact Match' search option."""
-    search_term = search_term.replace("\"", "")
-    if request.GET.get('exact_match'):
-        search_term = "\"{}\"".format(search_term)
-    return search_term

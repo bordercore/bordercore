@@ -28,7 +28,7 @@
 
 {% block content %}
 
-    <div id="search">
+    <div id="notes_search">
         <div class="row mb-3">
             <div class="col-lg-12">
                 <form class="form-inline" name="nav_form" id="search-form" action="{% url 'search:notes' %}" method="get" autocomplete="off">
@@ -51,29 +51,29 @@
         </div>
     </div>
 
-    {% if request.GET and not info %}
+    {% if request.GET and not object_list.hits.hits %}
         <div class="alert alert-info">No notes found</div>
     {% endif %}
 
     <div class="row">
         <div class="col-lg-12">
 
-            {% for note in info %}
+            {% for note in object_list.hits.hits %}
 
                 <div id="note" class="table-borders">
                     <h2>
-                        <a href="{% url 'blob:detail' note.uuid %}">{{ note.title|default:"Note Title" }}</a>
+                        <a href="{% url 'blob:detail' note.source.uuid %}">{{ note.source.title|default:"Note Title" }}</a>
                     </h2>
 
-                    <span class="glyphicon glyphicon-time"></span> <span> {{ note.date }} </span>
+                    <span class="glyphicon glyphicon-time"></span> <span> {{ note.source.date }} </span>
 
                     <br /><br />
 
                     <div>
-                        {{ note.content|safe }}
+                        {{ note.source.content|safe }}
                     </div>
 
-                    {% for tag in note.tags %}
+                    {% for tag in note.source.tags %}
                         <a id="tag" class="badge badge-info" href="{% url 'search:notes' %}?tagsearch={{ tag }}">{{ tag }}</a>
                     {% endfor %}
 
@@ -116,7 +116,7 @@
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
         new Vue({
-            el: "#search",
+            el: "#notes_search",
             methods: {
                 select(tag) {
                     window.location='{% url 'search:notes' %}?tagsearch=' + tag.value;
