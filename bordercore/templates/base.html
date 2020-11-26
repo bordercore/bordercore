@@ -92,7 +92,7 @@
                             accesskey="s"
                             user-name="{{ user.get_username }}"
                             initial-search-type="{{ request.session.top_search_filter }}"
-                            suggest-search-url="{% url 'search:kb_search_tags_booktitles' %}?term="
+                            suggest-search-url="{% url 'search:search_tags_and_titles' %}?term="
                             query-search-url="{% url 'search:search' %}"
                             tag-search-url="{% url 'search:kb_search_tag_detail' 666 %}"
                             uuid-search-url="{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}"

@@ -406,7 +406,7 @@ class SearchTagDetailView(ListView):
 
 
 @login_required
-def kb_search_tags_booktitles(request):
+def search_tags_and_titles(request):
 
     es = Elasticsearch(
         [settings.ELASTICSEARCH_ENDPOINT],
