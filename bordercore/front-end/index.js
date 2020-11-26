@@ -65,6 +65,10 @@ import SimpleSuggest from "./vue/common/SimpleSuggest.vue";
 Vue.component("SimpleSuggest", SimpleSuggest);
 window.SimpleSuggest = SimpleSuggest;
 
+import SearchSimpleSuggest from "./vue/common/SearchSimpleSuggest.vue";
+Vue.component("SearchSimpleSuggest", SearchSimpleSuggest);
+window.SearchSimpleSuggest = SearchSimpleSuggest;
+
 import TagsInput from "./vue/common/TagsInput.vue";
 Vue.component("TagsInput", TagsInput);
 window.TagsInput = TagsInput;

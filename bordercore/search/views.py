@@ -1,4 +1,5 @@
 import math
+import re
 
 import markdown
 from elasticsearch import Elasticsearch
@@ -304,6 +305,7 @@ class SearchTagDetailView(ListView):
         doctype_counts_sorted = sorted(doctype_counts.items(), key=operator.itemgetter(1), reverse=True)
         context["doctype_counts"] = doctype_counts_sorted
 
+        # TODO: Use dictionary comprehension?
         doctypes = {}
         for x in doctype_counts.keys():
             doctypes[x] = 1
@@ -411,33 +413,24 @@ def kb_search_tags_booktitles(request):
         verify_certs=False
     )
 
-    search_term = request.GET['term']
+    search_term = request.GET["term"]
+    doc_type = request.GET.get("doc_type", None)
+
+    search_terms = re.split(r"\s+", request.GET["term"])
 
     search_object = {
-        'query': {
-            'bool': {
-                'must': [
+        "query": {
+            "bool": {
+                "must": [
                     {
-                        'term': {
-                            'doctype': 'book'
-                        }
-                    },
-                    {
-                        "wildcard": {
-                            "title.raw": {
-                                "value": f"*{search_term}*",
-                            }
-                        }
-                    },
-                    {
-                        'term': {
-                            'user_id': request.user.id
+                        "term": {
+                            "user_id": request.user.id
                         }
                     }
                 ]
             }
         },
-        "from": 0, "size": 20,
+        "from": 0, "size": 50,
         "_source": ["author",
                     "date",
                     "date_unixtime",
@@ -447,8 +440,36 @@ def kb_search_tags_booktitles(request):
                     "sha1sum",
                     "tags",
                     "title",
+                    "url",
                     "uuid"]
     }
+
+    # Separate query into terms based on whitespace and
+    #  and treat it like an "AND" boolean search
+    for one_term in search_terms:
+        search_object["query"]["bool"]["must"].append(
+            {
+                "wildcard": {
+                    "title.raw": {
+                        "value": f"*{one_term}*",
+                    }
+                }
+            },
+        )
+
+    if doc_type:
+
+        # TEMP until we change "bordercore_bookmark" doctype to "bookmark"
+        if doc_type == "bookmark":
+            doc_type = "bordercore_bookmark"
+
+        search_object["query"]["bool"]["must"].append(
+            {
+                "term": {
+                    "doctype": doc_type
+                }
+            },
+        )
 
     results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 
@@ -457,20 +478,21 @@ def kb_search_tags_booktitles(request):
 
     for match in results["hits"]["hits"]:
 
-        if match["_source"]["doctype"] == "book":
-            matches.append(
-                {
-                    "object_type": "Book",
-                    "value": match["_source"]["title"],
-                    "uuid": match["_source"].get("uuid")
-                }
-            )
+        matches.append(
+            {
+                "object_type": match["_source"]["doctype"].title(),
+                "value": match["_source"]["title"],
+                "uuid": match["_source"].get("uuid"),
+                "id": match["_id"],
+                "url": match["_source"].get("url", None)
+            }
+        )
 
-        if match["_source"].get("tags", ""):
-            for tag in [x for x in match["_source"]["tags"] if x.lower().startswith(search_term.lower())]:
+        if "tags" in match["_source"]:
+            for tag in [x for x in match["_source"]["tags"] if x.lower().find(search_term.lower()) != -1]:
                 tags[tag] = 1
 
     for tag in tags:
-        matches.append({"object_type": "Tag", "value": tag})
+        matches.insert(0, {"object_type": "Tag", "value": tag, "id": tag})
 
     return JsonResponse(matches, safe=False)

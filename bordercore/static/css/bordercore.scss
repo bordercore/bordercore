@@ -204,6 +204,37 @@ pre {
   padding-left: 1.44rem;
 }
 
+/* Top Search */
+#top-search input {
+  cursor: pointer;
+  width: 10px;
+  border-radius: 10em;
+  transition: all 0.5s;
+}
+
+#top-search input:hover {
+  background-color: #fff;
+}
+
+#top-search input:focus {
+  width: 400px;
+  padding-left: 32px;
+  color: #000;
+  background-color: #fff;
+  border-color: #66cc75;
+  cursor: auto;
+  box-shadow: 0 0 5px rgba(109, 207, 246, 0.5);
+}
+
+#top-search-filter-type {
+  font-weight: bold;
+  color: $cyan;
+}
+
+.top-search-object-type {
+  color: $cyan;
+}
+
 /* Bookmarks */
 
 .bookmark-search {

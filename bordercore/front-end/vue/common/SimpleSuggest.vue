@@ -2,6 +2,7 @@
     <div>
         <vue-simple-suggest ref="suggestComponent"
                             :id="id"
+                            :accesskey="accesskey"
                             v-model="query"
                             :display-attribute="displayAttribute"
                             :value-attribute="valueAttribute"
@@ -10,8 +11,8 @@
                             :filter-by-query=true
                             :debounce=200
                             :min-length=2
+                            :max-suggestions="maxSuggestions"
                             :placeholder="placeHolder"
-                            autofocus
                             autocomplete="off"
                             :styles="autoCompleteStyle"
                             @select="select"
@@ -33,6 +34,9 @@
 
     export default {
         props: {
+            accesskey: {
+                default: null
+            },
             id: {
                 default: "simple-suggest"
             },
@@ -41,6 +45,10 @@
             },
             valueAttribute: {
                 default: "value"
+            },
+            maxSuggestions: {
+                default: 10,
+                type: Number
             },
             searchUrl: {
                 default: "search-url"

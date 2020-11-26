@@ -72,31 +72,38 @@
 
             <div class="container-fluid" id="content">
 
-                <div class="row">
+                <div class="row" id="top-search">
 
-                    <div class="col-lg-10" id="top-search">
+                    <div class="col-lg-5">
                         <div class="p-2">
-                            <form class="form-inline">
-                                <button type="button" id="sidebarCollapse" class="btn btn-info mr-3" @click="handleSidebarCollapse()">
-                                    <i class="fas fa-align-left"></i>
-                                    <font-awesome-icon icon="align-left"></font-awesome-icon>
-                                </button>
-                                <div class="position-relative">
-                                    <div class="has-search">
-                                        <input type="text" class="form-control" placeholder="Search" />
-                                        <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
-                                    </div>
-                                </div>
-                            </form>
+                            <button type="button" id="sidebarCollapse" class="btn btn-info mr-3" @click="handleSidebarCollapse()">
+                                <i class="fas fa-align-left"></i>
+                                <font-awesome-icon icon="align-left"></font-awesome-icon>
+                            </button>
                         </div>
                     </div>
 
-                    <div class="col-lg-2 align-self-end text-right">
-                        <div class="pr-2 justify-content-center">
-                            <span class="align-text-bottom" id="greeting">Hello <strong>{{ user.get_username }}</strong></span>
-                        </div>
-                    </div>
+                    <div class="col-lg-7 pt-2" style="padding-right: 25px">
 
+                        <search-simple-suggest
+                            ref="simpleSuggest"
+                            value-attribute="id"
+                            :max-suggestions=20
+                            accesskey="s"
+                            user-name="{{ user.get_username }}"
+                            initial-search-type="{{ request.session.top_search_filter }}"
+                            suggest-search-url="{% url 'search:kb_search_tags_booktitles' %}?term="
+                            query-search-url="{% url 'search:search' %}"
+                            tag-search-url="{% url 'search:kb_search_tag_detail' 666 %}"
+                            uuid-search-url="{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}"
+                            note-tag-search-url="{% url 'search:notes' %}?tagsearch="
+                            note-query-search-url="{% url 'search:notes' %}"
+                            bookmark-tag-search-url="{% url 'bookmark:get_bookmarks_by_tag' 666 %}"
+                            store-in-session-url="{% url "accounts:store_in_session" %}"
+                        >
+                        </search-simple-suggest>
+
+                    </div>
                 </div>
 
                 <hr class="m-0" />
@@ -241,7 +248,7 @@
                                             url: "{% url 'music:list' %}"
                                         },
                                         {
-                                            id: "add",
+                                            id: "create",
                                             name: "Add a Song",
                                             url: "{% url 'music:create_song' %}"
                                         },
@@ -312,6 +319,7 @@
                         {% endif %}
 
                         window.setInterval(this.getUntaggedBookmarkCount, 60000);
+
                     }
                 }
 
@@ -327,7 +335,7 @@
                 new Vue({
                     el: "#navbar",
                     components: {
-                        NavBar
+                        NavBar,
                     }
                 });
 
