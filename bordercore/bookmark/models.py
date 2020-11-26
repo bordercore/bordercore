@@ -57,7 +57,7 @@ class Bookmark(TimeStampedModel):
                     "must": [
                         {
                             "term": {
-                                "doctype": "bordercore_bookmark"
+                                "doctype": "bookmark"
                             }
                         },
                         {
@@ -91,7 +91,7 @@ class Bookmark(TimeStampedModel):
             "note": self.note,
             "importance": self.importance,
             "last_modified": self.modified,
-            "doctype": "bordercore_bookmark",
+            "doctype": "bookmark",
             "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
             "date_unixtime": self.created.strftime("%s"),
             "user_id": self.user.id

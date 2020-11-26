@@ -56,7 +56,7 @@
 
     <h4 class="search_book_title">Todo: <a href="{% url 'todo:update' match.source.uuid %}">{{ match.source.task }}</a></h4>
 
-{% elif match.source.doctype == 'bordercore_bookmark' %}
+{% elif match.source.doctype == 'bookmark' %}
 
     <h4 class="search_book_title">
         <img src="{{ STATIC_URL }}img/kb_link.png" />

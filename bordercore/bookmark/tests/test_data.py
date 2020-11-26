@@ -83,7 +83,7 @@ def test_elasticsearch_bookmarks_exist_in_db(es):
     search_object = {
         "query": {
             "term": {
-                "doctype": "bordercore_bookmark"
+                "doctype": "bookmark"
             }
         },
         "from": 0, "size": 10000,

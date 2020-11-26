@@ -69,7 +69,7 @@ class SearchListView(ListView):
     #     elif facet == 'Notes':
     #         return 'doctype:note'
     #     elif facet == 'Links':
-    #         return 'doctype:bordercore_bookmark'
+    #         return 'doctype:bookmark'
     #     elif facet == 'Titles':
     #         return '(title:{})'.format(term)
     #     elif facet == 'Tags':
@@ -458,10 +458,6 @@ def kb_search_tags_booktitles(request):
         )
 
     if doc_type:
-
-        # TEMP until we change "bordercore_bookmark" doctype to "bookmark"
-        if doc_type == "bookmark":
-            doc_type = "bordercore_bookmark"
 
         search_object["query"]["bool"]["must"].append(
             {
