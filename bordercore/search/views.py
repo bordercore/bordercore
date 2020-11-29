@@ -405,6 +405,40 @@ class SearchTagDetailView(ListView):
         return results
 
 
+def sort_results(matches):
+
+    types = {
+        "Tag": [],
+        "Book": [],
+        "Note": [],
+        "Bookmark": [],
+        "Document": [],
+        "Blob": [],
+    }
+
+    for match in matches:
+        types[match["object_type"]].append(match)
+
+    # Remove empty categories
+    result = {key: value for (key, value) in types.items() if len(value) > 0}
+
+    response = []
+    for key, value in result.items():
+        response.extend(
+            [
+                {
+                    "id": f"__{key}",
+                    "title": f"{key}s",
+                    "splitter": True,
+                    "value": "Bogus"
+                },
+                *result[key]
+            ]
+        )
+
+    return response
+
+
 @login_required
 def search_tags_and_titles(request):
 
@@ -491,4 +525,4 @@ def search_tags_and_titles(request):
     for tag in tags:
         matches.insert(0, {"object_type": "Tag", "value": tag, "id": tag})
 
-    return JsonResponse(matches, safe=False)
+    return JsonResponse(sort_results(matches), safe=False)

@@ -8,7 +8,7 @@
             </span>
             <div class="form-row">
 
-                <div class="col-auto has-search">
+                <div class="col-auto has-search" id="top-search-container">
                     <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
 
                     <vue-simple-suggest ref="suggestComponent"
@@ -31,8 +31,18 @@
                                         @keydown.native.enter.prevent="onEnter"
                     >
                         <div slot="suggestion-item" slot-scope="scope">
-                            <span v-html="boldenSuggestion(scope)"></span>
+                            <!-- @*event*.stop="null" handlers are needed to prevent the splitter from being selected -->
+                            <span v-if="scope.suggestion.splitter"
+                                  @click.stop="{}"
+                                  @keyup.stop="{}"
+                                  @mouseenter.stop="{}"
+                                  @mouseleave.stop="{}"
+                                  @keydown.stop="{}"
+                                  class="top-search-splitter"
+                            >{{ scope.suggestion.title }}</span>
+                            <span v-else v-html="boldenSuggestion(scope)" class="top-search-suggestion"></span>
                         </div>
+
                     </vue-simple-suggest>
 
                 </div>

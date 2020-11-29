@@ -235,6 +235,48 @@ pre {
   color: $cyan;
 }
 
+.top-search-splitter {
+  background-color: $gray-700;
+  font-size: larger;
+  font-weight: bold;
+  width: 100%;
+  padding: 5px;
+  cursor: auto;
+}
+
+.top-search-suggestion {
+  padding: 5px;
+  width: 100%;
+}
+
+.suggest-item {
+  background-color: $gray-900;
+}
+
+#top-search-container {
+  /* Note that we can't simply use ".suggest-item.hover", since a similar
+     selector defined by vue-simple-suggest overrides it via a !important flag */
+  .vue-simple-suggest.designed .suggestions .suggest-item.hover {
+    background-color: $cyan !important;
+  }
+
+  /* Set the padding to zero so that we can programmatically control the background color lower down
+     in the container hierarchy, based on whether an item is a divider or not.
+  */
+  .list-group-item {
+    padding: 0;
+  }
+
+  .vue-simple-suggest.designed .suggestions {
+    color: $green;
+    padding: 5px;
+  }
+
+  .suggest-item.hover .top-search-object-type {
+    color: $light-blue;
+  }
+}
+
 /* Bookmarks */
 
 .bookmark-search {
