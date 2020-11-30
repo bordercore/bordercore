@@ -50,7 +50,7 @@ class SongForm(ModelForm):
 
     class Meta:
         model = Song
-        fields = ('title', 'artist', 'track', 'year', 'tags', 'comment', 'source', 'id')
+        fields = ('title', 'artist', 'track', 'year', 'tags', 'comment', 'source', 'length', 'id')
         widgets = {
             'title': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'artist': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),

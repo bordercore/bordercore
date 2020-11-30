@@ -100,6 +100,9 @@ def convert_seconds(seconds):
     eg 339 would return "05:39", or 5 minutes and 39 seconds.
     """
 
+    if not seconds:
+        return "N/A"
+
     time_string = time.strftime("%H:%M:%S", time.gmtime(seconds))
     pattern = re.compile(r"00:(\d\d:\d\d)")
     matches = pattern.match(time_string)

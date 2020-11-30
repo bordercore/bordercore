@@ -19,7 +19,7 @@ s3_client = boto3.client("s3")
 
 def test_album_songs_have_length_field():
     "Assert that all album songs have a length field"
-    s = Song.objects.filter(length__isnull=True).filter(album__isnull=False)
+    s = Song.objects.all(length__isnull=True)
     assert len(s) == 0, "%s songs fail this test" % len(s)
 
 
