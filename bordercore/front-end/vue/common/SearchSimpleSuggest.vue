@@ -85,12 +85,8 @@
                 type: String
             },
             suggestSearchUrl: String,
-            uuidSearchUrl: String,
-            noteTagSearchUrl: String,
             querySearchUrl: String,
-            tagSearchUrl: String,
             noteQuerySearchUrl: String,
-            bookmarkTagSearchUrl: String,
             storeInSessionUrl: String,
         },
         data() {
@@ -112,7 +108,7 @@
 
                 try {
                     let url = this.searchUrl;
-                    return axios.get(url + query + "&doc_type=" + this.searchFilter.toLowerCase())
+                    return axios.get(url + query + "&filter=" + this.searchFilter.toLowerCase())
                                 .then(response => {
                                     return response.data;
                                 })
@@ -149,29 +145,7 @@
 
             },
             select(datum) {
-
-                if (this.searchFilter === "Note") {
-                    if (datum.object_type === "Tag") {
-                        window.location = this.noteTagSearchUrl + datum.value;
-                    } else {
-                        window.location = this.uuidSearchUrl.replace(/00000000-0000-0000-0000-000000000000/, datum.uuid);
-                    }
-                } else if (this.searchFilter === "Bookmark") {
-                    if (datum.object_type === "Tag") {
-                        window.location = this.bookmarkTagSearchUrl.replace(/666/, datum.value);
-                    } else {
-                        window.location = datum.url;
-                    }
-                } else if (datum.object_type === "Blob" || datum.object_type === "Document") {
-                    window.location = this.uuidSearchUrl.replace(/00000000-0000-0000-0000-000000000000/, datum.uuid);
-                } else if (datum.object_type === "Tag") {
-                    window.location = this.tagSearchUrl.replace(/666/, datum.value);
-                } else if (datum.object_type === "Bookmark") {
-                    window.location = datum.url;
-                } else {
-                    console.error(`Object type not supported: ${datum.object_type}`);
-                }
-
+                window.location = datum.link;
             },
             onEnter(evt) {
 
@@ -205,6 +179,8 @@
                     this.handleFilter("Bookmark");
                 } else if (evt.code === "KeyB" && evt.altKey) {
                     this.handleFilter("Book");
+                } else if (evt.code === "KeyM" && evt.altKey) {
+                    this.handleFilter("Music");
                 } else if (evt.key === "a" && evt.altKey) {
                     document.getElementById("top-simple-suggest").select();
                 }

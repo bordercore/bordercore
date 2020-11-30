@@ -8,6 +8,7 @@ from markdown.extensions.codehilite import CodeHiliteExtension
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
@@ -409,6 +410,9 @@ def sort_results(matches):
 
     types = {
         "Tag": [],
+        "Song": [],
+        "Artist": [],
+        "Album": [],
         "Book": [],
         "Note": [],
         "Bookmark": [],
@@ -439,6 +443,59 @@ def sort_results(matches):
     return response
 
 
+def get_link(doc_type, match):
+
+    if doc_type == "Bookmark":
+        return match["url"]
+    elif doc_type == "Song":
+        if "album_id" in match:
+            return reverse("music:album_detail", kwargs={"pk": match["album_id"]})
+        else:
+            return reverse("music:artist_detail", kwargs={"artist_name": match["artist"]})
+    elif doc_type == "Artist":
+        return reverse("music:artist_detail", kwargs={"artist_name": match["artist"]})
+    elif doc_type == "Album":
+        return reverse("music:album_detail", kwargs={"pk": match["album_id"]})
+    elif doc_type in ("Blob", "Book", "Document", "Note"):
+        return reverse("blob:detail", kwargs={"uuid": match["uuid"]})
+    else:
+        return ""
+
+
+def get_tag_link(doc_type, tag):
+
+    if doc_type == "note":
+        return reverse("search:notes") + f"?tagsearch={tag}"
+    elif doc_type == "bookmark":
+        return reverse("bookmark:get_bookmarks_by_tag", kwargs={"tag_filter": tag})
+    else:
+        return reverse("search:kb_search_tag_detail", kwargs={"taglist": tag})
+
+
+def get_title(doc_type, match):
+    if doc_type == "Song":
+        return f"{match['title']} - {match['artist']}"
+    elif doc_type == "Artist":
+        return match["artist"]
+    elif doc_type == "Album":
+        return match["album"]
+    else:
+        return match["title"].title()
+
+
+def get_doctype(match):
+
+    if match["_source"]["doctype"] == "song" and "highlight" in match:
+        highlight_fields = list(match["highlight"].keys())
+
+        highlight_fields = [x if x != "title" else "Song" for x in match["highlight"].keys()]
+        # There could be multiple highlighted fields. For now,
+        #  pick the first one.
+        return highlight_fields[0].title()
+    else:
+        return match["_source"]["doctype"].title()
+
+
 @login_required
 def search_tags_and_titles(request):
 
@@ -448,7 +505,12 @@ def search_tags_and_titles(request):
     )
 
     search_term = request.GET["term"]
-    doc_type = request.GET.get("doc_type", None)
+    doc_type = request.GET.get("filter", None)
+
+    # The front-end filter is a catch-all "Music", but the actual
+    #  Elasticsearch doctype is "song"
+    if doc_type == "music":
+        doc_type = "song"
 
     search_terms = re.split(r"\s+", request.GET["term"])
 
@@ -464,8 +526,11 @@ def search_tags_and_titles(request):
                 ]
             }
         },
-        "from": 0, "size": 50,
-        "_source": ["author",
+        "from": 0, "size": 100,
+        "_source": ["album_id",
+                    "album",
+                    "artist",
+                    "author",
                     "date",
                     "date_unixtime",
                     "doctype",
@@ -483,16 +548,43 @@ def search_tags_and_titles(request):
     for one_term in search_terms:
         search_object["query"]["bool"]["must"].append(
             {
-                "wildcard": {
-                    "title.raw": {
-                        "value": f"*{one_term}*",
-                    }
+                "bool": {
+                    "should": [
+                        {
+                            "wildcard": {
+                                "title": {
+                                    "value": f"*{one_term}*",
+                                }
+                            }
+                        },
+                        {
+                            "wildcard": {
+                                "album": {
+                                    "value": f"*{one_term}*",
+                                }
+                            }
+                        },
+                        {
+                            "wildcard": {
+                                "artist": {
+                                    "value": f"*{one_term}*",
+                                }
+                            }
+                        }
+                    ]
                 }
-            },
+            }
         )
 
-    if doc_type:
+    search_object["highlight"] = {
+        "fields": {
+            "album": {},
+            "title": {},
+            "artist": {}
+        }
+    }
 
+    if doc_type:
         search_object["query"]["bool"]["must"].append(
             {
                 "term": {
@@ -502,19 +594,20 @@ def search_tags_and_titles(request):
         )
 
     results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
-
     tags = {}
     matches = []
 
     for match in results["hits"]["hits"]:
 
+        object_type = get_doctype(match)
         matches.append(
             {
-                "object_type": match["_source"]["doctype"].title(),
-                "value": match["_source"]["title"],
+                "object_type": object_type,
+                "value": get_title(object_type, match["_source"]),
                 "uuid": match["_source"].get("uuid"),
                 "id": match["_id"],
-                "url": match["_source"].get("url", None)
+                "url": match["_source"].get("url", None),
+                "link": get_link(object_type, match["_source"])
             }
         )
 
@@ -523,6 +616,12 @@ def search_tags_and_titles(request):
                 tags[tag] = 1
 
     for tag in tags:
-        matches.insert(0, {"object_type": "Tag", "value": tag, "id": tag})
-
+        matches.insert(0,
+                       {
+                           "object_type": "Tag",
+                           "value": tag,
+                           "id": tag,
+                           "link": get_tag_link(doc_type, tag),
+                       }
+                       )
     return JsonResponse(sort_results(matches), safe=False)
