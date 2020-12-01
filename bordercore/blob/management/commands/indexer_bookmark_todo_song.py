@@ -8,6 +8,7 @@ from django.db.transaction import atomic
 
 from todo.models import Todo  # isort:skip
 from bookmark.models import Bookmark  # isort:skip
+from music.models import Song  # isort:skip
 
 
 es = Elasticsearch(
@@ -18,13 +19,13 @@ es = Elasticsearch(
 
 
 class Command(BaseCommand):
-    help = "Re-index all bookmarks or todo tasks in Elasticsearch"
+    help = "Re-index all bookmarks, songs, or todo tasks in Elasticsearch"
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--model",
-            choices=["bookmark", "todo"],
-            help="The model to index: 'bookmark' or 'todo'",
+            choices=["bookmark", "song", "todo"],
+            help="The model to index: 'bookmark', 'song', or 'todo'",
             required=True
         )
 
@@ -33,6 +34,8 @@ class Command(BaseCommand):
 
         if model == "bookmark":
             self.index_bookmarks_all()
+        elif model == "song":
+            self.index_song_all()
         elif model == "todo":
             self.index_todo_all()
 
@@ -41,6 +44,12 @@ class Command(BaseCommand):
         for b in Bookmark.objects.all():
             self.stdout.write(b.url)
             b.index_bookmark(es)
+
+    def index_song_all(self):
+
+        for s in Song.objects.all():
+            self.stdout.write(f"{s.artist} - {s.title}")
+            s.index_song(es)
 
     def index_todo_all(self):
 
