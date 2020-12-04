@@ -525,7 +525,7 @@ def search_tags_and_titles(request):
         verify_certs=False
     )
 
-    search_term = request.GET["term"]
+    search_term = request.GET["term"].lower()
     doc_type = request.GET.get("filter", None)
 
     # The front-end filter is a catch-all "Music", but the actual
@@ -533,7 +533,7 @@ def search_tags_and_titles(request):
     if doc_type == "music":
         doc_type = "song"
 
-    search_terms = re.split(r"\s+", request.GET["term"])
+    search_terms = re.split(r"\s+", search_term)
 
     search_object = {
         "query": {
