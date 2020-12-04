@@ -7,7 +7,7 @@ import pytest
 import django
 from django import urls
 
-from search.views import get_title, is_cached
+from search.views import get_doctype, get_title, is_cached, sort_results
 
 try:
     from bs4 import BeautifulSoup
@@ -91,6 +91,54 @@ def test_search_notes(mock_elasticsearch, user, client):
     matches = soup.select("div#note:nth-child(1) a#tag")
     for tag in matches:
         assert tag.text in data["hits"]["hits"][0]["source"]["tags"]
+
+
+def test_sort_results():
+
+    matches = [
+        {
+            "object_type": "Bookmark",
+            "value": "http://python.org"
+        },
+        {
+            "object_type": "Tag",
+            "value": "python"
+        },
+        {
+            "object_type": "Note",
+            "value": "Running Emacs Inside Docker"
+        },
+    ]
+
+    response = sort_results(matches)
+
+    assert response[0]["splitter"] is True
+    assert response[1]["value"] == "python"
+    assert response[1]["object_type"] == "Tag"
+    assert response[2]["splitter"] is True
+    assert response[3]["object_type"] == "Note"
+    assert response[3]["value"] == "Running Emacs Inside Docker"
+    assert response[4]["splitter"] is True
+    assert response[5]["object_type"] == "Bookmark"
+    assert response[5]["value"] == "http://python.org"
+    assert len(response) == 6
+
+
+def test_get_title():
+
+    assert get_title("Song", {"artist": "U2", "title": "The Joshua Tree"}) == "The Joshua Tree - U2"
+    assert get_title("Album", {"album": "The Joshua Tree"}) == "The Joshua Tree"
+    assert get_title("Artist", {"artist": "U2"}) == "U2"
+    assert get_title("Book", {"title": "War and Peace"}) == "War And Peace"
+    assert get_title("Book", {"title": "war and peace"}) == "War And Peace"
+
+
+def test_get_doctype():
+
+    assert get_doctype({"_source": {"doctype": "song"}}) == "Song"
+    assert get_doctype({"_source": {"doctype": "song"}, "highlight": {"album": ""}}) == "Album"
+    assert get_doctype({"_source": {"doctype": "song"}, "highlight": {"artist": ""}}) == "Artist"
+    assert get_doctype({"_source": {"doctype": "song"}, "highlight": {"artist": "", "album": ""}}) == "Artist"
 
 
 def test_is_cached():
