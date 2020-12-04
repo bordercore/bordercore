@@ -7,6 +7,8 @@ import pytest
 import django
 from django import urls
 
+from search.views import get_title, is_cached
+
 try:
     from bs4 import BeautifulSoup
 except ModuleNotFoundError:
@@ -89,3 +91,13 @@ def test_search_notes(mock_elasticsearch, user, client):
     matches = soup.select("div#note:nth-child(1) a#tag")
     for tag in matches:
         assert tag.text in data["hits"]["hits"][0]["source"]["tags"]
+
+
+def test_is_cached():
+
+    cache_checker = is_cached()
+
+    assert cache_checker("Artist", "U2") is False
+    assert cache_checker("Artist", "U2") is True
+    assert cache_checker("Album", "The Joshau Tree") is False
+    assert cache_checker("Book", "War and Peace") is False

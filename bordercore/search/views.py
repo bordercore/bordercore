@@ -496,6 +496,27 @@ def get_doctype(match):
         return match["_source"]["doctype"].title()
 
 
+def is_cached():
+
+    cache = {
+        "Artist": {},
+        "Album": {}
+    }
+
+    def check_cache(object_type, value):
+
+        if object_type not in ["Artist", "Album"]:
+            return False
+
+        if value in cache[object_type]:
+            return True
+
+        cache[object_type][value] = True
+        return False
+
+    return check_cache
+
+
 @login_required
 def search_tags_and_titles(request):
 
@@ -597,21 +618,25 @@ def search_tags_and_titles(request):
     tags = {}
     matches = []
 
+    cache_checker = is_cached()
+
     for match in results["hits"]["hits"]:
-
         object_type = get_doctype(match)
-        matches.append(
-            {
-                "object_type": object_type,
-                "value": get_title(object_type, match["_source"]),
-                "uuid": match["_source"].get("uuid"),
-                "id": match["_id"],
-                "url": match["_source"].get("url", None),
-                "link": get_link(object_type, match["_source"])
-            }
-        )
+        title = get_title(object_type, match["_source"])
 
-        if "tags" in match["_source"]:
+        if not cache_checker(object_type, title):
+            matches.append(
+                {
+                    "object_type": object_type,
+                    "value": title,
+                    "uuid": match["_source"].get("uuid"),
+                    "id": match["_id"],
+                    "url": match["_source"].get("url", None),
+                    "link": get_link(object_type, match["_source"])
+                }
+            )
+
+        if "tags" in match["_source"] and isinstance(match["_source"]["tags"], list):
             for tag in [x for x in match["_source"]["tags"] if x.lower().find(search_term.lower()) != -1]:
                 tags[tag] = 1
 
