@@ -61,8 +61,9 @@ def s3_bucket(s3_resource):
 def blob_image_factory(db, s3_resource, s3_bucket):
 
     blob = BlobFactory(
+        uuid="0bb4914e-cd3c-4d6b-9d72-0454adf00260",
         title="Vaporwave Wallpaper 2E",
-        tags=("django", "linux"),
+        tags=("django", "linux", "video"),
     )
 
     file_path = "resources/test_blob.jpg"
@@ -76,8 +77,9 @@ def blob_image_factory(db, s3_resource, s3_bucket):
 def blob_pdf_factory(db, s3_resource, s3_bucket):
 
     blob = BlobFactory(
+        uuid="4158cf58-306c-42d7-9c98-07d3a96a1d8b",
         title="Bleached Album Notes",
-        tags=("django", "linux"),
+        tags=("django", "linux", "video"),
     )
 
     file_path = "resources/test_blob.pdf"

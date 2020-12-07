@@ -6,8 +6,13 @@ import pytest
 
 import django
 from django import urls
+from django.test import RequestFactory
 
-from search.views import get_doctype, get_title, is_cached, sort_results
+from blob.tests.conftest import (aws_credentials, blob_image_factory,
+                                 blob_pdf_factory, s3_bucket, s3_resource)
+from search.views import (SearchTagDetailView, get_doctype, get_title,
+                          is_cached, sort_results)
+from tag.tests.conftest import tag
 
 try:
     from bs4 import BeautifulSoup
@@ -149,3 +154,72 @@ def test_is_cached():
     assert cache_checker("Artist", "U2") is True
     assert cache_checker("Album", "The Joshau Tree") is False
     assert cache_checker("Book", "War and Peace") is False
+
+
+@pytest.mark.django_db
+@patch("search.views.Elasticsearch")
+def test_search_tag(mock_elasticsearch, user, client, blob_image_factory, blob_pdf_factory):
+
+    filepath = Path(__file__).parent / "resources/search_results_tags.json"
+
+    with open(filepath) as f:
+        data = json.load(f)
+
+    instance = mock_elasticsearch.return_value
+    instance.search.return_value = data
+
+    url = urls.reverse("search:kb_search_tag_detail", kwargs={"taglist": "carl sagan"})
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+
+    soup = BeautifulSoup(resp.content, "html.parser")
+
+    matches = soup.select("#document div.row")
+    assert len(matches) == 3
+
+    matches = soup.select("#blob div.row")
+    assert len(matches) == 2
+
+
+def test_get_doc_counts():
+
+    request = RequestFactory().get("/")
+    view = SearchTagDetailView()
+    view.setup(request)
+
+    aggregations = {
+        "buckets": [
+            {
+                "key": "document",
+                "doc_count": 3
+            },
+            {
+                "key": "blob",
+                "doc_count": 2
+            }
+        ]
+    }
+
+    result = view.get_doc_counts([], aggregations)
+    assert len(result) == 2
+    assert result[0] == ("document", 3)
+    assert result[1] == ("blob", 2)
+
+
+def test_tag_list_js(user):
+
+    request = RequestFactory().get("/")
+    request.user = user
+    view = SearchTagDetailView()
+    view.setup(request)
+
+    results = view.get_tag_list_js(["django", "video"])
+
+    assert len(results) == 2
+    assert results[0]["text"] == "django"
+    assert results[0]["value"] == "django"
+    assert results[0]["is_meta"] == "false"
+    assert results[1]["text"] == "video"
+    assert results[1]["value"] == "video"
+    assert results[1]["is_meta"] == "false"

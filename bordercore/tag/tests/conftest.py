@@ -12,8 +12,11 @@ from tag.models import Tag, SortOrderTagBookmark  # isort:skip
 @pytest.fixture(scope="function")
 def tag(user):
 
-    tag = Tag.objects.create(name="django")
-    yield tag
+    tag1 = Tag.objects.create(name="django")
+
+    tag2 = Tag.objects.create(name="video", is_meta=True)
+
+    yield [tag1, tag2]
 
 
 @pytest.fixture(scope="function")
@@ -38,8 +41,8 @@ def bookmarks(user, tag):
         user=user
     )
 
-    SortOrderTagBookmark.objects.create(tag=tag, bookmark=bookmark3)
-    SortOrderTagBookmark.objects.create(tag=tag, bookmark=bookmark2)
-    SortOrderTagBookmark.objects.create(tag=tag, bookmark=bookmark1)
+    SortOrderTagBookmark.objects.create(tag=tag[0], bookmark=bookmark3)
+    SortOrderTagBookmark.objects.create(tag=tag[0], bookmark=bookmark2)
+    SortOrderTagBookmark.objects.create(tag=tag[0], bookmark=bookmark1)
 
     yield [bookmark1, bookmark2, bookmark3]

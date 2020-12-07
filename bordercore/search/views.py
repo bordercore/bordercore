@@ -256,87 +256,10 @@ class SearchTagDetailView(ListView):
     template_name = "search/tag_detail.html"
     SECTION = "search"
     RESULT_COUNT_PER_PAGE = 100
-    context_object_name = "info"
-
-    def get_context_data(self, **kwargs):
-
-        context = super(SearchTagDetailView, self).get_context_data(**kwargs)
-        results = {}
-        for myobject in context["info"]["hits"]["hits"]:
-
-            match = dict(
-                title=myobject["_source"].get("title", "No Title"),
-                task=myobject["_source"].get("task", ""),
-                url=myobject["_source"].get("url", ""),
-                uuid=myobject["_source"].get("uuid", "")
-            )
-            if myobject["_source"].get("sha1sum", ""):
-                match["sha1sum"] = myobject["_source"].get("sha1sum", "")
-                match["filename"] = myobject["_source"].get("filename", "")
-                match["url"] = Blob.get_s3_key_from_sha1sum(match["sha1sum"], match["filename"])
-                match["cover_url"] = Blob.get_cover_info(
-                    self.request.user,
-                    myobject["_source"]["sha1sum"],
-                    size="small"
-                )["url"]
-                if myobject["_source"].get("content_type", None):
-                    match["content_type"] = Blob.get_content_type(myobject["_source"]["content_type"])
-
-            if results.get(myobject["_source"]["doctype"], ""):
-                results[myobject["_source"]["doctype"]].append(match)
-            else:
-                results[myobject["_source"]["doctype"]] = [match]
-        context["info"]["matches"] = results
-
-        tag_counts = {}
-        tag_list = self.kwargs.get("taglist", "").split(",")
-        for buckets in context["info"]["aggregations"]["Tag Filter"]["buckets"]:
-            if buckets["key"] not in tag_list:
-                tag_counts[buckets["key"]] = buckets["doc_count"]
-        doctype_counts = {}
-        for buckets in context["info"]["aggregations"]["Doctype Filter"]["buckets"]:
-            if buckets["key"] not in tag_list:
-                doctype_counts[buckets["key"]] = buckets["doc_count"]
-
-        context["meta_tags"] = [x for x in tag_counts if x in Tag.get_meta_tags(self.request.user)]
-
-        import operator
-        tag_counts_sorted = sorted(tag_counts.items(), key=operator.itemgetter(1), reverse=True)
-        context["tag_counts"] = tag_counts_sorted
-        doctype_counts_sorted = sorted(doctype_counts.items(), key=operator.itemgetter(1), reverse=True)
-        context["doctype_counts"] = doctype_counts_sorted
-
-        # TODO: Use dictionary comprehension?
-        doctypes = {}
-        for x in doctype_counts.keys():
-            doctypes[x] = 1
-        context["doctypes"] = doctypes
-
-        tag_list_js = []
-        for tag in tag_list:
-            if tag != "":
-                tag_list_js.append(
-                    {
-                        "text": tag,
-                        "value": tag,
-                        "is_meta": "true" if tag in Tag.get_meta_tags(self.request.user) else "false",
-                        "classes": "badge badge-primary",
-                    }
-                )
-        context["tag_list"] = tag_list_js
-
-        context["kb_tag_detail_current_tab"] = self.request.session.get("kb_tag_detail_current_tab", "")
-        context["section"] = self.SECTION
-        context["subsection"] = "search-tag"
-
-        if context["tag_list"]:
-            context["title"] = "Search :: Tag Detail :: {}".format(", ".join(tag_list))
-        else:
-            context["title"] = "Tag Search"
-
-        return context
+    context_object_name = "search_results"
 
     def get_queryset(self):
+
         taglist = self.kwargs.get("taglist", "").split(",")
         hit_count = 1000
 
@@ -404,6 +327,102 @@ class SearchTagDetailView(ListView):
 
         results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
         return results
+
+    def get_context_data(self, **kwargs):
+
+        context = super(SearchTagDetailView, self).get_context_data(**kwargs)
+
+        results = {}
+        for match in context["search_results"]["hits"]["hits"]:
+
+            result = {
+                "title": match["_source"].get("title", "No Title"),
+                "task": match["_source"].get("task", ""),
+                "url": match["_source"].get("url", ""),
+                "uuid": match["_source"].get("uuid", "")
+            }
+            if match["_source"].get("sha1sum", ""):
+
+                result = {
+                    "sha1sum": match["_source"]["sha1sum"],
+                    "filename": match["_source"].get("filename", ""),
+                    "url": Blob.get_s3_key_from_sha1sum(
+                        match["_source"]["sha1sum"],
+                        match["_source"].get("filename", "")
+                    ),
+                    "cover_url": Blob.get_cover_info(
+                        self.request.user,
+                        match["_source"]["sha1sum"],
+                        size="small"
+                    )["url"],
+                    **result,
+                }
+
+                if "content_type" in match["_source"]:
+                    result["content_type"] = Blob.get_content_type(match["_source"]["content_type"])
+
+            results.setdefault(match["_source"]["doctype"], []).append(result)
+
+        context["search_results"]["matches"] = results
+
+        # Now that we've created a version of the result set organized by doc_type, we
+        #  don't need the original from Elasticsearch. Delete it to reduce payload size.
+        context["object_list"].pop("hits")
+
+        tag_list = self.kwargs.get("taglist", "").split(",")
+
+        # Get a list of tags and their counts, to be displayed
+        #  in the "Other tags" dropdown
+        context["tag_counts"] = self.get_doc_counts(
+            tag_list,
+            context["search_results"]["aggregations"]["Tag Filter"]
+        )
+
+        # Get a list of doc types and their counts
+        context["doctype_counts"] = self.get_doc_counts(
+            tag_list,
+            context["search_results"]["aggregations"]["Doctype Filter"]
+        )
+
+        context["meta_tags"] = [x[0] for x in context["tag_counts"] if x[0] in Tag.get_meta_tags(self.request.user)]
+
+        context["doctypes"] = [x[0] for x in context["doctype_counts"]]
+
+        context["kb_tag_detail_current_tab"] = self.request.session.get("kb_tag_detail_current_tab", "")
+        context["section"] = self.SECTION
+        context["subsection"] = "search-tag"
+
+        context["tag_list"] = self.get_tag_list_js(tag_list)
+        if context["tag_list"]:
+            context["title"] = f"Search :: Tag Detail :: {', '.join(tag_list)}"
+        else:
+            context["title"] = "Tag Search"
+
+        return context
+
+    def get_doc_counts(self, tag_list, aggregation):
+        tag_counts = {}
+        for buckets in aggregation["buckets"]:
+            if buckets["key"] not in tag_list:
+                tag_counts[buckets["key"]] = buckets["doc_count"]
+        import operator
+        tag_counts_sorted = sorted(tag_counts.items(), key=operator.itemgetter(1), reverse=True)
+
+        return tag_counts_sorted
+
+    def get_tag_list_js(self, tag_list):
+
+        return [
+            {
+                "text": tag,
+                "value": tag,
+                "is_meta": "true" if tag in Tag.get_meta_tags(self.request.user) else "false",
+                "classes": "badge badge-primary",
+            }
+            for tag in
+            tag_list
+            if tag != ""
+        ]
 
 
 def sort_results(matches):

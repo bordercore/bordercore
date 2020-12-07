@@ -62,7 +62,7 @@ def test_get_title(blob_image_factory):
 
 
 def test_get_tags(blob_image_factory):
-    assert blob_image_factory.get_tags() == "django, linux"
+    assert blob_image_factory.get_tags() == "django, linux, video"
 
 
 def test_is_ingestible_file(blob_image_factory):

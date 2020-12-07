@@ -67,7 +67,7 @@
         <div class="tab-content" id="tag-detail-tab-content">
 
             <div id="blob" class="tab-pane fade">
-            {% for match in info.matches.blob %}
+            {% for match in search_results.matches.blob %}
                 <div class="row voffset">
                     <div class="col-lg-12">
                         {% if match.sha1sum %}
@@ -91,7 +91,7 @@
                 <table class="table-borderless">
                     <tr>
 
-            {% for match in info.matches.book %}
+            {% for match in search_results.matches.book %}
                 {% if forloop.counter0|divisibleby:"3" %}
                     </tr><tr>
                 {% endif %}
@@ -108,7 +108,7 @@
             </div>
 
             <div id="bookmark" class="tab-pane fade">
-            {% for match in info.matches.bookmark %}
+            {% for match in search_results.matches.bookmark %}
                 <div class="row voffset">
                     <div class="col-lg-12">
                         <a href="{{ match.url }}">{{ match.title }}</a>
@@ -118,7 +118,7 @@
             </div>
 
             <div id="document" class="tab-pane fade">
-            {% for match in info.matches.document %}
+            {% for match in search_results.matches.document %}
                 <div class="row voffset">
                     <div class="col-lg-12">
                         <a href="{% url 'blob:detail' match.uuid %}">{{ match.title|default:"No Title" }}</a>
@@ -128,7 +128,7 @@
             </div>
 
             <div id="note" class="tab-pane fade">
-            {% for match in info.matches.note %}
+            {% for match in search_results.matches.note %}
                 <div class="row voffset">
                     <div class="col-lg-12">
                         <a href="{% url 'blob:detail' match.uuid %}">{{ match.title|default:"Note" }}</a>
@@ -138,7 +138,7 @@
             </div>
 
             <div id="todo" class="tab-pane fade">
-            {% for match in info.matches.todo %}
+            {% for match in search_results.matches.todo %}
                 <div class="row voffset">
                     <div class="col-lg-12">
                         {{ match.task }}  <span class="search_todo_date">{{ match.last_modified }}</span>
@@ -211,7 +211,7 @@
                 }
             },
             mounted() {
-                {% if kb_tag_detail_current_tab and doctypes|dict_get:kb_tag_detail_current_tab %}
+                {% if kb_tag_detail_current_tab and kb_tag_detail_current_tab in doctypes %}
                 $("li[data-type='{{ kb_tag_detail_current_tab }}'] a").tab("show");
                 {% else %}
                 // If the tab stored in the session doesn't match any current tab categories,
