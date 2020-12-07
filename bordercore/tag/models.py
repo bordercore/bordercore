@@ -25,7 +25,7 @@ class Tag(models.Model):
     def get_meta_tags(user):
         tags = cache.get('meta_tags')
         if not tags:
-            tags = Tag.objects.filter(blob__user=user, is_meta=True)
+            tags = Tag.objects.filter(blob__user=user, is_meta=True).distinct('name')
             cache.set('meta_tags', tags)
         return [x.name for x in tags]
 
