@@ -36,11 +36,6 @@ urlpatterns = [
         name="album_artwork"
     ),
     path(
-        route="search/",
-        view=views.search,
-        name="search"
-    ),
-    path(
         route="song/<int:id>",
         view=views.get_song_info,
         name="get_song_info"

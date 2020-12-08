@@ -460,56 +460,6 @@ class MusicListJson(BaseDatatableView):
         return json_data
 
 
-@login_required
-def search(request):
-
-    # The search could match an album name or an artist or a song title
-    albums = Album.objects.filter(user=request.user, title__icontains=request.GET['query'])
-    artists = Song.objects.filter(user=request.user, artist__icontains=request.GET['query']).distinct('artist').order_by('artist')
-    songs = Song.objects.filter(user=request.user, title__icontains=request.GET['query']).order_by('title')
-    tags = Tag.objects.filter(song__user=request.user, name__icontains=request.GET['query'], song__isnull=False).distinct("name")
-
-    results = []
-
-    for album in albums:
-        results.append({'name': '{} - {}'.format(album.artist, album.title),
-                        'value': f'album_{album.id}',
-                        'id': album.id,
-                        'link_type': 'album',
-                        'object_type': 'album'})
-
-    for artist in artists:
-        results.append({'name': '{}'.format(artist.artist),
-                        'value': f'artist_{artist.id}',
-                        'artist': artist.artist,
-                        'link_type': 'artist',
-                        'object_type': 'artist'})
-
-    for song in songs:
-        # If we don't have the album for the song (eg it's a "loose" song), return an 'artist' result,
-        #  otherwise return the 'album' result
-        if song.album_id:
-            results.append({'name': '{} - {}'.format(song.title, song.artist),
-                            'value': f'song_{song.id}',
-                            'id': song.album_id,
-                            'link_type': 'album',
-                            'object_type': 'song'})
-        else:
-            results.append({'name': '{} - {}'.format(song.title, song.artist),
-                            'value': f'song_{song.id}',
-                            'artist': song.artist,
-                            'link_type': 'artist',
-                            'object_type': 'song'})
-
-    for tag in tags:
-        results.append({'name': tag.name,
-                        'value': f'tag_{tag.id}',
-                        'link_type': 'tag',
-                        'object_type': 'tag'})
-
-    return JsonResponse(results, safe=False)
-
-
 def get_song_location(song):
 
     song_title = song.title.replace("/", "FORWARDSLASH")
