@@ -6,33 +6,35 @@
 
 {% block left-block %}
 
+    <div class="search-spacer"></div>
+
+    <div id="aggregations">
     {% if request.GET and search_results %}
 
-        <div class="card bg-info">
-            <div class="card-header text-white">Match Categories</div>
-            <div class="card-body bg-light">
-{% for facet in facet_counts|dictsortreversed:"count" %}
-                    <input type="checkbox" name="filter_query" class="facet my-2" id="{{ facet.doctype }}"
-                           {% if facet.doctype in filter_query %}checked="checked"{% endif %}
-                           /> {{ facet.doctype_purty }} ({{ facet.count }})
+        <h4 class="ml-3">
+          Total matches: <strong>{{ object_list.hits.total.value }}</strong>
+        </h4>
+
+        <div class="card mt-3">
+            <div class="card-header">Document Type Filter</div>
+            <div class="card-body text-info">
+            {% for doctype in aggregations %}
+                <input type="checkbox" name="filter_query" class="facet my-2" data-doctype="{{ doctype.doctype }}" @click="onClick"
+                       {% if doctype.doctype in doctype_filter %}checked="checked"{% endif %}
+                /> {{ doctype.doctype|title }} ({{ doctype.count }})
                 <br/>
-{% endfor %}
+            {% endfor %}
             </div>
         </div>
 
-        <div class="pt-5 ml-3">
-    Matches: <strong>{{ object_list.hits.total.value }}</strong>
-        </div>
-
     {% endif %}
+    </div>
 
 {% endblock %}
 
 {% block content %}
 
 {% include "search/header.html" %}
-
-<br />
 
 {% if request.GET %}
 
@@ -102,16 +104,16 @@ Tags: {% if not match.source.tags %}None{% endif %}
 
 {% endfor %}
 
-        </table>
-
-    </div>
-
-{% endif %}
-
-{% endif %}
+    </table>
 
         </div>
+
+{% endif %}
+
+{% endif %}
+
     </div>
+        </div>
 
 {% endblock %}
 
@@ -121,8 +123,31 @@ Tags: {% if not match.source.tags %}None{% endif %}
 
     <script type="text/javascript" charset="utf-8">
 
+        Vue.mixin({ delimiters: ["[[", "]]"] });
+
         new Vue({
-            delimiters: ["[[", "]]"],
+            el: "#aggregations",
+            methods: {
+                onClick(evt) {
+
+                    const selectedDoctype = evt.srcElement.getAttribute("data-doctype");
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const currentDoctype = urlParams.get("doctype");
+
+                    var searchParams = new URLSearchParams(window.location.search);
+
+                    if (selectedDoctype === currentDoctype) {
+                        searchParams.set("doctype", "")
+                    } else {
+                        searchParams.set("doctype", selectedDoctype);
+                    }
+
+                    window.location.search = searchParams;
+                }
+            }
+        });
+
+        new Vue({
             el: "#search",
             methods: {
                 select(tag) {

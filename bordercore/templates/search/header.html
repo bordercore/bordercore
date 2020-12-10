@@ -1,3 +1,5 @@
+<div class="search-spacer">
+
 <form id="search" action="{% url 'search:search' %}" method="get" autocomplete="off">
     <input type="hidden" id="facets" name="facets" value="" />
 
@@ -8,6 +10,7 @@
                 <simple-suggest
                     ref="simpleSuggest"
                     place-holder="Search"
+                    value="Foobar"
                     search-url="{% url 'search:search_tags_and_titles' %}?term="
                 >
                 </simple-suggest>
@@ -65,3 +68,5 @@
     </div>
 
 </form>
+
+</div>

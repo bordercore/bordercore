@@ -57,25 +57,6 @@ class SearchListView(ListView):
 
         return paginator
 
-    # def get_facet_query(self, facet, term):
-
-    #     if facet == 'Blobs':
-    #         return 'doctype:blob'
-    #     elif facet == 'Books':
-    #         return 'doctype:book'
-    #     elif facet == 'Documents':
-    #         return 'doctype:document'
-    #     elif facet == 'Todos':
-    #         return 'doctype:todo'
-    #     elif facet == 'Notes':
-    #         return 'doctype:note'
-    #     elif facet == 'Links':
-    #         return 'doctype:bookmark'
-    #     elif facet == 'Titles':
-    #         return '(title:{})'.format(term)
-    #     elif facet == 'Tags':
-    #         return 'tags:{}'.format(term)
-
     def get_hit_count(self):
 
         hit_count = self.request.GET.get("rows", None)
@@ -87,6 +68,13 @@ class SearchListView(ListView):
 
         return hit_count
 
+    def get_aggregations(self, context, aggregation):
+
+        aggregations = []
+        for x in context["search_results"]["aggregations"][aggregation]["buckets"]:
+            aggregations.append({"doctype": x["key"], "count": x["doc_count"]})
+        return aggregations
+
     def get_queryset(self, **kwargs):
 
         # Store the "sort" field in the user's session
@@ -96,6 +84,7 @@ class SearchListView(ListView):
         sort_field = self.request.GET.get("sort", "date_unixtime")
         hit_count = self.get_hit_count()
         boolean_type = self.request.GET.get("boolean_search_type", "AND")
+        doctype = self.request.GET.get("doctype", None)
 
         es = Elasticsearch(
             [settings.ELASTICSEARCH_ENDPOINT],
@@ -112,6 +101,14 @@ class SearchListView(ListView):
                             }
                         }
                     ]
+                }
+            },
+            "aggs": {
+                "Doctype Filter": {
+                    "terms": {
+                        "field": "doctype.keyword",
+                        "size": 10,
+                    }
                 }
             },
             "sort": {sort_field: {"order": "desc"}},
@@ -136,6 +133,13 @@ class SearchListView(ListView):
 
         # Let subclasses modify the query
         search_object = self.refine_search(search_object)
+
+        if doctype:
+            search_object["post_filter"] = {
+                "term": {
+                    "doctype": doctype
+                }
+            }
 
         if search_term:
             search_object["query"]["bool"]["must"].append(
@@ -166,16 +170,10 @@ class SearchListView(ListView):
 
         context = super(SearchListView, self).get_context_data(**kwargs)
 
-        # facet_counts = {}
-
-        # if self.request.GET.get("facets"):
-        #     context["filter_query"] = self.request.GET.get("facets").split(",")
+        if "doctype" in self.request.GET:
+            context["doctype_filter"] = self.request.GET["doctype"].split(",")
 
         if context["search_results"]:
-
-            # for k, v in context["info"]["facet_counts"]["facet_queries"].items():
-            #     if v > 0:
-            #         facet_counts[k] = v
 
             for match in context["search_results"]["hits"]["hits"]:
 
@@ -187,9 +185,7 @@ class SearchListView(ListView):
                 match["source"]["date"] = get_date_from_pattern(match["source"].get("date", None))
                 match["source"]["last_modified"] = get_relative_date(match["source"]["last_modified"])
 
-            # Convert to a list of dicts.  This lets us use the dictsortreversed
-            #  filter in our template to sort by count.
-            # context["facet_counts"] = [{"doctype_purty": k, "doctype": k, "count": v} for k, v in facet_counts.items()]
+            context["aggregations"] = self.get_aggregations(context, "Doctype Filter")
 
         context["section"] = self.SECTION
         context["subsection"] = self.SUB_SECTION

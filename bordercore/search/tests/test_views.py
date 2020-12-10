@@ -12,7 +12,6 @@ from blob.tests.conftest import (aws_credentials, blob_image_factory,
                                  blob_pdf_factory, s3_bucket, s3_resource)
 from search.views import (SearchTagDetailView, get_doctype, get_title,
                           is_cached, sort_results)
-from tag.tests.conftest import tag
 
 try:
     from bs4 import BeautifulSoup
