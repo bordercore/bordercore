@@ -429,6 +429,7 @@ def sort_results(matches):
         "Artist": [],
         "Album": [],
         "Book": [],
+        "Drill": [],
         "Note": [],
         "Bookmark": [],
         "Document": [],
@@ -473,6 +474,8 @@ def get_link(doc_type, match):
         return reverse("music:album_detail", kwargs={"pk": match["album_id"]})
     elif doc_type in ("Blob", "Book", "Document", "Note"):
         return reverse("blob:detail", kwargs={"uuid": match["uuid"]})
+    elif doc_type == "Drill":
+        return reverse("drill:detail", kwargs={"question_id": match["bordercore_id"]})
     else:
         return ""
 
@@ -483,6 +486,8 @@ def get_tag_link(doc_type, tag):
         return reverse("search:notes") + f"?tagsearch={tag}"
     elif doc_type == "bookmark":
         return reverse("bookmark:get_bookmarks_by_tag", kwargs={"tag_filter": tag})
+    elif doc_type == "drill":
+        return reverse("drill:study_tag", kwargs={"tag": tag})
     else:
         return reverse("search:kb_search_tag_detail", kwargs={"taglist": tag})
 
@@ -494,6 +499,8 @@ def get_title(doc_type, match):
         return match["artist"]
     elif doc_type == "Album":
         return match["album"]
+    elif doc_type == "Drill":
+        return match["question"][:30]
     else:
         return match["title"].title()
 
@@ -567,11 +574,13 @@ def search_tags_and_titles(request):
                     "album",
                     "artist",
                     "author",
+                    "bordercore_id",
                     "date",
                     "date_unixtime",
                     "doctype",
                     "filepath",
                     "importance",
+                    "question",
                     "sha1sum",
                     "tags",
                     "title",
@@ -603,6 +612,13 @@ def search_tags_and_titles(request):
                         {
                             "wildcard": {
                                 "artist": {
+                                    "value": f"*{one_term}*",
+                                }
+                            }
+                        },
+                        {
+                            "wildcard": {
+                                "question": {
                                     "value": f"*{one_term}*",
                                 }
                             }

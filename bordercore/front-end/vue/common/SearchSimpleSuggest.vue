@@ -87,6 +87,7 @@
             suggestSearchUrl: String,
             querySearchUrl: String,
             noteQuerySearchUrl: String,
+            drillQuerySearchUrl: String,
             storeInSessionUrl: String,
         },
         data() {
@@ -164,6 +165,8 @@
                     form.action = this.noteQuerySearchUrl;
                 } else if (this.searchFilter === "Bookmark") {
                     form.action = this.bookmarkQuerySearchUrl;
+                } else if (this.searchFilter === "Drill") {
+                    form.action = this.drillQuerySearchUrl;
                 } else {
                     form.action = this.querySearchUrl;
                 }
@@ -181,6 +184,8 @@
                     this.handleFilter("Book");
                 } else if (evt.code === "KeyM" && evt.altKey) {
                     this.handleFilter("Music");
+                } else if (evt.code === "KeyD" && evt.altKey) {
+                    this.handleFilter("Drill");
                 } else if (evt.key === "a" && evt.altKey) {
                     document.getElementById("top-simple-suggest").select();
                 }

@@ -1,10 +1,15 @@
+import uuid
 from datetime import timedelta
 
 import markdown
+from elasticsearch import Elasticsearch
 from markdown.extensions.codehilite import CodeHiliteExtension
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch.dispatcher import receiver
 
 from lib.mixins import TimeStampedModel
 from tag.models import Tag
@@ -32,6 +37,7 @@ class Question(TimeStampedModel):
     One question and its answer
     """
 
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     question = models.TextField()
     answer = models.TextField()
     tags = models.ManyToManyField(Tag, blank=True)
@@ -123,3 +129,74 @@ class Question(TimeStampedModel):
             self.efactor = self.efactor - (self.efactor * 0.2)
 
         self.save()
+
+    def delete(self):
+
+        es = Elasticsearch(
+            [settings.ELASTICSEARCH_ENDPOINT],
+            verify_certs=False
+        )
+
+        request_body = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "doctype": "drill"
+                            }
+                        },
+                        {
+                            "term": {
+                                "uuid.keyword": self.uuid
+                            }
+                        },
+
+                    ]
+                }
+            }
+        }
+
+        es.delete_by_query(index=settings.ELASTICSEARCH_INDEX, body=request_body)
+
+        super(Question, self).delete()
+
+    def index_question(self, es=None):
+
+        if not es:
+            es = Elasticsearch(
+                [settings.ELASTICSEARCH_ENDPOINT],
+                verify_certs=False
+            )
+
+        doc = {
+            "uuid": self.uuid,
+            "bordercore_id": self.id,
+            "question": self.question,
+            "answer": self.answer,
+            "tags": [tag.name for tag in self.tags.all()],
+            "last_modified": self.modified,
+            "doctype": "drill",
+            "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
+            "date_unixtime": self.created.strftime("%s"),
+            "user_id": self.user.id
+        }
+
+        if self.last_reviewed:
+            doc["last_reviewed"] = self.last_reviewed.strftime("%s")
+
+        es.index(
+            index=settings.ELASTICSEARCH_INDEX,
+            id=self.uuid,
+            body=doc
+        )
+
+
+@receiver(post_save, sender=Question)
+def post_save_wrapper(sender, instance, **kwargs):
+    """
+    This should be called anytime a question is created or updated.
+    """
+
+    # Index the question and answer in Elasticsearch
+    instance.index_question()

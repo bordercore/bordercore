@@ -9,7 +9,7 @@ from django.db.transaction import atomic
 from todo.models import Todo  # isort:skip
 from bookmark.models import Bookmark  # isort:skip
 from music.models import Song  # isort:skip
-
+from drill.models import Question  # isort:skip
 
 es = Elasticsearch(
     [settings.ELASTICSEARCH_ENDPOINT],
@@ -19,13 +19,13 @@ es = Elasticsearch(
 
 
 class Command(BaseCommand):
-    help = "Re-index all bookmarks, songs, or todo tasks in Elasticsearch"
+    help = "Re-index all bookmarks, songs, drill questions, or todo tasks in Elasticsearch"
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--model",
-            choices=["bookmark", "song", "todo"],
-            help="The model to index: 'bookmark', 'song', or 'todo'",
+            choices=["bookmark", "drill", "song", "todo"],
+            help="The model to index: 'bookmark', 'drill', 'song', or 'todo'",
             required=True
         )
 
@@ -34,6 +34,8 @@ class Command(BaseCommand):
 
         if model == "bookmark":
             self.index_bookmarks_all()
+        elif model == "drill":
+            self.index_drill_all()
         elif model == "song":
             self.index_song_all()
         elif model == "todo":
@@ -44,6 +46,12 @@ class Command(BaseCommand):
         for b in Bookmark.objects.all():
             self.stdout.write(b.url)
             b.index_bookmark(es)
+
+    def index_drill_all(self):
+
+        for q in Question.objects.all():
+            self.stdout.write(str(q.uuid))
+            q.index_question(es)
 
     def index_song_all(self):
 

@@ -4,7 +4,7 @@ from django import urls
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, F, Max, Q
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -65,7 +65,7 @@ class DrillSearchListView(ListView):
     template_name = 'drill/search.html'
 
     def get_queryset(self):
-        search_term = self.request.GET['search_term']
+        search_term = self.request.GET['search']
 
         return Question.objects.filter(Q(question__icontains=search_term) |
                                        Q(answer__icontains=search_term))
@@ -73,7 +73,7 @@ class DrillSearchListView(ListView):
     def get_context_data(self, **kwargs):
         context = super(DrillSearchListView, self).get_context_data(**kwargs)
 
-        search_term = self.request.GET['search_term']
+        search_term = self.request.GET['search']
 
         info = []
 
@@ -84,7 +84,7 @@ class DrillSearchListView(ListView):
                              answer=question.answer))
 
         context['cols'] = ['tags', 'id', 'question', 'answer']
-        context['search_term'] = search_term
+        context['search'] = search_term
         context['section'] = SECTION
         context['info'] = info
         context['title'] = 'Drill Search'
@@ -297,10 +297,3 @@ def skip_question(request, question_id):
         return redirect("drill:study_random")
     else:
         return redirect("drill:study_tag", tag=question.tags.all().first().name)
-
-
-def tag_search(request):
-
-    tags = Tag.objects.filter(question__user=request.user, name__icontains=request.GET.get("term", ""), question__isnull=False).distinct("name")
-
-    return JsonResponse([{"value": x.name, "is_meta": x.is_meta} for x in tags], safe=False)

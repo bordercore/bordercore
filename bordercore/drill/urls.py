@@ -64,10 +64,5 @@ urlpatterns = [
         route="study/tag/<str:tag>/",
         view=views.study_tag,
         name="study_tag"
-    ),
-    path(
-        route="tagsearch/",
-        view=views.tag_search,
-        name="tag_search"
-    ),
+    )
 ]

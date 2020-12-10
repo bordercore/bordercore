@@ -32,27 +32,6 @@
 
 <div id="search">
     {% include "common/show_messages.html" %}
-    <div class="row">
-        <div class="col-lg-7">
-            <form role="form" action="{% url 'drill:search' %}" method="get" autocomplete="off">
-
-                <div class="form-row">
-                    <div class="col-auto has-search">
-                        <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
-
-                        <simple-suggest
-                            ref="simpleSuggest"
-                            place-holder="Search"
-                            search-url="{% url 'drill:tag_search' %}?term="
-                        >
-                        </simple-suggest>
-
-                    </div>
-                </div>
-
-            </form>
-        </div>
-    </div>
 </div>
 
 <div class="row">
