@@ -184,6 +184,9 @@
                     this.handleFilter("Book");
                 } else if (evt.code === "KeyM" && evt.altKey) {
                     this.handleFilter("Music");
+                    // Hack to prevent Chrome on OS X from submitting the form.
+                    // I have no idea why this happens.
+                    evt.preventDefault();
                 } else if (evt.code === "KeyD" && evt.altKey) {
                     this.handleFilter("Drill");
                 } else if (evt.key === "a" && evt.altKey) {
