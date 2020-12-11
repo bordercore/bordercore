@@ -31,11 +31,12 @@ window.jQuery= jQuery;
 import "bootstrap";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faAlignLeft, faBars, faBookmark, faBriefcase, faCalendarAlt, faCopy, faEllipsisV, faHome, faGraduationCap, faMusic, faNewspaper, faPlus, faRunning, faSearch, faStickyNote, faTasks } from "@fortawesome/free-solid-svg-icons";
+import { faAlignLeft, faBars, faBook, faBookmark, faBriefcase, faCalendarAlt, faCopy, faEllipsisV, faHome, faGraduationCap, faMusic, faNewspaper, faPlus, faRunning, faSearch, faStickyNote, faTasks } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 library.add(faAlignLeft);
 library.add(faBars);
 library.add(faBookmark);
+library.add(faBook);
 library.add(faBriefcase);
 library.add(faCalendarAlt);
 library.add(faCopy);

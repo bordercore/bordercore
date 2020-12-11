@@ -57,13 +57,10 @@ def test_search(mock_elasticsearch, user, client):
 
     soup = BeautifulSoup(resp.content, "html.parser")
 
-    matches = soup.select("h4.search_book_title")
-    assert len(matches) == 14
+    matches = soup.select("h4.search_result")
+    assert len(matches) == 19
 
-    matches = soup.select("span.search_book_title")
-    assert len(matches) == 5
-
-    match = soup.select("h4.search_book_title a")[0].text
+    match = soup.select("h4.search_result a")[0].text
     assert data["hits"]["hits"][0]["source"]["title"] == match
 
 

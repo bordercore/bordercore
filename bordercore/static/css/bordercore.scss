@@ -365,13 +365,16 @@ ul.pagination {
   font-size: smaller;
 }
 
-.important {
-  background-color: #eee;
-  padding: 3px;
+.search_result {
+  padding: 5px;
+
+  a {
+    padding-left: 15px;
+  }
 }
 
-.search_book_title #edit_link {
-  font-size: 8px;
+.search_result_important {
+  background-color: $gray-700;
 }
 
 .search_todo_date {
