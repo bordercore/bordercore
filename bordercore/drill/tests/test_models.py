@@ -1,16 +1,22 @@
+import re
 from datetime import timedelta
 
-import django
+import factory
+import pytest
+
+from django.db.models import signals
+
+from .factories import QuestionFactory
 
 from drill.models import Question, EFACTOR_DEFAULT  # isort:skip
 
-django.setup()
-
+pytestmark = pytest.mark.django_db
 
 
 def test_get_tags(question):
 
-    assert question.get_tags() == "django"
+    tags = question.get_tags()
+    assert re.compile(r"tag_\d+, tag_\d+").match(tags) is not None
 
 
 def test_get_state_name(question):
@@ -53,7 +59,10 @@ def test_learning_step_increase(question):
     assert(question.learning_step == question.LEARNING_STEPS[1][0])
 
 
-def test_record_response(question):
+@factory.django.mute_signals(signals.post_save)
+def test_record_response():
+
+    question = QuestionFactory()
 
     question.record_response("good")
     assert question.state == "L"

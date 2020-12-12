@@ -78,5 +78,5 @@ def test_elasticsearch_questions_exist_in_db(es):
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["hits"]
 
     for question in found:
-        assert Question.objects.filter(id=question["_source"]["bordercore_id"]).count() == 1, \
+        assert Question.objects.filter(uuid=question["_id"]).count() == 1, \
             f"question exists in Elasticsearch but not in database, id={question['_id']}"

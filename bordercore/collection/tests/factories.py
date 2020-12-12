@@ -3,7 +3,6 @@ import datetime
 import factory
 
 from django.contrib.auth.models import User
-from django.db.models import signals
 
 from blob.models import Blob
 from collection.models import Collection

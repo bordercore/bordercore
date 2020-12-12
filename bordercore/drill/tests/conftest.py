@@ -1,29 +1,19 @@
-import os
-
 import pytest
 
-import django
+from tag.tests.factories import TagFactory
 
-from drill.models import EFACTOR_DEFAULT
-
-django.setup()
-
-from django.contrib.auth.models import User  # isort:skip
-from drill.models import Question  # isort:skip
-from tag.models import Tag  # isort:skip
+from .factories import QuestionFactory
 
 
 @pytest.fixture(scope="function")
 def question(user):
 
-    tag, _ = Tag.objects.get_or_create(name="django")
-    question = Question.objects.create(
-        question="What the first element in the periodic table?",
-        answer="Hydrogen",
-        efactor=EFACTOR_DEFAULT,
-        user=user
-    )
+    question = QuestionFactory()
 
-    question.tags.add(tag)
+    tag_1 = TagFactory()
+    tag_2 = TagFactory()
+
+    question.tags.add(tag_1)
+    question.tags.add(tag_2)
 
     yield question
