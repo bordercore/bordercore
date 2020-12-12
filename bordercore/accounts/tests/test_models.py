@@ -1,5 +1,5 @@
 from tag.models import Tag  # isort:skip
-from accounts.models import SortOrderUserTag  # isort:skip
+from accounts.models import SortOrderUserTag, favorite_tags_has_changed  # isort:skip
 
 
 def test_get_tags(user, sort_order):
@@ -39,3 +39,16 @@ def test_reorder(user, sort_order):
     assert tags[0] == tag3
     assert tags[1] == tag1
     assert len(tags) == 2
+
+
+def test_favorite_tags_has_changed():
+
+    assert favorite_tags_has_changed("django", "django") is False
+    assert favorite_tags_has_changed("django ", "django") is False
+    assert favorite_tags_has_changed("django,linux", "django,linux") is False
+    assert favorite_tags_has_changed("django, linux", "django,linux") is False
+    assert favorite_tags_has_changed("linux,django", "django,linux") is False
+    assert favorite_tags_has_changed("linux, django", "django,linux") is False
+    assert favorite_tags_has_changed("linux, django,postgresql", "django,linux") is True
+    assert favorite_tags_has_changed("linux, django,postgresql", "") is True
+    assert favorite_tags_has_changed("", "linux, django,postgresql") is True

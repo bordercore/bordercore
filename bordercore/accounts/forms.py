@@ -19,7 +19,9 @@ class UserProfileForm(ModelForm):
 
         self.fields['homepage_default_collection'].label = "Default collection"
         self.fields['homepage_default_collection'].widget.attrs['class'] = 'form-control'
+        self.fields['homepage_default_collection'].required = False
         self.fields['favorite_tags'].widget.attrs['class'] = 'form-control'
+        self.fields['orgmode_file'].required = False
         self.fields['todo_default_tag'].widget.attrs['class'] = 'form-control'
 
         # If this form has a model attached, get the tags and display them separated by commas
@@ -28,7 +30,7 @@ class UserProfileForm(ModelForm):
 
     todo_default_tag = MyModelChoiceField(queryset=Tag.objects.filter(todo__isnull=False).distinct('name'), empty_label='Select Tag')
 
-    homepage_default_collection = MyModelChoiceField(queryset=Collection.objects.exclude(name=''), empty_label='Select Collection')
+    homepage_default_collection = MyModelChoiceField(queryset=Collection.objects.none(), empty_label='Select Collection')
 
     favorite_tags = ModelCommaSeparatedChoiceField(
         required=False,

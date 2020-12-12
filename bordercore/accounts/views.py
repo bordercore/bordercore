@@ -8,10 +8,10 @@ from django.contrib import messages
 from django.contrib.auth import (authenticate, login, logout,
                                  update_session_auth_hash)
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
 from django.contrib.auth.views import PasswordChangeView
+from django.db import transaction
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
@@ -19,8 +19,10 @@ from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView
 
 from accounts.forms import UserProfileForm
-from accounts.models import SortOrderUserNote, UserProfile
+from accounts.models import (SortOrderUserNote, SortOrderUserTag, UserProfile,
+                             favorite_tags_has_changed)
 from blob.models import Blob
+from collection.models import Collection
 
 SECTION = 'prefs'
 
@@ -42,8 +44,33 @@ class UserProfileUpdateView(UpdateView):
     def get_object(self, queryset=None):
         return UserProfile.objects.get(user=self.request.user)
 
+    def get_initial(self):
+        self.initial.update(
+            {"homepage_default_collection": Collection.objects.filter(user=self.request.user).exclude(name='')}
+        )
+        return super(UserProfileUpdateView, self).get_initial()
+
     def form_valid(self, form):
         self.handle_sidebar(form)
+
+        userprofile = form.instance
+
+        # Only update favorite tags if they've changed.
+        if favorite_tags_has_changed(form.initial["favorite_tags"], self.request.POST["favorite_tags"]):
+            with transaction.atomic():
+
+                for tag in userprofile.favorite_tags.all():
+                    s = SortOrderUserTag.objects.get(userprofile=userprofile, tag=tag)
+                    s.delete()
+
+                # Delete all existing tags
+                userprofile.favorite_tags.clear()
+
+                # Then add the tags specified in the form
+                for tag in form.cleaned_data["favorite_tags"]:
+                    c = SortOrderUserTag(userprofile=userprofile, tag=tag)
+                    c.save()
+
         self.object = form.save()
         context = self.get_context_data(form=form)
         context["message"] = "Preferences updated"
