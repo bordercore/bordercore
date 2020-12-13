@@ -32,7 +32,7 @@ def test_todo_tasks_in_db_exist_in_elasticsearch(es):
         search_object = {
             "query": {
                 "term": {
-                    "uuid.keyword": task.uuid
+                    "uuid": task.uuid
                 }
             },
             "_source": ["id"]
@@ -62,7 +62,7 @@ def test_todo_tags_match_elasticsearch(es):
                     "must": [
                         {
                             "term": {
-                                "uuid.keyword": task.uuid
+                                "uuid": task.uuid
                             }
                         },
                         tag_query

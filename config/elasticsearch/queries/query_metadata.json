@@ -4,7 +4,7 @@
             "must": [
                 {
                     "term": {
-                        "uuid.keyword": "a337cd3b-52c7-46d6-b971-e44669a7eb1f"
+                        "uuid": "a337cd3b-52c7-46d6-b971-e44669a7eb1f"
                     }
                 },
                 {

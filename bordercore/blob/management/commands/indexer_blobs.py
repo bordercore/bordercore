@@ -139,7 +139,7 @@ class Command(BaseCommand):
 
     def blob_exists_in_es(self, uuid):
 
-        search_object = {"query": {"term": {"uuid.keyword": uuid}}, "_source": ["uuid"]}
+        search_object = {"query": {"term": {"uuid": uuid}}, "_source": ["uuid"]}
         results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
         return int(results["hits"]["total"]["value"])
 

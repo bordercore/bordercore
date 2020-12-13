@@ -106,7 +106,7 @@ class SearchListView(ListView):
             "aggs": {
                 "Doctype Filter": {
                     "terms": {
-                        "field": "doctype.keyword",
+                        "field": "doctype",
                         "size": 10,
                     }
                 }
@@ -291,7 +291,7 @@ class SearchTagDetailView(ListView):
             "aggs": {
                 "Doctype Filter": {
                     "terms": {
-                        "field": "doctype.keyword",
+                        "field": "doctype",
                         "size": 10
                     }
                 },

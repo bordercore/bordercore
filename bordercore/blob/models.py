@@ -248,7 +248,7 @@ class Blob(TimeStampedModel, AmazonMixin):
                     "must": [
                         {
                             "term": {
-                                "uuid.keyword": self.uuid
+                                "uuid": self.uuid
                             }
                         },
                         {

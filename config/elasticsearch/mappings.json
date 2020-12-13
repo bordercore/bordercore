@@ -1,55 +1,19 @@
 {
     "mappings": {
         "properties": {
-            "uuid": {
-                "type":"text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword"
-                    }
-                }
-            },
+            "uuid": { "type":"keyword" },
             "bordercore_id": { "type":"long" },
-            "sha1sum": {
-                "type":"text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword"
-                    }
-                }
-            },
+            "sha1sum": { "type":"keyword" },
             "user_id": { "type":"integer" },
             "is_private": { "type":"boolean" },
             "date": {
                 "type":"date_range",
                 "format":"yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM||yyyy||epoch_second"
             },
-            "title": {
-                "type":"text",
-                "fields": {
-                    "raw": {
-                        "type": "text",
-                        "analyzer": "no_tokenization"
-                    }
-                }
-            },
+            "title": { "type":"text" },
             "contents": { "type":"text" },
-            "doctype": {
-                "type":"text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword"
-                    }
-                }
-            },
-            "content_type": {
-                "type":"text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword"
-                    }
-                }
-            },
+            "doctype": { "type":"keyword" },
+            "content_type": { "type":"keyword" },
             "tags": {
                 "type":"text",
                 "fields": {

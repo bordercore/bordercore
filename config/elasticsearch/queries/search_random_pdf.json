@@ -13,7 +13,7 @@
                         },
                         {
                             "wildcard": {
-                                "content_type.keyword": {
+                                "content_type": {
                                     "value": "*/pdf"
                                 }
                             }

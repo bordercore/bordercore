@@ -97,7 +97,7 @@ class Command(BaseCommand):
                         },
                         {
                             "term": {
-                                "sha1sum.keyword": sha1sum
+                                "sha1sum": sha1sum
                             }
                         },
                         {
@@ -127,7 +127,7 @@ class Command(BaseCommand):
         request_body = {
             "query": {
                 "term": {
-                    "uuid.keyword": uuid
+                    "uuid": uuid
                 }
             },
             "script": {

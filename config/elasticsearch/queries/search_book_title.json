@@ -9,7 +9,7 @@
                 },
                 {
                     "wildcard": {
-                        "title.raw": {
+                        "title": {
                             "value": "*serious python*"
                         }
                     }

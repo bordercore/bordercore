@@ -303,7 +303,7 @@ def search_blob_titles(request):
                     },
                     {
                         "wildcard": {
-                            "title.raw": {
+                            "title": {
                                 "value": f"*{search_term}*",
                             }
                         }

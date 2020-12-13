@@ -124,7 +124,7 @@ def get_random_blob(request, content_type):
                         'must': [
                             {
                                 "wildcard": {
-                                    "content_type.keyword": {
+                                    "content_type": {
                                         "value": content_type,
                                     }
                                 }

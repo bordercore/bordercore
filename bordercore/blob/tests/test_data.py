@@ -519,7 +519,7 @@ def test_collection_blobs_exists_in_elasticsearch(es):
             search_object = {
                 "query": {
                     "term": {
-                        "uuid.keyword": blob.uuid
+                        "uuid": blob.uuid
                     }
                 },
                 "_source": ["uuid"]
@@ -545,7 +545,7 @@ def test_blob_metadata_exists_in_elasticsearch(es):
                     "must": [
                         {
                             "term": {
-                                "uuid.keyword": str(m.blob.uuid)
+                                "uuid": str(m.blob.uuid)
                             }
                         },
                         {
@@ -606,7 +606,7 @@ def test_blob_tags_match_elasticsearch(es):
                     "must": [
                         {
                             "term": {
-                                "uuid.keyword": b.uuid
+                                "uuid": b.uuid
                             }
                         },
                         tag_query
@@ -688,7 +688,7 @@ def test_all_notes_exist_in_elasticsearch(es):
                     "must": [
                         {
                             "term": {
-                                "uuid.keyword": note.uuid
+                                "uuid": note.uuid
                             }
                         },
                         {

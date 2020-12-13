@@ -148,7 +148,7 @@ class Question(TimeStampedModel):
                         },
                         {
                             "term": {
-                                "uuid.keyword": self.uuid
+                                "uuid": self.uuid
                             }
                         },
 
