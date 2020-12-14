@@ -513,8 +513,8 @@ Linking to <a href="{% url 'blob:detail' linked_blob.uuid %}">{{ linked_blob.tit
                     metadata: [
                         {% for m in metadata %}
                         {
-                            name: "{{ m.name }}",
-                            value: "{{ m.value }}",
+                            name: "{{ m.name|safe }}",
+                            value: "{{ m.value|safe }}",
                             counter: {{ forloop.counter }}
                         },
                         {% endfor %}

@@ -225,8 +225,10 @@ class BlobUpdateView(UpdateView):
             log.warn(f"No S3 cover image found for id={self.object.id}")
 
         context['metadata'] = self.object.metadata_set.exclude(name="is_book")
-        if True in [True for x in self.object.metadata_set.all() if x.name == 'is_book']:
+
+        if [x for x in self.object.metadata_set.all() if x.name == 'is_book']:
             context['is_book'] = True
+
         context['is_private'] = self.object.is_private
         context['is_note'] = self.object.is_note
         context['collections_other'] = Collection.objects.filter(Q(user=self.request.user)
