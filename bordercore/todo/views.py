@@ -143,6 +143,8 @@ class TodoCreateView(CreateView):
         context['nav'] = 'todo'
         context['action'] = 'Create'
         context['title'] = 'Todo Create'
+        if 'tagsearch' in self.request.GET:
+            context['tags'] = [{'text': self.request.GET['tagsearch'], 'value': self.request.GET['tagsearch'], 'is_meta': False}]
         return context
 
     def get_form_kwargs(self):
