@@ -14,6 +14,7 @@
                             :max-suggestions="maxSuggestions"
                             :placeholder="placeHolder"
                             autocomplete="off"
+                            :autofocus="autofocus"
                             :styles="autoCompleteStyle"
                             @select="select"
                             @keydown.native.enter="onEnter"
@@ -34,6 +35,9 @@
 
     export default {
         props: {
+            autofocus: {
+                default: false
+            },
             accesskey: {
                 default: null
             },
