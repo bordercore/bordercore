@@ -47,7 +47,7 @@
                 default: "value"
             },
             maxSuggestions: {
-                default: 10,
+                default: 20,
                 type: Number
             },
             searchUrl: {
