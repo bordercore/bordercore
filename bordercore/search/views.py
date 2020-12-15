@@ -541,6 +541,9 @@ def is_cached():
 
 @login_required
 def search_tags_and_titles(request):
+    """
+    Endpoint for top-search "auto-complete" matching tags and titles
+    """
 
     es = Elasticsearch(
         [settings.ELASTICSEARCH_ENDPOINT],
@@ -554,6 +557,37 @@ def search_tags_and_titles(request):
     #  Elasticsearch doctype is "song"
     if doc_type == "music":
         doc_type = "song"
+
+    results_title = search_titles(request, es, doc_type, search_term)
+
+    matches = []
+
+    cache_checker = is_cached()
+
+    for match in results_title["hits"]["hits"]:
+        object_type = get_doctype(match)
+        title = get_title(object_type, match["_source"])
+
+        if not cache_checker(object_type, title):
+            matches.append(
+                {
+                    "object_type": object_type,
+                    "value": title,
+                    "uuid": match["_source"].get("uuid"),
+                    "id": match["_id"],
+                    "url": match["_source"].get("url", None),
+                    "link": get_link(object_type, match["_source"])
+                }
+            )
+
+    # Add tag search results to the list of matches
+    matches.extend(search_tags(request, es, doc_type, search_term))
+
+    return JsonResponse(sort_results(matches), safe=False)
+
+
+@login_required
+def search_titles(request, es, doc_type, search_term):
 
     search_terms = re.split(r"\s+", search_term)
 
@@ -645,39 +679,78 @@ def search_tags_and_titles(request):
             },
         )
 
-    results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
-    tags = {}
-    matches = []
+    return es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 
-    cache_checker = is_cached()
 
-    for match in results["hits"]["hits"]:
-        object_type = get_doctype(match)
-        title = get_title(object_type, match["_source"])
+@login_required
+def search_tags(request, es, doc_type, search_term):
 
-        if not cache_checker(object_type, title):
-            matches.append(
-                {
-                    "object_type": object_type,
-                    "value": title,
-                    "uuid": match["_source"].get("uuid"),
-                    "id": match["_id"],
-                    "url": match["_source"].get("url", None),
-                    "link": get_link(object_type, match["_source"])
+    search_object = {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "term": {
+                            "user_id": request.user.id
+                        }
+                    },
+                    {
+                        "wildcard": {
+                            "tags": f"{search_term}*"
+                        }
+                    }
+                ]
+            }
+        },
+        "aggs": {
+            "Distinct Tags": {
+                "terms": {
+                    "field": "tags.keyword",
+                    "size": 1000
                 }
-            )
+            }
+        },
+        "from": 0, "size": 100,
+        "_source": ["album_id",
+                    "album",
+                    "artist",
+                    "author",
+                    "date",
+                    "date_unixtime",
+                    "doctype",
+                    "filepath",
+                    "importance",
+                    "question",
+                    "sha1sum",
+                    "tags",
+                    "title",
+                    "url",
+                    "uuid"]
+    }
 
-        if "tags" in match["_source"] and isinstance(match["_source"]["tags"], list):
-            for tag in [x for x in match["_source"]["tags"] if x.lower().find(search_term.lower()) != -1]:
-                tags[tag] = 1
+    if doc_type:
+        search_object["query"]["bool"]["must"].append(
+            {
+                "term": {
+                    "doctype": doc_type
+                }
+            },
+        )
 
-    for tag in tags:
-        matches.insert(0,
-                       {
-                           "object_type": "Tag",
-                           "value": tag,
-                           "id": tag,
-                           "link": get_tag_link(doc_type, tag),
-                       }
-                       )
-    return JsonResponse(sort_results(matches), safe=False)
+    results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+    print(results)
+
+    matches = []
+    for tag_result in results["aggregations"]["Distinct Tags"]["buckets"]:
+        if tag_result["key"].lower().find(search_term.lower()) != -1:
+            matches.insert(0,
+                           {
+                               "object_type": "Tag",
+                               "value": tag_result["key"],
+                               "id": tag_result["key"],
+                               "link": get_tag_link(doc_type, tag_result["key"]),
+                           }
+                           )
+
+    print(matches)
+    return matches
