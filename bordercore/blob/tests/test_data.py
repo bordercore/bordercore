@@ -641,6 +641,9 @@ def test_blobs_have_proper_metadata():
             except KeyError:
                 assert False, f"image uuid={blob.uuid} has no 'image-height' S3 metadata"
 
+        if obj.content_type == "binary/octet-stream":
+            assert False, f"blob uuid={blob.uuid} has no proper 'Content-Type' metadata"
+
 
 def test_blobs_have_size_field(es):
     "Assert that all blobs have a size field"
