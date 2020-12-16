@@ -474,7 +474,15 @@ def set_s3_metadata_file_modified(sender, instance, **kwargs):
     s3_object = s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key)
 
     s3_object.metadata.update({"file-modified": str(instance.file_modified)})
-    s3_object.copy_from(CopySource={"Bucket": settings.AWS_STORAGE_BUCKET_NAME, "Key": key}, Metadata=s3_object.metadata, MetadataDirective="REPLACE")
+
+    # Note: since "Content-Type" is system-defined metadata, it will be reset
+    #  to "binary/octent-stream" if you don't explicitly specify it.
+    s3_object.copy_from(
+        ContentType=s3_object.content_type,
+        CopySource={"Bucket": settings.AWS_STORAGE_BUCKET_NAME, "Key": key},
+        Metadata=s3_object.metadata,
+        MetadataDirective="REPLACE"
+    )
 
 
 @receiver(pre_delete, sender=Blob)

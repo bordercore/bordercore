@@ -65,7 +65,15 @@ def set_s3_metadata_image_dimensions(bucket, key, file_path):
     s3_object = s3_resource.Object(bucket, key)
     s3_object.metadata.update({"image-width": str(width)})
     s3_object.metadata.update({"image-height": str(height)})
-    s3_object.copy_from(CopySource={"Bucket": bucket, "Key": key}, Metadata=s3_object.metadata, MetadataDirective="REPLACE")
+
+    # Note: since "Content-Type" is system-defined metadata, it will be reset
+    #  to "binary/octent-stream" if you don't explicitly specify it.
+    s3_object.copy_from(
+        ContentType=s3_object.content_type,
+        CopySource={"Bucket": bucket, "Key": key},
+        Metadata=s3_object.metadata,
+        MetadataDirective="REPLACE"
+    )
 
 
 def is_cover_image(bucket, key):
