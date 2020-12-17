@@ -14,18 +14,19 @@
 
     <h1>Active Exercises</h1>
 
-    <table class="table" id="active_exercises">
+    <div class="table_container">
+        <table class="table" id="active_exercises"80%">
 
-        <thead>
-            <tr>
-                <th>Exercise</th>
-                <th>Muscle Group</th>
-                <th>Interval</th>
-                <th>Last Workout</th>
-                <th></th>
-                <th></th>
-            </tr>
-        </thead>
+            <thead>
+                <tr>
+                    <th>Exercise</th>
+                    <th>Muscle Group</th>
+                    <th>Interval</th>
+                    <th>Last Workout</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
 
     {% for exercise in active_exercises %}
 
@@ -34,51 +35,54 @@
             <td>{{ exercise.muscle.muscle_group }}</td>
             <td>{{ exercise.interval.days }} day{{ exercise.interval.days|pluralize:"s" }}</td>
             {% if exercise.last_active %}
-                <td>{{ exercise.last_active|date:"N j, Y" }} - {{ exercise.delta_days }} day{{ exercise.delta_days|pluralize:"s" }} ago</td>
+                <td>{{ exercise.last_active|date:"N j, Y" }} <span class="float-right">{{ exercise.delta_days }} day{{ exercise.delta_days|pluralize:"s" }} ago</span></td>
             {% else %}
                 <td>Never</td>
             {% endif %}
-            <td>{{ exercise.last_active|date:"U" }}</td>
-            <td>{{ exercise.delta_days }}</td>
+            <td></td>
+            <td></td>
         </tr>
 
     {% endfor %}
 
-    </table>
+        </table>
+    </div>
 
     <h1>Inactive Exercises</h1>
 
-    <table class="table" id="active_exercises" style="display:none" width="100%">
+    <div class="table_container">
+        <table class="table" id="inactive_exercises">
 
-        <thead>
-            <tr>
-                <th>Exercise</th>
-                <th>Muscle Group</th>
-                <th>Date</th>
-                <th></th>
-                <th></th>
-                <th></th>
-            </tr>
-        </thead>
+            <thead>
+                <tr>
+                    <th>Exercise</th>
+                    <th>Muscle Group</th>
+                    <th>Last Workout</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
 
     {% for exercise in inactive_exercises %}
 
         <tr>
             <td><a href="{% url 'fitness:exercise_detail' exercise.id %}">{{ exercise.exercise }}</a></td>
             <td>{{ exercise.muscle.muscle_group }}</td>
-            <td></td>
             {% if exercise.last_active %}
-                <td>{{ exercise.last_active|date:"N j, Y" }} - {{ exercise.delta_days }} day{{ exercise.delta_days|pluralize:"s" }} ago</td>
+                <td>{{ exercise.last_active|date:"N j, Y" }} <span class="float-right">{{ exercise.delta_days }} day{{ exercise.delta_days|pluralize:"s" }} ago</span></td>
             {% else %}
                 <td>Never</td>
             {% endif %}
-            <td>{{ exercise.last_active|date:"U" }}</td>
-            <td>{{ exercise.delta_days }}</td>
+            <td></td>
+            <td></td>
+            <td></td>
         </tr>
 
     {% endfor %}
 
-    </table>
+        </table>
+    </div>
 
 {% endblock %}
 
@@ -117,6 +121,9 @@
                 searching: false,
                 "sorting": [[3, 'asc']],
             });
+
+            // The "Inactive Exercises" table has one less column, so turn this invisible
+            $( "#inactive_exercises" ).dataTable().api().column(3).visible(false);
 
         });
 

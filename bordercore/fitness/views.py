@@ -101,8 +101,8 @@ def fitness_summary(request):
 
     for e in exercises:
 
-        if e.is_active and e.last_active:
-            if timezone.now() - e.last_active + timedelta(days=1) > e.interval:
+        if e.last_active:
+            if e.interval and timezone.now() - e.last_active + timedelta(days=1) > e.interval:
                 e.overdue = True
 
             delta = timezone.now() - e.last_active
