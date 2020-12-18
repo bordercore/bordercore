@@ -55,7 +55,14 @@
     <tr>
         <td{% if match.source.importance == 10 %} class="search_result_important"{% endif %}>
 
-{% if match.source.doctype == 'todo' %}
+{% if match.source.doctype == 'drill' %}
+
+    <h4 class="search_result">
+        <font-awesome-icon icon="graduation-cap"></font-awesome-icon>
+        Drill: <a href="{% url 'drill:detail' match.source.bordercore_id %}">{{ match.source.question }}</a>
+    </h4>
+
+{% elif match.source.doctype == 'todo' %}
 
     <h4 class="search_result">
         <font-awesome-icon icon="tasks"></font-awesome-icon>

@@ -124,6 +124,7 @@ class SearchListView(ListView):
                         "importance",
                         "bordercore_id",
                         "last_modified",
+                        "question",
                         "sha1sum",
                         "tags",
                         "title",
@@ -147,7 +148,7 @@ class SearchListView(ListView):
                     "multi_match": {
                         "type": "best_fields" if not self.request.GET.get("exact_match", None) else "phrase",
                         "query": search_term,
-                        "fields": ["artist", "author", "attachment.content", "contents", "sha1sum", "task", "title", "uuid"],
+                        "fields": ["answer", "artist", "author", "attachment.content", "contents", "question", "sha1sum", "task", "title", "uuid"],
                         "operator": boolean_type,
                     }
                 }
