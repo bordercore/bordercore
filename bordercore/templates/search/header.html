@@ -1,73 +1,75 @@
-<div class="search-spacer">
+<div class="search-spacer-right">
 
-<form id="search" action="{% url 'search:search' %}" method="get" autocomplete="off">
-    <input type="hidden" id="facets" name="facets" value="" />
+    <form action="{% url 'search:search' %}" method="get" autocomplete="off">
 
-    <div class="form-row align-items-center">
+        <table>
+            <tr>
+                <th>What are you searching for?</th>
+                <th>Boolean Type</th>
+                <th>Exact Match</th>
+                <th>Sort By</th>
+                <th>Limit</th>
+            </tr>
 
-        <div class="form-row">
-            <div class="col-auto">
-                <simple-suggest
-                    autofocus=true
-                    ref="simpleSuggest"
-                    place-holder="Search"
-                    value="Foobar"
-                    search-url="{% url 'search:search_tags_and_titles' %}?term="
-                >
-                </simple-suggest>
-            </div>
-        </div>
+            <tr>
 
-        <div class="col-auto">
-            <label class="bold">Limit</label>
-        </div>
-        <div class="col-auto">
-            <select name="rows" class="form-control">
-                <option>100</option>
-                <option>200</option>
-                <option>1000</option>
-                <option>No limit</option>
-            </select>
-        </div>
+                <div class="mt-2">
 
-        <div class="col-auto">
-            <label class="bold">Sort by</label>
-        </div>
+                    <td class="mt-2">
+                        <div class="col-auto has-search" id="search">
 
-        <div class="col-auto">
-            <select id="search-sort-by" name="sort" class="form-control">
-                <option value="_score"{% if request.session.search_sort_by == "_score" %} selected="selected"{% endif %}>Rank</option>
-                <option value="date_unixtime"{% if request.session.search_sort_by == "date_unixtime" %} selected="selected"{% endif %}>Date</option>
-            </select>
-        </div>
-        <div class="col-auto">
-            <input class="btn btn-primary ml-3" type="submit" name="Go" value="Search" />
-        </div>
+                            <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
 
-    </div>
+                            <simple-suggest
+                                autofocus=true
+                                ref="simpleSuggest"
+                                place-holder="Search"
+                                search-url="{% url 'search:search_tags_and_titles' %}?term="
+                            >
+                            </simple-suggest>
 
-    <div class="form-row align-items-center mt-2">
+                        </div>
+                    </td>
 
-        <div class="col-auto">
+                    <td>
+                        <select name="boolean_search_type" class="form-control">
+                            <option selected="selected">AND</option>
+                            <option>OR</option>
+                        </select>
+                    </td>
 
-            <label class="bold">Exact Match</label>
-            <input type="checkbox" name="exact_match"{% if request.GET.exact_match %} checked="checked"{% endif %} />
+                    <td>
+                        <div>
+                            <select name="exact_match" class="form-control">
+                                <option{% if request.GET.exact_match == "No" %} selected="selected"{% endif %}>No</option>
+                                <option{% if request.GET.exact_match == "Yes" %} selected="selected"{% endif %}>Yes</option>
+                            </select>
+                        </div>
+                    </td>
 
-        </div>
+                    <td>
+                        <select id="search-sort-by" name="sort" class="form-control">
+                            <option value="_score"{% if request.session.search_sort_by == "_score" %} selected="selected"{% endif %}>Rank</option>
+                            <option value="date_unixtime"{% if request.session.search_sort_by == "date_unixtime" %} selected="selected"{% endif %}>Date</option>
+                        </select>
+                    </td>
 
-        <div class="col-auto">
-            <label class="bold">Boolean Search Type</label>
-        </div>
+                    <td>
+                        <select name="rows" class="form-control">
+                            <option>100</option>
+                            <option>200</option>
+                            <option>1000</option>
+                            <option>No limit</option>
+                        </select>
+                    </td>
 
-        <div class="col-auto">
-            <select name="boolean_search_type" class="form-control">
-                <option selected="selected">AND</option>
-                <option>OR</option>
-            </select>
-        </div>
+                    <td>
+                        <input class="btn btn-primary" type="submit" name="Go" value="Search" />
+                    </td>
 
-    </div>
+                </div>
 
-</form>
-
+            </tr>
+        </table>
+    </form>
 </div>

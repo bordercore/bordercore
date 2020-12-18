@@ -205,6 +205,7 @@ pre {
 }
 
 /* Top Search */
+
 #top-search input {
   cursor: pointer;
   width: 10px;
@@ -277,6 +278,10 @@ pre {
   }
 }
 
+#top-search-form .has-search .form-control-feedback {
+  left: 1rem;
+}
+
 /* Bookmarks */
 
 .bookmark-search {
@@ -341,20 +346,21 @@ ul.pagination {
   height: 400px;
 }
 
-/* The "has-search" rules provide space for a
-  search icon on the left for forms */
+/* The "has-search" rules provide space for a Font Awesome
+  search icon inside a search input box */
+
+/* Specifies the distance between the search icon and where
+   you start typing your search query */
 .has-search .form-control {
-  padding-left: 2.375rem;
+  padding-left: 2rem;
 }
 
-/* Used to position a Font Awesome icon inside
-   a search input box */
 .has-search .form-control-feedback {
   position: absolute;
   z-index: 2;
   display: block;
   top: 0.7rem;
-  left: 1rem;
+  left: 1.5rem;
   line-height: 2.375rem;
   text-align: center;
   pointer-events: none;
@@ -521,8 +527,31 @@ div .search-box .search-box-input {
   width: $search_box_width;
 }
 
-.search-spacer {
+.search-spacer-left {
   height: 100px;
+}
+
+.search-spacer-right {
+  background-color: $gray-700;
+  border: 1px solid $primary;
+  border-radius: 10px;
+  box-shadow: 10px 10px 5px -1px rgba(0, 0, 0, 0.54);
+  font-size: 14px;
+  height: 100px;
+  margin-bottom: 20px;
+
+  table th:first-child {
+    padding: 8px 14px 0 20px;
+  }
+
+  table th {
+    font-weight: normal;
+    padding: 8px 20px 0 8px;
+  }
+
+  td {
+    padding: 6px;
+  }
 }
 
 /* Used to keep the tag search input field

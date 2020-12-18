@@ -6,7 +6,7 @@
 
 {% block left-block %}
 
-    <div class="search-spacer"></div>
+    <div class="search-spacer-left"></div>
 
     <div id="aggregations">
     {% if request.GET and search_results %}
@@ -15,6 +15,7 @@
           Total matches: <strong>{{ object_list.hits.total.value }}</strong>
         </h4>
 
+        {% if search_results.hits.hits %}
         <div class="card mt-3">
             <div class="card-header">Document Type Filter</div>
             <div class="card-body text-info">
@@ -26,6 +27,7 @@
             {% endfor %}
             </div>
         </div>
+        {% endif %}
 
     {% endif %}
     </div>
@@ -35,6 +37,8 @@
 {% block content %}
 
 {% include "search/header.html" %}
+
+    <div id="vue-app">
 
 {% if request.GET %}
 
@@ -48,7 +52,7 @@
 
 {% else %}
 
-    <table id="vue-app">
+    <table>
 
 {% for match in search_results.hits.hits %}
 
@@ -135,7 +139,9 @@
 {% endif %}
 
     </div>
-        </div>
+</div>
+
+    </div>
 
 {% endblock %}
 
@@ -182,6 +188,10 @@
                     window.location=url;
 
                 },
+            },
+            mounted() {
+                this.$refs.simpleSuggest.$refs.suggestComponent.isFalseFocus = true;
+                this.$refs.simpleSuggest.$refs.suggestComponent.text = "{{ request.GET.search }}";
             },
             components: {
                 SimpleSuggest
