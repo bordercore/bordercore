@@ -27,9 +27,9 @@
             <nav id="sidebar">
 
                 <div class="sidebar-header">
-                    <h3>Bordercore</h3>
+                    <img src="https://bordercore-blobs.s3.amazonaws.com/django/img/bordercore_icon.png" height="40" width="40" />
+                    Bordercore
                     <strong>BC</strong>
-                    {% block title %} {% endblock %}
                 </div>
 
                 <ul class="list-unstyled components" id="navbar">
@@ -74,16 +74,14 @@
 
                 <div class="row" id="top-search">
 
-                    <div class="col-lg-5">
-                        <div class="p-2">
-                            <button type="button" id="sidebarCollapse" class="btn btn-info mr-3" @click="handleSidebarCollapse()">
-                                <i class="fas fa-align-left"></i>
-                                <font-awesome-icon icon="align-left"></font-awesome-icon>
-                            </button>
-                        </div>
+                    <div class="col-lg-3 my-auto pl-3" id="top-title">
+                        <button type="button" id="sidebar-collapse" class="btn btn-info" @click="handleSidebarCollapse()" v-cloak>
+                            <font-awesome-icon icon="align-left"></font-awesome-icon>
+                        </button>
+                        {% block title %} {% endblock %}
                     </div>
 
-                    <div class="col-lg-7 pt-2" style="padding-right: 25px">
+                    <div class="col-lg-9 my-auto pr-5">
 
                         <search-simple-suggest
                             ref="simpleSuggest"
@@ -106,8 +104,6 @@
 
                     </div>
                 </div>
-
-                <hr class="m-0" />
 
                 <div class="row content-non-nav">
 
@@ -192,7 +188,7 @@
                                         },
                                         {
                                             id: "update",
-                                            name: "Manage Subscriptions",
+                                            name: "Manage",
                                             url: "{% url 'feed:subscriptions' %}"
                                         },
 

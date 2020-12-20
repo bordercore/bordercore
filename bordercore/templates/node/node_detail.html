@@ -167,15 +167,13 @@
                                 <div class="form-row align-items-center">
 
                                     <div class="form-row">
-                                        <div class="col-auto">
-                                            <simple-suggest
-                                                ref="simpleSuggest"
-                                                display-attribute="title"
-                                                value-attribute="uuid"
-                                                search-url="{% url 'node:search_blob_titles' %}?term="
-                                            >
-                                            </simple-suggest>
-                                        </div>
+                                        <simple-suggest
+                                            ref="simpleSuggest"
+                                            display-attribute="title"
+                                            value-attribute="uuid"
+                                            search-url="{% url 'node:search_blob_titles' %}?term="
+                                        >
+                                        </simple-suggest>
                                     </div>
                                 </div>
                             </form>
@@ -201,15 +199,13 @@
                                 <div class="form-row align-items-center">
 
                                     <div class="form-row">
-                                        <div class="col-auto">
-                                            <simple-suggest
-                                                ref="simpleSuggest"
-                                                display-attribute="title"
-                                                value-attribute="title"
-                                                search-url="{% url 'node:search_bookmarks' %}?term="
-                                            >
-                                            </simple-suggest>
-                                        </div>
+                                        <simple-suggest
+                                            ref="simpleSuggest"
+                                            display-attribute="title"
+                                            value-attribute="title"
+                                            search-url="{% url 'node:search_bookmarks' %}?term="
+                                        >
+                                        </simple-suggest>
                                     </div>
                                 </div>
                             </form>
