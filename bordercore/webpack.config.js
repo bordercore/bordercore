@@ -64,6 +64,15 @@ module.exports = (env, argv) => {
                         "sass-loader",
                     ],
                 },
+                // this will apply to both plain `.css` files
+                // AND `<style>` blocks in `.vue` files,
+                {
+                    test: /\.css$/,
+                    use: [
+                        "vue-style-loader",
+                        "css-loader"
+                    ]
+                },
                 {
                     test: /\.vue$/,
                     loader: "vue-loader"
