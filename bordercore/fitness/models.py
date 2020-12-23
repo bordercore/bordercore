@@ -1,5 +1,8 @@
 from datetime import timedelta
 
+import markdown
+from markdown.extensions.codehilite import CodeHiliteExtension
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import F, Max, Q
@@ -38,6 +41,11 @@ class Exercise(models.Model):
 
     def __str__(self):
         return self.exercise
+
+    @property
+    def note_markdown(self):
+        "Returns the exercise note with markdown support."
+        return markdown.markdown(self.note, extensions=[CodeHiliteExtension(guess_lang=False), "tables"])
 
 
 class Data(models.Model):

@@ -6,9 +6,17 @@
 
 {% block left-block %}
 
-    <h5 class="highlight-box mt-5">
-        {{ object.description }}
-    </h5>
+    {% if object.description %}
+        <h5 class="highlight-box mt-5">
+          {{ object.description }}
+        </h5>
+    {% endif %}
+
+    {% if object.note %}
+        <h5 class="highlight-box mt-5">
+          {{ object.note_markdown|safe }}
+        </h5>
+    {% endif %}
 
 {% endblock %}
 
@@ -53,13 +61,6 @@
             </form>
 
         </div>
-        {% if object.note %}
-            <div class="col-lg-6">
-                <p class="alert alert-info">
-                    {{ object.note }}
-                </p>
-            </div>
-        {% endif %}
     </div>
 
     <div id="exerciseDetailChart"></div>
