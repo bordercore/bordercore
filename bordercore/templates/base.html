@@ -77,7 +77,7 @@
         </div>
 
         <div id="sidebar">
-            <sidebar-menu @toggle-collapse="onToggleCollapse" :menu="menu" :collapsed="collapsed" width="240px" />
+            <sidebar-menu @toggle-collapse="onToggleCollapse" @item-click="onItemClick" :menu="menu" :collapsed="collapsed" width="240px" />
             <span slot="footer" v-if="!collapsed">
                 <div id="below-nav">
                     <a href="{% url 'accounts:logout' %}">Logout</a>
@@ -98,7 +98,6 @@
             {% else %}
                 <script type="text/javascript" src="{{ STATIC_URL }}js/javascript-bundle.min.js.gz"></script>
             {% endif %}
-
 
             <script type="text/javascript">
 
@@ -324,6 +323,9 @@
                                 wrapper.classList.remove("collapsed");
                             }
                         },
+                        onItemClick(event, item, node) {
+                            this.ps.update();
+                        },
                         getUntaggedBookmarkCount() {
 
                             let self = this;
@@ -342,6 +344,11 @@
                     mounted() {
 
                         window.setInterval(this.getUntaggedBookmarkCount, 60000);
+
+                        const ps = new PerfectScrollbar(".vsm--scroll-wrapper");
+
+                        // Save this so that we can update the scrollbar when expanding items in the sidebar
+                        this.ps = ps;
 
                     }
                 });

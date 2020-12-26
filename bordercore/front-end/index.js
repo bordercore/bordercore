@@ -84,3 +84,6 @@ window.SearchTagsInput = SearchTagsInput;
 import VueSidebarMenu from "vue-sidebar-menu"
 import "vue-sidebar-menu/dist/vue-sidebar-menu.css"
 Vue.use(VueSidebarMenu)
+
+import PerfectScrollbar from "perfect-scrollbar";
+window.PerfectScrollbar = PerfectScrollbar;
