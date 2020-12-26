@@ -35,8 +35,6 @@ def get_creators(matches):
 @method_decorator(login_required, name='dispatch')
 class SearchListView(ListView):
 
-    SECTION = 'search'
-    SUB_SECTION = 'home'
     template_name = 'search/search.html'
     context_object_name = 'search_results'
     RESULT_COUNT_PER_PAGE = 100
@@ -188,8 +186,6 @@ class SearchListView(ListView):
 
             context["aggregations"] = self.get_aggregations(context, "Doctype Filter")
 
-        context["section"] = self.SECTION
-        context["subsection"] = self.SUB_SECTION
         context["title"] = "Search"
         return context
 
@@ -197,8 +193,6 @@ class SearchListView(ListView):
 @method_decorator(login_required, name="dispatch")
 class NoteListView(SearchListView):
 
-    SECTION = "notes"
-    SUB_SECTION = None
     template_name = "blob/note_list.html"
     RESULT_COUNT_PER_PAGE_NOTE = 10
 
@@ -251,7 +245,6 @@ class NoteListView(SearchListView):
 class SearchTagDetailView(ListView):
 
     template_name = "search/tag_detail.html"
-    SECTION = "search"
     RESULT_COUNT_PER_PAGE = 100
     context_object_name = "search_results"
 
@@ -386,8 +379,6 @@ class SearchTagDetailView(ListView):
         context["doctypes"] = [x[0] for x in context["doctype_counts"]]
 
         context["kb_tag_detail_current_tab"] = self.request.session.get("kb_tag_detail_current_tab", "")
-        context["section"] = self.SECTION
-        context["subsection"] = "search-tag"
 
         context["tag_list"] = self.get_tag_list_js(tag_list)
         if context["tag_list"]:

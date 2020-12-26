@@ -15,8 +15,6 @@ from bookmark.models import Bookmark
 
 from .models import Node, SortOrderNodeBlob, SortOrderNodeBookmark
 
-SECTION = "nodes"
-
 
 class NodeOverviewView(TemplateView):
 
@@ -24,7 +22,6 @@ class NodeOverviewView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["section"] = SECTION
         context["nodes"] = Node.objects.filter(user=self.request.user)
         context["col_left"] = "bogus"
         context["col_content"] = "col-lg-12"
@@ -41,7 +38,6 @@ class NodeDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["section"] = SECTION
         context["col_left"] = "bogus"
         context["col_content"] = "col-lg-12"
         context["node_uuid"] = self.object.uuid

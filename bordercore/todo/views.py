@@ -11,8 +11,6 @@ from tag.models import SortOrderTagTodo, Tag
 from todo.forms import TodoForm
 from todo.models import Todo
 
-SECTION = 'todo'
-
 
 @method_decorator(login_required, name='dispatch')
 class TodoListView(ListView):
@@ -80,7 +78,6 @@ class TodoListView(ListView):
 
         context['cols'].extend(['task', 'priority', 'modified'])
 
-        context['section'] = SECTION
         context['nav'] = 'todo'
         context['info'] = info
         context['title'] = 'Todo List'
@@ -98,7 +95,6 @@ class TodoDetailView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(TodoDetailView, self).get_context_data(**kwargs)
-        context['section'] = SECTION
         context['nav'] = 'todo'
         context['uuid'] = self.kwargs.get('uuid')
         context['action'] = 'Update'
@@ -139,7 +135,6 @@ class TodoCreateView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super(TodoCreateView, self).get_context_data(**kwargs)
-        context['section'] = SECTION
         context['nav'] = 'todo'
         context['action'] = 'Create'
         context['title'] = 'Todo Create'

@@ -12,8 +12,10 @@
 
         {% if debug %}
             <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/theme-{{ request.user.userprofile.theme }}.css" />
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/vue-sidebar-menu.css" />
         {% else %}
             <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/theme-{{ request.user.userprofile.theme }}.min.css" />
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/vue-sidebar-menu.min.css" />
         {% endif %}
 
         {% block extra_head %}{% endblock %}
@@ -24,60 +26,11 @@
 
         <div class="wrapper">
 
-            <nav id="sidebar">
-
-                <div class="sidebar-header">
-                    <img src="https://bordercore-blobs.s3.amazonaws.com/django/img/bordercore_icon.png" height="40" width="40" />
-                    Bordercore
-                    <strong>BC</strong>
-                </div>
-
-                <ul class="list-unstyled components" id="navbar">
-
-                    <nav-bar inline-template>
-                        <div>
-                            <li v-for="item in items" v-cloak>
-                                <div v-if="item.subitems">
-                                    <a :href="'#' + subMenuId(item.id)" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle" :id="getSectionId(item.id)">
-                                        <span class="nav-icon text-center">
-                                            <font-awesome-icon :icon="item.icon"></font-awesome-icon>
-                                        </span>
-                                        [[ item.name ]]
-                                    </a>
-                                    <ul class="collapse list-unstyled" :id="subMenuId(item.id)">
-                                        <li v-for="subitem in item.subitems">
-                                            <a :href="subitem.url" :id="getSubSectionId(item.id, subitem.id)">[[ subitem.name ]]</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <a v-else :href="item.url" :id="getSectionId(item.id)">
-                                    <span class="nav-icon text-center">
-                                        <font-awesome-icon :icon="item.icon"></font-awesome-icon>
-                                    </span>
-                                    <span>[[ item.name ]]</span>
-                                    <span v-if="item.badge > 0" class="badge badge-info float-right">[[ item.badge ]]</span>
-                                </a>
-                            </li>
-                        </div>
-
-                    </nav-bar>
-
-                </ul>
-
-                <div id="below-nav">
-                    <a href="{% url 'accounts:logout' %}">Logout</a>
-                </div>
-
-            </nav>
-
             <div class="container-fluid" id="content">
 
                 <div class="row" id="top-search">
 
-                    <div class="col-lg-3 my-auto pl-3" id="top-title">
-                        <button type="button" id="sidebar-collapse" class="btn btn-info" @click="handleSidebarCollapse()" v-cloak>
-                            <font-awesome-icon icon="align-left"></font-awesome-icon>
-                        </button>
+                    <div class="col-lg-3 my-auto pl-4" id="top-title">
                         {% block title %} {% endblock %}
                     </div>
 
@@ -123,6 +76,21 @@
 
         </div>
 
+        <div id="sidebar">
+            <sidebar-menu @toggle-collapse="onToggleCollapse" :menu="menu" :collapsed="collapsed" width="240px" />
+            <span slot="footer" v-if="!collapsed">
+                <div id="below-nav">
+                    <a href="{% url 'accounts:logout' %}">Logout</a>
+                </div>
+            </span>
+            <span slot="toggle-icon">
+                <font-awesome-icon icon="arrows-alt-h"></font-awesome-icon>
+            </span>
+            <span slot="dropdown-icon">
+                <font-awesome-icon icon="angle-right"></font-awesome-icon>
+            </span>
+        </div>
+
         {% block javascript %}
 
             {% if debug %}
@@ -146,193 +114,235 @@
                 sidebar.style.backgroundImage = "url('https://bordercore-blobs.s3.amazonaws.com/sidebar/{{ user.userprofile.uuid }}/{{ user.userprofile.sidebar_image }}')";
                 {% endif %}
 
-                const NavBar = {
+                new Vue({
+                    el: "#top-search"
+                });
+
+                new Vue({
+                    el: "#sidebar",
                     data() {
                         return {
-                            items: [
+                            collapsed: false,
+                            menu: [
                                 {
-                                    id: "homepage",
-                                    name: "Home",
-                                    url: "{% url 'homepage:homepage' %}",
-                                    icon: "home"
+                                    header: true,
+                                    title: "Bordercore",
+                                    hiddenOnCollapse: true,
+                                    class: "sidebar-header"
                                 },
                                 {
-                                    id: "bookmarks",
-                                    name: "Bookmarks",
-                                    url: "{% url 'bookmark:overview' %}",
-                                    icon: "bookmark",
-                                    badge: 0
+                                    href: "{% url 'homepage:homepage' %}",
+                                    title: "Home",
+                                    class: "first-item",
+                                    icon: {
+                                        element: "font-awesome-icon",
+                                        attributes: {
+                                            icon: "home",
+                                        },
+                                        class: "fa-xs"
+                                    }
                                 },
                                 {
-                                    id: "nodes",
-                                    name: "Nodes",
-                                    url: "{% url 'node:list' %}",
-                                    icon: "bookmark",
-                                    badge: 0
+                                    href: "{% url 'bookmark:overview' %}",
+                                    title: "Bookmarks",
+                                    alias: "/bookmark/*",
+                                    icon: {
+                                        element: "font-awesome-icon",
+                                        attributes: {
+                                            icon: "bookmark",
+                                        }
+                                    },
+                                    badge: {
+                                        text: "0",
+                                        class: "vsm--badge_default"
+                                    }
                                 },
                                 {
-                                    id: "feed",
-                                    name: "Feeds",
-                                    url: "",
-                                    icon: "newspaper",
-                                    subitems: [
+                                    href: "{% url 'node:list' %}",
+                                    title: "Nodes",
+                                    alias: "/node/*",
+                                    icon: {
+                                        element: "font-awesome-icon",
+                                        attributes: {
+                                            icon: "box",
+                                        }
+                                    }
+                                },
+                                {
+                                    href: "",
+                                    title: "Feeds",
+                                    icon: {
+                                        element: "font-awesome-icon",
+                                        attributes: {
+                                            icon: "newspaper",
+                                        }
+                                    },
+                                    child: [
                                         {
-                                            id: "home",
-                                            name: "Browse",
-                                            url: "{% url 'feed:list' %}"
+                                            href: "{% url 'feed:list' %}",
+                                            title: "Browse"
                                         },
                                         {
-                                            id: "create",
-                                            name: "Create a Feed",
-                                            url: "{% url 'feed:create' %}"
+                                            href: "{% url 'feed:create' %}",
+                                            title: "Create a Feed"
                                         },
                                         {
-                                            id: "update",
-                                            name: "Manage",
-                                            url: "{% url 'feed:subscriptions' %}"
-                                        },
-
+                                            href: "{% url 'feed:subscriptions' %}",
+                                            title: "Manage"
+                                        }
                                     ]
                                 },
                                 {
-                                    id: "notes",
-                                    name: "Notes",
-                                    url: "{% url 'search:notes' %}",
-                                    icon: "sticky-note"
+                                    href: "{% url 'search:notes' %}",
+                                    title: "Notes",
+                                    icon: {
+                                        element: "font-awesome-icon",
+                                        attributes: {
+                                            icon: "sticky-note",
+                                        }
+                                    }
                                 },
                                 {
-                                    id: "search",
-                                    name: "KB",
-                                    icon: "copy",
-                                    subitems: [
+                                    href: "",
+                                    title: "KB",
+                                    icon: {
+                                        element: "font-awesome-icon",
+                                        attributes: {
+                                            icon: "copy",
+                                        }
+                                    },
+                                    child: [
                                         {
-                                            id: "home",
-                                            name: "Search",
-                                            url: "{% url 'search:search' %}"
+                                            href: "{% url 'search:search' %}",
+                                            title: "Search",
+                                            alias: "/search/search*",
                                         },
                                         {
-                                            id: "search-tag",
-                                            name: "Tag Search",
-                                            url: "{% url 'search:kb_search_tag_detail_search' %}"
+                                            href: "{% url 'search:kb_search_tag_detail_search' %}",
+                                            title: "Tag Search",
+                                            alias: "/search/tagdetail/*",
                                         },
                                         {
-                                            id: "collection",
-                                            name: "Collections",
-                                            url: "{% url 'collection:list' %}"
+                                            href: "{% url 'collection:list' %}",
+                                            title: "Collections",
+                                            alias: "/collection/*",
                                         },
                                         {
-                                            id: "blob-create",
-                                            name: "Create Blob",
-                                            url: "{% url 'blob:create' %}"
-                                        },
-
+                                            href: "{% url 'blob:create' %}",
+                                            title: "Create Blob",
+                                            alias: "/blob/*"
+                                        }
                                     ]
                                 },
                                 {
-                                    id: "drill",
-                                    name: "Drill",
-                                    url: "{% url 'drill:list' %}",
-                                    icon: "graduation-cap"
+                                    href: "{% url 'drill:list' %}",
+                                    title: "Drill",
+                                    alias: "/drill/*",
+                                    icon: {
+                                        element: "font-awesome-icon",
+                                        attributes: {
+                                            icon: "graduation-cap",
+                                        }
+                                    }
                                 },
                                 {
-                                    id: "music",
-                                    name: "Music",
-                                    icon: "music",
-                                    subitems: [
+                                    href: "",
+                                    title: "Music",
+                                    icon: {
+                                        element: "font-awesome-icon",
+                                        attributes: {
+                                            icon: "music",
+                                        }
+                                    },
+                                    child: [
                                         {
-                                            id: "home",
-                                            name: "Browse",
-                                            url: "{% url 'music:list' %}"
+                                            href: "{% url 'music:list' %}",
+                                            title: "Browse",
+                                            alias: "/music/*"
                                         },
                                         {
-                                            id: "create",
-                                            name: "Add a Song",
-                                            url: "{% url 'music:create_song' %}"
-                                        },
+                                            href: "{% url 'music:create_song' %}",
+                                            title: "Add a Song"
+                                        }
                                     ]
                                 },
                                 {
-                                    id: "todo",
-                                    name: "Todo",
-                                    url: "{% url 'todo:list' %}",
-                                    icon: "tasks",
+                                    href: "{% url 'todo:list' %}",
+                                    title: "Todo",
+                                    alias: "/todo/*",
+                                    icon: {
+                                        element: "font-awesome-icon",
+                                        attributes: {
+                                            icon: "tasks",
+                                        }
+                                    },
                                     {% if todo_count %}
-                                    badge: {{ todo_count|default:0 }}
+                                    badge: {
+                                        text: {{ todo_count|default:0 }},
+                                        class: "vsm--badge_default"
+                                    }
                                     {% endif %}
                                 },
                                 {
-                                    id: "fitness",
-                                    name: "Fitness",
-                                    url: "{% url 'fitness:summary' %}",
-                                    icon: "running",
+                                    href: "{% url 'fitness:summary' %}",
+                                    title: "Fitness",
+                                    alias: "/fitness/*",
+                                    icon: {
+                                        element: "font-awesome-icon",
+                                        attributes: {
+                                            icon: "running",
+                                        }
+                                    },
                                     {% if exercise_count %}
-                                    badge: {{ exercise_count|default:0 }}
+                                    badge: {
+                                        text: {{ exercise_count|default:0 }},
+                                        class: "vsm--badge_default"
+                                    }
                                     {% endif %}
                                 },
                                 {
-                                    id: "prefs",
-                                    name: "Prefs",
-                                    url: "{% url 'accounts:prefs' %}",
-                                    icon: "briefcase"
-                                },
-
-                            ],
-                            activeClass: "active"
+                                    href: "{% url 'accounts:prefs' %}",
+                                    title: "Prefs",
+                                    alias: "/accounts/*",
+                                    icon: {
+                                        element: "font-awesome-icon",
+                                        attributes: {
+                                            icon: "briefcase",
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     methods: {
-                        getSectionId(id) {
-                            return `nav-${id}`;
-                        },
-                        getSubSectionId(id, subSectionId) {
-                            return `nav-${id}-${subSectionId}`;
-                        },
-                        subMenuId(id) {
-                            return `${id}Submenu`;
+                        onToggleCollapse(collapsed) {
+                            this.collapsed = collapsed;
+                            const wrapper = document.querySelector(".wrapper");
+                            if (collapsed) {
+                                wrapper.classList.add("collapsed");
+                            } else {
+                                wrapper.classList.remove("collapsed");
+                            }
                         },
                         getUntaggedBookmarkCount() {
+
                             let self = this;
                             doGet(
                                 self,
                                 "{% url "bookmark:get_new_bookmarks_count" 666 %}".replace(/666/, timestamp),
                                 (response) => {
                                     count = response.data.count;
-                                    // TODO: Lookup item by "id=bookmark" rather than the index number of "1"
-                                    self.items[1].badge = count;
+                                    self.menu.find(item => item.title === "Bookmarks").badge.text = count;
 
                                 },
-                                "Error getting new bookmarks count"
+                                "error getting new bookmarks count"
                             );
-
                         }
                     },
                     mounted() {
 
-                        document.getElementById("nav-{{ section }}").classList.add("section-active");
-
-                        {% if subsection %}
-                        document.getElementById("nav-{{ section }}-{{ subsection }}").classList.add("subsection-active");
-                        $("#{{ section }}Submenu").collapse("show");
-                        {% endif %}
-
                         window.setInterval(this.getUntaggedBookmarkCount, 60000);
 
-                    }
-                }
-
-                new Vue({
-                    el: "#top-search",
-                    methods: {
-                        handleSidebarCollapse() {
-                            document.getElementById("sidebar").classList.toggle("active");
-                        }
-                    },
-                });
-
-                new Vue({
-                    el: "#navbar",
-                    components: {
-                        NavBar,
                     }
                 });
 

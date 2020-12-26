@@ -25,7 +25,6 @@ from bookmark.models import Bookmark
 from lib.util import get_pagination_range, parse_title_from_url
 from tag.models import SortOrderTagBookmark, Tag
 
-SECTION = 'bookmarks'
 BOOKMARKS_PER_PAGE = 50
 
 
@@ -79,7 +78,6 @@ class BookmarkUpdateView(UpdateView, FormValidMixin):
     def get_context_data(self, **kwargs):
         context = super(BookmarkUpdateView, self).get_context_data(**kwargs)
         context["action"] = "Update"
-        context["section"] = SECTION
         context["tags"] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
 
@@ -100,7 +98,6 @@ class BookmarkCreateView(CreateView, FormValidMixin):
     def get_context_data(self, **kwargs):
         context = super(BookmarkCreateView, self).get_context_data(**kwargs)
         context["action"] = "Create"
-        context["section"] = SECTION
         return context
 
     def get_form_kwargs(self):
@@ -254,7 +251,7 @@ def do_import(request):
         except ValueError:
             pass
 
-    return render(request, 'bookmark/import.html', {'section': SECTION})
+    return render(request, 'bookmark/import.html', {})
 
 
 @login_required
@@ -283,7 +280,6 @@ def overview(request,
 
     return render(request, 'bookmark/index.html',
                   {
-                      'section': SECTION,
                       'bookmarks': sorted_bookmarks,
                       'tag_counts': tag_counts,
                       'favorite_tags': favorite_tags,

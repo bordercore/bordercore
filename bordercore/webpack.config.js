@@ -15,6 +15,7 @@ module.exports = (env, argv) => {
             "js/javascript": ["./front-end/index.js"],
             "css/theme-light": ["./static/css/theme-light.scss"],
             "css/theme-dark": ["./static/css/theme-dark.scss"],
+            "css/vue-sidebar-menu": ["./static/css/vue-sidebar-menu/vue-sidebar-menu.scss"],
         },
         output: {
             filename: "[name]-bundle.min.js",

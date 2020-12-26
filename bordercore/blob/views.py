@@ -26,8 +26,6 @@ from blob.models import Blob, MetaData
 from collection.models import Collection
 from lib.time_utils import parse_date_from_string
 
-SECTION = 'search'
-
 # TODO: Move this to Django config file
 amazon_api_config = {
 }
@@ -57,8 +55,6 @@ class BlobCreateView(CreateView):
         collection_id = self.request.GET.get('collection_id', '')
         if collection_id:
             context['collection_info'] = Collection.objects.get(user=self.request.user, id=collection_id)
-        context['section'] = SECTION
-        context['subsection'] = 'blob-create'
         context['title'] = 'Create Blob'
 
         return context
@@ -193,10 +189,6 @@ class BlobDetailView(DetailView):
                                         'name': collection.name})
         context['collection_info'] = collection_info
         context['linked_blobs'] = linked_blobs
-        if self.object.is_note:
-            context["section"] = "notes"
-        else:
-            context['section'] = SECTION
 
         if "content_type" in context or self.object.sha1sum or context["metadata"]:
             context["show_metabox"] = True
@@ -216,7 +208,6 @@ class BlobUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(BlobUpdateView, self).get_context_data(**kwargs)
-        context['section'] = SECTION
         context['sha1sum'] = self.kwargs.get('sha1sum')
 
         try:
@@ -304,7 +295,6 @@ class BlobThumbnailView(UpdateView):
         # context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
         # if context['solr_info'].get('content_type', ''):
         #     context['content_type'] = Blob.get_content_type(context['solr_info']['content_type'][0]).lower()
-        context['section'] = SECTION
         context['title'] = 'Blob Thumbnail :: {}'.format(self.object.get_title(remove_edition_string=True))
 
         return context
@@ -423,8 +413,7 @@ def slideshow(request):
         log.warning(f"Can't get content type for uuid={blob.uuid}")
 
     return render(request, "blob/slideshow.html",
-                  {"section": SECTION,
-                   "content_type": content_type,
+                  {"content_type": content_type,
                    "blob": blob})
 
 @login_required

@@ -12,8 +12,6 @@ from django.views.generic.detail import DetailView
 
 from fitness.models import Data, Exercise, ExerciseUser
 
-SECTION = 'fitness'
-
 
 @method_decorator(login_required, name='dispatch')
 class ExerciseDetailView(DetailView):
@@ -32,7 +30,6 @@ class ExerciseDetailView(DetailView):
         except IndexError:
             pass
         context['activity_info'] = ExerciseUser.objects.filter(user=self.request.user, exercise__id=self.object.id)
-        context['section'] = SECTION
         context['nav'] = 'fitness'
         context['title'] = 'Exercise Detail :: {}'.format(self.object.exercise)
 
@@ -120,7 +117,6 @@ def fitness_summary(request):
 
     return render(request, "fitness/summary.html", {"active_exercises": active_exercises,
                                                     "inactive_exercises": inactive_exercises,
-                                                    "section": SECTION,
                                                     "nav": 'fitness',
                                                     "title": "Fitness Summary"})
 

@@ -4,8 +4,6 @@ from django.views.generic.list import ListView
 
 from book.models import Book
 
-SECTION = 'Books'
-
 
 @method_decorator(login_required, name='dispatch')
 class BookListView(ListView):
@@ -33,6 +31,5 @@ class BookListView(ListView):
         context['alphabet'] = string.ascii_uppercase
         context['selected_letter'] = self.selected_letter
         context['cols'] = ['title', 'author', 'year']
-        context['section'] = SECTION
         context['info'] = info
         return context

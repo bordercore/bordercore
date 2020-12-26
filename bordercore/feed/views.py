@@ -16,10 +16,6 @@ from accounts.models import UserProfile
 from feed.forms import FeedForm
 from feed.models import Feed, FeedItem
 
-# from feed.tasks import update_feed
-
-SECTION = 'feed'
-
 
 @method_decorator(login_required, name='dispatch')
 class FeedListView(ListView):
@@ -63,8 +59,6 @@ class FeedListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(FeedListView, self).get_context_data(**kwargs)
-        context['section'] = SECTION
-        context['subsection'] = 'home'
         context['current_feed'] = self.current_feed
         context['json'] = json.dumps(self.feed_all)
         context['title'] = 'Feed List'
@@ -88,7 +82,6 @@ class FeedSubscriptionListView(FeedListView):
 
     def get_context_data(self, **kwargs):
         context = super(FeedSubscriptionListView, self).get_context_data(**kwargs)
-        context['subsection'] = 'update'
         context['feeds_not_subscribed'] = self.feeds_not_subscribed
         context['title'] = 'Feeds :: Manage Subscriptions'
         return context
@@ -186,9 +179,7 @@ def feed_update(request, feed_id=None):
             subscribers = ', '.join([x.user.username for x in subscribers])
 
     return render(request, 'feed/update.html',
-                  {'section': SECTION,
-                   'subsection': 'add',
-                   'action': action,
+                  {'action': action,
                    'form': form,
                    'subscribers': subscribers,
                    'title': title})

@@ -24,8 +24,6 @@ from accounts.models import (SortOrderUserNote, SortOrderUserTag, UserProfile,
 from blob.models import Blob
 from collection.models import Collection
 
-SECTION = 'prefs'
-
 
 @method_decorator(login_required, name='dispatch')
 class UserProfileUpdateView(UpdateView):
@@ -35,7 +33,6 @@ class UserProfileUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super(UserProfileUpdateView, self).get_context_data(**kwargs)
         context['groups'] = ', '.join([x.name for x in self.request.user.groups.all()])
-        context['section'] = SECTION
         context['nav'] = 'prefs'
         context['title'] = 'Preferences'
         context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.favorite_tags.all()[::-1]]
@@ -126,7 +123,6 @@ class ChangePasswordView(PasswordChangeView):
 
     def get_context_data(self, **kwargs):
         context = super(ChangePasswordView, self).get_context_data(**kwargs)
-        context["section"] = SECTION
         context["nav"] = "prefs"
         context["title"] = "Preferences"
         return context

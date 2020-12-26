@@ -19,7 +19,6 @@ from collection.forms import CollectionForm
 from collection.models import Collection
 
 IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
-SECTION = 'search'
 
 
 @method_decorator(login_required, name='dispatch')
@@ -46,8 +45,6 @@ class CollectionListView(FormMixin, ListView):
                              objectcount=len(myobject.blob_list) if myobject.blob_list else 0, id=myobject.id))
 
         context['cols'] = ['name', 'tags', 'updated', 'unixtime', 'objectcount', 'id']
-        context['section'] = SECTION
-        context['subsection'] = 'collection'
         context['info'] = info
         context['title'] = 'Collection List'
 
@@ -111,7 +108,6 @@ class CollectionDetailView(DetailView):
                 context['first_blob_cover_info'] = Blob.get_cover_info(user=self.request.user, sha1sum=blob_list.first().sha1sum)
             except ClientError:
                 pass
-        context['section'] = SECTION
         context['nav'] = 'collection'
         context['title'] = 'Collection Detail :: {}'.format(self.object.name)
 

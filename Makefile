@@ -18,6 +18,7 @@ webpack_aws: check-env
 	aws s3 cp static/css/theme-dark.min.css $(S3)/css/ &&
 	aws s3 cp static/css/theme-light.css $(S3)/css/ &&
 	aws s3 cp static/css/theme-light.min.css $(S3)/css/ &&
+	aws s3 cp static/css/vue-sidebar-menu.min.css $(S3)/css/ &&
 	aws s3 cp static/js/javascript-bundle.js.gz $(S3)/js/ --content-encoding gzip &&
 	aws s3 cp static/js/javascript-bundle.min.js.gz $(S3)/js/ --content-encoding gzip
 

@@ -21,7 +21,7 @@ urlpatterns = [
         name="kb_search_tag_detail_search"
     ),
     path(
-        route="",
+        route="search",
         view=views.SearchListView.as_view(),
         name="search"
     ),

@@ -17,8 +17,6 @@ from drill.forms import QuestionForm
 from drill.models import EFACTOR_DEFAULT, Question
 from tag.models import Tag
 
-SECTION = "drill"
-
 
 @method_decorator(login_required, name='dispatch')
 class DrillListView(ListView):
@@ -45,7 +43,6 @@ class DrillListView(ListView):
                              id=tag["id"]))
 
         context["cols"] = ["tag_name", "question_count", "last_reviewed", "lastreviewed_sort", "id"]
-        context["section"] = SECTION
         context["info"] = info
         context["title"] = "Tag Categories"
         return context
@@ -85,7 +82,6 @@ class DrillSearchListView(ListView):
 
         context['cols'] = ['tags', 'id', 'question', 'answer']
         context['search'] = search_term
-        context['section'] = SECTION
         context['info'] = info
         context['title'] = 'Drill Search'
         return context
@@ -99,7 +95,6 @@ class QuestionCreateView(CreateView):
     def get_context_data(self, **kwargs):
         context = super(QuestionCreateView, self).get_context_data(**kwargs)
 
-        context['section'] = SECTION
         context['action'] = 'Add'
         context['title'] = 'Drill :: Add Question'
 
@@ -180,7 +175,6 @@ class QuestionDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(QuestionDetailView, self).get_context_data(**kwargs)
 
-        context['section'] = SECTION
         context['question'] = self.object
         context['state_name'] = Question.get_state_name(self.object.state)
         context['learning_step_count'] = self.object.get_learning_step_count()
@@ -199,7 +193,6 @@ class QuestionUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super(QuestionUpdateView, self).get_context_data(**kwargs)
         context['action'] = 'Update'
-        context['section'] = SECTION
         context['title'] = 'Drill :: Question Update'
         context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
@@ -267,8 +260,7 @@ def show_answer(request, question_id):
     question = Question.objects.get(user=request.user, pk=question_id)
 
     return render(request, 'drill/answer.html',
-                  {'section': SECTION,
-                   'question': question,
+                  {'question': question,
                    'state_name': Question.get_state_name(question.state),
                    'tag_list': ", ".join([x.name for x in question.tags.all()]),
                    'learning_step_count': question.get_learning_step_count(),

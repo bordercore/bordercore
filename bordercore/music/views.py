@@ -28,7 +28,6 @@ from music.forms import SongForm
 from music.models import Album, Listen, Song, SongSource
 from tag.models import Tag
 
-SECTION = 'music'
 MUSIC_ROOT = "/home/media/music"
 
 
@@ -47,9 +46,7 @@ def music_list(request):
         random_albums = random_album_info.first()
 
     return render(request, 'music/index.html',
-                  {'section': SECTION,
-                   'subsection': 'home',
-                   'cols': ['Date', 'artist', 'title', 'id'],
+                  {'cols': ['Date', 'artist', 'title', 'id'],
                    'message': message,
                    'recent_songs': recent_songs,
                    'random_albums': random_albums,
@@ -127,12 +124,10 @@ def song_update(request, song_id=None):
 
     else:
         action = 'Create'
-        form = SongForm()  # An unbound form
+        form = SongForm()
 
     return render(request, 'music/update.html',
-                  {'section': SECTION,
-                   'subsection': 'home',
-                   'action': action,
+                  {'action': action,
                    'form': form,
                    'file_info': file_info,
                    'tags': [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in song.tags.all()],
@@ -168,8 +163,6 @@ class AlbumDetailView(DetailView):
         context['title'] = 'Album Detail :: {}'.format(self.object.title)
         context['cols'] = ['id', 'track', 'raw_title', 'title', 'length', 'length_seconds']
         context['MEDIA_URL_MUSIC'] = settings.MEDIA_URL_MUSIC
-        context['section'] = SECTION
-        context['subsection'] = 'home'
 
         return context
 
@@ -202,8 +195,6 @@ def artist_detail(request, artist_name):
 
     return render(request, 'music/artist_detail.html',
                   {
-                      'section': SECTION,
-                      'subsection': 'home',
                       'artist_name': artist_name,
                       'album_list': a,
                       'song_list': song_list,
@@ -398,9 +389,7 @@ def create_song(request):
             action = 'Review'
 
     return render(request, 'music/create_song.html',
-                  {'section': SECTION,
-                   'subsection': 'create',
-                   'action': action,
+                  {'action': action,
                    'info': info,
                    'notes': notes,
                    'sha1sum': sha1sum,
@@ -544,6 +533,4 @@ class SearchTagListView(ListView):
             "cols": ["title", "artist", "year", "length", "id"],
             "tag_name": self.request.GET["tag"],
             "results": results,
-            "section": SECTION,
-            "subsection": "home"
         }

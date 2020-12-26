@@ -18,8 +18,6 @@ from music.models import Listen
 from quote.models import Quote
 from todo.models import Todo
 
-SECTION = 'homepage'
-
 
 @login_required
 def homepage(request):
@@ -81,8 +79,7 @@ def homepage(request):
     overdue_exercises = ExerciseUser.get_overdue_exercises(request.user)
 
     return render(request, 'homepage/index.html',
-                  {'section': SECTION,
-                   'quote': quote,
+                  {'quote': quote,
                    'tasks': tasks,
                    'music': music,
                    'daily_bookmarks': daily_bookmarks,

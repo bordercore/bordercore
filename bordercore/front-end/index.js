@@ -31,12 +31,15 @@ window.jQuery= jQuery;
 import "bootstrap";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faAlignLeft, faBars, faBook, faBookmark, faBriefcase, faCalendarAlt, faCopy, faEllipsisV, faHome, faGraduationCap, faMusic, faNewspaper, faPlus, faRunning, faSearch, faStickyNote, faTasks } from "@fortawesome/free-solid-svg-icons";
+import { faAlignLeft, faAngleRight, faArrowsAltH, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faCopy, faEllipsisV, faHome, faGraduationCap, faMusic, faNewspaper, faPlus, faRunning, faSearch, faStickyNote, faTasks } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 library.add(faAlignLeft);
+library.add(faAngleRight);
+library.add(faArrowsAltH);
 library.add(faBars);
 library.add(faBookmark);
 library.add(faBook);
+library.add(faBox);
 library.add(faBriefcase);
 library.add(faCalendarAlt);
 library.add(faCopy);
@@ -77,3 +80,7 @@ window.TagsInput = TagsInput;
 import SearchTagsInput from "./vue/common/SearchTagsInput.vue";
 Vue.component("SearchTagsInput", SearchTagsInput);
 window.SearchTagsInput = SearchTagsInput;
+
+import VueSidebarMenu from "vue-sidebar-menu"
+import "vue-sidebar-menu/dist/vue-sidebar-menu.css"
+Vue.use(VueSidebarMenu)
