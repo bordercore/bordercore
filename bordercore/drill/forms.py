@@ -35,6 +35,6 @@ class QuestionForm(ModelForm):
         model = Question
         fields = ('question', 'answer')
         widgets = {
-            'question': Textarea(attrs={'rows': 3, 'class': 'form-control'}),
+            'question': Textarea(attrs={'rows': 10, 'class': 'form-control'}),
             'answer': Textarea(attrs={'rows': 10, 'class': 'form-control'})
         }
