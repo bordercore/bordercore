@@ -14,6 +14,9 @@ $secondary: $gray-500;
 
 @import "../../node_modules/bootswatch/dist/darkly/bootswatch";
 
+// Import styles for BootstrapVue
+@import "../../node_modules/bootstrap-vue/src/index.scss";
+
 // My variables
 
 $background-color-light: #262c49;
