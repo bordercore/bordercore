@@ -1,6 +1,6 @@
 // Bootstrap variables
 
-$gray-900: #1e1e2e;
+$gray-900: #262c49;
 
 $gray-700: #27293d;
 
@@ -15,6 +15,10 @@ $secondary: $gray-500;
 @import "../../node_modules/bootswatch/dist/darkly/bootswatch";
 
 // My variables
+
+$background-color-light: #262c49;
+$background-color-dark: #10163a;
+
 $form-background-color: $gray-500;
 $light-blue: #212132;
 $link-hover-color: $green;

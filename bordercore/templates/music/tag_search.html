@@ -6,6 +6,15 @@
 
 {% block title %} Music :: Tag Search {% endblock %}
 
+{% block nav %}
+    <div class="content-nav">
+        <ul class="breadcrumb mb-0" style="background-color: #1e1e2e">
+            <li class="breadcrumb-item"> <a href="{% url 'music:list' %}">Music</a> </li>
+            <li class="breadcrumb-item active"> Tag: <strong>{{ tag_name }}</strong> </li>
+        </ul>
+    </div>
+{% endblock %}
+
 {% block left-block %}
 
     <br /><br />
@@ -20,19 +29,6 @@
 {% endblock %}
 
 {% block content %}
-
-<div class="row">
-    <div class="col-lg-12">
-        {% block breadcrumbs %}
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"> <a href="{% url 'music:list' %}">Music</a> </li>
-                <li class="breadcrumb-item active"> Tag: <strong>{{ tag_name }}</strong> </li>
-            </ol>
-        {% endblock %}
-
-    </div>
-
-</div>
 
 <div class="row">
     <div class="col-lg-11" id="song_list" @click="onClick">

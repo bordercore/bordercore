@@ -177,7 +177,7 @@
 }
 
 .v-sidebar-menu {
-  background-color: #2a2a2e;
+  background-color: #10163a;
 }
 .v-sidebar-menu .vsm--link {
   color: #fff;
@@ -200,12 +200,12 @@
   background-color: #7367f0;
 }
 .v-sidebar-menu .vsm--link_level-1 .vsm--icon {
-  background-color: #2a2a2e;
+  background-color: #10163a;
 }
 .v-sidebar-menu .vsm--link_hover, .v-sidebar-menu .vsm--link:hover {
   box-shadow: 0px 0px 10px 1px rgba(115, 103, 240, 0.7);
   border-radius: 5px;
-  background-color: rgba(30, 30, 33, 0.5);
+  background-color: rgba(10, 14, 38, 0.5);
 }
 .v-sidebar-menu .vsm--link_mobile-item {
   color: #fff;
@@ -219,7 +219,7 @@
   background-color: #4285f4;
 }
 .v-sidebar-menu .vsm--dropdown .vsm--list {
-  background-color: #36363b;
+  background-color: #161e4e;
 }
 .v-sidebar-menu .vsm--mobile-bg {
   background-color: #4285f4;
@@ -242,11 +242,11 @@
 }
 .v-sidebar-menu .vsm--badge_default {
   color: #fff;
-  background-color: #1e1e21;
+  background-color: #0a0e26;
 }
 .v-sidebar-menu .vsm--toggle-btn {
   color: #fff;
-  background-color: #1e1e21;
+  background-color: #0a0e26;
 }
 
 .v-sidebar-menu.vsm_white-theme {

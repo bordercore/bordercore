@@ -6,6 +6,15 @@
 
 {% block title %} Music {% endblock %}
 
+{% block nav %}
+    <div class="content-nav">
+        <ul class="breadcrumb mb-0" style="background-color: #1e1e2e">
+            <li class="breadcrumb-item"> <a href="{% url 'music:list' %}">Music</a> </li>
+            <li class="breadcrumb-item active">{{ artist_name }}</li>
+        </ul>
+    </div>
+{% endblock %}
+
 {% block left-block %}
     {% if song_list %}
         <div id="audio_player">
@@ -18,27 +27,6 @@
 {% endblock %}
 
 {% block content %}
-
-    <div class="row">
-
-        <div class="col-lg-6">
-
-            {% block breadcrumbs %}
-                <div id="subnavbar">
-                    <ul class="breadcrumb">
-                        <li class="breadcrumb-item">
-                            <a href="{% url 'music:list' %}">
-                                <font-awesome-icon icon="home"></font-awesome-icon>
-                            </a>
-                        </li>
-                        <li class="breadcrumb-item active">{{ artist_name }}</li>
-                    </ul>
-                </div>
-            {% endblock %}
-
-        </div>
-
-    </div>
 
     <div class="row">
 

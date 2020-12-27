@@ -1,27 +1,21 @@
 {% extends "base.html" %}
 
-{% block title %} Dril :: {{ action }} question {% endblock %}
+{% block title %} Drill {% endblock %}
+
+{% block nav %}
+    <div class="content-nav">
+        <ul class="breadcrumb mb-0" style="background-color: #1e1e2e">
+            <li class="breadcrumb-item"> <a href="{% url 'drill:list' %}">Drill</a> </li>
+            <li class="breadcrumb-item active">{{ action }} Question</li>
+        </ul>
+    </div>
+{% endblock %}
 
 {% block left-block %}
     <h2>{{ object.description }}</h2>
 {% endblock %}
 
 {% block content %}
-
-    <div class="row">
-
-        <div class="col-lg-12">
-
-            {% block breadcrumbs %}
-                <ul class="breadcrumb">
-                    <li class="breadcrumb-item"> <a href="{% url 'drill:list' %}">Tag Categories</a> </li>
-                    <li class="breadcrumb-item active">{{ action }} question</li>
-                </ul>
-            {% endblock %}
-
-        </div>
-
-    </div>
 
     <form id="question-form" action="{{ request.path }}" method="post">
         {% csrf_token %}

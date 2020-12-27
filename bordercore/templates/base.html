@@ -30,7 +30,7 @@
 
                 <div class="row" id="top-search">
 
-                    <div class="col-lg-5 my-auto pl-4" id="top-title">
+                    <div class="col-lg-5 my-auto pl-3" id="top-title">
                         {% block title %} {% endblock %}
                     </div>
 
@@ -56,7 +56,11 @@
                         </search-simple-suggest>
 
                     </div>
+
                 </div>
+
+                {% block nav %}
+                {% endblock %}
 
                 <div class="row content-non-nav">
 

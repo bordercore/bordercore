@@ -8,6 +8,17 @@
 
 {% block title %} KB :: Documents {% endblock %}
 
+{% block nav %}
+{% if object %}
+    <div class="content-nav">
+        <ul class="breadcrumb mb-0" style="background-color: #1e1e2e">
+            <li class="breadcrumb-item"><a href="{% url 'blob:detail' object.uuid %}">Blob Detail</a></li>
+            <li class="breadcrumb-item active">Edit Blob</li>
+        </ul>
+    </div>
+{% endif %}
+{% endblock %}
+
 {% block left-block %}
 
     <div id="vue-app-left">
@@ -103,17 +114,6 @@ Linking to <a href="{% url 'blob:detail' linked_blob.uuid %}">{{ linked_blob.tit
 {% endblock %}
 
 {% block content %}
-
-{% if object %}
-<div class="row">
-    <div class="col-lg-12">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'blob:detail' object.uuid %}">Blob Detail</a></li>
-            <li class="breadcrumb-item active">Edit Blob</li>
-        </ol>
-    </div>
-</div>
-{% endif %}
 
 {% if form.errors %}
     <div class="row">

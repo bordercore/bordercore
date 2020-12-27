@@ -2,6 +2,15 @@
 
 {% block title %} Blob Thumbnail {% endblock %}
 
+{% block nav %}
+    <div class="content-nav">
+        <ul class="breadcrumb mb-0" style="background-color: #1e1e2e">
+            <li class="breadcrumb-item"><a href="{% url 'blob:detail' object.uuid %}">Blob Detail</a></li>
+            <li class="breadcrumb-item active">Blob Thumbnail</li>
+        </ul>
+    </div>
+{% endblock %}
+
 {% block left-block %}
 
     Current Thumbnail
@@ -11,15 +20,6 @@
 {% endblock %}
 
 {% block content %}
-
-<div class="row">
-    <div class="col-lg-8">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'blob:detail' object.uuid %}">Blob Detail</a></li>
-            <li class="breadcrumb-item active">Blob Thumbnail</li>
-        </ol>
-    </div>
-</div>
 
 {% if content_type == 'pdf' or content_type == 'e-book' %}
 
