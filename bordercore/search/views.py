@@ -292,7 +292,7 @@ class SearchTagDetailView(ListView):
                 "Tag Filter": {
                     "terms": {
                         "field": "tags.keyword",
-                        "size": 10
+                        "size": 20
                     }
                 }
             },
