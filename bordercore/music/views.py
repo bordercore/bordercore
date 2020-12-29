@@ -130,6 +130,7 @@ def song_update(request, song_id=None):
                   {'action': action,
                    'form': form,
                    'file_info': file_info,
+                   'length': convert_seconds(song.length),
                    'tags': [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in song.tags.all()],
                    'song': song})
 

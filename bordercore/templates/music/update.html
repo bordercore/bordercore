@@ -35,7 +35,7 @@
                 {% endfor %}
                 </div>
 
-        {% else %}
+        {% elif field.label != 'Length' %}
 
             <div class="form-group{% if field.errors %} error{% endif %} row">
                 <label class="col-lg-2 col-form-label" for="inputTitle">{{ field.label }}</label>
@@ -54,13 +54,15 @@
 
     <div class="form-group row">
         <label class="col-lg-2 col-form-label">Length</label>
-        <label class="col-lg-5 text-left mb-0 form-no-input">{{ form.instance.length }}</label>
+        <label class="col-lg-5 text-left mb-0 form-no-input">{{ length }}</label>
     </div>
 
+    {% if form.instance.album.title %}
     <div class="form-group row">
         <label class="col-lg-2 col-form-label">Album</label>
         <label class="col-lg-5 text-left mb-0 form-no-input">{{ form.instance.album.title }}</label>
     </div>
+    {% endif %}
 
     <div class="form-group row">
         <label class="col-lg-2 col-form-label">Times Played</label>
