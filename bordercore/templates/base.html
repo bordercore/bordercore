@@ -26,32 +26,38 @@
 
             <div class="container-fluid" id="content">
 
-                <div class="row" id="top-search">
+                <div class="row">
+                    <div class="col-lg-12">
 
-                    <div class="col-lg-5 my-auto pl-3" id="top-title">
-                        {% block title %} {% endblock %}
-                    </div>
+                        <div id="top-search" class="row">
 
-                    <div class="col-lg-7 my-auto pr-5">
+                            <div class="col-lg-5 card-grid my-auto" id="top-title">
+                                {% block title %} {% endblock %}
+                            </div>
 
-                        <search-simple-suggest
-                            ref="simpleSuggest"
-                            value-attribute="id"
-                            :max-suggestions=20
-                            accesskey="s"
-                            user-name="{{ user.get_username }}"
-                            initial-search-type="{{ request.session.top_search_filter }}"
-                            suggest-search-url="{% url 'search:search_tags_and_titles' %}?term="
-                            query-search-url="{% url 'search:search' %}"
-                            tag-search-url="{% url 'search:kb_search_tag_detail' 666 %}"
-                            uuid-search-url="{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}"
-                            note-tag-search-url="{% url 'search:notes' %}?tagsearch="
-                            note-query-search-url="{% url 'search:notes' %}"
-                            bookmark-tag-search-url="{% url 'bookmark:get_bookmarks_by_tag' 666 %}"
-                            drill-query-search-url="{% url 'drill:search' %}"
-                            store-in-session-url="{% url "accounts:store_in_session" %}"
-                        >
-                        </search-simple-suggest>
+                            <div class="col-lg-7 my-auto">
+
+                                <search-simple-suggest
+                                    ref="simpleSuggest"
+                                    value-attribute="id"
+                                    :max-suggestions=20
+                                    accesskey="s"
+                                    user-name="{{ user.get_username }}"
+                                    initial-search-type="{{ request.session.top_search_filter }}"
+                                    suggest-search-url="{% url 'search:search_tags_and_titles' %}?term="
+                                    query-search-url="{% url 'search:search' %}"
+                                    tag-search-url="{% url 'search:kb_search_tag_detail' 666 %}"
+                                    uuid-search-url="{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}"
+                                    note-tag-search-url="{% url 'search:notes' %}?tagsearch="
+                                    note-query-search-url="{% url 'search:notes' %}"
+                                    bookmark-tag-search-url="{% url 'bookmark:get_bookmarks_by_tag' 666 %}"
+                                    drill-query-search-url="{% url 'drill:search' %}"
+                                    store-in-session-url="{% url "accounts:store_in_session" %}"
+                                >
+                                </search-simple-suggest>
+
+                            </div>
+                        </div>
 
                     </div>
 
@@ -60,14 +66,18 @@
                 {% block nav %}
                 {% endblock %}
 
-                <div class="row content-non-nav">
+                <div class="row content-main">
 
-                    <div class="{{ col_left|default:"col-lg-3" }}" {% if not left_block_nohighlight %}id="left-block"{% endif %}>
-                        {% block left-block %}
-                        {% endblock %}
-                    </div>
+                    {% if not no_left_block %}
 
-                    <div class="{{ col_content|default:"col-lg-9" }}">
+                        <div id="left-block" class="col-lg-3 px-0">
+                            {% block left-block %}
+                            {% endblock %}
+                        </div>
+
+                    {% endif %}
+
+                    <div class="col-lg-{{ content_block_width|default:"9" }}">
                         {% block content %}
                         {% endblock %}
                     </div>

@@ -88,7 +88,8 @@ def homepage(request):
                    'bookmarks': bookmarks,
                    'default_collection': default_collection,
                    'overdue_exercises': sorted(overdue_exercises, key=lambda x: x['lag'], reverse=True),
-                   'left_block_nohighlight': True,
+                   'no_left_block': True,
+                   'content_block_width': 12,
                    'title': 'Homepage'})
 
 

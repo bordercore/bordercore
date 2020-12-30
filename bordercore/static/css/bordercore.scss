@@ -1,3 +1,4 @@
+$grid-margin: 15px;
 $search_box_width: 330px;
 
 /* The overflow:hidden eliminates the horizontal scrollbar when
@@ -15,11 +16,18 @@ $search_box_width: 330px;
   padding: 5px;
 }
 
-.content-non-nav {
-  background-color: $background-color-dark;
+.content-main {
   border-radius: 7px;
-  margin: 10px 10px;
-  padding: 5px;
+  margin: $grid-margin * 0.5 $grid-margin * 0.5 $grid-margin * 0.5 $grid-margin * 0.5;
+}
+
+.card-title {
+  font-size: 17px;
+}
+
+.card-grid {
+  margin: 0 0 $grid-margin;
+  padding: 0 $grid-margin * 0.5;
 }
 
 #greeting {
@@ -167,7 +175,8 @@ $nav-tabs-link-hover-border-color: $nav-tabs-border-color;
 }
 
 .card-body {
-  background-color: $list-group-item-secondary;
+  background-color: $background-color-dark;
+  border-radius: 7px;
 }
 
 .list-group-item-secondary {
@@ -217,6 +226,7 @@ pre {
 
 #top-title {
   font-size: 32px;
+  padding-left: $grid-margin;
 }
 
 /* Top Search */
@@ -224,7 +234,7 @@ pre {
 #top-search {
   background-color: $background-color-dark;
   border-radius: 7px;
-  margin: 10px 10px;
+  margin: $grid-margin $grid-margin $grid-margin * 0.5 $grid-margin;
 }
 
 #top-search input {
@@ -604,7 +614,6 @@ div .search-box .search-box-input {
 }
 
 .dropdownmenu:hover {
-  /* background-color: $blue; */
   border-radius: 100%;
 }
 

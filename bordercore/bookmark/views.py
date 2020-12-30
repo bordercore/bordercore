@@ -283,8 +283,8 @@ def overview(request,
                       'bookmarks': sorted_bookmarks,
                       'tag_counts': tag_counts,
                       'favorite_tags': favorite_tags,
-                      'col_left': "bogus",
-                      'col_content': "col-lg-12"
+                      'no_left_block': True,
+                      'content_block_width': 12,
                   })
 
 

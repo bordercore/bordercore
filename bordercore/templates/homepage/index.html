@@ -4,136 +4,216 @@
 
 {% block title %} Home {% endblock %}
 
-{% block left-block %}
-
-        <div class="card">
-            <div class="card-header">Important Tasks</div>
-            <ul class="list-group">
-                {% for task in tasks %}
-                    <li class="list-group-item list-group-item-secondary text-info">{{ task.task }}
-                    <span class="badge badge-primary ml-1">{{ task.parent_category }}</span>
-                        {% if task.date %}
-                            {{ task.date }}
-                        {% endif %}
-                        {% for tag in task.tags.all %}
-                            <span class="badge badge-info">{{ tag.name }}</span>
-                        {% endfor %}
-                    </li>
-                {% empty %}
-                    <li class="list-group-item">All done!</li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <div class="card my-3">
-            <div class="card-header">Daily Bookmarks</div>
-            <ul class="list-group">
-                {% for bookmark in daily_bookmarks %}
-                    <li class="list-group-item list-group-item-secondary {{ bookmark.css_class }}"><a class="text-success" href="{% url 'bookmark:click' bookmark.id %}">{{ bookmark.title }}</a></li>
-                {% empty %}
-                    <li class="list-group-item">No bookmarks marked as Daily.</li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <div class="card my-3">
-            <div class="card-header">Overdue Exercises</div>
-            <ul class="list-group">
-                {% for exercise in overdue_exercises %}
-                    <li class="list-group-item list-group-item-secondary text-info"><a class="text-success" href="{% url 'fitness:exercise_detail' exercise.exercise.exercise_id %}">{{ exercise.exercise.exercise.exercise }}</a> {{ exercise.lag }} days</li>
-                {% empty %}
-                    <li class="list-group-item list-group-item-secondary">No active exercises.</li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <div class="card">
-            <div class="card-header">Pinned Bookmarks</div>
-            <ul class="list-group">
-                {% for bookmark in pinned_bookmarks %}
-                    <li class="list-group-item"><a href="{{ bookmark.url }}">{{ bookmark.title }}</a> </li>
-                {% empty %}
-                    <li class="list-group-item list-group-item-secondary">No pinned bookmarks.</li>
-                {% endfor %}
-            </ul>
-        </div>
-
-{% endblock %}
-
 {% block content %}
 
     <div id="vue-app">
 
-        {% include "common/show_messages.html" %}
-
         <div class="row">
+            <div class="col-lg-3">
 
-            <div class="col-lg-7">
+                <div class="row">
+                    <div class="col-lg-12 card-grid">
 
-                <div class="card">
-                    <div class="card-header">Recent Bookmarks</div>
-            {% if bookmarks %}
-                <ul class="list-group">
-                {% for bookmark in bookmarks %}
-                    <li class="list-group-item list-group-item-secondary text-success">{{ bookmark.url|favicon:16|safe }} <a class="text-success ml-2" href="{{ bookmark.url }}">{{ bookmark.title }}</a> </li>
-                {% endfor %}
-                </ul>
-            {% else %}
-                <li class="list-group-item list-group-item-secondary">
-                    <a class="ml-2" href="{% url 'bookmark:create' %}">Add a bookmark</a>
-                </li>
-            {% endif %}
+                        <card
+                            title="Important Tasks"
+                        >
+                            <template v-slot:content>
+                                <ul class="list-group">
+                                    {% for task in tasks %}
+                                        <li class="list-group-item list-group-item-secondary text-info">{{ task.task }}
+                                            <span class="badge badge-primary ml-1">{{ task.parent_category }}</span>
+                                                {% if task.date %}
+                                                    {{ task.date }}
+                                                {% endif %}
+                                                {% for tag in task.tags.all %}
+                                                    <span class="badge badge-info">{{ tag.name }}</span>
+                                                {% endfor %}
+                                        </li>
+                                    {% empty %}
+                                        <li class="list-group-item">All done!</li>
+                                    {% endfor %}
+                                </ul>
+                            </template>
+                        </card>
+
+                    </div>
                 </div>
 
-        {% if default_collection %}
-            <iframe src="{% url 'collection:embedded' default_collection %}" frameborder=0 scrolling="no" width="100%"></iframe>
-        {% endif %}
+                <div class="row">
+                    <div class="col-lg-12 card-grid">
 
-        <div class="card my-3">
-            <div class="card-header">Recently Played Music</div>
-            <ul class="list-group">
-                {% for song in music %}
-                    <li class="list-group-item list-group-item-secondary text-info">{{ song.song.title }} <strong>{{ song.song.artist }}</strong></li>
-                {% empty %}
-                    <li class="list-group-item list-group-item-secondary text-info">No music listened to.</li>
-                {% endfor %}
-            </ul>
-        </div>
+                        <card
+                            title="Daily Bookmarks"
+                        >
+                            <template v-slot:content>
+                                <ul class="list-group">
+                                    {% for bookmark in daily_bookmarks %}
+                                        <li class="list-group-item list-group-item-secondary {{ bookmark.css_class }}"><a class="text-success" href="{% url 'bookmark:click' bookmark.id %}">{{ bookmark.title }}</a></li>
+                                    {% empty %}
+                                        <li class="list-group-item">No bookmarks marked as Daily.</li>
+                                    {% endfor %}
+                                </ul>
+                            </template>
+                        </card>
 
-            </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-12 card-grid">
+
+                        <card
+                            title="Overdue Exercises"
+                        >
+                            <template v-slot:content>
+                                <ul class="list-group">
+                                    {% for exercise in overdue_exercises %}
+                                        <li class="list-group-item list-group-item-secondary text-info"><a class="text-success" href="{% url 'fitness:exercise_detail' exercise.exercise.exercise_id %}">{{ exercise.exercise.exercise.exercise }}</a> {{ exercise.lag }} days</li>
+                                    {% empty %}
+                                        <li class="list-group-item list-group-item-secondary">No active exercises.</li>
+                                    {% endfor %}
+                                </ul>
+                            </template>
+                        </card>
+
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-12 card-grid">
+
+                        <card
+                            title="Pinned Bookmarks"
+                        >
+                            <template v-slot:content>
+                                <ul class="list-group">
+                                    {% for bookmark in pinned_bookmarks %}
+                                        <li class="list-group-item list-group-item-secondary"><a href="{{ bookmark.url }}">{{ bookmark.title }}</a> </li>
+                                    {% empty %}
+                                        <li class="list-group-item list-group-item-secondary">No pinned bookmarks.</li>
+                                    {% endfor %}
+                                </ul>
+                            </template>
+                        </card>
+
+                    </div>
+                </div>
+
+            </div> <!-- End first column -->
+
+            {% include "common/show_messages.html" %}
 
             <div class="col-lg-5">
 
-                <div class="card">
-                    <div class="card-header">Upcoming Calendar Events</div>
-                    <ul class="list-group" id="events">
-                        <li v-if="waiting" :class="errorClass" class="list-group-item list-group-item-secondary">[[ msg ]]</li>
-                        <div v-for="event in events" :key="event.count" v-cloak>
-                            <li class="list-group-item list-group-item-secondary text-info">[[ event.start_pretty ]]: <strong>[[ event.summary ]]</strong> </li>
-                        </div>
-                    </ul>
+                <div class="row">
+                    <div class="col-lg-12 card-grid">
+
+                        <card
+                            title="Recent Bookmarks"
+                        >
+                            <template v-slot:content>
+                            {% if bookmarks %}
+                                <ul class="list-group">
+                                {% for bookmark in bookmarks %}
+                                    <li class="list-group-item list-group-item-secondary text-success">{{ bookmark.url|favicon:16|safe }} <a class="text-success ml-2" href="{{ bookmark.url }}">{{ bookmark.title }}</a> </li>
+                                {% endfor %}
+                                </ul>
+                            {% else %}
+                                <li class="list-group-item list-group-item-secondary">
+                                    <a class="ml-2" href="{% url 'bookmark:create' %}">Add a bookmark</a>
+                                </li>
+                            {% endif %}
+                            </template>
+                        </card>
+
+                    </div>
                 </div>
 
-                <div class="my-3">
-        {% if random_image_info %}
-            <a href="{% url 'blob:detail' random_image_info.uuid %}">
-                <img src="{{ random_image_info.cover_info.url }}" class="mw-100" height="{{ random_image_info.cover_info.height_cropped }}" width="{{ random_image_info.cover_info.width_cropped }}" />
-            </a>
-        {% else %}
-            <a href="{% url 'blob:create' %}">Add a blob</a>
-        {% endif %}
+                <div class="row">
+                    <div class="col-lg-12 card-grid">
+
+                        {% if default_collection %}
+                            <iframe src="{% url 'collection:embedded' default_collection %}" frameborder=0 scrolling="no" width="100%"></iframe>
+                        {% endif %}
+
+                        <card
+                            title="Recently Played Music"
+                        >
+                            <template v-slot:content>
+                                <ul class="list-group">
+                                    {% for song in music %}
+                                        <li class="list-group-item list-group-item-secondary text-info">{{ song.song.title }} <strong>{{ song.song.artist }}</strong></li>
+                                    {% empty %}
+                                        <li class="list-group-item list-group-item-secondary text-info">No music listened to.</li>
+                                    {% endfor %}
+                                </ul>
+                            </template>
+                        </card>
+
+                    </div>
                 </div>
 
-            </div>
+                <div class="row">
+                    <div class="col-lg-12 card-grid">
 
-        </div>
+                        <card
+                            title="Quote"
+                        >
+                            <template v-slot:content>
+                                <div>
+                                    {{ quote.quote }}<br /><strong>{{ quote.source }}</strong>
+                                </div>
+                            </template>
+                        </card>
 
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="alert alert-info">
-      {{ quote.quote }}<br /><strong>{{ quote.source }}</strong>
+                    </div>
                 </div>
-            </div>
+
+            </div> <!-- End second column -->
+
+            <div class="col-lg-4">
+
+                <div class="row">
+                    <div class="col-lg-12 card-grid">
+
+                        <card
+                            title="Calendar"
+                        >
+                            <template v-slot:content>
+                                <ul class="list-group" id="events">
+                                    <li v-if="waiting" :class="errorClass" class="list-group-item list-group-item-secondary">[[ msg ]]</li>
+                                    <div v-for="event in events" :key="event.count" v-cloak>
+                                        <li class="list-group-item list-group-item-secondary text-info">[[ event.start_pretty ]]: <strong>[[ event.summary ]]</strong> </li>
+                                    </div>
+                                </ul>
+                            </template>
+                        </card>
+
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-12 card-grid">
+                        <card
+                            title="{{ random_image_info.blob.title }}"
+                        >
+                            <template v-slot:content>
+                            {% if random_image_info %}
+                                <a href="{% url 'blob:detail' random_image_info.uuid %}">
+                                    <img src="{{ random_image_info.cover_info.url }}" class="mw-100" height="{{ random_image_info.cover_info.height_cropped }}" width="{{ random_image_info.cover_info.width_cropped }}" />
+                                </a>
+                            {% else %}
+                                <a href="{% url 'blob:create' %}">Add a blob</a>
+                            {% endif %}
+                            </template>
+                        </card>
+
+                    </div>
+
+                </div>
+
+            </div> <!-- End third column -->
+
         </div>
 
     </div>

@@ -81,6 +81,10 @@ import SearchTagsInput from "./vue/common/SearchTagsInput.vue";
 Vue.component("SearchTagsInput", SearchTagsInput);
 window.SearchTagsInput = SearchTagsInput;
 
+import Card from "./vue/common/Card.vue";
+Vue.component("Card", Card);
+window.Card = Card;
+
 import VueSidebarMenu from "vue-sidebar-menu"
 import "vue-sidebar-menu/dist/vue-sidebar-menu.css"
 Vue.use(VueSidebarMenu)
