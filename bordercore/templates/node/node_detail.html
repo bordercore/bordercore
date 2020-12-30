@@ -4,14 +4,12 @@
 
 {% load favicon %}
 
-{% block title %} Node {% endblock %}
+{% block title %} Node <span class="node-name">{{ node.name }}</span> {% endblock %}
 
 {% block left-block %}
 {% endblock %}
 
 {% block content %}
-
-    <h2>{{ node.name }}</h2>
 
     <div id="vue-app">
 
