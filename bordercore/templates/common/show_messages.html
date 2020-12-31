@@ -3,7 +3,7 @@
 {% for message in messages %}
 
     <div class="row">
-        <div class="col-lg-{{ width|default:12 }} offset-lg-{{ offset|default:0 }} mb-2">
+        <div class="col-lg-{{ width|default:12 }} offset-lg-{{ offset|default:0 }}">
 
     {% if message.tags == "error" or "show_in_dom" in message.tags %}
 

@@ -13,6 +13,7 @@ from django.shortcuts import render
 from blob.models import Blob
 from bookmark.models import Bookmark
 from cal.models import Calendar
+from collection.models import Collection
 from fitness.models import ExerciseUser
 from music.models import Listen
 from quote.models import Quote
@@ -72,7 +73,7 @@ def homepage(request):
     # Get the default collection
     default_collection = None
     try:
-        default_collection = request.user.userprofile.homepage_default_collection.id
+        default_collection = Collection.objects.get(pk=request.user.userprofile.homepage_default_collection.id)
     except AttributeError:
         pass
 
