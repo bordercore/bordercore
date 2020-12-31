@@ -7,12 +7,6 @@ from music.models import Song, SongSource
 from tag.models import Tag
 
 
-# We need to create a custom class so that we can define what get's displayed in the select widget
-class MyModelChoiceField(ModelChoiceField):
-    def label_from_instance(self, obj):
-        return obj.name
-
-
 class SongForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
@@ -39,9 +33,9 @@ class SongForm(ModelForm):
             raise forms.ValidationError(u'If you specify an album you must also specify the year')
         return a
 
-    source = MyModelChoiceField(queryset=SongSource.objects.all(),
-                                widget=forms.Select(attrs={'class': 'form-control'}),
-                                empty_label='Select Source')
+    source = ModelChoiceField(queryset=SongSource.objects.all(),
+                              widget=forms.Select(attrs={'class': 'form-control'}),
+                              empty_label='Select Source')
 
     tags = ModelCommaSeparatedChoiceField(
         required=False,

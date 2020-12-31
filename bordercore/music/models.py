@@ -38,6 +38,9 @@ class SongSource(TimeStampedModel):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
 
 class Song(TimeStampedModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
