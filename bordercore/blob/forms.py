@@ -39,7 +39,6 @@ class BlobForm(ModelForm):
             self.fields['filename'].disabled = True
             self.initial['date'] = datetime.date.today().strftime("%Y-%m-%dT00:00")
 
-
     filename = CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
     file_modified = IntegerField(required=False, widget=forms.HiddenInput())
 

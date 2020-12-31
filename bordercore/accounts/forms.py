@@ -7,36 +7,44 @@ from lib.fields import ModelCommaSeparatedChoiceField
 from tag.models import Tag
 
 
-# We need to create a custom class so that we can define what get's displayed in the select widget
-class MyModelChoiceField(ModelChoiceField):
-    def label_from_instance(self, obj):
-        return obj.name
-
-
 class UserProfileForm(ModelForm):
     def __init__(self, *args, **kwargs):
+
+        # The request object is passed in from UserProfileUpdateView.get_form_kwargs()
+        self.request = kwargs.pop("request", None)
+
         super(UserProfileForm, self).__init__(*args, **kwargs)
 
-        self.fields['homepage_default_collection'].label = "Default collection"
-        self.fields['homepage_default_collection'].widget.attrs['class'] = 'form-control'
-        self.fields['homepage_default_collection'].required = False
+        # Don't be alarmed by the Tag.objects.all() queryset. Django will
+        #  later filter this on just your favorite tags.
+        self.fields['favorite_tags'] = ModelCommaSeparatedChoiceField(
+            required=False,
+            id='id_tags',
+            queryset=Tag.objects.all(),
+            to_field_name='name')
+        self.initial['favorite_tags'] = self.instance.get_tags()
         self.fields['favorite_tags'].widget.attrs['class'] = 'form-control'
+
         self.fields['orgmode_file'].required = False
+
+        collections_list = Collection.objects.filter(user=self.request.user).exclude(name="")
+        if collections_list:
+            self.fields['homepage_default_collection'] = ModelChoiceField(
+                empty_label='Select Collection',
+                label='Default collection',
+                queryset=collections_list,
+                required=False,
+            )
+            self.fields['homepage_default_collection'].widget.attrs['class'] = 'form-control'
+        else:
+            # If the user doesn't have any collections, remove the field
+            self.fields.pop('homepage_default_collection')
+
+        self.fields['todo_default_tag'] = ModelChoiceField(
+            empty_label='Select Tag',
+            queryset=Tag.objects.filter(todo__isnull=False).distinct('name'),
+        )
         self.fields['todo_default_tag'].widget.attrs['class'] = 'form-control'
-
-        # If this form has a model attached, get the tags and display them separated by commas
-        if self.instance.id:
-            self.initial['favorite_tags'] = self.instance.get_tags()
-
-    todo_default_tag = MyModelChoiceField(queryset=Tag.objects.filter(todo__isnull=False).distinct('name'), empty_label='Select Tag')
-
-    homepage_default_collection = MyModelChoiceField(queryset=Collection.objects.none(), empty_label='Select Collection')
-
-    favorite_tags = ModelCommaSeparatedChoiceField(
-        required=False,
-        id='id_tags',
-        queryset=Tag.objects.filter(),
-        to_field_name='name')
 
     class Meta:
         model = UserProfile

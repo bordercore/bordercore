@@ -38,14 +38,15 @@ class UserProfileUpdateView(UpdateView):
         context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.favorite_tags.all()[::-1]]
         return context
 
+    # Override this method so that we can pass the request object to the form
+    #  so that we have access to it in UserProfileForm.__init__()
+    def get_form_kwargs(self):
+        kwargs = super(UserProfileUpdateView, self).get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
+
     def get_object(self, queryset=None):
         return UserProfile.objects.get(user=self.request.user)
-
-    def get_initial(self):
-        self.initial.update(
-            {"homepage_default_collection": Collection.objects.filter(user=self.request.user).exclude(name='')}
-        )
-        return super(UserProfileUpdateView, self).get_initial()
 
     def form_valid(self, form):
         self.handle_sidebar(form)
