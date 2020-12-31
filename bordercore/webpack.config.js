@@ -12,10 +12,10 @@ module.exports = (env, argv) => {
 
     config = {
         entry: {
-            "js/javascript": ["./front-end/index.js"],
-            "css/theme-light": ["./static/css/theme-light.scss"],
-            "css/theme-dark": ["./static/css/theme-dark.scss"],
-            "css/vue-sidebar-menu": ["./static/css/vue-sidebar-menu/vue-sidebar-menu.scss"],
+            "dist/js/javascript": ["./front-end/index.js"],
+            "dist/css/theme-light": ["./static/scss/themes/theme-light.scss"],
+            "dist/css/theme-dark": ["./static/scss/themes/theme-dark.scss"],
+            "dist/css/vue-sidebar-menu": ["./static/css/vue-sidebar-menu/vue-sidebar-menu.scss"],
         },
         output: {
             filename: "[name]-bundle.min.js",
@@ -32,7 +32,7 @@ module.exports = (env, argv) => {
 
             // Lint my SCSS
             new StylelintPlugin({
-                files: "**/bordercore.scss"
+                files: "static/scss/**.scss"
             }),
 
             // Remove the boilerplate JS files from chunks of CSS only entries

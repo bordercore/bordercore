@@ -1,0 +1,37 @@
+// Base styles
+@import "../variables";
+
+// Custom Bootswatch variables which overrides the "cerulean" theme
+$gray-700: #495057;
+$gray-900: #212529;
+
+@import "../../../node_modules/bootswatch/dist/cerulean/variables";
+
+// Import the Bootstrap core
+// (This file imports all Bootstrap core's variables and components from the Bootstrap core package installed via npm)
+@import "../../../node_modules/bootstrap/scss/bootstrap.scss";
+
+@import "../../../node_modules/bootswatch/dist/cerulean/bootswatch";
+
+// Import styles for BootstrapVue
+@import "../../../node_modules/bootstrap-vue/src/index.scss";
+
+// Import CSS for perfect-scrollbar
+@import "../../css/perfect-scrollbar.css";
+
+// Custom colors for this theme
+$background-color-dark: #10163a;
+$background-color-light: #262b48;
+$form-background-color: $gray-300;
+$light-blue: #212132;
+$link-hover-color: $primary;
+$list-group-item-secondary: $white;
+$markdown-background-color: $gray-200;
+$markdown-border-color: $black;
+$modal-background-color: $white;
+$nav-tabs-border-color: $gray-500;
+$selected-background-color: $cyan;
+$sidebar-background-color: #343a40;
+
+// Import core SCSS
+@import "../base";

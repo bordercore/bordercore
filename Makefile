@@ -14,13 +14,13 @@ webpack_build: check-env
 
 webpack_aws: check-env
 	cd $(BORDERCORE_HOME)
-	aws s3 cp static/css/theme-dark.css $(S3)/css/ &&
-	aws s3 cp static/css/theme-dark.min.css $(S3)/css/ &&
-	aws s3 cp static/css/theme-light.css $(S3)/css/ &&
-	aws s3 cp static/css/theme-light.min.css $(S3)/css/ &&
-	aws s3 cp static/css/vue-sidebar-menu.min.css $(S3)/css/ &&
-	aws s3 cp static/js/javascript-bundle.js.gz $(S3)/js/ --content-encoding gzip &&
-	aws s3 cp static/js/javascript-bundle.min.js.gz $(S3)/js/ --content-encoding gzip
+	aws s3 cp static/dist/css/theme-dark.css $(S3)/css/ &&
+	aws s3 cp static/dist/css/theme-dark.min.css $(S3)/css/ &&
+	aws s3 cp static/dist/css/theme-light.css $(S3)/css/ &&
+	aws s3 cp static/dist/css/theme-light.min.css $(S3)/css/ &&
+	aws s3 cp static/dist/css/vue-sidebar-menu.min.css $(S3)/css/ &&
+	aws s3 cp static/dist/js/javascript-bundle.js.gz $(S3)/js/ --content-encoding gzip &&
+	aws s3 cp static/dist/js/javascript-bundle.min.js.gz $(S3)/js/ --content-encoding gzip
 
 check-env:
 ifndef BORDERCORE_HOME
@@ -35,7 +35,7 @@ test_data:
 	$(VIRTUALENV)pytest --disable-warnings -n 3 -m "not wumpus and data_quality" $(BORDERCORE_HOME)
 
 test_unit:
-	$(VIRTUALENV)pytest -s --disable-warnings -m "not data_quality" $(BORDERCORE_HOME)
+	$(VIRTUALENV)pytest -s --disable-warnings -m "not data_quality and not functional" $(BORDERCORE_HOME)
 
 test_wumpus:
 	$(VIRTUALENV)pytest --disable-warnings $(BORDERCORE_HOME)/blob/ -m wumpus

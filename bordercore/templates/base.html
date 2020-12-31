@@ -9,8 +9,8 @@
         <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-glyphicons.css" />
 
         {% if debug %}
-            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/theme-{{ request.user.userprofile.theme }}.css" />
-            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/vue-sidebar-menu.css" />
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}dist/css/theme-{{ request.user.userprofile.theme }}.css" />
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}dist/css/vue-sidebar-menu.css" />
         {% else %}
             <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/theme-{{ request.user.userprofile.theme }}.min.css" />
             <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/vue-sidebar-menu.min.css" />
@@ -106,7 +106,7 @@
         {% block javascript %}
 
             {% if debug %}
-                <script type="text/javascript" src="{{ STATIC_URL }}js/javascript-bundle.js.gz"></script>
+                <script type="text/javascript" src="{{ STATIC_URL }}dist/js/javascript-bundle.js.gz"></script>
             {% else %}
                 <script type="text/javascript" src="{{ STATIC_URL }}js/javascript-bundle.min.js.gz"></script>
             {% endif %}
