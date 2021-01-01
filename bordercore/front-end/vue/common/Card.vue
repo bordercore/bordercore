@@ -2,6 +2,8 @@
     <div class="card-body">
         <div class="card-title">
         {{ title }}
+            <slot name="top-right">
+            </slot>
         </div>
         <slot name="content" class="card-content">
         Insert your content here
