@@ -7,6 +7,7 @@ from PyOrgMode import PyOrgMode
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.shortcuts import render
 
@@ -60,6 +61,8 @@ def homepage(request):
                 messages.add_message(request, messages.ERROR, f"Error getting random image info for uuid={random_image.uuid}: {e}")
     except ConnectionRefusedError:
         messages.add_message(request, messages.ERROR, 'Cannot connect to Elasticsearch')
+    except ObjectDoesNotExist:
+        messages.add_message(request, messages.ERROR, 'Blob found in Elasticsearch but not the DB')
 
     # Get the most recent untagged bookmarks
     bookmarks = Bookmark.objects.filter(user=request.user, tags__isnull=True).order_by('-created')[:10]
