@@ -36,36 +36,38 @@
         <div class="alert alert-info">No notes found</div>
     {% endif %}
 
-    <div class="row">
-        <div class="col-lg-12">
+    <div id="vue-app">
 
-            {% for note in object_list.hits.hits %}
+    {% for note in object_list.hits.hits %}
 
-                <div id="note" class="table-borders">
-                    <h2>
-                        <a href="{% url 'blob:detail' note.source.uuid %}">{{ note.source.title|default:"Note Title" }}</a>
-                    </h2>
+        <div class="row">
+            <div class="col-lg-12 card-grid">
+                <card title="{{ note.source.title|default:"Note Title" }}">
+                    <template v-slot:content>
 
-                    <span class="glyphicon glyphicon-time"></span> <span> {{ note.source.date }} </span>
+                        <div id="note" class="table-borders">
+                            <h2>
+                                <a href="{% url 'blob:detail' note.source.uuid %}">{{ note.source.title|default:"Note Title" }}</a>
+                            </h2>
 
-                    <br /><br />
+                            <span class="glyphicon glyphicon-time"></span> <span> {{ note.source.date }} </span>
 
-                    <div>
-                        {{ note.source.content|safe }}
-                    </div>
+                            <div>
+                                {{ note.source.content|safe }}
+                            </div>
 
-                    {% for tag in note.source.tags %}
-                        <a id="tag" class="badge badge-info" href="{% url 'search:notes' %}?tagsearch={{ tag }}">{{ tag }}</a>
-                    {% endfor %}
+                            {% for tag in note.source.tags %}
+                                <a id="tag" class="badge badge-info" href="{% url 'search:notes' %}?tagsearch={{ tag }}">{{ tag }}</a>
+                            {% endfor %}
+                        </div>
 
-                    <br /><br />
-                </div>
-
-            {% endfor %}
-                </transition-group>
-            </draggable>
-
+                    </template>
+                </card>
+            </div>
         </div>
+
+    {% endfor %}
+
     </div>
 
     {% if object_list and paginator.num_pages > 1 %}
@@ -95,6 +97,10 @@
     <script type="text/javascript">
 
         Vue.mixin({ delimiters: ["[[", "]]"] });
+
+        new Vue({
+            el: "#vue-app",
+        });
 
         new Vue({
             el: '#sort-container-notes',

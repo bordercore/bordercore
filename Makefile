@@ -40,8 +40,11 @@ test_unit:
 test_wumpus:
 	$(VIRTUALENV)pytest --disable-warnings $(BORDERCORE_HOME)/blob/ -m wumpus
 
+test_functional:
+	$(VIRTUALENV)pytest --disable-warnings $(BORDERCORE_HOME)/ -m functional
+
 test_coverage:
-	$(VIRTUALENV)pytest -m "not data_quality" --cov=$(BORDERCORE_HOME) --cov-report html --cov-config=/home/jerrell/dev/django/bordercore_project/.coveragerc -s --disable-warnings $(BORDERCORE_HOME)
+	$(VIRTUALENV)pytest -m "not data_quality and not functional" --cov=$(BORDERCORE_HOME) --cov-report html --cov-config=/home/jerrell/dev/django/bordercore_project/.coveragerc -s --disable-warnings $(BORDERCORE_HOME)
 
 lint:
 	pylint --disable=R,C hello cli
