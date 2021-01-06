@@ -8,8 +8,6 @@ import django
 from django import urls
 from django.test import RequestFactory
 
-from blob.tests.conftest import (aws_credentials, blob_image_factory,
-                                 blob_pdf_factory, s3_bucket, s3_resource)
 from search.views import (SearchTagDetailView, get_doctype, get_title,
                           is_cached, sort_results)
 
@@ -18,29 +16,15 @@ try:
 except ModuleNotFoundError:
     pass
 
+pytestmark = pytest.mark.django_db
 
 django.setup()
 
-from django.contrib.auth.models import User  # isort:skip
-from tag.models import Tag  # isort:skip
-from blob.models import Blob  # isort:skip
 
-
-@pytest.fixture(scope="function")
-def user(db, client, django_user_model):
-    username = "testuser"
-    password = "password"
-    email = "testuser@testdomain.com"
-
-    user = django_user_model.objects.create_user(username, email, password)
-    client.login(username=username, password=password)
-
-    return user
-
-
-@pytest.mark.django_db
 @patch("search.views.Elasticsearch")
-def test_search(mock_elasticsearch, user, client):
+def test_search(mock_elasticsearch, auto_login_user):
+
+    _, client = auto_login_user()
 
     filepath = Path(__file__).parent / "resources/search_results.json"
 
@@ -64,9 +48,10 @@ def test_search(mock_elasticsearch, user, client):
     assert data["hits"]["hits"][0]["source"]["title"] == match
 
 
-@pytest.mark.django_db
 @patch("search.views.Elasticsearch")
-def test_search_notes(mock_elasticsearch, user, client):
+def test_search_notes(mock_elasticsearch, auto_login_user):
+
+    _, client = auto_login_user()
 
     filepath = Path(__file__).parent / "resources/search_results_notes.json"
 
@@ -152,9 +137,10 @@ def test_is_cached():
     assert cache_checker("Book", "War and Peace") is False
 
 
-@pytest.mark.django_db
 @patch("search.views.Elasticsearch")
-def test_search_tag(mock_elasticsearch, user, client, blob_image_factory, blob_pdf_factory):
+def test_search_tag(mock_elasticsearch, auto_login_user, blob_image_factory, blob_pdf_factory):
+
+    _, client = auto_login_user()
 
     filepath = Path(__file__).parent / "resources/search_results_tags.json"
 
@@ -203,7 +189,9 @@ def test_get_doc_counts():
     assert result[1] == ("blob", 2)
 
 
-def test_tag_list_js(user):
+def test_tag_list_js(auto_login_user):
+
+    user, _ = auto_login_user()
 
     request = RequestFactory().get("/")
     request.user = user

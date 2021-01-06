@@ -33,7 +33,9 @@ def login(live_server, browser, settings):
     page.login()
 
 
-def test_homepage(todo_factory, login, live_server, browser, django_user, settings):
+def test_homepage(auto_login_user, todo_factory, login, live_server, browser, settings):
+
+    user, _ = auto_login_user()
 
     settings.DEBUG = True
 

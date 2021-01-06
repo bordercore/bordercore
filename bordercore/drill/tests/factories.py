@@ -1,21 +1,12 @@
 import factory
 from faker import Factory as FakerFactory
 
-from django.contrib.auth.models import User
 from django.db.models import signals
 
+from accounts.tests.factories import UserFactory
 from drill.models import EFACTOR_DEFAULT, Question
 
 faker = FakerFactory.create()
-
-
-class UserFactory(factory.DjangoModelFactory):
-
-    class Meta:
-        model = User
-        django_get_or_create = ("username",)
-
-    username = "testuser"
 
 
 @factory.django.mute_signals(signals.post_save)

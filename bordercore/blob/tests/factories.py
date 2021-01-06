@@ -1,29 +1,20 @@
 import factory
 
-import django
-from django.contrib.auth.models import User
+from django.db.models import signals
 
+from accounts.tests.factories import UserFactory
 from blob.models import Blob, MetaData
 from tag.tests.factories import TagFactory
 
-django.setup()
 
-
-class UserFactory(factory.DjangoModelFactory):
-
-    class Meta:
-        model = User
-        django_get_or_create = ("username",)
-
-    username = "testuser"
-
-
+@factory.django.mute_signals(signals.post_save)
 class MetaDataFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = MetaData
 
 
+@factory.django.mute_signals(signals.post_save)
 class BlobFactory(factory.DjangoModelFactory):
 
     class Meta:

@@ -1,16 +1,16 @@
 import datetime
 
-import django
+import pytest
 
 from .factories import CollectionFactory
-
-django.setup()
 
 from blob.models import Blob  # isort:skip
 from collection.models import Collection  # isort:skip
 
+pytestmark = pytest.mark.django_db
 
-def test_sort_collection(user):
+
+def test_sort_collection():
 
     collection = CollectionFactory()
 

@@ -1,18 +1,29 @@
-from tag.models import Tag  # isort:skip
-from accounts.models import SortOrderUserTag, favorite_tags_has_changed  # isort:skip
+import pytest
+
+from django.contrib.auth.models import User
+
+from accounts.models import SortOrderUserTag, favorite_tags_has_changed
+from accounts.tests.factories import TEST_USERNAME
+from tag.models import Tag
+
+pytestmark = pytest.mark.django_db
 
 
-def test_get_tags(user, sort_order):
+def test_get_tags(sort_order_user_tag):
+
+    user = User.objects.get(username=TEST_USERNAME)
 
     assert user.userprofile.get_tags() == "tag1, tag2, tag3"
 
 
-def test_reorder(user, sort_order):
+def test_reorder(sort_order_user_tag):
 
     # Starting order: 3, 2, 1
     tag1 = Tag.objects.get(name="tag1")
     tag2 = Tag.objects.get(name="tag2")
     tag3 = Tag.objects.get(name="tag3")
+
+    user = User.objects.get(username=TEST_USERNAME)
 
     # New order: 2, 3, 1
     s = SortOrderUserTag.objects.get(userprofile=user.userprofile, tag=tag2)

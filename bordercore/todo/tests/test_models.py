@@ -1,31 +1,20 @@
 import pytest
 
-from tag.tests.factories import TagFactory
-from todo.models import Todo
+from django.contrib.auth.models import User
 
-from .factories import TodoFactory
+from accounts.tests.factories import TEST_USERNAME
+from todo.models import Todo
 
 pytestmark = pytest.mark.django_db
 
 
-def test_get_todo_counts():
+def test_get_todo_counts(todo_factory):
 
-    task_1 = TodoFactory()
-    task_2 = TodoFactory()
-    task_3 = TodoFactory()
-
-    tag_1 = TagFactory()
-    tag_2 = TagFactory()
-
-    task_1.tags.add(tag_1)
-    task_2.tags.add(tag_1)
-    task_3.tags.add(tag_1)
-    task_3.tags.add(tag_2)
-
-    counts = Todo.get_todo_counts(task_1.user, tag_1.name)
+    user = User.objects.get(username=TEST_USERNAME)
+    counts = Todo.get_todo_counts(user, "tag_0")
     assert counts[0]["count"] == 3
     assert counts[1]["count"] == 1
 
-    counts = Todo.get_todo_counts(task_1.user, tag_2.name)
+    counts = Todo.get_todo_counts(user, "tag_1")
     assert counts[0]["count"] == 1
     assert counts[1]["count"] == 3

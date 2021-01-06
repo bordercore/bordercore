@@ -1,11 +1,10 @@
+from accounts.tests.factories import TEST_PASSWORD, TEST_USERNAME
+
 try:
     from selenium.webdriver.common.by import By
 except ModuleNotFoundError:
     # Don't worry if this import doesn't exist in production
     pass
-
-TEST_USERNAME = "testuser"
-TEST_PASSWORD = "testuser"
 
 
 class LoginPage:

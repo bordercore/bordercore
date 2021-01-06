@@ -7,24 +7,12 @@ try:
 except ModuleNotFoundError:
     pass
 
-from django.contrib.auth.models import User  # isort:skip
-from tag.models import Tag  # isort:skip
-from blob.models import Blob  # isort:skip
+pytestmark = pytest.mark.django_db
 
 
-@pytest.fixture(scope="function")
-def user(db, client, django_user_model):
-    username = "testuser"
-    password = "password"
-    email = "testuser@testdomain.com"
+def test_todo_list_empty(auto_login_user):
 
-    user = django_user_model.objects.create_user(username, email, password)
-    client.login(username=username, password=password)
-
-    return user
-
-
-def test_todo_list_empty(user, client):
+    _, client = auto_login_user()
 
     url = urls.reverse("todo:list")
     resp = client.get(url)
@@ -32,7 +20,9 @@ def test_todo_list_empty(user, client):
     assert resp.status_code == 200
 
 
-def test_todo_list(user, client, todo_factory):
+def test_todo_list(auto_login_user, todo_factory):
+
+    _, client = auto_login_user()
 
     url = urls.reverse("todo:list")
     resp = client.get(url)
@@ -41,4 +31,4 @@ def test_todo_list(user, client, todo_factory):
 
     soup = BeautifulSoup(resp.content, "html.parser")
 
-    assert soup.select("table#todo_list tr:nth-child(1) td")[4].text.strip() == "task_3"
+    assert soup.select("table#todo_list tr:nth-child(1) td")[4].text.strip() == "task_2"

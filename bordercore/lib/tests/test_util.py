@@ -1,3 +1,5 @@
+import pytest
+
 import django
 
 from lib.util import (get_missing_blob_ids, get_missing_bookmark_ids,
@@ -9,8 +11,12 @@ django.setup()
 from bookmark.models import Bookmark  # isort:skip
 from blob.models import Blob  # isort:skip
 
+pytestmark = pytest.mark.django_db
 
-def test_get_missing_blob_ids(user):
+
+def test_get_missing_blob_ids(auto_login_user):
+
+    user, _ = auto_login_user()
 
     found = {
         "hits": {
@@ -72,7 +78,9 @@ def test_get_missing_blob_ids(user):
     assert get_missing_blob_ids(expected, found) == "d77befd1-9172-4872-b527-628217f25d89"
 
 
-def test_get_missing_bookmark_ids(user):
+def test_get_missing_bookmark_ids(auto_login_user):
+
+    user, _ = auto_login_user()
 
     found = {
         "hits": {

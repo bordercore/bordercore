@@ -2,21 +2,14 @@ import datetime
 
 import factory
 
-from django.contrib.auth.models import User
+from django.db.models import signals
 
+from accounts.tests.factories import UserFactory
 from blob.models import Blob
 from collection.models import Collection
 
 
-class UserFactory(factory.DjangoModelFactory):
-
-    class Meta:
-        model = User
-        django_get_or_create = ("username",)
-
-    username = "testuser"
-
-
+@factory.django.mute_signals(signals.post_save)
 class CollectionFactory(factory.DjangoModelFactory):
 
     class Meta:

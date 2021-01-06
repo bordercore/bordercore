@@ -1,12 +1,16 @@
 
+import pytest
+
 import django
 
 django.setup()
 
 from tag.models import SortOrderTagBookmark, Tag  # isort:skip
 
+pytestmark = pytest.mark.django_db
 
-def test_reorder(user, bookmarks, tag):
+
+def test_reorder(bookmarks, tag):
 
     # Move the first bookmark down the list, from 1 -> 2
     tbso = SortOrderTagBookmark.objects.get(tag=tag[0], bookmark=bookmarks[0])
@@ -57,7 +61,7 @@ def test_reorder(user, bookmarks, tag):
     assert tbso.sort_order == 3
 
 
-def test_delete(user, bookmarks, tag):
+def test_delete(bookmarks, tag):
 
     # Delete the first bookmark
     tbso = SortOrderTagBookmark.objects.get(tag=tag[0], bookmark=bookmarks[0])

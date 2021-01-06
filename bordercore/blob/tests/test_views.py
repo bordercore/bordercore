@@ -55,21 +55,11 @@ def s3_bucket(s3_resource):
     s3_resource.create_bucket(Bucket=settings.AWS_STORAGE_BUCKET_NAME)
 
 
-@pytest.fixture(scope="function")
-def user(db, client, django_user_model):
-    username = "testuser"
-    password = "password"
-    email = "testuser@testdomain.com"
-
-    user = django_user_model.objects.create_user(username, email, password)
-    client.login(username=username, password=password)
-
-    return user
-
-
 @pytest.mark.django_db
-def test_blob_detail(user, blob_image_factory, client):
+def test_blob_detail(auto_login_user, blob_image_factory):
     """Verify we redirect to the memes page when a user is logged in"""
+
+    _, client = auto_login_user()
 
     url = urls.reverse("blob:detail", args=(blob_image_factory.uuid,))
     resp = client.get(url)
