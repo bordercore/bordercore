@@ -33,7 +33,7 @@ def login(live_server, browser, settings):
     page.login()
 
 
-def test_homepage(auto_login_user, todo_factory, login, live_server, browser, settings):
+def test_homepage(auto_login_user, bookmarks, todo_factory, login, live_server, browser, settings):
 
     user, _ = auto_login_user()
 
@@ -45,3 +45,9 @@ def test_homepage(auto_login_user, todo_factory, login, live_server, browser, se
 
     # There should be two important todo tasks
     assert page.todo_count() == 2
+
+    # There should be three recent bookmarks
+    assert page.bookmarks_count() == 3
+
+    # There should be one pinned bookmark
+    assert page.pinned_bookmarks_count() == 1

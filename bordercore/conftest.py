@@ -92,7 +92,7 @@ def bookmarks(tag):
 
     bookmark_1 = BookmarkFactory()
     bookmark_2 = BookmarkFactory()
-    bookmark_3 = BookmarkFactory()
+    bookmark_3 = BookmarkFactory(is_pinned=True)
 
     SortOrderTagBookmark.objects.create(tag=tag[0], bookmark=bookmark_3)
     SortOrderTagBookmark.objects.create(tag=tag[0], bookmark=bookmark_2)
