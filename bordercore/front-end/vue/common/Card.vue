@@ -1,12 +1,14 @@
 <template>
     <div class="card-body">
-        <div class="card-title">
-        {{ title }}
-            <slot name="top-right">
-            </slot>
-        </div>
+        <slot name="title-slot">
+            <div class="card-title">
+                {{ title }}
+                <slot name="top-right">
+                </slot>
+            </div>
+        </slot>
         <slot name="content" class="card-content">
-        Insert your content here
+            Insert your content here
         </slot>
     </div>
 </template>
