@@ -71,12 +71,12 @@ def test_search_notes(mock_elasticsearch, auto_login_user):
     matches = soup.select("div#note")
     assert len(matches) == 10
 
-    match = soup.select("div#note h2")[0].text.strip()
+    match = soup.select("div#vue-app card")[0]["title"]
     assert data["hits"]["hits"][0]["source"]["title"] == match
 
-    matches = soup.select("div#note:nth-child(1) a#tag")
+    matches = soup.select("div#note:nth-of-type(0) a#tag")
     for tag in matches:
-        assert tag.text in data["hits"]["hits"][0]["source"]["tags"]
+        assert tag.findAll(text=True)[0] in data["hits"]["hits"][0]["source"]["tags"]
 
 
 def test_sort_results():

@@ -8,28 +8,43 @@
 
 {% block left-block %}
 
-    <div class="h3">
-        Favorite Notes
-    </div>
+    <div class="row card-grid">
+        <div class="col-lg-12 card-grid" id="sort-container-notes">
+            <card title="Favorite Notes">
 
-    <ul class="list-group" id="sort-container-notes">
-        <draggable v-model="notes" @change="onChange" ghost-class="sortable-ghost">
-            <transition-group type="transition">
-                <div v-for="note in notes" :key="note.uuid" v-cloak>
-                    <li class="list-group-item list-group-item-secondary" :data-uuid="note.uuid">
-                        <a :href="note.url">[[ note.title ]]</a>
-                    </li>
-                </div>
-            </transition-group>
-        </draggable>
-    </ul>
+                <template v-slot:title-slot>
+                    <div class="h3">
+                         Favorite Notes
+                    </div>
+                </template>
+
+                <template v-slot:content>
+
+                    <ul class="list-group" _id="sort-container-notes">
+                        <draggable v-model="notes" @change="onChange" ghost-class="sortable-ghost">
+                            <transition-group type="transition">
+                                <div v-for="note in notes" :key="note.uuid" v-cloak>
+                                    <li class="list-group-item list-group-item-secondary" :data-uuid="note.uuid">
+                                        <a :href="note.url">[[ note.title ]]</a>
+                                    </li>
+                                </div>
+                            </transition-group>
+                        </draggable>
+                    </ul>
+
+                </template>
+            </card>
+        </div>
+    </div>
 
 {% endblock %}
 
 {% block content %}
 
-    <div>
-        <a class="btn btn-primary ml-2 float-right" href="{% url 'blob:create' %}?is_note=true">Add note</a>
+    <div class="row">
+        <div class="col-lg-12 card-grid">
+            <a class="btn btn-primary ml-2 float-right" href="{% url 'blob:create' %}?is_note=true">Add note</a>
+        </div>
     </div>
 
     {% if request.GET and not object_list.hits.hits %}
@@ -43,12 +58,14 @@
         <div class="row">
             <div class="col-lg-12 card-grid">
                 <card title="{{ note.source.title|default:"Note Title" }}">
+                    <template v-slot:title-slot>
+                        <h2>
+                            <a href="{% url 'blob:detail' note.source.uuid %}">{{ note.source.title|default:"Note Title" }}</a>
+                        </h2>
+                    </template>
                     <template v-slot:content>
 
                         <div id="note" class="table-borders">
-                            <h2>
-                                <a href="{% url 'blob:detail' note.source.uuid %}">{{ note.source.title|default:"Note Title" }}</a>
-                            </h2>
 
                             <span class="glyphicon glyphicon-time"></span> <span> {{ note.source.date }} </span>
 
