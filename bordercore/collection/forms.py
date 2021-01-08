@@ -8,16 +8,20 @@ from tag.models import Tag
 class CollectionForm(ModelForm):
     def __init__(self, *args, **kwargs):
 
+        # The request object is passed in from a view's get_form_kwargs() method
+        self.request = kwargs.pop("request", None)
+
         super(CollectionForm, self).__init__(*args, **kwargs)
 
         # If this form has a model attached, get the tags and display them separated by commas
         if self.instance.id:
             self.initial['tags'] = self.instance.get_tags()
 
-    tags = ModelCommaSeparatedChoiceField(
-        required=False,
-        queryset=Tag.objects.filter(),
-        to_field_name='name')
+        self.fields['tags'] = ModelCommaSeparatedChoiceField(
+            request=self.request,
+            required=False,
+            queryset=Tag.objects.filter(user=self.request.user),
+            to_field_name='name')
 
     class Meta:
         model = Collection

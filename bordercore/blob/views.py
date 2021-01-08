@@ -38,6 +38,13 @@ class BlobCreateView(CreateView):
     template_name = 'blob/update.html'
     form_class = BlobForm
 
+    # Override this method so that we can pass the request object to the form
+    #  so that we have access to it in QuestionForm.__init__()
+    def get_form_kwargs(self):
+        kwargs = super(BlobCreateView, self).get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super(BlobCreateView, self).get_context_data(**kwargs)
         context['action'] = 'Create'
@@ -205,6 +212,13 @@ class BlobDetailView(DetailView):
 class BlobUpdateView(UpdateView):
     template_name = 'blob/update.html'
     form_class = BlobForm
+
+    # Override this method so that we can pass the request object to the form
+    #  so that we have access to it in BlobForm.__init__()
+    def get_form_kwargs(self):
+        kwargs = super(BlobUpdateView, self).get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super(BlobUpdateView, self).get_context_data(**kwargs)

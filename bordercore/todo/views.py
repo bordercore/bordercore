@@ -30,14 +30,14 @@ class TodoListView(ListView):
         elif self.request.user.userprofile.todo_default_tag:
             tag_name = self.request.user.userprofile.todo_default_tag
         else:
-            tag_info = Tag.objects.filter(todo__user=self.request.user, todo__isnull=False).first()
+            tag_info = Tag.objects.filter(user=self.request.user, todo__user=self.request.user, todo__isnull=False).first()
             tag_name = None
             if tag_info:
                 tag_name = tag_info.name
         self.tagsearch = tag_name
 
         if tag_name:
-            return Tag.objects.get(name=tag_name).todos.all().order_by("sortordertagtodo__sort_order")
+            return Tag.objects.get(user=self.request.user, name=tag_name).todos.all().order_by("sortordertagtodo__sort_order")
         else:
             return []
 
@@ -93,6 +93,13 @@ class TodoDetailView(UpdateView):
     slug_field = 'uuid'
     slug_url_kwarg = 'uuid'
 
+    # Override this method so that we can pass the request object to the form
+    #  so that we have access to it in TodoForm.__init__()
+    def get_form_kwargs(self):
+        kwargs = super(TodoDetailView, self).get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super(TodoDetailView, self).get_context_data(**kwargs)
         context['nav'] = 'todo'
@@ -142,8 +149,9 @@ class TodoCreateView(CreateView):
             context['tags'] = [{'text': self.request.GET['tagsearch'], 'value': self.request.GET['tagsearch'], 'is_meta': False}]
         return context
 
+    # Override this method so that we can pass the request object to the form
+    #  so that we have access to it in TodoForm.__init__()
     def get_form_kwargs(self):
-        # pass the request object to the form so that we have access to the session
         kwargs = super(TodoCreateView, self).get_form_kwargs()
         kwargs['request'] = self.request
         return kwargs

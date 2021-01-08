@@ -8,6 +8,9 @@ from tag.models import Tag
 class QuestionForm(ModelForm):
     def __init__(self, *args, **kwargs):
 
+        # The request object is passed in from a view's get_form_kwargs() method
+        self.request = kwargs.pop("request", None)
+
         super(QuestionForm, self).__init__(*args, **kwargs)
 
         # Some answers might contain start with code identation required for markdown formatiing,
@@ -18,10 +21,11 @@ class QuestionForm(ModelForm):
         if self.instance.id:
             self.initial['tags'] = self.instance.get_tags()
 
-    tags = ModelCommaSeparatedChoiceField(
-        required=False,
-        queryset=Tag.objects.filter(),
-        to_field_name='name')
+        self.fields['tags'] = ModelCommaSeparatedChoiceField(
+            request=self.request,
+            required=False,
+            queryset=Tag.objects.filter(user=self.request.user),
+            to_field_name='name')
 
     def clean_tags(self):
 

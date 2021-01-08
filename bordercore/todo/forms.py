@@ -11,7 +11,7 @@ class TodoForm(ModelForm):
         # In case one of our views passed in the request object (eg from get_form_kwargs()),
         #  save it and remove it from kwargs before calling super()
         if kwargs.get('request'):
-            request = kwargs.pop("request")
+            self.request = kwargs.pop("request")
 
         super(TodoForm, self).__init__(*args, **kwargs)
 
@@ -19,13 +19,14 @@ class TodoForm(ModelForm):
         if self.instance.id:
             self.initial['tags'] = self.instance.get_tags()
         else:
-            initial_tag = request.session.get('current_todo_tag', None)
+            initial_tag = self.request.session.get('current_todo_tag', None)
             self.initial['tags'] = initial_tag
 
-    tags = ModelCommaSeparatedChoiceField(
-        required=False,
-        queryset=Tag.objects.filter(),
-        to_field_name='name')
+        self.fields['tags'] = ModelCommaSeparatedChoiceField(
+            request=self.request,
+            required=False,
+            queryset=Tag.objects.filter(user=self.request.user),
+            to_field_name='name')
 
     class Meta:
         model = Todo

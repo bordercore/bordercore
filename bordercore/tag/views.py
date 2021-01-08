@@ -21,7 +21,7 @@ def tag_search(request):
     query = urllib.parse.unquote(request.GET.get("query", ""))
 
     tag_list = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in
-                Tag.objects.filter(Q(name__icontains=query), **args).distinct("name")]
+                Tag.objects.filter(Q(user=request.user) & Q(name__icontains=query), **args).distinct("name")]
 
     tag_alias_list = [{"text": f"{x.name} ({x.tag.name})", "value": x.tag.name, "is_alias": True} for x in
                       TagAlias.objects.filter(Q(user=request.user) & Q(name__icontains=query))]
@@ -35,7 +35,7 @@ def add_favorite_tag(request):
 
     tag = request.POST["tag"]
 
-    tag_object = Tag.objects.get(name=tag)
+    tag_object = Tag.objects.get(name=tag, user=request.user)
     c = SortOrderUserTag(userprofile=request.user.userprofile, tag=tag_object)
     c.save()
 
@@ -47,7 +47,7 @@ def remove_favorite_tag(request):
 
     tag = request.POST["tag"]
 
-    tag_object = Tag.objects.get(name=tag)
+    tag_object = Tag.objects.get(name=tag, user=request.user)
 
     old_position = SortOrderUserTag.objects.get(userprofile=request.user.userprofile, tag=tag_object)
     old_position.delete()

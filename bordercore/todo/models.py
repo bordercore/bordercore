@@ -61,7 +61,7 @@ class Todo(TimeStampedModel):
         # Get the list of tags, initially sorted by count per tag
         tags = Tag.objects.values("id", "name") \
                           .annotate(count=Count("todo", distinct=True)) \
-                          .filter(todo__user=user) \
+                          .filter(user=user, todo__user=user) \
                           .order_by("-count")
 
         # Convert from queryset to list of dicts so we can further sort them
@@ -149,7 +149,7 @@ def tags_changed(sender, **kwargs):
         todo = kwargs["instance"]
 
         for tag_id in kwargs["pk_set"]:
-            so = SortOrderTagTodo(tag=Tag.objects.get(pk=tag_id), todo=todo)
+            so = SortOrderTagTodo(tag=Tag.objects.get(user=todo.user, pk=tag_id), todo=todo)
             so.save()
 
 

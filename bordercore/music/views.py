@@ -26,7 +26,6 @@ from lib.time_utils import convert_seconds
 from lib.util import remove_non_ascii_characters
 from music.forms import SongForm
 from music.models import Album, Listen, Song, SongSource
-from tag.models import Tag
 
 MUSIC_ROOT = "/home/media/music"
 
@@ -105,7 +104,7 @@ def song_update(request, song_id=None):
 
     if request.method == 'POST':
         if request.POST['Go'] in ['Update', 'Create']:
-            form = SongForm(request.POST, instance=song)
+            form = SongForm(request.POST, instance=song, request=request)
             if form.is_valid():
                 newform = form.save(commit=False)
                 newform.user = request.user
@@ -120,11 +119,11 @@ def song_update(request, song_id=None):
 
     elif song_id:
         action = 'Update'
-        form = SongForm(instance=song)
+        form = SongForm(instance=song, request=request)
 
     else:
         action = 'Create'
-        form = SongForm()
+        form = SongForm(request=request)
 
     return render(request, 'music/update.html',
                   {'action': action,
@@ -261,7 +260,7 @@ def create_song(request):
             track_number = track_info[0]
             formdata['track'] = track_number
 
-        form = SongForm(initial=formdata)
+        form = SongForm(initial=formdata, request=request)
 
         # This should initialize form._errors, used below
         form.full_clean()
@@ -281,7 +280,7 @@ def create_song(request):
         else:
             song = None
 
-        form = SongForm(request.POST, instance=song)  # A form bound to the POST data
+        form = SongForm(request.POST, instance=song, request=request)
 
         info = MP3(f"/tmp/{sha1sum}", ID3=EasyID3)
 

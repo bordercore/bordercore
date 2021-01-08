@@ -107,7 +107,7 @@ class TagViewSet(viewsets.ModelViewSet):
     serializer_class = TagSerializer
 
     def get_queryset(self):
-        return Tag.objects.all()
+        return Tag.objects.filter(user=self.request.user)
 
 
 class TodoViewSet(viewsets.ModelViewSet):

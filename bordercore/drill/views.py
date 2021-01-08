@@ -54,7 +54,8 @@ class DrillListView(ListView):
         return Tag.objects.values("id", "name") \
                           .annotate(count=Count("question", distinct=True)) \
                           .annotate(max=Max("question__last_reviewed")) \
-                          .filter(question__user=self.request.user)
+                          .filter(user=self.request.user, question__user=self.request.user)
+
 
 @method_decorator(login_required, name='dispatch')
 class DrillSearchListView(ListView):
@@ -64,8 +65,8 @@ class DrillSearchListView(ListView):
     def get_queryset(self):
         search_term = self.request.GET['search']
 
-        return Question.objects.filter(Q(question__icontains=search_term) |
-                                       Q(answer__icontains=search_term))
+        return Question.objects.filter(Q(question__icontains=search_term)
+                                       | Q(answer__icontains=search_term))
 
     def get_context_data(self, **kwargs):
         context = super(DrillSearchListView, self).get_context_data(**kwargs)
@@ -92,6 +93,13 @@ class QuestionCreateView(CreateView):
     template_name = 'drill/question_edit.html'
     form_class = QuestionForm
 
+    # Override this method so that we can pass the request object to the form
+    #  so that we have access to it in QuestionForm.__init__()
+    def get_form_kwargs(self):
+        kwargs = super(QuestionCreateView, self).get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
+
     def get_context_data(self, **kwargs):
         context = super(QuestionCreateView, self).get_context_data(**kwargs)
 
@@ -101,7 +109,7 @@ class QuestionCreateView(CreateView):
         # If we're adding a question with an initial tag value,
         # pre-populate the form with this tag.
         if context['form']['tags'].value():
-            tag = Tag.objects.get(name=context['form']['tags'].value())
+            tag = Tag.objects.get(user=self.request.user, name=context['form']['tags'].value())
             context['tags'] = [
                 {
                     "text": tag.name,
@@ -189,6 +197,13 @@ class QuestionUpdateView(UpdateView):
     model = Question
     form_class = QuestionForm
     template_name = 'drill/question_edit.html'
+
+    # Override this method so that we can pass the request object to the form
+    #  so that we have access to it in QuestionForm.__init__()
+    def get_form_kwargs(self):
+        kwargs = super(QuestionUpdateView, self).get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super(QuestionUpdateView, self).get_context_data(**kwargs)

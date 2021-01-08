@@ -154,7 +154,7 @@ def snarf_link(request):
 @login_required
 def get_tags_used_by_bookmarks(request):
 
-    tags = Tag.objects.filter(bookmark__user=request.user, name__icontains=request.GET.get("query", ""), bookmark__isnull=False).distinct("name")
+    tags = Tag.objects.filter(user=request.user, bookmark__user=request.user, name__icontains=request.GET.get("query", ""), bookmark__isnull=False).distinct("name")
 
     return JsonResponse([{"value": x.name, "is_meta": x.is_meta} for x in tags], safe=False)
 
@@ -184,7 +184,7 @@ def add_bookmarks_from_import(request, tag, bookmarks):
             # Add the specified tag to the bookmark.
             # Create the tag if it doesn't exist.
             try:
-                t = Tag.objects.get(name=tag)
+                t = Tag.objects.get(user=request.user, name=tag)
             except ObjectDoesNotExist:
                 t = Tag(name=tag)
                 t.save()
@@ -271,7 +271,7 @@ def overview(request,
     favorite_tags = request.user.userprofile.favorite_tags.all().order_by('sortorderusertag__sort_order')
 
     t = Tag.objects\
-           .filter(id__in=[x.id for x in favorite_tags])\
+           .filter(user=request.user, id__in=[x.id for x in favorite_tags])\
            .values('id', 'name')\
            .annotate(bookmark_count=Count('bookmarks__sortordertagbookmark__bookmark'))
 
@@ -429,7 +429,7 @@ def sort_favorite_tags(request):
 
     else:
 
-        tag = Tag.objects.get(id=tag_id)
+        tag = Tag.objects.get(user=request.user, id=tag_id)
 
         s = SortOrderUserTag.objects.get(userprofile=request.user.userprofile, tag=tag)
         SortOrderUserTag.reorder(s, new_position)

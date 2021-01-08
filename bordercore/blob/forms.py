@@ -17,7 +17,12 @@ from tag.models import Tag
 class BlobForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
+
+        # The request object is passed in from a view's SongForm() constructor
+        self.request = kwargs.pop("request", None)
+
         super(BlobForm, self).__init__(*args, **kwargs)
+
         self.fields['file'].required = False
         self.fields['file'].label = "File"
         self.fields['date'].required = False
@@ -39,13 +44,14 @@ class BlobForm(ModelForm):
             self.fields['filename'].disabled = True
             self.initial['date'] = datetime.date.today().strftime("%Y-%m-%dT00:00")
 
+        self.fields['tags'] = ModelCommaSeparatedChoiceField(
+            request=self.request,
+            required=False,
+            queryset=Tag.objects.filter(user=self.request.user),
+            to_field_name='name')
+
     filename = CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
     file_modified = IntegerField(required=False, widget=forms.HiddenInput())
-
-    tags = ModelCommaSeparatedChoiceField(
-        required=False,
-        queryset=Tag.objects.filter(),
-        to_field_name='name')
 
     # TODO: Should I (can I) use separate clean_<field> functions
     #  rather than one clean() function?

@@ -8,8 +8,9 @@ from lib.mixins import SortOrderMixin
 
 
 class Tag(models.Model):
-    name = models.TextField(unique=True)
+    name = models.TextField()
     is_meta = models.BooleanField(default=False)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)
 
     bookmarks = models.ManyToManyField("bookmark.Bookmark", through="SortOrderTagBookmark")
@@ -21,11 +22,16 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        unique_together = (
+            ("name", "user")
+        )
+
     @staticmethod
     def get_meta_tags(user):
         tags = cache.get('meta_tags')
         if not tags:
-            tags = Tag.objects.filter(blob__user=user, is_meta=True).distinct('name')
+            tags = Tag.objects.filter(user=user, blob__user=user, is_meta=True).distinct('name')
             cache.set('meta_tags', tags)
         return [x.name for x in tags]
 

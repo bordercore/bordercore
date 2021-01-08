@@ -22,7 +22,6 @@ from accounts.forms import UserProfileForm
 from accounts.models import (SortOrderUserNote, SortOrderUserTag, UserProfile,
                              favorite_tags_has_changed)
 from blob.models import Blob
-from collection.models import Collection
 
 
 @method_decorator(login_required, name='dispatch')

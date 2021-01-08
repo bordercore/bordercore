@@ -56,6 +56,23 @@ def auto_login_user(client):
 
 
 @pytest.fixture()
+def auto_login_user_test(client):
+
+    print(f"cookies: {client.cookies}")
+
+    user = UserFactory()
+    result = client.login(username=user.username, password=TEST_PASSWORD)
+    print(f"client a: {id(client)}, {result}")
+    # print(dir(client.session))
+    for x in client.session.items():
+        print(x)
+
+    print(f"cookies: {client.cookies}")
+
+    return user, client
+
+
+@pytest.fixture()
 def blob_image_factory(db, s3_resource, s3_bucket):
 
     blob = BlobFactory(
@@ -106,9 +123,9 @@ def collection():
 
     collection = CollectionFactory()
 
-    tag1, created = Tag.objects.get_or_create(name="django")
-    tag2, created = Tag.objects.get_or_create(name="linux")
-    collection.tags.add(tag1, tag2)
+    tag_1 = TagFactory(name="django")
+    tag_2 = TagFactory(name="linux")
+    collection.tags.add(tag_1, tag_2)
 
     yield collection
 

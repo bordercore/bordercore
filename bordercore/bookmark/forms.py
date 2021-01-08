@@ -17,8 +17,7 @@ class BookmarkForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
 
-        # This is passed in from BookmarkUpdateView.get_form_kwargs(), to be used
-        #  in a clean_* method.
+        # The request object is passed in from  a view's get_form_kwargs() method
         self.request = kwargs.pop('request', None)
 
         super(BookmarkForm, self).__init__(*args, **kwargs)
@@ -30,6 +29,12 @@ class BookmarkForm(ModelForm):
         if self.instance.id:
             self.initial['tags'] = self.instance.get_tags()
 
+        self.fields['tags'] = ModelCommaSeparatedChoiceField(
+            request=self.request,
+            required=False,
+            queryset=Tag.objects.filter(user=self.request.user),
+            to_field_name='name')
+
     def clean_url(self):
         data = self.cleaned_data['url']
         # Verify that this url is not a dupe.  Note: exclude current url when searching.
@@ -37,11 +42,6 @@ class BookmarkForm(ModelForm):
         if b:
             raise ValidationError("Error: this bookmark already exists")
         return data
-
-    tags = ModelCommaSeparatedChoiceField(
-        required=False,
-        queryset=Tag.objects.filter(),
-        to_field_name='name')
 
     class Meta:
         model = Bookmark

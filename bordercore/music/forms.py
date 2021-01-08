@@ -10,7 +10,12 @@ from tag.models import Tag
 class SongForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
+
+        # The request object is passed in from a view's SongForm() constructor
+        self.request = kwargs.pop("request", None)
+
         super(SongForm, self).__init__(*args, **kwargs)
+
         self.fields['source'].empty_label = None
         self.fields['track'].required = False
         self.fields['comment'].required = False
@@ -20,6 +25,12 @@ class SongForm(ModelForm):
         # If this form has a model attached, get the tags and display them separated by commas
         if self.instance.id:
             self.initial['tags'] = self.instance.get_tags()
+
+        self.fields['tags'] = ModelCommaSeparatedChoiceField(
+            request=self.request,
+            required=False,
+            queryset=Tag.objects.filter(user=self.request.user),
+            to_field_name='name')
 
     def clean(self):
         cleaned_data = super(SongForm, self).clean()
@@ -36,11 +47,6 @@ class SongForm(ModelForm):
     source = ModelChoiceField(queryset=SongSource.objects.all(),
                               widget=forms.Select(attrs={'class': 'form-control'}),
                               empty_label='Select Source')
-
-    tags = ModelCommaSeparatedChoiceField(
-        required=False,
-        queryset=Tag.objects.filter(),
-        to_field_name='name')
 
     class Meta:
         model = Song

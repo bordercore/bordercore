@@ -18,9 +18,10 @@ class UserProfileForm(ModelForm):
         # Don't be alarmed by the Tag.objects.all() queryset. Django will
         #  later filter this on just your favorite tags.
         self.fields['favorite_tags'] = ModelCommaSeparatedChoiceField(
+            request=self.request,
             required=False,
             id='id_tags',
-            queryset=Tag.objects.all(),
+            queryset=Tag.objects.filter(user=self.request.user),
             to_field_name='name')
         self.initial['favorite_tags'] = self.instance.get_tags()
         self.fields['favorite_tags'].widget.attrs['class'] = 'form-control'
@@ -42,7 +43,7 @@ class UserProfileForm(ModelForm):
 
         self.fields['todo_default_tag'] = ModelChoiceField(
             empty_label='Select Tag',
-            queryset=Tag.objects.filter(todo__isnull=False).distinct('name'),
+            queryset=Tag.objects.filter(user=self.request.user, todo__isnull=False).distinct('name'),
         )
         self.fields['todo_default_tag'].widget.attrs['class'] = 'form-control'
 
