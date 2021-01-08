@@ -42,6 +42,7 @@ class UserProfileForm(ModelForm):
             self.fields.pop('homepage_default_collection')
 
         self.fields['todo_default_tag'] = ModelChoiceField(
+            required=False,
             empty_label='Select Tag',
             queryset=Tag.objects.filter(user=self.request.user, todo__isnull=False).distinct('name'),
         )
