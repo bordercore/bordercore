@@ -20,7 +20,7 @@ def test_todo_list_empty(auto_login_user):
     assert resp.status_code == 200
 
 
-def test_todo_list(auto_login_user, todo_factory):
+def test_todo_list(auto_login_user, todo):
 
     _, client = auto_login_user()
 

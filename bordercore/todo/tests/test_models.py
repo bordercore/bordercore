@@ -8,7 +8,7 @@ from todo.models import Todo
 pytestmark = pytest.mark.django_db
 
 
-def test_get_todo_counts(todo_factory):
+def test_get_todo_counts(todo):
 
     user = User.objects.get(username=TEST_USERNAME)
     counts = Todo.get_todo_counts(user, "tag_0")

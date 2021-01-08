@@ -56,23 +56,6 @@ def auto_login_user(client):
 
 
 @pytest.fixture()
-def auto_login_user_test(client):
-
-    print(f"cookies: {client.cookies}")
-
-    user = UserFactory()
-    result = client.login(username=user.username, password=TEST_PASSWORD)
-    print(f"client a: {id(client)}, {result}")
-    # print(dir(client.session))
-    for x in client.session.items():
-        print(x)
-
-    print(f"cookies: {client.cookies}")
-
-    return user, client
-
-
-@pytest.fixture()
 def blob_image_factory(db, s3_resource, s3_bucket):
 
     blob = BlobFactory(
@@ -105,7 +88,7 @@ def blob_pdf_factory(db, s3_resource, s3_bucket):
 
 
 @pytest.fixture()
-def bookmarks(tag):
+def bookmark(tag):
 
     bookmark_1 = BookmarkFactory()
     bookmark_2 = BookmarkFactory()
@@ -168,19 +151,17 @@ def s3_bucket(s3_resource):
 
 
 @pytest.fixture()
-def sort_order_user_tag(auto_login_user):
+def sort_order_user_tag():
 
-    user, _ = auto_login_user()
+    tag_1 = TagFactory(name="tag1")
+    tag_2 = TagFactory(name="tag2")
+    tag_3 = TagFactory(name="tag3")
 
-    tag1, _ = Tag.objects.get_or_create(name="tag1")
-    tag2, _ = Tag.objects.get_or_create(name="tag2")
-    tag3, _ = Tag.objects.get_or_create(name="tag3")
-
-    sort_order = SortOrderUserTag(userprofile=user.userprofile, tag=tag1)
+    sort_order = SortOrderUserTag(userprofile=tag_1.user.userprofile, tag=tag_1)
     sort_order.save()
-    sort_order = SortOrderUserTag(userprofile=user.userprofile, tag=tag2)
+    sort_order = SortOrderUserTag(userprofile=tag_1.user.userprofile, tag=tag_2)
     sort_order.save()
-    sort_order = SortOrderUserTag(userprofile=user.userprofile, tag=tag3)
+    sort_order = SortOrderUserTag(userprofile=tag_1.user.userprofile, tag=tag_3)
     sort_order.save()
 
 
@@ -196,7 +177,7 @@ def tag():
 
 
 @pytest.fixture()
-def todo_factory():
+def todo():
 
     TagFactory.reset_sequence(0)
     TodoFactory.reset_sequence(0)

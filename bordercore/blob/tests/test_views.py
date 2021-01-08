@@ -1,61 +1,17 @@
-import os
 from urllib.parse import urlparse
 
-import boto3
-import botocore
 import pytest
 
-import django
 from django import urls
-from django.conf import settings
 
 try:
     from bs4 import BeautifulSoup
-    from moto import mock_s3
 except ModuleNotFoundError:
     pass
 
-
-django.setup()
-
-from django.contrib.auth.models import User  # isort:skip
-from tag.models import Tag  # isort:skip
-from blob.models import Blob  # isort:skip
+pytestmark = pytest.mark.django_db
 
 
-@pytest.fixture(scope="module")
-def aws_credentials():
-    """Mocked AWS Credentials for moto."""
-    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
-    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
-    os.environ["AWS_SECURITY_TOKEN"] = "testing"
-    os.environ["AWS_SESSION_TOKEN"] = "testing"
-
-
-@pytest.fixture(scope="module")
-def s3_resource(aws_credentials):
-    """Mocked S3 Fixture."""
-
-    with mock_s3():
-        yield boto3.resource(service_name="s3")
-
-
-@pytest.fixture(scope="module")
-def s3_bucket(s3_resource):
-
-    # Verify that the S3 mock is working
-    try:
-        s3_resource.meta.client.head_bucket(Bucket=settings.AWS_STORAGE_BUCKET_NAME)
-    except botocore.exceptions.ClientError:
-        pass
-    else:
-        err = f"Bucket {settings.AWS_STORAGE_BUCKET_NAME} should not exist."
-        raise EnvironmentError(err)
-
-    s3_resource.create_bucket(Bucket=settings.AWS_STORAGE_BUCKET_NAME)
-
-
-@pytest.mark.django_db
 def test_blob_detail(auto_login_user, blob_image_factory):
     """Verify we redirect to the memes page when a user is logged in"""
 

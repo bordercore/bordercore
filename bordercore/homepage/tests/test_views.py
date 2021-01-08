@@ -33,9 +33,7 @@ def login(live_server, browser, settings):
     page.login()
 
 
-def test_homepage(auto_login_user, bookmarks, todo_factory, login, live_server, browser, settings):
-
-    user, _ = auto_login_user()
+def test_homepage(bookmark, todo, login, live_server, browser, settings):
 
     settings.DEBUG = True
 
