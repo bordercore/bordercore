@@ -9,64 +9,66 @@
     <div id="vue-app">
 
         <div class="row">
-            <feed-status></feed-status>
+            <feed-status inline-template>
+                <div id="feed-status" class="alert offset-lg-2 col-lg-6" ref="status">[[ status ]]</div>
+            </feed-status>
         </div>
 
-    {% if form.errors %}
-        <div class="alert alert-danger offset-lg-2 col-lg-10">
-Please correct the errors below.
-        </div>
-    {% endif %}
+        {% if form.errors %}
+            <div class="alert alert-danger offset-lg-2 col-lg-10">
+                    Please correct the errors below.
+            </div>
+        {% endif %}
 
-    {% include "common/show_messages.html" with width=6 %}
+        {% include "common/show_messages.html" with width=6 %}
 
-    <p class="lead offset-lg-2">{{ form.instance.url|favicon|safe }} {{ action }} Feed</p>
+        <p class="lead offset-lg-2">{{ form.instance.url|favicon|safe }} {{ action }} Feed</p>
 
-    <form action="{{ request.path }}" method="post">
-        {% csrf_token %}
+        <form action="{{ request.path }}" method="post">
+            {% csrf_token %}
 
-        <url-form inline-template>
-            <div>
-        {% for field in form %}
-            <div class="form-group{% if field.errors %} error{% endif %} row">
-                <label class="col-lg-2 col-form-label" for="inputTitle">{{ field.label }}</label>
-                <div class="col-lg-5">
-                    {% if field.label == "Url" %}
-                        <input type="text" name="url" value="{{ field.value|default:'' }}" class="form-control" required id="id_url" @blur="onBlur" , autocomplete="off">
-                    {% else %}
-                    {{ field }}
-                    {% endif %}
-                    {% for error in field.errors %}
-                        <span class="form-error">{{ error }}</span>
+            <url-form inline-template>
+                <div>
+                    {% for field in form %}
+                        <div class="form-group{% if field.errors %} error{% endif %} row">
+                            <label class="col-lg-2 col-form-label" for="inputTitle">{{ field.label }}</label>
+                            <div class="col-lg-5">
+                                {% if field.label == "Url" %}
+                                    <input type="text" name="url" value="{{ field.value|default:'' }}" class="form-control" required id="id_url" @blur="onBlur" autocomplete="off">
+                                {% else %}
+                                    {{ field }}
+                                {% endif %}
+                            {% for error in field.errors %}
+                                <span class="form-error">{{ error }}</span>
+                            {% endfor %}
+                            </div>
+                        </div>
                     {% endfor %}
                 </div>
-            </div>
-        {% endfor %}
-            </div>
-        </url-form>
+            </url-form>
 
-        <div class="form-group{% if field.errors %} error{% endif %} row">
-            <label class="col-lg-2 col-form-label" for="inputTitle">Subscribe</label>
-            <div class="col-lg-5">
-                <input type="checkbox" name="subscribe" {% if request.POST.subscribe %} checked="yes" {% endif %} />
+            <div class="form-group{% if field.errors %} error{% endif %} row">
+                <label class="col-lg-2 col-form-label" for="inputTitle">Subscribe</label>
+                <div class="col-lg-5">
+                    <input type="checkbox" name="subscribe" {% if request.POST.subscribe %} checked="yes" {% endif %} />
+                </div>
             </div>
-        </div>
 
-        <div class="form-group">
-            <div class="col-lg-5 offset-lg-2">
-                <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}">
-                <input class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete">
-                <a class="btn btn-secondary" href="{% url 'feed:subscriptions' %}">Cancel</a>
+            <div class="form-group">
+                <div class="col-lg-5 offset-lg-2">
+                    <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}">
+                    <input class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete">
+                    <a class="btn btn-secondary" href="{% url 'feed:subscriptions' %}">Cancel</a>
+                </div>
             </div>
-        </div>
 
-    </form>
+        </form>
 
-    {% if subscribers %}
-        <div class="alert alert-info offset-lg-2 col-lg-6">
-The following users are currently subscribed to this feed: <strong>{{ subscribers }}</strong>
-        </div>
-    {% endif %}
+        {% if subscribers %}
+            <div class="alert alert-info offset-lg-2 col-lg-6">
+                The following users are currently subscribed to this feed: <strong>{{ subscribers }}</strong>
+            </div>
+        {% endif %}
 
     </div>
 
@@ -83,9 +85,6 @@ The following users are currently subscribed to this feed: <strong>{{ subscriber
         const EventBus = new Vue();
 
         const FeedStatus = {
-            template: `
-                <div id="feed-status" class="alert offset-lg-2 col-lg-6" _style="display: none" ref="status">[[ status ]]</div>
-            `,
             data() {
                 return {
                     status: ""
@@ -113,7 +112,6 @@ The following users are currently subscribed to this feed: <strong>{{ subscriber
             },
             methods: {
                 onBlur(evt) {
-
                     var feedUrl = document.getElementById("id_url").value;
                     if ( !feedUrl ) {
                         return;
@@ -162,40 +160,6 @@ The following users are currently subscribed to this feed: <strong>{{ subscriber
                 FeedStatus,
                 UrlForm
             }
-        });
-
-        $(document).ready(function() {
-
-            $('#__id_url').blur( function(event) {
-
-                var feed_url = $('#id_url').val();
-                if (!feed_url) {
-                    return;
-                }
-
-                if ( !$('#id_homepage').val() ) {
-                    var baseUrl = $('#id_url').val().match(/^(http:\/\/.*?)\//);
-                    if (baseUrl) {
-                        $('#id_homepage').val( baseUrl[1] );
-                    }
-                }
-
-                feed_url = encodeURIComponent(feed_url).replace(/%/g, "%25")
-
-                $.ajax( { type: 'GET',
-                          url: '{% url 'feed:check_url' 666 %}'.replace(/666/, feed_url),
-                }).done(function( json ) {
-                    if (!json || json.status != 200) {
-                        $('#feed-status').fadeIn(1000).addClass("alert-danger").removeClass("alert-success").html("Feed error.  Status: " + json.status);
-                    } else if (json.entry_count == 0){
-                        $('#feed-status').fadeIn(1000).addClass("alert-danger").removeClass("alert-success").html("Feed error.  Found no feed items.");
-                    } else {
-                        $('#feed-status').fadeIn(1000).addClass("alert-success").removeClass("alert-danger").html("Feed OK.  Found " + json.entry_count + " feed items.");
-                    }
-                });
-
-            })
-
         });
 
     </script>
