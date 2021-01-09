@@ -6,7 +6,7 @@ import requests
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -14,53 +14,37 @@ from django.views.generic.list import ListView
 
 from accounts.models import UserProfile
 from feed.forms import FeedForm
-from feed.models import Feed, FeedItem
+from feed.models import Feed
 
 
 @method_decorator(login_required, name='dispatch')
 class FeedListView(ListView):
     template_name = 'feed/index.html'
-    context_object_name = 'feed_info'
-
-    feed_all = None
+    context_object_name = 'subscribed_feeds_list'
 
     def get_queryset(self):
         default_feed_id = Feed.objects.get(name='Hacker News').id
-        self.current_feed = self.request.session.get('current_feed', default_feed_id)
+        self.current_feed = Feed.objects.values("id", "name", "homepage").filter(pk=self.request.session.get('current_feed', default_feed_id))[0]
 
         feed_info = []
 
         if self.request.user.userprofile.rss_feeds:
-            feeds = FeedItem.objects.select_related().filter(feed__id__in=self.request.user.userprofile.rss_feeds)
-
-            feed_all = {}
-
-            for feed in feeds:
-                data = {'id': feed.feed.id, 'name': feed.feed.name, 'link': feed.link, 'title': feed.title}
-                if feed.feed.id in feed_all:
-                    feed_all[feed.feed.id]['links'].append(data)
-                else:
-                    feed_all[feed.feed_id] = {'links': [data], 'name': feed.feed.name, 'feed_homepage': feed.feed.homepage}
-
-            self.feed_all = feed_all
-
             # We can't merely use Feed.objects.filter(), since this won't retrieve our feeds in
             #  the correct order (based on the order of the feed ids in userprofile.rss_feeds)
             #  So we store the feed name temporarily in a lookup table...
             lookup = {}
-            for feed in Feed.objects.filter(id__in=self.request.user.userprofile.rss_feeds):
+            for feed in Feed.objects.filter(id__in=self.request.user.userprofile.rss_feeds).prefetch_related("feeditem_set"):
                 lookup[feed.id] = feed
 
             # ...then use that here, where the proper order is preserved
             for feed_id in self.request.user.userprofile.rss_feeds:
-                feed_info.append({'id': feed_id, 'feed': lookup[feed_id], 'name': lookup[feed_id].name})
+                feed_info.append(lookup[feed_id])
 
         return feed_info
 
     def get_context_data(self, **kwargs):
         context = super(FeedListView, self).get_context_data(**kwargs)
-        context['current_feed'] = self.current_feed
-        context['json'] = json.dumps(self.feed_all)
+        context['current_feed'] = json.dumps(self.current_feed)
         context['title'] = 'Feed List'
         return context
 
@@ -146,21 +130,18 @@ def feed_update(request, feed_id=None):
 
     if request.method == 'POST':
         if request.POST['Go'] in ['Update', 'Create']:
-            form = FeedForm(request.POST, instance=f)  # A form bound to the POST data
+            form = FeedForm(request.POST, instance=f)
             if form.is_valid():
                 newform = form.save(commit=False)
                 newform.user = request.user
                 newform.save()
-                form.save_m2m()  # Save the many-to-many data for the form.
+                form.save_m2m()
 
-                # If this is a new feed, download the feed items
                 if request.POST['Go'] == 'Create':
-                    # update_feed.delay(newform.id)
                     # If the user clicked the 'subscribe' checkbox, subscribe her
                     if request.POST.get('subscribe', ''):
                         newform.subscribe_user(request.user, 1)
 
-                # snarf_favicon.delay(b.url)
                 messages.add_message(request, messages.INFO, 'Feed ' + request.POST['Go'].lower() + 'ed')
         elif request.POST['Go'] == 'Delete':
             f.delete()
@@ -168,7 +149,7 @@ def feed_update(request, feed_id=None):
             return HttpResponseRedirect(reverse('feed:subscriptions'))
 
     else:
-        form = FeedForm()  # An unbound form
+        form = FeedForm()
 
     if feed_id:
         form = FeedForm(instance=f)
@@ -199,4 +180,4 @@ def check_url(request, url):
         status = {'status': r.status_code,
                   'entry_count': len(d.entries)}
 
-    return HttpResponse(json.dumps(status), content_type="application/json")
+    return JsonResponse(status, safe=False)

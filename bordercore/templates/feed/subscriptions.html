@@ -57,8 +57,6 @@
 
     <script type="text/javascript">
 
-        var feed_json_text = {{ json|safe }};
-
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
         const FeedListSubscribed = {
@@ -67,10 +65,10 @@
                     feedList: [
                         {% for feed in feed_info %}
                         {
-                            id: {{ feed.feed.id }},
-                            name: "{{ feed.feed.name }}",
-                            url: "{% url 'feed:update' feed.feed.id %}",
-                            lastResponseCode: {{ feed.feed.last_response_code }}
+                            id: {{ feed.id }},
+                            name: "{{ feed.name }}",
+                            url: "{% url 'feed:update' feed.id %}",
+                            lastResponseCode: {{ feed.last_response_code }}
                         },
                         {% endfor %}
                     ]

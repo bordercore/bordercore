@@ -15,16 +15,16 @@
                     <draggable v-model="feedList" @change="onChange" ghost-class="collection_sortable-ghost" animation="500" forceFallback="true">
                         <transition-group type="transition">
                             <li v-for="feed in feedList" :key="feed.id" v-cloak>
-                                <a href="#" :data-id="feed.id" @click="onClick">[[ feed.name ]]</a>
+                                <a href="#" :data-id="feed.id" @click="onClick(feed)">[[ feed.name ]]</a>
                             </li>
                         </transition-group>
                     </draggable>
                 </div>
             </feed-list>
-            {% for feed in feed_info %}
+            {% for feed in subscribed_feeds_list %}
                 <li>
-                    <a href="#" id="link_{{ feed.feed.id }}">{{ feed.feed.name }}</a>
-                    {% if feed.feed.last_response_code != 200 %}<span class="list_annotation">{{ feed.feed.last_response_code }}</span>{% endif %}
+                    <a href="#" id="link_{{ feed.id }}">{{ feed.name }}</a>
+                    {% if feed.last_response_code != 200 %}<span class="list_annotation">{{ feed.last_response_code }}</span>{% endif %}
                 </li>
             {% empty %}
                 No feed subscriptions found. <a href="{% url 'feed:subscriptions' %}">Subscribe here.</a>
@@ -35,10 +35,10 @@
 
     <url-list inline-template>
         <div class="col-lg-6">
-            <h3 id="feed-title" v-cloak><a :href="links.feed_homepage">[[ links.name ]]</a></h3>
+            <h3 id="feed-title" v-cloak><a :href="currentFeed.homepage">[[ currentFeed.name ]]</a></h3>
             <hr />
             <ul>
-                <li v-for="url in links.links" v-cloak>
+                <li v-for="url in currentFeed.feedItems" v-cloak>
                     <a :href="url.link">[[ url.title ]]</a>
                 </li>
             </ul>
@@ -55,8 +55,6 @@
 
     <script type="text/javascript">
 
-        var feed_json_text = {{ json|safe }};
-
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
         const EventBus = new Vue();
@@ -65,26 +63,34 @@
             data() {
                 return {
                     feedList: [
-                        {% for feed in feed_info %}
+                        {% for feed in subscribed_feeds_list %}
                         {
-                            id: {{ feed.feed.id }},
-                            name: "{{ feed.feed.name }}",
-                            lastResponseCode: {{ feed.feed.last_response_code }}
+                            id: {{ feed.id }},
+                            name: "{{ feed.name }}",
+                            lastResponseCode: {{ feed.last_response_code }},
+                            homepage: "{{ feed.homepage }}",
+                            feedItems: [
+                                {% for feed_item in feed.feeditem_set.all %}
+                                {
+                                    link: "{{ feed_item.link }}",
+                                    title: "{{ feed_item.title }}"
+                                },
+                                {% endfor %}
+                            ]
                         },
                         {% endfor %}
                     ]
                 }
             },
             methods: {
-                onClick(evt) {
-                    const feedId = evt.srcElement.dataset.id;
-                    EventBus.$emit("showFeed", feedId);
+                onClick(feed) {
+                    EventBus.$emit("showFeed", feed);
 
                     doPost(
                         this,
                         "{% url "accounts:store_in_session" %}",
                         {
-                            "current_feed": feedId
+                            "current_feed": feed.id
                         }
                         ,
                         (response) => {},
@@ -113,24 +119,26 @@
                     })
 
                 }
+            },
+            mounted() {
+                currentFeed = this.feedList.find(element => element.id === {{ current_feed|safe }}.id);
+
+                this.$nextTick(() => {
+                    EventBus.$emit("showFeed", currentFeed);
+                });
             }
         };
 
         const UrlList = {
             data() {
                 return {
-                    currentFeed: {{ current_feed }},
-                }
-            },
-            computed: {
-                links() {
-                    return feed_json_text[this.currentFeed];
+                    currentFeed: 0,
                 }
             },
             mounted() {
 
-                EventBus.$on("showFeed", feedId => {
-                    this.currentFeed = feedId;
+                EventBus.$on("showFeed", feed => {
+                    this.currentFeed = feed;
                 });
 
             }
@@ -143,7 +151,6 @@
                 UrlList
             }
         });
-
 
     </script>
 

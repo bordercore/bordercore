@@ -46,7 +46,7 @@ class Feed(TimeStampedModel):
             FeedItem.objects.filter(feed_id=self.pk).delete()
 
             for x in d.entries:
-                title = x.title or 'No Title'
+                title = x.title.replace("\n", "") or 'No Title'
                 link = x.link or ''
                 FeedItem.objects.create(feed_id=self.pk, title=saxutils.unescape(title), link=saxutils.unescape(link))
 
