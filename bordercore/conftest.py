@@ -1,4 +1,3 @@
-
 import hashlib
 import os
 from pathlib import Path
@@ -11,6 +10,14 @@ from PIL import Image
 import django
 from django.conf import settings
 from django.core.files import File
+
+try:
+    from pyvirtualdisplay import Display
+    from selenium import webdriver
+    from homepage.tests.pages.homepage import LoginPage
+except (ModuleNotFoundError, NameError):
+    # Don't worry if these imports don't exist in production
+    pass
 
 django.setup()
 
@@ -99,6 +106,38 @@ def bookmark(tag):
     SortOrderTagBookmark.objects.create(tag=tag[0], bookmark=bookmark_1)
 
     yield [bookmark_1, bookmark_2, bookmark_3]
+
+
+@pytest.fixture(scope="session")
+def browser():
+
+    # Set screen resolution to 1366 x 768 like most 15" laptops
+    display = Display(visible=0, size=(1366, 768))
+    display.start()
+
+    driver = webdriver.Firefox(executable_path="/opt/bin/geckodriver")
+
+    # Fails with "Message: Service /opt/google/chrome/chrome unexpectedly exited. Status code was: 0"
+    # driver = webdriver.Chrome(executable_path="/opt/google/chrome/chrome")
+
+    yield driver
+
+    # Quit the Xvfb display
+    display.stop()
+
+    driver.quit()
+
+
+@pytest.fixture()
+def login(auto_login_user, live_server, browser, settings, request):
+
+    settings.DEBUG = True
+
+    auto_login_user()
+
+    page = LoginPage(browser)
+    page.load(live_server, request.param)
+    page.login()
 
 
 @pytest.fixture()

@@ -8,6 +8,7 @@ except ModuleNotFoundError:
 
 
 class LoginPage:
+
     USERNAME_INPUT = (By.NAME, "username")
     PASSWORD_INPUT = (By.NAME, "password")
     SUBMIT_BUTTON = (By.CSS_SELECTOR, "button[type='submit']")
@@ -15,8 +16,8 @@ class LoginPage:
     def __init__(self, browser):
         self.browser = browser
 
-    def load(self, live_server):
-        self.browser.get(f"{live_server.url}/accounts/login/?next=/")
+    def load(self, live_server, url="/"):
+        self.browser.get(f"{live_server.url}/accounts/login/?next={url}")
 
     def login(self):
         username_input = self.browser.find_element(*self.USERNAME_INPUT)
@@ -30,6 +31,7 @@ class LoginPage:
 
 
 class HomePage:
+
     BOOKMARK = (By.XPATH, "//div[div[@class='card-title'][normalize-space(text())='Recent Bookmarks']]//li")
     PINNED_BOOKMARK = (By.XPATH, "//div[div[@class='card-title'][normalize-space(text())='Pinned Bookmarks']]//li")
     TITLE = (By.TAG_NAME, "title")
@@ -37,9 +39,6 @@ class HomePage:
 
     def __init__(self, browser):
         self.browser = browser
-
-    def load(self, live_server):
-        self.browser.get(f"{live_server.url}/")
 
     def title_value(self):
         """
