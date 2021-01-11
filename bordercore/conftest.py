@@ -145,8 +145,8 @@ def collection():
 
     collection = CollectionFactory()
 
-    tag_1 = TagFactory(name="django")
-    tag_2 = TagFactory(name="linux")
+    tag_1 = TagFactory(name="linux")
+    tag_2 = TagFactory(name="django")
     collection.tags.add(tag_1, tag_2)
 
     yield collection
@@ -211,8 +211,9 @@ def tag():
 
     tag_1 = TagFactory(name="django")
     tag_2 = TagFactory(name="video", is_meta=True)
+    tag_3 = TagFactory(name="linux")
 
-    yield [tag_1, tag_2]
+    yield [tag_1, tag_2, tag_3]
 
 
 @pytest.fixture()

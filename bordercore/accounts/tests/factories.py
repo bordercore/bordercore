@@ -26,5 +26,5 @@ class UserFactory(factory.DjangoModelFactory):
 
         UserProfile.objects.get_or_create(
             user=obj,
-            theme="dark"
+            theme="light"
         )
