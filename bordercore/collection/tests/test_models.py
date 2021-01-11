@@ -40,7 +40,8 @@ def test_get_modified(collection):
 
 def test_get_tags(collection):
 
-    assert collection.get_tags() == "django, linux"
+    # Use set() since get_tags() doesn't guarantee sort order
+    assert set([x.strip() for x in collection.get_tags().split(",")]) == set(["django", "linux"])
 
 
 def test_get_blob(collection):
