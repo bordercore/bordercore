@@ -4,6 +4,7 @@ from pathlib import Path
 
 import boto3
 import botocore
+import factory
 import pytest
 from PIL import Image
 
@@ -28,6 +29,7 @@ from bookmark.tests.factories import BookmarkFactory  # isort:skip
 from collection.tests.factories import CollectionFactory  # isort:skip
 from drill.tests.factories import QuestionFactory  # isort:skip
 from tag.models import Tag  # isort:skip
+from feed.tests.factories import FeedFactory  # isort:skip
 from tag.models import Tag, SortOrderTagBookmark  # isort:skip
 from tag.tests.factories import TagFactory  # isort:skip
 from todo.tests.factories import TodoFactory, UserFactory  #isort:skip
@@ -138,6 +140,19 @@ def login(auto_login_user, live_server, browser, settings, request):
     page = LoginPage(browser)
     page.load(live_server, request.param)
     page.login()
+
+
+@pytest.fixture()
+def feed(auto_login_user):
+
+    user, _ = auto_login_user()
+
+    feed_0 = FeedFactory(name="Hacker News")
+    feed_0.subscribe_user(user, 1)
+    feed_1 = FeedFactory()
+    feed_2 = FeedFactory()
+
+    yield [feed_0, feed_1, feed_2]
 
 
 @pytest.fixture()
