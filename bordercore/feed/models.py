@@ -70,6 +70,30 @@ class Feed(TimeStampedModel):
             self.last_check = datetime.utcnow().replace(tzinfo=utc)
             self.save()
 
+    @staticmethod
+    def get_feed_list(request, get_feed_items=True):
+
+        feed_info = []
+
+        if request.user.userprofile.rss_feeds:
+            # We can't merely use Feed.objects.filter(), since this won't retrieve our feeds in
+            #  the correct order (based on the order of the feed ids in userprofile.rss_feeds)
+            #  So we store the feed name temporarily in a lookup table...
+            lookup = {}
+
+            qs = Feed.objects.filter(id__in=request.user.userprofile.rss_feeds)
+            if get_feed_items:
+                qs = qs.prefetch_related("feeditem_set")
+
+            for feed in qs:
+                lookup[feed.id] = feed
+
+            # ...then use that here, where the proper order is preserved
+            for feed_id in request.user.userprofile.rss_feeds:
+                feed_info.append(lookup[feed_id])
+
+        return feed_info
+
     def subscribe_user(self, user, position):
         feeds = user.userprofile.rss_feeds
         # Verify that the user isn't already subscribed

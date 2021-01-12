@@ -23,50 +23,37 @@ class FeedListView(ListView):
     context_object_name = 'subscribed_feeds_list'
 
     def get_queryset(self):
-        default_feed_id = Feed.objects.get(name='Hacker News').id
-        self.current_feed = Feed.objects.values("id", "name", "homepage").filter(pk=self.request.session.get('current_feed', default_feed_id))[0]
-
-        feed_info = []
-
-        if self.request.user.userprofile.rss_feeds:
-            # We can't merely use Feed.objects.filter(), since this won't retrieve our feeds in
-            #  the correct order (based on the order of the feed ids in userprofile.rss_feeds)
-            #  So we store the feed name temporarily in a lookup table...
-            lookup = {}
-            for feed in Feed.objects.filter(id__in=self.request.user.userprofile.rss_feeds).prefetch_related("feeditem_set"):
-                lookup[feed.id] = feed
-
-            # ...then use that here, where the proper order is preserved
-            for feed_id in self.request.user.userprofile.rss_feeds:
-                feed_info.append(lookup[feed_id])
-
-        return feed_info
+        return Feed.get_feed_list(self.request)
 
     def get_context_data(self, **kwargs):
         context = super(FeedListView, self).get_context_data(**kwargs)
-        context['current_feed'] = json.dumps(self.current_feed)
+
+        default_feed_id = Feed.objects.get(name='Hacker News').id
+        current_feed = Feed.objects.values("id", "name", "homepage").filter(pk=self.request.session.get('current_feed', default_feed_id))[0]
+
+        context['current_feed'] = json.dumps(current_feed)
         context['title'] = 'Feed List'
         return context
 
 
 @method_decorator(login_required, name='dispatch')
-class FeedSubscriptionListView(FeedListView):
+class FeedSubscriptionListView(ListView):
     template_name = 'feed/subscriptions.html'
     context_object_name = 'feed_info'
 
     def get_queryset(self):
-
-        # Get a list of all feeds not currently subscribed
-        rss_feeds = self.request.user.userprofile.rss_feeds
-        if rss_feeds is None:
-            rss_feeds = []
-        feeds_not_subscribed = Feed.objects.exclude(id__in=rss_feeds)
-        self.feeds_not_subscribed = sorted(feeds_not_subscribed, key=lambda feed: feed.name.lower())
-        return super(FeedSubscriptionListView, self).get_queryset()
+        return Feed.get_feed_list(self.request, get_feed_items=False)
 
     def get_context_data(self, **kwargs):
         context = super(FeedSubscriptionListView, self).get_context_data(**kwargs)
-        context['feeds_not_subscribed'] = self.feeds_not_subscribed
+
+        # Get a list of all feeds not currently subscribed to
+        rss_feeds = self.request.user.userprofile.rss_feeds or []
+        context['feeds_not_subscribed'] = sorted(
+            Feed.objects.exclude(id__in=rss_feeds),
+            key=lambda feed: feed.name.lower()
+        )
+
         context['title'] = 'Feeds :: Manage Subscriptions'
         return context
 
