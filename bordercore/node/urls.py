@@ -66,11 +66,6 @@ urlpatterns = [
         name="remove_bookmark"
     ),
     path(
-        route="<int:pk>/note/",
-        view=views.get_note,
-        name="get_note"
-    ),
-    path(
         route="blob/add/",
         view=views.add_blob,
         name="add_blob"

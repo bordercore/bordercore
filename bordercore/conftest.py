@@ -4,7 +4,6 @@ from pathlib import Path
 
 import boto3
 import botocore
-import factory
 import pytest
 from PIL import Image
 
@@ -28,8 +27,10 @@ from blob.tests.factories import BlobFactory  # isort:skip
 from bookmark.tests.factories import BookmarkFactory  # isort:skip
 from collection.tests.factories import CollectionFactory  # isort:skip
 from drill.tests.factories import QuestionFactory  # isort:skip
-from tag.models import Tag  # isort:skip
 from feed.tests.factories import FeedFactory  # isort:skip
+from node.models import SortOrderNodeBookmark, SortOrderNodeBlob  # isort:skip
+from node.tests.factories import NodeFactory  # isort:skip
+from tag.models import Tag  # isort:skip
 from tag.models import Tag, SortOrderTagBookmark  # isort:skip
 from tag.tests.factories import TagFactory  # isort:skip
 from todo.tests.factories import TodoFactory, UserFactory  #isort:skip
@@ -165,6 +166,24 @@ def collection():
     collection.tags.add(tag_1, tag_2)
 
     yield collection
+
+
+@pytest.fixture()
+def node(bookmark, blob_image_factory, blob_pdf_factory):
+
+    node = NodeFactory()
+
+    so = SortOrderNodeBookmark(node=node, bookmark=bookmark[0])
+    so.save()
+    so = SortOrderNodeBookmark(node=node, bookmark=bookmark[1])
+    so.save()
+
+    so = SortOrderNodeBlob(node=node, blob=blob_image_factory)
+    so.save()
+    so = SortOrderNodeBlob(node=node, blob=blob_pdf_factory)
+    so.save()
+
+    yield node
 
 
 @pytest.fixture()
