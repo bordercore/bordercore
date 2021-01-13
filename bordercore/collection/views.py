@@ -1,10 +1,7 @@
-from pathlib import PurePath
-
 from botocore.errorfactory import ClientError
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Case, CharField, Value, When
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.dateformat import format
@@ -83,40 +80,17 @@ class CollectionDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(CollectionDetailView, self).get_context_data(**kwargs)
 
-        if self.kwargs.get('embedded', ''):
-            self.template_name = 'collection/embedded.html'
+        blob_list = self.object.get_blob_list()
 
-        if self.object.blob_list:
-            ids = [x['id'] for x in self.object.blob_list]
-            order = Case(*[When(id=i, then=pos) for pos, i in enumerate(ids)])
-
-            whens = [
-                When(id=x['id'], then=Value(x.get('note', ''))) for x in self.object.blob_list
-            ]
-
-            blob_list = Blob.objects.filter(id__in=ids).annotate(
-                collection_note=Case(
-                    *whens,
-                    output_field=CharField()
-                )).order_by(order)
-
-            for blob in blob_list:
-                blob.cover_url = Blob.get_cover_info(
-                    self.request.user,
-                    blob.sha1sum,
-                    size="small"
-                ).get("url", None)
-
-                blob.title = blob.get_title(use_filename_if_present=True).replace("\"", "\\\"")
-
+        if blob_list:
             context['blob_list'] = blob_list
-
             try:
-                context['first_blob_cover_info'] = Blob.get_cover_info(user=self.request.user, sha1sum=blob_list.first().sha1sum)
+                context['first_blob_cover_info'] = Blob.get_cover_info(user=self.request.user, sha1sum=context['blob_list'].first().sha1sum)
             except ClientError:
                 pass
+
         context['nav'] = 'collection'
-        context['title'] = 'Collection Detail :: {}'.format(self.object.name)
+        context['title'] = f'Collection Detail :: {self.object.name}'
 
         return context
 
@@ -132,12 +106,6 @@ class CollectionCreateView(CreateView):
         kwargs = super(CollectionCreateView, self).get_form_kwargs()
         kwargs["request"] = self.request
         return kwargs
-
-    def get_context_data(self, **kwargs):
-        context = super(CollectionCreateView, self).get_context_data(**kwargs)
-        context['action'] = 'Create'
-        context['title'] = 'Create Collection'
-        return context
 
     def form_valid(self, form):
 
@@ -211,7 +179,7 @@ def get_info(request):
                 'tags': [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in match.tags.all()]
             }
     except ObjectDoesNotExist:
-        pass
+        info = {}
 
     return JsonResponse(info)
 

@@ -70,7 +70,7 @@
         const BlobList = {
             template: `
                 <div>
-                    <ul style="list-style-type:none" class="collection_sortable borderless">
+                    <ul class="list-group list-group-horizontal text-center list-unstyled collection_sortable">
                         <draggable v-model="blob_list" @change="onChange" ghost-class="collection_ghost_class" animation="500" forceFallback="true">
                             <li v-for="blob in blob_list" :key="blob.id">
                                 <a :href="[[ blob.url ]]"><img :src="[[ blob.cover_url ]]" /></a>

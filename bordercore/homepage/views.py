@@ -74,11 +74,7 @@ def homepage(request):
             bookmark.css_class = "bold"
 
     # Get the default collection
-    default_collection = None
-    try:
-        default_collection = Collection.objects.get(pk=request.user.userprofile.homepage_default_collection.id)
-    except AttributeError:
-        pass
+    default_collection = get_default_collection_blobs(request)
 
     overdue_exercises = ExerciseUser.get_overdue_exercises(request.user)
 
@@ -157,6 +153,18 @@ def get_random_blob(request, content_type):
         return Blob.objects.get(user=request.user, uuid=results["hits"]["hits"][0]["_source"]["uuid"])
     else:
         return None
+
+
+def get_default_collection_blobs(request):
+
+    try:
+        collection = Collection.objects.get(pk=request.user.userprofile.homepage_default_collection.id)
+        return {
+            "name": collection.name,
+            "blob_list": collection.get_blob_list(limit=3)
+        }
+    except AttributeError:
+        pass
 
 
 def get_date(node):

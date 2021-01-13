@@ -4,6 +4,7 @@ from django.apps import apps
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.db import models
+from django.db.models import Case, CharField, Value, When
 from django.utils import timezone
 
 from lib.mixins import TimeStampedModel
@@ -69,3 +70,39 @@ class Collection(TimeStampedModel):
                 sha1sum=blob.sha1sum
             )
         }
+
+    def get_blob_list(self, limit=None):
+
+        Blob = apps.get_model("blob", "Blob")
+
+        blob_list = self.blob_list[:limit] if limit else self.blob_list
+
+        if blob_list:
+
+            ids = [x['id'] for x in blob_list]
+            order = Case(*[When(id=i, then=pos) for pos, i in enumerate(ids)])
+
+            whens = [
+                When(id=x['id'], then=Value(x.get('note', ''))) for x in blob_list
+            ]
+
+            blob_list = Blob.objects.filter(id__in=ids).annotate(
+                collection_note=Case(
+                    *whens,
+                    output_field=CharField()
+                )).order_by(order)
+
+            for blob in blob_list:
+                blob.cover_url = Blob.get_cover_info(
+                    self.user,
+                    blob.sha1sum,
+                    size="small"
+                ).get("url", None)
+
+                blob.title = blob.get_title(use_filename_if_present=True).replace("\"", "\\\"")
+
+            return blob_list
+
+        else:
+
+            return []

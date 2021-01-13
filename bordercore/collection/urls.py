@@ -11,12 +11,6 @@ urlpatterns = [
         name="list"
     ),
     path(
-        route="embedded/<int:collection_id>/",
-        view=views.CollectionDetailView.as_view(),
-        kwargs={'embedded': True},
-        name="embedded"
-    ),
-    path(
         route="create/",
         view=views.CollectionCreateView.as_view(),
         name="create"

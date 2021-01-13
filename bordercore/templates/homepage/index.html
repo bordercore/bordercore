@@ -131,14 +131,20 @@
 
                 {% if default_collection %}
                     <div class="row">
-                    <div class="col-lg-12 card-grid">
-                        <card
-                            title="{{ default_collection.name }}"
-                        >
-                            <template v-slot:content>
-                                <iframe src="{% url 'collection:embedded' default_collection.id %}" frameborder=0 scrolling="no" width="100%"></iframe>
-                            </template>
-                        </card>
+                        <div class="col-lg-12 card-grid">
+                            <card
+                                title="{{ default_collection.name }}"
+                            >
+                                <template v-slot:content>
+                                    <ul class="list-group list-group-horizontal text-center list-unstyled">
+                                        <li v-for="blob in blob_list" :key="blob.id">
+                                            <a :href="[[ blob.url ]]"><img :src="[[ blob.cover_url ]]" /></a>
+                                            <br/>
+                                            <a :href="[[ blob.url ]]">[[ blob.title ]]</a> {% if blob.collection_note %}<img src="{{ STATIC_URL }}img/note.png" height="16" width="16" data-toggle="popover" data-content="[[ blob.collection_note ]]"/>{% endif %}
+                                        </li>
+                                    </ul>
+                                </template>
+                            </card>
                     </div>
                 </div>
                 {% endif %}
@@ -245,7 +251,20 @@
                     errorClass: "",
                     events: [],
                     msg: "Retrieving...",
-                    waiting: true
+                    waiting: true,
+                    blob_list: [
+                        {% for blob in default_collection.blob_list %}
+                        {
+                            id: {{ blob.id }},
+                            cover_url: "{{ blob.cover_url}}",
+                            uuid: "{{ blob.uuid }}",
+                            title: "{{ blob.title|safe }}",
+                            collection_note: "{{ blob.collection_note }}",
+                            url: "{% url 'blob:detail' blob.uuid %}",
+                            cover_url: "{{ blob.cover_url }}"
+                        },
+                        {% endfor %}
+                    ]
                 }
             },
             mounted() {
