@@ -132,10 +132,13 @@
                 {% if default_collection %}
                     <div class="row">
                         <div class="col-lg-12 card-grid">
-                            <card
-                                title="{{ default_collection.name }}"
-                            >
-                                <template v-slot:content>
+                            <card>
+                                <template v-slot:title-slot>
+                                    <div class="card-title">
+                                        <a href="{% url 'collection:detail' default_collection.id %}">{{ default_collection.name }}</a>
+                                    </div>
+                                </template>
+                                    <template v-slot:content>
                                     <ul class="list-group list-group-horizontal text-center list-unstyled">
                                         <li v-for="blob in blob_list" :key="blob.id">
                                             <a :href="[[ blob.url ]]"><img :src="[[ blob.cover_url ]]" /></a>

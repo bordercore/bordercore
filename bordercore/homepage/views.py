@@ -160,6 +160,7 @@ def get_default_collection_blobs(request):
     try:
         collection = Collection.objects.get(pk=request.user.userprofile.homepage_default_collection.id)
         return {
+            "id": collection.id,
             "name": collection.name,
             "blob_list": collection.get_blob_list(limit=3)
         }
