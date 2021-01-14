@@ -101,6 +101,19 @@ def blob_pdf_factory(db, s3_resource, s3_bucket):
 
 
 @pytest.fixture()
+def blob_text_factory(db, s3_resource, s3_bucket):
+
+    blob = BlobFactory(
+        id=3,
+        uuid="7ef28ad2-ee89-4bf7-8a58-4bdfb74424e2",
+        title="Sampe blob with no sha1sum",
+        tags=("django"),
+    )
+
+    yield blob
+
+
+@pytest.fixture()
 def bookmark(tag):
 
     bookmark_1 = BookmarkFactory()
