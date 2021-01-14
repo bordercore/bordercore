@@ -160,7 +160,7 @@ class BlobDetailView(DetailView):
         if self.object.sha1sum:
             context["aws_url"] = f"https://s3.console.aws.amazon.com/s3/buckets/{settings.AWS_STORAGE_BUCKET_NAME}/blobs/{self.object.sha1sum[:2]}/{self.object.sha1sum}/"
             try:
-                context['cover_info'] = Blob.get_cover_info(self.request.user, self.object.sha1sum)
+                context['cover_info'] = self.object.get_cover_info()
             except ClientError:
                 log.warn(f"No S3 cover image found for id={self.object.id}")
         if self.object.is_note:
@@ -225,7 +225,7 @@ class BlobUpdateView(UpdateView):
         context['sha1sum'] = self.kwargs.get('sha1sum')
 
         try:
-            context['cover_info'] = Blob.get_cover_info(self.request.user, self.object.sha1sum, max_cover_image_width=400)
+            context['cover_info'] = self.object.get_cover_info(max_cover_image_width=400)
         except ClientError:
             log.warn(f"No S3 cover image found for id={self.object.id}")
 
@@ -303,7 +303,7 @@ class BlobThumbnailView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super(BlobThumbnailView, self).get_context_data(**kwargs)
-        context['cover_info'] = Blob.get_cover_info(self.request.user, self.object.sha1sum, max_cover_image_width=70, size='small')
+        context['cover_info'] = self.object.get_cover_info(max_cover_image_width=70, size='small')
         context['filename'] = self.object.file
         query = 'uuid:{}'.format(self.object.uuid)
         # context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
@@ -475,10 +475,8 @@ def create_thumbnail(request, uuid, page_number=None):
     except PdfReadError as e:
         return JsonResponse({'error': str(e)})
 
-    cover_info = Blob.get_cover_info(request.user,
-                                            b.sha1sum,
-                                            max_cover_image_width=70,
-                                            size='small')
+    cover_info = b.get_cover_info(max_cover_image_width=70,
+                                  size='small')
 
     return JsonResponse({'message': 'OK', 'cover_url': cover_info['url']})
 

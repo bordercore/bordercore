@@ -1,11 +1,8 @@
-import datetime
-
 import factory
 
 from django.db.models import signals
 
 from accounts.tests.factories import UserFactory
-from blob.models import Blob
 from collection.models import Collection
 
 
@@ -17,28 +14,3 @@ class CollectionFactory(factory.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: f"collection_{n}")
     user = factory.SubFactory(UserFactory)
-
-    @factory.post_generation
-    def create_blobs(obj, create, extracted, **kwargs):
-
-        if not create:
-            return
-
-        blobs = [
-            Blob.objects.create(
-                id=1,
-                user=obj.user),
-            Blob.objects.create(
-                id=2,
-                user=obj.user),
-            Blob.objects.create(
-                id=3,
-                user=obj.user)
-        ]
-        obj.blob_list = [
-            {
-                "id": x.id,
-                "added": int(datetime.datetime.now().strftime("%s"))
-            }
-            for x in blobs
-        ]

@@ -3,7 +3,6 @@ import hashlib
 import json
 import logging
 import re
-import urllib.parse
 import uuid
 from pathlib import PurePath
 from urllib.parse import urlparse
@@ -336,13 +335,13 @@ class Blob(TimeStampedModel, AmazonMixin):
 
     def has_thumbnail_url(self):
         try:
-            _ = Blob.get_cover_info(self.user, self.sha1sum, size='small')['url']
+            _ = self.get_cover_info(self.user, self.sha1sum, size='small')['url']
             return True
         except Exception:
             return False
 
     def get_cover_url_small(self):
-        return Blob.get_cover_info(self.user, self.sha1sum, size='small')['url']
+        return self.get_cover_info(self.user, self.sha1sum, size='small')['url']
 
     @staticmethod
     def get_image_dimensions(s3_key, max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
@@ -375,19 +374,17 @@ class Blob(TimeStampedModel, AmazonMixin):
         else:
             return False
 
-    @staticmethod
-    def get_cover_info(user, sha1sum, size="large", max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
-        if sha1sum is None:
+    def get_cover_info(self, size="large", max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
+
+        if self.sha1sum is None:
             return {"url": ""}
 
         info = {}
         url = None
 
-        b = Blob.objects.get(user=user, sha1sum=sha1sum)
+        prefix = settings.COVER_URL + f"{self.sha1sum[:2]}/{self.sha1sum}"
 
-        prefix = settings.COVER_URL + f"{sha1sum[:2]}/{sha1sum}"
-
-        file_extension = PurePath(b.file.name).suffix
+        file_extension = PurePath(self.file.name).suffix
 
         if size != "large":
             url = f"{prefix}/cover.jpg"
@@ -395,15 +392,25 @@ class Blob(TimeStampedModel, AmazonMixin):
             # Is the blob itself an image?
             if file_extension[1:].lower() in ["gif", "jpg", "jpeg", "png"]:
                 # For the large version, use the image itself
-                url = f"{settings.MEDIA_URL}{b.get_s3_key()}"
-                info = Blob.get_image_dimensions(b.get_s3_key(), max_cover_image_width)
+                url = f"{settings.MEDIA_URL}{self.get_s3_key()}"
+                info = Blob.get_image_dimensions(self.get_s3_key(), max_cover_image_width)
             else:
                 url = f"{prefix}/cover-{size}.jpg"
-                info = Blob.get_image_dimensions(f"{PurePath(b.get_s3_key()).parent}/cover-{size}.jpg", max_cover_image_width)
+                info = Blob.get_image_dimensions(f"{PurePath(self.get_s3_key()).parent}/cover-{size}.jpg", max_cover_image_width)
 
         info["url"] = url
 
         return info
+
+    @staticmethod
+    def get_cover_info_static(user, sha1sum, size="large", max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
+
+        if sha1sum is None:
+            return {"url": ""}
+
+        b = Blob.objects.get(user=user, sha1sum=sha1sum)
+
+        return b.get_cover_info(size, max_cover_image_width)
 
     def index_blob(self, file_changed=True):
         """

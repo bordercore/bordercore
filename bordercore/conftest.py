@@ -1,3 +1,4 @@
+import datetime
 import hashlib
 import os
 from pathlib import Path
@@ -69,6 +70,7 @@ def auto_login_user(client):
 def blob_image_factory(db, s3_resource, s3_bucket):
 
     blob = BlobFactory(
+        id=1,
         uuid="0bb4914e-cd3c-4d6b-9d72-0454adf00260",
         title="Vaporwave Wallpaper 2E",
         tags=("django", "linux", "video"),
@@ -85,6 +87,7 @@ def blob_image_factory(db, s3_resource, s3_bucket):
 def blob_pdf_factory(db, s3_resource, s3_bucket):
 
     blob = BlobFactory(
+        id=2,
         uuid="4158cf58-306c-42d7-9c98-07d3a96a1d8b",
         title="Bleached Album Notes",
         tags=("django", "linux", "video"),
@@ -157,13 +160,22 @@ def feed(auto_login_user):
 
 
 @pytest.fixture()
-def collection():
+def collection(blob_image_factory, blob_pdf_factory):
 
     collection = CollectionFactory()
 
     tag_1 = TagFactory(name="linux")
     tag_2 = TagFactory(name="django")
     collection.tags.add(tag_1, tag_2)
+
+    collection.blob_list = [
+        {
+            "id": x.id,
+            "added": int(datetime.datetime.now().strftime("%s"))
+        }
+        for x in [blob_image_factory, blob_pdf_factory]
+    ]
+    collection.save()
 
     yield collection
 

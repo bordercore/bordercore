@@ -340,7 +340,7 @@ class SearchTagDetailView(ListView):
                         match["_source"]["sha1sum"],
                         match["_source"].get("filename", "")
                     ),
-                    "cover_url": Blob.get_cover_info(
+                    "cover_url": Blob.get_cover_info_static(
                         self.request.user,
                         match["_source"]["sha1sum"],
                         size="small"

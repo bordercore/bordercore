@@ -65,10 +65,7 @@ class Collection(TimeStampedModel):
 
         return {
             "blob_id": blob.id,
-            "cover_info": Blob.get_cover_info(
-                user=self.user,
-                sha1sum=blob.sha1sum
-            )
+            "cover_info": blob.get_cover_info()
         }
 
     def get_blob_list(self, limit=None):
@@ -93,9 +90,7 @@ class Collection(TimeStampedModel):
                 )).order_by(order)
 
             for blob in blob_list:
-                blob.cover_url = Blob.get_cover_info(
-                    self.user,
-                    blob.sha1sum,
+                blob.cover_url = blob.get_cover_info(
                     size="small"
                 ).get("url", None)
 
