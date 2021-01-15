@@ -29,10 +29,13 @@ class FeedListView(ListView):
         context = super(FeedListView, self).get_context_data(**kwargs)
 
         default_feed_id = Feed.objects.get(name='Hacker News').id
-        current_feed = Feed.objects.values("id", "name", "homepage").filter(pk=self.request.session.get('current_feed', default_feed_id))[0]
+        current_feed = Feed.objects.values("id", "homepage", "last_check", "name").filter(pk=self.request.session.get('current_feed', default_feed_id))[0]
 
-        context['current_feed'] = json.dumps(current_feed)
+        context['current_feed'] = json.dumps(current_feed, default=str)
         context['title'] = 'Feed List'
+        context['no_left_block'] = True
+        context['content_block_width'] = 12
+
         return context
 
 

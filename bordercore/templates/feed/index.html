@@ -4,48 +4,77 @@
 
 {% block content %}
 
-<div class="row" id="vue-app">
+    <div id="vue-app">
 
-    <div class="col-lg-4">
-        <h3>Feed List</h3>
-        <hr />
-        <ul id="sort-container" class="feed-list">
-            <feed-list inline-template>
-                <div>
-                    <draggable v-model="feedList" @change="onChange" ghost-class="collection_sortable-ghost" animation="500" forceFallback="true">
-                        <transition-group type="transition">
-                            <li v-for="feed in feedList" :key="feed.id" v-cloak>
-                                <a href="#" :data-id="feed.id" @click="onClick(feed)">[[ feed.name ]]</a>
-                            </li>
-                        </transition-group>
-                    </draggable>
+        <div class="row">
+            <div class="col-lg-3">
+
+                <div class="row h-100">
+                    <div class="col-lg-12 card-grid">
+                        <feed-info inline-template>
+                            <card title="Feed Info" class-name="h-100">
+                                <template v-slot:content>
+                                    <strong>Updated</strong>: [[ currentFeed.lastCheck ]]
+                                    <br />
+                                    <strong>Status</strong>: <font-awesome-icon class="ml-1" :class="status.class" :icon="status.font"></font-awesome-icon>
+                                </template>
+                            </card>
+                        </feed-info>
+                    </div>
                 </div>
-            </feed-list>
-            {% for feed in subscribed_feeds_list %}
-                <li>
-                    <a href="#" id="link_{{ feed.id }}">{{ feed.name }}</a>
-                    {% if feed.last_response_code != 200 %}<span class="list_annotation">{{ feed.last_response_code }}</span>{% endif %}
-                </li>
-            {% empty %}
-                No feed subscriptions found. <a href="{% url 'feed:subscriptions' %}">Subscribe here.</a>
-            {% endfor %}
-        </ul>
 
-    </div>
+            </div> <!-- End first column -->
 
-    <url-list inline-template>
-        <div class="col-lg-6">
-            <h3 id="feed-title" v-cloak><a :href="currentFeed.homepage">[[ currentFeed.name ]]</a></h3>
-            <hr />
-            <ul>
-                <li v-for="url in currentFeed.feedItems" v-cloak>
-                    <a :href="url.link">[[ url.title ]]</a>
-                </li>
-            </ul>
+            <div class="col-lg-3">
+
+                <div class="row">
+                    <div class="col-lg-12 card-grid">
+
+                        <div class="card-body">
+                            <h3>Feed List</h3>
+                            <hr />
+                            <ul id="sort-container" class="feed-list">
+                                <feed-list inline-template>
+                                    <div>
+                                        <draggable v-model="feedList" @change="onChange" ghost-class="collection_sortable-ghost" animation="500" forceFallback="true">
+                                            <transition-group type="transition">
+                                                <li v-for="feed in feedList" :key="feed.id" v-cloak>
+                                                    <a href="#" :data-id="feed.id" @click="onClick(feed)">[[ feed.name ]]</a>
+                                                    <span v-if="feed.lastResponseCode !== 200" class="list_annotation">[[ feed.lastResponseCode ]]</span>
+                                                </li>
+                                            </transition-group>
+                                        </draggable>
+                                        <div class="text-secondary" v-if="feedList.length === 0" v-cloak>
+                                            No feed subscriptions found. <a href="{% url 'feed:subscriptions' %}">Subscribe here.</a>
+                                        </div>
+                                    </div>
+                                </feed-list>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- End second column -->
+
+            <div class="col-lg-6">
+
+                <div class="row h-100">
+                    <div class="col-lg-12 card-grid">
+                        <url-list inline-template>
+                            <div class="card-body h-100">
+                                <h3 id="feed-title" v-cloak><a :href="currentFeed.homepage">[[ currentFeed.name ]]</a></h3>
+                                <hr />
+                                <ul>
+                                    <li v-for="url in currentFeed.feedItems" v-cloak>
+                                        <a :href="url.link">[[ url.title ]]</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </url-list>
+                    </div>
+                </div>
+            </div>
         </div>
-    </url-list>
-
-</div>
+    </div>
 
 {% endblock %}
 
@@ -59,6 +88,36 @@
 
         const EventBus = new Vue();
 
+        const FeedInfo = {
+            data() {
+                return {
+                    currentFeed: 0,
+                }
+            },
+            computed: {
+                status: function() {
+                    if (this.currentFeed.lastResponseCode === 200) {
+                        return {
+                            "class": "success",
+                            "font": "check"
+                        };
+                    } else {
+                        return {
+                            "class": "failure",
+                            "font": "exclamation-triangle"
+                        };
+                    }
+                }
+            },
+            mounted() {
+
+                EventBus.$on("showFeed", feed => {
+                    this.currentFeed = feed;
+                });
+
+            }
+        }
+
         const FeedList = {
             data() {
                 return {
@@ -67,13 +126,14 @@
                         {
                             id: {{ feed.id }},
                             name: "{{ feed.name }}",
+                            lastCheck: "{{ feed.last_check }}",
                             lastResponseCode: {{ feed.last_response_code }},
                             homepage: "{{ feed.homepage }}",
                             feedItems: [
                                 {% for feed_item in feed.feeditem_set.all %}
                                 {
                                     link: "{{ feed_item.link }}",
-                                    title: "{{ feed_item.title }}"
+                                    title: "{{ feed_item.title|escapejs }}"
                                 },
                                 {% endfor %}
                             ]
@@ -147,6 +207,7 @@
         new Vue({
             el: "#vue-app",
             components: {
+                FeedInfo,
                 FeedList,
                 UrlList
             }

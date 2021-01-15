@@ -474,6 +474,14 @@ ul.pagination {
 
 /* Misc */
 
+.success {
+  color: $green;
+}
+
+.failure {
+  color: $red;
+}
+
 #myModal #title {
   width: 300px;
 }
