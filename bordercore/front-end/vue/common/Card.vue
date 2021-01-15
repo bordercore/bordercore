@@ -1,5 +1,5 @@
 <template>
-    <div class="card-body">
+    <div class="card-body" :class="className">
         <slot name="title-slot">
             <div class="card-title">
                 {{ title }}
@@ -21,6 +21,10 @@
         props: {
             title: {
                 default: "Card Title",
+                type: String
+            },
+            className: {
+                default: "",
                 type: String
             }
         }
