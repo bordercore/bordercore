@@ -32,19 +32,16 @@ test:
 #	python -m pytest --nbval-lax notebook.ipynb
 
 test_data:
-	$(VIRTUALENV)pytest --disable-warnings -n 3 -m "not wumpus and data_quality" $(BORDERCORE_HOME)
+	$(VIRTUALENV)python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test-list data
 
 test_unit:
-	$(VIRTUALENV)pytest -s --disable-warnings -m "not data_quality and not functional" $(BORDERCORE_HOME)
+	$(VIRTUALENV)python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test-list unit --coverage
 
 test_wumpus:
-	$(VIRTUALENV)pytest --disable-warnings $(BORDERCORE_HOME)/blob/ -m wumpus
+	$(VIRTUALENV)python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test-list wumpus
 
 test_functional:
-	$(VIRTUALENV)pytest --disable-warnings $(BORDERCORE_HOME)/ -m functional
-
-test_coverage:
-	$(VIRTUALENV)pytest -m "not data_quality and not functional" --cov=$(BORDERCORE_HOME) --cov-report html --cov-config=/home/jerrell/dev/django/bordercore_project/.coveragerc -s --disable-warnings $(BORDERCORE_HOME)
+	$(VIRTUALENV)python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test-list functional
 
 lint:
 	pylint --disable=R,C hello cli

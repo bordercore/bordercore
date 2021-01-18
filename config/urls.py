@@ -20,7 +20,7 @@ urlpatterns = [
 
 ]
 
-for app in ("accounts", "blob", "bookmark", "collection", "drill", "feed", "fitness", "music", "node", "search", "tag", "todo"):
+for app in ("accounts", "blob", "bookmark", "collection", "drill", "feed", "fitness", "metrics", "music", "node", "search", "tag", "todo"):
     urlpatterns += [
         path(f"{app}/", include(f"{app}.urls", namespace=app)),
     ]

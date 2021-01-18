@@ -1,0 +1,363 @@
+{% extends "base.html" %}
+
+{% load dict_get %}
+
+{% load favicon %}
+
+{% block title %} Bordercore Metrics {% endblock %}
+
+{% block left-block %}
+
+    <div class="card-grid">
+
+        <h3 class="text-info mb-4">Bordercore Testing Methodology</h3>
+
+        <h4 class="text-info mt-4">Unit Testing</h4>
+
+        Tests that primarily focus on the Django models.
+
+        <h4 class="text-info mt-4">Functional Testing</h4>
+
+        Selenium-based tests for the front-end.
+
+        <h4 class="text-info mt-4">Data Quality Testing</h4>
+
+        Check for inconsistent or missing data in the database.
+
+        <h4 class="text-info mt-4">Wumpus Testing</h4>
+
+        Check that the data stored in S3 is consistent with the data stored on wumpus.
+
+    </div>
+
+{% endblock %}
+
+{% block content %}
+
+    <div id="vue-app">
+
+        <div class="row">
+            <div class="col-lg-4">
+
+                <div class="row">
+
+                    <div class="col-lg-12 card-grid">
+
+                        <card title="Unit Tests">
+
+                            <template v-slot:content>
+                                <div class="d-flex">
+                                    <div class="flex-grow-1">
+                                        <ul class="list-unstyled">
+                                            <li class="d-flex">
+                                                <div class="flex-fill font-weight-bold">Test Count</div>
+                                                <div class="text-info pr-5">[[ unit.test_count ]]</div>
+                                            </li>
+                                            <li class="d-flex">
+                                                <div class="flex-fill font-weight-bold">Errors</div>
+                                                <div class="text-info pr-5">[[ unit.test_errors ]]</div>
+                                            </li>
+                                            <li class="d-flex">
+                                                <div class="flex-fill font-weight-bold">Failures</div>
+                                                <div class="text-info pr-5">[[ unit.test_failures ]]</div>
+                                            </li>
+                                            <hr class="bg-secondary" />
+                                            <li>
+                                                <div>
+                                                    <strong>Runtime</strong> <span :class="get_overdue_status(unit)">[[ unit.test_time_elapsed ]]</span>
+                                                </div>
+                                                <div>
+                                                    <strong>Date</strong> <span :class="get_overdue_status(unit)">[[ unit.test_runtime ]]</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="ml-3">
+                                        <font-awesome-icon class="ml-1 fa-3x" :class="status_unit.class" :icon="status_unit.font"></font-awesome-icon>
+                                    </div>
+                                </div>
+                            </template>
+                        </card>
+
+                    </div>
+
+                </div>
+
+               <div class="row">
+                    <div class="col-lg-12 card-grid">
+
+                        <card title="Wumpus Tests">
+
+                            <template v-slot:content>
+                                <div class="d-flex">
+                                    <div class="flex-grow-1">
+                                        <ul class="list-unstyled">
+                                            <li class="d-flex">
+                                                <div class="flex-fill font-weight-bold">Test Count</div>
+                                                <div class="text-info pr-5">[[ wumpus.test_count ]]</div>
+                                            </li>
+                                            <li class="d-flex">
+                                                <div class="flex-fill font-weight-bold">Errors</div>
+                                                <div class="text-info pr-5">[[ wumpus.test_errors ]]</div>
+                                            </li>
+                                            <li class="d-flex">
+                                                <div class="flex-fill font-weight-bold">Failures</div>
+                                                <div class="text-info pr-5">[[ wumpus.test_failures ]]</div>
+                                            </li>
+                                            <hr class="bg-secondary" />
+                                            <li>
+                                                <div>
+                                                    <strong>Runtime</strong> <span :class="get_overdue_status(unit)">[[ wumpus.test_time_elapsed ]]</span>
+                                                </div>
+                                                <div>
+                                                    <strong>Date</strong> <span :class="get_overdue_status(wumpus)">[[ wumpus.test_runtime ]]</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="ml-3">
+                                        <font-awesome-icon class="ml-1 fa-3x" :class="status_wumpus.class" :icon="status_wumpus.font"></font-awesome-icon>
+                                    </div>
+                                </div>
+                            </template>
+                        </card>
+
+                    </div>
+
+               </div>
+
+            </div> <!-- End first column -->
+
+            <div class="col-lg-4">
+
+                <div class="row">
+                    <div class="col-lg-12 card-grid">
+
+                        <card title="Functional Tests">
+
+                            <template v-slot:content>
+                                <div class="d-flex">
+                                    <div class="flex-grow-1">
+                                        <ul class="list-unstyled">
+                                            <li class="d-flex">
+                                                <div class="flex-fill font-weight-bold">Test Count</div>
+                                                <div class="text-info pr-5">[[ functional.test_count ]]</div>
+                                            </li>
+                                            <li class="d-flex">
+                                                <div class="flex-fill font-weight-bold">Errors</div>
+                                                <div class="text-info pr-5">[[ functional.test_errors ]]</div>
+                                            </li>
+                                            <li class="d-flex">
+                                                <div class="flex-fill font-weight-bold">Failures</div>
+                                                <div class="text-info pr-5">[[ functional.test_failures ]]</div>
+                                            </li>
+                                            <hr class="bg-secondary" />
+                                            <li>
+                                                <div>
+                                                    <strong>Runtime</strong> <span :class="get_overdue_status(unit)">[[ functional.test_time_elapsed ]]</span>
+                                                </div>
+                                                <div>
+                                                    <strong>Date</strong> <span :class="get_overdue_status(functional)">[[ functional.test_runtime ]]</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="ml-3">
+                                        <font-awesome-icon class="ml-1 fa-3x" :class="status_functional.class" :icon="status_functional.font"></font-awesome-icon>
+                                    </div>
+                                </div>
+                            </template>
+                        </card>
+
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-12 card-grid">
+
+                        <card title="Code Coverage">
+
+                            <template v-slot:content>
+                                <div class="d-flex">
+                                    <div class="flex-grow-1">
+                                         <ul class="list-unstyled">
+                                            <li class="d-flex">
+                                                <div class="flex-fill font-weight-bold">Coverage</div>
+                                                <div class="text-info pr-5">[[ coverage.line_rate ]]%</div>
+                                            </li>
+                                            <hr class="bg-secondary" />
+                                            <li>
+                                                <div>
+                                                    <strong>Date</strong> <span :class="get_overdue_status(coverage)">[[ coverage.test_runtime ]]</span>
+                                                </div>
+                                           </li>
+                                            <ul>
+                                        </ul>
+                                    </div>
+                                    <div class="ml-3">
+                                        <font-awesome-icon class="ml-1 fa-3x" :class="status_coverage.class" :icon="status_coverage.font"></font-awesome-icon>
+                                    </div>
+                                </div>
+                            </template>
+                        </card>
+
+                    </div>
+
+                </div>
+
+            </div> <!-- End second column -->
+
+            <div class="col-lg-4">
+
+               <div class="row">
+                    <div class="col-lg-12 card-grid">
+
+                        <card title="Data Quality Tests">
+
+                            <template v-slot:content>
+                                <div class="d-flex">
+                                    <div class="flex-grow-1">
+                                        <ul class="list-unstyled">
+                                            <li class="d-flex">
+                                                <div class="flex-fill font-weight-bold">Test Count</div>
+                                                <div class="text-info pr-5">[[ data.test_count ]]</div>
+                                            </li>
+                                            <li class="d-flex">
+                                                <div class="flex-fill font-weight-bold">Errors</div>
+                                                <div class="text-info pr-5">[[ data.test_errors ]]</div>
+                                            </li>
+                                            <li class="d-flex">
+                                                <div class="flex-fill font-weight-bold">Failures</div>
+                                                <div class="text-info pr-5">[[ data.test_failures ]]</div>
+                                            </li>
+                                            <hr class="bg-secondary" />
+                                            <li>
+                                                <div>
+                                                    <strong>Runtime</strong> <span :class="get_overdue_status(unit)">[[ data.test_time_elapsed ]]</span>
+                                                </div>
+                                                <div>
+                                                    <strong>Date</strong> <span :class="get_overdue_status(data)">[[ data.test_runtime ]]</span>
+                                                </div>
+                                            </li>
+                                         </ul>
+                                    </div>
+                                    <div class="ml-3">
+                                        <font-awesome-icon class="ml-1 fa-3x" :class="status_data.class" :icon="status_data.font"></font-awesome-icon>
+                                    </div>
+                                </div>
+                            </template>
+                        </card>
+
+                    </div>
+
+               </div>
+
+            </div> <!-- End third column -->
+
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript">
+
+        Vue.mixin({ delimiters: ["[[", "]]"] });
+
+        const failure = {
+            "class": "failure",
+            "font": "exclamation-triangle"
+        };
+
+        const success = {
+            "class": "success",
+            "font": "check"
+        };
+
+        const unknown = {
+            "class": "failure",
+            "font": "question"
+        };
+
+        const coverage_minimum = 80;
+
+        new Vue({
+            el: "#vue-app",
+            data: {
+                "unit": {
+                    "test_count": "{{ unit.latest_result.test_count }}",
+                    "test_errors": "{{ unit.latest_result.test_errors }}",
+                    "test_failures": "{{ unit.latest_result.test_failures }}",
+                    "test_time_elapsed": "{{ unit.latest_result.test_time_elapsed }}",
+                    "test_runtime": "{{ unit.created }}"
+                },
+                "functional": {
+                    "test_count": "{{ functional.latest_result.test_count }}",
+                    "test_errors": "{{ functional.latest_result.test_errors }}",
+                    "test_failures": "{{ functional.latest_result.test_failures }}",
+                    "test_time_elapsed": "{{ functional.latest_result.test_time_elapsed }}",
+                    "test_runtime": "{{ functional.created }}"
+                },
+                "data": {
+                    "test_count": "{{ data.latest_result.test_count }}",
+                    "test_errors": "{{ data.latest_result.test_errors }}",
+                    "test_failures": "{{ data.latest_result.test_failures }}",
+                    "test_time_elapsed": "{{ data.latest_result.test_time_elapsed }}",
+                    "test_runtime": "{{ data.created }}"
+                },
+                "wumpus": {
+                    "test_count": "{{ wumpus.latest_result.test_count }}",
+                    "test_errors": "{{ wumpus.latest_result.test_errors }}",
+                    "test_failures": "{{ wumpus.latest_result.test_failures }}",
+                    "test_overdue": "{{ wumpus.overdue }}",
+                    "test_time_elapsed": "{{ wumpus.latest_result.test_time_elapsed }}",
+                    "test_runtime": "{{ wumpus.created }}",
+                },
+                "coverage": {
+                    "line_rate": "{{ coverage.latest_result.line_rate }}",
+                    "test_time_elapsed": "{{ coverage.latest_result.test_time_elapsed }}",
+                    "test_runtime": "{{ coverage.created }}"
+                },
+            },
+            computed: {
+                status_unit: function() {
+                    return this.get_status("unit");
+                },
+                status_functional: function() {
+                    return this.get_status("functional");
+                },
+                status_data: function() {
+                    return this.get_status("data");
+                },
+                status_wumpus: function() {
+                    return this.get_status("wumpus");
+                },
+                status_coverage: function() {
+                    return this.coverage.line_rate >= coverage_minimum ? success: failure;
+                },
+            },
+            methods: {
+                get_overdue_status: function(metric) {
+                    return metric.test_overdue ? "text-danger" : "text-info";
+                },
+                get_status: function(test_type) {
+                    if (this[test_type].test_overdue) {
+                        return question;
+                    } else if ((this[test_type].test_errors === "0"
+                             && this[test_type].test_failures === "0")
+                               || this[test_type].test_errors === undefined) {
+                        return success;
+                    } else {
+                        return failure;
+                    }
+                }
+            }
+        });
+
+    </script>
+
+{% endblock %}

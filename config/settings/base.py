@@ -159,6 +159,7 @@ INSTALLED_APPS = (
     'node',
     'tag',
     'bookmark',
+    'metrics',
     'music',
     'pygments',
     'quote',
