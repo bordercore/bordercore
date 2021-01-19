@@ -293,6 +293,8 @@ def todo():
     task_3.tags.add(tag_1)
     task_3.tags.add(tag_2)
 
+    yield task_3
+
 
 def handle_file_info(blob, file_path, cover_filename):
 
