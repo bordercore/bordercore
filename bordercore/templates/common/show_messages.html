@@ -11,7 +11,8 @@
             :show=true
             :variant="'{{ message.tags|get_message_level }}'"
         >
-          {{ message|safe }}
+            <font-awesome-icon class="mr-1" icon="exclamation-triangle"></font-awesome-icon>
+            {{ message|safe }}
         </b-alert>
 
     {% else %}
@@ -28,7 +29,8 @@
             :visible=true
             :variant="'{{ message.tags|get_message_level }}'"
         >
-          {{ message|safe }}
+            <font-awesome-icon class="mr-1 pt-1 success" icon="check"></font-awesome-icon>
+            {{ message|safe }}
         </b-toast>
 
     {% endif %}
