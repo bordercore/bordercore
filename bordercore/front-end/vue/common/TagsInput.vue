@@ -6,8 +6,9 @@
             :tags="tags"
             @tags-changed=tagsChanged
             :autocomplete-items="filteredItems"
+            :autofocus="autofocus"
             :add-only-from-autocomplete="false"
-            placeholder="">
+            :placeholder="placeHolder">
             <div slot="autocomplete-item" slot-scope="scope" @click="scope.performAdd(scope.item)">
                 <div>{{ scope.item.text }}</div>
             </div>
@@ -24,6 +25,9 @@
     export default {
 
         props: {
+            autofocus: {
+                default: false
+            },
             searchUrl: {
                 default: "search-url",
                 type: String
@@ -34,6 +38,10 @@
             },
             name: {
                 default: "tags",
+                type: String
+            },
+            placeHolder: {
+                default: "",
                 type: String
             }
         },
