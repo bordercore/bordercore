@@ -298,7 +298,8 @@ class SearchTagDetailView(ListView):
             },
             "sort": {"last_modified": {"order": "desc"}},
             "from": 0, "size": hit_count,
-            "_source": ["author",
+            "_source": ["artist",
+                        "author",
                         "task",
                         "content_type",
                         "date",
@@ -326,6 +327,7 @@ class SearchTagDetailView(ListView):
         for match in context["search_results"]["hits"]["hits"]:
 
             result = {
+                "artist": match["_source"].get("artist", ""),
                 "title": match["_source"].get("title", "No Title"),
                 "task": match["_source"].get("task", ""),
                 "url": match["_source"].get("url", ""),

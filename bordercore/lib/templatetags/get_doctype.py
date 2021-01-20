@@ -9,6 +9,7 @@ doctype_mapping = {'blob': 'Blobs',
                    'note': 'Notes',
                    'bookmark': 'Bookmarks',
                    'todo': 'Todo Items',
+                   'song': 'Songs',
                    'document': 'Documents'}
 
 

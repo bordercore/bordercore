@@ -139,6 +139,16 @@
             {% endfor %}
             </div>
 
+            <div id="song" class="tab-pane fade">
+            {% for match in search_results.matches.song %}
+                <div class="row voffset">
+                    <div class="col-lg-12">
+                        <a href="{% url 'music:artist_detail' match.artist %}">{{ match.artist }} - {{ match.title }}</a>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+
             <div id="todo" class="tab-pane fade">
             {% for match in search_results.matches.todo %}
                 <div class="row voffset">
