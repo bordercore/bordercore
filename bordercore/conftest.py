@@ -212,15 +212,12 @@ def node(bookmark, blob_image_factory, blob_pdf_factory):
 
 
 @pytest.fixture()
-def question():
+def question(tag):
 
     question = QuestionFactory()
 
-    tag_1 = TagFactory()
-    tag_2 = TagFactory()
-
-    question.tags.add(tag_1)
-    question.tags.add(tag_2)
+    question.tags.add(tag[0])
+    question.tags.add(tag[1])
 
     yield question
 

@@ -16,7 +16,7 @@ pytestmark = pytest.mark.django_db
 def test_get_tags(question):
 
     tags = question.get_tags()
-    assert re.compile(r"tag_\d+, tag_\d+").match(tags) is not None
+    assert tags == "django, video"
 
 
 def test_get_state_name(question):
