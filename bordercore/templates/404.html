@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% load favicon %}
+
+{% block title %} Not Found {% endblock %}
+
+{% block content %}
+
+    <div class="mt-5 text-center">
+        <div class="font-weight-bold" style="font-size: 100px">404</div>
+        <h2>Oops</h2>
+
+        <div>
+            The page you're looking for cannot be found.
+        </div>
+
+        <a href="{% url 'homepage:homepage' %}" type="button" class="mt-5 btn btn-primary">Back to the homepage</a>
+
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+{% endblock %}

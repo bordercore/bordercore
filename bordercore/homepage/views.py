@@ -8,8 +8,10 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
-from django.shortcuts import render
+from django.http import (Http404, HttpResponse, HttpResponseNotFound,
+                         JsonResponse)
+from django.shortcuts import render, render_to_response
+from django.template import RequestContext
 
 from blob.models import Blob
 from bookmark.models import Bookmark
@@ -181,19 +183,31 @@ def get_date(node):
                 return property.value
 
 
-def handler404(request, exception, template=None):
+def handler404(request, exception):
 
-    url = request.get_full_path().replace('.ico', '')
+    response = render(request, "404.html", {
+        "content_block_width": "12",
+        "no_left_block": True
+    })
+    response.status_code = 404
+    return response
 
-    p = re.compile(".*/img/favicons/(.*)")
-    m = p.match(url)
-    if m:
-        # url = m.group(1)
-        # if url != 'default':
-        #     snarf_favicon.delay(url, False)
 
-        # Serve back a default favicon
-        with open("%s/static/img/favicons/default.png" % (settings.PROJECT_DIR,), "rb") as f:
-            return HttpResponse(f.read(), content_type="image/x-icon")
+def handler403(request, exception):
 
-    return HttpResponseNotFound('<h1>Page not found</h1>')
+    response = render(request, "403.html", {
+        "content_block_width": "12",
+        "no_left_block": True
+    })
+    response.status_code = 403
+    return response
+
+
+def handler500(request):
+
+    response = render(request, "500.html", {
+        "content_block_width": "12",
+        "no_left_block": True
+    })
+    response.status_code = 500
+    return response

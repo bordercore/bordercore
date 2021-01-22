@@ -10,6 +10,7 @@ from api.views import (AlbumViewSet, BlobViewSet, BookmarkViewSet,
                        SongSourceViewSet, SongViewSet, TagViewSet, TodoViewSet,
                        UserViewSet)
 from book.views import BookListView
+from homepage.views import handler403, handler404, handler500
 
 admin.autodiscover()
 
@@ -35,8 +36,6 @@ if settings.DEBUG:
         path("__debug__/", include(debug_toolbar.urls)),
     ]
 
-handler404 = "homepage.views.handler404"
-
 router = routers.DefaultRouter()
 router.register(r"albums", AlbumViewSet, "Album")
 router.register(r"blobs", BlobViewSet, "Blob")
@@ -54,3 +53,7 @@ urlpatterns += [
     url(r"^api/", include(router.urls)),
     path("", include("rest_framework.urls", namespace="rest_framework"))
 ]
+
+handler403 = "homepage.views.handler403"
+handler404 = "homepage.views.handler404"
+handler500 = "homepage.views.handler500"
