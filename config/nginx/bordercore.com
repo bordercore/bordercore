@@ -63,7 +63,7 @@ server {
     # }
 
     # git support
-    location ~ /git(/.*) {
+    location ~ ^/git(/.*) {
 
         auth_basic "Git Repos";
         auth_basic_user_file "/etc/nginx/htpasswd-git";
