@@ -127,7 +127,7 @@
                             id: {{ feed.id }},
                             name: "{{ feed.name }}",
                             lastCheck: "{{ feed.last_check }}",
-                            lastResponseCode: {{ feed.last_response_code }},
+                            lastResponseCode: {{ feed.last_response_code|default:-1 }},
                             homepage: "{{ feed.homepage }}",
                             feedItems: [
                                 {% for feed_item in feed.feeditem_set.all %}
