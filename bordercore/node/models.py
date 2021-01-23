@@ -22,6 +22,9 @@ class Node(models.Model):
     bookmarks = models.ManyToManyField(Bookmark, through="SortOrderNodeBookmark")
     blobs = models.ManyToManyField(Blob, through="SortOrderNodeBlob")
 
+    def __str__(self):
+        return self.name
+
 
 class SortOrderNodeBookmark(SortOrderMixin):
 
@@ -29,6 +32,9 @@ class SortOrderNodeBookmark(SortOrderMixin):
     bookmark = models.ForeignKey(Bookmark, on_delete=models.CASCADE)
 
     field_name = "node"
+
+    def __str__(self):
+        return f"SortOrder: {self.node}, {self.bookmark}"
 
     class Meta:
         ordering = ("sort_order",)
@@ -48,6 +54,9 @@ class SortOrderNodeBlob(SortOrderMixin):
     blob = models.ForeignKey(Blob, on_delete=models.CASCADE)
 
     field_name = "node"
+
+    def __str__(self):
+        return f"SortOrder: {self.node}, {self.blob}"
 
     class Meta:
         ordering = ("sort_order",)

@@ -41,6 +41,9 @@ class Bookmark(TimeStampedModel):
 
     created = models.DateTimeField(db_index=True, auto_now_add=True)
 
+    def __str__(self):
+        return self.title
+
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
 

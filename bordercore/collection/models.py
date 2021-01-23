@@ -23,9 +23,6 @@ class Collection(TimeStampedModel):
     description = models.TextField(null=True, blank=True)
     is_private = models.BooleanField(default=False)
 
-    def __unicode__(self):
-        return self.name
-
     def __str__(self):
         return self.name
 

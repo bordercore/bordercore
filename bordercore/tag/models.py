@@ -16,9 +16,6 @@ class Tag(models.Model):
     bookmarks = models.ManyToManyField("bookmark.Bookmark", through="SortOrderTagBookmark")
     todos = models.ManyToManyField("todo.Todo", through="SortOrderTagTodo")
 
-    def __unicode__(self):
-        return self.name
-
     def __str__(self):
         return self.name
 
@@ -43,6 +40,9 @@ class SortOrderTagTodo(SortOrderMixin):
 
     field_name = "tag"
 
+    def __str__(self):
+        return f"SortOrder: {self.tag}, {self.todo}"
+
     class Meta:
         ordering = ("sort_order",)
         unique_together = (
@@ -62,6 +62,9 @@ class SortOrderTagBookmark(SortOrderMixin):
 
     field_name = "tag"
 
+    def __str__(self):
+        return f"SortOrder: {self.tag}, {self.bookmark}"
+
     class Meta:
         ordering = ("sort_order",)
         unique_together = (
@@ -79,11 +82,8 @@ class TagAlias(models.Model):
     tag = models.OneToOneField(Tag, on_delete=models.PROTECT)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 
-    class Meta:
-        verbose_name_plural = "Tag Aliases"
-
-    def __unicode__(self):
-        return self.name
-
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name_plural = "Tag Aliases"

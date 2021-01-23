@@ -37,8 +37,8 @@ class UserProfile(models.Model):
     def get_tags(self):
         return ", ".join([tag.name for tag in self.favorite_tags.all()])
 
-    def __unicode__(self):
-        return u'Profile of user: %s' % self.user
+    def __str__(self):
+        return self.user.username
 
 
 class SortOrderUserTag(SortOrderMixin):

@@ -12,9 +12,6 @@ from django.utils import timezone
 class MuscleGroup(models.Model):
     muscle_group = models.TextField(unique=True)
 
-    def __unicode__(self):
-        return self.muscle_group
-
     def __str__(self):
         return self.muscle_group
 
@@ -22,9 +19,6 @@ class MuscleGroup(models.Model):
 class Muscle(models.Model):
     muscle = models.TextField(unique=True)
     muscle_group = models.ForeignKey(MuscleGroup, on_delete=models.PROTECT)
-
-    def __unicode__(self):
-        return self.muscle
 
     def __str__(self):
         return self.muscle
@@ -35,9 +29,6 @@ class Exercise(models.Model):
     muscle = models.ForeignKey(Muscle, on_delete=models.PROTECT)
     description = models.TextField(blank=True)
     note = models.TextField(blank=True)
-
-    def __unicode__(self):
-        return self.exercise
 
     def __str__(self):
         return self.exercise
@@ -67,9 +58,6 @@ class ExerciseUser(models.Model):
 
     class Meta:
         unique_together = ('user', 'exercise')
-
-    def __unicode__(self):
-        return self.exercise.exercise
 
     def __str__(self):
         return self.exercise.exercise

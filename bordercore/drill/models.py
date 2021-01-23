@@ -60,9 +60,6 @@ class Question(TimeStampedModel):
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
 
-    def __unicode__(self):
-        return self.question
-
     def __str__(self):
         return self.question
 

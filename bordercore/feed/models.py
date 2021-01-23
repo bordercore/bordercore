@@ -22,6 +22,9 @@ class Feed(TimeStampedModel):
     last_response_code = models.IntegerField(null=True)
     homepage = models.URLField(null=True)
 
+    def __str__(self):
+        return self.name
+
     def delete(self):
         # Unsubscribe all users who are currently subscribed to this feed
         subscribers = UserProfile.objects.filter(rss_feeds__contains=[int(self.pk)])
@@ -117,3 +120,6 @@ class FeedItem(models.Model):
     title = models.TextField()
     link = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title

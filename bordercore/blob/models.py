@@ -123,6 +123,9 @@ class Blob(TimeStampedModel, AmazonMixin):
     is_note = models.BooleanField(default=False)
     documents = models.ManyToManyField("self", blank=True)
 
+    def __str__(self):
+        return self.title
+
     def __init__(self, *args, **kwargs):
         super(Blob, self).__init__(*args, **kwargs)
 
@@ -515,6 +518,9 @@ class MetaData(TimeStampedModel):
     value = models.TextField()
     blob = models.ForeignKey(Blob, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         unique_together = ('name', 'value', 'blob')

@@ -35,9 +35,6 @@ class SongSource(TimeStampedModel):
     name = models.TextField()
     description = models.TextField()
 
-    def __unicode__(self):
-        return self.name
-
     def __str__(self):
         return self.name
 
