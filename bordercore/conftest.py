@@ -248,13 +248,15 @@ def s3_bucket(s3_resource):
 
 
 @pytest.fixture()
-def sort_order_user_tag(tag):
+def sort_order_user_tag(auto_login_user, tag):
 
-    sort_order = SortOrderUserTag(userprofile=tag[0].user.userprofile, tag=tag[0])
+    user, _ = auto_login_user()
+
+    sort_order = SortOrderUserTag(userprofile=user.userprofile, tag=tag[0])
     sort_order.save()
-    sort_order = SortOrderUserTag(userprofile=tag[0].user.userprofile, tag=tag[1])
+    sort_order = SortOrderUserTag(userprofile=user.userprofile, tag=tag[1])
     sort_order.save()
-    sort_order = SortOrderUserTag(userprofile=tag[0].user.userprofile, tag=tag[2])
+    sort_order = SortOrderUserTag(userprofile=user.userprofile, tag=tag[2])
     sort_order.save()
 
 
@@ -263,11 +265,11 @@ def tag():
 
     TagFactory.reset_sequence(0)
 
-    tag_1 = TagFactory(name="django")
-    tag_2 = TagFactory(name="video", is_meta=True)
-    tag_3 = TagFactory(name="linux")
+    tag_0 = TagFactory(name="django")
+    tag_1 = TagFactory(name="video", is_meta=True)
+    tag_2 = TagFactory(name="linux")
 
-    yield [tag_1, tag_2, tag_3]
+    yield [tag_0, tag_1, tag_2]
 
 
 @pytest.fixture()
