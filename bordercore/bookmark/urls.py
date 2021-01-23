@@ -43,6 +43,7 @@ urlpatterns = [
     path(
         route="snarf_link.html",
         view=views.snarf_link,
+        name="snarf"
     ),
     path(
         route="overview/",

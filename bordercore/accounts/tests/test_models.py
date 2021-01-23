@@ -15,7 +15,7 @@ def test_get_tags(sort_order_user_tag):
 
     user = User.objects.get(username=TEST_USERNAME)
 
-    assert user.userprofile.get_tags() == "tag1, tag2, tag3"
+    assert user.userprofile.get_tags() == "django, video, linux"
 
 
 def test_reorder(sort_order_user_tag):

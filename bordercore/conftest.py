@@ -116,15 +116,17 @@ def blob_text_factory(db, s3_resource, s3_bucket):
 @pytest.fixture()
 def bookmark(tag):
 
-    bookmark_1 = BookmarkFactory()
+    bookmark_1 = BookmarkFactory(daily={"viewed": "false"})
     bookmark_2 = BookmarkFactory()
     bookmark_3 = BookmarkFactory(is_pinned=True)
+    bookmark_4 = BookmarkFactory()
+    bookmark_5 = BookmarkFactory()
 
-    SortOrderTagBookmark.objects.create(tag=tag[0], bookmark=bookmark_3)
-    SortOrderTagBookmark.objects.create(tag=tag[0], bookmark=bookmark_2)
-    SortOrderTagBookmark.objects.create(tag=tag[0], bookmark=bookmark_1)
+    bookmark_3.tags.add(tag[0])
+    bookmark_2.tags.add(tag[0])
+    bookmark_1.tags.add(tag[0])
 
-    yield [bookmark_1, bookmark_2, bookmark_3]
+    yield [bookmark_1, bookmark_2, bookmark_3, bookmark_4, bookmark_5]
 
 
 @pytest.fixture(scope="session")
@@ -246,17 +248,13 @@ def s3_bucket(s3_resource):
 
 
 @pytest.fixture()
-def sort_order_user_tag():
+def sort_order_user_tag(tag):
 
-    tag_1 = TagFactory(name="tag1")
-    tag_2 = TagFactory(name="tag2")
-    tag_3 = TagFactory(name="tag3")
-
-    sort_order = SortOrderUserTag(userprofile=tag_1.user.userprofile, tag=tag_1)
+    sort_order = SortOrderUserTag(userprofile=tag[0].user.userprofile, tag=tag[0])
     sort_order.save()
-    sort_order = SortOrderUserTag(userprofile=tag_1.user.userprofile, tag=tag_2)
+    sort_order = SortOrderUserTag(userprofile=tag[0].user.userprofile, tag=tag[1])
     sort_order.save()
-    sort_order = SortOrderUserTag(userprofile=tag_1.user.userprofile, tag=tag_3)
+    sort_order = SortOrderUserTag(userprofile=tag[0].user.userprofile, tag=tag[2])
     sort_order.save()
 
 

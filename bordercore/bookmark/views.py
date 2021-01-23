@@ -299,7 +299,6 @@ class BookmarkListView(ListView):
         if "search" in self.kwargs:
             query = query.filter(title__icontains=self.kwargs.get("search"))
         elif "tag_filter" in self.kwargs:
-            print("GOT HERE")
             query = query.filter(title__icontains=self.kwargs.get("tag_filter"))
         else:
             query = query.filter(tags__isnull=True)
@@ -311,7 +310,7 @@ class BookmarkListView(ListView):
             query = query.order_by("?")
         else:
             query = query.order_by("-created")
-        print(query.query)
+
         page_number = self.kwargs.get("page_number", 1)
         paginator = Paginator(query, BOOKMARKS_PER_PAGE)
         page_obj = paginator.get_page(page_number)
