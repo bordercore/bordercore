@@ -18,7 +18,6 @@ class UserProfile(models.Model):
     rss_feeds = ArrayField(models.IntegerField(), null=True)
     favorite_tags = models.ManyToManyField(Tag, through="SortOrderUserTag")
     favorite_notes = models.ManyToManyField(Blob, through="SortOrderUserNote")
-    todo_default_tag = models.OneToOneField(Tag, related_name='default_tag', null=True, on_delete=models.PROTECT)
     orgmode_file = models.TextField(null=True)
     google_calendar = JSONField(blank=True, null=True)
     homepage_default_collection = models.OneToOneField(Collection, related_name='default_collection', null=True, on_delete=models.PROTECT)

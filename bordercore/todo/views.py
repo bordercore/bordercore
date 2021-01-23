@@ -27,8 +27,6 @@ class TodoListView(ListView):
         elif 'current_todo_tag' in self.request.session:
             # Use the last tag accessed
             tag_name = self.request.session.get('current_todo_tag')
-        elif self.request.user.userprofile.todo_default_tag:
-            tag_name = self.request.user.userprofile.todo_default_tag
         else:
             tag_info = Tag.objects.filter(user=self.request.user, todo__user=self.request.user, todo__isnull=False).first()
             tag_name = None

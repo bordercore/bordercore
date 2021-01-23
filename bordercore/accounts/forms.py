@@ -41,16 +41,9 @@ class UserProfileForm(ModelForm):
             # If the user doesn't have any collections, remove the field
             self.fields.pop('homepage_default_collection')
 
-        self.fields['todo_default_tag'] = ModelChoiceField(
-            required=False,
-            empty_label='Select Tag',
-            queryset=Tag.objects.filter(user=self.request.user, todo__isnull=False).distinct('name'),
-        )
-        self.fields['todo_default_tag'].widget.attrs['class'] = 'form-control'
-
     class Meta:
         model = UserProfile
-        fields = ('theme', 'sidebar_image', 'favorite_tags', 'todo_default_tag', 'homepage_default_collection', 'orgmode_file', 'google_calendar')
+        fields = ('theme', 'sidebar_image', 'favorite_tags', 'homepage_default_collection', 'orgmode_file', 'google_calendar')
         widgets = {
             'google_calendar': Textarea(attrs={'class': 'form-control'}),
             'orgmode_file': TextInput(attrs={'class': 'form-control'}),
