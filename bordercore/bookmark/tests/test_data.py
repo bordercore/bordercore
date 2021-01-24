@@ -26,7 +26,40 @@ def es():
     yield es
 
 
-def test_bookmark_tags_match_elasticsearch_bulk(es):
+def test_bookmarks_in_db_exist_in_elasticsearch(es):
+    "Assert that all bookmarks tags match those found in Elasticsearch"
+    bookmarks = Bookmark.objects.all().only("id", "tags")
+
+    step = 50
+    for batch in range(0, len(bookmarks), step):
+        batch_size = len(bookmarks[batch:batch + step])
+
+        query = [
+            {
+                "term": {
+                    "_id": f"bordercore_bookmark_{b.id}"
+                }
+            }
+            for b
+            in bookmarks[batch:batch + step]
+        ]
+
+        search_object = {
+            "query": {
+                "bool": {
+                    "should": query
+                }
+            },
+            "size": batch_size,
+            "_source": [""]
+        }
+
+        found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+        assert found["hits"]["total"]["value"] == batch_size, \
+            "bookmarks found in the database but not in Elasticsearch: " + get_missing_bookmark_ids(bookmarks[batch:batch + step], found)
+
+
+def test_bookmark_tags_match_elasticsearch(es):
     "Assert that all bookmarks tags match those found in Elasticsearch"
     bookmarks = Bookmark.objects.filter(tags__isnull=False).only("id", "tags").order_by("id").distinct("id")
 
