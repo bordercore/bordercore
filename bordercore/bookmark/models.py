@@ -145,7 +145,7 @@ class Bookmark(TimeStampedModel):
     @staticmethod
     def get_tagged_bookmarks(user, tag_name):
 
-        bookmark_info = [(x.bookmark, x.note) for x in SortOrderTagBookmark.objects.filter(tag__name=tag_name)]
+        bookmark_info = [(x.bookmark, x.note) for x in SortOrderTagBookmark.objects.filter(tag__name=tag_name).select_related("bookmark")]
 
         # If there is an associated note, add it to the bookmark object
         sorted_bookmarks = []
