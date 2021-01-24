@@ -21,6 +21,14 @@ def get_missing_bookmark_ids(expected, found):
     return ", ".join(missing)
 
 
+def get_missing_metadata_ids(expected, found):
+
+    found_ids = [x["_id"] for x in found["hits"]["hits"]]
+
+    missing = [str(x.blob.uuid) for x in expected if str(x.blob.uuid) not in found_ids]
+    return ", ".join(missing)
+
+
 def remove_non_ascii_characters(input_string, default="Default"):
     """
     Remove all non ASCII characters from string. If the entire string consists

@@ -12,7 +12,7 @@ from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
-from lib.util import get_missing_blob_ids, is_image
+from lib.util import get_missing_blob_ids, get_missing_metadata_ids, is_image
 
 logging.getLogger("elasticsearch").setLevel(logging.ERROR)
 
@@ -532,42 +532,63 @@ def test_collection_blobs_exists_in_elasticsearch(es):
 def test_blob_metadata_exists_in_elasticsearch(es):
     "Assert that blob metadata exists in Elasticsearch"
 
-    metadata = MetaData.objects.exclude(blob__uuid__in=BLOBS_NOT_TO_INDEX)
+    metadata = MetaData.objects.exclude(Q(blob__uuid__in=BLOBS_NOT_TO_INDEX)
+                                        | Q(name="is_book")
+                                        | Q(name=""))
+    step_size = 100
+    metadata_count = metadata.count()
 
-    for m in metadata:
-        name = m.name.lower()
-        if name == "is_book" or name == "":
-            continue
+    for batch in range(0, metadata_count, step_size):
 
-        search_object = {
-            "query": {
+        # The batch_size will always be equal to "step_size", except probably
+        #  the last batch, which will be less.
+        batch_size = step_size if metadata_count - batch > step_size else metadata_count - batch
+
+        query = [
+            {
                 "bool": {
                     "must": [
                         {
                             "term": {
-                                "uuid": str(m.blob.uuid)
+                                "uuid": str(x.blob.uuid)
                             }
                         },
                         {
                             "match": {
-                                f"{name}": {
-                                    "query": m.value,
+                                f"{x.name.lower()}": {
+                                    "query": x.value,
                                     "operator": "and"
                                 }
                             }
                         }
                     ]
                 }
+            }
+            for x
+            in metadata[batch:batch + step_size]
+        ]
+
+        # A list of unique metadata names used in this batch
+        names = set([x.name.lower() for x in metadata[batch:batch + step_size]])
+        names.add("uuid")
+
+        unique_uuids = set([x.blob.uuid for x in metadata[batch:batch + step_size]])
+
+        search_object = {
+            "query": {
+                "bool": {
+                    "should": query
+                }
             },
-            "from": 0, "size": 10000,
-            "_source": ["filename", "sha1sum", "uuid"]
+            "from": 0, "size": batch_size,
+            "_source": list(names)
         }
+        found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+        assert found["hits"]["total"]["value"] == len(unique_uuids), \
+            "metadata for blobs found in the database but not in Elasticsearch: " + get_missing_metadata_ids(metadata[batch:batch + step_size], found)
 
-        found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["total"]["value"]
-        assert found == 1, f"metadata for blob uuid={m.blob.uuid} does not exist in Elasticsearch, {m.name}:{m.value}"
 
-
-def test_elasticsearch_search(es):
+def test_elasticsearch_search_NEW(es):
     "Assert that a simple Elasticsearch search works"
 
     search_object = {
