@@ -74,7 +74,7 @@ def test_books_with_tags(es):
     }
 
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)['hits']
-    print(found)
+
     assert found['total']['value'] == 0, f"{found}['total']['value'] books fail this test, uuid={found['hits'][0]['_id']}"
 
 
@@ -602,45 +602,60 @@ def test_elasticsearch_search_NEW(es):
     }
 
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["total"]["value"]
-    assert found >= 1, f"Simple Elasticsearch fails"
+    assert found >= 1, "Simple Elasticsearch fails"
 
 
 def test_blob_tags_match_elasticsearch(es):
     "Assert that all blob tags match those found in Elasticsearch"
 
-    blobs = Blob.objects.filter(tags__isnull=False).exclude(uuid__in=BLOBS_NOT_TO_INDEX)
+    blobs = Blob.objects.filter(tags__isnull=False).exclude(uuid__in=BLOBS_NOT_TO_INDEX).distinct("uuid").order_by("uuid")
+    step_size = 100
+    blob_count = blobs.count()
 
-    for b in blobs:
+    for batch in range(0, blob_count, step_size):
 
-        tag_query = [
+        # The batch_size will always be equal to "step_size", except probably
+        #  the last batch, which will be less.
+        batch_size = step_size if blob_count - batch > step_size else blob_count - batch
+
+        query = [
             {
-                "term": {
-                    "tags.keyword": x.name
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "uuid": str(b.uuid)
+                            }
+                        },
+                        [
+                            {
+                                "term": {
+                                    "tags.keyword": x.name
+                                }
+                            }
+                            for x in b.tags.all()
+                        ]
+                    ]
                 }
             }
-            for x in b.tags.all()
+            for b
+            in blobs[batch:batch + step_size]
         ]
 
         search_object = {
             "query": {
                 "bool": {
-                    "must": [
-                        {
-                            "term": {
-                                "uuid": b.uuid
-                            }
-                        },
-                        tag_query
-                    ]
+                    "should": query
                 }
             },
-            "from": 0, "size": 10000,
+            "from": 0, "size": batch_size,
             "_source": ["uuid"]
         }
 
-        found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["total"]["value"]
+        found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 
-        assert found == 1, f"blob uuid={b.uuid} has tags which don't match those found in Elasticsearch"
+        assert found["hits"]["total"]["value"] == batch_size, \
+            "blobs found in the database with tags which don't match those found in Elasticsearch" + get_missing_blob_ids(blobs[batch:batch + step_size], found)
 
 
 def test_blobs_have_proper_metadata():
