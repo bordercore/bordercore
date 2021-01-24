@@ -11,12 +11,12 @@ urlpatterns = [
         name="list"
     ),
     path(
-        route="question/delete/<int:pk>/",
+        route="question/delete/<uuid:uuid>/",
         view=views.QuestionDeleteView.as_view(),
         name="delete"
     ),
     path(
-        route="question/<int:question_id>/",
+        route="question/<uuid:uuid>/",
         view=views.QuestionDetailView.as_view(),
         name="detail"
     ),
@@ -31,12 +31,12 @@ urlpatterns = [
         name="add"
     ),
     path(
-        route="question/update/<int:pk>/",
+        route="question/update/<uuid:uuid>/",
         view=views.QuestionUpdateView.as_view(),
         name="update"
     ),
     path(
-        route="question/skip/<int:question_id>/",
+        route="question/skip/<uuid:uuid>/",
         view=views.skip_question,
         name="skip"
     ),
@@ -46,12 +46,12 @@ urlpatterns = [
         name="search"
     ),
     path(
-        route="answer/<int:question_id>/",
+        route="answer/<uuid:uuid>/",
         view=views.show_answer,
         name="answer"
     ),
     path(
-        route="response/<int:question_id>/<str:response>/",
+        route="response/<uuid:uuid>/<str:response>/",
         view=views.record_response,
         name="record_response"
     ),

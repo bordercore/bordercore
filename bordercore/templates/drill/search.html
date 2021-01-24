@@ -42,7 +42,7 @@
         $(document).ready(function() {
 
             function formatQuestion( data, type, row ) {
-                return '<a href="{% url 'drill:detail' 666 %}">'.replace(/666/, row[1]) + row[2] + '</a>';
+                return '<a href="{% url 'drill:detail' '00000000-0000-0000-0000-000000000000' %}">'.replace('00000000-0000-0000-0000-000000000000', row[1]) + row[2] + '</a>';
             }
 
             table = $('#search_results').DataTable( {

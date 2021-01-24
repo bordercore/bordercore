@@ -63,7 +63,7 @@
 
     <h4 class="search_result">
         <font-awesome-icon icon="graduation-cap"></font-awesome-icon>
-        Drill: <a href="{% url 'drill:detail' match.source.bordercore_id %}">{{ match.source.question }}</a>
+        Drill: <a href="{% url 'drill:detail' match.source.uuid %}">{{ match.source.question }}</a>
     </h4>
 
 {% elif match.source.doctype == 'todo' %}

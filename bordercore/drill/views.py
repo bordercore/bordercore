@@ -77,11 +77,11 @@ class DrillSearchListView(ListView):
 
         for question in context['object_list']:
             info.append(dict(tags=", ".join([x.name for x in question.tags.all()]),
-                             id=question.id,
+                             uuid=question.uuid,
                              question=question.question,
                              answer=question.answer))
 
-        context['cols'] = ['tags', 'id', 'question', 'answer']
+        context['cols'] = ['tags', 'uuid', 'question', 'answer']
         context['search'] = search_term
         context['info'] = info
         context['title'] = 'Drill Search'
@@ -139,7 +139,7 @@ class QuestionCreateView(CreateView):
 
         obj.save()
 
-        review_url = urls.reverse("drill:detail", kwargs={"question_id": obj.id})
+        review_url = urls.reverse("drill:detail", kwargs={"uuid": obj.uuid})
         messages.add_message(
             self.request,
             messages.INFO, f"Question added. <a href='{review_url}'>Review it here</a>"
@@ -161,7 +161,7 @@ class QuestionDeleteView(DeleteView):
         return super(QuestionDeleteView, self).delete(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
-        question = Question.objects.get(user=self.request.user, id=self.kwargs.get('pk'))
+        question = Question.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
         return question
 
     def get_success_url(self):
@@ -172,12 +172,12 @@ class QuestionDeleteView(DeleteView):
 class QuestionDetailView(DetailView):
 
     model = Question
-    slug_field = 'id'
-    slug_url_kwarg = 'id'
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
     template_name = 'drill/question.html'
 
     def get_object(self, queryset=None):
-        obj = Question.objects.get(user=self.request.user, id=self.kwargs.get('question_id'))
+        obj = Question.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
         return obj
 
     def get_context_data(self, **kwargs):
@@ -195,6 +195,9 @@ class QuestionDetailView(DetailView):
 @method_decorator(login_required, name='dispatch')
 class QuestionUpdateView(UpdateView):
     model = Question
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
+
     form_class = QuestionForm
     template_name = 'drill/question_edit.html'
 
@@ -224,7 +227,7 @@ class QuestionUpdateView(UpdateView):
             obj.tags.add(tag)
         obj.save()
 
-        review_url = urls.reverse("drill:detail", kwargs={"question_id": obj.id})
+        review_url = urls.reverse("drill:detail", kwargs={"uuid": obj.uuid})
         messages.add_message(
             self.request,
             messages.INFO, f"Question edited. <a href='{review_url}'>Review it here</a>",
@@ -242,7 +245,7 @@ def study_random(request):
 
     request.session["drill_mode"] = "random"
     question = Question.objects.filter(user=request.user).order_by("?").first()
-    return redirect("drill:detail", question_id=question.id)
+    return redirect("drill:detail", uuid=question.uuid)
 
 
 @login_required
@@ -266,13 +269,13 @@ def study_tag(request, tag):
         question = Question.objects.filter(user=request.user, tags__name=tag).order_by('?').first()
         messages.add_message(request, messages.INFO, 'Nothing to drill. Here''s a random question.')
 
-    return redirect('drill:detail', question_id=question.id)
+    return redirect('drill:detail', uuid=question.uuid)
 
 
 @login_required
-def show_answer(request, question_id):
+def show_answer(request, uuid):
 
-    question = Question.objects.get(user=request.user, pk=question_id)
+    question = Question.objects.get(user=request.user, uuid=uuid)
 
     return render(request, 'drill/answer.html',
                   {'question': question,
@@ -283,9 +286,9 @@ def show_answer(request, question_id):
 
 
 @login_required
-def record_response(request, question_id, response):
+def record_response(request, uuid, response):
 
-    question = Question.objects.get(user=request.user, pk=question_id)
+    question = Question.objects.get(user=request.user, uuid=uuid)
     question.last_reviewed = timezone.now()
     question.record_response(response)
 
@@ -296,9 +299,9 @@ def record_response(request, question_id, response):
 
 
 @login_required
-def skip_question(request, question_id):
+def skip_question(request, uuid):
 
-    question = Question.objects.get(user=request.user, pk=question_id)
+    question = Question.objects.get(user=request.user, uuid=uuid)
 
     if request.session.get("drill_mode") == "random":
         return redirect("drill:study_random")

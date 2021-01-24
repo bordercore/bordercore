@@ -469,7 +469,7 @@ def get_link(doc_type, match):
     elif doc_type in ("Blob", "Book", "Document", "Note"):
         return reverse("blob:detail", kwargs={"uuid": match["uuid"]})
     elif doc_type == "Drill":
-        return reverse("drill:detail", kwargs={"question_id": match["bordercore_id"]})
+        return reverse("drill:detail", kwargs={"uuid": match["uuid"]})
     else:
         return ""
 

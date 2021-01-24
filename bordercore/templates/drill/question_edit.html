@@ -96,8 +96,8 @@
             },
             methods: {
                 handleClick: function() {
-                    {% if object.id %}
-                    document.getElementById("question-form").action = "{% url 'drill:delete' object.id %}";
+                    {% if object.uuid %}
+                    document.getElementById("question-form").action = "{% url 'drill:delete' object.uuid %}";
                     {% endif %}
                 }
             },

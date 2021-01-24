@@ -31,7 +31,7 @@ Interval: <strong class="text-info">{{ question.interval }}</strong>
 <br />
 Easiness Factor: <strong class="text-info">{{ question.efactor|floatformat:1 }}</strong>
 
-    <form action="{% url 'drill:update' question.id %}" class="mt-5">
+    <form action="{% url 'drill:update' question.uuid %}" class="mt-5">
         <input type="submit" class="btn btn-primary" value="Update">
     </form>
 
@@ -93,13 +93,13 @@ Easiness Factor: <strong class="text-info">{{ question.efactor|floatformat:1 }}<
         {{ question.get_answer|safe }}
     </h1>
 
-    <a href="{% url 'drill:record_response' question.id 'again' %}" class="btn btn-primary btn-lg" role="button">Again</a>
+    <a href="{% url 'drill:record_response' question.uuid 'again' %}" class="btn btn-primary btn-lg" role="button">Again</a>
     {% if state_name == 'To Review' %}
-        <a href="{% url 'drill:record_response' question.id 'hard' %}" class="btn btn-primary btn-lg" role="button">Hard</a>
+        <a href="{% url 'drill:record_response' question.uuid 'hard' %}" class="btn btn-primary btn-lg" role="button">Hard</a>
     {% endif %}
-    <a href="{% url 'drill:record_response' question.id 'good' %}" class="btn btn-primary btn-lg" role="button">Good</a>
-    <a href="{% url 'drill:record_response' question.id 'easy' %}" class="btn btn-primary btn-lg" role="button">Easy</a>
-    &nbsp; &nbsp; <a href="{% url 'drill:skip' question.id %}" class="btn btn-primary btn-lg" role="button">Skip</a>
+    <a href="{% url 'drill:record_response' question.uuid 'good' %}" class="btn btn-primary btn-lg" role="button">Good</a>
+    <a href="{% url 'drill:record_response' question.uuid 'easy' %}" class="btn btn-primary btn-lg" role="button">Easy</a>
+    &nbsp; &nbsp; <a href="{% url 'drill:skip' question.uuid %}" class="btn btn-primary btn-lg" role="button">Skip</a>
 
 {% endblock %}
 

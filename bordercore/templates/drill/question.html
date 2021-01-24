@@ -33,7 +33,7 @@ Interval: <strong class="text-info">{{ question.interval }}</strong>
 <br />
 Easiness Factor: <strong class="text-info">{{ question.efactor|floatformat:1 }}</strong>
 
-    <form action="{% url 'drill:update' question.id %}" class="mt-5">
+    <form action="{% url 'drill:update' question.uuid %}" class="mt-5">
         <input type="submit" class="btn btn-primary" value="Update">
     </form>
 
@@ -66,8 +66,8 @@ Easiness Factor: <strong class="text-info">{{ question.efactor|floatformat:1 }}<
         <br /><br />
     {% endif %}
 
-    <a href="{% url 'drill:answer' question.id %}" class="btn btn-primary btn-lg" role="button">Show Answer</a>
-    <a href="{% url 'drill:skip' question.id %}" class="btn btn-primary btn-lg" role="button">Skip</a>
+    <a href="{% url 'drill:answer' question.uuid %}" class="btn btn-primary btn-lg" role="button">Show Answer</a>
+    <a href="{% url 'drill:skip' question.uuid %}" class="btn btn-primary btn-lg" role="button">Skip</a>
 
 {% endblock %}
 

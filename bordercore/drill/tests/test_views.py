@@ -53,7 +53,7 @@ def test_drill_delete(auto_login_user, question):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("drill:delete", kwargs={"pk": question.id})
+    url = urls.reverse("drill:delete", kwargs={"uuid": question.uuid})
     resp = client.post(url, {})
 
     assert resp.status_code == 302
@@ -63,7 +63,7 @@ def test_drill_detail(auto_login_user, question):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("drill:detail", kwargs={"question_id": question.id})
+    url = urls.reverse("drill:detail", kwargs={"uuid": question.uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200
@@ -75,13 +75,13 @@ def test_drill_update(auto_login_user, question):
     _, client = auto_login_user()
 
     # The empty form
-    url = urls.reverse("drill:update", kwargs={"pk": question.id})
+    url = urls.reverse("drill:update", kwargs={"uuid": question.uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200
 
     # The submitted form
-    url = urls.reverse("drill:update", kwargs={"pk": question.id})
+    url = urls.reverse("drill:update", kwargs={"uuid": question.uuid})
     resp = client.post(url, {
         "question": "Sample Question Changed",
         "answer": "Sample Answer Changed",
@@ -115,7 +115,7 @@ def test_drill_show_answer(auto_login_user, question):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("drill:answer", kwargs={"question_id": question.id})
+    url = urls.reverse("drill:answer", kwargs={"uuid": question.uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200
@@ -129,7 +129,7 @@ def test_drill_record_response(auto_login_user, question):
     url = urls.reverse(
         "drill:record_response",
         kwargs={
-            "question_id": question.id,
+            "uuid": question.uuid,
             "response": "Sample Response"
         }
     )
@@ -142,7 +142,7 @@ def test_drill_skip_question(auto_login_user, question):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("drill:skip", kwargs={"question_id": question.id})
+    url = urls.reverse("drill:skip", kwargs={"uuid": question.uuid})
     resp = client.get(url)
 
     assert resp.status_code == 302
