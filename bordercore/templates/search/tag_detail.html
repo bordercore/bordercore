@@ -139,6 +139,16 @@
             {% endfor %}
             </div>
 
+            <div id="drill" class="tab-pane fade">
+            {% for match in search_results.matches.drill %}
+                <div class="row voffset">
+                    <div class="col-lg-12">
+                        <a href="{% url 'drill:detail' match.uuid %}">{{ match.question }}</a>
+                    </div>
+                </div>
+            {% endfor %}
+            </div>
+
             <div id="song" class="tab-pane fade">
             {% for match in search_results.matches.song %}
                 <div class="row voffset">

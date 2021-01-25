@@ -4,7 +4,7 @@ import django
 
 from lib.util import (get_missing_blob_ids, get_missing_bookmark_ids,
                       get_pagination_range, is_image, is_pdf,
-                      remove_non_ascii_characters)
+                      remove_non_ascii_characters, truncate)
 
 django.setup()
 
@@ -140,6 +140,15 @@ def test_get_missing_bookmark_ids(auto_login_user):
     }
 
     assert get_missing_bookmark_ids(expected, found) == "69"
+
+
+def test_truncate():
+
+    string = "foobar"
+    assert truncate(string) == "foobar"
+
+    string = "foobar"
+    assert truncate(string, 3) == "foo..."
 
 
 def test_remove_non_ascii_characters():

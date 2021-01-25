@@ -29,6 +29,11 @@ def get_missing_metadata_ids(expected, found):
     return ", ".join(missing)
 
 
+def truncate(string, limit=100):
+
+    return string[:limit] + ("..." if len(string) > limit else "")
+
+
 def remove_non_ascii_characters(input_string, default="Default"):
     """
     Remove all non ASCII characters from string. If the entire string consists

@@ -6,6 +6,7 @@ register = template.Library()
 
 doctype_mapping = {'blob': 'Blobs',
                    'book': 'Books',
+                   'drill': 'Drill',
                    'note': 'Notes',
                    'bookmark': 'Bookmarks',
                    'todo': 'Todo Items',

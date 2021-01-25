@@ -14,6 +14,7 @@ from django.views.generic.list import ListView
 
 from blob.models import Blob
 from lib.time_utils import get_date_from_pattern, get_relative_date
+from lib.util import truncate
 from tag.models import Tag
 
 
@@ -309,6 +310,7 @@ class SearchTagDetailView(ListView):
                         "importance",
                         "bordercore_id",
                         "last_modified",
+                        "question",
                         "sha1sum",
                         "tags",
                         "title",
@@ -328,6 +330,7 @@ class SearchTagDetailView(ListView):
 
             result = {
                 "artist": match["_source"].get("artist", ""),
+                "question": truncate(match["_source"].get("question", "")),
                 "title": match["_source"].get("title", "No Title"),
                 "task": match["_source"].get("task", ""),
                 "url": match["_source"].get("url", ""),
@@ -734,7 +737,6 @@ def search_tags(request, es, doc_type, search_term):
         )
 
     results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
-    print(results)
 
     matches = []
     for tag_result in results["aggregations"]["Distinct Tags"]["buckets"]:
@@ -748,5 +750,4 @@ def search_tags(request, es, doc_type, search_term):
                            }
                            )
 
-    print(matches)
     return matches
