@@ -36,7 +36,7 @@ def music_list(request):
     message = ''
 
     # Get a list of recently played songs
-    recent_songs = Listen.objects.filter(user=request.user).select_related().distinct().order_by('-created')[:10]
+    recent_songs = Listen.objects.filter(user=request.user).select_related("song").distinct().order_by('-created')[:10]
 
     # Get a random album
     random_albums = None
