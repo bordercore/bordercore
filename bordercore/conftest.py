@@ -29,6 +29,8 @@ from bookmark.tests.factories import BookmarkFactory  # isort:skip
 from collection.tests.factories import CollectionFactory  # isort:skip
 from drill.tests.factories import QuestionFactory  # isort:skip
 from feed.tests.factories import FeedFactory  # isort:skip
+from music.models import Listen, SongSource  # isort:skip
+from music.tests.factories import SongFactory, AlbumFactory  # isort:skip
 from node.models import SortOrderNodeBookmark, SortOrderNodeBlob  # isort:skip
 from node.tests.factories import NodeFactory  # isort:skip
 from tag.models import Tag  # isort:skip
@@ -245,6 +247,37 @@ def s3_bucket(s3_resource):
         raise EnvironmentError(err)
 
     s3_resource.create_bucket(Bucket=settings.AWS_STORAGE_BUCKET_NAME)
+
+    # Verify that the S3 mock is working
+    try:
+        s3_resource.meta.client.head_bucket(Bucket=settings.AWS_BUCKET_NAME_MUSIC)
+    except botocore.exceptions.ClientError:
+        pass
+    else:
+        err = f"Bucket {settings.AWS_BUCKET_NAME_MUSIC} should not exist."
+        raise EnvironmentError(err)
+
+    s3_resource.create_bucket(Bucket=settings.AWS_BUCKET_NAME_MUSIC)
+
+
+@pytest.fixture()
+def song(auto_login_user):
+
+    user, _ = auto_login_user()
+
+    album = AlbumFactory()
+
+    song_0 = SongFactory()
+    song_1 = SongFactory(album=album)
+    song_2 = SongFactory()
+
+    listen = Listen(user=user, song=song_2)
+    listen.save()
+
+    song_source = SongSource(name="Amazon")
+    song_source.save()
+
+    yield [song_0, song_1, song_2]
 
 
 @pytest.fixture()
