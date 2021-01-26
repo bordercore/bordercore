@@ -119,16 +119,13 @@ class UserProfileUpdateView(UpdateView):
 @method_decorator(login_required, name='dispatch')
 class ChangePasswordView(PasswordChangeView):
     template_name = "prefs/password.html"
-    success_url = reverse_lazy("password")
+    success_url = reverse_lazy("accounts:password")
 
     def get_context_data(self, **kwargs):
         context = super(ChangePasswordView, self).get_context_data(**kwargs)
         context["nav"] = "prefs"
         context["title"] = "Preferences"
         return context
-
-    def get_object(self, queryset=None):
-        return UserProfile.objects.get(user=self.request.user)
 
     def post(self, request, *args, **kwargs):
 
@@ -216,7 +213,7 @@ def bc_login(request):
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    response = redirect(request.POST.get("next", "homepage"))
+                    response = redirect(request.POST.get("next", "homepage:homepage"))
                     # Remember the username for a month
                     response.set_cookie('bordercore_username', username, max_age=2592000)
                     return response

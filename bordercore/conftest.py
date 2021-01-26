@@ -22,7 +22,7 @@ except (ModuleNotFoundError, NameError):
 
 django.setup()
 
-from accounts.models import SortOrderUserTag  # isort:skip
+from accounts.models import SortOrderUserTag, SortOrderUserNote  # isort:skip
 from accounts.tests.factories import TEST_PASSWORD  # isort:skip
 from blob.tests.factories import BlobFactory  # isort:skip
 from bookmark.tests.factories import BookmarkFactory  # isort:skip
@@ -55,12 +55,13 @@ def aws_credentials():
 
 
 @pytest.fixture
-def auto_login_user(client):
+def auto_login_user(client, blob_text_factory):
 
     def make_auto_login(user=None):
 
         if user is None:
             user = UserFactory()
+            SortOrderUserNote.objects.get_or_create(userprofile=user.userprofile, note=blob_text_factory)
 
         client.login(username=user.username, password=TEST_PASSWORD)
         return user, client
