@@ -31,11 +31,6 @@ urlpatterns = [
         name="get_song_list"
     ),
     path(
-        route="album_artwork/<int:song_id>",
-        view=views.album_artwork,
-        name="album_artwork"
-    ),
-    path(
         route="song/<int:id>",
         view=views.get_song_info,
         name="get_song_info"

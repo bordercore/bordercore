@@ -55,32 +55,6 @@ def music_list(request):
 
 
 @login_required
-def album_artwork(request, song_id):
-
-    if len(song_id) == 32:
-        file_path = "/tmp/{}".format(song_id)
-    else:
-        song = Song.objects.get(user=request.user, id=song_id)
-
-        if not song.album:
-            return HttpResponseNotFound()
-
-        tracknumber = str(song.track)
-        if len(tracknumber) == 1:
-            tracknumber = '0' + tracknumber
-
-            file_path = "{}/{}/{}/{} - {}.mp3".format(MUSIC_ROOT, song.artist, song.album.title, tracknumber, song.title)
-
-    audio = MP3(file_path)
-    artwork = audio.tags.get('APIC:')
-
-    if artwork:
-        return HttpResponse(artwork.data, content_type=artwork.mime)
-    else:
-        return redirect("https://www.bordercore.com/static/img/image_not_found.jpg")
-
-
-@login_required
 def song_update(request, song_id=None):
 
     action = 'Update'

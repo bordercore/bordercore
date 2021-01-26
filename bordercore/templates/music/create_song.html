@@ -6,10 +6,6 @@
 
 {% block left-block %}
 
-    {% if info.id %}
-        <img src="{% url 'music:album_artwork' info.id %}" height="300" width="300" />
-    {% endif %}
-
     {% if notes %}
         <div>
 
