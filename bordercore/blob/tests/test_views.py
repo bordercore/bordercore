@@ -1,8 +1,13 @@
 from urllib.parse import urlparse
 
+import factory
 import pytest
+from elasticsearch import Elasticsearch
 
 from django import urls
+from django.db.models import signals
+
+from blob.models import Blob
 
 try:
     from bs4 import BeautifulSoup
@@ -10,6 +15,85 @@ except ModuleNotFoundError:
     pass
 
 pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def monkeypatch_index_blob(monkeypatch):
+    """
+    Prevent the blob object from interacting with Elasticsearch by
+    patching out the Blob.index_blob() method
+    """
+
+    def mock(*args, **kwargs):
+        pass
+    monkeypatch.setattr(Blob, "index_blob", mock)
+
+
+@pytest.fixture
+def monkeypatch_elasticsearch_delete(monkeypatch):
+    """
+    Prevent the blob object from interacting with Elasticsearch by
+    patching out the Blob.index_blob() method
+    """
+
+    def mock(*args, **kwargs):
+        pass
+    monkeypatch.setattr(Elasticsearch, "delete", mock)
+
+
+@factory.django.mute_signals(signals.post_save)
+def test_blob_create(monkeypatch_index_blob, auto_login_user):
+
+    _, client = auto_login_user()
+
+    # The empty form
+    url = urls.reverse("blob:create")
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+
+    # The submitted form
+    url = urls.reverse("blob:create")
+    resp = client.post(url, {
+        "tags": "django",
+        "importance": 1,
+    })
+    print(resp.content)
+    assert resp.status_code == 302
+
+
+@factory.django.mute_signals(signals.pre_delete)
+def test_blob_delete(monkeypatch_elasticsearch_delete, auto_login_user, blob_text_factory):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("blob:delete", kwargs={"uuid": blob_text_factory.uuid})
+    resp = client.post(url)
+
+    assert resp.status_code == 302
+
+
+@factory.django.mute_signals(signals.post_save)
+def test_blob_update(monkeypatch_index_blob, auto_login_user, blob_text_factory):
+
+    _, client = auto_login_user()
+
+    # The empty form
+    url = urls.reverse("blob:update", kwargs={"uuid": blob_text_factory.uuid})
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+
+    # The submitted form
+    url = urls.reverse("blob:update", kwargs={"uuid": blob_text_factory.uuid})
+    resp = client.post(url, {
+        "title": "Title Changed",
+        "note": "Note Changed",
+        "importance": 1,
+        "tags": "django"
+    })
+
+    assert resp.status_code == 302
 
 
 @pytest.mark.parametrize("blob", [pytest.lazy_fixture("blob_image_factory"), pytest.lazy_fixture("blob_text_factory")])
@@ -42,3 +126,46 @@ def test_blob_detail(auto_login_user, blob):
     assert soup.select("div#blob_note")[0].text.strip() == blob.note
 
     assert soup.select("span.metadata_value")[0].text == "John Smith, Jane Doe"
+
+
+def test_blob_metadata_name_search(auto_login_user, blob_image_factory):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("blob:metadata_name_search")
+    resp = client.get(f"{url}?query=foobar")
+
+    assert resp.status_code == 200
+
+
+def test_blob_collection_mutate(auto_login_user, blob_text_factory, collection):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("blob:collection_mutate")
+
+    resp = client.post(url, {
+        "blob_id": blob_text_factory.id,
+        "collection_id": collection.id,
+        "mutation": "add"
+    })
+
+    assert resp.status_code == 200
+
+    resp = client.post(url, {
+        "blob_id": blob_text_factory.id,
+        "collection_id": collection.id,
+        "mutation": "delete"
+    })
+
+    assert resp.status_code == 200
+
+
+def test_blob_parse_date(auto_login_user):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("blob:parse_date", kwargs={"input_date": "2021-01-01"})
+    resp = client.get(url)
+
+    assert resp.status_code == 200
