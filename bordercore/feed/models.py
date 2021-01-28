@@ -2,8 +2,6 @@ import xml.sax.saxutils as saxutils
 from datetime import datetime
 
 import feedparser
-import psycopg2
-import psycopg2.extras
 import requests
 
 from django.db import models
@@ -26,16 +24,18 @@ class Feed(TimeStampedModel):
         return self.name
 
     def delete(self):
+
         # Unsubscribe all users who are currently subscribed to this feed
-        subscribers = UserProfile.objects.filter(rss_feeds__contains=[int(self.pk)])
+        subscribers = UserProfile.objects.filter(rss_feeds__contains=[self.pk])
         for userprofile in subscribers:
-            feeds = userprofile.rss_feeds
-            feeds.remove(self.pk)
-            userprofile.rss_feeds = feeds
+            userprofile.rss_feeds.remove(self.pk)
             userprofile.save()
         super(Feed, self).delete()
 
     def update(self):
+
+        r = None
+
         try:
 
             headers = {'user-agent': USER_AGENT}
@@ -51,40 +51,26 @@ class Feed(TimeStampedModel):
             for x in d.entries:
                 title = x.title.replace("\n", "") or 'No Title'
                 link = x.link or ''
-                FeedItem.objects.create(feed_id=self.pk, title=saxutils.unescape(title), link=saxutils.unescape(link))
-
-        except Exception as e:
-
-            message = ""
-            if isinstance(e, requests.exceptions.HTTPError):
-                message = e
-            elif isinstance(e, psycopg2.Error):
-                message = e.pgerror
-            elif isinstance(e, UnicodeEncodeError):
-                message = str(type(e)) + ': ' + str(e)
-            else:
-                message = e
-
-            raise Exception(message)
+                FeedItem.objects.create(feed=self, title=saxutils.unescape(title), link=saxutils.unescape(link))
 
         finally:
-
-            self.last_response_code = r.status_code
+            if r:
+                self.last_response_code = r.status_code
             self.last_check = datetime.utcnow().replace(tzinfo=utc)
             self.save()
 
     @staticmethod
-    def get_feed_list(request, get_feed_items=True):
+    def get_feed_list(rss_feeds, get_feed_items=True):
 
         feed_info = []
 
-        if request.user.userprofile.rss_feeds:
+        if rss_feeds:
             # We can't merely use Feed.objects.filter(), since this won't retrieve our feeds in
             #  the correct order (based on the order of the feed ids in userprofile.rss_feeds)
             #  So we store the feed name temporarily in a lookup table...
             lookup = {}
 
-            qs = Feed.objects.filter(id__in=request.user.userprofile.rss_feeds)
+            qs = Feed.objects.filter(id__in=rss_feeds)
             if get_feed_items:
                 qs = qs.prefetch_related("feeditem_set")
 
@@ -92,7 +78,7 @@ class Feed(TimeStampedModel):
                 lookup[feed.id] = feed
 
             # ...then use that here, where the proper order is preserved
-            for feed_id in request.user.userprofile.rss_feeds:
+            for feed_id in rss_feeds:
                 feed_info.append(lookup[feed_id])
 
         return feed_info

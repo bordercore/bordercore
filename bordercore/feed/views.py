@@ -23,7 +23,7 @@ class FeedListView(ListView):
     context_object_name = 'subscribed_feeds_list'
 
     def get_queryset(self):
-        return Feed.get_feed_list(self.request)
+        return Feed.get_feed_list(self.request.user.userprofile.rss_feeds)
 
     def get_context_data(self, **kwargs):
         context = super(FeedListView, self).get_context_data(**kwargs)
@@ -45,7 +45,7 @@ class FeedSubscriptionListView(ListView):
     context_object_name = 'feed_info'
 
     def get_queryset(self):
-        return Feed.get_feed_list(self.request, get_feed_items=False)
+        return Feed.get_feed_list(self.request.user.userprofile.rss_feeds, get_feed_items=False)
 
     def get_context_data(self, **kwargs):
         context = super(FeedSubscriptionListView, self).get_context_data(**kwargs)
