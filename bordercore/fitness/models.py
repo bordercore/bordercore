@@ -47,7 +47,7 @@ class Data(models.Model):
     reps = models.IntegerField()
 
     class Meta:
-        verbose_name_plural = 'Data'
+        verbose_name_plural = "Data"
 
 
 class ExerciseUser(models.Model):
@@ -57,7 +57,7 @@ class ExerciseUser(models.Model):
     interval = models.DurationField(default=timedelta(days=7), blank=False, null=False)
 
     class Meta:
-        unique_together = ('user', 'exercise')
+        unique_together = ("user", "exercise")
 
     def __str__(self):
         return self.exercise.exercise

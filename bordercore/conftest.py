@@ -1,6 +1,7 @@
 import datetime
 import hashlib
 import os
+from datetime import timedelta
 from pathlib import Path
 
 import boto3
@@ -28,6 +29,7 @@ from blob.tests.factories import BlobFactory  # isort:skip
 from bookmark.tests.factories import BookmarkFactory  # isort:skip
 from collection.tests.factories import CollectionFactory  # isort:skip
 from drill.tests.factories import QuestionFactory  # isort:skip
+from fitness.models import Exercise, ExerciseUser, Muscle, MuscleGroup, Data  # isort:skip
 from feed.tests.factories import FeedFactory  # isort:skip
 from music.models import Listen, SongSource  # isort:skip
 from music.tests.factories import SongFactory, AlbumFactory  # isort:skip
@@ -175,6 +177,44 @@ def feed(auto_login_user):
     feed_2 = FeedFactory()
 
     yield [feed_0, feed_1, feed_2]
+
+
+@pytest.fixture
+def fitness(auto_login_user):
+
+    user, _ = auto_login_user()
+
+    muscle_group = MuscleGroup.objects.create(muscle_group="Chest")
+    muscle = Muscle.objects.create(muscle="Pectoralis Major", muscle_group=muscle_group)
+    note = "### Trying to make some **gains**"
+    exercise_0 = Exercise.objects.create(exercise="Bench Press", muscle=muscle, note=note)
+    ExerciseUser.objects.create(user=user, exercise=exercise_0, started=datetime.datetime.now(), interval=timedelta(days=2))
+    Data.objects.create(user=user, exercise=exercise_0, weight=200, reps=8)
+    Data.objects.create(user=user, exercise=exercise_0, weight=205, reps=8)
+    Data.objects.create(user=user, exercise=exercise_0, weight=210, reps=8)
+    Data.objects.create(user=user, exercise=exercise_0, weight=220, reps=8)
+
+    muscle_group = MuscleGroup.objects.create(muscle_group="Back")
+    muscle = Muscle.objects.create(muscle="Latissimus Dorsi", muscle_group=muscle_group)
+    exercise_1 = Exercise.objects.create(exercise="Pull Ups", muscle=muscle)
+
+    muscle_group = MuscleGroup.objects.create(muscle_group="Legs")
+    muscle = Muscle.objects.create(muscle="Glutes", muscle_group=muscle_group)
+    exercise_2 = Exercise.objects.create(exercise="Squats", muscle=muscle)
+
+    ExerciseUser.objects.create(user=user, exercise=exercise_2, interval=timedelta(days=2))
+
+    # Force this exercise to be overdue
+    data = Data.objects.create(user=user, exercise=exercise_2, weight=200, reps=8)
+    data.date = data.date - timedelta(days=3)
+    data.save()
+
+    # Force this exercise to be overdue
+    data = Data.objects.create(user=user, exercise=exercise_2, weight=205, reps=8)
+    data.date = data.date - timedelta(days=3)
+    data.save()
+
+    yield [exercise_0, exercise_1, exercise_2]
 
 
 @pytest.fixture()
