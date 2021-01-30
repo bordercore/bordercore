@@ -80,3 +80,33 @@ def test_delete(bookmark, tag):
     # Verify that the last bookmark has sort_order = 1
     tbso = SortOrderTagBookmark.objects.get(tag=tag[0], bookmark=bookmark[2])
     assert tbso.sort_order == 1
+
+
+def test_search(tag, auto_login_user):
+
+    user, _ = auto_login_user()
+
+    assert tag[0].name in [x["text"] for x in Tag.search(user, "djang")]
+    assert len(Tag.search(user, "djang")) == 1
+
+    assert len(Tag.search(user, "postg")) == 0
+    assert len(Tag.search(user, "djang", True)) == 0
+
+
+def test_add_favorite_tag(auto_login_user, tag):
+
+    user, _ = auto_login_user()
+
+    tag[0].add_favorite_tag()
+
+    assert tag[0] in user.userprofile.favorite_tags.all()
+
+
+def test_remove_favorite_tag(auto_login_user, tag):
+
+    user, _ = auto_login_user()
+
+    tag[0].add_favorite_tag()
+    tag[0].remove_favorite_tag()
+
+    assert tag[0] not in user.userprofile.favorite_tags.all()
