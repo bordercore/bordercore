@@ -1,6 +1,8 @@
+from django.apps import apps
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
+from django.db.models import Q
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
@@ -23,6 +25,54 @@ class Tag(models.Model):
         unique_together = (
             ("name", "user")
         )
+
+    def add_favorite_tag(self):
+
+        SortOrderUserTag = apps.get_model("accounts", "SortOrderUserTag")
+        c = SortOrderUserTag(userprofile=self.user.userprofile, tag=self)
+        c.save()
+
+    def remove_favorite_tag(self):
+
+        SortOrderUserTag = apps.get_model("accounts", "SortOrderUserTag")
+        sort_order_user_tag = SortOrderUserTag.objects.get(userprofile=self.user.userprofile, tag=self)
+        sort_order_user_tag.delete()
+
+    @staticmethod
+    def search(user, query, search_notes_only=False):
+
+        args = {}
+
+        # Only retrieve tags which have been applied to at least one note
+        if search_notes_only:
+            args["blob__is_note"] = True
+
+        tag_list = [
+            {
+                "text": x.name,
+                "value": x.name,
+                "is_meta": x.is_meta
+            } for x in Tag.objects.filter(
+                Q(user=user)
+                & Q(name__icontains=query),
+                **args
+            ).distinct("name")
+        ]
+
+        tag_alias_list = [
+            {
+                "text": f"{x.name} ({x.tag.name})",
+                "value": x.tag.name,
+                "is_alias": True
+            } for x in TagAlias.objects.filter(
+                Q(user=user)
+                & Q(name__icontains=query)
+            )
+        ]
+
+        tag_alias_list.extend(tag_list)
+
+        return tag_alias_list
 
     @staticmethod
     def get_meta_tags(user):
