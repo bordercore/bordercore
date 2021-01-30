@@ -270,7 +270,7 @@
                     window.location="{% url 'bookmark:update' 666 %}".replace(/666/, selectedId);
                 },
                 addToFavorites(evt) {
-                    const tagName = this.$parent.$refs.search.$refs.suggestComponent.text
+                    const tagName = this.$parent.$refs.search.$refs.simpleSuggest.$refs.suggestComponent.text
                     document.getElementById("add-to-remote-from-favorite-tagname").value = tagName;
                     const form = document.querySelector("#search-form");
                     form.method = "post";
