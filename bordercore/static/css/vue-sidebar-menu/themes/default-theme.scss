@@ -105,7 +105,7 @@
   }
   .vsm--badge_default {
     color: $item-color;
-    background-color: darken( $base-bg, 5% );
+    background-color: $primary-color;
   }
   .vsm--toggle-btn {
     color: $item-color;

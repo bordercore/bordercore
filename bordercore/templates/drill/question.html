@@ -3,9 +3,9 @@
 {% block title %} Drill :: Question {% endblock %}
 
 {% block nav %}
-    <div class="content-nav">
-        <ul class="breadcrumb mb-0" style="background-color: #1e1e2e">
-            <li class="breadcrumb-item"> <a href="{% url 'drill:list' %}">Drill Home</a> </li>
+    <div id="vue-nav">
+        <ul class="breadcrumb mb-0">
+            <li class="breadcrumb-item"> <a href="{% url 'drill:list' %}"><font-awesome-icon icon="home"></font-awesome-icon></a> </li>
             <li class="breadcrumb-item active">Question</li>
         </ul>
     </div>
@@ -16,58 +16,105 @@
 {% endblock %}
 
 {% block left-block %}
-
-    <br />
-
-State: <strong class="text-info">{{ state_name  }}</strong>
-    <br />
-{% if state_name == 'Learning' %}
-        Learning step: <strong class="text-info">{{ question.learning_step }}</strong> out of {{ learning_step_count  }}
-    <br />
-{% endif %}
-{% if state_name != 'New' %}
-Last Reviewed: <strong class="text-info">{{ question.last_reviewed }}</strong>
-    <br />
-{% endif %}
-Interval: <strong class="text-info">{{ question.interval }}</strong>
-<br />
-Easiness Factor: <strong class="text-info">{{ question.efactor|floatformat:1 }}</strong>
-
-    <form action="{% url 'drill:update' question.uuid %}" class="mt-5">
-        <input type="submit" class="btn btn-primary" value="Update">
-    </form>
-
-    <br />
-    <div>
-        {% if object.tags.all %}
-            <a href="{% url 'drill:add_with_tag' object.tags.all.0 %}" class="btn btn-primary" role="button">Add Question</a>
-        {% else %}
-            <a href="{% url 'drill:add' %}" class="btn btn-primary" role="button">Add Question</a>
-        {% endif %}
-    </div>
-
 {% endblock %}
 
 {% block content %}
 
-    <div id="vue-app">
-        {% include "common/show_messages.html" %}
+    <div class="row">
+        <div class="col-lg-4">
+
+            <div class="row">
+
+                <div class="col-lg-12 card-grid">
+
+                    <div class="card-body">
+
+                        <div class="d-flex">
+                            <div class="flex-grow-1">
+                                <ul class="list-unstyled">
+                                    <li class="d-flex">
+                                        <div class="flex-fill font-weight-bold">State</div>
+                                        <div class="text-info pr-5">{{ state_name }}</div>
+                                    </li>
+                                    {% if state_name == 'Learning' %}
+                                        <li class="d-flex">
+                                            <div class="flex-fill font-weight-bold">Learning step</div>
+                                            <div class="text-info pr-5"><strong class="text-info">{{ question.learning_step }}</strong> out of {{ learning_step_count  }}</div>
+                                        </li>
+                                    {% endif %}
+                        {% if state_name != 'New' %}
+                            <li class="d-flex">
+                                        <div class="flex-fill font-weight-bold">Last reviewed</div>
+                                        <div class="text-info pr-5">{{ question.last_reviewed|default:"Never" }}</div>
+                            </li>
+                        {% endif %}
+                                    <li class="d-flex">
+                                        <div class="flex-fill font-weight-bold">Interval</div>
+                                        <div class="text-info pr-5">{{ question.interval }}</div>
+                                    </li>
+                                    <li class="d-flex">
+                                        <div class="flex-fill font-weight-bold">Easiness factor</div>
+                                        <div class="text-info pr-5">{{ question.efactor|floatformat:1 }}</div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <form action="{% url 'drill:update' question.uuid %}" class="mt-2">
+                            <input type="submit" class="btn btn-primary" value="Update">
+                        </form>
+
+                        <div class="mt-2">
+                            {% if object.tags.all %}
+                                <a href="{% url 'drill:add_with_tag' object.tags.all.0 %}" class="btn btn-primary" role="button">Add Question</a>
+                            {% else %}
+                                <a href="{% url 'drill:add' %}" class="btn btn-primary" role="button">Add Question</a>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div> <!-- End first column -->
+
+        <div class="col-lg-8">
+
+            <div class="row">
+                <div class="col-lg-12 card-grid">
+
+                    <div class="card-body">
+
+                        <div id="vue-app">
+                            {% include "common/show_messages.html" %}
+                        </div>
+
+                        <h3 class="table-borders markdown">
+                            {{ question.get_question|safe }}
+                        </h3>
+
+                        {% if object.tags.all %}
+                            Tags:
+                            {% for tag in object.tags.all %}
+                                <a class="badge badge-primary" href="{% url 'drill:study_tag' tag.name %}">{{ tag.name }}</a>
+                            {% endfor %}
+                            <br /><br />
+                        {% endif %}
+
+                        <a href="{% url 'drill:answer' question.uuid %}" class="btn btn-primary" role="button">Show Answer</a>
+                        <a href="{% url 'drill:skip' question.uuid %}" class="btn btn-primary" role="button">Skip</a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
-
-    <h1 class="table-borders">
-        {{ question.get_question|safe }}
-    </h1>
-
-    {% if object.tags.all %}
-            Tags:
-        {% for tag in object.tags.all %}
-            <a class="badge badge-primary" href="{% url 'drill:study_tag' tag.name %}">{{ tag.name }}</a>
-        {% endfor %}
-        <br /><br />
-    {% endif %}
-
-    <a href="{% url 'drill:answer' question.uuid %}" class="btn btn-primary btn-lg" role="button">Show Answer</a>
-    <a href="{% url 'drill:skip' question.uuid %}" class="btn btn-primary btn-lg" role="button">Skip</a>
 
 {% endblock %}
 
@@ -104,6 +151,10 @@ Easiness Factor: <strong class="text-info">{{ question.efactor|floatformat:1 }}<
                 }
             }
         };
+
+        new Vue({
+            el: "#vue-nav",
+        });
 
         new Vue({
             el: "#vue-app",

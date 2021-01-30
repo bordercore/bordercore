@@ -152,6 +152,11 @@ tr.selected {
 
 /* Bootstrap modifications */
 
+.breadcrumb {
+  background-color: $background-color-light;
+  padding-left: 15px + 20px;
+}
+
 $nav-tabs-link-active-border-color: $nav-tabs-border-color $nav-tabs-border-color $nav-tabs-link-active-bg;
 $nav-tabs-link-hover-border-color: $nav-tabs-border-color;
 
@@ -214,6 +219,12 @@ $nav-tabs-link-hover-border-color: $nav-tabs-border-color;
 }
 
 /* Markdown */
+
+.markdown {
+  strong {
+    color: $info;
+  }
+}
 
 pre {
   background: $markdown-background-color;

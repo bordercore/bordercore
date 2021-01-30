@@ -44,7 +44,9 @@ class DrillListView(ListView):
 
         context["cols"] = ["tag_name", "question_count", "last_reviewed", "lastreviewed_sort", "id"]
         context["info"] = info
-        context["title"] = "Tag Categories"
+        context["title"] = "Home"
+        context["no_left_block"] = True
+        context["content_block_width"] = "12"
         return context
 
     def get_queryset(self):
@@ -188,6 +190,8 @@ class QuestionDetailView(DetailView):
         context['learning_step_count'] = self.object.get_learning_step_count()
         context['title'] = 'Drill :: Question Detail'
         context['tag_list'] = ", ".join([x.name for x in self.object.tags.all()])
+        context["no_left_block"] = True
+        context["content_block_width"] = "12"
 
         return context
 
@@ -282,6 +286,8 @@ def show_answer(request, uuid):
                    'state_name': Question.get_state_name(question.state),
                    'tag_list': ", ".join([x.name for x in question.tags.all()]),
                    'learning_step_count': question.get_learning_step_count(),
+                   'no_left_block': True,
+                   'content_block_width': '12',
                    'title': 'Drill :: Show Answer'})
 
 
