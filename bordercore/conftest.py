@@ -75,7 +75,7 @@ def auto_login_user(client, blob_text_factory):
 def blob_image_factory(db, s3_resource, s3_bucket):
 
     blob = BlobFactory(
-        id=1,
+        id=1000,
         uuid="0bb4914e-cd3c-4d6b-9d72-0454adf00260",
         title="Vaporwave Wallpaper 2E",
         tags=("django", "linux", "video"),
@@ -92,7 +92,7 @@ def blob_image_factory(db, s3_resource, s3_bucket):
 def blob_pdf_factory(db, s3_resource, s3_bucket):
 
     blob = BlobFactory(
-        id=2,
+        id=2000,
         uuid="4158cf58-306c-42d7-9c98-07d3a96a1d8b",
         title="Bleached Album Notes",
         tags=("django", "linux", "video"),
@@ -109,6 +109,7 @@ def blob_pdf_factory(db, s3_resource, s3_bucket):
 def blob_text_factory(db, s3_resource, s3_bucket):
 
     blob = BlobFactory(
+        id=3000,
         uuid="7ef28ad2-ee89-4bf7-8a58-4bdfb74424e2",
         title="Sample blob with no sha1sum",
         tags=("django"),
@@ -233,7 +234,6 @@ def collection(blob_image_factory, blob_pdf_factory):
         for x in [blob_image_factory, blob_pdf_factory]
     ]
     collection.save()
-
     yield collection
 
 

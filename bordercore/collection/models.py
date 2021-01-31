@@ -35,6 +35,9 @@ class Collection(TimeStampedModel):
 
     def sort(self, blob_id, new_position):
 
+        if blob_id not in [x["id"] for x in self.blob_list]:
+            raise ValueError(f"blob_id={blob_id} not in collection {self}")
+
         # First remove the blob from the existing list
         saved_blob = []
         new_blob_list = []
