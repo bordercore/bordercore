@@ -17,7 +17,7 @@ try:
     from pyvirtualdisplay import Display
     from selenium import webdriver
     from homepage.tests.pages.homepage import LoginPage
-except (ModuleNotFoundError, NameError):
+except (ModuleNotFoundError, NameError, django.core.exceptions.AppRegistryNotReady):
     # Don't worry if these imports don't exist in production
     pass
 
@@ -109,9 +109,8 @@ def blob_pdf_factory(db, s3_resource, s3_bucket):
 def blob_text_factory(db, s3_resource, s3_bucket):
 
     blob = BlobFactory(
-        id=3,
         uuid="7ef28ad2-ee89-4bf7-8a58-4bdfb74424e2",
-        title="Sampe blob with no sha1sum",
+        title="Sample blob with no sha1sum",
         tags=("django"),
     )
 
