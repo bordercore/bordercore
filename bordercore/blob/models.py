@@ -147,7 +147,8 @@ class Blob(TimeStampedModel, AmazonMixin):
             "image/gif": "Image",
             "image/jpeg": "Image",
             "image/png": "Image",
-            "video/mp4": "Video"
+            "video/mp4": "Video",
+            "video/webm": "Video"
         }
 
         return switcher.get(argument, "")
