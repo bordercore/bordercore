@@ -59,9 +59,15 @@ class Command(BaseCommand):
             help="Increase output verbosity",
             action="store_true"
         )
+        parser.add_argument(
+            "--create-connection",
+            help="Create connection to Elasticsearch",
+            default=False,
+            action="store_true"
+        )
 
     @atomic
-    def handle(self, *args, uuid, force, limit, verbose, **kwargs):
+    def handle(self, *args, uuid, force, create_connection, limit, verbose, **kwargs):
 
         if uuid:
             # A single blob
@@ -102,7 +108,7 @@ class Command(BaseCommand):
                     blob_count = blob_count + 1
                     if blob_count > limit:
                         break
-                    index_blob(uuid=blob_info.uuid, create_connection=False)
+                    index_blob(uuid=blob_info.uuid, create_connection=create_connection)
 
                 self.stdout.write(f"{blob_info.uuid} {blob_info.file} {blob_info.title}")
 
