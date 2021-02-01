@@ -75,7 +75,7 @@ def test_books_with_tags(es):
 
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)['hits']
 
-    assert found['total']['value'] == 0, f"{found}['total']['value'] books fail this test, uuid={found['hits'][0]['_id']}"
+    assert found['total']['value'] == 0, f"{found}['total']['value'] books found without tags, uuid={found['hits'][0]['_id']}"
 
 
 def test_documents_with_dates(es):
@@ -187,7 +187,7 @@ def test_books_with_title(es):
 
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["total"]["value"]
 
-    assert found == 0, f"{found} books fail this test"
+    assert found == 0, f"{found} books found with no title"
 
 
 def test_books_with_author(es):
@@ -220,7 +220,7 @@ def test_books_with_author(es):
     }
 
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]
-    assert found["total"]["value"] == 0, f"{found['total']['value']} books fail this test, uuid={found['hits'][0]['_id']}"
+    assert found["total"]["value"] == 0, f"{found['total']['value']} books found with no author, uuid={found['hits'][0]['_id']}"
 
 
 def test_books_with_contents(es):
@@ -256,7 +256,7 @@ def test_books_with_contents(es):
 
     for match in found["hits"]:
         if match["_source"]["filename"].endswith("pdf") and match["_id"] not in BLOBS_NOT_TO_INDEX:
-            assert False, f"Book fails this test, uuid={match['_id']}"
+            assert False, f"Book has no content, uuid={match['_id']}"
 
 
 def test_tags_all_lowercase():
