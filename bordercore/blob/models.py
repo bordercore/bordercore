@@ -53,16 +53,6 @@ ILLEGAL_FILENAMES = [
     "cover-small.jpg"
 ]
 
-# These blobs are too big to be indexed by Elasticsearch,
-# generating "Broken pip" errors.
-
-BLOBS_NOT_TO_INDEX = [
-    "50d894af-8dad-44ab-a15e-2435dd8f827a",
-    "56ba664e-e918-4598-b198-8e01da064f75",
-    "95546f46-3842-49d4-93d3-82fad914e3ce",
-    "b9d3b971-682a-42ba-9db4-6b867edd60eb",
-]
-
 log = logging.getLogger(f"bordercore.{__name__}")
 
 
@@ -118,6 +108,7 @@ class Blob(TimeStampedModel, AmazonMixin):
     importance = models.IntegerField(default=1)
     is_private = models.BooleanField(default=False)
     is_note = models.BooleanField(default=False)
+    is_indexed = models.BooleanField(default=True)
     documents = models.ManyToManyField("self", blank=True)
 
     def __str__(self):
@@ -469,10 +460,10 @@ def set_s3_metadata_file_modified(sender, instance, **kwargs):
     Store a file's modification time as S3 metadata after it's saved.
     """
 
-    # instance.file_modified will be "None" if we're editing a blob's
-    # information, but not changing the blob itself. In that case we
-    # don't want to update its "file_modified" metadata.
-    if not instance.file or instance.file_modified is None:
+    # instance.file_modified will be "None" or non-existentif we're
+    # editing a blob's information, but not changing the blob itself.
+    # In that case we don't want to update its "file_modified" metadata.
+    if not instance.file or not hasattr(instance, "file_modified"):
         return
 
     s3 = boto3.resource("s3")

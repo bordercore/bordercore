@@ -21,7 +21,7 @@ pytestmark = pytest.mark.data_quality
 django.setup()
 
 from django.contrib.auth.models import User  # isort:skip
-from blob.models import BLOBS_NOT_TO_INDEX, Blob, ILLEGAL_FILENAMES, MetaData   # isort:skip
+from blob.models import Blob, ILLEGAL_FILENAMES, MetaData   # isort:skip
 from collection.models import Collection  # isort:skip
 from drill.models import Question  # isort:skip
 from tag.models import Tag  # isort:skip
@@ -225,6 +225,7 @@ def test_books_with_author(es):
 
 def test_books_with_contents(es):
     "Assert that all books have contents"
+    blobs_not_indexed = [str(x.uuid) for x in Blob.objects.filter(is_indexed=False).only("uuid")]
     search_object = {
         "query": {
             "bool": {
@@ -255,7 +256,7 @@ def test_books_with_contents(es):
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]
 
     for match in found["hits"]:
-        if match["_source"]["filename"].endswith("pdf") and match["_id"] not in BLOBS_NOT_TO_INDEX:
+        if match["_source"]["filename"].endswith("pdf") and match["_id"] not in blobs_not_indexed:
             assert False, f"Book has no content, uuid={match['_id']}"
 
 
@@ -280,7 +281,7 @@ def test_tags_no_orphans():
 def test_blobs_in_db_exist_in_elasticsearch(es):
     "Assert that all blobs in the database exist in Elasticsearch"
 
-    blobs = Blob.objects.exclude(uuid__in=BLOBS_NOT_TO_INDEX).only("uuid")
+    blobs = Blob.objects.filter(is_indexed=True).only("uuid")
     step_size = 100
     blob_count = blobs.count()
 
@@ -507,13 +508,15 @@ def test_collection_blobs_exists_in_db():
 def test_collection_blobs_exists_in_elasticsearch(es):
     "Assert that all blobs currently in collections actually exist in Elasticsearch"
 
+    blobs_not_indexed = [x.uuid for x in Blob.objects.filter(is_indexed=False).only("uuid")]
+
     collections = Collection.objects.filter(blob_list__isnull=False)
 
     for c in collections:
         for blob_info in c.blob_list:
 
             blob = Blob.objects.get(pk=blob_info["id"])
-            if str(blob.uuid) in BLOBS_NOT_TO_INDEX:
+            if blob.uuid in blobs_not_indexed:
                 continue
 
             search_object = {
@@ -532,7 +535,7 @@ def test_collection_blobs_exists_in_elasticsearch(es):
 def test_blob_metadata_exists_in_elasticsearch(es):
     "Assert that blob metadata exists in Elasticsearch"
 
-    metadata = MetaData.objects.exclude(Q(blob__uuid__in=BLOBS_NOT_TO_INDEX)
+    metadata = MetaData.objects.exclude(Q(blob__is_indexed=False)
                                         | Q(name="is_book")
                                         | Q(name=""))
     step_size = 100
@@ -608,7 +611,7 @@ def test_elasticsearch_search_NEW(es):
 def test_blob_tags_match_elasticsearch(es):
     "Assert that all blob tags match those found in Elasticsearch"
 
-    blobs = Blob.objects.filter(tags__isnull=False).exclude(uuid__in=BLOBS_NOT_TO_INDEX).distinct("uuid").order_by("uuid")
+    blobs = Blob.objects.filter(tags__isnull=False).exclude(is_indexed=False).distinct("uuid").order_by("uuid")
     step_size = 100
     blob_count = blobs.count()
 

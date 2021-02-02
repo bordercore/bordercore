@@ -13,7 +13,7 @@ from django.db.transaction import atomic
 
 from blob.elasticsearch_indexer import index_blob
 
-from blob.models import Blob, BLOBS_NOT_TO_INDEX  # isort:skip
+from blob.models import Blob  # isort:skip
 
 
 urllib3.disable_warnings()
@@ -74,10 +74,10 @@ class Command(BaseCommand):
             blobs = Blob.objects.filter(uuid=uuid)
         else:
             # All blobs
-            blobs = Blob.objects.exclude(uuid__in=BLOBS_NOT_TO_INDEX).order_by("created")
+            blobs = Blob.objects.filter(is_indexed=True).order_by("created")
 
             # Use this to only include "ingestible" file types
-            # blobs = Blob.objects.exclude(uuid__in=BLOBS_NOT_TO_INDEX).filter(file__iregex=r".(azw3|chm|epub|html|pdf|txt)$").order_by("created")
+            # blobs = Blob.objects.exclude(is_indexed=False).filter(file__iregex=r".(azw3|chm|epub|html|pdf|txt)$").order_by("created")
 
         last_blob = self.get_last_blob()
         blob = None

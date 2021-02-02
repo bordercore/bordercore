@@ -11,7 +11,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 from django.db.transaction import atomic
 
-from blob.models import BLOBS_NOT_TO_INDEX, Blob, set_s3_metadata_file_modified
+from blob.models import Blob, set_s3_metadata_file_modified
 
 
 class Command(BaseCommand):
@@ -46,7 +46,7 @@ class Command(BaseCommand):
             blobs = Blob.objects.filter(uuid=uuid)
         else:
             # All blobs
-            blobs = Blob.objects.exclude(uuid__in=BLOBS_NOT_TO_INDEX).filter(~Q(file="")).order_by("created")
+            blobs = Blob.objects.exclude(is_indexed=False).filter(~Q(file="")).order_by("created")
 
         for blob_info in blobs:
 
