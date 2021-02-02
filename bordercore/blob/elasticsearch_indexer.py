@@ -46,7 +46,6 @@ logging.getLogger().setLevel(logging.INFO)
 log = logging.getLogger(__name__)
 
 s3client = boto3.client("s3")
-db_conn = psycopg2.connect("dbname=%s port=5432 host=%s user=%s password=%s" % (DB_DATABASE, DB_ENDPOINT, DB_USERNAME, DB_PASSWORD))
 
 
 class ESBlob(Document_ES):
@@ -74,7 +73,7 @@ class ESBlob(Document_ES):
 def get_doctype(blob, metadata):
     if blob["is_note"] is True:
         return "note"
-    elif metadata.get("is_book", ""):
+    elif "is_book" in metadata:
         return "book"
     elif blob["sha1sum"] is not None:
         return "blob"
@@ -91,16 +90,16 @@ def is_ingestible_file(filename):
         return False
 
 
-def get_blob_info(**kwargs):
-
+def get_blob_info(db_conn, **kwargs):
     param = None
-    if kwargs.get("sha1sum", None):
+    if "sha1sum" in kwargs:
         predicate = "WHERE bd.sha1sum = %s"
         param = kwargs["sha1sum"]
-    elif kwargs.get("uuid", None):
+    elif "uuid" in kwargs:
         predicate = "WHERE bd.uuid = %s"
         param = kwargs["uuid"]
     else:
+        # TODO Raise more specific exception
         raise Exception("Must pass in uuid or sha1sum")
 
     sql = f"SELECT * FROM blob_blob bd {predicate}"
@@ -127,7 +126,7 @@ def get_blob_info(**kwargs):
     return dict2
 
 
-def get_blob_metadata(uuid):
+def get_blob_metadata(db_conn, uuid):
 
     sql = """
     SELECT bd.uuid,bm.name,bm.value FROM blob_blob bd
@@ -210,6 +209,8 @@ def get_num_pages(content):
 
 def index_blob(**kwargs):
 
+    db_conn = psycopg2.connect("dbname=%s port=5432 host=%s user=%s password=%s" % (DB_DATABASE, DB_ENDPOINT, DB_USERNAME, DB_PASSWORD))
+
     if kwargs.get("create_connection", True):
         connections.create_connection(
             hosts=[{"host": ES_ENDPOINT, "port": ES_PORT}],
@@ -219,8 +220,8 @@ def index_blob(**kwargs):
             connection_class=RequestsHttpConnection,
         )
 
-    blob_info = get_blob_info(**kwargs)
-    metadata = get_blob_metadata(blob_info["uuid"])
+    blob_info = get_blob_info(db_conn, **kwargs)
+    metadata = get_blob_metadata(db_conn, blob_info["uuid"])
 
     # An empty string causes a Python datetime validation error,
     #  so convert to "None" to avoid this.
