@@ -4,7 +4,7 @@ Description: Create Thumbnails from uploaded blobs
 
 Globals:
     Function:
-        Timeout: 60
+        Timeout: 900
 
 
 Resources:
