@@ -195,34 +195,32 @@ Linked with: <a href="{% url 'blob:create' %}?linked_collection={{ collection.id
 
           {% if content_type == "Video" %}
 
-                <video class="slide_show"autoplay loop muted>
-                    <source src="{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}" type="video/mp4">
-                </video>
+              <video class="slide_show"autoplay loop muted>
+                  <source src="{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}" type="video/mp4">
+              </video>
 
-          {% else %}
+          {% elif content_type == "Audio" %}
 
-                {% if content_type == 'Audio' %}
                 <audio controls controlsList="nodownload">
                     <source src="{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}" type="audio/mpeg">
   Your browser does not support the audio tag.
                 </audio>
-                {% endif %}
-
-                {% if object.content %}
-                    <div id="blob_detail_content" class="table-borders">
-                        {{ object.get_content|safe }}
-                    </div>
-                {% endif %}
-
-                {% if cover_info %}
-                    <img src="{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" data-toggle="modal" data-target="#myModal3" />
-                {% endif %}
-
-                <br /><br />
 
           {% endif %}
 
-        </div>
+          {% if object.content %}
+              <div id="blob_detail_content" class="table-borders">
+                        {{ object.get_content|safe }}
+              </div>
+          {% endif %}
+
+          {% if cover_info %}
+              <img src="{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" data-toggle="modal" data-target="#myModal3" />
+          {% endif %}
+
+          <br /><br />
+
+      </div>
 
     </div>
 
