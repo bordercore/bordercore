@@ -25,7 +25,7 @@ def test_feed_subscription_list(auto_login_user, feed):
     assert resp.status_code == 200
 
 
-def test_feed_update(auto_login_user, feed):
+def test_feed_create(auto_login_user, feed):
 
     _, client = auto_login_user()
 
@@ -33,6 +33,35 @@ def test_feed_update(auto_login_user, feed):
     resp = client.get(url)
 
     assert resp.status_code == 200
+
+
+def test_feed_update(auto_login_user, feed):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("feed:update", kwargs={"feed_id": feed[0].id})
+    resp = client.post(url, {
+        "Go": "Update",
+        "name": "Feed Name Changed",
+        "url": "https://www.bordercore.com/rss",
+        "homepage": "https://www.bordercore.com"
+    })
+
+    assert resp.status_code == 200
+
+
+def test_feed_delete(auto_login_user, feed):
+
+    _, client = auto_login_user()
+
+    feed[0].feeditem_set.all().delete()
+
+    url = urls.reverse("feed:update", kwargs={"feed_id": feed[0].id})
+    resp = client.post(url, {
+        "Go": "Delete",
+    })
+
+    assert resp.status_code == 302
 
 
 def test_sort_feed(auto_login_user, feed):
