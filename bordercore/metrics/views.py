@@ -48,12 +48,14 @@ class MetricListView(UserPassesTestMixin, ListView):
 
         for metric in self.object_list:
 
-            if timezone.now() - metric.created > timedelta(days=1):
-                metric.overdue = True
+            if metric.created:
 
-            context[self.test_types[metric.name]] = metric
+                if timezone.now() - metric.created > timedelta(days=1):
+                    metric.overdue = True
 
-            if metric.name == "Bordercore Test Coverage":
-                metric.latest_result["line_rate"] = int(round(float(metric.latest_result["line_rate"]) * 100, 0))
+                context[self.test_types[metric.name]] = metric
+
+                if metric.name == "Bordercore Test Coverage":
+                    metric.latest_result["line_rate"] = int(round(float(metric.latest_result["line_rate"]) * 100, 0))
 
         return context

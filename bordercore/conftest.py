@@ -28,9 +28,11 @@ from accounts.tests.factories import TEST_PASSWORD  # isort:skip
 from blob.tests.factories import BlobFactory  # isort:skip
 from bookmark.tests.factories import BookmarkFactory  # isort:skip
 from collection.tests.factories import CollectionFactory  # isort:skip
+from django.contrib.auth.models import Group  # isort:skip
 from drill.tests.factories import QuestionFactory  # isort:skip
 from fitness.models import Exercise, ExerciseUser, Muscle, MuscleGroup, Data  # isort:skip
 from feed.tests.factories import FeedFactory  # isort:skip
+from metrics.models import Metric, MetricData  # isort:skip
 from music.models import Listen, SongSource  # isort:skip
 from music.tests.factories import SongFactory, AlbumFactory  # isort:skip
 from node.models import SortOrderNodeBookmark, SortOrderNodeBlob  # isort:skip
@@ -64,6 +66,10 @@ def auto_login_user(client, blob_text_factory):
         if user is None:
             user = UserFactory()
             SortOrderUserNote.objects.get_or_create(userprofile=user.userprofile, note=blob_text_factory)
+
+            # Make the user an admin
+            admin_group, created = Group.objects.get_or_create(name="Admin")
+            admin_group.user_set.add(user)
 
         client.login(username=user.username, password=TEST_PASSWORD)
         return user, client
@@ -235,6 +241,53 @@ def collection(blob_image_factory, blob_pdf_factory):
     ]
     collection.save()
     yield collection
+
+
+@pytest.fixture()
+def metrics(auto_login_user):
+
+    user, _ = auto_login_user()
+
+    m_0 = Metric.objects.create(name="Bordercore Unit Tests", user=user)
+    m_1 = Metric.objects.create(name="Bordercore Functional Tests", user=user)
+    m_2 = Metric.objects.create(name="Bordercore Test Coverage", user=user)
+
+    md = MetricData.objects.create(
+        metric=m_0,
+        value={
+            "test_failures": 2,
+            "test_errors": 1,
+            "test_skipped": 0,
+            "test_count": 10,
+            "test_time_elapsed": "03:18",
+            "test_output": ""
+        }
+    )
+
+    md = MetricData.objects.create(
+        metric=m_1,
+        value={
+            "test_failures": 0,
+            "test_errors": 1,
+            "test_skipped": 0,
+            "test_count": 20,
+            "test_time_elapsed": "01:53",
+            "test_output": ""
+        }
+    )
+    # Overdue metrics
+    md.created = datetime.datetime.now() - timedelta(days=3)
+    md.save()
+
+    # Test coverage metrics
+    md = MetricData.objects.create(
+        metric=m_2,
+        value={
+            "line_rate": 0.82
+        }
+    )
+
+    yield [m_0, m_1, m_2]
 
 
 @pytest.fixture()
