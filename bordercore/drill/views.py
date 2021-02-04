@@ -185,6 +185,7 @@ class QuestionDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(QuestionDetailView, self).get_context_data(**kwargs)
 
+        context['tag_info'] = self.object.get_tag_info()
         context['question'] = self.object
         context['state_name'] = Question.get_state_name(self.object.state)
         context['learning_step_count'] = self.object.get_learning_step_count()

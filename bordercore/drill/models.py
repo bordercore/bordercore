@@ -8,8 +8,10 @@ from markdown.extensions.codehilite import CodeHiliteExtension
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import F, Q
 from django.db.models.signals import post_save
 from django.dispatch.dispatcher import receiver
+from django.utils import timezone
 
 from lib.mixins import TimeStampedModel
 from tag.models import Tag
@@ -126,6 +128,29 @@ class Question(TimeStampedModel):
             self.efactor = self.efactor - (self.efactor * 0.2)
 
         self.save()
+
+    def get_tag_info(self):
+
+        info = []
+
+        for tag in self.tags.all():
+
+            count = Question.objects.filter(user=self.user).filter(tags=tag).count()
+            todo = Question.objects.filter(
+                Q(user=self.user),
+                Q(tags__name=tag),
+                Q(interval__lte=timezone.now() - F("last_reviewed"))
+                | Q(last_reviewed__isnull=True)
+                | Q(state="L")).count()
+
+            info.append(
+                {
+                    "name": tag.name,
+                    "progress": 100 - (todo / count * 100)
+                }
+            )
+
+        return info
 
     def delete(self):
 

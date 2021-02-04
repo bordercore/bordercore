@@ -50,7 +50,8 @@
                                     {% endif %}
                                     <li class="d-flex">
                                         <div class="flex-fill font-weight-bold">Interval</div>
-                                        <div class="text-info pr-5">{{ question.interval }}</div>
+                                        <div class="text-info pr-5">{{ question.interval.days }} day{{ question.interval.days|pluralize:"s" }}</div>
+
                                     </li>
                                     <li class="d-flex">
                                         <div class="flex-fill font-weight-bold">Easiness factor</div>
@@ -129,9 +130,9 @@
                             {% endfor %}
                             <br /><br />
                         {% endif %}
-                        <div class="table-borders markdown">
+                        <h3 class="table-borders markdown">
                             {{ question.get_answer|safe }}
-                        </div>
+                        </h3>
 
                         <a href="{% url 'drill:record_response' question.uuid 'again' %}" class="btn btn-primary" role="button">Again</a>
                         {% if state_name == 'To Review' %}
