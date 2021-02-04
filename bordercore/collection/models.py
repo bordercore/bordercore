@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import uuid
+
 from django.apps import apps
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
@@ -16,6 +18,7 @@ class Collection(TimeStampedModel):
     A collection of blobs organized around a common theme or project
     """
 
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     blob_list = JSONField(blank=True, null=True)

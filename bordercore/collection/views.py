@@ -15,13 +15,13 @@ from blob.models import Blob
 from collection.forms import CollectionForm
 from collection.models import Collection
 
-IMAGE_TYPE_LIST = ['jpeg', 'gif', 'png']
+IMAGE_TYPE_LIST = ["jpeg", "gif", "png"]
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class CollectionListView(FormMixin, ListView):
 
-    context_object_name = 'info'
+    context_object_name = "info"
     form_class = CollectionForm
 
     # Override this method so that we can pass the request object to the form
@@ -41,25 +41,26 @@ class CollectionListView(FormMixin, ListView):
 
         info = []
 
-        for myobject in context['object_list']:
+        for myobject in context["object_list"]:
             info.append(dict(name=myobject.name,
                              tags=myobject.get_tags(),
                              updated=myobject.get_modified(),
-                             unixtime=format(myobject.modified, 'U'),
-                             objectcount=len(myobject.blob_list) if myobject.blob_list else 0, id=myobject.id))
+                             unixtime=format(myobject.modified, "U"),
+                             objectcount=len(myobject.blob_list) if myobject.blob_list else 0,
+                             id=myobject.uuid))
 
-        context['cols'] = ['name', 'tags', 'updated', 'unixtime', 'objectcount', 'id']
-        context['info'] = info
-        context['title'] = 'Collection List'
+        context["cols"] = ["name", "tags", "updated", "unixtime", "objectcount", "id"]
+        context["info"] = info
+        context["title"] = "Collection List"
 
         return context
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class CollectionDeleteView(DeleteView):
 
     def get_object(self, queryset=None):
-        return Collection.objects.get(user=self.request.user, id=self.kwargs.get('pk'))
+        return Collection.objects.get(user=self.request.user, uuid=self.kwargs.get("collection_uuid"))
 
     def get_success_url(self):
         messages.add_message(
@@ -67,15 +68,15 @@ class CollectionDeleteView(DeleteView):
             messages.INFO, f"Collection <strong>{self.object.name}</strong> deleted",
             extra_tags="show_in_dom"
         )
-        return reverse('collection:list')
+        return reverse("collection:list")
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class CollectionDetailView(DetailView):
 
     model = Collection
-    slug_field = 'id'
-    slug_url_kwarg = 'collection_id'
+    slug_field = "uuid"
+    slug_url_kwarg = "collection_uuid"
 
     def get_context_data(self, **kwargs):
         context = super(CollectionDetailView, self).get_context_data(**kwargs)
@@ -83,21 +84,21 @@ class CollectionDetailView(DetailView):
         blob_list = self.object.get_blob_list()
 
         if blob_list:
-            context['blob_list'] = blob_list
+            context["blob_list"] = blob_list
             try:
-                context['first_blob_cover_info'] = Blob.get_cover_info_static(user=self.request.user, sha1sum=context['blob_list'].first().sha1sum)
+                context["first_blob_cover_info"] = Blob.get_cover_info_static(user=self.request.user, sha1sum=context["blob_list"].first().sha1sum)
             except ClientError:
                 pass
 
-        context['nav'] = 'collection'
-        context['title'] = f'Collection Detail :: {self.object.name}'
+        context["nav"] = "collection"
+        context["title"] = f"Collection Detail :: {self.object.name}"
 
         return context
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class CollectionCreateView(CreateView):
-    template_name = 'collection/collection_list.html'
+    template_name = "collection/collection_list.html"
     form_class = CollectionForm
 
     # Override this method so that we can pass the request object to the form
@@ -114,7 +115,7 @@ class CollectionCreateView(CreateView):
         obj.save()
 
         # Take care of the tags.  Create any that are new.
-        for tag in form.cleaned_data['tags']:
+        for tag in form.cleaned_data["tags"]:
             obj.tags.add(tag)
 
         obj.save()
@@ -122,14 +123,16 @@ class CollectionCreateView(CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('collection:list')
+        return reverse("collection:list")
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class CollectionUpdateView(UpdateView):
     model = Collection
     form_class = CollectionForm
-    success_url = reverse_lazy('collection:list')
+    success_url = reverse_lazy("collection:list")
+    slug_field = "uuid"
+    slug_url_kwarg = "collection_uuid"
 
     # Override this method so that we can pass the request object to the form
     #  so that we have access to it in CollectionForm.__init__()
@@ -151,7 +154,7 @@ class CollectionUpdateView(UpdateView):
         obj.tags.clear()
 
         # Then add all tags specified
-        for tag in form.cleaned_data['tags']:
+        for tag in form.cleaned_data["tags"]:
             obj.tags.add(tag)
 
         obj.save()
@@ -164,19 +167,19 @@ def get_info(request):
 
     from django.core.exceptions import ObjectDoesNotExist
 
-    info = ''
+    info = ""
 
     try:
-        if request.GET.get('query_type', '') == 'id':
-            match = Collection.objects.get(user=request.user, pk=request.GET['id'])
+        if request.GET.get("query_type", "") == "uuid":
+            match = Collection.objects.get(user=request.user, uuid=request.GET["uuid"])
         else:
-            match = Collection.objects.get(user=request.user, name=request.GET['name'])
+            match = Collection.objects.get(user=request.user, name=request.GET["name"])
         if match:
             info = {
-                'name': match.name,
-                'description': match.description,
-                'id': match.id,
-                'tags': [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in match.tags.all()]
+                "name": match.name,
+                "description": match.description,
+                "uuid": match.uuid,
+                "tags": [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in match.tags.all()]
             }
     except ObjectDoesNotExist:
         info = {}
@@ -187,9 +190,9 @@ def get_info(request):
 @login_required
 def sort_collection(request):
 
-    collection_id = int(request.POST['collection_id'])
-    blob_id = int(request.POST['blob_id'])
-    new_position = int(request.POST['position'])
+    collection_id = int(request.POST["collection_id"])
+    blob_id = int(request.POST["blob_id"])
+    new_position = int(request.POST["position"])
 
     collection = Collection.objects.get(user=request.user, id=collection_id)
 

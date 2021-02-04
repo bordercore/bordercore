@@ -19,7 +19,7 @@ def test_collection_detail(auto_login_user, collection):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("collection:detail", kwargs={"collection_id": collection.id})
+    url = urls.reverse("collection:detail", kwargs={"collection_uuid": collection.uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200
@@ -27,7 +27,7 @@ def test_collection_detail(auto_login_user, collection):
     # Test a collection with no objects
     collection.blob_list = None
     collection.save()
-    url = urls.reverse("collection:detail", kwargs={"collection_id": collection.id})
+    url = urls.reverse("collection:detail", kwargs={"collection_uuid": collection.uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200
@@ -38,7 +38,7 @@ def test_collection_get_info(auto_login_user, collection):
     _, client = auto_login_user()
 
     url = urls.reverse("collection:get_info")
-    resp = client.get(f"{url}?query_type=id&id={collection.id}")
+    resp = client.get(f"{url}?query_type=uuid&uuid={collection.uuid}")
 
     assert resp.status_code == 200
 
@@ -49,7 +49,7 @@ def test_collection_get_info(auto_login_user, collection):
 
     # Test for an object that doesn't exist
     url = urls.reverse("collection:get_info")
-    resp = client.get(f"{url}?query_type=id&id=666")
+    resp = client.get(f"{url}?query_type=uuid&uuid=00000000-0000-0000-0000-000000000000")
 
     assert resp.status_code == 200
 
@@ -99,9 +99,8 @@ def test_update_collection(auto_login_user, collection):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("collection:update", kwargs={"pk": collection.id})
+    url = urls.reverse("collection:update", kwargs={"collection_uuid": collection.uuid})
     resp = client.post(url, {
-        "collection_id": collection.id,
         "name": "New name",
         "tags": "django"
     })
@@ -113,7 +112,7 @@ def test_delete_collection(auto_login_user, collection):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("collection:delete", kwargs={"pk": collection.id})
-    resp = client.post(url, {"collection_id": collection.id})
+    url = urls.reverse("collection:delete", kwargs={"collection_uuid": collection.uuid})
+    resp = client.post(url)
 
     assert resp.status_code == 302

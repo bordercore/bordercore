@@ -90,7 +90,7 @@
     {% if collection_info %}
         <div>
             <br />
-        Adding to collection <strong><a href="{% url 'collection:detail' collection_info.id %}">{{ collection_info.name }}</a></strong>
+        Adding to collection <strong><a href="{% url 'collection:detail' collection_info.uuid %}">{{ collection_info.name }}</a></strong>
         </div>
     {% endif %}
 
@@ -132,7 +132,7 @@ Linking to <a href="{% url 'blob:detail' linked_blob.uuid %}">{{ linked_blob.tit
 <form id="form-blob" action="{{ request.path }}" method="post" enctype="multipart/form-data">
     <input type="hidden" name="metadata" id="input-metadata" />
     <input type="hidden" name="linked_blob" value="{{ linked_blob.id }}" />
-    <input type="hidden" name="linked_collection" value="{{ linked_collection_info.id }}" />
+    <input type="hidden" name="linked_collection" value="{{ linked_collection_info.uuid }}" />
     {% if collection_info %}
         <input type="hidden" name="collection_id" value="{{ collection_info.id }}" />
     {% endif %}

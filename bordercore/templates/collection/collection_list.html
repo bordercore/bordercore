@@ -140,17 +140,17 @@
 
                     var selectedId = table.cell(".selected", 5).data();
                     var formEl = document.getElementById("form-edit");
-                    formEl.setAttribute("action", "{% url 'collection:delete' 666 %}".replace(/666/, selectedId));
+                    formEl.setAttribute("action", "{% url 'collection:delete' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', selectedId));
                     formEl.submit();
 
                 },
                 onClickUpdate(evt) {
 
-                    var selectedId = table.cell(".selected", 5).data();
+                    var selectedUuid = table.cell(".selected", 5).data();
 
                     doGet(
                         this,
-                        "{% url 'collection:get_info' %}?id=" + selectedId + "&query_type=id",
+                        "{% url 'collection:get_info' %}?uuid=" + selectedUuid + "&query_type=uuid",
                         (response) => {
                             nameEl = document.getElementById("id_name");
                             nameEl.value = response.data.name;
@@ -158,7 +158,7 @@
                             EventBus.$emit("addTags", response.data.tags);
                             document.getElementById("action-type").innerHTML = "Update";
                             document.getElementById("btn-action").value = "Update";
-                            document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection:update' 666 %}".replace(/666/, selectedId));
+                            document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection:update' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', selectedUuid));
                             $("#modalAdd").modal("show");
                         },
                         ""
@@ -211,7 +211,7 @@
         $(document).ready(function() {
 
             function formatName( data, type, row ) {
-                return '<a href="{% url 'collection:detail' 666 %}">'.replace(/666/, row[5]) + row[0] + '</a>';
+                return '<a href="{% url 'collection:detail' '00000000-0000-0000-0000-000000000000' %}">'.replace('00000000-0000-0000-0000-000000000000', row[5]) + row[0] + '</a>';
             }
 
             table = $('#collection_list').DataTable( {

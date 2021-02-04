@@ -135,7 +135,7 @@
                             <card>
                                 <template v-slot:title-slot>
                                     <div class="card-title">
-                                        <a href="{% url 'collection:detail' default_collection.id %}">{{ default_collection.name }}</a>
+                                        <a href="{% url 'collection:detail' default_collection.uuid %}">{{ default_collection.name }}</a>
                                     </div>
                                 </template>
                                     <template v-slot:content>

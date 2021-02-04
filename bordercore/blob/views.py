@@ -53,10 +53,10 @@ class BlobCreateView(CreateView):
             context['linked_blob'] = linked_blob
             # Grab the initial metadata from the linked blob
             context['metadata'] = linked_blob.metadata_set.all()
-        if self.request.GET.get('linked_collection', ''):
-            collection_id = self.request.GET['linked_collection']
-            context['linked_collection_info'] = Collection.objects.get(user=self.request.user, id=collection_id)
-            context['linked_collection_blob_list'] = [Blob.objects.get(user=self.request.user, pk=x['id']) for x in Collection.objects.get(user=self.request.user, id=collection_id).blob_list]
+        if 'linked_collection' in self.request.GET:
+            collection_uuid = self.request.GET['linked_collection']
+            context['linked_collection_info'] = Collection.objects.get(user=self.request.user, uuid=collection_uuid)
+            context['linked_collection_blob_list'] = [Blob.objects.get(user=self.request.user, pk=x['id']) for x in Collection.objects.get(user=self.request.user, uuid=collection_uuid).blob_list]
             # Grab the initial metadata from one of the other blobs in the collection
             context['metadata'] = context['linked_collection_blob_list'][0].metadata_set.all()
         collection_id = self.request.GET.get('collection_id', '')
@@ -77,8 +77,8 @@ class BlobCreateView(CreateView):
             form.initial['date'] = blob.date
             form.initial['title'] = blob.title
         if self.request.GET.get('linked_collection', False):
-            collection_id = self.request.GET['linked_collection']
-            blob_id = Collection.objects.get(user=self.request.user, id=collection_id).blob_list[0]['id']
+            collection_uuid = self.request.GET['linked_collection']
+            blob_id = Collection.objects.get(user=self.request.user, uuid=collection_uuid).blob_list[0]['id']
             blob = Blob.objects.get(user=self.request.user, pk=blob_id)
             form.initial['tags'] = ','.join([x.name for x in blob.tags.all()])
             form.initial['date'] = blob.date
@@ -187,12 +187,12 @@ class BlobDetailView(DetailView):
         for collection in Collection.objects.filter(user=self.request.user, blob_list__contains=[{'id': self.object.id}]):
             blob_list = Blob.objects.filter(user=self.request.user, pk__in=[x['id'] for x in collection.blob_list if x['id'] != self.object.id])
             if collection.is_private:
-                linked_blobs.append({'id': collection.id,
+                linked_blobs.append({'uuid': collection.uuid,
                                      'name': collection.name,
                                      'is_private': collection.is_private,
                                      'blob_list': blob_list})
             else:
-                collection_info.append({'id': collection.id,
+                collection_info.append({'uuid': collection.uuid,
                                         'name': collection.name})
         context['collection_info'] = collection_info
         context['linked_blobs'] = linked_blobs
@@ -350,7 +350,7 @@ def handle_linked_blob(blob, request):
 def handle_linked_collection(blob, request):
 
     if request.POST.get('linked_collection', ''):
-        collection = Collection.objects.get(user=request.user, id=int(request.POST['linked_collection']))
+        collection = Collection.objects.get(user=request.user, uuid=request.POST['linked_collection'])
         blob = {'id': blob.id, 'added': int(datetime.datetime.now().strftime("%s"))}
         collection.blob_list.append(blob)
         collection.save()
