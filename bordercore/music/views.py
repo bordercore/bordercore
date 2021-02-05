@@ -15,8 +15,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.forms.utils import ErrorList
-from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
-from django.shortcuts import redirect, render
+from django.http import JsonResponse
+from django.shortcuts import render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
@@ -55,12 +55,12 @@ def music_list(request):
 
 
 @login_required
-def song_update(request, song_id=None):
+def song_update(request, song_uuid=None):
 
     action = 'Update'
     file_info = None
 
-    song = Song.objects.get(user=request.user, pk=song_id) if song_id else None
+    song = Song.objects.get(user=request.user, uuid=song_uuid) if song_uuid else None
 
     tracknumber = str(song.track)
     if len(tracknumber) == 1:
@@ -91,7 +91,7 @@ def song_update(request, song_id=None):
             messages.add_message(request, messages.INFO, 'Song deleted')
             return music_list(request)
 
-    elif song_id:
+    elif song_uuid:
         action = 'Update'
         form = SongForm(instance=song, request=request)
 
@@ -112,6 +112,8 @@ def song_update(request, song_id=None):
 class AlbumDetailView(DetailView):
 
     model = Album
+    slug_field = 'uuid'
+    slug_url_kwarg = 'uuid'
 
     def get_context_data(self, **kwargs):
         context = super(AlbumDetailView, self).get_context_data(**kwargs)
@@ -126,7 +128,7 @@ class AlbumDetailView(DetailView):
                 display_title = song.title + ' - ' + song.artist
             else:
                 display_title = song.title
-            song_list.append(dict(id=song.id,
+            song_list.append(dict(uuid=song.uuid,
                                   track=song.track,
                                   raw_title=song.title.replace('/', 'FORWARDSLASH'),
                                   title=display_title,
@@ -135,7 +137,7 @@ class AlbumDetailView(DetailView):
 
         context['song_list'] = song_list
         context['title'] = 'Album Detail :: {}'.format(self.object.title)
-        context['cols'] = ['id', 'track', 'raw_title', 'title', 'length', 'length_seconds']
+        context['cols'] = ['uuid', 'track', 'raw_title', 'title', 'length', 'length_seconds']
         context['MEDIA_URL_MUSIC'] = settings.MEDIA_URL_MUSIC
 
         return context
@@ -159,7 +161,7 @@ def artist_detail(request, artist_name):
     song_list = []
 
     for song in s:
-        song_list.append(dict(id=song.id,
+        song_list.append(dict(uuid=song.uuid,
                               year=song.year,
                               title=song.title,
                               length_seconds=song.length,
@@ -173,7 +175,7 @@ def artist_detail(request, artist_name):
                       'album_list': a,
                       'song_list': song_list,
                       'compilation_album_list': c,
-                      'cols': ['year', 'artist', 'title', 'length', 'length_seconds', 'info', 'id'],
+                      'cols': ['year', 'artist', 'title', 'length', 'length_seconds', 'info', 'uuid'],
                       'title': 'Artist Detail :: {}'.format(artist_name),
                       'MEDIA_URL_MUSIC': settings.MEDIA_URL_MUSIC
                   })
@@ -260,7 +262,7 @@ def create_song(request):
 
         if form.is_valid():
 
-            album_id = None
+            album_uuid = None
 
             album_title = request.POST.get("album", "").strip()
 
@@ -304,7 +306,7 @@ def create_song(request):
                     new_song.tags.add(tag)
 
             if a:
-                album_id = a.id
+                album_uuid = a.uuid
 
             s3_client = boto3.client("s3")
             key = f"songs/{new_song.uuid}"
@@ -334,7 +336,7 @@ def create_song(request):
                     fh.write(artwork[0].data)
                     fh.close()
 
-                    key = f"artwork/{album_id}"
+                    key = f"artwork/{album_uuid}"
                     s3_client.upload_file(
                         artwork_file,
                         settings.AWS_BUCKET_NAME_MUSIC,
@@ -352,7 +354,7 @@ def create_song(request):
                 action = 'Upload'
                 sha1sum = None
                 if a:
-                    listen_url = reverse('music:album_detail', args=[album_id])
+                    listen_url = reverse('music:album_detail', args=[album_uuid])
                 else:
                     listen_url = reverse('music:artist_detail', args=[form.cleaned_data['artist']])
                 messages.add_message(request, messages.INFO, 'Song successfully created.  <a href="' + listen_url + '">Listen to it here.</a>')
@@ -452,9 +454,9 @@ def get_song_location(song):
 
 
 @login_required
-def get_song_info(request, id):
+def get_song_info(request, uuid):
 
-    song = Song.objects.get(user=request.user, pk=id)
+    song = Song.objects.get(user=request.user, uuid=uuid)
 
     # Indicate that this song has been listened to, but only if we're in production
     if not settings.DEBUG:

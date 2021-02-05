@@ -36,7 +36,7 @@
             <div class="col-lg-4">
                 <table class="table table-borderless">
                     <tr><td style="padding: 0">
-                        <a href="{% url 'music:album_detail' random_albums.id %}">
+                        <a href="{% url 'music:album_detail' random_albums.uuid %}">
                             <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ random_albums.id }}" height="150" width="150" />
                         </a>
 

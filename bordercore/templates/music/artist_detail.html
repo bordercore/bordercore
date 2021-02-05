@@ -54,7 +54,7 @@
                 {% endif %}
 
                 <td>
-                    <a href="{% url 'music:album_detail' album.id %}">
+                    <a href="{% url 'music:album_detail' album.uuid %}">
                         <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ album.id }}" height="150" width="150" /> <br />
                     </a>
 
@@ -85,7 +85,7 @@
                     {% endif %}
 
                     <td>
-                        <a href="{% url 'music:album_detail' album.id %}">
+                        <a href="{% url 'music:album_detail' album.uuid %}">
                             <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ album.id }}" height="150" width="150" /> <br />
                         </a>
 
@@ -150,9 +150,9 @@
                         return;
                     }
 
-                    var songId = table.cell(".selected", 6).data();
+                    var songUuid = table.cell(".selected", 6).data();
 
-                    axios.get("{% url 'music:get_song_info' 666 %}".replace(/666/, songId))
+                    axios.get("{% url 'music:get_song_info' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', songUuid))
                          .then(response => {
                              $("#player").get(0).src = response.data.url;
                              $("#player").get(0).play()

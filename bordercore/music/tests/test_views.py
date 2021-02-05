@@ -26,7 +26,7 @@ def test_music_song_update(auto_login_user, song):
     _, client = auto_login_user()
 
     # The submitted form
-    url = urls.reverse("music:song_update", kwargs={"song_id": song[1].id})
+    url = urls.reverse("music:song_update", kwargs={"song_uuid": song[1].uuid})
     resp = client.post(url, {
         "Go": "Update",
         "artist": "Artist Changed",
@@ -37,7 +37,7 @@ def test_music_song_update(auto_login_user, song):
 
     assert resp.status_code == 200
 
-    url = urls.reverse("music:song_update", kwargs={"song_id": song[1].id})
+    url = urls.reverse("music:song_update", kwargs={"song_uuid": song[1].uuid})
     resp = client.post(url, {
         "Go": "Delete",
     })
@@ -49,7 +49,7 @@ def test_music_album_detail(auto_login_user, song):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("music:album_detail", kwargs={"pk": song[1].id})
+    url = urls.reverse("music:album_detail", kwargs={"uuid": song[1].album.uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200
@@ -118,7 +118,7 @@ def test_music_get_song_info(auto_login_user, song):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("music:get_song_info", kwargs={"id": song[1].id})
+    url = urls.reverse("music:get_song_info", kwargs={"uuid": song[1].uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200

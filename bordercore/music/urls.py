@@ -6,7 +6,7 @@ app_name = "music"
 
 urlpatterns = [
     path(
-        route="update/<int:song_id>/",
+        route="update/<uuid:song_uuid>/",
         view=views.song_update,
         name="song_update"
     ),
@@ -16,7 +16,7 @@ urlpatterns = [
         name="create_song"
     ),
     path(
-        route="album/<int:pk>/",
+        route="album/<uuid:uuid>/",
         view=views.AlbumDetailView.as_view(),
         name="album_detail"
     ),
@@ -31,7 +31,7 @@ urlpatterns = [
         name="get_song_list"
     ),
     path(
-        route="song/<int:id>",
+        route="song/<uuid:uuid>",
         view=views.get_song_info,
         name="get_song_info"
     ),

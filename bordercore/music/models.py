@@ -16,6 +16,7 @@ from tag.models import Tag
 
 
 class Album(TimeStampedModel):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     title = models.TextField()
     artist = models.TextField()
     year = models.IntegerField()
@@ -116,7 +117,7 @@ class Song(TimeStampedModel):
 
         if self.album:
             doc["album"] = self.album.title
-            doc["album_id"] = self.album.id
+            doc["album_uuid"] = self.album.uuid
 
         es.index(
             index=settings.ELASTICSEARCH_INDEX,
