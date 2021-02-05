@@ -6,7 +6,7 @@ app_name = "fitness"
 
 urlpatterns = [
     path(
-        route="add/<int:exercise_id>/",
+        route="add/<uuid:exercise_uuid>/",
         view=views.fitness_add,
         name="add"
     ),
@@ -16,7 +16,7 @@ urlpatterns = [
         name="change_active_status"
     ),
     path(
-        route="<int:exercise_id>/",
+        route="<uuid:exercise_uuid>/",
         view=views.ExerciseDetailView.as_view(),
         name="exercise_detail"
     ),

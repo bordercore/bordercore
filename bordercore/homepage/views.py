@@ -8,10 +8,8 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import (Http404, HttpResponse, HttpResponseNotFound,
-                         JsonResponse)
-from django.shortcuts import render, render_to_response
-from django.template import RequestContext
+from django.http import JsonResponse
+from django.shortcuts import render
 
 from blob.models import Blob
 from bookmark.models import Bookmark

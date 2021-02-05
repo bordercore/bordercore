@@ -1,3 +1,4 @@
+import uuid
 from datetime import timedelta
 
 import markdown
@@ -25,6 +26,7 @@ class Muscle(models.Model):
 
 
 class Exercise(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     exercise = models.TextField(unique=True)
     muscle = models.ForeignKey(Muscle, on_delete=models.PROTECT)
     description = models.TextField(blank=True)

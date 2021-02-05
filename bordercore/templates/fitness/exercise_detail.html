@@ -46,7 +46,7 @@
 
             <form action="{% url 'fitness:change_active_status' %}" method="post">
                 {% csrf_token %}
-                <input type="hidden" name="exercise_id" value="{{ object.id }}" />
+                <input type="hidden" name="exercise_uuid" value="{{ object.uuid }}" />
                 {% if activity_info %}
         You've been doing this exercise since {{ activity_info.0.started|date:"N j, Y" }}
                     <button type="submit" class="btn btn-primary ml-2" id="inactive">Make Inactive</button>
@@ -73,7 +73,7 @@
                 <div class="card-header bg-info text-white">Add a new workout</div>
                 <div class="card-body">
 
-                    <form id="form-workout" class="form-inline" action="{% url 'fitness:add' exercise.id %}" method="post" autocomplete="off">
+                    <form id="form-workout" class="form-inline" action="{% url 'fitness:add' exercise.uuid %}" method="post" autocomplete="off">
                         <input type="hidden" name="workout-data" :value="workoutDataJson" />
                         {% csrf_token %}
 

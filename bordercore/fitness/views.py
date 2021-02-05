@@ -13,25 +13,25 @@ from django.views.generic.detail import DetailView
 from fitness.models import Data, Exercise, ExerciseUser
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class ExerciseDetailView(DetailView):
 
     model = Exercise
-    slug_field = 'id'
-    slug_url_kwarg = 'exercise_id'
+    slug_field = "uuid"
+    slug_url_kwarg = "exercise_uuid"
 
     def get_context_data(self, **kwargs):
         context = super(ExerciseDetailView, self).get_context_data(**kwargs)
-        context['id'] = self.object.id
+        context["uuid"] = self.object.uuid
         try:
-            workout_data = Data.objects.filter(user=self.request.user, exercise__id=self.object.id).order_by('-date')[:70]
-            context['recent_data'] = workout_data[0]
-            context['delta_days'] = int((int(datetime.datetime.now().strftime("%s")) - int(context['recent_data'].date.strftime("%s"))) / 86400) + 1
+            workout_data = Data.objects.filter(user=self.request.user, exercise__id=self.object.id).order_by("-date")[:70]
+            context["recent_data"] = workout_data[0]
+            context["delta_days"] = int((int(datetime.datetime.now().strftime("%s")) - int(context["recent_data"].date.strftime("%s"))) / 86400) + 1
         except IndexError:
             pass
-        context['activity_info'] = ExerciseUser.objects.filter(user=self.request.user, exercise__id=self.object.id)
-        context['nav'] = 'fitness'
-        context['title'] = 'Exercise Detail :: {}'.format(self.object.exercise)
+        context["activity_info"] = ExerciseUser.objects.filter(user=self.request.user, exercise__id=self.object.id)
+        context["nav"] = "fitness"
+        context["title"] = "Exercise Detail :: {}".format(self.object.exercise)
 
         if workout_data:
             self.set_plot_data(context, workout_data)
@@ -67,17 +67,17 @@ class ExerciseDetailView(DetailView):
 
 
 @login_required
-def fitness_add(request, exercise_id):
+def fitness_add(request, exercise_uuid):
 
-    exercise = Exercise.objects.get(pk=exercise_id)
+    exercise = Exercise.objects.get(uuid=exercise_uuid)
 
-    if request.method == 'POST':
-        for datum in json.loads(request.POST['workout-data']):
+    if request.method == "POST":
+        for datum in json.loads(request.POST["workout-data"]):
             new_data = Data(weight=datum[0], reps=datum[1], user=request.user, exercise=exercise)
             new_data.save()
-        messages.add_message(request, messages.INFO, 'Added workout data for exercise <strong>%s</strong>' % exercise)
+        messages.add_message(request, messages.INFO, f"Added workout data for exercise <strong>{exercise}</strong>")
 
-    return redirect('fitness:summary')
+    return redirect("fitness:summary")
 
 
 @login_required
@@ -117,24 +117,24 @@ def fitness_summary(request):
 
     return render(request, "fitness/summary.html", {"active_exercises": active_exercises,
                                                     "inactive_exercises": inactive_exercises,
-                                                    "nav": 'fitness',
+                                                    "nav": "fitness",
                                                     "title": "Fitness Summary"})
 
 
 @login_required
 def change_active_status(request):
 
-    exercise_id = request.POST['exercise_id']
+    exercise_uuid = request.POST["exercise_uuid"]
 
-    if request.POST['state'] == 'inactive':
-        exercise = Exercise.objects.get(id=exercise_id)
+    if request.POST["state"] == "inactive":
+        exercise = Exercise.objects.get(uuid=exercise_uuid)
         eu = ExerciseUser.objects.get(user=request.user, exercise=exercise)
         eu.delete()
-        messages.add_message(request, messages.INFO, 'This exercise is no longer active')
-    elif request.POST['state'] == 'active':
-        exercise = Exercise.objects.get(id=exercise_id)
+        messages.add_message(request, messages.INFO, "This exercise is no longer active")
+    elif request.POST["state"] == "active":
+        exercise = Exercise.objects.get(uuid=exercise_uuid)
         eu = ExerciseUser(user=request.user, exercise=exercise)
         eu.save()
-        messages.add_message(request, messages.INFO, 'This exercise is now active for you')
+        messages.add_message(request, messages.INFO, "This exercise is now active for you")
 
-    return redirect('fitness:exercise_detail', exercise_id)
+    return redirect("fitness:exercise_detail", exercise_uuid)

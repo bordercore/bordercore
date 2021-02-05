@@ -11,7 +11,7 @@ def test_fitness_exercise_detail(auto_login_user, fitness):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("fitness:exercise_detail", kwargs={"exercise_id": fitness[0].id})
+    url = urls.reverse("fitness:exercise_detail", kwargs={"exercise_uuid": fitness[0].uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200
@@ -21,7 +21,7 @@ def test_fitness_add(auto_login_user, fitness):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("fitness:add", kwargs={"exercise_id": fitness[0].id})
+    url = urls.reverse("fitness:add", kwargs={"exercise_uuid": fitness[0].uuid})
     resp = client.post(url, {
         "workout-data": json.dumps([[230, 7], [230, 6], [230, 5]])
     })
@@ -46,14 +46,14 @@ def test_fitness_change_active_status(auto_login_user, fitness):
     url = urls.reverse("fitness:change_active_status")
 
     resp = client.post(url, {
-        "exercise_id": fitness[0].id,
+        "exercise_uuid": fitness[0].uuid,
         "state": "inactive"
     })
 
     assert resp.status_code == 302
 
     resp = client.post(url, {
-        "exercise_id": fitness[0].id,
+        "exercise_uuid": fitness[0].uuid,
         "state": "active"
     })
 

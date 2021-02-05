@@ -31,7 +31,7 @@
     {% for exercise in active_exercises %}
 
         <tr{% if exercise.overdue %} class="selected"{% endif %}>
-            <td><a href="{% url 'fitness:exercise_detail' exercise.id %}">{{ exercise.exercise }}</a></td>
+            <td><a href="{% url 'fitness:exercise_detail' exercise.uuid %}">{{ exercise.exercise }}</a></td>
             <td>{{ exercise.muscle.muscle_group }}</td>
             <td>{{ exercise.interval.days }} day{{ exercise.interval.days|pluralize:"s" }}</td>
             {% if exercise.last_active %}
@@ -67,7 +67,7 @@
     {% for exercise in inactive_exercises %}
 
         <tr>
-            <td><a href="{% url 'fitness:exercise_detail' exercise.id %}">{{ exercise.exercise }}</a></td>
+            <td><a href="{% url 'fitness:exercise_detail' exercise.uuid %}">{{ exercise.exercise }}</a></td>
             <td>{{ exercise.muscle.muscle_group }}</td>
             {% if exercise.last_active %}
                 <td>{{ exercise.last_active|date:"N j, Y" }} <span class="float-right">{{ exercise.delta_days }} day{{ exercise.delta_days|pluralize:"s" }} ago</span></td>
