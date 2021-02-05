@@ -17,7 +17,7 @@
 
             {% if content_type == "Video" %}
 
-                <video class="slide_show"autoplay loop muted>
+                <video class="slide_show" controls autoplay loop muted>
                     <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="video/mp4">
                 </video>
 
