@@ -154,7 +154,7 @@ class Bookmark(TimeStampedModel):
         sorted_bookmarks = []
         for bookmarks in bookmark_info:
             if bookmarks[1]:
-                bookmarks[0].note = base64.b64encode(bookmarks[1].encode()).decode()
+                bookmarks[0].note = bookmarks[1]
             sorted_bookmarks.append(bookmarks[0])
 
         return sorted_bookmarks
