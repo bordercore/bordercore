@@ -67,7 +67,7 @@
                         {
                             id: {{ feed.id }},
                             name: "{{ feed.name }}",
-                            url: "{% url 'feed:update' feed.id %}",
+                            url: "{% url 'feed:update' feed.uuid %}",
                             lastResponseCode: {{ feed.last_response_code }}
                         },
                         {% endfor %}
@@ -133,7 +133,7 @@
                         {
                             id: {{ feed.id }},
                             name: "{{ feed.name }}",
-                            url: "{% url 'feed:update' feed.id %}",
+                            url: "{% url 'feed:update' feed.uuid %}",
                             lastResponseCode: {{ feed.last_response_code }}
                         },
                         {% endfor %}

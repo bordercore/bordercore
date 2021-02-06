@@ -1,3 +1,4 @@
+import uuid
 import xml.sax.saxutils as saxutils
 from datetime import datetime
 
@@ -14,6 +15,7 @@ USER_AGENT = "Bordercore/1.0"
 
 
 class Feed(TimeStampedModel):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.TextField()
     url = models.URLField(unique=True)
     last_check = models.DateTimeField(null=True)

@@ -105,13 +105,13 @@ def feed_unsubscribe(request):
 
 
 @login_required
-def feed_update(request, feed_id=None):
+def feed_update(request, feed_uuid=None):
 
     f = None
     subscribers = None
 
-    if feed_id:
-        f = Feed.objects.get(pk=feed_id)
+    if feed_uuid:
+        f = Feed.objects.get(uuid=feed_uuid)
         action = 'Update'
         title = 'Feed Update :: {}'.format(f.name)
     else:
@@ -141,10 +141,10 @@ def feed_update(request, feed_id=None):
     else:
         form = FeedForm()
 
-    if feed_id:
+    if feed_uuid:
         form = FeedForm(instance=f)
         subscribers = UserProfile.objects.filter(
-            rss_feeds__contains=[feed_id]
+            rss_feeds__contains=[f.id]
         )
         if subscribers:
             subscribers = ', '.join([x.user.username for x in subscribers])

@@ -39,7 +39,7 @@ def test_feed_update(auto_login_user, feed):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("feed:update", kwargs={"feed_id": feed[0].id})
+    url = urls.reverse("feed:update", kwargs={"feed_uuid": feed[0].uuid})
     resp = client.post(url, {
         "Go": "Update",
         "name": "Feed Name Changed",
@@ -56,7 +56,7 @@ def test_feed_delete(auto_login_user, feed):
 
     feed[0].feeditem_set.all().delete()
 
-    url = urls.reverse("feed:update", kwargs={"feed_id": feed[0].id})
+    url = urls.reverse("feed:update", kwargs={"feed_uuid": feed[0].uuid})
     resp = client.post(url, {
         "Go": "Delete",
     })

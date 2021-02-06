@@ -11,7 +11,7 @@ urlpatterns = [
         name="sort"
     ),
     path(
-        route="update/<int:feed_id>/",
+        route="update/<uuid:feed_uuid>/",
         view=views.feed_update,
         name="update"
     ),
