@@ -78,7 +78,7 @@ class BookmarkUpdateView(UpdateView, FormValidMixin):
     success_url = reverse_lazy("bookmark:overview")
 
     def get_context_data(self, **kwargs):
-        context = super(BookmarkUpdateView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["action"] = "Update"
         context["tags"] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
@@ -86,7 +86,7 @@ class BookmarkUpdateView(UpdateView, FormValidMixin):
     def get_form_kwargs(self):
         # Pass the request object to the form so that we have access to it
         #  in a clean_* method
-        kwargs = super(BookmarkUpdateView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs["request"] = self.request
         return kwargs
 
@@ -98,14 +98,14 @@ class BookmarkCreateView(CreateView, FormValidMixin):
     success_url = reverse_lazy("bookmark:overview")
 
     def get_context_data(self, **kwargs):
-        context = super(BookmarkCreateView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["action"] = "Create"
         return context
 
     def get_form_kwargs(self):
         # Pass the request object to the form so that we have access to it
         #  in a clean_* method
-        kwargs = super(BookmarkCreateView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs["request"] = self.request
         return kwargs
 

@@ -11,7 +11,7 @@ class QuestionForm(ModelForm):
         # The request object is passed in from a view's get_form_kwargs() method
         self.request = kwargs.pop("request", None)
 
-        super(QuestionForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Some answers might contain start with code identation required for markdown formatiing,
         #  so disable automatic whitespace stripping

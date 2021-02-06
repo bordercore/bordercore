@@ -32,7 +32,7 @@ class Feed(TimeStampedModel):
         for userprofile in subscribers:
             userprofile.rss_feeds.remove(self.pk)
             userprofile.save()
-        super(Feed, self).delete()
+        super().delete()
 
     def update(self):
 

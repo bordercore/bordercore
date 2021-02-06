@@ -40,7 +40,7 @@ class TodoListView(ListView):
             return []
 
     def get_context_data(self, **kwargs):
-        context = super(TodoListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         info = []
         fields = []
@@ -94,12 +94,12 @@ class TodoDetailView(UpdateView):
     # Override this method so that we can pass the request object to the form
     #  so that we have access to it in TodoForm.__init__()
     def get_form_kwargs(self):
-        kwargs = super(TodoDetailView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs["request"] = self.request
         return kwargs
 
     def get_context_data(self, **kwargs):
-        context = super(TodoDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['nav'] = 'todo'
         context['uuid'] = self.kwargs.get('uuid')
         context['action'] = 'Update'
@@ -139,7 +139,7 @@ class TodoCreateView(CreateView):
     form_class = TodoForm
 
     def get_context_data(self, **kwargs):
-        context = super(TodoCreateView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['nav'] = 'todo'
         context['action'] = 'Create'
         context['title'] = 'Todo Create'
@@ -150,7 +150,7 @@ class TodoCreateView(CreateView):
     # Override this method so that we can pass the request object to the form
     #  so that we have access to it in TodoForm.__init__()
     def get_form_kwargs(self):
-        kwargs = super(TodoCreateView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs['request'] = self.request
         return kwargs
 
@@ -182,7 +182,7 @@ class TodoDeleteView(DeleteView):
 
     # Verify that the user is the owner of the task
     def get_object(self, queryset=None):
-        obj = super(TodoDeleteView, self).get_object()
+        obj = super().get_object()
         if not obj.user == self.request.user:
             raise Http404
         return obj

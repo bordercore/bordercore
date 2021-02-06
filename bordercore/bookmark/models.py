@@ -77,7 +77,7 @@ class Bookmark(TimeStampedModel):
 
         es.delete_by_query(index=settings.ELASTICSEARCH_INDEX, body=request_body)
 
-        super(Bookmark, self).delete()
+        super().delete()
 
     def index_bookmark(self, es=None):
 

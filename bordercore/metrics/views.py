@@ -42,7 +42,7 @@ class MetricListView(UserPassesTestMixin, ListView):
             .filter(user=self.request.user)
 
     def get_context_data(self, **kwargs):
-        context = super(MetricListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         context["title"] = "Bordercore Metrics"
 

@@ -13,7 +13,7 @@ class TodoForm(ModelForm):
         if kwargs.get('request'):
             self.request = kwargs.pop("request")
 
-        super(TodoForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # If this form has a model attached, get the tags and display them separated by commas
         if self.instance.id:

@@ -14,7 +14,7 @@ class SongForm(ModelForm):
         # The request object is passed in from a view's SongForm() constructor
         self.request = kwargs.pop("request", None)
 
-        super(SongForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.fields['source'].empty_label = None
         self.fields['track'].required = False
@@ -33,7 +33,7 @@ class SongForm(ModelForm):
             to_field_name='name')
 
     def clean(self):
-        cleaned_data = super(SongForm, self).clean()
+        cleaned_data = super().clean()
         for field in ['title', 'artist', 'comment']:
             cleaned_data[field] = cleaned_data[field].strip()
         return cleaned_data

@@ -72,7 +72,7 @@ class BlobFileSystemStorage(FileSystemStorage):
             # if the file exists, do not call the superclasses _save method
             return name
         # if the file is new, DO call it
-        return super(BlobFileSystemStorage, self)._save(name, content)
+        return super()._save(name, content)
 
 
 class DownloadableS3Boto3Storage(S3Boto3Storage):
@@ -115,7 +115,7 @@ class Blob(TimeStampedModel, AmazonMixin):
         return self.title
 
     def __init__(self, *args, **kwargs):
-        super(Blob, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Save the sha1sum so that when it changes by a blob edit
         #  in save() we know what the original was.
@@ -272,7 +272,7 @@ class Blob(TimeStampedModel, AmazonMixin):
                 hasher.update(chunk)
             self.sha1sum = hasher.hexdigest()
 
-        super(Blob, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
         if self.sha1sum:
 
@@ -451,7 +451,7 @@ class Blob(TimeStampedModel, AmazonMixin):
             collection.blob_list = [x for x in collection.blob_list if x['id'] != self.id]
             collection.save()
 
-        super(Blob, self).delete()
+        super().delete()
 
 
 @receiver(post_save, sender=Blob)

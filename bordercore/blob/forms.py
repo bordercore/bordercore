@@ -21,7 +21,7 @@ class BlobForm(ModelForm):
         # The request object is passed in from a view's SongForm() constructor
         self.request = kwargs.pop("request", None)
 
-        super(BlobForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.fields['file'].required = False
         self.fields['file'].label = "File"
@@ -56,7 +56,7 @@ class BlobForm(ModelForm):
     # TODO: Should I (can I) use separate clean_<field> functions
     #  rather than one clean() function?
     def clean(self):
-        cleaned_data = super(BlobForm, self).clean()
+        cleaned_data = super().clean()
 
         try:
             cleaned_data['author'] = [x.strip() for x in ''.join(cleaned_data['author']).split(',')]

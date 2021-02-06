@@ -116,7 +116,7 @@ class AlbumDetailView(DetailView):
     slug_url_kwarg = 'uuid'
 
     def get_context_data(self, **kwargs):
-        context = super(AlbumDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         context['a'] = self.object
         s = Song.objects.filter(user=self.request.user, album=self.object).order_by('track')
@@ -490,7 +490,7 @@ class SearchTagListView(ListView):
 
     def get_context_data(self, **kwargs):
 
-        context = super(SearchTagListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         results = []
 

@@ -25,7 +25,7 @@ class DrillListView(ListView):
     template_name = "drill/drill_list.html"
 
     def get_context_data(self, **kwargs):
-        context = super(DrillListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         info = []
 
@@ -71,7 +71,7 @@ class DrillSearchListView(ListView):
                                        | Q(answer__icontains=search_term))
 
     def get_context_data(self, **kwargs):
-        context = super(DrillSearchListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         search_term = self.request.GET['search']
 
@@ -98,12 +98,12 @@ class QuestionCreateView(CreateView):
     # Override this method so that we can pass the request object to the form
     #  so that we have access to it in QuestionForm.__init__()
     def get_form_kwargs(self):
-        kwargs = super(QuestionCreateView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs["request"] = self.request
         return kwargs
 
     def get_context_data(self, **kwargs):
-        context = super(QuestionCreateView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         context['action'] = 'Add'
         context['title'] = 'Drill :: Add Question'
@@ -160,7 +160,7 @@ class QuestionDeleteView(DeleteView):
 
     def delete(self, request, *args, **kwargs):
         messages.add_message(self.request, messages.INFO, "Question deleted")
-        return super(QuestionDeleteView, self).delete(request, *args, **kwargs)
+        return super().delete(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
         question = Question.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
@@ -183,7 +183,7 @@ class QuestionDetailView(DetailView):
         return obj
 
     def get_context_data(self, **kwargs):
-        context = super(QuestionDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         context['tag_info'] = self.object.get_tag_info()
         context['question'] = self.object
@@ -209,12 +209,12 @@ class QuestionUpdateView(UpdateView):
     # Override this method so that we can pass the request object to the form
     #  so that we have access to it in QuestionForm.__init__()
     def get_form_kwargs(self):
-        kwargs = super(QuestionUpdateView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs["request"] = self.request
         return kwargs
 
     def get_context_data(self, **kwargs):
-        context = super(QuestionUpdateView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['action'] = 'Update'
         context['title'] = 'Drill :: Question Update'
         context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]

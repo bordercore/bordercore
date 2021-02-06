@@ -102,7 +102,7 @@ class Todo(TimeStampedModel):
 
         es.delete_by_query(index=settings.ELASTICSEARCH_INDEX, body=request_body)
 
-        super(Todo, self).delete()
+        super().delete()
 
     def index_todo(self, es=None):
 

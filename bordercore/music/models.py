@@ -89,7 +89,7 @@ class Song(TimeStampedModel):
 
         es.delete_by_query(index=settings.ELASTICSEARCH_INDEX, body=request_body)
 
-        super(Song, self).delete()
+        super().delete()
 
     def index_song(self, es=None):
 

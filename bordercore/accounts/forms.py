@@ -13,7 +13,7 @@ class UserProfileForm(ModelForm):
         # The request object is passed in from UserProfileUpdateView.get_form_kwargs()
         self.request = kwargs.pop("request", None)
 
-        super(UserProfileForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Don't be alarmed by the Tag.objects.all() queryset. Django will
         #  later filter this on just your favorite tags.

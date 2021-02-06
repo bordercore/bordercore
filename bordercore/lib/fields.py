@@ -19,7 +19,7 @@ class ModelCommaSeparatedChoiceField(ModelMultipleChoiceField):
 
         self.request = kwargs.pop("request", None)
 
-        super(ModelCommaSeparatedChoiceField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def clean(self, value):
         if value is not None:
@@ -31,4 +31,4 @@ class ModelCommaSeparatedChoiceField(ModelMultipleChoiceField):
             newtag, created = Tag.objects.get_or_create(user=self.request.user, name=tag)
             if created:
                 newtag.save()
-        return super(ModelCommaSeparatedChoiceField, self).clean(value)
+        return super().clean(value)

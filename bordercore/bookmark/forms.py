@@ -20,7 +20,7 @@ class BookmarkForm(ModelForm):
         # The request object is passed in from  a view's get_form_kwargs() method
         self.request = kwargs.pop('request', None)
 
-        super(BookmarkForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.fields['note'].required = False
         self.fields['tags'].required = False

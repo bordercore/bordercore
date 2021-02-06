@@ -41,12 +41,12 @@ class BlobCreateView(CreateView):
     # Override this method so that we can pass the request object to the form
     #  so that we have access to it in QuestionForm.__init__()
     def get_form_kwargs(self):
-        kwargs = super(BlobCreateView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs["request"] = self.request
         return kwargs
 
     def get_context_data(self, **kwargs):
-        context = super(BlobCreateView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['action'] = 'Create'
         if self.request.GET.get('linked_blob', ''):
             linked_blob = Blob.objects.get(user=self.request.user, id=self.request.GET['linked_blob'])
@@ -67,7 +67,7 @@ class BlobCreateView(CreateView):
         return context
 
     def get_form(self, form_class=None):
-        form = super(BlobCreateView, self).get_form(form_class)
+        form = super().get_form(form_class)
 
         if self.request.GET.get('is_note', False):
             form.initial['is_note'] = True
@@ -108,7 +108,7 @@ class BlobCreateView(CreateView):
 
         obj.index_blob()
 
-        return super(BlobCreateView, self).form_valid(form)
+        return super().form_valid(form)
 
     def get_success_url(self):
         return reverse_lazy('blob:detail', kwargs={'uuid': self.object.uuid})
@@ -123,7 +123,7 @@ class BlobDeleteView(DeleteView):
     #  thrown by Elasticsearch
     def delete(self, request, *args, **kwargs):
         try:
-            return super(BlobDeleteView, self).delete(request, *args, **kwargs)
+            return super().delete(request, *args, **kwargs)
         except Exception as e:
             messages.add_message(request, messages.ERROR, f"Error deleting object: {e}")
             return HttpResponseRedirect(reverse('blob:update', kwargs={'uuid': str(self.get_object().uuid)}))
@@ -145,7 +145,7 @@ class BlobDetailView(DetailView):
     template_name = 'blob/blob_detail.html'
 
     def get_context_data(self, **kwargs):
-        context = super(BlobDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['id'] = self.object.id
 
         context["metadata"] = {key: value for (key, value) in self.object.get_metadata().items()
@@ -216,12 +216,12 @@ class BlobUpdateView(UpdateView):
     # Override this method so that we can pass the request object to the form
     #  so that we have access to it in BlobForm.__init__()
     def get_form_kwargs(self):
-        kwargs = super(BlobUpdateView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs["request"] = self.request
         return kwargs
 
     def get_context_data(self, **kwargs):
-        context = super(BlobUpdateView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['sha1sum'] = self.kwargs.get('sha1sum')
 
         try:
@@ -302,7 +302,7 @@ class BlobThumbnailView(UpdateView):
     form_class = BlobForm
 
     def get_context_data(self, **kwargs):
-        context = super(BlobThumbnailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['cover_info'] = self.object.get_cover_info(max_cover_image_width=70, size='small')
         context['filename'] = self.object.file
         query = 'uuid:{}'.format(self.object.uuid)

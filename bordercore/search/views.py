@@ -168,7 +168,7 @@ class SearchListView(ListView):
 
     def get_context_data(self, **kwargs):
 
-        context = super(SearchListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         if "doctype" in self.request.GET:
             context["doctype_filter"] = self.request.GET["doctype"].split(",")
@@ -226,7 +226,7 @@ class NoteListView(SearchListView):
 
     def get_context_data(self, **kwargs):
 
-        context = super(NoteListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         page = int(self.request.GET.get("page", 1))
         context["paginator"] = self.get_paginator(page, context["search_results"])
@@ -323,7 +323,7 @@ class SearchTagDetailView(ListView):
 
     def get_context_data(self, **kwargs):
 
-        context = super(SearchTagDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         results = {}
         for match in context["search_results"]["hits"]["hits"]:

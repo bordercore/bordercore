@@ -27,7 +27,7 @@ class CollectionListView(FormMixin, ListView):
     # Override this method so that we can pass the request object to the form
     #  so that we have access to it in CollectionForm.__init__()
     def get_form_kwargs(self):
-        kwargs = super(CollectionListView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs["request"] = self.request
         return kwargs
 
@@ -37,7 +37,7 @@ class CollectionListView(FormMixin, ListView):
             prefetch_related("tags")
 
     def get_context_data(self, **kwargs):
-        context = super(CollectionListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         info = []
 
@@ -79,7 +79,7 @@ class CollectionDetailView(DetailView):
     slug_url_kwarg = "collection_uuid"
 
     def get_context_data(self, **kwargs):
-        context = super(CollectionDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         blob_list = self.object.get_blob_list()
 
@@ -104,7 +104,7 @@ class CollectionCreateView(CreateView):
     # Override this method so that we can pass the request object to the form
     #  so that we have access to it in CollectionForm.__init__()
     def get_form_kwargs(self):
-        kwargs = super(CollectionCreateView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs["request"] = self.request
         return kwargs
 
@@ -137,12 +137,12 @@ class CollectionUpdateView(UpdateView):
     # Override this method so that we can pass the request object to the form
     #  so that we have access to it in CollectionForm.__init__()
     def get_form_kwargs(self):
-        kwargs = super(CollectionUpdateView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs["request"] = self.request
         return kwargs
 
     def get_queryset(self):
-        base_qs = super(CollectionUpdateView, self).get_queryset()
+        base_qs = super().get_queryset()
         return base_qs.filter(user=self.request.user)
 
     def form_valid(self, form):

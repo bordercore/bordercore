@@ -11,7 +11,7 @@ class CollectionForm(ModelForm):
         # The request object is passed in from a view's get_form_kwargs() method
         self.request = kwargs.pop("request", None)
 
-        super(CollectionForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # If this form has a model attached, get the tags and display them separated by commas
         if self.instance.id:

@@ -30,7 +30,7 @@ class UserProfileUpdateView(UpdateView):
     form_class = UserProfileForm
 
     def get_context_data(self, **kwargs):
-        context = super(UserProfileUpdateView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['groups'] = ', '.join([x.name for x in self.request.user.groups.all()])
         context['nav'] = 'prefs'
         context['title'] = 'Preferences'
@@ -40,7 +40,7 @@ class UserProfileUpdateView(UpdateView):
     # Override this method so that we can pass the request object to the form
     #  so that we have access to it in UserProfileForm.__init__()
     def get_form_kwargs(self):
-        kwargs = super(UserProfileUpdateView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs["request"] = self.request
         return kwargs
 
@@ -113,7 +113,7 @@ class UserProfileUpdateView(UpdateView):
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
-        return super(UserProfileUpdateView, self).dispatch(*args, **kwargs)
+        return super().dispatch(*args, **kwargs)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -122,7 +122,7 @@ class ChangePasswordView(PasswordChangeView):
     success_url = reverse_lazy("accounts:password")
 
     def get_context_data(self, **kwargs):
-        context = super(ChangePasswordView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["nav"] = "prefs"
         context["title"] = "Preferences"
         return context

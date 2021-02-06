@@ -21,7 +21,7 @@ class ExerciseDetailView(DetailView):
     slug_url_kwarg = "exercise_uuid"
 
     def get_context_data(self, **kwargs):
-        context = super(ExerciseDetailView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["uuid"] = self.object.uuid
         try:
             workout_data = Data.objects.filter(user=self.request.user, exercise__id=self.object.id).order_by("-date")[:70]

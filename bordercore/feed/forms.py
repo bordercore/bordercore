@@ -5,7 +5,7 @@ from feed.models import Feed
 
 class FeedForm(ModelForm):
     def __init__(self, *args, **kwargs):
-        super(FeedForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     class Meta:
         model = Feed

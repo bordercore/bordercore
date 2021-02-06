@@ -26,7 +26,7 @@ class FeedListView(ListView):
         return Feed.get_feed_list(self.request.user.userprofile.rss_feeds)
 
     def get_context_data(self, **kwargs):
-        context = super(FeedListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         default_feed_id = Feed.objects.get(name='Hacker News').id
         current_feed = Feed.objects.values("id", "homepage", "last_check", "name").filter(pk=self.request.session.get('current_feed', default_feed_id))[0]
@@ -48,7 +48,7 @@ class FeedSubscriptionListView(ListView):
         return Feed.get_feed_list(self.request.user.userprofile.rss_feeds, get_feed_items=False)
 
     def get_context_data(self, **kwargs):
-        context = super(FeedSubscriptionListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
 
         # Get a list of all feeds not currently subscribed to
         rss_feeds = self.request.user.userprofile.rss_feeds or []
