@@ -11,7 +11,7 @@ urlpatterns = [
         name="add_note"
     ),
     path(
-        route="click/<int:bookmark_id>/",
+        route="click/<uuid:bookmark_uuid>/",
         view=views.click,
         name="click"
     ),
@@ -21,7 +21,7 @@ urlpatterns = [
         name="create"
     ),
     path(
-        route="update/<int:pk>/",
+        route="update/<uuid:uuid>/",
         view=views.BookmarkUpdateView.as_view(),
         name="update"
     ),
@@ -87,7 +87,7 @@ urlpatterns = [
         name="sort"
     ),
     path(
-        route="delete/<int:pk>",
+        route="delete/<uuid:uuid>",
         view=views.BookmarkDeleteView.as_view(),
         name="delete"
     ),

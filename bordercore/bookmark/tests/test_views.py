@@ -11,39 +11,41 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def monkeypatch_index_bookmark(monkeypatch):
+def monkeypatch_bookmark(monkeypatch):
     """
-    Prevent the bookmark object from interacting with Elasticsearch by
-    patching out the Bookmark.index_bookmark() method
+    Prevent the bookmark object from interacting with external services by
+    patching out the Bookmark.index_bookmark() and Bookmark.snarf_favicon()
+    methods
     """
 
     def mock(*args, **kwargs):
         pass
     monkeypatch.setattr(Bookmark, "index_bookmark", mock)
+    monkeypatch.setattr(Bookmark, "snarf_favicon", mock)
 
 
 def test_bookmark_click(auto_login_user, bookmark):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("bookmark:click", kwargs={"bookmark_id": bookmark[0].id})
+    url = urls.reverse("bookmark:click", kwargs={"bookmark_uuid": bookmark[0].uuid})
     resp = client.get(url)
 
     assert resp.status_code == 302
 
 
-def test_bookmark_update(monkeypatch_index_bookmark, auto_login_user, bookmark):
+def test_bookmark_update(monkeypatch_bookmark, auto_login_user, bookmark):
 
     _, client = auto_login_user()
 
     # The empty form
-    url = urls.reverse("bookmark:update", kwargs={"pk": bookmark[0].id})
+    url = urls.reverse("bookmark:update", kwargs={"uuid": bookmark[0].uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200
 
     # The submitted form
-    url = urls.reverse("bookmark:update", kwargs={"pk": bookmark[0].id})
+    url = urls.reverse("bookmark:update", kwargs={"uuid": bookmark[0].uuid})
     resp = client.post(url, {
         "url": "https://www.bordercore.com/bookmark/",
         "title": "Sample Title Changed",
@@ -54,7 +56,7 @@ def test_bookmark_update(monkeypatch_index_bookmark, auto_login_user, bookmark):
     assert resp.status_code == 302
 
 
-def test_bookmark_create(monkeypatch_index_bookmark, auto_login_user, bookmark):
+def test_bookmark_create(monkeypatch_bookmark, auto_login_user, bookmark):
 
     _, client = auto_login_user()
 
@@ -81,7 +83,7 @@ def test_bookmark_delete(auto_login_user, bookmark):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("bookmark:delete", kwargs={"pk": bookmark[0].id})
+    url = urls.reverse("bookmark:delete", kwargs={"uuid": bookmark[0].uuid})
     resp = client.post(url)
 
     assert resp.status_code == 302
@@ -102,7 +104,7 @@ def test_bookmark_list(auto_login_user, bookmark):
     assert resp.status_code == 200
 
 
-def test_bookmark_snarf_link(monkeypatch_index_bookmark, auto_login_user, bookmark):
+def test_bookmark_snarf_link(monkeypatch_bookmark, auto_login_user, bookmark):
 
     _, client = auto_login_user()
 
@@ -172,7 +174,7 @@ def test_bookmark_sort_bookmarks(auto_login_user, tag, bookmark):
     url = urls.reverse("bookmark:sort")
     resp = client.post(url, {
         "tag": tag[0].name,
-        "link_id": bookmark[0].id,
+        "bookmark_uuid": bookmark[0].uuid,
         "position": 3
     })
 
@@ -186,7 +188,7 @@ def test_bookmark_add_note(auto_login_user, tag, bookmark):
     url = urls.reverse("bookmark:add_note")
     resp = client.post(url, {
         "tag": tag[0].name,
-        "link_id": bookmark[0].id,
+        "bookmark_uuid": bookmark[0].uuid,
         "note": "Sample Note"
     })
 

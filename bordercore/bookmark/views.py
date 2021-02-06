@@ -29,9 +29,9 @@ BOOKMARKS_PER_PAGE = 50
 
 
 @login_required
-def click(request, bookmark_id=None):
+def click(request, bookmark_uuid=None):
 
-    b = Bookmark.objects.get(user=request.user, pk=bookmark_id) if bookmark_id else None
+    b = Bookmark.objects.get(user=request.user, uuid=bookmark_uuid) if bookmark_uuid else None
     b.daily['viewed'] = 'true'
     b.save()
     return redirect(b.url)
@@ -71,6 +71,8 @@ class FormValidMixin(ModelFormMixin):
 
 class BookmarkUpdateView(UpdateView, FormValidMixin):
     model = Bookmark
+    slug_field = "uuid"
+    slug_url_kwarg = "uuid"
     template_name = "bookmark/update.html"
     form_class = BookmarkForm
     success_url = reverse_lazy("bookmark:overview")
@@ -111,6 +113,8 @@ class BookmarkCreateView(CreateView, FormValidMixin):
 @method_decorator(login_required, name="dispatch")
 class BookmarkDeleteView(DeleteView):
     model = Bookmark
+    slug_field = "uuid"
+    slug_url_kwarg = "uuid"
     success_url = reverse_lazy("bookmark:overview")
 
 
@@ -141,14 +145,14 @@ def snarf_link(request):
             f"Bookmark already exists and was added on {b.created.strftime('%B %d, %Y')}",
             extra_tags="show_in_dom"
         )
-        return redirect('bookmark:update', b.id)
+        return redirect("bookmark:update", b.uuid)
     except ObjectDoesNotExist:
         b = Bookmark(is_pinned=False, user=request.user, url=url, title=title)
         b.save()
         b.index_bookmark()
         b.snarf_favicon()
 
-    return redirect('bookmark:update', b.id)
+    return redirect("bookmark:update", b.uuid)
 
 
 @login_required
@@ -304,7 +308,7 @@ class BookmarkListView(ListView):
             query = query.filter(tags__isnull=True)
 
         query = query.prefetch_related("tags")
-        query = query.only("id", "created", "url", "title", "last_response_code", "note")
+        query = query.only("uuid", "created", "url", "title", "last_response_code", "note")
 
         if "random" in self.kwargs:
             query = query.order_by("?")
@@ -348,7 +352,7 @@ class BookmarkListView(ListView):
         for x in queryset:
             bookmarks.append(
                 {
-                    "id": x.id,
+                    "uuid": x.uuid,
                     "created": x.created.strftime("%B %d, %Y"),
                     "createdYear": x.created.strftime("%Y"),
                     "url": x.url,
@@ -384,7 +388,7 @@ class BookmarkListTagView(BookmarkListView):
         for x in queryset:
             bookmarks.append(
                 {
-                    "id": x.id,
+                    "uuid": x.uuid,
                     "created": x.created.strftime("%B %d, %Y"),
                     "createdYear": x.created.strftime("%Y"),
                     "url": x.url,
@@ -448,10 +452,10 @@ def sort_bookmarks(request):
     """
 
     tag_name = request.POST["tag"]
-    link_id = int(request.POST["link_id"])
+    bookmark_uuid = request.POST["bookmark_uuid"]
     new_position = int(request.POST["position"])
 
-    s = SortOrderTagBookmark.objects.get(tag__name=tag_name, bookmark__id=link_id)
+    s = SortOrderTagBookmark.objects.get(tag__name=tag_name, bookmark__uuid=bookmark_uuid)
     SortOrderTagBookmark.reorder(s, new_position)
 
     return JsonResponse({"status": "OK"}, safe=False)
@@ -461,13 +465,13 @@ def sort_bookmarks(request):
 def add_note(request):
 
     tag_name = request.POST["tag"]
-    link_id = int(request.POST["link_id"])
+    bookmark_uuid = request.POST["bookmark_uuid"]
 
     note = request.POST["note"]
 
     SortOrderTagBookmark.objects.filter(
         tag__name=tag_name,
-        bookmark__id=link_id
+        bookmark__uuid=bookmark_uuid
     ).update(note=note)
 
     return JsonResponse({"status": "OK"}, safe=False)

@@ -120,7 +120,7 @@
                             <table>
                                 <tbody is="draggable" v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" :disabled="disableSort">
                                     <transition-group type="transition">
-                                        <tr v-for="bookmark in bookmarkList" :data-id="bookmark.id" :key="bookmark.id" class="bookmark-list" @click="onClick" v-cloak>
+                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="bookmark-list" @click="onClick" v-cloak>
                                             <td class="bookmark-list-date p-2 text-info">
                                                 <span>[[ bookmark.created ]]</span>
                                             </td>
@@ -248,11 +248,11 @@
                 onClickDelete(evt) {
 
                     var bookmarkEl = document.querySelector("tr.bookmark-list.selected");
-                    var selectedId = bookmarkEl.dataset.id;
+                    var selectedUuid = bookmarkEl.dataset.uuid;
 
                     var self = this;
 
-                    axios.delete("{% url 'bookmark:delete' 666 %}".replace(/666/, selectedId))
+                    axios.delete("{% url 'bookmark:delete' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', selectedUuid))
                          .then(() => {
 
                              this.$store.commit("changeButtonsDisabled", true)
@@ -266,8 +266,8 @@
                          })
                 },
                 onClickUpdate(evt) {
-                    var selectedId = document.querySelector("tr.bookmark-list.selected").dataset.id;
-                    window.location="{% url 'bookmark:update' 666 %}".replace(/666/, selectedId);
+                    var selectedUuid = document.querySelector("tr.bookmark-list.selected").dataset.uuid;
+                    window.location="{% url 'bookmark:update' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', selectedUuid);
                 },
                 addToFavorites(evt) {
                     const tagName = this.$parent.$refs.search.$refs.simpleSuggest.$refs.suggestComponent.text
@@ -391,9 +391,9 @@
                         if (this.$store.getters.selectedTagName) {
                             noteValue = "";
 
-                            var selectedId = parseInt(element.dataset.id, 10);
+                            var bookmarkUuid = element.dataset.uuid;
 
-                            const found = this.bookmarkList.find(element => element.id == selectedId);
+                            const found = this.bookmarkList.find(element => element.uuid == bookmarkUuid);
 
                             if (found) {
                                 noteValue = found.note;
@@ -417,7 +417,7 @@
                 },
                 onChange(evt) {
 
-                    linkId = evt.moved.element.id;
+                    bookmarkUuid = evt.moved.element.uuid;
 
                     // The backend expects the ordering to begin
                     // with 1, not 0, so add 1.
@@ -428,7 +428,7 @@
                         "{% url "bookmark:sort" %}",
                         {
                             "tag": this.$store.getters.selectedTagName,
-                            "link_id": linkId,
+                            "bookmark_uuid": bookmarkUuid,
                             "position": newPosition
                         },
                         (response) => {},
@@ -488,6 +488,7 @@
                                  } else {
                                      lastDate = bookmark.created;
                                  }
+                                 bookmark.note = atob(bookmark.note);
                                  bookmarks.push(bookmark);
                              }
                              if (searchTag != null) {
@@ -513,7 +514,7 @@
                 EventBus.$on("foobar", payload => {
 
                     this.bookmarkList.forEach( bookmark => {
-                        if( bookmark.id == payload.id ) {
+                        if( bookmark.uuid == payload.uuid ) {
                             bookmark.note = btoa(payload.noteValue);
                         }
                     });
@@ -586,19 +587,19 @@
                 onClick(evt) {
 
                     const note = document.getElementById("note").value;
-                    var selectedId = document.querySelector("tr.bookmark-list.selected").dataset.id;
+                    var bookmarkUuid = document.querySelector("tr.bookmark-list.selected").dataset.uuid;
 
                     doPost(
                         this,
                         "{% url "bookmark:add_note" %}",
                         {
                             "tag": this.$store.getters.selectedTagName,
-                            "link_id": selectedId,
+                            "bookmark_uuid": bookmarkUuid,
                             "note": note
                         },
                         (response) => {
                             payload = {
-                                id: selectedId,
+                                uuid: bookmarkUuid,
                                 noteValue: note
                             }
                             EventBus.$emit("foobar", payload);

@@ -1,6 +1,7 @@
 import base64
 import json
 import re
+import uuid
 
 import boto3
 from elasticsearch import Elasticsearch
@@ -28,6 +29,7 @@ class DailyBookmarkJSONField(JSONField):
 
 
 class Bookmark(TimeStampedModel):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     url = models.TextField()
     title = models.TextField()
     user = models.ForeignKey(User, on_delete=models.PROTECT)
@@ -97,7 +99,8 @@ class Bookmark(TimeStampedModel):
             "doctype": "bookmark",
             "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
             "date_unixtime": self.created.strftime("%s"),
-            "user_id": self.user.id
+            "user_id": self.user.id,
+            "uuid": self.uuid
         }
 
         res = es.index(

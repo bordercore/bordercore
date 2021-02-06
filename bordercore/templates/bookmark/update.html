@@ -78,15 +78,15 @@
             },
             data() {
                 return {
-                    {% if bookmark.id %}
-                    id: {{ bookmark.id }}
+                    {% if bookmark.uuid %}
+                    uuid: "{{ bookmark.uuid }}"
                     {% endif %}
                 }
             },
             methods: {
                 onClickDelete(evt) {
                     const formEl = document.getElementById("bookmark-form");
-                    formEl.setAttribute("action", "{% url 'bookmark:delete' 666 %}".replace(/666/, this.id));
+                    formEl.setAttribute("action", "{% url 'bookmark:delete' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', this.uuid));
                     formEl.submit();
                 },
                 onBlur(evt) {
