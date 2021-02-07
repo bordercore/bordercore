@@ -53,8 +53,9 @@ log.setLevel(logging.DEBUG)
 s3_client = boto3.client("s3")
 s3_resource = boto3.resource("s3")
 
-BLOBS_DIR = "/tmp/blobs"
-COVERS_DIR = "/tmp/covers"
+EFS_DIR = os.environ.get("EFS_DIR", "/tmp")
+BLOBS_DIR = f"{EFS_DIR}/blobs"
+COVERS_DIR = f"{EFS_DIR}/covers"
 
 
 def set_s3_metadata_image_dimensions(bucket, key, file_path):

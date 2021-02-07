@@ -7,6 +7,23 @@ Globals:
         Timeout: 900
 
 
+Parameters:
+    EFSMountPointParameter:
+        Type: String
+        Description: The EFS mount point on the file system
+    EFSAccessPointParameter:
+        Type: String
+        Description: The EFS access point
+    SecurityGroupParameter:
+        Type: String
+        Description: The VPC security group that lambda is in
+    Subnet1Parameter:
+        Type: String
+        Description: The first VPC subnet
+    Subnet2Parameter:
+        Type: String
+        Description: The second VPC subnet
+
 Resources:
 
     PDFUtilsLayer:
@@ -34,6 +51,19 @@ Resources:
             Environment:
                 Variables:
                     BUCKET_NAME: bordercore-blobs
+                    EFS_DIR:
+                      Ref: EFSMountPointParameter
+            VpcConfig:
+                SecurityGroupIds:
+                    - !Ref SecurityGroupParameter
+                SubnetIds:
+                    - !Ref Subnet1Parameter
+                    - !Ref Subnet2Parameter
+
+            FileSystemConfigs:
+                - Arn: !Sub "arn:aws:elasticfilesystem:us-east-1:${AWS::AccountId}:access-point/${EFSAccessPointParameter}"
+                  LocalMountPath:
+                      Ref: EFSMountPointParameter
 
     LambdaFunctionLogGroup:
         Type: "AWS::Logs::LogGroup"
