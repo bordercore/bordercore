@@ -1,7 +1,7 @@
 <template>
     <div class="card-body" :class="className">
         <slot name="title-slot">
-            <div class="card-title">
+            <div class="card-title" v-if="title">
                 {{ title }}
                 <slot name="top-right">
                 </slot>
