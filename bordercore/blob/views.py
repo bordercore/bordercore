@@ -123,7 +123,9 @@ class BlobDeleteView(DeleteView):
     #  thrown by Elasticsearch
     def delete(self, request, *args, **kwargs):
         try:
-            return super().delete(request, *args, **kwargs)
+            response = super().delete(request, *args, **kwargs)
+            messages.add_message(self.request, messages.INFO, "Blob successfully deleted")
+            return response
         except Exception as e:
             messages.add_message(request, messages.ERROR, f"Error deleting object: {e}")
             return HttpResponseRedirect(reverse('blob:update', kwargs={'uuid': str(self.get_object().uuid)}))
