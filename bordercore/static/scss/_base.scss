@@ -55,7 +55,7 @@
 /* Common components */
 
 .highlight-box {
-  background: $markdown-background-color;
+  background: lighten(#10163a, 5%);
   padding: 1em;
   border-radius: 11px;
 }
@@ -441,6 +441,10 @@ ul.pagination {
 }
 
 /* Blobs */
+
+#author {
+  color: $info;
+}
 
 .blob_edit_amazon_name_field {
   width: 100px;

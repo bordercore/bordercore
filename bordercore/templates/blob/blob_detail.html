@@ -11,161 +11,185 @@
 
 {% block left-block %}
 
-    <h1 id="title" class="pl-0">{{ caption }}</h1>
+        <div class="col-lg-12 card-grid" id="vue-app">
 
-    <h5>{{ object.get_edition_string }}</h5>
+            <card title="">
 
-    <br />
+                <template v-slot:content>
 
-    {% if author %}by <span id="author">{{ author }}</span><br />{% endif %}
+                    <h2 id="title" class="pl-0">
+                        {{ caption }}
+                    </h2>
 
-    {% if date %}{{ date }}<br /><br />{% endif  %}
+                    <h5>{{ object.get_edition_string }}</h5>
 
-    {% if object.tags.all %}
-            Tags:
-        {% for tag in object.tags.all %}
-            <a class="badge badge-primary" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
-        {% endfor %}
-        <br /><br />
-    {% endif %}
+                    {% if author %}
+                        <div class="mb-2">
+                            by <span id="author">{{ author }}</span>
+                        </div>
+                    {% endif %}
 
-    {% if urls %}
+                    {% if date %}
+                        <div class="mb-2">
+                            {{ date }}
+                        </div>
+                    {% endif  %}
 
-        {% for url in urls %}
-            <strong><a href="{{ url.url }}">{{ url.domain }}</a></strong>
-            <br />
-        {% endfor %}
+                    {% if object.tags.all %}
+                        <div class="mb-2">
+                            Tags:
+                            {% for tag in object.tags.all %}
+                                <a class="badge badge-primary" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
 
-        <br />
+                    {% if urls %}
+                        <div class="mb-2">
+                           {% for url in urls %}
+                               <strong><a href="{{ url.url }}">{{ url.domain }}</a></strong>
+                           {% endfor %}
+                        </div>
+                    {% endif %}
 
-    {% endif %}
+                    {% if show_metabox %}
+                        <div class="highlight-box">
 
-{% if show_metabox %}
-    <div class="highlight-box">
+                            {% for key, values in metadata.items %}
+                                <div>
+                                    <strong class="metadata_name">{{ key }}</strong>
+                                    <span class="metadata_value">{{ values }}</span>
+                                </div>
+                            {% endfor %}
 
-            {% for key, values in metadata.items %}
-                <div>
-                    <strong class="metadata_name">{{ key }}</strong><br />
-                    <span class="metadata_value">{{ values }}</span>
-                </div>
-            {% endfor %}
-            {% if content_type %}
-                <div>
-                    <strong>Object Type</strong><br />
-                    {{ content_type }}
-                </div>
-            {% endif %}
-            {% if object.sha1sum %}
-                <div>
-                    <strong>Sha1sum</strong><br />
-                    <small id="sha1sum">
-                        {% if request.user|is_in_group:"Admin" %}
-                            <a href="{{ aws_url }}">{{ object.sha1sum }}</a>
-                        {% else %}
-                            {{ object.sha1sum }}
+                           {% if content_type %}
+                               <div>
+                                   <strong>Object Type</strong>
+                                       {{ content_type }}
+                               </div>
+                           {% endif %}
+
+                           {% if object.sha1sum %}
+                               <div>
+                                   <strong>Sha1sum</strong><br />
+                                   <small id="sha1sum">
+                                       {% if request.user|is_in_group:"Admin" %}
+                                           <a href="{{ aws_url }}">{{ object.sha1sum }}</a>
+                                       {% else %}
+                                           {{ object.sha1sum }}
+                                       {% endif %}
+                                   </small>
+                               </div>
+                               <div>
+                                   <strong>Size</strong>
+                                   <small>{{ size }}</small>
+                               </div>
+                               {% if elasticsearch_info.num_pages %}
+                                   <div>
+                                       <strong>Pages</strong>
+                                       <small>{{ elasticsearch_info.num_pages }}</small>
+                                   </div>
+                               {% endif %}
+                           {% endif %}
+
+                        </div>
+
+                    {% endif %}
+
+                    {% if object.note %}
+                        <div class="mt-3" id="blob_note">{{ object.get_note|safe }}</div>
+                    {% endif %}
+
+                    {% if object.is_note and object.has_been_modified %}
+                        <div class="mt-3">
+                            <strong>Last edited</strong>
+                            <small>{{ object.modified|date:"F j, Y" }}</small>
+                        </div>
+                    {% endif %}
+
+                    {% if linked_blobs %}
+                        <div class="row top-buffer">
+                            <div class="col-lg-12">
+                                {% for collection in linked_blobs %}
+                                    <div id="blob_collection_list">
+                                        Linked with: <a href="{% url 'blob:create' %}?linked_collection={{ collection.id }}"></a>
+                                    </div>
+                                    <ul class="list-group">
+                                    {% for blob in collection.blob_list %}
+                                        <li class="list-group-item">
+                                            {% if blob.has_thumbnail_url %}
+                                                <img src="{{ blob.get_cover_url_small }}" />
+                                            {% endif %}
+                                            <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
+                                        </li>
+                                    {% endfor %}
+                                    <li class="list-group-item">
+                                        <a class="btn btn-secondary" href="{% url 'blob:create' %}?linked_collection={{ collection.id }}">Create Blob</a>
+                                    </li>
+                                    </ul>
+                                    <br />
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if collection_info %}
+                        <div class="row top-buffer">
+                            <div class="col-lg-12">
+                                In collection{% if collection_info|length > 1 %}s{% else %}{% endif %}:
+                                {% for collection in collection_info %}
+                                    <a href="{% url 'collection:detail' collection.uuid %}">{{ collection.name }}{% if not forloop.last %}, {% endif %}</a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <form action="{% url 'blob:update' object.uuid %}" class="mt-3">
+
+                        {% if object.sha1sum %}
+                            <a href="{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}" class="btn btn-primary" role="button">Download</a>
                         {% endif %}
-                    </small>
-                </div>
-                <div>
-                    <strong>Size</strong><br />
-                    <small>{{ size }}</small>
-                </div>
-                {% if elasticsearch_info.num_pages %}
-                    <div>
-                        <strong>Pages</strong><br />
-                        <small>{{ elasticsearch_info.num_pages }}</small>
-                    </div>
-                {% endif %}
-            {% endif %}
+
+                        <input type="submit" class="btn btn-primary" value="Update">
+
+                    </form>
+
+                    {% if object.is_note %}
+                        <div class="mt-3">
+                        {% if is_favorite_note %}
+                            <form action="{% url 'accounts:favorites_remove' object.uuid %}">
+                                <input type="submit" class="btn btn-primary" value="Remove from Favorites">
+                            </form>
+                        {% else %}
+                            <form action="{% url 'accounts:favorites_add' object.uuid %}">
+                                <input type="submit" class="btn btn-primary" value="Add to Favorites">
+                            </form>
+                        {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <br /><br />
+
+                    <a href="{% url 'blob:create' %}?linked_blob={{ object.id }}">Link to New Blob</a> <strong>|</strong>
+                    <a href="{% url 'blob:thumbnail' object.uuid %}">Update Thumbnail</a>
+                    <br /><br />
+
+                    {% for blob in object.get_related_blobs %}
+                        {% if forloop.first %}
+                            Related blobs:
+                            <ul>
+                        {% endif %}
+                        {% if forloop.last %}
+                            </ul>
+                        {% endif %}
+                        <li> <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a> </li>
+                    {% endfor %}
+
+                </template>
+
+            </card>
 
         </div>
-
-{% endif %}
-
-    {% if object.note %}
-        <div class="mt-3" id="blob_note">{{ object.get_note|safe }}</div>
-    {% endif %}
-
-    {% if object.has_been_modified %}
-        <div class="mt-3">Last edited: {{ object.modified }}</div>
-    {% endif %}
-
-    {% if linked_blobs %}
-        <div class="row top-buffer">
-            <div class="col-lg-12">
-                {% for collection in linked_blobs %}
-                    <div id="blob_collection_list">
-Linked with: <a href="{% url 'blob:create' %}?linked_collection={{ collection.id }}"></a>
-                    </div>
-                    <ul class="list-group">
-                        {% for blob in collection.blob_list %}
-                            <li class="list-group-item">
-                                {% if blob.has_thumbnail_url %}
-                                    <img src="{{ blob.get_cover_url_small }}" />
-                                {% endif %}
-                                <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
-                            </li>
-                        {% endfor %}
-                        <li class="list-group-item">
-                            <a class="btn btn-secondary" href="{% url 'blob:create' %}?linked_collection={{ collection.id }}">Create Blob</a>
-                        </li>
-                        <br />
-                {% endfor %}
-            </div>
-        </div>
-    {% endif %}
-    {% if collection_info %}
-        <div class="row top-buffer">
-            <div class="col-lg-12">
-                In collections:
-                {% for collection in collection_info %}
-                    <a href="{% url 'collection:detail' collection.uuid %}">{{ collection.name }}{% if not forloop.last %}, {% endif %}</a>
-                {% endfor %}
-            </div>
-        </div>
-    {% endif %}
-
-    <hr class="divider" />
-
-    <form action="{% url 'blob:update' object.uuid %}">
-
-    {% if object.sha1sum %}
-        <a href="{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}" class="btn btn-primary" role="button">Download</a>
-    {% endif %}
-        <input type="submit" class="btn btn-primary" value="Update">
-
-        <br /><br />
-
-    </form>
-
-    {% if object.is_note %}
-        {% if is_favorite_note %}
-            <form action="{% url 'accounts:favorites_remove' object.uuid %}">
-                <input type="submit" class="btn btn-primary" value="Remove from Favorites">
-            </form>
-        {% else %}
-            <form action="{% url 'accounts:favorites_add' object.uuid %}">
-                <input type="submit" class="btn btn-primary" value="Add to Favorites">
-            </form>
-        {% endif %}
-    {% endif %}
-
-    <br /><br />
-
-    <a href="{% url 'blob:create' %}?linked_blob={{ object.id }}">Link to New Blob</a> <strong>|</strong>
-    <a href="{% url 'blob:thumbnail' object.uuid %}">Update Thumbnail</a>
-    <br /><br />
-
-    {% for blob in object.get_related_blobs %}
-        {% if forloop.first %}
-                Related blobs:
-            <ul>
-        {% endif %}
-        {% if forloop.last %}
-            </ul>
-        {% endif %}
-        <li> <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a> </li>
-    {% endfor %}
 
 {% endblock %}
 
@@ -185,7 +209,7 @@ Linked with: <a href="{% url 'blob:create' %}?linked_collection={{ collection.id
     </div>
     {% endif %}
 
-    <div id="vue-app">
+    <div id="vue-messages">
         {% include "common/show_messages.html" %}
     </div>
 
@@ -203,7 +227,7 @@ Linked with: <a href="{% url 'blob:create' %}?linked_collection={{ collection.id
 
                 <audio controls controlsList="nodownload">
                     <source src="{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}" type="audio/mpeg">
-  Your browser does not support the audio tag.
+                        Your browser does not support the audio tag.
                 </audio>
 
           {% endif %}
@@ -234,6 +258,10 @@ Linked with: <a href="{% url 'blob:create' %}?linked_collection={{ collection.id
 
         new Vue({
             el: "#vue-app",
+        });
+
+        new Vue({
+            el: "#vue-messages",
         });
 
     </script>

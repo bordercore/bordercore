@@ -110,22 +110,22 @@ def test_blob_detail(auto_login_user, blob):
     soup = BeautifulSoup(resp.content, "html.parser")
 
     if blob.title == "Vaporwave Wallpaper 2E":
-        sha1sum = soup.select("small#sha1sum")[0].text.strip()
+        sha1sum = soup.select("small#sha1sum")[0].findAll(text=True)[1]
         assert sha1sum == blob.sha1sum
 
-    assert soup.select("div#left-block h1#title")[0].text == blob.get_title(remove_edition_string=True)
+    assert soup.select("div#left-block h2#title")[0].findAll(text=True)[0].strip() == blob.get_title(remove_edition_string=True)
 
     url = [x.value for x in blob.metadata_set.all() if x.name == "Url"][0]
-    assert soup.select("strong a")[0].text == urlparse(url).netloc
+    assert soup.select("strong a")[0].findAll(text=True)[0] == urlparse(url).netloc
 
     author = [x.value for x in blob.metadata_set.all() if x.name == "Author"][0]
-    assert soup.select("span#author")[0].text == author
+    assert soup.select("span#author")[0].findAll(text=True)[0] == author
 
     assert soup.select("div#blob_detail_content")[0].text.strip() == blob.content
 
-    assert soup.select("div#blob_note")[0].text.strip() == blob.note
+    assert soup.select("div#blob_note")[0].findAll(text=True)[0] == blob.note
 
-    assert soup.select("span.metadata_value")[0].text == "John Smith, Jane Doe"
+    assert soup.select("span.metadata_value")[0].findAll(text=True)[0] == "John Smith, Jane Doe"
 
 
 def test_blob_metadata_name_search(auto_login_user, blob_image_factory):
