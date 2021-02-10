@@ -8,6 +8,7 @@ from pathlib import PurePath
 from urllib.parse import urlparse
 
 import boto3
+import humanize
 import markdown
 from elasticsearch import Elasticsearch, NotFoundError
 from markdown.extensions.codehilite import CodeHiliteExtension
@@ -23,6 +24,7 @@ from django.dispatch.dispatcher import receiver
 from blob.amazon import AmazonMixin
 from collection.models import Collection
 from lib.mixins import TimeStampedModel
+from lib.time_utils import get_date_from_pattern
 from tag.models import Tag
 
 EDITIONS = {'1': 'First',
@@ -254,6 +256,12 @@ class Blob(TimeStampedModel, AmazonMixin):
 
         results = es.search(index=settings.ELASTICSEARCH_INDEX, body=query)["hits"]["hits"][0]
 
+        if "content_type" in results["_source"]:
+            results["_source"]["content_type"] = Blob.get_content_type(results["_source"]["content_type"])
+
+        if "size" in results["_source"]:
+            results["_source"]["size"] = humanize.naturalsize(results["_source"]["size"])
+
         return {**results["_source"], "id": results["_id"]}
 
     def save(self, *args, **kwargs):
@@ -322,7 +330,35 @@ class Blob(TimeStampedModel, AmazonMixin):
         return self in self.user.userprofile.favorite_notes.all()
 
     def get_collection_info(self):
-        return Collection.objects.filter(user=self.user, blob_list__contains=[{'id': self.id}])
+        return Collection.objects.filter(
+            user=self.user,
+            blob_list__contains=[{"id": self.id}],
+            is_private=False)
+
+    def get_linked_blobs(self):
+
+        linked_blobs = []
+
+        for collection in Collection.objects.filter(user=self.user, blob_list__contains=[{"id": self.id}]):
+            blob_list = Blob.objects.filter(user=self.user, pk__in=[x["id"] for x in collection.blob_list if x["id"] != self.id])
+            if collection.is_private:
+                linked_blobs.append(
+                    {
+                        "uuid": collection.uuid,
+                        "name": collection.name,
+                        "is_private": collection.is_private,
+                        "blob_list": blob_list
+                    }
+                )
+
+        return linked_blobs
+
+    def get_date(self):
+        return get_date_from_pattern({"gte": self.date})
+
+    def get_detail_page_metadata(self):
+        return {key: value for (key, value) in self.get_metadata().items()
+                if key not in ["is_book", "Url", "Publication Date", "Title", "Author"]}
 
     def has_thumbnail_url(self):
         try:

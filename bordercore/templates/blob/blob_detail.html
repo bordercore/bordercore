@@ -11,185 +11,180 @@
 
 {% block left-block %}
 
-        <div class="col-lg-12 card-grid" id="vue-app">
+    <div class="col-lg-12 card-grid" id="vue-app">
 
-            <card title="">
+        <card title="">
 
-                <template v-slot:content>
+            <template v-slot:content>
 
-                    <h2 id="title" class="pl-0">
-                        {{ caption }}
-                    </h2>
+                <h2 id="title" class="pl-0">
+                    {{ caption }}
+                </h2>
 
-                    <h5>{{ object.get_edition_string }}</h5>
+                <h5>{{ blob.get_edition_string }}</h5>
 
-                    {% if author %}
-                        <div class="mb-2">
+                {% if author %}
+                    <div class="mb-2">
                             by <span id="author">{{ author }}</span>
-                        </div>
-                    {% endif %}
+                    </div>
+                {% endif %}
 
-                    {% if date %}
-                        <div class="mb-2">
-                            {{ date }}
-                        </div>
-                    {% endif  %}
+                {% if date %}
+                    <div class="mb-2">
+                        {{ date }}
+                    </div>
+                {% endif  %}
 
-                    {% if object.tags.all %}
-                        <div class="mb-2">
-                            Tags:
-                            {% for tag in object.tags.all %}
-                                <a class="badge badge-primary" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+                {% if blob.tags.all %}
+                    <div class="mb-2">
+                        Tags:
+                        {% for tag in blob.tags.all %}
+                            <a class="badge badge-primary" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
 
-                    {% if urls %}
-                        <div class="mb-2">
-                           {% for url in urls %}
-                               <strong><a href="{{ url.url }}">{{ url.domain }}</a></strong>
-                           {% endfor %}
-                        </div>
-                    {% endif %}
+                {% if urls %}
+                    <div class="mb-2">
+                       {% for url in urls %}
+                           <strong><a href="{{ url.url }}">{{ url.domain }}</a></strong>
+                       {% endfor %}
+                    </div>
+                {% endif %}
 
-                    {% if show_metabox %}
-                        <div class="highlight-box">
+                {% if show_metadata %}
 
-                            {% for key, values in metadata.items %}
-                                <div>
-                                    <strong class="metadata_name">{{ key }}</strong>
-                                    <span class="metadata_value">{{ values }}</span>
-                                </div>
-                            {% endfor %}
+                    <div class="highlight-box">
 
-                           {% if content_type %}
-                               <div>
-                                   <strong>Object Type</strong>
-                                       {{ content_type }}
-                               </div>
-                           {% endif %}
-
-                           {% if object.sha1sum %}
-                               <div>
-                                   <strong>Sha1sum</strong><br />
-                                   <small id="sha1sum">
-                                       {% if request.user|is_in_group:"Admin" %}
-                                           <a href="{{ aws_url }}">{{ object.sha1sum }}</a>
-                                       {% else %}
-                                           {{ object.sha1sum }}
-                                       {% endif %}
-                                   </small>
-                               </div>
-                               <div>
-                                   <strong>Size</strong>
-                                   <small>{{ size }}</small>
-                               </div>
-                               {% if elasticsearch_info.num_pages %}
-                                   <div>
-                                       <strong>Pages</strong>
-                                       <small>{{ elasticsearch_info.num_pages }}</small>
-                                   </div>
-                               {% endif %}
-                           {% endif %}
-
-                        </div>
-
-                    {% endif %}
-
-                    {% if object.note %}
-                        <div class="mt-3" id="blob_note">{{ object.get_note|safe }}</div>
-                    {% endif %}
-
-                    {% if object.is_note and object.has_been_modified %}
-                        <div class="mt-3">
-                            <strong>Last edited</strong>
-                            <small>{{ object.modified|date:"F j, Y" }}</small>
-                        </div>
-                    {% endif %}
-
-                    {% if linked_blobs %}
-                        <div class="row top-buffer">
-                            <div class="col-lg-12">
-                                {% for collection in linked_blobs %}
-                                    <div id="blob_collection_list">
-                                        Linked with: <a href="{% url 'blob:create' %}?linked_collection={{ collection.id }}"></a>
-                                    </div>
-                                    <ul class="list-group">
-                                    {% for blob in collection.blob_list %}
-                                        <li class="list-group-item">
-                                            {% if blob.has_thumbnail_url %}
-                                                <img src="{{ blob.get_cover_url_small }}" />
-                                            {% endif %}
-                                            <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
-                                        </li>
-                                    {% endfor %}
-                                    <li class="list-group-item">
-                                        <a class="btn btn-secondary" href="{% url 'blob:create' %}?linked_collection={{ collection.id }}">Create Blob</a>
-                                    </li>
-                                    </ul>
-                                    <br />
-                                {% endfor %}
+                        {% for key, values in metadata.items %}
+                            <div>
+                                <strong class="metadata_name">{{ key }}</strong>
+                                <span class="metadata_value">{{ values }}</span>
                             </div>
-                        </div>
-                    {% endif %}
+                        {% endfor %}
 
-                    {% if collection_info %}
-                        <div class="row top-buffer">
-                            <div class="col-lg-12">
-                                In collection{% if collection_info|length > 1 %}s{% else %}{% endif %}:
-                                {% for collection in collection_info %}
-                                    <a href="{% url 'collection:detail' collection.uuid %}">{{ collection.name }}{% if not forloop.last %}, {% endif %}</a>
-                                {% endfor %}
+                        {% if elasticsearch_info.content_type %}
+                            <div>
+                                <strong>Object Type</strong>
+                                    {{ elasticsearch_info.content_type }}
                             </div>
-                        </div>
-                    {% endif %}
-
-                    <form action="{% url 'blob:update' object.uuid %}" class="mt-3">
-
-                        {% if object.sha1sum %}
-                            <a href="{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}" class="btn btn-primary" role="button">Download</a>
                         {% endif %}
 
-                        <input type="submit" class="btn btn-primary" value="Update">
+                        {% if blob.sha1sum %}
+                            <div>
+                                <strong>Sha1sum</strong><br />
+                                <small id="sha1sum">
+                                    {% if request.user|is_in_group:"Admin" %}
+                                        <a href="{{ aws_url }}">{{ blob.sha1sum }}</a>
+                                    {% else %}
+                                        {{ blob.sha1sum }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <div>
+                                <strong>Size</strong>
+                                <small>{{ elasticsearch_info.size }}</small>
+                            </div>
+                            {% if elasticsearch_info.num_pages %}
+                                <div>
+                                    <strong>Pages</strong>
+                                    <small>{{ elasticsearch_info.num_pages }}</small>
+                                </div>
+                            {% endif %}
+                        {% endif %}
 
-                    </form>
+                    </div>
 
-                    {% if object.is_note %}
-                        <div class="mt-3">
+                {% endif %}
+
+                {% if blob.note %}
+                    <div class="mt-3" id="blob_note">{{ blob.get_note|safe }}</div>
+                {% endif %}
+
+                {% if blob.is_note and blob.has_been_modified %}
+                    <div class="mt-3">
+                        <strong>Last edited</strong>
+                        <small>{{ blob.modified|date:"F j, Y" }}</small>
+                    </div>
+                {% endif %}
+
+                {% if linked_blobs %}
+                    <h4 class="mt-3">Collections</h4>
+                            {% for collection in linked_blobs %}
+                                {{ collection.name }}
+                                <ul class="list-group">
+                                {% for blob in collection.blob_list %}
+                                    <li class="list-group-item list-group-item-secondary text-info">
+                                        {% if blob.has_thumbnail_url %}
+                                            <img src="{{ blob.get_cover_url_small }}" />
+                                        {% endif %}
+                                        <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
+                                    </li>
+                                {% endfor %}
+                                <li class="list-group-item list-group-item-secondary text-info">
+                                    <a class="btn btn-primary" href="{% url 'blob:create' %}?linked_collection={{ collection.uuid }}">Add to Collection</a>
+                                </li>
+                                </ul>
+                            {% endfor %}
+                {% endif %}
+
+                {% if collection_list %}
+                    <div class="row mt-3">
+                        <div class="col-lg-12">
+                            In collection{% if collection_list|length > 1 %}s{% else %}{% endif %}:
+                            {% for collection in collection_list %}
+                                <a href="{% url 'collection:detail' collection.uuid %}">{{ collection.name }}{% if not forloop.last %}, {% endif %}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+                <form action="{% url 'blob:update' blob.uuid %}" class="mt-3">
+
+                    {% if blob.sha1sum %}
+                        <a href="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" class="btn btn-primary" role="button">Download</a>
+                    {% endif %}
+
+                    <input type="submit" class="btn btn-primary" value="Update">
+
+                </form>
+
+                {% if blob.is_note %}
+                    <div class="mt-3">
                         {% if is_favorite_note %}
-                            <form action="{% url 'accounts:favorites_remove' object.uuid %}">
+                            <form action="{% url 'accounts:favorites_remove' blob.uuid %}">
                                 <input type="submit" class="btn btn-primary" value="Remove from Favorites">
                             </form>
                         {% else %}
-                            <form action="{% url 'accounts:favorites_add' object.uuid %}">
+                            <form action="{% url 'accounts:favorites_add' blob.uuid %}">
                                 <input type="submit" class="btn btn-primary" value="Add to Favorites">
                             </form>
                         {% endif %}
-                        </div>
-                    {% endif %}
+                    </div>
+                {% endif %}
 
-                    <br /><br />
+                <br /><br />
 
-                    <a href="{% url 'blob:create' %}?linked_blob={{ object.id }}">Link to New Blob</a> <strong>|</strong>
-                    <a href="{% url 'blob:thumbnail' object.uuid %}">Update Thumbnail</a>
-                    <br /><br />
+                <a href="{% url 'blob:create' %}?linked_blob={{ blob.id }}">Link to New Blob</a> <strong>|</strong>
+                <a href="{% url 'blob:thumbnail' blob.uuid %}">Update Thumbnail</a>
+                <br /><br />
 
-                    {% for blob in object.get_related_blobs %}
-                        {% if forloop.first %}
+                {% for blob in blob.get_related_blobs %}
+                    {% if forloop.first %}
                             Related blobs:
-                            <ul>
-                        {% endif %}
+                        <ul>
+                    {% endif %}
                         {% if forloop.last %}
-                            </ul>
+                        </ul>
                         {% endif %}
                         <li> <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a> </li>
-                    {% endfor %}
+                {% endfor %}
 
-                </template>
+            </template>
 
-            </card>
+        </card>
 
-        </div>
+    </div>
 
 {% endblock %}
 
@@ -217,24 +212,24 @@
 
       <div class="col-lg-12">
 
-          {% if content_type == "Video" %}
+          {% if elasticsearch_info.content_type == "Video" %}
 
-              <video class="slide_show" controls autoplay loop muted>
-                  <source src="{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}" type="video/mp4">
+              <video class="slide_show w-100" controls autoplay loop muted>
+                  <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="video/mp4">
               </video>
 
-          {% elif content_type == "Audio" %}
+          {% elif elasticsearch_info.content_type == "Audio" %}
 
                 <audio controls controlsList="nodownload">
-                    <source src="{{ MEDIA_URL }}blobs/{{ object.get_url|safe }}" type="audio/mpeg">
+                    <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="audio/mpeg">
                         Your browser does not support the audio tag.
                 </audio>
 
           {% endif %}
 
-          {% if object.content %}
+          {% if blob.content %}
               <div id="blob_detail_content" class="table-borders">
-                        {{ object.get_content|safe }}
+                        {{ blob.get_content|safe }}
               </div>
           {% endif %}
 

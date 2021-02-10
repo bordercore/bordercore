@@ -81,6 +81,7 @@ def auto_login_user(client, blob_text_factory):
 def blob_image_factory(db, s3_resource, s3_bucket):
 
     blob = BlobFactory(
+        date="2021-03-04",
         id=1000,
         uuid="0bb4914e-cd3c-4d6b-9d72-0454adf00260",
         title="Vaporwave Wallpaper 2E",
@@ -98,6 +99,7 @@ def blob_image_factory(db, s3_resource, s3_bucket):
 def blob_pdf_factory(db, s3_resource, s3_bucket):
 
     blob = BlobFactory(
+        date="1996-11-19",
         id=2000,
         uuid="4158cf58-306c-42d7-9c98-07d3a96a1d8b",
         title="Bleached Album Notes",

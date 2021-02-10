@@ -1,7 +1,5 @@
 import django
 
-from .factories import BlobFactory
-
 django.setup()
 
 from django.contrib.auth.models import User  # isort:skip
@@ -61,6 +59,27 @@ def test_get_title(blob_image_factory):
 
 def test_get_tags(blob_image_factory):
     assert blob_image_factory.get_tags() == "django, linux, video"
+
+
+def test_get_collection_info(collection, blob_pdf_factory):
+    assert len(blob_pdf_factory.get_collection_info()) == 1
+    assert blob_pdf_factory.get_collection_info().first().name == "collection_0"
+
+
+def test_get_linked_blobs(blob_pdf_factory):
+    assert len(blob_pdf_factory.get_linked_blobs()) == 0
+
+
+def test_get_date(blob_image_factory):
+    assert blob_image_factory.get_date() == "March 04, 2021"
+
+
+def test_get_detail_page_metadata(blob_image_factory):
+    assert blob_image_factory.get_detail_page_metadata() == {"Artist": "John Smith, Jane Doe"}
+
+
+def test_has_thumbnail_url(blob_image_factory):
+    assert blob_image_factory.has_thumbnail_url() is False
 
 
 def test_is_ingestible_file(blob_image_factory):

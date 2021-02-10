@@ -4,7 +4,6 @@ import random
 import re
 
 import boto3
-import humanize
 from amazonproduct import API
 from amazonproduct.errors import NoExactMatchesFound
 from botocore.errorfactory import ClientError
@@ -135,74 +134,53 @@ class BlobDeleteView(DeleteView):
         return obj
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class BlobDetailView(DetailView):
 
     model = Blob
-    slug_field = 'uuid'
-    slug_url_kwarg = 'uuid'
-
-    # When we rename the object, we should be able to remove this and let
-    # Django figure out the template name on its own
-    template_name = 'blob/blob_detail.html'
+    slug_field = "uuid"
+    slug_url_kwarg = "uuid"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['id'] = self.object.id
 
-        context["metadata"] = {key: value for (key, value) in self.object.get_metadata().items()
-                               if key not in ["is_book", "Url", "Publication Date", "Title", "Author"]}
+        context["metadata"] = self.object.get_detail_page_metadata()
 
-        context['author'] = self.object.get_metadata().get("Author", None)
-        context['urls'] = self.object.get_urls()
+        context["author"] = self.object.get_metadata().get("Author", None)
 
-        from lib.time_utils import get_date_from_pattern
-        context['date'] = get_date_from_pattern({"gte": self.object.date})
+        context["urls"] = self.object.get_urls()
+
+        context["date"] = self.object.get_date()
 
         if self.object.sha1sum:
             context["aws_url"] = f"https://s3.console.aws.amazon.com/s3/buckets/{settings.AWS_STORAGE_BUCKET_NAME}/blobs/{self.object.sha1sum[:2]}/{self.object.sha1sum}/"
             try:
-                context['cover_info'] = self.object.get_cover_info()
+                context["cover_info"] = self.object.get_cover_info()
             except ClientError:
                 log.warn(f"No S3 cover image found for id={self.object.id}")
+
         if self.object.is_note:
             context["is_favorite_note"] = self.object.is_favorite_note()
+
         try:
             context["elasticsearch_info"] = self.object.get_elasticsearch_info()
-            if self.object.sha1sum and context["elasticsearch_info"].get("size"):
-                context["size"] = humanize.naturalsize(context["elasticsearch_info"]["size"])
-            if context["elasticsearch_info"].get("content_type", None):
-                context["content_type"] = Blob.get_content_type(context["elasticsearch_info"]["content_type"])
         except IndexError:
-            # Give Solr up to a minute to index the blob
             if int(datetime.datetime.now().strftime("%s")) - int(self.object.created.strftime("%s")) < 60:
-                messages.add_message(self.request, messages.INFO, 'New blob not yet indexed in Elasticsearch')
+                # Give Elasticsearch up to a minute to index the blob
+                messages.add_message(self.request, messages.INFO, "New blob not yet indexed in Elasticsearch")
             else:
-                messages.add_message(self.request, messages.ERROR, 'Blob not found in Elasticsearch')
-        context['caption'] = self.object.get_title(remove_edition_string=True)
+                messages.add_message(self.request, messages.ERROR, "Blob not found in Elasticsearch")
 
-        context['current_collections'] = Collection.objects.filter(user=self.request.user, blob_list__contains=[{'id': self.object.id}])
+        context["caption"] = self.object.get_title(remove_edition_string=True)
 
-        collection_info = []
-        linked_blobs = []
+        context["linked_blobs"] = self.object.get_linked_blobs()
 
-        for collection in Collection.objects.filter(user=self.request.user, blob_list__contains=[{'id': self.object.id}]):
-            blob_list = Blob.objects.filter(user=self.request.user, pk__in=[x['id'] for x in collection.blob_list if x['id'] != self.object.id])
-            if collection.is_private:
-                linked_blobs.append({'uuid': collection.uuid,
-                                     'name': collection.name,
-                                     'is_private': collection.is_private,
-                                     'blob_list': blob_list})
-            else:
-                collection_info.append({'uuid': collection.uuid,
-                                        'name': collection.name})
-        context['collection_info'] = collection_info
-        context['linked_blobs'] = linked_blobs
+        context["collection_list"] = self.object.get_collection_info()
 
         if "content_type" in context or self.object.sha1sum or context["metadata"]:
-            context["show_metabox"] = True
+            context["show_metadata"] = True
         else:
-            context["show_metabox"] = False
+            context["show_metadata"] = False
 
         return context
 
@@ -424,7 +402,7 @@ def slideshow(request):
 
     content_type = None
     try:
-        content_type = Blob.get_content_type(blob.get_elasticsearch_info()["content_type"])
+        content_type = blob.get_elasticsearch_info()["content_type"]
     except Exception:
         log.warning(f"Can't get content type for uuid={blob.uuid}")
 
