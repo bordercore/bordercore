@@ -109,10 +109,6 @@ def test_blob_detail(auto_login_user, blob):
 
     soup = BeautifulSoup(resp.content, "html.parser")
 
-    if blob.title == "Vaporwave Wallpaper 2E":
-        sha1sum = soup.select("small#sha1sum")[0].findAll(text=True)[1]
-        assert sha1sum == blob.sha1sum
-
     assert soup.select("div#left-block h2#title")[0].findAll(text=True)[0].strip() == blob.get_title(remove_edition_string=True)
 
     url = [x.value for x in blob.metadata_set.all() if x.name == "Url"][0]

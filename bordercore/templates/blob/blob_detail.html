@@ -13,9 +13,25 @@
 
     <div class="col-lg-12 card-grid" id="vue-app">
 
-        <card title="">
+        <card title="" v-b-hover="handleHover">
 
             <template v-slot:content>
+
+                <div class="dropdownmenu hidden">
+
+                    <dropdown-menu v-model="show">
+                        <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
+                        <div slot="dropdown">
+                            <a class="dropdown-item" href="{% url 'blob:update' blob.uuid %}">Update</a>
+                            {% if blob.sha1sum and request.user|is_in_group:"Admin" %}
+                                <a class="dropdown-item" href="#" @click="handleCopySha1sum('{{ blob.sha1sum }}')">Copy Sha1sum</a>
+                                <a class="dropdown-item" href="{{ aws_url }}">S3 Link</a>
+                            {% endif %}
+                            <a class="dropdown-item" href="{% url 'blob:create' %}?linked_blob={{ blob.id }}">Link to New Blob</a>
+                        </div>
+                    </dropdown-menu>
+                </div>
+
 
                 <h2 id="title" class="pl-0">
                     {{ caption }}
@@ -71,16 +87,6 @@
                         {% endif %}
 
                         {% if blob.sha1sum %}
-                            <div>
-                                <strong>Sha1sum</strong><br />
-                                <small id="sha1sum">
-                                    {% if request.user|is_in_group:"Admin" %}
-                                        <a href="{{ aws_url }}">{{ blob.sha1sum }}</a>
-                                    {% else %}
-                                        {{ blob.sha1sum }}
-                                    {% endif %}
-                                </small>
-                            </div>
                             <div>
                                 <strong>Size</strong>
                                 <small>{{ elasticsearch_info.size }}</small>
@@ -145,8 +151,6 @@
                         <a href="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" class="btn btn-primary" role="button">Download</a>
                     {% endif %}
 
-                    <input type="submit" class="btn btn-primary" value="Update">
-
                 </form>
 
                 {% if blob.is_note %}
@@ -163,10 +167,6 @@
                     </div>
                 {% endif %}
 
-                <br /><br />
-
-                <a href="{% url 'blob:create' %}?linked_blob={{ blob.id }}">Link to New Blob</a> <strong>|</strong>
-                <a href="{% url 'blob:thumbnail' blob.uuid %}">Update Thumbnail</a>
                 <br /><br />
 
                 {% for blob in blob.get_related_blobs %}
@@ -253,6 +253,28 @@
 
         new Vue({
             el: "#vue-app",
+            data() {
+                return {
+                    show: false
+                }
+            },
+            methods: {
+                handleHover(hovered, evt) {
+                    evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
+                    if (hovered == true) {
+                        evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
+                    } else {
+                        evt.currentTarget.querySelector(".dropdownmenu").classList.add("hidden");
+                    };
+                },
+                handleCopySha1sum(sha1sum) {
+                    navigator.clipboard.writeText(sha1sum)
+                    this.$bvToast.toast("Sha1sum copied to clipboard", {
+                        title: "Info",
+                        variant: "primary"
+                    })
+                }
+            }
         });
 
         new Vue({

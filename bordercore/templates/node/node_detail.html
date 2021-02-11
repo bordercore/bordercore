@@ -39,7 +39,7 @@
                                                     <div class="dropdownmenu hidden">
 
                                                         <dropdown-menu v-model="show">
-                                                            <font-awesome-icon icon="ellipsis-v" style="width: 22px"></font-awesome-icon>
+                                                            <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
                                                             <div slot="dropdown">
                                                                 <a class="dropdown-item" href="#" @click="removeBlob(blob.uuid)">Remove</a>
                                                                 <a v-if="!blob.note" class="dropdown-item" href="#" @click="addNote(blob.uuid, index)">Add note</a>
@@ -92,7 +92,7 @@
                                         Notes
                                         <span class="dropdownmenu hidden float-right" v-if="note !== null">
                                             <dropdown-menu v-model="show">
-                                                <font-awesome-icon icon="ellipsis-v" style="width: 22px"></font-awesome-icon>
+                                                <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
                                                 <div slot="dropdown">
                                                     <a v-if="note" class="dropdown-item" href="#" @click="editNote()">Edit note</a>
                                                 </div>
@@ -140,7 +140,7 @@
                                                 <li v-for="(bookmark, index) in bookmarkList" class="list-group-item list-group-item-secondary text-info draggable" :data-uuid="bookmark.id" :key="bookmark.id" v-cloak  v-b-hover="handleHover">
                                                     <div class="dropdownmenu hidden">
                                                         <dropdown-menu v-model="show">
-                                                            <font-awesome-icon icon="ellipsis-v" style="width: 22px"></font-awesome-icon>
+                                                            <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
                                                             <div slot="dropdown">
                                                                 <a class="dropdown-item" href="#" @click="removeBookmark(bookmark.id)">Remove</a>
                                                                 <a v-if="!bookmark.note" class="dropdown-item" href="#" @click="addNote(bookmark.id, index)">Add note</a>
