@@ -64,7 +64,14 @@
   border-radius: 11px;
 }
 
-/* login page */
+/* Login page */
+
+.jumbotron {
+  border: 2px solid #fff;
+  border-radius: 25px;
+  opacity: 0.9;
+}
+
 html.login,
 body.login {
   height: 100%;
