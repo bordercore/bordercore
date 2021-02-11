@@ -266,18 +266,6 @@ def test_tags_all_lowercase():
     assert len(t) == 0, "{} tags fail this test".format(len(t))
 
 
-def test_tags_no_orphans():
-    "Assert that all tags are used by some object"
-    t = Tag.objects.filter(Q(todo__isnull=True) &
-                           Q(blob__isnull=True) &
-                           Q(bookmark__isnull=True) &
-                           Q(collection__isnull=True) &
-                           Q(question__isnull=True) &
-                           Q(song__isnull=True) &
-                           Q(userprofile__isnull=True))
-    assert len(t) == 0, "{} tags fail this test; example: name={}".format(len(t), t.first().name)
-
-
 def test_blobs_in_db_exist_in_elasticsearch(es):
     "Assert that all blobs in the database exist in Elasticsearch"
 
