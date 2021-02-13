@@ -3,6 +3,7 @@ from faker import Factory as FakerFactory
 
 from django.db.models import signals
 
+from accounts.tests.factories import UserFactory
 from feed.models import Feed, FeedItem
 
 faker = FakerFactory.create()
@@ -27,6 +28,7 @@ class FeedFactory(factory.DjangoModelFactory):
     name = faker.text()
     url = factory.LazyAttribute(lambda _: faker.url())
     homepage = faker.domain_name()
+    user = factory.SubFactory(UserFactory)
 
     @factory.post_generation
     def create_feed_items(obj, create, extracted, **kwargs):

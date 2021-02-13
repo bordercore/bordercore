@@ -21,7 +21,7 @@
 
                     <dropdown-menu v-model="show">
                         <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
-                        <div slot="dropdown">
+                        <div slot="dropdown" style="border: 1px solid #fff; padding: 0px">
                             <a class="dropdown-item" href="{% url 'blob:update' blob.uuid %}">Update</a>
                             {% if blob.sha1sum and request.user|is_in_group:"Admin" %}
                                 <a class="dropdown-item" href="#" @click="handleCopySha1sum('{{ blob.sha1sum }}')">Copy Sha1sum</a>
@@ -52,7 +52,7 @@
                 {% endif  %}
 
                 {% if blob.tags.all %}
-                    <div class="mb-2">
+                    <div class="mt-5 mb-3">
                         Tags:
                         {% for tag in blob.tags.all %}
                             <a class="badge badge-primary" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
@@ -61,7 +61,7 @@
                 {% endif %}
 
                 {% if urls %}
-                    <div class="mb-2">
+                    <div class="mb-3">
                        {% for url in urls %}
                            <strong><a href="{{ url.url }}">{{ url.domain }}</a></strong>
                        {% endfor %}
@@ -70,7 +70,7 @@
 
                 {% if show_metadata %}
 
-                    <div class="highlight-box">
+                    <div class="highlight-box mb-3">
 
                         {% for key, values in metadata.items %}
                             <div>
@@ -104,7 +104,7 @@
                 {% endif %}
 
                 {% if blob.note %}
-                    <div class="mt-3" id="blob_note">{{ blob.get_note|safe }}</div>
+                    <div class="mt-3" class="highlight-box">{{ blob.get_note|safe }}</div>
                 {% endif %}
 
                 {% if blob.is_note and blob.has_been_modified %}

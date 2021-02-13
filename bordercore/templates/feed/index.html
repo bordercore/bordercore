@@ -6,6 +6,8 @@
 
     <div id="vue-app">
 
+        {% include "common/show_messages.html" with width=6 %}
+
         <div class="row">
             <div class="col-lg-3">
 
@@ -45,7 +47,7 @@
                                             </transition-group>
                                         </draggable>
                                         <div class="text-secondary" v-if="feedList.length === 0" v-cloak>
-                                            No feed subscriptions found. <a href="{% url 'feed:subscriptions' %}">Subscribe here.</a>
+                                            No feeds found. <a href="{% url 'feed:create' %}">Add one here.</a>
                                         </div>
                                     </div>
                                 </feed-list>
@@ -122,7 +124,7 @@
             data() {
                 return {
                     feedList: [
-                        {% for feed in subscribed_feeds_list %}
+                        {% for feed in object_list %}
                         {
                             id: {{ feed.id }},
                             name: "{{ feed.name }}",

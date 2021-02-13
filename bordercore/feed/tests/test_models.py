@@ -20,6 +20,49 @@ def test_feed_str(auto_login_user, feed):
     assert str(feed[0]) == "Hacker News"
 
 
+def test_get_current_feed(auto_login_user, feed):
+
+    user, _ = auto_login_user()
+
+    session = {}
+    assert Feed.get_current_feed(user, session) == {
+        "id": feed[2].id,
+        "homepage": feed[2].homepage,
+        "last_check": feed[2].last_check,
+        "name": feed[2].name,
+    }
+
+    session = {"current_feed": feed[0].id}
+    assert Feed.get_current_feed(user, session) == {
+        "id": feed[0].id,
+        "homepage": feed[0].homepage,
+        "last_check": feed[0].last_check,
+        "name": feed[0].name,
+    }
+
+    # Test for a non-existent current. This should
+    #  return the first feed
+    session = {"current_feed": 666}
+    assert Feed.get_current_feed(user, session) == {
+        "id": feed[2].id,
+        "homepage": feed[2].homepage,
+        "last_check": feed[2].last_check,
+        "name": feed[2].name,
+    }
+
+
+def test_get_first_feed(auto_login_user, feed):
+
+    user, _ = auto_login_user()
+
+    assert Feed.get_first_feed(user) == {
+        "id": feed[2].id,
+        "homepage": feed[2].homepage,
+        "last_check": feed[2].last_check,
+        "name": feed[2].name,
+    }
+
+
 @responses.activate
 def test_update(auto_login_user, feed):
 
@@ -39,41 +82,3 @@ def test_update(auto_login_user, feed):
     assert FeedItem.objects.filter(feed=feed[0])[2].title == "Bad Title"
 
     assert FeedItem.objects.filter(feed=feed[0])[3].title == "No Title"
-
-    # Delete the feed and verify that the user is no longer subscribed
-    FeedItem.objects.filter(feed=feed[0]).delete()
-    feed[0].delete()
-    userprofile = UserProfile.objects.get(user=user)
-
-    assert feed[0].id not in userprofile.rss_feeds
-
-
-def test_get_feed_list(auto_login_user, feed):
-
-    user, _ = auto_login_user()
-
-    rss_feeds = user.userprofile.rss_feeds
-    feed_list = Feed.get_feed_list(rss_feeds)
-    assert feed_list[0].name == "Hacker News"
-
-
-def test_subscribe_user(auto_login_user, feed):
-
-    user, _ = auto_login_user()
-
-    feed[1].subscribe_user(user, 1)
-    userprofile = UserProfile.objects.get(user=user)
-    assert feed[1].id in userprofile.rss_feeds
-
-    feed[1].unsubscribe_user(user)
-    userprofile = UserProfile.objects.get(user=user)
-    assert feed[1].id not in userprofile.rss_feeds
-
-
-def test_unsubscribe_user(auto_login_user, feed):
-
-    user, _ = auto_login_user()
-
-    feed[0].unsubscribe_user(user)
-    userprofile = UserProfile.objects.get(user=user)
-    assert feed[0].id not in userprofile.rss_feeds

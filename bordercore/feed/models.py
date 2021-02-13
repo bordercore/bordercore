@@ -5,10 +5,10 @@ from datetime import datetime
 import feedparser
 import requests
 
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils.timezone import utc
 
-from accounts.models import UserProfile
 from lib.mixins import TimeStampedModel
 
 USER_AGENT = "Bordercore/1.0"
@@ -21,18 +21,10 @@ class Feed(TimeStampedModel):
     last_check = models.DateTimeField(null=True)
     last_response_code = models.IntegerField(null=True)
     homepage = models.URLField(null=True)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     def __str__(self):
         return self.name
-
-    def delete(self):
-
-        # Unsubscribe all users who are currently subscribed to this feed
-        subscribers = UserProfile.objects.filter(rss_feeds__contains=[self.pk])
-        for userprofile in subscribers:
-            userprofile.rss_feeds.remove(self.pk)
-            userprofile.save()
-        super().delete()
 
     def update(self):
 
@@ -40,7 +32,7 @@ class Feed(TimeStampedModel):
 
         try:
 
-            headers = {'user-agent': USER_AGENT}
+            headers = {"user-agent": USER_AGENT}
             r = requests.get(self.url, headers=headers)
 
             if r.status_code != 200:
@@ -51,9 +43,13 @@ class Feed(TimeStampedModel):
             FeedItem.objects.filter(feed_id=self.pk).delete()
 
             for x in d.entries:
-                title = x.title.replace("\n", "") or 'No Title'
-                link = x.link or ''
-                FeedItem.objects.create(feed=self, title=saxutils.unescape(title), link=saxutils.unescape(link))
+                title = x.title.replace("\n", "") or "No Title"
+                link = x.link or ""
+                FeedItem.objects.create(
+                    feed=self,
+                    title=saxutils.unescape(title),
+                    link=saxutils.unescape(link)
+                )
 
         finally:
             if r:
@@ -62,49 +58,28 @@ class Feed(TimeStampedModel):
             self.save()
 
     @staticmethod
-    def get_feed_list(rss_feeds, get_feed_items=True):
+    def get_current_feed(user, session):
 
-        feed_info = []
+        current_feed_id = session.get("current_feed")
 
-        if rss_feeds:
-            # We can't merely use Feed.objects.filter(), since this won't retrieve our feeds in
-            #  the correct order (based on the order of the feed ids in userprofile.rss_feeds)
-            #  So we store the feed name temporarily in a lookup table...
-            lookup = {}
+        if not current_feed_id:
+            # If there is not a current feed in the session, then just pick the first feed
+            return Feed.get_first_feed(user)
+        else:
+            try:
+                return Feed.objects.values("id", "homepage", "last_check", "name").filter(pk=current_feed_id)[0]
+            except Exception as e:
+                log.warning(f"Feed exception: {e}")
+                # If the session's current feed has been deleted, then just pick the first feed
+                return Feed.get_first_feed(user)
 
-            qs = Feed.objects.filter(id__in=rss_feeds)
-            if get_feed_items:
-                qs = qs.prefetch_related("feeditem_set")
-
-            for feed in qs:
-                lookup[feed.id] = feed
-
-            # ...then use that here, where the proper order is preserved
-            for feed_id in rss_feeds:
-                feed_info.append(lookup[feed_id])
-
-        return feed_info
-
-    def subscribe_user(self, user, position):
-        feeds = user.userprofile.rss_feeds
-        # Verify that the user isn't already subscribed
-        if feeds is None:
-            feeds = []
-        if self.pk in feeds:
-            return
-        feeds.insert(position - 1, self.pk)
-        user.userprofile.rss_feeds = feeds
-        user.userprofile.save()
-
-    def unsubscribe_user(self, user):
-        feeds = user.userprofile.rss_feeds
-        feeds.remove(self.pk)
-        user.userprofile.rss_feeds = feeds
-        user.userprofile.save()
+    @staticmethod
+    def get_first_feed(user):
+        return user.userprofile.feeds.values("id", "homepage", "last_check", "name").order_by("sortorderuserfeed__sort_order").first()
 
 
 class FeedItem(models.Model):
-    feed = models.ForeignKey(Feed, on_delete=models.PROTECT)
+    feed = models.ForeignKey(Feed, on_delete=models.CASCADE)
     title = models.TextField()
     link = models.TextField()
     created = models.DateTimeField(auto_now_add=True)

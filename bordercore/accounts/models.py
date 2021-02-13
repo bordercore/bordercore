@@ -1,13 +1,14 @@
 import uuid
 
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import ArrayField, JSONField
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 
 from blob.models import Blob
 from collection.models import Collection
+from feed.models import Feed
 from lib.mixins import SortOrderMixin
 from tag.models import Tag
 
@@ -15,9 +16,9 @@ from tag.models import Tag
 class UserProfile(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.PROTECT)
-    rss_feeds = ArrayField(models.IntegerField(), null=True)
     favorite_tags = models.ManyToManyField(Tag, through="SortOrderUserTag")
     favorite_notes = models.ManyToManyField(Blob, through="SortOrderUserNote")
+    feeds = models.ManyToManyField(Feed, through="SortOrderUserFeed")
     orgmode_file = models.TextField(null=True)
     google_calendar = JSONField(blank=True, null=True)
     homepage_default_collection = models.OneToOneField(Collection, related_name='default_collection', null=True, on_delete=models.PROTECT)
@@ -72,6 +73,28 @@ class SortOrderUserNote(SortOrderMixin):
         unique_together = (
             ("userprofile", "note")
         )
+
+
+class SortOrderUserFeed(SortOrderMixin):
+
+    userprofile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    feed = models.ForeignKey(Feed, on_delete=models.CASCADE)
+
+    field_name = "userprofile"
+
+    def __str__(self):
+        return f"SortOrder: {self.node}, {self.feed}"
+
+    class Meta:
+        ordering = ("sort_order",)
+        unique_together = (
+            ("userprofile", "feed")
+        )
+
+
+@receiver(pre_delete, sender=SortOrderUserFeed)
+def remove_feed(sender, instance, **kwargs):
+    instance.handle_delete()
 
 
 def favorite_tags_has_changed(initial, form):

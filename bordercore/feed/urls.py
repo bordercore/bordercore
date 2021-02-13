@@ -21,24 +21,9 @@ urlpatterns = [
         name="create"
     ),
     path(
-        route="subscriptions/",
-        view=views.FeedSubscriptionListView.as_view(),
-        name="subscriptions"
-    ),
-    path(
         route="check_url/<str:url>/",
         view=views.check_url,
         name="check_url"
-    ),
-    path(
-        route="subscribe/",
-        view=views.feed_subscribe,
-        name="subscribe"
-    ),
-    path(
-        route="unsubscribe/",
-        view=views.feed_unsubscribe,
-        name="unsubscribe"
     ),
     path(
         route="",

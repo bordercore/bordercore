@@ -36,11 +36,6 @@
         </div>
     {% endif %}
 
-    <div class="form-group row">
-        <label class="bold col-lg-2 col-form-label text-right" for="inputTitle">RSS Feeds</label>
-        <div class="col-lg-5 align-self-center"><a href="{% url 'feed:subscriptions' %}">Update</a></div>
-    </div>
-
     {% for field in form %}
 
         {% if field.label == "Sidebar image" %}
