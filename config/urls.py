@@ -6,10 +6,11 @@ from django.contrib import admin
 from django.urls import include, path
 
 from api.views import (AlbumViewSet, BlobViewSet, BookmarkViewSet,
-                       CollectionViewSet, FeedViewSet, QuestionViewSet,
-                       SongSourceViewSet, SongViewSet, TagViewSet, TodoViewSet,
-                       UserViewSet)
+                       CollectionViewSet, FeedItemViewSet, FeedViewSet,
+                       QuestionViewSet, SongSourceViewSet, SongViewSet,
+                       TagViewSet, TodoViewSet, UserViewSet)
 from book.views import BookListView
+from feed.views import update_feed_list
 from homepage.views import handler403, handler404, handler500
 
 admin.autodiscover()
@@ -37,21 +38,28 @@ if settings.DEBUG:
     ]
 
 router = routers.DefaultRouter()
-router.register(r"albums", AlbumViewSet, "Album")
-router.register(r"blobs", BlobViewSet, "Blob")
-router.register(r"bookmarks", BookmarkViewSet, "Bookmark")
-router.register(r"collections", CollectionViewSet, "Collection")
-router.register(r"feeds", FeedViewSet, "Feed")
-router.register(r"questions", QuestionViewSet, "Question")
-router.register(r"songs", SongViewSet, "Song")
-router.register(r"songsources", SongSourceViewSet, "SongSource")
-router.register(r"tags", TagViewSet, "Tag")
-router.register(r"todos", TodoViewSet, "Todo")
-router.register(r"users", UserViewSet, "User")
+router.register(r"albums", AlbumViewSet, "album")
+router.register(r"blobs", BlobViewSet, "blob")
+router.register(r"bookmarks", BookmarkViewSet, "bookmark")
+router.register(r"collections", CollectionViewSet, "collection")
+router.register(r"feeds", FeedViewSet, "feed")
+router.register(r"feeditem", FeedItemViewSet)
+router.register(r"questions", QuestionViewSet, "question")
+router.register(r"songs", SongViewSet, "song")
+router.register(r"songsources", SongSourceViewSet, "songsource")
+router.register(r"tags", TagViewSet, "tag")
+router.register(r"todos", TodoViewSet, "todo")
+router.register(r"users", UserViewSet, "user")
 
 urlpatterns += [
     url(r"^api/", include(router.urls)),
+    path("api/feeds/update_feed_list/<uuid:feed_uuid>/", update_feed_list),
     path("", include("rest_framework.urls", namespace="rest_framework"))
+]
+
+# Include any API calls that call outside the usual DRF "CRUD" operations
+urlpatterns += [
+    path("api/feeds/update_feed_list/<uuid:feed_uuid>/", update_feed_list),
 ]
 
 handler403 = "homepage.views.handler403"

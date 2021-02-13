@@ -1,3 +1,4 @@
+import logging
 import uuid
 import xml.sax.saxutils as saxutils
 from datetime import datetime
@@ -12,6 +13,8 @@ from django.utils.timezone import utc
 from lib.mixins import TimeStampedModel
 
 USER_AGENT = "Bordercore/1.0"
+
+log = logging.getLogger(f"bordercore.{__name__}")
 
 
 class Feed(TimeStampedModel):
@@ -29,6 +32,7 @@ class Feed(TimeStampedModel):
     def update(self):
 
         r = None
+        feed_list = []
 
         try:
 
@@ -39,23 +43,30 @@ class Feed(TimeStampedModel):
                 r.raise_for_status()
 
             d = feedparser.parse(r.text)
+            feed_list = d.entries
 
             FeedItem.objects.filter(feed_id=self.pk).delete()
 
-            for x in d.entries:
-                title = x.title.replace("\n", "") or "No Title"
-                link = x.link or ""
-                FeedItem.objects.create(
-                    feed=self,
-                    title=saxutils.unescape(title),
-                    link=saxutils.unescape(link)
-                )
+            for x in feed_list:
+
+                try:
+                    title = x.title.replace("\n", "") or "No Title"
+                    link = x.link or ""
+                    FeedItem.objects.create(
+                        feed=self,
+                        title=saxutils.unescape(title),
+                        link=saxutils.unescape(link)
+                    )
+                except AttributeError as e:
+                    log.error(f"feed_uuid={self.uuid} Missing data in feed item: {e}")
 
         finally:
             if r:
                 self.last_response_code = r.status_code
             self.last_check = datetime.utcnow().replace(tzinfo=utc)
             self.save()
+
+        return len(feed_list)
 
     @staticmethod
     def get_current_feed(user, session):

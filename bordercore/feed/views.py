@@ -3,6 +3,7 @@ import urllib
 
 import feedparser
 import requests
+from rest_framework.decorators import api_view
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -99,6 +100,16 @@ def feed_update(request, feed_uuid=None):
                   {"action": action,
                    "form": form,
                    "title": title})
+
+
+@api_view(["GET"])
+def update_feed_list(request, feed_uuid):
+
+    feed = Feed.objects.get(uuid=feed_uuid)
+    updated_count = feed.update()
+    status = {"status": "OK", "updated_count": updated_count}
+
+    return JsonResponse(status, safe=False)
 
 
 @login_required

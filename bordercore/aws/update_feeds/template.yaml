@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Update RSS feeds
+
+Globals:
+    Function:
+        Timeout: 60
+
+Parameters:
+  DRFTokenParameter:
+    Type: String
+    Description: The Django Rest Framework token used for authentication
+
+Resources:
+
+    UpdateFeedsFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: .
+            FunctionName: UpdateFeeds
+            Handler: update_feeds_lambda.handler
+            MemorySize: 128
+            Runtime: python3.7
+            Role: !GetAtt UpdateFeedsLambdaRole.Arn
+            Environment:
+                Variables:
+                    DRF_TOKEN: !Ref DRFTokenParameter
+
+    LambdaFunctionLogGroup:
+        Type: "AWS::Logs::LogGroup"
+        DependsOn: "UpdateFeedsFunction"
+        Properties:
+            RetentionInDays: 90
+            LogGroupName: !Join ["", ["/aws/lambda/", !Ref UpdateFeedsFunction]]
+
+
+    UpdateFeedsLambdaRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: 2012-10-17
+                Statement:
+                    - Effect: 'Allow'
+                      Principal:
+                          Service:
+                              - 'lambda.amazonaws.com'
+                      Action:
+                          - 'sts:AssumeRole'
+
+            Policies:
+            - PolicyName: LambdaWriteToLogs
+              PolicyDocument:
+                  Statement:
+                      - Effect: 'Allow'
+                        Action:
+                            - 'logs:CreateLogGroup'
+                            - 'logs:CreateLogStream'
+                            - 'logs:PutLogEvents'
+                            - 'logs:DescribeLogStreams'
+                        Resource:
+                            - 'arn:aws:logs:*:*:*'
+            ManagedPolicyArns:
+            - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+
+
+Outputs:
+
+    UpdateFeedsFunction:
+      Description: "Update RSS Feeds"
+      Value: !GetAtt UpdateFeedsFunction.Arn

@@ -6,14 +6,14 @@ from blob.models import Blob
 from bookmark.models import Bookmark
 from collection.models import Collection
 from drill.models import Question
-from feed.models import Feed
+from feed.models import Feed, FeedItem
 from music.models import Album, Song, SongSource
 from tag.models import Tag
 from todo.models import Todo
 
 from .serializers import (AlbumSerializer, BlobSerializer, BookmarkSerializer,
-                          CollectionSerializer, FeedSerializer,
-                          QuestionSerializer, SongSerializer,
+                          CollectionSerializer, FeedItemSerializer,
+                          FeedSerializer, QuestionSerializer, SongSerializer,
                           SongSourceSerializer, TagSerializer, TodoSerializer,
                           UserSerializer)
 
@@ -70,9 +70,16 @@ class CollectionViewSet(viewsets.ModelViewSet):
 class FeedViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = FeedSerializer
+    lookup_field = "uuid"
 
     def get_queryset(self):
         return Feed.objects.filter(user=self.request.user)
+
+
+class FeedItemViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = FeedItemSerializer
+    queryset = FeedItem.objects.filter()
 
 
 class QuestionViewSet(viewsets.ModelViewSet):

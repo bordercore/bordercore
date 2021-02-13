@@ -82,7 +82,7 @@
                     this.isDisabledUpdate = true;
                     this.isDisabledDelete = true;
 
-                    axios.delete("{% url 'Todo-list' %}" + selectedId)
+                    axios.delete("{% url 'todo-list' %}" + selectedId)
                          .then((response) => {
                              var element = document.getElementById("todo_feedback");
                              element.classList.remove("d-none");

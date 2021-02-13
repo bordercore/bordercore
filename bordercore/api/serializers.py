@@ -5,7 +5,7 @@ from blob.models import Blob
 from bookmark.models import Bookmark
 from collection.models import Collection
 from drill.models import Question
-from feed.models import Feed
+from feed.models import Feed, FeedItem
 from music.models import Album, Song, SongSource
 from tag.models import Tag
 from todo.models import Todo
@@ -40,9 +40,18 @@ class CollectionSerializer(serializers.ModelSerializer):
 
 
 class FeedSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Feed
         fields = ["homepage", "last_check", "last_response_code", "name", "url"]
+
+
+class FeedItemSerializer(serializers.ModelSerializer):
+    feed = FeedSerializer()
+
+    class Meta:
+        model = FeedItem
+        fields = ["feed", "title", "url"]
 
 
 class QuestionSerializer(serializers.ModelSerializer):
