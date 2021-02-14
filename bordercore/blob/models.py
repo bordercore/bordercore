@@ -358,7 +358,7 @@ class Blob(TimeStampedModel, AmazonMixin):
 
     def get_detail_page_metadata(self):
         return {key: value for (key, value) in self.get_metadata().items()
-                if key not in ["is_book", "Url", "Publication Date", "Title", "Author"]}
+                if key not in ["is_book", "Url", "Publication Date", "Subtitle", "Title", "Author"]}
 
     def has_thumbnail_url(self):
         try:

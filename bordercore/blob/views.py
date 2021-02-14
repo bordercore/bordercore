@@ -148,6 +148,8 @@ class BlobDetailView(DetailView):
 
         context["author"] = self.object.get_metadata().get("Author", None)
 
+        context["subtitle"] = self.object.get_metadata().get("Subtitle", None)
+
         context["urls"] = self.object.get_urls()
 
         context["date"] = self.object.get_date()
@@ -181,6 +183,9 @@ class BlobDetailView(DetailView):
             context["show_metadata"] = True
         else:
             context["show_metadata"] = False
+
+        context["no_left_block"] = True
+        context["content_block_width"] = "12"
 
         return context
 

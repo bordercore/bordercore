@@ -9,122 +9,134 @@
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/code_style.css" />
 {% endblock %}
 
-{% block left-block %}
+{% block content %}
 
-    <div class="col-lg-12 card-grid" id="vue-app">
+    <div class="row h-100">
 
-        <card title="" v-b-hover="handleHover">
+        <div class="col-lg-3">
 
-            <template v-slot:content>
+            <div class="row h-100">
 
-                <div class="dropdownmenu hidden">
+                <div class="card-grid extend-block">
 
-                    <dropdown-menu v-model="show">
-                        <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
-                        <div slot="dropdown" style="border: 1px solid #fff; padding: 0px">
-                            <a class="dropdown-item" href="{% url 'blob:update' blob.uuid %}">Update</a>
-                            {% if blob.sha1sum and request.user|is_in_group:"Admin" %}
-                                <a class="dropdown-item" href="#" @click="handleCopySha1sum('{{ blob.sha1sum }}')">Copy Sha1sum</a>
-                                <a class="dropdown-item" href="{{ aws_url }}">S3 Link</a>
-                            {% endif %}
-                            <a class="dropdown-item" href="{% url 'blob:create' %}?linked_blob={{ blob.id }}">Link to New Blob</a>
+                    <div class="col-lg-12 card-body h-100" id="vue-app" v-b-hover="handleHover">
+
+                        <div class="dropdownmenu hidden">
+
+                            <dropdown-menu v-model="show" class="text-center">
+                                <font-awesome-icon icon="ellipsis-v" class="burger-menu" style="text-align: center"></font-awesome-icon>
+                                <div slot="dropdown" style="margin-top: 0px">
+                                    <a class="dropdown-item" href="{% url 'blob:update' blob.uuid %}">Update</a>
+                                    {% if blob.sha1sum and request.user|is_in_group:"Admin" %}
+                                        <a class="dropdown-item" href="#" @click="handleCopySha1sum('{{ blob.sha1sum }}')">Copy Sha1sum</a>
+                                        <a class="dropdown-item" href="{{ aws_url }}">S3 Link</a>
+                                    {% endif %}
+                                    <a class="dropdown-item" href="{% url 'blob:create' %}?linked_blob={{ blob.id }}">Link to New Blob</a>
+                                </div>
+                            </dropdown-menu>
+
                         </div>
-                    </dropdown-menu>
-                </div>
 
+                        <h2 id="title" class="pl-0 text-break">
+                            {{ caption }}
+                        </h2>
 
-                <h2 id="title" class="pl-0">
-                    {{ caption }}
-                </h2>
+                        <h5>{{ blob.get_edition_string }}</h5>
 
-                <h5>{{ blob.get_edition_string }}</h5>
-
-                {% if author %}
-                    <div class="mb-2">
-                            by <span id="author">{{ author }}</span>
-                    </div>
-                {% endif %}
-
-                {% if date %}
-                    <div class="mb-2">
-                        {{ date }}
-                    </div>
-                {% endif  %}
-
-                {% if blob.tags.all %}
-                    <div class="mt-5 mb-3">
-                        Tags:
-                        {% for tag in blob.tags.all %}
-                            <a class="badge badge-primary" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                {% if urls %}
-                    <div class="mb-3">
-                       {% for url in urls %}
-                           <strong><a href="{{ url.url }}">{{ url.domain }}</a></strong>
-                       {% endfor %}
-                    </div>
-                {% endif %}
-
-                {% if show_metadata %}
-
-                    <div class="highlight-box mb-3">
-
-                        {% for key, values in metadata.items %}
-                            <div>
-                                <strong class="metadata_name">{{ key }}</strong>
-                                <span class="metadata_value">{{ values }}</span>
-                            </div>
-                        {% endfor %}
-
-                        {% if elasticsearch_info.content_type %}
-                            <div>
-                                <strong>Object Type</strong>
-                                    {{ elasticsearch_info.content_type }}
+                        {% if subtitle %}
+                            <div id="blob_subtitle">
+                                {{ subtitle }}
                             </div>
                         {% endif %}
 
-                        {% if blob.sha1sum %}
-                            <div>
-                                <strong>Size</strong>
-                                <small>{{ elasticsearch_info.size }}</small>
+                        {% if author %}
+                            <div class="mt-2">
+                                by <span id="author">{{ author }}</span>
                             </div>
+                        {% endif %}
+
+                        {% if date %}
+                            <div class="mb-2">
+                                {{ date }}
+                            </div>
+                        {% endif  %}
+
+                        {% if blob.tags.all %}
+                            <div class="mt-5 mb-3">
+                                Tags:
+                                {% for tag in blob.tags.all %}
+                                    <a class="badge badge-primary" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        {% if urls %}
+                            <div class="mb-3">
+                                {% for url in urls %}
+                                    <strong><a href="{{ url.url }}">{{ url.domain }}</a></strong>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        {% if show_metadata and metadata.items %}
+
+                            <div class="highlight-box mb-3">
+
+                            {% for key, values in metadata.items %}
+                                {% if key != "Subtitle" %}
+                                    <div>
+                                        <strong class="metadata_name">{{ key }}</strong>
+                                        <span class="metadata_value">{{ values }}</span>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if elasticsearch_info.content_type %}
+                                <div>
+                                    <strong>Object Type</strong>
+                                        {{ elasticsearch_info.content_type }}
+                                </div>
+                            {% endif %}
+
+                            {% if blob.sha1sum %}
+                                <div>
+                                    <strong>Size</strong>
+                                    <small>{{ elasticsearch_info.size }}</small>
+                                </div>
                             {% if elasticsearch_info.num_pages %}
                                 <div>
                                     <strong>Pages</strong>
                                     <small>{{ elasticsearch_info.num_pages }}</small>
                                 </div>
                             {% endif %}
+                            {% endif %}
+
+                            </div>
+
                         {% endif %}
 
-                    </div>
+                        {% if blob.note %}
+                            <div id="blob_note" class="highlight-box mt-3 text-break">{{ blob.get_note|safe }}</div>
+                        {% endif %}
 
-                {% endif %}
+                        {% if blob.is_note and blob.has_been_modified %}
+                            <div class="mt-3">
+                                <strong>Last edited</strong>
+                                <small>{{ blob.modified|date:"F j, Y" }}</small>
+                            </div>
+                        {% endif %}
 
-                {% if blob.note %}
-                    <div class="mt-3" class="highlight-box">{{ blob.get_note|safe }}</div>
-                {% endif %}
-
-                {% if blob.is_note and blob.has_been_modified %}
-                    <div class="mt-3">
-                        <strong>Last edited</strong>
-                        <small>{{ blob.modified|date:"F j, Y" }}</small>
-                    </div>
-                {% endif %}
-
-                {% if linked_blobs %}
-                    <h4 class="mt-3">Collections</h4>
+                        {% if linked_blobs %}
+                            <h4 class="mt-3">Collections</h4>
                             {% for collection in linked_blobs %}
                                 {{ collection.name }}
                                 <ul class="list-group">
                                 {% for blob in collection.blob_list %}
                                     <li class="list-group-item list-group-item-secondary text-info">
-                                        {% if blob.has_thumbnail_url %}
-                                            <img src="{{ blob.get_cover_url_small }}" />
-                                        {% endif %}
-                                        <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
+                                    {% if blob.has_thumbnail_url %}
+                                        <img src="{{ blob.get_cover_url_small }}" />
+                                    {% endif %}
+                                    <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
                                     </li>
                                 {% endfor %}
                                 <li class="list-group-item list-group-item-secondary text-info">
@@ -132,114 +144,116 @@
                                 </li>
                                 </ul>
                             {% endfor %}
-                {% endif %}
+                        {% endif %}
 
-                {% if collection_list %}
-                    <div class="row mt-3">
-                        <div class="col-lg-12">
-                            In collection{% if collection_list|length > 1 %}s{% else %}{% endif %}:
-                            {% for collection in collection_list %}
-                                <a href="{% url 'collection:detail' collection.uuid %}">{{ collection.name }}{% if not forloop.last %}, {% endif %}</a>
-                            {% endfor %}
+                        {% if collection_list %}
+                            <div class="row mt-3">
+                                <div class="col-lg-12">
+                                    In collection{% if collection_list|length > 1 %}s{% else %}{% endif %}:
+                                    {% for collection in collection_list %}
+                                        <a href="{% url 'collection:detail' collection.uuid %}">{{ collection.name }}{% if not forloop.last %}, {% endif %}</a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <form action="{% url 'blob:update' blob.uuid %}" class="mt-3">
+                            {% if blob.sha1sum %}
+                                <a href="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" class="btn btn-primary" role="button">Download</a>
+                            {% endif %}
+                        </form>
+
+                        {% if blob.is_note %}
+                            <div class="mt-3">
+                            {% if is_favorite_note %}
+                                <form action="{% url 'accounts:favorites_remove' blob.uuid %}">
+                                    <input type="submit" class="btn btn-primary" value="Remove from Favorites">
+                                </form>
+                            {% else %}
+                                <form action="{% url 'accounts:favorites_add' blob.uuid %}">
+                                    <input type="submit" class="btn btn-primary" value="Add to Favorites">
+                                </form>
+                            {% endif %}
+                            </div>
+                        {% endif %}
+
+                        <br /><br />
+
+                        {% for blob in blob.get_related_blobs %}
+                            {% if forloop.first %}
+                            Related blobs:
+                                <ul>
+                            {% endif %}
+                            {% if forloop.last %}
+                                </ul>
+                            {% endif %}
+                            <li> <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a> </li>
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            {% if cover_info %}
+                <div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                    <div class="modal-dialog modal-dialog-centered w-75 mw-100" role="document">
+                        <div class="modal-content">
+                            <div class="modal-body">
+                                <div>
+                                    <img src="{{ cover_info.url }}" style="width: 100%"/>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                {% endif %}
-
-                <form action="{% url 'blob:update' blob.uuid %}" class="mt-3">
-
-                    {% if blob.sha1sum %}
-                        <a href="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" class="btn btn-primary" role="button">Download</a>
-                    {% endif %}
-
-                </form>
-
-                {% if blob.is_note %}
-                    <div class="mt-3">
-                        {% if is_favorite_note %}
-                            <form action="{% url 'accounts:favorites_remove' blob.uuid %}">
-                                <input type="submit" class="btn btn-primary" value="Remove from Favorites">
-                            </form>
-                        {% else %}
-                            <form action="{% url 'accounts:favorites_add' blob.uuid %}">
-                                <input type="submit" class="btn btn-primary" value="Add to Favorites">
-                            </form>
-                        {% endif %}
-                    </div>
-                {% endif %}
-
-                <br /><br />
-
-                {% for blob in blob.get_related_blobs %}
-                    {% if forloop.first %}
-                            Related blobs:
-                        <ul>
-                    {% endif %}
-                        {% if forloop.last %}
-                        </ul>
-                        {% endif %}
-                        <li> <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a> </li>
-                {% endfor %}
-
-            </template>
-
-        </card>
-
-    </div>
-
-{% endblock %}
-
-{% block content %}
-
-    {% if cover_info %}
-    <div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog modal-dialog-centered w-75 mw-100" role="document">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <div>
-                        <img src="{{ cover_info.url }}" style="width: 100%"/>
-                    </div>
                 </div>
+            {% endif %}
+
             </div>
+
+        </div> <!-- End first column -->
+
+        <div class="col-lg-9">
+
+            <div class="row">
+
+                <div class="col-lg-12">
+
+                    <div id="vue-messages">
+                        {% include "common/show_messages.html" %}
+                    </div>
+
+                    {% if elasticsearch_info.content_type == "Video" %}
+
+                        <video class="slide_show w-100" controls autoplay loop muted>
+                            <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="video/mp4">
+                        </video>
+
+                    {% elif elasticsearch_info.content_type == "Audio" %}
+
+                        <audio controls controlsList="nodownload">
+                            <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="audio/mpeg">
+                                Your browser does not support the audio tag.
+                        </audio>
+
+                    {% endif %}
+
+                    {% if blob.content %}
+                        <div id="blob_detail_content" class="table-borders">
+                            {{ blob.get_content|safe }}
+                        </div>
+                    {% endif %}
+
+                    {% if cover_info %}
+                        <img src="{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" data-toggle="modal" data-target="#myModal3" />
+                    {% endif %}
+
+                    <br /><br />
+
+                </div>
+
+            </div>
+
         </div>
-    </div>
-    {% endif %}
-
-    <div id="vue-messages">
-        {% include "common/show_messages.html" %}
-    </div>
-
-    <div class="row">
-
-      <div class="col-lg-12">
-
-          {% if elasticsearch_info.content_type == "Video" %}
-
-              <video class="slide_show w-100" controls autoplay loop muted>
-                  <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="video/mp4">
-              </video>
-
-          {% elif elasticsearch_info.content_type == "Audio" %}
-
-                <audio controls controlsList="nodownload">
-                    <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="audio/mpeg">
-                        Your browser does not support the audio tag.
-                </audio>
-
-          {% endif %}
-
-          {% if blob.content %}
-              <div id="blob_detail_content" class="table-borders">
-                        {{ blob.get_content|safe }}
-              </div>
-          {% endif %}
-
-          {% if cover_info %}
-              <img src="{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" data-toggle="modal" data-target="#myModal3" />
-          {% endif %}
-
-          <br /><br />
-
-      </div>
 
     </div>
 

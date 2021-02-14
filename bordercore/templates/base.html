@@ -77,13 +77,15 @@
                 {% block nav %}
                 {% endblock %}
 
-                <div class="row content-main">
+                <div class="row content-main h-100">
 
                     {% if not no_left_block %}
 
-                        <div id="left-block" class="col-lg-3 px-0">
-                            {% block left-block %}
-                            {% endblock %}
+                        <div id="left-block" class="col-lg-3">
+                            <div>
+                                {% block left-block %}
+                                {% endblock %}
+                            </div>
                         </div>
 
                     {% endif %}

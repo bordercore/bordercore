@@ -7,6 +7,11 @@
   padding: 0;
 }
 
+/* Used on full-height blocks to force some padding at the bottom of the page */
+.extend-block {
+  padding-bottom: $grid-margin * 5 + ($grid-margin * 0.5) !important;
+}
+
 .content-nav {
   font-size: 17px;
   margin: 10px;
@@ -457,13 +462,12 @@ ul.pagination {
   color: $info;
 }
 
-.blob_edit_amazon_name_field {
-  width: 100px;
+#blob_subtitle {
+  color: $teal;
 }
 
-#blob_note {
-  border: 1px solid #999;
-  padding: 5px;
+.blob_edit_amazon_name_field {
+  width: 100px;
 }
 
 /* Todo */
@@ -614,19 +618,28 @@ div .search-box .search-box-input {
 
 /* Node */
 
+.dropdown-menu.show {
+  background-color: $gray-700;
+  border: 1px solid $gray-900;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.24);
+}
+
 .dropdownmenu {
   float: right;
   color: $cyan;
   font-size: 0.75rem;
   position: absolute;
-  right: 7px;
-  padding: 2px 35px 2px 2px;
+  right: 10px;
+  top: 10px;
+  padding: 2px 2px 2px 2px;
   width: 26px;
   height: 24px;
 }
 
 .dropdownmenu:hover {
+  background: lighten($background-color-dark, 5%);
   border-radius: 100%;
+  color: $white;
 }
 
 .node-name {
