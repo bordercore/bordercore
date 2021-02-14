@@ -5,7 +5,7 @@ import logging
 import re
 import uuid
 from pathlib import PurePath
-from urllib.parse import urlparse
+from urllib.parse import quote_plus, urlparse
 
 import boto3
 import humanize
@@ -153,7 +153,7 @@ class Blob(TimeStampedModel, AmazonMixin):
         return ", ".join([tag.name for tag in self.tags.all()])
 
     def get_url(self):
-        return f"{self.sha1sum[0:2]}/{self.sha1sum}/{self.file}"
+        return f"{self.sha1sum[0:2]}/{self.sha1sum}/{quote_plus(str(self.file))}"
 
     def get_title(self, remove_edition_string=False, use_filename_if_present=False):
         title = self.title

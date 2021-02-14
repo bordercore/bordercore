@@ -1,3 +1,5 @@
+from urllib.parse import quote_plus
+
 import django
 
 django.setup()
@@ -44,7 +46,7 @@ def test_get_parent_dir(blob_image_factory):
 
 def test_get_url(blob_image_factory):
     url = blob_image_factory.get_url()
-    assert url == f"{blob_image_factory.sha1sum[:2]}/{blob_image_factory.sha1sum}/{blob_image_factory.file}"
+    assert url == f"{blob_image_factory.sha1sum[:2]}/{blob_image_factory.sha1sum}/{quote_plus(str(blob_image_factory.file))}"
 
 
 def test_get_title(blob_image_factory):
