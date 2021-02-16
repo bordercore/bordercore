@@ -9,8 +9,7 @@ from pathlib import PurePath
 
 import boto3
 import magic
-import psycopg2
-import psycopg2.extras
+import requests
 from elasticsearch import RequestsHttpConnection
 from elasticsearch_dsl import Boolean, DateRange
 from elasticsearch_dsl import Document as Document_ES
@@ -25,13 +24,10 @@ ES_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT", "localhost")
 ES_PORT = 9200
 ES_INDEX_NAME = "bordercore"
 
-DB_ENDPOINT = os.environ.get("DATABASE_ENDPOINT")
-DB_USERNAME = "bordercore"
-DB_PASSWORD = os.environ.get("DATABASE_PASSWORD")
-DB_DATABASE = "bordercore"
-
 S3_KEY_PREFIX = "blobs"
 S3_BUCKET_NAME = "bordercore-blobs"
+
+DRF_TOKEN = os.environ.get("DRF_TOKEN")
 
 FILE_TYPES_TO_INGEST = [
     'azw3',
@@ -90,66 +86,37 @@ def is_ingestible_file(filename):
         return False
 
 
-def get_blob_info(db_conn, **kwargs):
-    param = None
+def get_blob_info(**kwargs):
+
     if "sha1sum" in kwargs:
-        predicate = "WHERE bd.sha1sum = %s"
+        prefix = "sha1sums"
         param = kwargs["sha1sum"]
     elif "uuid" in kwargs:
-        predicate = "WHERE bd.uuid = %s"
+        prefix = "blobs"
         param = kwargs["uuid"]
     else:
-        # TODO Raise more specific exception
-        raise Exception("Must pass in uuid or sha1sum")
+        raise ValueError("Must pass in uuid or sha1sum")
 
-    sql = f"SELECT * FROM blob_blob bd {predicate}"
+    headers = {"Authorization": f"Token {DRF_TOKEN}"}
 
-    cursor = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    r = requests.get(f"https://www.bordercore.com/api/{prefix}/{param}/", headers=headers)
+    if r.status_code != 200:
+        raise Exception(f"Error when accessing Bordercore REST API: status code={r.status_code}")
 
-    cursor.execute(sql, (param,))
-    results = cursor.fetchone()
-
-    sql = f"""
-    SELECT tt.name FROM blob_blob bd
-    JOIN blob_blob_tags bdt ON (bd.id = bdt.blob_id)
-    JOIN tag_tag tt ON (bdt.tag_id = tt.id)
-    {predicate}
-    """
-
-    cursor = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    cursor.execute(sql, (param,))
-
-    dict2 = {key: value for key, value in results.items()}
-    dict2["tags"] = [x[0] for x in cursor.fetchall()]
-
-    return dict2
-
-
-def get_blob_metadata(db_conn, uuid):
-
-    sql = """
-    SELECT bd.uuid,bm.name,bm.value FROM blob_blob bd
-    JOIN blob_metadata bm ON (bd.id = bm.blob_id)
-    WHERE bd.uuid=%s
-    """
-
-    cursor = db_conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    cursor.execute(sql, (uuid,))
+    info = r.json()
 
     metadata = {}
 
-    for row in cursor.fetchall():
+    for x in info["metadata_set"]:
+        for key, value in x.items():
+            existing = metadata.get(key.lower(), [])
+            existing.append(value)
+            metadata[key.lower()] = existing
 
-        # Empty field names will cause an Elasticsearch error
-        if row["name"] == "":
-            continue
-        existing = metadata.get(row["name"].lower(), [])
-        existing.append(row["value"])
-        metadata[row["name"].lower()] = existing
-
-    return metadata
+    return {
+        **info,
+        "metadata": metadata
+    }
 
 
 def get_blob_contents_from_s3(blob):
@@ -209,8 +176,6 @@ def get_num_pages(content):
 
 def index_blob(**kwargs):
 
-    db_conn = psycopg2.connect("dbname=%s port=5432 host=%s user=%s password=%s" % (DB_DATABASE, DB_ENDPOINT, DB_USERNAME, DB_PASSWORD))
-
     if kwargs.get("create_connection", True):
         connections.create_connection(
             hosts=[{"host": ES_ENDPOINT, "port": ES_PORT}],
@@ -220,8 +185,7 @@ def index_blob(**kwargs):
             connection_class=RequestsHttpConnection,
         )
 
-    blob_info = get_blob_info(db_conn, **kwargs)
-    metadata = get_blob_metadata(db_conn, blob_info["uuid"])
+    blob_info = get_blob_info(**kwargs)
 
     # An empty string causes a Python datetime validation error,
     #  so convert to "None" to avoid this.
@@ -232,18 +196,18 @@ def index_blob(**kwargs):
         uuid=blob_info["uuid"],
         bordercore_id=blob_info["id"],
         sha1sum=blob_info["sha1sum"],
-        user_id=blob_info["user_id"],
+        user_id=blob_info["user"],
         is_private=blob_info["is_private"],
         title=blob_info["title"],
         contents=blob_info["content"],
-        doctype=get_doctype(blob_info, metadata),
+        doctype=get_doctype(blob_info, blob_info["metadata"]),
         tags=blob_info["tags"],
         filename=str(blob_info["file"]),
         note=blob_info["note"],
         importance=blob_info["importance"],
         date_unixtime=get_unixtime_from_string(blob_info["date"]),
         last_modified=blob_info["modified"],
-        **metadata
+        **blob_info["metadata"]
     )
 
     article = ESBlob(**fields)
@@ -288,6 +252,3 @@ def index_blob(**kwargs):
 
     else:
         article.update(doc_as_upsert=True, **fields)
-
-    # Rollback to avoid idle transactions
-    db_conn.rollback()

@@ -7,15 +7,12 @@ Globals:
         Timeout: 360
 
 Parameters:
-  DatabaseEndpointParameter:
-    Type: String
-    Description: The RDS database endpoint
-  DatabasePasswordParameter:
-    Type: String
-    Description: The RDS database password
   ElasticsearchEndpointParameter:
     Type: String
     Description: The Elasticsearch endpoint
+  DRFTokenParameter:
+    Type: String
+    Description: The Django Rest Framework token used for authentication
 
 Resources:
 
@@ -35,9 +32,8 @@ Resources:
                 - subnet-2ff16448
             Environment:
                 Variables:
+                    DRF_TOKEN: !Ref DRFTokenParameter
                     ELASTICSEARCH_ENDPOINT: !Ref ElasticsearchEndpointParameter
-                    DATABASE_ENDPOINT: !Ref DatabaseEndpointParameter
-                    DATABASE_PASSWORD: !Ref DatabasePasswordParameter
 
     LambdaFunctionLogGroup:
         Type: "AWS::Logs::LogGroup"

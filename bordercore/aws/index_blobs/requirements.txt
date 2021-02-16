@@ -4,6 +4,5 @@ elasticsearch==7.0.5
 elasticsearch-dsl==7.1.0
 lxml==4.3.3
 PyPDF2==1.26.0
-psycopg2-binary==2.8.2
 python-magic==0.4.15
 requests-aws4auth==0.9

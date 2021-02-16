@@ -1,7 +1,10 @@
+import json
+from pathlib import Path
+
 from rest_framework import serializers
 
 from accounts.models import User
-from blob.models import Blob
+from blob.models import Blob, MetaData
 from bookmark.models import Bookmark
 from collection.models import Collection
 from drill.models import Question
@@ -18,12 +21,50 @@ class AlbumSerializer(serializers.ModelSerializer):
                   "title", "year"]
 
 
+class BlobFileField(serializers.RelatedField):
+    """
+    Extract just the filename from the file path
+    """
+    def to_representation(self, value):
+        return Path(value.name).name
+
+
+class BlobMetaDataField(serializers.RelatedField):
+    def to_representation(self, value):
+        return {
+            value.name: value.value
+        }
+
+
+class BlobTagsField(serializers.RelatedField):
+    def to_representation(self, value):
+        return value.name
+
+
 class BlobSerializer(serializers.ModelSerializer):
+
+    file = BlobFileField(read_only=True)
+    metadata_set = BlobMetaDataField(many=True, read_only=True)
+    tags = BlobTagsField(many=True, read_only=True)
+
     class Meta:
         model = Blob
-        fields = ["content", "date", "documents", "file", "importance",
-                  "is_private", "is_note", "note", "sha1sum",
-                  "tags", "title", "user", "uuid"]
+        fields = ["content", "date", "documents", "file", "id", "importance",
+                  "is_private", "is_note", "metadata_set", "modified", "note",
+                  "sha1sum", "tags", "title", "user", "uuid"]
+
+
+class BlobSha1sumSerializer(serializers.ModelSerializer):
+
+    file = BlobFileField(read_only=True)
+    metadata_set = BlobMetaDataField(many=True, read_only=True)
+    tags = BlobTagsField(many=True, read_only=True)
+
+    class Meta:
+        model = Blob
+        fields = ["content", "date", "documents", "file", "id", "importance",
+                  "is_private", "is_note", "metadata_set", "modified",
+                  "note", "sha1sum", "tags", "title", "user", "uuid"]
 
 
 class BookmarkSerializer(serializers.ModelSerializer):
@@ -52,6 +93,12 @@ class FeedItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = FeedItem
         fields = ["feed", "title", "url"]
+
+
+class MetaDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MetaData
+        fields = ["name", "value", "blob", "user"]
 
 
 class QuestionSerializer(serializers.ModelSerializer):

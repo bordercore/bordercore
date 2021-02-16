@@ -5,10 +5,10 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.urls import include, path
 
-from api.views import (AlbumViewSet, BlobViewSet, BookmarkViewSet,
-                       CollectionViewSet, FeedItemViewSet, FeedViewSet,
-                       QuestionViewSet, SongSourceViewSet, SongViewSet,
-                       TagViewSet, TodoViewSet, UserViewSet)
+from api.views import (AlbumViewSet, BlobSha1sumViewSet, BlobViewSet,
+                       BookmarkViewSet, CollectionViewSet, FeedItemViewSet,
+                       FeedViewSet, QuestionViewSet, SongSourceViewSet,
+                       SongViewSet, TagViewSet, TodoViewSet, UserViewSet)
 from book.views import BookListView
 from feed.views import update_feed_list
 from homepage.views import handler403, handler404, handler500
@@ -45,6 +45,7 @@ router.register(r"collections", CollectionViewSet, "collection")
 router.register(r"feeds", FeedViewSet, "feed")
 router.register(r"feeditem", FeedItemViewSet)
 router.register(r"questions", QuestionViewSet, "question")
+router.register(r"sha1sums", BlobSha1sumViewSet, "sha1sum")
 router.register(r"songs", SongViewSet, "song")
 router.register(r"songsources", SongSourceViewSet, "songsource")
 router.register(r"tags", TagViewSet, "tag")

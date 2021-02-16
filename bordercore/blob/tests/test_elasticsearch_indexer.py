@@ -1,11 +1,10 @@
 from pathlib import Path
 
-import psycopg2
 import pytest
+import responses
 from elasticsearch_dsl import Range
 
-from blob.elasticsearch_indexer import (DB_ENDPOINT, DB_PASSWORD, DB_USERNAME,
-                                        get_blob_info, get_doctype,
+from blob.elasticsearch_indexer import (get_blob_info, get_doctype,
                                         get_num_pages, get_range_from_date,
                                         get_unixtime_from_string,
                                         is_ingestible_file)
@@ -20,6 +19,63 @@ def test_is_ingestible_file():
 
     assert is_ingestible_file("foobar.pdf") is True
     assert is_ingestible_file("foobar.mp4") is False
+
+
+def test_get_blob_info(blob_image_factory):
+
+    url = f"https://www.bordercore.com/api/blobs/{blob_image_factory.uuid}/"
+
+    blob_info = {
+        "title": blob_image_factory.title,
+        "metadata_set": [
+            {
+                "Url": "https://www.bordercore.com"
+            },
+            {
+                "Author": "John Smith"
+            }
+        ]
+    }
+
+    responses.add(responses.GET, url,
+                  json=blob_info, status=200)
+
+    assert get_blob_info(uuid=blob_image_factory.uuid) == {
+        "title": blob_image_factory.title,
+        "metadata": {
+            "author": ["John Smith"],
+            "url": ["https://www.bordercore.com"]
+        },
+        "metadata_set": [
+            {
+                "Url": "https://www.bordercore.com"
+            },
+            {
+                "Author": "John Smith"
+            }
+        ],
+    }
+
+    url = f"https://www.bordercore.com/api/sha1sums/{blob_image_factory.sha1sum}/"
+
+    responses.add(responses.GET, url,
+                  json=blob_info, status=200)
+
+    assert get_blob_info(sha1sum=blob_image_factory.sha1sum) == {
+        "title": blob_image_factory.title,
+        "metadata": {
+            "author": ["John Smith"],
+            "url": ["https://www.bordercore.com"]
+        },
+        "metadata_set": [
+            {
+                "Url": "https://www.bordercore.com"
+            },
+            {
+                "Author": "John Smith"
+            }
+        ],
+    }
 
 
 def test_get_unixtime_from_string():

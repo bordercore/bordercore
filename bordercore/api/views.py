@@ -11,7 +11,8 @@ from music.models import Album, Song, SongSource
 from tag.models import Tag
 from todo.models import Todo
 
-from .serializers import (AlbumSerializer, BlobSerializer, BookmarkSerializer,
+from .serializers import (AlbumSerializer, BlobSerializer,
+                          BlobSha1sumSerializer, BookmarkSerializer,
                           CollectionSerializer, FeedItemSerializer,
                           FeedSerializer, QuestionSerializer, SongSerializer,
                           SongSourceSerializer, TagSerializer, TodoSerializer,
@@ -41,6 +42,15 @@ class BlobViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         instance = serializer.save()
         instance.index_blob()
+
+
+class BlobSha1sumViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = BlobSha1sumSerializer
+    lookup_field = "sha1sum"
+
+    def get_queryset(self):
+        return Blob.objects.filter(user=self.request.user)
 
 
 class BookmarkViewSet(viewsets.ModelViewSet):

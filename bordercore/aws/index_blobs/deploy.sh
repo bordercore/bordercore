@@ -19,6 +19,4 @@ $SAM deploy \
      --template-file $TEMPLATE_FILE \
      --stack-name IndexBlobStack \
      --capabilities CAPABILITY_IAM \
-     --parameter-overrides ParameterKey=DatabaseEndpointParameter,ParameterValue=${DATABASE_ENDPOINT} \
-     ParameterKey=DatabasePasswordParameter,ParameterValue=${DATABASE_PASSWORD} \
-     ParameterKey=ElasticsearchEndpointParameter,ParameterValue=${ELASTICSEARCH_ENDPOINT}
+     --parameter-overrides ParameterKey=DRFTokenParameter,ParameterValue=${DRF_TOKEN} \ ParameterKey=ElasticsearchEndpointParameter,ParameterValue=${ELASTICSEARCH_ENDPOINT}
