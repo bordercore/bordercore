@@ -19,7 +19,6 @@
 # For more information see the manual pages of crontab(5) and cron(8)
 # 
 # m h  dom mon dow   command
-HOME=/home/jerrell
 MAILTO=jerrell@bordercore.com
 VIRTUALENV=/var/www/django/env/bin/
 BORDERCORE_HOME=/var/www/django/bordercore/bordercore
@@ -37,4 +36,4 @@ DJANGO_SETTINGS_MODULE=config.settings.prod
 30 2 * * * ${VIRTUALENV}python $BIN_DIR/archive_urls.py
 
 # Run data tests once a day
-57 7 * * * cd $BORDERCORE_HOME/.. && make test_data
+59 13 * * * . /home/ubuntu/.env && cd $BORDERCORE_HOME/.. && make test_data

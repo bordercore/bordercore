@@ -1,11 +1,12 @@
 """Production settings and globals."""
-
 from __future__ import absolute_import
+
+import os
 
 from .base import *
 
 # Elasticsearch config
-ELASTICSEARCH_ENDPOINT = "http://ec2-18-209-231-14.compute-1.amazonaws.com:9200"
+ELASTICSEARCH_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT", "http://localhost:9200")
 
 LOGGING['handlers']['bordercore'] = {
     'level': 'DEBUG',
