@@ -462,7 +462,7 @@ def get_link(doc_type, match):
         return match["url"]
     elif doc_type == "Song":
         if "album_uuid" in match:
-            return reverse("music:album_detail", kwargs={"uuid": match["album_uud"]})
+            return reverse("music:album_detail", kwargs={"uuid": match["album_uuid"]})
         else:
             return reverse("music:artist_detail", kwargs={"artist_name": match["artist"]})
     elif doc_type == "Artist":
@@ -603,7 +603,7 @@ def search_titles(request, es, doc_type, search_term):
             }
         },
         "from": 0, "size": 100,
-        "_source": ["album_id",
+        "_source": ["album_uuid",
                     "album",
                     "artist",
                     "author",
