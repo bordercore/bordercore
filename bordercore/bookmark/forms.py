@@ -1,3 +1,4 @@
+from django.contrib.postgres.forms import JSONField
 from django.forms import (CheckboxInput, ModelForm, Select, Textarea,
                           TextInput, ValidationError)
 
@@ -7,10 +8,39 @@ from tag.models import Tag
 
 
 def daily_check_test(value):
-    if value == 'null':
+    """
+    Interpret a null value from the database as False, and leave the checkbox unchecked.
+    Otherwise it's true and checked.
+    """
+    if value == 'null' or value == 'false':
         return False
     else:
         return True
+
+
+class DailyCheckboxInput(CheckboxInput):
+
+    def format_value(self, value):
+        """
+        This insures that the widget is never rendered with a "value" attribute.
+        We only care about whether it's checked or not, not its value.
+        """
+        return
+
+
+class CheckboxJSONField(JSONField):
+
+    def bound_data(self, data, initial):
+        """
+        Return the value that should be shown for this field on render of a
+        bound form, given the submitted POST data for the field and the initial
+        data, if any.
+        We override this to prevent the default JSONField from throwing an error
+        when trying to decode a boolean value (from the checkbox) as valid JSON.
+        """
+        if self.disabled:
+            return initial
+        return data
 
 
 class BookmarkForm(ModelForm):
@@ -51,5 +81,8 @@ class BookmarkForm(ModelForm):
             'title': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'importance': Select(attrs={'class': 'form-control', 'autocomplete': 'off'}, choices=((1, 'Normal'), (5, 'High'), (10, 'Highest'))),
-            'daily': CheckboxInput(check_test=daily_check_test)
+            'daily': DailyCheckboxInput(check_test=daily_check_test)
+        }
+        field_classes = {
+            'daily': CheckboxJSONField,
         }
