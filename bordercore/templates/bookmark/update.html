@@ -28,7 +28,7 @@
                     </tags-input>
                 {% elif field.label == "Url" %}
                     <input
-                        type="text"
+                        type="url"
                         name="url"
                         value="{{ field.value|default:'' }}"
                         class="form-control"
@@ -39,6 +39,7 @@
                         {% endif %}
                         autocomplete="off"
                     />
+                    <div class="form-error">{{ field.errors.0 }}</div>
                 {% else %}
                   {{ field }}
                   {% for error in field.errors %}

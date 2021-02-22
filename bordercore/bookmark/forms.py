@@ -1,6 +1,6 @@
 from django.contrib.postgres.forms import JSONField
 from django.forms import (CheckboxInput, ModelForm, Select, Textarea,
-                          TextInput, ValidationError)
+                          TextInput, URLInput, ValidationError)
 
 from bookmark.models import Bookmark
 from lib.fields import ModelCommaSeparatedChoiceField
@@ -77,7 +77,7 @@ class BookmarkForm(ModelForm):
         model = Bookmark
         fields = ('url', 'title', 'note', 'tags', 'importance', 'is_pinned', 'daily', 'id')
         widgets = {
-            'url': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'url': URLInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'title': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'importance': Select(attrs={'class': 'form-control', 'autocomplete': 'off'}, choices=((1, 'Normal'), (5, 'High'), (10, 'Highest'))),

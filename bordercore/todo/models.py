@@ -19,7 +19,7 @@ class Todo(TimeStampedModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     task = models.TextField()
     note = models.TextField(null=True, blank=True)
-    url = models.TextField(null=True, blank=True)
+    url = models.URLField(max_length=1000, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     due_date = models.DateTimeField(null=True, blank=True)
     tags = models.ManyToManyField(Tag)
