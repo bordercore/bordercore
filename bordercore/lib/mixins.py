@@ -1,4 +1,5 @@
 from django.apps import apps
+from django.conf import settings
 from django.db import models, transaction
 from django.db.models import F
 
@@ -27,7 +28,14 @@ class SortOrderMixin(models.Model):
 
     def handle_delete(self):
 
-        filter_kwargs = {self.field_name: getattr(self, self.field_name)}
+        try:
+            # ignore spurious nplusone warning about "Potential n+1 query detected"
+            from nplusone.core import signals
+            with signals.ignore(signals.lazy_load):
+                filter_kwargs = {self.field_name: getattr(self, self.field_name)}
+        except ModuleNotFoundError:
+            # nplusone won't be installed in production
+            filter_kwargs = {self.field_name: getattr(self, self.field_name)}
 
         self.get_queryset().filter(
             **filter_kwargs,
