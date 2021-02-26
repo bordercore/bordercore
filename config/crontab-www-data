@@ -26,8 +26,8 @@ BIN_DIR=/var/www/django/bordercore/bin
 PYTHONPATH=/var/www/django/bordercore:/var/www/django/bordercore/bordercore
 DJANGO_SETTINGS_MODULE=config.settings.prod
 
-# Get the news feeds once per hour
-5 0-23 * * * ${VIRTUALENV}python $BIN_DIR/get_feed.py
+# Get the news feeds once every four hours
+5 */4 * * * ${VIRTUALENV}python $BIN_DIR/get_feed.py
 
 # Reset the daily bookmarks
 30 3 * * * ${VIRTUALENV}python $BIN_DIR/reset-daily-links.py
