@@ -31,13 +31,18 @@ class ExerciseDetailView(DetailView):
             pass
         context["activity_info"] = ExerciseUser.objects.filter(user=self.request.user, exercise__id=self.object.id)
         context["nav"] = "fitness"
-        context["title"] = "Exercise Detail :: {}".format(self.object.exercise)
+        context["title"] = f"Exercise Detail :: {self.object.exercise}"
 
-        if workout_data:
-            self.set_plot_data(context, workout_data)
+        plot_data = self.get_plot_data(context, workout_data)
+        context["labels"] = plot_data[0]
+        context["plotdata"] = plot_data[1]
+
         return context
 
-    def set_plot_data(self, context, data):
+    def get_plot_data(self, context, data):
+
+        if not data:
+            return ([], [])
 
         # A workout is defined as all the data recorded for a specific date,
         #  regardless of time of day.
@@ -62,8 +67,7 @@ class ExerciseDetailView(DetailView):
         plotdata = [x.weight for x in unique_workout_data]
         labels = [x.date.strftime("%b %d") for x in unique_workout_data]
 
-        context["labels"] = json.dumps(labels[::-1])
-        context["plotdata"] = json.dumps(plotdata[::-1])
+        return (json.dumps(labels[::-1]), json.dumps(plotdata[::-1]))
 
 
 @login_required

@@ -17,7 +17,7 @@
 
     {% if object.description %}
         <h5 class="highlight-box mt-5">
-          {{ object.description }}
+          {{ object.description|safe }}
         </h5>
     {% endif %}
 
@@ -142,9 +142,11 @@
                     {% if recent_data %}
                     weight: {{ recent_data.weight }},
                     reps: {{ reps_latest_workout|last }},
+                    {% else %}
+                    weight: 0,
+                    reps: 0,
                     {% endif %}
-                    workoutData: [
-                    ],
+                    workoutData: [],
                     submitIsDisabled: true
                 }
             },
