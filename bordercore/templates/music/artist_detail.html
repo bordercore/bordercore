@@ -55,7 +55,7 @@
 
                 <td>
                     <a href="{% url 'music:album_detail' album.uuid %}">
-                        <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ album.id }}" height="150" width="150" /> <br />
+                        <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ album.uuid }}" height="150" width="150" /> <br />
                     </a>
 
                     <strong> {{ album.title }} </strong><br />
@@ -86,7 +86,7 @@
 
                     <td>
                         <a href="{% url 'music:album_detail' album.uuid %}">
-                            <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ album.id }}" height="150" width="150" /> <br />
+                            <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ album.uuid }}" height="150" width="150" /> <br />
                         </a>
 
                         <strong> {{ album.title }} </strong><br />

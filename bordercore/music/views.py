@@ -280,11 +280,12 @@ def handle_s3(song, sha1sum):
             fh.write(artwork[0].data)
             fh.close()
 
-            key = f"artwork/{song.album.id}"
+            key = f"artwork/{song.album.uuid}"
             s3_client.upload_file(
                 artwork_file,
                 settings.AWS_BUCKET_NAME_MUSIC,
-                key
+                key,
+                ExtraArgs={"ContentType": "image/jpeg"}
             )
 
             os.remove(artwork_file)
