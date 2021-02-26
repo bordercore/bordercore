@@ -21,8 +21,8 @@ urlpatterns = [
         name="album_detail"
     ),
     path(
-        route="artist/<str:artist_name>/",
-        view=views.artist_detail,
+        route="artist/<str:artist>/",
+        view=views.ArtistDetailView.as_view(),
         name="artist_detail"
     ),
     path(

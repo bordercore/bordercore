@@ -464,9 +464,9 @@ def get_link(doc_type, match):
         if "album_uuid" in match:
             return reverse("music:album_detail", kwargs={"uuid": match["album_uuid"]})
         else:
-            return reverse("music:artist_detail", kwargs={"artist_name": match["artist"]})
+            return reverse("music:artist_detail", kwargs={"artist": match["artist"]})
     elif doc_type == "Artist":
-        return reverse("music:artist_detail", kwargs={"artist_name": match["artist"]})
+        return reverse("music:artist_detail", kwargs={"artist": match["artist"]})
     elif doc_type == "Album":
         return reverse("music:album_detail", kwargs={"uuid": match["album_uuid"]})
     elif doc_type in ("Blob", "Book", "Document", "Note"):

@@ -14,6 +14,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
+from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
@@ -105,6 +106,55 @@ def song_update(request, song_uuid=None):
 
 
 @method_decorator(login_required, name='dispatch')
+class ArtistDetailView(TemplateView):
+
+    template_name = "music/artist_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        artist_name = self.kwargs.get("artist")
+
+        print(f"GOT HERE: {artist_name}")
+
+        # Get all albums by this artist
+        albums = Album.objects.filter(user=self.request.user, artist=artist_name).order_by("-original_release_year")
+
+        # Get all songs by this artist that do not appear on an album
+        songs = Song.objects.filter(user=self.request.user, artist=artist_name).filter(album__isnull=True)
+
+        # Get all songs by this artist that do appear on compilation album
+        compilation_songs = Album.objects.filter(
+            Q(user=self.request.user)
+            & Q(song__artist=artist_name)
+            & ~Q(artist=artist_name)
+        ).distinct("song__album")
+
+        song_list = []
+
+        for song in songs:
+            song_list.append(dict(uuid=song.uuid,
+                                  year=song.year,
+                                  title=song.title,
+                                  length_seconds=song.length,
+                                  length=convert_seconds(song.length),
+                                  artist=song.artist,
+                                  info=song.comment))
+
+        context = {
+            "artist_name": artist_name,
+            "album_list": albums,
+            "song_list": song_list,
+            "compilation_album_list": compilation_songs,
+            "cols": ["year", "artist", "title", "length", "length_seconds", "info", "uuid"],
+            "title": f"Artist Detail :: {artist_name}",
+            "MEDIA_URL_MUSIC": settings.MEDIA_URL_MUSIC
+        }
+
+        return context
+
+
+@method_decorator(login_required, name='dispatch')
 class AlbumDetailView(DetailView):
 
     model = Album
@@ -140,41 +190,6 @@ class AlbumDetailView(DetailView):
 
     def get_queryset(self):
         return Album.objects.filter(user=self.request.user)
-
-
-@login_required
-def artist_detail(request, artist_name):
-
-    # Get all albums by this artist
-    a = Album.objects.filter(user=request.user, artist=artist_name).order_by('-original_release_year')
-
-    # Get all songs by this artist that do not appear on an album
-    s = Song.objects.filter(user=request.user, artist=artist_name).filter(album__isnull=True)
-
-    # Get all songs by this artist that do appear on compilation album
-    c = Album.objects.filter(Q(user=request.user) & Q(song__artist=artist_name) & ~Q(artist=artist_name)).distinct('song__album')
-
-    song_list = []
-
-    for song in s:
-        song_list.append(dict(uuid=song.uuid,
-                              year=song.year,
-                              title=song.title,
-                              length_seconds=song.length,
-                              length=convert_seconds(song.length),
-                              artist=song.artist,
-                              info=song.comment))
-
-    return render(request, 'music/artist_detail.html',
-                  {
-                      'artist_name': artist_name,
-                      'album_list': a,
-                      'song_list': song_list,
-                      'compilation_album_list': c,
-                      'cols': ['year', 'artist', 'title', 'length', 'length_seconds', 'info', 'uuid'],
-                      'title': 'Artist Detail :: {}'.format(artist_name),
-                      'MEDIA_URL_MUSIC': settings.MEDIA_URL_MUSIC
-                  })
 
 
 @method_decorator(login_required, name='dispatch')
