@@ -1,31 +1,27 @@
-import hashlib
 import os
-import re
 from datetime import datetime
 from pathlib import Path
 
 import boto3
 from django_datatables_view.base_datatable_view import BaseDatatableView
-from mutagen.easyid3 import EasyID3
 from mutagen.mp3 import MP3
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
-from django.forms.utils import ErrorList
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.urls import reverse
+from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
+from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
 
 from lib.time_utils import convert_seconds
 from lib.util import remove_non_ascii_characters
 from music.forms import SongForm
-from music.models import Album, Listen, Song, SongSource
+from music.models import Album, Listen, Song
 
 MUSIC_ROOT = "/home/media/music"
 
@@ -181,196 +177,102 @@ def artist_detail(request, artist_name):
                   })
 
 
-@login_required
-def create_song(request):
+@method_decorator(login_required, name='dispatch')
+class SongCreateView(CreateView):
+    model = Song
+    template_name = "music/create_song.html"
+    form_class = SongForm
+    success_url = reverse_lazy("music:create_song")
 
-    info = {}
-    notes = []
-    sha1sum = None
-    form = None
-    action = 'Upload'
+    # Override this method so that we can pass the request object to the form
+    #  so that we have access to it in TodoForm.__init__()
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
 
-    if 'upload' in request.POST:
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["action"] = "Create"
+        return context
 
-        formdata = {}
+    def form_valid(self, form):
 
-        action = 'Review'
-        blob = request.FILES['song'].read()
-        sha1sum = hashlib.sha1(blob).hexdigest()
-        filename = f"/tmp/{sha1sum}"
+        album_info = Song.get_album_info(self.request.user, form.cleaned_data)
 
-        try:
-            f = open(filename, "wb")
-            f.write(blob)
-            f.close()
-        except (IOError) as e:
-            messages.add_message(request, messages.ERROR, f'IOError: {e}')
+        song = form.save(commit=False)
+        song.user = self.request.user
+        song.save()
 
-        info = MP3(filename, ID3=EasyID3)
+        # Take care of the tags.  Create any that are new.
+        for tag in form.cleaned_data["tags"]:
+            song.tags.add(tag)
 
-        for field in ('artist', 'title', 'album'):
-            formdata[field] = info[field][0] if info.get(field) else None
-        if info.get('date'):
-            formdata['year'] = info['date'][0]
-        formdata['length'] = int(info.info.length)
+        # If an album name was specified, associate it with the song
+        if album_info:
+            song.album = album_info
 
-        # I usually buy my music from Amazon, so set that as the default
-        #  if the song source is not set in the session
-        song_source = request.session.get('song_source', 'Amazon')
-        formdata['source'] = SongSource.objects.get(name=song_source).id
+        song.save()
 
-        if info.get('album') and info.get('artist'):
-            if info.get('album'):
-                if Album.objects.filter(user=request.user, title=info['album'][0], artist=info['artist'][0]):
-                    notes.append('You already have an album with this title')
-                # Look for a fuzzy match
-                fuzzy_matches = Album.objects.filter(Q(user=request.user) & Q(title__icontains=info['title'][0].lower()))
-                if fuzzy_matches:
-                    notes.append(f'Found a fuzzy match on the album title: "{fuzzy_matches.first().title}" by {fuzzy_matches.first().artist}')
+        # Upload the song and its artwork to S3
+        handle_s3(song, form.cleaned_data["sha1sum"])
 
-            if Song.objects.filter(user=request.user, title=info['title'][0], artist=info['artist'][0]):
-                notes.append('You already have a song with this title by this artist')
+        # Remove the uploaded song from /tmp
+        os.remove(f"/tmp/{self.request.user.userprofile.uuid}-{form.cleaned_data['sha1sum']}.mp3")
 
-        if info.get('tracknumber'):
-            track_info = info['tracknumber'][0].split('/')
-            track_number = track_info[0]
-            formdata['track'] = track_number
+        # Save the song source in the session
+        self.request.session["song_source"] = form.cleaned_data["source"].name
 
-        form = SongForm(initial=formdata, request=request)
+        listen_url = Song.get_song_url(song)
+        messages.add_message(
+            self.request, messages.INFO,
+            f"Song successfully created.  <a href='{listen_url}'>Listen to it here.</a>"
+        )
 
-        # This should initialize form._errors, used below
-        form.full_clean()
+        return super().form_valid(form)
 
-        if formdata.get('year') and not re.search(r'^\d+$', formdata['year']):
-            form._errors["year"] = ErrorList([u"Wrong format"])
 
-    elif 'create' in request.POST:
+def handle_s3(song, sha1sum):
 
-        sha1sum = request.POST['sha1sum']
+    s3_client = boto3.client("s3")
+    key = f"songs/{song.uuid}"
 
-        if request.POST['year']:
-            try:
-                song = Song.objects.get(user=request.user, artist=request.POST['artist'], title=request.POST['title'], year=request.POST['year'])
-            except ObjectDoesNotExist:
-                song = None
-        else:
-            song = None
+    # Note: S3 Metadata cannot contain non ASCII characters
+    s3_client.upload_file(
+        f"/tmp/{song.user.userprofile.uuid}-{sha1sum}.mp3",
+        settings.AWS_BUCKET_NAME_MUSIC,
+        key,
+        ExtraArgs={
+            "Metadata": {
+                "artist": remove_non_ascii_characters(song.artist, default="Artist"),
+                "title": remove_non_ascii_characters(song.title, default="Title")
+            }
+        }
+    )
 
-        form = SongForm(request.POST, instance=song, request=request)
+    if not song.album:
+        return
 
-        info = MP3(f"/tmp/{sha1sum}", ID3=EasyID3)
+    audio = MP3(f"/tmp/{song.user.userprofile.uuid}-{sha1sum}.mp3")
 
-        if form.is_valid():
+    if audio:
+        artwork = audio.tags.getall("APIC")
+        if artwork:
 
-            album_uuid = None
+            artwork_file = f"/tmp/{sha1sum}-artwork.jpg"
 
-            album_title = request.POST.get("album", "").strip()
+            fh = open(artwork_file, "wb")
+            fh.write(artwork[0].data)
+            fh.close()
 
-            # If an album was specified, check if we have the album
-            if album_title:
-                album_artist = form.cleaned_data['artist']
-                if request.POST.get('compilation'):
-                    album_artist = request.POST['album_artist']
-                try:
-                    a = Album.objects.get(user=request.user, title=album_title, artist=album_artist)
-                except ObjectDoesNotExist:
-                    a = None
-                if a:
-                    if a.year != form.cleaned_data['year']:
-                        messages.add_message(request, messages.ERROR, 'The same album exists but with a different year')
-                else:
-                    # This is a new album
-                    a = Album(user=request.user,
-                              title=album_title,
-                              artist=album_artist,
-                              year=form.cleaned_data['year'],
-                              original_release_year=request.POST['original_release_year'] if request.POST['original_release_year'] else form.cleaned_data['year'],
-                              compilation=True if 'compilation' in request.POST else False)
-            else:
-                # No album was specified
-                a = None
-
-            if not messages.get_messages(request):
-                if a:
-                    a.save()
-                form.cleaned_data['length'] = int(info.info.length)
-                new_song = form.save(commit=False)
-                if a:
-                    new_song.album = a
-                new_song.user = request.user
-
-                new_song.save()
-
-                # Take care of the tags.  Create any that are new.
-                for tag in form.cleaned_data['tags']:
-                    new_song.tags.add(tag)
-
-            if a:
-                album_uuid = a.uuid
-
-            s3_client = boto3.client("s3")
-            key = f"songs/{new_song.uuid}"
-
-            # Note: S3 Metadata cannot contain non ASCII characters
+            key = f"artwork/{song.album.id}"
             s3_client.upload_file(
-                f"/tmp/{sha1sum}",
+                artwork_file,
                 settings.AWS_BUCKET_NAME_MUSIC,
-                key,
-                ExtraArgs={
-                    "Metadata": {
-                        "artist": remove_non_ascii_characters(form.cleaned_data["artist"], default="Artist"),
-                        "title": remove_non_ascii_characters(form.cleaned_data["title"], default="Title")
-                    }
-                }
+                key
             )
 
-            audio = MP3(f"/tmp/{sha1sum}")
-
-            if audio:
-                artwork = audio.tags.getall("APIC")
-                if artwork:
-
-                    artwork_file = f"/tmp/{sha1sum}-artwork.jpg"
-
-                    fh = open(artwork_file, "wb")
-                    fh.write(artwork[0].data)
-                    fh.close()
-
-                    key = f"artwork/{album_uuid}"
-                    s3_client.upload_file(
-                        artwork_file,
-                        settings.AWS_BUCKET_NAME_MUSIC,
-                        key)
-
-                    os.remove(artwork_file)
-
-            os.remove(f"/tmp/{sha1sum}")
-
-            # Save the song source in the session in case we're adding
-            #  multiple songs from the same source.
-            request.session['song_source'] = form.cleaned_data['source'].name
-
-            if not messages.get_messages(request):
-                action = 'Upload'
-                sha1sum = None
-                if a:
-                    listen_url = reverse('music:album_detail', args=[album_uuid])
-                else:
-                    listen_url = reverse('music:artist_detail', args=[form.cleaned_data['artist']])
-                messages.add_message(request, messages.INFO, 'Song successfully created.  <a href="' + listen_url + '">Listen to it here.</a>')
-            else:
-                action = 'Review'
-
-        else:
-            action = 'Review'
-
-    return render(request, 'music/create_song.html',
-                  {'action': action,
-                   'info': info,
-                   'notes': notes,
-                   'sha1sum': sha1sum,
-                   'form': form,
-                   'title': 'Create Song'})
+            os.remove(artwork_file)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -393,20 +295,9 @@ class MusicListJson(BaseDatatableView):
         sSearch = self.request.GET.get('sSearch', None)
         if sSearch:
             qs = qs.filter(
-                Q(title__icontains=sSearch) |
-                Q(artist__icontains=sSearch)
+                Q(title__icontains=sSearch)
+                | Q(artist__icontains=sSearch)
             )
-
-        # more advanced example
-        # filter_customer = self.request.GET.get('customer', None)
-
-        # if filter_customer:
-        #     customer_parts = filter_customer.split(' ')
-        #     qs_params = None
-        #     for part in customer_parts:
-        #         q = Q(customer_firstname__istartswith=part)|Q(customer_lastname__istartswith=part)
-        #         qs_params = qs_params | q if qs_params else q
-        #         qs = qs.filter(qs_params)
 
         return qs
 
@@ -476,6 +367,14 @@ def get_song_info(request, uuid):
                'url': file_location}
 
     return JsonResponse(results)
+
+
+@login_required
+def get_song_id3_info(request):
+
+    song = request.FILES["song"].read()
+    id3_info = Song.get_id3_info(request, messages, song)
+    return JsonResponse({**id3_info})
 
 
 @method_decorator(login_required, name="dispatch")

@@ -362,7 +362,14 @@ def s3_bucket(s3_resource):
 
 
 @pytest.fixture()
-def song(auto_login_user):
+def song_source(auto_login_user):
+
+    song_source, _ = SongSource.objects.get_or_create(name="Amazon")
+    return song_source
+
+
+@pytest.fixture()
+def song(auto_login_user, song_source):
 
     user, _ = auto_login_user()
 
@@ -374,9 +381,6 @@ def song(auto_login_user):
 
     listen = Listen(user=user, song=song_2)
     listen.save()
-
-    song_source = SongSource(name="Amazon")
-    song_source.save()
 
     yield [song_0, song_1, song_2]
 

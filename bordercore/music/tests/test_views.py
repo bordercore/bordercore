@@ -1,5 +1,6 @@
 import hashlib
 from pathlib import Path
+from shutil import copy2
 
 import factory
 import pytest
@@ -59,28 +60,18 @@ def test_music_artist_detail(auto_login_user, song):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("music:artist_detail", kwargs={"artist_name": song[1].artist})
+    url = urls.reverse("music:artist_detail", kwargs={"artist": song[1].artist})
     resp = client.get(url)
 
     assert resp.status_code == 200
 
 
 @factory.django.mute_signals(signals.post_save)
-def test_music_create(s3_resource, s3_bucket, auto_login_user, song):
+def test_music_create(s3_resource, s3_bucket, auto_login_user, song, song_source):
 
-    _, client = auto_login_user()
-
-    url = urls.reverse("music:create_song")
+    user, client = auto_login_user()
 
     mp3 = Path(__file__).parent / "resources/Mysterious Lights.mp3"
-
-    with open(mp3, "rb") as fp:
-        resp = client.post(url, {
-            "song": fp,
-            "upload": "Upload"
-        })
-
-    assert resp.status_code == 200
 
     hasher = hashlib.sha1()
     with open(mp3, "rb") as f:
@@ -88,19 +79,30 @@ def test_music_create(s3_resource, s3_bucket, auto_login_user, song):
         hasher.update(buf)
         sha1sum = hasher.hexdigest()
 
-    resp = client.post(url, {
-        "sha1sum": sha1sum,
-        "create": "Create",
-        "artist": "Artist",
-        "title": "Title",
-        "album": "album_0",
-        "original_release_year": "",
-        "source": "1",
-        "year": 2021,
-        "tags": "synthwave"
-    })
+    # Mimic the file upload process by copying the song to /tmp
+    #  for processing by the view
+    copy2(mp3, f"/tmp/{user.userprofile.uuid}-{sha1sum}.mp3")
 
-    assert resp.status_code == 200
+    url = urls.reverse("music:create_song")
+
+    with open(mp3, "rb") as f:
+        resp = client.post(url, {
+            "song": mp3,
+            "sha1sum": sha1sum,
+            "artist": "Bryan Teoh",
+            "title": "Mysterious Lights",
+            "album_name": "FreePD Music",
+            "original_release_year": "",
+            "source": song_source.id,
+            "year": 2020,
+            "tags": "synthwave"
+        })
+
+    # print(resp.content)
+    with open("/tmp/create-song-test-result.html", "wb") as foo:
+        foo.write(resp.content)
+
+    assert resp.status_code == 302
 
 
 def test_music_get_song_list(auto_login_user, song):

@@ -6,14 +6,14 @@ app_name = "music"
 
 urlpatterns = [
     path(
+        route="create/",
+        view=views.SongCreateView.as_view(),
+        name="create_song"
+    ),
+    path(
         route="update/<uuid:song_uuid>/",
         view=views.song_update,
         name="song_update"
-    ),
-    path(
-        route="create/",
-        view=views.create_song,
-        name="create_song"
     ),
     path(
         route="album/<uuid:uuid>/",
@@ -44,5 +44,10 @@ urlpatterns = [
         route="",
         view=views.music_list,
         name="list"
+    ),
+    path(
+        route="get_song_id3_info",
+        view=views.get_song_id3_info,
+        name="get_song_id3_info"
     ),
 ]

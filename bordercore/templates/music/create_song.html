@@ -1,163 +1,149 @@
-{% extends "base.html" %}
-
-{% load dict_get %}
+1{% extends "base.html" %}
 
 {% block title %} Music {% endblock %}
 
-{% block left-block %}
-
-    {% if notes %}
-        <div>
-
-            <br /><br />
-
-            <table class="table table-bordered table-striped">
-                <caption><strong>Notes</strong></caption>
-                {% for note in notes %}
-                    <tr><td>{{ note }}</td></tr>
-                {% endfor %}
-            </table>
-
-        </div>
-    {% endif %}
-
-
-{% endblock %}
-
 {% block content %}
 
-    <div id="vue-messages">
-        {% include "common/show_messages.html" with width=6 %}
-    </div>
+    <div id="vue-app">
 
-    <div class="row">
+        {% include "common/show_messages.html" %}
 
-        <div class="col-lg-12">
-            <p class="lead">{{ action }} Song</p>
-        </div>
+        {% if request.POST.Go and not form.errors %}
+            <div class="alert alert-success offset-lg-2">Post {{ action }}ed</div>
+        {% endif %}
 
-        <div class="col-lg-12">
+        <p class="lead offset-lg-2 font-weight-bold pl-2">{{ action }} a Song</p>
 
-            <form enctype="multipart/form-data" action="{{ request.path }}" method="post">
-                {% csrf_token %}
+        <form action="{{ request.path }}" method="post">
+            {% csrf_token %}
 
-                <input type="hidden" name="sha1sum" value="{{ sha1sum }}" />
-
-                {{ form.length.as_hidden }}
-
-                {% if action == 'Upload' %}
-
-                    <div id="vue-file-upload">
-                        <div class="form-group row">
-                            <div class="col-lg-6 input-group">
-                                <input type="text" name="filename" :value="filename" class="form-control" id="id_filename" autocomplete="off" />
-
-                                <span class="input-group-append">
-                                    <label class="btn btn-primary">Choose song
-                                        <input type="file" id="customFile" name="song" hidden accept="audio/*" @change="onChange" />
-                                    </label>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 pl-0">
-                            <button type="submit" class="btn btn-primary" name="upload" disabled="true" ref="submitButton">Upload</button>
-                            <a class="btn btn-secondary" href="{% url 'music:list' %}">Cancel</a>
+            {% if form.non_field_errors %}
+                <div class="row">
+                    <div class="col-lg-5 offset-lg-2">
+                        <div class="form-error mb-2">
+                        {% for error in form.non_field_errors %}
+                            {{ error|safe }}
+                        {% endfor %}
                         </div>
                     </div>
+                </div>
+            {% endif %}
 
-                {% endif %}
+            <input type="hidden" name="sha1sum" :value="sha1sum" />
+            <input type="hidden" name="length" :value="length" />
 
-                {% if action == 'Review' %}
+            <div class="form-group row">
+                <label class="col-lg-2 col-form-label font-weight-bold text-right">File</label>
 
-                    <div id="vue-review">
+                <div class="col-lg-5">
+                    <div class="input-group">
 
-                    {% for field in form %}
+                        <input type="text" name="filename" :value="filename" class="form-control" id="id_filename" autocomplete="off" />
 
-                        {% if field.label == "Tags" %}
+                        <span class="input-group-append">
+                            <label class="btn btn-primary">Choose song
+                                <input type="file" id="id_file" name="song" hidden accept="audio/*" @change="onChange" />
+                            </label>
+                        </span>
 
-                            <div class="form-group {% if field.errors %} error{% endif %} row">
-                                <label class="bold col-lg-3 col-form-label text-right" for="inputTitle">Tags</label>
+                    </div>
+                </div>
+            </div>
 
-                                <div class="col-lg-5 controls" v-cloak>
-                                    <tags-input
-                                        search-url="{% url 'tag:search' %}?query="
-                                    >
-                                    </tags-input>
+            {% for field in form %}
+                {% if field.label == "Tags" %}
 
-                                </div>
-                                    {% for error in field.errors %}
-                                        <span class="form-error">{{ error }}</span>
-                                    {% endfor %}
-                            </div>
+                    <div class="form-group{% if field.errors %} error{% endif %} row">
+                        <label class="col-lg-2 col-form-label font-weight-bold text-right">Tags</label>
 
-                        {% elif field.label == 'Year' %}
-
-                            <div class="form-group{% if field.errors %} error{% endif %} row">
-                                <label class="bold col-lg-3 col-form-label text-right" for="inputTitle">Year</label>
-                                <div class="col-lg-5">
-                                    <input class="form-control" id="id_year" name="year" type="text" value="{{ info.date.0 }}" autocomplete="off" />
-                                </div>
-                            </div>
-
-                            <div class="form-group{% if field.errors %} error{% endif %} row">
-                                <label class="bold col-lg-3 col-form-label text-right" for="inputTitle">Album</label>
-                                <div class="col-lg-5">
-                                    <input class="form-control" id="id_album" name="album" type="text" value="{{ info.album.0 }}" autocomplete="off" />
-                                </div>
-                            </div>
-
-                            <div class="form-group{% if field.errors %} error{% endif %} row">
-                                <label class="bold col-lg-3 col-form-label text-right" for="inputTitle">Compilation</label>
-                                <div class="col-lg-5 form-inline">
-                                    <input type="checkbox" name="compilation" id="id_compilation" v-model="isCompilation" />
-                                </div>
-                            </div>
-
-                            <div v-if="isCompilation" class="form-group{% if field.errors %} error{% endif %} row" id="album_artist_field">
-                                <label class="bold col-lg-3 col-form-label text-right" for="inputTitle">Album Artist</label>
-                                <div class="col-lg-5">
-                                    <input class="form-control" id="id_album_artist" name="album_artist" type="text" value="Various Artists" autocomplete="off" />
-                                </div>
-                            </div>
-
-                            <div class="form-group{% if field.errors %} error{% endif %} row">
-                                <label class="bold col-lg-3 col-form-label text-right" for="inputTitle">Original Release Year</label>
-                                <div class="col-lg-5">
-                                    <input class="form-control" id="id_original_release_year" name="original_release_year" type="text" autocomplete="off" />
-                                </div>
-                            </div>
-
-                        {% elif field.label != 'Length' %}
-
-                            <div class="form-group{% if field.errors %} error{% endif %} row">
-                                <label class="bold col-lg-3 col-form-label text-right" for="inputTitle">{{ field.label }}</label>
-                                <div class="col-lg-5 controls">
-                                    {{ field }}
-                                    {% for error in field.errors %}
-                                        <span class="form-error">{{ error }}</span>
-                                    {% endfor %}
-                                </div>
-                            </div>
-
-                        {% endif %}
+                        <div class="col-lg-5">
+                            <tags-input search-url="{% url 'tag:search' %}?query=">
+                            </tags-input>
+                        </div>
+                    {% for error in field.errors %}
+                        <span class="form-error">{{ error }}</span>
                     {% endfor %}
+                    </div>
 
-                    <div class="form-group">
-                        <div class="col-lg-3 offset-lg-3">
-                            <button type="submit" class="btn btn-primary" name="create">Create</button>
-                            <a class="btn btn-secondary" href="{% url 'music:create_song' %}">Cancel</a>
+                {% elif field.label == 'Compilation' %}
+
+                    <div class="form-group{% if field.errors %} error{% endif %} row">
+                        <label class="col-lg-2 col-form-label font-weight-bold text-right">Compilation</label>
+                        <div class="col-lg-5 form-inline">
+                            <input type="checkbox" name="compilation" id="id_compilation" v-model="isCompilation" />
                         </div>
                     </div>
 
-            </form>
+                    <div v-if="isCompilation" class="form-group{% if field.errors %} error{% endif %} row" id="album_artist_field">
+                        <label class="col-lg-2 col-form-label font-weight-bold text-right">Album Artist</label>
+                        <div class="col-lg-5">
+                            <input class="form-control" id="id_album_artist" name="album_artist" type="text" value="Various Artists" autocomplete="off" />
+                        </div>
+                    </div>
+
+                {% elif field.label != 'Length' and field.label != 'Sha1sum' %}
+
+                    <div class="form-group{% if field.errors %} error{% endif %} row">
+                        <label class="col-lg-2 col-form-label font-weight-bold text-right">{{ field.label }}</label>
+
+                        <div class="col-lg-5">
+                        {{ field }}
+                        {% for error in field.errors %}
+                            <span class="form-error">{{ error }}</span>
+                        {% endfor %}
+                        </div>
 
                     </div>
 
                 {% endif %}
+            {% endfor %}
+
+            <div class="form-group row">
+                <label class="col-lg-2 col-form-label font-weight-bold text-right">Length</label>
+                <label class="col-lg-5 text-left mb-0 form-no-input" id="id_length">[[ length_pretty ]]</label>
+            </div>
+
+            {% if form.instance.album.title %}
+                <div class="form-group row">
+                    <label class="col-lg-2 col-form-label font-weight-bold text-right">Album</label>
+                    <label class="col-lg-5 text-left mb-0 form-no-input">{{ form.instance.album.title }}</label>
+                </div>
+            {% endif %}
+
+            <div class="form-group">
+                <div class="col-lg-5 offset-lg-2">
+                    <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}">
+                    <input class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete">
+                    <a class="btn btn-secondary" href="{% url 'music:list' %}">Cancel</a>
+                </div>
+            </div>
+
+        </form>
+
+    {% if file_info %}
+
+        <div class="row">
+
+            <div class="col-lg-3">
+                <img src="{{ STATIC_URL }}albums/{{ song.artist }}/{{ song.album.title }}/artwork.jpg" width="150" height="150" />
+            </div>
+
+            <div class="col-lg-4">
+
+                <table class="table table-striped">
+1                <tr><td><strong>length</strong></td><td>{{ file_info.length }}</td></tr>
+                    <tr><td><strong>bit rate</strong></td><td>{{ file_info.id3_info.info.bitrate }}</td></tr>
+                    <tr><td><strong>sample rate</strong></td><td>{{ file_info.id3_info.info.sample_rate }}</td></tr>
+                    <tr><td><strong>file size</strong></td><td>{{ file_info.filesize }}</td></tr>
+                </table>
+
+            </div>
 
         </div>
 
     </div>
+
+    {% endif %}
 
 {% endblock %}
 
@@ -171,39 +157,46 @@
 
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
-        {% if action == 'Upload' %}
         new Vue({
-            el: "#vue-file-upload",
+            el: "#vue-app",
             data() {
                 return {
-                    filename: null
+                    filename: null,
+                    length: null,
+                    length_pretty: "N/A",
+                    sha1sum: null,
+                    isCompilation: false
                 }
             },
             methods: {
                 onChange(evt) {
-                    this.$refs.submitButton.removeAttribute("disabled");
                     this.filename = evt.target.files[0].name;
-                },
-            },
-        });
-        {% endif %}
 
-        {% if action == 'Review' %}
-        new Vue({
-            el: "#vue-review",
-            data() {
-                return {
-                    isCompilation: false
-                }
+                    let song = document.getElementById("id_file").files[0];
+                    let formData = new FormData();
+                    formData.append("song", song);
+
+                    axios.post("{% url "music:get_song_id3_info" %}", formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }).then(response => {
+                        const array = ["title", "artist", "year", "track", "album_name"]
+                        array.forEach(function (item, index) {
+                            data = response.data[item];
+                            if (data) {
+                                document.getElementById("id_" + item).value = data;
+                            }
+                        });
+                        this.length = response.data.length;
+                        this.length_pretty = response.data.length_pretty;
+                        this.sha1sum = response.data.sha1sum;
+                    });
+                },
             },
             components: {
                 TagsInput
-            },
-        });
-        {% endif %}
-
-        new Vue({
-            el: "#vue-messages",
+            }
         });
 
     </script>
