@@ -7,7 +7,7 @@
                             :display-attribute="displayAttribute"
                             :value-attribute="valueAttribute"
                             :list="search"
-                            name="search"
+                            :name="name"
                             :filter-by-query=true
                             :debounce=200
                             :min-length=2
@@ -59,6 +59,9 @@
             },
             placeHolder: {
                 default: "Name"
+            },
+            name: {
+                default: "search"
             }
 
         },
