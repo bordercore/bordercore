@@ -1,9 +1,12 @@
 import os
+import re
+import urllib
 from datetime import datetime
 from pathlib import Path
 
 import boto3
 from django_datatables_view.base_datatable_view import BaseDatatableView
+from elasticsearch import Elasticsearch
 from mutagen.mp3 import MP3
 
 from django.conf import settings
@@ -289,6 +292,78 @@ def handle_s3(song, sha1sum):
             )
 
             os.remove(artwork_file)
+
+
+@login_required
+def search_artists(request):
+
+    es = Elasticsearch(
+        [settings.ELASTICSEARCH_ENDPOINT],
+        verify_certs=False
+    )
+
+    search_terms = re.split(r"\s+", urllib.parse.unquote(request.GET["term"].lower()))
+
+    search_object = {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "term": {
+                            "doctype": "song"
+                        }
+                    },
+                    {
+                        "term": {
+                            "user_id": request.user.id
+                        }
+                    }
+                ]
+            }
+        },
+        "aggs": {
+            "unique_artists": {
+                "terms": {
+                    "field": "artist.keyword",
+                    "size": 100
+                }
+            }
+        },
+        "from": 0, "size": 0,
+        "_source": ["artist"]
+    }
+
+    # Separate query into terms based on whitespace and
+    #  and treat it like an "AND" boolean search
+    for one_term in search_terms:
+        search_object["query"]["bool"]["must"].append(
+            {
+                "bool": {
+                    "should": [
+                        {
+                            "wildcard": {
+                                "artist": {
+                                    "value": f"*{one_term}*",
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        )
+
+    results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+    matches = []
+
+    for match in results["aggregations"]["unique_artists"]["buckets"]:
+
+        matches.append(
+            {
+                "artist": match["key"]
+            }
+        )
+
+    return JsonResponse(matches, safe=False)
 
 
 @method_decorator(login_required, name='dispatch')

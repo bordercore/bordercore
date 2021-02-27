@@ -65,6 +65,28 @@
                     {% endfor %}
                     </div>
 
+                {% elif field.label == "Artist" %}
+
+                    <div class="form-group{% if field.errors %} error{% endif %} row">
+                        <label class="col-lg-2 col-form-label font-weight-bold text-right">Artist</label>
+
+                        <div class="col-lg-5">
+                            <simple-suggest
+                                id="id_artist"
+                                name="artist"
+                                ref="simpleSuggest"
+                                display-attribute="artist"
+                                value-attribute="artist"
+                                search-url="{% url 'music:search_artists' %}?term="
+                                place-holder=""
+                            >
+                            </simple-suggest>
+                        </div>
+                    {% for error in field.errors %}
+                        <span class="form-error">{{ error }}</span>
+                    {% endfor %}
+                    </div>
+
                 {% elif field.label == 'Compilation' %}
 
                     <div class="form-group{% if field.errors %} error{% endif %} row">
@@ -170,6 +192,9 @@
             },
             methods: {
                 onChange(evt) {
+
+                    var self = this;
+
                     this.filename = evt.target.files[0].name;
 
                     let song = document.getElementById("id_file").files[0];
@@ -186,13 +211,20 @@
                             data = response.data[item];
                             if (data) {
                                 document.getElementById("id_" + item).value = data;
+                                if (item === "artist") {
+                                    // Sync the artist input value with the simpleSuggest Vue component's value
+                                    self.$refs.simpleSuggest.query = data;
+                                }
                             }
                         });
                         this.length = response.data.length;
                         this.length_pretty = response.data.length_pretty;
                         this.sha1sum = response.data.sha1sum;
+
+
                     });
                 },
+                select() {}
             },
             components: {
                 TagsInput

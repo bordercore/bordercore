@@ -11,6 +11,11 @@ urlpatterns = [
         name="create_song"
     ),
     path(
+        route="search_artist",
+        view=views.search_artists,
+        name="search_artists"
+    ),
+    path(
         route="update/<uuid:song_uuid>/",
         view=views.song_update,
         name="song_update"
