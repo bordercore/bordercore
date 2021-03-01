@@ -1,7 +1,9 @@
 import hashlib
+import os
 import uuid
 
 import boto3
+import humanize
 import markdown
 from elasticsearch import Elasticsearch
 from markdown.extensions.codehilite import CodeHiliteExtension
@@ -150,7 +152,10 @@ class Song(TimeStampedModel):
         info = MP3(filename, ID3=EasyID3)
 
         data = {
-            "sha1sum": sha1sum
+            "filesize": humanize.naturalsize(os.stat(filename).st_size),
+            "sha1sum": sha1sum,
+            "bit_rate": info.info.bitrate,
+            "sample_rate": info.info.sample_rate
         }
 
         for field in ("artist", "title"):

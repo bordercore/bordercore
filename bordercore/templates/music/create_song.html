@@ -1,12 +1,36 @@
-1{% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %} Music {% endblock %}
 
 {% block content %}
 
-    <div id="vue-app">
+    <div class="row no-gutters h-100">
+        <div class="col-lg-3 d-flex flex-column">
 
-        {% include "common/show_messages.html" %}
+            <div class="w-100" id="vue-song-info" id="vue-song-info" :class="{'d-none': hideSongInfo}" v-cloak>
+                <card title="Song Info">
+                    <template v-slot:content>
+                        <ul>
+                            <li><strong>Song Length</strong> [[ songLengthPretty ]]</li>
+                            <li><strong>Song Size</strong> [[ songSize ]]</li>
+                            <li><strong>Sample Rate</strong> [[ sampleRate ]]</li>
+                            <li><strong>Bit Rate</strong> [[ bitRate ]]</li>
+                        </ul>
+                    </template>
+                </card>
+            </div>
+
+            <div class="d-flex extend-block card-body">
+                <div> Choose the local MP3 file containing the song you want to upload. Any embedded <strong>ID3v2</strong> tags will be scanned and the corresponding form fields will be populated. </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-8 h-100">
+
+            <div id="vue-app">
+
+                {% include "common/show_messages.html" %}
 
         {% if request.POST.Go and not form.errors %}
             <div class="alert alert-success offset-lg-2">Post {{ action }}ed</div>
@@ -30,7 +54,7 @@
             {% endif %}
 
             <input type="hidden" name="sha1sum" :value="sha1sum" />
-            <input type="hidden" name="length" :value="length" />
+            <input type="hidden" name="length" :value="songLength" />
 
             <div class="form-group row">
                 <label class="col-lg-2 col-form-label font-weight-bold text-right">File</label>
@@ -120,11 +144,6 @@
                 {% endif %}
             {% endfor %}
 
-            <div class="form-group row">
-                <label class="col-lg-2 col-form-label font-weight-bold text-right">Length</label>
-                <label class="col-lg-5 text-left mb-0 form-no-input" id="id_length">[[ length_pretty ]]</label>
-            </div>
-
             {% if form.instance.album.title %}
                 <div class="form-group row">
                     <label class="col-lg-2 col-form-label font-weight-bold text-right">Album</label>
@@ -142,22 +161,7 @@
 
         </form>
 
-    {% if file_info %}
-
-        <div class="row">
-
-            <div class="col-lg-3">
-                <img src="{{ STATIC_URL }}albums/{{ song.artist }}/{{ song.album.title }}/artwork.jpg" width="150" height="150" />
-            </div>
-
-            <div class="col-lg-4">
-
-                <table class="table table-striped">
-1                <tr><td><strong>length</strong></td><td>{{ file_info.length }}</td></tr>
-                    <tr><td><strong>bit rate</strong></td><td>{{ file_info.id3_info.info.bitrate }}</td></tr>
-                    <tr><td><strong>sample rate</strong></td><td>{{ file_info.id3_info.info.sample_rate }}</td></tr>
-                    <tr><td><strong>file size</strong></td><td>{{ file_info.filesize }}</td></tr>
-                </table>
+                </div>
 
             </div>
 
@@ -165,7 +169,7 @@
 
     </div>
 
-    {% endif %}
+    </div>
 
 {% endblock %}
 
@@ -179,13 +183,51 @@
 
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
+        const store = new Vuex.Store({
+            state: {
+                songLength: null,
+                songLengthPretty: null,
+                songSize: null,
+                sampleRate: null,
+                bitRate: null,
+            },
+            getters: {},
+            mutations: {},
+        });
+
+        new Vue({
+            el: "#vue-song-info",
+            store,
+            computed: {
+                songLengthPretty () {
+                    return this.$store.state.songLengthPretty
+                },
+                songSize () {
+                    return this.$store.state.songSize
+                },
+                sampleRate () {
+                    return this.$store.state.sampleRate
+                },
+                bitRate () {
+                    return this.$store.state.bitRate
+                },
+                hideSongInfo () {
+                    return this.$store.state.songLength === null
+                }
+            }
+        });
+
         new Vue({
             el: "#vue-app",
+            store,
+            computed: {
+                songLength () {
+                    return this.$store.state.songLength
+                }
+            },
             data() {
                 return {
                     filename: null,
-                    length: null,
-                    length_pretty: "N/A",
                     sha1sum: null,
                     isCompilation: false
                 }
@@ -203,7 +245,7 @@
 
                     axios.post("{% url "music:get_song_id3_info" %}", formData, {
                         headers: {
-                            'Content-Type': 'multipart/form-data'
+                            "Content-Type": "multipart/form-data"
                         }
                     }).then(response => {
                         const array = ["title", "artist", "year", "track", "album_name"]
@@ -217,11 +259,12 @@
                                 }
                             }
                         });
-                        this.length = response.data.length;
-                        this.length_pretty = response.data.length_pretty;
+                        this.$store.state.songLength = response.data.length;
+                        this.$store.state.songLengthPretty = response.data.length_pretty;
+                        this.$store.state.songSize = response.data.filesize;
+                        this.$store.state.sampleRate = response.data.sample_rate;
+                        this.$store.state.bitRate = response.data.bit_rate;
                         this.sha1sum = response.data.sha1sum;
-
-
                     });
                 },
                 select() {}

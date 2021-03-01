@@ -212,6 +212,8 @@ class SongCreateView(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["action"] = "Create"
+        context["no_left_block"] = True
+        context["content_block_width"] = "12"
         return context
 
     def form_valid(self, form):

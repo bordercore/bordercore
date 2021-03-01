@@ -7,9 +7,9 @@
   padding: 0;
 }
 
-/* Used on full-height blocks to force some padding at the bottom of the page */
+/* Used on the last block in a flex column to extend to the bottom of the page */
 .extend-block {
-  padding-bottom: $grid-margin * 5 + ($grid-margin * 0.5) !important;
+  flex: 1 0 auto;
 }
 
 .content-nav {
@@ -199,6 +199,7 @@ $nav-tabs-link-hover-border-color: $nav-tabs-border-color;
 .card-body {
   background-color: $background-color-dark;
   border-radius: 7px;
+  margin: 0 0 15px 15px;
 }
 
 .list-group-item-secondary {
