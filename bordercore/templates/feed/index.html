@@ -8,71 +8,57 @@
 
         {% include "common/show_messages.html" with width=6 %}
 
-        <div class="row">
-            <div class="col-lg-3">
+        <div class="row no-gutters">
 
-                <div class="row h-100">
-                    <div class="col-lg-12 card-grid">
-                        <feed-info inline-template>
-                            <card title="Feed Info" class-name="h-100">
-                                <template v-slot:content>
-                                    <strong>Updated</strong>: [[ currentFeed.lastCheck ]]
-                                    <br />
-                                    <strong>Status</strong>: <font-awesome-icon class="ml-1" :class="status.class" :icon="status.font"></font-awesome-icon>
-                                </template>
-                            </card>
-                        </feed-info>
-                    </div>
-                </div>
+            <div class="col-lg-3 d-flex flex-column">
+                <feed-info inline-template>
+                    <card title="Feed Info">
+                        <template v-slot:content>
+                            <strong>Updated</strong>: [[ currentFeed.lastCheck ]]
+                            <br />
+                            <strong>Status</strong>: <font-awesome-icon class="ml-1" :class="status.class" :icon="status.font"></font-awesome-icon>
+                        </template>
+                    </card>
+                </feed-info>
+            </div>
 
-            </div> <!-- End first column -->
-
-            <div class="col-lg-3">
-
-                <div class="row">
-                    <div class="col-lg-12 card-grid">
-
-                        <div class="card-body">
-                            <h3>Feed List</h3>
-                            <hr />
-                            <ul id="sort-container" class="feed-list">
-                                <feed-list inline-template>
-                                    <div>
-                                        <draggable v-model="feedList" @change="onChange" ghost-class="collection_sortable-ghost" animation="500" forceFallback="true">
-                                            <transition-group type="transition">
-                                                <li v-for="feed in feedList" :key="feed.id" v-cloak>
-                                                    <a href="#" :data-id="feed.id" @click="onClick(feed)">[[ feed.name ]]</a>
-                                                    <span v-if="feed.lastResponseCode !== 200" class="list_annotation">[[ feed.lastResponseCode ]]</span>
-                                                </li>
-                                            </transition-group>
-                                        </draggable>
-                                        <div class="text-secondary" v-if="feedList.length === 0" v-cloak>
+            <div class="col-lg-3 d-flex flex-column">
+                <div class="card-body">
+                    <h3>Feed List</h3>
+                    <hr />
+                    <ul id="sort-container" class="feed-list">
+                        <feed-list inline-template>
+                            <div>
+                                <draggable v-model="feedList" @change="onChange" ghost-class="collection_sortable-ghost" animation="500" forceFallback="true">
+                                    <transition-group type="transition">
+                                        <li v-for="feed in feedList" :key="feed.id" v-cloak>
+                                            <a href="#" :data-id="feed.id" @click="onClick(feed)">[[ feed.name ]]</a>
+                                            <span v-if="feed.lastResponseCode !== 200" class="list_annotation">[[ feed.lastResponseCode ]]</span>
+                                        </li>
+                                    </transition-group>
+                                </draggable>
+                                <div class="text-secondary" v-if="feedList.length === 0" v-cloak>
                                             No feeds found. <a href="{% url 'feed:create' %}">Add one here.</a>
-                                        </div>
-                                    </div>
-                                </feed-list>
+                                </div>
+                            </div>
+                        </feed-list>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-6 d-flex flex-column">
+                <div class="d-flex right-column extend-block">
+                    <url-list inline-template>
+                        <div class="card-body">
+                            <h3 id="feed-title" v-cloak><a :href="currentFeed.homepage">[[ currentFeed.name ]]</a></h3>
+                            <hr />
+                            <ul>
+                                <li v-for="url in currentFeed.feedItems" v-cloak>
+                                    <a :href="url.link">[[ url.title ]]</a>
+                                </li>
                             </ul>
                         </div>
-                    </div>
-                </div>
-            </div> <!-- End second column -->
-
-            <div class="col-lg-6">
-
-                <div class="row h-100">
-                    <div class="col-lg-12 card-grid">
-                        <url-list inline-template>
-                            <div class="card-body h-100">
-                                <h3 id="feed-title" v-cloak><a :href="currentFeed.homepage">[[ currentFeed.name ]]</a></h3>
-                                <hr />
-                                <ul>
-                                    <li v-for="url in currentFeed.feedItems" v-cloak>
-                                        <a :href="url.link">[[ url.title ]]</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </url-list>
-                    </div>
+                    </url-list>
                 </div>
             </div>
         </div>

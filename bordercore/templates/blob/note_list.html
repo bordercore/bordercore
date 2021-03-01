@@ -6,20 +6,20 @@
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/code_style.css" />
 {% endblock %}
 
-{% block left-block %}
+{% block content %}
 
-    <div class="row card-grid">
-        <div class="col-lg-12 card-grid" id="sort-container-notes">
+    <div class="row no-gutters">
+
+        <div class="col-lg-3 d-flex flex-column" id="sort-container-notes">
             <card title="Favorite Notes">
 
                 <template v-slot:title-slot>
                     <div class="h3">
-                         Favorite Notes
+                        Favorite Notes
                     </div>
                 </template>
 
                 <template v-slot:content>
-
                     <ul class="list-group" _id="sort-container-notes">
                         <draggable v-model="notes" @change="onChange" ghost-class="sortable-ghost">
                             <transition-group type="transition">
@@ -31,79 +31,81 @@
                             </transition-group>
                         </draggable>
                     </ul>
-
                 </template>
+
             </card>
         </div>
-    </div>
 
-{% endblock %}
+        <div class="col-lg-9 d-flex flex-column" id="vue-app">
 
-{% block content %}
+            <div class="row">
+                <div class="col-lg-12 card-grid">
+                    <a class="btn btn-primary ml-2 mr-4 float-right right-column" href="{% url 'blob:create' %}?is_note=true">Add note</a>
+                </div>
+            </div>
 
-    <div class="row">
-        <div class="col-lg-12 card-grid">
-            <a class="btn btn-primary ml-2 float-right" href="{% url 'blob:create' %}?is_note=true">Add note</a>
-        </div>
-    </div>
+            {% if request.GET and not object_list.hits.hits %}
+                <div class="alert alert-info">No notes found</div>
+            {% endif %}
 
-    {% if request.GET and not object_list.hits.hits %}
-        <div class="alert alert-info">No notes found</div>
-    {% endif %}
+            {% for note in object_list.hits.hits %}
 
-    <div id="vue-app">
+                <div class="right-column">
+                    <card title="{{ note.source.title|default:"Note Title" }}">
+                        <template v-slot:title-slot>
+                            <h2>
+                                <a href="{% url 'blob:detail' note.source.uuid %}">{{ note.source.title|default:"Note Title" }}</a>
+                            </h2>
+                        </template>
+                        <template v-slot:content>
 
-    {% for note in object_list.hits.hits %}
+                            <div id="note" class="table-borders">
 
-        <div class="row">
-            <div class="col-lg-12 card-grid">
-                <card title="{{ note.source.title|default:"Note Title" }}">
-                    <template v-slot:title-slot>
-                        <h2>
-                            <a href="{% url 'blob:detail' note.source.uuid %}">{{ note.source.title|default:"Note Title" }}</a>
-                        </h2>
-                    </template>
-                    <template v-slot:content>
+                                <span class="glyphicon glyphicon-time"></span> <span> {{ note.source.date }} </span>
 
-                        <div id="note" class="table-borders">
-
-                            <span class="glyphicon glyphicon-time"></span> <span> {{ note.source.date }} </span>
-
-                            <div>
+                                <div>
                                 {{ note.source.content|safe }}
-                            </div>
+                                </div>
 
                             {% for tag in note.source.tags %}
                                 <a id="tag" class="badge badge-info" href="{% url 'search:notes' %}?tagsearch={{ tag }}">{{ tag }}</a>
                             {% endfor %}
-                        </div>
+                            </div>
 
-                    </template>
-                </card>
+                        </template>
+                    </card>
+                </div>
+
+            {% endfor %}
+
+            <div class="row">
+                <div class="col-lg-12 card-grid ml-4">
+
+                    {% if object_list and paginator.num_pages > 1 %}
+                        <nav class="mb-5 navigation">
+                            <ul class="pagination">
+                                <li class="page-item{% if not paginator.has_previous %} disabled{% endif %}">
+                                    <a class="page-link" href="?page={{ paginator.previous_page_number }}&tagsearch={{ request.GET.tagsearch }}&search={{ request.GET.search }}">Previous</a>
+                                </li>
+                                <li class="page-item disabled">
+                                    <span class="page-link ">
+            Page <strong>{{ paginator.number }}</strong> of <strong>{{ paginator.num_pages }}</strong>
+                                    </span>
+                                </li>
+                                <li class="page-item{% if not paginator.has_next %} disabled{% endif %}">
+                                    <a class="page-link" href="?page={{ paginator.next_page_number }}&tagsearch={{ request.GET.tagsearch }}&search={{ request.GET.search }}">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    {% endif %}
+
+                </div>
             </div>
-        </div>
 
-    {% endfor %}
+        </div>
 
     </div>
 
-    {% if object_list and paginator.num_pages > 1 %}
-        <nav class="mb-5 navigation">
-            <ul class="pagination">
-                <li class="page-item{% if not paginator.has_previous %} disabled{% endif %}">
-                    <a class="page-link" href="?page={{ paginator.previous_page_number }}&tagsearch={{ request.GET.tagsearch }}&search={{ request.GET.search }}">Previous</a>
-                </li>
-                <li class="page-item disabled">
-                    <span class="page-link ">
-            Page <strong>{{ paginator.number }}</strong> of <strong>{{ paginator.num_pages }}</strong>
-                    </span>
-                </li>
-                <li class="page-item{% if not paginator.has_next %} disabled{% endif %}">
-                    <a class="page-link" href="?page={{ paginator.next_page_number }}&tagsearch={{ request.GET.tagsearch }}&search={{ request.GET.search }}">Next</a>
-                </li>
-            </ul>
-        </nav>
-    {% endif %}
 
 {% endblock %}
 

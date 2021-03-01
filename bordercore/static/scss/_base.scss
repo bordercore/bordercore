@@ -12,15 +12,15 @@
   flex: 1 0 auto;
 }
 
+/* Add this to the right-most column in a flex grid */
+.right-column {
+  margin-right: 1rem;
+}
+
 .content-nav {
   font-size: 17px;
   margin: 10px;
   padding: 5px;
-}
-
-.content-main {
-  border-radius: 7px;
-  margin: $grid-margin * 0.5 $grid-margin * 0.5 $grid-margin * 0.5 $grid-margin * 0.5;
 }
 
 .card-title {
@@ -266,7 +266,7 @@ pre {
 #top-search {
   background-color: $background-color-dark;
   border-radius: 7px;
-  margin: $grid-margin $grid-margin $grid-margin * 0.5 $grid-margin;
+  margin: $grid-margin $grid-margin $grid-margin $grid-margin;
 }
 
 #top-search input {

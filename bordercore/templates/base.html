@@ -35,7 +35,7 @@
 
         <div class="wrapper">
 
-            <div class="container-fluid" id="content">
+            <div class="container-fluid d-flex flex-column" id="content">
 
                 <div class="row">
                     <div class="col-lg-12">
@@ -77,7 +77,7 @@
                 {% block nav %}
                 {% endblock %}
 
-                <div class="row content-main h-100">
+                <div class="row extend-block">
 
                     {% if not no_left_block %}
 
@@ -152,7 +152,7 @@
                                     header: true,
                                     title: "Bordercore",
                                     hiddenOnCollapse: true,
-                                    class: "sidebar-header"
+                                    class: "sidebar-header text-center"
                                 },
                                 {
                                     href: "{% url 'homepage:homepage' %}",

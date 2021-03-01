@@ -239,6 +239,9 @@ class NoteListView(SearchListView):
                 extensions=[CodeHiliteExtension(guess_lang=False), "tables"]
             )
 
+        context["no_left_block"] = True
+        context["content_block_width"] = 12
+
         return context
 
 

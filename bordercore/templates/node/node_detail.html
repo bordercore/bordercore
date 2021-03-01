@@ -13,104 +13,95 @@
 
     <div id="vue-app">
 
-        <div class="row">
-            <div class="col-lg-4">
+        <div class="row no-gutters h-100">
+            <div class="col-lg-4 d-flex flex-column">
 
-                <div class="row">
+                <div>
+                    <blob-list inline-template ref="blobList">
 
-                    <div class="col-lg-12 card-grid">
-                        <blob-list inline-template ref="blobList">
+                        <card title="Reference">
+                            <template v-slot:top-right>
+                                <span class="float-right" @click="chooseBlob()">
+                                    <font-awesome-icon icon="plus"></font-awesome-icon>
+                                </span>
+                            </template>
 
-                            <card
-                                title="Reference"
-                            >
-                                <template v-slot:top-right>
-                                    <span class="float-right" @click="chooseBlob()">
-                                        <font-awesome-icon icon="plus"></font-awesome-icon>
-                                    </span>
-                                </template>
+                            <template v-slot:content>
 
-                                <template v-slot:content>
+                                <ul class="list-group list-group-flush" id="sort-container-tags">
+                                    <draggable v-model="blobList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
+                                        <transition-group type="transition" id="node-note">
+                                            <li v-for="(blob, index) in blobList" class="list-group-item list-group-item-secondary text-info draggable" :data-uuid="blob.uuid" :key="blob.uuid" v-cloak v-b-hover="handleHover">
+                                                <div class="dropdownmenu hidden">
 
-                                    <ul class="list-group list-group-flush" id="sort-container-tags">
-                                        <draggable v-model="blobList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
-                                            <transition-group type="transition" id="node-note">
-                                                <li v-for="(blob, index) in blobList" class="list-group-item list-group-item-secondary text-info draggable" :data-uuid="blob.uuid" :key="blob.uuid" v-cloak v-b-hover="handleHover">
-                                                    <div class="dropdownmenu hidden">
+                                                    <dropdown-menu v-model="show">
+                                                        <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
+                                                        <div slot="dropdown">
+                                                            <a class="dropdown-item" href="#" @click="removeBlob(blob.uuid)">Remove</a>
+                                                            <a v-if="!blob.note" class="dropdown-item" href="#" @click="addNote(blob.uuid, index)">Add note</a>
+                                                        </div>
+                                                    </dropdown-menu>
+                                                </div>
 
-                                                        <dropdown-menu v-model="show">
-                                                            <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
-                                                            <div slot="dropdown">
-                                                                <a class="dropdown-item" href="#" @click="removeBlob(blob.uuid)">Remove</a>
-                                                                <a v-if="!blob.note" class="dropdown-item" href="#" @click="addNote(blob.uuid, index)">Add note</a>
-                                                            </div>
-                                                        </dropdown-menu>
-                                                    </div>
+                                                <div style="display:table">
+                                                    <div style="display:table-row">
 
-                                                    <div style="display:table">
-                                                        <div style="display:table-row">
+                                                        <div style="display:table-cell" class="pr-2">
+                                                            <img :src="[[ blob.cover_url ]]" height="75" width="70" />
+                                                        </div>
 
-                                                            <div style="display:table-cell" class="pr-2">
-                                                                <img :src="[[ blob.cover_url ]]" height="75" width="70" />
-                                                            </div>
+                                                        <div style="display:table-cell; vertical-align: top">
 
-                                                            <div style="display:table-cell; vertical-align: top">
+                                                            <a :href="blob.url">[[ blob.title ]]</a>
+                                                            <div v-if="blob.note" @click="activateInEditMode(blob, $event.target)" v-show="!blob.noteIsEditable" class="node-note">[[ blob.note ]]</div>
+                                                            <span v-show="blob.noteIsEditable">
+                                                                <input type="text" class="form-control form-control-sm" :value="blob.note" ref="input" placeholder="Add Note" @blur="editNote(blob.uuid, $event.target.value)" @keydown.enter="editNote(blob.uuid, $event.target.value)" >
+                                                            </span>
 
-                                                                <a :href="blob.url">[[ blob.title ]]</a>
-                                                                <div v-if="blob.note" @click="activateInEditMode(blob, $event.target)" v-show="!blob.noteIsEditable" class="node-note">[[ blob.note ]]</div>
-                                                                <span v-show="blob.noteIsEditable">
-                                                                    <input type="text" class="form-control form-control-sm" :value="blob.note" ref="input" placeholder="Add Note" @blur="editNote(blob.uuid, $event.target.value)" @keydown.enter="editNote(blob.uuid, $event.target.value)" >
-                                                                </span>
-
-                                                            </div>
                                                         </div>
                                                     </div>
-
-                                                </li>
-                                                <div class="text-secondary" v-if="blobList.length == 0" :key="1" v-cloak>
-                                                    Nothing to show
                                                 </div>
-                                            </transition-group>
-                                        </draggable>
-                                    </ul>
-                                </template>
-                            </card>
-                        </blob-list>
 
-                    </div>
+                                            </li>
+                                            <div class="text-secondary" v-if="blobList.length == 0" :key="1" v-cloak>
+                                                    Nothing to show
+                                            </div>
+                                        </transition-group>
+                                    </draggable>
+                                </ul>
+                            </template>
+                        </card>
+                    </blob-list>
 
                 </div>
 
-                <div class="row">
-                    <div class="col-lg-12 card-grid">
-                        <note inline-template ref="note">
+                <div class="d-flex" style="flex: 1 0 auto">
+                    <note inline-template ref="note">
 
-                            <card v-b-hover="handleHover">
+                        <card v-b-hover="handleHover">
 
-                                <template v-slot:title-slot>
-                                    <div class="card-title" v-cloak>
+                            <template v-slot:title-slot>
+                                <div class="card-title" v-cloak>
                                         Notes
-                                        <span class="dropdownmenu hidden float-right" v-if="note !== null">
-                                            <dropdown-menu v-model="show">
-                                                <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
-                                                <div slot="dropdown">
-                                                    <a v-if="note" class="dropdown-item" href="#" @click="editNote()">Edit note</a>
-                                                </div>
-                                            </dropdown-menu>
-                                        </span>
-                                    </div>
-                                </template>
-                                <template v-slot:content>
-                                    <div class="text-info" :class="{editing: isEditing}" v-cloak>
-                                        <label @dblclick="editNote()" v-html="noteHtml"></label>
-                                        <span v-if="note === null || note === ''"><a href="#" @click="editNote()">Add a note</a></span>
-                                        <textarea id="note" class="node-note-edit" v-model="note" rows="5" @blur="doneEdit()"></textarea>
-                                    </div>
-                                </template>
-                            </card>
-                        </note>
-
-                    </div>
+                                    <span class="dropdownmenu hidden float-right" v-if="note !== null">
+                                        <dropdown-menu v-model="show">
+                                            <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
+                                            <div slot="dropdown">
+                                                <a v-if="note" class="dropdown-item" href="#" @click="editNote()">Edit note</a>
+                                            </div>
+                                        </dropdown-menu>
+                                    </span>
+                                </div>
+                            </template>
+                            <template v-slot:content>
+                                <div class="text-info" :class="{editing: isEditing}" v-cloak>
+                                    <label @dblclick="editNote()" v-html="noteHtml"></label>
+                                    <span v-if="note === null || note === ''"><a href="#" @click="editNote()">Add a note</a></span>
+                                    <textarea id="note" class="node-note-edit" v-model="note" rows="5" @blur="doneEdit()"></textarea>
+                                </div>
+                            </template>
+                        </card>
+                    </note>
 
                 </div>
 
@@ -118,60 +109,55 @@
 
             <div class="col-lg-5">
 
-                <div class="row">
+                <div class="d-flex">
+                    <bookmark-list inline-template ref="bookmarkList">
 
-                    <div class="col-lg-12 card-grid">
-                        <bookmark-list inline-template ref="bookmarkList">
+                        <card title="Links">
+                            <template v-slot:top-right>
+                                <span class="float-right" @click="chooseBookmark()">
+                                    <font-awesome-icon icon="plus"></font-awesome-icon>
+                                </span>
+                            </template>
 
-                            <card
-                                title="Links"
-                            >
-                                <template v-slot:top-right>
-                                    <span class="float-right" @click="chooseBookmark()">
-                                        <font-awesome-icon icon="plus"></font-awesome-icon>
-                                    </span>
-                                </template>
+                            <template v-slot:content>
 
-                                <template v-slot:content>
+                                <ul class="list-group list-group-flush" id="sort-container-tags">
+                                    <draggable v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
+                                        <transition-group type="transition">
+                                            <li v-for="(bookmark, index) in bookmarkList" class="list-group-item list-group-item-secondary text-info draggable" :data-uuid="bookmark.id" :key="bookmark.id" v-cloak  v-b-hover="handleHover">
+                                                <div class="dropdownmenu hidden">
+                                                    <dropdown-menu v-model="show">
+                                                        <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
+                                                        <div slot="dropdown">
+                                                            <a class="dropdown-item" href="#" @click="removeBookmark(bookmark.id)">Remove</a>
+                                                            <a v-if="!bookmark.note" class="dropdown-item" href="#" @click="addNote(bookmark.id, index)">Add note</a>
+                                                        </div>
+                                                    </dropdown-menu>
+                                                </div>
+                                                <div style="display:table">
+                                                    <div style="display:table-row">
+                                                        <div v-html="bookmark.favicon_url" class="float-left pr-2" style="display:table-cell"></div>
+                                                        <div style="display:table-cell; vertical-align: top">
+                                                            <a :href="bookmark.url">[[ bookmark.title ]]</a>
 
-                                    <ul class="list-group list-group-flush" id="sort-container-tags">
-                                        <draggable v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
-                                            <transition-group type="transition">
-                                                <li v-for="(bookmark, index) in bookmarkList" class="list-group-item list-group-item-secondary text-info draggable" :data-uuid="bookmark.id" :key="bookmark.id" v-cloak  v-b-hover="handleHover">
-                                                    <div class="dropdownmenu hidden">
-                                                        <dropdown-menu v-model="show">
-                                                            <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
-                                                            <div slot="dropdown">
-                                                                <a class="dropdown-item" href="#" @click="removeBookmark(bookmark.id)">Remove</a>
-                                                                <a v-if="!bookmark.note" class="dropdown-item" href="#" @click="addNote(bookmark.id, index)">Add note</a>
-                                                            </div>
-                                                        </dropdown-menu>
-                                                    </div>
-                                                    <div style="display:table">
-                                                        <div style="display:table-row">
-                                                            <div v-html="bookmark.favicon_url" class="float-left pr-2" style="display:table-cell"></div>
-                                                            <div style="display:table-cell; vertical-align: top">
-                                                                <a :href="bookmark.url">[[ bookmark.title ]]</a>
+                                                            <div v-if="bookmark.note" v-on:click="activateInEditMode(bookmark, $event.target)" v-show="!bookmark.noteIsEditable" class="node-note">[[ bookmark.note ]]</div>
+                                                            <span v-show="bookmark.noteIsEditable">
+                                                                <input type="text" class="form-control form-control-sm" :value="bookmark.note" ref="input" placeholder="Add Bookmark" @blur="editNote(bookmark.id, $event.target.value)" @keydown.enter="editNote(bookmark.id, $event.target.value)" >
+                                                            </span>
 
-                                                                <div v-if="bookmark.note" v-on:click="activateInEditMode(bookmark, $event.target)" v-show="!bookmark.noteIsEditable" class="node-note">[[ bookmark.note ]]</div>
-                                                                <span v-show="bookmark.noteIsEditable">
-                                                                    <input type="text" class="form-control form-control-sm" :value="bookmark.note" ref="input" placeholder="Add Bookmark" @blur="editNote(bookmark.id, $event.target.value)" @keydown.enter="editNote(bookmark.id, $event.target.value)" >
-                                                                </span>
-
-                                                            </div>
                                                         </div>
                                                     </div>
-                                                </li>
-                                                <div class="text-secondary" v-if="bookmarkList.length == 0" :key="1" v-cloak>
-                                                    No links
                                                 </div>
-                                            </transition-group>
-                                        </draggable>
-                                    </ul>
-                                </template>
-                            </card>
-                        </bookmark-list>
-                    </div>
+                                            </li>
+                                            <div class="text-secondary" v-if="bookmarkList.length == 0" :key="1" v-cloak>
+                                                    No links
+                                            </div>
+                                        </transition-group>
+                                    </draggable>
+                                </ul>
+                            </template>
+                        </card>
+                    </bookmark-list>
                 </div>
             </div>
 
