@@ -278,11 +278,12 @@
                                         {
                                             href: "{% url 'music:list' %}",
                                             title: "Browse",
-                                            alias: "/music/*"
+                                            alias: ["/music/artist/*", "/music/album/*", "/music/tag/*"]
                                         },
                                         {
                                             href: "{% url 'music:create' %}",
-                                            title: "Add a Song"
+                                            title: "Add a Song",
+                                            alias: ["/music/create", "/music/update/*"]
                                         }
                                     ]
                                 },
