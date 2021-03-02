@@ -55,4 +55,9 @@ urlpatterns = [
         view=views.get_song_id3_info,
         name="get_song_id3_info"
     ),
+    path(
+        route="delete/<uuid:uuid>/",
+        view=views.MusicDeleteView.as_view(),
+        name="delete"
+    ),
 ]

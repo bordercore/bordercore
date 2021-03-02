@@ -41,6 +41,7 @@ def test_music_song_update(auto_login_user, song, song_source):
     url = urls.reverse("music:update", kwargs={"song_uuid": song[1].uuid})
     resp = client.post(url, {
         "Go": "Delete",
+        "tags": ""
     })
 
     assert resp.status_code == 200
@@ -99,7 +100,6 @@ def test_music_create(s3_resource, s3_bucket, auto_login_user, song, song_source
             "Go": "Create"
         })
 
-    # print(resp.content)
     with open("/tmp/create-song-test-result.html", "wb") as foo:
         foo.write(resp.content)
 

@@ -42,7 +42,7 @@
 
                 <p class="lead offset-lg-2 font-weight-bold pl-2">{{ action }} a Song</p>
 
-                <form action="{{ request.path }}" method="post">
+                <form id="song-form" action="{{ request.path }}" method="post">
                 {% csrf_token %}
 
                 {% if form.non_field_errors %}
@@ -160,7 +160,7 @@
                 <div class="form-group">
                     <div class="col-lg-5 offset-lg-2">
                         <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}">
-                        <input class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete">
+                        <input class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" @click="onClickDelete">
                         <a class="btn btn-secondary" href="{% url 'music:list' %}">Cancel</a>
                     </div>
                 </div>
@@ -236,7 +236,10 @@
                 return {
                     filename: null,
                     sha1sum: null,
-                    isCompilation: false
+                    isCompilation: false,
+                    {% if action == "Update" %}
+                    uuid: "{{ song.uuid }}"
+                    {% endif %}
                 }
             },
             methods: {
@@ -274,7 +277,12 @@
                         this.sha1sum = response.data.sha1sum;
                     });
                 },
-                select() {}
+                select() {},
+                onClickDelete(evt) {
+                    const formEl = document.getElementById("song-form");
+                    formEl.setAttribute("action", "{% url 'music:delete' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', this.uuid));
+                    formEl.submit();
+                },
             },
             components: {
                 TagsInput

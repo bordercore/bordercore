@@ -19,7 +19,7 @@ from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
 from lib.time_utils import convert_seconds
@@ -240,6 +240,21 @@ class SongCreateView(CreateView):
         )
 
         return super().form_valid(form)
+
+
+@method_decorator(login_required, name="dispatch")
+class MusicDeleteView(DeleteView):
+    model = Song
+    success_url = reverse_lazy("music:list")
+
+    def delete(self, request, *args, **kwargs):
+        response = super().delete(request, *args, **kwargs)
+        messages.add_message(self.request, messages.INFO, "Song successfully deleted")
+        return response
+
+    def get_object(self, queryset=None):
+        song = Song.objects.get(user=self.request.user, uuid=self.kwargs.get("uuid"))
+        return song
 
 
 def handle_s3(song, sha1sum):
