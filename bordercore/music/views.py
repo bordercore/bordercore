@@ -483,7 +483,7 @@ class SearchTagListView(ListView):
                     "artist": match.artist,
                     "year": match.year,
                     "length": convert_seconds(match.length),
-                    "id": match.id,
+                    "id": match.uuid,
                 }
             )
 
