@@ -22,23 +22,23 @@ def test_music_list(auto_login_user, song):
 
 
 @factory.django.mute_signals(signals.post_save)
-def test_music_song_update(auto_login_user, song):
+def test_music_song_update(auto_login_user, song, song_source):
 
     _, client = auto_login_user()
 
     # The submitted form
-    url = urls.reverse("music:song_update", kwargs={"song_uuid": song[1].uuid})
+    url = urls.reverse("music:update", kwargs={"song_uuid": song[1].uuid})
     resp = client.post(url, {
         "Go": "Update",
         "artist": "Artist Changed",
         "title": "Title Changed",
-        "source": "1",
-        "tags": ""
+        "source": song_source.id,
+        "tags": "django"
     })
 
-    assert resp.status_code == 200
+    assert resp.status_code == 302
 
-    url = urls.reverse("music:song_update", kwargs={"song_uuid": song[1].uuid})
+    url = urls.reverse("music:update", kwargs={"song_uuid": song[1].uuid})
     resp = client.post(url, {
         "Go": "Delete",
     })
@@ -83,7 +83,7 @@ def test_music_create(s3_resource, s3_bucket, auto_login_user, song, song_source
     #  for processing by the view
     copy2(mp3, f"/tmp/{user.userprofile.uuid}-{sha1sum}.mp3")
 
-    url = urls.reverse("music:create_song")
+    url = urls.reverse("music:create")
 
     with open(mp3, "rb") as f:
         resp = client.post(url, {
@@ -95,7 +95,8 @@ def test_music_create(s3_resource, s3_bucket, auto_login_user, song, song_source
             "original_release_year": "",
             "source": song_source.id,
             "year": 2020,
-            "tags": "synthwave"
+            "tags": "synthwave",
+            "Go": "Create"
         })
 
     # print(resp.content)

@@ -35,6 +35,11 @@ class SongForm(ModelForm):
 
         self.fields["compilation"].required = False
 
+        # If we're editing the metadata for an existing song,
+        #  there will be no file upload and thus no sha1sum
+        if "data" in kwargs and kwargs["data"]["Go"] == "Update":
+            self.fields["sha1sum"].required = False
+
         # Use the song source stored in the user's session
         song_source = self.request.session.get("song_source", "Amazon")
         self.fields["source"].initial = SongSource.objects.get(name=song_source).id
@@ -81,15 +86,15 @@ class SongForm(ModelForm):
             if field in cleaned_data:
                 cleaned_data[field] = cleaned_data[field].strip()
 
-        song = Song.objects.filter(
-            user=self.request.user,
-            title=cleaned_data["title"],
-            artist=cleaned_data["artist"]
-        )
-
-        if song:
-            listen_url = Song.get_song_url(song[0])
-            raise ValidationError(mark_safe(f"Error: <a href='{listen_url}'>A song</a> with this title and artist already exists."))
+        if self.request.POST["Go"] == "Create":
+            song = Song.objects.filter(
+                user=self.request.user,
+                title=cleaned_data["title"],
+                artist=cleaned_data["artist"]
+            )
+            if song:
+                listen_url = Song.get_song_url(song[0])
+                raise ValidationError(mark_safe(f"Error: <a href='{listen_url}'>A song</a> with this title and artist already exists."))
 
         return cleaned_data
 

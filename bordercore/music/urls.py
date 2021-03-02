@@ -8,7 +8,7 @@ urlpatterns = [
     path(
         route="create/",
         view=views.SongCreateView.as_view(),
-        name="create_song"
+        name="create"
     ),
     path(
         route="search_artist",
@@ -17,8 +17,8 @@ urlpatterns = [
     ),
     path(
         route="update/<uuid:song_uuid>/",
-        view=views.song_update,
-        name="song_update"
+        view=views.SongUpdateView.as_view(),
+        name="update"
     ),
     path(
         route="album/<uuid:uuid>/",

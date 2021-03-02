@@ -189,7 +189,6 @@ class Song(TimeStampedModel):
                 pass
             if not album_info:
                 # No existing album found. Create a new one.
-                print(f"Creating new album: {song_info}")
                 album_info = Album(user=user,
                                    title=song_info["album_name"],
                                    artist=album_artist,

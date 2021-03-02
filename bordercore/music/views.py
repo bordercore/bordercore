@@ -13,13 +13,13 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView
 
 from lib.time_utils import convert_seconds
@@ -54,60 +54,6 @@ def music_list(request):
                    })
 
 
-@login_required
-def song_update(request, song_uuid=None):
-
-    action = 'Update'
-    file_info = None
-
-    song = Song.objects.get(user=request.user, uuid=song_uuid) if song_uuid else None
-
-    tracknumber = str(song.track)
-    if len(tracknumber) == 1:
-        tracknumber = '0' + tracknumber
-
-    if song.album:
-        filename = "{}/{}/{}/{} - {}.mp3".format(MUSIC_ROOT, song.artist, song.album.title, tracknumber, song.title)
-        try:
-            id3_info = MP3(filename)
-            file_info = {'id3_info': id3_info,
-                         'filesize': os.stat(filename).st_size,
-                         'length': convert_seconds(id3_info.info.length)}
-        except IOError as e:
-            messages.add_message(request, messages.ERROR, 'IOError: {}'.format(e))
-
-    if request.method == 'POST':
-        if request.POST['Go'] in ['Update', 'Create']:
-            form = SongForm(request.POST, instance=song, request=request)
-            if form.is_valid():
-                newform = form.save(commit=False)
-                newform.user = request.user
-                newform.save()
-                form.save_m2m()
-                messages.add_message(request, messages.INFO, 'Song updated')
-                return music_list(request)
-        elif request.POST['Go'] == 'Delete':
-            song.delete()
-            messages.add_message(request, messages.INFO, 'Song deleted')
-            return music_list(request)
-
-    elif song_uuid:
-        action = 'Update'
-        form = SongForm(instance=song, request=request)
-
-    else:
-        action = 'Create'
-        form = SongForm(request=request)
-
-    return render(request, 'music/update.html',
-                  {'action': action,
-                   'form': form,
-                   'file_info': file_info,
-                   'length': convert_seconds(song.length),
-                   'tags': [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in song.tags.all()],
-                   'song': song})
-
-
 @method_decorator(login_required, name='dispatch')
 class ArtistDetailView(TemplateView):
 
@@ -117,8 +63,6 @@ class ArtistDetailView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         artist_name = self.kwargs.get("artist")
-
-        print(f"GOT HERE: {artist_name}")
 
         # Get all albums by this artist
         albums = Album.objects.filter(user=self.request.user, artist=artist_name).order_by("-original_release_year")
@@ -196,14 +140,60 @@ class AlbumDetailView(DetailView):
 
 
 @method_decorator(login_required, name='dispatch')
+class SongUpdateView(UpdateView):
+
+    model = Song
+    template_name = "music/create_song.html"
+    form_class = SongForm
+    success_url = reverse_lazy("music:list")
+    slug_field = "uuid"
+    slug_url_kwarg = "song_uuid"
+
+    # Override this method so that we can pass the request object to the form
+    #  so that we have access to it in SongForm.__init__()
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["action"] = "Update"
+        context["no_left_block"] = True
+        context["content_block_width"] = "12"
+        context["song_length_pretty"] = convert_seconds(self.object.length)
+        context["tags"] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
+        return context
+
+    def form_valid(self, form):
+        song = form.instance
+
+        # Delete all existing tags
+        song.tags.clear()
+
+        # Then add the tags specified in the form
+        for tag in form.cleaned_data["tags"]:
+            song.tags.add(tag)
+
+        self.object = form.save()
+
+        messages.add_message(
+            self.request, messages.INFO,
+            "Song updated"
+        )
+
+        return HttpResponseRedirect(self.get_success_url())
+
+
+@method_decorator(login_required, name='dispatch')
 class SongCreateView(CreateView):
     model = Song
     template_name = "music/create_song.html"
     form_class = SongForm
-    success_url = reverse_lazy("music:create_song")
+    success_url = reverse_lazy("music:create")
 
     # Override this method so that we can pass the request object to the form
-    #  so that we have access to it in TodoForm.__init__()
+    #  so that we have access to it in SongForm.__init__()
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["request"] = self.request
