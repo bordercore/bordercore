@@ -15,7 +15,7 @@
 
         <div class="col-lg-3 d-flex flex-column">
 
-            <div class="d-flex card-body extend-block" id="vue-app" v-b-hover="handleHover">
+            <div class="card-body" id="vue-app" v-b-hover="handleHover">
                 <div>
                     <div class="dropdownmenu hidden">
 
@@ -34,43 +34,43 @@
                     </div>
 
                     <h2 id="title" class="pl-0 text-break">
-                            {{ caption }}
+                        {{ caption }}
                     </h2>
 
                     <h5>{{ blob.get_edition_string }}</h5>
 
                     {% if subtitle %}
                         <div id="blob_subtitle">
-                                {{ subtitle }}
+                            {{ subtitle }}
                         </div>
                     {% endif %}
 
                     {% if author %}
                         <div class="mt-2">
-                                by <span id="author">{{ author }}</span>
+                            by <span id="author">{{ author }}</span>
                         </div>
                     {% endif %}
 
                     {% if date %}
                         <div class="mb-2">
-                                {{ date }}
+                            {{ date }}
                         </div>
                     {% endif  %}
 
                     {% if blob.tags.all %}
                         <div class="mt-5 mb-3">
-                                Tags:
-                                {% for tag in blob.tags.all %}
-                                    <a class="badge badge-primary" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
-                                {% endfor %}
+                            Tags:
+                            {% for tag in blob.tags.all %}
+                                <a class="badge badge-primary" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
+                            {% endfor %}
                         </div>
                     {% endif %}
 
                     {% if urls %}
                         <div class="mb-3">
-                                {% for url in urls %}
-                                    <strong><a href="{{ url.url }}">{{ url.domain }}</a></strong>
-                                {% endfor %}
+                            {% for url in urls %}
+                                <strong><a href="{{ url.url }}">{{ url.domain }}</a></strong>
+                            {% endfor %}
                         </div>
                     {% endif %}
 

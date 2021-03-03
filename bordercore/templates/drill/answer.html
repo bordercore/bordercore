@@ -4,7 +4,7 @@
 
 {% block nav %}
     <div id="vue-nav">
-        <ul class="breadcrumb mb-0">
+        <ul class="breadcrumb mb-0 pt-0">
             <li class="breadcrumb-item"> <a href="{% url 'drill:list' %}"><font-awesome-icon icon="home"></font-awesome-icon></a> </li>
             <li class="breadcrumb-item active">Answer</li>
         </ul>
@@ -20,134 +20,119 @@
 
 {% block content %}
 
-    <div class="row">
-        <div class="col-lg-4">
+    <div class="row no-gutters h-100">
 
-            <div class="row">
+        <div class="col-lg-4 d-flex flex-grow-1">
+            <div class="card-body">
 
-                <div class="col-lg-12 card-grid">
+                <div class="d-flex">
+                    <div class="flex-grow-1">
+                        <ul class="list-unstyled">
+                            <li class="d-flex">
+                                <div class="flex-fill font-weight-bold">State</div>
+                                <div class="text-info pr-5">{{ state_name }}</div>
+                            </li>
+                            {% if state_name == 'Learning' %}
+                                <li class="d-flex">
+                                    <div class="flex-fill font-weight-bold">Learning step</div>
+                                    <div class="text-info pr-5"><strong class="text-info">{{ question.learning_step }}</strong> out of {{ learning_step_count  }}</div>
+                                </li>
+                            {% endif %}
+                            {% if state_name != 'New' %}
+                                <li class="d-flex">
+                                    <div class="flex-fill font-weight-bold">Last reviewed</div>
+                                    <div class="text-info pr-5">{{ question.last_reviewed|date:"F j, Y"|default:"Never" }}</div>
+                                </li>
+                            {% endif %}
+                            <li class="d-flex">
+                                <div class="flex-fill font-weight-bold">Interval</div>
+                                <div class="text-info pr-5">{{ question.interval.days }} day{{ question.interval.days|pluralize:"s" }}</div>
 
-                    <div class="card-body">
+                            </li>
+                            <li class="d-flex">
+                                <div class="flex-fill font-weight-bold">Easiness factor</div>
+                                <div class="text-info pr-5">{{ question.efactor|floatformat:1 }}</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
 
-                        <div class="d-flex">
-                            <div class="flex-grow-1">
-                                <ul class="list-unstyled">
-                                    <li class="d-flex">
-                                        <div class="flex-fill font-weight-bold">State</div>
-                                        <div class="text-info pr-5">{{ state_name }}</div>
-                                    </li>
-                                    {% if state_name == 'Learning' %}
-                                        <li class="d-flex">
-                                            <div class="flex-fill font-weight-bold">Learning step</div>
-                                            <div class="text-info pr-5"><strong class="text-info">{{ question.learning_step }}</strong> out of {{ learning_step_count  }}</div>
-                                        </li>
-                                    {% endif %}
-                                    {% if state_name != 'New' %}
-                                        <li class="d-flex">
-                                            <div class="flex-fill font-weight-bold">Last reviewed</div>
-                                            <div class="text-info pr-5">{{ question.last_reviewed|default:"Never" }}</div>
-                                        </li>
-                                    {% endif %}
-                                    <li class="d-flex">
-                                        <div class="flex-fill font-weight-bold">Interval</div>
-                                        <div class="text-info pr-5">{{ question.interval.days }} day{{ question.interval.days|pluralize:"s" }}</div>
+                <form action="{% url 'drill:update' question.uuid %}" class="mt-2">
+                    <input type="submit" class="btn btn-primary" value="Update">
+                </form>
 
-                                    </li>
-                                    <li class="d-flex">
-                                        <div class="flex-fill font-weight-bold">Easiness factor</div>
-                                        <div class="text-info pr-5">{{ question.efactor|floatformat:1 }}</div>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
+                <br />
 
-                        <form action="{% url 'drill:update' question.uuid %}" class="mt-2">
-                            <input type="submit" class="btn btn-primary" value="Update">
-                        </form>
+                <div>
+                    <a href="{% url 'drill:add_with_tag' question.tags.all.0 %}" class="btn btn-primary" role="button">Add Question</a>
+                </div>
 
-                        <br />
+                {% if state_name == 'Learning' %}
 
-                        <div>
-                            <a href="{% url 'drill:add_with_tag' question.tags.all.0 %}" class="btn btn-primary" role="button">Add Question</a>
-                        </div>
-
-                    {% if state_name == 'Learning' %}
-
-                        <div class="mt-5">
-                            <strong>Again</strong> Move the question to the first step
-                        </div>
-
-                        <div>
-                            <strong>Good</strong> Move the question to the next step
-                        </div>
-
-                        <div>
-                            <strong>Easy</strong> Graduate the question to state 'To Review'
-                        </div>
-
-                    {% else %}
-
-                        <div class="mt-5">
-                            <strong>Again</strong> You failed to correctly answer the question, ie you've "lapsed". The question goes back into "learning" mode
-                        </div>
-
-                        <div>
-                            <strong>Hard</strong> Show the card more frequently in the future
-                        </div>
-
-                        <div>
-                            <strong>Good</strong> Should be the most common response
-                        </div>
-
-                        <div>
-                            <strong>Easy</strong> Only use for the easiest of questions
-                        </div>
-
-                    {% endif %}
-
+                    <div class="mt-5">
+                        <strong>Again</strong> Move the question to the first step
                     </div>
 
-                </div>
+                    <div>
+                        <strong>Good</strong> Move the question to the next learning step
+                    </div>
+
+                    <div>
+                        <strong>Easy</strong> Graduate the question to state 'To Review'
+                    </div>
+
+                {% else %}
+
+                    <div class="mt-5">
+                        <strong>Again</strong> You failed to correctly answer the question, ie you've "lapsed". The question goes back into "learning" mode
+                    </div>
+
+                    <div>
+                        <strong>Hard</strong> Show the card more frequently in the future
+                    </div>
+
+                    <div>
+                        <strong>Good</strong> Should be the most common response
+                    </div>
+
+                    <div>
+                        <strong>Easy</strong> Only use for the easiest of questions
+                    </div>
+
+                {% endif %}
 
             </div>
 
-        </div> <!-- End first column -->
+        </div>
 
         <div class="col-lg-8">
+            <div class="right-column">
+                <div class="card-body">
 
-            <div class="row">
-                <div class="col-lg-12 card-grid">
+                    <h3 class="table-borders markdown">
+                    {{ question.get_question|safe }}
+                    </h3>
+                    {% if question.tags.all %}
+                        Tags:
+                        {% for tag in question.tags.all %}
+                            <a class="badge badge-primary" href="{% url 'drill:study_tag' tag.name %}">{{ tag.name }}</a>
+                        {% endfor %}
+                        <br /><br />
+                    {% endif %}
+                    <h3 class="table-borders markdown">
+                    {{ question.get_answer|safe }}
+                    </h3>
 
-                    <div class="card-body">
-
-                        <h3 class="table-borders markdown">
-                            {{ question.get_question|safe }}
-                        </h3>
-                        {% if question.tags.all %}
-                            Tags:
-                            {% for tag in question.tags.all %}
-                                <a class="badge badge-primary" href="{% url 'drill:study_tag' tag.name %}">{{ tag.name }}</a>
-                            {% endfor %}
-                            <br /><br />
-                        {% endif %}
-                        <h3 class="table-borders markdown">
-                            {{ question.get_answer|safe }}
-                        </h3>
-
-                        <a href="{% url 'drill:record_response' question.uuid 'again' %}" class="btn btn-primary" role="button">Again</a>
-                        {% if state_name == 'To Review' %}
-                            <a href="{% url 'drill:record_response' question.uuid 'hard' %}" class="btn btn-primary" role="button">Hard</a>
-                        {% endif %}
-                        <a href="{% url 'drill:record_response' question.uuid 'good' %}" class="btn btn-primary" role="button">Good</a>
-                        <a href="{% url 'drill:record_response' question.uuid 'easy' %}" class="btn btn-primary" role="button">Easy</a>
-                        <a href="{% url 'drill:skip' question.uuid %}" class="btn btn-primary ml-2" role="button">Skip</a>
-
-                    </div>
+                    <a href="{% url 'drill:record_response' question.uuid 'again' %}" class="btn btn-primary" role="button">Again</a>
+                    {% if state_name == 'To Review' %}
+                        <a href="{% url 'drill:record_response' question.uuid 'hard' %}" class="btn btn-primary" role="button">Hard</a>
+                    {% endif %}
+                    <a href="{% url 'drill:record_response' question.uuid 'good' %}" class="btn btn-primary" role="button">Good</a>
+                    <a href="{% url 'drill:record_response' question.uuid 'easy' %}" class="btn btn-primary" role="button">Easy</a>
+                    <a href="{% url 'drill:skip' question.uuid %}" class="btn btn-primary ml-2" role="button">Skip</a>
 
                 </div>
-
             </div>
-
         </div>
 
     </div>

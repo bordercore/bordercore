@@ -58,4 +58,7 @@ class MetricListView(UserPassesTestMixin, ListView):
                 if metric.name == "Bordercore Test Coverage":
                     metric.latest_result["line_rate"] = int(round(float(metric.latest_result["line_rate"]) * 100, 0))
 
+        context["no_left_block"] = True
+        context["content_block_width"] = "12"
+
         return context
