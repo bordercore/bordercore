@@ -23,7 +23,7 @@ def test_get_state_name(question):
 
     assert Question.get_state_name("N") == "New"
     assert Question.get_state_name("L") == "Learning"
-    assert Question.get_state_name("R") == "To Review"
+    assert Question.get_state_name("R") == "Reviewing"
     assert Question.get_state_name("X") is None
 
 
@@ -72,19 +72,19 @@ def test_record_response():
 
     question.record_response("good")
     assert question.state == "R"
-    assert question.interval == timedelta(days=1)
+    assert question.interval == timedelta(days=2, seconds=43200)
     assert question.efactor == EFACTOR_DEFAULT
     assert question.learning_step == 2
 
     question.record_response("good")
     assert question.state == "R"
-    assert question.interval == timedelta(days=2, seconds=43200)
+    assert question.interval == timedelta(days=6, seconds=21600)
     assert question.efactor == EFACTOR_DEFAULT
     assert question.learning_step == 2
 
     question.record_response("hard")
     assert question.state == "R"
-    assert question.interval == timedelta(days=3)
+    assert question.interval == timedelta(days=7, seconds=43200)
     assert question.efactor == 2.125
     assert question.learning_step == 2
 
@@ -102,6 +102,6 @@ def test_record_response():
 
     question.record_response("easy")
     assert question.state == "R"
-    assert question.interval == timedelta(days=1, seconds=25920)
+    assert question.interval == timedelta(days=1, seconds=66355, microseconds=200000)
     assert question.efactor == 1.5639999999999998
     assert question.learning_step == 1

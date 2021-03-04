@@ -3,12 +3,26 @@
 {% block title %} Drill :: Question {% endblock %}
 
 {% block nav %}
-    <div id="vue-nav">
-        <ul class="breadcrumb mb-0 pt-0">
-            <li class="breadcrumb-item"> <a href="{% url 'drill:list' %}"><font-awesome-icon icon="home"></font-awesome-icon></a> </li>
-            <li class="breadcrumb-item active">Question</li>
-        </ul>
+
+    <div class="d-flex mb-3" id="vue-nav">
+
+        <div class="mr-auto align-self-center">
+            <ul class="breadcrumb mb-0 pt-0 pb-0">
+                <li class="breadcrumb-item"> <a href="{% url 'drill:list' %}"><font-awesome-icon icon="home"></font-awesome-icon></a> </li>
+                <li class="breadcrumb-item active">Question</li>
+            </ul>
+        </div>
+
+        <div class="right-column">
+            {% if object.tags.all %}
+                <a href="{% url 'drill:add_with_tag' object.tags.all.0 %}" class="btn btn-primary" role="button"><font-awesome-icon icon="plus" class="mr-2"></font-awesome-icon>Add Question</a>
+            {% else %}
+                <a href="{% url 'drill:add' %}" class="btn btn-primary" role="button"><font-awesome-icon icon="plus" class="mr-2"></font-awesome-icon>Add Question</a>
+            {% endif %}
+        </div>
+
     </div>
+
 {% endblock %}
 
 {% block extra_head %}
@@ -30,29 +44,25 @@
                     <div class="flex-grow-1">
                         <ul class="list-unstyled">
                             <li class="d-flex">
-                                <div class="flex-fill font-weight-bold">State</div>
-                                <div class="text-info pr-5">{{ state_name }}</div>
+                                <div class="flex-fill font-weight-bold">Mode</div>
+                                <div class="text-info">{{ state_name }}</div>
                             </li>
-                                {% if state_name == 'Learning' %}
-                                    <li class="d-flex">
-                                        <div class="flex-fill font-weight-bold">Learning step</div>
-                                        <div class="text-info pr-5"><strong class="text-info">{{ question.learning_step }}</strong> out of {{ learning_step_count  }}</div>
-                                    </li>
-                                {% endif %}
-                                {% if state_name != 'New' %}
-                                    <li class="d-flex">
-                                        <div class="flex-fill font-weight-bold">Last reviewed</div>
-                                        <div class="text-info pr-5">{{ question.last_reviewed|date:"F j, Y"|default:"Never" }}</div>
-                                    </li>
-                                {% endif %}
+                            {% if state_name == 'Learning' %}
                                 <li class="d-flex">
-                                    <div class="flex-fill font-weight-bold">Interval</div>
-                                    <div class="text-info pr-5">{{ question.interval.days }} day{{ question.interval.days|pluralize:"s" }}</div>
+                                    <div class="flex-fill font-weight-bold">Learning step</div>
+                                    <div class="text-info"><strong class="text-info">{{ question.learning_step }}</strong> out of {{ learning_step_count  }}</div>
                                 </li>
+                            {% endif %}
+                            {% if state_name != 'New' %}
                                 <li class="d-flex">
-                                    <div class="flex-fill font-weight-bold">Easiness factor</div>
-                                    <div class="text-info pr-5">{{ question.efactor|floatformat:1 }}</div>
+                                    <div class="flex-fill font-weight-bold">Last reviewed</div>
+                                    <div class="text-info">{{ question.last_reviewed|date:"F j, Y"|default:"Never" }}</div>
                                 </li>
+                            {% endif %}
+                            <li class="d-flex">
+                                <div class="flex-fill font-weight-bold">Interval</div>
+                                <div class="text-info">{{ question.interval.days }} day{{ question.interval.days|pluralize:"s" }}</div>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -61,20 +71,14 @@
                     <input type="submit" class="btn btn-primary" value="Update">
                 </form>
 
-                <div class="mt-2">
-                        {% if object.tags.all %}
-                            <a href="{% url 'drill:add_with_tag' object.tags.all.0 %}" class="btn btn-primary" role="button">Add Question</a>
-                        {% else %}
-                            <a href="{% url 'drill:add' %}" class="btn btn-primary" role="button">Add Question</a>
-                        {% endif %}
-                </div>
-
             </div>
 
             <div class="d-flex flex-grow-1">
                 <card title="Tag Progress">
                     <template v-slot:content>
-                            {% for tag in tag_info %}
+                        <div class="d-flex">
+                        {% for tag in tag_info %}
+                            <div class="mr-5 text-center">
                                 <span class="text-info mt-2">{{ tag.name }}</span>
                                 <div class="demo" class="pt-5" style="margin-top: 10px">
                                     <svg width="120" height="120" viewBox="0 0 120 120">
@@ -83,7 +87,9 @@
                                         <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px" fill="#fff">[[ foobar({{ tag.progress }}) ]]%</text>
                                     </svg>
                                 </div>
-                            {% endfor %}
+                            </div>
+                        {% endfor %}
+                        </div>
                     </template>
                 </card>
 
@@ -96,22 +102,22 @@
             <div class="right-column">
                 <div class="card-body right-column">
 
-                        {% include "common/show_messages.html" %}
+                    {% include "common/show_messages.html" %}
 
                     <h3 class="table-borders markdown">
-                            {{ question.get_question|safe }}
+                        {{ question.get_question|safe }}
                     </h3>
 
-                        {% if object.tags.all %}
-                            Tags:
-                            {% for tag in object.tags.all %}
-                                <a class="badge badge-primary" href="{% url 'drill:study_tag' tag.name %}">{{ tag.name }}</a>
-                            {% endfor %}
-                            <br /><br />
-                        {% endif %}
+                    {% if object.tags.all %}
+                        Tags:
+                        {% for tag in object.tags.all %}
+                            <a class="badge badge-primary" href="{% url 'drill:study_tag' tag.name %}">{{ tag.name }}</a>
+                        {% endfor %}
+                        <br /><br />
+                    {% endif %}
 
-                        <a href="{% url 'drill:answer' question.uuid %}" class="btn btn-primary" role="button">Show Answer</a>
-                        <a href="{% url 'drill:skip' question.uuid %}" class="btn btn-primary" role="button">Skip</a>
+                    <a href="{% url 'drill:answer' question.uuid %}" class="btn btn-primary" role="button">Show Answer</a>
+                    <a href="{% url 'drill:skip' question.uuid %}" class="btn btn-primary" role="button">Skip</a>
 
                 </div>
             </div>

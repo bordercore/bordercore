@@ -17,12 +17,13 @@ from lib.mixins import TimeStampedModel
 from tag.models import Tag
 
 QUESTION_STATES = (
-    ('N', 'New'),
-    ('L', 'Learning'),
-    ('R', 'To Review'),
+    ("N", "New"),
+    ("L", "Learning"),
+    ("R", "Reviewing"),
 )
 
-EASY_BONUS = 1.3
+EASY_FACTOR = 1.3
+HARD_FACTOR = 1.2
 
 # Starting "easiness" factor
 # Answering "Good" will increase the delay by approximately this amount
@@ -50,14 +51,14 @@ class Question(TimeStampedModel):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     LEARNING_STEPS = (
-        (1, '1'),
-        (2, '10')
+        (1, "1"),
+        (2, "10")
     )
     learning_step = models.IntegerField(default=1, null=False)
 
     state = models.CharField(max_length=1,
                              choices=QUESTION_STATES,
-                             default='L')
+                             default="L")
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
@@ -104,20 +105,20 @@ class Question(TimeStampedModel):
             if self.state == "L":
                 if self.is_final_learning_step():
                     self.state = "R"
+                    self.interval = self.interval * self.efactor * INTERVAL_MODIFIER
                 else:
                     self.learning_step_increase()
             else:
                 self.interval = self.interval * self.efactor
         elif response == "easy":
-            # An "easy" answer to a "Learning" question is
-            #  graduated to "To Review"
+            # An "easy" answer to a "Learning" question is graduated to "Reviewing"
             if self.state == "L":
                 self.state = "R"
-            self.interval = self.interval * EASY_BONUS * INTERVAL_MODIFIER
+            self.interval = self.interval * self.efactor * EASY_FACTOR * INTERVAL_MODIFIER
             self.efactor = self.efactor + (self.efactor * 0.15)
         elif response == "hard":
             self.times_failed = self.times_failed + 1
-            self.interval = self.interval * 1.2 * INTERVAL_MODIFIER
+            self.interval = self.interval * HARD_FACTOR * INTERVAL_MODIFIER
             self.efactor = self.efactor - (self.efactor * 0.15)
         elif response == "again":
             if self.state == "L":
