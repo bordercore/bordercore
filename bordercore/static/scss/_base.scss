@@ -104,6 +104,11 @@ blockquote {
 
 /* Tables */
 
+.table_header {
+  background-color: $primary;
+  border-radius: 4px;
+}
+
 tr.selected {
   background-color: $selected-background-color !important;
   color: $white;

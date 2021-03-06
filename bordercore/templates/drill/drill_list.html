@@ -1,19 +1,13 @@
 {% extends "base.html" %}
 
-{% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.css"/>
-{% endblock %}
-
 {% block title %} Drill :: {{ title }} {% endblock %}
-
-{% block left-block %}
-{% endblock %}
 
 {% block content %}
 
     <div class="row no-gutters">
 
-        <div class="col-lg-4 d-flex flex-column">
+        <div class="col-lg-3 d-flex flex-column" id="vue-app-left">
+
             <div class="card-body">
 
                 <div>
@@ -31,15 +25,114 @@
                 <hr />
 
                 <div>
-                    <a href="{% url 'drill:add' %}" class="btn btn-primary" role="button">Add Question</a>
+                    <a href="{% url 'drill:add' %}" class="btn btn-primary" role="button"><font-awesome-icon icon="plus" class="mr-2"></font-awesome-icon>Add Question</a>
                 </div>
 
             </div>
+
         </div>
 
-        <div class="col-lg-5">
-            <div class="card-grid">
+        <div class="col-lg-3" id="vue-app">
 
+            <div class="d-flex flex-grow-1">
+                <card title="Total Progress">
+                    <template v-slot:content>
+                        <div class="d-flex">
+                            <div class="d-flex justify-content-center align-items-center">
+                                Percentage across all tags of questions not needing review
+                            </div>
+                            <div class="mr-5 text-center">
+                                <div class="demo" class="pt-5">
+                                    <svg width="120" height="120" viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke="#262c49" stroke-width="12" />
+                                        <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke="#7fffd4" stroke-width="12" :stroke-dasharray="strokeDashArray" :stroke-dashoffset="getDashOffset({{ total_progress }})" />
+                                        <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px" fill="#fff">[[ round({{ total_progress }}) ]]%</text>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </card>
+            </div>
+
+            <card title="Tags still learning">
+
+                <template v-slot:content>
+                    <ul class="list-unstyled">
+                        <li class="d-flex table_header px-2 py-1 mb-2">
+                            <div class="flex-fill font-weight-bold">Tag</div>
+                            <div class="font-weight-bold">Question Count</div>
+                        </li>
+                        {% for tag in tags_still_learning %}
+                            <li class="d-flex px-2">
+                                <div class="flex-fill"><a href="{% url 'drill:study_tag' tag.name %}">{{ tag.name }}</a></div>
+                                <div class="text-info">{{ tag.count }}</div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </template>
+
+            </card>
+
+        </div>
+
+        <div class="col-lg-3" id="tag-search">
+
+            <div class="mb-2" style="margin-left: 15px">
+                <simple-suggest
+                    ref="simpleSuggest"
+                    search-url="{% url 'drill:search_tags' %}?query="
+                    place-holder="Tag Search"
+                >
+                </simple-suggest>
+            </div>
+
+            <div class="d-flex flex-grow-1" v-if="tag.value">
+                <card>
+                    <template v-slot:title-slot>
+                        <h6><a :href="tag.link">[[ tag.value ]]</a></h6>
+                    </template>
+                    <template v-slot:content>
+                        <div class="d-flex">
+                            <div class="flex-grow-1 d-flex justify-content-center align-items-center">
+                                <ul class="list-unstyled">
+                                    <li>Last Reviewed <br/> <strong>[[ tag.info.last_reviewed ]]</strong></li>
+                                </ul>
+                            </div>
+                            <div class="flex-grow-1 text-center">
+                                <div class="demo" class="pt-5">
+                                    <svg width="120" height="120" viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke="#262c49" stroke-width="12" />
+                                        <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke="#7fffd4" stroke-width="12" :stroke-dasharray="strokeDashArray" :stroke-dashoffset="getDashOffset(tag.info.progress)" />
+                                        <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px" fill="#fff">[[ round(tag.info.progress) ]]%</text>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </card>
+            </div>
+
+            <card title="Tags needing review">
+
+                <template v-slot:content>
+                    <ul class="list-unstyled">
+                        <li class="d-flex table_header px-2 py-1 mb-2">
+                            <div class="flex-fill font-weight-bold">Tag</div>
+                            <div class="font-weight-bold">Last Reviewed</div>
+                        </li>
+                        {% for tag in tags_needing_review %}
+                            <li class="d-flex px-2">
+                                <div class="flex-fill"><a href="{% url 'drill:study_tag' tag.name %}">{{ tag.name }}</a></div>
+                                <div class="text-info">{{ tag.last_reviewed|default:"Never" }}</div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </template>
+
+            </card>
+
+            <div class="card-grid">
 
                 <div id="search">
                     {% include "common/show_messages.html" %}
@@ -52,6 +145,16 @@
                 </div>
 
             </div>
+        </div>
+
+        <div class="col-lg-3" id="favorite_tags">
+
+            <card title="Favorite Tags">
+                <template v-slot:content>
+                Favorite Tags Yo
+                </template>
+            </card>
+
         </div>
 
     </div>
@@ -110,6 +213,63 @@
                 ],
             } );
 
+        });
+
+        new Vue({
+            el: "#vue-app-left"
+        });
+
+        new Vue({
+            el: "#vue-app",
+            data() {
+                return {
+                    circleRadius: 54
+                }
+            },
+            computed: {
+                strokeDashArray: function() {
+                    return 2 * 3.14 * this.circleRadius;
+                }
+            },
+            methods: {
+                getDashOffset(progress) {
+                    return this.strokeDashArray * (1 - progress/100)
+                },
+                round: function(progress) {
+                    return Math.round(progress);
+                }
+            }
+        });
+
+        new Vue({
+            el: "#tag-search",
+            data() {
+                return {
+                    tag: {},
+                    circleRadius: 54
+                }
+            },
+            computed: {
+                strokeDashArray: function() {
+                    return 2 * 3.14 * this.circleRadius;
+                }
+            },
+            methods: {
+                select(datum) {
+                    this.tag = datum;
+                },
+                getDashOffset(progress) {
+                    return this.strokeDashArray * (1 - progress/100)
+                },
+                round: function(progress) {
+                    console.log(progress);
+                    return Math.round(progress);
+                }
+            }
+        });
+
+        new Vue({
+            el: "#favorite_tags"
         });
 
     </script>

@@ -1,10 +1,13 @@
 import time
 
+from elasticsearch import Elasticsearch
+
 from django import urls
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, F, Max, Q
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -26,7 +29,6 @@ class DrillListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         info = []
 
         for tag in self.object_list:
@@ -42,12 +44,17 @@ class DrillListView(ListView):
                              lastreviewed_sort=last_reviewed_sort,
                              id=tag["id"]))
 
-        context["cols"] = ["tag_name", "question_count", "last_reviewed", "lastreviewed_sort", "id"]
-        context["info"] = info
-        context["title"] = "Home"
-        context["no_left_block"] = True
-        context["content_block_width"] = "12"
-        return context
+        return {
+            **context,
+            "cols": ["tag_name", "question_count", "last_reviewed", "lastreviewed_sort", "id"],
+            "info": info,
+            "title": "Home",
+            "tags_still_learning": Question.get_tags_still_learning(self.request.user),
+            "tags_needing_review": Question.get_tags_needing_review(self.request.user),
+            "total_progress": Question.get_total_progress(self.request.user),
+            "no_left_block": True,
+            "content_block_width": "12"
+        }
 
     def get_queryset(self):
         # TODO: This query joins on drill_question_tags *twice*, which is
@@ -185,7 +192,7 @@ class QuestionDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context['tag_info'] = self.object.get_tag_info()
+        context['tag_info'] = self.object.get_tags_info()
         context['question'] = self.object
         context['state_name'] = Question.get_state_name(self.object.state)
         context['learning_step_count'] = self.object.get_learning_step_count()
@@ -314,3 +321,63 @@ def skip_question(request, uuid):
         return redirect("drill:study_random")
     else:
         return redirect("drill:study_tag", tag=question.tags.all().first().name)
+
+
+@login_required
+def search_tags(request):
+
+    search_term = request.GET["query"].lower()
+
+    es = Elasticsearch(
+        [settings.ELASTICSEARCH_ENDPOINT],
+        verify_certs=False
+    )
+
+    search_object = {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "term": {
+                            "user_id": request.user.id
+                        }
+                    },
+                    {
+                        "wildcard": {
+                            "tags": f"{search_term}*"
+                        }
+                    },
+                    {
+                        "term": {
+                            "doctype": "drill"
+                        }
+                    },
+                ]
+            }
+        },
+        "aggs": {
+            "Distinct Tags": {
+                "terms": {
+                    "field": "tags.keyword",
+                    "size": 1000
+                }
+            }
+        },
+        "from": 0, "size": 0,
+        "_source": ["tags"]
+    }
+
+    results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+
+    matches = []
+    for tag_result in results["aggregations"]["Distinct Tags"]["buckets"]:
+        if tag_result["key"].lower().find(search_term.lower()) != -1:
+            matches.append({
+                "value": tag_result["key"],
+                "id": tag_result["key"],
+                "info": Question.get_tag_info(request.user, tag_result["key"]),
+                "link": reverse("drill:study_tag", kwargs={"tag": tag_result["key"]})
+            }
+            )
+
+    return JsonResponse(matches, safe=False)

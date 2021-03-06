@@ -8,7 +8,7 @@ from markdown.extensions.codehilite import CodeHiliteExtension
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models import F, Q
+from django.db.models import Count, F, Max, Min, Q
 from django.db.models.signals import post_save
 from django.dispatch.dispatcher import receiver
 from django.utils import timezone
@@ -23,7 +23,7 @@ QUESTION_STATES = (
 )
 
 EASY_FACTOR = 1.3
-HARD_FACTOR = 1.2
+HARD_FACTOR = 0.7
 
 # Starting "easiness" factor
 # Answering "Good" will increase the delay by approximately this amount
@@ -130,26 +130,12 @@ class Question(TimeStampedModel):
 
         self.save()
 
-    def get_tag_info(self):
+    def get_tags_info(self):
 
         info = []
 
         for tag in self.tags.all():
-
-            count = Question.objects.filter(user=self.user).filter(tags=tag).count()
-            todo = Question.objects.filter(
-                Q(user=self.user),
-                Q(tags__name=tag),
-                Q(interval__lte=timezone.now() - F("last_reviewed"))
-                | Q(last_reviewed__isnull=True)
-                | Q(state="L")).count()
-
-            info.append(
-                {
-                    "name": tag.name,
-                    "progress": 100 - (todo / count * 100)
-                }
-            )
+            info.append(Question.get_tag_info(self.user, tag.name))
 
         return info
 
@@ -213,6 +199,66 @@ class Question(TimeStampedModel):
             id=self.uuid,
             body=doc
         )
+
+    @staticmethod
+    def get_tags_still_learning(user):
+        """
+        Get the tags with the most questions in state "Learning"
+        """
+        tags = Tag.objects.values("id", "name") \
+                          .filter(user=user, question__state="L") \
+                          .annotate(count=Count("question", distinct=True)) \
+                          .order_by("-count")
+
+        return tags[:10]
+
+    @staticmethod
+    def get_tags_needing_review(user):
+        """
+        Get the tags which haven't been reviewed in a while
+        """
+        tags = Tag.objects.values("id", "name") \
+                          .filter(user=user, question__isnull=False) \
+                          .annotate(last_reviewed=Min("question__last_reviewed")) \
+                          .order_by("-last_reviewed")
+
+        return tags[:10]
+
+    @staticmethod
+    def get_total_progress(user):
+
+        count = Question.objects.filter(user=user).count()
+
+        todo = Question.objects.filter(
+            Q(user=user),
+            Q(interval__lte=timezone.now() - F("last_reviewed"))
+            | Q(last_reviewed__isnull=True)
+            | Q(state="L")).count()
+
+        return 100 - (todo / count * 100)
+
+    @staticmethod
+    def get_tag_info(user, tag):
+
+        count = Question.objects.filter(user=user).filter(tags__name=tag).count()
+
+        todo = Question.objects.filter(
+            Q(user=user),
+            Q(tags__name=tag),
+            Q(interval__lte=timezone.now() - F("last_reviewed"))
+            | Q(last_reviewed__isnull=True)
+            | Q(state="L")).count()
+
+        last_reviewed = Tag.objects.filter(user=user, name=tag).annotate(last_reviewed=Max("question__last_reviewed")).first()
+
+        if last_reviewed.last_reviewed:
+            last_reviewed = last_reviewed.last_reviewed.strftime("%B %d, %Y")
+
+        return {
+            "name": tag,
+            "progress": 100 - (todo / count * 100),
+            "last_reviewed": last_reviewed
+        }
 
 
 @receiver(post_save, sender=Question)

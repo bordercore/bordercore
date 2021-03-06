@@ -9,7 +9,7 @@
         <div class="mr-auto align-self-center">
             <ul class="breadcrumb mb-0 pt-0 pb-0">
                 <li class="breadcrumb-item"> <a href="{% url 'drill:list' %}"><font-awesome-icon icon="home"></font-awesome-icon></a> </li>
-                <li class="breadcrumb-item active">Question</li>
+                <li class="breadcrumb-item active">Question with tag <strong>{{ object.tags.all.0 }}</strong></li>
             </ul>
         </div>
 
@@ -67,10 +67,6 @@
                     </div>
                 </div>
 
-                <form action="{% url 'drill:update' question.uuid %}" class="mt-2">
-                    <input type="submit" class="btn btn-primary" value="Update">
-                </form>
-
             </div>
 
             <div class="d-flex flex-grow-1">
@@ -84,7 +80,7 @@
                                     <svg width="120" height="120" viewBox="0 0 120 120">
                                         <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke="#262c49" stroke-width="12" />
                                         <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke="#7fffd4" stroke-width="12" :stroke-dasharray="strokeDashArray" :stroke-dashoffset="getDashOffset({{ tag.progress }})" />
-                                        <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px" fill="#fff">[[ foobar({{ tag.progress }}) ]]%</text>
+                                        <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px" fill="#fff">[[ round({{ tag.progress }}) ]]%</text>
                                     </svg>
                                 </div>
                             </div>
@@ -92,7 +88,6 @@
                         </div>
                     </template>
                 </card>
-
             </div>
 
         </div>
@@ -119,6 +114,10 @@
                     <a href="{% url 'drill:answer' question.uuid %}" class="btn btn-primary" role="button">Show Answer</a>
                     <a href="{% url 'drill:skip' question.uuid %}" class="btn btn-primary" role="button">Skip</a>
 
+                    <form action="{% url 'drill:update' question.uuid %}" class="mt-2 float-right">
+                        <input type="submit" class="btn btn-primary" value="Update">
+                    </form>
+
                 </div>
             </div>
 
@@ -133,7 +132,7 @@
     {{ block.super }}
 
     <script type="text/javascript" id="MathJax-script" async
-            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
     </script>
 
     <script type="text/javascript">
@@ -176,12 +175,13 @@
             computed: {
                 strokeDashArray: function() {
                     return 2 * 3.14 * this.circleRadius;
-                }            },
+                }
+            },
             methods: {
                 getDashOffset(progress) {
                     return this.strokeDashArray * (1 - progress/100)
                 },
-                foobar: function(progress) {
+                round: function(progress) {
                     return Math.round(progress);
                 }
             }

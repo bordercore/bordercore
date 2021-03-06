@@ -84,7 +84,7 @@ def test_record_response():
 
     question.record_response("hard")
     assert question.state == "R"
-    assert question.interval == timedelta(days=7, seconds=43200)
+    assert question.interval == timedelta(days=4, seconds=32400)
     assert question.efactor == 2.125
     assert question.learning_step == 2
 
