@@ -1,3 +1,5 @@
+import re
+
 from botocore.errorfactory import ClientError
 
 from django.contrib import messages
@@ -82,6 +84,9 @@ class CollectionDetailView(DetailView):
         context = super().get_context_data(**kwargs)
 
         blob_list = self.object.get_blob_list()
+
+        for blob in blob_list:
+            blob.title = re.sub("[\n\r]", "", blob.title)
 
         if blob_list:
             context["blob_list"] = blob_list
