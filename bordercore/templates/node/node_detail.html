@@ -30,11 +30,10 @@
 
                                 <ul class="list-group list-group-flush" id="sort-container-tags">
                                     <draggable v-model="blobList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
-                                        <transition-group type="transition" id="node-note">
+                                        <transition-group type="transition" class="w-100">
                                             <li v-for="(blob, index) in blobList" class="list-group-item list-group-item-secondary text-info draggable" :data-uuid="blob.uuid" :key="blob.uuid" v-cloak v-b-hover="handleHover">
-                                                <div class="dropdownmenu hidden">
-
-                                                    <dropdown-menu v-model="show">
+                                                <div class="dropdownmenu hidden float-right">
+                                                    <dropdown-menu v-model="show" class="text-center">
                                                         <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
                                                         <div slot="dropdown">
                                                             <a class="dropdown-item" href="#" @click="removeBlob(blob.uuid)">Remove</a>
@@ -64,7 +63,7 @@
 
                                             </li>
                                             <div class="text-secondary" v-if="blobList.length == 0" :key="1" v-cloak>
-                                                    Nothing to show
+                                                Nothing to show
                                             </div>
                                         </transition-group>
                                     </draggable>
@@ -75,16 +74,14 @@
 
                 </div>
 
-                <div class="d-flex" style="flex: 1 0 auto">
+                <div>
                     <note inline-template ref="note">
-
                         <card v-b-hover="handleHover">
-
                             <template v-slot:title-slot>
-                                <div class="card-title" v-cloak>
-                                        Notes
+                                <div class="card-title position-relative" v-cloak>
+                                    Notes
                                     <span class="dropdownmenu hidden float-right" v-if="note !== null">
-                                        <dropdown-menu v-model="show">
+                                        <dropdown-menu v-model="show" class="text-center">
                                             <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
                                             <div slot="dropdown">
                                                 <a v-if="note" class="dropdown-item" href="#" @click="editNote()">Edit note</a>
@@ -102,14 +99,13 @@
                             </template>
                         </card>
                     </note>
-
                 </div>
 
             </div> <!-- - End first column -->
 
-            <div class="col-lg-5">
+            <div class="col-lg-4 d-flex flex-column">
 
-                <div class="d-flex">
+                <div>
                     <bookmark-list inline-template ref="bookmarkList">
 
                         <card title="Links">
@@ -123,10 +119,10 @@
 
                                 <ul class="list-group list-group-flush" id="sort-container-tags">
                                     <draggable v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
-                                        <transition-group type="transition">
-                                            <li v-for="(bookmark, index) in bookmarkList" class="list-group-item list-group-item-secondary text-info draggable" :data-uuid="bookmark.id" :key="bookmark.id" v-cloak  v-b-hover="handleHover">
-                                                <div class="dropdownmenu hidden">
-                                                    <dropdown-menu v-model="show">
+                                        <transition-group type="transition" class="w-100">
+                                            <li v-for="(bookmark, index) in bookmarkList" class="list-group-item list-group-item-secondary text-info draggable" :data-uuid="bookmark.id" :key="bookmark.id" v-cloak v-b-hover="handleHover">
+                                                <div class="dropdownmenu hidden float-right">
+                                                    <dropdown-menu v-model="show" class="text-center">
                                                         <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
                                                         <div slot="dropdown">
                                                             <a class="dropdown-item" href="#" @click="removeBookmark(bookmark.id)">Remove</a>
@@ -150,7 +146,7 @@
                                                 </div>
                                             </li>
                                             <div class="text-secondary" v-if="bookmarkList.length == 0" :key="1" v-cloak>
-                                                    No links
+                                                No links
                                             </div>
                                         </transition-group>
                                     </draggable>
@@ -161,72 +157,72 @@
                 </div>
             </div>
 
-            <blob-search inline-template ref="blobSearch">
-                <div class="modal fade" id="modalAddBlob" tabindex="-1" role="dialog">
-
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h4 class="modal-title" id="myModalLabel">Add blob</h4>
-                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
-                            </div>
-                            <div class="modal-body">
-
-                                <form id="search" action="" method="get" autocomplete="off">
-
-                                    <div class="form-row align-items-center">
-
-                                        <div class="form-row">
-                                            <simple-suggest
-                                                ref="simpleSuggest"
-                                                display-attribute="title"
-                                                value-attribute="uuid"
-                                                search-url="{% url 'node:search_blob_titles' %}?term="
-                                            >
-                                            </simple-suggest>
-                                        </div>
-                                    </div>
-                                </form>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </blob-search>
-
-            <bookmark-search inline-template ref="bookmarkSearch">
-                <div class="modal fade" id="modalAddBookmark" tabindex="-1" role="dialog">
-
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h4 class="modal-title" id="myModalLabel">Add bookmark</h4>
-                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
-                            </div>
-                            <div class="modal-body">
-
-                                <form id="search" action="" method="get" autocomplete="off">
-                                    <div class="form-row align-items-center">
-
-                                        <div class="form-row">
-                                            <simple-suggest
-                                                ref="simpleSuggest"
-                                                display-attribute="title"
-                                                value-attribute="title"
-                                                search-url="{% url 'node:search_bookmarks' %}?term="
-                                            >
-                                            </simple-suggest>
-                                        </div>
-                                    </div>
-                                </form>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </bookmark-search>
-
         </div>
+
+        <blob-search inline-template ref="blobSearch">
+            <div class="modal fade" id="modalAddBlob" tabindex="-1" role="dialog">
+
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="myModalLabel">Add blob</h4>
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body">
+
+                            <form id="search" action="" method="get" autocomplete="off">
+
+                                <div class="form-row align-items-center">
+
+                                    <div class="form-row">
+                                        <simple-suggest
+                                            ref="simpleSuggest"
+                                            display-attribute="title"
+                                            value-attribute="uuid"
+                                            search-url="{% url 'node:search_blob_titles' %}?term="
+                                        >
+                                        </simple-suggest>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </blob-search>
+
+        <bookmark-search inline-template ref="bookmarkSearch">
+            <div class="modal fade" id="modalAddBookmark" tabindex="-1" role="dialog">
+
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="myModalLabel">Add bookmark</h4>
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body">
+
+                            <form id="search" action="" method="get" autocomplete="off">
+                                <div class="form-row align-items-center">
+
+                                    <div class="form-row">
+                                        <simple-suggest
+                                            ref="simpleSuggest"
+                                            display-attribute="title"
+                                            value-attribute="title"
+                                            search-url="{% url 'node:search_bookmarks' %}?term="
+                                        >
+                                        </simple-suggest>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </bookmark-search>
 
     </div>
 
