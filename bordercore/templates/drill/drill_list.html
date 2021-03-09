@@ -149,11 +149,69 @@
 
         <div class="col-lg-3" id="favorite_tags">
 
-            <card title="Favorite Tags">
-                <template v-slot:content>
-                Favorite Tags Yo
-                </template>
-            </card>
+            <div class="right-column">
+                <card title="Favorite Tags" v-b-hover="handleHover">
+                    <template v-slot:title-slot>
+                        <div class="card-title" v-cloak>
+                            Favorite Tags
+                            <span class="dropdownmenu hidden float-right mr-2">
+                                <dropdown-menu
+                                    v-model="show"
+                                    :right="right"
+                                    :transition="transition"
+                                    :interactive="interactive"
+                                    class="text-center"
+                                >
+                                    <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
+                                    <div slot="dropdown">
+                                        <a class="dropdown-item" href="#" @click="chooseTag()">Add tag</a>
+                                    </div>
+                                </dropdown-menu>
+                            </span>
+                        </div>
+                    </template>
+
+                    <template v-slot:content>
+                        <ul class="list-unstyled">
+                            <li v-for="tag in tagList" class="d-flex px-2">
+                                <div class="flex-fill"><a :href="tag.url">[[ tag.name ]]</a></div>
+                                <div class="text-info">[[ tag.progress ]]%</div>
+                            </li>
+                        </ul>
+                    </template>
+                </card>
+            </div>
+
+            <tag-search inline-template ref="tagSearch">
+                <div class="modal fade" id="modalAddTag" tabindex="-1" role="dialog">
+
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="myModalLabel">Add tag</h4>
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                            </div>
+                            <div class="modal-body">
+
+                                <form id="search" action="" method="get" autocomplete="off">
+
+                                    <div class="form-row align-items-center">
+                                        <div class="form-row">
+                                            <simple-suggest
+                                                ref="simpleSuggest"
+                                                search-url="{% url 'drill:search_tags' %}?query="
+                                                place-holder="Tag Search"
+                                            >
+                                        </div>
+                                    </div>
+
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </tag-search>
 
         </div>
 
@@ -169,8 +227,9 @@
 
     <script type="text/javascript" charset="utf-8">
 
+        const EventBus = new Vue();
+
         new Vue({
-            delimiters: ["[[", "]]"],
             el: "#search",
             methods: {
                 select(tag) {
@@ -262,14 +321,101 @@
                     return this.strokeDashArray * (1 - progress/100)
                 },
                 round: function(progress) {
-                    console.log(progress);
                     return Math.round(progress);
                 }
             }
         });
 
+        const TagSearch = {
+            methods: {
+                select(selection) {
+
+                    EventBus.$emit("add-tag", selection.value);
+                    $("#modalAddTag").modal("hide");
+
+                    this.$nextTick(() => {
+                        this.$refs.simpleSuggest.$refs.suggestComponent.$el.querySelector("input").blur();
+                        this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
+                    });
+
+                },
+            },
+            components: {
+                SimpleSuggest
+            }
+        };
+
         new Vue({
-            el: "#favorite_tags"
+            el: "#favorite_tags",
+            components: {
+                TagSearch
+            },
+            data() {
+                return {
+                    show: false,
+                    right: true,
+                    interactive: true,
+                    transition: "translate-fade-down",
+                    tagList: []
+                }
+            },
+            methods: {
+
+                getTagList() {
+                    doGet(
+                        this,
+                        "{% url "drill:get_favorite_tags" %}",
+                        (response) => {
+                            this.tagList = response.data.tag_list;
+                        },
+                        "Error getting favorite tags"
+                    );
+                },
+
+                handleHover(hovered, evt) {
+
+                    evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
+                    if (hovered == true) {
+                        evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
+                    } else {
+                        evt.currentTarget.querySelector(".dropdownmenu").classList.add("hidden");
+                    };
+                },
+
+                chooseTag() {
+
+                    $("#modalAddTag").modal("show");
+                    setTimeout( () => { this.$refs.tagSearch.$refs.simpleSuggest.$refs.suggestComponent.input.focus(); }, 500)
+
+                },
+
+                addTag(tag) {
+                    doPost(
+                        this,
+                        "{% url "drill:add_favorite_tag" %}",
+                        {
+                            "tag": tag
+                        },
+                        (response) => {
+                            this.getTagList();
+                        },
+                        "Tag added",
+                        ""
+                    );
+
+                },
+
+            },
+            mounted() {
+
+                EventBus.$on("add-tag", payload => {
+                    this.addTag(payload);
+                });
+
+                this.getTagList();
+
+            }
+
         });
 
     </script>

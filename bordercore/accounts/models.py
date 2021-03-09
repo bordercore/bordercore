@@ -19,6 +19,7 @@ class UserProfile(models.Model):
     favorite_tags = models.ManyToManyField(Tag, through="SortOrderUserTag")
     favorite_notes = models.ManyToManyField(Blob, through="SortOrderUserNote")
     feeds = models.ManyToManyField(Feed, through="SortOrderUserFeed")
+    favorite_drill_tags = models.ManyToManyField(Tag, through="SortOrderDrillTag", related_name="favorite_drill_tags")
     orgmode_file = models.TextField(null=True)
     google_calendar = JSONField(blank=True, null=True)
     homepage_default_collection = models.OneToOneField(Collection, related_name='default_collection', null=True, on_delete=models.PROTECT)
@@ -94,6 +95,25 @@ class SortOrderUserFeed(SortOrderMixin):
 
 @receiver(pre_delete, sender=SortOrderUserFeed)
 def remove_feed(sender, instance, **kwargs):
+    instance.handle_delete()
+
+
+class SortOrderDrillTag(SortOrderMixin):
+
+    userprofile = models.ForeignKey("accounts.UserProfile", on_delete=models.CASCADE)
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+
+    field_name = "userprofile"
+
+    class Meta:
+        ordering = ("sort_order",)
+        unique_together = (
+            ("userprofile", "tag")
+        )
+
+
+@receiver(pre_delete, sender=SortOrderDrillTag)
+def remove_tag_for_drill(sender, instance, **kwargs):
     instance.handle_delete()
 
 

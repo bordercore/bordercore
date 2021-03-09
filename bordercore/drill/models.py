@@ -11,6 +11,7 @@ from django.db import models
 from django.db.models import Count, F, Max, Min, Q
 from django.db.models.signals import post_save
 from django.dispatch.dispatcher import receiver
+from django.urls import reverse
 from django.utils import timezone
 
 from lib.mixins import TimeStampedModel
@@ -253,12 +254,30 @@ class Question(TimeStampedModel):
 
         if last_reviewed.last_reviewed:
             last_reviewed = last_reviewed.last_reviewed.strftime("%B %d, %Y")
+        else:
+            last_reviewed = "Never"
 
         return {
             "name": tag,
-            "progress": 100 - (todo / count * 100),
+            "progress": round(100 - (todo / count * 100)),
             "last_reviewed": last_reviewed
         }
+
+    @staticmethod
+    def get_favorite_tags(user):
+
+        tags = user.userprofile.favorite_drill_tags.all().only("name").order_by("sortorderdrilltag__sort_order")
+
+        info = []
+
+        for tag in tags:
+            tag_info = Question.get_tag_info(user, tag.name)
+            info.append({
+                **tag_info,
+                "url": reverse("drill:study_tag", kwargs={"tag": tag.name})
+            })
+
+        return info
 
 
 @receiver(post_save, sender=Question)

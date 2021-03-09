@@ -9,6 +9,7 @@
         <div class="mr-auto align-self-center">
             <ul class="breadcrumb mb-0 pt-0 pb-0">
                 <li class="breadcrumb-item"> <a href="{% url 'drill:list' %}"><font-awesome-icon icon="home"></font-awesome-icon></a> </li>
+                <li class="breadcrumb-item active"><a href="{% url 'drill:detail' question.uuid %}">Question with tag <strong>{{ question.tags.all.0 }}</strong></a></li>
                 <li class="breadcrumb-item active">Answer</li>
             </ul>
         </div>

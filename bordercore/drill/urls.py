@@ -69,5 +69,15 @@ urlpatterns = [
         route="study/tag/<str:tag>/",
         view=views.study_tag,
         name="study_tag"
-    )
+    ),
+    path(
+        route="get_favorite_tags",
+        view=views.get_favorite_tags,
+        name="get_favorite_tags"
+    ),
+    path(
+        route="add_favorite_tag",
+        view=views.add_favorite_tag,
+        name="add_favorite_tag"
+    ),
 ]

@@ -16,6 +16,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
+from accounts.models import SortOrderDrillTag
 from drill.forms import QuestionForm
 from drill.models import EFACTOR_DEFAULT, Question
 from tag.models import Tag
@@ -381,3 +382,32 @@ def search_tags(request):
             )
 
     return JsonResponse(matches, safe=False)
+
+
+@login_required
+def get_favorite_tags(request):
+
+    tags = Question.get_favorite_tags(request.user)
+
+    response = {
+        "status": "OK",
+        "tag_list": tags
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def add_favorite_tag(request):
+
+    tag_name = request.POST["tag"]
+
+    tag = Tag.objects.get(name=tag_name, user=request.user)
+    so = SortOrderDrillTag(userprofile=request.user.userprofile, tag=tag)
+    so.save()
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
