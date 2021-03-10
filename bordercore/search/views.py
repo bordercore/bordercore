@@ -195,7 +195,7 @@ class SearchListView(ListView):
 class NoteListView(SearchListView):
 
     template_name = "blob/note_list.html"
-    RESULT_COUNT_PER_PAGE_NOTE = 10
+    RESULT_COUNT_PER_PAGE = 10
 
     def refine_search(self, search_object):
 
