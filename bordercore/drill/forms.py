@@ -15,17 +15,17 @@ class QuestionForm(ModelForm):
 
         # Some answers might contain start with code identation required for markdown formatiing,
         #  so disable automatic whitespace stripping
-        self.fields['answer'].strip = False
+        self.fields["answer"].strip = False
 
         # If this form has a model attached, get the tags and display them separated by commas
         if self.instance.id:
-            self.initial['tags'] = self.instance.get_tags()
+            self.initial["tags"] = self.instance.get_tags()
 
-        self.fields['tags'] = ModelCommaSeparatedChoiceField(
+        self.fields["tags"] = ModelCommaSeparatedChoiceField(
             request=self.request,
             required=False,
             queryset=Tag.objects.filter(user=self.request.user),
-            to_field_name='name')
+            to_field_name="name")
 
     def clean_tags(self):
 
@@ -37,8 +37,10 @@ class QuestionForm(ModelForm):
 
     class Meta:
         model = Question
-        fields = ('question', 'answer')
+        fields = ("question", "answer")
         widgets = {
-            'question': Textarea(attrs={'rows': 10, 'class': 'form-control'}),
-            'answer': Textarea(attrs={'rows': 10, 'class': 'form-control'})
+            # Add "v-pre" attribute in case the question or answer happens to contain
+            #  any Vue mustache tags
+            "question": Textarea(attrs={"rows": 10, "class": "form-control", "v-pre": "true"}),
+            "answer": Textarea(attrs={"rows": 10, "class": "form-control", "v-pre": "true"})
         }
