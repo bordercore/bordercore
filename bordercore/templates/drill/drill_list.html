@@ -4,7 +4,7 @@
 
 {% block content %}
 
-    <div class="row no-gutters">
+    <div class="row no-gutters h-100">
 
         <div class="col-lg-3 d-flex flex-column" id="vue-app-left">
 
@@ -81,7 +81,7 @@
             <div class="mb-2" style="margin-left: 15px">
                 <simple-suggest
                     ref="simpleSuggest"
-                    search-url="{% url 'drill:search_tags' %}?query="
+                    search-url="{% url 'drill:search_tags' %}?drill_only=true&query="
                     place-holder="Tag Search"
                 >
                 </simple-suggest>
@@ -124,7 +124,7 @@
                         {% for tag in tags_needing_review %}
                             <li class="d-flex px-2">
                                 <div class="flex-fill"><a href="{% url 'drill:study_tag' tag.name %}">{{ tag.name }}</a></div>
-                                <div class="text-info">{{ tag.last_reviewed|default:"Never" }}</div>
+                                <div class="text-info">{{ tag.last_reviewed|date:"F j, Y"|default:"Never" }}</div>
                             </li>
                         {% endfor %}
                     </ul>
@@ -132,19 +132,6 @@
 
             </card>
 
-            <div class="card-grid">
-
-                <div id="search">
-                    {% include "common/show_messages.html" %}
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-12">
-                        {% include "common/datatable.html" with data=info cols=cols id="drill_list" %}
-                    </div>
-                </div>
-
-            </div>
         </div>
 
         <div class="col-lg-3" id="favorite_tags">
@@ -152,14 +139,13 @@
             <div class="right-column">
                 <card title="Favorite Tags" v-b-hover="handleHover">
                     <template v-slot:title-slot>
-                        <div class="card-title" v-cloak>
+                        <div class="card-title">
                             Favorite Tags
-                            <span class="dropdownmenu hidden float-right mr-2">
+                            <span class="dropdownmenu hidden float-right mr-2" v-cloak>
                                 <dropdown-menu
                                     v-model="show"
                                     :right="right"
                                     :transition="transition"
-                                    :interactive="interactive"
                                     class="text-center"
                                 >
                                     <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
@@ -178,6 +164,32 @@
                                 <div class="text-info">[[ tag.progress ]]%</div>
                             </li>
                         </ul>
+                    </template>
+                </card>
+            </div>
+
+            <div class="right-column">
+                <card>
+                    <template v-slot:title-slot>
+                        <h5>Random tag: <a href="{{ random_tag.url }}">{{ random_tag.name }}</a></h5>
+                    </template>
+                    <template v-slot:content>
+                        <div class="d-flex">
+                            <div class="flex-grow-1 d-flex justify-content-center align-items-center">
+                                <ul class="list-unstyled">
+                                    <li>Last Reviewed <br/> <strong>{{ random_tag.last_reviewed }}</strong></li>
+                                </ul>
+                            </div>
+                            <div class="flex-grow-1 text-center">
+                                <div class="demo" class="pt-5">
+                                    <svg width="120" height="120" viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke="#262c49" stroke-width="12" />
+                                        <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke="#7fffd4" stroke-width="12" :stroke-dasharray="strokeDashArray" :stroke-dashoffset="getDashOffset({{ random_tag.progress }})" />
+                                        <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px" fill="#fff">{{ random_tag.progress }}%</text>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
                     </template>
                 </card>
             </div>
@@ -356,7 +368,13 @@
                     right: true,
                     interactive: true,
                     transition: "translate-fade-down",
-                    tagList: []
+                    tagList: [],
+                    circleRadius: 54
+                }
+            },
+            computed: {
+                strokeDashArray: function() {
+                    return 2 * 3.14 * this.circleRadius;
                 }
             },
             methods: {
@@ -404,6 +422,14 @@
                     );
 
                 },
+
+                getDashOffset(progress) {
+                    return this.strokeDashArray * (1 - progress/100)
+                },
+
+                round: function(progress) {
+                    return Math.round(progress);
+                }
 
             },
             mounted() {

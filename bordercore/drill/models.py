@@ -257,10 +257,16 @@ class Question(TimeStampedModel):
         else:
             last_reviewed = "Never"
 
+        if count != 0:
+            progress = round(100 - (todo / count * 100))
+        else:
+            progress = 0
+
         return {
             "name": tag,
-            "progress": round(100 - (todo / count * 100)),
-            "last_reviewed": last_reviewed
+            "progress": progress,
+            "last_reviewed": last_reviewed,
+            "url": reverse("drill:study_tag", kwargs={"tag": tag})
         }
 
     @staticmethod
@@ -271,13 +277,24 @@ class Question(TimeStampedModel):
         info = []
 
         for tag in tags:
-            tag_info = Question.get_tag_info(user, tag.name)
-            info.append({
-                **tag_info,
-                "url": reverse("drill:study_tag", kwargs={"tag": tag.name})
-            })
+            info.append(Question.get_tag_info(user, tag.name))
 
         return info
+
+    @staticmethod
+    def get_random_tag(user):
+        """
+        Get a random tag and its related information.
+
+        We don't want a simple "order by random" on the entire tag set,
+        since that will bias selections for popular tags. So we use
+        a subquery to get the distinct tags first, then choose
+        a random tag from that set.
+        """
+
+        distinct_tags = Tag.objects.filter(question__isnull=False).distinct("name")
+        random_tag = Tag.objects.filter(id__in=distinct_tags).order_by("?")[0]
+        return Question.get_tag_info(user, random_tag.name)
 
 
 @receiver(post_save, sender=Question)

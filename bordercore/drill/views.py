@@ -6,6 +6,7 @@ from django import urls
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError
 from django.db.models import Count, F, Max, Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
@@ -25,46 +26,23 @@ from tag.models import Tag
 @method_decorator(login_required, name='dispatch')
 class DrillListView(ListView):
 
-    context_object_name = "info"
     template_name = "drill/drill_list.html"
+    queryset = Question.objects.none()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        info = []
-
-        for tag in self.object_list:
-            if tag["max"]:
-                last_reviewed = tag["max"].strftime("%b %d, %Y")
-                last_reviewed_sort = time.mktime(tag["max"].timetuple())
-            else:
-                last_reviewed = ""
-                last_reviewed_sort = ""
-            info.append(dict(tag_name=tag["name"],
-                             question_count=tag["count"],
-                             last_reviewed=last_reviewed,
-                             lastreviewed_sort=last_reviewed_sort,
-                             id=tag["id"]))
 
         return {
             **context,
             "cols": ["tag_name", "question_count", "last_reviewed", "lastreviewed_sort", "id"],
-            "info": info,
             "title": "Home",
             "tags_still_learning": Question.get_tags_still_learning(self.request.user),
             "tags_needing_review": Question.get_tags_needing_review(self.request.user),
+            "random_tag": Question.get_random_tag(self.request.user),
             "total_progress": Question.get_total_progress(self.request.user),
             "no_left_block": True,
             "content_block_width": "12"
         }
-
-    def get_queryset(self):
-        # TODO: This query joins on drill_question_tags *twice*, which is
-        #  obviously inefficient. The "distinct=True" saves us for now
-        #  from returning duplicate rows
-        return Tag.objects.values("id", "name") \
-                          .annotate(count=Count("question", distinct=True)) \
-                          .annotate(max=Max("question__last_reviewed")) \
-                          .filter(user=self.request.user, question__user=self.request.user)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -347,12 +325,7 @@ def search_tags(request):
                         "wildcard": {
                             "tags": f"{search_term}*"
                         }
-                    },
-                    {
-                        "term": {
-                            "doctype": "drill"
-                        }
-                    },
+                    }
                 ]
             }
         },
@@ -367,6 +340,17 @@ def search_tags(request):
         "from": 0, "size": 0,
         "_source": ["tags"]
     }
+
+    # If "drill_only" is passed in, then limit our search
+    #  to tags attached to questions, rather than all tags
+    if "drill_only" in request.GET:
+        search_object["query"]["bool"]["must"].append(
+            {
+                "term": {
+                    "doctype": "drill"
+                }
+            },
+        )
 
     results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 
@@ -402,12 +386,21 @@ def add_favorite_tag(request):
 
     tag_name = request.POST["tag"]
 
-    tag = Tag.objects.get(name=tag_name, user=request.user)
-    so = SortOrderDrillTag(userprofile=request.user.userprofile, tag=tag)
-    so.save()
+    try:
 
-    response = {
-        "status": "OK",
-    }
+        tag = Tag.objects.get(name=tag_name, user=request.user)
+        so = SortOrderDrillTag(userprofile=request.user.userprofile, tag=tag)
+        so.save()
+
+        response = {
+            "status": "OK"
+        }
+
+    except IntegrityError:
+
+        response = {
+            "status": "Error",
+            "message": "Duplicate: that tag is already a favorite."
+        }
 
     return JsonResponse(response)
