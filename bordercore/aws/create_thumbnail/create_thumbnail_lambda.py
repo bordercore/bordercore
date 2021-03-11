@@ -142,7 +142,8 @@ def handler(event, context):
                     f"{path}/{coverfile}",
                     ExtraArgs={'Metadata': {"image-width": str(width),
                                             "image-height": str(height),
-                                            "cover-image": "Yes"}}
+                                            "cover-image": "Yes"},
+                               "ContentType": "image/jpeg"}
                 )
                 os.remove(cover)
 
