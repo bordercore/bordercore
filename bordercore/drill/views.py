@@ -386,7 +386,14 @@ def add_favorite_tag(request):
 
     tag_name = request.POST["tag"]
 
-    try:
+    if SortOrderDrillTag.objects.filter(userprofile=request.user.userprofile, tag__name=tag_name).exists():
+
+        response = {
+            "status": "Error",
+            "message": "Duplicate: that tag is already a favorite."
+        }
+
+    else:
 
         tag = Tag.objects.get(name=tag_name, user=request.user)
         so = SortOrderDrillTag(userprofile=request.user.userprofile, tag=tag)
@@ -394,13 +401,6 @@ def add_favorite_tag(request):
 
         response = {
             "status": "OK"
-        }
-
-    except IntegrityError:
-
-        response = {
-            "status": "Error",
-            "message": "Duplicate: that tag is already a favorite."
         }
 
     return JsonResponse(response)
