@@ -45,13 +45,14 @@ def music_list(request):
         random_albums = random_album_info.first()
 
     return render(request, 'music/index.html',
-                  {'cols': ['Date', 'artist', 'title', 'id'],
-                   'message': message,
-                   'recent_songs': recent_songs,
-                   'random_albums': random_albums,
-                   'title': 'Music List',
-                   'MEDIA_URL_MUSIC': settings.MEDIA_URL_MUSIC
-                   })
+                  {
+                      'cols': ['Date', 'artist', 'title', 'id'],
+                      'message': message,
+                      'recent_songs': recent_songs,
+                      'random_albums': random_albums,
+                      'title': 'Music List',
+                      'MEDIA_URL_MUSIC': settings.MEDIA_URL_MUSIC,
+                  })
 
 
 @method_decorator(login_required, name='dispatch')
@@ -159,8 +160,6 @@ class SongUpdateView(UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["action"] = "Update"
-        context["no_left_block"] = True
-        context["content_block_width"] = "12"
         context["song_length_pretty"] = convert_seconds(self.object.length)
         context["tags"] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
@@ -202,8 +201,6 @@ class SongCreateView(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["action"] = "Create"
-        context["no_left_block"] = True
-        context["content_block_width"] = "12"
         return context
 
     def form_valid(self, form):

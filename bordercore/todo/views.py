@@ -79,6 +79,7 @@ class TodoListView(ListView):
         context['nav'] = 'todo'
         context['info'] = info
         context['title'] = 'Todo List'
+
         return context
 
 

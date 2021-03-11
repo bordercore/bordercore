@@ -184,9 +184,6 @@ class BlobDetailView(DetailView):
         else:
             context["show_metadata"] = False
 
-        context["no_left_block"] = True
-        context["content_block_width"] = "12"
-
         return context
 
     def get_queryset(self):

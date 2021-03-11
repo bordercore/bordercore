@@ -7,34 +7,50 @@
 {% block title %} Music :: Tag Search {% endblock %}
 
 {% block nav %}
-    <div class="content-nav">
-        <ul class="breadcrumb mb-0" style="background-color: #1e1e2e">
-            <li class="breadcrumb-item"> <a href="{% url 'music:list' %}">Music</a> </li>
-            <li class="breadcrumb-item active"> Tag: <strong>{{ tag_name }}</strong> </li>
-        </ul>
-    </div>
-{% endblock %}
 
-{% block left-block %}
-
-    <br /><br />
-
-    <div id="audio_player">
-        <audio controls controlsList="nodownload" id="player">
-            <source src="" type="audio/mpeg">
-  Your browser does not support the audio tag.
-        </audio>
-    </div>
+        <div class="d-flex mb-3">
+            <div class="mr-auto align-self-center">
+                <ul class="breadcrumb mb-0 pt-0 pb-0">
+                    <li class="breadcrumb-item"> <a href="{% url 'music:list' %}">Music</a> </li>
+                    <li class="breadcrumb-item active"> Tag: <strong>{{ tag_name }}</strong> </li>
+                </ul>
+            </div>
+        </div>
 
 {% endblock %}
 
 {% block content %}
 
-<div class="row">
-    <div class="col-lg-11" id="song_list" @click="onClick">
-        {% include "common/datatable.html" with data=results cols=cols %}
+    <div class="row no-gutters h-100">
+
+        <div class="col-lg-3 d-flex flex-column">
+
+            <div class="card-grid ml-2">
+
+                <div id="audio_player">
+                    <audio controls controlsList="nodownload" id="player" class="mw-100">
+                        <source src="" type="audio/mpeg" />
+                        Your browser does not support the audio tag.
+                    </audio>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-9">
+
+            <div class="card-grid ml-2">
+
+                <div class="col-lg-9" id="song_list" @click="onClick">
+                    {% include "common/datatable.html" with data=results cols=cols %}
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
-</div>
 
 {% endblock %}
 

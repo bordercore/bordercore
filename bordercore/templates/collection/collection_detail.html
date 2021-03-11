@@ -11,47 +11,56 @@
     </div>
 {% endblock %}
 
-{% block left-block %}
-
-    <h2>{{ object.description }}</h2>
-
-    <br />
-
-    <input type="submit" class="btn btn-primary" value="Gallery" id="show-gallery" data-toggle="modal" data-target="#gallery">
-
-    <br /><br />
-
-    <form action="{% url 'blob:create' %}" method="GET">
-        <input type="hidden" name="collection_id" value="{{ collection.id }}" />
-        <input type="submit" class="btn btn-primary" value="Add">
-    </form>
-
-{% endblock %}
-
 {% block content %}
 
-    <div class="row" id="vue-app">
-        <div class="col-lg-12">
+    <div class="row no-gutters h-100">
 
-            <h3>{{ object.name }}</h3>
+        <div class="col-lg-3 d-flex flex-column">
 
-            <blob-list></blob-list>
+            <div class="card-body">
+
+                <h2>{{ object.description }}</h2>
+
+                <br />
+
+                <input type="submit" class="btn btn-primary" value="Gallery" id="show-gallery" data-toggle="modal" data-target="#gallery">
+
+                <br /><br />
+
+                <form action="{% url 'blob:create' %}" method="GET">
+                    <input type="hidden" name="collection_id" value="{{ collection.id }}" />
+                    <input type="submit" class="btn btn-primary" value="Add">
+                </form>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-9" id="vue-app">
+
+            <div class="card-grid ml-2">
+
+                <h3>{{ object.name }}</h3>
+
+                <blob-list></blob-list>
                 {% if not blob_list %}
                     <div class="alert alert-warning" role="alert">Nothing in this collection</div>
                 {% endif %}
+            </div>
         </div>
-    </div>
 
-    <div class="modal fade" id="gallery" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered w-75 mw-100" role="document">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <div>
-                        <img id="gallery_image" src="{{ first_blob_cover_info.url }}" style="width: 100%"/>
+        <div class="modal fade" id="gallery" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered w-75 mw-100" role="document">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div>
+                            <img id="gallery_image" src="{{ first_blob_cover_info.url }}" style="width: 100%"/>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
 
 {% endblock %}

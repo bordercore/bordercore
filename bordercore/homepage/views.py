@@ -88,8 +88,6 @@ def homepage(request):
                    'bookmarks': bookmarks,
                    'default_collection': default_collection,
                    'overdue_exercises': sorted(overdue_exercises, key=lambda x: x['lag'], reverse=True),
-                   'no_left_block': True,
-                   'content_block_width': 12,
                    'title': 'Homepage'})
 
 
@@ -183,29 +181,20 @@ def get_date(node):
 
 def handler404(request, exception):
 
-    response = render(request, "404.html", {
-        "content_block_width": "12",
-        "no_left_block": True
-    })
+    response = render(request, "404.html", {})
     response.status_code = 404
     return response
 
 
 def handler403(request, exception):
 
-    response = render(request, "403.html", {
-        "content_block_width": "12",
-        "no_left_block": True
-    })
+    response = render(request, "403.html", {})
     response.status_code = 403
     return response
 
 
 def handler500(request):
 
-    response = render(request, "500.html", {
-        "content_block_width": "12",
-        "no_left_block": True
-    })
+    response = render(request, "500.html", {})
     response.status_code = 500
     return response

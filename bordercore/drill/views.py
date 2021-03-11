@@ -40,8 +40,6 @@ class DrillListView(ListView):
             "tags_needing_review": Question.get_tags_needing_review(self.request.user),
             "random_tag": Question.get_random_tag(self.request.user),
             "total_progress": Question.get_total_progress(self.request.user),
-            "no_left_block": True,
-            "content_block_width": "12"
         }
 
 
@@ -177,8 +175,6 @@ class QuestionDetailView(DetailView):
         context['learning_step_count'] = self.object.get_learning_step_count()
         context['title'] = 'Drill :: Question Detail'
         context['tag_list'] = ", ".join([x.name for x in self.object.tags.all()])
-        context["no_left_block"] = True
-        context["content_block_width"] = "12"
 
         return context
 
@@ -273,8 +269,6 @@ def show_answer(request, uuid):
                    'state_name': Question.get_state_name(question.state),
                    'tag_list': ", ".join([x.name for x in question.tags.all()]),
                    'learning_step_count': question.get_learning_step_count(),
-                   'no_left_block': True,
-                   'content_block_width': '12',
                    'title': 'Drill :: Show Answer'})
 
 

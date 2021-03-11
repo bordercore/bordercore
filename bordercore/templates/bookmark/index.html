@@ -7,60 +7,55 @@
 
 {% block title %} Bookmarks {% endblock %}
 
-{% block left-block %}
+{% block nav %}
+
+    <div class="ml-2 mb-3" id="vue-app-top">
+
+        {% include "common/show_messages.html" %}
+
+        <form class="form-inline" role="form" id="search-form" method="get" @submit.prevent>
+
+            {% csrf_token %}
+
+            <input type="hidden" id="add-to-remote-from-favorite-tagname" name="tag" />
+
+            <div class="form-group col-auto has-search">
+                <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
+                <search inline-template @search-term="searchTerm" @search-tag="searchTag" @get-page="getPage" ref="search">
+                    <div>
+                        <simple-suggest
+                            ref="simpleSuggest"
+                            place-holder="Search"
+                            search-url="{% url 'bookmark:get_tags_used_by_bookmarks' %}?query="
+                        >
+                        </simple-suggest>
+                    </div>
+                </search>
+            </div>
+
+            <button-group inline-template @get-page="getPage">
+                <div class="btn-group ml-5">
+                    <a class="btn btn-secondary" id="btn-add" href="{% url 'bookmark:create' %}">Create</a>
+                    <input type="button" class="btn btn-secondary" id="btn-update" value="Update" :disabled="buttonsDisabled" @click="onClickUpdate" />
+                    <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="buttonsDisabled" @click="onClickDelete" />
+                    <input v-if="removeFavoriteButtonVisible" type="button" class="btn btn-secondary ml-2" value="Remove from Favorites" @click="removeFromFavorites" v-cloak />
+                    <input v-if="addFavoriteButtonVisible" type="button" class="btn btn-secondary ml-2" value="Add to Favorites" @click="addToFavorites" v-cloak />
+                </div>
+            </button-group>
+
+        </form>
+
+    </div>
+
 {% endblock %}
 
 {% block content %}
 
-    <div id="vue-app-top">
+    <div class="row no-gutters h-100">
 
-        {% include "common/show_messages.html" %}
+        <div class="col-lg-3 d-flex flex-column">
 
-        <div class="row">
-
-            <div class="col-lg-12 bookmark-search">
-
-                <form class="form-inline" role="form" id="search-form" method="get" @submit.prevent>
-                    {% csrf_token %}
-                    <input type="hidden" id="add-to-remote-from-favorite-tagname" name="tag" />
-
-                    <div class="form-group col-auto has-search">
-                        <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
-                        <search inline-template @search-term="searchTerm" @search-tag="searchTag" @get-page="getPage" ref="search">
-                            <div>
-                                <simple-suggest
-                                    ref="simpleSuggest"
-                                    place-holder="Search"
-                                    search-url="{% url 'bookmark:get_tags_used_by_bookmarks' %}?query="
-                                >
-                                </simple-suggest>
-                            </div>
-                        </search>
-                    </div>
-
-                    <button-group inline-template @get-page="getPage">
-                        <div class="btn-group ml-5">
-                            <a class="btn btn-secondary" id="btn-add" href="{% url 'bookmark:create' %}">Create</a>
-                            <input type="button" class="btn btn-secondary" id="btn-update" value="Update" :disabled="buttonsDisabled" @click="onClickUpdate" />
-                            <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="buttonsDisabled" @click="onClickDelete" />
-                            <input v-if="removeFavoriteButtonVisible" type="button" class="btn btn-secondary ml-2" value="Remove from Favorites" @click="removeFromFavorites" v-cloak />
-                            <input v-if="addFavoriteButtonVisible" type="button" class="btn btn-secondary ml-2" value="Add to Favorites" @click="addToFavorites" v-cloak />
-                        </div>
-                    </button-group>
-
-                </form>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="row ml-3 mt-3">
-
-        <div class="col-lg-3">
-
-            <div id="vue-app-left">
+            <div class="card-body" id="vue-app-left">
 
                 <add-note inline-template>
                     <div id="bookmark-sidebar" >
@@ -74,11 +69,11 @@
                     </div>
                 </add-note>
 
-                <ul class="list-group" id="sort-container-tags">
+                <ul class="list-group flex-column w-100" id="sort-container-tags">
                     <tag-list inline-template>
                         <div>
                             <draggable v-model="favoriteTags" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
-                                <transition-group type="transition">
+                                <transition-group type="transition" class="w-100">
                                     <li v-for="tag in favoriteTags" class="list-group-item list-group-item-secondary" :class="{ active: tag.isActive, draggable: tag.isDraggable, 'bookmark-tag-list-header': tag.isHeader }" :data-id="tag.id" :key="tag.id" v-cloak>
                                         <template v-if="tag.isHeader">
                                             [[ tag.name ]]
@@ -112,7 +107,7 @@
 
         <div class="col-lg-9">
 
-            <div id="vue-app-right">
+            <div class="card-grid ml-2" id="vue-app-right">
 
                 <bookmark-list inline-template @paginate="paginate" ref="bookmarkList">
                     <div class="row">
@@ -141,7 +136,7 @@
                     </div>
                 </bookmark-list>
 
-                <pagination inline-template :pagination="pagination" @get-page="getPage">
+                <pagination class="ml-3" inline-template :pagination="pagination" @get-page="getPage">
                     <div class="row" v-if="pagination.num_pages > 1">
                         <nav aria-label="Page navigation">
                             <ul class="pagination">
@@ -183,6 +178,8 @@
             </div>
 
         </div>
+
+    </div>
 
 {% endblock %}
 

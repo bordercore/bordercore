@@ -4,142 +4,151 @@
 
 {% block title %} Search {% endblock %}
 
-{% block left-block %}
-
-    <div class="search-spacer-left"></div>
-
-    <div id="aggregations">
-    {% if request.GET and search_results %}
-
-        <h4 class="ml-3">
-          Total matches: <strong>{{ object_list.hits.total.value }}</strong>
-        </h4>
-
-        {% if search_results.hits.hits %}
-        <div class="card mt-3">
-            <div class="card-header">Document Type Filter</div>
-            <div class="card-body text-info">
-            {% for doctype in aggregations %}
-                <input type="checkbox" name="filter_query" class="facet my-2" data-doctype="{{ doctype.doctype }}" @click="onClick"
-                       {% if doctype.doctype in doctype_filter %}checked="checked"{% endif %}
-                /> {{ doctype.doctype|title }} ({{ doctype.count }})
-                <br/>
-            {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-
-    {% endif %}
-    </div>
-
-{% endblock %}
-
 {% block content %}
 
-{% include "search/header.html" %}
+    <div class="row no-gutters h-100">
 
-    <div id="vue-app">
+        <div class="col-lg-3 d-flex flex-column">
 
-{% if request.GET %}
+            <div class="card-body">
 
-    <div class="row">
-        <div class="col-lg-12">
+                <div id="aggregations">
 
-{% if not search_results and not messages %}
+                    {% if request.GET and search_results %}
 
-    <br />
-    <div class="alert alert-info">Nothing found</div>
+                        <h4 class="ml-3">
+                                Total matches: <strong>{{ object_list.hits.total.value }}</strong>
+                        </h4>
 
-{% else %}
+                        {% if search_results.hits.hits %}
 
-    <table>
+                            <card title="Document Type Filter">
 
-{% for match in search_results.hits.hits %}
+                                <template v-slot:content>
 
-    <tr>
-        <td{% if match.source.importance == 10 %} class="search_result_important"{% endif %}>
+                                    <div class="text-info">
 
-{% if match.source.doctype == 'drill' %}
+                            {% for doctype in aggregations %}
+                                <input type="checkbox" name="filter_query" class="facet my-2" data-doctype="{{ doctype.doctype }}" @click="onClick"
+                                   {% if doctype.doctype in doctype_filter %}checked="checked"{% endif %}
+                                /> {{ doctype.doctype|title }} ({{ doctype.count }})
+                                <br/>
+                            {% endfor %}
 
-    <h4 class="search_result">
-        <font-awesome-icon icon="graduation-cap"></font-awesome-icon>
-        Drill: <a href="{% url 'drill:detail' match.source.uuid %}">{{ match.source.question }}</a>
-    </h4>
+                                    </div>
+                                </template>
+                            </card>
+                        {% endif %}
 
-{% elif match.source.doctype == 'todo' %}
+                    {% endif %}
+                </div>
 
-    <h4 class="search_result">
-        <font-awesome-icon icon="tasks"></font-awesome-icon>
-        Todo: <a href="{% url 'todo:update' match.source.uuid %}">{{ match.source.task }}</a>
-    </h4>
-
-{% elif match.source.doctype == 'bookmark' %}
-
-    <h4 class="search_result">
-        <font-awesome-icon icon="bookmark"></font-awesome-icon>
-        <a href="{{ match.source.url }}">{{ match.source.title }}</a>
-    </h4>
-
-{% elif match.source.doctype == 'note' %}
-
-    <h4 class="search_result">
-        <font-awesome-icon icon="sticky-note"></font-awesome-icon>
-        <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.title|default:"Note" }}</a>
-    </h4>
-
-    <h5>{{ match.source.note|safe }}</h5>
-
-{% elif match.source.doctype == 'document' %}
-
-    <h4 class="search_result">
-        <font-awesome-icon icon="copy"></font-awesome-icon>
-        <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.title|default:"Title" }}</a>
-    </h4>
-
-    <h5>{{ match.source.note|safe }}</h5>
-
-{% elif match.source.doctype == 'song' %}
-
-    <h4 class="search_result">
-        <font-awesome-icon icon="music"></font-awesome-icon>
-        <a href="{% url 'music:artist_detail' match.source.artist %}">{{ match.source.title|default:"Title" }}</a>
-    </h4>
-
-    <h5>{{ match.source.note|safe }}</h5>
-
-{% else %}
-
-    <h4 class="search_result">
-        <font-awesome-icon icon="book"></font-awesome-icon>
-        <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.title|default:"No title" }}</a>
-        {% if match.source.creators %} - {{ match.source.creators }}{% endif %}
-    </h4>
-{% endif %}
-
-<div class="pl-4">
-    <span class="ml-3">{{ match.source.date }}</span>
-
-{% for tag in match.source.tags %}
-    <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
-{% endfor %}
-
-</div>
-
-        </td>
-    </tr>
-
-{% endfor %}
-
-    </table>
+            </div>
 
         </div>
 
-{% endif %}
+        <div class="col-lg-9" id="vue-app">
 
-{% endif %}
+            <div class="card-grid ml-2">
 
-    </div>
-</div>
+                {% include "search/header.html" %}
+
+                {% if request.GET %}
+
+                    {% if not search_results and not messages %}
+
+                        <br />
+                        <div class="alert alert-info">Nothing found</div>
+
+                    {% else %}
+
+                        <table>
+
+                            {% for match in search_results.hits.hits %}
+
+                                <tr>
+                                    <td{% if match.source.importance == 10 %} class="search_result_important"{% endif %}>
+
+                                {% if match.source.doctype == 'drill' %}
+
+                                    <h4 class="search_result">
+                                        <font-awesome-icon icon="graduation-cap"></font-awesome-icon>
+        Drill: <a href="{% url 'drill:detail' match.source.uuid %}">{{ match.source.question }}</a>
+                                    </h4>
+
+                                {% elif match.source.doctype == 'todo' %}
+
+                                    <h4 class="search_result">
+                                        <font-awesome-icon icon="tasks"></font-awesome-icon>
+        Todo: <a href="{% url 'todo:update' match.source.uuid %}">{{ match.source.task }}</a>
+                                    </h4>
+
+                                {% elif match.source.doctype == 'bookmark' %}
+
+                                    <h4 class="search_result">
+                                        <font-awesome-icon icon="bookmark"></font-awesome-icon>
+                                        <a href="{{ match.source.url }}">{{ match.source.title }}</a>
+                                    </h4>
+
+                                {% elif match.source.doctype == 'note' %}
+
+                                    <h4 class="search_result">
+                                        <font-awesome-icon icon="sticky-note"></font-awesome-icon>
+                                        <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.title|default:"Note" }}</a>
+                                    </h4>
+
+                                    <h5>{{ match.source.note|safe }}</h5>
+
+                                {% elif match.source.doctype == 'document' %}
+
+                                    <h4 class="search_result">
+                                        <font-awesome-icon icon="copy"></font-awesome-icon>
+                                        <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.title|default:"Title" }}</a>
+                                    </h4>
+
+                                    <h5>{{ match.source.note|safe }}</h5>
+
+                                {% elif match.source.doctype == 'song' %}
+
+                                    <h4 class="search_result">
+                                        <font-awesome-icon icon="music"></font-awesome-icon>
+                                        <a href="{% url 'music:artist_detail' match.source.artist %}">{{ match.source.title|default:"Title" }}</a>
+                                    </h4>
+
+                                    <h5>{{ match.source.note|safe }}</h5>
+
+                                {% else %}
+
+                                    <h4 class="search_result">
+                                        <font-awesome-icon icon="book"></font-awesome-icon>
+                                        <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.title|default:"No title" }}</a>
+        {% if match.source.creators %} - {{ match.source.creators }}{% endif %}
+                                    </h4>
+                                {% endif %}
+
+                                <div class="pl-4">
+                                    <span class="ml-3">{{ match.source.date }}</span>
+
+                                    {% for tag in match.source.tags %}
+                                        <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+
+                                </div>
+
+                                    </td>
+                                </tr>
+
+                            {% endfor %}
+
+                        </table>
+
+            </div>
+
+                    {% endif %}
+
+                {% endif %}
+
+        </div>
 
     </div>
 

@@ -32,8 +32,6 @@ class FeedListView(ListView):
 
         context["current_feed"] = json.dumps(current_feed, default=str)
         context["title"] = "Feed List"
-        context["no_left_block"] = True
-        context["content_block_width"] = 12
 
         return context
 

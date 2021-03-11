@@ -7,121 +7,137 @@
 {% block title %} Music {% endblock %}
 
 {% block nav %}
-    <div class="content-nav">
-        <ul class="breadcrumb mb-0" style="background-color: #1e1e2e">
-            <li class="breadcrumb-item"> <a href="{% url 'music:list' %}">Music</a> </li>
-            <li class="breadcrumb-item active">{{ artist_name }}</li>
-        </ul>
-    </div>
-{% endblock %}
 
-{% block left-block %}
-    {% if song_list %}
-        <div id="audio_player">
-            <audio controls controlsList="nodownload" id="player" class="mw-100">
-                <source src="" type="audio/mpeg">
-  Your browser does not support the audio tag.
-            </audio>
+    <div class="d-flex mb-3">
+        <div class="mr-auto align-self-center">
+            <ul class="breadcrumb mb-0 pt-0 pb-0">
+                <li class="breadcrumb-item"> <a href="{% url 'music:list' %}">Music</a> </li>
+                <li class="breadcrumb-item active">{{ artist_name }}</li>
+            </ul>
         </div>
-    {% endif %}
+    </div>
+
 {% endblock %}
 
 {% block content %}
 
-    <div class="row">
+    <div class="row no-gutters h-100">
 
-        <div class="col-lg-11">
+        <div class="col-lg-3 d-flex flex-column">
 
-            <h2> {% if album_list %} {{ album_list.0.artist }} {% else %} {{ song_list.0.artist }} {% endif %} </h2>
+            <div class="card-grid ml-2">
 
-            {% if album_list %}
-                {{ album_list|length }} album{{ album_list|pluralize }} <br />
-            {% endif %}
-
-        </div>
-    </div>
-
-    <table class="table-borderless">
-        <tr>
-
-            {% for album in album_list %}
-
-                {% if forloop.counter0|divisibleby:"4" %}
-
-        </tr>
-        <tr>
-
-                {% endif %}
-
-                <td>
-                    <a href="{% url 'music:album_detail' album.uuid %}">
-                        <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ album.uuid }}" height="150" width="150" /> <br />
-                    </a>
-
-                    <strong> {{ album.title }} </strong><br />
-                    {{ album.year }} <br />
-
-                </td>
-
-            {% endfor %}
-
-        </tr>
-    </table>
-
-    {% if compilation_album_list %}
-
-        {{ compilation_album_list|length }} compilation album{{ compilation_album_list|pluralize }} <br />
-
-        <table class="table-borderless">
-            <tr>
-
-                {% for album in compilation_album_list %}
-
-                    {% if forloop.counter0|divisibleby:"3" %}
-
-            </tr>
-            <tr>
-
-                    {% endif %}
-
-                    <td>
-                        <a href="{% url 'music:album_detail' album.uuid %}">
-                            <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ album.uuid }}" height="150" width="150" /> <br />
-                        </a>
-
-                        <strong> {{ album.title }} </strong><br />
-                        {{ album.year }} <br />
-
-                    </td>
-
-                {% endfor %}
-
-            </tr>
-        </table>
-    {% endif %}
-
-    {% if song_list %}
-
-        <div class="row">
-
-            <div class="col-lg-11">
-
-                <br />
-                {% if album_list %}
-                    <h4>Other songs</h4>
-                    <br />
-                {% endif %}
-
-                <div class="col-lg-11" id="song_list" @click="onClick">
-                    {% include "common/datatable.html" with data=song_list %}
+            {% if song_list %}
+                <div id="audio_player">
+                    <audio controls controlsList="nodownload" id="player" class="mw-100">
+                        <source src="" type="audio/mpeg">
+                            Your browser does not support the audio tag.
+                    </audio>
                 </div>
-
+            {% endif %}
 
             </div>
 
         </div>
 
-    {% endif %}
+        <div class="col-lg-9">
+
+            <div class="card-grid ml-2">
+
+                <h2> {% if album_list %} {{ album_list.0.artist }} {% else %} {{ song_list.0.artist }} {% endif %} </h2>
+
+                {% if album_list %}
+                    {{ album_list|length }} album{{ album_list|pluralize }} <br />
+                {% endif %}
+
+                <table class="table-borderless">
+                    <tr>
+
+                        {% for album in album_list %}
+
+                            {% if forloop.counter0|divisibleby:"4" %}
+
+                    </tr>
+                    <tr>
+
+                            {% endif %}
+
+                            <td>
+                                <a href="{% url 'music:album_detail' album.uuid %}">
+                                    <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ album.uuid }}" height="150" width="150" /> <br />
+                                </a>
+
+                                <strong> {{ album.title }} </strong><br />
+                                {{ album.year }} <br />
+
+                            </td>
+
+                        {% endfor %}
+
+                    </tr>
+                </table>
+
+            {% if compilation_album_list %}
+
+            {{ compilation_album_list|length }} compilation album{{ compilation_album_list|pluralize }} <br />
+
+                <table class="table-borderless">
+                    <tr>
+
+                        {% for album in compilation_album_list %}
+
+                            {% if forloop.counter0|divisibleby:"3" %}
+
+                    </tr>
+                    <tr>
+
+                            {% endif %}
+
+                            <td>
+                                <a href="{% url 'music:album_detail' album.uuid %}">
+                                    <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ album.uuid }}" height="150" width="150" /> <br />
+                                </a>
+
+                                <strong> {{ album.title }} </strong><br />
+                                {{ album.year }} <br />
+
+                            </td>
+
+                        {% endfor %}
+
+                    </tr>
+                </table>
+
+            {% endif %}
+
+            {% if song_list %}
+
+                <div class="row">
+
+                    <div class="col-lg-11">
+
+                        <br />
+                        {% if album_list %}
+                            <h4>Other songs</h4>
+                            <br />
+                        {% endif %}
+
+                        <div class="col-lg-11" id="song_list" @click="onClick">
+                            {% include "common/datatable.html" with data=song_list %}
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
 
 {% endblock %}
 

@@ -79,18 +79,7 @@
 
                 <div class="row flex-grow-1">
 
-                    {% if not no_left_block %}
-
-                        <div id="left-block" class="col-lg-3">
-                            <div>
-                                {% block left-block %}
-                                {% endblock %}
-                            </div>
-                        </div>
-
-                    {% endif %}
-
-                    <div class="col-lg-{{ content_block_width|default:"9" }}">
+                    <div class="col-lg-12 }}">
                         {% block content %}
                         {% endblock %}
                     </div>

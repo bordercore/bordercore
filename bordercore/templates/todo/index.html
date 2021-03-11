@@ -8,44 +8,55 @@
 
 {% endblock %}
 
-{% block left-block %}
-
-    <h2>
-        Todo tags
-    </h2>
-
-    {% for tag in tags %}
-        <div id="todo_tag_list">
-            <a class="btn {% ifequal tagsearch tag.name %}btn-primary{% else %}btn-info{% endifequal %}" href="{% url 'todo:list' %}?tagsearch={{ tag.name }}">
-                {{ tag.name }} <span class="badge {% ifequal tagsearch tag.name %}badge-light{% else %}badge-light{% endifequal %}">{{ tag.count }}</span>
-            </a>
-        </div>
-    {% endfor %}
-
-
-{% endblock %}
-
 {% block content %}
 
-    <div class="row" id="vue-app">
-        <div class="col-lg-10">
-            <form class="form-inline" role="form">
+    <div class="row no-gutters h-100">
 
-                <button-group></button-group>
+        <div class="col-lg-3 d-flex flex-column">
 
-                <div class="form-group">
-                    <input id="todo_search" type="text" class="form-control" placeholder="Search">
-                </div>
+            <div class="card-body">
 
-                <div class="form-group">
-                    <label id="todo_feedback" class="alert alert-success d-none">{{ messages.0.message }}</label>
-                </div>
+                <h2>
+                    Todo tags
+                </h2>
 
-            </form>
+                {% for tag in tags %}
+                    <div id="todo_tag_list">
+                        <a class="btn {% ifequal tagsearch tag.name %}btn-primary{% else %}btn-info{% endifequal %}" href="{% url 'todo:list' %}?tagsearch={{ tag.name }}">
+                {{ tag.name }} <span class="badge {% ifequal tagsearch tag.name %}badge-light{% else %}badge-light{% endifequal %}">{{ tag.count }}</span>
+                        </a>
+                    </div>
+                {% endfor %}
+
+            </div>
+
         </div>
-    </div>
 
-{% include "common/datatable.html" with data=info cols=cols id="todo_list" %}
+        <div class="col-lg-9" id="vue-app">
+
+            <div class="card-grid ml-2">
+
+                <form class="form-inline" role="form">
+
+                    <button-group></button-group>
+
+                    <div class="form-group">
+                        <input id="todo_search" type="text" class="form-control" placeholder="Search">
+                    </div>
+
+                    <div class="form-group">
+                        <label id="todo_feedback" class="alert alert-success d-none">{{ messages.0.message }}</label>
+                    </div>
+
+                </form>
+
+                {% include "common/datatable.html" with data=info cols=cols id="todo_list" %}
+
+            </div>
+
+        </div>
+
+    </div>
 
 {% endblock %}
 

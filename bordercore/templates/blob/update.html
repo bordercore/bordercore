@@ -9,211 +9,219 @@
 {% block title %} KB :: Documents {% endblock %}
 
 {% block nav %}
-{% if object %}
-    <div class="content-nav">
-        <ul class="breadcrumb mb-0" style="background-color: #1e1e2e">
-            <li class="breadcrumb-item"><a href="{% url 'blob:detail' object.uuid %}">Blob Detail</a></li>
-            <li class="breadcrumb-item active">Edit Blob</li>
-        </ul>
-    </div>
-{% endif %}
-{% endblock %}
-
-{% block left-block %}
-
-    <div id="vue-app-left">
-
-       {% include "common/show_messages.html" %}
 
     {% if object %}
 
-        {% if cover_info %}
-            <img id="amazon-cover-image" src="{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" class="mw-100" />
-            <br /><br />
-        {% endif %}
-
-    <div id="update-cover-div">
-        <input id="update-cover" class="btn btn-secondary" type="button" value="Update Image" />
-    </div>
-
-    <div id="set-cover-div" class="hidden">
-        <span id="progress" class="glyphicon glyphicon-refresh glyphicon-refresh-animate hidden"></span>
-        <input id="next-cover" class="btn btn-secondary" type="button" value="Next Image" />
-        <input id="set-cover" class="btn btn-primary" type="button" value="Set Image" />
-        <span id="amazon-feedback"></span>
-    </div>
-
-    <br /><br />
-
-    <div class="form-group">
-        <div class="row">
-            <div class="col-lg-9">
-                <add-to-collection-dropdown></add-to-collection-dropdown>
+        <div class="d-flex mb-3">
+            <div class="mr-auto align-self-center">
+                <ul class="breadcrumb mb-0 pt-0 pb-0">
+                    <li class="breadcrumb-item"><a href="{% url 'blob:detail' object.uuid %}">Blob Detail</a></li>
+                    <li class="breadcrumb-item active">Edit Blob</li>
+                </ul>
             </div>
         </div>
-    </div>
-
-{% if object.get_collection_info %}
-    <div class="form-group">
-        <div class="row">
-            <div class="col-lg-9">
-                <remove-from-collection-dropdown></remove-from-collection-dropdown>
-            </div>
-        </div>
-    </div>
-{% endif %}
-
-    </form>
-
-    <form action="{% url 'blob:delete' object.uuid %}" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="uuid" value="{{ object.uuid }}" />
-        <button type="submit" class="btn btn-warning">
-            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete
-        </button>
-    </form>
-
-    <hr/>
 
     {% endif %}
-
-    <div class="row">
-        <div class="col-lg-4 mt-3">
-            <cleanup-filename-button></cleanup-filename-button>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-lg-4 mt-3">
-            <upper-case-first-button></upper-case-first-button>
-        </div>
-    </div>
-
-    {% if collection_info %}
-        <div>
-            <br />
-        Adding to collection <strong><a href="{% url 'collection:detail' collection_info.uuid %}">{{ collection_info.name }}</a></strong>
-        </div>
-    {% endif %}
-
-    {% if linked_blob %}
-        <br /><br />
-Linking to <a href="{% url 'blob:detail' linked_blob.uuid %}">{{ linked_blob.title|default:"Blob" }}</a>
-    {% endif %}
-    {% if linked_collection_blob_list %}
-        <br /><br />
-        <div style="font-size: 18px; margin-bottom: 10px">Linking to a collection with these blobs: </div>
-        <ul class="list-group">
-            {% for blob in linked_collection_blob_list %}
-                <li class="list-group-item">
-                    <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
-                </li>
-        {% endfor %}
-    {% endif %}
-
-</div>
 
 {% endblock %}
 
 {% block content %}
 
-{% if form.errors %}
-    <div class="row">
-        <div class="col-lg-10 offset-lg-2">
-            {% for field,error in form.errors.items %}
-                <div class="alert alert-danger">{{ error }}</div>
-            {% endfor %}
-        </div>
-    </div>
-{% endif %}
+    <div class="row no-gutters h-100">
 
-<div class="row" id="vue-app-right">
+        <div class="col-lg-3 d-flex flex-column">
 
-    <div class="col-lg-12">
+            <div class="card-body" id="vue-app-left">
 
-<form id="form-blob" action="{{ request.path }}" method="post" enctype="multipart/form-data">
-    <input type="hidden" name="metadata" id="input-metadata" />
-    <input type="hidden" name="linked_blob" value="{{ linked_blob.id }}" />
-    <input type="hidden" name="linked_collection" value="{{ linked_collection_info.uuid }}" />
-    {% if collection_info %}
-        <input type="hidden" name="collection_id" value="{{ collection_info.id }}" />
-    {% endif %}
-    {% csrf_token %}
+                {% include "common/show_messages.html" %}
 
-    {% for field in form.visible_fields %}
-        {% if field.label != 'Filename' and field.name != 'is_private' and field.name != 'is_note' %}
-        <div class="form-group{% if field.errors %}error{% endif %} row">
-            <label class="bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">{{ field.label }}</label>
+                {% if object %}
 
-            {% if field.label == 'File' %}
+                    {% if cover_info %}
+                        <img
+                            id="amazon-cover-image"
+                            src="{{ cover_info.url }}"
+                            height="{{ cover_info.height_cropped }}"
+                            width="{{ cover_info.width_cropped }}"
+                            class="mw-100 mb-3"
+                        />
+                    {% endif %}
 
-                <file-upload></file-upload>
+                    <div class="mb-3" id="update-cover-div">
+                        <input id="update-cover" class="btn btn-secondary" type="button" value="Update Image" />
+                    </div>
 
-            {% elif field.label == 'Date' %}
+                    <div class="form-group w-75">
+                        <add-to-collection-dropdown></add-to-collection-dropdown>
+                    </div>
 
-                <date-input></date-input>
+                    {% if object.get_collection_info %}
+                        <div class="form-group w-75">
+                            <remove-from-collection-dropdown></remove-from-collection-dropdown>
+                        </div>
+                    {% endif %}
 
-            {% elif field.label == 'Content' %}
+                    <form action="{% url 'blob:delete' object.uuid %}" method="post">
 
-                <content-text-area></content-text-area>
+                        {% csrf_token %}
 
-            {% elif field.label == 'Tags' %}
+                        <input type="hidden" name="uuid" value="{{ object.uuid }}" />
+                        <button type="submit" class="btn btn-warning">
+                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete
+                        </button>
 
-                <div class="col-lg-10 col-sm-10">
-                    <tags-input
-                        search-url="{% url 'tag:search' %}?query="
-                    >
-                    </tags-input>
+                    </form>
+
+                    <hr/>
+
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-lg-4 mt-3">
+                        <cleanup-filename-button></cleanup-filename-button>
+                    </div>
                 </div>
 
-            {% else %}
-                <div class="col-lg-10 col-sm-10 align-self-center">
+                <div class="row">
+                    <div class="col-lg-4 mt-3">
+                        <upper-case-first-button></upper-case-first-button>
+                    </div>
+                </div>
+
+                {% if collection_info %}
+
+                    <div>
+                        <br />
+                        Adding to collection <strong><a href="{% url 'collection:detail' collection_info.uuid %}">{{ collection_info.name }}</a></strong>
+                    </div>
+
+                {% endif %}
+
+                {% if linked_blob %}
+                    <br /><br />
+                    Linking to <a href="{% url 'blob:detail' linked_blob.uuid %}">{{ linked_blob.title|default:"Blob" }}</a>
+                {% endif %}
+
+                {% if linked_collection_blob_list %}
+                    <br /><br />
+                    <div style="font-size: 18px; margin-bottom: 10px">
+                        Linking to a collection with these blobs:
+                    </div>
+                    <ul class="list-group">
+                    {% for blob in linked_collection_blob_list %}
+                        <li class="list-group-item">
+                            <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-9">
+
+            <div class="card-grid ml-2" id="vue-app-right">
+
+                {% if form.errors %}
+                    <div class="col-lg-10 offset-lg-2">
+                    {% for field,error in form.errors.items %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                    {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form id="form-blob" action="{{ request.path }}" method="post" enctype="multipart/form-data">
+
+                    {% csrf_token %}
+
+                    <input type="hidden" name="metadata" id="input-metadata" />
+                    <input type="hidden" name="linked_blob" value="{{ linked_blob.id }}" />
+                    <input type="hidden" name="linked_collection" value="{{ linked_collection_info.uuid }}" />
+
+                    {% if collection_info %}
+                        <input type="hidden" name="collection_id" value="{{ collection_info.id }}" />
+                    {% endif %}
+
+                    {% for field in form.visible_fields %}
+
+                        {% if field.label != 'Filename' and field.name != 'is_private' and field.name != 'is_note' %}
+
+                            <div class="form-group{% if field.errors %}error{% endif %} row">
+                                <label class="bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">{{ field.label }}</label>
+
+                            {% if field.label == 'File' %}
+
+                                <file-upload></file-upload>
+
+                            {% elif field.label == 'Date' %}
+
+                                <date-input></date-input>
+
+                            {% elif field.label == 'Content' %}
+
+                                <content-text-area></content-text-area>
+
+                            {% elif field.label == 'Tags' %}
+
+                                <div class="col-lg-10 col-sm-10">
+                                    <tags-input
+                                        search-url="{% url 'tag:search' %}?query="
+                                    >
+                                    </tags-input>
+                                </div>
+
+                            {% else %}
+                                <div class="col-lg-10 col-sm-10 align-self-center">
                     {{ field }}
-                </div>
-            {% endif %}
+                                </div>
+                            {% endif %}
 
-        </div>
+                            </div>
 
-        {% endif %}
-    {% endfor %}
+                        {% endif %}
 
-    <div class="row form-group offset-lg-2 form-inline {% if field.errors %}error{% endif %}">
+                    {% endfor %}
 
-        <div class="col-lg-3 form-group">
-            <div class="form-check">
-                <label class="form-check-label bold">Is note</label>
-                <input class="form-check-input ml-3" type="checkbox"{% if form.is_note.value == True %} checked="checked"{% endif %} name="is_note" id="id_is_note" />
+                    <div class="row form-group offset-lg-2 form-inline {% if field.errors %}error{% endif %}">
+
+                        <div class="col-lg-3 form-group">
+                            <div class="form-check">
+                                <label class="form-check-label bold">Is note</label>
+                                <input class="form-check-input ml-3" type="checkbox"{% if form.is_note.value == True %} checked="checked"{% endif %} name="is_note" id="id_is_note" />
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 form-group">
+                            <div class="form-check">
+                                <label class="form-check-label bold">Is private</label>
+                                <input class="form-check-input ml-3" type="checkbox"{% if is_private %} checked="checked"{% endif %} name="is_private" id="id_is_private" />
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 form-group">
+                            <div class="form-check">
+                                <label class="form-check-label bold">Is book</label>
+                                <input class="form-check-input ml-3" type="checkbox"{% if is_book %} checked="checked"{% endif %} name="is_book" id="id_is_book" />
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <metadata-wrapper></metadata-wrapper>
+
+                    <div class="form-group">
+                        <div class="col-lg-3 offset-lg-2">
+                            <input class="btn btn-primary btn-lg" type="submit" name="Go" value="{{ action }}" />
+                        </div>
+                    </div>
+
+                </form>
+
             </div>
         </div>
-
-        <div class="col-lg-3 form-group">
-            <div class="form-check">
-                <label class="form-check-label bold">Is private</label>
-                <input class="form-check-input ml-3" type="checkbox"{% if is_private %} checked="checked"{% endif %} name="is_private" id="id_is_private" />
-            </div>
-        </div>
-
-        <div class="col-lg-3 form-group">
-            <div class="form-check">
-                <label class="form-check-label bold">Is book</label>
-                <input class="form-check-input ml-3" type="checkbox"{% if is_book %} checked="checked"{% endif %} name="is_book" id="id_is_book" />
-            </div>
-        </div>
-
     </div>
-
-    <metadata-wrapper></metadata-wrapper>
-
-    <div class="form-group">
-        <div class="col-lg-3 offset-lg-2">
-            <input class="btn btn-primary btn-lg" type="submit" name="Go" value="{{ action }}" />
-        </div>
-    </div>
-
-</form>
-
-    </div>
-</div>
 
 {% endblock %}
 

@@ -5,122 +5,147 @@
 {% block title %} Exercise :: Detail {% endblock %}
 
 {% block nav %}
-    <div class="content-nav">
-        <ul class="breadcrumb mb-0" style="background-color: #1e1e2e">
-            <li class="breadcrumb-item"> <a href="{% url 'fitness:summary' %}">Exercises</a> </li>
-            <li class="breadcrumb-item active"> {{ object.exercise }} </li>
-        </ul>
+
+    <div class="d-flex mb-3">
+        <div class="mr-auto align-self-center">
+            <ul class="breadcrumb mb-0 pt-0 pb-0">
+                <li class="breadcrumb-item"> <a href="{% url 'fitness:summary' %}">Exercises</a> </li>
+                <li class="breadcrumb-item active"> {{ object.exercise }} </li>
+            </ul>
+        </div>
     </div>
-{% endblock %}
-
-{% block left-block %}
-
-    {% if object.description %}
-        <h5 class="highlight-box mt-5">
-          {{ object.description|safe }}
-        </h5>
-    {% endif %}
-
-    {% if object.note %}
-        <h5 class="highlight-box mt-5">
-          {{ object.note_markdown|safe }}
-        </h5>
-    {% endif %}
 
 {% endblock %}
 
 {% block content %}
 
     <div id="vue-message">
-    {% include "common/show_messages.html" %}
+        {% include "common/show_messages.html" %}
     </div>
 
-    <h1>{{ object.exercise }}</h1>
+    <div class="row no-gutters h-100">
 
-    <div class="row">
-        <div class="col-lg-6">
+        <div class="col-lg-3 d-flex flex-column">
 
-    Last workout: {{ recent_data.date|date:"N j, Y" }} - {{ delta_days }} day{{ delta_days|pluralize:"s" }} ago
+            <div class="card-body">
 
-            <br /><br />
-
-            <form action="{% url 'fitness:change_active_status' %}" method="post">
-                {% csrf_token %}
-                <input type="hidden" name="exercise_uuid" value="{{ object.uuid }}" />
-                {% if activity_info %}
-        You've been doing this exercise since {{ activity_info.0.started|date:"N j, Y" }}
-                    <button type="submit" class="btn btn-primary ml-2" id="inactive">Make Inactive</button>
-                    <input type="hidden" name="state" value="inactive" />
-                {% else %}
-                    <button type="submit" class="btn btn-primary" id="active">Make Active</button>
-                    <input type="hidden" name="state" value="active" />
+                {% if object.description %}
+                    <h5 class="highlight-box mt-5">
+          {{ object.description|safe }}
+                    </h5>
                 {% endif %}
-            </form>
+
+                {% if object.note %}
+                    <h5 class="highlight-box mt-5">
+          {{ object.note_markdown|safe }}
+                    </h5>
+                {% endif %}
+
+            </div>
 
         </div>
-    </div>
 
-    <div id="exerciseDetailChart"></div>
+        <div class="col-lg-9">
 
-    {% if reps_latest_workout %}
-        <p class="alert alert-info">Reps last workout: <strong>{{ reps_latest_workout|join:", " }}</strong></p>
-    {% endif %}
+            <div class="card-grid ml-2">
 
-    <br /><br />
-    <div class="card" id="vue-app">
-        <add-workout-form inline-template>
-            <div>
-                <div class="card-header bg-info text-white">Add a new workout</div>
-                <div class="card-body">
+                <h1>{{ object.exercise }}</h1>
 
-                    <form id="form-workout" class="form-inline" action="{% url 'fitness:add' exercise.uuid %}" method="post" autocomplete="off">
-                        <input type="hidden" name="workout-data" :value="workoutDataJson" />
-                        {% csrf_token %}
+                <div class="row">
+                    <div class="col-lg-6">
 
-                        <div class="form-group">
-                            <label>Weight</label>
-                            <input class="form-control mx-3" type="text" name="weight" v-model="weight" />
-                        </div>
+                        Last workout: {{ recent_data.date|date:"N j, Y" }} - {{ delta_days }} day{{ delta_days|pluralize:"s" }} ago
 
-                        <div class="form-group">
-                            <label>Reps</label>
-                            <input class="form-control mx-3" type="text" name="reps" v-model="reps" />
-                        </div>
+                        <form class="mb-3" action="{% url 'fitness:change_active_status' %}" method="post">
 
-                        <input class="btn btn-secondary" type="button" name="Go" value="Add" @click="onClick" />
-                        <input class="btn btn-primary ml-3" id="btn-submit" :disabled="submitIsDisabled" type="submit" name="Go" value="Submit" />
+                            {% csrf_token %}
 
-                    </form>
+                            <input type="hidden" name="exercise_uuid" value="{{ object.uuid }}" />
 
-                    <br />
+                            {% if activity_info %}
+        You've been doing this exercise since {{ activity_info.0.started|date:"N j, Y" }}
+                                <button type="submit" class="btn btn-primary ml-2" id="inactive">Make Inactive</button>
+                                <input type="hidden" name="state" value="inactive" />
+                            {% else %}
+                                <button type="submit" class="btn btn-primary" id="active">Make Active</button>
+                                <input type="hidden" name="state" value="active" />
+                            {% endif %}
 
-                    <div class="row">
-
-                        <div class="col-lg-5">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Weight</th>
-                                        <th>Reps</th>
-                                    </tr>
-                                </thead>
-                                <tr v-for="set in workoutData" v-cloak>
-                                    <td>[[ set[0] ]]</td>
-                                    <td>[[ set[1] ]]</td>
-                                </tr>
-                                <tr v-if="workoutData.length == 0" class="text-center">
-                                    <td colspan="2">
-                                    No workout data.
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
+                        </form>
 
                     </div>
-
                 </div>
+
+                <div id="exerciseDetailChart"></div>
+
+                    {% if reps_latest_workout %}
+                        <div class="m-3">
+                            Reps last workout: <strong>{{ reps_latest_workout|join:", " }}</strong>
+                        </div>
+                    {% endif %}
+
+                    <div class="card" id="vue-app">
+                        <add-workout-form inline-template>
+                            <div>
+                                <div class="card-header bg-info text-white">Add a new workout</div>
+                                <div class="card-body">
+
+                                    <form id="form-workout" class="form-inline" action="{% url 'fitness:add' exercise.uuid %}" method="post" autocomplete="off">
+
+                                        {% csrf_token %}
+
+                                        <input type="hidden" name="workout-data" :value="workoutDataJson" />
+
+                                        <div class="form-group">
+                                            <label>Weight</label>
+                                            <input class="form-control mx-3" type="text" name="weight" v-model="weight" />
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Reps</label>
+                                            <input class="form-control mx-3" type="text" name="reps" v-model="reps" />
+                                        </div>
+
+                                        <input class="btn btn-secondary" type="button" name="Go" value="Add" @click="onClick" />
+                                        <input class="btn btn-primary ml-3" id="btn-submit" :disabled="submitIsDisabled" type="submit" name="Go" value="Submit" />
+
+                                    </form>
+
+                                    <br />
+
+                                    <div class="row">
+
+                                        <div class="col-lg-5">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Weight</th>
+                                                        <th>Reps</th>
+                                                    </tr>
+                                                </thead>
+                                                <tr v-for="set in workoutData" v-cloak>
+                                                    <td>[[ set[0] ]]</td>
+                                                    <td>[[ set[1] ]]</td>
+                                                </tr>
+                                                <tr v-if="workoutData.length == 0" class="text-center">
+                                                    <td colspan="2">
+                                    No workout data.
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </add-workout-form>
+                    </div>
+
             </div>
-        </add-workout-form>
+
+        </div>
+
     </div>
 
 {% endblock %}
