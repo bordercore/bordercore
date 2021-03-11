@@ -45,10 +45,11 @@
                                 <div class="demo" class="pt-5">
                                     <svg width="120" height="120" viewBox="0 0 120 120">
                                         <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke="#262c49" stroke-width="12" />
-                                        <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke="#7fffd4" stroke-width="12" :stroke-dasharray="strokeDashArray" :stroke-dashoffset="getDashOffset({{ total_progress }})" />
-                                        <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px" fill="#fff">[[ round({{ total_progress }}) ]]%</text>
+                                        <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke="#7fffd4" stroke-width="12" :stroke-dasharray="strokeDashArray" :stroke-dashoffset="getDashOffset({{ total_progress.percentage }})" />
+                                        <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px" fill="#fff">[[ round({{ total_progress.percentage }}) ]]%</text>
                                     </svg>
                                 </div>
+                                <span class="text-secondary mt-2">{{ total_progress.count }} questions</span>
                             </div>
                         </div>
                     </template>
@@ -107,6 +108,7 @@
                                         <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px" fill="#fff">[[ round(tag.info.progress) ]]%</text>
                                     </svg>
                                 </div>
+                                <span class="text-secondary mt-2">[[ tag.info.count ]] questions</span>
                             </div>
                         </div>
                     </template>
@@ -188,6 +190,7 @@
                                         <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px" fill="#fff">{{ random_tag.progress }}%</text>
                                     </svg>
                                 </div>
+                                <span class="text-secondary mt-2">{{ random_tag.count }} questions</span>
                             </div>
                         </div>
                     </template>

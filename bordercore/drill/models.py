@@ -236,7 +236,10 @@ class Question(TimeStampedModel):
             | Q(last_reviewed__isnull=True)
             | Q(state="L")).count()
 
-        return 100 - (todo / count * 100)
+        return {
+            "percentage": 100 - (todo / count * 100),
+            "count": count
+        }
 
     @staticmethod
     def get_tag_info(user, tag):
@@ -266,7 +269,8 @@ class Question(TimeStampedModel):
             "name": tag,
             "progress": progress,
             "last_reviewed": last_reviewed,
-            "url": reverse("drill:study_tag", kwargs={"tag": tag})
+            "url": reverse("drill:study_tag", kwargs={"tag": tag}),
+            "count": count
         }
 
     @staticmethod
