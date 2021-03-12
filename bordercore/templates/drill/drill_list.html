@@ -147,7 +147,7 @@
                                 <dropdown-menu
                                     v-model="show"
                                     :right="right"
-                                    :transition="transition"
+                                    transition="translate-fade-down"
                                     class="text-center"
                                 >
                                     <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
@@ -354,7 +354,6 @@
                     show: false,
                     right: true,
                     interactive: true,
-                    transition: "translate-fade-down",
                     tagList: [],
                     circleRadius: 54
                 }

@@ -19,7 +19,7 @@
                 <div>
                     <div class="dropdownmenu hidden">
 
-                        <dropdown-menu v-model="show" class="text-center">
+                        <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center">
                             <font-awesome-icon icon="ellipsis-v" class="burger-menu text-center"></font-awesome-icon>
                             <div slot="dropdown" class="mt-0">
                                 <a class="dropdown-item" href="{% url 'blob:update' blob.uuid %}">Update</a>
