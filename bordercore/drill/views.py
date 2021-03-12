@@ -1,4 +1,6 @@
+import re
 import time
+import urllib
 
 from elasticsearch import Elasticsearch
 
@@ -306,6 +308,8 @@ def search_tags(request):
         verify_certs=False
     )
 
+    search_terms = re.split(r"\s+", urllib.parse.unquote(search_term))
+
     search_object = {
         "query": {
             "bool": {
@@ -315,11 +319,11 @@ def search_tags(request):
                             "user_id": request.user.id
                         }
                     },
-                    {
-                        "wildcard": {
-                            "tags": f"{search_term}*"
-                        }
-                    }
+                    # {
+                    #     "wildcard": {
+                    #         "tags": f"{search_term}*"
+                    #     }
+                    # }
                 ]
             }
         },
@@ -334,6 +338,25 @@ def search_tags(request):
         "from": 0, "size": 0,
         "_source": ["tags"]
     }
+
+    # Separate query into terms based on whitespace and
+    #  and treat it like an "AND" boolean search
+    for one_term in search_terms:
+        search_object["query"]["bool"]["must"].append(
+            {
+                "bool": {
+                    "should": [
+                        {
+                            "wildcard": {
+                                "tags": {
+                                    "value": f"*{one_term}*",
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        )
 
     # If "drill_only" is passed in, then limit our search
     #  to tags attached to questions, rather than all tags
