@@ -6,6 +6,19 @@
 
 {% block title %} Node <span class="node-name">{{ node.name }}</span> {% endblock %}
 
+{% block nav %}
+
+    <div class="d-flex mb-3">
+        <div class="mr-auto align-self-center">
+            <ul class="breadcrumb mb-0 pt-0 pb-0">
+                <li class="breadcrumb-item"> <a href="{% url 'node:list' %}">Nodes</a> </li>
+                <li class="breadcrumb-item active">{{ node.name }}</li>
+            </ul>
+        </div>
+    </div>
+
+{% endblock %}
+
 {% block content %}
 
     <div id="vue-app">
