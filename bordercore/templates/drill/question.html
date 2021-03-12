@@ -80,7 +80,7 @@
                                         <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px" fill="#fff">[[ round({{ tag.progress }}) ]]%</text>
                                     </svg>
                                 </div>
-                                <span class="text-secondary mt-2">{{ tag.count }} questions</span>
+                                <span class="text-secondary mt-2">{{ tag.count }} question{{ tag.count|pluralize }}</span>
                             </div>
                         {% endfor %}
                         </div>
@@ -181,6 +181,9 @@
                 },
                 round: function(progress) {
                     return Math.round(progress);
+                },
+                getQuestionCountString: function(tag) {
+                    return tag.info.count + " " + pluralize("question", tag.info.count);
                 }
             }
         });

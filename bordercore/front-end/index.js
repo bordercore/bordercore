@@ -20,6 +20,9 @@ import Datepicker from "vuejs-datepicker";
 Vue.component("vuejs-datepicker", Datepicker);
 window.Datepicker = Datepicker;
 
+import pluralize from "pluralize";
+window.pluralize = pluralize;
+
 import axios from "axios";
 window.axios = axios;
 

@@ -49,7 +49,7 @@
                                         <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px" fill="#fff">[[ round({{ total_progress.percentage }}) ]]%</text>
                                     </svg>
                                 </div>
-                                <span class="text-secondary mt-2">{{ total_progress.count }} questions</span>
+                                <span class="text-secondary mt-2">{{ total_progress.count }} question{{ total_progress.count|pluralize }}</span>
                             </div>
                         </div>
                     </template>
@@ -108,7 +108,7 @@
                                         <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px" fill="#fff">[[ round(tag.info.progress) ]]%</text>
                                     </svg>
                                 </div>
-                                <span class="text-secondary mt-2">[[ tag.info.count ]] questions</span>
+                                <span class="text-secondary mt-2">[[ getQuestionCountString(tag.info.count) ]]</span>
                             </div>
                         </div>
                     </template>
@@ -190,7 +190,7 @@
                                         <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px" fill="#fff">{{ random_tag.progress }}%</text>
                                     </svg>
                                 </div>
-                                <span class="text-secondary mt-2">{{ random_tag.count }} questions</span>
+                                <span class="text-secondary mt-2">{{ random_tag.count }} question{{ random_tag.count|pluralize }}</span>
                             </div>
                         </div>
                     </template>
@@ -321,6 +321,9 @@
                 },
                 round: function(progress) {
                     return Math.round(progress);
+                },
+                getQuestionCountString: function(count) {
+                    return count + " " + pluralize("question", count);
                 }
             }
         });
