@@ -45,10 +45,13 @@ export function doPost(scope, url, params, callback, successMsg, errorMsg) {
             })
             console.log("Error: ", response.data.message);
         } else {
-            scope.$bvToast.toast(successMsg, {
-                title: "Success",
-                variant: "success"
-            })
+            scope.$bvToast.toast(
+                response.data.message ? response.data.message : successMsg,
+                {
+                    title: "Success",
+                    variant: "success"
+                }
+            )
             console.log("Success: ", response.data);
             callback(response);
         }
