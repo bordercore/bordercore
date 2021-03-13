@@ -3,12 +3,16 @@
 {% block title %} Collections {% endblock %}
 
 {% block nav %}
-    <div class="content-nav">
-        <ul class="breadcrumb mb-0" style="background-color: #1e1e2e">
-            <li class="breadcrumb-item"> <a href="{% url 'collection:list' %}">Collection List</a> </li>
-            <li class="breadcrumb-item active">{{ object.name }}</li>
-        </ul>
-    </div>
+
+        <div class="d-flex mb-3">
+            <div class="mr-auto align-self-center">
+                <ul class="breadcrumb mb-0 pt-0 pb-0">
+                    <li class="breadcrumb-item"> <a href="{% url 'collection:list' %}">Collection List</a> </li>
+                    <li class="breadcrumb-item active">{{ object.name }}</li>
+                </ul>
+            </div>
+        </div>
+
 {% endblock %}
 
 {% block content %}
@@ -54,7 +58,7 @@
                 <div class="modal-content">
                     <div class="modal-body">
                         <div>
-                            <img id="gallery_image" src="{{ first_blob_cover_info.url }}" style="width: 100%"/>
+                            <img class="w-100" id="gallery_image" src="{{ first_blob_cover_info.url }}"/>
                         </div>
                     </div>
                 </div>

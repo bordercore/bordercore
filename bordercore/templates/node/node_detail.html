@@ -52,22 +52,18 @@
                                                     </dropdown-menu>
                                                 </div>
 
-                                                <div style="display:table">
-                                                    <div style="display:table-row">
+                                                <div class="d-flex">
 
-                                                        <div style="display:table-cell" class="pr-2">
-                                                            <img :src="[[ blob.cover_url ]]" height="75" width="70" />
-                                                        </div>
+                                                    <div class="pr-2">
+                                                        <img :src="[[ blob.cover_url ]]" height="75" width="70" />
+                                                    </div>
 
-                                                        <div style="display:table-cell; vertical-align: top">
-
-                                                            <a :href="blob.url">[[ blob.title ]]</a>
-                                                            <div v-if="blob.note" @click="activateInEditMode(blob, $event.target)" v-show="!blob.noteIsEditable" class="node-note">[[ blob.note ]]</div>
-                                                            <span v-show="blob.noteIsEditable">
-                                                                <input type="text" class="form-control form-control-sm" :value="blob.note" ref="input" placeholder="Add Note" @blur="editNote(blob.uuid, $event.target.value)" @keydown.enter="editNote(blob.uuid, $event.target.value)" >
-                                                            </span>
-
-                                                        </div>
+                                                    <div>
+                                                        <a :href="blob.url">[[ blob.title ]]</a>
+                                                        <div v-if="blob.note" @click="activateInEditMode(blob, $event.target)" v-show="!blob.noteIsEditable" class="node-note">[[ blob.note ]]</div>
+                                                        <span v-show="blob.noteIsEditable">
+                                                            <input type="text" class="form-control form-control-sm" :value="blob.note" ref="input" placeholder="Add Note" @blur="editNote(blob.uuid, $event.target.value)" @keydown.enter="editNote(blob.uuid, $event.target.value)" >
+                                                        </span>
                                                     </div>
                                                 </div>
 
@@ -140,18 +136,16 @@
                                                         </div>
                                                     </dropdown-menu>
                                                 </div>
-                                                <div style="display:table">
-                                                    <div style="display:table-row">
-                                                        <div v-html="bookmark.favicon_url" class="float-left pr-2" style="display:table-cell"></div>
-                                                        <div style="display:table-cell; vertical-align: top">
-                                                            <a :href="bookmark.url">[[ bookmark.title ]]</a>
+                                                <div>
+                                                    <div v-html="bookmark.favicon_url" class="float-left pr-2"></div>
+                                                    <div>
+                                                        <a :href="bookmark.url">[[ bookmark.title ]]</a>
 
-                                                            <div v-if="bookmark.note" v-on:click="activateInEditMode(bookmark, $event.target)" v-show="!bookmark.noteIsEditable" class="node-note">[[ bookmark.note ]]</div>
-                                                            <span v-show="bookmark.noteIsEditable">
-                                                                <input type="text" class="form-control form-control-sm" :value="bookmark.note" ref="input" placeholder="Add Bookmark" @blur="editNote(bookmark.id, $event.target.value)" @keydown.enter="editNote(bookmark.id, $event.target.value)" >
-                                                            </span>
+                                                        <div v-if="bookmark.note" v-on:click="activateInEditMode(bookmark, $event.target)" v-show="!bookmark.noteIsEditable" class="node-note">[[ bookmark.note ]]</div>
+                                                        <span v-show="bookmark.noteIsEditable">
+                                                            <input type="text" class="form-control form-control-sm" :value="bookmark.note" ref="input" placeholder="Add Bookmark" @blur="editNote(bookmark.id, $event.target.value)" @keydown.enter="editNote(bookmark.id, $event.target.value)" >
+                                                        </span>
 
-                                                        </div>
                                                     </div>
                                                 </div>
                                             </li>

@@ -3,12 +3,14 @@
 {% block title %} Blob Thumbnail {% endblock %}
 
 {% block nav %}
-    <div class="content-nav">
-        <ul class="breadcrumb mb-0" style="background-color: #1e1e2e">
+
+    <div class="mr-auto align-self-center">
+        <ul class="breadcrumb mb-0 pt-0 pb-0">
             <li class="breadcrumb-item"><a href="{% url 'blob:detail' object.uuid %}">Blob Detail</a></li>
             <li class="breadcrumb-item active">Blob Thumbnail</li>
         </ul>
     </div>
+
 {% endblock %}
 
 {% block left-block %}
