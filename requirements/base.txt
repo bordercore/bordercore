@@ -2,6 +2,7 @@ anyjson==0.3.3
 Babel==2.2.0
 backports-abc==0.4
 backports.ssl-match-hostname==3.5.0.1
+beautifulsoup4==4.9.0
 billiard==3.6.0.0
 boto3==1.9.156
 certifi==2019.6.16
