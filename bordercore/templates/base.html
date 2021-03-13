@@ -1,3 +1,5 @@
+{% load is_in_group %}
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 
@@ -46,14 +48,13 @@
                                 {% block title %} {% endblock %}
                             </div>
 
-                            <div class="col-lg-7 my-auto">
+                            <div class="col-lg-7 my-auto d-flex justify-content-end">
 
                                 <search-simple-suggest
                                     ref="simpleSuggest"
                                     value-attribute="id"
                                     :max-suggestions=20
                                     accesskey="s"
-                                    user-name="{{ user.get_username }}"
                                     initial-search-type="{{ request.session.top_search_filter }}"
                                     suggest-search-url="{% url 'search:search_tags_and_titles' %}?term="
                                     query-search-url="{% url 'search:search' %}"
@@ -66,6 +67,26 @@
                                     store-in-session-url="{% url "accounts:store_in_session" %}"
                                 >
                                 </search-simple-suggest>
+
+                                <div class="col-auto" v-cloak>
+                                    <span class="dropdown-menu-user mr-2">
+                                        <dropdown-menu
+                                            v-model="show"
+                                            :right="right"
+                                            transition="translate-fade-down"
+                                            class="text-center"
+                                        >
+                                            <span class="align-middle pt-2">Hello <strong>{{ user.get_username }}</strong></span>
+                                            <div slot="dropdown">
+                                                <a class="dropdown-item pl-3" href="{% url 'accounts:prefs' %}"><font-awesome-icon icon="briefcase" class="mr-2"></font-awesome-icon>Preferences</a>
+                                                {% if request.user|is_in_group:"Admin" %}
+                                                    <a class="dropdown-item pl-3" href="{% url 'metrics:list' %}"><font-awesome-icon icon="chart-bar" class="mr-2"></font-awesome-icon>Metrics</a>
+                                                {% endif %}
+                                                <a class="dropdown-item pl-3" href="{% url 'accounts:logout' %}"><font-awesome-icon icon="sign-out-alt" class="mr-2"></font-awesome-icon>Logout</a>
+                                            </div>
+                                        </dropdown-menu>
+                                    </span>
+                                </div>
 
                             </div>
                         </div>
@@ -92,11 +113,6 @@
 
         <div id="sidebar">
             <sidebar-menu @toggle-collapse="onToggleCollapse" @item-click="onItemClick" :menu="menu" :collapsed="collapsed" width="240px" />
-            <span slot="footer" v-if="!collapsed">
-                <div id="below-nav">
-                    <a href="{% url 'accounts:logout' %}">Logout</a>
-                </div>
-            </span>
             <span slot="toggle-icon">
                 <font-awesome-icon icon="arrows-alt-h"></font-awesome-icon>
             </span>
@@ -128,7 +144,14 @@
                 {% endif %}
 
                 new Vue({
-                    el: "#top-search"
+                    el: "#top-search",
+                    data() {
+                        return {
+                            collapsed: false,
+                            show: false,
+                            right: true
+                        }
+                    }
                 });
 
                 new Vue({
@@ -310,17 +333,6 @@
                                     }
                                     {% endif %}
                                 },
-                                {
-                                    href: "{% url 'accounts:prefs' %}",
-                                    title: "Prefs",
-                                    alias: "/accounts/*",
-                                    icon: {
-                                        element: "font-awesome-icon",
-                                        attributes: {
-                                            icon: "briefcase",
-                                        }
-                                    }
-                                }
                             ]
                         }
                     },

@@ -40,10 +40,6 @@
   width: 22px;
 }
 
-#greeting {
-  padding: 6px 0 6px 0;
-}
-
 [hidden] {
   display: none !important;
 }
@@ -67,6 +63,65 @@
   background: lighten(#10163a, 5%);
   padding: 1em;
   border-radius: 11px;
+}
+
+/* Dropdown Menus */
+
+/* Override vue-dropdown-menu */
+.dropdown-menu {
+  top: 45px;
+}
+
+.dropdown-menu.show {
+  background-color: $gray-700;
+  border: 1px solid $gray-900;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.24);
+}
+
+.dropdown-menu-user {
+  cursor: pointer;
+}
+
+.dropdownmenu {
+  color: $cyan;
+  font-size: 0.75rem;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  padding: 2px 2px 2px 2px;
+  width: 26px;
+  height: 24px;
+}
+
+.dropdownmenu:hover {
+  background: lighten($background-color-dark, 5%);
+  border-radius: 100%;
+  color: $white;
+}
+
+/* CSS transition for dropdown, top to down */
+.translate-fade-down-enter-active,
+.translate-fade-down-leave-active {
+  transition: all 250ms;
+  transition-timing-function: cubic-bezier(0.53, 2, 0.36, 0.85);
+}
+
+.translate-fade-down-enter,
+.translate-fade-down-leave-active {
+  opacity: 0;
+}
+
+.translate-fade-down-enter,
+.translate-fade-down-leave-to {
+  position: absolute;
+}
+
+.translate-fade-down-enter {
+  transform: translateY(-10px);
+}
+
+.translate-fade-down-leave-active {
+  transform: translateY(10px);
 }
 
 /* Login page */
@@ -619,54 +674,6 @@ div .search-box .search-box-input {
 
 /* Node */
 
-.dropdown-menu.show {
-  background-color: $gray-700;
-  border: 1px solid $gray-900;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.24);
-}
-
-.dropdownmenu {
-  color: $cyan;
-  font-size: 0.75rem;
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  padding: 2px 2px 2px 2px;
-  width: 26px;
-  height: 24px;
-}
-
-.dropdownmenu:hover {
-  background: lighten($background-color-dark, 5%);
-  border-radius: 100%;
-  color: $white;
-}
-
-/* CSS transition for dropdown, top to down */
-.translate-fade-down-enter-active,
-.translate-fade-down-leave-active {
-  transition: all 250ms;
-  transition-timing-function: cubic-bezier(0.53, 2, 0.36, 0.85);
-}
-
-.translate-fade-down-enter,
-.translate-fade-down-leave-active {
-  opacity: 0;
-}
-
-.translate-fade-down-enter,
-.translate-fade-down-leave-to {
-  position: absolute;
-}
-
-.translate-fade-down-enter {
-  transform: translateY(-10px);
-}
-
-.translate-fade-down-leave-active {
-  transform: translateY(10px);
-}
-
 .node-name {
   color: $cyan;
 }
@@ -916,11 +923,6 @@ span {
 
 #sidebar .first-item {
   margin-top: 15px;
-}
-
-#below-nav {
-  margin-bottom: 20px;
-  text-align: center;
 }
 
 /* CONTENT STYLE */

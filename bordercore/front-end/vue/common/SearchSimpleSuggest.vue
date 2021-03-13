@@ -1,6 +1,6 @@
 <template>
     <div>
-        <form class="form-inline float-right" method="get" id="top-search-form">
+        <form class="form-inline" method="get" id="top-search-form">
             <span class="pr-2" v-if="searchFilter">Filter:
                 <span id="top-search-filter-type">
                 {{ searchFilter }}
@@ -47,10 +47,6 @@
 
                 </div>
 
-                <div class="col-auto">
-                    <span class="align-text-bottom" id="greeting">Hello <strong>{{ userName }}</strong></span>
-                </div>
-
             </div>
         </form>
     </div>
@@ -79,7 +75,6 @@
                 default: 10,
                 type: Number
             },
-            userName: String,
             initialSearchType: {
                 default: "",
                 type: String
@@ -101,7 +96,7 @@
                     suggestItem: "list-group-item"
                 },
                 searchFilter: this.initialSearchType,
-                searchUrl: this.suggestSearchUrl
+                searchUrl: this.suggestSearchUrl,
             }
         },
         methods: {
