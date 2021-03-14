@@ -12,7 +12,7 @@
         {% include "common/show_messages.html" %}
     </div>
 
-    <div class="row">
+    <div class="row card-grid">
         <div class="col-lg-7">
 
             <h1>Collection List</h1>
@@ -20,7 +20,7 @@
         </div>
     </div>
 
-    <div id="vue-app">
+    <div class="card-grid ml-3" id="vue-app">
 
         <div class="row">
             <div class="col-lg-7">
@@ -28,10 +28,6 @@
             {% csrf_token %}
 
                     <button-group></button-group>
-
-                    <div class="form-group">
-                        <input id="myfilter" type="text" style="width: 200px" class="form-control" placeholder="Search">
-                    </div>
 
                     <div class="form-group">
                         <label id="feedback"></label>

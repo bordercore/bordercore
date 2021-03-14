@@ -8,80 +8,84 @@
 
 {% block content %}
 
-    <div id="vue-message">
-    {% include "common/show_messages.html" %}
-    </div>
+    <div class="card-grid ml-3">
 
-    <h1>Active Exercises</h1>
+        <div id="vue-message">
+            {% include "common/show_messages.html" %}
+        </div>
 
-    <div class="table_container">
-        <table class="table" id="active_exercises"80%">
+        <h1>Active Exercises</h1>
 
-            <thead>
-                <tr>
-                    <th>Exercise</th>
-                    <th>Muscle Group</th>
-                    <th>Interval</th>
-                    <th>Last Workout</th>
-                    <th></th>
-                    <th></th>
-                </tr>
-            </thead>
+        <div class="table_container">
+            <table class="table" id="active_exercises"80%">
 
-    {% for exercise in active_exercises %}
+                <thead>
+                    <tr>
+                        <th>Exercise</th>
+                        <th>Muscle Group</th>
+                        <th>Interval</th>
+                        <th>Last Workout</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
 
-        <tr{% if exercise.overdue %} class="selected"{% endif %}>
-            <td><a href="{% url 'fitness:exercise_detail' exercise.uuid %}">{{ exercise.exercise }}</a></td>
-            <td>{{ exercise.muscle.muscle_group }}</td>
-            <td>{{ exercise.interval.days }} day{{ exercise.interval.days|pluralize:"s" }}</td>
-            {% if exercise.last_active %}
-                <td>{{ exercise.last_active|date:"N j, Y" }} <span class="float-right">{{ exercise.delta_days }} day{{ exercise.delta_days|pluralize:"s" }} ago</span></td>
-            {% else %}
-                <td>Never</td>
-            {% endif %}
-            <td></td>
-            <td></td>
-        </tr>
+                {% for exercise in active_exercises %}
 
-    {% endfor %}
+                    <tr{% if exercise.overdue %} class="selected"{% endif %}>
+                        <td><a href="{% url 'fitness:exercise_detail' exercise.uuid %}">{{ exercise.exercise }}</a></td>
+                        <td>{{ exercise.muscle.muscle_group }}</td>
+                        <td>{{ exercise.interval.days }} day{{ exercise.interval.days|pluralize:"s" }}</td>
+                        {% if exercise.last_active %}
+                            <td>{{ exercise.last_active|date:"N j, Y" }} <span class="float-right">{{ exercise.delta_days }} day{{ exercise.delta_days|pluralize:"s" }} ago</span></td>
+                        {% else %}
+                            <td>Never</td>
+                        {% endif %}
+                        <td></td>
+                        <td></td>
+                    </tr>
 
-        </table>
-    </div>
+                {% endfor %}
 
-    <h1>Inactive Exercises</h1>
+            </table>
+        </div>
 
-    <div class="table_container">
-        <table class="table" id="inactive_exercises">
+        <h1>Inactive Exercises</h1>
 
-            <thead>
-                <tr>
-                    <th>Exercise</th>
-                    <th>Muscle Group</th>
-                    <th>Last Workout</th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                </tr>
-            </thead>
+        <div class="table_container">
+            <table class="table" id="inactive_exercises">
 
-    {% for exercise in inactive_exercises %}
+                <thead>
+                    <tr>
+                        <th>Exercise</th>
+                        <th>Muscle Group</th>
+                        <th>Last Workout</th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
 
-        <tr>
-            <td><a href="{% url 'fitness:exercise_detail' exercise.uuid %}">{{ exercise.exercise }}</a></td>
-            <td>{{ exercise.muscle.muscle_group }}</td>
-            {% if exercise.last_active %}
-                <td>{{ exercise.last_active|date:"N j, Y" }} <span class="float-right">{{ exercise.delta_days }} day{{ exercise.delta_days|pluralize:"s" }} ago</span></td>
-            {% else %}
-                <td>Never</td>
-            {% endif %}
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
+        {% for exercise in inactive_exercises %}
 
-    {% endfor %}
+            <tr>
+                <td><a href="{% url 'fitness:exercise_detail' exercise.uuid %}">{{ exercise.exercise }}</a></td>
+                <td>{{ exercise.muscle.muscle_group }}</td>
+                {% if exercise.last_active %}
+                    <td>{{ exercise.last_active|date:"N j, Y" }} <span class="float-right">{{ exercise.delta_days }} day{{ exercise.delta_days|pluralize:"s" }} ago</span></td>
+                {% else %}
+                    <td>Never</td>
+                {% endif %}
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
 
-        </table>
+        {% endfor %}
+
+            </table>
+        </div>
+
     </div>
 
 {% endblock %}

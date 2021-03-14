@@ -15,7 +15,10 @@
 
 {% block content %}
 
-    <form id="question-form" action="{{ request.path }}" method="post">
+    <div class="card-grid">
+
+        <form id="question-form" action="{{ request.path }}" method="post">
+
         {% csrf_token %}
 
         {% for field in form %}
@@ -26,19 +29,19 @@
 
                     {% include "common/show_messages.html" %}
 
-                    <div class="form-group row{% if field.errors %} error{% endif %}">
-                        <label class="col-lg-2 col-form-label" for="inputTitle">Tags</label>
+                        <div class="form-group row{% if field.errors %} error{% endif %}">
+                            <label class="col-lg-2 col-form-label" for="inputTitle">Tags</label>
 
-                        <div class="col-lg-5">
-                            <tags-input
-                                search-url="{% url 'tag:search' %}?query="
-                            >
-                        </tags-input>
-                        </div>
+                            <div class="col-lg-5">
+                                <tags-input
+                                    search-url="{% url 'tag:search' %}?query="
+                                >
+                                </tags-input>
+                            </div>
                         {% for error in field.errors %}
                             <span class="form-error">{{ error }}</span>
                         {% endfor %}
-                    </div>
+                        </div>
 
                     </div>
                 </search>
@@ -68,7 +71,9 @@
             </div>
         </div>
 
-    </form>
+        </form>
+
+    </div>
 
 {% endblock %}
 

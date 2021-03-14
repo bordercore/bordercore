@@ -81,7 +81,8 @@ class BookmarkForm(ModelForm):
             'title': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'importance': Select(attrs={'class': 'form-control', 'autocomplete': 'off'}, choices=((1, 'Normal'), (5, 'High'), (10, 'Highest'))),
-            'daily': DailyCheckboxInput(check_test=daily_check_test)
+            'daily': DailyCheckboxInput(check_test=daily_check_test, attrs={'class': 'align-middle mt-2'}),
+            'is_pinned': DailyCheckboxInput(attrs={'class': 'align-middle mt-2'})
         }
         field_classes = {
             'daily': CheckboxJSONField,

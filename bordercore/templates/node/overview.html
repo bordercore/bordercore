@@ -8,14 +8,16 @@
 
 {% block content %}
 
-    <div id="vue-app">
+    <div class="card-grid ml-3" id="vue-app">
 
         {% for node in nodes %}
         <div class="row">
 
             <div class="col-lg-12">
 
-                <a href="{% url "node:detail" node.uuid %}">{{ node.name }}</a>
+                <h4>
+                    <a href="{% url "node:detail" node.uuid %}">{{ node.name }}</a>
+                </h4>
 
             </div>
         </div>
