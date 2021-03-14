@@ -131,7 +131,7 @@
                                     {% for song in music %}
                                         <li class="list-group-item list-group-item-secondary text-info">{{ song.song.title }} <strong>{{ song.song.artist }}</strong></li>
                                     {% empty %}
-                                        <li class="list-group-item list-group-item-secondary text-info">No music listened to.</li>
+                                        <li class="list-group-item">No music listened to.</li>
                                     {% endfor %}
                             </ul>
                         </template>
