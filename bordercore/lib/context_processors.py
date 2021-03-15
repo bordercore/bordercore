@@ -1,5 +1,6 @@
 from bookmark.models import Bookmark
 from fitness.models import ExerciseUser
+from metrics.models import Metric
 from todo.models import Todo
 
 
@@ -20,8 +21,12 @@ def get_counts(request):
 
     bookmark_untagged_count = Bookmark.objects.filter(user=request.user, tags__isnull=True).count()
 
+    # Get failed test count
+    failed_test_count = Metric.get_failed_test_count(request.user)
+
     return {
         "bookmark_untagged_count": bookmark_untagged_count,
         "exercise_count": exercise_count,
-        "todo_count": todo_count
+        "todo_count": todo_count,
+        "failed_test_count": failed_test_count
     }

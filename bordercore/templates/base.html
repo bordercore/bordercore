@@ -80,10 +80,15 @@
                                             <div slot="dropdown">
                                                 <a class="dropdown-item pl-3" href="{% url 'accounts:prefs' %}"><font-awesome-icon icon="briefcase" class="mr-2"></font-awesome-icon>Preferences</a>
                                                 {% if request.user|is_in_group:"Admin" %}
-                                                    <a class="dropdown-item pl-3" href="{% url 'metrics:list' %}"><font-awesome-icon icon="chart-bar" class="mr-2"></font-awesome-icon>Metrics</a>
+                                                    <a class="dropdown-item pl-3" href="{% url 'metrics:list' %}"><font-awesome-icon icon="chart-bar" class="mr-2"></font-awesome-icon>Metrics <span class="failed_test_count align-middle ml-2 mt-2 mb-2 pt-1 pl-2" v-if="failed_test_count > 0">[[ failed_test_count ]]</span></a>
+
                                                 {% endif %}
                                                 <a class="dropdown-item pl-3" href="{% url 'accounts:logout' %}"><font-awesome-icon icon="sign-out-alt" class="mr-2"></font-awesome-icon>Logout</a>
                                             </div>
+                                            {% if request.user|is_in_group:"Admin" %}
+                                                <span class="failed_test_count align-middle ml-2 mt-2 pt-1" v-if="failed_test_count > 0">[[ failed_test_count ]]</span>
+                                            {% endif %}
+                                            <span class="align-middle ml-2 mt-2"><font-awesome-icon icon="angle-down"></font-awesome-icon></span>
                                         </dropdown-menu>
                                     </span>
                                 </div>
@@ -149,7 +154,8 @@
                         return {
                             collapsed: false,
                             show: false,
-                            right: true
+                            right: true,
+                            failed_test_count: {{ failed_test_count }}
                         }
                     }
                 });

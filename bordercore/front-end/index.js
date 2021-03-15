@@ -34,9 +34,10 @@ window.jQuery= jQuery;
 import "bootstrap";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faAlignLeft, faAngleRight, faArrowsAltH, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faCopy, faEllipsisV, faExclamationTriangle, faHome, faGraduationCap, faMusic, faNewspaper, faPlus, faQuestion, faRunning, faSearch, faSignOutAlt, faStickyNote, faTasks } from "@fortawesome/free-solid-svg-icons";
+import { faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faCopy, faEllipsisV, faExclamationTriangle, faHome, faGraduationCap, faMusic, faNewspaper, faPlus, faQuestion, faRunning, faSearch, faSignOutAlt, faStickyNote, faTasks } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 library.add(faAlignLeft);
+library.add(faAngleDown);
 library.add(faAngleRight);
 library.add(faArrowsAltH);
 library.add(faBars);

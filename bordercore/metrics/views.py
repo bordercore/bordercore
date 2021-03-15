@@ -2,12 +2,11 @@ from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.db.models import OuterRef, Subquery
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
-from .models import Metric, MetricData
+from .models import Metric
 
 
 @method_decorator(login_required, name="dispatch")
@@ -33,13 +32,7 @@ class MetricListView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
 
-        newest = MetricData.objects.filter(metric=OuterRef("pk")) \
-                                   .order_by("-created")
-
-        return Metric.objects.annotate(
-            latest_result=Subquery(newest.values("value")[:1]),
-            created=Subquery(newest.values("created")[:1])) \
-            .filter(user=self.request.user)
+        return Metric.objects.latest_metrics(self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
