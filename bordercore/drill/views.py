@@ -1,5 +1,4 @@
 import re
-import time
 import urllib
 
 from elasticsearch import Elasticsearch
@@ -8,8 +7,7 @@ from django import urls
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import IntegrityError
-from django.db.models import Count, F, Max, Q
+from django.db.models import F, Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -38,10 +36,10 @@ class DrillListView(ListView):
             **context,
             "cols": ["tag_name", "question_count", "last_reviewed", "lastreviewed_sort", "id"],
             "title": "Home",
-            "tags_still_learning": Question.get_tags_still_learning(self.request.user),
-            "tags_needing_review": Question.get_tags_needing_review(self.request.user),
-            "random_tag": Question.get_random_tag(self.request.user),
-            "total_progress": Question.get_total_progress(self.request.user),
+            "tags_still_learning": Question.objects.tags_still_learning(self.request.user)[:10],
+            "tags_needing_review": Question.objects.tags_needing_review(self.request.user)[:10],
+            "random_tag": Question.objects.get_random_tag(self.request.user),
+            "total_progress": Question.objects.total_tag_progress(self.request.user)
         }
 
 
@@ -388,7 +386,7 @@ def search_tags(request):
 @login_required
 def get_favorite_tags(request):
 
-    tags = Question.get_favorite_tags(request.user)
+    tags = Question.objects.get_favorite_tags(request.user)
 
     response = {
         "status": "OK",
