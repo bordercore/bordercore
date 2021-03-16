@@ -22,7 +22,7 @@
 
 {% block content %}
 
-    <div class="row no-gutters h-100">
+    <div class="row no-gutters h-100" id="vue-app">
 
         <div class="col-lg-3 d-flex flex-column">
 
@@ -35,10 +35,15 @@
                 {% endif %}
 
                 <div class="mt-3" id="audio_player">
-                    <audio controls controlsList="nodownload" id="player" class="mw-100">
+                    <audio controls controlsList="nodownload" id="player" class="mw-100" ref="audioPlayer">
                         <source src="" type="audio/mpeg" />
                         Your browser does not support the audio tag.
                     </audio>
+                </div>
+
+                <div class="ml-4 mt-1">
+                    <input type="checkbox" id="continuous_play" @change="onCheck">
+                    <label for="continuous_play">Continous Play</label>
                 </div>
 
             </div>
@@ -78,8 +83,24 @@
 
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
+        const EventBus = new Vue();
+
+        let currentlyPlayingSongUuid = null;
+
         new Vue({
-            el: "#song_list",
+            el: "#vue-app",
+            data() {
+                return {
+                    songList: [
+                        {% for song in song_list %}
+                        {
+                            uuid: "{{ song.uuid }}",
+                        },
+                        {% endfor %}
+                    ],
+                    continuousPlay: false
+                }
+            },
             methods: {
                 onClick(evt) {
 
@@ -89,15 +110,60 @@
                         return;
                     }
 
-                    var songUuid = table.cell(".selected", 0).data();
+                    // If a song is currently being played, de-select it
+                    let currentlySelectedRow = document.querySelector("tr.selected");
+                    if (currentlySelectedRow) {
+                        currentlySelectedRow.classList.remove("selected");
+                    }
 
-                    axios.get("{% url 'music:get_song_info' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', songUuid))
+                    // Select the new song. We access the parent because you can
+                    //  only click on a td element, so we need the parent tr.
+                    evt.srcElement.parentElement.classList.add("selected");
+
+                    // Get the song's UUID
+                    currentlyPlayingSongUuid = table.row(evt.srcElement).data()[0];
+
+                    // Play the song
+                    axios.get("{% url 'music:get_song_info' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', currentlyPlayingSongUuid))
                          .then(response => {
-                             $("#player").get(0).src = response.data.url;
-                             $("#player").get(0).play()
+                             let vid = document.getElementById("player");
+                             vid.src = response.data.url;
+                             vid.play()
                          })
+                },
+                onCheck(evt) {
+                    this.continuousPlay = evt.srcElement.checked;
                 }
+            },
+            mounted() {
+
+                EventBus.$on("onEnded", payload => {
+
+                    // Find next song in list to play
+                    let index = this.songList.findIndex(x => x.uuid === currentlyPlayingSongUuid);
+                    index = index + 1;
+
+                    let currentlySelectedRow = document.querySelector("tr.selected");
+                    let nextRow = document.querySelector("tr.selected + tr");
+                    currentlySelectedRow.classList.remove("selected");
+                    console.log(this.continuousPlay);
+                    if (this.continuousPlay && index < this.songList.length) {
+                        currentlyPlayingSongUuid = this.songList[index].uuid;
+
+                        axios.get("{% url 'music:get_song_info' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', currentlyPlayingSongUuid))
+                             .then(response => {
+                                 let vid = document.getElementById("player");
+                                 vid.src = response.data.url;
+                                 vid.play()
+                                 nextRow.classList.add("selected");
+                             })
+
+                    }
+
+                });
+
             }
+
         });
 
         var table;
@@ -110,7 +176,7 @@
                     $("#song_list table").show();
                     api.columns.adjust();
                 },
-                "select": true,
+                "select": false,
                 "info": false,
                 "filter": false,
                 "paginate": false,
@@ -126,6 +192,10 @@
             } );
 
         });
+
+        document.getElementById("player").onended = function(evt) {
+            EventBus.$emit("onEnded");
+        };
 
     </script>
 
