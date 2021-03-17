@@ -299,12 +299,12 @@ def skip_question(request, uuid):
 @login_required
 def search_tags(request):
 
-    search_term = request.GET["query"].lower()
-
     es = Elasticsearch(
         [settings.ELASTICSEARCH_ENDPOINT],
         verify_certs=False
     )
+
+    search_term = request.GET["query"].lower()
 
     search_terms = re.split(r"\s+", urllib.parse.unquote(search_term))
 
@@ -317,11 +317,6 @@ def search_tags(request):
                             "user_id": request.user.id
                         }
                     },
-                    # {
-                    #     "wildcard": {
-                    #         "tags": f"{search_term}*"
-                    #     }
-                    # }
                 ]
             }
         },

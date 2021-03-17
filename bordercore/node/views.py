@@ -1,3 +1,6 @@
+import re
+import urllib
+
 import markdown
 from elasticsearch import Elasticsearch
 from markdown.extensions.codehilite import CodeHiliteExtension
@@ -268,6 +271,8 @@ def search_blob_titles(request):
 
     search_term = request.GET["term"].lower()
 
+    search_terms = re.split(r"\s+", urllib.parse.unquote(search_term))
+
     search_object = {
         "query": {
             "bool": {
@@ -294,13 +299,6 @@ def search_blob_titles(request):
                         }
                     },
                     {
-                        "wildcard": {
-                            "title": {
-                                "value": f"*{search_term}*",
-                            }
-                        }
-                    },
-                    {
                         "term": {
                             "user_id": request.user.id
                         }
@@ -322,11 +320,29 @@ def search_blob_titles(request):
                     "uuid"]
     }
 
+    # Separate query into terms based on whitespace and
+    #  and treat it like an "AND" boolean search
+    for one_term in search_terms:
+        search_object["query"]["bool"]["must"].append(
+            {
+                "bool": {
+                    "should": [
+                        {
+                            "wildcard": {
+                                "tags": {
+                                    "value": f"*{one_term}*",
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        )
+
     results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+
     matches = []
-
     for match in results["hits"]["hits"]:
-
         matches.append(
             {
                 "doctype": match["_source"].get("doctype", ""),
