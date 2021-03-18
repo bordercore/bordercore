@@ -509,34 +509,22 @@ ul.pagination {
   color: #aaa;
 }
 
-.search_book_author {
-  font-size: smaller;
-}
-
-.search_result {
-  padding: 5px;
+.search-result {
+  padding-left: 1.5rem;
 
   a {
-    padding-left: 15px;
+    padding-left: 0.5rem;
   }
 }
 
-.search_result_important {
+.search-result-important {
   background-color: $gray-700;
 }
 
-.search_todo_date {
+.search-todo-date {
   font-weight: normal;
   color: #c76257;
-  font-size: 10px;
-}
-
-.search_note_snippet {
-  font-weight: bold;
-}
-
-#kbsearch {
-  width: 330px;
+  font-size: 0.5rem;
 }
 
 /* Blobs */
@@ -657,35 +645,23 @@ a.tag:active {
 /* Search */
 
 .search-box {
-  width: $search_box_width !important;
-}
-
-div .search-box .search-box-input {
-  width: $search_box_width;
-}
-
-.search-spacer-right {
   background-color: $gray-700;
   border: 1px solid $primary;
-  border-radius: 10px;
-  box-shadow: 10px 10px 5px -1px rgba(0, 0, 0, 0.54);
-  font-size: 14px;
-  height: 100px;
-  margin-bottom: 20px;
-  margin-left: 15px;
-  margin-right: 15px;
+  border-radius: 1rem;
+  box-shadow: 0.75rem 0.75rem 0.5rem -1px rgba(0, 0, 0, 0.54);
+  font-size: 1rem;
 
   table th:first-child {
-    padding: 8px 14px 0 20px;
+    padding: 0.5rem 1rem 0 1.25rem;
   }
 
   table th {
     font-weight: normal;
-    padding: 8px 20px 0 8px;
+    padding: 0.5rem 1.25rem 0 0.5rem;
   }
 
   td {
-    padding: 6px;
+    padding: 0.5rem;
   }
 }
 

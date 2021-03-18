@@ -23,21 +23,20 @@
                         {% if search_results.hits.hits %}
 
                             <card title="Document Type Filter">
-
                                 <template v-slot:content>
-
                                     <div class="text-info">
 
-                            {% for doctype in aggregations %}
-                                <input type="checkbox" name="filter_query" class="facet my-2" data-doctype="{{ doctype.doctype }}" @click="onClick"
-                                   {% if doctype.doctype in doctype_filter %}checked="checked"{% endif %}
-                                /> {{ doctype.doctype|title }} ({{ doctype.count }})
-                                <br/>
-                            {% endfor %}
+                                    {% for doctype in aggregations %}
+                                        <input type="checkbox" name="filter_query" class="facet my-2" data-doctype="{{ doctype.doctype }}" @click="onClick"
+                                               {% if doctype.doctype in doctype_filter %}checked="checked"{% endif %}
+                                        /> {{ doctype.doctype|title }} ({{ doctype.count }})
+                                        <br/>
+                                    {% endfor %}
 
                                     </div>
                                 </template>
                             </card>
+
                         {% endif %}
 
                     {% endif %}
@@ -47,11 +46,92 @@
 
         </div>
 
-        <div class="col-lg-9" id="vue-app">
+        <div class="col-lg-9" id="search">
 
-            <div class="card-grid ml-2">
+            <div class="right-column ml-2">
 
-                {% include "search/header.html" %}
+                <div class="card-body">
+
+                    <div class="search-box right-column mb-4 pb-2">
+
+                        <form action="{% url 'search:search' %}" method="get" autocomplete="off">
+
+                            <table>
+                                <tr>
+                                    <th>What are you searching for?</th>
+                                    <th>Boolean Type</th>
+                                    <th>Exact Match</th>
+                                    <th>Sort By</th>
+                                    <th>Limit</th>
+                                </tr>
+
+                                <tr>
+
+                                    <div class="mt-2">
+
+                                        <td class="mt-2">
+                                            <div class="col-auto has-search">
+
+                                                <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
+
+                                                <simple-suggest
+                                                    autofocus=true
+                                                    ref="simpleSuggest"
+                                                    place-holder="Search"
+                                                    search-url="{% url 'search:search_tags_and_titles' %}?term="
+                                                    value="Bogus"
+                                                >
+                                                </simple-suggest>
+
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            <select name="boolean_search_type" class="form-control">
+                                                <option selected="selected">AND</option>
+                                                <option>OR</option>
+                                            </select>
+                                        </td>
+
+                                        <td>
+                                            <div>
+                                                <select name="exact_match" class="form-control">
+                                                    <option{% if request.GET.exact_match == "No" %} selected="selected"{% endif %}>No</option>
+                                                    <option{% if request.GET.exact_match == "Yes" %} selected="selected"{% endif %}>Yes</option>
+                                                </select>
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            <select id="search-sort-by" name="sort" class="form-control">
+                                                <option value="_score"{% if request.session.search_sort_by == "_score" %} selected="selected"{% endif %}>Rank</option>
+                                                <option value="date_unixtime"{% if request.session.search_sort_by == "date_unixtime" %} selected="selected"{% endif %}>Date</option>
+                                            </select>
+                                        </td>
+
+                                        <td>
+                                            <select name="rows" class="form-control">
+                                                <option>100</option>
+                                                <option>200</option>
+                                                <option>1000</option>
+                                                <option>No limit</option>
+                                            </select>
+                                        </td>
+
+                                        <td>
+                                            <input class="btn btn-primary" type="submit" name="Go" value="Search" />
+                                        </td>
+
+                                    </div>
+
+                                </tr>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-column">
 
                 {% if request.GET %}
 
@@ -67,73 +147,73 @@
                             {% for match in search_results.hits.hits %}
 
                                 <tr>
-                                    <td{% if match.source.importance == 10 %} class="search_result_important"{% endif %}>
+                                    <td class="search-result">
 
-                                {% if match.source.doctype == 'drill' %}
+                                    {% if match.source.doctype == 'drill' %}
 
-                                    <h4 class="search_result">
-                                        <font-awesome-icon icon="graduation-cap"></font-awesome-icon>
-        Drill: <a href="{% url 'drill:detail' match.source.uuid %}">{{ match.source.question }}</a>
-                                    </h4>
+                                        <h4 class="{% if match.source.importance == 10 %} search-result-important{% endif %}">
+                                            <font-awesome-icon icon="graduation-cap"></font-awesome-icon>
+                                        Drill: <a href="{% url 'drill:detail' match.source.uuid %}">{{ match.source.question }}</a>
+                                        </h4>
 
-                                {% elif match.source.doctype == 'todo' %}
+                                    {% elif match.source.doctype == 'todo' %}
 
-                                    <h4 class="search_result">
-                                        <font-awesome-icon icon="tasks"></font-awesome-icon>
-        Todo: <a href="{% url 'todo:update' match.source.uuid %}">{{ match.source.task }}</a>
-                                    </h4>
+                                        <h4>
+                                            <font-awesome-icon icon="tasks"></font-awesome-icon>
+                                        Todo: <a href="{% url 'todo:update' match.source.uuid %}">{{ match.source.task }}</a>
+                                        </h4>
 
-                                {% elif match.source.doctype == 'bookmark' %}
+                                    {% elif match.source.doctype == 'bookmark' %}
 
-                                    <h4 class="search_result">
-                                        <font-awesome-icon icon="bookmark"></font-awesome-icon>
-                                        <a href="{{ match.source.url }}">{{ match.source.title }}</a>
-                                    </h4>
+                                        <h4>
+                                            <font-awesome-icon icon="bookmark"></font-awesome-icon>
+                                            <a href="{{ match.source.url }}">{{ match.source.title }}</a>
+                                        </h4>
 
-                                {% elif match.source.doctype == 'note' %}
+                                    {% elif match.source.doctype == 'note' %}
 
-                                    <h4 class="search_result">
-                                        <font-awesome-icon icon="sticky-note"></font-awesome-icon>
-                                        <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.title|default:"Note" }}</a>
-                                    </h4>
+                                        <h4>
+                                            <font-awesome-icon icon="sticky-note"></font-awesome-icon>
+                                            <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.title|default:"Note" }}</a>
+                                        </h4>
 
-                                    <h5>{{ match.source.note|safe }}</h5>
+                                        <h5>{{ match.source.note|safe }}</h5>
 
-                                {% elif match.source.doctype == 'document' %}
+                                    {% elif match.source.doctype == 'document' %}
 
-                                    <h4 class="search_result">
-                                        <font-awesome-icon icon="copy"></font-awesome-icon>
-                                        <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.title|default:"Title" }}</a>
-                                    </h4>
+                                        <h4>
+                                            <font-awesome-icon icon="copy"></font-awesome-icon>
+                                            <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.title|default:"Title" }}</a>
+                                        </h4>
 
-                                    <h5>{{ match.source.note|safe }}</h5>
+                                        <h5>{{ match.source.note|safe }}</h5>
 
-                                {% elif match.source.doctype == 'song' %}
+                                    {% elif match.source.doctype == 'song' %}
 
-                                    <h4 class="search_result">
-                                        <font-awesome-icon icon="music"></font-awesome-icon>
-                                        <a href="{% url 'music:artist_detail' match.source.artist %}">{{ match.source.title|default:"Title" }}</a>
-                                    </h4>
+                                        <h4>
+                                            <font-awesome-icon icon="music"></font-awesome-icon>
+                                            <a href="{% url 'music:artist_detail' match.source.artist %}">{{ match.source.title|default:"Title" }}</a>
+                                        </h4>
 
-                                    <h5>{{ match.source.note|safe }}</h5>
+                                        <h5>{{ match.source.note|safe }}</h5>
 
-                                {% else %}
+                                    {% else %}
 
-                                    <h4 class="search_result">
-                                        <font-awesome-icon icon="book"></font-awesome-icon>
-                                        <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.title|default:"No title" }}</a>
+                                        <h4>
+                                            <font-awesome-icon icon="book"></font-awesome-icon>
+                                            <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.title|default:"No title" }}</a>
         {% if match.source.creators %} - {{ match.source.creators }}{% endif %}
-                                    </h4>
-                                {% endif %}
+                                        </h4>
+                                    {% endif %}
 
-                                <div class="pl-4">
-                                    <span class="ml-3">{{ match.source.date }}</span>
+                                    <div class="pl-4">
+                                        <span class="ml-3">{{ match.source.date }}</span>
 
-                                    {% for tag in match.source.tags %}
-                                        <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>{% if not forloop.last %}, {% endif %}
-                                    {% endfor %}
+                                        {% for tag in match.source.tags %}
+                                            <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
+                                        {% endfor %}
 
-                                </div>
+                                    </div>
 
                                     </td>
                                 </tr>
@@ -142,11 +222,11 @@
 
                         </table>
 
-            </div>
-
                     {% endif %}
 
                 {% endif %}
+
+            </div>
 
         </div>
 
@@ -205,10 +285,6 @@
             components: {
                 SimpleSuggest
             }
-        });
-
-        new Vue({
-            el: "#vue-app"
         });
 
     </script>

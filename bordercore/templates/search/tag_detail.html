@@ -7,8 +7,6 @@
 
 {% block content %}
 
-{% include "search/header.html" %}
-
     <div class="card-grid ml-3" id="vue-app">
 
         <div class="row">
@@ -161,7 +159,7 @@
             {% for match in search_results.matches.todo %}
                 <div class="row voffset">
                     <div class="col-lg-12">
-                        {{ match.task }}  <span class="search_todo_date">{{ match.last_modified }}</span>
+                        {{ match.task }}  <span class="search-todo-date">{{ match.last_modified }}</span>
                     </div>
                 </div>
             {% endfor %}
