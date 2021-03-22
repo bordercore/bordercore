@@ -131,7 +131,7 @@ class TagSerializer(serializers.ModelSerializer):
 class TodoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Todo
-        fields = ["id", "due_date", "note", "tags", "task", "url", "user", "uuid"]
+        fields = ["id", "note", "tags", "task", "url", "user", "uuid"]
 
 
 class UserSerializer(serializers.ModelSerializer):
