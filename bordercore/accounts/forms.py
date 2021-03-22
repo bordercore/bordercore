@@ -35,7 +35,7 @@ class UserProfileForm(ModelForm):
                 label='Default collection',
                 queryset=collections_list,
                 required=False,
-                to_field_name='uuid'
+                to_field_name='id'
             )
             self.fields['homepage_default_collection'].widget.attrs['class'] = 'form-control'
         else:
