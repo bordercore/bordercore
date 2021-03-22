@@ -1,8 +1,9 @@
 import Vue from "vue";
 window.Vue = Vue;
 
-import { AlertPlugin, ToastPlugin, VBHoverPlugin } from "bootstrap-vue"
+import { AlertPlugin, TablePlugin, ToastPlugin, VBHoverPlugin } from "bootstrap-vue"
 Vue.use(AlertPlugin)
+Vue.use(TablePlugin)
 Vue.use(ToastPlugin)
 Vue.use(VBHoverPlugin)
 
@@ -11,6 +12,10 @@ Vue.component("DropdownMenu", DropdownMenu);
 
 import draggable from "vuedraggable";
 Vue.component("draggable", draggable);
+
+import Sortable from "sortablejs";
+Vue.component("Sortable", Sortable);
+window.Sortable = Sortable;
 
 import Vuex from "vuex";
 window.Vuex = Vuex;
@@ -34,7 +39,7 @@ window.jQuery= jQuery;
 import "bootstrap";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faCopy, faEllipsisV, faExclamationTriangle, faHome, faGraduationCap, faMusic, faNewspaper, faPlus, faQuestion, faRunning, faSearch, faSignOutAlt, faStickyNote, faTasks } from "@fortawesome/free-solid-svg-icons";
+import { faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faCopy, faEllipsisV, faExclamationTriangle, faHome, faGraduationCap, faLink, faMusic, faNewspaper, faPlus, faQuestion, faRunning, faSearch, faSignOutAlt, faStickyNote, faTasks } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 library.add(faAlignLeft);
 library.add(faAngleDown);
@@ -53,6 +58,7 @@ library.add(faEllipsisV);
 library.add(faExclamationTriangle);
 library.add(faHome);
 library.add(faGraduationCap);
+library.add(faLink);
 library.add(faMusic);
 library.add(faNewspaper);
 library.add(faPlus);

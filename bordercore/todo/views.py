@@ -1,3 +1,5 @@
+import re
+
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import Http404, HttpResponseRedirect, JsonResponse
@@ -12,50 +14,72 @@ from todo.forms import TodoForm
 from todo.models import Todo
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class TodoListView(ListView):
 
     model = Todo
     template_name = "todo/index.html"
-    context_object_name = 'info'
-    tagsearch = None
+    context_object_name = "info"
 
-    def get_queryset(self):
-        if 'tagsearch' in self.request.GET:
-            tag_name = self.request.GET.get('tagsearch')
-            self.request.session['current_todo_tag'] = tag_name
-        elif 'current_todo_tag' in self.request.session:
+    def get_tag_name(self):
+
+        if "tagsearch" in self.request.GET:
+            tag_name = self.request.GET.get("tagsearch")
+            self.request.session["current_todo_tag"] = tag_name
+        elif "current_todo_tag" in self.request.session:
             # Use the last tag accessed
-            tag_name = self.request.session.get('current_todo_tag')
+            tag_name = self.request.session.get("current_todo_tag")
         else:
             tag_info = Tag.objects.filter(user=self.request.user, todo__user=self.request.user, todo__isnull=False).first()
             tag_name = None
             if tag_info:
                 tag_name = tag_info.name
-        self.tagsearch = tag_name
 
-        if tag_name:
-            return Tag.objects.get(user=self.request.user, name=tag_name).todos.all().order_by("sortordertagtodo__sort_order")
-        else:
-            return []
+        return tag_name
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        tag_name = self.get_tag_name()
+
+        return {
+            **context,
+            "tags": Todo.get_todo_counts(self.request.user, tag_name),
+            "tagsearch": tag_name
+        }
+
+
+@method_decorator(login_required, name="dispatch")
+class TodoTaskList(ListView):
+
+    model = Todo
+    context_object_name = "info"
+
+    def get_queryset(self):
+
+        tag_name = self.kwargs.get("tag_name")
+        return Tag.objects.get(user=self.request.user, name=tag_name).todos.all().order_by("sortordertagtodo__sort_order")
+
+    def get(self, request, *args, **kwargs):
+
+        queryset = self.get_queryset()
+
         info = []
         fields = []
 
-        context["tags"] = Todo.get_todo_counts(self.request.user, self.tagsearch)
+        for sort_order, todo in enumerate(queryset, 1):
 
-        for sort_order, todo in enumerate(context['object_list'], 1):
-
-            data = dict(manual_order="",
-                        sort_order=sort_order,
-                        task=todo.task,
-                        priority=Todo.get_priority_name(todo.priority),
-                        modified=todo.get_modified(),
-                        unixtime=format(todo.modified, 'U'),
-                        uuid=todo.uuid)
+            data = {
+                "manual_order": "",
+                "sort_order": sort_order,
+                "task": re.sub("[\n\r\"]", "", todo.task),
+                "priority": Todo.get_priority_name(todo.priority),
+                "modified": todo.get_modified(),
+                "unixtime": int(format(todo.modified, "U")),
+                "note": re.sub("[\n\r\"]", "", todo.note or ""),
+                "url": todo.url,
+                "uuid": todo.uuid
+            }
 
             if todo.data:
                 fields.extend(list(todo.data.keys()))
@@ -65,22 +89,12 @@ class TodoListView(ListView):
 
         fields = list(set(fields))
 
-        context['tagsearch'] = self.tagsearch
+        response = {
+            "status": "OK",
+            "todo_list": info
+        }
 
-        # These fields go first so we can easily reference
-        #  them in the template by index
-        context['cols'] = ['Manual', 'sort_order', 'unixtime', 'uuid']
-
-        # Add the optional "data" JSONField fields
-        context['cols'].extend(fields)
-
-        context['cols'].extend(['task', 'priority', 'modified'])
-
-        context['nav'] = 'todo'
-        context['info'] = info
-        context['title'] = 'Todo List'
-
-        return context
+        return JsonResponse(response)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -195,8 +209,8 @@ class TodoDeleteView(DeleteView):
 @login_required
 def sort_todo(request):
     """
-    Given an ordered list of bookmarks with a specified tag, move a
-    bookmark to a new position within that list
+    Given an ordered list of todo items with a specified tag, move an
+    item to a new position within that list
     """
 
     tag_name = request.POST["tag"]

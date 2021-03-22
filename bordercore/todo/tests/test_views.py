@@ -31,10 +31,6 @@ def test_todo_list(auto_login_user, todo):
 
     assert resp.status_code == 200
 
-    soup = BeautifulSoup(resp.content, "html.parser")
-
-    assert soup.select("table#todo_list tr:nth-child(1) td")[4].text.strip() == "task_2"
-
 
 @factory.django.mute_signals(signals.post_save)
 def test_todo_detail(auto_login_user, todo):

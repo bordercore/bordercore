@@ -169,7 +169,33 @@ blockquote {
   background-color: $gray-600;
 }
 
-/* Tables */
+/*
+   Tables
+*/
+
+/* Eliminate the focus effect when selecting a row or column */
+.b-table-selectable tr:focus,
+.b-table-selectable th:focus {
+  outline: 0;
+}
+
+/* BootstrapVue table sort icon: none */
+body .table.b-table > tfoot > tr > [aria-sort=none],
+body .table.b-table > thead > tr > th[aria-sort=none] {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' opacity='.3' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' opacity='.3' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important;
+}
+
+/* BootstrapVue table sort icon: ascending */
+body .table.b-table > tfoot > tr > [aria-sort=ascending],
+body .table.b-table > thead > tr > th[aria-sort=ascending] {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' opacity='.3' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important;
+}
+
+/* BootstrapVue table sort icon: descending */
+body .table.b-table > tfoot > tr > [aria-sort=descending],
+body .table.b-table > thead > tr > [aria-sort=descending] {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' opacity='.3' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important;
+}
 
 .table_header {
   background-color: $primary;
@@ -204,13 +230,6 @@ tr.selected {
 .table-borders th {
   border-bottom: 3px solid black;
   padding: 10px;
-}
-
-/* Use this to center content */
-.center {
-  float: none;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .bold {
@@ -543,21 +562,24 @@ ul.pagination {
 
 /* Todo */
 
-#todo_tag_list {
-  padding: 5px;
+.todo-col-manual-sorting {
+  width: 6rem;
 }
 
-#todo_search {
-  margin-left: 10px;
-  width: 300px;
+.todo-col-priority {
+  width: 6rem;
 }
 
-#todo_feedback.alert {
-  padding: 0.37rem 1.25rem;
-  margin-left: 1rem;
+.todo-col-date {
+  width: 8rem;
 }
 
-.cursor_grab {
+.todo-note {
+  font-size: 0.75rem;
+  color: $cyan;
+}
+
+.cursor-grab {
   cursor: -webkit-grab;
   cursor: -moz-grab;
 }
@@ -668,9 +690,16 @@ a.tag:active {
 /* Sortable */
 
 .sortable-ghost {
-  border-left: 6px solid rgb(0, 183, 255);
-  box-shadow: 10px 10px 5px -1px rgba(0, 0, 0, 0.14);
-  opacity: 0.7;
+  background: #7367f0 !important;
+  border-radius: 0.5rem;
+}
+
+/* The element you're dragging */
+
+.sortable-drag {
+  background: #7367f0 !important;
+  opacity: 1;
+  border-radius: 0.5rem;
 }
 
 /* Node */

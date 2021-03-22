@@ -1,0 +1,33 @@
+import time
+
+import pytest
+
+from django.urls import reverse
+
+try:
+    from .pages.todo import TodoPage
+except (ModuleNotFoundError, NameError):
+    # Don't worry if these imports don't exist in production
+    pass
+
+pytestmark = pytest.mark.functional
+
+
+@pytest.mark.parametrize("login", [reverse("todo:list")], indirect=True)
+def test_todo(todo, login, live_server, browser, settings):
+
+    page = TodoPage(browser)
+
+    # Wait for the Vue front-end to load
+    time.sleep(1)
+
+    assert page.title_value() == "Bordercore :: Bordercore"
+
+    # There should be three todo tasks
+    assert page.todo_count() == 3
+
+    # Get the first todo task text
+    assert page.todo_task_text() == "task_2"
+
+    # Sort by priority to find the most important task
+    assert page.sort_by_priority() == "task_1"

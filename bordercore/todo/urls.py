@@ -30,4 +30,9 @@ urlpatterns = [
         view=views.TodoListView.as_view(),
         name="list"
     ),
+    path(
+        route="<str:tag_name>",
+        view=views.TodoTaskList.as_view(),
+        name="list_tasks"
+    ),
 ]

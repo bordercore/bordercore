@@ -2,12 +2,6 @@
 
 {% block title %} Todo {% endblock %}
 
-{% block extra_head %}
-
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.21/rr-1.2.7/sl-1.3.1/datatables.min.css"/>
-
-{% endblock %}
-
 {% block content %}
 
     <div class="row no-gutters h-100">
@@ -17,13 +11,13 @@
             <div class="card-body">
 
                 <h2>
-                    Todo tags
+                    Tags
                 </h2>
 
                 {% for tag in tags %}
-                    <div id="todo_tag_list">
+                    <div class="p-2">
                         <a class="btn {% ifequal tagsearch tag.name %}btn-primary{% else %}btn-info{% endifequal %}" href="{% url 'todo:list' %}?tagsearch={{ tag.name }}">
-                {{ tag.name }} <span class="badge {% ifequal tagsearch tag.name %}badge-light{% else %}badge-light{% endifequal %}">{{ tag.count }}</span>
+                            {{ tag.name }} <span class="badge {% ifequal tagsearch tag.name %}badge-light{% else %}badge-light{% endifequal %}">{{ tag.count }}</span>
                         </a>
                     </div>
                 {% endfor %}
@@ -38,19 +32,49 @@
 
                 <form class="form-inline" role="form">
 
-                    <button-group></button-group>
+                    <button-group inline-template>
+                        <div class="btn-group">
+                            <a class="btn btn-secondary" id="btn-create" href="{% url 'todo:create' %}?tagsearch={{ tagsearch }}">Create</a>
+                            <input type="button" class="btn btn-secondary" id="btn-update" value="Update" :disabled="isDisabled" @click="onClickUpdate" />
+                            <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="isDisabled" @click="onClickDelete" />
+                        </div>
+                    </button-group>
 
-                    <div class="form-group">
-                        <input id="todo_search" type="text" class="form-control" placeholder="Search">
-                    </div>
-
-                    <div class="form-group">
-                        <label id="todo_feedback" class="alert alert-success d-none">{{ messages.0.message }}</label>
+                    <div class="form-group ml-2">
+                        <input v-model="filter" id="todo_search" type="text" class="form-control" placeholder="Filter">
                     </div>
 
                 </form>
 
-                {% include "common/datatable.html" with data=info cols=cols id="todo_list" %}
+                <b-table
+                    hover
+                    primary-key="uuid"
+                    :items="items"
+                    :fields="fields"
+                    selectable
+                    select-mode="single"
+                    :sort-compare="sortCompare"
+                    @row-selected="rowSelected"
+                    @sort-changed="sortChanged"
+                    onEnd="onEnd"
+                    selected-variant="info"
+                    :filter="filter"
+                    v-sortable
+                    :sorting="items"
+                    sort-by="manualSorting"
+                >
+                    <template #cell(task)="data">
+                        <span v-html="data.value"></span>
+                        <span v-if="data.item.url"><a class="ml-1" :href="data.item.url"><font-awesome-icon icon="link"></font-awesome-icon></a></span>
+                        <div class="todo-note">[[ data.item.note ]]</div>
+                    </template>
+
+                    <template #cell(manualSorting)="data">
+                        <font-awesome-icon icon="bars"></font-awesome-icon>
+                        <span v-html="data.value"></span>
+                    </template>
+
+                </b-table>
 
             </div>
 
@@ -64,53 +88,36 @@
 
     {{ block.super }}
 
-    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.21/rr-1.2.7/sl-1.3.1/datatables.min.js"></script>
-
     <script type="text/javascript" charset="utf-8">
 
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
         const EventBus = new Vue();
 
-        window.addEventListener("keyup", function(e) {
-            var value = document.getElementById("todo_search").value;
-            table.search(value).draw();
+        const store = new Vuex.Store({
+            state: {
+                selectedUuid: null
+            }
         });
 
         const ButtonGroup = {
-            template: `
-                <div class="btn-group">
-                    <a class="btn btn-secondary" id="btn-create" href="{% url 'todo:create' %}?tagsearch={{ tagsearch }}">Create</a>
-                    <input type="button" class="btn btn-secondary" id="btn-update" value="Update" :disabled="isDisabledUpdate" @click="onClickEdit" />
-                    <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="isDisabledDelete" @click="onClickDelete" />
-                </div>
-            `,
+            store,
             methods: {
                 onClickDelete(evt) {
 
-                    var selectedId = table.cell(".selected", 3).data();
+                    let selectedUuid = this.$store.state.selectedUuid;
 
-                    this.isDisabledUpdate = true;
-                    this.isDisabledDelete = true;
-
-                    axios.delete("{% url 'todo-list' %}" + selectedId)
+                    axios.delete("{% url 'todo-list' %}" + selectedUuid)
                          .then((response) => {
-                             var element = document.getElementById("todo_feedback");
-                             element.classList.remove("d-none");
-                             element.innerHTML = "Task Deleted.";
 
-                             table.row(".selected").remove();
-                             table.draw();
+                             this.$bvToast.toast("Todo task deleted", {
+                                 title: "Info",
+                                 variant: "primary"
+                             })
 
-                             this.isDisabledUpdate = true;
-                             this.isDisabledDelete = true;
+                             EventBus.$emit("get-todo-list");
 
-                             // Now that we've deleted a row, re-order the "sort_order" column
-                             //  to eliminate the new gap, so that rows range from 1 to <table size>
-                             sort_order = 1;
-                             table.rows().every( function ( index ) {
-                                 table.cell(index,1).data(sort_order++).draw();
-                             });
+                             this.$store.state.selectedUuid = null;
 
                              console.log("Success");
                          }, (error) => {
@@ -118,153 +125,155 @@
                          });
 
                 },
-                onClickEdit(evt) {
-
-                    var selectedId = table.cell(".selected", 3).data();
-                    window.location="{% url 'todo:update' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, selectedId);
-
+                onClickUpdate(evt) {
+                    let selectedUuid = this.$store.state.selectedUuid;
+                    window.location="{% url 'todo:update' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, selectedUuid);
                 },
             },
+            computed: {
+                isDisabled () {
+                    return this.$store.state.selectedUuid === null ? true : false;
+                }
+            }
+        };
+
+        let sortable = null;
+
+        Vue.directive("sortable", {
+            update(el, binding, vnode) {
+
+                const sort_items = vnode.data.attrs.sorting;
+                let options = {};
+
+                if (sort_items) {
+
+                    options.onUpdate = function sortableUpdate(evt) {
+                        const deleted = sort_items.splice(evt.oldIndex, 1);
+                        sort_items.splice(evt.newIndex, 0, deleted[0]);
+                    };
+
+                    options.onEnd = function sortableEnd(evt) {
+                        if (evt.newIndex !== evt.oldIndex) {
+
+                            const bodyFormData = new URLSearchParams();
+                            bodyFormData.append("tag", "{{ tagsearch }}");
+                            bodyFormData.append("todo_uuid", evt.item.dataset.pk);
+                            bodyFormData.append("position", evt.newIndex + 1);
+
+                            axios("{% url 'todo:sort' %}", {
+                                method: "POST",
+                                data: bodyFormData,
+                            })
+                                .then((response) => {
+                                    console.log("Success");
+                                }, (error) => {
+                                    console.log(error);
+                                });
+
+                        }
+                    }
+                }
+
+                sortable = Sortable.create(document.querySelector("tbody"), options);
+            }
+        });
+
+        new Vue({
+            el: "#vue-app",
+            store,
             data() {
                 return {
-                    isDisabledUpdate: true,
-                    isDisabledDelete: true
+                    items: [],
+                    fields: [
+                        {
+                            key: "manualSorting",
+                            label: "Manual",
+                            class: "cursor-grab text-center",
+                            sortable: false,
+                            thClass: "todo-col-manual-sorting",
+                        },
+                        {
+                            key: "task",
+                            sortable: true,
+                        },
+                        {
+                            key: "priority",
+                            sortable: true,
+                            thClass: "todo-col-priority"
+                        },
+                        {
+                            key: "modified",
+                            label: "Date",
+                            class: "text-nowrap",
+                            sortable: true,
+                            thClass: "todo-col-date"
+                        }
+                    ],
+                    selectedUuid: null,
+                    filter: null,
+                    sortableOptions: {
+                    },
+                }
+            },
+            methods: {
+                getTodoList() {
+                    doGet(
+                        this,
+                        "{% url "todo:list_tasks" tagsearch %}",
+                        (response) => {
+                            this.items = response.data.todo_list;
+                        },
+                        "Error todo list"
+                    );
+                },
+                sortCompare(aRow, bRow, key) {
+
+                    let a = b = null;
+
+                    if (key === "modified") {
+                        a = aRow["unixtime"];
+                        b = bRow["unixtime"];
+                    } else if (key === "manualSorting") {
+                        a = aRow["sort_order"];
+                        b = bRow["sort_order"];
+                    } else {
+                        a = aRow[key];
+                        b = bRow[key];
+                    }
+
+                    return a < b ? -1 : a > b ? 1 : 0;
+
+                },
+                rowSelected(evt) {
+                    if (evt.length > 0) {
+                        this.selectedUuid = evt[0].uuid;
+                        this.$store.state.selectedUuid = evt[0].uuid;
+                    } else {
+                        this.$store.state.selectedUuid = null;
+                    }
+                },
+                sortChanged(evt) {
+                    if (evt.sortBy === "") {
+                        sortable.option("disabled", false);
+                    } else {
+                        sortable.option("disabled", true);
+                    }
                 }
             },
             mounted() {
 
-                EventBus.$on("toggleDisabledEdit", payload => {
-                    if (payload == "disable") {
-                        this.isDisabledUpdate = true;
-                    } else if (payload == "enable") {
-                        this.isDisabledUpdate = false;
-                    }
+                EventBus.$on("get-todo-list", payload => {
+                    this.getTodoList();
                 });
 
-                EventBus.$on("toggleDisabledDelete", payload => {
-                    if (payload == "disable") {
-                        this.isDisabledDelete = true;
-                    } else if (payload == "enable") {
-                        this.isDisabledDelete = false;
-                    }
-                });
+                var el = document.querySelector("tbody");
 
-            }
-        };
+                this.getTodoList();
 
-        new Vue({
-            el: "#vue-app",
+            },
             components: {
                 ButtonGroup
             }
-        });
-
-
-        var table;
-
-        $(document).ready(function() {
-
-            function formatDragHandle( data, type, row ) {
-                return "<img width='20' height='16' src='{{ STATIC_URL }}img/drag_and_drop_handle.png' />"
-            }
-
-            table = $('#todo_list').DataTable( {
-                initComplete: function () {
-                    var api = this.api();
-                    $('#todo_list').show();
-                    api.columns.adjust();
-                },
-                "rowReorder": {
-                    "dataSrc": 1,
-                    "snapX": 10
-                },
-                "select": true,
-                "order": [[ 0, "asc" ]],
-                "info": false,
-                "paginate": false,
-                "filter": true,
-                "language": {
-                    "emptyTable": "Nothing to do"
-                },
-                "lengthChange": false,
-                "dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'float-right col-lg-4'p>>",
-                "searchable": false,
-                "columnDefs": [
-                    { "targets": [0], "orderData": 1, "orderSequence": [ "asc" ], "class": "cursor_grab", "render": formatDragHandle },
-                    { "targets": [2], "sorting": [ "desc", "asc" ] },
-                    { "targets": [-1], "dataSort": 2, "sorting": [ "desc", "asc" ] },
-                    { "targets": [1,2,3], "visible": false },
-                ],
-            } );
-
-            var uuid = null;
-
-            table.on( "select", function () {
-                EventBus.$emit("toggleDisabledEdit", "enable");
-                EventBus.$emit("toggleDisabledDelete", "enable");
-            } ).on( "deselect", function () {
-                EventBus.$emit("toggleDisabledEdit", "disable");
-                EventBus.$emit("toggleDisabledDelete", "disable");
-            }).on('row-reorder', function(e, diff, edit) {
-
-                // edit.triggerRow is the row the drag was initiated on
-                uuid = edit.triggerRow.data()[3]
-
-                new_position = null;
-
-                // diff is an array of rows affected by the move.
-                // Iterate through this array, looking for the row
-                // we've moved and record its new position
-                for ( var i=0, ien=diff.length ; i<ien ; i++ ) {
-                    var rowData = table.row( diff[i].node ).data();
-
-                    if (rowData[3] == uuid) {
-                        new_position = diff[i].newData;
-                        break;
-                    }
-                }
-
-                if (new_position != null) {
-
-                    const bodyFormData = new URLSearchParams();
-                    bodyFormData.append("tag", "{{ tagsearch }}");
-                    bodyFormData.append("todo_uuid", uuid);
-                    bodyFormData.append("position", new_position);
-
-                    axios("{% url 'todo:sort' %}", {
-                        method: "POST",
-                        data: bodyFormData,
-                    })
-                        .then((response) => {
-                            console.log("Success");
-                        }, (error) => {
-                            console.log(error);
-                        });
-
-                }
-            }).on( 'order.dt', function ( e, settings, details ) {
-                var order = table.order();
-                colNumber = order[0][0];
-                if( colNumber == 0 ) {
-                    // If we're sorting on the "Manual" column (index=0),
-                    // enable row reordering and switch to the "grab" cursor.
-
-                    table.rowReorder.enable();
-
-                    table.rows().every( function ( index ) {
-                        $(table.cell(index,0).node()).addClass("cursor_grab");
-                    });
-                } else {
-                    // If we're sorting on any column other than "Manual",
-                    // disable row reordering and switch away from the "grab" cursor.
-                    table.rowReorder.disable();
-
-                    table.rows().every( function ( index ) {
-                        $(table.cell(index,0).node()).removeClass("cursor_grab");
-                    });
-                }
-            });
-
         });
 
     </script>
