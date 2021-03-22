@@ -436,7 +436,7 @@ pre {
   left: 1rem;
 }
 
-.failed_test_count {
+.failed-test-count {
   color: $white;
   background-color: lighten($primary, 10%);
   border-radius: 50%;
@@ -445,6 +445,11 @@ pre {
   width: 1.25rem;
   height: 1.25rem;
   line-height: 0.75rem;
+  padding-left: 0.4rem;
+}
+
+.failed-test-count-center-helper {
+  padding-left: 0.1rem;
 }
 
 /* Bookmarks */
