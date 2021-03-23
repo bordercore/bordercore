@@ -87,7 +87,7 @@ class ArtistDetailView(TemplateView):
                                   length_seconds=song.length,
                                   length=convert_seconds(song.length),
                                   artist=song.artist,
-                                  info=song.comment))
+                                  info=song.note))
 
         context = {
             "artist_name": artist_name,

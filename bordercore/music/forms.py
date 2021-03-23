@@ -25,7 +25,7 @@ class SongForm(ModelForm):
 
         self.fields["source"].empty_label = None
         self.fields["track"].required = False
-        self.fields["comment"].required = False
+        self.fields["note"].required = False
         self.fields["year"].required = False
         self.fields["tags"].required = False
 
@@ -82,7 +82,7 @@ class SongForm(ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        for field in ["title", "artist", "comment", "album_name"]:
+        for field in ["title", "artist", "note", "album_name"]:
             if field in cleaned_data:
                 cleaned_data[field] = cleaned_data[field].strip()
 
@@ -104,11 +104,11 @@ class SongForm(ModelForm):
 
     class Meta:
         model = Song
-        fields = ("title", "artist", "track", "year", "tags", "album_name", "compilation", "comment", "source", "length", "id")
+        fields = ("title", "artist", "track", "year", "tags", "album_name", "compilation", "note", "source", "length", "id")
         widgets = {
             "title": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
             "artist": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
-            "comment": Textarea(attrs={"rows": 2, "class": "form-control"}),
+            "note": Textarea(attrs={"rows": 2, "class": "form-control"}),
             "source": Select(),
             "track": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
             "year": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),

@@ -30,11 +30,11 @@ class Album(TimeStampedModel):
     year = models.IntegerField()
     original_release_year = models.IntegerField(null=True)
     compilation = models.BooleanField(default=False)
-    comment = models.TextField(null=True)
+    note = models.TextField(null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 
-    def get_comment(self):
-        return markdown.markdown(self.comment, extensions=[CodeHiliteExtension(guess_lang=False), "tables"])
+    def get_note(self):
+        return markdown.markdown(self.note, extensions=[CodeHiliteExtension(guess_lang=False), "tables"])
 
     class Meta:
         unique_together = ("title", "artist")
@@ -56,7 +56,7 @@ class Song(TimeStampedModel):
     track = models.IntegerField(null=True)
     year = models.IntegerField(null=True)
     length = models.IntegerField(blank=True, null=True)
-    comment = models.TextField(null=True)
+    note = models.TextField(null=True)
     source = models.ForeignKey(SongSource, on_delete=models.PROTECT)
     last_time_played = models.DateTimeField(null=True)
     times_played = models.IntegerField(default=0, blank=True, null=True)
@@ -115,7 +115,7 @@ class Song(TimeStampedModel):
             "year": self.year,
             "track": self.track,
             "tags": [tag.name for tag in self.tags.all()],
-            "note": self.comment,
+            "note": self.note,
             "last_modified": self.modified,
             "doctype": "song",
             "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
