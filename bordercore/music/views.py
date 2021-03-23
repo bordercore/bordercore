@@ -102,39 +102,38 @@ class ArtistDetailView(TemplateView):
         return context
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class AlbumDetailView(DetailView):
 
     model = Album
-    slug_field = 'uuid'
-    slug_url_kwarg = 'uuid'
+    slug_field = "uuid"
+    slug_url_kwarg = "uuid"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context['a'] = self.object
-        s = Song.objects.filter(user=self.request.user, album=self.object).order_by('track')
+        context["a"] = self.object
+        s = Song.objects.filter(user=self.request.user, album=self.object).order_by("track")
 
         song_list = []
 
         for song in s:
             if self.object.compilation:
-                display_title = song.title + ' - ' + song.artist
+                display_title = song.title + " - " + song.artist
             else:
                 display_title = song.title
             song_list.append(dict(uuid=song.uuid,
                                   track=song.track,
-                                  raw_title=song.title.replace('/', 'FORWARDSLASH'),
+                                  raw_title=song.title.replace("/", "FORWARDSLASH"),
                                   title=display_title,
                                   length_seconds=song.length,
                                   length=convert_seconds(song.length)))
 
-        context['song_list'] = song_list
-        context['title'] = 'Album Detail :: {}'.format(self.object.title)
-        context['cols'] = ['uuid', 'track', 'raw_title', 'title', 'length', 'length_seconds']
-        context['MEDIA_URL_MUSIC'] = settings.MEDIA_URL_MUSIC
-
-        return context
+        return {
+            **context,
+            "song_list": song_list,
+            "MEDIA_URL_MUSIC": settings.MEDIA_URL_MUSIC
+        }
 
     def get_queryset(self):
         return Album.objects.filter(user=self.request.user)
