@@ -1,9 +1,5 @@
 {% extends "base.html" %}
 
-{% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.css"/>
-{% endblock %}
-
 {% block title %} KB :: Collections {% endblock %}
 
 {% block content %}
@@ -25,9 +21,15 @@
         <div class="row">
             <div class="col-lg-7">
                 <form class="form-inline" role="form" id="form-edit" method="POST">
-            {% csrf_token %}
+                    {% csrf_token %}
 
-                    <button-group></button-group>
+                    <button-group inline-template>
+                        <div class="btn-group">
+                            <input type="button" class="btn btn-secondary" id="btn-create" value="Create" @click="onClickCreate" />
+                            <input type="button" class="btn btn-secondary" id="btn-update" value="Update" :disabled="isDisabled" @click="onClickUpdate" />
+                            <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="isDisabled" @click="onClickDelete" />
+                        </div>
+                    </button-group>
 
                     <div class="form-group">
                         <label id="feedback"></label>
@@ -37,11 +39,23 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-lg-12">
-        {% include "common/datatable.html" with data=info cols=cols id="collection_list" %}
-            </div>
-        </div>
+        <b-table
+            hover
+            primary-key="uuid"
+            :items="items"
+            :fields="fields"
+            selectable
+            select-mode="single"
+            :sort-compare="sortCompare"
+            @row-selected="rowSelected"
+            selected-variant="info"
+            sort-by="updated"
+            sort-desc
+        >
+            <template #cell(name)="data">
+                <a :href="data.item.collection_url">[[ data.value ]]</a>
+            </template>
+            </b-table>
 
         <form action="{% url 'collection:list' %}" method="post" id="form-collection-edit">
             <div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -101,23 +115,20 @@
 
     {{ block.super }}
 
-    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.js"></script>
-
     <script type="text/javascript" charset="utf-8">
 
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
         const EventBus = new Vue();
 
+        const store = new Vuex.Store({
+            state: {
+                selectedUuid: null
+            }
+        });
+
         const ButtonGroup = {
-            template: `
-                <div class="btn-group">
-                    <input type="button" class="btn btn-secondary" id="btn-create" value="Create" @click="onClickCreate" />
-                    <input type="button" class="btn btn-secondary" id="btn-update" value="Update" :disabled="isDisabledUpdate" @click="onClickUpdate" />
-                    <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="isDisabledDelete" @click="onClickDelete" />
-                </div>
-            `
-            ,
+            store,
             methods: {
                 onClickCreate(evt) {
 
@@ -127,22 +138,22 @@
                     document.getElementById("action-type").innerHTML = "Create";
                     document.getElementById("btn-action").value = "Create";
                     document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection:create' %}");
-                    $("#modalAdd").modal("show");
-
+                    $("#modalAdd").modal("show")
                     window.setTimeout(() => { document.getElementById("id_name").focus() }, 500);
 
                 },
                 onClickDelete(evt) {
 
-                    var selectedId = table.cell(".selected", 5).data();
-                    var formEl = document.getElementById("form-edit");
-                    formEl.setAttribute("action", "{% url 'collection:delete' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', selectedId));
+                    let selectedUuid = this.$store.state.selectedUuid;
+
+                    let formEl = document.getElementById("form-edit");
+                    formEl.setAttribute("action", "{% url 'collection:delete' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', selectedUuid));
                     formEl.submit();
 
                 },
                 onClickUpdate(evt) {
 
-                    var selectedUuid = table.cell(".selected", 5).data();
+                    let selectedUuid = this.$store.state.selectedUuid;
 
                     doGet(
                         this,
@@ -162,36 +173,82 @@
 
                 }
             },
-            data() {
-                return {
-                    isDisabledUpdate: true,
-                    isDisabledDelete: true
+            computed: {
+                isDisabled () {
+                    return this.$store.state.selectedUuid === null ? true : false;
                 }
-            },
-            mounted() {
-
-                EventBus.$on("toggleDisabledEdit", payload => {
-                    if (payload == "disable") {
-                        this.isDisabledUpdate = true;
-                    } else if (payload == "enable") {
-                        this.isDisabledUpdate = false;
-                    }
-                });
-
-                EventBus.$on("toggleDisabledDelete", payload => {
-                    if (payload == "disable") {
-                        this.isDisabledDelete = true;
-                    } else if (payload == "enable") {
-                        this.isDisabledDelete = false;
-                    }
-                });
-
-            },
-
+            }
         };
 
         new Vue({
             el: "#vue-app",
+            store,
+            data() {
+                return {
+                    items: [
+                        {% for collection in info %}
+                        {
+                            "name": "{{ collection.name }}",
+                            "collection_url": "{% url 'collection:detail' collection.uuid %}",
+                            "tags": "{{ collection.tags }}",
+                            "updated": "{{ collection.updated }}",
+                            "unixtime": "{{ collection.unixtime }}",
+                            "objectcount": {{ collection.objectcount }},
+                            "uuid": "{{ collection.uuid }}"
+                        },
+                        {% endfor %}
+                    ],
+                    fields: [
+                        {
+                            key: "name",
+                            sortable: true
+                        },
+                        {
+                            key: "tags",
+                            sortable: true
+                        },
+                        {
+                            key: "updated",
+                            class: "text-center",
+                            sortable: true,
+                            sortDirection: "desc"
+                        },
+                        {
+                            key: "objectcount",
+                            label: "Object Count",
+                            class: "text-center",
+                            sortable: true,
+                            sortDirection: "desc"
+                        },
+                    ],
+                    selectedUuid: null,
+                }
+            },
+            methods: {
+                rowSelected(evt) {
+                    if (evt.length > 0) {
+                        this.selectedUuid = evt[0].uuid;
+                        this.$store.state.selectedUuid = evt[0].uuid;
+                    } else {
+                        this.$store.state.selectedUuid = null;
+                    }
+                },
+                sortCompare(aRow, bRow, key) {
+
+                    let a = b = null;
+
+                    if (key === "updated") {
+                        a = aRow["unixtime"];
+                        b = bRow["unixtime"];
+                    } else {
+                        a = aRow[key];
+                        b = bRow[key];
+                    }
+
+                    return a < b ? -1 : a > b ? 1 : 0;
+
+                },
+            },
             components: {
                 ButtonGroup,
                 TagsInput
@@ -200,45 +257,6 @@
 
         new Vue({
             el: "#vue-messages",
-        });
-
-        var table;
-
-        $(document).ready(function() {
-
-            function formatName( data, type, row ) {
-                return '<a href="{% url 'collection:detail' '00000000-0000-0000-0000-000000000000' %}">'.replace('00000000-0000-0000-0000-000000000000', row[5]) + row[0] + '</a>';
-            }
-
-            table = $('#collection_list').DataTable( {
-                initComplete: function () {
-                    var api = this.api();
-                    $('#collection_list').show();
-                    api.columns.adjust();
-                },
-                "select": true,
-                "info": false,
-                "paginate": false,
-                "sorting": [[2, 'desc']],
-                "filter": true,
-                "lengthChange": false,
-                "dom": "<'row'<'col-lg-3'<'toolbar'>l>r>t<'row'<'float-right col-lg-4'p>>",
-                "searchable": false,
-                "columnDefs": [
-                    { "targets": [0], "sorting": [ "desc", "asc" ], "render": formatName, "useRendered": false  },
-                    { "targets": [2], "class": "monospaced", "dataSort": 3, "sorting": [ "desc", "asc" ] },
-                    { "targets": [3,5], "visible": false },
-                ],
-            } );
-
-            table.on( 'select', function () {
-                EventBus.$emit("toggleDisabledEdit", "enable");
-                EventBus.$emit("toggleDisabledDelete", "enable");
-            } ).on( 'deselect', function () {
-                EventBus.$emit("toggleDisabledEdit", "disable");
-                EventBus.$emit("toggleDisabledDelete", "disable");
-            });
-
         });
 
     </script>

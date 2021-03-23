@@ -49,9 +49,8 @@ class CollectionListView(FormMixin, ListView):
                              updated=myobject.get_modified(),
                              unixtime=format(myobject.modified, "U"),
                              objectcount=len(myobject.blob_list) if myobject.blob_list else 0,
-                             id=myobject.uuid))
+                             uuid=myobject.uuid))
 
-        context["cols"] = ["name", "tags", "updated", "unixtime", "objectcount", "id"]
         context["info"] = info
         context["title"] = "Collection List"
 
