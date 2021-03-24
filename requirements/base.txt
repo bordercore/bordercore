@@ -7,7 +7,6 @@ billiard==3.6.0.0
 boto3==1.9.156
 certifi==2019.6.16
 Django==2.2.13
-django-datatables-view==1.12.1
 djangorestframework==3.11.0
 django-storages==1.7.1
 https://github.com/bordercore/PyOrgMode/archive/master.zip
