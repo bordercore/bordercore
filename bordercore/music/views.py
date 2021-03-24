@@ -84,22 +84,18 @@ class ArtistDetailView(TemplateView):
             song_list.append(dict(uuid=song.uuid,
                                   year=song.year,
                                   title=song.title,
-                                  length_seconds=song.length,
                                   length=convert_seconds(song.length),
                                   artist=song.artist,
-                                  info=song.note))
+                                  note=re.sub("[\n\r\"]", "", song.note)))
 
-        context = {
+        return {
+            **context,
             "artist_name": artist_name,
             "album_list": albums,
             "song_list": song_list,
             "compilation_album_list": compilation_songs,
-            "cols": ["year", "artist", "title", "length", "length_seconds", "info", "uuid"],
-            "title": f"Artist Detail :: {artist_name}",
             "MEDIA_URL_MUSIC": settings.MEDIA_URL_MUSIC
         }
-
-        return context
 
 
 @method_decorator(login_required, name="dispatch")

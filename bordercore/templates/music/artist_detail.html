@@ -1,9 +1,5 @@
 {% extends "base.html" %}
 
-{% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.css"/>
-{% endblock %}
-
 {% block title %} Music {% endblock %}
 
 {% block nav %}
@@ -21,7 +17,7 @@
 
 {% block content %}
 
-    <div class="row no-gutters h-100">
+    <div class="row no-gutters h-100" id="vue-app">
 
         <div class="col-lg-3 d-flex flex-column">
 
@@ -31,7 +27,7 @@
                 <div id="audio_player">
                     <audio controls controlsList="nodownload" id="player" class="mw-100">
                         <source src="" type="audio/mpeg">
-                            Your browser does not support the audio tag.
+                        Your browser does not support the audio tag.
                     </audio>
                 </div>
             {% endif %}
@@ -79,7 +75,7 @@
 
             {% if compilation_album_list %}
 
-            {{ compilation_album_list|length }} compilation album{{ compilation_album_list|pluralize }} <br />
+                {{ compilation_album_list|length }} compilation album{{ compilation_album_list|pluralize }} <br />
 
                 <table class="table-borderless">
                     <tr>
@@ -119,13 +115,22 @@
                         <br />
                         {% if album_list %}
                             <h4>Other songs</h4>
-                            <br />
                         {% endif %}
 
-                        <div class="col-lg-11" id="song_list" @click="onClick">
-                            {% include "common/datatable.html" with data=song_list %}
-                        </div>
-
+                        <b-table
+                            hover
+                            primary-key="uuid"
+                            :items="songList"
+                            :fields="fields"
+                            selectable
+                            select-mode="single"
+                            @row-selected="rowSelected"
+                            selected-variant="info"
+                            sort-by="year"
+                            sort-desc
+                            ref="table"
+                        >
+                        </b-table>
 
                     </div>
 
@@ -145,60 +150,84 @@
 
     {{ block.super }}
 
-    <script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.10.20/sl-1.3.1/datatables.min.js"></script>
-
     <script type="text/javascript" charset="utf-8">
 
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
+        const EventBus = new Vue();
+
         new Vue({
-            el: "#song_list",
-            methods: {
-                onClick(evt) {
-
-                    // If we clicked on column title to sort, ignore this event. We don't
-                    //  actually want to play a song
-                    if (evt.target.tagName == "TH") {
-                        return;
-                    }
-
-                    var songUuid = table.cell(".selected", 6).data();
-
-                    axios.get("{% url 'music:get_song_info' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', songUuid))
-                         .then(response => {
-                             $("#player").get(0).src = response.data.url;
-                             $("#player").get(0).play()
-                         })
+            el: "#vue-app",
+            data() {
+                return {
+                    currentlyPlayingSongUuid: null,
+                    songList: [
+                        {% for song in song_list %}
+                        {
+                            "uuid": "{{ song.uuid }}",
+                            "year": "{{ song.year|default:'' }}",
+                            "title": "{{ song.title|safe }}",
+                            "length": "{{ song.length }}",
+                            "note": "{{ song.note }}",
+                        },
+                        {% endfor %}
+                    ],
+                    fields: [
+                        {
+                            key: "year",
+                            sortable: true
+                        },
+                        {
+                            key: "title",
+                            sortable: true
+                        },
+                        {
+                            key: "length",
+                            sortable: true
+                        },
+                        {
+                            key: "note",
+                            sortable: true
+                        },
+                    ]
                 }
+            },
+            methods: {
+                rowSelected(evt) {
+
+                    if (evt.length > 0) {
+
+                        this.currentlyPlayingSongUuid = evt[0].uuid;
+
+                        axios.get("{% url 'music:get_song_info' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', this.currentlyPlayingSongUuid))
+                             .then(response => {
+                                 let vid = document.getElementById("player");
+                                 vid.src = response.data.url;
+                                 vid.play()
+                             })
+
+                    } else {
+                        this.currentlyPlayingSongUuid = null;
+                    }
+                }
+            },
+            mounted() {
+
+                EventBus.$on("onEnded", payload => {
+
+                    // Find next song in list to play
+                    let index = this.songList.findIndex(x => x.uuid === this.currentlyPlayingSongUuid);
+                    this.$refs.table.unselectRow(index);
+
+                });
+
             }
-        });
-
-        var table;
-
-        $(document).ready(function() {
-
-            table = $("#song_list table").DataTable( {
-                initComplete: function () {
-                    var api = this.api();
-                    $("#song_list table").show();
-                    api.columns.adjust();
-                },
-                "select": true,
-                "paginate": false,
-                "info": false,
-                "sorting": [[0, 'desc']],
-                "filter": false,
-                "lengthChange": false,
-                "dom": "<'row'<'span6'<'toolbar'>l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
-                "searchable": false,
-                "columnDefs": [
-                    { "targets": [0], "sorting": [ "desc", "asc" ] },
-                    { "targets": [3], "iDataSort": 4 },
-                    { "targets": [1,4,6], "visible": false },
-                ],
-            } );
 
         });
+
+        document.getElementById("player").onended = function(evt) {
+            EventBus.$emit("onEnded");
+        };
 
     </script>
 
