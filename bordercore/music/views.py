@@ -481,21 +481,21 @@ class SearchTagListView(ListView):
 
         context = super().get_context_data(**kwargs)
 
-        results = []
+        song_list = []
 
         for match in context["object_list"]:
-            results.append(
+            song_list.append(
                 {
+                    "uuid": match.uuid,
                     "title": match.title,
                     "artist": match.artist,
                     "year": match.year,
-                    "length": convert_seconds(match.length),
-                    "id": match.uuid,
+                    "length": convert_seconds(match.length)
                 }
             )
 
         return {
-            "cols": ["title", "artist", "year", "length", "id"],
+            **context,
             "tag_name": self.request.GET["tag"],
-            "results": results,
+            "song_list": song_list
         }
