@@ -43,35 +43,38 @@ class DrillListView(ListView):
         }
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class DrillSearchListView(ListView):
 
-    template_name = 'drill/search.html'
+    template_name = "drill/search.html"
 
     def get_queryset(self):
-        search_term = self.request.GET['search']
+        search_term = self.request.GET["search"]
 
         return Question.objects.filter(Q(question__icontains=search_term)
-                                       | Q(answer__icontains=search_term))
+                                       | Q(answer__icontains=search_term)) \
+                               .prefetch_related("tags")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        search_term = self.request.GET['search']
+        search_term = self.request.GET["search"]
 
         info = []
 
-        for question in context['object_list']:
+        for question in context["object_list"]:
             info.append(dict(tags=", ".join([x.name for x in question.tags.all()]),
                              uuid=question.uuid,
-                             question=question.question,
-                             answer=question.answer))
+                             question=re.sub("[\n\r\"]", "", question.question),
+                             answer=re.sub("[\n\r\"]", "", question.answer)))
 
-        context['cols'] = ['tags', 'uuid', 'question', 'answer']
-        context['search'] = search_term
-        context['info'] = info
-        context['title'] = 'Drill Search'
-        return context
+        return {
+            **context,
+            "cols": ["tags", "uuid", "question", "answer"],
+            "search": search_term,
+            "info": info,
+            "title": "Drill Search"
+        }
 
 
 @method_decorator(login_required, name='dispatch')
