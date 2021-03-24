@@ -5,7 +5,6 @@ from datetime import datetime
 from pathlib import Path
 
 import boto3
-from django_datatables_view.base_datatable_view import BaseDatatableView
 from elasticsearch import Elasticsearch
 from mutagen.mp3 import MP3
 
@@ -15,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
@@ -33,29 +32,29 @@ MUSIC_ROOT = "/home/media/music"
 @login_required
 def music_list(request):
 
-    message = ''
+    message = ""
 
     # Get a list of recently played songs
-    recent_songs = Listen.objects.filter(user=request.user).select_related("song").distinct().order_by('-created')[:10]
+    recent_songs = Listen.objects.filter(user=request.user).select_related("song").distinct().order_by("-created")[:10]
 
     # Get a random album
     random_albums = None
-    random_album_info = Album.objects.filter(user=request.user).order_by('?')
+    random_album_info = Album.objects.filter(user=request.user).order_by("?")
     if random_album_info:
         random_albums = random_album_info.first()
 
-    return render(request, 'music/index.html',
+    return render(request, "music/index.html",
                   {
-                      'cols': ['Date', 'artist', 'title', 'id'],
-                      'message': message,
-                      'recent_songs': recent_songs,
-                      'random_albums': random_albums,
-                      'title': 'Music List',
-                      'MEDIA_URL_MUSIC': settings.MEDIA_URL_MUSIC,
+                      "cols": ["Date", "artist", "title", "id"],
+                      "message": message,
+                      "recent_songs": recent_songs,
+                      "random_albums": random_albums,
+                      "title": "Music List",
+                      "MEDIA_URL_MUSIC": settings.MEDIA_URL_MUSIC,
                   })
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class ArtistDetailView(TemplateView):
 
     template_name = "music/artist_detail.html"
@@ -86,7 +85,7 @@ class ArtistDetailView(TemplateView):
                                   title=song.title,
                                   length=convert_seconds(song.length),
                                   artist=song.artist,
-                                  note=re.sub("[\n\r\"]", "", song.note)))
+                                  note=re.sub("[\n\r\"]", "", song.note or "")))
 
         return {
             **context,
@@ -135,7 +134,7 @@ class AlbumDetailView(DetailView):
         return Album.objects.filter(user=self.request.user)
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class SongUpdateView(UpdateView):
 
     model = Song
@@ -179,7 +178,7 @@ class SongUpdateView(UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class SongCreateView(CreateView):
     model = Song
     template_name = "music/create_song.html"
@@ -365,45 +364,46 @@ def search_artists(request):
     return JsonResponse(matches, safe=False)
 
 
-@method_decorator(login_required, name='dispatch')
-class MusicListJson(BaseDatatableView):
-    # define column names that will be used in sorting
-    # order is important and should be same as order of columns
-    # displayed by datatables. For non sortable columns use empty
-    # value like ''
-    order_columns = ['created', 'artist', 'title']
+@method_decorator(login_required, name="dispatch")
+class RecentSongsListView(ListView):
 
-    def get_initial_queryset(self):
-        # return queryset used as base for futher sorting/filtering
-        # these are simply objects displayed in datatable
-        return Song.objects.filter(user=self.request.user)
+    def get_queryset(self):
+        search_term = self.request.GET.get("tag", None)
 
-    def filter_queryset(self, qs):
-        # use request parameters to filter queryset
+        queryset = Song.objects.filter(user=self.request.user)
 
-        # simple example:
-        sSearch = self.request.GET.get('sSearch', None)
-        if sSearch:
-            qs = qs.filter(
-                Q(title__icontains=sSearch)
-                | Q(artist__icontains=sSearch)
+        if search_term:
+            queryset = queryset.filter(
+                Q(title__icontains=search_term)
+                | Q(artist__icontains=search_term)
             )
 
-        return qs
+        return queryset.order_by("-created", "artist", "title")[:20]
 
-    def prepare_results(self, qs):
-        # prepare list with output column data
-        # queryset is already paginated here
+    def get(self, request, *args, **kwargs):
 
-        json_data = []
-        for item in qs:
-            json_data.append([
-                item.created.strftime("%b %d, %Y"),
-                item.artist,
-                item.title,
-                item.id
-            ])
-        return json_data
+        queryset = self.get_queryset()
+
+        song_list = []
+
+        for match in queryset:
+            song_list.append(
+                {
+                    "uuid": match.uuid,
+                    "title": match.title,
+                    "artist": match.artist,
+                    "year": match.year,
+                    "length": convert_seconds(match.length),
+                    "artist_url": reverse("music:artist_detail", kwargs={"artist": match.artist})
+                }
+            )
+
+        response = {
+            "status": "OK",
+            "song_list": song_list
+        }
+
+        return JsonResponse(response)
 
 
 def get_song_location(song):
@@ -413,23 +413,23 @@ def get_song_location(song):
     # If the song is associated with an album, look for it in the album's directory
     if song.album:
         if song.album.compilation:
-            artist_name = 'Various'
+            artist_name = "Various"
         else:
             artist_name = song.artist
         tracknumber = str(song.track)
         if len(tracknumber) == 1:
-            tracknumber = '0' + tracknumber
-        file_info = {'url': '/music/{}/{}/{} - {}.mp3'.format(artist_name, song.album.title, tracknumber, song_title)}
+            tracknumber = "0" + tracknumber
+        file_info = {"url": "/music/{}/{}/{} - {}.mp3".format(artist_name, song.album.title, tracknumber, song_title)}
     else:
-        file_info = {'url': '/music/{}/{}.mp3'.format(song.artist, song_title)}
+        file_info = {"url": "/music/{}/{}.mp3".format(song.artist, song_title)}
 
-        if not Path('/home/media/{}'.format(file_info['url'])).is_file():
+        if not Path("/home/media/{}".format(file_info["url"])).is_file():
             # Check this type of file path: /home/media/mp3/Primitives - Crash.mp3
-            file_info = {'url': '/mp3/{} - {}.mp3'.format(song.artist, song_title)}
+            file_info = {"url": "/mp3/{} - {}.mp3".format(song.artist, song_title)}
 
-            if not Path('/home/media/{}'.format(file_info['url'])).is_file():
+            if not Path("/home/media/{}".format(file_info["url"])).is_file():
                 # Check this type of file path: /home/media/mp3/m/Motley Crue - She's Got Looks That Kill.mp3
-                file_info = {'url': '/mp3/{}/{} - {}.mp3'.format(song.artist[0].lower(), song.artist, song_title)}
+                file_info = {"url": "/mp3/{}/{} - {}.mp3".format(song.artist[0].lower(), song.artist, song_title)}
 
     return file_info
 
@@ -453,8 +453,8 @@ def get_song_info(request, uuid):
 
     file_location = f"{settings.MEDIA_URL_MUSIC}songs/{song.uuid}"
 
-    results = {'title': song.title,
-               'url': file_location}
+    results = {"title": song.title,
+               "url": file_location}
 
     return JsonResponse(results)
 

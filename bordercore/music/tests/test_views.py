@@ -106,11 +106,11 @@ def test_music_create(s3_resource, s3_bucket, auto_login_user, song, song_source
     assert resp.status_code == 302
 
 
-def test_music_get_song_list(auto_login_user, song):
+def test_music_recent_songs(auto_login_user, song):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("music:get_song_list")
+    url = urls.reverse("music:recent_songs")
     resp = client.get(url)
 
     assert resp.status_code == 200

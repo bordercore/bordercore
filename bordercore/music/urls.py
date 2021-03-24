@@ -31,9 +31,9 @@ urlpatterns = [
         name="artist_detail"
     ),
     path(
-        route="datatable/data/",
-        view=views.MusicListJson.as_view(),
-        name="get_song_list"
+        route="recent_songs",
+        view=views.RecentSongsListView.as_view(),
+        name="recent_songs"
     ),
     path(
         route="song/<uuid:uuid>",
