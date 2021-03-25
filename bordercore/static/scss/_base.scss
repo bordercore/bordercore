@@ -576,6 +576,10 @@ pre {
 .todo-note {
   font-size: 0.75rem;
   color: $cyan;
+
+  p {
+    margin-bottom: 0;
+  }
 }
 
 .cursor-grab {

@@ -66,7 +66,7 @@
                     <template #cell(task)="data">
                         <span v-html="data.value"></span>
                         <span v-if="data.item.url"><a class="ml-1" :href="data.item.url"><font-awesome-icon icon="link"></font-awesome-icon></a></span>
-                        <div class="todo-note">[[ data.item.note ]]</div>
+                        <div class="todo-note" v-html="data.item.note"></div>
                     </template>
 
                     <template #cell(manualSorting)="data">
