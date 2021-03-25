@@ -329,7 +329,7 @@ def search_blob_titles(request):
                     "should": [
                         {
                             "wildcard": {
-                                "tags": {
+                                "title": {
                                     "value": f"*{one_term}*",
                                 }
                             }
