@@ -100,6 +100,10 @@ import Card from "./vue/common/Card.vue";
 Vue.component("Card", Card);
 window.Card = Card;
 
+import DrillTagProgress from "./vue/common/DrillTagProgress.vue";
+Vue.component("DrillTagProgress", DrillTagProgress);
+window.DrillTagProgress = DrillTagProgress;
+
 import VueSidebarMenu from "vue-sidebar-menu"
 import "vue-sidebar-menu/dist/vue-sidebar-menu.css"
 Vue.use(VueSidebarMenu)

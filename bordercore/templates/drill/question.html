@@ -71,17 +71,14 @@
                     <template v-slot:content>
                         <div class="d-flex flex-wrap">
                         {% for tag in tag_info %}
-                            <div class="mt-2 mr-5 text-center">
-                                <span class="text-info mt-2">{{ tag.name }}</span>
-                                <div class="pt-2">
-                                    <svg width="120" height="120" viewBox="0 0 120 120">
-                                        <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke="#262c49" stroke-width="12" />
-                                        <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke="#7fffd4" stroke-width="12" :stroke-dasharray="strokeDashArray" :stroke-dashoffset="getDashOffset({{ tag.progress }})" />
-                                        <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px" fill="#fff">[[ round({{ tag.progress }}) ]]%</text>
-                                    </svg>
-                                </div>
-                                <span class="text-secondary mt-2">{{ tag.count }} question{{ tag.count|pluralize }}</span>
-                            </div>
+                            <drill-tag-progress
+                                :count={{ tag.count }}
+                                :progress={{ tag.progress }}
+                            >
+                                <template v-slot:title-slot>
+                                    <span class="text-info mt-2 mb-2">{{ tag.name }}</span>
+                                </template>
+                            </drill-tag-progress>
                         {% endfor %}
                         </div>
                     </template>
@@ -160,32 +157,11 @@
         };
 
         new Vue({
-            el: "#vue-nav",
+            el: "#vue-nav"
         });
 
         new Vue({
-            el: "#vue-app",
-            data() {
-                return {
-                    circleRadius: 54
-                }
-            },
-            computed: {
-                strokeDashArray: function() {
-                    return 2 * 3.14 * this.circleRadius;
-                }
-            },
-            methods: {
-                getDashOffset(progress) {
-                    return this.strokeDashArray * (1 - progress/100)
-                },
-                round: function(progress) {
-                    return Math.round(progress);
-                },
-                getQuestionCountString: function(tag) {
-                    return tag.info.count + " " + pluralize("question", tag.info.count);
-                }
-            }
+            el: "#vue-app"
         });
 
     </script>
