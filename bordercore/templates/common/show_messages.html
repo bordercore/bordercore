@@ -2,18 +2,19 @@
 
 {% for message in messages %}
 
-    <div class="row">
+    <div class="row no-gutters">
         <div class="col-lg-{{ width|default:12 }} offset-lg-{{ offset|default:0 }}">
 
     {% if message.tags == "error" or "show_in_dom" in message.tags %}
 
-        <b-alert
-            :show=true
-            :variant="'{{ message.tags|get_message_level }}'"
-        >
-            <font-awesome-icon class="mr-1" icon="exclamation-triangle"></font-awesome-icon>
+        <div class="card-grid ml-2 mr-2">
+
+            <b-alert :show=true :variant="'{{ message.tags|get_message_level }}'">
+                <font-awesome-icon class="mr-1" icon="exclamation-triangle"></font-awesome-icon>
             {{ message|safe }}
-        </b-alert>
+            </b-alert>
+
+        </div>
 
     {% else %}
 
