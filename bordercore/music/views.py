@@ -121,6 +121,7 @@ class AlbumDetailView(DetailView):
                                   track=song.track,
                                   raw_title=song.title.replace("/", "FORWARDSLASH"),
                                   title=display_title,
+                                  note=song.note,
                                   length_seconds=song.length,
                                   length=convert_seconds(song.length)))
 
