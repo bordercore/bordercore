@@ -166,6 +166,7 @@ def browser():
 def login(auto_login_user, live_server, browser, settings, request):
 
     settings.DEBUG = True
+    os.environ["DISABLE_DEBUG_TOOLBAR"] = "1"
 
     auto_login_user()
 

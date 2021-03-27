@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import logging
+import os
 
 from .base import *
 
@@ -47,6 +48,18 @@ DEBUG_TOOLBAR_PANELS = (
     'debug_toolbar.panels.timer.TimerPanel',
     'debug_toolbar.panels.versions.VersionsPanel'
 )
+
+
+# Disable the debug toolbar if the environment variable
+# "SHOW_TOOLBAR_CALLBACK" is set. Useful for selenium
+# testing when you don't want it getting in the way.
+
+def show_debug_toolbar(request):
+    return not bool(int(os.getenv("DISABLE_DEBUG_TOOLBAR", 0)))
+
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": "config.settings.dev.show_debug_toolbar",
+}
 
 NPLUSONE_LOGGER = logging.getLogger('nplusone')
 NPLUSONE_LOG_LEVEL = logging.WARN
