@@ -32,13 +32,9 @@
 
                 <form class="form-inline" role="form">
 
-                    <button-group inline-template>
-                        <div class="btn-group">
-                            <a class="btn btn-secondary" id="btn-create" href="{% url 'todo:create' %}?tagsearch={{ tagsearch }}">Create</a>
-                            <input type="button" class="btn btn-secondary" id="btn-update" value="Update" :disabled="isDisabled" @click="onClickUpdate" />
-                            <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="isDisabled" @click="onClickDelete" />
-                        </div>
-                    </button-group>
+                    <div class="btn-group">
+                        <a class="btn btn-secondary" id="btn-create" href="{% url 'todo:create' %}?tagsearch={{ tagsearch }}">Create</a>
+                    </div>
 
                     <div class="form-group ml-2">
                         <input v-model="filter" id="todo_search" type="text" class="form-control" placeholder="Filter">
@@ -51,13 +47,11 @@
                     primary-key="uuid"
                     :items="items"
                     :fields="fields"
-                    selectable
-                    select-mode="single"
                     :sort-compare="sortCompare"
-                    @row-selected="rowSelected"
                     @sort-changed="sortChanged"
+                    @row-hovered="rowHovered"
+                    @row-unhovered="rowUnHovered"
                     onEnd="onEnd"
-                    selected-variant="info"
                     :filter="filter"
                     v-sortable
                     :sorting="items"
@@ -66,12 +60,24 @@
                     <template #cell(task)="data">
                         <span v-html="data.value"></span>
                         <span v-if="data.item.url"><a class="ml-1" :href="data.item.url"><font-awesome-icon icon="link"></font-awesome-icon></a></span>
-                        <div class="todo-note" v-html="data.item.note"></div>
+                        <div class="table-note" v-html="data.item.note"></div>
                     </template>
 
                     <template #cell(manualSorting)="data">
                         <font-awesome-icon icon="bars"></font-awesome-icon>
                         <span v-html="data.value"></span>
+                    </template>
+
+                    <template #cell(uuid)="data">
+                        <div class="hover-target hidden">
+                            <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="text-center">
+                                <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
+                                <div slot="dropdown">
+                                    <a class="dropdown-item" href="#" @click="onClickUpdate(data.value)">Update</a>
+                                    <a class="dropdown-item" href="#" @click="onClickDelete(data.value)">Delete</a>
+                                </div>
+                            </dropdown-menu>
+                        </div>
                     </template>
 
                 </b-table>
@@ -93,49 +99,6 @@
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
         const EventBus = new Vue();
-
-        const store = new Vuex.Store({
-            state: {
-                selectedUuid: null
-            }
-        });
-
-        const ButtonGroup = {
-            store,
-            methods: {
-                onClickDelete(evt) {
-
-                    let selectedUuid = this.$store.state.selectedUuid;
-
-                    axios.delete("{% url 'todo-list' %}" + selectedUuid)
-                         .then((response) => {
-
-                             this.$bvToast.toast("Todo task deleted", {
-                                 title: "Info",
-                                 variant: "primary"
-                             })
-
-                             EventBus.$emit("get-todo-list");
-
-                             this.$store.state.selectedUuid = null;
-
-                             console.log("Success");
-                         }, (error) => {
-                             console.log(error);
-                         });
-
-                },
-                onClickUpdate(evt) {
-                    let selectedUuid = this.$store.state.selectedUuid;
-                    window.location="{% url 'todo:update' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, selectedUuid);
-                },
-            },
-            computed: {
-                isDisabled () {
-                    return this.$store.state.selectedUuid === null ? true : false;
-                }
-            }
-        };
 
         let sortable = null;
 
@@ -180,7 +143,6 @@
 
         new Vue({
             el: "#vue-app",
-            store,
             data() {
                 return {
                     items: [],
@@ -207,12 +169,17 @@
                             class: "text-nowrap",
                             sortable: true,
                             thClass: "todo-col-date"
+                        },
+                        {
+                            key: "uuid",
+                            label: "",
+                            tdClass: "text-center align-middle",
+                            thClass: "col-action"
                         }
                     ],
-                    selectedUuid: null,
                     filter: null,
-                    sortableOptions: {
-                    },
+                    show: false,
+                    right: true
                 }
             },
             methods: {
@@ -244,21 +211,44 @@
                     return a < b ? -1 : a > b ? 1 : 0;
 
                 },
-                rowSelected(evt) {
-                    if (evt.length > 0) {
-                        this.selectedUuid = evt[0].uuid;
-                        this.$store.state.selectedUuid = evt[0].uuid;
-                    } else {
-                        this.$store.state.selectedUuid = null;
-                    }
-                },
                 sortChanged(evt) {
                     if (evt.sortBy === "") {
                         sortable.option("disabled", false);
                     } else {
                         sortable.option("disabled", true);
                     }
-                }
+                },
+                rowHovered(item, index, evt) {
+                    evt.currentTarget.querySelector(".hover-target").classList.remove("hidden");
+                },
+                rowUnHovered(item, index, evt) {
+                    evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
+                },
+                onClickUpdate(item, index, evt) {
+                    window.location="{% url 'todo:update' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, item);
+                },
+                onClickDelete(item, index, evt) {
+
+                    let selectedUuid = item;
+
+                    axios.delete("{% url 'todo-list' %}" + selectedUuid)
+                         .then((response) => {
+
+                             this.$bvToast.toast("Todo task deleted", {
+                                 title: "Info",
+                                 variant: "primary"
+                             })
+
+                             EventBus.$emit("get-todo-list");
+
+                             this.$store.state.selectedUuid = null;
+
+                             console.log("Success");
+                         }, (error) => {
+                             console.log(error);
+                         });
+
+                },
             },
             mounted() {
 
@@ -270,9 +260,6 @@
 
                 this.getTodoList();
 
-            },
-            components: {
-                ButtonGroup
             }
         });
 

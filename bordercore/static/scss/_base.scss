@@ -67,11 +67,6 @@
 
 /* Dropdown Menus */
 
-/* Override vue-dropdown-menu */
-.dropdown-menu {
-  top: 45px;
-}
-
 .dropdown-menu.show {
   background-color: $gray-700;
   border: 1px solid $gray-900;
@@ -174,9 +169,18 @@ blockquote {
 */
 
 /* Eliminate the focus effect when selecting a row or column */
-.b-table-selectable tr:focus,
-.b-table-selectable th:focus {
+.b-table tr:focus,
+.b-table th:focus {
   outline: 0;
+}
+
+.table-note {
+  font-size: 0.75rem;
+  color: $cyan;
+
+  p {
+    margin-bottom: 0;
+  }
 }
 
 /* BootstrapVue table sort icon: none */
@@ -573,13 +577,8 @@ pre {
   width: 8rem;
 }
 
-.todo-note {
-  font-size: 0.75rem;
-  color: $cyan;
-
-  p {
-    margin-bottom: 0;
-  }
+.col-action {
+  width: 4rem;
 }
 
 .cursor-grab {
