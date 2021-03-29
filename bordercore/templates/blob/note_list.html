@@ -45,7 +45,11 @@
             </div>
 
             {% if request.GET and not object_list.hits.hits %}
-                <div class="alert alert-info">No notes found</div>
+                <div class="card-grid ml-2 mr-2">
+                    <div class="alert alert-warning">
+                        No notes found
+                    </div>
+                </div>
             {% endif %}
 
             {% for note in object_list.hits.hits %}

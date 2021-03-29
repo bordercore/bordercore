@@ -40,7 +40,11 @@
             </div>
         </div>
     {% else %}
-        <div class="alert alert-warning">Nothing found. <a href="{% url 'drill:list' %}">Go back</a></div>
+        <div class="card-grid ml-2 mr-2 mt-3">
+            <div class="alert alert-warning">
+                No questions found.
+            </div>
+        </div>
     {% endif %}
 
     </div>
