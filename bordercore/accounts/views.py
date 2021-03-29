@@ -20,7 +20,7 @@ from django.views.generic.edit import UpdateView
 
 from accounts.forms import UserProfileForm
 from accounts.models import (SortOrderUserNote, SortOrderUserTag, UserProfile,
-                             favorite_tags_has_changed)
+                             pinned_tags_has_changed)
 from blob.models import Blob
 
 
@@ -34,7 +34,7 @@ class UserProfileUpdateView(UpdateView):
         context['groups'] = ', '.join([x.name for x in self.request.user.groups.all()])
         context['nav'] = 'prefs'
         context['title'] = 'Preferences'
-        context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.favorite_tags.all()[::-1]]
+        context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.pinned_tags.all()[::-1]]
         return context
 
     # Override this method so that we can pass the request object to the form
@@ -52,19 +52,19 @@ class UserProfileUpdateView(UpdateView):
 
         userprofile = form.instance
 
-        # Only update favorite tags if they've changed.
-        if favorite_tags_has_changed(form.initial["favorite_tags"], self.request.POST["favorite_tags"]):
+        # Only update pinned tags if they've changed.
+        if pinned_tags_has_changed(form.initial["pinned_tags"], self.request.POST["pinned_tags"]):
             with transaction.atomic():
 
-                for tag in userprofile.favorite_tags.all():
+                for tag in userprofile.pinned_tags.all():
                     s = SortOrderUserTag.objects.get(userprofile=userprofile, tag=tag)
                     s.delete()
 
                 # Delete all existing tags
-                userprofile.favorite_tags.clear()
+                userprofile.pinned_tags.clear()
 
                 # Then add the tags specified in the form
-                for tag in form.cleaned_data["favorite_tags"]:
+                for tag in form.cleaned_data["pinned_tags"]:
                     c = SortOrderUserTag(userprofile=userprofile, tag=tag)
                     c.save()
 

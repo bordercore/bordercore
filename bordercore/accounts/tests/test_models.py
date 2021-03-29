@@ -2,7 +2,7 @@ import pytest
 
 from django.contrib.auth.models import User
 
-from accounts.models import SortOrderUserTag, favorite_tags_has_changed
+from accounts.models import SortOrderUserTag, pinned_tags_has_changed
 from accounts.tests.factories import TEST_USERNAME
 from tag.tests.factories import TagFactory
 
@@ -22,13 +22,13 @@ def test_reorder(sort_order_user_tag, tag):
 
     user = User.objects.get(username=TEST_USERNAME)
 
-    tags = user.userprofile.favorite_tags.all().order_by("sortorderusertag__sort_order")
+    tags = user.userprofile.pinned_tags.all().order_by("sortorderusertag__sort_order")
 
     # New order: 2, 3, 1
     s = SortOrderUserTag.objects.get(userprofile=user.userprofile, tag=tag[1])
     SortOrderUserTag.reorder(s, 1)
 
-    tags = user.userprofile.favorite_tags.all().order_by("sortorderusertag__sort_order")
+    tags = user.userprofile.pinned_tags.all().order_by("sortorderusertag__sort_order")
 
     assert tags[0] == tag[1]
     assert tags[1] == tag[2]
@@ -38,7 +38,7 @@ def test_reorder(sort_order_user_tag, tag):
     # New order: 1, 3, 2
     s = SortOrderUserTag.objects.get(userprofile=user.userprofile, tag=tag[2])
     SortOrderUserTag.reorder(s, 3)
-    tags = user.userprofile.favorite_tags.all().order_by("sortorderusertag__sort_order")
+    tags = user.userprofile.pinned_tags.all().order_by("sortorderusertag__sort_order")
     assert tags[0] == tag[1]
     assert tags[1] == tag[0]
     assert tags[2] == tag[2]
@@ -47,20 +47,20 @@ def test_reorder(sort_order_user_tag, tag):
     # Delete tag2, so we're left with 1, 3
     sort_order = SortOrderUserTag.objects.get(userprofile=user.userprofile, tag=tag[2])
     sort_order.delete()
-    tags = user.userprofile.favorite_tags.all().order_by("sortorderusertag__sort_order")
+    tags = user.userprofile.pinned_tags.all().order_by("sortorderusertag__sort_order")
     assert tags[0] == tag[1]
     assert tags[1] == tag[0]
     assert len(tags) == 2
 
 
-def test_favorite_tags_has_changed():
+def test_pinned_tags_has_changed():
 
-    assert favorite_tags_has_changed("django", "django") is False
-    assert favorite_tags_has_changed("django ", "django") is False
-    assert favorite_tags_has_changed("django,linux", "django,linux") is False
-    assert favorite_tags_has_changed("django, linux", "django,linux") is False
-    assert favorite_tags_has_changed("linux,django", "django,linux") is False
-    assert favorite_tags_has_changed("linux, django", "django,linux") is False
-    assert favorite_tags_has_changed("linux, django,postgresql", "django,linux") is True
-    assert favorite_tags_has_changed("linux, django,postgresql", "") is True
-    assert favorite_tags_has_changed("", "linux, django,postgresql") is True
+    assert pinned_tags_has_changed("django", "django") is False
+    assert pinned_tags_has_changed("django ", "django") is False
+    assert pinned_tags_has_changed("django,linux", "django,linux") is False
+    assert pinned_tags_has_changed("django, linux", "django,linux") is False
+    assert pinned_tags_has_changed("linux,django", "django,linux") is False
+    assert pinned_tags_has_changed("linux, django", "django,linux") is False
+    assert pinned_tags_has_changed("linux, django,postgresql", "django,linux") is True
+    assert pinned_tags_has_changed("linux, django,postgresql", "") is True
+    assert pinned_tags_has_changed("", "linux, django,postgresql") is True

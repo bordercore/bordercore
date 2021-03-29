@@ -16,7 +16,7 @@ from tag.models import Tag
 class UserProfile(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.PROTECT)
-    favorite_tags = models.ManyToManyField(Tag, through="SortOrderUserTag")
+    pinned_tags = models.ManyToManyField(Tag, through="SortOrderUserTag")
     pinned_notes = models.ManyToManyField(Blob, through="SortOrderUserNote")
     feeds = models.ManyToManyField(Feed, through="SortOrderUserFeed")
     favorite_drill_tags = models.ManyToManyField(Tag, through="SortOrderDrillTag", related_name="favorite_drill_tags")
@@ -37,7 +37,7 @@ class UserProfile(models.Model):
     )
 
     def get_tags(self):
-        return ", ".join([tag.name for tag in self.favorite_tags.all()])
+        return ", ".join([tag.name for tag in self.pinned_tags.all()])
 
     def __str__(self):
         return self.user.username
@@ -117,9 +117,9 @@ def remove_tag_for_drill(sender, instance, **kwargs):
     instance.handle_delete()
 
 
-def favorite_tags_has_changed(initial, form):
+def pinned_tags_has_changed(initial, form):
     """
-    Check if the CSV list of favorite tags has been changed. Account
+    Check if the CSV list of pinned tags has been changed. Account
     for spaces between the tags and the sort order.
     """
 

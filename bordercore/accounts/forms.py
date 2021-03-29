@@ -16,15 +16,15 @@ class UserProfileForm(ModelForm):
         super().__init__(*args, **kwargs)
 
         # Don't be alarmed by the Tag.objects.all() queryset. Django will
-        #  later filter this on just your favorite tags.
-        self.fields['favorite_tags'] = ModelCommaSeparatedChoiceField(
+        #  later filter this on just your pinned tags.
+        self.fields['pinned_tags'] = ModelCommaSeparatedChoiceField(
             request=self.request,
             required=False,
             id='id_tags',
             queryset=Tag.objects.filter(user=self.request.user),
             to_field_name='name')
-        self.initial['favorite_tags'] = self.instance.get_tags()
-        self.fields['favorite_tags'].widget.attrs['class'] = 'form-control'
+        self.initial['pinned_tags'] = self.instance.get_tags()
+        self.fields['pinned_tags'].widget.attrs['class'] = 'form-control'
 
         self.fields['orgmode_file'].required = False
 
@@ -44,7 +44,7 @@ class UserProfileForm(ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('theme', 'sidebar_image', 'favorite_tags', 'homepage_default_collection', 'orgmode_file', 'google_calendar')
+        fields = ('theme', 'sidebar_image', 'pinned_tags', 'homepage_default_collection', 'orgmode_file', 'google_calendar')
         widgets = {
             'google_calendar': Textarea(attrs={'class': 'form-control'}),
             'orgmode_file': TextInput(attrs={'class': 'form-control'}),

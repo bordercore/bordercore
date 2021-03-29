@@ -18,7 +18,7 @@ def test_accounts_prefs(auto_login_user):
     # The submitted form
     url = urls.reverse("accounts:prefs")
     resp = client.post(url, {
-        "favorite_tags": "django",
+        "pinned_tags": "django",
         "google_calendar": "",
         "theme": "dark"
     })
@@ -47,7 +47,7 @@ def test_accounts_password(auto_login_user):
     assert resp.status_code == 302
 
 
-def test_accounts_sort_favorite_notes(auto_login_user, blob_text_factory):
+def test_accounts_sort_pinned_notes(auto_login_user, blob_text_factory):
 
     user, client = auto_login_user()
 

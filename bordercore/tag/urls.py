@@ -11,13 +11,13 @@ urlpatterns = [
         name="search"
     ),
     path(
-        route="add_favorite/",
-        view=views.add_favorite_tag,
-        name="add_favorite_tag"
+        route="pin/",
+        view=views.pin,
+        name="pin"
     ),
     path(
-        route="remove_favorite/",
-        view=views.remove_favorite_tag,
-        name="remove_favorite_tag"
+        route="unpin/",
+        view=views.unpin,
+        name="unpin"
     ),
 ]

@@ -17,7 +17,7 @@
 
             {% csrf_token %}
 
-            <input type="hidden" id="add-to-remote-from-favorite-tagname" name="tag" />
+            <input type="hidden" id="add-to-remote-from-pinned-tagname" name="tag" />
 
             <div class="form-group col-auto has-search">
                 <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
@@ -38,8 +38,8 @@
                     <a class="btn btn-secondary" id="btn-add" href="{% url 'bookmark:create' %}">Create</a>
                     <input type="button" class="btn btn-secondary" id="btn-update" value="Update" :disabled="buttonsDisabled" @click="onClickUpdate" />
                     <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="buttonsDisabled" @click="onClickDelete" />
-                    <input v-if="removeFavoriteButtonVisible" type="button" class="btn btn-secondary ml-2" value="Remove from Favorites" @click="removeFromFavorites" v-cloak />
-                    <input v-if="addFavoriteButtonVisible" type="button" class="btn btn-secondary ml-2" value="Add to Favorites" @click="addToFavorites" v-cloak />
+                    <input v-if="unPinButtonVisible" type="button" class="btn btn-secondary ml-2" value="Unpin" @click="unPin" v-cloak />
+                    <input v-if="pinButtonVisible" type="button" class="btn btn-secondary ml-2" value="Pin" @click="pin" v-cloak />
                 </div>
             </button-group>
 
@@ -72,9 +72,9 @@
                 <ul class="list-group flex-column w-100" id="sort-container-tags">
                     <tag-list inline-template>
                         <div>
-                            <draggable v-model="favoriteTags" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
+                            <draggable v-model="pinnedTags" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
                                 <transition-group type="transition" class="w-100">
-                                    <li v-for="tag in favoriteTags" class="list-group-item list-group-item-secondary" :class="{ active: tag.isActive, draggable: tag.isDraggable, 'bookmark-tag-list-header': tag.isHeader }" :data-id="tag.id" :key="tag.id" v-cloak>
+                                    <li v-for="tag in pinnedTags" class="list-group-item list-group-item-secondary" :class="{ active: tag.isActive, draggable: tag.isDraggable, 'bookmark-tag-list-header': tag.isHeader }" :data-id="tag.id" :key="tag.id" v-cloak>
                                         <template v-if="tag.isHeader">
                                             [[ tag.name ]]
                                         </template>
@@ -204,34 +204,34 @@
 
         const store = new Vuex.Store({
             state: {
-                addFavoriteButtonVisible: false,
+                pinButtonVisible: false,
                 buttonsDisabled: true,
                 selectedTagName: null,
-                removeFavoriteButtonVisible: false
+                unPinButtonVisible: false
             },
             getters: {
-                addFavoriteButtonVisible: state => {
-                    return state.addFavoriteButtonVisible
+                pinButtonVisible: state => {
+                    return state.pinButtonVisible
                 },
                 buttonsDisabled: state => {
                     return state.buttonsDisabled
                 },
-                removeFavoriteButtonVisible: state => {
-                    return state.removeFavoriteButtonVisible
+                unPinButtonVisible: state => {
+                    return state.unPinButtonVisible
                 },
                 selectedTagName: state => {
                     return state.selectedTagName
                 },
             },
             mutations: {
-                addFavoriteButtonVisible (state, payload) {
-                    state.addFavoriteButtonVisible = payload
+                pinButtonVisible (state, payload) {
+                    state.pinButtonVisible = payload
                 },
                 changeButtonsDisabled (state, payload) {
                     state.buttonsDisabled = payload
                 },
-                removeFavoriteButtonVisible (state, payload) {
-                    state.removeFavoriteButtonVisible = payload
+                unPinButtonVisible (state, payload) {
+                    state.unPinButtonVisible = payload
                 },
                 selectedTagName (state, payload) {
                     state.selectedTagName = payload
@@ -240,7 +240,7 @@
         });
 
         const ButtonGroup = {
-            computed: mapGetters(["addFavoriteButtonVisible", "buttonsDisabled", "removeFavoriteButtonVisible"]),
+            computed: mapGetters(["pinButtonVisible", "buttonsDisabled", "unPinButtonVisible"]),
             methods: {
                 onClickDelete(evt) {
 
@@ -266,27 +266,27 @@
                     var selectedUuid = document.querySelector("tr.bookmark-list.selected").dataset.uuid;
                     window.location="{% url 'bookmark:update' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', selectedUuid);
                 },
-                addToFavorites(evt) {
+                pin(evt) {
                     const tagName = this.$parent.$refs.search.$refs.simpleSuggest.$refs.suggestComponent.text
-                    document.getElementById("add-to-remote-from-favorite-tagname").value = tagName;
+                    document.getElementById("add-to-remote-from-pinned-tagname").value = tagName;
                     const form = document.querySelector("#search-form");
                     form.method = "post";
-                    form.action = "{% url 'tag:add_favorite_tag' %}";
+                    form.action = "{% url 'tag:pin' %}";
                     form.submit();
                 },
-                removeFromFavorites(evt) {
-                    document.getElementById("add-to-remote-from-favorite-tagname").value = this.$store.getters.selectedTagName;
+                unPin(evt) {
+                    document.getElementById("add-to-remote-from-pinned-tagname").value = this.$store.getters.selectedTagName;
                     const form = document.querySelector("#search-form");
                     form.method = "post";
-                    form.action = "{% url 'tag:remove_favorite_tag' %}";
+                    form.action = "{% url 'tag:unpin' %}";
                     form.submit();
                 }
 
             },
             mounted() {
 
-                EventBus.$on("selected-favorite-tag", value => {
-                    this.showRemoveFavorite = value;
+                EventBus.$on("selected-pinned-tag", value => {
+                    this.showRemovePin = value;
                 });
 
             }
@@ -296,7 +296,7 @@
             methods: {
                 select(tag) {
                     this.$emit("search-tag", tag.value);
-                    EventBus.$emit("select-favorite-tag", tag.value);
+                    EventBus.$emit("select-pinned-tag", tag.value);
                     disableTermSearch = false;
                 },
                 onHideList() {
@@ -316,16 +316,16 @@
                     if (searchTerm) {
                         this.$store.commit("selectedTagName", searchTerm);
                         this.$emit("search-term", searchTerm);
-                        EventBus.$emit("select-favorite-tag", null);
-                        this.$store.commit("addFavoriteButtonVisible", false)
-                        this.$store.commit("removeFavoriteButtonVisible", false)
+                        EventBus.$emit("select-pinned-tag", null);
+                        this.$store.commit("pinButtonVisible", false)
+                        this.$store.commit("unPinButtonVisible", false)
                     } else {
                         // If the search box is empty, refresh the list with no filters
                         isFiltered = false;
                         this.$emit("get-page", 1);
-                        EventBus.$emit("select-favorite-tag", "Untagged");
-                        this.$store.commit("addFavoriteButtonVisible", false)
-                        this.$store.commit("removeFavoriteButtonVisible", false)
+                        EventBus.$emit("select-pinned-tag", "Untagged");
+                        this.$store.commit("pinButtonVisible", false)
+                        this.$store.commit("unPinButtonVisible", false)
                         this.$store.commit("selectedTagName", "");
                     }
 
@@ -372,7 +372,7 @@
                     if (evt.srcElement.classList.contains("badge")) {
                         const tagName = evt.srcElement.innerHTML;
                         EventBus.$emit("search-tag", tagName);
-                        EventBus.$emit("select-favorite-tag", tag.value);
+                        EventBus.$emit("select-pinned-tag", tag.value);
                     } else if (element.classList.contains("selected")) {
 
                         if (this.$store.getters.selectedTagName) {
@@ -618,10 +618,10 @@
         const TagList = {
             data() {
                 return {
-                    favoriteTags: [
+                    pinnedTags: [
                         {
                             id: -1,
-                            name: "Favorite Tags",
+                            name: "Pinned Tags",
                             isHeader: true,
                             isActive: false,
                             isDraggable: false,
@@ -633,7 +633,7 @@
                             isDraggable: false,
                             count: {{ tag_counts|dict_get:"Untagged" }},
                         },
-                        {% for tag in favorite_tags %}
+                        {% for tag in pinned_tags %}
                         {
                             id: {{ tag.id }},
                             name: "{{ tag.name }}",
@@ -651,7 +651,7 @@
                     const tagName = evt.srcElement.dataset.tag;
                     this.selectedTag = tagName;
 
-                    for (tag of this.favoriteTags) {
+                    for (tag of this.pinnedTags) {
                         if (tag.name == tagName) {
                             tag.isActive = true;
                         } else {
@@ -663,12 +663,12 @@
                         this.$store.commit("selectedTagName", "");
                         isFiltered = false;
                         EventBus.$emit("get-page", 1);
-                        this.$store.commit("addFavoriteButtonVisible", false)
-                        this.$store.commit("removeFavoriteButtonVisible", false)
+                        this.$store.commit("pinButtonVisible", false)
+                        this.$store.commit("unPinButtonVisible", false)
                     } else {
                         EventBus.$emit("search-tag", tagName);
-                        this.$store.commit("addFavoriteButtonVisible", false)
-                        this.$store.commit("removeFavoriteButtonVisible", true)
+                        this.$store.commit("pinButtonVisible", false)
+                        this.$store.commit("unPinButtonVisible", true)
                     }
                 },
                 getClassName(tagName) {
@@ -689,7 +689,7 @@
 
                     doPost(
                         this,
-                        "{% url "bookmark:sort_favorite_tags" %}",
+                        "{% url "bookmark:sort_pinned_tags" %}",
                         {
                             "tag_id": tagId,
                             "new_position": newPosition
@@ -705,19 +705,19 @@
 
                 EventBus.$on("search-tag", tagName => {
 
-                    if (!this.favoriteTags.find(element => element.name == tagName)) {
-                        this.$store.commit("addFavoriteButtonVisible", true)
-                        this.$store.commit("removeFavoriteButtonVisible", false)
+                    if (!this.pinnedTags.find(element => element.name == tagName)) {
+                        this.$store.commit("pinButtonVisible", true)
+                        this.$store.commit("unPinButtonVisible", false)
                     } else {
-                        this.$store.commit("addFavoriteButtonVisible", false)
-                        this.$store.commit("removeFavoriteButtonVisible", true)
+                        this.$store.commit("pinButtonVisible", false)
+                        this.$store.commit("unPinButtonVisible", true)
                     }
 
                 });
 
-                EventBus.$on("select-favorite-tag", tagName => {
+                EventBus.$on("select-pinned-tag", tagName => {
 
-                    for (tag of this.favoriteTags) {
+                    for (tag of this.pinnedTags) {
                         if (tag.name == tagName) {
                             tag.isActive = true;
                         } else {
@@ -733,9 +733,9 @@
         const RandomizeButton = {
             methods: {
                 onClick(evt) {
-                    EventBus.$emit("select-favorite-tag", null);
-                    this.$store.commit("addFavoriteButtonVisible", false)
-                    this.$store.commit("removeFavoriteButtonVisible", false)
+                    EventBus.$emit("select-pinned-tag", null);
+                    this.$store.commit("pinButtonVisible", false)
+                    this.$store.commit("unPinButtonVisible", false)
                     EventBus.$emit("randomize");
                 }
             }

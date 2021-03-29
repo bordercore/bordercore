@@ -154,11 +154,11 @@ def test_bookmark_get_bookmarks_by_tag(auto_login_user, bookmark):
     assert resp.status_code == 200
 
 
-def test_bookmark_sort_favorite_tags(auto_login_user, sort_order_user_tag, tag):
+def test_bookmark_sort_pinned_tags(auto_login_user, sort_order_user_tag, tag):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("bookmark:sort_favorite_tags")
+    url = urls.reverse("bookmark:sort_pinned_tags")
     resp = client.post(url, {
         "tag_id": tag[1].id,
         "new_position": 1

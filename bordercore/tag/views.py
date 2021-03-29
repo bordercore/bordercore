@@ -18,22 +18,22 @@ def tag_search(request):
 
 
 @login_required
-def add_favorite_tag(request):
+def pin(request):
 
     tag_name = request.POST["tag"]
 
     tag = Tag.objects.get(name=tag_name, user=request.user)
-    tag.add_favorite_tag()
+    tag.pin()
 
     return redirect("bookmark:overview")
 
 
 @login_required
-def remove_favorite_tag(request):
+def unpin(request):
 
     tag_name = request.POST["tag"]
 
     tag = Tag.objects.get(name=tag_name, user=request.user)
-    tag.remove_favorite_tag()
+    tag.unpin()
 
     return redirect("bookmark:overview")

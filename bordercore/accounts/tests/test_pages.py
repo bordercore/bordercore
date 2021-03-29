@@ -32,8 +32,8 @@ def test_prefs(collection, login, live_server, browser, settings):
     # Choose the 'dark' theme
     page.choose_theme(THEME_NAME)
 
-    # Add some favorite tags
-    page.add_favorite_tags(TAG_NAME)
+    # Add some pinned tags
+    page.add_pinned_tags(TAG_NAME)
 
     time.sleep(1)
 
@@ -47,5 +47,5 @@ def test_prefs(collection, login, live_server, browser, settings):
     # Test that the default collection was switched
     assert page.selected_default_collection() == COLLECTION_NAME
 
-    # Test that a favorite tag was added
-    assert page.favorite_tags() == TAG_NAME
+    # Test that a pinned tag was added
+    assert page.pinned_tags() == TAG_NAME

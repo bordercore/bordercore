@@ -73,8 +73,8 @@ urlpatterns = [
     ),
     path(
         route="tag/sort/",
-        view=views.sort_favorite_tags,
-        name="sort_favorite_tags"
+        view=views.sort_pinned_tags,
+        name="sort_pinned_tags"
     ),
     path(
         route="tag/search/",

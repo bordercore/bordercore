@@ -77,11 +77,11 @@
                             <div class="form-group{% if field.errors %} error{% endif %} row">
                                 <label class="bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">{{ field.label }}</label>
                                 <div class="col-lg-5">
-                            {% if field.label == 'Favorite tags' %}
+                            {% if field.label == 'Pinned tags' %}
                                 <tags-input
-                                    id="id_favorite_tags"
+                                    id="id_pinned_tags"
                                     search-url="{% url 'tag:search' %}?query="
-                                    name="favorite_tags"
+                                    name="pinned_tags"
                                 >
                                 </tags-input>
                             {% else %}

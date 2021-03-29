@@ -26,13 +26,13 @@ class Tag(models.Model):
             ("name", "user")
         )
 
-    def add_favorite_tag(self):
+    def pin(self):
 
         SortOrderUserTag = apps.get_model("accounts", "SortOrderUserTag")
         c = SortOrderUserTag(userprofile=self.user.userprofile, tag=self)
         c.save()
 
-    def remove_favorite_tag(self):
+    def unpin(self):
 
         SortOrderUserTag = apps.get_model("accounts", "SortOrderUserTag")
         sort_order_user_tag = SortOrderUserTag.objects.get(userprofile=self.user.userprofile, tag=self)

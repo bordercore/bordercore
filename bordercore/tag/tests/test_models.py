@@ -93,20 +93,20 @@ def test_search(tag, auto_login_user):
     assert len(Tag.search(user, "djang", True)) == 0
 
 
-def test_add_favorite_tag(auto_login_user, tag):
+def test_pin(auto_login_user, tag):
 
     user, _ = auto_login_user()
 
-    tag[0].add_favorite_tag()
+    tag[0].pin()
 
-    assert tag[0] in user.userprofile.favorite_tags.all()
+    assert tag[0] in user.userprofile.pinned_tags.all()
 
 
-def test_remove_favorite_tag(auto_login_user, tag):
+def test_unpin(auto_login_user, tag):
 
     user, _ = auto_login_user()
 
-    tag[0].add_favorite_tag()
-    tag[0].remove_favorite_tag()
+    tag[0].pin()
+    tag[0].unpin()
 
-    assert tag[0] not in user.userprofile.favorite_tags.all()
+    assert tag[0] not in user.userprofile.pinned_tags.all()

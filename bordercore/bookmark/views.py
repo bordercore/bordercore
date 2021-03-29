@@ -272,10 +272,10 @@ def overview(request,
 
     tag_counts["Untagged"] = Bookmark.objects.filter(user=request.user, tags__isnull=True).count()
 
-    favorite_tags = request.user.userprofile.favorite_tags.all().order_by('sortorderusertag__sort_order')
+    pinned_tags = request.user.userprofile.pinned_tags.all().order_by('sortorderusertag__sort_order')
 
     t = Tag.objects\
-           .filter(user=request.user, id__in=[x.id for x in favorite_tags])\
+           .filter(user=request.user, id__in=[x.id for x in pinned_tags])\
            .values('id', 'name')\
            .annotate(bookmark_count=Count('bookmarks__sortordertagbookmark__bookmark'))
 
@@ -286,7 +286,7 @@ def overview(request,
                   {
                       'bookmarks': sorted_bookmarks,
                       'tag_counts': tag_counts,
-                      'favorite_tags': favorite_tags,
+                      'pinned_tags': pinned_tags,
                   })
 
 
@@ -413,7 +413,7 @@ class BookmarkListTagView(BookmarkListView):
 
 
 @login_required
-def sort_favorite_tags(request):
+def sort_pinned_tags(request):
     """
     Move a given tag to a new position in a sorted list
     """
