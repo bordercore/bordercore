@@ -31,18 +31,18 @@ urlpatterns = [
         name="logout"
     ),
     path(
-        route="favorites/add/<uuid:uuid>/",
-        view=views.add_to_favorites,
-        name="favorites_add"
+        route="pinned/add/<uuid:uuid>/",
+        view=views.pin_note,
+        name="pin_note"
     ),
     path(
-        route="favorites/remove/<uuid:uuid>/",
-        view=views.remove_from_favorites,
-        name="favorites_remove"
+        route="pinned/remove/<uuid:uuid>/",
+        view=views.unpin_note,
+        name="unpin_note"
     ),
     path(
         route="note/sort/",
-        view=views.sort_favorite_notes,
-        name="sort_favorite_notes"
+        view=views.sort_pinned_notes,
+        name="sort_pinned_notes"
     ),
 ]

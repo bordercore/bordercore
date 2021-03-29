@@ -51,7 +51,7 @@ def test_accounts_sort_favorite_notes(auto_login_user, blob_text_factory):
 
     user, client = auto_login_user()
 
-    url = urls.reverse("accounts:sort_favorite_notes")
+    url = urls.reverse("accounts:sort_pinned_notes")
     resp = client.post(url, {
         "note_uuid": blob_text_factory.uuid,
         "new_position": "1"
@@ -60,21 +60,21 @@ def test_accounts_sort_favorite_notes(auto_login_user, blob_text_factory):
     assert resp.status_code == 200
 
 
-def test_accounts_add_to_favorites(auto_login_user, blob_text_factory):
+def test_accounts_pin_note(auto_login_user, blob_text_factory):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("accounts:favorites_add", kwargs={"uuid": blob_text_factory.uuid})
+    url = urls.reverse("accounts:pin_note", kwargs={"uuid": blob_text_factory.uuid})
     resp = client.get(url)
 
     assert resp.status_code == 302
 
 
-def test_accounts_remove_from_favorites(auto_login_user, blob_text_factory):
+def test_accounts_unpin_note(auto_login_user, blob_text_factory):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("accounts:favorites_remove", kwargs={"uuid": blob_text_factory.uuid})
+    url = urls.reverse("accounts:unpin_note", kwargs={"uuid": blob_text_factory.uuid})
     resp = client.get(url)
 
     assert resp.status_code == 302

@@ -17,7 +17,7 @@ class UserProfile(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.PROTECT)
     favorite_tags = models.ManyToManyField(Tag, through="SortOrderUserTag")
-    favorite_notes = models.ManyToManyField(Blob, through="SortOrderUserNote")
+    pinned_notes = models.ManyToManyField(Blob, through="SortOrderUserNote")
     feeds = models.ManyToManyField(Feed, through="SortOrderUserFeed")
     favorite_drill_tags = models.ManyToManyField(Tag, through="SortOrderDrillTag", related_name="favorite_drill_tags")
     orgmode_file = models.TextField(null=True)

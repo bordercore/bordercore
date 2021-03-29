@@ -11,11 +11,11 @@
     <div class="row no-gutters">
 
         <div class="col-lg-3 d-flex flex-column" id="sort-container-notes">
-            <card title="Favorite Notes">
+            <card title="Pinned Notes">
 
                 <template v-slot:title-slot>
                     <div class="h3">
-                        Favorite Notes
+                        Pinned Notes
                     </div>
                 </template>
 
@@ -129,7 +129,7 @@
             el: '#sort-container-notes',
             data: {
                 notes: [
-                    {% for note in favorite_notes %}
+                    {% for note in pinned_notes %}
                     {
                         url: "{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, "{{ note.uuid }}"),
                         uuid: "{{ note.uuid }}",
@@ -151,7 +151,7 @@
                     bodyFormData.append("note_uuid", note_uuid);
                     bodyFormData.append("new_position", new_position);
 
-                    axios("{% url "accounts:sort_favorite_notes" %}", {
+                    axios("{% url "accounts:sort_pinned_notes" %}", {
                         method: "POST",
                         data: bodyFormData,
                     }).then(response =>  {

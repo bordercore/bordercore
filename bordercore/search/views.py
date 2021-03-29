@@ -230,7 +230,7 @@ class NoteListView(SearchListView):
 
         page = int(self.request.GET.get("page", 1))
         context["paginator"] = self.get_paginator(page, context["search_results"])
-        context["favorite_notes"] = self.request.user.userprofile.favorite_notes.all().only("title", "uuid").order_by("sortorderusernote__sort_order")
+        context["pinned_notes"] = self.request.user.userprofile.pinned_notes.all().only("title", "uuid").order_by("sortorderusernote__sort_order")
 
         for match in context["search_results"]["hits"]["hits"]:
 

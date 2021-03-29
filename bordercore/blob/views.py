@@ -162,7 +162,7 @@ class BlobDetailView(DetailView):
                 log.warn(f"No S3 cover image found for id={self.object.id}")
 
         if self.object.is_note:
-            context["is_favorite_note"] = self.object.is_favorite_note()
+            context["is_pinned_note"] = self.object.is_pinned_note()
 
         try:
             context["elasticsearch_info"] = self.object.get_elasticsearch_info()
