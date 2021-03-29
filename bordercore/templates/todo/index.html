@@ -4,7 +4,7 @@
 
 {% block content %}
 
-    <div class="row no-gutters h-100">
+    <div class="row no-gutters h-100" id="vue-app">
 
         <div class="col-lg-3 d-flex flex-column">
 
@@ -16,7 +16,7 @@
 
                 {% for tag in tags %}
                     <div class="p-2">
-                        <a class="btn {% ifequal tagsearch tag.name %}btn-primary{% else %}btn-info{% endifequal %}" href="{% url 'todo:list' %}?tagsearch={{ tag.name }}">
+                        <a class="btn" :class="getButtonClass('{{ tag.name }}')" href="" @click.prevent="onClickTag" data-tag="{{ tag.name }}">
                             {{ tag.name }} <span class="badge {% ifequal tagsearch tag.name %}badge-light{% else %}badge-light{% endifequal %}">{{ tag.count }}</span>
                         </a>
                     </div>
@@ -26,7 +26,7 @@
 
         </div>
 
-        <div class="col-lg-9" id="vue-app">
+        <div class="col-lg-9">
 
             <div class="card-grid ml-2">
 
@@ -145,6 +145,7 @@
             el: "#vue-app",
             data() {
                 return {
+                    selectedTag: "{{ tagsearch }}",
                     items: [],
                     fields: [
                         {
@@ -186,7 +187,7 @@
                 getTodoList() {
                     doGet(
                         this,
-                        "{% url "todo:list_tasks" tagsearch %}",
+                        "{% url "todo:list_tasks" 666 %}".replace(/666/, this.selectedTag),
                         (response) => {
                             this.items = response.data.todo_list;
                         },
@@ -249,6 +250,17 @@
                          });
 
                 },
+                onClickTag(evt) {
+                    this.selectedTag = evt.srcElement.dataset.tag;
+                    this.getTodoList();
+                },
+                getButtonClass(tag) {
+                    if (tag === this.selectedTag) {
+                        return "btn-primary"
+                    } else {
+                        return "btn-info"
+                    }
+                }
             },
             mounted() {
 

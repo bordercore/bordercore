@@ -58,6 +58,8 @@ class TodoTaskList(ListView):
     def get_queryset(self):
 
         tag_name = self.kwargs.get("tag_name")
+        self.request.session["current_todo_tag"] = tag_name
+
         return Tag.objects.get(user=self.request.user, name=tag_name).todos.all().order_by("sortordertagtodo__sort_order")
 
     def get(self, request, *args, **kwargs):
