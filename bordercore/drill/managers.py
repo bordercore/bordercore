@@ -63,14 +63,14 @@ class DrillManager(models.Manager):
         random_tag = Tag.objects.filter(id__in=distinct_tags).order_by("?")[0]
         return Question.get_tag_info(user, random_tag.name)
 
-    def get_favorite_tags(self, user):
+    def get_pinned_tags(self, user):
         """
-        Get the user's favorite tags
+        Get the user's pinned tags
         """
 
         Question = apps.get_model("drill", "Question")
 
-        tags = user.userprofile.favorite_drill_tags.all().only("name").order_by("sortorderdrilltag__sort_order")
+        tags = user.userprofile.pinned_drill_tags.all().only("name").order_by("sortorderdrilltag__sort_order")
 
         info = []
 

@@ -382,9 +382,9 @@ def search_tags(request):
 
 
 @login_required
-def get_favorite_tags(request):
+def get_pinned_tags(request):
 
-    tags = Question.objects.get_favorite_tags(request.user)
+    tags = Question.objects.get_pinned_tags(request.user)
 
     response = {
         "status": "OK",
@@ -395,7 +395,7 @@ def get_favorite_tags(request):
 
 
 @login_required
-def add_favorite_tag(request):
+def pin_tag(request):
 
     tag_name = request.POST["tag"]
 
@@ -403,7 +403,7 @@ def add_favorite_tag(request):
 
         response = {
             "status": "Error",
-            "message": "Duplicate: that tag is already a favorite."
+            "message": "Duplicate: that tag is already pinned."
         }
 
     else:

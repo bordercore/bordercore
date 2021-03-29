@@ -128,13 +128,13 @@
 
         </div>
 
-        <div class="col-lg-3" id="favorite_tags">
+        <div class="col-lg-3" id="pinned_tags">
 
             <div class="right-column">
-                <card title="Favorite Tags" v-b-hover="handleHover">
+                <card title="Pinned Tags" v-b-hover="handleHover">
                     <template v-slot:title-slot>
                         <div class="card-title">
-                            Favorite Tags
+                            Pinned Tags
                             <span class="dropdownmenu hidden float-right mr-2" v-cloak>
                                 <dropdown-menu
                                     v-model="show"
@@ -267,7 +267,7 @@
         };
 
         new Vue({
-            el: "#favorite_tags",
+            el: "#pinned_tags",
             components: {
                 TagSearch
             },
@@ -284,11 +284,11 @@
                 getTagList() {
                     doGet(
                         this,
-                        "{% url "drill:get_favorite_tags" %}",
+                        "{% url "drill:get_pinned_tags" %}",
                         (response) => {
                             this.tagList = response.data.tag_list;
                         },
-                        "Error getting favorite tags"
+                        "Error getting pinned tags"
                     );
                 },
 
@@ -312,7 +312,7 @@
                 addTag(tag) {
                     doPost(
                         this,
-                        "{% url "drill:add_favorite_tag" %}",
+                        "{% url "drill:pin_tag" %}",
                         {
                             "tag": tag
                         },

@@ -19,7 +19,7 @@ class UserProfile(models.Model):
     pinned_tags = models.ManyToManyField(Tag, through="SortOrderUserTag")
     pinned_notes = models.ManyToManyField(Blob, through="SortOrderUserNote")
     feeds = models.ManyToManyField(Feed, through="SortOrderUserFeed")
-    favorite_drill_tags = models.ManyToManyField(Tag, through="SortOrderDrillTag", related_name="favorite_drill_tags")
+    pinned_drill_tags = models.ManyToManyField(Tag, through="SortOrderDrillTag", related_name="pinned_drill_tags")
     orgmode_file = models.TextField(null=True)
     google_calendar = JSONField(blank=True, null=True)
     homepage_default_collection = models.OneToOneField(Collection, related_name='default_collection', null=True, on_delete=models.PROTECT)

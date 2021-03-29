@@ -71,13 +71,13 @@ urlpatterns = [
         name="study_tag"
     ),
     path(
-        route="get_favorite_tags",
-        view=views.get_favorite_tags,
-        name="get_favorite_tags"
+        route="get_pinned_tags",
+        view=views.get_pinned_tags,
+        name="get_pinned_tags"
     ),
     path(
-        route="add_favorite_tag",
-        view=views.add_favorite_tag,
-        name="add_favorite_tag"
+        route="pin_tag",
+        view=views.pin_tag,
+        name="pin_tag"
     ),
 ]
