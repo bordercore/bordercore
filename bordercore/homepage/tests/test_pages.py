@@ -12,7 +12,7 @@ pytestmark = pytest.mark.functional
 
 
 @pytest.mark.parametrize("login", [reverse("homepage:homepage")], indirect=True)
-def test_homepage(bookmark, todo, login, live_server, browser, settings):
+def test_homepage(bookmark, question, todo, login, live_server, browser, settings):
 
     settings.DEBUG = True
 

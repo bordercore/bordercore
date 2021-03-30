@@ -15,6 +15,7 @@ from blob.models import Blob
 from bookmark.models import Bookmark
 from cal.models import Calendar
 from collection.models import Collection
+from drill.models import Question
 from fitness.models import ExerciseUser
 from music.models import Listen
 from quote.models import Quote
@@ -88,6 +89,7 @@ def homepage(request):
                    'bookmarks': bookmarks,
                    'default_collection': default_collection,
                    'overdue_exercises': sorted(overdue_exercises, key=lambda x: x['lag'], reverse=True),
+                   'drill_total_progress': Question.objects.total_tag_progress(request.user),
                    'title': 'Homepage'})
 
 

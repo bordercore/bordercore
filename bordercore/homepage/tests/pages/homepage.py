@@ -32,10 +32,10 @@ class LoginPage:
 
 class HomePage:
 
-    BOOKMARK = (By.XPATH, "//div[div[@class='card-title'][normalize-space(text())='Recent Bookmarks']]//li")
-    PINNED_BOOKMARK = (By.XPATH, "//div[div[@class='card-title'][normalize-space(text())='Pinned Bookmarks']]//li")
+    RECENT_BOOKMARKS = (By.XPATH, "//div[a[normalize-space(text())='Recent Bookmarks']]/following-sibling::ul/li")
+    PINNED_BOOKMARKS = (By.XPATH, "//div[div[@class='card-title'][normalize-space(text())='Pinned Bookmarks']]//li")
     TITLE = (By.TAG_NAME, "title")
-    TODO = (By.XPATH, "//div[div[@class='card-title'][normalize-space(text())='Important Tasks']]//li")
+    TODO = (By.XPATH, "//div[a[normalize-space(text())='Important Tasks']]/following-sibling::ul/li")
 
     def __init__(self, browser):
         self.browser = browser
@@ -58,12 +58,12 @@ class HomePage:
         """
         Find all recent bookmarks
         """
-        bookmarks_elements = self.browser.find_elements(*self.BOOKMARK)
+        bookmarks_elements = self.browser.find_elements(*self.RECENT_BOOKMARKS)
         return len(bookmarks_elements)
 
     def pinned_bookmarks_count(self):
         """
         Find all pinned bookmarks
         """
-        pinned_bookmarks_elements = self.browser.find_elements(*self.PINNED_BOOKMARK)
+        pinned_bookmarks_elements = self.browser.find_elements(*self.PINNED_BOOKMARKS)
         return len(pinned_bookmarks_elements)

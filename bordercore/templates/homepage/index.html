@@ -14,7 +14,12 @@
 
             <div class="col-lg-3">
 
-                <card title="Important Tasks">
+                <card>
+                    <template v-slot:title-slot>
+                        <div class="card-title">
+                            <a href="{% url 'todo:list' %}">Important Tasks</a>
+                        </div>
+                    </template>
                     <template v-slot:content>
                         <ul class="list-group">
                             {% for task in tasks %}
@@ -33,6 +38,30 @@
                         </ul>
                     </template>
                 </card>
+
+                <div>
+
+                    <card title="Drill Total Progress">
+                        <template v-slot:title-slot>
+                            <div class="card-title">
+                                <a href="{% url 'drill:list' %}">Drill Total Progress</a>
+                            </div>
+                        </template>
+                        <template v-slot:content>
+                            <div class="d-flex">
+                                <div class="d-flex justify-content-center align-items-center">
+                                Percentage across all tags of questions not needing review
+                                </div>
+                                <drill-tag-progress
+                                    :count={{ drill_total_progress.count }}
+                                    :progress={{ drill_total_progress.percentage }}
+                                >
+                                </drill-tag-progress>
+                            </div>
+                        </template>
+                    </card>
+
+                </div>
 
                 <div>
 
@@ -86,7 +115,12 @@
 
             <div class="col-lg-5">
 
-                <card title="Recent Bookmarks">
+                <card>
+                    <template v-slot:title-slot>
+                        <div class="card-title">
+                            <a href="{% url 'bookmark:overview' %}">Recent Bookmarks</a>
+                        </div>
+                    </template>
                     <template v-slot:content>
                         {% if bookmarks %}
                             <ul class="list-group">
