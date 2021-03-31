@@ -20,7 +20,7 @@
                 </template>
 
                 <template v-slot:content>
-                    <ul class="list-group" _id="sort-container-notes">
+                    <ul class="list-group">
                         <draggable v-model="notes" @change="onChange" ghost-class="sortable-ghost">
                             <transition-group type="transition">
                                 <div v-for="note in notes" :key="note.uuid" v-cloak>

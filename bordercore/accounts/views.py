@@ -158,35 +158,21 @@ def sort_pinned_notes(request):
 
 
 @login_required
-def pin_note(request, uuid):
+def pin_note(request):
+
+    uuid = request.POST["uuid"]
+    remove = request.POST.get("remove", False)
 
     note = Blob.objects.get(user=request.user, uuid=uuid)
 
-    if note.is_pinned_note():
-        messages.add_message(request, messages.WARNING, "This note is already pinned")
+    if remove:
+        sort_order = SortOrderUserNote.objects.get(userprofile=request.user.userprofile, note=note)
+        sort_order.delete()
     else:
-
         c = SortOrderUserNote(userprofile=request.user.userprofile, note=note)
         c.save()
 
-        messages.add_message(request, messages.INFO, "Note pinned")
-
-    return HttpResponseRedirect(reverse('blob:detail', args=(uuid,)))
-
-
-@login_required
-def unpin_note(request, uuid):
-
-    note = Blob.objects.get(user=request.user, uuid=uuid)
-
-    if not note.is_pinned_note():
-        messages.add_message(request, messages.WARNING, "This note is not pinned")
-    else:
-        sort_order = SortOrderUserNote.objects.get(userprofile=request.user.userprofile, note=note)
-        sort_order.delete()
-        messages.add_message(request, messages.INFO, "Removed pin")
-
-    return HttpResponseRedirect(reverse('blob:detail', args=(uuid,)))
+    return JsonResponse({"status": "OK"}, safe=False)
 
 
 @login_required

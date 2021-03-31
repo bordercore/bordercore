@@ -161,15 +161,9 @@
 
                     {% if blob.is_note %}
                         <div class="mt-3">
-                            {% if is_pinned_note %}
-                                <form action="{% url 'accounts:unpin_note' blob.uuid %}">
-                                    <input type="submit" class="btn btn-primary" value="Unpin Note">
-                                </form>
-                            {% else %}
-                                <form action="{% url 'accounts:pin_note' blob.uuid %}">
-                                    <input type="submit" class="btn btn-primary" value="Pin Note">
-                                </form>
-                            {% endif %}
+                            <button type="submit" class="btn btn-primary" @click=onClick v-cloak>
+                                <font-awesome-icon v-if="isPinnedNote" icon="check" class="mr-2"></font-awesome-icon>[[ pinnedButtonValue ]]
+                            </button>
                         </div>
                     {% endif %}
 
@@ -259,7 +253,8 @@
             el: "#vue-app",
             data() {
                 return {
-                    show: false
+                    show: false,
+                    isPinnedNote: {{ is_pinned_note|yesno:"true,false" }}
                 }
             },
             methods: {
@@ -277,6 +272,30 @@
                         title: "Info",
                         variant: "primary"
                     })
+                },
+                onClick(evt) {
+                    payload = {
+                        "uuid": "{{ blob.uuid }}"
+                    };
+                    if (this.isPinnedNote) {
+                        payload.remove = true;
+                    }
+                    doPost(
+                        this,
+                        url = "{% url "accounts:pin_note" %}",
+                        payload,
+                        (response) => {
+                            this.isPinnedNote = ! this.isPinnedNote;
+                        },
+                        "",
+                        ""
+                    );
+
+                }
+            },
+            computed: {
+                pinnedButtonValue: function() {
+                    return this.isPinnedNote ? "Pinned" : "Pin Note"
                 }
             }
         });

@@ -31,18 +31,13 @@ urlpatterns = [
         name="logout"
     ),
     path(
-        route="pinned/add/<uuid:uuid>/",
-        view=views.pin_note,
-        name="pin_note"
-    ),
-    path(
-        route="pinned/remove/<uuid:uuid>/",
-        view=views.unpin_note,
-        name="unpin_note"
-    ),
-    path(
         route="note/sort/",
         view=views.sort_pinned_notes,
         name="sort_pinned_notes"
+    ),
+    path(
+        route="note/pin/",
+        view=views.pin_note,
+        name="pin_note"
     ),
 ]
