@@ -65,13 +65,13 @@
 
                 <div>
 
-                    <card title="Daily Bookmarks">
+                    <card title="Overdue Exercises">
                         <template v-slot:content>
                             <ul class="list-group">
-                                {% for bookmark in daily_bookmarks %}
-                                    <li class="list-group-item list-group-item-secondary {{ bookmark.css_class }}"><a class="text-success" href="{% url 'bookmark:click' bookmark.uuid %}">{{ bookmark.title }}</a></li>
+                                {% for exercise in overdue_exercises %}
+                                    <li class="list-group-item list-group-item-secondary text-info"><a class="text-success" href="{% url 'fitness:exercise_detail' exercise.exercise.exercise.uuid %}">{{ exercise.exercise.exercise.exercise }}</a> {{ exercise.lag }} days</li>
                                 {% empty %}
-                                    <li class="list-group-item">No bookmarks marked as Daily.</li>
+                                    <li class="list-group-item list-group-item-secondary">No active exercises.</li>
                                 {% endfor %}
                             </ul>
                         </template>
@@ -81,13 +81,13 @@
 
                 <div>
 
-                    <card title="Overdue Exercises">
+                    <card title="Daily Bookmarks">
                         <template v-slot:content>
                             <ul class="list-group">
-                                {% for exercise in overdue_exercises %}
-                                    <li class="list-group-item list-group-item-secondary text-info"><a class="text-success" href="{% url 'fitness:exercise_detail' exercise.exercise.exercise.uuid %}">{{ exercise.exercise.exercise.exercise }}</a> {{ exercise.lag }} days</li>
+                                {% for bookmark in daily_bookmarks %}
+                                    <li class="list-group-item list-group-item-secondary {{ bookmark.css_class }}"><a class="text-success" href="{% url 'bookmark:click' bookmark.uuid %}">{{ bookmark.title }}</a></li>
                                 {% empty %}
-                                    <li class="list-group-item list-group-item-secondary">No active exercises.</li>
+                                    <li class="list-group-item">No bookmarks marked as Daily.</li>
                                 {% endfor %}
                             </ul>
                         </template>
