@@ -45,7 +45,7 @@
 
         </div>
 
-        <div class="col-lg-9">
+        <div class="col-lg-9" id="vue-app">
 
             <div class="card-grid ml-2">
 
@@ -56,27 +56,20 @@
 
                         Last workout: {{ recent_data.date|date:"N j, Y" }} - {{ delta_days }} day{{ delta_days|pluralize:"s" }} ago
 
-                        <form class="mb-3" action="{% url 'fitness:change_active_status' %}" method="post">
+                        <input type="hidden" name="exercise_uuid" value="{{ object.uuid }}" />
 
-                            {% csrf_token %}
+                        <button type="submit" class="btn btn-primary" @click=onClick v-cloak>
+                            <font-awesome-icon v-if="isActiveExercise" icon="check" class="mr-2"></font-awesome-icon>[[ activeButtonValue ]]
+                        </button>
 
-                            <input type="hidden" name="exercise_uuid" value="{{ object.uuid }}" />
-
-                            {% if activity_info %}
-        You've been doing this exercise since {{ activity_info.0.started|date:"N j, Y" }}
-                                <button type="submit" class="btn btn-primary ml-2" id="inactive">Make Inactive</button>
-                                <input type="hidden" name="state" value="inactive" />
-                            {% else %}
-                                <button type="submit" class="btn btn-primary" id="active">Make Active</button>
-                                <input type="hidden" name="state" value="active" />
-                            {% endif %}
-
-                        </form>
+                            <span v-if="showHistoryMessage">
+                                You've been doing this exercise since {{ activity_info.0.started|date:"N j, Y" }}
+                            </span>
 
                     </div>
                 </div>
 
-                <div id="exerciseDetailChart"></div>
+                <div class="mt-3" id="exerciseDetailChart"></div>
 
                     {% if reps_latest_workout %}
                         <div class="m-3">
@@ -84,7 +77,7 @@
                         </div>
                     {% endif %}
 
-                    <div class="card" id="vue-app">
+                    <div class="card">
                         <add-workout-form inline-template>
                             <div>
                                 <div class="card-header bg-info text-white">Add a new workout</div>
@@ -191,6 +184,40 @@
 
         new Vue({
             el: "#vue-app",
+            data() {
+                return {
+                    isActiveExercise: {% if activity_info %}true{% else %}false{% endif %},
+                    showHistoryMessage: {% if activity_info %}true{% else %}false{% endif %}
+                }
+            },
+            methods: {
+                onClick(evt) {
+                    payload = {
+                        "uuid": "{{ object.uuid }}"
+                    };
+                    if (this.isActiveExercise) {
+                        payload.remove = true;
+                    } else {
+                        this.showHistoryMessage = false;
+                    }
+                    doPost(
+                        this,
+                        url = "{% url "fitness:change_active_status" %}",
+                        payload,
+                        (response) => {
+                            this.isActiveExercise = ! this.isActiveExercise;
+                        },
+                        "",
+                        ""
+                    );
+
+                }
+            },
+            computed: {
+                activeButtonValue: function() {
+                    return this.isActiveExercise ? "Active" : "Activate Exercise"
+                }
+            },
             components: {
                 AddWorkoutForm
             }

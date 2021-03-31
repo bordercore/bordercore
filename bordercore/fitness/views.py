@@ -5,6 +5,7 @@ from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import F, Max, OuterRef, Q, Subquery
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -128,17 +129,15 @@ def fitness_summary(request):
 @login_required
 def change_active_status(request):
 
-    exercise_uuid = request.POST["exercise_uuid"]
+    uuid = request.POST["uuid"]
+    remove = request.POST.get("remove", False)
 
-    if request.POST["state"] == "inactive":
-        exercise = Exercise.objects.get(uuid=exercise_uuid)
-        eu = ExerciseUser.objects.get(user=request.user, exercise=exercise)
+    if remove:
+        eu = ExerciseUser.objects.get(user=request.user, exercise__uuid=uuid)
         eu.delete()
-        messages.add_message(request, messages.INFO, "This exercise is no longer active")
-    elif request.POST["state"] == "active":
-        exercise = Exercise.objects.get(uuid=exercise_uuid)
+    else:
+        exercise = Exercise.objects.get(uuid=uuid)
         eu = ExerciseUser(user=request.user, exercise=exercise)
         eu.save()
-        messages.add_message(request, messages.INFO, "This exercise is now active for you")
 
-    return redirect("fitness:exercise_detail", exercise_uuid)
+    return JsonResponse({"status": "OK"}, safe=False)

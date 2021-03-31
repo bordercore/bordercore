@@ -46,15 +46,14 @@ def test_fitness_change_active_status(auto_login_user, fitness):
     url = urls.reverse("fitness:change_active_status")
 
     resp = client.post(url, {
-        "exercise_uuid": fitness[0].uuid,
-        "state": "inactive"
+        "uuid": fitness[0].uuid,
+        "remove": "true"
     })
 
-    assert resp.status_code == 302
+    assert resp.status_code == 200
 
     resp = client.post(url, {
-        "exercise_uuid": fitness[0].uuid,
-        "state": "active"
+        "uuid": fitness[0].uuid
     })
 
-    assert resp.status_code == 302
+    assert resp.status_code == 200
