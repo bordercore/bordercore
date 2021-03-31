@@ -36,7 +36,7 @@ class Todo(TimeStampedModel):
         default=2
     )
 
-    def get_modified(self):
+    def get_created(self):
         return self.modified.strftime('%b %d, %Y')
 
     def get_tags(self):

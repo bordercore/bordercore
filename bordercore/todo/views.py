@@ -1,9 +1,12 @@
 import re
+from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.db.models import F, Q
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.utils.dateformat import format
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
@@ -60,7 +63,24 @@ class TodoTaskList(ListView):
         tag_name = self.kwargs.get("tag_name")
         self.request.session["current_todo_tag"] = tag_name
 
-        return Tag.objects.get(user=self.request.user, name=tag_name).todos.all().order_by("sortordertagtodo__sort_order")
+        priority = self.request.GET.get("priority", None)
+        time = self.request.GET.get("time", None)
+
+        if priority or time:
+
+            queryset = Todo.objects
+
+            if priority:
+                queryset = queryset.filter(priority=priority)
+            if time:
+                queryset = queryset.filter(created__gt=(timezone.now() - timedelta(days=int(time))))
+
+            queryset = queryset.filter(tag__name=tag_name).order_by("task")
+
+        else:
+            queryset = Tag.objects.get(user=self.request.user, name=tag_name).todos.all().order_by("sortordertagtodo__sort_order")
+
+        return queryset
 
     def get(self, request, *args, **kwargs):
 
@@ -76,8 +96,8 @@ class TodoTaskList(ListView):
                 "sort_order": sort_order,
                 "task": re.sub("[\n\r\"]", "", todo.task),
                 "priority": Todo.get_priority_name(todo.priority),
-                "created": todo.get_modified(),
-                "unixtime": int(format(todo.modified, "U")),
+                "created": todo.get_created(),
+                "unixtime": int(format(todo.created, "U")),
                 "note": re.sub("[\n\r\"]", "", todo.get_note()),
                 "url": todo.url,
                 "uuid": todo.uuid
