@@ -153,8 +153,14 @@ class TodoDetailView(UpdateView):
 
         with transaction.atomic():
 
+            # Keep track of the sort order of this task for each
+            #  tag. Once we delete them and add them back,
+            #  restore the original sort order using this hash
+            todo_sort_order = {}
+
             for tag in task.tags.all():
                 s = SortOrderTagTodo.objects.get(tag=tag, todo=task)
+                todo_sort_order[tag.name] = s.sort_order
                 s.delete()
 
             # Delete all existing tags
@@ -163,6 +169,11 @@ class TodoDetailView(UpdateView):
             # Then add the tags specified in the form
             for tag in form.cleaned_data['tags']:
                 task.tags.add(tag)
+                s = SortOrderTagTodo.objects.get(tag=tag, todo=task)
+                # The tag won't be in todo_sort_order if we're
+                #  adding it as new, so check for that.
+                if tag.name in todo_sort_order:
+                    s.reorder(todo_sort_order[tag.name])
 
         self.object = form.save()
         context = self.get_context_data(form=form)
