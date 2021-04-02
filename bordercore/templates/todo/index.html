@@ -132,7 +132,9 @@
             update(el, binding, vnode) {
 
                 const sort_items = vnode.data.attrs.sorting;
-                let options = {};
+                let options = {
+                    handle: ".drag-handle"
+                };
 
                 if (sort_items) {
 
@@ -179,7 +181,7 @@
                         {
                             key: "manualSorting",
                             label: "Manual",
-                            class: "cursor-grab text-center",
+                            class: "drag-handle text-center cursor-grab",
                             sortable: false,
                             thClass: "todo-col-manual-sorting",
                         },
@@ -246,11 +248,11 @@
                 },
                 sortChanged(evt) {
                     if (evt.sortBy === "") {
-                        console.log("sortChanged -- a");
                         sortable.option("disabled", false);
+                        this.fields[0].class="drag-handle text-center cursor-grab";
                     } else {
-                        console.log("sortChanged -- b");
                         sortable.option("disabled", true);
+                        this.fields[0].class="drag-handle text-center";
                     }
                 },
                 rowHovered(item, index, evt) {
