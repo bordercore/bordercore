@@ -10,15 +10,14 @@
 
             <div class="card-body">
 
-                <h2>
-                    Tags
-                </h2>
+                <h3>
+                    Tag Filter
+                </h3>
 
                 {% for tag in tags %}
-                    <div class="p-2">
-                        <a class="btn" :class="getButtonClass('{{ tag.name }}')" href="" @click.prevent="onClickTag" data-tag="{{ tag.name }}">
-                            {{ tag.name }} <span class="badge {% ifequal tagsearch tag.name %}badge-light{% else %}badge-light{% endifequal %}">{{ tag.count }}</span>
-                        </a>
+                    <div class="tag-list p-2 d-flex" :class="getTagClass('{{ tag.name }}')" @click.prevent="onClickTag" data-tag="{{ tag.name }}">
+                        <div>{{ tag.name }}</div>
+                        <div class="ml-auto"><span class="px-2 badge badge-pill {% ifequal tagsearch tag.name %}badge-dark{% else %}badge-primary{% endifequal %}">{{ tag.count }}</span></div>
                     </div>
                 {% endfor %}
 
@@ -287,14 +286,12 @@
 
                 },
                 onClickTag(evt) {
-                    this.selectedTag = evt.srcElement.dataset.tag;
+                    this.selectedTag = evt.currentTarget.dataset.tag;
                     this.getTodoList();
                 },
-                getButtonClass(tag) {
+                getTagClass(tag) {
                     if (tag === this.selectedTag) {
-                        return "btn-primary"
-                    } else {
-                        return "btn-info"
+                        return "selected"
                     }
                 },
                 onChange(event) {

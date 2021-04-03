@@ -585,7 +585,19 @@ pre {
   width: 100px;
 }
 
-/* Todo */
+/*
+   Todo
+*/
+
+.tag-list {
+  a {
+    color: $white;
+  }
+
+  &:hover {
+    background-color: $background-color-light;
+  }
+}
 
 .todo-col-manual-sorting {
   width: 6rem;
