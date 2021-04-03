@@ -33,7 +33,7 @@
                                     <transition-group type="transition">
                                         <li v-for="feed in feedList" :key="feed.id" v-cloak>
                                             <a href="#" :data-id="feed.id" @click="onClick(feed)">[[ feed.name ]]</a>
-                                            <span v-if="feed.lastResponseCode !== 200" class="list_annotation">[[ feed.lastResponseCode ]]</span>
+                                            <span v-if="feed.lastResponseCode !== 200" class="list-annotation">[[ feed.lastResponseCode ]]</span>
                                         </li>
                                     </transition-group>
                                 </draggable>

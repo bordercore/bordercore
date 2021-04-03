@@ -17,14 +17,8 @@
   margin-right: 1rem;
 }
 
-.content-nav {
-  font-size: 17px;
-  margin: 10px;
-  padding: 5px;
-}
-
 .card-title {
-  font-size: 17px;
+  font-size: 1.2rem;
 
   a {
     color: $white;
@@ -37,15 +31,11 @@
 }
 
 .burger-menu {
-  width: 22px;
+  width: 1.5rem;
 }
 
 [hidden] {
   display: none !important;
-}
-
-#title {
-  padding: 5px 0 0 15px;
 }
 
 .hidden {
@@ -62,7 +52,7 @@
 .highlight-box {
   background: lighten(#10163a, 5%);
   padding: 1em;
-  border-radius: 11px;
+  border-radius: 0.7rem;
 }
 
 .button-add {
@@ -71,11 +61,10 @@
   font: inherit;
   color: inherit;
   cursor: pointer;
-  height: 40px;
-  width: 40px;
-  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
+  height: 2.5rem;
+  width: 2.5rem;
   background-color: $info;
-  border-radius: 25px;
+  border-radius: 1.5rem;
 
   .fa-plus:hover {
     color: $white !important;
@@ -92,7 +81,7 @@
 .dropdown-menu.show {
   background-color: $gray-700;
   border: 1px solid $gray-900;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.24);
+  box-shadow: 0 0.25rem 1.5rem rgba(0, 0, 0, 0.24);
   color: $white;
 }
 
@@ -108,11 +97,11 @@
   color: $cyan;
   font-size: 0.75rem;
   position: absolute;
-  right: 10px;
-  top: 10px;
-  padding: 2px 2px 2px 2px;
-  width: 26px;
-  height: 24px;
+  right: 0.6rem;
+  top: 0.6rem;
+  padding: 0.25rem 0.25rem 0.25rem 0.25rem;
+  width: 1.6rem;
+  height: 1.5rem;
 }
 
 .dropdownmenu:hover {
@@ -139,25 +128,25 @@
 }
 
 .translate-fade-down-enter {
-  transform: translateY(-10px);
+  transform: translateY(-0.6rem);
 }
 
 .translate-fade-down-leave-active {
-  transform: translateY(10px);
+  transform: translateY(0.6rem);
 }
 
 /* Error pages */
 
-.response_code {
-  font-size: 100px;
+.response-code {
+  font-size: 6.25rem;
   font-weight: bold;
 }
 
 /* Login page */
 
 .jumbotron {
-  border: 2px solid #fff;
-  border-radius: 25px;
+  border: 0.12rem solid #fff;
+  border-radius: 1.5rem;
   opacity: 0.9;
 }
 
@@ -166,20 +155,9 @@ body.login {
   height: 100%;
 }
 
-blockquote {
-  border-left: 10px solid #ccc;
-  margin: 1.5em 10px;
-  padding: 0.5em 10px;
-}
-
-.list_annotation {
+.list-annotation {
   color: #c76257;
   font-size: 80%;
-}
-
-/* Don't display the '*' for required fields */
-.asteriskField {
-  display: none;
 }
 
 .divider {
@@ -225,7 +203,7 @@ body .table.b-table > thead > tr > [aria-sort=descending] {
 
 .table_header {
   background-color: $primary;
-  border-radius: 4px;
+  border-radius: 0.25rem;
 }
 
 tr.selected {
@@ -249,13 +227,13 @@ tr.selected {
 
 .table-borders table,
 .table-borders td {
-  border: 1px solid #ccc;
-  padding: 10px;
+  border: 0.06rem solid #ccc;
+  padding: 0.6rem;
 }
 
 .table-borders th {
   border-bottom: 3px solid black;
-  padding: 10px;
+  padding: 0.6rem;
 }
 
 .bold {
@@ -287,7 +265,7 @@ tr.selected {
 
 .breadcrumb {
   background-color: $background-color-light;
-  padding-left: 15px + 20px;
+  padding-left: 1rem + 1.25rem;
 }
 
 $nav-tabs-link-active-border-color: $nav-tabs-border-color $nav-tabs-border-color $nav-tabs-link-active-bg;
@@ -315,8 +293,8 @@ $nav-tabs-link-hover-border-color: $nav-tabs-border-color;
 
 .card-body {
   background-color: $background-color-dark;
-  border-radius: 7px;
-  margin: 0 0 15px 15px;
+  border-radius: 0.4rem;
+  margin: 0 0 1rem 1rem;
 }
 
 .list-group-item-secondary {
@@ -331,13 +309,13 @@ $nav-tabs-link-hover-border-color: $nav-tabs-border-color;
 .form-error {
   color: $yellow;
   font-weight: bold;
-  margin-left: 10px;
-  padding-top: 5px;
+  margin-left: 0.6rem;
+  padding-top: 0.3rem;
 }
 
 /* Used when you want to display text instead of a form field */
 .form-no-input {
-  padding: 7px 20px;
+  padding: 0.4rem 1.25rem;
 }
 
 .input-group .highlight-changed-field {
@@ -365,16 +343,16 @@ $nav-tabs-link-hover-border-color: $nav-tabs-border-color;
 
 pre {
   background: $markdown-background-color;
-  border-top: 5px solid $markdown-border-color;
-  border-bottom: 5px solid $markdown-border-color;
-  padding: 1rem;
+  border-top: 0.3rem solid $markdown-border-color;
+  border-bottom: 0.3rem solid $markdown-border-color;
+  padding: 0.06rem;
   padding-left: 1.44rem;
 }
 
 /* Top Title */
 
 #top-title {
-  font-size: 32px;
+  font-size: 2rem;
   padding-left: $grid-margin;
 }
 
@@ -382,13 +360,13 @@ pre {
 
 #top-search {
   background-color: $background-color-dark;
-  border-radius: 7px;
+  border-radius: 0.4rem;
   margin: $grid-margin $grid-margin $grid-margin $grid-margin;
 }
 
 #top-search input {
   cursor: pointer;
-  width: 10px;
+  width: 0.6rem;
   border-radius: 10em;
   transition: all 0.5s;
 }
@@ -398,13 +376,13 @@ pre {
 }
 
 #top-search input:focus {
-  width: 400px;
-  padding-left: 32px;
+  width: 25rem;
+  padding-left: 2rem;
   color: #000;
   background-color: #fff;
   border-color: #66cc75;
   cursor: auto;
-  box-shadow: 0 0 5px rgba(109, 207, 246, 0.5);
+  box-shadow: 0 0 0.3rem rgba(109, 207, 246, 0.5);
 }
 
 #top-search-filter-type {
@@ -421,12 +399,12 @@ pre {
   font-size: larger;
   font-weight: bold;
   width: 100%;
-  padding: 5px;
+  padding: 0.6rem;
   cursor: auto;
 }
 
 .top-search-suggestion {
-  padding: 5px;
+  padding: 0.6rem;
   width: 100%;
 }
 
@@ -450,7 +428,7 @@ pre {
 
   .vue-simple-suggest.designed .suggestions {
     color: $green;
-    padding: 5px;
+    padding: 0.3rem;
   }
 
   .suggest-item.hover .top-search-object-type {
@@ -480,11 +458,6 @@ pre {
 
 /* Bookmarks */
 
-.bookmark-created {
-  color: #999;
-  width: 90px;
-}
-
 .bookmark-list-date {
   text-align: right;
   vertical-align: text-bottom;
@@ -509,17 +482,17 @@ pre {
   background-color: #fff;
   position: fixed;
   overflow: hidden;
-  left: -300px;
-  border: 1px solid #999;
-  height: 400px;
-  width: 300px;
+  left: -18.75rem;
+  border: 0.06rem solid #999;
+  height: 25rem;
+  width: 18.75rem;
   z-index: 200;
-  padding: 5px;
+  padding: 0.3rem;
   transition: all 1s ease;
 }
 
 #bookmark-sidebar.show {
-  left: 20px;
+  left: 1.25rem;
   transition: all 1s ease;
 }
 
@@ -527,9 +500,9 @@ pre {
   font-family: Courier, sans-serif;
 }
 
-#exerciseDetailChart {
-  width: 800px;
-  height: 400px;
+#exercise-detail-chart {
+  width: 50rem;
+  height: 25rem;
 }
 
 /* The "has-search" rules provide space for a Font Awesome
@@ -579,10 +552,6 @@ pre {
 
 #blob_subtitle {
   color: $teal;
-}
-
-.blob_edit_amazon_name_field {
-  width: 100px;
 }
 
 /*
@@ -639,7 +608,7 @@ pre {
 }
 
 #myModal #title {
-  width: 300px;
+  width: 18.75rem;
 }
 
 li.active a {
@@ -662,16 +631,12 @@ a.tag:active {
   color: yellow;
 }
 
-.voffset {
-  margin-top: 5px;
-}
-
 .random-image-card {
   border: 0;
 }
 
 .random-image-card .card-header {
-  margin-bottom: 15px;
+  margin-bottom: 1rem;
 }
 
 .random-image-card .list-group {
@@ -679,22 +644,15 @@ a.tag:active {
   margin: 0 auto;
 }
 
-#tag-detail-tab-content {
-  padding-left: 10px;
-}
-
 .table-borderless td,
 .table-borderless th {
   border: 0;
-  padding: 10px;
+  padding: 0.6rem;
 }
 
-.collection_sortable li {
-  margin: 3px 3px 3px 0;
-  padding: 15px 15px 130px 15px;
-  float: left;
-  width: 200px;
-  height: 200px;
+.collection-sortable li {
+  width: 12.5rem;
+  height: 12.5rem;
 }
 
 .collection_ghost_class {
@@ -708,7 +666,7 @@ a.tag:active {
   background-color: $gray-700;
   border: 1px solid $primary;
   border-radius: 1rem;
-  box-shadow: 0.75rem 0.75rem 0.5rem -1px rgba(0, 0, 0, 0.54);
+  box-shadow: 0.75rem 0.75rem 0.5rem -0.06rem rgba(0, 0, 0, 0.54);
   font-size: 1rem;
 
   table th:first-child {
@@ -740,7 +698,9 @@ a.tag:active {
   border-radius: 0.5rem;
 }
 
-/* Node */
+/*
+   Node
+*/
 
 .node-name {
   color: $cyan;
@@ -757,24 +717,21 @@ a.tag:active {
 .editing .node-note-edit {
   display: block;
   width: 100%;
-  padding: 12px 16px;
 }
 
-/* Music */
-
-#music-search {
-  width: 400px;
-}
+/*
+   Music
+*/
 
 /* Audio player controls */
 
 audio {
   outline: none;
-  width: 600px;
+  width: 37.5rem;
 }
 
 #audio_player audio {
-  width: 400px;
+  width: 25rem;
 }
 
 /* CodeMirror */
@@ -809,7 +766,7 @@ div.CodeMirror-focused {
 }
 
 .vue-simple-suggest.designed.focus .input-wrapper input {
-  border: 1px solid #aaa;
+  border: 0.06rem solid #aaa;
 }
 
 .vue-simple-suggest.designed .suggestions {
@@ -817,9 +774,9 @@ div.CodeMirror-focused {
   left: 0;
   right: 0;
   top: 100%;
-  top: calc(100% + 5px);
-  border-radius: 3px;
-  border: 1px solid #aaa;
+  top: calc(100% + 0.3rem);
+  border-radius: 0.18rem;
+  border: 0.06rem solid #aaa;
   background-color: #fff;
   opacity: 1;
   z-index: 1000;
@@ -832,7 +789,7 @@ div.CodeMirror-focused {
 
 .vue-simple-suggest.designed .suggestions .suggest-item,
 .vue-simple-suggest.designed .suggestions .misc-item {
-  padding: 5px 10px;
+  padding: 0.3rem 0.6rem;
 }
 
 .vue-simple-suggest.designed .suggestions .suggest-item.hover {
@@ -852,11 +809,11 @@ div.CodeMirror-focused {
   background-color: #2fa4e7 !important;
   font-size: 75%;
   font-weight: 700;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-  padding: 5px 8px;
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+  border-bottom-left-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
+  padding: 0.3rem 0.5rem;
 }
 
 .vue-tags-input .ti-new-tag-input {
@@ -866,11 +823,11 @@ div.CodeMirror-focused {
 
 .vue-tags-input .ti-input {
   background-color: $form-background-color;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-  padding: 6px 12px;
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+  border-bottom-left-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
+  padding: 0.37rem 0.75rem;
 }
 
 .vue-tags-input.ti-focus .ti-input {
@@ -893,7 +850,7 @@ div.CodeMirror-focused {
 
 /* Use this for inputs of arbitrary length */
 #tag-filter-form input {
-  width: 400px;
+  width: 25rem;
 }
 
 /* vuejs-datepicker */
@@ -928,36 +885,6 @@ p {
   color: $gray-700;
 }
 
-.navbar {
-  padding: 15px 10px;
-  background: #fff;
-  border: none;
-  border-radius: 0;
-  margin-bottom: 40px;
-  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-btn {
-  box-shadow: none;
-  outline: none !important;
-  border: none;
-}
-
-#navbar a,
-#navbar a:hover,
-#navbar a:focus {
-  color: inherit;
-  text-decoration: none;
-  transition: all 0.3s;
-}
-
-.line {
-  width: 100%;
-  height: 1px;
-  border-bottom: 1px dashed #ddd;
-  margin: 40px 0;
-}
-
 i,
 span {
   display: inline-block;
@@ -968,20 +895,20 @@ span {
 .wrapper {
   display: flex;
   align-items: stretch;
-  padding-left: 240px;
+  padding-left: 15rem;
   transition: 0.3s ease;
 }
 
 .wrapper.collapsed {
   display: flex;
   align-items: stretch;
-  padding-left: 50px;
+  padding-left: 3.1rem;
   transition: 0.3s ease;
 }
 
 #sidebar .sidebar-header {
-  font-size: 32px;
-  padding: 10px 0 10px 10px;
+  font-size: 2rem;
+  padding: 0.6rem 0 0.6rem 0.6rem;
 }
 
 #sidebar .sidebar-header strong {
@@ -990,7 +917,7 @@ span {
 }
 
 #sidebar .first-item {
-  margin-top: 15px;
+  margin-top: 2rem;
 }
 
 /* CONTENT STYLE */

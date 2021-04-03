@@ -62,11 +62,11 @@
             </ul>
         </tab-list>
 
-        <div class="tab-content" id="tag-detail-tab-content">
+        <div class="tab-content pl-3">
 
             <div id="blob" class="tab-pane fade">
             {% for match in search_results.matches.blob %}
-                <div class="row voffset">
+                <div class="row mt-2">
                     <div class="col-lg-12">
                         {% if match.sha1sum %}
                             <a href="{{ MEDIA_URL }}{{ match.url|safe }}">
@@ -78,7 +78,7 @@
                         {% endif %}
                         <a href="{% url 'blob:detail' match.uuid %}">{{ match.title|default:"No Title" }}</a>
                         {% if match.content_type and match.content_type != 'Image' %}
-                            <span class="list_annotation">{{ match.content_type }}</span>
+                            <span class="list-annotation">{{ match.content_type }}</span>
                         {% endif %}
                     </div>
                 </div>
@@ -107,7 +107,7 @@
 
             <div id="bookmark" class="tab-pane fade">
             {% for match in search_results.matches.bookmark %}
-                <div class="row voffset">
+                <div class="row mt-2">
                     <div class="col-lg-12">
                         <a href="{{ match.url }}">{{ match.title }}</a>
                     </div>
@@ -117,7 +117,7 @@
 
             <div id="document" class="tab-pane fade">
             {% for match in search_results.matches.document %}
-                <div class="row voffset">
+                <div class="row mt-2">
                     <div class="col-lg-12">
                         <a href="{% url 'blob:detail' match.uuid %}">{{ match.title|default:"No Title" }}</a>
                     </div>
@@ -127,7 +127,7 @@
 
             <div id="note" class="tab-pane fade">
             {% for match in search_results.matches.note %}
-                <div class="row voffset">
+                <div class="row mt-2">
                     <div class="col-lg-12">
                         <a href="{% url 'blob:detail' match.uuid %}">{{ match.title|default:"Note" }}</a>
                     </div>
@@ -137,7 +137,7 @@
 
             <div id="drill" class="tab-pane fade">
             {% for match in search_results.matches.drill %}
-                <div class="row voffset">
+                <div class="row mt-2">
                     <div class="col-lg-12">
                         <a href="{% url 'drill:detail' match.uuid %}">{{ match.question }}</a>
                     </div>
@@ -147,7 +147,7 @@
 
             <div id="song" class="tab-pane fade">
             {% for match in search_results.matches.song %}
-                <div class="row voffset">
+                <div class="row mt-2">
                     <div class="col-lg-12">
                         <a href="{% url 'music:artist_detail' match.artist %}">{{ match.artist }} - {{ match.title }}</a>
                     </div>
@@ -157,7 +157,7 @@
 
             <div id="todo" class="tab-pane fade">
             {% for match in search_results.matches.todo %}
-                <div class="row voffset">
+                <div class="row mt-2">
                     <div class="col-lg-12">
                         {{ match.task }}  <span class="search-todo-date">{{ match.last_modified }}</span>
                     </div>

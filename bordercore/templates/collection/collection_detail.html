@@ -84,9 +84,9 @@
         const BlobList = {
             template: `
                 <div>
-                    <ul class="list-group list-group-horizontal text-center list-unstyled collection_sortable">
+                    <ul class="list-group list-group-horizontal text-center list-unstyled collection-sortable">
                         <draggable v-model="blob_list" @change="onChange" ghost-class="collection_ghost_class" animation="500" forceFallback="true">
-                            <li v-for="blob in blob_list" :key="blob.id">
+                            <li v-for="blob in blob_list" :key="blob.id" class="float-left p-3">
                                 <a :href="[[ blob.url ]]"><img :src="[[ blob.cover_url ]]" /></a>
                                 <br/>
                                 <a :href="[[ blob.url ]]">[[ blob.title ]]</a> {% if blob.collection_note %}<img src="{{ STATIC_URL }}img/note.png" height="16" width="16" data-toggle="popover" data-content="[[ blob.collection_note ]]"/>{% endif %}
