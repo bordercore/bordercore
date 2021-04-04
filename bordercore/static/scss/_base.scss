@@ -69,11 +69,11 @@
   .fa-plus:hover {
     color: $white !important;
   }
-}
 
-.button-add:focus {
-  color: $white;
-  outline: 0;
+  &:focus {
+    color: $white;
+    outline: 0;
+  }
 }
 
 /* Dropdown Menus */
@@ -102,12 +102,12 @@
   padding: 0.25rem 0.25rem 0.25rem 0.25rem;
   width: 1.6rem;
   height: 1.5rem;
-}
 
-.dropdownmenu:hover {
-  background: lighten($background-color-dark, 5%);
-  border-radius: 100%;
-  color: $white;
+  &:hover {
+    background: lighten($background-color-dark, 5%);
+    border-radius: 100%;
+    color: $white;
+  }
 }
 
 /* CSS transition for dropdown, top to down */
@@ -500,11 +500,6 @@ pre {
   font-family: Courier, sans-serif;
 }
 
-#exercise-detail-chart {
-  width: 50rem;
-  height: 25rem;
-}
-
 /* The "has-search" rules provide space for a Font Awesome
   search icon inside a search input box */
 
@@ -597,6 +592,11 @@ pre {
   width: 17rem;
 }
 
+#exercise-detail-chart {
+  width: 50rem;
+  height: 25rem;
+}
+
 /* Misc */
 
 .success {
@@ -615,33 +615,22 @@ li.active a {
   color: #fff;
 }
 
-a.tag:link {
-  color: white;
-}
+a.tag {
+  &:link {
+    color: white;
+  }
 
-a.tag:visited {
-  color: white;
-}
+  &:visited {
+    color: white;
+  }
 
-a.tag:hover {
-  color: white;
-}
+  &:hover {
+    color: white;
+  }
 
-a.tag:active {
-  color: yellow;
-}
-
-.random-image-card {
-  border: 0;
-}
-
-.random-image-card .card-header {
-  margin-bottom: 1rem;
-}
-
-.random-image-card .list-group {
-  width: 90%;
-  margin: 0 auto;
+  &:active {
+    color: yellow;
+  }
 }
 
 .table-borderless td,
