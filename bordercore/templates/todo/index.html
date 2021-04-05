@@ -34,18 +34,15 @@
                     <form class="form-inline" role="form">
 
                         <select class="form-control ml-2" id="filter-priority" v-model="filterPriority" @change="onChange($event)">
-                            <option value="">Priority</option>
-                            <option value="1">High</option>
-                            <option value="2">Medium</option>
-                            <option value="3">Low</option>
+                            <option v-for="option in filterPriorityOptions" :value="option[0]">
+                                [[ option[1] ]]
+                            </option>
                         </select>
 
                         <select class="form-control ml-2" id="filter-time" v-model="filterTime" @change="onChange($event)">
-                            <option value="">Created</option>
-                            <option value="1">Last Day</option>
-                            <option value="3">Last 3 Days</option>
-                            <option value="7">Last Week</option>
-                            <option value="30">Last Month</option>
+                            <option v-for="option in filterTimeOptions" :value="option[0]">
+                                [[ option[1] ]]
+                            </option>
                         </select>
 
                         <div class="form-group ml-2">
@@ -179,8 +176,8 @@
             data() {
                 return {
                     selectedTag: "{{ tagsearch }}",
-                    filterPriority: "",
-                    filterTime: "",
+                    filterPriority: "{{ filter.todo_filter_priority|default:'' }}",
+                    filterTime: "{{ filter.todo_filter_time|default:'' }}",
                     items: [],
                     fields: [
                         {
@@ -212,6 +209,19 @@
                             tdClass: "text-center align-middle",
                             thClass: "col-action"
                         }
+                    ],
+                    filterPriorityOptions: [
+                        ["", "Priority"],
+                        ["1", "High"],
+                        ["2", "Medium"],
+                        ["3", "Low"]
+                    ],
+                    filterTimeOptions: [
+                        ["", "Created"],
+                        ["1", "Last Day"],
+                        ["3", "Last 3 Days"],
+                        ["7", "Last Week"],
+                        ["30", "Last Month"],
                     ],
                     filter: null,
                     show: false,

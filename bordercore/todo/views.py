@@ -40,6 +40,13 @@ class TodoListView(ListView):
 
         return tag_name
 
+    def get_filter(self):
+
+        return {
+            "todo_filter_priority": self.request.session.get("todo_filter_priority", ""),
+            "todo_filter_time": self.request.session.get("todo_filter_time", ""),
+        }
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -48,7 +55,8 @@ class TodoListView(ListView):
         return {
             **context,
             "tags": Todo.get_todo_counts(self.request.user, tag_name),
-            "tagsearch": tag_name
+            "tagsearch": tag_name,
+            "filter": self.get_filter()
         }
 
 
@@ -64,7 +72,11 @@ class TodoTaskList(ListView):
         self.request.session["current_todo_tag"] = tag_name
 
         priority = self.request.GET.get("priority", None)
+        if priority is not None:
+            self.request.session["todo_filter_priority"] = priority
         time = self.request.GET.get("time", None)
+        if time is not None:
+            self.request.session["todo_filter_time"] = time
 
         if priority or time:
 
