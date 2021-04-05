@@ -47,7 +47,9 @@
   display: none;
 }
 
-/* Common components */
+/*
+   Common components
+*/
 
 .highlight-box {
   background: lighten(#10163a, 5%);
@@ -674,17 +676,19 @@ a.tag {
 
 /* Sortable */
 
+/* The element you've chosen to drag */
+.sortable-chosen {
+  background-color: $background-color-dark !important;
+}
+
+/* Disable the ghosting effect */
 .sortable-ghost {
-  background: #7367f0 !important;
-  border-radius: 0.5rem;
+  opacity: 0 !important;
 }
 
 /* The element you're dragging */
-
 .sortable-drag {
-  background: #7367f0 !important;
-  opacity: 1;
-  border-radius: 0.5rem;
+  background: $background-color-dark !important;
 }
 
 /*

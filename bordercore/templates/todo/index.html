@@ -65,7 +65,7 @@
                 </div>
 
                 <b-table
-                    hover
+                    :hover="hover"
                     primary-key="uuid"
                     :items="items"
                     :fields="fields"
@@ -137,12 +137,18 @@
 
                 if (sort_items) {
 
+                    options.onStart = function sortableStart(evt) {
+                        // Disable the table's hover feature will we're dragging and dropping
+                        table.hover = false;
+                    }
+
                     options.onUpdate = function sortableUpdate(evt) {
                         const deleted = sort_items.splice(evt.oldIndex, 1);
                         sort_items.splice(evt.newIndex, 0, deleted[0]);
                     };
 
                     options.onEnd = function sortableEnd(evt) {
+                        table.hover = true;
                         if (evt.newIndex !== evt.oldIndex) {
 
                             const bodyFormData = new URLSearchParams();
@@ -168,7 +174,7 @@
             }
         });
 
-        new Vue({
+        const table = new Vue({
             el: "#vue-app",
             data() {
                 return {
@@ -209,7 +215,8 @@
                     ],
                     filter: null,
                     show: false,
-                    right: true
+                    right: true,
+                    hover: true
                 }
             },
             methods: {
