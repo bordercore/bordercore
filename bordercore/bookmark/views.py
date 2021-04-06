@@ -259,34 +259,19 @@ def do_import(request):
 
 
 @login_required
-def get_random_bookmarks(request):
-    return overview(request, random=True)
-
-
-@login_required
-def overview(request,
-             random=False):
+def overview(request):
 
     sorted_bookmarks = []
-    tag_counts = {}
 
-    tag_counts["Untagged"] = Bookmark.objects.filter(user=request.user, tags__isnull=True).count()
+    untagged_count = Bookmark.objects.filter(user=request.user, tags__isnull=True).count()
 
-    pinned_tags = request.user.userprofile.pinned_tags.all().order_by('sortorderusertag__sort_order')
+    pinned_tags = request.user.userprofile.pinned_tags.all().annotate(bookmark_count=Count("sortordertagbookmark")).order_by("sortorderusertag__sort_order")
 
-    t = Tag.objects\
-           .filter(user=request.user, id__in=[x.id for x in pinned_tags])\
-           .values('id', 'name')\
-           .annotate(bookmark_count=Count('bookmarks__sortordertagbookmark__bookmark'))
-
-    for x in t:
-        tag_counts[x["name"]] = x["bookmark_count"]
-
-    return render(request, 'bookmark/index.html',
+    return render(request, "bookmark/index.html",
                   {
-                      'bookmarks': sorted_bookmarks,
-                      'tag_counts': tag_counts,
-                      'pinned_tags': pinned_tags,
+                      "bookmarks": sorted_bookmarks,
+                      "untagged_count": untagged_count,
+                      "pinned_tags": pinned_tags,
                   })
 
 

@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 
-{% load dict_get %}
 {% load jsonify %}
 
 {% load favicon %}
@@ -631,7 +630,7 @@
                             name: "Untagged",
                             isActive: true,
                             isDraggable: false,
-                            count: {{ tag_counts|dict_get:"Untagged" }},
+                            count: {{ untagged_count }},
                         },
                         {% for tag in pinned_tags %}
                         {
@@ -639,7 +638,7 @@
                             name: "{{ tag.name }}",
                             isActive: false,
                             isDraggable: true,
-                            count: {{ tag_counts|dict_get:tag.name }},
+                            count: {{ tag.bookmark_count }},
                         },
                         {% endfor %}
                     ],
