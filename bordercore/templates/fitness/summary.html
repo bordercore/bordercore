@@ -20,6 +20,7 @@
                 :items="items_active"
                 :fields="fields"
                 sort-by="last_active"
+                :sort-compare="mySortCompare"
                 :tbody-tr-class="rowClass"
             >
                 <template #cell(exercise)="data">
@@ -27,7 +28,7 @@
                 </template>
                 <template #cell(last_active)="data">
                     <div v-if="data.value">
-                        <span class="float-left">[[ data.value ]]</span>
+                        <span class="float-left">[[ getFormattedDate(data.value) ]]</span>
                         <span class="float-right">[[ getInterval(data) ]]</span>
                     </div>
                     <div v-else>Never</div>
@@ -83,7 +84,7 @@
                             "exercise": "{{ exercise.exercise }}",
                             "muscle_group": "{{ exercise.muscle.muscle_group }}",
                             "interval": "{{ exercise.interval.days }} day{{ exercise.interval.days|pluralize:"s" }}",
-                            "last_active": "{{ exercise.last_active|date:"N j, Y" }}",
+                            "last_active": new Date("{{ exercise.last_active|date:"Y-m-d" }}"),
                             "delta_days": {{ exercise.delta_days }},
                             "overdue": "{{ exercise.overdue }}"
                         },
@@ -130,6 +131,21 @@
                     } else {
                         return row.item.delta_days + " " + pluralize("day", row.item.delta_days) + " ago";
                     }
+                },
+                mySortCompare(a, b, key) {
+                    if (key === "last_active") {
+                        // Assuming the date field is a `Date` object, subtraction
+                        // works on the date serial number (epoch value)
+                        return a[key] - b[key]
+                    } else {
+                        // Let b-table handle sorting other fields (other than `date` field)
+                        return false
+                    }
+                },
+                getFormattedDate(date) {
+                    var options = { year: "numeric", month: "long", day: "numeric" };
+                    var formattedDate  = new Date(date);
+                    return formattedDate.toLocaleDateString("en-US", options);
                 },
                 rowClass(item, type) {
                     if (!item || type !== "row") return
