@@ -1,5 +1,11 @@
 from datetime import timedelta
 
+import markdown
+from markdown.extensions.codehilite import CodeHiliteExtension
+from pygments import highlight
+from pygments.formatters import HtmlFormatter
+from pygments.lexers import PythonLexer
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils import timezone
@@ -47,7 +53,8 @@ class MetricListView(UserPassesTestMixin, ListView):
                     metric.overdue = True
 
                 context[self.test_types[metric.name]] = metric
-
+                if metric.name != "Bordercore Test Coverage":
+                    metric.latest_result["test_output"] = metric.latest_result["test_output"].replace("\\n", "<br />")
                 if metric.name == "Bordercore Test Coverage":
                     metric.latest_result["line_rate"] = int(round(float(metric.latest_result["line_rate"]) * 100, 0))
 

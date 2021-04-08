@@ -40,8 +40,7 @@
 
             <div class="col-lg-3 d-flex flex-column">
 
-                <card title="Unit Tests" class-name="flex-grow-0">
-
+                <card title="Unit Tests" class-name="flex-grow-0" id="popover-target-unit">
                     <template v-slot:content>
                         <div class="d-flex">
                             <div class="flex-grow-1">
@@ -76,8 +75,12 @@
                     </template>
                 </card>
 
-                <card title="Wumpus Tests" class-name="flex-grow-0">
+                <b-popover target="popover-target-unit" placement="bottom" variant="primary" custom-class="metric-test-result-popover">
+                    <template #title>Test Output</template>
+                    <span v-html="unit.test_output"></span>
+                </b-popover>
 
+                <card title="Wumpus Tests" class-name="flex-grow-0" id="popover-target-wumpus">
                     <template v-slot:content>
                         <div class="d-flex">
                             <div class="flex-grow-1">
@@ -112,11 +115,16 @@
                     </template>
                 </card>
 
+                <b-popover target="popover-target-wumpus" placement="bottom" variant="primary" custom-class="metric-test-result-popover">
+                    <template #title>Test Output</template>
+                    <span v-html="wumpus.test_output"></span>
+                </b-popover>
+
             </div>
 
             <div class="col-lg-3 d-flex flex-column">
 
-                <card title="Functional Tests" class-name="flex-grow-0">
+                <card title="Functional Tests" class-name="flex-grow-0" id="popover-target-functional">
 
                     <template v-slot:content>
                         <div class="d-flex">
@@ -150,7 +158,13 @@
                             </div>
                         </div>
                     </template>
+
                 </card>
+
+                <b-popover target="popover-target-functional" placement="bottom" variant="primary" custom-class="metric-test-result-popover">
+                    <template #title>Test Output</template>
+                    <span v-html="functional.test_output"></span>
+                </b-popover>
 
                 <card title="Code Coverage" class-name="flex-grow-0">
 
@@ -183,7 +197,7 @@
 
                 <div class="right-column flex-grow-0">
 
-                    <card title="Data Quality Tests">
+                    <card title="Data Quality Tests" id="popover-target-data">
                         <template v-slot:content>
                             <div class="d-flex">
                                 <div class="flex-grow-1">
@@ -217,6 +231,11 @@
                             </div>
                         </template>
                     </card>
+
+                    <b-popover target="popover-target-data" placement="bottom" variant="primary" custom-class="metric-test-result-popover">
+                        <template #title>Test Output</template>
+                        <span v-html="data.test_output"></span>
+                    </b-popover>
 
                 </div>
 
@@ -261,21 +280,24 @@
                     "test_errors": "{{ unit.latest_result.test_errors }}",
                     "test_failures": "{{ unit.latest_result.test_failures }}",
                     "test_time_elapsed": "{{ unit.latest_result.test_time_elapsed }}",
-                    "test_runtime": "{{ unit.created }}"
+                    "test_runtime": "{{ unit.created }}",
+                    "test_output": "{{ unit.latest_result.test_output|escapejs }}"
                 },
                 "functional": {
                     "test_count": "{{ functional.latest_result.test_count }}",
                     "test_errors": "{{ functional.latest_result.test_errors }}",
                     "test_failures": "{{ functional.latest_result.test_failures }}",
                     "test_time_elapsed": "{{ functional.latest_result.test_time_elapsed }}",
-                    "test_runtime": "{{ functional.created }}"
+                    "test_runtime": "{{ functional.created }}",
+                    "test_output": "{{ functional.latest_result.test_output|escapejs }}"
                 },
                 "data": {
                     "test_count": "{{ data.latest_result.test_count }}",
                     "test_errors": "{{ data.latest_result.test_errors }}",
                     "test_failures": "{{ data.latest_result.test_failures }}",
                     "test_time_elapsed": "{{ data.latest_result.test_time_elapsed }}",
-                    "test_runtime": "{{ data.created }}"
+                    "test_runtime": "{{ data.created }}",
+                    "test_output": "{{ data.latest_result.test_output|escapejs }}"
                 },
                 "wumpus": {
                     "test_count": "{{ wumpus.latest_result.test_count }}",
@@ -284,6 +306,7 @@
                     "test_overdue": "{{ wumpus.overdue }}",
                     "test_time_elapsed": "{{ wumpus.latest_result.test_time_elapsed }}",
                     "test_runtime": "{{ wumpus.created }}",
+                    "test_output": "{{ wumpus.latest_result.test_output|escapejs }}"
                 },
                 "coverage": {
                     "line_rate": "{{ coverage.latest_result.line_rate }}",
