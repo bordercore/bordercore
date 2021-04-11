@@ -7,23 +7,29 @@
         <meta http-equiv="refresh" content="3600; URL={% url 'blob:slideshow' %}">
         <title>Bordercore :: Slideshow</title>
 
-        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/slideshow.css" />
+        {% if debug %}
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}dist/css/theme-{{ request.user.userprofile.theme }}.css" />
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}dist/css/vue-sidebar-menu.css" />
+        {% else %}
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/theme-{{ request.user.userprofile.theme }}.min.css" />
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/vue-sidebar-menu.min.css" />
+        {% endif %}
 
     </head>
 
-    <body>
+    <body id="slide-show">
 
         {% block content %}
 
             {% if content_type == "Video" %}
 
-                <video class="slide_show" controls autoplay loop muted>
+                <video class="slide-show" controls autoplay loop muted>
                     <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="video/mp4">
                 </video>
 
             {% else %}
 
-                <img class="slide_show" src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" />
+                <img class="slide-show" src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" />
 
             {% endif %}
 
