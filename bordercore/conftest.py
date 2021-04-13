@@ -37,8 +37,6 @@ from music.models import Listen, SongSource  # isort:skip
 from music.tests.factories import SongFactory, AlbumFactory  # isort:skip
 from node.models import SortOrderNodeBookmark, SortOrderNodeBlob  # isort:skip
 from node.tests.factories import NodeFactory  # isort:skip
-from tag.models import Tag  # isort:skip
-from tag.models import Tag, SortOrderTagBookmark  # isort:skip
 from tag.tests.factories import TagFactory  # isort:skip
 from todo.tests.factories import TodoFactory, UserFactory  #isort:skip
 

@@ -101,6 +101,10 @@ import Card from "./vue/common/Card.vue";
 Vue.component("Card", Card);
 window.Card = Card;
 
+import TreeMenu from "./vue/common/TreeMenu.vue";
+Vue.component("TreeMenu", TreeMenu);
+window.TreeMenu = TreeMenu;
+
 import DrillTagProgress from "./vue/common/DrillTagProgress.vue";
 Vue.component("DrillTagProgress", DrillTagProgress);
 window.DrillTagProgress = DrillTagProgress;

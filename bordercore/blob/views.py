@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 import random
 import re
@@ -184,7 +185,15 @@ class BlobDetailView(DetailView):
         else:
             context["show_metadata"] = False
 
+        context["tree"] = json.dumps(
+            {
+                "label": "Root",
+                "nodes": self.object.get_tree()
+            }
+        )
+
         return context
+
 
     def get_queryset(self):
         return Blob.objects.filter(user=self.request.user)

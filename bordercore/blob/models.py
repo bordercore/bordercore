@@ -4,6 +4,7 @@ import json
 import logging
 import re
 import uuid
+from collections import defaultdict
 from pathlib import PurePath
 from urllib.parse import quote_plus, urlparse
 
@@ -467,6 +468,92 @@ class Blob(TimeStampedModel, AmazonMixin):
             Message=json.dumps(message),
         )
         # TODO: Handle response errors
+
+    def tree(self):
+        return defaultdict(self.tree)
+
+    def get_tree(self):
+
+        if not self.content:
+            return []
+
+        content_out = ""
+
+        nodes = defaultdict(self.tree)
+
+        nodes["label"] = "root"
+        nodes["nodes"] = []  # Necessary?
+
+        node_id = 1
+        current_node = nodes
+        current_level = None
+        current_label = "root"
+
+        top_level = None
+
+        for line in self.content.split("\n"):
+            x = re.search(r"^(#+)(.*)", line.strip())
+            if x:
+
+                content_out = f"{content_out}<a name='section_{node_id}'></a>\n{line}\n"
+                level = len(x.group(1))
+                heading = x.group(2).strip()
+
+                if not top_level:
+                    top_level = level
+
+                if not current_level:
+                    # This is the first level encountered. Note: might not be 1.
+                    current_label = heading
+                    current_level = level
+
+                if level > current_level:
+                    for node in current_node["nodes"]:
+                        if node["label"] == current_label:
+                            node["nodes"].append(
+                                {
+                                    "id": node_id,
+                                    "label": heading,
+                                    "nodes": []
+                                }
+                            )
+                            current_node = node
+
+                elif current_level > level:
+
+                    if level == top_level:
+                        current_node = nodes
+                    else:
+                        current_node = nodes
+                        for _ in range(level - top_level):
+                            current_node = current_node["nodes"][-1]
+
+                    current_node["nodes"].append(
+                        {
+                            "id": node_id,
+                            "label": heading,
+                            "nodes": []
+                        }
+                    )
+
+                else:
+                    current_node["nodes"].append(
+                        {
+                            "id": node_id,
+                            "label": heading,
+                            "nodes": []
+                        }
+                    )
+                current_level = level
+                current_label = heading
+                node_id = node_id + 1
+
+            else:
+                content_out = f"{content_out}{line}\n"
+
+        self.content = content_out
+
+        return nodes["nodes"]
 
     def delete(self):
 

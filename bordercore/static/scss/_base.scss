@@ -47,6 +47,23 @@
   display: none;
 }
 
+::-webkit-scrollbar {
+  width: 0.7rem;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 0.6rem;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 0.6rem;
+  background-color: lighten($background-color-dark, 2%);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: lighten($background-color-dark, 4%);
+}
+
 /*
    Common components
 */
@@ -216,13 +233,6 @@ tr.selected {
 .selected,
 .selected a,
 .selected a:visited {
-  background-color: $selected-background-color;
-  color: $white;
-}
-
-#row_selected,
-#row_selected a,
-#row_selected a:active {
   background-color: $selected-background-color;
   color: $white;
 }
@@ -549,6 +559,21 @@ pre {
 
 #blob_subtitle {
   color: $teal;
+}
+
+#tree-menu {
+  background-color: #161e4e;
+  border-radius: 0.6rem;
+
+  ul {
+    padding-left: 1em;
+    line-height: 1.5em;
+  }
+}
+
+.hide-list-element {
+  padding-left: 0;
+  list-style-type: none;
 }
 
 #slide-show {

@@ -88,7 +88,6 @@ def test_is_ingestible_file(blob_image_factory):
     assert Blob.is_ingestible_file("file.png") is False
     assert Blob.is_ingestible_file("file.pdf") is True
 
-
 def test_get_cover_info(blob_image_factory, blob_pdf_factory):
 
     cover_info = blob_image_factory.get_cover_info()
@@ -105,3 +104,79 @@ def test_get_cover_info(blob_image_factory, blob_pdf_factory):
     assert cover_info_pdf["url"] == "https://blobs.bordercore.com/c3/c315bac6f171d8e9cf52613d89a950b5161d8c16/cover.jpg"
 
     assert Blob.get_cover_info_static(blob_pdf_factory.user, None) == {"url": ""}
+
+
+def count_nodes(nodes, root_node=True):
+
+    return (0 if root_node else 1) + sum(count_nodes(node["nodes"], False) for node in nodes)
+
+
+def test_parse_nodes(blob_text_factory):
+
+    blob_text_factory.content = ""
+    tree = blob_text_factory.get_tree()
+    assert count_nodes(tree) == 0
+
+    blob_text_factory.content = """
+    # Node 1
+    """
+    tree = blob_text_factory.get_tree()
+    assert count_nodes(tree) == 1
+    assert tree[0]["id"] == 1
+    assert tree[0]["label"] == "Node 1"
+    assert tree[0]["nodes"] == []
+
+    blob_text_factory.content = """
+    ### Node 1
+    Content
+    #### Subnode 1a
+    Content
+    ### Node 2
+    """
+
+    tree = blob_text_factory.get_tree()
+    assert count_nodes(tree) == 3
+    assert tree[0]["id"] == 1
+    assert tree[0]["label"] == "Node 1"
+    assert tree[0]["nodes"][0]["id"] == 2
+    assert tree[0]["nodes"][0]["label"] == "Subnode 1a"
+    assert tree[0]["nodes"][0]["nodes"] == []
+    assert tree[1]["id"] == 3
+    assert tree[1]["label"] == "Node 2"
+    assert tree[1]["nodes"] == []
+
+    blob_text_factory.content = """
+    ## Node 1
+    ### Subnode 1a
+    ### Subnode 1b
+    ### Subnode 1c
+    ### Subnode 1d
+    ## Node 2
+    ## Node 3
+    ### Subnode 3a
+    """
+
+    tree = blob_text_factory.get_tree()
+    assert count_nodes(tree) == 8
+    assert tree[0]["id"] == 1
+    assert tree[0]["label"] == "Node 1"
+    assert tree[0]["nodes"][0]["id"] == 2
+    assert tree[0]["nodes"][0]["label"] == "Subnode 1a"
+    assert tree[0]["nodes"][0]["nodes"] == []
+    assert tree[0]["nodes"][1]["id"] == 3
+    assert tree[0]["nodes"][1]["label"] == "Subnode 1b"
+    assert tree[0]["nodes"][1]["nodes"] == []
+    assert tree[0]["nodes"][2]["id"] == 4
+    assert tree[0]["nodes"][2]["label"] == "Subnode 1c"
+    assert tree[0]["nodes"][2]["nodes"] == []
+    assert tree[0]["nodes"][3]["id"] == 5
+    assert tree[0]["nodes"][3]["label"] == "Subnode 1d"
+    assert tree[0]["nodes"][3]["nodes"] == []
+    assert tree[1]["id"] == 6
+    assert tree[1]["label"] == "Node 2"
+    assert tree[1]["nodes"] == []
+    assert tree[2]["id"] == 7
+    assert tree[2]["label"] == "Node 3"
+    assert tree[2]["nodes"][0]["id"] == 8
+    assert tree[2]["nodes"][0]["label"] == "Subnode 3a"
+    assert tree[2]["nodes"][0]["nodes"] == []

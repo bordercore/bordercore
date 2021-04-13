@@ -3,7 +3,6 @@ from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.models import F, Q
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
