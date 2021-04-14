@@ -23,7 +23,7 @@
                     <template v-slot:content>
                         <ul class="list-group">
                             {% for task in tasks %}
-                                <li class="list-group-item list-group-item-secondary text-info">{{ task.task }}
+                                <li class="list-group-item list-group-item-secondary text-info">{{ task.name }}
                                     <span class="badge badge-primary ml-1">{{ task.parent_category }}</span>
                                     {% if task.date %}
                                         {{ task.date }}

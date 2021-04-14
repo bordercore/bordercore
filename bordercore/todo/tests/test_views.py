@@ -39,7 +39,7 @@ def test_todo_detail(auto_login_user, todo):
 
     url = urls.reverse("todo:update", kwargs={"uuid": todo.uuid})
     resp = client.post(url, {
-        "task": "Sample Task Changed",
+        "name": "Sample Task Changed",
         "priority": "2",
         "tags": "django"
     })
@@ -61,7 +61,7 @@ def test_todo_create(auto_login_user, todo):
     # The submitted form
     url = urls.reverse("todo:create")
     resp = client.post(url, {
-        "task": "Sample Task",
+        "name": "Sample Task",
         "priority": "2",
         "tags": "django"
     })

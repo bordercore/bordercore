@@ -62,5 +62,5 @@ class Command(BaseCommand):
     def index_todo_all(self):
 
         for t in Todo.objects.all():
-            self.stdout.write(t.task)
+            self.stdout.write(t.name)
             t.index_todo(es)

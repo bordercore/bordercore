@@ -10,30 +10,30 @@ class TodoForm(ModelForm):
 
         # In case one of our views passed in the request object (eg from get_form_kwargs()),
         #  save it and remove it from kwargs before calling super()
-        if kwargs.get('request'):
+        if kwargs.get("request"):
             self.request = kwargs.pop("request")
 
         super().__init__(*args, **kwargs)
 
         # If this form has a model attached, get the tags and display them separated by commas
         if self.instance.id:
-            self.initial['tags'] = self.instance.get_tags()
+            self.initial["tags"] = self.instance.get_tags()
         else:
-            initial_tag = self.request.session.get('current_todo_tag', None)
-            self.initial['tags'] = initial_tag
+            initial_tag = self.request.session.get("current_todo_tag", None)
+            self.initial["tags"] = initial_tag
 
-        self.fields['tags'] = ModelCommaSeparatedChoiceField(
+        self.fields["tags"] = ModelCommaSeparatedChoiceField(
             request=self.request,
             required=False,
             queryset=Tag.objects.filter(user=self.request.user),
-            to_field_name='name')
+            to_field_name="name")
 
     class Meta:
         model = Todo
-        fields = ('task', 'priority', 'note', 'url')
+        fields = ("name", "priority", "note", "url")
         widgets = {
-            'priority': Select(attrs={'class': 'form-control'}),
-            'task': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off', 'autofocus': 'true'}),
-            'note': Textarea(attrs={'class': 'form-control', 'rows': 2}),
-            'url': TextInput(attrs={'class': 'form-control'}),
+            "priority": Select(attrs={"class": "form-control"}),
+            "name": TextInput(attrs={"class": "form-control", "autocomplete": "off", "autofocus": "true"}),
+            "note": Textarea(attrs={"class": "form-control", "rows": 2}),
+            "url": TextInput(attrs={"class": "form-control"}),
         }

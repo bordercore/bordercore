@@ -19,7 +19,7 @@ from tag.models import SortOrderTagTodo, Tag
 
 class Todo(TimeStampedModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
-    task = models.TextField()
+    name = models.TextField()
     note = models.TextField(null=True, blank=True)
     url = models.URLField(max_length=1000, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
@@ -119,7 +119,7 @@ class Todo(TimeStampedModel):
         doc = {
             "bordercore_id": self.id,
             "uuid": self.uuid,
-            "task": self.task,
+            "name": self.name,
             "tags": [tag.name for tag in self.tags.all()],
             "url": self.url,
             "note": self.note,

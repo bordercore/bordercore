@@ -12,7 +12,7 @@ class TodoFactory(factory.DjangoModelFactory):
     class Meta:
         model = Todo
 
-    task = factory.Sequence(lambda n: f"task_{n}")
+    name = factory.Sequence(lambda n: f"task_{n}")
     user = factory.SubFactory(UserFactory)
 
     @factory.post_generation

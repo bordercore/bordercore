@@ -79,7 +79,7 @@
                     empty-text="No tasks found"
                 >
 
-                    <template #cell(task)="data">
+                    <template #cell(name)="data">
                         <span v-html="data.value"></span>
                         <span v-if="data.item.url"><a class="ml-1" :href="data.item.url"><font-awesome-icon icon="link"></font-awesome-icon></a></span>
                         <div class="table-note" v-html="data.item.note"></div>
@@ -192,7 +192,7 @@
                             thClass: "todo-col-manual-sorting",
                         },
                         {
-                            key: "task",
+                            key: "name",
                             sortable: true,
                         },
                         {

@@ -160,7 +160,7 @@
 
                                         <h4>
                                             <font-awesome-icon icon="tasks"></font-awesome-icon>
-                                        Todo: <a href="{% url 'todo:update' match.source.uuid %}">{{ match.source.task }}</a>
+                                        Todo: <a href="{% url 'todo:update' match.source.uuid %}">{{ match.source.name }}</a>
                                         </h4>
 
                                     {% elif match.source.doctype == 'bookmark' %}

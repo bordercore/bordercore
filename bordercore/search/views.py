@@ -115,14 +115,13 @@ class SearchListView(ListView):
             "_source": ["artist",
                         "author",
                         "bordercore_id",
-                        "task",
                         "date",
                         "date_unixtime",
                         "doctype",
                         "filepath",
                         "importance",
-                        "bordercore_id",
                         "last_modified",
+                        "name",
                         "question",
                         "sha1sum",
                         "tags",
@@ -147,7 +146,7 @@ class SearchListView(ListView):
                     "multi_match": {
                         "type": "phrase" if self.request.GET.get("exact_match", None) in ["Yes"] else "best_fields",
                         "query": search_term,
-                        "fields": ["answer", "artist", "author", "attachment.content", "contents", "question", "sha1sum", "task", "title", "uuid"],
+                        "fields": ["answer", "artist", "author", "attachment.content", "contents", "name", "question", "sha1sum", "title", "uuid"],
                         "operator": boolean_type,
                     }
                 }
@@ -301,7 +300,6 @@ class SearchTagDetailView(ListView):
             "from": 0, "size": hit_count,
             "_source": ["artist",
                         "author",
-                        "task",
                         "content_type",
                         "date",
                         "date_unixtime",
@@ -310,6 +308,7 @@ class SearchTagDetailView(ListView):
                         "importance",
                         "bordercore_id",
                         "last_modified",
+                        "name",
                         "question",
                         "sha1sum",
                         "tags",
@@ -332,7 +331,7 @@ class SearchTagDetailView(ListView):
                 "artist": match["_source"].get("artist", ""),
                 "question": truncate(match["_source"].get("question", "")),
                 "title": match["_source"].get("title", "No Title"),
-                "task": match["_source"].get("task", ""),
+                "task": match["_source"].get("name", ""),
                 "url": match["_source"].get("url", ""),
                 "uuid": match["_source"].get("uuid", "")
             }

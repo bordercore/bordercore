@@ -86,7 +86,7 @@ class TodoTaskList(ListView):
             if time:
                 queryset = queryset.filter(created__gt=(timezone.now() - timedelta(days=int(time))))
 
-            queryset = queryset.filter(tag__name=tag_name).order_by("task")
+            queryset = queryset.filter(tag__name=tag_name).order_by("name")
 
         else:
             queryset = Tag.objects.get(user=self.request.user, name=tag_name).todos.all().order_by("sortordertagtodo__sort_order")
@@ -105,7 +105,7 @@ class TodoTaskList(ListView):
             data = {
                 "manual_order": "",
                 "sort_order": sort_order,
-                "task": re.sub("[\n\r\"]", "", todo.task),
+                "name": re.sub("[\n\r\"]", "", todo.name),
                 "priority": Todo.get_priority_name(todo.priority),
                 "created": format(todo.modified, "Y-m-d"),
                 "note": re.sub("[\n\r\"]", "", todo.get_note()),
@@ -150,7 +150,7 @@ class TodoDetailView(UpdateView):
         context['nav'] = 'todo'
         context['uuid'] = self.kwargs.get('uuid')
         context['action'] = 'Update'
-        context['title'] = 'Todo Update :: {}'.format(self.object.task)
+        context['title'] = 'Todo Update :: {}'.format(self.object.name)
         context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
 
