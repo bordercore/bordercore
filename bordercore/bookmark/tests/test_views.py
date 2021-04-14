@@ -48,7 +48,7 @@ def test_bookmark_update(monkeypatch_bookmark, auto_login_user, bookmark):
     url = urls.reverse("bookmark:update", kwargs={"uuid": bookmark[0].uuid})
     resp = client.post(url, {
         "url": "https://www.bordercore.com/bookmark/",
-        "title": "Sample Title Changed",
+        "name": "Sample Title Changed",
         "tags": "linux",
         "importance": "1"
     })
@@ -71,7 +71,7 @@ def test_bookmark_create(monkeypatch_bookmark, auto_login_user, bookmark):
 
     resp = client.post(url, {
         "url": "https://www.bordercore.com/foo",
-        "title": "Sample Title",
+        "name": "Sample Title",
         "tags": "django",
         "importance": "1"
     })
@@ -109,7 +109,7 @@ def test_bookmark_snarf_link(monkeypatch_bookmark, auto_login_user, bookmark):
     _, client = auto_login_user()
 
     url = urls.reverse("bookmark:snarf")
-    resp = client.get(f"{url}?url=http%3A%2F%2Fwww.bordercore.com%2F&title=Sample%2BTitlte")
+    resp = client.get(f"{url}?url=http%3A%2F%2Fwww.bordercore.com%2F&name=Sample%2BTitlte")
 
     assert resp.status_code == 302
 

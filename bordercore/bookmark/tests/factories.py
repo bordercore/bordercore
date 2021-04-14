@@ -9,6 +9,6 @@ class BookmarkFactory(factory.DjangoModelFactory):
     class Meta:
         model = Bookmark
 
-    title = factory.Sequence(lambda n: f"Bookmark {n}")
+    name = factory.Sequence(lambda n: f"Bookmark {n}")
     url = "https://www.bordercore.com"
     user = factory.SubFactory(UserFactory)

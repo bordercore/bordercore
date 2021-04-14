@@ -136,8 +136,8 @@ def test_bookmark_fields_are_trimmed():
     bookmarks = Bookmark.objects.filter(
         Q(url__iregex=r"\s$")
         | Q(url__iregex=r"^\s")
-        | Q(title__iregex=r"\s$")
-        | Q(title__iregex=r"^\s")
+        | Q(name__iregex=r"\s$")
+        | Q(name__iregex=r"^\s")
         | Q(note__iregex=r"\s$")
         | Q(note__iregex=r"^\s")
     )

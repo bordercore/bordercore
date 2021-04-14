@@ -32,7 +32,7 @@ BOOKMARKS_PER_PAGE = 50
 def click(request, bookmark_uuid=None):
 
     b = Bookmark.objects.get(user=request.user, uuid=bookmark_uuid) if bookmark_uuid else None
-    b.daily['viewed'] = 'true'
+    b.daily["viewed"] = "true"
     b.save()
     return redirect(b.url)
 
@@ -124,7 +124,7 @@ def delete(request, bookmark_id=None):
     bookmark = Bookmark.objects.get(user=request.user, pk=bookmark_id)
     bookmark.delete()
 
-    return HttpResponse(json.dumps('OK'), content_type="application/json")
+    return HttpResponse(json.dumps("OK"), content_type="application/json")
 
 
 @login_required
@@ -133,8 +133,8 @@ def snarf_link(request):
     from html.parser import HTMLParser
     h = HTMLParser()
 
-    url = request.GET['url']
-    title = h.unescape(request.GET['title'])
+    url = request.GET["url"]
+    name = h.unescape(request.GET["name"])
 
     # First verify that this url does not already exist
     try:
@@ -147,7 +147,7 @@ def snarf_link(request):
         )
         return redirect("bookmark:update", b.uuid)
     except ObjectDoesNotExist:
-        b = Bookmark(is_pinned=False, user=request.user, url=url, title=title)
+        b = Bookmark(is_pinned=False, user=request.user, url=url, name=name)
         b.save()
         b.index_bookmark()
         b.snarf_favicon()
@@ -179,7 +179,7 @@ def add_bookmarks_from_import(request, tag, bookmarks):
             b = Bookmark(
                 user=request.user,
                 url=link["url"],
-                title=link["title"],
+                name=link["name"],
                 created=link["created"],
                 modified=link["created"]
             )
@@ -213,10 +213,10 @@ def do_import(request):
     Supported formats: Google bookmark export format
     """
 
-    if request.method == 'POST':
+    if request.method == "POST":
 
-        start = request.POST.get('start_folder', '')
-        tag = request.POST.get('tags', '')
+        start = request.POST.get("start_folder", "")
+        tag = request.POST.get("tags", "")
 
         links = []
 
@@ -229,13 +229,13 @@ def do_import(request):
                 messages.add_message(request, messages.ERROR, "Please specify a starting folder")
                 raise ValueError()
 
-            xml_string = ''
-            for chunk in request.FILES['file'].chunks():
+            xml_string = ""
+            for chunk in request.FILES["file"].chunks():
                 xml_string = xml_string + str(chunk)
 
             tree = lh.fromstring(xml_string)
 
-            found = tree.xpath('//dt/h3[text()="{}"]/following::dl[1]//a'.format(start))
+            found = tree.xpath("//dt/h3[text()='{}']/following::dl[1]//a".format(start))
 
             if not found:
                 messages.add_message(request, messages.ERROR, "No bookmarks were found")
@@ -246,7 +246,7 @@ def do_import(request):
                     {
                         "url": link.get("href"),
                         "created": datetime.datetime.fromtimestamp(int(link.get("add_date"))),
-                        "title": link.text
+                        "name": link.text
                     }
                 )
 
@@ -255,7 +255,7 @@ def do_import(request):
         except ValueError:
             pass
 
-    return render(request, 'bookmark/import.html', {})
+    return render(request, "bookmark/import.html", {})
 
 
 @login_required
@@ -284,14 +284,14 @@ class BookmarkListView(ListView):
 
         query = Bookmark.objects.filter(user=self.request.user)
         if "search" in self.kwargs:
-            query = query.filter(title__icontains=self.kwargs.get("search"))
+            query = query.filter(name__icontains=self.kwargs.get("search"))
         elif "tag_filter" in self.kwargs:
-            query = query.filter(title__icontains=self.kwargs.get("tag_filter"))
+            query = query.filter(name__icontains=self.kwargs.get("tag_filter"))
         else:
             query = query.filter(tags__isnull=True)
 
         query = query.prefetch_related("tags")
-        query = query.only("uuid", "created", "url", "title", "last_response_code", "note")
+        query = query.only("uuid", "created", "url", "name", "last_response_code", "note")
 
         if "random" in self.kwargs:
             query = query.order_by("?")
@@ -339,7 +339,7 @@ class BookmarkListView(ListView):
                     "created": x.created.strftime("%B %d, %Y"),
                     "createdYear": x.created.strftime("%Y"),
                     "url": x.url,
-                    "title": re.sub("[\n\r]", "", x.title),
+                    "name": re.sub("[\n\r]", "", x.name),
                     "last_response_code": x.last_response_code,
                     "note": x.note,
                     "favicon_url": x.get_favicon_url(size=16),
@@ -375,7 +375,7 @@ class BookmarkListTagView(BookmarkListView):
                     "created": x.created.strftime("%B %d, %Y"),
                     "createdYear": x.created.strftime("%Y"),
                     "url": x.url,
-                    "title": re.sub("[\n\r]", "", x.title),
+                    "name": re.sub("[\n\r]", "", x.name),
                     "last_response_code": x.last_response_code,
                     "note": x.note,
                     "favicon_url": x.get_favicon_url(size=16),

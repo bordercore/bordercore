@@ -71,7 +71,7 @@ class BookmarkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bookmark
         fields = ["daily", "importance", "is_pinned", "last_check",
-                  "last_response_code", "note", "title", "url", "user"]
+                  "last_response_code", "note", "name", "url", "user"]
 
 
 class CollectionSerializer(serializers.ModelSerializer):

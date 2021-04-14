@@ -95,9 +95,9 @@
                 },
                 onBlur(evt) {
 
-                    // If the title has already been filled-in, abort
-                    const title = document.getElementById("id_title");
-                    if ( title.value ) {
+                    // If the name has already been filled-in, abort
+                    const name = document.getElementById("id_name");
+                    if ( name.value ) {
                         return;
                     }
 
@@ -112,7 +112,7 @@
                         this,
                         "{% url "bookmark:get_title_from_url" %}?url=" + url,
                         (response) => {
-                            title.value = response.data.title;
+                            name.value = response.data.title;
                         },
                         "Error getting title from url"
                     );

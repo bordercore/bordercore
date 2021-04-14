@@ -85,7 +85,7 @@
                         <template v-slot:content>
                             <ul class="list-group">
                                 {% for bookmark in daily_bookmarks %}
-                                    <li class="list-group-item list-group-item-secondary {{ bookmark.css_class }}"><a class="text-success" href="{% url 'bookmark:click' bookmark.uuid %}">{{ bookmark.title }}</a></li>
+                                    <li class="list-group-item list-group-item-secondary {{ bookmark.css_class }}"><a class="text-success" href="{% url 'bookmark:click' bookmark.uuid %}">{{ bookmark.name }}</a></li>
                                 {% empty %}
                                     <li class="list-group-item">No bookmarks marked as Daily.</li>
                                 {% endfor %}
@@ -101,7 +101,7 @@
                         <template v-slot:content>
                             <ul class="list-group">
                                 {% for bookmark in pinned_bookmarks %}
-                                    <li class="list-group-item list-group-item-secondary"><a href="{{ bookmark.url }}">{{ bookmark.title }}</a> </li>
+                                    <li class="list-group-item list-group-item-secondary"><a href="{{ bookmark.url }}">{{ bookmark.name }}</a> </li>
                                 {% empty %}
                                     <li class="list-group-item list-group-item-secondary">No pinned bookmarks.</li>
                                 {% endfor %}
@@ -125,7 +125,7 @@
                         {% if bookmarks %}
                             <ul class="list-group">
                             {% for bookmark in bookmarks %}
-                                <li class="list-group-item list-group-item-secondary text-success">{{ bookmark.url|favicon:16|safe }} <a class="text-success ml-2" href="{{ bookmark.url }}">{{ bookmark.title }}</a> </li>
+                                <li class="list-group-item list-group-item-secondary text-success">{{ bookmark.url|favicon:16|safe }} <a class="text-success ml-2" href="{{ bookmark.url }}">{{ bookmark.name }}</a> </li>
                             {% endfor %}
                             </ul>
                         {% else %}

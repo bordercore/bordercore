@@ -75,10 +75,10 @@ class BookmarkForm(ModelForm):
 
     class Meta:
         model = Bookmark
-        fields = ('url', 'title', 'note', 'tags', 'importance', 'is_pinned', 'daily', 'id')
+        fields = ('url', 'name', 'note', 'tags', 'importance', 'is_pinned', 'daily', 'id')
         widgets = {
             'url': URLInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-            'title': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'name': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'importance': Select(attrs={'class': 'form-control', 'autocomplete': 'off'}, choices=((1, 'Normal'), (5, 'High'), (10, 'Highest'))),
             'daily': DailyCheckboxInput(check_test=daily_check_test, attrs={'class': 'align-middle mt-2'}),

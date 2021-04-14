@@ -30,7 +30,7 @@ class DailyBookmarkJSONField(JSONField):
 class Bookmark(TimeStampedModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     url = models.URLField(max_length=1000)
-    title = models.TextField()
+    name = models.TextField()
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     note = models.TextField(null=True)
     tags = models.ManyToManyField("tag.Tag")
@@ -43,7 +43,7 @@ class Bookmark(TimeStampedModel):
     created = models.DateTimeField(db_index=True, auto_now_add=True)
 
     def __str__(self):
-        return self.title
+        return self.name
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
@@ -88,7 +88,7 @@ class Bookmark(TimeStampedModel):
 
         doc = {
             "bordercore_id": self.id,
-            "title": self.title,
+            "name": self.name,
             "bordercore_bookmark_note": self.note,
             "tags": [tag.name for tag in self.tags.all()],
             "url": self.url,

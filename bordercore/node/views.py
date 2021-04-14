@@ -148,13 +148,13 @@ def edit_blob_note(request):
 def get_bookmark_list(request, uuid):
 
     node = Node.objects.get(uuid=uuid, user=request.user)
-    bookmark_list = list(node.bookmarks.all().only("title", "id").order_by("sortordernodebookmark__sort_order"))
+    bookmark_list = list(node.bookmarks.all().only("name", "id").order_by("sortordernodebookmark__sort_order"))
 
     response = {
         "status": "OK",
         "bookmark_list": [
             {
-                "title": x.title,
+                "name": x.name,
                 "url": x.url,
                 "id": x.id,
                 "favicon_url": x.get_favicon_url(size=16),
@@ -243,7 +243,7 @@ def edit_bookmark_note(request):
 @login_required
 def search_bookmarks(request):
 
-    results = Bookmark.objects.filter(user=request.user).filter(title__icontains=request.GET["term"])
+    results = Bookmark.objects.filter(user=request.user).filter(name__icontains=request.GET["term"])
     matches = []
 
     for match in results:
@@ -253,7 +253,7 @@ def search_bookmarks(request):
                 "id": match.id,
                 "url": match.url,
                 "note": match.note,
-                "title": match.title,
+                "name": match.name,
                 "favicon_url": match.get_favicon_url(size=16),
             }
         )
@@ -313,6 +313,7 @@ def search_blob_titles(request):
                     "doctype",
                     "filepath",
                     "importance",
+                    "name",
                     "note",
                     "sha1sum",
                     "tags",
