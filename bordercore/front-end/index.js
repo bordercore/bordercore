@@ -77,9 +77,10 @@ window.format = format;
 import EasyMDE from "easymde";
 window.EasyMDE = EasyMDE;
 
-import { doGet, doPost } from "./util.js";
+import { doGet, doPost, getFormattedDate } from "./util.js";
 window.doGet = doGet;
 window.doPost = doPost;
+window.getFormattedDate = getFormattedDate;
 
 import SimpleSuggest from "./vue/common/SimpleSuggest.vue";
 Vue.component("SimpleSuggest", SimpleSuggest);

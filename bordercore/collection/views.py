@@ -46,8 +46,7 @@ class CollectionListView(FormMixin, ListView):
         for myobject in context["object_list"]:
             info.append(dict(name=myobject.name,
                              tags=myobject.get_tags(),
-                             updated=myobject.get_modified(),
-                             unixtime=format(myobject.modified, "U"),
+                             updated=format(myobject.modified, "Y-m-d"),
                              objectcount=len(myobject.blob_list) if myobject.blob_list else 0,
                              uuid=myobject.uuid))
 

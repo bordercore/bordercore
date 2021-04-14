@@ -107,8 +107,7 @@ class TodoTaskList(ListView):
                 "sort_order": sort_order,
                 "task": re.sub("[\n\r\"]", "", todo.task),
                 "priority": Todo.get_priority_name(todo.priority),
-                "created": todo.get_created(),
-                "unixtime": int(format(todo.created, "U")),
+                "created": format(todo.modified, "Y-m-d"),
                 "note": re.sub("[\n\r\"]", "", todo.get_note()),
                 "url": todo.url,
                 "uuid": todo.uuid

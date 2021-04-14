@@ -30,11 +30,6 @@ def test_sort_collection(collection):
         collection.sort(1, 1)
 
 
-def test_get_modified(collection):
-
-    assert collection.get_modified() == datetime.datetime.now().strftime('%b %d, %Y')
-
-
 def test_get_tags(collection):
 
     # Use set() since get_tags() doesn't guarantee sort order

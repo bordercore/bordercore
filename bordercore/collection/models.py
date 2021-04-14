@@ -29,10 +29,6 @@ class Collection(TimeStampedModel):
     def __str__(self):
         return self.name
 
-    def get_modified(self):
-        to_tz = timezone.get_default_timezone()
-        return self.modified.astimezone(to_tz).strftime("%b %d, %Y")
-
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
 

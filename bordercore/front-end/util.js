@@ -66,3 +66,9 @@ export function doPost(scope, url, params, callback, successMsg, errorMsg) {
         });
 
 }
+
+export function getFormattedDate(date, monthFormat="short") {
+    var formattedDate  = new Date(date);
+    var options = { year: "numeric", month: monthFormat, day: "numeric" };
+    return formattedDate.toLocaleDateString("en-US", options);
+}

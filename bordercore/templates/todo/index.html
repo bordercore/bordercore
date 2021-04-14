@@ -102,6 +102,10 @@
                         </div>
                     </template>
 
+                    <template #cell(created)="data">
+                        [[ getDate(data.value) ]]
+                    </template>
+
                 </b-table>
 
             </div>
@@ -201,6 +205,7 @@
                             label: "Date",
                             class: "text-nowrap",
                             sortable: true,
+                            sortDirection: "desc",
                             thClass: "todo-col-date"
                         },
                         {
@@ -244,19 +249,14 @@
                         "Error todo list"
                     );
                 },
-                sortCompare(aRow, bRow, key) {
+                sortCompare(aRow, bRow, key, sortDesc) {
 
-                    let a = b = null;
+                    let a = aRow[key]
+                    let b = bRow[key]
 
-                    if (key === "created") {
-                        a = aRow["unixtime"];
-                        b = bRow["unixtime"];
-                    } else if (key === "manualSorting") {
+                    if (key === "manualSorting") {
                         a = aRow["sort_order"];
                         b = bRow["sort_order"];
-                    } else {
-                        a = aRow[key];
-                        b = bRow[key];
                     }
 
                     return a < b ? -1 : a > b ? 1 : 0;
@@ -315,6 +315,9 @@
                     this.getTodoList();
                     sortable.option("disabled", true);
                 },
+                getDate(date) {
+                    return getFormattedDate(date);
+                }
             },
             computed: {
                 isFiltered() {

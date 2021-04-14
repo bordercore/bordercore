@@ -36,17 +36,14 @@ class Todo(TimeStampedModel):
         default=2
     )
 
-    def get_created(self):
-        return self.modified.strftime('%b %d, %Y')
-
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
 
     def get_note(self):
         if self.note:
             return markdown.markdown(self.note, extensions=[CodeHiliteExtension(guess_lang=False), "tables"])
-        else:
-            return ""
+
+        return ""
 
     @staticmethod
     def get_priority_name(priority_value):
