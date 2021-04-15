@@ -93,7 +93,7 @@ class Collection(TimeStampedModel):
                     size="small"
                 ).get("url", None)
 
-                blob.title = blob.get_title(use_filename_if_present=True).replace("\"", "\\\"")
+                blob.name = blob.get_name(use_filename_if_present=True).replace("\"", "\\\"")
 
             return blob_list
 

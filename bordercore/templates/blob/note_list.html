@@ -25,7 +25,7 @@
                             <transition-group type="transition">
                                 <div v-for="note in notes" :key="note.uuid" v-cloak>
                                     <li class="list-group-item list-group-item-secondary" :data-uuid="note.uuid">
-                                        <a :href="note.url">[[ note.title ]]</a>
+                                        <a :href="note.url">[[ note.name ]]</a>
                                     </li>
                                 </div>
                             </transition-group>
@@ -55,10 +55,10 @@
                         </div>
                     {% endif %}
 
-                    <card title="{{ note.source.title|default:"Note Title" }}">
+                    <card title="{{ note.source.name|default:"Note Name" }}">
                         <template v-slot:title-slot>
                             <h2>
-                                <a href="{% url 'blob:detail' note.source.uuid %}">{{ note.source.title|default:"Note Title" }}</a>
+                                <a href="{% url 'blob:detail' note.source.uuid %}">{{ note.source.name|default:"Note Name" }}</a>
                             </h2>
                         </template>
                         <template v-slot:content>
@@ -133,7 +133,7 @@
                     {
                         url: "{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, "{{ note.uuid }}"),
                         uuid: "{{ note.uuid }}",
-                        title: "{{ note.title }}"
+                        name: "{{ note.name }}"
                     },
                     {% endfor %}
                 ]

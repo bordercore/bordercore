@@ -42,8 +42,8 @@ urlpatterns = [
     ),
     path(
         route="blob/search/",
-        view=views.search_blob_titles,
-        name="search_blob_titles"
+        view=views.search_blob_names,
+        name="search_blob_names"
     ),
     path(
         route="blob/sort/",

@@ -33,7 +33,7 @@
 
                     </div>
 
-                    <h2 id="title" class="pl-0 text-break">
+                    <h2 id="name" class="pl-0 text-break">
                         {{ caption }}
                     </h2>
 
@@ -132,7 +132,7 @@
                                     {% if blob.has_thumbnail_url %}
                                         <img src="{{ blob.get_cover_url_small }}" />
                                     {% endif %}
-                                    <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
+                                    <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.name|default:"No Name" }}</a>
                                     </li>
                                 {% endfor %}
                                 <li class="list-group-item list-group-item-secondary text-info">
@@ -177,7 +177,7 @@
                             {% if forloop.last %}
                             </ul>
                             {% endif %}
-                            <li> <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a> </li>
+                            <li> <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.name|default:"No Name" }}</a> </li>
                     {% endfor %}
 
                 </div>

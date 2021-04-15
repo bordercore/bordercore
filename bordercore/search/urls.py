@@ -7,8 +7,8 @@ app_name = "search"
 urlpatterns = [
     path(
         route="tagstitle/",
-        view=views.search_tags_and_titles,
-        name="search_tags_and_titles"
+        view=views.search_tags_and_names,
+        name="search_tags_and_names"
     ),
     re_path(
         route=r"^tagdetail/(?P<taglist>.*)/",

@@ -26,7 +26,7 @@ def test_get_blob_info(blob_image_factory):
     url = f"https://www.bordercore.com/api/blobs/{blob_image_factory.uuid}/"
 
     blob_info = {
-        "title": blob_image_factory.title,
+        "name": blob_image_factory.name,
         "metadata_set": [
             {
                 "Url": "https://www.bordercore.com"
@@ -41,7 +41,7 @@ def test_get_blob_info(blob_image_factory):
                   json=blob_info, status=200)
 
     assert get_blob_info(uuid=blob_image_factory.uuid) == {
-        "title": blob_image_factory.title,
+        "name": blob_image_factory.name,
         "metadata": {
             "author": ["John Smith"],
             "url": ["https://www.bordercore.com"]
@@ -62,7 +62,7 @@ def test_get_blob_info(blob_image_factory):
                   json=blob_info, status=200)
 
     assert get_blob_info(sha1sum=blob_image_factory.sha1sum) == {
-        "title": blob_image_factory.title,
+        "name": blob_image_factory.name,
         "metadata": {
             "author": ["John Smith"],
             "url": ["https://www.bordercore.com"]

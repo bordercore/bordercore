@@ -125,7 +125,6 @@ class SearchListView(ListView):
                         "question",
                         "sha1sum",
                         "tags",
-                        "title",
                         "url",
                         "uuid"]
         }
@@ -146,7 +145,7 @@ class SearchListView(ListView):
                     "multi_match": {
                         "type": "phrase" if self.request.GET.get("exact_match", None) in ["Yes"] else "best_fields",
                         "query": search_term,
-                        "fields": ["answer", "artist", "author", "attachment.content", "contents", "name", "question", "sha1sum", "title", "uuid"],
+                        "fields": ["answer", "artist", "author", "attachment.content", "contents", "name", "question", "sha1sum", "uuid"],
                         "operator": boolean_type,
                     }
                 }
@@ -229,7 +228,7 @@ class NoteListView(SearchListView):
 
         page = int(self.request.GET.get("page", 1))
         context["paginator"] = self.get_paginator(page, context["search_results"])
-        context["pinned_notes"] = self.request.user.userprofile.pinned_notes.all().only("title", "uuid").order_by("sortorderusernote__sort_order")
+        context["pinned_notes"] = self.request.user.userprofile.pinned_notes.all().only("name", "uuid").order_by("sortorderusernote__sort_order")
 
         for match in context["search_results"]["hits"]["hits"]:
 
@@ -312,7 +311,6 @@ class SearchTagDetailView(ListView):
                         "question",
                         "sha1sum",
                         "tags",
-                        "title",
                         "url",
                         "uuid"]
         }
@@ -330,7 +328,7 @@ class SearchTagDetailView(ListView):
             result = {
                 "artist": match["_source"].get("artist", ""),
                 "question": truncate(match["_source"].get("question", "")),
-                "title": match["_source"].get("title", "No Title"),
+                "name": match["_source"].get("name", "No Name"),
                 "task": match["_source"].get("name", ""),
                 "url": match["_source"].get("url", ""),
                 "uuid": match["_source"].get("uuid", "")
@@ -444,7 +442,7 @@ def sort_results(matches):
             [
                 {
                     "id": f"__{key}",
-                    "title": f"{key}s",
+                    "name": f"{key}s",
                     "splitter": True,
                     "value": "Bogus"
                 },
@@ -490,7 +488,7 @@ def get_tag_link(doc_type, tag):
         return reverse("search:kb_search_tag_detail", kwargs={"taglist": tag})
 
 
-def get_title(doc_type, match):
+def get_name(doc_type, match):
     if doc_type == "Song":
         return f"{match['title']} - {match['artist']}"
     elif doc_type == "Artist":
@@ -500,7 +498,7 @@ def get_title(doc_type, match):
     elif doc_type == "Drill":
         return match["question"][:30]
     else:
-        return match["title"].title()
+        return match["name"].title()
 
 
 def get_doctype(match):
@@ -508,7 +506,7 @@ def get_doctype(match):
     if match["_source"]["doctype"] == "song" and "highlight" in match:
         highlight_fields = list(match["highlight"].keys())
 
-        highlight_fields = [x if x != "title" else "Song" for x in match["highlight"].keys()]
+        highlight_fields = [x if x != "name" else "Song" for x in match["highlight"].keys()]
         # There could be multiple highlighted fields. For now,
         #  pick the first one.
         return highlight_fields[0].title()
@@ -538,9 +536,9 @@ def is_cached():
 
 
 @login_required
-def search_tags_and_titles(request):
+def search_tags_and_names(request):
     """
-    Endpoint for top-search "auto-complete" matching tags and titles
+    Endpoint for top-search "auto-complete" matching tags and names
     """
 
     es = Elasticsearch(
@@ -556,21 +554,21 @@ def search_tags_and_titles(request):
     if doc_type == "music":
         doc_type = "song"
 
-    results_title = search_titles(request, es, doc_type, search_term)
+    results_name = search_names(request, es, doc_type, search_term)
 
     matches = []
 
     cache_checker = is_cached()
 
-    for match in results_title["hits"]["hits"]:
+    for match in results_name["hits"]["hits"]:
         object_type = get_doctype(match)
-        title = get_title(object_type, match["_source"])
+        name = get_name(object_type, match["_source"])
 
-        if not cache_checker(object_type, title):
+        if not cache_checker(object_type, name):
             matches.append(
                 {
                     "object_type": object_type,
-                    "value": title,
+                    "value": name,
                     "uuid": match["_source"].get("uuid"),
                     "id": match["_id"],
                     "url": match["_source"].get("url", None),
@@ -585,7 +583,7 @@ def search_tags_and_titles(request):
 
 
 @login_required
-def search_titles(request, es, doc_type, search_term):
+def search_names(request, es, doc_type, search_term):
 
     search_terms = re.split(r"\s+", search_term)
 
@@ -612,10 +610,10 @@ def search_titles(request, es, doc_type, search_term):
                     "doctype",
                     "filepath",
                     "importance",
+                    "name",
                     "question",
                     "sha1sum",
                     "tags",
-                    "title",
                     "url",
                     "uuid"]
     }
@@ -629,7 +627,7 @@ def search_titles(request, es, doc_type, search_term):
                     "should": [
                         {
                             "wildcard": {
-                                "title": {
+                                "name": {
                                     "value": f"*{one_term}*",
                                 }
                             }
@@ -663,7 +661,7 @@ def search_titles(request, es, doc_type, search_term):
     search_object["highlight"] = {
         "fields": {
             "album": {},
-            "title": {},
+            "name": {},
             "artist": {}
         }
     }
@@ -718,10 +716,10 @@ def search_tags(request, es, doc_type, search_term):
                     "doctype",
                     "filepath",
                     "importance",
+                    "name",
                     "question",
                     "sha1sum",
                     "tags",
-                    "title",
                     "url",
                     "uuid"]
     }

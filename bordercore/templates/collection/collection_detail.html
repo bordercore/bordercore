@@ -89,7 +89,7 @@
                             <li v-for="blob in blob_list" :key="blob.id" class="float-left p-3">
                                 <a :href="[[ blob.url ]]"><img :src="[[ blob.cover_url ]]" /></a>
                                 <br/>
-                                <a :href="[[ blob.url ]]">[[ blob.title ]]</a> {% if blob.collection_note %}<img src="{{ STATIC_URL }}img/note.png" height="16" width="16" data-toggle="popover" data-content="[[ blob.collection_note ]]"/>{% endif %}
+                                <a :href="[[ blob.url ]]">[[ blob.name ]]</a> {% if blob.collection_note %}<img src="{{ STATIC_URL }}img/note.png" height="16" width="16" data-toggle="popover" data-content="[[ blob.collection_note ]]"/>{% endif %}
                             </li>
                         </draggable>
                     </ul>
@@ -102,7 +102,7 @@
                         {
                             id: {{ blob.id }},
                             uuid: "{{ blob.uuid }}",
-                            title: "{{ blob.title|safe }}",
+                            name: "{{ blob.name|safe }}",
                             collection_note: "{{ blob.collection_note }}",
                             url: "{% url 'blob:detail' blob.uuid %}",
                             cover_url: "{{ blob.cover_url }}"

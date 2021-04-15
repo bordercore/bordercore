@@ -29,11 +29,11 @@ class Command(BaseCommand):
     def handle(self, *args, uuid, collection_id, **kwargs):
 
         original_blob = Blob.objects.get(uuid=uuid)
-        print(f"Cloning blob titled '{original_blob.title}'")
+        print(f"Cloning blob named '{original_blob.name}'")
 
         new_blob = Blob.objects.create(
             content=original_blob.content,
-            title=f"Copy of {original_blob.title}",
+            name=f"Copy of {original_blob.name}",
             user=original_blob.user,
             date=original_blob.date,
             importance=original_blob.importance,

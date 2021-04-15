@@ -48,13 +48,13 @@ class NodeDetailView(DetailView):
 def get_blob_list(request, uuid):
 
     node = Node.objects.get(uuid=uuid, user=request.user)
-    blob_list = list(node.blobs.all().only("title", "uuid").order_by("sortordernodeblob__sort_order"))
+    blob_list = list(node.blobs.all().only("name", "uuid").order_by("sortordernodeblob__sort_order"))
 
     response = {
         "status": "OK",
         "blob_list": [
             {
-                "title": x.title,
+                "name": x.name,
                 "url": reverse('blob:detail', kwargs={"uuid": str(x.uuid)}),
                 "uuid": x.uuid,
                 "note": x.sortordernodeblob_set.get(node=node).note,
@@ -262,7 +262,7 @@ def search_bookmarks(request):
 
 
 @login_required
-def search_blob_titles(request):
+def search_blob_names(request):
 
     es = Elasticsearch(
         [settings.ELASTICSEARCH_ENDPOINT],
@@ -317,7 +317,6 @@ def search_blob_titles(request):
                     "note",
                     "sha1sum",
                     "tags",
-                    "title",
                     "uuid"]
     }
 
@@ -330,7 +329,7 @@ def search_blob_titles(request):
                     "should": [
                         {
                             "wildcard": {
-                                "title": {
+                                "name": {
                                     "value": f"*{one_term}*",
                                 }
                             }
@@ -348,7 +347,7 @@ def search_blob_titles(request):
             {
                 "doctype": match["_source"].get("doctype", ""),
                 "note": match["_source"].get("note", ""),
-                "title": match["_source"]["title"],
+                "name": match["_source"]["name"],
                 "uuid": match["_source"].get("uuid"),
                 "url": reverse('blob:detail', kwargs={"uuid": str(match["_source"].get("uuid"))}),
                 "cover_url": settings.MEDIA_URL + Blob.get_cover_info_static(

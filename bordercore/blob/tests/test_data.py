@@ -20,7 +20,6 @@ pytestmark = pytest.mark.data_quality
 
 django.setup()
 
-from django.contrib.auth.models import User  # isort:skip
 from blob.models import Blob, ILLEGAL_FILENAMES, MetaData   # isort:skip
 from collection.models import Collection  # isort:skip
 from drill.models import Question  # isort:skip
@@ -156,8 +155,8 @@ def test_dates_with_unixtimes(es):
     assert found == 0, f"{found} documents fail this test"
 
 
-def test_books_with_title(es):
-    "Assert that all books have a title"
+def test_books_with_names(es):
+    "Assert that all books have a name"
     search_object = {
         "query": {
             "bool": {
@@ -167,7 +166,7 @@ def test_books_with_title(es):
                             "must_not": [
                                 {
                                     "exists": {
-                                        "field": "title"
+                                        "field": "name"
                                     }
                                 }
                             ]
@@ -187,7 +186,7 @@ def test_books_with_title(es):
 
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["total"]["value"]
 
-    assert found == 0, f"{found} books found with no title"
+    assert found == 0, f"{found} books found with no name"
 
 
 def test_books_with_author(es):
@@ -579,14 +578,14 @@ def test_blob_metadata_exists_in_elasticsearch(es):
             "metadata for blobs found in the database but not in Elasticsearch: " + get_missing_metadata_ids(metadata[batch:batch + step_size], found)
 
 
-def test_elasticsearch_search_NEW(es):
+def test_elasticsearch_search(es):
     "Assert that a simple Elasticsearch search works"
 
     search_object = {
         "query": {
             "multi_match": {
                 "query": "carl sagan",
-                "fields": ["contents", "title"]
+                "fields": ["contents", "name"]
             }
         },
         "_source": ["uuid"]

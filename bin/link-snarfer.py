@@ -100,7 +100,7 @@ def add_to_bordercore(link_info):
 
     payload = {
         "url": link_info["url"],
-        "title": link_info["subject"],
+        "name": link_info["subject"],
         "user": 1
     }
 

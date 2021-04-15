@@ -99,7 +99,7 @@
 
                 {% if linked_blob %}
                     <br /><br />
-                    Linking to <a href="{% url 'blob:detail' linked_blob.uuid %}">{{ linked_blob.title|default:"Blob" }}</a>
+                    Linking to <a href="{% url 'blob:detail' linked_blob.uuid %}">{{ linked_blob.name|default:"Blob" }}</a>
                 {% endif %}
 
                 {% if linked_collection_blob_list %}
@@ -107,7 +107,7 @@
                     <ul class="list-group">
                     {% for blob in linked_collection_blob_list %}
                         <li class="list-group-item">
-                            <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.title|default:"No Title" }}</a>
+                            <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.name|default:"No Name" }}</a>
                         </li>
                     {% endfor %}
                     </ul>
@@ -298,13 +298,13 @@
             template: '<input type="button" class="btn btn-secondary" value="Cleanup Filename" @click="onClick" />',
             methods: {
                 async onClick(evt) {
-                    var title = document.getElementById("id_title").value;
-                    if (title) {
+                    var name = document.getElementById("id_name").value;
+                    if (name) {
                         var fileNameEl = document.getElementById("id_filename");
                         var fileName = fileNameEl.value;
                         var match = /(.*)(\..*?)$/.exec(fileName);
                         if (match) {
-                            fileNameEl.value = title + match[2];
+                            fileNameEl.value = name + match[2];
                             fileNameEl.classList.add("highlight-changed-field");
                             await new Promise(r => setTimeout(r, 2000));
                             fileNameEl.classList.add("color-transition");

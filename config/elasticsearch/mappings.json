@@ -10,7 +10,7 @@
                 "type":"date_range",
                 "format":"yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM||yyyy||epoch_second"
             },
-            "title": { "type":"text" },
+            "name": { "type":"text" },
             "contents": { "type":"text" },
             "doctype": { "type":"keyword" },
             "content_type": { "type":"keyword" },

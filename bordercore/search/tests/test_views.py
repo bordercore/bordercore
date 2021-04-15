@@ -8,7 +8,7 @@ import django
 from django import urls
 from django.test import RequestFactory
 
-from search.views import (SearchTagDetailView, get_doctype, get_title,
+from search.views import (SearchTagDetailView, get_doctype, get_name,
                           is_cached, sort_results)
 
 try:
@@ -45,7 +45,7 @@ def test_search(mock_elasticsearch, auto_login_user):
     assert len(matches) == 40
 
     match = soup.select("h4 a")[0].text
-    assert data["hits"]["hits"][0]["source"]["title"] == match
+    assert data["hits"]["hits"][0]["source"]["name"] == match
 
 
 @patch("search.views.Elasticsearch")
@@ -72,7 +72,7 @@ def test_search_notes(mock_elasticsearch, auto_login_user):
     assert len(matches) == 10
 
     match = soup.select("div#vue-app card")[0]["title"]
-    assert data["hits"]["hits"][0]["source"]["title"] == match
+    assert data["hits"]["hits"][0]["source"]["name"] == match
 
     matches = soup.select("div#note:nth-of-type(0) a#tag")
     for tag in matches:
@@ -110,13 +110,13 @@ def test_sort_results():
     assert len(response) == 6
 
 
-def test_get_title():
+def test_get_name():
 
-    assert get_title("Song", {"artist": "U2", "title": "The Joshua Tree"}) == "The Joshua Tree - U2"
-    assert get_title("Album", {"album": "The Joshua Tree"}) == "The Joshua Tree"
-    assert get_title("Artist", {"artist": "U2"}) == "U2"
-    assert get_title("Book", {"title": "War and Peace"}) == "War And Peace"
-    assert get_title("Book", {"title": "war and peace"}) == "War And Peace"
+    assert get_name("Song", {"artist": "U2", "title": "The Joshua Tree"}) == "The Joshua Tree - U2"
+    assert get_name("Album", {"album": "The Joshua Tree"}) == "The Joshua Tree"
+    assert get_name("Artist", {"artist": "U2"}) == "U2"
+    assert get_name("Book", {"name": "War and Peace"}) == "War And Peace"
+    assert get_name("Book", {"name": "war and peace"}) == "War And Peace"
 
 
 def test_get_doctype():

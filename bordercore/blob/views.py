@@ -75,14 +75,14 @@ class BlobCreateView(CreateView):
             blob = Blob.objects.get(user=self.request.user, pk=int(self.request.GET.get('linked_blob')))
             form.initial['tags'] = ','.join([x.name for x in blob.tags.all()])
             form.initial['date'] = blob.date
-            form.initial['title'] = blob.title
+            form.initial['name'] = blob.name
         if self.request.GET.get('linked_collection', False):
             collection_uuid = self.request.GET['linked_collection']
             blob_id = Collection.objects.get(user=self.request.user, uuid=collection_uuid).blob_list[0]['id']
             blob = Blob.objects.get(user=self.request.user, pk=blob_id)
             form.initial['tags'] = ','.join([x.name for x in blob.tags.all()])
             form.initial['date'] = blob.date
-            form.initial['title'] = blob.title
+            form.initial['name'] = blob.name
 
         return form
 
@@ -174,7 +174,7 @@ class BlobDetailView(DetailView):
             else:
                 messages.add_message(self.request, messages.ERROR, "Blob not found in Elasticsearch")
 
-        context["caption"] = self.object.get_title(remove_edition_string=True)
+        context["caption"] = self.object.get_name(remove_edition_string=True)
 
         context["linked_blobs"] = self.object.get_linked_blobs()
 
@@ -231,7 +231,7 @@ class BlobUpdateView(UpdateView):
                                                                  & ~Q(blob_list__contains=[{'id': self.object.id}])
                                                                  & Q(is_private=False))
         context['action'] = 'Update'
-        context['title'] = 'Blob Update :: {}'.format(self.object.get_title(remove_edition_string=True))
+        context['title'] = 'Blob Update :: {}'.format(self.object.get_name(remove_edition_string=True))
         context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
 
@@ -300,7 +300,7 @@ class BlobThumbnailView(UpdateView):
         # context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
         # if context['solr_info'].get('content_type', ''):
         #     context['content_type'] = Blob.get_content_type(context['solr_info']['content_type'][0]).lower()
-        context['title'] = 'Blob Thumbnail :: {}'.format(self.object.get_title(remove_edition_string=True))
+        context['title'] = 'Blob Thumbnail :: {}'.format(self.object.get_name(remove_edition_string=True))
 
         return context
 

@@ -84,7 +84,7 @@ class CollectionDetailView(DetailView):
         blob_list = self.object.get_blob_list()
 
         for blob in blob_list:
-            blob.title = re.sub("[\n\r]", "", blob.title)
+            blob.name = re.sub("[\n\r]", "", blob.name)
 
         if blob_list:
             context["blob_list"] = blob_list

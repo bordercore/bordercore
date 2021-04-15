@@ -31,7 +31,7 @@ class BlobForm(ModelForm):
         self.fields['content'].required = False
         self.fields['note'].required = False
         self.fields['tags'].required = False
-        self.fields['title'].required = False
+        self.fields['name'].required = False
 
         if self.instance.id:
             self.fields['filename'].initial = self.instance.file
@@ -127,10 +127,10 @@ class BlobForm(ModelForm):
 
     class Meta:
         model = Blob
-        fields = ('file', 'title', 'filename', 'file_modified', 'date', 'tags', 'content', 'note', 'importance', 'is_note', 'is_private', 'id')
+        fields = ('file', 'name', 'filename', 'file_modified', 'date', 'tags', 'content', 'note', 'importance', 'is_note', 'is_private', 'id')
         widgets = {
             'content': Textarea(attrs={'rows': 5, 'class': 'form-control'}),
             'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),
-            'title': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'name': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'importance': Select(attrs={'class': 'form-control', 'autocomplete': 'off'}, choices=((1, 'Normal'), (5, 'High'), (10, 'Highest')))
         }

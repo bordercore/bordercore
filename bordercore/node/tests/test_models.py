@@ -4,7 +4,7 @@ import django
 
 django.setup()
 
-from node.models import SortOrderNodeBookmark, SortOrderNodeBlob, Bookmark  # isort:skip
+from node.models import SortOrderNodeBookmark, SortOrderNodeBlob  # isort:skip
 
 pytestmark = pytest.mark.django_db
 

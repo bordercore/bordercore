@@ -101,7 +101,7 @@ class DownloadableS3Boto3Storage(S3Boto3Storage):
 class Blob(TimeStampedModel, AmazonMixin):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     content = models.TextField(null=True)
-    title = models.TextField(null=True)
+    name = models.TextField(null=True)
     sha1sum = models.CharField(max_length=40, unique=True, blank=True, null=True)
     file = models.FileField(max_length=500, storage=DownloadableS3Boto3Storage(), blank=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
@@ -115,7 +115,7 @@ class Blob(TimeStampedModel, AmazonMixin):
     documents = models.ManyToManyField("self", blank=True)
 
     def __str__(self):
-        return self.title
+        return self.name
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -156,25 +156,25 @@ class Blob(TimeStampedModel, AmazonMixin):
     def get_url(self):
         return f"{self.sha1sum[0:2]}/{self.sha1sum}/{quote_plus(str(self.file))}"
 
-    def get_title(self, remove_edition_string=False, use_filename_if_present=False):
-        title = self.title
-        if title:
+    def get_name(self, remove_edition_string=False, use_filename_if_present=False):
+        name = self.name
+        if name:
             if remove_edition_string:
                 pattern = re.compile(r'(.*) (\d)E$')
-                matches = pattern.match(title)
+                matches = pattern.match(name)
                 if matches and EDITIONS.get(matches.group(2), None):
                     return "%s" % (matches.group(1))
-            return title
+            return name
         else:
             if use_filename_if_present:
                 return PurePath(str(self.file)).name
             else:
-                return "No title"
+                return "No name"
 
     def get_edition_string(self):
-        if self.title:
+        if self.name:
             pattern = re.compile(r'(.*) (\d)E$')
-            matches = pattern.match(self.title)
+            matches = pattern.match(self.name)
             if matches and EDITIONS.get(matches.group(2), None):
                 return "%s Edition" % (EDITIONS[matches.group(2)])
 
@@ -252,7 +252,7 @@ class Blob(TimeStampedModel, AmazonMixin):
                     ]
                 }
             },
-            "_source": ["author", "task", "content_type", "doctype", "note", "filename", "bordercore_id", "attr_is_book", "last_modified", "num_pages", "tags", "title", "sha1sum", "size", "url"]
+            "_source": ["author", "task", "content_type", "doctype", "note", "filename", "bordercore_id", "attr_is_book", "last_modified", "name", "num_pages", "tags", "sha1sum", "size", "url"]
         }
 
         results = es.search(index=settings.ELASTICSEARCH_INDEX, body=query)["hits"]["hits"][0]
@@ -324,7 +324,7 @@ class Blob(TimeStampedModel, AmazonMixin):
     def get_related_blobs(self):
         related_blobs = []
         for blob in self.documents.all():
-            related_blobs.append({'uuid': blob.uuid, 'title': blob.title})
+            related_blobs.append({"uuid": blob.uuid, "name": blob.name})
         return related_blobs
 
     def is_pinned_note(self):
@@ -359,7 +359,7 @@ class Blob(TimeStampedModel, AmazonMixin):
 
     def get_detail_page_metadata(self):
         return {key: value for (key, value) in self.get_metadata().items()
-                if key not in ["is_book", "Url", "Publication Date", "Subtitle", "Title", "Author"]}
+                if key not in ["is_book", "Url", "Publication Date", "Subtitle", "Name", "Author"]}
 
     def has_thumbnail_url(self):
         try:

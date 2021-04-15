@@ -87,7 +87,7 @@ def test_blob_update(monkeypatch_index_blob, auto_login_user, blob_text_factory)
     # The submitted form
     url = urls.reverse("blob:update", kwargs={"uuid": blob_text_factory.uuid})
     resp = client.post(url, {
-        "title": "Title Changed",
+        "name": "Name Changed",
         "note": "Note Changed",
         "importance": 1,
         "tags": "django"
@@ -109,7 +109,7 @@ def test_blob_detail(auto_login_user, blob):
 
     soup = BeautifulSoup(resp.content, "html.parser")
 
-    assert soup.select("div#vue-app h2#title")[0].findAll(text=True)[0].strip() == blob.get_title(remove_edition_string=True)
+    assert soup.select("div#vue-app h2#name")[0].findAll(text=True)[0].strip() == blob.get_name(remove_edition_string=True)
 
     url = [x.value for x in blob.metadata_set.all() if x.name == "Url"][0]
     assert soup.select("strong a")[0].findAll(text=True)[0] == urlparse(url).netloc

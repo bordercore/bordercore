@@ -51,7 +51,7 @@ class ESBlob(Document_ES):
     user_id = Integer()
     is_private = Boolean()
     date = DateRange()
-    title = Text()
+    name = Text()
     contents = Text()
     doctype = Text()
     tags = Text()
@@ -198,7 +198,7 @@ def index_blob(**kwargs):
         sha1sum=blob_info["sha1sum"],
         user_id=blob_info["user"],
         is_private=blob_info["is_private"],
-        title=blob_info["title"],
+        name=blob_info["name"],
         contents=blob_info["content"],
         doctype=get_doctype(blob_info, blob_info["metadata"]),
         tags=blob_info["tags"],

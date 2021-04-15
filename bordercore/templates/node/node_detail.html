@@ -63,7 +63,7 @@
                                                     </div>
 
                                                     <div>
-                                                        <a :href="blob.url">[[ blob.title ]]</a>
+                                                        <a :href="blob.url">[[ blob.name ]]</a>
                                                         <div v-if="blob.note" @click="activateInEditMode(blob, $event.target)" v-show="!blob.noteIsEditable" class="node-note">[[ blob.note ]]</div>
                                                         <span v-show="blob.noteIsEditable">
                                                             <input type="text" class="form-control form-control-sm" :value="blob.note" ref="input" placeholder="Add Note" @blur="editNote(blob.uuid, $event.target.value)" @keydown.enter="editNote(blob.uuid, $event.target.value)" >
@@ -143,7 +143,7 @@
                                                 <div>
                                                     <div v-html="bookmark.favicon_url" class="float-left pr-2"></div>
                                                     <div>
-                                                        <a :href="bookmark.url">[[ bookmark.title ]]</a>
+                                                        <a :href="bookmark.url">[[ bookmark.name ]]</a>
 
                                                         <div v-if="bookmark.note" v-on:click="activateInEditMode(bookmark, $event.target)" v-show="!bookmark.noteIsEditable" class="node-note">[[ bookmark.note ]]</div>
                                                         <span v-show="bookmark.noteIsEditable">
@@ -185,9 +185,9 @@
                                     <div class="form-row">
                                         <simple-suggest
                                             ref="simpleSuggest"
-                                            display-attribute="title"
+                                            display-attribute="name"
                                             value-attribute="uuid"
-                                            search-url="{% url 'node:search_blob_titles' %}?term="
+                                            search-url="{% url 'node:search_blob_names' %}?term="
                                         >
                                         </simple-suggest>
                                     </div>
@@ -217,8 +217,8 @@
                                     <div class="form-row">
                                         <simple-suggest
                                             ref="simpleSuggest"
-                                            display-attribute="title"
-                                            value-attribute="title"
+                                            display-attribute="name"
+                                            value-attribute="name"
                                             search-url="{% url 'node:search_bookmarks' %}?term="
                                         >
                                         </simple-suggest>

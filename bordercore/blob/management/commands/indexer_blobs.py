@@ -110,7 +110,7 @@ class Command(BaseCommand):
                         break
                     index_blob(uuid=blob_info.uuid, create_connection=create_connection)
 
-                self.stdout.write(f"{blob_info.uuid} {blob_info.file} {blob_info.title}")
+                self.stdout.write(f"{blob_info.uuid} {blob_info.file} {blob_info.name}")
 
                 self.write_checkpoint(blob_info.uuid)
 

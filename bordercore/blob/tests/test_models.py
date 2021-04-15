@@ -24,7 +24,7 @@ def test_get_edition_string(blob_image_factory):
 
     assert blob_image_factory.get_edition_string() == "Second Edition"
 
-    blob_image_factory.title = "Title"
+    blob_image_factory.name = "Name"
     assert blob_image_factory.get_edition_string() == ""
 
 
@@ -49,14 +49,14 @@ def test_get_url(blob_image_factory):
     assert url == f"{blob_image_factory.sha1sum[:2]}/{blob_image_factory.sha1sum}/{quote_plus(str(blob_image_factory.file))}"
 
 
-def test_get_title(blob_image_factory):
+def test_get_name(blob_image_factory):
 
-    assert blob_image_factory.get_title() == "Vaporwave Wallpaper 2E"
-    assert blob_image_factory.get_title(remove_edition_string=True) == "Vaporwave Wallpaper"
+    assert blob_image_factory.get_name() == "Vaporwave Wallpaper 2E"
+    assert blob_image_factory.get_name(remove_edition_string=True) == "Vaporwave Wallpaper"
 
-    blob_image_factory.title = ""
-    assert blob_image_factory.get_title(use_filename_if_present=True) == blob_image_factory.file
-    assert blob_image_factory.get_title() == "No title"
+    blob_image_factory.name = ""
+    assert blob_image_factory.get_name(use_filename_if_present=True) == blob_image_factory.file
+    assert blob_image_factory.get_name() == "No name"
 
 
 def test_get_tags(blob_image_factory):

@@ -183,11 +183,11 @@ def test_search_bookmarks(auto_login_user, node):
     assert resp.status_code == 200
 
 
-def test_search_blob_titles(auto_login_user, node):
+def test_search_blob_names(auto_login_user, node):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("node:search_blob_titles")
+    url = urls.reverse("node:search_blob_names")
     resp = client.get(f"{url}?term=Bookmark")
 
     assert resp.status_code == 200

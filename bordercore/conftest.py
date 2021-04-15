@@ -82,7 +82,7 @@ def blob_image_factory(db, s3_resource, s3_bucket):
         date="2021-03-04",
         id=1000,
         uuid="0bb4914e-cd3c-4d6b-9d72-0454adf00260",
-        title="Vaporwave Wallpaper 2E",
+        name="Vaporwave Wallpaper 2E",
         tags=("django", "linux", "video"),
     )
 
@@ -100,7 +100,7 @@ def blob_pdf_factory(db, s3_resource, s3_bucket):
         date="1996-11-19",
         id=2000,
         uuid="4158cf58-306c-42d7-9c98-07d3a96a1d8b",
-        title="Bleached Album Notes",
+        name="Bleached Album Notes",
         tags=("django", "linux", "video"),
     )
 
@@ -117,7 +117,7 @@ def blob_text_factory(db, s3_resource, s3_bucket):
     blob = BlobFactory(
         id=3000,
         uuid="7ef28ad2-ee89-4bf7-8a58-4bdfb74424e2",
-        title="Sample blob with no sha1sum",
+        name="Sample blob with no sha1sum",
         tags=("django"),
     )
 
