@@ -91,6 +91,7 @@ def test_get_missing_bookmark_ids(auto_login_user):
                     "_id": "bordercore_bookmark_65",
                     "_score": 17.678326,
                     "_source": {
+                        "uuid": "3f40b11c-0b0e-4e11-aeb7-41c2bfee5d91"
                     }
                 },
                 {
@@ -99,6 +100,7 @@ def test_get_missing_bookmark_ids(auto_login_user):
                     "_id": "bordercore_bookmark_69",
                     "_score": 17.32817,
                     "_source": {
+                        "uuid": "d2edec1c-493a-4d9c-877b-21900e848187"
                     }
                 }
             ]
@@ -107,10 +109,10 @@ def test_get_missing_bookmark_ids(auto_login_user):
 
     expected = [
         Bookmark.objects.create(
-            id=65,
+            uuid="3f40b11c-0b0e-4e11-aeb7-41c2bfee5d91",
             user=user),
         Bookmark.objects.create(
-            id=69,
+            uuid="d2edec1c-493a-4d9c-877b-21900e848187",
             user=user)
     ]
 
@@ -125,6 +127,7 @@ def test_get_missing_bookmark_ids(auto_login_user):
                     "_id": "bordercore_bookmark_65",
                     "_score": 17.678326,
                     "_source": {
+                        "uuid": "3f40b11c-0b0e-4e11-aeb7-41c2bfee5d91"
                     }
                 },
                 {
@@ -133,13 +136,14 @@ def test_get_missing_bookmark_ids(auto_login_user):
                     "_id": "bordercore_bookmark_67",
                     "_score": 17.32817,
                     "_source": {
+                        "uuid": "167873d9-28b6-49db-8d9b-d0ed6172f7de"
                     }
                 }
             ]
         }
     }
 
-    assert get_missing_bookmark_ids(expected, found) == "69"
+    assert get_missing_bookmark_ids(expected, found) == "d2edec1c-493a-4d9c-877b-21900e848187"
 
 
 def test_truncate():

@@ -27,8 +27,8 @@ def es():
 
 
 def test_bookmarks_in_db_exist_in_elasticsearch(es):
-    "Assert that all bookmarks tags match those found in Elasticsearch"
-    bookmarks = Bookmark.objects.all().only("id", "tags")
+    "Assert that all bookmarks in the database also exist in Elasticsearch"
+    bookmarks = Bookmark.objects.all().only("uuid")
 
     step = 50
     for batch in range(0, len(bookmarks), step):
@@ -37,7 +37,7 @@ def test_bookmarks_in_db_exist_in_elasticsearch(es):
         query = [
             {
                 "term": {
-                    "_id": f"bordercore_bookmark_{b.id}"
+                    "uuid": str(b.uuid)
                 }
             }
             for b
@@ -51,7 +51,7 @@ def test_bookmarks_in_db_exist_in_elasticsearch(es):
                 }
             },
             "size": batch_size,
-            "_source": [""]
+            "_source": ["uuid"]
         }
 
         found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
@@ -61,7 +61,7 @@ def test_bookmarks_in_db_exist_in_elasticsearch(es):
 
 def test_bookmark_tags_match_elasticsearch(es):
     "Assert that all bookmarks tags match those found in Elasticsearch"
-    bookmarks = Bookmark.objects.filter(tags__isnull=False).only("id", "tags").order_by("id").distinct("id")
+    bookmarks = Bookmark.objects.filter(tags__isnull=False).only("uuid", "tags").order_by("uuid").distinct("uuid")
 
     step = 50
     for batch in range(0, len(bookmarks), step):
@@ -73,7 +73,7 @@ def test_bookmark_tags_match_elasticsearch(es):
                     "must": [
                         {
                             "term": {
-                                "_id": f"bordercore_bookmark_{b.id}"
+                                "uuid": b.uuid
                             }
                         },
                         {
@@ -102,7 +102,7 @@ def test_bookmark_tags_match_elasticsearch(es):
                 }
             },
             "size": batch_size,
-            "_source": [""]
+            "_source": ["uuid"]
         }
 
         found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
