@@ -16,11 +16,6 @@ urlpatterns = [
         name="update"
     ),
     path(
-        route="<uuid:uuid>/thumbnail/",
-        view=views.BlobThumbnailView.as_view(),
-        name="thumbnail"
-    ),
-    path(
         route="create/",
         view=views.BlobCreateView.as_view(),
         name="create"
@@ -34,11 +29,6 @@ urlpatterns = [
         route="metadata_name_search/",
         view=views.metadata_name_search,
         name="metadata_name_search"
-    ),
-    path(
-        route="create_thumbnail/<uuid:uuid>/<int:page_number>/",
-        view=views.create_thumbnail,
-        name="create_thumbnail"
     ),
     path(
         route="mutate/",

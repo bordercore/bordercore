@@ -5,8 +5,6 @@ import random
 import re
 
 import boto3
-from amazonproduct import API
-from amazonproduct.errors import NoExactMatchesFound
 from botocore.errorfactory import ClientError
 from PyPDF2.utils import PdfReadError
 
@@ -25,10 +23,6 @@ from blob.forms import BlobForm
 from blob.models import Blob, MetaData
 from collection.models import Collection
 from lib.time_utils import parse_date_from_string
-
-# TODO: Move this to Django config file
-amazon_api_config = {
-}
 
 log = logging.getLogger(f"bordercore.{__name__}")
 
@@ -287,28 +281,6 @@ class BlobUpdateView(UpdateView):
         return HttpResponseRedirect(reverse('blob:detail', kwargs={'uuid': str(blob.uuid)}))
 
 
-@method_decorator(login_required, name='dispatch')
-class BlobThumbnailView(UpdateView):
-    template_name = 'blob/thumbnail.html'
-    form_class = BlobForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['cover_info'] = self.object.get_cover_info(max_cover_image_width=70, size='small')
-        context['filename'] = self.object.file
-        query = 'uuid:{}'.format(self.object.uuid)
-        # context['solr_info'] = self.object.get_solr_info(query)['docs'][0]
-        # if context['solr_info'].get('content_type', ''):
-        #     context['content_type'] = Blob.get_content_type(context['solr_info']['content_type'][0]).lower()
-        context['title'] = 'Blob Thumbnail :: {}'.format(self.object.get_name(remove_edition_string=True))
-
-        return context
-
-    def get_object(self, queryset=None):
-        obj = Blob.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
-        return obj
-
-
 # Metadata objects are not handled by the form -- handle them manually
 def handle_metadata(blob, request):
 
@@ -370,37 +342,6 @@ def metadata_name_search(request):
 
 
 @login_required
-def get_amazon_image_info(request, sha1sum, index=0):
-
-    b = Blob.objects.get(user=request.user, sha1sum=sha1sum)
-    result = b.get_amazon_cover_url(index)
-
-    return JsonResponse(result)
-
-
-@login_required
-def set_amazon_image_info(request, sha1sum, index=0):
-
-    b = Blob.objects.get(user=request.user, sha1sum=sha1sum)
-    try:
-        b.set_amazon_cover_url('small', request.POST['small'])
-        b.set_amazon_cover_url('large', request.POST['large'])
-        result = {'message': 'Cover image updated'}
-    except Exception as e:
-        result = {'message': str(e), 'error': True}
-
-    return JsonResponse(result)
-
-
-def amazon_metadata_dupe_check(dupes, name, value):
-    if value in dupes[name]:
-        return False
-    else:
-        dupes[name][value] = True
-        return True
-
-
-@login_required
 def slideshow(request):
     """
     Select a random blob from the collection "To Display"
@@ -420,56 +361,6 @@ def slideshow(request):
     return render(request, "blob/slideshow.html",
                   {"content_type": content_type,
                    "blob": blob})
-
-@login_required
-def get_amazon_metadata(request, title):
-
-    api = API(cfg=amazon_api_config)
-
-    return_data = {'data': []}
-    dupes = {'Title': {}, 'Author': {}, 'Publication Date': {}}
-
-    try:
-        results = api.item_search('Books', Title=title, ResponseGroup='Medium', Sort='-publication_date')
-        for result in results:
-            try:
-                title = result.ItemAttributes.Title.text
-                if amazon_metadata_dupe_check(dupes, 'Title', title):
-                    return_data['data'].append(['Title', title])
-                author_raw = result.ItemAttributes.Author.text
-                matches = [x.strip() for x in re.split(r"\s?;\s?|\s?,\s?", author_raw)]
-                for author in matches:
-                    if amazon_metadata_dupe_check(dupes, 'Author', author):
-                        return_data['data'].append(['Author', author])
-                publication_data_raw = str(result.ItemAttributes.PublicationDate)
-                matches = re.match(r'^(\d\d\d\d)', publication_data_raw)
-                if matches:
-                    publication_date = matches.group(1)
-                else:
-                    publication_date = str(result.ItemAttributes.PublicationDate)
-                if amazon_metadata_dupe_check(dupes, 'Publication Date', publication_date):
-                    return_data['data'].append(['Publication Date', publication_date])
-            except AttributeError as e:
-                log.error("AttributeError: %s" % e)
-    except NoExactMatchesFound:
-        return_data['error'] = "No Amazon matches found"
-
-    return JsonResponse(return_data)
-
-
-@login_required
-def create_thumbnail(request, uuid, page_number=None):
-    b = Blob.objects.get(user=request.user, uuid=uuid)
-
-    try:
-        b.create_thumbnail(page_number)
-    except PdfReadError as e:
-        return JsonResponse({'error': str(e)})
-
-    cover_info = b.get_cover_info(max_cover_image_width=70,
-                                  size='small')
-
-    return JsonResponse({'message': 'OK', 'cover_url': cover_info['url']})
 
 
 @login_required

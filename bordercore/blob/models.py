@@ -22,7 +22,6 @@ from django.db import models
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch.dispatcher import receiver
 
-from blob.amazon import AmazonMixin
 from collection.models import Collection
 from lib.mixins import TimeStampedModel
 from lib.time_utils import get_date_from_pattern
@@ -98,7 +97,7 @@ class DownloadableS3Boto3Storage(S3Boto3Storage):
         return super()._save(name, content)
 
 
-class Blob(TimeStampedModel, AmazonMixin):
+class Blob(TimeStampedModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     content = models.TextField(null=True)
     name = models.TextField(null=True)
