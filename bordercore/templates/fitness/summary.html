@@ -80,7 +80,7 @@
                         {% for exercise in active_exercises %}
                         {
                             "exercise_url": "{% url 'fitness:exercise_detail' exercise.uuid %}",
-                            "exercise": "{{ exercise.exercise }}",
+                            "exercise": "{{ exercise.name }}",
                             "muscle_group": "{{ exercise.muscle.muscle_group }}",
                             "interval": "{{ exercise.interval.days }} day{{ exercise.interval.days|pluralize:"s" }}",
                             "last_active": new Date("{{ exercise.last_active|date:"Y-m-d" }}"),
@@ -93,7 +93,7 @@
                         {% for exercise in inactive_exercises %}
                         {
                             "exercise_url": "{% url 'fitness:exercise_detail' exercise.uuid %}",
-                            "exercise": "{{ exercise.exercise }}",
+                            "exercise": "{{ exercise.name }}",
                             "muscle_group": "{{ exercise.muscle.muscle_group }}",
                             "last_active": "{{ exercise.last_active|date:"N j, Y" }}",
                             {% if exercise.delta_days %}

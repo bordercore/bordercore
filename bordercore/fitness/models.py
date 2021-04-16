@@ -11,29 +11,29 @@ from django.utils import timezone
 
 
 class MuscleGroup(models.Model):
-    muscle_group = models.TextField(unique=True)
+    name = models.TextField(unique=True)
 
     def __str__(self):
-        return self.muscle_group
+        return self.name
 
 
 class Muscle(models.Model):
-    muscle = models.TextField(unique=True)
+    name = models.TextField(unique=True)
     muscle_group = models.ForeignKey(MuscleGroup, on_delete=models.PROTECT)
 
     def __str__(self):
-        return self.muscle
+        return self.name
 
 
 class Exercise(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
-    exercise = models.TextField(unique=True)
+    name = models.TextField(unique=True)
     muscle = models.ForeignKey(Muscle, on_delete=models.PROTECT)
     description = models.TextField(blank=True)
     note = models.TextField(blank=True)
 
     def __str__(self):
-        return self.exercise
+        return self.name
 
     @property
     def note_markdown(self):
@@ -62,8 +62,9 @@ class ExerciseUser(models.Model):
         unique_together = ("user", "exercise")
 
     def __str__(self):
-        return self.exercise.exercise
+        return self.exercise.name
 
+    @staticmethod
     def get_overdue_exercises(user, count_only=False):
 
         exercises = ExerciseUser.objects.annotate(

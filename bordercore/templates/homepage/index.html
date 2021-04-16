@@ -69,7 +69,7 @@
                         <template v-slot:content>
                             <ul class="list-group">
                                 {% for exercise in overdue_exercises %}
-                                    <li class="list-group-item list-group-item-secondary text-info"><a class="text-success" href="{% url 'fitness:exercise_detail' exercise.exercise.exercise.uuid %}">{{ exercise.exercise.exercise.exercise }}</a> {{ exercise.lag }} days</li>
+                                    <li class="list-group-item list-group-item-secondary text-info"><a class="text-success" href="{% url 'fitness:exercise_detail' exercise.exercise.exercise.uuid %}">{{ exercise.exercise.exercise.name }}</a> {{ exercise.lag }} days</li>
                                 {% empty %}
                                     <li class="list-group-item list-group-item-secondary">No active exercises.</li>
                                 {% endfor %}

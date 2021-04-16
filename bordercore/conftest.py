@@ -197,23 +197,23 @@ def fitness(auto_login_user):
 
     user, _ = auto_login_user()
 
-    muscle_group = MuscleGroup.objects.create(muscle_group="Chest")
-    muscle = Muscle.objects.create(muscle="Pectoralis Major", muscle_group=muscle_group)
+    muscle_group = MuscleGroup.objects.create(name="Chest")
+    muscle = Muscle.objects.create(name="Pectoralis Major", muscle_group=muscle_group)
     note = "### Trying to make some **gains**"
-    exercise_0 = Exercise.objects.create(exercise="Bench Press", muscle=muscle, note=note)
+    exercise_0 = Exercise.objects.create(name="Bench Press", muscle=muscle, note=note)
     ExerciseUser.objects.create(user=user, exercise=exercise_0, started=datetime.datetime.now(), interval=timedelta(days=2))
     Data.objects.create(user=user, exercise=exercise_0, weight=200, reps=8)
     Data.objects.create(user=user, exercise=exercise_0, weight=205, reps=8)
     Data.objects.create(user=user, exercise=exercise_0, weight=210, reps=8)
     Data.objects.create(user=user, exercise=exercise_0, weight=220, reps=8)
 
-    muscle_group = MuscleGroup.objects.create(muscle_group="Back")
-    muscle = Muscle.objects.create(muscle="Latissimus Dorsi", muscle_group=muscle_group)
-    exercise_1 = Exercise.objects.create(exercise="Pull Ups", muscle=muscle)
+    muscle_group = MuscleGroup.objects.create(name="Back")
+    muscle = Muscle.objects.create(name="Latissimus Dorsi", muscle_group=muscle_group)
+    exercise_1 = Exercise.objects.create(name="Pull Ups", muscle=muscle)
 
-    muscle_group = MuscleGroup.objects.create(muscle_group="Legs")
-    muscle = Muscle.objects.create(muscle="Glutes", muscle_group=muscle_group)
-    exercise_2 = Exercise.objects.create(exercise="Squats", muscle=muscle)
+    muscle_group = MuscleGroup.objects.create(name="Legs")
+    muscle = Muscle.objects.create(name="Glutes", muscle_group=muscle_group)
+    exercise_2 = Exercise.objects.create(name="Squats", muscle=muscle)
 
     ExerciseUser.objects.create(user=user, exercise=exercise_2, interval=timedelta(days=2))
 

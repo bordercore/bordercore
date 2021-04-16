@@ -32,7 +32,7 @@ class ExerciseDetailView(DetailView):
             pass
         context["activity_info"] = ExerciseUser.objects.filter(user=self.request.user, exercise__id=self.object.id)
         context["nav"] = "fitness"
-        context["title"] = f"Exercise Detail :: {self.object.exercise}"
+        context["title"] = f"Exercise Detail :: {self.object.name}"
 
         plot_data = self.get_plot_data(context, workout_data)
         context["labels"] = plot_data[0]
