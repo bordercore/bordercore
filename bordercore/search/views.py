@@ -1,5 +1,6 @@
 import math
 import re
+import urllib
 
 import markdown
 from elasticsearch import Elasticsearch
@@ -684,6 +685,8 @@ def search_names(request, es, doc_type, search_term):
 @login_required
 def search_tags(request, es, doc_type, search_term):
 
+    search_terms = re.split(r"\s+", urllib.parse.unquote(search_term))
+
     search_object = {
         "query": {
             "bool": {
@@ -691,11 +694,6 @@ def search_tags(request, es, doc_type, search_term):
                     {
                         "term": {
                             "user_id": request.user.id
-                        }
-                    },
-                    {
-                        "wildcard": {
-                            "tags": f"{search_term}*"
                         }
                     }
                 ]
@@ -727,6 +725,23 @@ def search_tags(request, es, doc_type, search_term):
                     "uuid"]
     }
 
+    # Separate query into terms based on whitespace and
+    #  and treat it like an "AND" boolean search
+    for one_term in search_terms:
+        search_object["query"]["bool"]["must"].append(
+            {
+                "bool": {
+                    "should": [
+                        {
+                            "wildcard": {
+                                "tags": f"{one_term}*"
+                            }
+                        }
+                    ]
+                }
+            }
+        )
+
     if doc_type:
         search_object["query"]["bool"]["must"].append(
             {
@@ -749,5 +764,4 @@ def search_tags(request, es, doc_type, search_term):
                                "link": get_tag_link(doc_type, tag_result["key"]),
                            }
                            )
-
     return matches
