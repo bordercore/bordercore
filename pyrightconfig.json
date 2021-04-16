@@ -1,0 +1,17 @@
+{
+  "executionEnvironments": [
+    {
+      "root": "bordercore"
+    }
+  ],
+
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/static",
+    "**/.aws-sam"
+  ],
+
+  "venvPath": "/home/jerrell/dev/django",
+  "venv": "env"
+}
