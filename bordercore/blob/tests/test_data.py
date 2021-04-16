@@ -645,7 +645,7 @@ def test_blob_tags_match_elasticsearch(es):
         found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 
         assert found["hits"]["total"]["value"] == batch_size, \
-            "blobs found in the database with tags which don't match those found in Elasticsearch" + get_missing_blob_ids(blobs[batch:batch + step_size], found)
+            "blobs found in the database with tags which don't match those found in Elasticsearch: " + get_missing_blob_ids(blobs[batch:batch + step_size], found)
 
 
 def test_blobs_have_proper_metadata():
@@ -701,7 +701,7 @@ def test_blobs_have_size_field(es):
     }
 
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]
-    assert found["total"]["value"] == 0, f"{found['total']['value']} blobs fail this test; example: uuid={found['hits'][0]['_source']['uuid']}"
+    assert found["total"]["value"] == 0, f"{found['total']['value']} blobs found with no size, uuid={found['hits'][0]['_source']['uuid']}"
 
 
 def test_all_notes_exist_in_elasticsearch(es):
