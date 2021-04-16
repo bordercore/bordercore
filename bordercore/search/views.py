@@ -417,6 +417,8 @@ class SearchTagDetailView(ListView):
 
 def sort_results(matches):
 
+    # These categories are sorted according to importance and define
+    #  the order matches appear in the search results
     types = {
         "Tag": [],
         "Song": [],
@@ -428,6 +430,7 @@ def sort_results(matches):
         "Bookmark": [],
         "Document": [],
         "Blob": [],
+        "Todo": []
     }
 
     for match in matches:
