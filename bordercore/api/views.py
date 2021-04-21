@@ -127,6 +127,15 @@ class TagViewSet(viewsets.ModelViewSet):
         return Tag.objects.filter(user=self.request.user)
 
 
+class TagNameViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = TagSerializer
+    lookup_field = "name"
+
+    def get_queryset(self):
+        return Tag.objects.filter(user=self.request.user)
+
+
 class TodoViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = TodoSerializer
