@@ -44,7 +44,7 @@ def homepage(request):
     #     except AttributeError as e:
     #         log.info("AttributeError: %s" % e)
 
-    tasks = Todo.objects.filter(user=request.user, priority=Todo.get_priority_value("High")).prefetch_related("tags")
+    tasks = Todo.objects.filter(user=request.user, priority=Todo.get_priority_value("High")).prefetch_related("tags")[:5]
 
     # Get some recently played music
     music = Listen.objects.filter(user=request.user).select_related("song").distinct().order_by('-created')[:3]
