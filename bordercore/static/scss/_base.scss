@@ -95,6 +95,12 @@
   }
 }
 
+code {
+  background-color: #4e5059;
+  color: $white;
+  padding: 0.2rem;
+}
+
 /* Dropdown Menus */
 
 .dropdown-menu.show {
@@ -355,10 +361,10 @@ $nav-tabs-link-hover-border-color: $nav-tabs-border-color;
 
 pre {
   background: $markdown-background-color;
-  border-top: 0.3rem solid $markdown-border-color;
-  border-bottom: 0.3rem solid $markdown-border-color;
-  padding: 0.06rem;
-  padding-left: 1.44rem;
+  border-top: 0.1rem solid $markdown-border-color;
+  border-bottom: 0.1rem solid $markdown-border-color;
+  padding: 0.3rem;
+  padding-left: 0.8rem;
 }
 
 /* Top Title */
@@ -553,6 +559,10 @@ pre {
 
 /* Blobs */
 
+h2#name {
+  color: #6ac2f6;
+}
+
 #author {
   color: $info;
 }
@@ -596,6 +606,33 @@ pre {
 #blob_note {
   p {
     margin-bottom: 0;
+  }
+}
+
+.blob-content {
+  h1 {
+    color: $markdown-heading;
+    font-size: 2rem;
+  }
+
+  h2 {
+    color: darken($markdown-heading, 30%);
+    font-size: 1.75rem;
+  }
+
+  h3 {
+    color: darken($markdown-heading, 40%);
+    font-size: 1.5rem;
+  }
+
+  h4 {
+    color: darken($markdown-heading, 50%);
+    font-size: 1.25rem;
+  }
+
+  h5 {
+    color: darken($markdown-heading, 60%);
+    font-size: 1rem;
   }
 }
 

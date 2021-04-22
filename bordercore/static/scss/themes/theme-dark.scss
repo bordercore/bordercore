@@ -41,5 +41,8 @@ $nav-tabs-border-color: $white;
 $selected-background-color: $blue;
 $sidebar-background-color: #343a40;
 
+// Import CSS for code hilighting
+@import "./code-style-dark.scss";
+
 // Import core SCSS
 @import "../base";

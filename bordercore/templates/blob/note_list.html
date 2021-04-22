@@ -2,10 +2,6 @@
 
 {% block title %} Notes {% endblock %}
 
-{% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/code_style.css" />
-{% endblock %}
-
 {% block content %}
 
     <div class="row no-gutters">
@@ -63,7 +59,7 @@
                         </template>
                         <template v-slot:content>
 
-                            <div id="note" class="table-borders">
+                            <div id="note" class="blob-content table-borders">
 
                                 <span class="glyphicon glyphicon-time"></span> <span> {{ note.source.date }} </span>
 

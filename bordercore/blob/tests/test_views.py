@@ -117,7 +117,7 @@ def test_blob_detail(auto_login_user, blob):
     author = [x.value for x in blob.metadata_set.all() if x.name == "Author"][0]
     assert soup.select("span#author")[0].findAll(text=True)[0] == author
 
-    assert soup.select("div#blob_detail_content")[0].text.strip() == blob.content
+    assert soup.select("div#blob-detail-content")[0].text.strip() == blob.content
 
     assert soup.select("div#blob_note")[0].findAll(text=True)[0] == blob.note
 
