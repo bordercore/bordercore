@@ -59,7 +59,7 @@ class DrillManager(models.Manager):
 
         Question = apps.get_model("drill", "Question")
 
-        distinct_tags = Tag.objects.filter(question__isnull=False).distinct("name")
+        distinct_tags = Tag.objects.filter(question__isnull=False, user=user).distinct("name")
         random_tag = Tag.objects.filter(id__in=distinct_tags).order_by("?")[0]
         return Question.get_tag_info(user, random_tag.name)
 
