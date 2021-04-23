@@ -221,7 +221,6 @@ class QuestionUpdateView(UpdateView):
         messages.add_message(
             self.request,
             messages.INFO, f"Question edited. <a href='{review_url}'>Review it here</a>",
-            extra_tags="show_in_dom"
         )
 
         return HttpResponseRedirect(self.get_success_url())
