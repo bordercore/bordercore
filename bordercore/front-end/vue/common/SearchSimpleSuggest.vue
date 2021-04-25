@@ -33,13 +33,9 @@
                         <div slot="suggestion-item" slot-scope="scope">
                             <!-- @*event*.stop="null" handlers are needed to prevent the splitter from being selected -->
                             <span v-if="scope.suggestion.splitter"
-                                  @click.stop="{}"
-                                  @keyup.stop="{}"
-                                  @mouseenter.stop="{}"
-                                  @mouseleave.stop="{}"
-                                  @keydown.stop="{}"
+                                  @click.stop=""
                                   class="top-search-splitter"
-                            >{{ scope.suggestion.title }}</span>
+                            >{{ scope.suggestion.name }}</span>
                             <span v-else v-html="boldenSuggestion(scope)" class="top-search-suggestion"></span>
                         </div>
 
@@ -170,7 +166,6 @@
 
             },
             onKeyDown(evt) {
-                console.log(evt);
                 if (evt.code === "KeyN" && evt.altKey) {
                     this.handleFilter("Note");
                 } else if (evt.code === "KeyL" && evt.altKey) {
