@@ -23,38 +23,20 @@ class TodoListView(ListView):
     template_name = "todo/index.html"
     context_object_name = "info"
 
-    def get_tag_name(self):
-
-        if "tagsearch" in self.request.GET:
-            tag_name = self.request.GET.get("tagsearch")
-            self.request.session["current_todo_tag"] = tag_name
-        elif "current_todo_tag" in self.request.session:
-            # Use the last tag accessed
-            tag_name = self.request.session.get("current_todo_tag")
-        else:
-            tag_info = Tag.objects.filter(user=self.request.user, todo__user=self.request.user, todo__isnull=False).first()
-            tag_name = None
-            if tag_info:
-                tag_name = tag_info.name
-
-        return tag_name
-
     def get_filter(self):
 
         return {
             "todo_filter_priority": self.request.session.get("todo_filter_priority", ""),
             "todo_filter_time": self.request.session.get("todo_filter_time", ""),
+            "todo_filter_tag": self.request.session.get("todo_filter_tag", ""),
         }
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        tag_name = self.get_tag_name()
-
         return {
             **context,
-            "tags": Todo.get_todo_counts(self.request.user, tag_name),
-            "tagsearch": tag_name,
+            "tags": Todo.get_todo_counts(self.request.user),
             "filter": self.get_filter()
         }
 
@@ -67,59 +49,68 @@ class TodoTaskList(ListView):
 
     def get_queryset(self):
 
-        tag_name = self.kwargs.get("tag_name")
-        self.request.session["current_todo_tag"] = tag_name
-
         priority = self.request.GET.get("priority", None)
         if priority is not None:
             self.request.session["todo_filter_priority"] = priority
+
         time = self.request.GET.get("time", None)
         if time is not None:
             self.request.session["todo_filter_time"] = time
 
+        tag_name = self.request.GET.get("tag", None)
+        if tag_name is not None:
+            self.request.session["todo_filter_tag"] = tag_name
+
         if priority or time:
 
-            queryset = Todo.objects
+            queryset = Todo.objects.filter(user=self.request.user)
 
             if priority:
                 queryset = queryset.filter(priority=priority)
             if time:
                 queryset = queryset.filter(created__gt=(timezone.now() - timedelta(days=int(time))))
+            if tag_name:
+                queryset = queryset.filter(tag__name=tag_name)
 
-            queryset = queryset.filter(tag__name=tag_name).order_by("name")
+            queryset = queryset.order_by("name")
+
+        elif tag_name:
+
+            queryset = Tag.objects.get(user=self.request.user, name=tag_name).todos.all().order_by("sortordertagtodo__sort_order")
 
         else:
-            queryset = Tag.objects.get(user=self.request.user, name=tag_name).todos.all().order_by("sortordertagtodo__sort_order")
+
+            queryset = Todo.objects.filter(user=self.request.user).order_by("-created")
 
         return queryset
 
     def get(self, request, *args, **kwargs):
 
-        queryset = self.get_queryset()
+        search_term = self.request.GET.get("search", None)
+
+        if search_term:
+            tasks = Todo.search(search_term, self.request.user.id)
+        else:
+            tasks = self.get_queryset().values()
 
         info = []
-        fields = []
 
-        for sort_order, todo in enumerate(queryset, 1):
-
+        for sort_order, todo in enumerate(tasks, 1):
             data = {
                 "manual_order": "",
                 "sort_order": sort_order,
-                "name": re.sub("[\n\r\"]", "", todo.name),
-                "priority": Todo.get_priority_name(todo.priority),
-                "created": format(todo.modified, "Y-m-d"),
-                "note": re.sub("[\n\r\"]", "", todo.get_note()),
-                "url": todo.url,
-                "uuid": todo.uuid
+                "name": re.sub("[\n\r\"]", "", todo["name"]),
+                "priority": Todo.get_priority_name(todo["priority"]),
+                "created": format(todo["created"], "Y-m-d"),
+                "note": re.sub("[\n\r\"]", "", todo["note"] or ""),
+                "url": todo["url"],
+                "uuid": todo["uuid"]
             }
 
-            if todo.data:
-                fields.extend(list(todo.data.keys()))
-                data = {**data, **todo.data}
+            # if todo.data:
+            #     data = {**data, **todo.data}
 
             info.append(data)
-
-        fields = list(set(fields))
 
         response = {
             "status": "OK",

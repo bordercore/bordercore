@@ -10,12 +10,25 @@
 
             <div class="card-body">
 
-                <h3>
-                    Tag Filter
-                </h3>
+                <h4>Priority</h4>
+                <div v-for="option in filterPriorityOptions" :class="getPriorityClass(option[0])" class="tag-list pl-2 py-1 pr-1 d-flex" @click.prevent="onClickPriority" :data-priority="option[0]">
+                    <div>[[ option[1] ]]</div>
+                    <div class="ml-auto"><span class="px-2 badge badge-pill">3</span></div>
+                </div>
 
+                <hr class="filter-divider" />
+
+                <h4>Created</h4>
+                <div v-for="option in filterTimeOptions" :class="getTimeClass(option[0])" class="tag-list pl-2 py-1 pr-1 d-flex" @click.prevent="onClickTime" :data-created="option[0]">
+                    <div>[[ option[1] ]]</div>
+                    <div class="ml-auto"><span class="px-2 badge badge-pill">3</span></div>
+                </div>
+
+                <hr class="filter-divider" />
+
+                <h4>Tags</h4>
                 {% for tag in tags %}
-                    <div class="tag-list p-2 d-flex" :class="getTagClass('{{ tag.name }}')" @click.prevent="onClickTag" data-tag="{{ tag.name }}">
+                    <div class="tag-list pl-2 py-1 pr-1 d-flex" :class="getTagClass('{{ tag.name }}')" @click.prevent="onClickTag" data-tag="{{ tag.name }}">
                         <div>{{ tag.name }}</div>
                         <div class="ml-auto"><span class="px-2 badge badge-pill {% ifequal tagsearch tag.name %}badge-dark{% else %}badge-primary{% endifequal %}">{{ tag.count }}</span></div>
                     </div>
@@ -33,20 +46,8 @@
 
                     <form class="form-inline" role="form">
 
-                        <select class="form-control ml-2" id="filter-priority" v-model="filterPriority" @change="onChange($event)">
-                            <option v-for="option in filterPriorityOptions" :value="option[0]">
-                                [[ option[1] ]]
-                            </option>
-                        </select>
-
-                        <select class="form-control ml-2" id="filter-time" v-model="filterTime" @change="onChange($event)">
-                            <option v-for="option in filterTimeOptions" :value="option[0]">
-                                [[ option[1] ]]
-                            </option>
-                        </select>
-
                         <div class="form-group ml-2">
-                            <input v-model="filter" id="todo_search" type="text" class="form-control" placeholder="Name Filter">
+                            <input type="text" v-model="filterSearch" class="form-control" placeholder="Search" @keydown.enter.prevent="search()">
                         </div>
 
                     </form>
@@ -71,7 +72,6 @@
                     @row-hovered="rowHovered"
                     @row-unhovered="rowUnHovered"
                     onEnd="onEnd"
-                    :filter="filter"
                     v-sortable
                     :sorting="items"
                     sort-by="manualSorting"
@@ -153,20 +153,14 @@
                         if (evt.newIndex !== evt.oldIndex) {
 
                             const bodyFormData = new URLSearchParams();
-                            bodyFormData.append("tag", "{{ tagsearch }}");
                             bodyFormData.append("todo_uuid", evt.item.dataset.pk);
                             bodyFormData.append("position", evt.newIndex + 1);
 
-                            axios("{% url 'todo:sort' %}", {
-                                method: "POST",
-                                data: bodyFormData,
-                            })
-                                .then((response) => {
-                                    console.log("Success");
-                                }, (error) => {
-                                    console.log(error);
-                                });
-
+                            // We don't have access to the Vue app's "filterTag"
+                            //  data, which we need to send with the Ajax request.
+                            //  So we instead emit a message with a partial payload
+                            // which is captured inside the Vue app elsewhere.
+                            EventBus.$emit("todo-sort", bodyFormData);
                         }
                     }
                 }
@@ -179,9 +173,11 @@
             el: "#vue-app",
             data() {
                 return {
-                    selectedTag: "{{ tagsearch }}",
+                    filterTag: "{{ filter.todo_filter_tag|default:'' }}",
                     filterPriority: "{{ filter.todo_filter_priority|default:'' }}",
                     filterTime: "{{ filter.todo_filter_time|default:'' }}",
+                    filterSearch: "",
+                    filterCache: {},
                     items: [],
                     fields: [
                         {
@@ -216,19 +212,16 @@
                         }
                     ],
                     filterPriorityOptions: [
-                        ["", "Priority"],
                         ["1", "High"],
                         ["2", "Medium"],
                         ["3", "Low"]
                     ],
                     filterTimeOptions: [
-                        ["", "Created"],
                         ["1", "Last Day"],
                         ["3", "Last 3 Days"],
                         ["7", "Last Week"],
                         ["30", "Last Month"],
                     ],
-                    filter: null,
                     show: false,
                     right: true,
                     hover: true
@@ -236,13 +229,13 @@
             },
             methods: {
                 getTodoList() {
-                    const filterPriority = document.getElementById("filter-priority").value;
-                    const filterTime = document.getElementById("filter-time").value;
                     doGet(
                         this,
-                        "{% url "todo:list_tasks" 666 %}".replace(/666/, this.selectedTag) +
-                        `?priority=${filterPriority}` +
-                        `&time=${filterTime}`,
+                        "{% url 'todo:get_tasks' %}" +
+                        `?tag=${this.filterTag}` +
+                        `&priority=${this.filterPriority}` +
+                        `&time=${this.filterTime}` +
+                        `&search=${this.filterSearch}`,
                         (response) => {
                             this.items = response.data.todo_list;
                         },
@@ -303,12 +296,42 @@
 
                 },
                 onClickTag(evt) {
-                    this.selectedTag = evt.currentTarget.dataset.tag;
+                    if (this.filterTag == evt.currentTarget.dataset.tag) {
+                        this.filterTag = "";
+                    } else {
+                        this.filterTag = evt.currentTarget.dataset.tag;
+                    }
+                    this.getTodoList();
+                },
+                onClickPriority(evt) {
+                    if (this.filterPriority == evt.currentTarget.dataset.priority) {
+                        this.filterPriority = "";
+                    } else {
+                        this.filterPriority = evt.currentTarget.dataset.priority;
+                    }
+                    this.getTodoList();
+                },
+                onClickTime(evt) {
+                    if (this.filterTime == evt.currentTarget.dataset.created) {
+                        this.filterTime = "";
+                    } else {
+                        this.filterTime = evt.currentTarget.dataset.created;
+                    }
                     this.getTodoList();
                 },
                 getTagClass(tag) {
-                    if (tag === this.selectedTag) {
-                        return "selected"
+                    if (tag === this.filterTag) {
+                        return "selected rounded-sm"
+                    }
+                },
+                getPriorityClass(priority) {
+                    if (priority === this.filterPriority) {
+                        return "selected rounded-sm"
+                    }
+                },
+                getTimeClass(created) {
+                    if (created === this.filterTime) {
+                        return "selected rounded-sm"
                     }
                 },
                 onChange(event) {
@@ -317,6 +340,21 @@
                 },
                 getDate(date) {
                     return getFormattedDate(date);
+                },
+                search() {
+                    if (this.filterSearch === "") {
+                        this.filterPriority = this.filterCache.priority;
+                        this.filterTime = this.filterCache.time;
+                        this.filterCache = {}
+                    } else {
+                        this.filterCache = {
+                            "priority": this.filterPriority,
+                            "time": this.filterTime
+                        };
+                        this.filterPriority = "";
+                        this.filterTime = "";
+                    }
+                    this.getTodoList();
                 }
             },
             computed: {
@@ -324,13 +362,27 @@
                     return this.filterPriority !== "" || this.filterTime !== "";
                 },
                 createTodoUrl() {
-                    return "{% url 'todo:create' %}?tagsearch=" + this.selectedTag;
+                    return "{% url 'todo:create' %}?tagsearch=" + this.filterTag;
                 }
             },
             mounted() {
 
                 EventBus.$on("get-todo-list", payload => {
                     this.getTodoList();
+                });
+
+                EventBus.$on("todo-sort", bodyFormData => {
+
+                    bodyFormData.append("tag", this.filterTag);
+                    axios("{% url 'todo:sort' %}", {
+                        method: "POST",
+                        data: bodyFormData,
+                    })
+                        .then((response) => {
+                            console.log("Success");
+                        }, (error) => {
+                            console.log(error);
+                        });
                 });
 
                 var el = document.querySelector("tbody");

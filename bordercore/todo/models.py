@@ -1,5 +1,7 @@
+import datetime
+import re
+import urllib
 import uuid
-from functools import cmp_to_key
 
 import markdown
 from elasticsearch import Elasticsearch
@@ -9,7 +11,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import JSONField
 from django.db import models
-from django.db.models import Count
+from django.db.models import Count, Max
 from django.db.models.signals import m2m_changed, post_save
 from django.dispatch.dispatcher import receiver
 
@@ -60,20 +62,17 @@ class Todo(TimeStampedModel):
         return None
 
     @staticmethod
-    def get_todo_counts(user, first_tag):
+    def get_todo_counts(user):
 
         # Get the list of tags, initially sorted by count per tag
         tags = Tag.objects.values("id", "name") \
                           .annotate(count=Count("todo", distinct=True)) \
+                          .annotate(created=Max("todo__created")) \
                           .filter(user=user, todo__user=user) \
-                          .order_by("-count")
+                          .order_by("-created")
 
         # Convert from queryset to list of dicts so we can further sort them
         counts = [{"name": x["name"], "count": x["count"]} for x in tags]
-
-        # Use a custom sort function to insure that the tag matching first_tag
-        #  always comes out first.
-        counts.sort(key=cmp_to_key(lambda x, y: -1 if x["name"] == first_tag else 1))
 
         return counts
 
@@ -124,17 +123,95 @@ class Todo(TimeStampedModel):
             "url": self.url,
             "note": self.note,
             "last_modified": self.modified,
+            "priority": self.priority,
             "doctype": "todo",
             "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
             "date_unixtime": self.created.strftime("%s"),
             "user_id": self.user.id
         }
 
-        res = es.index(
+        es.index(
             index=settings.ELASTICSEARCH_INDEX,
             id=self.uuid,
             body=doc
         )
+
+    @staticmethod
+    def search(search_term, user_id):
+
+        es = Elasticsearch(
+            [settings.ELASTICSEARCH_ENDPOINT],
+            verify_certs=False
+        )
+
+        search_term = search_term.lower()
+
+        search_terms = re.split(r"\s+", urllib.parse.unquote(search_term))
+
+        search_object = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "user_id": user_id
+                            }
+                        },
+                        {
+                            "term": {
+                                "doctype": "todo"
+                            }
+                        },
+                    ]
+                }
+            },
+            "from": 0, "size": 1000,
+            "_source":[
+                "date",
+                "last_modified",
+                "name",
+                "note",
+                "priority",
+                "url",
+                "uuid"
+            ]
+        }
+
+        # Separate query into terms based on whitespace and
+        #  and treat it like an "AND" boolean search
+        for one_term in search_terms:
+            search_object["query"]["bool"]["must"].append(
+                {
+                    "bool": {
+                        "should": [
+                            {
+                                "wildcard": {
+                                    "name": {
+                                        "value": f"*{one_term}*",
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            )
+
+        results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+
+        matches = []
+        for match in results["hits"]["hits"]:
+            matches.append(
+                {
+                    "created": datetime.datetime.strptime(match["_source"]["date"]["gte"], "%Y-%m-%d %H:%M:%S"),
+                    "name": match["_source"]["name"],
+                    "note": match["_source"]["note"],
+                    "priority": match["_source"]["priority"],
+                    "url": match["_source"]["url"],
+                    "uuid": match["_source"]["uuid"],
+                }
+            )
+
+        return matches
 
 
 @receiver(post_save, sender=Todo)
