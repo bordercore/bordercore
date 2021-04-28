@@ -68,7 +68,7 @@ class TodoTaskList(ListView):
             if priority:
                 queryset = queryset.filter(priority=priority)
             if time:
-                queryset = queryset.filter(created__gt=(timezone.now() - timedelta(days=int(time))))
+                 queryset = queryset.filter(created__gt=(timezone.now() - timedelta(days=int(time))))
             if tag_name:
                 queryset = queryset.filter(tag__name=tag_name)
 
@@ -112,8 +112,13 @@ class TodoTaskList(ListView):
 
             info.append(data)
 
+        priority_counts = Todo.objects.priority_counts(request.user)
+        created_counts = Todo.objects.created_counts(request.user)
+
         response = {
             "status": "OK",
+            "priority_counts": list(priority_counts),
+            "created_counts": list(created_counts),
             "todo_list": info
         }
 

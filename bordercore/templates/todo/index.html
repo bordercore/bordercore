@@ -13,7 +13,9 @@
                 <h4>Priority</h4>
                 <div v-for="option in filterPriorityOptions" :class="getPriorityClass(option[0])" class="tag-list pl-2 py-1 pr-1 d-flex" @click.prevent="onClickPriority" :data-priority="option[0]">
                     <div>[[ option[1] ]]</div>
-                    <div class="ml-auto"><span class="px-2 badge badge-pill">3</span></div>
+                    <div class="ml-auto">
+                        <span class="px-2 badge badge-pill">[[ option[2] ]]</span>
+                    </div>
                 </div>
 
                 <hr class="filter-divider" />
@@ -21,7 +23,9 @@
                 <h4>Created</h4>
                 <div v-for="option in filterTimeOptions" :class="getTimeClass(option[0])" class="tag-list pl-2 py-1 pr-1 d-flex" @click.prevent="onClickTime" :data-created="option[0]">
                     <div>[[ option[1] ]]</div>
-                    <div class="ml-auto"><span class="px-2 badge badge-pill">3</span></div>
+                    <div class="ml-auto">
+                        <span class="px-2 badge badge-pill">[[ option[2] ]]</span>
+                    </div>
                 </div>
 
                 <hr class="filter-divider" />
@@ -211,17 +215,8 @@
                             thClass: "col-action"
                         }
                     ],
-                    filterPriorityOptions: [
-                        ["1", "High"],
-                        ["2", "Medium"],
-                        ["3", "Low"]
-                    ],
-                    filterTimeOptions: [
-                        ["1", "Last Day"],
-                        ["3", "Last 3 Days"],
-                        ["7", "Last Week"],
-                        ["30", "Last Month"],
-                    ],
+                    filterPriorityOptions: null,
+                    filterTimeOptions: null,
                     show: false,
                     right: true,
                     hover: true
@@ -238,6 +233,8 @@
                         `&search=${this.filterSearch}`,
                         (response) => {
                             this.items = response.data.todo_list;
+                            this.filterPriorityOptions = response.data.priority_counts;
+                            this.filterTimeOptions = response.data.created_counts;
                         },
                         "Error todo list"
                     );

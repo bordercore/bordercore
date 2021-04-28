@@ -18,6 +18,8 @@ from django.dispatch.dispatcher import receiver
 from lib.mixins import TimeStampedModel
 from tag.models import SortOrderTagTodo, Tag
 
+from .managers import TodoManager
+
 
 class Todo(TimeStampedModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
@@ -27,6 +29,8 @@ class Todo(TimeStampedModel):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     tags = models.ManyToManyField(Tag)
     data = JSONField(null=True, blank=True)
+
+    objects = TodoManager()
 
     PRIORITY_CHOICES = [
         (1, "High"),
