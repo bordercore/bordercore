@@ -45,9 +45,10 @@ class Todo(TimeStampedModel):
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
 
-    def get_note(self):
-        if self.note:
-            return markdown.markdown(self.note, extensions=[CodeHiliteExtension(guess_lang=False), "tables"])
+    @staticmethod
+    def get_markdown_note(note):
+        if note:
+            return markdown.markdown(note, extensions=[CodeHiliteExtension(guess_lang=False), "tables"])
 
         return ""
 
