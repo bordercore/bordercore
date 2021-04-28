@@ -12,6 +12,7 @@ class TodoPage:
     TITLE = (By.TAG_NAME, "title")
     TODO_ELEMENTS = (By.XPATH, "//div[@id='vue-app']//table/tbody/tr")
     FIRST_TASK = (By.XPATH, "//div[@id='vue-app']//table/tbody/tr[1]/td[2]/span")
+    NO_TASKS = (By.XPATH, "//div[@id='vue-app']//table/tbody/tr[1]/td[1]/div/div")
     PRIORITY_COLUMN = (By.XPATH, "//div[@id='vue-app']//table/thead/tr/th[@class='todo-col-priority']")
 
     def __init__(self, browser):
@@ -36,6 +37,13 @@ class TodoPage:
         Find the text of the first ask
         """
         todo_element = self.browser.find_elements(*self.FIRST_TASK)
+        return todo_element[0].get_attribute("innerHTML")
+
+    def todo_no_tasks_text(self):
+        """
+        Find the text of the first ask
+        """
+        todo_element = self.browser.find_elements(*self.NO_TASKS)
         return todo_element[0].get_attribute("innerHTML")
 
     def sort_by_priority(self):

@@ -54,6 +54,13 @@ class HomePage:
         todo_elements = self.browser.find_elements(*self.TODO)
         return len(todo_elements)
 
+    def todo_item(self, item_position):
+        """
+        Get the todo item at the specified position
+        """
+        todo_elements = self.browser.find_elements(*self.TODO)
+        return todo_elements[item_position].get_attribute("innerHTML")
+
     def bookmarks_count(self):
         """
         Find all recent bookmarks

@@ -42,8 +42,13 @@ class DrillManager(models.Manager):
             | Q(last_reviewed__isnull=True)
             | Q(state="L")).count()
 
+        if count > 0:
+            percentage = 100 - (todo / count * 100)
+        else:
+            percentage = 0
+
         return {
-            "percentage": 100 - (todo / count * 100),
+            "percentage": percentage,
             "count": count
         }
 
@@ -60,8 +65,8 @@ class DrillManager(models.Manager):
         Question = apps.get_model("drill", "Question")
 
         distinct_tags = Tag.objects.filter(question__isnull=False, user=user).distinct("name")
-        random_tag = Tag.objects.filter(id__in=distinct_tags).order_by("?")[0]
-        return Question.get_tag_info(user, random_tag.name)
+        random_tag = Tag.objects.filter(id__in=distinct_tags).order_by("?").first()
+        return Question.get_tag_info(user, random_tag.name) if random_tag else None
 
     def get_pinned_tags(self, user):
         """
