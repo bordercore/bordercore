@@ -416,3 +416,20 @@ def pin_tag(request):
         }
 
     return JsonResponse(response)
+
+@login_required
+def is_favorite_mutate(request):
+
+    question_uuid = request.POST["question_uuid"]
+    mutation = request.POST["mutation"]
+
+    question = Question.objects.get(uuid=question_uuid)
+
+    if mutation == "add":
+        question.is_favorite = True
+    elif mutation == "delete":
+        question.is_favorite = False
+
+    question.save()
+
+    return JsonResponse({"status": "OK"}, safe=False)

@@ -51,6 +51,7 @@ class Question(TimeStampedModel):
     times_failed = models.IntegerField(default=0, null=False)
     interval = models.DurationField(default=timedelta(days=1), blank=False, null=False)
     efactor = models.FloatField(blank=False, null=False)
+    is_favorite = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     objects = DrillManager()

@@ -41,6 +41,11 @@ urlpatterns = [
         name="skip"
     ),
     path(
+        route="mutate_is_favorite/",
+        view=views.is_favorite_mutate,
+        name="is_favorite_mutate"
+    ),
+    path(
         route="search/",
         view=views.DrillSearchListView.as_view(),
         name="search"

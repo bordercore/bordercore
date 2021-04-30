@@ -90,9 +90,14 @@
 
                     {% include "common/show_messages.html" %}
 
-                    <h3 class="table-borders markdown">
-                        {{ question.get_question|safe }}
-                    </h3>
+                    <div class="d-flex">
+                        <h3 class="table-borders markdown">
+                            {{ question.get_question|safe }}
+                        </h3>
+                        <div class="ml-auto pt-4">
+                            <font-awesome-icon icon="heart" :class="heartClass" @click="onClick"></font-awesome-icon>
+                        </div>
+                    </div>
 
                     {% if object.tags.all %}
                         Tags:
@@ -157,7 +162,32 @@
         });
 
         new Vue({
-            el: "#vue-app"
+            el: "#vue-app",
+            data() {
+                return {
+                    is_favorite: {{ question.is_favorite|yesno:"true,false" }},
+                }
+            },
+            methods: {
+                onClick() {
+                    this.is_favorite = !this.is_favorite;
+                    doPost(
+                        this,
+                        "{% url "drill:is_favorite_mutate" %}",
+                        {
+                            "question_uuid": "{{ question.uuid }}",
+                            "mutation": this.is_favorite ? "add" : "delete"
+                        },
+                        (response) => {},
+                        ""
+                    );
+                }
+            },
+            computed: {
+                heartClass: function() {
+                    return this.is_favorite ? "favorite" : ""
+                }
+            }
         });
 
     </script>
