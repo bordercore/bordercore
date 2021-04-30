@@ -89,7 +89,7 @@ cluster.initial_master_nodes: ["node-1"]
 #
 #action.destructive_requires_name: true
 #
-http.max_content_length: 200mb
+http.max_content_length: 250mb
 
 # indices.breaker.total.limit: 999mb
 
