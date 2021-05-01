@@ -95,7 +95,7 @@
                             {{ question.get_question|safe }}
                         </h3>
                         <div class="ml-auto pt-4">
-                            <font-awesome-icon icon="heart" :class="heartClass" @click="onClick"></font-awesome-icon>
+                            <font-awesome-icon icon="heart" :class="heartClass" @click="onClick" data-toggle="tooltip" data-placement="bottom" :title="toolTip"></font-awesome-icon>
                         </div>
                     </div>
 
@@ -186,6 +186,9 @@
             computed: {
                 heartClass: function() {
                     return this.is_favorite ? "favorite" : ""
+                },
+                toolTip: function() {
+                    return this.is_favorite ? "Remove this as a favorite" : "Set this as a favorite"
                 }
             }
         });
