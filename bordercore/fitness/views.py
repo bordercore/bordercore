@@ -146,3 +146,19 @@ def change_active_status(request):
         eu.save()
 
     return JsonResponse({"status": "OK"}, safe=False)
+
+@login_required
+def edit_note(request):
+
+    exercise_uuid = request.POST["uuid"]
+    note = request.POST["note"]
+
+    exercise = Exercise.objects.get(uuid=exercise_uuid)
+    exercise.note = note
+    exercise.save()
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)

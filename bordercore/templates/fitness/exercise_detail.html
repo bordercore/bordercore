@@ -23,29 +23,48 @@
         {% include "common/show_messages.html" %}
     </div>
 
-    <div class="row no-gutters h-100">
+    <div class="row no-gutters h-100" id="vue-app">
 
         <div class="col-lg-3 d-flex flex-column">
 
             <div class="card-body">
 
+                <div v-if="showHistoryMessage" class="text-info mb-2">
+                    You've been doing this exercise since <br />
+                    <strong>{{ activity_info.0.started|date:"N j, Y" }}</strong>
+                </div>
+
+                <div class="text-info mb-4">
+                    Last workout: <br/>
+                    <strong>{{ recent_data.date|date:"N j, Y" }} - {{ delta_days }} day{{ delta_days|pluralize:"s" }} ago</strong>
+                </div>
+
+                <button type="submit" class="btn btn-primary" @click=onClick v-cloak>
+                    <font-awesome-icon v-if="isActiveExercise" icon="check" class="mr-2"></font-awesome-icon>[[ activeButtonValue ]]
+                </button>
+
                 {% if object.description %}
                     <h5 class="highlight-box mt-5">
-          {{ object.description|safe }}
+                        {{ object.description|safe }}
                     </h5>
                 {% endif %}
 
-                {% if object.note %}
-                    <h5 class="highlight-box mt-5">
-          {{ object.note_markdown|safe }}
-                    </h5>
-                {% endif %}
+                <editable-text-area
+                    uuid="{{ object.uuid }}"
+                    note="{{ object.note_markdown|escape|safe }}"
+                    edit-url="{% url 'fitness:edit_note' %}"
+                    extra-class="mt-5"
+                >
+                    <template v-slot:title>
+                        <div class="bold text-info">Note</div>
+                    </template>
+                </editable-text-area>
 
             </div>
 
         </div>
 
-        <div class="col-lg-9" id="vue-app">
+        <div class="col-lg-9">
 
             <div class="card-grid ml-2">
 
@@ -54,17 +73,7 @@
                 <div class="row">
                     <div class="col-lg-6">
 
-                        Last workout: {{ recent_data.date|date:"N j, Y" }} - {{ delta_days }} day{{ delta_days|pluralize:"s" }} ago
-
                         <input type="hidden" name="exercise_uuid" value="{{ object.uuid }}" />
-
-                        <button type="submit" class="btn btn-primary" @click=onClick v-cloak>
-                            <font-awesome-icon v-if="isActiveExercise" icon="check" class="mr-2"></font-awesome-icon>[[ activeButtonValue ]]
-                        </button>
-
-                            <span v-if="showHistoryMessage">
-                                You've been doing this exercise since {{ activity_info.0.started|date:"N j, Y" }}
-                            </span>
 
                     </div>
                 </div>
@@ -186,6 +195,8 @@
             el: "#vue-app",
             data() {
                 return {
+                    note: "{{ object.note_markdown|escapejs|safe }}",
+                    isEditingNote: false,
                     isActiveExercise: {% if activity_info %}true{% else %}false{% endif %},
                     showHistoryMessage: {% if activity_info %}true{% else %}false{% endif %}
                 }
@@ -211,6 +222,11 @@
                         ""
                     );
 
+                },
+                editNote() {
+                    console.log("edit note");
+                },
+                doneEdit() {
                 }
             },
             computed: {

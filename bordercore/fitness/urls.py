@@ -25,4 +25,9 @@ urlpatterns = [
         view=views.fitness_summary,
         name="summary"
     ),
+    path(
+        route="edit_note/",
+        view=views.edit_note,
+        name="edit_note"
+    )
 ]

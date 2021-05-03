@@ -83,6 +83,10 @@ window.doGet = doGet;
 window.doPost = doPost;
 window.getFormattedDate = getFormattedDate;
 
+import EditableTextArea from "./vue/common/EditableTextArea.vue";
+Vue.component("EditableTextArea", EditableTextArea);
+window.EditableTextArea = EditableTextArea;
+
 import SimpleSuggest from "./vue/common/SimpleSuggest.vue";
 Vue.component("SimpleSuggest", SimpleSuggest);
 window.SimpleSuggest = SimpleSuggest;

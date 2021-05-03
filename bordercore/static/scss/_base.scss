@@ -30,6 +30,27 @@
   padding: 0 $grid-margin * 0.5;
 }
 
+.editable-textarea {
+  display: none;
+  color: $white;
+  background-color: $gray-900;
+}
+
+.editable-textarea-label p:last-child {
+  margin-bottom: 0;
+}
+
+.editing {
+  .editable-textarea {
+    display: block;
+    width: 100%;
+  }
+
+  .editable-textarea-label {
+    display: none;
+  }
+}
+
 .burger-menu {
   width: 1.5rem;
 }
