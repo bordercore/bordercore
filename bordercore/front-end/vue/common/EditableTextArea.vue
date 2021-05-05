@@ -5,7 +5,7 @@
         <div v-if="textAreaValue || isEditingNote" :class="[isEditingNote ? 'editing' : '', extraClass]">
             <slot name="title">
             </slot>
-            <label class="editable-textarea-label" v-html="textAreaValue" data-toggle="tooltip" data-placement="bottom" title="Doubleclick to edit note" @dblclick="editNote"></label>
+            <label class="editable-textarea-label" v-html="textAreaMarkdown" data-toggle="tooltip" data-placement="bottom" title="Doubleclick to edit note" @dblclick="editNote"></label>
             <textarea id="note" class="editable-textarea px-3" placeholder="Enter note text here" v-model="textAreaValue" @blur="doneEdit()"></textarea>
         </div>
         <div v-else class="ml-2" :class="extraClass">
@@ -38,7 +38,28 @@
                 textAreaValue: this.note
             }
         },
+        computed: {
+            textAreaMarkdown() {
+
+                var md = window.markdownit({
+                    highlight: function (str, lang) {
+                        if (lang && hljs.getLanguage(lang)) {
+                            try {
+                                return hljs.highlight(str, { language: lang }).value;
+                            } catch (__) {}
+                        }
+
+                        return ''; // use external default escaping
+                    }
+                });
+                var result = md.render(this.textAreaValue);
+                return result;
+            }
+        },
         methods: {
+            setTextAreaValue(value) {
+                this.textAreaValue = value;
+            },
             editNote() {
 
                 this.beforeEditCache = this.textAreaValue;

@@ -116,12 +116,6 @@
   }
 }
 
-code {
-  background-color: #4e5059;
-  color: $white;
-  padding: 0.2rem;
-}
-
 /* Dropdown Menus */
 
 .dropdown-menu.show {
@@ -374,16 +368,10 @@ $nav-tabs-link-hover-border-color: $nav-tabs-border-color;
 
 /* Markdown */
 
-.markdown {
-  strong {
-    color: $info;
-  }
-}
-
 pre {
   background: $markdown-background-color;
-  border-top: 0.1rem solid $markdown-border-color;
-  border-bottom: 0.1rem solid $markdown-border-color;
+  border-top: 0.05rem solid $markdown-border-color;
+  border-bottom: 0.05rem solid $markdown-border-color;
   padding: 0.3rem;
   padding-left: 0.8rem;
 }

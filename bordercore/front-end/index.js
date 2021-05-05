@@ -78,10 +78,17 @@ window.format = format;
 import EasyMDE from "easymde";
 window.EasyMDE = EasyMDE;
 
-import { doGet, doPost, getFormattedDate } from "./util.js";
+import hljs from "highlight.js";
+window.hljs = hljs;
+
+import markdownit from "markdown-it";
+window.markdownit = markdownit;
+
+import { doGet, doPost, getFormattedDate, getMarkdown } from "./util.js";
 window.doGet = doGet;
 window.doPost = doPost;
 window.getFormattedDate = getFormattedDate;
+window.markdown = getMarkdown();
 
 import EditableTextArea from "./vue/common/EditableTextArea.vue";
 Vue.component("EditableTextArea", EditableTextArea);
