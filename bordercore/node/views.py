@@ -1,9 +1,7 @@
 import re
 import urllib
 
-import markdown
 from elasticsearch import Elasticsearch
-from markdown.extensions.codehilite import CodeHiliteExtension
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -39,8 +37,6 @@ class NodeDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["node_uuid"] = self.object.uuid
-
         return context
 
 
@@ -366,12 +362,9 @@ def get_note(request, uuid):
 
     node = Node.objects.get(uuid=uuid, user=request.user)
 
-    node_html = markdown.markdown(node.note, extensions=[CodeHiliteExtension(guess_lang=False), "tables"]) if node.note else None
-
     response = {
         "status": "OK",
-        "note": node.note,
-        "noteHtml": node_html
+        "note": node.note
     }
 
     return JsonResponse(response)
@@ -380,7 +373,7 @@ def get_note(request, uuid):
 @login_required
 def edit_note(request):
 
-    node_uuid = request.POST["node_uuid"]
+    node_uuid = request.POST["uuid"]
     note = request.POST["note"]
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)

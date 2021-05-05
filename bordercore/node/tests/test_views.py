@@ -209,7 +209,7 @@ def test_edit_note(auto_login_user, node):
 
     url = urls.reverse("node:edit_note")
     resp = client.post(url, {
-        "node_uuid": node.uuid,
+        "uuid": node.uuid,
         "note": "Sample Changed Note"
     })
 
