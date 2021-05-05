@@ -15,11 +15,6 @@ def test_fitness_str(auto_login_user, fitness):
     assert str(ExerciseUser.objects.get(user=user, exercise=fitness[2])) == "Squats"
 
 
-def test_fitness_note_markdown(fitness):
-
-    assert fitness[0].note_markdown == "<h3>Trying to make some <strong>gains</strong></h3>"
-
-
 def test_get_overdue_exercises(auto_login_user, fitness):
 
     user, _ = auto_login_user()

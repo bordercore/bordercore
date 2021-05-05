@@ -51,7 +51,7 @@
 
                 <editable-text-area
                     uuid="{{ object.uuid }}"
-                    note="{{ object.note_markdown|escape|safe }}"
+                    note="{{ object.note }}"
                     edit-url="{% url 'fitness:edit_note' %}"
                     extra-class="mt-5"
                 >
@@ -195,7 +195,6 @@
             el: "#vue-app",
             data() {
                 return {
-                    note: "{{ object.note_markdown|escapejs|safe }}",
                     isEditingNote: false,
                     isActiveExercise: {% if activity_info %}true{% else %}false{% endif %},
                     showHistoryMessage: {% if activity_info %}true{% else %}false{% endif %}
@@ -222,11 +221,6 @@
                         ""
                     );
 
-                },
-                editNote() {
-                    console.log("edit note");
-                },
-                doneEdit() {
                 }
             },
             computed: {
