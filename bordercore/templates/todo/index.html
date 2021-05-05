@@ -86,7 +86,7 @@
                     <template #cell(name)="data">
                         <span v-html="data.value"></span>
                         <span v-if="data.item.url"><a class="ml-1" :href="data.item.url"><font-awesome-icon icon="link"></font-awesome-icon></a></span>
-                        <div class="table-note" v-html="data.item.note"></div>
+                        <div class="table-note" v-html="getNote(data.item.note)"></div>
                     </template>
 
                     <template #cell(manualSorting)="data">
@@ -350,6 +350,9 @@
                         this.filterTime = "";
                     }
                     this.getTodoList();
+                },
+                getNote(note) {
+                    return markdown.render(note);
                 }
             },
             computed: {

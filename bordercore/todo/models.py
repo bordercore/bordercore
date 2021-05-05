@@ -3,9 +3,7 @@ import re
 import urllib
 import uuid
 
-import markdown
 from elasticsearch import Elasticsearch
-from markdown.extensions.codehilite import CodeHiliteExtension
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -44,13 +42,6 @@ class Todo(TimeStampedModel):
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
-
-    @staticmethod
-    def get_markdown_note(note):
-        if note:
-            return markdown.markdown(note, extensions=[CodeHiliteExtension(guess_lang=False), "tables"])
-
-        return ""
 
     @staticmethod
     def get_priority_name(priority_value):

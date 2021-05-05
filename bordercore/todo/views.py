@@ -102,7 +102,7 @@ class TodoTaskList(ListView):
                 "name": re.sub("[\n\r\"]", "", todo["name"]),
                 "priority": Todo.get_priority_name(todo["priority"]),
                 "created": format(todo["created"], "Y-m-d"),
-                "note": re.sub("[\n\r\"]", "", Todo.get_markdown_note(todo["note"]) or ""),
+                "note": todo["note"] or "",
                 "url": todo["url"],
                 "uuid": todo["uuid"]
             }
