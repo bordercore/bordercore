@@ -4,9 +4,7 @@ import uuid
 
 import boto3
 import humanize
-import markdown
 from elasticsearch import Elasticsearch
-from markdown.extensions.codehilite import CodeHiliteExtension
 from mutagen.easyid3 import EasyID3
 from mutagen.mp3 import MP3
 
@@ -32,9 +30,6 @@ class Album(TimeStampedModel):
     compilation = models.BooleanField(default=False)
     note = models.TextField(null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
-
-    def get_note(self):
-        return markdown.markdown(self.note, extensions=[CodeHiliteExtension(guess_lang=False), "tables"])
 
     class Meta:
         unique_together = ("title", "artist")
