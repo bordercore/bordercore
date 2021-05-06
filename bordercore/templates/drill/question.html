@@ -27,7 +27,7 @@
 
 {% block content %}
 
-    <div id="vue-app" class="row no-gutters h-100">
+    <div class="row no-gutters h-100" id="vue-app">
 
         <div class="col-lg-3 d-flex flex-column">
 
@@ -91,8 +91,7 @@
                     {% include "common/show_messages.html" %}
 
                     <div class="d-flex">
-                        <h3 class="table-borders markdown">
-                            {{ question.get_question|safe }}
+                        <h3 class="table-borders markdown" v-html="getQuestion()">
                         </h3>
                         <div class="ml-auto pt-4">
                             <font-awesome-icon icon="heart" :class="heartClass" @click="onClick" data-toggle="tooltip" data-placement="bottom" :title="toolTip"></font-awesome-icon>
@@ -181,6 +180,9 @@
                         (response) => {},
                         ""
                     );
+                },
+                getQuestion() {
+                    return markdown.render("{{ question.question|escapejs }}")
                 }
             },
             computed: {

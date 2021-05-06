@@ -24,7 +24,7 @@
 
 {% block content %}
 
-    <div class="row no-gutters h-100">
+    <div class="row no-gutters h-100" id="vue-app">
 
         <div class="col-lg-3 d-flex flex-grow-1">
             <div class="card-body">
@@ -107,8 +107,7 @@
             <div class="right-column">
                 <div class="card-body">
 
-                    <h3 class="table-borders markdown">
-                    {{ question.get_question|safe }}
+                    <h3 class="table-borders markdown" v-html="getQuestion()">
                     </h3>
                     {% if question.tags.all %}
                         Tags:
@@ -118,8 +117,7 @@
                         <br /><br />
                     {% endif %}
                     <hr class="divider" _style="background-color: #f00" />
-                    <h3 class="table-borders markdown">
-                    {{ question.get_answer|safe }}
+                    <h3 class="table-borders markdown" v-html="getAnswer()">
                     </h3>
 
                     <a href="{% url 'drill:record_response' question.uuid 'good' %}" class="btn btn-primary" role="button">Good</a>
@@ -178,6 +176,18 @@
 
         new Vue({
             el: "#vue-nav",
+        });
+
+        new Vue({
+            el: "#vue-app",
+            methods: {
+                getQuestion() {
+                    return markdown.render("{{ question.question|escapejs }}")
+                },
+                getAnswer() {
+                    return markdown.render("{{ question.answer|escapejs }}")
+                }
+            }
         });
 
     </script>

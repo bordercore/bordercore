@@ -1,9 +1,7 @@
 import uuid
 from datetime import timedelta
 
-import markdown
 from elasticsearch import Elasticsearch
-from markdown.extensions.codehilite import CodeHiliteExtension
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -78,12 +76,6 @@ class Question(TimeStampedModel):
             if state[0] == name:
                 return state[1]
         return None
-
-    def get_question(self):
-        return markdown.markdown(self.question, extensions=[CodeHiliteExtension(guess_lang=False), "tables", "pymdownx.arithmatex"])
-
-    def get_answer(self):
-        return markdown.markdown(self.answer, extensions=[CodeHiliteExtension(guess_lang=False), "tables", "pymdownx.arithmatex"])
 
     def get_learning_step_count(self):
         return len(self.LEARNING_STEPS)
