@@ -27,16 +27,6 @@ def test_get_state_name(question):
     assert Question.get_state_name("X") is None
 
 
-def test_get_question(question):
-
-    assert question.get_question() == f"<p>{question.question}</p>"
-
-
-def test_get_answer(question):
-
-    assert question.get_answer() == f"<p>{question.answer}</p>"
-
-
 def test_get_learning_count_step(question):
 
     assert question.get_learning_step_count() == 2

@@ -58,7 +58,7 @@ def test_blob_create(monkeypatch_index_blob, auto_login_user):
         "tags": "django",
         "importance": 1,
     })
-    print(resp.content)
+
     assert resp.status_code == 302
 
 
@@ -116,10 +116,6 @@ def test_blob_detail(auto_login_user, blob):
 
     author = [x.value for x in blob.metadata_set.all() if x.name == "Author"][0]
     assert soup.select("span#author")[0].findAll(text=True)[0] == author
-
-    assert soup.select("div#blob-detail-content")[0].text.strip() == blob.content
-
-    assert soup.select("div#blob_note")[0].findAll(text=True)[0] == blob.note
 
     assert soup.select("span.metadata_value")[0].findAll(text=True)[0] == "John Smith, Jane Doe"
 

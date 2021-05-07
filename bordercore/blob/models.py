@@ -10,9 +10,7 @@ from urllib.parse import quote_plus, urlparse
 
 import boto3
 import humanize
-import markdown
 from elasticsearch import Elasticsearch, NotFoundError
-from markdown.extensions.codehilite import CodeHiliteExtension
 from storages.backends.s3boto3 import S3Boto3Storage
 
 from django.conf import settings
@@ -122,12 +120,6 @@ class Blob(TimeStampedModel):
         # Save the sha1sum so that when it changes by a blob edit
         #  in save() we know what the original was.
         setattr(self, "__original_sha1sum", getattr(self, 'sha1sum'))
-
-    def get_content(self):
-        return markdown.markdown(self.content, extensions=[CodeHiliteExtension(guess_lang=False), "tables"])
-
-    def get_note(self):
-        return markdown.markdown(self.note, extensions=[CodeHiliteExtension(guess_lang=False), "tables"])
 
     @staticmethod
     def get_content_type(argument):
@@ -494,7 +486,7 @@ class Blob(TimeStampedModel):
             x = re.search(r"^(#+)(.*)", line.strip())
             if x:
 
-                content_out = f"{content_out}<a name='section_{node_id}'></a>\n{line}\n"
+                content_out = f"{content_out}%#@!{node_id}!@#%\n{line}\n"
                 level = len(x.group(1))
                 heading = x.group(2).strip()
 

@@ -1,11 +1,5 @@
 from datetime import timedelta
 
-import markdown
-from markdown.extensions.codehilite import CodeHiliteExtension
-from pygments import highlight
-from pygments.formatters import HtmlFormatter
-from pygments.lexers import PythonLexer
-
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils import timezone

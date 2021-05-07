@@ -68,9 +68,6 @@ def test_search_notes(mock_elasticsearch, auto_login_user):
 
     soup = BeautifulSoup(resp.content, "html.parser")
 
-    matches = soup.select("div#note")
-    assert len(matches) == 10
-
     match = soup.select("div#vue-app card")[0]["title"]
     assert data["hits"]["hits"][0]["source"]["name"] == match
 

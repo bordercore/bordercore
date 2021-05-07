@@ -2,9 +2,7 @@ import math
 import re
 import urllib
 
-import markdown
 from elasticsearch import Elasticsearch
-from markdown.extensions.codehilite import CodeHiliteExtension
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -230,13 +228,6 @@ class NoteListView(SearchListView):
         page = int(self.request.GET.get("page", 1))
         context["paginator"] = self.get_paginator(page, context["search_results"])
         context["pinned_notes"] = self.request.user.userprofile.pinned_notes.all().only("name", "uuid").order_by("sortorderusernote__sort_order")
-
-        for match in context["search_results"]["hits"]["hits"]:
-
-            match["source"]["content"] = markdown.markdown(
-                match["source"]["contents"],
-                extensions=[CodeHiliteExtension(guess_lang=False), "tables"]
-            )
 
         return context
 
