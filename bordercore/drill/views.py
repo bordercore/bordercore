@@ -39,6 +39,7 @@ class DrillListView(ListView):
             "tags_still_learning": Question.objects.tags_still_learning(self.request.user)[:10],
             "tags_needing_review": Question.objects.tags_needing_review(self.request.user)[:10],
             "random_tag": Question.objects.get_random_tag(self.request.user),
+            "favorite_questions_progress": Question.objects.favorite_questions_progress(self.request.user),
             "total_progress": Question.objects.total_tag_progress(self.request.user)
         }
 

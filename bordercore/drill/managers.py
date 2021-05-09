@@ -52,6 +52,32 @@ class DrillManager(models.Manager):
             "count": count
         }
 
+    def favorite_questions_progress(self, user):
+        """
+        Get percentage of favorite questions not needing review
+        """
+
+        Question = apps.get_model("drill", "Question")
+
+        count = Question.objects.filter(user=user, is_favorite=True).count()
+
+        todo = Question.objects.filter(
+            Q(user=user),
+            Q(is_favorite=True),
+            Q(interval__lte=timezone.now() - F("last_reviewed"))
+            | Q(last_reviewed__isnull=True)
+            | Q(state="L")).count()
+
+        if count > 0:
+            percentage = 100 - (todo / count * 100)
+        else:
+            percentage = 0
+
+        return {
+            "percentage": percentage,
+            "count": count
+        }
+
     def get_random_tag(self, user):
         """
         Get a random tag and its related information.
