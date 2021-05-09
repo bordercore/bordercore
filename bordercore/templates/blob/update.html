@@ -1,7 +1,5 @@
 {% extends "base.html" %}
 
-{% load escape_characters %}
-
 {% block extra_head %}
     <link rel="stylesheet" href="{{ STATIC_URL }}css/easymde.min.css">
 {% endblock %}
@@ -48,12 +46,22 @@
                     {% endif %}
 
                     <div class="form-group w-75">
-                        <add-to-collection-dropdown></add-to-collection-dropdown>
+                        <add-to-collection-dropdown inline-template>
+                            <select class="form-control" @change="onChange">
+                                <option>Add to collection</option>
+                                <option v-for="c in collection_list" :value="c.id">[[ c.name ]]</option>
+                            </select>
+                        </add-to-collection-dropdown>
                     </div>
 
                     {% if object.get_collection_info %}
                         <div class="form-group w-75">
-                            <remove-from-collection-dropdown></remove-from-collection-dropdown>
+                            <remove-from-collection-dropdown inline-template>
+                                <select class="form-control" @change="onChange">
+                                    <option>Remove from collection</option>
+                                    <option v-for="c in collection_list" :value="c.id">[[ c.name ]]</option>
+                                </select>
+                            </remove-from-collection-dropdown>
                         </div>
                     {% endif %}
 
@@ -74,13 +82,17 @@
 
                 <div class="row">
                     <div class="col-lg-4 mt-3">
-                        <cleanup-filename-button></cleanup-filename-button>
+                        <cleanup-filename-button inline-template>
+                            <input type="button" class="btn btn-secondary" value="Cleanup Filename" @click="onClick" />
+                        </cleanup-filename-button>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-lg-4 mt-3">
-                        <upper-case-first-button></upper-case-first-button>
+                        <upper-case-first-button inline-template>
+                            <input type="button" class="btn btn-secondary" value="Upper Case First" @click="onClick" />
+                        </upper-case-first-button>
                     </div>
                 </div>
 
@@ -146,15 +158,50 @@
 
                             {% if field.label == 'File' %}
 
-                                <file-upload></file-upload>
+                                <file-upload inline-template>
+                                    <div class="col-lg-8 input-group">
+                                        <input type="text" name="filename" :value="filename" class="form-control" id="id_filename" autocomplete="off" />
+                                        <input type="hidden" name="file_modified" :value="lastModified" />
+                                        <span class="input-group-append">
+                                            <label class="btn btn-primary">Choose file
+                                                <input type="file" name="file" id="id_file" hidden @change="onChange" />
+                                            </label>
+                                        </span>
+                                    </div>
+                                </file-upload>
 
                             {% elif field.label == 'Date' %}
 
-                                <date-input></date-input>
+                                <date-input inline-template>
+                                    <div class="col-lg-2 input-group">
+                                        <div id="dateapp">
+                                            <vuejs-datepicker
+                                                :bootstrap-styling="true"
+                                                :format="customFormatter"
+                                                :typeable="true"
+                                                :value="date"
+                                                name="date"
+                                                id="id_date"
+                                                calendar-class="calendar"
+                                            >
+                                                <span slot="afterDateInput" class="input-group-append">
+                                                    <div class="input-group-text">
+                                                        <font-awesome-icon icon="calendar-alt"></font-awesome-icon>
+                                                    </div>
+                                                </span>
+                                            </vuejs-datepicker>
+                                        </div>
+                                    </div>
+                                </date-input>
 
                             {% elif field.label == 'Content' %}
 
-                                <content-text-area></content-text-area>
+                                <content-text-area inline-template>
+                                    <div class="col-lg-10 col-sm-10 align-self-center">
+                                        <textarea name="content" cols="40" rows="5" class="form-control" id="id_content" @focus="onFocus">{{ form.content.value|default:"" }}</textarea>
+                                    </div>
+
+                                </content-text-area>
 
                             {% elif field.label == 'Tags' %}
 
@@ -202,7 +249,61 @@
 
                     </div>
 
-                    <metadata-wrapper></metadata-wrapper>
+                    <metadata-wrapper inline-template>
+                        <div>
+                            <div class="form-group row">
+
+                                <div class="col-lg-2 col-sm-2">
+                                    <simple-suggest
+                                        ref="simpleSuggest"
+                                        id="simple-suggest"
+                                        search-url="{% url 'blob:metadata_name_search' %}?query="
+                                    >
+                                    </simple-suggest>
+                                </div>
+
+                                <div class="col-lg-10 col-sm-10">
+                                    <div class="col-lg-10 input-group">
+                                        <metadata-input @add-metadata=addMetadata inline-template>
+                                            <input type="text" id="id_value" class="form-control" placeholder="Value" autocomplete="off" @keydown.enter.prevent="onKeyDown" />
+                                        </metadata-input>
+                                        <span class="input-group-append">
+                                            <add-metadata-button @add-metadata=addMetadata inline-template>
+                                                <button class="btn btn-success" type="button" @click="onClick">
+                                                    <span class="glyphicon glyphicon-plus"></span>
+                                                </button>
+                                            </add-metadata-button>
+                                        </span>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <metadata-list
+                                :metadata="metadata"
+                                @delete=deleteMetadata
+                                inline-template
+                            >
+                                <div>
+                                    <div v-for="m in metadata">
+                                        <div class="form-group row">
+                                            <label class="bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">[[ m.name ]]</label>
+                                            <div class="col-lg-10 col-sm-10">
+                                                <div class="col-lg-10 input-group">
+                                                    <input type="text" :name="m.counter + '_' + m.name" :value="m.value" class="form-control" autocomplete="off" />
+                                                    <span class="input-group-append">
+                                                        <button class="btn btn-danger btn-remove" type="button" @click="$emit('delete', m.counter)">
+                                                            <span class="glyphicon glyphicon-minus"></span>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </metadata-list>
+                        </div>
+                    </metadata-wrapper>
 
                     <div class="form-group">
                         <div class="col-lg-3 offset-lg-2">
@@ -237,12 +338,6 @@
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
         const AddToCollectionDropdown = {
-            template: `
-                <select class="form-control" @change="onChange">
-                    <option>Add to collection</option>
-                    <option v-for="c in collection_list" :value="c.id">[[ c.name ]]</option>
-                </select>
-            `,
             data() {
                 return {
                     collection_list: [
@@ -264,12 +359,6 @@
 
         {% if object and object.get_collection_info %}
         const RemoveFromCollectionDropdown = {
-            template: `
-                <select class="form-control" @change="onChange">
-                    <option>Remove from collection</option>
-                    <option v-for="c in collection_list" :value="c.id">[[ c.name ]]</option>
-                </select>
-            `,
             data() {
                 return {
                     collection_list: [
@@ -291,7 +380,6 @@
         {% endif %}
 
         const CleanupFilenameButton = {
-            template: '<input type="button" class="btn btn-secondary" value="Cleanup Filename" @click="onClick" />',
             methods: {
                 async onClick(evt) {
                     var name = document.getElementById("id_name").value;
@@ -311,7 +399,6 @@
         }
 
         const UpperCaseFirstButton = {
-            template: '<input type="button" class="btn btn-secondary" value="Upper Case First" @click="onClick" />',
             methods: {
                 async onClick(evt) {
 
@@ -328,17 +415,6 @@
         };
 
         const FileUpload = {
-            template: `
-                <div class="col-lg-8 input-group">
-                    <input type="text" name="filename" :value="filename" class="form-control" id="id_filename" autocomplete="off" />
-                    <input type="hidden" name="file_modified" :value="lastModified" />
-                    <span class="input-group-append">
-                        <label class="btn btn-primary">Choose file
-                            <input type="file" name="file" id="id_file" hidden @change="onChange" />
-                        </label>
-                    </span>
-                </div>
-            `,
             data() {
                 return {
                     filename: "{{ form.filename.value|default:"" }}",
@@ -356,12 +432,6 @@
         const noDelimiter = {replace: function(){}};
 
         const ContentTextArea = {
-            delimiters: [noDelimiter, noDelimiter],
-            template: `
-                <div class="col-lg-10 col-sm-10 align-self-center">
-                    <textarea name="content" cols="40" rows="5" class="form-control" id="id_content" @focus="onFocus">{{ form.content.value|escape_characters }}</textarea>
-                </div>
-            `,
             methods: {
                 onFocus(evt) {
                     // Expand the content for editing, but only do it once.
@@ -375,27 +445,6 @@
         }
 
         const DateInput = {
-            template: `
-                <div class="col-lg-2 input-group">
-                    <div id="dateapp">
-                        <vuejs-datepicker
-                            :bootstrap-styling="true"
-                            :format="customFormatter"
-                            :typeable="true"
-                            :value="date"
-                              name="date"
-                              id="id_date"
-                              calendar-class="calendar"
-                            >
-                            <span slot="afterDateInput" class="input-group-append">
-                                <div class="input-group-text">
-                                    <font-awesome-icon icon="calendar-alt"></font-awesome-icon>
-                                </div>
-                            </span>
-                        </vuejs-datepicker>
-                    </div>
-                </div>
-            `,
             data() {
                 return {
                     date: "{{ form.date.value }}"
@@ -435,34 +484,10 @@
         }
 
         const MetadataList = {
-            template: `
-                <div>
-                    <div v-for="m in metadata">
-                        <div class="form-group row">
-                            <label class="bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">[[ m.name ]]</label>
-                            <div class="col-lg-10 col-sm-10">
-                                <div class="col-lg-10 input-group">
-                                    <input type="text" :name="m.counter + '_' + m.name" :value="m.value" class="form-control" autocomplete="off" />
-                                    <span class="input-group-append">
-                                        <button class="btn btn-danger btn-remove" type="button" @click="$emit('delete', m.counter)">
-                                            <span class="glyphicon glyphicon-minus"></span>
-                                        </button>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            `,
             props: ['metadata']
         }
 
         const AddMetadataButton = {
-            template: `<button class="btn btn-success" type="button" @click="onClick">
-                <span class="glyphicon glyphicon-plus"></span>
-            </button>
-            `,
             methods: {
                 onClick(evt) {
                     this.$emit("add-metadata");
@@ -471,7 +496,6 @@
         }
 
         const MetadataInput = {
-            template: '<input type="text" id="id_value" class="form-control" placeholder="Value" autocomplete="off" @keydown.enter.prevent="onKeyDown" />',
             methods: {
                 onKeyDown(evt) {
                     this.$emit("add-metadata");
@@ -480,37 +504,6 @@
         };
 
         const MetadataWrapper = {
-            template: `
-                <div>
-                    <div class="form-group row">
-
-                        <div class="col-lg-2 col-sm-2">
-                            <simple-suggest
-                                   ref="simpleSuggest"
-                                   id="simple-suggest"
-                                   search-url="{% url 'blob:metadata_name_search' %}?query="
-                                >
-                            </simple-suggest>
-                        </div>
-
-                        <div class="col-lg-10 col-sm-10">
-                            <div class="col-lg-10 input-group">
-                                <metadata-input @add-metadata=addMetadata></metadata-input>
-                                <span class="input-group-append">
-                                    <add-metadata-button @add-metadata=addMetadata></add-metadata-button>
-                                </span>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <metadata-list
-                        :metadata="metadata"
-                        @delete=deleteMetadata
-                        ></metadata-list>
-
-                </div>
-            `,
             data() {
                 return {
                     metadata: [
