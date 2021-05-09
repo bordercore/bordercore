@@ -4,9 +4,6 @@ from django.contrib.auth.models import User
 
 from accounts.models import SortOrderUserTag, pinned_tags_has_changed
 from accounts.tests.factories import TEST_USERNAME
-from tag.tests.factories import TagFactory
-
-# from tag.models import Tag
 
 pytestmark = pytest.mark.django_db
 

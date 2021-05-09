@@ -24,7 +24,7 @@ except (ModuleNotFoundError, NameError, django.core.exceptions.AppRegistryNotRea
 django.setup()
 
 from accounts.models import SortOrderUserTag, SortOrderUserNote, SortOrderUserFeed  # isort:skip
-from accounts.tests.factories import TEST_PASSWORD  # isort:skip
+from accounts.tests.factories import TEST_PASSWORD, UserFactory  # isort:skip
 from blob.tests.factories import BlobFactory  # isort:skip
 from bookmark.tests.factories import BookmarkFactory  # isort:skip
 from collection.tests.factories import CollectionFactory  # isort:skip
@@ -38,13 +38,18 @@ from music.tests.factories import SongFactory, AlbumFactory  # isort:skip
 from node.models import SortOrderNodeBookmark, SortOrderNodeBlob  # isort:skip
 from node.tests.factories import NodeFactory  # isort:skip
 from tag.tests.factories import TagFactory  # isort:skip
-from todo.tests.factories import TodoFactory, UserFactory  #isort:skip
+from todo.tests.factories import TodoFactory  #isort:skip
 
 try:
     from moto import mock_s3
 except ModuleNotFoundError:
     # Don't worry if this import doesn't exist in production
     pass
+
+
+# Disable the Debug Toolbar and thereby prevent it
+#  from interfering with functional and views tests
+os.environ["DISABLE_DEBUG_TOOLBAR"] = "1"
 
 
 @pytest.fixture()
@@ -66,7 +71,7 @@ def auto_login_user(client, blob_text_factory):
             SortOrderUserNote.objects.get_or_create(userprofile=user.userprofile, note=blob_text_factory)
 
             # Make the user an admin
-            admin_group, created = Group.objects.get_or_create(name="Admin")
+            admin_group, _ = Group.objects.get_or_create(name="Admin")
             admin_group.user_set.add(user)
 
         client.login(username=user.username, password=TEST_PASSWORD)

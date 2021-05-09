@@ -51,7 +51,7 @@ DEBUG_TOOLBAR_PANELS = (
 
 
 # Disable the debug toolbar if the environment variable
-# "SHOW_TOOLBAR_CALLBACK" is set. Useful for selenium
+# "DISABLE_DEBUG_TOOLBAR" is set. Useful for selenium
 # testing when you don't want it getting in the way.
 
 def show_debug_toolbar(request):

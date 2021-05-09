@@ -1,11 +1,7 @@
-import os
-
 import pytest
-from bs4 import BeautifulSoup
 
 import django
 from django.apps import apps
-from django.conf import settings
 from django.db.models import Count, Max, Min
 
 pytestmark = pytest.mark.data_quality
