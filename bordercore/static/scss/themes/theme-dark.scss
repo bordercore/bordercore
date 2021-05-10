@@ -27,8 +27,22 @@ $secondary: $gray-500;
   color: #1b4f72;
 }
 
+// The close button for Bootstrap modals
+.modal-header .close {
+  color: $white;
+}
+
 h4 {
   color: $markdown-heading;
+}
+
+// Inline code. Exclude code in pre blocks, since
+//  that is handled by highlight.js
+
+*:not(pre) > code {
+  background-color: #c9c9bf;
+  color: #000;
+  padding: 0.25rem;
 }
 
 // Custom colors for this theme

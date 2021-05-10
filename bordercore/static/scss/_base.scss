@@ -63,6 +63,10 @@
   display: none;
 }
 
+hr {
+  background-color: $gray-700;
+}
+
 /* Used to hide mustached content before Vue has loaded */
 [v-cloak] {
   display: none;
