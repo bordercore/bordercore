@@ -1,10 +1,26 @@
 import factory
 import pytest
+from elasticsearch import Elasticsearch
 
 from django import urls
 from django.db.models import signals
 
+from drill.models import Question
+
 pytestmark = pytest.mark.django_db
+
+
+
+@pytest.fixture
+def monkeypatch_drill(monkeypatch):
+    """
+    Prevent the question object from interacting with Elasticsearch by
+    patching out the Question.delete() method
+    """
+
+    def mock(*args, **kwargs):
+        pass
+    monkeypatch.setattr(Question, "delete", mock)
 
 
 def test_drill_list(auto_login_user, question):
@@ -48,8 +64,7 @@ def test_drill_create(auto_login_user, question):
 
     assert resp.status_code == 302
 
-
-def test_drill_delete(auto_login_user, question):
+def test_drill_delete(monkeypatch_drill, auto_login_user, question):
 
     _, client = auto_login_user()
 

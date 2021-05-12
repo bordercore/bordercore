@@ -22,6 +22,7 @@ def monkeypatch_bookmark(monkeypatch):
         pass
     monkeypatch.setattr(Bookmark, "index_bookmark", mock)
     monkeypatch.setattr(Bookmark, "snarf_favicon", mock)
+    monkeypatch.setattr(Bookmark, "delete", mock)
 
 
 def test_bookmark_click(auto_login_user, bookmark):
@@ -79,7 +80,7 @@ def test_bookmark_create(monkeypatch_bookmark, auto_login_user, bookmark):
     assert resp.status_code == 302
 
 
-def test_bookmark_delete(auto_login_user, bookmark):
+def test_bookmark_delete(monkeypatch_bookmark, auto_login_user, bookmark):
 
     _, client = auto_login_user()
 

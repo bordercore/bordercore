@@ -1,10 +1,29 @@
 import pytest
+from elasticsearch import Elasticsearch
 
 from django import urls
 
 from node.models import SortOrderNodeBlob, SortOrderNodeBookmark
 
 pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def monkeypatch_node(monkeypatch):
+    """
+    Prevent node views from interacting with Elasticsearch by
+    patching out the 'search_blob_names_image' function.
+    """
+
+    def mock(*args, **kwargs):
+        return {
+            "hits": {
+                "hits": []
+            }
+        }
+
+
+    monkeypatch.setattr(Elasticsearch, "search", mock)
 
 
 def test_node_overview(auto_login_user, node):
@@ -183,7 +202,7 @@ def test_search_bookmarks(auto_login_user, node):
     assert resp.status_code == 200
 
 
-def test_search_blob_names(auto_login_user, node):
+def test_search_blob_names(monkeypatch_node, auto_login_user, node):
 
     _, client = auto_login_user()
 

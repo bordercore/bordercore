@@ -4,12 +4,27 @@ import pytest
 from django import urls
 from django.db.models import signals
 
+from todo.views import Todo
+
 try:
     from bs4 import BeautifulSoup
 except ModuleNotFoundError:
     pass
 
 pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def monkeypatch_todo(monkeypatch):
+    """
+    Prevent the todo object from interacting with Elasticsearch by
+    patching out various methods.
+    """
+
+    def mock(*args, **kwargs):
+        pass
+
+    monkeypatch.setattr(Todo, "delete", mock)
 
 
 def test_todo_list_empty(auto_login_user):
@@ -69,7 +84,7 @@ def test_todo_create(auto_login_user, todo):
     assert resp.status_code == 302
 
 
-def test_todo_delete(auto_login_user, todo):
+def test_todo_delete(monkeypatch_todo, auto_login_user, todo):
 
     _, client = auto_login_user()
 

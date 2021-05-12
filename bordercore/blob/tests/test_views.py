@@ -18,31 +18,22 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def monkeypatch_index_blob(monkeypatch):
+def monkeypatch_blob(monkeypatch):
     """
     Prevent the blob object from interacting with Elasticsearch by
-    patching out the Blob.index_blob() method
+    patching out various methods.
     """
 
     def mock(*args, **kwargs):
         pass
+
+    monkeypatch.setattr(Elasticsearch, "delete", mock)
+    monkeypatch.setattr(Blob, "get_elasticsearch_info", mock)
     monkeypatch.setattr(Blob, "index_blob", mock)
 
 
-@pytest.fixture
-def monkeypatch_elasticsearch_delete(monkeypatch):
-    """
-    Prevent the blob object from interacting with Elasticsearch by
-    patching out the Blob.index_blob() method
-    """
-
-    def mock(*args, **kwargs):
-        pass
-    monkeypatch.setattr(Elasticsearch, "delete", mock)
-
-
 @factory.django.mute_signals(signals.post_save)
-def test_blob_create(monkeypatch_index_blob, auto_login_user):
+def test_blob_create(monkeypatch_blob, auto_login_user):
 
     _, client = auto_login_user()
 
@@ -63,7 +54,7 @@ def test_blob_create(monkeypatch_index_blob, auto_login_user):
 
 
 @factory.django.mute_signals(signals.pre_delete)
-def test_blob_delete(monkeypatch_elasticsearch_delete, auto_login_user, blob_text_factory):
+def test_blob_delete(monkeypatch_blob, auto_login_user, blob_text_factory):
 
     _, client = auto_login_user()
 
@@ -74,7 +65,7 @@ def test_blob_delete(monkeypatch_elasticsearch_delete, auto_login_user, blob_tex
 
 
 @factory.django.mute_signals(signals.post_save)
-def test_blob_update(monkeypatch_index_blob, auto_login_user, blob_text_factory):
+def test_blob_update(monkeypatch_blob, auto_login_user, blob_text_factory):
 
     _, client = auto_login_user()
 
@@ -97,7 +88,7 @@ def test_blob_update(monkeypatch_index_blob, auto_login_user, blob_text_factory)
 
 
 @pytest.mark.parametrize("blob", [pytest.lazy_fixture("blob_image_factory"), pytest.lazy_fixture("blob_text_factory")])
-def test_blob_detail(auto_login_user, blob):
+def test_blob_detail(monkeypatch_blob, auto_login_user, blob):
     """Verify we redirect to the memes page when a user is logged in"""
 
     _, client = auto_login_user()
