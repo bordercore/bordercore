@@ -63,10 +63,6 @@
   display: none;
 }
 
-hr {
-  background-color: $gray-700;
-}
-
 /* Used to hide mustached content before Vue has loaded */
 [v-cloak] {
   display: none;
@@ -823,6 +819,26 @@ a.tag {
   color: #f00;
 }
 
+#modal-study {
+  input.form-control {
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+    height: calc(1.5em + 0.75rem + 8px);
+  }
+
+  #tag-name {
+    width: 60%;
+  }
+
+  #study-random-count {
+    width: 4rem;
+  }
+
+  #search-term {
+    width: 45%;
+  }
+}
+
 /*
    Music
 */
@@ -922,7 +938,7 @@ div.CodeMirror-focused {
 
 .vue-tags-input .ti-new-tag-input {
   background: transparent;
-  color: $gray-900;
+  color: #27293d;
 }
 
 .vue-tags-input .ti-input {
@@ -986,7 +1002,12 @@ p {
 }
 
 .form-control::placeholder {
-  color: $gray-700;
+  color: $gray-600;
+}
+
+strong {
+  color: $info;
+  font-weight: bold;
 }
 
 i,
@@ -1001,6 +1022,7 @@ span {
   align-items: stretch;
   padding-left: 15rem;
   transition: 0.3s ease;
+  background: radial-gradient(farthest-side at 10% 0, $gray-900, #17193b);
 }
 
 .wrapper.collapsed {

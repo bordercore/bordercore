@@ -9,8 +9,7 @@
         <div class="mr-auto align-self-center">
             <ul class="breadcrumb mb-0 pt-0 pb-0">
                 <li class="breadcrumb-item"> <a href="{% url 'drill:list' %}"><font-awesome-icon icon="home"></font-awesome-icon></a> </li>
-                <li class="breadcrumb-item active"><a href="{% url 'drill:detail' question.uuid %}">Question with tag <strong>{{ question.tags.all.0 }}</strong></a></li>
-                <li class="breadcrumb-item active">Answer</li>
+                <li class="breadcrumb-item active"> {% include "drill/nav-session.html" %} </li>
             </ul>
         </div>
 
@@ -112,7 +111,7 @@
                     {% if question.tags.all %}
                         Tags:
                         {% for tag in question.tags.all %}
-                            <a class="badge badge-primary" href="{% url 'drill:study_tag' tag.name %}">{{ tag.name }}</a>
+                            <a class="badge badge-primary" href="{% url 'drill:start_study_session_tag' tag.name %}">{{ tag.name }}</a>
                         {% endfor %}
                         <br /><br />
                     {% endif %}
@@ -126,7 +125,7 @@
                     {% endif %}
                     <a href="{% url 'drill:record_response' question.uuid 'easy' %}" class="btn btn-primary" role="button">Easy</a>
                     <a href="{% url 'drill:record_response' question.uuid 'again' %}" class="btn btn-primary" role="button">Reset</a>
-                    <a href="{% url 'drill:skip' question.uuid %}" class="btn btn-primary ml-2" role="button">Skip</a>
+                    <a href="{% url 'drill:study' %}" class="btn btn-primary ml-2" role="button">Skip</a>
 
                     <form action="{% url 'drill:update' question.uuid %}" class="mt-2 float-right">
                         <input type="submit" class="btn btn-primary" value="Update">

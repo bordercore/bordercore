@@ -36,6 +36,10 @@ h4 {
   color: $markdown-heading;
 }
 
+hr {
+  background-color: $primary;
+}
+
 // Inline code. Exclude code in pre blocks, since
 //  that is handled by highlight.js
 

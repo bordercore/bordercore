@@ -476,7 +476,7 @@ def get_tag_link(doc_type, tag):
     elif doc_type == "bookmark":
         return reverse("bookmark:get_bookmarks_by_tag", kwargs={"tag_filter": tag})
     elif doc_type == "drill":
-        return reverse("drill:study_tag", kwargs={"tag": tag})
+        return reverse("drill:start_study_session_tag", kwargs={"tag": tag})
     elif doc_type == "song":
         return reverse("music:search_tag") + f"?tag={tag}"
     else:

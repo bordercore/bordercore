@@ -36,11 +36,6 @@ urlpatterns = [
         name="update"
     ),
     path(
-        route="question/skip/<uuid:uuid>/",
-        view=views.skip_question,
-        name="skip"
-    ),
-    path(
         route="mutate_is_favorite/",
         view=views.is_favorite_mutate,
         name="is_favorite_mutate"
@@ -66,14 +61,29 @@ urlpatterns = [
         name="record_response"
     ),
     path(
-        route="study/random/",
-        view=views.study_random,
-        name="study_random"
+        route="start_study_session/<str:session_type>",
+        view=views.start_study_session,
+        name="start_study_session"
     ),
     path(
-        route="study/tag/<str:tag>/",
-        view=views.study_tag,
-        name="study_tag"
+        route="start_study_session/tag/<str:tag>",
+        view=views.start_study_session_tag,
+        name="start_study_session_tag"
+    ),
+    path(
+        route="start_study_session/random/<str:count>",
+        view=views.start_study_session_random,
+        name="start_study_session_random"
+    ),
+    path(
+        route="start_study_session/search/<str:search>",
+        view=views.start_study_session_search,
+        name="start_study_session_search"
+    ),
+    path(
+        route="study",
+        view=views.get_next_question,
+        name="study"
     ),
     path(
         route="get_pinned_tags",

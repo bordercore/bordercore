@@ -13,16 +13,37 @@
             <div class="card-body">
 
                 <div>
-                    Click the Start button to drill on random questions or select a tag on the right to drill on a specific category.
+                    Click the <strong>Study</strong> button to start a study session or select a <strong>tag</strong> on the right to drill on a specific category.
                 </div>
 
-                <br />
-
-                <div>
-                    <form action="{% url 'drill:study_random' %}">
-                        <input class="btn btn-primary" type="submit" value="Start" id="random_mode" />
-                    </form>
+                <div class="mt-3">
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-study">Study</button>
                 </div>
+
+                {% if request.session.drill_study_session %}
+                    <hr />
+
+                    <span>
+                        <a href="{% url 'drill:study' %}" type="button" class="btn btn-primary">Resume</a> study session.
+                    </span>
+                        <div class="mt-3 text-success">
+                            <small>
+                            {% if request.session.drill_study_session.type == "favorites" %}
+                                Currently studying your <strong class="text-info">favorite questions</strong>.
+                            {% elif request.session.drill_study_session.type == "tag-needing-review" %}
+                                Currently studying tag <strong class="text-info">{{ request.session.drill_study_session.tag }}</strong>.
+                            {% elif request.session.drill_study_session.type == "learning" %}
+                                Currently studying questions that need learning.
+                            {% elif request.session.drill_study_session.type == "random" %}
+                                Currently studying random questions.
+                            {% elif request.session.drill_study_session.type == "search" %}
+                                Currently studying questions that match search <strong class="text-info">{{ request.session.drill_study_session.search_term }}</strong>.
+                            {% endif %}
+                                <br />
+                                <strong class="text-info">{{ study_session_progress }}</strong> out of <strong class="text-info">{{ request.session.drill_study_session.list|length }}</strong> questions completed.
+                            </small>
+                        </div>
+                {% endif %}
 
                 <hr />
 
@@ -63,7 +84,7 @@
                         </li>
                         {% for tag in tags_still_learning %}
                             <li class="d-flex px-2">
-                                <div class="flex-fill"><a href="{% url 'drill:study_tag' tag.name %}">{{ tag.name }}</a></div>
+                                <div class="flex-fill"><a href="{% url 'drill:start_study_session_tag' tag.name %}">{{ tag.name }}</a></div>
                                 <div class="text-info">{{ tag.count }}</div>
                             </li>
                         {% endfor %}
@@ -119,7 +140,7 @@
                         </li>
                         {% for tag in tags_needing_review %}
                             <li class="d-flex px-2">
-                                <div class="flex-fill"><a href="{% url 'drill:study_tag' tag.name %}">{{ tag.name }}</a></div>
+                                <div class="flex-fill"><a href="{% url 'drill:start_study_session_tag' tag.name %}">{{ tag.name }}</a></div>
                                 <div class="text-info">{{ tag.last_reviewed|date:"F j, Y"|default:"Never" }}</div>
                             </li>
                         {% endfor %}
@@ -234,11 +255,78 @@
 
     </div>
 
+    <div class="modal fade" id="modal-study" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">Start Study Session</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+
+                    <h5>
+                        Choose your study method
+                        <hr />
+                    </h5>
+
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" value="favorites" v-model="picked">
+                        <label class="form-check-label" for="flexRadioDefault1">
+                            Favorite questions
+                        </label>
+                    </div>
+
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" value="learning" v-model="picked">
+                        <label class="form-check-label" for="flexRadioDefault1">
+                            Questions to learn
+                        </label>
+                    </div>
+
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" value="tag-needing-review" v-model="picked">
+                        <label class="form-check-label d-flex" for="flexRadioDefault1">
+                            <div class="mr-3">Tag</div>
+                            <tags-input search-url="{% url 'tag:search' %}?query=" id="tag-name" place-holder="Tag name"></tags-input>
+                        </label>
+                    </div>
+
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" value="random" v-model="picked">
+                        <label class="form-check-label d-flex" for="flexRadioDefault1">
+                            <div class="mr-3">Random questions, count of</div>
+                            <select class="form-control" id="study-random-count">
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="100">100</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" value="search" v-model="picked">
+                        <label class="form-check-label d-flex" for="flexRadioDefault1">
+                            <div class="mr-3">Questions matching search</div>
+                            <input class="form-control" id="search-term" placeholder="Search term" autocomplete="off" />
+                        </label>
+                    </div>
+
+                    <div class="form-group row mt-3 ml-3">
+                        <a href="#" type="button" class="btn btn-primary" @click="onClick">Study</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
 
 {% block javascript %}
 
     {{ block.super }}
+
+    {{ tags|json_script:"initial-tags"|default:"" }}
 
     <script type="text/javascript" charset="utf-8">
 
@@ -354,6 +442,40 @@
 
             }
 
+        });
+
+        new Vue({
+            el: "#modal-study",
+            components: {
+                TagsInput
+            },
+            data() {
+                return {
+                    picked: "favorites"
+                }
+            },
+            methods: {
+                onClick() {
+                    if (this.picked === "favorites") {
+                        window.location = "{% url 'drill:start_study_session' 'favorites' %}";
+                    } else if (this.picked === "tag-needing-review") {
+                        const tag = document.getElementsByName("tags")[0].value;
+                        if (tag) {
+                            window.location = "{% url 'drill:start_study_session_tag' 666 %}".replace(/666/, tag);
+                        }
+                    } else if (this.picked === "learning") {
+                        window.location = "{% url 'drill:start_study_session' 'learning' %}";
+                    } else if (this.picked === "random") {
+                        const count = document.getElementById("study-random-count").value;
+                        window.location = "{% url 'drill:start_study_session_random' 666 %}".replace(/666/, count);
+                    } else if (this.picked === "search") {
+                        const search_term = document.getElementById("search-term").value;
+                        if (search_term) {
+                            window.location = "{% url 'drill:start_study_session_search' 666 %}".replace(/666/, search_term);
+                        }
+                    }
+            }
+        }
         });
 
     </script>

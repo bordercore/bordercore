@@ -106,26 +106,6 @@ def test_drill_update(auto_login_user, question):
     assert resp.status_code == 302
 
 
-def test_drill_study_random(auto_login_user, question):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("drill:study_random")
-    resp = client.get(url)
-
-    assert resp.status_code == 302
-
-
-def test_drill_study_tag(auto_login_user, question):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("drill:study_tag", kwargs={"tag": "django"})
-    resp = client.get(url)
-
-    assert resp.status_code == 302
-
-
 def test_drill_show_answer(auto_login_user, question):
 
     _, client = auto_login_user()
@@ -148,16 +128,6 @@ def test_drill_record_response(auto_login_user, question):
             "response": "Sample Response"
         }
     )
-    resp = client.get(url)
-
-    assert resp.status_code == 302
-
-
-def test_drill_skip_question(auto_login_user, question):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("drill:skip", kwargs={"uuid": question.uuid})
     resp = client.get(url)
 
     assert resp.status_code == 302

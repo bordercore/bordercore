@@ -199,6 +199,54 @@ class Question(TimeStampedModel):
         )
 
     @staticmethod
+    def start_study_session(user, session, session_type, param=None):
+
+        questions = []
+
+        if session_type == "favorites":
+            questions = Question.objects.filter(user=user, is_favorite=True).order_by("?").values("uuid")
+        elif session_type == "tag-needing-review":
+            questions = Question.objects.filter(
+                Q(user=user),
+                Q(tags__name=param),
+                Q(interval__lte=timezone.now() - F("last_reviewed"))
+                | Q(last_reviewed__isnull=True)
+                | Q(state="L")
+            ).order_by("?").values("uuid")
+        elif session_type == "learning":
+            questions = Question.objects.filter(
+                Q(user=user),
+                Q(state="L")
+            ).order_by("?").values("uuid")
+        elif session_type == "random":
+            count = int(param)
+            questions = Question.objects.filter(
+                Q(user=user)
+            ).order_by("?").values("uuid")[:count]
+        elif session_type == "search":
+            questions = Question.objects.filter(
+                Q(user=user),
+                Q(question__icontains=param)
+                | Q(answer__icontains=param)
+            ).order_by("?").values("uuid")
+
+        if questions:
+            session["drill_study_session"] = {
+                "type": session_type,
+                "current": str(questions[0]["uuid"]),
+                "list": [str(x["uuid"]) for x in questions],
+                "tag": param,
+                "search_term": param
+            }
+            return session["drill_study_session"]["current"]
+
+
+    @staticmethod
+    def get_study_session_progress(session):
+        if "drill_study_session" in session:
+            return session["drill_study_session"]["list"].index(session["drill_study_session"]["current"])
+
+    @staticmethod
     def get_tag_info(user, tag):
 
         count = Question.objects.filter(user=user).filter(tags__name=tag).count()
@@ -226,7 +274,7 @@ class Question(TimeStampedModel):
             "name": tag,
             "progress": progress,
             "last_reviewed": last_reviewed,
-            "url": reverse("drill:study_tag", kwargs={"tag": tag}),
+            "url": reverse("drill:start_study_session_tag", kwargs={"tag": tag}),
             "count": count
         }
 

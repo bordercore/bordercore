@@ -7,7 +7,7 @@ from django import urls
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import F, Q
+from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -40,7 +40,8 @@ class DrillListView(ListView):
             "tags_needing_review": Question.objects.tags_needing_review(self.request.user)[:10],
             "random_tag": Question.objects.get_random_tag(self.request.user),
             "favorite_questions_progress": Question.objects.favorite_questions_progress(self.request.user),
-            "total_progress": Question.objects.total_tag_progress(self.request.user)
+            "total_progress": Question.objects.total_tag_progress(self.request.user),
+            "study_session_progress": Question.get_study_session_progress(self.request.session)
         }
 
 
@@ -173,14 +174,16 @@ class QuestionDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context['tag_info'] = self.object.get_tags_info()
-        context['question'] = self.object
-        context['state_name'] = Question.get_state_name(self.object.state)
-        context['learning_step_count'] = self.object.get_learning_step_count()
-        context['title'] = 'Drill :: Question Detail'
-        context['tag_list'] = ", ".join([x.name for x in self.object.tags.all()])
-
-        return context
+        return {
+            **context,
+            "tag_info": self.object.get_tags_info(),
+            "question": self.object,
+            "state_name": Question.get_state_name(self.object.state),
+            "learning_step_count": self.object.get_learning_step_count(),
+            "title": "Drill :: Question Detail",
+            "tag_list": ", ".join([x.name for x in self.object.tags.all()]),
+            "study_session_progress": Question.get_study_session_progress(self.request.session)
+        }
 
 
 @method_decorator(login_required, name='dispatch')
@@ -231,35 +234,56 @@ class QuestionUpdateView(UpdateView):
 
 
 @login_required
-def study_random(request):
+def start_study_session(request, session_type, param=None):
+    """
+    Start a study session
+    """
 
-    request.session["drill_mode"] = "random"
-    question = Question.objects.filter(user=request.user).order_by("?").first()
-    return redirect("drill:detail", uuid=question.uuid)
+    first_question = Question.start_study_session(request.user, request.session, session_type, param)
+
+    if first_question:
+        return redirect("drill:detail", uuid=first_question)
+    else:
+        messages.add_message(
+            request,
+            messages.WARNING, f"No questions found to study"
+        )
+        return redirect("drill:list")
 
 
 @login_required
-def study_tag(request, tag):
+def get_next_question(request):
 
-    request.session.pop("drill_mode", None)
+    if "drill_study_session" in request.session:
 
-    # Criteria for selecting a question:
-    #  The question hasn't been reviewed within its interval
-    #  The question is new (last_reviewed is null)
-    #  The question is still being learned
-    question = Question.objects.filter(
-        Q(user=request.user),
-        Q(tags__name=tag),
-        Q(interval__lte=timezone.now() - F("last_reviewed"))
-        | Q(last_reviewed__isnull=True)
-        | Q(state="L")
-    ).order_by("?").first()
+        request.session.modified = True
 
-    if question is None:
-        question = Question.objects.filter(user=request.user, tags__name=tag).order_by('?').first()
-        messages.add_message(request, messages.INFO, 'Nothing to drill. Here''s a random question.')
+        current_index = request.session["drill_study_session"]["list"].index(request.session["drill_study_session"]["current"])
+        if current_index + 1 == len(request.session["drill_study_session"]["list"]):
+            messages.add_message(request, messages.INFO, "Study session over.")
+            request.session.pop("drill_study_session")
+            return redirect("drill:list")
+        next_index = current_index + 1
+        next_question = request.session["drill_study_session"]["list"][next_index]
+        request.session["drill_study_session"]["current"] = next_question
+        return redirect("drill:detail", uuid=next_question)
 
-    return redirect('drill:detail', uuid=question.uuid)
+    else:
+
+        return redirect("drill:list")
+
+@login_required
+def start_study_session_tag(request, tag):
+    return start_study_session(request, "tag-needing-review", tag)
+
+
+@login_required
+def start_study_session_random(request, count):
+    return start_study_session(request, "random", count)
+
+@login_required
+def start_study_session_search(request, search):
+    return start_study_session(request, "search", search)
 
 
 @login_required
@@ -267,12 +291,17 @@ def show_answer(request, uuid):
 
     question = Question.objects.get(user=request.user, uuid=uuid)
 
-    return render(request, 'drill/answer.html',
-                  {'question': question,
-                   'state_name': Question.get_state_name(question.state),
-                   'tag_list': ", ".join([x.name for x in question.tags.all()]),
-                   'learning_step_count': question.get_learning_step_count(),
-                   'title': 'Drill :: Show Answer'})
+    return render(request, "drill/answer.html",
+                  {
+                      "question": question,
+                      "state_name": Question.get_state_name(question.state),
+                      "tag_list": ", ".join([x.name for x in question.tags.all()]),
+                      "learning_step_count": question.get_learning_step_count(),
+                      "title": "Drill :: Show Answer",
+                      "study_session_progress": Question.get_study_session_progress(request.session)
+                  }
+    )
+
 
 
 @login_required
@@ -282,21 +311,7 @@ def record_response(request, uuid, response):
     question.last_reviewed = timezone.now()
     question.record_response(response)
 
-    if request.session.get("drill_mode") == "random":
-        return redirect("drill:study_random")
-    else:
-        return redirect("drill:study_tag", tag=question.tags.all().first().name)
-
-
-@login_required
-def skip_question(request, uuid):
-
-    question = Question.objects.get(user=request.user, uuid=uuid)
-
-    if request.session.get("drill_mode") == "random":
-        return redirect("drill:study_random")
-    else:
-        return redirect("drill:study_tag", tag=question.tags.all().first().name)
+    return get_next_question(request)
 
 
 @login_required
@@ -374,7 +389,7 @@ def search_tags(request):
                 "value": tag_result["key"],
                 "id": tag_result["key"],
                 "info": Question.get_tag_info(request.user, tag_result["key"]),
-                "link": reverse("drill:study_tag", kwargs={"tag": tag_result["key"]})
+                "link": reverse("drill:start_study_session_tag", kwargs={"tag": tag_result["key"]})
             }
             )
 
