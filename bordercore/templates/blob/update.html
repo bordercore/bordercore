@@ -553,7 +553,10 @@
                     }
                 },
                 select(datum) {
-                    document.getElementById("id_value").focus();
+                    // After a metadata name is selected, focus the value field
+                    this.$nextTick(() => {
+                        document.getElementById("id_value").focus();
+                    })
                 }
             },
             components: {
