@@ -2,6 +2,7 @@ import re
 
 from botocore.errorfactory import ClientError
 from elasticsearch import Elasticsearch
+from elasticsearch.exceptions import ConnectionError
 from PyOrgMode import PyOrgMode
 
 from django.conf import settings
@@ -60,7 +61,7 @@ def homepage(request):
                                      'cover_info': Blob.get_cover_info_static(request.user, random_image.sha1sum, 'large', 500)}
             except ClientError as e:
                 messages.add_message(request, messages.ERROR, f"Error getting random image info for uuid={random_image.uuid}: {e}")
-    except ConnectionRefusedError:
+    except (ConnectionRefusedError, ConnectionError):
         messages.add_message(request, messages.ERROR, 'Cannot connect to Elasticsearch')
     except ObjectDoesNotExist:
         messages.add_message(request, messages.ERROR, 'Blob found in Elasticsearch but not the DB')
