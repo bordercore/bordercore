@@ -84,7 +84,9 @@
                             "muscle_group": "{{ exercise.muscle.muscle_group }}",
                             "interval": "{{ exercise.interval.days }} day{{ exercise.interval.days|pluralize:"s" }}",
                             "last_active": new Date("{{ exercise.last_active|date:"Y-m-d" }}"),
+                            {% if exercise.delta_days %}
                             "delta_days": {{ exercise.delta_days }},
+                            {% endif %}
                             "overdue": "{{ exercise.overdue }}"
                         },
                         {% endfor %}
