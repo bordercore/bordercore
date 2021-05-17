@@ -28,8 +28,10 @@ Resources:
             VpcConfig:
               SecurityGroupIds:
                 - sg-bfa013fe
+              # This subnet should match the private subnet created for the NAT gateway,
+              #  which I am labeling 'Private Lambda'
               SubnetIds:
-                - subnet-2ff16448
+                - subnet-09460047abea1c3bd
             Environment:
                 Variables:
                     DRF_TOKEN: !Ref DRFTokenParameter
