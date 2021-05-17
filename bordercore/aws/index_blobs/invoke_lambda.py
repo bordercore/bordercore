@@ -15,8 +15,6 @@ client = boto3.client("lambda")
 
 def invoke(uuid, file_changed):
 
-    blob = Blob.objects.get(uuid=uuid)
-
     message = {
         "Records": [
             {
@@ -26,9 +24,7 @@ def invoke(uuid, file_changed):
                         "name": "bordercore-blobs",
                     },
                     "file_changed": file_changed,
-                    "object": {
-                        "key": f"blobs/{blob.sha1sum[:2]}/{blob.sha1sum}/{blob.file}"
-                    }
+                    "uuid": str(uuid)
                 }
             }
         ]
