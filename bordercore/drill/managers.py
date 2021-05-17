@@ -92,7 +92,7 @@ class DrillManager(models.Manager):
 
         distinct_tags = Tag.objects.filter(question__isnull=False, user=user).distinct("name")
         random_tag = Tag.objects.filter(id__in=distinct_tags).order_by("?").first()
-        return Question.get_tag_info(user, random_tag.name) if random_tag else None
+        return Question.get_tag_progress(user, random_tag.name) if random_tag else None
 
     def get_pinned_tags(self, user):
         """
@@ -106,6 +106,6 @@ class DrillManager(models.Manager):
         info = []
 
         for tag in tags:
-            info.append(Question.get_tag_info(user, tag.name))
+            info.append(Question.get_tag_progress(user, tag.name))
 
         return info

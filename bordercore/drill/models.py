@@ -126,14 +126,18 @@ class Question(TimeStampedModel):
             self.interval = timedelta(days=1)
             self.efactor = self.efactor - (self.efactor * 0.2)
 
+        self.last_reviewed = timezone.now()
         self.save()
 
-    def get_tags_info(self):
+    def get_all_tags_progress(self):
+        """
+        Get review progress for all tags assocated with this question.
+        """
 
         info = []
 
         for tag in self.tags.all():
-            info.append(Question.get_tag_info(self.user, tag.name))
+            info.append(Question.get_tag_progress(self.user, tag.name))
 
         return info
 
@@ -247,8 +251,12 @@ class Question(TimeStampedModel):
             return session["drill_study_session"]["list"].index(session["drill_study_session"]["current"])
 
     @staticmethod
-    def get_tag_info(user, tag):
-
+    def get_tag_progress(user, tag):
+        """
+        For all questions with the specified tag, return a summary of testing progress,
+        including the last time any of those questions was reviewed, the percentage
+        of those questions which need review, and the total question count.
+        """
         count = Question.objects.filter(user=user).filter(tags__name=tag).count()
 
         todo = Question.objects.filter(

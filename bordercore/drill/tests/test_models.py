@@ -1,3 +1,4 @@
+import datetime
 import re
 from datetime import timedelta
 
@@ -15,7 +16,7 @@ pytestmark = pytest.mark.django_db
 
 def test_get_tags(question):
 
-    tags = question.get_tags()
+    tags = question[0].get_tags()
     assert tags == "django, video"
 
 
@@ -29,24 +30,24 @@ def test_get_state_name(question):
 
 def test_get_learning_count_step(question):
 
-    assert question.get_learning_step_count() == 2
+    assert question[0].get_learning_step_count() == 2
 
 
 def test_is_final_learning_step(question):
 
-    assert question.is_final_learning_step() is False
+    assert question[0].is_final_learning_step() is False
 
-    question.learning_step = 2
-    assert question.is_final_learning_step() is True
+    question[0].learning_step = 2
+    assert question[0].is_final_learning_step() is True
 
 
 def test_learning_step_increase(question):
 
-    assert(question.learning_step == question.LEARNING_STEPS[0][0])
-    question.learning_step_increase()
-    assert(question.learning_step == question.LEARNING_STEPS[1][0])
-    question.learning_step_increase()
-    assert(question.learning_step == question.LEARNING_STEPS[1][0])
+    assert(question[0].learning_step == question[0].LEARNING_STEPS[0][0])
+    question[0].learning_step_increase()
+    assert(question[0].learning_step == question[0].LEARNING_STEPS[1][0])
+    question[0].learning_step_increase()
+    assert(question[0].learning_step == question[0].LEARNING_STEPS[1][0])
 
 
 @factory.django.mute_signals(signals.post_save)
@@ -95,3 +96,70 @@ def test_record_response():
     assert question.interval == timedelta(days=1, seconds=66355, microseconds=200000)
     assert question.efactor == 1.5639999999999998
     assert question.learning_step == 1
+
+
+def test_get_all_tags_progress(question):
+
+    tags_info = question[0].get_all_tags_progress()
+    assert len(tags_info) == 2
+
+def test_start_study_session(question, tag):
+
+    session = {}
+
+    current = Question.start_study_session(question[0].user, session, "favorites")
+    assert current in [str(question[2].uuid), str(question[3].uuid)]
+    assert len(session["drill_study_session"]["list"]) == 2
+
+    current = Question.start_study_session(question[0].user, session, "tag-needing-review", tag[0].name)
+    assert current in [str(x.uuid) for x in question]
+    assert len(session["drill_study_session"]["list"]) == 1
+    assert session["drill_study_session"]["tag"] == tag[0].name
+
+    current = Question.start_study_session(question[0].user, session, "learning")
+    assert current in [str(x.uuid) for x in question]
+    assert len(session["drill_study_session"]["list"]) == 4
+
+    current = Question.start_study_session(question[0].user, session, "random", 3)
+    assert current in [str(x.uuid) for x in question]
+    assert len(session["drill_study_session"]["list"]) == 3
+
+    first_word_of_question = question[0].question.split(" ")[0]
+    current = Question.start_study_session(question[0].user, session, "search", first_word_of_question)
+    assert current in [str(x.uuid) for x in question]
+    assert len(session["drill_study_session"]["list"]) > 1
+    first_word_of_answer = question[0].question.split(" ")[0]
+    current = Question.start_study_session(question[0].user, session, "search", first_word_of_answer)
+    assert current in [str(x.uuid) for x in question]
+    assert len(session["drill_study_session"]["list"]) > 1
+
+@factory.django.mute_signals(signals.post_save)
+def test_get_tag_progress(question, tag):
+
+    tags_info = Question.get_tag_progress(question[0].user, tag[0])
+    assert str(tags_info["name"]) == "django"
+    assert tags_info["progress"] == 0
+    assert tags_info["last_reviewed"] == "Never"
+    assert tags_info["count"] == 1
+
+    question[0].record_response("good")
+
+    tags_info = Question.get_tag_progress(question[0].user, tag[0])
+    assert str(tags_info["name"]) == "django"
+    assert tags_info["progress"] == 0
+    assert tags_info["last_reviewed"] == datetime.datetime.now().strftime("%B %d, %Y")
+    assert tags_info["count"] == 1
+
+    question[0].record_response("good")
+
+    tags_info = Question.get_tag_progress(question[0].user, tag[0])
+    assert str(tags_info["name"]) == "django"
+    assert tags_info["progress"] == 100
+    assert tags_info["last_reviewed"] == datetime.datetime.now().strftime("%B %d, %Y")
+    assert tags_info["count"] == 1
+
+    tags_info = Question.get_tag_progress(question[0].user, tag[2])
+    assert str(tags_info["name"]) == "linux"
+    assert tags_info["progress"] == 0
+    assert tags_info["last_reviewed"] == "Never"
+    assert tags_info["count"] == 0

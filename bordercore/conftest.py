@@ -323,12 +323,15 @@ def node(bookmark, blob_image_factory, blob_pdf_factory):
 @pytest.fixture()
 def question(tag):
 
-    question = QuestionFactory()
+    question_0 = QuestionFactory()
+    question_1 = QuestionFactory()
+    question_2 = QuestionFactory(is_favorite=True)
+    question_3 = QuestionFactory(is_favorite=True)
 
-    question.tags.add(tag[0])
-    question.tags.add(tag[1])
+    question_0.tags.add(tag[0])
+    question_0.tags.add(tag[1])
 
-    yield question
+    yield [question_0, question_1, question_2, question_3]
 
 
 @pytest.fixture()

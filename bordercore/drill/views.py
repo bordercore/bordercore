@@ -11,7 +11,6 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
@@ -176,7 +175,7 @@ class QuestionDetailView(DetailView):
 
         return {
             **context,
-            "tag_info": self.object.get_tags_info(),
+            "tag_info": self.object.get_all_tags_progress(),
             "question": self.object,
             "state_name": Question.get_state_name(self.object.state),
             "learning_step_count": self.object.get_learning_step_count(),
@@ -255,7 +254,6 @@ def start_study_session(request, session_type, param=None):
 def get_next_question(request):
 
     if "drill_study_session" in request.session:
-
         request.session.modified = True
 
         current_index = request.session["drill_study_session"]["list"].index(request.session["drill_study_session"]["current"])
@@ -308,7 +306,6 @@ def show_answer(request, uuid):
 def record_response(request, uuid, response):
 
     question = Question.objects.get(user=request.user, uuid=uuid)
-    question.last_reviewed = timezone.now()
     question.record_response(response)
 
     return get_next_question(request)
@@ -388,7 +385,7 @@ def search_tags(request):
             matches.append({
                 "value": tag_result["key"],
                 "id": tag_result["key"],
-                "info": Question.get_tag_info(request.user, tag_result["key"]),
+                "info": Question.get_tag_progress(request.user, tag_result["key"]),
                 "link": reverse("drill:start_study_session_tag", kwargs={"tag": tag_result["key"]})
             }
             )
