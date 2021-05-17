@@ -99,7 +99,13 @@ def get_blob_info(**kwargs):
 
     headers = {"Authorization": f"Token {DRF_TOKEN}"}
 
-    r = requests.get(f"https://www.bordercore.com/api/{prefix}/{param}/", headers=headers)
+    session = requests.Session()
+
+    # Ignore .netrc files. Useful for local debugging.
+    session.trust_env = False
+
+    r = session.get(f"https://www.bordercore.com/api/{prefix}/{param}/", headers=headers)
+
     if r.status_code != 200:
         raise Exception(f"Error when accessing Bordercore REST API: status code={r.status_code}")
 
