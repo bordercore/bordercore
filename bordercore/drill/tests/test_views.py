@@ -178,6 +178,29 @@ def test_drill_study(auto_login_user, question):
 
 
 @factory.django.mute_signals(signals.post_save)
+def test_drill_get_current_question(auto_login_user, question):
+
+    _, client = auto_login_user()
+
+    session = client.session
+
+    # Create a study session of random questions and set
+    #  the current question to the second one.
+    session["drill_study_session"] = {
+        "type": "random",
+        "current": str(question[1].uuid),
+        "list": [str(x.uuid) for x in question]
+    }
+    session.save()
+
+    url = urls.reverse(
+        "drill:resume"
+    )
+    resp = client.get(url)
+    assert resp.status_code == 302
+
+
+@factory.django.mute_signals(signals.post_save)
 def test_drill_record_response(auto_login_user, question):
 
     _, client = auto_login_user()

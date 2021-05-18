@@ -271,6 +271,16 @@ def get_next_question(request):
         return redirect("drill:list")
 
 @login_required
+def get_current_question(request):
+
+    if "drill_study_session" in request.session:
+        current_question = request.session["drill_study_session"]["current"]
+        return redirect("drill:detail", uuid=current_question)
+    else:
+        return redirect("drill:list")
+
+
+@login_required
 def start_study_session_tag(request, tag):
     return start_study_session(request, "tag-needing-review", tag)
 

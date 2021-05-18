@@ -86,6 +86,11 @@ urlpatterns = [
         name="study"
     ),
     path(
+        route="resume",
+        view=views.get_current_question,
+        name="resume"
+    ),
+    path(
         route="get_pinned_tags",
         view=views.get_pinned_tags,
         name="get_pinned_tags"
