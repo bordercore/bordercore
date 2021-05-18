@@ -25,7 +25,7 @@ def get_missing_metadata_ids(expected, found):
 
     found_ids = [x["_id"] for x in found["hits"]["hits"]]
 
-    missing = [str(x.blob.uuid) for x in expected if str(x.blob.uuid) not in found_ids]
+    missing = set([str(x.blob.uuid) for x in expected if str(x.blob.uuid) not in found_ids])
     return ", ".join(missing)
 
 
