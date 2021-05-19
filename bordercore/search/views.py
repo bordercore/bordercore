@@ -2,9 +2,10 @@ import math
 import re
 import urllib
 
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, RequestError
 
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.urls import reverse
@@ -151,7 +152,11 @@ class SearchListView(ListView):
                 }
             )
 
-        results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+        try:
+            results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+        except RequestError as e:
+            messages.add_message(self.request, messages.ERROR, f"Request Error: {e.status_code} {e.error}")
+            return []
 
         # Django templates don't allow variables with underscores, so
         #  change the "_source" key to "source"
