@@ -124,6 +124,7 @@ class SearchListView(ListView):
                         "question",
                         "sha1sum",
                         "tags",
+                        "title",
                         "url",
                         "uuid"]
         }
@@ -144,7 +145,7 @@ class SearchListView(ListView):
                     "multi_match": {
                         "type": "phrase" if self.request.GET.get("exact_match", None) in ["Yes"] else "best_fields",
                         "query": search_term,
-                        "fields": ["answer", "artist", "author", "attachment.content", "contents", "name", "question", "sha1sum", "uuid"],
+                        "fields": ["answer", "artist", "author", "attachment.content", "contents", "name", "question", "sha1sum", "title", "uuid"],
                         "operator": boolean_type,
                     }
                 }
@@ -609,6 +610,7 @@ def search_names(request, es, doc_type, search_term):
                     "question",
                     "sha1sum",
                     "tags",
+                    "title",
                     "url",
                     "uuid"]
     }
@@ -647,7 +649,14 @@ def search_names(request, es, doc_type, search_term):
                                     "value": f"*{one_term}*",
                                 }
                             }
-                        }
+                        },
+                        {
+                            "wildcard": {
+                                "title": {
+                                    "value": f"*{one_term}*",
+                                }
+                            }
+                        },
                     ]
                 }
             }
