@@ -83,7 +83,9 @@
                             "exercise": "{{ exercise.name|escapejs }}",
                             "muscle_group": "{{ exercise.muscle.muscle_group }}",
                             "interval": "{{ exercise.interval.days }} day{{ exercise.interval.days|pluralize:"s" }}",
+                            {% if exercise.last_active %}
                             "last_active": new Date("{{ exercise.last_active|date:"Y-m-d" }}"),
+                            {% endif %}
                             {% if exercise.delta_days %}
                             "delta_days": {{ exercise.delta_days }},
                             {% endif %}
