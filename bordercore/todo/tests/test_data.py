@@ -73,7 +73,7 @@ def test_todo_tags_match_elasticsearch(es):
         }
 
         found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["total"]["value"]
-        assert found == 1, f"todo's tags don't match those found in Elasticsearch, id={task.id}"
+        assert found == 1, f"todo's tags don't match those found in Elasticsearch, id={task.uuid}"
 
 
 def test_elasticsearch_todo_tasks_exist_in_db(es):
