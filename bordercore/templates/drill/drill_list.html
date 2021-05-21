@@ -57,22 +57,20 @@
 
         <div class="col-lg-3" id="vue-app">
 
-            <div class="d-flex flex-grow-1">
-                <card title="Total Progress">
-                    <template v-slot:content>
-                        <div class="d-flex">
-                            <div class="d-flex justify-content-center align-items-center">
+            <card title="Total Progress">
+                <template v-slot:content>
+                    <div class="d-flex">
+                        <div class="d-flex justify-content-center align-items-center">
                                 Percentage across all tags of questions not needing review
-                            </div>
-                            <drill-tag-progress
-                                :count={{ total_progress.count }}
-                                :progress={{ total_progress.percentage }}
-                            >
-                            </drill-tag-progress>
                         </div>
-                    </template>
-                </card>
-            </div>
+                        <drill-tag-progress
+                            :count={{ total_progress.count }}
+                                   :progress={{ total_progress.percentage }}
+                        >
+                        </drill-tag-progress>
+                    </div>
+                </template>
+            </card>
 
             <card title="Tags still learning">
 
@@ -87,6 +85,8 @@
                                 <div class="flex-fill"><a href="{% url 'drill:start_study_session_tag' tag.name %}">{{ tag.name }}</a></div>
                                 <div class="text-info">{{ tag.count }}</div>
                             </li>
+                        {% empty %}
+                            <div class="text-success text-center">Nothing to learn</div>
                         {% endfor %}
                     </ul>
                 </template>
@@ -143,6 +143,8 @@
                                 <div class="flex-fill"><a href="{% url 'drill:start_study_session_tag' tag.name %}">{{ tag.name }}</a></div>
                                 <div class="text-info">{{ tag.last_reviewed|date:"F j, Y"|default:"Never" }}</div>
                             </li>
+                         {% empty %}
+                            <div class="text-success text-center">Nothing to learn</div>
                         {% endfor %}
                     </ul>
                 </template>
@@ -180,6 +182,7 @@
                                 <div class="flex-fill"><a :href="tag.url">[[ tag.name ]]</a></div>
                                 <div class="text-info">[[ tag.progress ]]%</div>
                             </li>
+                            <li v-if="!tagList.length"><a href="#" @click="chooseTag()">Add a tag</a></li>
                         </ul>
                     </template>
                 </card>

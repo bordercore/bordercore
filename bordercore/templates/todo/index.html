@@ -36,6 +36,8 @@
                         <div>{{ tag.name }}</div>
                         <div class="ml-auto"><span class="px-2 badge badge-pill {% ifequal tagsearch tag.name %}badge-dark{% else %}badge-primary{% endifequal %}">{{ tag.count }}</span></div>
                     </div>
+                {% empty %}
+                    <div class="text-success">No tags found</div>
                 {% endfor %}
 
             </div>
@@ -57,11 +59,11 @@
                     </form>
 
                     <div class="float-right mr-2">
-                        <button class="button-add">
-                            <a id="btn-create" :href=createTodoUrl>
-                                <font-awesome-icon icon="plus" class="form-control-feedback text-dark"></font-awesome-icon>
-                            </a>
-                        </button>
+                        <a id="btn-create" :href=createTodoUrl>
+                            <button class="button-add">
+                                <font-awesome-icon icon="plus" class="form-control-feedback text-primary"></font-awesome-icon>
+                            </button>
+                        </a>
                     </div>
 
                 </div>

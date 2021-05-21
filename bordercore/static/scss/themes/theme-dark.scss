@@ -4,6 +4,7 @@
 // Custom Bootswatch variables which overrides the "darkly" theme
 $gray-700: #27293d;
 $gray-900: #262c49;
+$primary: #6ea6e0;
 
 @import "../../../node_modules/bootswatch/dist/darkly/variables";
 
@@ -22,9 +23,46 @@ $secondary: $gray-500;
 // Import CSS for perfect-scrollbar
 @import "../../css/perfect-scrollbar.css";
 
+// Custom colors for this theme
+$background-color-dark: #10163a;
+$background-color-light: #262c49;
+$form-background-color: $gray-500;
+$light-blue: #212132;
+$link-hover-color: $green;
+$list-group-item-secondary: $background-color-dark;
+$drill-progress-circle-color: #262c49;
+$dropdown-color: $cyan;
+$dropdown-hover-background-color: $background-color-dark;
+$dropdown-hover-color: $white;
+$dropdown-menu-background-color: $gray-700;
+$dropdown-menu-color: $white;
+$markdown-heading: #6af6d0;
+$markdown-background-color: $gray-700;
+$markdown-blockquote-background-color: #33364b;
+$markdown-blockquote-border-left: #00ffd1;
+$markdown-border-color: $gray-600;
+$markdown-code-background-color: #33364b;
+$markdown-code-color: #46b7e3;
+$modal-background-color: $gray-900;
+$nav-tabs-border-color: $white;
+$selected-background-color: $blue;
+$sidebar-background-color: #343a40;
+$tree-menu-background-color: #161e4e;
+$tree-menu-color: #2fa4e7;
+$vue-simple-suggest-item-background-color: $gray-900;
+
+.table_header {
+  background-color: $primary;
+}
+
+
 // The close button for toast dialogs
-.close {
+button.close, button.close:hover {
   color: #1b4f72;
+}
+
+.text-emphasis {
+  color: $white;
 }
 
 // The close button for Bootstrap modals
@@ -40,28 +78,9 @@ hr {
   background-color: $primary;
 }
 
-// Inline code. Exclude code in pre blocks, since
-//  that is handled by highlight.js
-
-*:not(pre) > code {
-  background-color: #c9c9bf;
-  color: #000;
-  padding: 0.25rem;
+.wrapper {
+  background: radial-gradient(farthest-side at 10% 0, $gray-900, #17193b);
 }
-
-// Custom colors for this theme
-$background-color-dark: #10163a;
-$background-color-light: #262c49;
-$form-background-color: $gray-500;
-$light-blue: #212132;
-$link-hover-color: $green;
-$list-group-item-secondary: $background-color-dark;
-$markdown-background-color: $gray-700;
-$markdown-border-color: $gray-600;
-$modal-background-color: $gray-900;
-$nav-tabs-border-color: $white;
-$selected-background-color: $blue;
-$sidebar-background-color: #343a40;
 
 // Import highlight.js CSS
 @import "../../../node_modules/highlight.js/styles/gradient-dark.css";

@@ -23,17 +23,14 @@
                     <template v-slot:content>
                         <ul class="list-group">
                             {% for task in tasks %}
-                                <li class="list-group-item list-group-item-secondary text-info">{{ task.name }}
+                                <li class="list-group-item list-group-item-secondary text-primary">{{ task.name }}
                                     <span class="badge badge-primary ml-1">{{ task.parent_category }}</span>
-                                    {% if task.date %}
-                                        {{ task.date }}
-                                    {% endif %}
                                     {% for tag in task.tags.all %}
                                         <span class="badge badge-info">{{ tag.name }}</span>
                                     {% endfor %}
                                 </li>
                             {% empty %}
-                                <li class="list-group-item">All done!</li>
+                                <li class="list-group-item list-group-item-secondary">All done!</li>
                             {% endfor %}
                         </ul>
                     </template>
@@ -87,7 +84,7 @@
                                 {% for bookmark in daily_bookmarks %}
                                     <li class="list-group-item list-group-item-secondary {{ bookmark.css_class }}"><a class="text-success" href="{% url 'bookmark:click' bookmark.uuid %}">{{ bookmark.name }}</a></li>
                                 {% empty %}
-                                    <li class="list-group-item">No bookmarks marked as Daily.</li>
+                                    <li class="list-group-item list-group-item-secondary">No bookmarks marked as Daily.</li>
                                 {% endfor %}
                             </ul>
                         </template>
@@ -118,7 +115,7 @@
                 <card>
                     <template v-slot:title-slot>
                         <div class="card-title">
-                            <a href="{% url 'bookmark:overview' %}">Recent Bookmarks</a>
+                            <a class="text-emphasis" href="{% url 'bookmark:overview' %}">Recent Bookmarks</a>
                         </div>
                     </template>
                     <template v-slot:content>
@@ -165,7 +162,7 @@
                                     {% for song in music %}
                                         <li class="list-group-item list-group-item-secondary text-info">{{ song.song.title }} <strong>{{ song.song.artist }}</strong></li>
                                     {% empty %}
-                                        <li class="list-group-item">No music listened to.</li>
+                                        <li class="list-group-item list-group-item-secondary">No music listened to.</li>
                                     {% endfor %}
                             </ul>
                         </template>
@@ -196,7 +193,7 @@
                             <ul class="list-group" id="events">
                                 <li v-if="waiting" :class="errorClass" class="list-group-item list-group-item-secondary">[[ msg ]]</li>
                                 <div v-for="event in events" :key="event.count" v-cloak>
-                                    <li class="list-group-item list-group-item-secondary text-info">[[ event.start_pretty ]]: <strong>[[ event.summary ]]</strong> </li>
+                                    <li class="list-group-item list-group-item-secondary text-primary">[[ event.start_pretty ]]: <strong class="text-emphasis">[[ event.summary ]]</strong> </li>
                                 </div>
                             </ul>
                         </template>

@@ -2,14 +2,14 @@
     <div class="mr-5 text-center">
         <slot name="title-slot">
         </slot>
-    <div>
+    <div class="progress-circle">
       <svg width="120" height="120" viewBox="0 0 120 120">
-        <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke="#262c49" stroke-width="12" />
+        <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke-width="12" />
         <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke="#7fffd4" stroke-width="12" :stroke-dasharray="strokeDashArray" :stroke-dashoffset="getDashOffset()" />
-        <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px" fill="#fff">{{ getProgress() }}%</text>
+        <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px">{{ getProgress() }}%</text>
       </svg>
     </div>
-    <span class="text-secondary mt-2">{{ count }} {{ getPluralized() }}</span>
+    <span class="text-primary mt-2">{{ count }} {{ getPluralized() }}</span>
   </div>
 </template>
 

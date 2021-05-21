@@ -41,6 +41,10 @@
         computed: {
             textAreaMarkdown() {
 
+                if (!this.textAreaValue) {
+                    return "";
+                }
+
                 var md = window.markdownit({
                     highlight: function (str, lang) {
                         if (lang && hljs.getLanguage(lang)) {
