@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %} Gallery {% endblock %}
+
+{% block content %}
+
+    <div class="p-3" id="vue-app">
+
+        <h1>
+        A gallery of Bordercore content
+        </h1>
+
+        <h4>
+        This page contains all of the display elements found throughout Bordercore, useful for testing various CSS with both light and dark themes.
+        </h4>
+
+        <h4 class="mt-5">Code blocks</h4>
+
+        <div v-html="getContent()"></div>
+
+        <h4 class="mt-5">Inline code</h4>
+        This is <code>some inline</code> code.
+
+        <h4 class="mt-5">Homepage Cards</h4>
+
+        <div class="row no-gutters">
+
+            <div class="col-lg-4">
+
+                <card>
+                    <template v-slot:title-slot>
+                        <div class="card-title">
+                            <a href="#">Important Tasks</a>
+                        </div>
+                    </template>
+                    <template v-slot:content>
+                        <ul class="list-group">
+                            <li class="list-group-item list-group-item-secondary text-primary">Get stuff done
+                                <span class="badge badge-primary ml-1">linux</span>
+                                <span class="badge badge-info">django</span>
+                            </li>
+                            <li class="list-group-item list-group-item-secondary text-primary">Get more stuff done
+                                <span class="badge badge-primary ml-1">linux</span>
+                                <span class="badge badge-info">django</span>
+                            </li>
+                        </ul>
+                    </template>
+                </card>
+
+            </div>
+
+            <div class="col-lg-4">
+
+                <card>
+                    <template v-slot:title-slot>
+                        <div class="card-title">
+                            <a href="#">Important Tasks</a>
+                        </div>
+                    </template>
+                    <template v-slot:content>
+                        <ul class="list-group">
+                            <li class="list-group-item list-group-item-secondary">All done!</li>
+                        </ul>
+                    </template>
+                </card>
+
+            </div>
+
+        </div>
+
+        <h4 class="mt-5">Block Quotes Exported by org-mode markdown files</h4>
+
+        <blockquote>
+            <p>line 1
+                line 2
+                line 3
+            </p>
+        </blockquote>
+
+        <h4 class="mt-5">Breadcrumb Navigation</h4>
+
+        <div class="d-flex mb-3">
+            <div class="mr-auto align-self-center">
+                <ul class="breadcrumb mb-0 pt-0 pb-0">
+                    <li class="breadcrumb-item"><a href="#">Blob Detail</a></li>
+                    <li class="breadcrumb-item active">Edit Blob</li>
+                </ul>
+            </div>
+        </div>
+
+        <h4 class="mt-5">Alerts</h4>
+
+        <b-alert :show=true :variant="'info'">
+            <font-awesome-icon class="mr-1" icon="exclamation-triangle"></font-awesome-icon>
+            This is an <strong>info</strong> level message
+        </b-alert>
+
+        <b-alert :show=true :variant="'success'">
+            <font-awesome-icon class="mr-1" icon="exclamation-triangle"></font-awesome-icon>
+            This is a <strong>success</strong> level message
+        </b-alert>
+
+        <b-alert :show=true :variant="'warning'">
+            <font-awesome-icon class="mr-1" icon="exclamation-triangle"></font-awesome-icon>
+            This is a <strong>warning</strong> level message
+        </b-alert>
+
+        <b-alert :show=true :variant="'danger'">
+            <font-awesome-icon class="mr-1" icon="exclamation-triangle"></font-awesome-icon>
+            This is a <strong>danger</strong> level message
+        </b-alert>
+
+        <h4 class="mt-5">Toasts</h4>
+
+        <button class="btn btn-primary" @click=createToast('info')>Info Toast</button>
+        <button class="btn btn-success" @click=createToast('success')>Success Toast</button>
+        <button class="btn btn-warning" @click=createToast('warning')>Warning Toast</button>
+        <button class="btn btn-danger" @click=createToast('danger')>Danger Toast</button>
+
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" charset="utf-8">
+
+        const EventBus = new Vue();
+
+        new Vue({
+            el: "#vue-app",
+            data() {
+                return {
+                    javascript_sample: `
+\`\`\`python
+class SortOrderTagBookmark(SortOrderMixin):
+
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    bookmark = models.ForeignKey("bookmark.Bookmark", on_delete=models.CASCADE)
+
+    field_name = "tag"
+
+    class Meta:
+        ordering = ("sort_order",)
+        unique_together = (
+            ("tag", "bookmark")
+        )
+
+    @receiver(pre_delete, sender=SortOrderTagBookmark)
+    def remove_bookmark(sender, instance, **kwargs):
+        instance.handle_delete()
+\`\`\`
+                    `
+                }
+            },
+            methods: {
+                getContent() {
+                    return markdown.render(this.javascript_sample);
+                },
+                createToast(level) {
+                    this.$bvToast.toast("This is a sample toast", {
+                        title: "Toast",
+                        variant: level,
+                        noAutoHide: true
+                    })
+                }
+            }
+        });
+
+    </script>
+
+{% endblock %}

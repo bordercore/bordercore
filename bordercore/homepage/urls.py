@@ -15,4 +15,9 @@ urlpatterns = [
         view=views.get_calendar_events,
         name="get_calendar_events"
     ),
+    path(
+        route="gallery",
+        view=views.gallery,
+        name="gallery"
+    ),
 ]

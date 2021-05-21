@@ -182,6 +182,11 @@ def get_date(node):
                 return property.value
 
 
+@login_required
+def gallery(request):
+    return render(request, "homepage/gallery.html", {})
+
+
 def handler404(request, exception):
 
     response = render(request, "404.html", {})
