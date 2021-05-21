@@ -96,6 +96,9 @@
 }
 
 .button-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 0;
   border: none;
   font: inherit;
@@ -109,11 +112,11 @@
 
   &:hover {
     background-color: $primary;
-    color: $white !important;
+    color: $info !important;
     transform: translateY(-0.25rem);
 
     .fa-plus {
-      color: $info !important;
+      color: $white !important;
     }
   }
 

@@ -34,13 +34,17 @@
 
             <button-group inline-template @get-page="getPage">
                 <div class="btn-group ml-5">
-                    <a class="btn btn-secondary" id="btn-add" href="{% url 'bookmark:create' %}">Create</a>
                     <input type="button" class="btn btn-secondary" id="btn-update" value="Update" :disabled="buttonsDisabled" @click="onClickUpdate" />
                     <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="buttonsDisabled" @click="onClickDelete" />
                     <input v-if="unPinButtonVisible" type="button" class="btn btn-secondary ml-2" value="Unpin" @click="unPin" v-cloak />
                     <input v-if="pinButtonVisible" type="button" class="btn btn-secondary ml-2" value="Pin" @click="pin" v-cloak />
                 </div>
             </button-group>
+
+            <div class="ml-5">
+                <add-button url="{% url 'bookmark:create' %}">
+                </add-button>
+            </div>
 
         </form>
 

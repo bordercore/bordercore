@@ -122,6 +122,10 @@ import DrillTagProgress from "./vue/common/DrillTagProgress.vue";
 Vue.component("DrillTagProgress", DrillTagProgress);
 window.DrillTagProgress = DrillTagProgress;
 
+import AddButton from "./vue/common/AddButton.vue";
+Vue.component("AddButton", AddButton);
+window.AddButton = AddButton;
+
 import VueSidebarMenu from "vue-sidebar-menu"
 import "vue-sidebar-menu/dist/vue-sidebar-menu.css"
 Vue.use(VueSidebarMenu)

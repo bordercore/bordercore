@@ -58,12 +58,9 @@
 
                     </form>
 
-                    <div class="float-right mr-2">
-                        <a id="btn-create" :href=createTodoUrl>
-                            <button class="button-add">
-                                <font-awesome-icon icon="plus" class="form-control-feedback text-primary"></font-awesome-icon>
-                            </button>
-                        </a>
+                    <div class="mr-2">
+                        <add-button :url="'{% url 'todo:create' %}?tagsearch=' + this.filterTag">
+                        </add-button>
                     </div>
 
                 </div>
@@ -360,9 +357,6 @@
             computed: {
                 isFiltered() {
                     return this.filterPriority !== "" || this.filterTime !== "";
-                },
-                createTodoUrl() {
-                    return "{% url 'todo:create' %}?tagsearch=" + this.filterTag;
                 }
             },
             mounted() {
