@@ -28,6 +28,11 @@ def test_get_edition_string(blob_image_factory):
     assert blob_image_factory.get_edition_string() == ""
 
 
+def test_doctype(blob_image_factory, blob_text_factory):
+
+    assert blob_image_factory.doctype == "image"
+    assert blob_text_factory.doctype == "document"
+
 def test_get_metadata(blob_image_factory):
 
     metadata = blob_image_factory.get_metadata()

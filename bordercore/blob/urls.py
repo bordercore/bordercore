@@ -6,6 +6,11 @@ app_name = "blob"
 
 urlpatterns = [
     path(
+        route="list",
+        view=views.BlobListView.as_view(),
+        name="list"
+    ),
+    path(
         route="<uuid:uuid>/",
         view=views.BlobDetailView.as_view(),
         name="detail"
@@ -44,5 +49,10 @@ urlpatterns = [
         route="slideshow/",
         view=views.slideshow,
         name="slideshow"
+    ),
+    path(
+        route="get_recent_blobs",
+        view=views.get_recent_blobs,
+        name="get_recent_blobs"
     ),
 ]

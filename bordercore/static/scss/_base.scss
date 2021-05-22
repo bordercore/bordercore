@@ -608,6 +608,26 @@ pre {
 
 /* Blobs */
 
+.blob-list-nav {
+  background-color: $blob-list-nav;
+}
+
+.blob-list {
+  .blob-content {
+    height: 18.75rem;
+    overflow: hidden;
+    font-size: 0.25rem;
+  }
+
+  .blob-info {
+    font-size: 0.6rem;
+  }
+
+  &:hover {
+    background-color: $blob-list-hover-background-color;
+  }
+}
+
 .nav-selected {
   border-bottom: 5px solid $blue;
 }

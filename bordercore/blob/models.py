@@ -23,6 +23,7 @@ from django.dispatch.dispatcher import receiver
 from collection.models import Collection
 from lib.mixins import TimeStampedModel
 from lib.time_utils import get_date_from_pattern
+from lib.util import is_image
 from tag.models import Tag
 
 EDITIONS = {'1': 'First',
@@ -170,6 +171,19 @@ class Blob(TimeStampedModel):
                 return "%s Edition" % (EDITIONS[matches.group(2)])
 
         return ""
+
+    @property
+    def doctype(self):
+        if self.is_note is True:
+            return "note"
+        elif "is_book" in [x.name for x in self.metadata_set.all()]:
+            return "book"
+        elif is_image(self.file):
+            return "image"
+        elif self.sha1sum is not None:
+            return "blob"
+        else:
+            return "document"
 
     def get_cleaned_date(self, date):
         """

@@ -3,10 +3,11 @@ import json
 import logging
 import random
 import re
+from collections import defaultdict
 
 import boto3
+import humanize
 from botocore.errorfactory import ClientError
-from PyPDF2.utils import PdfReadError
 
 from django.conf import settings
 from django.contrib import messages
@@ -15,16 +16,35 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.list import ListView
 
 from blob.forms import BlobForm
 from blob.models import Blob, MetaData
 from collection.models import Collection
 from lib.time_utils import parse_date_from_string
+from lib.util import is_image, is_pdf
 
 log = logging.getLogger(f"bordercore.{__name__}")
+
+@method_decorator(login_required, name="dispatch")
+class BlobListView(ListView):
+
+    def get_queryset(self):
+        return Blob.objects.filter(user=self.request.user). \
+            prefetch_related("tags"). \
+            order_by("-created")[:10]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        return {
+            **context,
+            "title": "Recent Blobs"
+        }
 
 
 @method_decorator(login_required, name='dispatch')
@@ -404,3 +424,42 @@ def parse_date(request, input_date):
 
     return JsonResponse({'output_date': response,
                          'error': error})
+
+@login_required
+def get_recent_blobs(request):
+
+    blob_list =  Blob.objects.filter(user=request.user). \
+        prefetch_related("tags", "metadata_set"). \
+        order_by("-created")[:10]
+
+    doctypes = defaultdict(int)
+
+    info = []
+
+    for blob in blob_list:
+        delta = timezone.now() - blob.modified
+        props = {
+            "name": blob.name,
+            "tags": blob.get_tags(),
+            "url": reverse("blob:detail", kwargs={"uuid": blob.uuid}),
+            "delta_days": delta.days,
+            "___updated": f"{blob.modified:%Y-%m-%d}",
+            "uuid": blob.uuid,
+            "content": blob.content[:10000],
+            "doctype": blob.doctype,
+            "content_size": humanize.naturalsize(len(blob.content))
+        }
+        doctypes[blob.doctype] += 1
+        if is_image(blob.file) or is_pdf(blob.file):
+            props["cover_url"] = blob.get_cover_info(size="large").get("url", None)
+        info.append(props)
+
+        doctypes["all"] = len(blob_list)
+
+    response = {
+        "blobList": info,
+        "docTypes": doctypes,
+        "status": "OK"
+    }
+
+    return JsonResponse(response, safe=False)

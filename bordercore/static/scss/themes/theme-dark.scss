@@ -24,8 +24,11 @@ $secondary: $gray-500;
 @import "../../css/perfect-scrollbar.css";
 
 // Custom colors for this theme
+$background-color: $gray-900;
 $background-color-dark: #10163a;
 $background-color-light: #262c49;
+$blob-list-nav: #333c6f;
+$blob-list-hover-background-color: lighten($background-color, 1%);
 $form-background-color: $gray-500;
 $light-blue: #212132;
 $link-hover-color: $green;
@@ -79,7 +82,7 @@ hr {
 }
 
 .wrapper {
-  background: radial-gradient(farthest-side at 10% 0, $gray-900, #17193b);
+  background: radial-gradient(farthest-side at 10% 0, $background-color, #17193b);
 }
 
 // Import highlight.js CSS
