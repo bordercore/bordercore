@@ -54,7 +54,16 @@
 
             <div class="card-grid ml-2">
 
-                <h3>Recently added music</h3>
+                <div class="d-flex">
+
+                    <h3>Recently added music</h3>
+
+                    <div class="mr-2 ml-auto">
+                        <add-button url="{% url 'music:create' %}">
+                        </add-button>
+                    </div>
+
+                </div>
 
                 <div class="col-lg-11">
                     <b-table

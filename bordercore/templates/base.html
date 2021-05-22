@@ -180,7 +180,19 @@
                                         attributes: {
                                             icon: "home",
                                         },
-                                        class: "fa-xs"
+                                        class: "fa-xs sidebar-icon"
+                                    }
+                                },
+                                {
+                                    href: "{% url 'search:search' %}",
+                                    title: "Search",
+                                    alias: "/search/search*",
+                                    icon: {
+                                        element: "font-awesome-icon",
+                                        attributes: {
+                                            icon: "search",
+                                        },
+                                        class: "sidebar-icon"
                                     }
                                 },
                                 {
@@ -191,7 +203,8 @@
                                         element: "font-awesome-icon",
                                         attributes: {
                                             icon: "bookmark",
-                                        }
+                                        },
+                                        class: "sidebar-icon"
                                     },
                                     badge: {
                                         text: "0",
@@ -206,7 +219,8 @@
                                         element: "font-awesome-icon",
                                         attributes: {
                                             icon: "box",
-                                        }
+                                        },
+                                        class: "sidebar-icon"
                                     }
                                 },
                                 {
@@ -216,7 +230,8 @@
                                         element: "font-awesome-icon",
                                         attributes: {
                                             icon: "newspaper",
-                                        }
+                                        },
+                                        class: "sidebar-icon"
                                     },
                                     child: [
                                         {
@@ -236,7 +251,8 @@
                                         element: "font-awesome-icon",
                                         attributes: {
                                             icon: "sticky-note",
-                                        }
+                                        },
+                                        class: "sidebar-icon"
                                     }
                                 },
                                 {
@@ -246,13 +262,14 @@
                                         element: "font-awesome-icon",
                                         attributes: {
                                             icon: "copy",
-                                        }
+                                        },
+                                        class: "sidebar-icon"
                                     },
                                     child: [
                                         {
-                                            href: "{% url 'search:search' %}",
-                                            title: "Search",
-                                            alias: "/search/search*",
+                                            href: "{% url 'blob:list' %}",
+                                            title: "Home",
+                                            alias: "/blob/list",
                                         },
                                         {
                                             href: "{% url 'search:kb_search_tag_detail_search' %}",
@@ -263,11 +280,6 @@
                                             href: "{% url 'collection:list' %}",
                                             title: "Collections",
                                             alias: "/collection/*",
-                                        },
-                                        {
-                                            href: "{% url 'blob:create' %}",
-                                            title: "Create Blob",
-                                            alias: "/blob/*"
                                         }
                                     ]
                                 },
@@ -279,30 +291,21 @@
                                         element: "font-awesome-icon",
                                         attributes: {
                                             icon: "graduation-cap",
-                                        }
+                                        },
+                                        class: "sidebar-icon"
                                     }
                                 },
                                 {
-                                    href: "",
+                                    href: "{% url 'music:list' %}",
                                     title: "Music",
+                                    alias: ["/music/artist/*", "/music/album/*", "/music/tag/*"],
                                     icon: {
                                         element: "font-awesome-icon",
                                         attributes: {
-                                            icon: "music",
-                                        }
-                                    },
-                                    child: [
-                                        {
-                                            href: "{% url 'music:list' %}",
-                                            title: "Browse",
-                                            alias: ["/music/artist/*", "/music/album/*", "/music/tag/*"]
+                                            icon: "music"
                                         },
-                                        {
-                                            href: "{% url 'music:create' %}",
-                                            title: "Add a Song",
-                                            alias: ["/music/create", "/music/update/*"]
-                                        }
-                                    ]
+                                        class: "sidebar-icon"
+                                    }
                                 },
                                 {
                                     href: "{% url 'todo:list' %}",
@@ -312,7 +315,8 @@
                                         element: "font-awesome-icon",
                                         attributes: {
                                             icon: "tasks",
-                                        }
+                                        },
+                                        class: "sidebar-icon"
                                     },
                                     {% if todo_count %}
                                     badge: {
@@ -329,7 +333,8 @@
                                         element: "font-awesome-icon",
                                         attributes: {
                                             icon: "running",
-                                        }
+                                        },
+                                        class: "sidebar-icon"
                                     },
                                     {% if exercise_count %}
                                     badge: {
