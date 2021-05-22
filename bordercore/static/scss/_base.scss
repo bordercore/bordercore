@@ -676,6 +676,11 @@ h2#name {
   object-fit: contain;
 }
 
+#blob-detail-menu {
+  right: 0.5rem;
+  top: 0.5rem;
+}
+
 #blob_note {
   p {
     margin-bottom: 0;
@@ -865,6 +870,16 @@ a.tag {
   font-size: small;
 }
 
+.node-blob-menu {
+  right: -0.25rem;
+  top: 0.5rem;
+}
+
+.node-bookmark-menu {
+  right: -0.25rem;
+  top: 0.5rem;
+}
+
 /*
   Metrics
 */
@@ -877,6 +892,11 @@ a.tag {
 /*
   Drill
 */
+
+#drill-pinned-tags-menu {
+  right: 1rem;
+  top: 1rem;
+}
 
 .favorite {
   color: #f00;

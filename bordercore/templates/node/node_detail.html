@@ -42,7 +42,7 @@
                                     <draggable v-model="blobList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
                                         <transition-group type="transition" class="w-100">
                                             <li v-for="(blob, index) in blobList" class="list-group-item list-group-item-secondary text-info draggable" :data-uuid="blob.uuid" :key="blob.uuid" v-cloak v-b-hover="handleHover">
-                                                <div class="dropdownmenu hidden float-right">
+                                                <div class="dropdownmenu hidden float-right node-blob-menu">
                                                     <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center">
                                                         <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
                                                         <div slot="dropdown">
@@ -129,7 +129,7 @@
                                     <draggable v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
                                         <transition-group type="transition" class="w-100">
                                             <li v-for="(bookmark, index) in bookmarkList" class="list-group-item list-group-item-secondary text-info draggable" :data-uuid="bookmark.id" :key="bookmark.id" v-cloak v-b-hover="handleHover">
-                                                <div class="dropdownmenu hidden float-right">
+                                                <div class="dropdownmenu hidden float-right node-bookmark-menu">
                                                     <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center">
                                                         <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
                                                         <div slot="dropdown">
