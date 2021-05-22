@@ -116,7 +116,7 @@
         </div>
 
         <div id="sidebar">
-            <sidebar-menu @toggle-collapse="onToggleCollapse" @item-click="onItemClick" :menu="menu" :collapsed="collapsed" width="240px" />
+            <sidebar-menu @toggle-collapse="onToggleCollapse" @item-click="onItemClick" :menu="menu" :collapsed="collapsed" ref="sidebar" />
             <span slot="toggle-icon">
                 <font-awesome-icon icon="arrows-alt-h"></font-awesome-icon>
             </span>
@@ -163,7 +163,7 @@
                     el: "#sidebar",
                     data() {
                         return {
-                            collapsed: false,
+                            collapsed: {% if request.session.show_sidebar == "true" %}false{% else %}true{% endif %},
                             menu: [
                                 {
                                     header: true,
@@ -348,6 +348,7 @@
                     },
                     methods: {
                         onToggleCollapse(collapsed) {
+
                             this.collapsed = collapsed;
                             const wrapper = document.querySelector(".wrapper");
                             if (collapsed) {
@@ -355,6 +356,19 @@
                             } else {
                                 wrapper.classList.remove("collapsed");
                             }
+
+                            doPost(
+                                this,
+                                "{% url "accounts:store_in_session" %}",
+                                {
+                                    "show_sidebar": !collapsed
+                                }
+                                ,
+                                (response) => {},
+                                "",
+                                ""
+                            );
+
                         },
                         onItemClick(event, item, node) {
                             this.ps.update();
@@ -383,8 +397,15 @@
                         // Save this so that we can update the scrollbar when expanding items in the sidebar
                         this.ps = ps;
 
+                        const wrapper = document.querySelector(".wrapper");
+                        {% if request.session.show_sidebar == "false" %}
+                        wrapper.classList.add("collapsed");
+                        {% else %}
+                        wrapper.classList.add("sidebar-transition");
+                        {% endif %}
                     }
                 });
+
 
             </script>
 
