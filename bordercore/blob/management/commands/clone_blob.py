@@ -21,12 +21,12 @@ class Command(BaseCommand):
             required=True
         )
         parser.add_argument(
-            "--collection-id",
-            help="The ID of the collection to which the blob belongs",
+            "--collection-uuid",
+            help="The UUID of the collection to which the blob belongs",
         )
 
     @atomic
-    def handle(self, *args, uuid, collection_id, **kwargs):
+    def handle(self, *args, uuid, collection_uuid, **kwargs):
 
         original_blob = Blob.objects.get(uuid=uuid)
         print(f"Cloning blob named '{original_blob.name}'")
@@ -53,8 +53,8 @@ class Command(BaseCommand):
         for x in original_blob.tags.all():
             new_blob.tags.add(x)
 
-        if collection_id:
-            collection = Collection.objects.get(user=original_blob.user, pk=collection_id)
+        if collection_uuid:
+            collection = Collection.objects.get(user=original_blob.user, uuid=collection_uuid)
             blob_info = {
                 "id": new_blob.id,
                 "added": int(datetime.datetime.now().strftime("%s"))
