@@ -26,7 +26,7 @@ def monkeypatch_node(monkeypatch):
     monkeypatch.setattr(Elasticsearch, "search", mock)
 
 
-def test_node_overview(auto_login_user, node):
+def test_node_listview(auto_login_user, node):
 
     _, client = auto_login_user()
 

@@ -5,12 +5,13 @@ from elasticsearch import Elasticsearch
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
 from django.http import JsonResponse
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
+from django.views.generic.list import ListView
 
 from blob.models import Blob
 from bookmark.models import Bookmark
@@ -18,13 +19,19 @@ from bookmark.models import Bookmark
 from .models import Node, SortOrderNodeBlob, SortOrderNodeBookmark
 
 
-class NodeOverviewView(TemplateView):
+class NodeListView(ListView):
 
-    template_name = "node/overview.html"
+    def get_queryset(self):
+        return Node.objects.filter(user=self.request.user) \
+            .annotate(
+                blob_count=Count("blobs"),
+                bookmark_count=Count("bookmarks")
+                ) \
+            .order_by("-modified")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["nodes"] = Node.objects.filter(user=self.request.user).order_by("-modified")
+        context["nodes"] = context["object_list"]
 
         return context
 

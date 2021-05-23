@@ -7,7 +7,7 @@ app_name = "node"
 urlpatterns = [
     path(
         route="",
-        view=views.NodeOverviewView.as_view(),
+        view=views.NodeListView.as_view(),
         name="list"
     ),
     path(

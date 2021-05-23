@@ -10,18 +10,24 @@
 
     <div class="card-grid ml-3" id="vue-app">
 
+        <div class="d-flex flex-row flex-wrap">
         {% for node in nodes %}
-        <div class="row">
 
-            <div class="col-lg-12">
-
+            <div class="w-50">
                 <h4>
                     <a href="{% url "node:detail" node.uuid %}">{{ node.name }}</a>
+                    <div class="node-list-stats pl-2 pt-1 text-primary">
+                        <ul class="list-unstyled">
+                            <li>Last modified: <span class="text-emphasis">{{ node.modified|date:"M d, Y" }}</span></li>
+                            <li>Blob count: <span class="text-emphasis">{{ node.blob_count }}</span></li>
+                            <li>Bookmark count: <span class="text-emphasis">{{ node.bookmark_count }}</span></li>
+                        </ul>
+                    </div>
                 </h4>
-
             </div>
-        </div>
+
         {% endfor %}
+        </div>
 
     </div>
 
