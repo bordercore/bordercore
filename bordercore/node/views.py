@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
@@ -23,7 +24,7 @@ class NodeOverviewView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["nodes"] = Node.objects.filter(user=self.request.user)
+        context["nodes"] = Node.objects.filter(user=self.request.user).order_by("-modified")
 
         return context
 
@@ -77,8 +78,11 @@ def sort_blobs(request):
     blob_uuid = request.POST["blob_uuid"]
     new_position = int(request.POST["new_position"])
 
-    s = SortOrderNodeBlob.objects.get(node__uuid=node_uuid, blob__uuid=blob_uuid)
-    SortOrderNodeBlob.reorder(s, new_position)
+    so = SortOrderNodeBlob.objects.get(node__uuid=node_uuid, blob__uuid=blob_uuid)
+    SortOrderNodeBlob.reorder(so, new_position)
+
+    so.node.modified = timezone.now()
+    so.node.save()
 
     response = {
         "status": "OK",
@@ -99,6 +103,9 @@ def add_blob(request):
     so = SortOrderNodeBlob(node=node, blob=blob)
     so.save()
 
+    so.node.modified = timezone.now()
+    so.node.save()
+
     response = {
         "status": "OK",
     }
@@ -112,8 +119,11 @@ def remove_blob(request):
     node_uuid = request.POST["node_uuid"]
     blob_uuid = request.POST["blob_uuid"]
 
-    s = SortOrderNodeBlob.objects.get(node__uuid=node_uuid, blob__uuid=blob_uuid)
-    s.delete()
+    so = SortOrderNodeBlob.objects.get(node__uuid=node_uuid, blob__uuid=blob_uuid)
+    so.delete()
+
+    so.node.modified = timezone.now()
+    so.node.save()
 
     response = {
         "status": "OK",
@@ -129,9 +139,12 @@ def edit_blob_note(request):
     blob_uuid = request.POST["blob_uuid"]
     note = request.POST["note"]
 
-    s = SortOrderNodeBlob.objects.get(node__uuid=node_uuid, blob__uuid=blob_uuid)
-    s.note = note
-    s.save()
+    so = SortOrderNodeBlob.objects.get(node__uuid=node_uuid, blob__uuid=blob_uuid)
+    so.note = note
+    so.save()
+
+    so.node.modified = timezone.now()
+    so.node.save()
 
     response = {
         "status": "OK",
@@ -173,8 +186,11 @@ def sort_bookmarks(request):
     bookmark_id = request.POST["bookmark_id"]
     new_position = int(request.POST["new_position"])
 
-    s = SortOrderNodeBookmark.objects.get(node__uuid=node_uuid, bookmark__id=bookmark_id)
-    SortOrderNodeBookmark.reorder(s, new_position)
+    so = SortOrderNodeBookmark.objects.get(node__uuid=node_uuid, bookmark__id=bookmark_id)
+    SortOrderNodeBookmark.reorder(so, new_position)
+
+    so.node.modified = timezone.now()
+    so.node.save()
 
     response = {
         "status": "OK",
@@ -195,6 +211,9 @@ def add_bookmark(request):
     so = SortOrderNodeBookmark(node=node, bookmark=bookmark)
     so.save()
 
+    so.node.modified = timezone.now()
+    so.node.save()
+
     response = {
         "status": "OK",
     }
@@ -208,8 +227,11 @@ def remove_bookmark(request):
     node_uuid = request.POST["node_uuid"]
     bookmark_id = request.POST["bookmark_id"]
 
-    s = SortOrderNodeBookmark.objects.get(node__uuid=node_uuid, bookmark__id=bookmark_id)
-    s.delete()
+    so = SortOrderNodeBookmark.objects.get(node__uuid=node_uuid, bookmark__id=bookmark_id)
+    so.delete()
+
+    so.node.modified = timezone.now()
+    so.node.save()
 
     response = {
         "status": "OK",
@@ -225,9 +247,12 @@ def edit_bookmark_note(request):
     bookmark_id = int(request.POST["bookmark_id"])
     note = request.POST["note"]
 
-    s = SortOrderNodeBookmark.objects.get(node__uuid=node_uuid, bookmark__id=bookmark_id)
-    s.note = note
-    s.save()
+    so = SortOrderNodeBookmark.objects.get(node__uuid=node_uuid, bookmark__id=bookmark_id)
+    so.note = note
+    so.save()
+
+    so.node.modified = timezone.now()
+    so.node.save()
 
     response = {
         "status": "OK",

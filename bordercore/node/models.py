@@ -7,18 +7,17 @@ from django.dispatch import receiver
 
 from blob.models import Blob
 from bookmark.models import Bookmark
-from lib.mixins import SortOrderMixin
+from lib.mixins import SortOrderMixin, TimeStampedModel
 
 
-class Node(models.Model):
+class Node(TimeStampedModel):
+    """
+    A collection of blobs, bookmarks, and notes around a certain topic.
+    """
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
-
     name = models.TextField()
     user = models.ForeignKey(User, on_delete=models.PROTECT)
-
-    # TODO: Should this be a 1 to many relationship?
     note = models.TextField(blank=True, null=True)
-
     bookmarks = models.ManyToManyField(Bookmark, through="SortOrderNodeBookmark")
     blobs = models.ManyToManyField(Blob, through="SortOrderNodeBlob")
 
