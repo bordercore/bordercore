@@ -84,7 +84,7 @@ class SortOrderUserFeed(SortOrderMixin):
     field_name = "userprofile"
 
     def __str__(self):
-        return f"SortOrder: {self.node}, {self.feed}"
+        return f"SortOrder: {self.userprofile}, {self.feed}"
 
     class Meta:
         ordering = ("sort_order",)
