@@ -23,8 +23,10 @@ def test_sort_order_mixin():
     for model in models:
         if "SortOrderMixin" in [x.__name__ for x in model.__bases__]:
 
-            field_names = model.objects.order_by(model.field_name).distinct(model.field_name)
+            # Use .order_by() to ignore the default ordering of the model
+            field_names = model.objects.distinct(model.field_name).order_by()
 
+            # For each model, there will be on distinct field_name per user
             for field_name in field_names:
 
                 filter_kwargs = {field_name.field_name: getattr(field_name, field_name.field_name)}
