@@ -82,10 +82,11 @@
                                                 {% if request.user|is_in_group:"Admin" %}
                                                     <a class="dropdown-item pl-3" href="{% url 'metrics:list' %}"><font-awesome-icon icon="chart-bar" class="mr-2"></font-awesome-icon>Metrics <span class="failed-test-count ml-1 mt-2 mb-2 pt-1" v-if="failed_test_count > 0">[[ failed_test_count ]]</span></a>
                                                 {% endif %}
+                                                <a class="dropdown-item pl-3" href="#" @click="showHelp"><font-awesome-icon icon="question" class="mr-2"></font-awesome-icon>Help</a>
                                                 <a class="dropdown-item pl-3" href="{% url 'accounts:logout' %}"><font-awesome-icon icon="sign-out-alt" class="mr-2"></font-awesome-icon>Logout</a>
                                             </div>
                                             {% if request.user|is_in_group:"Admin" %}
-                                                <span class="failed-test-count failed-test-count-center-helper align-middle ml-2 mt-2 pt-1" _style="padding-left: 0.1rem" v-if="failed_test_count > 0">[[ failed_test_count ]]</span>
+                                                <span class="failed-test-count failed-test-count-center-helper align-middle ml-2 mt-2 pt-1" v-if="failed_test_count > 0">[[ failed_test_count ]]</span>
                                             {% endif %}
                                             <span class="align-middle ml-2 mt-2"><font-awesome-icon icon="angle-down"></font-awesome-icon></span>
                                         </dropdown-menu>
@@ -125,6 +126,20 @@
             </span>
         </div>
 
+        <div class="modal fade" id="modalHelp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">Help</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    </div>
+                    <div class="modal-body" id="modal-body">
+                            Help!
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {% block javascript %}
 
             {% if debug %}
@@ -155,6 +170,13 @@
                             show: false,
                             right: true,
                             failed_test_count: {{ failed_test_count }}
+                        }
+                    },
+                    methods: {
+                        showHelp(evt) {
+                            const helpText = document.getElementById("help-text").innerHTML;
+                            document.getElementById("modal-body").innerHTML = markdown.render(helpText);
+                            $("#modalHelp").modal("show");
                         }
                     }
                 });
@@ -409,6 +431,13 @@
 
             </script>
 
+        {% endblock %}
+
+        {% block help %}
+
+            <div class="d-none" id="help-text">
+Bordercore is a place to organize all your information.
+            </div>
         {% endblock %}
 
     </body>

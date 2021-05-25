@@ -56,48 +56,6 @@
                     </div>
                 </div>
 
-                <br />
-
-                <h5 class="mt-3">Responses</h5>
-
-                {% if state_name == 'Learning' %}
-
-                    <div>
-                        <strong>Good</strong> Move the question to the next learning step
-                    </div>
-
-                    <div>
-                        <strong>Easy</strong> Graduate the question to "reviewing" mode
-                    </div>
-
-                    <div>
-                        <strong>Reset</strong> Move the question to the first learning step
-                    </div>
-
-                {% else %}
-
-                    <div>
-                        <strong>Good</strong> You answered correctly without too much effort. Should be the most common response.
-                    </div>
-
-                    <div>
-                        <strong>Hard</strong> Show the question more frequently in the future.
-                    </div>
-
-                    <div>
-                        <strong>Easy</strong> Show the question less frequently in the future.
-                    </div>
-
-                    <div>
-                        <strong>Reset</strong> You failed to correctly answer the question, ie you've "lapsed". The question goes back into "learning" mode.
-                    </div>
-
-                {% endif %}
-
-                <div>
-                    <strong>Skip</strong> Skip the question without recording a response.
-                </div>
-
             </div>
 
         </div>
@@ -115,7 +73,7 @@
                         {% endfor %}
                         <br /><br />
                     {% endif %}
-                    <hr class="divider" _style="background-color: #f00" />
+                    <hr class="divider" />
                     <h3 class="table-borders markdown" v-html="getAnswer()">
                     </h3>
 
@@ -190,5 +148,37 @@
         });
 
     </script>
+
+{% endblock %}
+
+{% block help %}
+
+    <div class="d-none" id="help-text">
+
+### Responses
+
+{% if state_name == 'Learning' %}
+
+**Good** Move the question to the next learning step
+
+**Easy** Graduate the question to "reviewing" mode
+
+**Reset** Move the question to the first learning step
+
+{% else %}
+
+**Good** You answered correctly without too much effort. This should be the most common response.
+
+**Hard** Show the question more frequently in the future.
+
+**Easy** Show the question less frequently in the future.
+
+**Reset** You failed to correctly answer the question, ie you've "lapsed". The question goes back into "learning" mode.
+
+{% endif %}
+
+**Skip** Skip the question without recording a response.
+
+    </div>
 
 {% endblock %}
