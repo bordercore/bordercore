@@ -5,9 +5,6 @@ import os
 
 from .base import *
 
-# Elasticsearch config
-ELASTICSEARCH_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT", "http://localhost:9200")
-
 LOGGING['handlers']['bordercore'] = {
     'level': 'DEBUG',
     'class': 'logging.handlers.RotatingFileHandler',

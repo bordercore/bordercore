@@ -16,9 +16,6 @@ INTERNAL_IPS = ('127.0.0.1', '10.3.2.2')
 
 STATIC_URL = '/static/'
 
-# Elasticsearch config
-ELASTICSEARCH_ENDPOINT = "http://localhost:9200"
-
 MIDDLEWARE += (
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'nplusone.ext.django.NPlusOneMiddleware'

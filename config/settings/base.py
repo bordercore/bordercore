@@ -218,7 +218,7 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 LOGIN_URL = "/accounts/login/"
 
 # Elasticsearch config
-# See dev.py and prod.py for endpoint url
+ELASTICSEARCH_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT", "http://localhost:9200")
 ELASTICSEARCH_INDEX = "bordercore"
 
 LOGGING = {
