@@ -19,7 +19,8 @@
                 primary-key="uuid"
                 :items="items_active"
                 :fields="fields"
-                sort-by="last_active"
+                sort-by="overdue"
+                :sort-compare="sortCompare"
                 :tbody-tr-class="rowClass"
             >
                 <template #cell(exercise)="data">
@@ -140,7 +141,15 @@
                 },
                 rowClass(item, type) {
                     if (!item || type !== "row") return
-                    if (item.overdue) return "selected"
+                    if (item.overdue === "1") return "selected"
+                },
+                sortCompare(aRow, bRow, key, sortDesc) {
+
+                    const a = aRow[key]
+                    const b = bRow[key]
+
+                    return a < b ? 1 : a > b ? -1 : 0;
+
                 }
             }
         });

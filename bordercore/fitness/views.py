@@ -110,7 +110,9 @@ def fitness_summary(request):
             #  that exceeds the exercises's interval, it's overdue.
             if e.interval and (timezone.now() - datetime.datetime(1970,1,1).astimezone()).days - \
                (e.last_active - datetime.datetime(1970,1,1).astimezone()).days + 1 > e.interval.days:
-                e.overdue = True
+                e.overdue = 1
+            else:
+                e.overdue = 0
 
             delta = timezone.now() - e.last_active
 
