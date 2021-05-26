@@ -533,7 +533,7 @@
             },
             mounted() {
 
-                EventBus.$on("foobar", payload => {
+                EventBus.$on("add-note", payload => {
 
                     this.bookmarkList.forEach( bookmark => {
                         if( bookmark.uuid == payload.uuid ) {
@@ -543,7 +543,11 @@
 
                 });
 
+                {% if tag %}
+                this.getBookmarkList({searchTag: "{{ tag }}"});
+                {% else %}
                 this.getBookmarkList({pageNumber: 1});
+                {% endif %}
 
                 window.setInterval(this.getBookmarkList, 60000, {pageNumber: null});
 
@@ -624,7 +628,7 @@
                                 uuid: bookmarkUuid,
                                 noteValue: note
                             }
-                            EventBus.$emit("foobar", payload);
+                            EventBus.$emit("add-note", payload);
                         },
                         "",
                         "Error adding note"
