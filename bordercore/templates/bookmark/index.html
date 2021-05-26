@@ -12,41 +12,57 @@
 
         {% include "common/show_messages.html" %}
 
-        <form class="form-inline" role="form" id="search-form" method="get" @submit.prevent>
+        <div _class="row">
+
+            <form class="form-inline row" role="form" id="search-form" method="get" @submit.prevent>
 
             {% csrf_token %}
 
-            <input type="hidden" id="add-to-remote-from-pinned-tagname" name="tag" />
+                <input type="hidden" id="add-to-remote-from-pinned-tagname" name="tag" />
 
-            <div class="form-group col-auto has-search">
-                <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
-                <search inline-template @search-term="searchTerm" @search-tag="searchTag" @get-page="getPage" ref="search">
-                    <div>
-                        <simple-suggest
-                            ref="simpleSuggest"
-                            place-holder="Search"
-                            search-url="{% url 'bookmark:get_tags_used_by_bookmarks' %}?query="
-                        >
-                        </simple-suggest>
-                    </div>
-                </search>
-            </div>
-
-            <button-group inline-template @get-page="getPage">
-                <div class="btn-group ml-5">
-                    <input type="button" class="btn btn-secondary" id="btn-update" value="Update" :disabled="buttonsDisabled" @click="onClickUpdate" />
-                    <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="buttonsDisabled" @click="onClickDelete" />
-                    <input v-if="unPinButtonVisible" type="button" class="btn btn-secondary ml-2" value="Unpin" @click="unPin" v-cloak />
-                    <input v-if="pinButtonVisible" type="button" class="btn btn-secondary ml-2" value="Pin" @click="pin" v-cloak />
+                <div class="form-group col-auto has-search offset-lg-3 col-lg-3">
+                    <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
+                    <search inline-template @search-term="searchTerm" @search-tag="searchTag" @get-page="getPage" ref="search">
+                        <div>
+                            <simple-suggest
+                                ref="simpleSuggest"
+                                place-holder="Search"
+                                search-url="{% url 'bookmark:get_tags_used_by_bookmarks' %}?query="
+                            >
+                            </simple-suggest>
+                        </div>
+                    </search>
                 </div>
-            </button-group>
 
-            <div class="ml-5">
-                <add-button url="{% url 'bookmark:create' %}">
-                </add-button>
-            </div>
+                <div class="d-flex col-lg-6">
 
-        </form>
+                    <button-group inline-template @get-page="getPage">
+                        <div class="btn-group ml-5">
+                            <input type="button" class="btn btn-secondary" id="btn-update" value="Update" :disabled="buttonsDisabled" @click="onClickUpdate" />
+                            <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="buttonsDisabled" @click="onClickDelete" />
+                            <input v-if="unPinButtonVisible" type="button" class="btn btn-secondary ml-2" value="Unpin" @click="unPin" v-cloak />
+                            <input v-if="pinButtonVisible" type="button" class="btn btn-secondary ml-2" value="Pin" @click="pin" v-cloak />
+                        </div>
+                    </button-group>
+
+                    <div class="ml-5">
+                        <add-button url="{% url 'bookmark:create' %}">
+                        </add-button>
+                    </div>
+
+                    <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="bookmark-dropdown text-center ml-auto mr-2 mt-2">
+                        <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
+                        <div slot="dropdown">
+                            <a class="dropdown-item" href="{% url 'bookmark:import' %}" >Import</a>
+                            <a class="dropdown-item" href="#" @click="randomize">Randomize</a>
+                        </div>
+                    </dropdown-menu>
+
+                </div>
+
+            </form>
+
+        </div>
 
     </div>
 
@@ -91,18 +107,6 @@
                         </div>
                     </tag-list>
                 </ul>
-
-                <randomize-button inline-template>
-                    <form role="form" action="" method="get">
-                        <div class="btn-group mt-5">
-                            <button class="btn btn-secondary" @click.prevent="onClick" id="btn-random">Randomize</button>
-                        </div>
-
-                        <div class="btn-group mt-5">
-                            <a class="btn btn-secondary" href="{% url 'bookmark:import' %}">Import</a>
-                        </div>
-                    </form>
-                </randomize-button>
 
             </div>
 
@@ -349,6 +353,12 @@
         new Vue({
             el: "#vue-app-top",
             store,
+            data() {
+                return {
+                    show: false,
+                    right: true,
+                }
+            },
             components: {
                 ButtonGroup,
                 Search
@@ -362,6 +372,12 @@
                 },
                 searchTag(searchTag) {
                     EventBus.$emit("search-tag", searchTag);
+                },
+                randomize(evt) {
+                    EventBus.$emit("select-pinned-tag", null);
+                    this.$store.commit("pinButtonVisible", false)
+                    this.$store.commit("unPinButtonVisible", false)
+                    EventBus.$emit("randomize");
                 }
             }
         });
@@ -740,24 +756,12 @@
             }
         };
 
-        const RandomizeButton = {
-            methods: {
-                onClick(evt) {
-                    EventBus.$emit("select-pinned-tag", null);
-                    this.$store.commit("pinButtonVisible", false)
-                    this.$store.commit("unPinButtonVisible", false)
-                    EventBus.$emit("randomize");
-                }
-            }
-        }
-
         new Vue({
             el: "#vue-app-left",
             store,
             components: {
                 AddNote,
-                TagList,
-                RandomizeButton
+                TagList
             }
         });
 
