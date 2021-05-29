@@ -246,7 +246,7 @@
                                     }
                                 },
                                 {
-                                    href: "",
+                                    href: "{% url 'feed:list' %}",
                                     title: "Feeds",
                                     icon: {
                                         element: "font-awesome-icon",
@@ -254,17 +254,7 @@
                                             icon: "newspaper",
                                         },
                                         class: "sidebar-icon"
-                                    },
-                                    child: [
-                                        {
-                                            href: "{% url 'feed:list' %}",
-                                            title: "Home"
-                                        },
-                                        {
-                                            href: "{% url 'feed:create' %}",
-                                            title: "Create a Feed"
-                                        }
-                                    ]
+                                    }
                                 },
                                 {
                                     href: "{% url 'search:notes' %}",

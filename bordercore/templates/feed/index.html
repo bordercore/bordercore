@@ -17,6 +17,11 @@
                             <strong>Updated</strong>: [[ currentFeed.lastCheck ]]
                             <br />
                             <strong>Status</strong>: <font-awesome-icon class="ml-1" :class="status.class" :icon="status.font"></font-awesome-icon>
+                            <br />
+                            <div class="mt-3">
+                                <add-button url="{% url 'feed:create' %}">
+                                </add-button>
+                            </div>
                         </template>
                     </card>
                 </feed-info>
