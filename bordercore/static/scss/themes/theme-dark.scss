@@ -59,10 +59,17 @@ $vue-simple-suggest-item-background-color: $gray-900;
   background-color: $primary;
 }
 
+.btn-primary {
+  background-color: #05376c;
+}
 
 // The close button for toast dialogs
 button.close, button.close:hover {
   color: #1b4f72;
+}
+
+em {
+  color: #00ffd1;
 }
 
 .text-emphasis {

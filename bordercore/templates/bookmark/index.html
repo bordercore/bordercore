@@ -52,66 +52,58 @@
 
         <div class="col-lg-9">
 
-    <div class="ml-2 mb-3" id="vue-app-top">
+            <div class="ml-2 mb-3" id="vue-app-top">
 
-        {% include "common/show_messages.html" %}
+                {% include "common/show_messages.html" %}
 
-        <div class="row">
+                <div class="d-flex">
 
-            <div class="col-lg-3">
+                    <form class="form-inline" role="form" id="search-form" method="get" @submit.prevent>
+                        {% csrf_token %}
 
-                <form class="form-inline w-100" role="form" id="search-form" method="get" @submit.prevent>
-                {% csrf_token %}
+                        <input type="hidden" id="add-to-remote-from-pinned-tagname" name="tag" />
 
-                    <input type="hidden" id="add-to-remote-from-pinned-tagname" name="tag" />
+                        <div class="form-group has-search">
+                            <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
+                            <search inline-template @search-term="searchTerm" @search-tag="searchTag" @get-page="getPage" ref="search">
+                                <div>
+                                    <simple-suggest
+                                        ref="simpleSuggest"
+                                        place-holder="Search"
+                                        search-url="{% url 'bookmark:get_tags_used_by_bookmarks' %}?query="
+                                    >
+                                    </simple-suggest>
+                                </div>
+                            </search>
+                        </div>
 
-                    <div class="form-group has-search">
-                        <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
-                        <search inline-template @search-term="searchTerm" @search-tag="searchTag" @get-page="getPage" ref="search">
-                            <div>
-                                <simple-suggest
-                                    ref="simpleSuggest"
-                                    place-holder="Search"
-                                    search-url="{% url 'bookmark:get_tags_used_by_bookmarks' %}?query="
-                                >
-                                </simple-suggest>
-                            </div>
-                        </search>
+                    </form>
+
+                    <button-group inline-template @get-page="getPage">
+                        <div class="btn-group ml-3">
+                            <input type="button" class="btn btn-secondary" id="btn-update" value="Update" :disabled="buttonsDisabled" @click="onClickUpdate" />
+                            <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="buttonsDisabled" @click="onClickDelete" />
+                            <input v-if="unPinButtonVisible" type="button" class="btn btn-secondary" value="Unpin" @click="unPin" v-cloak />
+                            <input v-if="pinButtonVisible" type="button" class="btn btn-secondary" value="Pin" @click="pin" v-cloak />
+                        </div>
+                    </button-group>
+
+                    <div class="ml-3">
+                        <add-button url="{% url 'bookmark:create' %}">
+                        </add-button>
                     </div>
 
-                </form>
+                    <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="bookmark-dropdown text-center ml-auto mr-2 mt-2">
+                        <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
+                        <div slot="dropdown">
+                            <a class="dropdown-item" href="{% url 'bookmark:import' %}" >Import</a>
+                            <a class="dropdown-item" href="#" @click="randomize">Randomize</a>
+                        </div>
+                    </dropdown-menu>
 
-            </div>
-
-            <div class="d-flex col-lg-9">
-
-                <button-group inline-template @get-page="getPage">
-                    <div class="btn-group">
-                        <input type="button" class="btn btn-secondary" id="btn-update" value="Update" :disabled="buttonsDisabled" @click="onClickUpdate" />
-                        <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="buttonsDisabled" @click="onClickDelete" />
-                        <input v-if="unPinButtonVisible" type="button" class="btn btn-secondary _ml-2" value="Unpin" @click="unPin" v-cloak />
-                        <input v-if="pinButtonVisible" type="button" class="btn btn-secondary _ml-2" value="Pin" @click="pin" v-cloak />
-                    </div>
-                </button-group>
-
-                <div class="ml-5">
-                    <add-button url="{% url 'bookmark:create' %}">
-                    </add-button>
                 </div>
 
-                <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="bookmark-dropdown text-center ml-auto mr-2 mt-2">
-                    <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
-                    <div slot="dropdown">
-                        <a class="dropdown-item" href="{% url 'bookmark:import' %}" >Import</a>
-                        <a class="dropdown-item" href="#" @click="randomize">Randomize</a>
-                    </div>
-                </dropdown-menu>
-
             </div>
-
-        </div>
-
-    </div>
 
             <div class="card-grid ml-2" id="vue-app-right">
 
