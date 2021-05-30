@@ -128,10 +128,10 @@ class BlobCreateView(CreateView):
         return reverse_lazy('blob:detail', kwargs={'uuid': self.object.uuid})
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class BlobDeleteView(DeleteView):
     model = Blob
-    success_url = reverse_lazy('blob:create')
+    success_url = reverse_lazy("blob:list")
 
     # Override delete() so that we can catch any exceptions, especially any
     #  thrown by Elasticsearch
@@ -142,10 +142,10 @@ class BlobDeleteView(DeleteView):
             return response
         except Exception as e:
             messages.add_message(request, messages.ERROR, f"Error deleting object: {e}")
-            return HttpResponseRedirect(reverse('blob:update', kwargs={'uuid': str(self.get_object().uuid)}))
+            return HttpResponseRedirect(reverse("blob:update", kwargs={"uuid": str(self.get_object().uuid)}))
 
     def get_object(self, queryset=None):
-        obj = Blob.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
+        obj = Blob.objects.get(user=self.request.user, uuid=self.kwargs.get("uuid"))
         return obj
 
 
