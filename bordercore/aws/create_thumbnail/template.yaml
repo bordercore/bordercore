@@ -45,7 +45,7 @@ Resources:
             Handler: create_thumbnail_lambda.handler
             Layers:
                 - !Ref PDFUtilsLayer
-            MemorySize: 512
+            MemorySize: 1024
             Runtime: python3.7
             Role: !GetAtt CreateThumbnailLambdaRole.Arn
             Environment:
