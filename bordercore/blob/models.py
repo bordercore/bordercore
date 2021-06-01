@@ -103,7 +103,7 @@ class Blob(TimeStampedModel):
     sha1sum = models.CharField(max_length=40, unique=True, blank=True, null=True)
     file = models.FileField(max_length=500, storage=DownloadableS3Boto3Storage(), blank=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
-    note = models.TextField(null=True)
+    note = models.TextField(null=True, blank=True)
     tags = models.ManyToManyField(Tag)
     date = models.TextField(null=True)
     importance = models.IntegerField(default=1)
@@ -113,7 +113,7 @@ class Blob(TimeStampedModel):
     documents = models.ManyToManyField("self", blank=True)
 
     def __str__(self):
-        return self.name
+        return self.name or ""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
