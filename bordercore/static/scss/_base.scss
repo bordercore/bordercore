@@ -126,6 +126,16 @@
   }
 }
 
+// A more understated "add" button
+.button-plus {
+  border-radius: 0.25rem;
+  padding: 0 0.5rem 0 0.5rem;
+
+  &:hover {
+    background-color: $button-plus-hover-background-color;
+  }
+}
+
 // Disable the outline around toast close buttons when you click
 // on them
 button:focus {
