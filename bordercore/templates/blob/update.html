@@ -198,7 +198,7 @@
 
                                 <content-text-area inline-template>
                                     <div class="col-lg-10 col-sm-10 align-self-center">
-                                        <textarea name="content" cols="40" rows="5" class="form-control" id="id_content" @focus="onFocus">{{ form.content.value|default:"" }}</textarea>
+                                        <textarea v-pre name="content" cols="40" rows="5" class="form-control" id="id_content">{{ form.content.value|default:"" }}</textarea>
                                     </div>
 
                                 </content-text-area>
@@ -432,16 +432,6 @@
         const noDelimiter = {replace: function(){}};
 
         const ContentTextArea = {
-            methods: {
-                onFocus(evt) {
-                    // Expand the content for editing, but only do it once.
-                    if (! isExpanded) {
-                        document.getElementById("id_content").classList.add("foobar");
-                        /* $("#id_content").animate({ height: "30em" }, 500); */
-                        isExpanded = true;
-                    }
-                }
-            }
         }
 
         const DateInput = {
