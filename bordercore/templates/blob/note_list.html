@@ -124,7 +124,7 @@
                         {
                             "uuid": "{{ note.source.uuid }}",
                             "date": "{{ note.source.date }}",
-                            "name": "{{ note.source.name|default:"Note Name" }}",
+                            "name": "{{ note.source.name|default:"Note" }}",
                             "contents": "{{ note.source.contents|escapejs }}",
                             "url": "{% url 'blob:detail' note.source.uuid %}",
                             "tags": [
