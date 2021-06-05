@@ -62,6 +62,19 @@
 
             </div>
 
+            <drill-bookmarks
+                question-uuid="{{ object.uuid }}"
+                get-bookmark-list-url="{% url 'drill:get_bookmark_list' '00000000-0000-0000-0000-000000000000' %}"
+                sort-bookmark-list-url="{% url 'drill:sort_bookmark_list' %}"
+                add-bookmark-url="{% url 'drill:add_bookmark' %}"
+                remove-bookmark-url="{% url 'drill:remove_bookmark' %}"
+                edit-bookmark-note-url="{% url 'drill:edit_bookmark_note' %}"
+                search-url="{% url 'bookmark:search' %}?term="
+                get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
+                create-bookmark-url="{% url 'bookmark-list' %}"
+            >
+            </drill-bookmarks>
+
             <div class="d-flex flex-grow-1">
                 <card title="Tag Progress">
                     <template v-slot:content>

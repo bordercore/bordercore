@@ -5,7 +5,9 @@ from urllib.parse import unquote
 
 import lxml.html as lh
 import pytz
+from elasticsearch import Elasticsearch
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
@@ -493,3 +495,80 @@ def get_title_from_url(request):
             "title": title[1]
         }
     )
+
+@login_required
+def search(request):
+
+    es = Elasticsearch(
+        [settings.ELASTICSEARCH_ENDPOINT],
+        verify_certs=False
+    )
+
+    search_term = request.GET["term"].lower()
+
+    search_terms = re.split(r"\s+", unquote(search_term))
+
+    search_object = {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "bool": {
+                            "should": [
+                                {
+                                    "term": {
+                                        "doctype": "bookmark"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "term": {
+                            "user_id": request.user.id
+                        }
+                    }
+                ]
+            }
+        },
+        "from": 0, "size": 100,
+        "_source": ["url",
+                    "note",
+                    "name",
+                    "uuid"]
+    }
+
+    # Separate query into terms based on whitespace and
+    #  and treat it like an "AND" boolean search
+    for one_term in search_terms:
+        search_object["query"]["bool"]["must"].append(
+            {
+                "bool": {
+                    "should": [
+                        {
+                            "wildcard": {
+                                "name": {
+                                    "value": f"*{one_term}*",
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        )
+
+    results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+
+    matches = []
+    for match in results["hits"]["hits"]:
+        matches.append(
+            {
+                "url": match["_source"].get("url"),
+                "name": match["_source"]["name"],
+                "note": match["_source"].get("note", ""),
+                "uuid": match["_source"].get("uuid"),
+                "favicon_url": Bookmark.get_favicon_url_new(match["_source"].get("url"), size=16)
+            }
+        )
+
+    return JsonResponse(matches, safe=False)

@@ -118,9 +118,17 @@ import TreeMenu from "./vue/common/TreeMenu.vue";
 Vue.component("TreeMenu", TreeMenu);
 window.TreeMenu = TreeMenu;
 
+import BookmarkSearch from "./vue/bookmark/BookmarkSearch.vue";
+Vue.component("BookmarkSearch", BookmarkSearch);
+window.BookmarkSearch = BookmarkSearch;
+
 import DrillTagProgress from "./vue/common/DrillTagProgress.vue";
 Vue.component("DrillTagProgress", DrillTagProgress);
 window.DrillTagProgress = DrillTagProgress;
+
+import DrillBookmarks from "./vue/drill/DrillBookmarks.vue";
+Vue.component("DrillBookmarks", DrillBookmarks);
+window.DrillBookmarks = DrillBookmarks;
 
 import AddButton from "./vue/common/AddButton.vue";
 Vue.component("AddButton", AddButton);

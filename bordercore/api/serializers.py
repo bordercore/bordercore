@@ -85,10 +85,13 @@ class BlobSha1sumSerializer(serializers.ModelSerializer):
 
 
 class BookmarkSerializer(serializers.ModelSerializer):
+
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = Bookmark
         fields = ["daily", "importance", "is_pinned", "last_check",
-                  "last_response_code", "note", "name", "url", "user"]
+                  "last_response_code", "note", "name", "url", "user", "uuid"]
 
 
 class CollectionSerializer(serializers.ModelSerializer):

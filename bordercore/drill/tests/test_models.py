@@ -1,5 +1,4 @@
 import datetime
-import re
 from datetime import timedelta
 
 import factory
@@ -103,6 +102,7 @@ def test_get_all_tags_progress(question):
     tags_info = question[0].get_all_tags_progress()
     assert len(tags_info) == 2
 
+
 def test_start_study_session(question, tag):
 
     session = {}
@@ -132,6 +132,7 @@ def test_start_study_session(question, tag):
     current = Question.start_study_session(question[0].user, session, "search", first_word_of_answer)
     assert current in [str(x.uuid) for x in question]
     assert len(session["drill_study_session"]["list"]) > 1
+
 
 @factory.django.mute_signals(signals.post_save)
 def test_get_tag_progress(question, tag):

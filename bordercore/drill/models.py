@@ -7,12 +7,13 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import F, Max, Q
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch.dispatcher import receiver
 from django.urls import reverse
 from django.utils import timezone
 
-from lib.mixins import TimeStampedModel
+from bookmark.models import Bookmark
+from lib.mixins import SortOrderMixin, TimeStampedModel
 from tag.models import Tag
 
 from .managers import DrillManager
@@ -51,6 +52,7 @@ class Question(TimeStampedModel):
     efactor = models.FloatField(blank=False, null=False)
     is_favorite = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
+    bookmarks = models.ManyToManyField(Bookmark, through="SortOrderDrillBookmark")
 
     objects = DrillManager()
 
@@ -244,7 +246,6 @@ class Question(TimeStampedModel):
             }
             return session["drill_study_session"]["current"]
 
-
     @staticmethod
     def get_study_session_progress(session):
         if "drill_study_session" in session:
@@ -295,3 +296,25 @@ def post_save_wrapper(sender, instance, **kwargs):
 
     # Index the question and answer in Elasticsearch
     instance.index_question()
+
+
+class SortOrderDrillBookmark(SortOrderMixin):
+
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    bookmark = models.ForeignKey(Bookmark, on_delete=models.CASCADE)
+
+    field_name = "question"
+
+    def __str__(self):
+        return f"SortOrder: {self.question}, {self.bookmark}"
+
+    class Meta:
+        ordering = ("sort_order",)
+        unique_together = (
+            ("question", "bookmark")
+        )
+
+
+@receiver(pre_delete, sender=SortOrderDrillBookmark)
+def remove_bookmark(sender, instance, **kwargs):
+    instance.handle_delete()
