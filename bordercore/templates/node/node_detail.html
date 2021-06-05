@@ -29,7 +29,7 @@
                 <div>
                     <blob-list inline-template ref="blobList">
 
-                        <card title="Reference">
+                        <card title="Blobs">
                             <template v-slot:top-right>
                                 <span class="button-plus float-right" @click="chooseBlob()">
                                     <font-awesome-icon icon="plus"></font-awesome-icon>
@@ -436,8 +436,8 @@
 
                     if (!query) return result;
 
-                    const texts = query.split(/[\s-_/\\|\.]/gm).filter(t => !!t) || [''];
-                    return result.replace(new RegExp('(.*?)(' + texts.join('|') + ')(.*?)','gi'), '$1<b>$2</b>$3');
+                    const texts = query.split(/[\s-_/\\|\.]/gm).filter(t => !!t) || [""];
+                    return result.replace(new RegExp("(.*?)(" + texts.join("|") + ")(.*?)","gi"), "$1<b class='text-primary'>$2</b>$3");
                 }
             },
             components: {
