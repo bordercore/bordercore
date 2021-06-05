@@ -138,12 +138,12 @@
                                                         </div>
                                                     </dropdown-menu>
                                                 </div>
-                                                <div>
+                                                <div class="d-flex">
                                                     <div v-html="bookmark.favicon_url" class="float-left pr-2"></div>
                                                     <div>
                                                         <a :href="bookmark.url">[[ bookmark.name ]]</a>
 
-                                                        <div v-if="bookmark.note" v-on:click="activateInEditMode(bookmark, $event.target)" v-show="!bookmark.noteIsEditable" class="node-note">[[ bookmark.note ]]</div>
+                                                        <div v-if="bookmark.note" v-on:click="activateInEditMode(bookmark, $event.target)" v-show="!bookmark.noteIsEditable" class="node-note" v-html="getNote(bookmark.note)"></div>
                                                         <span v-show="bookmark.noteIsEditable">
                                                             <input type="text" class="form-control form-control-sm" :value="bookmark.note" ref="input" placeholder="Add Bookmark" @blur="editNote(bookmark.id, $event.target.value)" @keydown.enter="editNote(bookmark.id, $event.target.value)" >
                                                         </span>
@@ -558,6 +558,9 @@
                         ""
                     );
 
+                },
+                getNote(note) {
+                    return markdown.render(note);
                 },
                 editNote(bookmark_id, note) {
 
