@@ -1,4 +1,4 @@
-import urllib
+from urllib.parse import unquote
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -10,7 +10,7 @@ from tag.models import Tag
 @login_required
 def tag_search(request):
 
-    query = urllib.parse.unquote(request.GET.get("query", None))
+    query = unquote(request.GET.get("query", None))
 
     results = Tag.search(request.user, query, request.GET.get("type", None) == "note")
 

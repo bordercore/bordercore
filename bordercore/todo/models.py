@@ -1,7 +1,7 @@
 import datetime
 import re
-import urllib
 import uuid
+from urllib.parse import unquote
 
 from elasticsearch import Elasticsearch
 
@@ -142,7 +142,7 @@ class Todo(TimeStampedModel):
 
         search_term = search_term.lower()
 
-        search_terms = re.split(r"\s+", urllib.parse.unquote(search_term))
+        search_terms = re.split(r"\s+", unquote(search_term))
 
         search_object = {
             "query": {

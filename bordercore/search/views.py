@@ -1,6 +1,6 @@
 import math
 import re
-import urllib
+from urllib.parse import unquote
 
 from elasticsearch import Elasticsearch, RequestError
 
@@ -692,7 +692,7 @@ def search_names(request, es, doc_type, search_term):
 @login_required
 def search_tags(request, es, doc_type, search_term):
 
-    search_terms = re.split(r"\s+", urllib.parse.unquote(search_term))
+    search_terms = re.split(r"\s+", unquote(search_term))
 
     search_object = {
         "query": {

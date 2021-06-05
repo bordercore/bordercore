@@ -1,7 +1,7 @@
 import datetime
 import json
 import re
-import urllib
+from urllib.parse import unquote
 
 import lxml.html as lh
 import pytz
@@ -483,8 +483,7 @@ def get_title_from_url(request):
     """
     Parse the title from the HTML page pointed to by a url
     """
-
-    url = urllib.parse.unquote(request.GET["url"])
+    url = unquote(request.GET["url"])
 
     title = parse_title_from_url(url)
 

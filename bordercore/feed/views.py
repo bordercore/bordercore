@@ -1,5 +1,5 @@
 import json
-import urllib
+from urllib.parse import unquote
 
 import feedparser
 import requests
@@ -113,7 +113,7 @@ def update_feed_list(request, feed_uuid):
 @login_required
 def check_url(request, url):
 
-    url = urllib.parse.unquote(url)
+    url = unquote(url)
 
     r = requests.get(url)
     if r.status_code != 200:

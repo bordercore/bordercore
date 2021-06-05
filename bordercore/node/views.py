@@ -1,5 +1,5 @@
 import re
-import urllib
+from urllib.parse import unquote
 
 from elasticsearch import Elasticsearch
 
@@ -299,7 +299,7 @@ def search_blob_names(request):
 
     search_term = request.GET["term"].lower()
 
-    search_terms = re.split(r"\s+", urllib.parse.unquote(search_term))
+    search_terms = re.split(r"\s+", unquote(search_term))
 
     search_object = {
         "query": {

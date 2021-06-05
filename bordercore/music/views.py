@@ -1,8 +1,8 @@
 import os
 import re
-import urllib
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import unquote
 
 import boto3
 from elasticsearch import Elasticsearch
@@ -301,7 +301,7 @@ def search_artists(request):
         verify_certs=False
     )
 
-    search_terms = re.split(r"\s+", urllib.parse.unquote(request.GET["term"].lower()))
+    search_terms = re.split(r"\s+", unquote(request.GET["term"].lower()))
 
     search_object = {
         "query": {
