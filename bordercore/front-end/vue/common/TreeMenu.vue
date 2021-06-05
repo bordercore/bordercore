@@ -24,12 +24,10 @@
 
 <script>
 
-    import Vue from "vue";
-
     export default {
         props: {
             item: Object,
-            depth: Number
+            depth: Number,
         },
         data: function() {
             return {
@@ -39,11 +37,11 @@
         computed: {
             isFolder: function() {
                 return this.item.nodes && this.item.nodes.length;
-            }
+            },
         },
         methods: {
             getId(id) {
-                return "#section_" + id
+                return "#section_" + id;
             },
             toggle: function() {
                 if (this.isFolder) {
@@ -55,8 +53,8 @@
                     this.$emit("make-folder", this.item);
                     this.isOpen = true;
                 }
-            }
-        }
-    }
+            },
+        },
+    };
 
     </script>

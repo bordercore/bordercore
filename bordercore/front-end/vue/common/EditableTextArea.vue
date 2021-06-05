@@ -19,8 +19,6 @@
 
 <script>
 
-    import Vue from "vue";
-
     export default {
         props: {
             uuid: String,
@@ -28,44 +26,42 @@
             editUrl: String,
             extraClass: {
                 type: String,
-                default: "mt-4"
-            }
+                default: "mt-4",
+            },
         },
         data() {
             return {
                 isEditingNote: false,
                 minNumberRows: 10,
-                textAreaValue: this.note
-            }
+                textAreaValue: this.note,
+            };
         },
         computed: {
             textAreaMarkdown() {
-
                 if (!this.textAreaValue) {
                     return "";
                 }
 
-                var md = window.markdownit({
-                    highlight: function (str, lang) {
+                const md = window.markdownit({
+                    highlight: function(str, lang) {
                         if (lang && hljs.getLanguage(lang)) {
                             try {
-                                return hljs.highlight(str, { language: lang }).value;
+                                return hljs.highlight(str, {language: lang}).value;
                             } catch (__) {}
                         }
 
-                        return ''; // use external default escaping
-                    }
+                        return ""; // use external default escaping
+                    },
                 });
-                var result = md.render(this.textAreaValue);
+                const result = md.render(this.textAreaValue);
                 return result;
-            }
+            },
         },
         methods: {
             setTextAreaValue(value) {
                 this.textAreaValue = value;
             },
             editNote() {
-
                 this.beforeEditCache = this.textAreaValue;
                 this.isEditingNote = true;
 
@@ -76,7 +72,6 @@
                 const txtarea = document.getElementById("note");
 
                 if (txtarea) {
-
                     // The lineHeight is the height of each row
                     const style = getComputedStyle(txtarea);
                     const lineHeight = style.lineHeight;
@@ -97,16 +92,13 @@
                     // Position the cursor at the beginning of the textarea
                     txtarea.focus();
                     txtarea.setSelectionRange(0, 0);
-
                 }
 
                 this.$nextTick(() => {
                     document.getElementById("note").focus();
                 });
-
             },
             doneEdit() {
-
                 // If the note hasn't changed, abort
                 if (this.beforeEditCache == this.textAreaValue) {
                     this.isEditingNote = false;
@@ -118,25 +110,22 @@
                     this.editUrl,
                     {
                         "uuid": this.uuid,
-                        "note": this.textAreaValue
+                        "note": this.textAreaValue,
                     },
                     (response) => {
                     },
                     "",
-                    ""
+                    "",
                 );
 
                 this.isEditingNote = false;
-
             },
             addNote() {
-
                 this.$nextTick(() => {
                     this.editNote();
-                })
-
-            }
-        }
-    }
+                });
+            },
+        },
+    };
 
 </script>

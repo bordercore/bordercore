@@ -7,15 +7,16 @@
         extends: TagsInput,
         props: {
             tagsChangedUrl: {
-                type: String
-            }
+                type: String,
+            },
         },
         methods: {
             tagsChanged(newTags) {
-                var tags = newTags.map(x => x.value).join(",");
-                window.location=this.tagsChangedUrl.replace("666", tags);
-            }
-        }
-    }
+                const tags = newTags.map((x) => x.value).join(",");
+                window.location = this.tagsChangedUrl.replace("666", tags);
+            },
+        },
+
+    };
 
 </script>

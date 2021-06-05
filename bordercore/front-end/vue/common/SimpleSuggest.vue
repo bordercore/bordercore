@@ -30,39 +30,38 @@
 
 <script>
 
-    import Vue from "vue";
     import VueSimpleSuggest from "vue-simple-suggest";
 
     export default {
         props: {
             autofocus: {
-                default: false
+                default: false,
             },
             accesskey: {
-                default: null
+                default: null,
             },
             id: {
-                default: "simple-suggest"
+                default: "simple-suggest",
             },
             displayAttribute: {
-                default: "value"
+                default: "value",
             },
             valueAttribute: {
-                default: "value"
+                default: "value",
             },
             maxSuggestions: {
                 default: 20,
-                type: Number
+                type: Number,
             },
             searchUrl: {
-                default: "search-url"
+                default: "search-url",
             },
             placeHolder: {
-                default: "Name"
+                default: "Name",
             },
             name: {
-                default: "search"
-            }
+                default: "search",
+            },
 
         },
         data() {
@@ -73,26 +72,23 @@
                     inputWrapper: "",
                     defaultInput: "form-control search-box-input",
                     suggestions: "position-absolute list-group z-1000",
-                    suggestItem: "list-group-item"
-                }
-            }
+                    suggestItem: "list-group-item",
+                },
+            };
         },
         methods: {
             search(query) {
-
                 try {
-                    let url = this.searchUrl;
+                    const url = this.searchUrl;
                     return axios.get(url + query)
-                                .then(response => {
-                                    return response.data;
-                                })
-                } catch(error) {
+                        .then((response) => {
+                            return response.data;
+                        });
+                } catch (error) {
                     console.log(`Error: ${error}`);
                 }
-
             },
             boldenSuggestion(scope) {
-
                 // If the parent provided a custom boldenSuggestion function, use that.
                 //  Otherwise use this default code.
                 if (typeof this.$parent.boldenSuggestion === "function") {
@@ -101,7 +97,7 @@
 
                 if (!scope) return scope;
 
-                const { suggestion, query } = scope;
+                const {suggestion, query} = scope;
 
                 let result = this.$refs.suggestComponent.displayProperty(suggestion);
 
@@ -109,13 +105,12 @@
                     return result;
                 }
 
-                result = "<em>" + suggestion.object_type + "</em> - " + result
+                result = "<em>" + suggestion.object_type + "</em> - " + result;
 
                 if (!query) return result;
 
-                const texts = query.split(/[\s-_/\\|\.]/gm).filter(t => !!t) || [''];
-                return result.replace(new RegExp('(.*?)(' + texts.join('|') + ')(.*?)','gi'), '$1<b>$2</b>$3');
-
+                const texts = query.split(/[\s-_/\\|\.]/gm).filter((t) => !!t) || [""];
+                return result.replace(new RegExp("(.*?)(" + texts.join("|") + ")(.*?)", "gi"), "$1<b class='text-primary'>$2</b>$3");
             },
             select(datum) {
                 if (typeof this.$parent.select !== "function") {
@@ -141,8 +136,8 @@
             },
         },
         components: {
-            VueSimpleSuggest
-        }
+            VueSimpleSuggest,
+        },
     };
 
 </script>

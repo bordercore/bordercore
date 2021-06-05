@@ -15,19 +15,17 @@
 
 <script>
 
-    import Vue from "vue";
-
     export default {
         props: {
             title: {
                 default: "Card Title",
-                type: String
+                type: String,
             },
             className: {
                 default: "",
-                type: String
-            }
-        }
+                type: String,
+            },
+        },
     };
 
 </script>

@@ -50,30 +50,29 @@
 
 <script>
 
-    import Vue from "vue";
     import VueSimpleSuggest from "vue-simple-suggest";
 
     export default {
         props: {
             accesskey: {
-                default: null
+                default: null,
             },
             id: {
-                default: "simple-suggest"
+                default: "simple-suggest",
             },
             displayAttribute: {
-                default: "value"
+                default: "value",
             },
             valueAttribute: {
-                default: "value"
+                default: "value",
             },
             maxSuggestions: {
                 default: 10,
-                type: Number
+                type: Number,
             },
             initialSearchType: {
                 default: "",
-                type: String
+                type: String,
             },
             suggestSearchUrl: String,
             querySearchUrl: String,
@@ -89,28 +88,25 @@
                     inputWrapper: "",
                     defaultInput: "form-control search-box-input",
                     suggestions: "position-absolute list-group z-1000",
-                    suggestItem: "list-group-item"
+                    suggestItem: "list-group-item",
                 },
                 searchFilter: this.initialSearchType,
                 searchUrl: this.suggestSearchUrl,
-            }
+            };
         },
         methods: {
             search(query) {
-
                 try {
-                    let url = this.searchUrl;
+                    const url = this.searchUrl;
                     return axios.get(url + query + "&filter=" + this.searchFilter.toLowerCase())
-                                .then(response => {
-                                    return response.data;
-                                })
-                } catch(error) {
+                        .then((response) => {
+                            return response.data;
+                        });
+                } catch (error) {
                     console.log(`Error: ${error}`);
                 }
-
             },
             boldenSuggestion(scope) {
-
                 // If the parent provided a custom boldenSuggestion function, use that.
                 //  Otherwise use this default code.
                 if (typeof this.$parent.boldenSuggestion === "function") {
@@ -119,9 +115,9 @@
 
                 if (!scope) return scope;
 
-                const { suggestion, query } = scope;
+                const {suggestion, query} = scope;
 
-                let result = this.$refs.suggestComponent.displayProperty(suggestion);
+                const result = this.$refs.suggestComponent.displayProperty(suggestion);
 
                 if (!suggestion.object_type) {
                     return result;
@@ -129,18 +125,16 @@
 
                 if (!query) return result;
 
-                const texts = query.split(/[\s-_/\\|\.]/gm).filter(t => !!t) || [''];
+                const texts = query.split(/[\s-_/\\|\.]/gm).filter((t) => !!t) || [""];
 
-                const bold_result = result.replace(new RegExp('(.*?)(' + texts.join('|') + ')(.*?)','gi'), '$1<b>$2</b>$3');
+                const boldResult = result.replace(new RegExp("(.*?)(" + texts.join("|") + ")(.*?)", "gi"), "$1<b class='text-primary'>$2</b>$3");
 
-                return "<em class=\"top-search-object-type\">" + suggestion.object_type + "</em> - " + bold_result;
-
+                return "<em class=\"top-search-object-type\">" + suggestion.object_type + "</em> - " + boldResult;
             },
             select(datum) {
                 window.location = datum.link;
             },
             onEnter(evt) {
-
                 if (this.$refs.suggestComponent.hoveredIndex != -1) {
                     return;
                 }
@@ -163,7 +157,6 @@
                 }
 
                 form.submit();
-
             },
             onKeyDown(evt) {
                 if (evt.code === "KeyN" && evt.altKey) {
@@ -193,24 +186,22 @@
                 this.$refs.suggestComponent.research();
             },
             saveSearchFilter(searchFilter) {
-
                 doPost(
                     this,
                     this.storeInSessionUrl,
                     {
-                        "top_search_filter": searchFilter
+                        "top_search_filter": searchFilter,
                     }
                     ,
                     (response) => {},
                     "",
-                    ""
+                    "",
                 );
-
-            }
+            },
         },
         components: {
-            VueSimpleSuggest
-        }
+            VueSimpleSuggest,
+        },
     };
 
 </script>

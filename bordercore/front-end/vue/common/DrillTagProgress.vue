@@ -15,38 +15,36 @@
 
 <script>
 
-    import Vue from "vue";
-
     export default {
         props: {
             count: {
-                default: 0
+                default: 0,
             },
             progress: {
-                default: 0.0
-            }
+                default: 0.0,
+            },
         },
         data() {
             return {
-                circleRadius: 54
-            }
+                circleRadius: 54,
+            };
         },
         computed: {
             strokeDashArray: function() {
                 return 2 * 3.14 * this.circleRadius;
-            }
+            },
         },
         methods: {
             getDashOffset(progress) {
-                return this.strokeDashArray * (1 - this.progress/100)
+                return this.strokeDashArray * (1 - this.progress/100);
             },
             getProgress: function() {
                 return Math.round(this.progress);
             },
             getPluralized: function() {
-                return pluralize("question", this.count)
-            }
-        }
+                return pluralize("question", this.count);
+            },
+        },
     };
 
 </script>

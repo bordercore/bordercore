@@ -8,20 +8,18 @@
 
 <script>
 
-    import Vue from "vue";
-
     export default {
         props: {
             url: {
                 default: "https://www.bordercore.com",
-                type: String
-            }
+                type: String,
+            },
         },
         computed: {
             getUrl() {
                 return this.url;
-            }
-        }
+            },
+        },
     };
 
 </script>
