@@ -265,7 +265,7 @@ def overview(request):
 
     sorted_bookmarks = []
 
-    untagged_count = Bookmark.objects.filter(user=request.user, tags__isnull=True).count()
+    untagged_count = Bookmark.objects.filter(user=request.user, tags__isnull=True, sortorderdrillbookmark__isnull=True).count()
 
     pinned_tags = request.user.userprofile.pinned_tags.all().annotate(bookmark_count=Count("sortordertagbookmark")).order_by("sortorderusertag__sort_order")
 
@@ -291,7 +291,7 @@ class BookmarkListView(ListView):
         elif "tag_filter" in self.kwargs:
             query = query.filter(name__icontains=self.kwargs.get("tag_filter"))
         else:
-            query = query.filter(tags__isnull=True)
+            query = query.filter(tags__isnull=True, sortorderdrillbookmark__isnull=True)
 
         query = query.prefetch_related("tags")
         query = query.only("uuid", "created", "url", "name", "last_response_code", "note")
