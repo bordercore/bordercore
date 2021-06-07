@@ -80,13 +80,13 @@
                                             <div slot="dropdown">
                                                 <a class="dropdown-item pl-3" href="{% url 'accounts:prefs' %}"><font-awesome-icon icon="briefcase" class="mr-2"></font-awesome-icon>Preferences</a>
                                                 {% if request.user|is_in_group:"Admin" %}
-                                                    <a class="dropdown-item pl-3" href="{% url 'metrics:list' %}"><font-awesome-icon icon="chart-bar" class="mr-2"></font-awesome-icon>Metrics <span class="failed-test-count ml-1 mt-2 mb-2 pt-1" v-if="failed_test_count > 0">[[ failed_test_count ]]</span></a>
+                                                    <a class="dropdown-item pl-3" href="{% url 'metrics:list' %}"><font-awesome-icon icon="chart-bar" class="mr-2"></font-awesome-icon>Metrics <span class="failed-test-count pt-1" v-if="failed_test_count > 0">[[ failed_test_count ]]</span></a>
                                                 {% endif %}
                                                 <a class="dropdown-item pl-3" href="#" @click="showHelp"><font-awesome-icon icon="question" class="mr-2"></font-awesome-icon>Help</a>
                                                 <a class="dropdown-item pl-3" href="{% url 'accounts:logout' %}"><font-awesome-icon icon="sign-out-alt" class="mr-2"></font-awesome-icon>Logout</a>
                                             </div>
                                             {% if request.user|is_in_group:"Admin" %}
-                                                <span class="failed-test-count failed-test-count-center-helper align-middle ml-2 mt-2 pt-1" v-if="failed_test_count > 0">[[ failed_test_count ]]</span>
+                                                <span class="failed-test-count align-middle ml-2 mt-2 pt-1" v-if="failed_test_count > 0">[[ failed_test_count ]]</span>
                                             {% endif %}
                                             <span class="align-middle ml-2 mt-2"><font-awesome-icon icon="angle-down"></font-awesome-icon></span>
                                         </dropdown-menu>

@@ -36,11 +36,11 @@
                     <template v-slot:content>
                         <ul class="list-group">
                             <li class="list-group-item list-group-item-secondary text-primary">Get stuff done
-                                <span class="badge badge-primary ml-1">linux</span>
+                                <span class="badge badge-info ml-1">linux</span>
                                 <span class="badge badge-info">django</span>
                             </li>
                             <li class="list-group-item list-group-item-secondary text-primary">Get more stuff done
-                                <span class="badge badge-primary ml-1">linux</span>
+                                <span class="badge badge-info ml-1">linux</span>
                                 <span class="badge badge-info">django</span>
                             </li>
                         </ul>
@@ -116,6 +116,11 @@
         <button class="btn btn-success" @click=createToast('success')>Success Toast</button>
         <button class="btn btn-warning" @click=createToast('warning')>Warning Toast</button>
         <button class="btn btn-danger" @click=createToast('danger')>Danger Toast</button>
+
+        <h4 class="mt-5">Badges</h4>
+
+        <span class="failed-test-count pt-1">1</span>
+        <span class="failed-test-count mt-2 mb-2 pt-1">42</span>
 
     </div>
 

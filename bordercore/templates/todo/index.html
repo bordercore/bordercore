@@ -34,7 +34,7 @@
                 {% for tag in tags %}
                     <div class="tag-list pl-2 py-1 pr-1 d-flex" :class="getTagClass('{{ tag.name }}')" @click.prevent="onClickTag" data-tag="{{ tag.name }}">
                         <div>{{ tag.name }}</div>
-                        <div class="ml-auto"><span class="px-2 badge badge-pill {% ifequal tagsearch tag.name %}badge-dark{% else %}badge-primary{% endifequal %}">{{ tag.count }}</span></div>
+                        <div class="ml-auto"><span class="px-2 badge badge-pill {% ifequal tagsearch tag.name %}badge-dark{% else %}badge-info{% endifequal %}">{{ tag.count }}</span></div>
                     </div>
                 {% empty %}
                     <div class="text-success">No tags found</div>

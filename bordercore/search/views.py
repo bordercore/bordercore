@@ -405,7 +405,7 @@ class SearchTagDetailView(ListView):
                 "text": tag,
                 "value": tag,
                 "is_meta": "true" if tag in Tag.get_meta_tags(self.request.user) else "false",
-                "classes": "badge badge-primary",
+                "classes": "badge badge-info",
             }
             for tag in
             tag_list

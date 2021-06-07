@@ -38,7 +38,7 @@
                                         <template v-else>
                                             <a href="" @click.prevent="onClick" :data-tag="tag.name">[[ tag.name ]]</a>
                                         </template>
-                                        <span v-if="tag.count" class="ml-2 badge" :class="{ 'badge-light': tag.isActive, 'badge-primary': !tag.isActive }">[[ tag.count ]]</span>
+                                        <span v-if="tag.count" class="ml-2 badge" :class="{ 'badge-light': tag.isActive, 'badge-info': !tag.isActive }">[[ tag.count ]]</span>
                                     </li>
                                 </transition-group>
                             </draggable>
@@ -697,7 +697,7 @@
                     if (tagName == this.selectedTag) {
                         return "badge-light";
                     } else {
-                        return "badge-primary";
+                        return "badge-info";
                     }
                 },
                 onChange(evt) {

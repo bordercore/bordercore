@@ -23,7 +23,7 @@
 
         <ul class="blob-list-nav list-group list-group-horizontal list-unstyled pl-5 ml-3">
             <li v-for="nav in navAll" v-if="nav === 'All' || doctypeCount(nav) > 0" class="px-5 m-3 mx-auto justify-content-center" v-bind:class="{ 'nav-selected': nav === navCurrent }" @click="onClick(nav)">
-                <span class="text-center"><a href="#" v-cloak>[[ nav ]]</a></span><span class="ml-1 badge badge-primary" v-html="doctypeCount(nav)"></span>
+                <span class="text-center"><a href="#" v-cloak>[[ nav ]]</a></span><span class="ml-1 badge badge-info" v-html="doctypeCount(nav)"></span>
             </li>
         </ul>
 

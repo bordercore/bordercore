@@ -109,7 +109,7 @@ class QuestionCreateView(CreateView):
                     "text": tag.name,
                     "value": tag.name,
                     "is_meta": tag.is_meta,
-                    "classes": "badge badge-primary",
+                    "classes": "badge badge-info",
                 }
             ]
 

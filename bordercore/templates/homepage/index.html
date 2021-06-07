@@ -24,7 +24,7 @@
                         <ul class="list-group">
                             {% for task in tasks %}
                                 <li class="list-group-item list-group-item-secondary text-primary">{{ task.name }}
-                                    <span class="badge badge-primary ml-1">{{ task.parent_category }}</span>
+                                    <span class="badge badge-info ml-1">{{ task.parent_category }}</span>
                                     {% for tag in task.tags.all %}
                                         <span class="badge badge-info">{{ tag.name }}</span>
                                     {% endfor %}

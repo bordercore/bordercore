@@ -60,7 +60,7 @@
                         <div class="mt-5 mb-3">
                             Tags:
                             {% for tag in blob.tags.all %}
-                                <a class="badge badge-primary" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
+                                <a class="badge badge-info" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
                             {% endfor %}
                         </div>
                     {% endif %}
