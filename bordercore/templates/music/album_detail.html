@@ -66,7 +66,9 @@
                         :fields="fields"
                         selectable
                         select-mode="single"
-                        @row-selected="rowSelected"
+                        @row-clicked="rowClicked"
+                        @row-hovered="rowHovered"
+                        @row-unhovered="rowUnHovered"
                         selected-variant="info"
                         sort-by="track"
                         ref="table"
@@ -75,6 +77,17 @@
                         <template #cell(title)="data">
                             <span v-html="data.value"></span>
                             <span class="pl-2 table-note" v-html="data.item.note"></span>
+                        </template>
+
+                        <template #cell(uuid)="data">
+                            <div class="hover-target hidden" data-foo="bar">
+                                <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="text-center">
+                                    <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
+                                    <div slot="dropdown">
+                                        <a class="dropdown-item" href="#" @click="onClickUpdate(data.value)">Update</a>
+                                    </div>
+                                </dropdown-menu>
+                            </div>
                         </template>
 
                     </b-table>
@@ -118,24 +131,37 @@
                     ],
                     fields: [
                         {
-                            key: "track"
+                            key: "track",
+                            tdClass: "text-center",
+                            thClass: "col-action text-center",
                         },
                         {
-                            key: "title"
+                            key: "title",
                         },
                         {
-                            key: "length"
-                        }
+                            key: "length",
+                            tdClass: "text-center",
+                            thClass: "text-center",
+                        },
+                        {
+                            key: "uuid",
+                            label: "",
+                            tdClass: "text-center align-middle",
+                            thClass: "col-action",
+                        },
                     ],
-                    continuousPlay: false
+                    continuousPlay: false,
+                    show: false,
+                    right: true,
                 }
             },
             methods: {
-                rowSelected(evt) {
-
-                    if (evt.length > 0) {
-
-                        currentlyPlayingSongUuid = evt[0].uuid;
+                rowClicked(item, index, evt) {
+                    // If we found anthing other than a TD element, we've
+                    //  clicked on the "on hover" context menu. In that case,
+                    //  don't play the song.
+                    if (evt.srcElement.nodeName === "TD") {
+                        currentlyPlayingSongUuid = item.uuid;
 
                         axios.get("{% url 'music:get_song_info' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', currentlyPlayingSongUuid))
                              .then(response => {
@@ -144,10 +170,16 @@
                                  vid.play()
                              })
 
-                    } else {
-                        currentlyPlayingSongUuid = null;
                     }
-
+                },
+                rowHovered(item, index, evt) {
+                    evt.currentTarget.querySelector(".hover-target").classList.remove("hidden");
+                },
+                rowUnHovered(item, index, evt) {
+                    evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
+                },
+                onClickUpdate(uuid) {
+                    window.location="{% url 'music:update' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
                 },
                 onCheck(evt) {
                     this.continuousPlay = evt.srcElement.checked;

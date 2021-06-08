@@ -104,7 +104,9 @@ def convert_seconds(seconds):
         return "N/A"
 
     time_string = time.strftime("%H:%M:%S", time.gmtime(seconds))
-    pattern = re.compile(r"00:(\d\d:\d\d)")
+
+    # Ignore any leading '0's
+    pattern = re.compile(r"00:0?(\d?\d:\d\d)")
     matches = pattern.match(time_string)
 
     if matches:

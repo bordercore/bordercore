@@ -38,7 +38,7 @@ def test_get_relative_date():
 
 def test_convert_seconds():
 
-    assert convert_seconds(339) == "05:39"
+    assert convert_seconds(339) == "5:39"
     assert convert_seconds(7200) == "02:00:00"
     assert convert_seconds(None) == "N/A"
 
