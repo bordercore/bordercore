@@ -69,17 +69,19 @@ class Command(BaseCommand):
     @atomic
     def handle(self, *args, uuid, force, create_connection, limit, verbose, **kwargs):
 
+        last_blob = None
+
         if uuid:
             # A single blob
             blobs = Blob.objects.filter(uuid=uuid)
         else:
             # All blobs
             blobs = Blob.objects.filter(is_indexed=True).order_by("created")
+            last_blob = self.get_last_blob()
 
             # Use this to only include "ingestible" file types
             # blobs = Blob.objects.exclude(is_indexed=False).filter(file__iregex=r".(azw3|chm|epub|html|pdf|txt)$").order_by("created")
 
-        last_blob = self.get_last_blob()
         blob = None
 
         go = True if uuid else False
