@@ -8,7 +8,9 @@
             :autocomplete-items="filteredItems"
             :autofocus="autofocus"
             :add-only-from-autocomplete="false"
-            :placeholder="placeHolder">
+            :placeholder="placeHolder"
+            :disabled="disabled"
+        >
             <div slot="autocomplete-item" slot-scope="scope" @click="scope.performAdd(scope.item)">
                 <div>{{ scope.item.text }}</div>
             </div>
@@ -42,6 +44,10 @@
             placeHolder: {
                 default: "",
                 type: String,
+            },
+            disabled: {
+                default: false,
+                type: Boolean,
             },
         },
         data() {
