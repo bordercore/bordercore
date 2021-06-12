@@ -19,6 +19,7 @@ from bookmark.models import Bookmark
 from .models import Node, SortOrderNodeBlob, SortOrderNodeBookmark
 
 
+@method_decorator(login_required, name="dispatch")
 class NodeListView(ListView):
 
     def get_queryset(self):

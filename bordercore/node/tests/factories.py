@@ -1,12 +1,9 @@
-import datetime
-
 import factory
 from faker import Factory as FakerFactory
 
 from django.db.models import signals
 
 from accounts.tests.factories import UserFactory
-from blob.models import Blob
 from node.models import Node
 
 faker = FakerFactory.create()
