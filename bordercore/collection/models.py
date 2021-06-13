@@ -4,9 +4,8 @@ import uuid
 
 from django.apps import apps
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import JSONField
 from django.db import models
-from django.db.models import Case, CharField, Value, When
+from django.db.models import Case, CharField, JSONField, Value, When
 
 from lib.mixins import TimeStampedModel
 from tag.models import Tag

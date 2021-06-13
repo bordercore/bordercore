@@ -7,9 +7,8 @@ from elasticsearch import Elasticsearch
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import JSONField
 from django.db import models
-from django.db.models import Count, Max
+from django.db.models import Count, JSONField, Max
 from django.db.models.signals import m2m_changed, post_save
 from django.dispatch.dispatcher import receiver
 

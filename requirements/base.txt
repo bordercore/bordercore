@@ -6,9 +6,9 @@ beautifulsoup4==4.9.0
 billiard==3.6.0.0
 boto3==1.9.156
 certifi==2019.6.16
-Django==2.2.22
+Django==3.2.4
 djangorestframework==3.11.0
-django-storages==1.7.1
+django-storages==1.11.1
 https://github.com/bordercore/PyOrgMode/archive/master.zip
 elasticsearch==7.0.5
 elasticsearch-dsl==7.1.0
