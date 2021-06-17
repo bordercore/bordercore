@@ -7,16 +7,17 @@ from bookmark.models import Bookmark
 from collection.models import Collection
 from drill.models import Question
 from feed.models import Feed, FeedItem
-from music.models import Album, Song, SongSource
+from music.models import Album, Playlist, PlaylistItem, Song, SongSource
 from tag.models import Tag
 from todo.models import Todo
 
 from .serializers import (AlbumSerializer, BlobSerializer,
                           BlobSha1sumSerializer, BookmarkSerializer,
                           CollectionSerializer, FeedItemSerializer,
-                          FeedSerializer, QuestionSerializer, SongSerializer,
-                          SongSourceSerializer, TagSerializer, TodoSerializer,
-                          UserSerializer)
+                          FeedSerializer, PlaylistItemSerializer,
+                          PlaylistSerializer, QuestionSerializer,
+                          SongSerializer, SongSourceSerializer, TagSerializer,
+                          TodoSerializer, UserSerializer)
 
 
 class AlbumViewSet(viewsets.ModelViewSet):
@@ -117,6 +118,24 @@ class SongSourceViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return SongSource.objects.filter(user=self.request.user)
+
+
+class PlaylistViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = PlaylistSerializer
+    lookup_field = "uuid"
+
+    def get_queryset(self):
+        return Playlist.objects.filter(user=self.request.user)
+
+
+class PlaylistItemViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = PlaylistItemSerializer
+    lookup_field = "uuid"
+
+    def get_queryset(self):
+        return PlaylistItem.objects.filter(playlist__user=self.request.user)
 
 
 class TagViewSet(viewsets.ModelViewSet):

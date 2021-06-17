@@ -31,4 +31,4 @@ def test_get_id3_info(auto_login_user, song):
     assert song_info["year"] == "2020"
     assert song_info["album_name"] == "FreePD Music"
     assert song_info["length"] == 178
-    assert song_info["length_pretty"] == "02:58"
+    assert song_info["length_pretty"] == "2:58"

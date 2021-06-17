@@ -11,6 +11,7 @@ from api.views import (AlbumViewSet, BlobSha1sumViewSet, BlobViewSet,
                        SongViewSet, TagNameViewSet, TagViewSet, TodoViewSet,
                        UserViewSet)
 from book.views import BookListView
+from bordercore.api.views import PlaylistItemViewSet, PlaylistViewSet
 from feed.views import update_feed_list
 from homepage.views import handler403, handler404, handler500
 
@@ -49,6 +50,8 @@ router.register(r"questions", QuestionViewSet, "question")
 router.register(r"sha1sums", BlobSha1sumViewSet, "sha1sum")
 router.register(r"songs", SongViewSet, "song")
 router.register(r"songsources", SongSourceViewSet, "songsource")
+router.register(r"playlists", PlaylistViewSet, "playlist")
+router.register(r"playlistitems", PlaylistItemViewSet, "playlistitem")
 router.register(r"tags", TagViewSet, "tag")
 router.register(r"tagnames", TagNameViewSet, "tagname")
 router.register(r"todos", TodoViewSet, "todo")

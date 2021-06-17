@@ -1,18 +1,20 @@
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import unquote
 
 import boto3
+import humanize
 from elasticsearch import Elasticsearch
 from mutagen.mp3 import MP3
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
-from django.http import HttpResponseRedirect, JsonResponse
+from django.db.models import Count, Q, Sum
+from django.db.models.functions import Coalesce
+from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
@@ -23,16 +25,15 @@ from django.views.generic.list import ListView
 
 from lib.time_utils import convert_seconds
 from lib.util import remove_non_ascii_characters
-from music.forms import SongForm
-from music.models import Album, Listen, Song
+
+from .forms import PlaylistForm, SongForm
+from .models import Album, Listen, Playlist, PlaylistItem, Song
 
 MUSIC_ROOT = "/home/media/music"
 
 
 @login_required
 def music_list(request):
-
-    message = ""
 
     # Get a list of recently played songs
     recent_songs = Listen.objects.filter(user=request.user).select_related("song").distinct().order_by("-created")[:10]
@@ -43,12 +44,14 @@ def music_list(request):
     if random_album_info:
         random_albums = random_album_info.first()
 
+    playlists = Playlist.objects.annotate(num_songs=Count("playlistitem"))
+
     return render(request, "music/index.html",
                   {
                       "cols": ["Date", "artist", "title", "id"],
-                      "message": message,
                       "recent_songs": recent_songs,
                       "random_albums": random_albums,
+                      "playlists": playlists,
                       "title": "Music List",
                       "MEDIA_URL_MUSIC": settings.MEDIA_URL_MUSIC,
                   })
@@ -365,6 +368,79 @@ def search_artists(request):
     return JsonResponse(matches, safe=False)
 
 
+@login_required
+def search_tags(request):
+
+    es = Elasticsearch(
+        [settings.ELASTICSEARCH_ENDPOINT],
+        verify_certs=False
+    )
+
+    search_term = request.GET["query"].lower()
+
+    search_terms = re.split(r"\s+", unquote(search_term))
+
+    search_object = {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "term": {
+                            "user_id": request.user.id
+                        }
+                    },
+                    {
+                        "term": {
+                            "doctype": "song"
+                        }
+                    },
+                ]
+            }
+        },
+        "aggs": {
+            "Distinct Tags": {
+                "terms": {
+                    "field": "tags.keyword",
+                    "size": 1000
+                }
+            }
+        },
+        "from": 0, "size": 0,
+        "_source": ["tags"]
+    }
+
+    # Separate query into terms based on whitespace and
+    #  and treat it like an "AND" boolean search
+    for one_term in search_terms:
+        search_object["query"]["bool"]["must"].append(
+            {
+                "bool": {
+                    "should": [
+                        {
+                            "wildcard": {
+                                "tags": {
+                                    "value": f"*{one_term}*",
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        )
+
+    results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+
+    matches = []
+    for tag_result in results["aggregations"]["Distinct Tags"]["buckets"]:
+        if tag_result["key"].lower().find(search_term.lower()) != -1:
+            matches.append({
+                "value": tag_result["key"],
+                "text": tag_result["key"],
+            })
+
+    return JsonResponse(matches, safe=False)
+
+
 @method_decorator(login_required, name="dispatch")
 class RecentSongsListView(ListView):
 
@@ -500,3 +576,229 @@ class SearchTagListView(ListView):
             "tag_name": self.request.GET["tag"],
             "song_list": song_list
         }
+
+
+@method_decorator(login_required, name="dispatch")
+class PlaylistDetailView(DetailView):
+
+    model = Playlist
+    slug_field = "uuid"
+    slug_url_kwarg = "uuid"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return {
+            **context
+        }
+
+
+@method_decorator(login_required, name="dispatch")
+class CreatePlaylist(CreateView):
+    model = Playlist
+    form_class = PlaylistForm
+    template_name = "music/index.html"
+
+    # Override this method so that we can pass the request object to the form
+    #  so that we have access to it in SongForm.__init__()
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
+
+    def form_valid(self, form):
+
+        playlist = form.save(commit=False)
+        playlist.user = self.request.user
+
+        playlist.parameters = {
+            x: self.request.POST[x]
+            for x in
+            ["tag", "start_year", "end_year"]
+            if x in self.request.POST and self.request.POST[x] != ""
+        }
+        playlist.save()
+
+        self.success_url = reverse_lazy("playlist_detail", kwargs={"uuid": playlist.uuid})
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("music:playlist_detail", kwargs={"uuid": self.object.uuid})
+
+
+@method_decorator(login_required, name="dispatch")
+class PlaylistDeleteView(DeleteView):
+    model = Playlist
+    slug_field = "uuid"
+    slug_url_kwarg = "uuid"
+
+    # Verify that the user is the owner of the task
+    def get_object(self, queryset=None):
+        obj = super().get_object()
+        if not obj.user == self.request.user:
+            raise Http404
+        return obj
+
+    def get_success_url(self):
+        messages.add_message(
+            self.request,
+            messages.INFO, f"Playlist <strong>{self.object.name}</strong> deleted",
+        )
+        return reverse("music:list")
+
+
+@login_required
+def get_playlist(request, uuid):
+
+    playlist = Playlist.objects.get(uuid=uuid)
+
+    song_list = []
+
+    if playlist.type == "manual":
+        song_list = get_playlist_songs_manual(playlist)
+    else:
+        song_list = get_playlist_songs_smart(playlist, playlist.size)
+
+    total_time = humanize.precisedelta(
+        timedelta(seconds=song_list["playtime"]),
+        minimum_unit="minutes",
+        format="%.f"
+    )
+
+    response = {
+        "status": "OK",
+        "totalTime": total_time,
+        "playlistitems": song_list["song_list"]
+    }
+
+    return JsonResponse(response)
+
+
+def get_playlist_songs_smart(playlist, size):
+
+    if playlist.type == "tag":
+        song_list = Song.objects.filter(tags__name=playlist.parameters["tag"]).order_by("?")
+    elif playlist.type == "recent":
+        song_list = Song.objects.all().order_by("-created")
+    elif playlist.type == "time":
+        song_list = Song.objects.filter(
+            year__gte=playlist.parameters["start_year"],
+            year__lte=playlist.parameters["end_year"],
+        ).order_by("?")
+    else:
+        raise ValueError(f"Playlist type not supported: {playlist.type}")
+
+    if size:
+        song_list = song_list[:size]
+
+    playtime = 0
+    for song in song_list:
+        playtime += song.length
+
+    song_list = [
+        {
+            "song_uuid": x.uuid,
+            "sort_order": i,
+            "artist": x.artist,
+            "title": x.title,
+            "note": x.note,
+            "year": x.year,
+            "length": convert_seconds(x.length)
+        }
+        for i, x
+        in enumerate(song_list, 1)
+    ]
+
+    return {
+        "song_list": song_list,
+        "playtime": playtime
+    }
+
+
+def get_playlist_songs_manual(playlist):
+
+    playtime = PlaylistItem.objects.filter(playlist=playlist).aggregate(total_time=Coalesce(Sum("song__length"), 0))["total_time"]
+
+    song_list = [
+        {
+            "playlistitem_uuid": x.uuid,
+            "song_uuid": x.song.uuid,
+            "sort_order": x.sort_order,
+            "artist": x.song.artist,
+            "title": x.song.title,
+            "note": x.song.note,
+            "year": x.song.year,
+            "length": convert_seconds(x.song.length)
+        }
+        for x
+        in PlaylistItem.objects.filter(playlist=playlist)
+        .select_related("song")
+    ]
+
+    return {
+        "song_list": song_list,
+        "playtime": playtime
+    }
+
+
+@login_required
+def sort_playlist(request):
+    """
+    Given an ordered list of songs in a playlist, move a song to
+    a new position within that playlist
+    """
+
+    playlistitem_uuid = request.POST["playlistitem_uuid"]
+    new_position = int(request.POST["position"])
+
+    playlistitem = PlaylistItem.objects.get(uuid=playlistitem_uuid)
+    playlistitem.reorder(new_position)
+
+    return JsonResponse({"status": "OK"}, safe=False)
+
+
+@login_required
+def search_playlists(request):
+
+    playlists = Playlist.objects.filter(
+        user=request.user,
+        type="manual",
+        name__icontains=request.GET.get("query", "")
+    )
+
+    return JsonResponse([{"value": x.name, "uuid": x.uuid} for x in playlists], safe=False)
+
+
+@login_required
+def add_to_playlist(request):
+    """
+    """
+
+    playlist_uuid = request.POST["playlist_uuid"]
+    song_uuid = request.POST["song_uuid"]
+
+    playlist = Playlist.objects.get(uuid=playlist_uuid)
+    song = Song.objects.get(uuid=song_uuid)
+
+    if PlaylistItem.objects.filter(playlist=playlist, song=song).exists():
+
+        response = {
+            "status": "Warning",
+            "message": "That song is already on the playlist."
+        }
+
+    else:
+
+        playlistitem = PlaylistItem(playlist=playlist, song=song)
+        playlistitem.save()
+
+        # Save the playlist in the user's session, so that this will
+        #  be the default selection next time.
+        request.session["music_playlist"] = playlist_uuid
+
+        response = {
+            "status": "OK"
+        }
+
+    return JsonResponse(response)
+
+

@@ -60,4 +60,44 @@ urlpatterns = [
         view=views.MusicDeleteView.as_view(),
         name="delete"
     ),
+    path(
+        route="playlist_detail/<uuid:uuid>",
+        view=views.PlaylistDetailView.as_view(),
+        name="playlist_detail"
+    ),
+    path(
+        route="playlist_create",
+        view=views.CreatePlaylist.as_view(),
+        name="playlist_create"
+    ),
+    path(
+        route="get_playlist/<uuid:uuid>",
+        view=views.get_playlist,
+        name="get_playlist"
+    ),
+    path(
+        route="delete_playlist/<uuid:uuid>/",
+        view=views.PlaylistDeleteView.as_view(),
+        name="delete_playlist"
+    ),
+    path(
+        route="sort_playlist",
+        view=views.sort_playlist,
+        name="sort_playlist"
+    ),
+    path(
+        route="search_tags",
+        view=views.search_tags,
+        name="search_tags"
+    ),
+    path(
+        route="search_playlists/",
+        view=views.search_playlists,
+        name="search_playlists"
+    ),
+    path(
+        route="add_to_playlist/",
+        view=views.add_to_playlist,
+        name="add_to_playlist"
+    ),
 ]

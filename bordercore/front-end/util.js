@@ -18,7 +18,7 @@ export function doGet(scope, url, callback, errorMsg) {
         .catch((error) => {
             scope.$bvToast.toast(`${errorMsg}: ${error.message}`, {
                 title: "Error!",
-                noAutoHide: true,
+                autoHideDelay: 60000,
                 variant: "danger"
             })
             console.error(error);
@@ -37,7 +37,14 @@ export function doPost(scope, url, params, callback, successMsg, errorMsg) {
         method: "POST",
         data: bodyFormData,
     }).then(response => {
-        if (response.data.status != "OK") {
+        if (response.data.status === "Warning") {
+            scope.$bvToast.toast(response.data.message, {
+                title: "Error",
+                autoHideDelay: 10000,
+                variant: "warning"
+            })
+            console.log("Warning: ", response.data.message);
+        } else if (response.data.status != "OK") {
             scope.$bvToast.toast(response.data.message, {
                 title: "Error",
                 noAutoHide: true,

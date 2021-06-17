@@ -138,5 +138,9 @@ import VueSidebarMenu from "vue-sidebar-menu"
 import "vue-sidebar-menu/dist/vue-sidebar-menu.css"
 Vue.use(VueSidebarMenu)
 
+import AddToPlaylist from "./vue/music/AddToPlaylist.vue"
+Vue.component("AddToPlaylist", AddToPlaylist);
+window.AddToPlaylist = AddToPlaylist;
+
 import PerfectScrollbar from "perfect-scrollbar";
 window.PerfectScrollbar = PerfectScrollbar;

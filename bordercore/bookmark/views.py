@@ -567,7 +567,7 @@ def search(request):
                 "name": match["_source"]["name"],
                 "note": match["_source"].get("note", ""),
                 "uuid": match["_source"].get("uuid"),
-                "favicon_url": Bookmark.get_favicon_url_new(match["_source"].get("url"), size=16)
+                "favicon_url": Bookmark.get_favicon_url(match["_source"].get("url"), size=16)
             }
         )
 

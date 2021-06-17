@@ -8,7 +8,7 @@ from bookmark.models import Bookmark
 from collection.models import Collection
 from drill.models import Question
 from feed.models import Feed, FeedItem
-from music.models import Album, Song, SongSource
+from music.models import Album, Playlist, PlaylistItem, Song, SongSource
 from tag.models import Tag
 from todo.models import Todo
 
@@ -41,6 +41,7 @@ class BlobTagsField(serializers.RelatedField):
 
     def to_internal_value(self, data):
         return data
+
 
 class BlobSerializer(serializers.ModelSerializer):
 
@@ -140,6 +141,18 @@ class SongSourceSerializer(serializers.ModelSerializer):
     class Meta:
         model = SongSource
         fields = ["description", "name"]
+
+
+class PlaylistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Playlist
+        fields = ["uuid", "name", "note", "size", "parameters", "type"]
+
+
+class PlaylistItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlaylistItem
+        fields = ["uuid", "playlist", "song"]
 
 
 class TagSerializer(serializers.ModelSerializer):

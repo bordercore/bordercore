@@ -1,13 +1,14 @@
 from django import forms
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.forms import (ModelChoiceField, ModelForm, Select, Textarea,
-                          TextInput)
+from django.forms import (ModelChoiceField, ModelForm, NumberInput, Select,
+                          Textarea, TextInput)
 from django.forms.fields import BooleanField, CharField
 from django.utils.safestring import mark_safe
 
 from lib.fields import ModelCommaSeparatedChoiceField
-from music.models import Album, Song, SongSource
 from tag.models import Tag
+
+from .models import Album, Playlist, Song, SongSource
 
 
 class SongForm(ModelForm):
@@ -112,4 +113,25 @@ class SongForm(ModelForm):
             "source": Select(),
             "track": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
             "year": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
+        }
+
+
+class PlaylistForm(ModelForm):
+
+    name = CharField()
+
+    def __init__(self, *args, **kwargs):
+
+        # The request object is passed in from a view's PlaylistForm() constructor
+        self.request = kwargs.pop("request", None)
+        super().__init__(*args, **kwargs)
+
+    class Meta:
+        model = Playlist
+        fields = ("name", "note", "size", "type")
+        widgets = {
+            "name": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
+            "note": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
+            "size": NumberInput(attrs={"class": "form-control", "autocomplete": "off"}),
+            "type": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
         }

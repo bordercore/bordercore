@@ -80,11 +80,12 @@
                         </template>
 
                         <template #cell(uuid)="data">
-                            <div class="hover-target hidden" data-foo="bar">
+                            <div class="hover-target hidden">
                                 <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="text-center">
                                     <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
                                     <div slot="dropdown">
                                         <a class="dropdown-item" href="#" @click="onClickUpdate(data.value)">Update</a>
+                                        <a class="dropdown-item" href="#" @click="onClickAddToPlaylist(data.value)">Add to playlist</a>
                                     </div>
                                 </dropdown-menu>
                             </div>
@@ -97,6 +98,14 @@
             </div>
 
         </div>
+
+        <add-to-playlist
+            ref="addToPlaylist"
+            get-playlists-url="{% url 'playlist-list' %}"
+            add-to-playlist-url="{% url 'music:add_to_playlist' %}?query="
+            default-playlist="{{ request.session.music_playlist }}"
+        >
+        </add-to-playlist>
 
     </div>
 
@@ -116,6 +125,9 @@
 
         new Vue({
             el: "#vue-app",
+            components: {
+                AddToPlaylist
+            },
             data() {
                 return {
                     songList: [
@@ -162,14 +174,7 @@
                     //  don't play the song.
                     if (evt.srcElement.nodeName === "TD") {
                         currentlyPlayingSongUuid = item.uuid;
-
-                        axios.get("{% url 'music:get_song_info' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', currentlyPlayingSongUuid))
-                             .then(response => {
-                                 let vid = document.getElementById("player");
-                                 vid.src = response.data.url;
-                                 vid.play()
-                             })
-
+                        this.playCurrentlySelectedSong();
                     }
                 },
                 rowHovered(item, index, evt) {
@@ -181,12 +186,23 @@
                 onClickUpdate(uuid) {
                     window.location="{% url 'music:update' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
                 },
+                onClickAddToPlaylist(uuid) {
+                    this.$refs.addToPlaylist.openModal(uuid);
+                },
                 onCheck(evt) {
                     this.continuousPlay = evt.srcElement.checked;
                 },
                 getNote(note) {
                     return markdown.render(note);
                 },
+                playCurrentlySelectedSong() {
+                    axios.get("{% url 'music:get_song_info' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', currentlyPlayingSongUuid))
+                         .then(response => {
+                             let vid = document.getElementById("player");
+                             vid.src = response.data.url;
+                             vid.play()
+                         })
+                }
             },
             mounted() {
 
@@ -199,6 +215,7 @@
                     if (this.continuousPlay && index < this.songList.length) {
                         currentlyPlayingSongUuid = this.songList[index].uuid;
                         this.$refs.table.selectRow(index);
+                        this.playCurrentlySelectedSong();
                     } else {
                         this.$refs.table.unselectRow(index - 1);
                     }

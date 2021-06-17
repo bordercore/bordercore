@@ -124,12 +124,32 @@
                             :fields="fields"
                             selectable
                             select-mode="single"
-                            @row-selected="rowSelected"
+                            @row-clicked="rowClicked"
+                            @row-hovered="rowHovered"
+                            @row-unhovered="rowUnHovered"
                             selected-variant="info"
                             sort-by="year"
                             sort-desc
                             ref="table"
                         >
+
+                            <template #cell(title)="data">
+                                <span v-html="data.value"></span>
+                                <span class="pl-2 table-note" v-html="data.item.note"></span>
+                            </template>
+
+                            <template #cell(uuid)="data">
+                                <div class="hover-target hidden">
+                                    <dropdown-menu v-model="show" :right="true" transition="translate-fade-down" class="text-center">
+                                        <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
+                                        <div slot="dropdown">
+                                            <a class="dropdown-item" href="#" @click="onClickUpdate(data.value)">Update</a>
+                                            <a class="dropdown-item" href="#" @click="onClickAddToPlaylist(data.value)">Add to playlist</a>
+                                        </div>
+                                    </dropdown-menu>
+                                </div>
+                            </template>
+
                         </b-table>
 
                     </div>
@@ -137,6 +157,14 @@
                 </div>
 
             </div>
+
+            <add-to-playlist
+                ref="addToPlaylist"
+                get-playlists-url="{% url 'playlist-list' %}"
+                add-to-playlist-url="{% url 'music:add_to_playlist' %}?query="
+                default-playlist="{{ request.session.music_playlist }}"
+            >
+            </add-to-playlist>
 
             {% endif %}
 
@@ -158,6 +186,9 @@
 
         new Vue({
             el: "#vue-app",
+            components: {
+                AddToPlaylist
+            },
             data() {
                 return {
                     currentlyPlayingSongUuid: null,
@@ -168,17 +199,17 @@
                             "year": "{{ song.year|default:'' }}",
                             "title": "{{ song.title|safe }}",
                             "length": "{{ song.length }}",
-                            "note": "{{ song.note }}",
+                            "note": "{{ song.note|safe }}",
                         },
                         {% endfor %}
                     ],
                     fields: [
                         {
-                            key: "year",
+                            key: "title",
                             sortable: true
                         },
                         {
-                            key: "title",
+                            key: "year",
                             sortable: true
                         },
                         {
@@ -186,18 +217,23 @@
                             sortable: true
                         },
                         {
-                            key: "note",
-                            sortable: true
+                            key: "uuid",
+                            label: "",
+                            tdClass: "text-center align-middle",
+                            thClass: "col-action",
                         },
-                    ]
+                    ],
+                    show: false,
                 }
             },
             methods: {
-                rowSelected(evt) {
+                rowClicked(item, index, evt) {
+                    // If we found anthing other than a TD element, we've
+                    //  clicked on the "on hover" context menu. In that case,
+                    //  don't play the song.
+                    if (evt.srcElement.nodeName === "TD") {
 
-                    if (evt.length > 0) {
-
-                        this.currentlyPlayingSongUuid = evt[0].uuid;
+                        this.currentlyPlayingSongUuid = item.uuid;
 
                         axios.get("{% url 'music:get_song_info' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', this.currentlyPlayingSongUuid))
                              .then(response => {
@@ -206,10 +242,20 @@
                                  vid.play()
                              })
 
-                    } else {
-                        this.currentlyPlayingSongUuid = null;
                     }
-                }
+                },
+                rowHovered(item, index, evt) {
+                    evt.currentTarget.querySelector(".hover-target").classList.remove("hidden");
+                },
+                rowUnHovered(item, index, evt) {
+                    evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
+                },
+                onClickUpdate(uuid) {
+                    window.location="{% url 'music:update' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
+                },
+                onClickAddToPlaylist(uuid) {
+                    this.$refs.addToPlaylist.openModal(uuid);
+                },
             },
             mounted() {
 

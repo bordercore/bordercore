@@ -12,11 +12,13 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.db.models.signals import post_delete, post_save
+from django.db.models import JSONField
+from django.db.models.signals import post_delete, post_save, pre_delete
 from django.dispatch.dispatcher import receiver
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
-from lib.mixins import TimeStampedModel
+from lib.mixins import SortOrderMixin, TimeStampedModel
 from lib.time_utils import convert_seconds
 from tag.models import Tag
 
@@ -235,6 +237,53 @@ def mymodel_delete_s3(sender, instance, **kwargs):
         Bucket=settings.AWS_BUCKET_NAME_MUSIC,
         Key=f"songs/{instance.uuid}"
     )
+
+
+class Playlist(TimeStampedModel):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    name = models.TextField()
+    note = models.TextField(null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    size = models.IntegerField(null=True, blank=True)
+    parameters = JSONField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+    class PlaylistType(models.TextChoices):
+        MANUAL = "manual", _("Manually Selected")
+        TAG = "tag", _("Tagged")
+        RECENT = "recent", _("Recently Added")
+        TIME = "time", _("Time Period")
+        RATED = "rating", _("Rated")
+
+    type = models.CharField(
+        max_length=100,
+        choices=PlaylistType.choices,
+        default=PlaylistType.MANUAL,
+    )
+
+
+class PlaylistItem(TimeStampedModel, SortOrderMixin):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    playlist = models.ForeignKey(Playlist, on_delete=models.CASCADE)
+    song = models.ForeignKey(Song, on_delete=models.CASCADE)
+
+    field_name = "playlist"
+
+    def __str__(self):
+        return f"{self.playlist} - {self.song}"
+
+    class Meta:
+        unique_together = (
+            ("playlist", "song")
+        )
+
+
+@receiver(pre_delete, sender=PlaylistItem)
+def remove_playlistitem(sender, instance, **kwargs):
+    instance.handle_delete()
 
 
 class Listen(TimeStampedModel):

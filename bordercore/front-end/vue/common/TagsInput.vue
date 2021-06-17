@@ -10,6 +10,7 @@
             :add-only-from-autocomplete="false"
             :placeholder="placeHolder"
             :disabled="disabled"
+            :max-tags="maxTags"
         >
             <div slot="autocomplete-item" slot-scope="scope" @click="scope.performAdd(scope.item)">
                 <div>{{ scope.item.text }}</div>
@@ -48,6 +49,10 @@
             disabled: {
                 default: false,
                 type: Boolean,
+            },
+            maxTags: {
+                default: undefined,
+                type: Number,
             },
         },
         data() {

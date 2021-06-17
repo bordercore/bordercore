@@ -35,11 +35,32 @@
                 </template>
             </card>
 
+            <card title="Playlists">
+
+                <template v-slot:content>
+
+                    <ul class="list-group interior-borders">
+                        {% for playlist in playlists %}
+                            <li class="list-group-item list-group-item-secondary text-info">
+                                <a href="{% url 'music:playlist_detail' playlist.uuid %}">{{ playlist.name }}</a>
+                                {% if playlist.type == "manual" %}
+                                    <span class="ml-2 badge badge-info">{{ playlist.num_songs }}</span></li>
+                                {% endif %}
+                        {% endfor %}
+                    </ul>
+                    <div class="mt-3 ml-3">
+                        <font-awesome-icon icon="plus"></font-awesome-icon>
+                        <a href="#" class="text-info" @click="onClickCreate">Create a playlist</a>
+                    </div>
+                </template>
+
+            </card>
+
             <card title="Recently Played Songs">
 
                 <template v-slot:content>
 
-                    <ul class="list-group">
+                    <ul class="list-group interior-borders">
                         {% for song in recent_songs %}
                             <li class="list-group-item list-group-item-secondary text-info">{{ song.song.title}} <strong>{{ song.song.artist }}</strong></li>
                         {% endfor %}
@@ -86,6 +107,100 @@
 
         </div>
 
+        <form action="{% url 'music:playlist_create' %}" method="post">
+            {% csrf_token %}
+            <div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="myModalLabel"><span id="action-type">Create</span> Playlist</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body">
+
+                            <div class="form-group row">
+                                <label class="col-lg-3 col-form-label" for="inputTitle">Name</label>
+                                <div class="col-lg-9">
+                                    <input type="text" name="name" autocomplete="off" maxlength="200" required="required" id="id_name" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-lg-3 col-form-label" for="inputTitle">Note</label>
+                                <div class="col-lg-9">
+                                    <textarea name="note" cols="40" rows="3" id="id_note" class="form-control"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-lg-3 col-form-label" for="inputTitle">Type</label>
+                                <div class="col-lg-9 align-self-center d-flex">
+                                    <div class="w-50">
+                                        <input type="radio" name="type" value="manual" v-model="type" />
+                                        <span>Manual</span>
+                                    </div>
+                                    <div class="w-50">
+                                        <input class="ml-3" type="radio" _name="type" _value="smart" v-model="type" />
+                                        <span>Smart</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div v-if="type !=='manual'">
+
+                                <hr />
+
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input" type="radio" name="type" value="tag" v-model="smartType">
+                                    <label class="form-check-label d-flex align-self-center" for="type">
+                                        <div class="mr-3">Tag</div>
+                                        <tags-input search-url="{% url 'music:search_tags' %}?query=" name="tag" place-holder="Tag name" :disabled="!playlistTypeIsTag" :max-tags="1"></tags-input>
+                                    </label>
+                                </div>
+
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input" type="radio" name="type" value="recent" v-model="smartType">
+                                    <label class="form-check-label d-flex" for="type">
+                                        <div class="mr-3">Recently added songs</div>
+                                    </label>
+                                </div>
+
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input" type="radio" name="type" value="time" v-model="smartType">
+                                    <label class="form-check-label d-flex" for="type">
+                                        <div class="mr-3 text-nowrap">Time period</div>
+                                        <input class="form-control mr-1" type="number" name="start_year" size="4" placeholder="Start year" autocomplete="off" :disabled="!playlistTypeIsTimePeriod" />
+                                        <input class="form-control ml-1" type="number" name="end_year" size="4" placeholder="End year" autocomplete="off" :disabled="!playlistTypeIsTimePeriod" />
+                                    </label>
+                                </div>
+
+                                <div class="form-group row mt-3">
+                                    <label class="col-lg-3 col-form-label">Size</label>
+                                    <div class="col-lg-9">
+                                        <select class="form-control" name="size">
+                                            <option value="">Unlimited</option>
+                                            <option value="5">5</option>
+                                            <option value="10">10</option>
+                                            <option value="20" selected>20</option>
+                                            <option value="50">50</option>
+                                            <option value="100">100</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <div class="modal-footer justify-content-end">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <input id="btn-action" class="btn btn-primary" type="submit" name="Go" value="Create" />
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+
     </div>
 
 {% endblock %}
@@ -94,13 +209,15 @@
 
     {{ block.super }}
 
+    {{ tags|json_script:"initial-tags"|default:"" }}
+
     <script type="text/javascript" charset="utf-8">
+
+        Vue.mixin({ delimiters: ["[[", "]]"] });
 
         new Vue({
             el: "#vue-messages",
         });
-
-        Vue.mixin({ delimiters: ["[[", "]]"] });
 
         new Vue({
             el: "#vue-app",
@@ -121,7 +238,9 @@
                             tdClass: "text-center",
                             thClass: "text-center"
                         },
-                    ]
+                    ],
+                    type: "manual",
+                    smartType: "tag"
                 }
             },
             methods: {
@@ -133,10 +252,22 @@
                         const items = data.data.song_list
                         return items || []
                     })
-                }
+                },
+                onClickCreate(evt) {
+                    $("#modalAdd").modal("show")
+                    window.setTimeout(() => { document.getElementById("id_name").focus() }, 500);
+                },
+            },
+            computed: {
+                playlistTypeIsTag() {
+                    return this.smartType === "tag"
+                },
+                playlistTypeIsTimePeriod() {
+                    return this.smartType === "time"
+                },
             }
         });
 
-   </script>
+    </script>
 
 {% endblock %}
