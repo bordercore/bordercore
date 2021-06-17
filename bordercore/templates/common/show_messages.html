@@ -22,8 +22,7 @@
             toaster="b-toaster-top-right"
             title="Alert"
             {% if message.tags == "error" %}
-                :static=true
-                auto-hide=false
+                auto-hide-delay=60000
             {% else %}
                 auto-hide-delay=5000
             {% endif %}
