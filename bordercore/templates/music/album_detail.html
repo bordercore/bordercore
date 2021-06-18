@@ -4,10 +4,10 @@
 
 {% block nav %}
 
-    <div class="d-flex mb-3">
+    <div class="d-flex mb-3" id="vue-nav">
         <div class="mr-auto align-self-center">
             <ul class="breadcrumb mb-0 pt-0 pb-0">
-                <li class="breadcrumb-item"> <a href="{% url 'music:list' %}">Music</a> </li>
+                <li class="breadcrumb-item"> <a href="{% url 'music:list' %}"><font-awesome-icon icon="home"></font-awesome-icon></a> </li>
                 <li class="breadcrumb-item"> <a href="{% url 'music:artist_detail' album.artist %}">{{ album.artist }}</a> </li>
                 <li class="breadcrumb-item active"> {{ album.title }} </li>
             </ul>
@@ -122,6 +122,10 @@
         const EventBus = new Vue();
 
         let currentlyPlayingSongUuid = null;
+
+        new Vue({
+            el: "#vue-nav",
+        });
 
         new Vue({
             el: "#vue-app",
