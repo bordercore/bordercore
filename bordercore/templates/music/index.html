@@ -59,7 +59,6 @@
             <card title="Recently Played Songs">
 
                 <template v-slot:content>
-
                     <ul class="list-group interior-borders">
                         {% for song in recent_songs %}
                             <li class="list-group-item list-group-item-secondary text-info">{{ song.song.title}} <strong>{{ song.song.artist }}</strong></li>

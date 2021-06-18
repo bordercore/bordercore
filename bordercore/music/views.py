@@ -160,6 +160,7 @@ class SongUpdateView(UpdateView):
         context["action"] = "Update"
         context["song_length_pretty"] = convert_seconds(self.object.length)
         context["tags"] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
+        context["tag_counts"] = Song.get_song_tags(self.request.user)
         return context
 
     def form_valid(self, form):

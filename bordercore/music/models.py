@@ -12,7 +12,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.db.models import JSONField
+from django.db.models import Count, JSONField
 from django.db.models.signals import post_delete, post_save, pre_delete
 from django.dispatch.dispatcher import receiver
 from django.urls import reverse
@@ -213,6 +213,22 @@ class Song(TimeStampedModel):
             listen_url = reverse("music:artist_detail", args=[song.artist])
 
         return listen_url
+
+    @staticmethod
+    def get_song_tags(user):
+        """
+        Get a count of all song tags, grouped by tag
+        """
+        return sorted(
+            Tag.objects.values("name").
+            filter(
+                song__isnull=False,
+                song__user=user
+            ).
+            annotate(count=Count("song")),
+            key=lambda s: s["count"],
+            reverse=True
+        )
 
 
 @receiver(post_save, sender=Song)

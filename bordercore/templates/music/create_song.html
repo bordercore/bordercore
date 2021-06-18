@@ -8,6 +8,7 @@
         <div class="col-lg-3 d-flex flex-column">
 
             <div class="w-100" id="vue-song-info" id="vue-song-info" :class="{'d-none': hideSongInfo}" v-cloak>
+
                 <card title="Song Info">
                     <template v-slot:content>
                         <ul>
@@ -20,6 +21,17 @@
                         </ul>
                     </template>
                 </card>
+
+                <card title="Total Tag Counts">
+                    <template v-slot:content>
+                        <ul class="list-group interior-borders">
+                            {% for tag in tag_counts %}
+                                <li class="list-group-item list-group-item-secondary text-info">{{ tag.name}}<span class="ml-2 badge badge-info">{{ tag.count }}</span></li>
+                            {% endfor %}
+                        </ul>
+                    </template>
+                </card>
+
             </div>
 
             {% if action == "Create" %}
