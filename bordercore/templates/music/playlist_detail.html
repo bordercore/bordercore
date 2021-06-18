@@ -104,6 +104,7 @@
                                 <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
                                 <div slot="dropdown">
                                     <a class="dropdown-item" href="#" @click="onClickRemove(data.value)">Remove from playlist</a>
+                                    <a class="dropdown-item" href="#" @click="onClickUpdate(data.item.song_uuid)">Update</a>
                                 </div>
                             </dropdown-menu>
                         </div>
@@ -266,12 +267,6 @@
                 }
             },
             methods: {
-                values (data, a, b) {
-                    if (data && data.length) {
-                        console.log(data)
-                        /* this.$refs.sm.clear(); */
-                    }
-                },
                 getPlaylist() {
                     doGet(
                         this,
@@ -315,6 +310,9 @@
                          });
 
                 },
+                onClickUpdate(uuid) {
+                    window.location="{% url 'music:update' '00000000-0000-0000-0000-000000000000' %}?return_url={{ request.get_full_path }}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
+                 },
                 playCurrentlySelectedSong() {
                     axios.get("{% url 'music:get_song_info' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', currentlyPlayingSongUuid))
                          .then(response => {
