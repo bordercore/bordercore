@@ -179,7 +179,13 @@ class SongUpdateView(UpdateView):
             "Song updated"
         )
 
-        return HttpResponseRedirect(self.get_success_url())
+        if "return_url" in self.request.POST and self.request.POST["return_url"] != "":
+            success_url = self.request.POST["return_url"]
+        else:
+            success_url = self.success_url
+        print(success_url)
+
+        return HttpResponseRedirect(success_url)
 
 
 @method_decorator(login_required, name="dispatch")

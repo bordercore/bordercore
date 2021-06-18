@@ -43,7 +43,8 @@
                 <p class="lead offset-lg-2 font-weight-bold pl-2">{{ action }} a Song</p>
 
                 <form id="song-form" action="{{ request.path }}" method="post">
-                {% csrf_token %}
+                    {% csrf_token %}
+                    <input type="hidden" name="return_url" value="{{ request.GET.return_url }}" />
 
                 {% if form.non_field_errors %}
                     <div class="row">
