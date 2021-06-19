@@ -126,8 +126,17 @@
   }
 }
 
+.hoverable {
+  border-radius: 0.5rem;
+  transition: 0.5s;
+
+  &:hover {
+    background-color: lighten($background-color-dark, 5%);
+  }
+}
+
 // A list with only interior borders
-ul.interior-borders {
+.interior-borders {
   li:first-child {
     border-top: none;
   }

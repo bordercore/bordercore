@@ -35,7 +35,7 @@
                 </template>
             </card>
 
-            <card title="Playlists">
+            <card title="Playlists" class-name="flex-grow-0">
 
                 <template v-slot:content>
 
@@ -72,37 +72,74 @@
 
         <div class="col-lg-9">
 
-            <div class="card-grid ml-2">
+            <div class="right-column">
 
-                <div class="d-flex">
+                <card>
+                    <template v-slot:title-slot>
+                        <div class="d-flex">
 
-                    <h3>Recently added music</h3>
+                            <div class="card-title">Recently Added Albums</div>
 
-                    <div class="mr-2 ml-auto">
-                        <add-button url="{% url 'music:create' %}">
-                        </add-button>
+                            <div class="mr-2 ml-auto">
+                                <add-button url="{% url 'music:create' %}"></add-button>
+                            </div>
+
+                        </div>
+                    </template>
+
+                    <template v-slot:content>
+                        <table class="table-borderless mt-2">
+                            <tr>
+
+                                {% for album in recent_albums %}
+
+                                    {% if forloop.counter0|divisibleby:"4" %}
+
+                            </tr>
+                            <tr class="m-2">
+
+                                    {% endif %}
+
+                                    <td class="w-25 hoverable p-2">
+                                        <a href="{% url 'music:album_detail' album.uuid %}">
+                                            <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ album.uuid }}" height="150" width="150" /> <br />
+                                        </a>
+                                        <div class="mt-1"><strong>{{ album.title }}</strong></div>
+                                        <div class="text-light">{{ album.artist }}</div>
+                                    </td>
+
+                                {% endfor %}
+
+                            </tr>
+                        </table>
+                    </template>
+                </card>
+
+            <card title="Recently added music">
+                <template v-slot:content>
+                    <div class="card-grid ml-2">
+
+                        <div>
+                            <b-table
+                                hover
+                                primary-key="uuid"
+                                :items="myProvider"
+                                :fields="fields"
+                                sort-by="year"
+                                sort-desc
+                                ref="table"
+                            >
+                                <template #cell(artist)="data">
+                                    <a :href="data.item.artist_url">[[ data.value ]]</a>
+                                </template>
+                            </b-table>
+                        </div>
+
                     </div>
-
-                </div>
-
-                <div class="col-lg-11">
-                    <b-table
-                        hover
-                        primary-key="uuid"
-                        :items="myProvider"
-                        :fields="fields"
-                        sort-by="year"
-                        sort-desc
-                        ref="table"
-                    >
-                        <template #cell(artist)="data">
-                            <a :href="data.item.artist_url">[[ data.value ]]</a>
-                        </template>
-                    </b-table>
-
-                </div>
-
+                </template>
+            </card>
             </div>
+
 
         </div>
 

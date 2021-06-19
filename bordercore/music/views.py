@@ -46,10 +46,13 @@ def music_list(request):
 
     playlists = Playlist.objects.annotate(num_songs=Count("playlistitem"))
 
+    recent_albums = Album.objects.filter(user=request.user).order_by("-created")[:12]
+
     return render(request, "music/index.html",
                   {
                       "cols": ["Date", "artist", "title", "id"],
                       "recent_songs": recent_songs,
+                      "recent_albums": recent_albums,
                       "random_albums": random_albums,
                       "playlists": playlists,
                       "title": "Music List",
