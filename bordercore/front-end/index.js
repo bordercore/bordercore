@@ -1,12 +1,12 @@
 import Vue from "vue";
 window.Vue = Vue;
 
-import { AlertPlugin, PopoverPlugin, TablePlugin, ToastPlugin, VBHoverPlugin } from "bootstrap-vue"
-Vue.use(AlertPlugin)
-Vue.use(PopoverPlugin)
-Vue.use(TablePlugin)
-Vue.use(ToastPlugin)
-Vue.use(VBHoverPlugin)
+import {AlertPlugin, PopoverPlugin, TablePlugin, ToastPlugin, VBHoverPlugin} from "bootstrap-vue";
+Vue.use(AlertPlugin);
+Vue.use(PopoverPlugin);
+Vue.use(TablePlugin);
+Vue.use(ToastPlugin);
+Vue.use(VBHoverPlugin);
 
 import DropdownMenu from "@innologica/vue-dropdown-menu";
 Vue.component("DropdownMenu", DropdownMenu);
@@ -39,9 +39,9 @@ window.jQuery= jQuery;
 
 import "bootstrap";
 
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faCopy, faEllipsisV, faExclamationTriangle, faHeart, faHome, faGraduationCap, faLink, faMusic, faNewspaper, faPlus, faQuestion, faRunning, faSearch, faSignOutAlt, faStickyNote, faTasks } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import {library} from "@fortawesome/fontawesome-svg-core";
+import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faCopy, faEllipsisV, faExclamationTriangle, faHeart, faHome, faImage, faGraduationCap, faLink, faMusic, faNewspaper, faPlus, faQuestion, faRunning, faSearch, faSignOutAlt, faStickyNote, faTasks} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 library.add(faAlignLeft);
 library.add(faAngleDown);
 library.add(faAngleRight);
@@ -59,6 +59,7 @@ library.add(faEllipsisV);
 library.add(faExclamationTriangle);
 library.add(faHeart);
 library.add(faHome);
+library.add(faImage);
 library.add(faGraduationCap);
 library.add(faLink);
 library.add(faMusic);
@@ -72,7 +73,7 @@ library.add(faSignOutAlt);
 library.add(faTasks);
 Vue.component("font-awesome-icon", FontAwesomeIcon);
 
-import { format } from "date-fns";
+import {format} from "date-fns";
 window.format = format;
 
 import EasyMDE from "easymde";
@@ -84,7 +85,7 @@ window.hljs = hljs;
 import markdownit from "markdown-it";
 window.markdownit = markdownit;
 
-import { doGet, doPost, getFormattedDate, getMarkdown } from "./util.js";
+import {doGet, doPost, getFormattedDate, getMarkdown} from "./util.js";
 window.doGet = doGet;
 window.doPost = doPost;
 window.getFormattedDate = getFormattedDate;
@@ -134,11 +135,11 @@ import AddButton from "./vue/common/AddButton.vue";
 Vue.component("AddButton", AddButton);
 window.AddButton = AddButton;
 
-import VueSidebarMenu from "vue-sidebar-menu"
-import "vue-sidebar-menu/dist/vue-sidebar-menu.css"
-Vue.use(VueSidebarMenu)
+import VueSidebarMenu from "vue-sidebar-menu";
+import "vue-sidebar-menu/dist/vue-sidebar-menu.css";
+Vue.use(VueSidebarMenu);
 
-import AddToPlaylist from "./vue/music/AddToPlaylist.vue"
+import AddToPlaylist from "./vue/music/AddToPlaylist.vue";
 Vue.component("AddToPlaylist", AddToPlaylist);
 window.AddToPlaylist = AddToPlaylist;
 
