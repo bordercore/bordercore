@@ -4,73 +4,68 @@
 
 {% block content %}
 
-    <div id="vue-messages">
+    <div id="vue-app">
+
         {% include "common/show_messages.html" %}
-    </div>
 
-    <div class="row card-grid">
-        <div class="col-lg-7">
+        <div class="row card-grid">
+            <div class="col-lg-12 d-flex">
 
-            <h1>Collection List</h1>
+                <h1>Collection List</h1>
 
-        </div>
-    </div>
+                <div class="mr-2 ml-auto" @click="onClickCreate">
+                    <add-button url="#"></add-button>
+                </div>
 
-    <div class="card-grid ml-3" id="vue-app">
-
-        <div class="row">
-            <div class="col-lg-7">
-                <form class="form-inline" role="form" id="form-edit" method="POST">
-                    {% csrf_token %}
-
-                    <button-group inline-template>
-                        <div class="btn-group">
-                            <input type="button" class="btn btn-secondary" id="btn-create" value="Create" @click="onClickCreate" />
-                            <input type="button" class="btn btn-secondary" id="btn-update" value="Update" :disabled="isDisabled" @click="onClickUpdate" />
-                            <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="isDisabled" @click="onClickDelete" />
-                        </div>
-                    </button-group>
-
-                    <div class="form-group">
-                        <label id="feedback"></label>
-                    </div>
-
-                </form>
             </div>
         </div>
 
-        <b-table
-            hover
-            primary-key="uuid"
-            :items="items"
-            :fields="fields"
-            selectable
-            select-mode="single"
-            @row-selected="rowSelected"
-            selected-variant="info"
-            sort-by="updated"
-            sort-desc
-        >
-            <template #cell(name)="data">
-                <a :href="data.item.collection_url">[[ data.value ]]</a>
-            </template>
+        <div class="card-grid ml-3">
 
-            <template #cell(updated)="data">
+            <b-table
+                hover
+                primary-key="uuid"
+                :items="items"
+                :fields="fields"
+                select-mode="single"
+                @row-hovered="rowHovered"
+                @row-unhovered="rowUnHovered"
+                selected-variant="info"
+                sort-by="updated"
+                sort-desc
+            >
+                <template #cell(name)="data">
+                    <a :href="data.item.collection_url">[[ data.value ]]</a>
+                </template>
+
+                <template #cell(updated)="data">
                 [[ getDate(data.value) ]]
-            </template>
+                </template>
 
-        </b-table>
+                <template #cell(uuid)="data">
+                    <div class="hover-target hidden">
+                        <dropdown-menu v-model="show" :right="true" transition="translate-fade-down" class="text-center">
+                            <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
+                            <div slot="dropdown">
+                                <a class="dropdown-item" href="#" @click="onClickUpdate(data.value)">Update</a>
+                                <a class="dropdown-item" href="#" @click="onClickDelete(data.value)">Delete</a>
+                            </div>
+                        </dropdown-menu>
+                    </div>
+                </template>
+
+            </b-table>
 
 
-        <form action="{% url 'collection:list' %}" method="post" id="form-collection-edit">
-            <div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title" id="myModalLabel"><span id="action-type">Create</span> Collection</h4>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        </div>
-                        <div class="modal-body">
+            <form action="{% url 'collection:list' %}" method="post" id="form-collection-edit">
+                <div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="myModalLabel"><span id="action-type">Create</span> Collection</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            </div>
+                            <div class="modal-body">
                     {% csrf_token %}
                     {% for field in form %}
                         <div class="form-group{% if field.errors %} error{% endif %} row">
@@ -100,17 +95,19 @@
                         </div>
                     {% endfor %}
 
-                        </div>
-                        <div class="modal-footer">
-                            <label id="feedback" _class="alert alert-success"></label>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                            <input id="btn-action" class="btn btn-primary" type="submit" name="Go" value="Create" />
-                        </div>
+                            </div>
+                            <div class="modal-footer">
+                                <label id="feedback" _class="alert alert-success"></label>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <input id="btn-action" class="btn btn-primary" type="submit" name="Go" value="Create" />
+                            </div>
 
+                        </div>
                     </div>
                 </div>
-            </div>
-        </form>
+            </form>
+
+        </div>
 
     </div>
 
@@ -126,68 +123,8 @@
 
         const EventBus = new Vue();
 
-        const store = new Vuex.Store({
-            state: {
-                selectedUuid: null
-            }
-        });
-
-        const ButtonGroup = {
-            store,
-            methods: {
-                onClickCreate(evt) {
-
-                    document.getElementById("id_name").value = "";
-                    document.getElementById("id_description").value = "";
-                    EventBus.$emit("addTags", []);
-                    document.getElementById("action-type").innerHTML = "Create";
-                    document.getElementById("btn-action").value = "Create";
-                    document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection:create' %}");
-                    $("#modalAdd").modal("show")
-                    window.setTimeout(() => { document.getElementById("id_name").focus() }, 500);
-
-                },
-                onClickDelete(evt) {
-
-                    let selectedUuid = this.$store.state.selectedUuid;
-
-                    let formEl = document.getElementById("form-edit");
-                    formEl.setAttribute("action", "{% url 'collection:delete' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', selectedUuid));
-                    formEl.submit();
-
-                },
-                onClickUpdate(evt) {
-
-                    let selectedUuid = this.$store.state.selectedUuid;
-
-                    doGet(
-                        this,
-                        "{% url 'collection:get_info' %}?uuid=" + selectedUuid + "&query_type=uuid",
-                        (response) => {
-                            nameEl = document.getElementById("id_name");
-                            nameEl.value = response.data.name;
-                            document.getElementById("id_description").value = response.data.description;
-                            EventBus.$emit("addTags", response.data.tags);
-                            document.getElementById("action-type").innerHTML = "Update";
-                            document.getElementById("btn-action").value = "Update";
-                            document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection:update' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', selectedUuid));
-                            $("#modalAdd").modal("show");
-                        },
-                        ""
-                    );
-
-                }
-            },
-            computed: {
-                isDisabled () {
-                    return this.$store.state.selectedUuid === null ? true : false;
-                }
-            }
-        };
-
         new Vue({
             el: "#vue-app",
-            store,
             data() {
                 return {
                     items: [
@@ -224,31 +161,87 @@
                             sortable: true,
                             sortDirection: "desc"
                         },
+                        {
+                            key: "uuid",
+                            label: "",
+                            tdClass: "text-center align-middle",
+                            thClass: "col-action",
+                        },
                     ],
                     selectedUuid: null,
+                    show: false,
                 }
             },
             methods: {
-                rowSelected(evt) {
-                    if (evt.length > 0) {
-                        this.selectedUuid = evt[0].uuid;
-                        this.$store.state.selectedUuid = evt[0].uuid;
-                    } else {
-                        this.$store.state.selectedUuid = null;
-                    }
+                rowHovered(item, index, evt) {
+                    evt.currentTarget.querySelector(".hover-target").classList.remove("hidden");
+                },
+                rowUnHovered(item, index, evt) {
+                    evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
+                },
+                onClickCreate(evt) {
+
+                    document.getElementById("id_name").value = "";
+                    document.getElementById("id_description").value = "";
+                    EventBus.$emit("addTags", []);
+                    document.getElementById("action-type").innerHTML = "Create";
+                    document.getElementById("btn-action").value = "Create";
+                    document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection:create' %}");
+                    $("#modalAdd").modal("show")
+                    window.setTimeout(() => { document.getElementById("id_name").focus() }, 500);
+
+                },
+                onClickUpdate(uuid) {
+
+                    doGet(
+                        this,
+                        `{% url 'collection:get_info' %}?uuid=${uuid}&query_type=uuid`,
+                        (response) => {
+                            nameEl = document.getElementById("id_name");
+                            nameEl.value = response.data.name;
+                            document.getElementById("id_description").value = response.data.description;
+                            EventBus.$emit("addTags", response.data.tags);
+                            document.getElementById("action-type").innerHTML = "Update";
+                            document.getElementById("btn-action").value = "Update";
+                            document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection:update' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', uuid));
+                            $("#modalAdd").modal("show");
+                        },
+                        ""
+                    );
+
+                },
+                onClickDelete(uuid) {
+
+                    let self = this;
+                    this.selectedUuid = uuid;
+
+                    axios.delete("{% url 'collection-detail' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', uuid))
+                         .then((response) => {
+
+                             // Remove the deleted item from the list
+                             const index = self.items.findIndex(x => x.uuid === self.selectedUuid)
+                             const collectionName = self.items[index].name;
+                             self.items.splice(index, 1);
+
+                             this.$bvToast.toast(`Collection ${collectionName} deleted`, {
+                                 title: "Info",
+                                 variant: "info",
+                                 allowHtml: true,
+                             })
+
+                             console.log("Success");
+
+                         }, (error) => {
+                             console.log(error);
+                         });
                 },
                 getDate(date) {
                     return getFormattedDate(date);
                 }
             },
             components: {
-                ButtonGroup,
                 TagsInput
             },
-        });
-
-        new Vue({
-            el: "#vue-messages",
         });
 
     </script>

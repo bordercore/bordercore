@@ -112,7 +112,7 @@ def test_delete_collection(auto_login_user, collection):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("collection:delete", kwargs={"collection_uuid": collection.uuid})
-    resp = client.post(url)
+    url = urls.reverse("collection-detail", kwargs={"uuid": collection.uuid})
+    resp = client.delete(url)
 
-    assert resp.status_code == 302
+    assert resp.status_code == 204

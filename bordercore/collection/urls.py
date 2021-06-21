@@ -16,11 +16,6 @@ urlpatterns = [
         name="create"
     ),
     path(
-        route="delete/<uuid:collection_uuid>/",
-        view=views.CollectionDeleteView.as_view(),
-        name="delete"
-    ),
-    path(
         route="update/<uuid:collection_uuid>/",
         view=views.CollectionUpdateView.as_view(),
         name="update"

@@ -4,54 +4,90 @@
 
 {% block nav %}
 
-        <div class="d-flex mb-3">
-            <div class="mr-auto align-self-center">
-                <ul class="breadcrumb mb-0 pt-0 pb-0">
-                    <li class="breadcrumb-item"> <a href="{% url 'collection:list' %}">Collection List</a> </li>
-                    <li class="breadcrumb-item active">{{ object.name }}</li>
-                </ul>
-            </div>
+    <div class="d-flex mb-3">
+        <div class="mr-auto align-self-center">
+            <ul class="breadcrumb mb-0 pt-0 pb-0">
+                <li class="breadcrumb-item"> <a href="{% url 'collection:list' %}">Collection List</a> </li>
+                <li class="breadcrumb-item active">{{ collection.name }}</li>
+            </ul>
         </div>
+    </div>
 
 {% endblock %}
 
 {% block content %}
 
-    <div class="row no-gutters h-100">
+    <div class="row no-gutters h-100" id="vue-app">
 
         <div class="col-lg-3 d-flex flex-column">
 
             <div class="card-body">
 
-                {% if object.description %}
+                {% if collection.description %}
                     <h2>{{ collection.description }}</h2>
                     <br />
                 {% endif %}
 
-                <input type="submit" class="btn btn-primary" value="Gallery" id="show-gallery" data-toggle="modal" data-target="#gallery">
-
-                <br /><br />
-
-                <form action="{% url 'blob:create' %}" method="GET">
-                    <input type="hidden" name="collection_id" value="{{ collection.id }}" />
-                    <input type="submit" class="btn btn-primary" value="Add">
-                </form>
+                <button type="submit" class="btn btn-primary" id="show-gallery" data-toggle="modal" data-target="#gallery" v-cloak>
+                    <font-awesome-icon icon="image" class="mr-2"></font-awesome-icon>Gallery
+                </button>
 
             </div>
 
         </div>
 
-        <div class="col-lg-9" id="vue-app">
+        <div class="col-lg-9">
 
-            <div class="card-grid ml-2">
+            <div class="right-column">
 
-                <h3>{{ object.name }}</h3>
+                <card>
 
-                <blob-list></blob-list>
-                {% if not blob_list %}
-                    <div class="alert alert-warning" role="alert">Nothing in this collection</div>
-                {% endif %}
+                    <template v-slot:title-slot>
+
+                        <div class="d-flex">
+                            <h3>{{ collection.name }}</h3>
+                            <div class="mr-2 ml-auto">
+                                <add-button url="{% url 'blob:create' %}?collection_id={{ collection.id }}"></add-button>
+                            </div>
+                        </div>
+
+                    </template>
+
+                    <template v-slot:content>
+                        <div class="card-body ml-2">
+
+                            <blob-list inline-template>
+                                <div>
+                                    <ul class="list-group list-group-horizontal text-center list-unstyled collection-sortable">
+                                        <draggable v-model="blob_list" @change="onChange" ghost-class="collection_ghost_class" animation="500" forceFallback="true">
+                                            <li v-for="blob in blob_list" :key="blob.id" class="hoverable float-left p-3">
+                                                <a :href="[[ blob.url ]]"><img :src="[[ blob.cover_url ]]" /></a>
+
+                                                <div class="collection-item">[[ blob.name ]]</div>
+
+                                    {% if blob.collection_note %}
+
+                                        <img src="{{ STATIC_URL }}img/note.png" height="16" width="16" data-toggle="popover" data-content="[[ blob.collection_note ]]"/>
+
+                                    {% endif %}
+
+                                            </li>
+                                        </draggable>
+                                    </ul>
+                                </div>
+                            </blob-list>
+
+                           {% if not blob_list %}
+                               <div class="alert alert-warning" role="alert">Nothing in this collection</div>
+                           {% endif %}
+
+                        </div>
+                    </template>
+
+                </card>
+
             </div>
+
         </div>
 
         <div class="modal fade" id="gallery" tabindex="-1">
@@ -82,19 +118,6 @@
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
         const BlobList = {
-            template: `
-                <div>
-                    <ul class="list-group list-group-horizontal text-center list-unstyled collection-sortable">
-                        <draggable v-model="blob_list" @change="onChange" ghost-class="collection_ghost_class" animation="500" forceFallback="true">
-                            <li v-for="blob in blob_list" :key="blob.id" class="float-left p-3">
-                                <a :href="[[ blob.url ]]"><img :src="[[ blob.cover_url ]]" /></a>
-                                <br/>
-                                <a :href="[[ blob.url ]]">[[ blob.name ]]</a> {% if blob.collection_note %}<img src="{{ STATIC_URL }}img/note.png" height="16" width="16" data-toggle="popover" data-content="[[ blob.collection_note ]]"/>{% endif %}
-                            </li>
-                        </draggable>
-                    </ul>
-                </div>
-            `,
             data() {
                 return {
                     blob_list: [
@@ -164,7 +187,7 @@
 
                         }
 
-                        axios.get("{% url "collection:get_blob" object.id 666 %}".replace(/666/, current_index))
+                        axios.get("{% url "collection:get_blob" collection.id 666 %}".replace(/666/, current_index))
                              .then(response => {
                                  document.getElementById("gallery_image").setAttribute("src", response.data.cover_info.url);
                              })

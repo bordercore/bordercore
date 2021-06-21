@@ -73,6 +73,7 @@ class BookmarkViewSet(viewsets.ModelViewSet):
 class CollectionViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = CollectionSerializer
+    lookup_field = "uuid"
 
     def get_queryset(self):
         return Collection.objects.filter(user=self.request.user)

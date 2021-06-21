@@ -2,15 +2,13 @@ import re
 
 from botocore.errorfactory import ClientError
 
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.dateformat import format
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import (CreateView, DeleteView, FormMixin,
-                                       UpdateView)
+from django.views.generic.edit import CreateView, FormMixin, UpdateView
 from django.views.generic.list import ListView
 
 from blob.models import Blob
@@ -54,21 +52,6 @@ class CollectionListView(FormMixin, ListView):
         context["title"] = "Collection List"
 
         return context
-
-
-@method_decorator(login_required, name="dispatch")
-class CollectionDeleteView(DeleteView):
-
-    def get_object(self, queryset=None):
-        return Collection.objects.get(user=self.request.user, uuid=self.kwargs.get("collection_uuid"))
-
-    def get_success_url(self):
-        messages.add_message(
-            self.request,
-            messages.INFO, f"Collection <strong>{self.object.name}</strong> deleted",
-            extra_tags="show_in_dom"
-        )
-        return reverse("collection:list")
 
 
 @method_decorator(login_required, name="dispatch")
