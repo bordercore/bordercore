@@ -34,7 +34,13 @@ class BlobViewSet(viewsets.ModelViewSet):
     lookup_field = "uuid"
 
     def get_queryset(self):
-        return Blob.objects.filter(user=self.request.user)
+        """
+        Only the owner of the blob or the service user has access
+        """
+        if self.request.user == User.objects.get(username="service_user"):
+            return Blob.objects.all()
+        else:
+            return Blob.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         instance = serializer.save()
@@ -51,7 +57,13 @@ class BlobSha1sumViewSet(viewsets.ModelViewSet):
     lookup_field = "sha1sum"
 
     def get_queryset(self):
-        return Blob.objects.filter(user=self.request.user)
+        """
+        Only the owner of the blob or the service user has access
+        """
+        if self.request.user == User.objects.get(username="service_user"):
+            return Blob.objects.all()
+        else:
+            return Blob.objects.filter(user=self.request.user)
 
 
 class BookmarkViewSet(viewsets.ModelViewSet):
