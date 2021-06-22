@@ -4,7 +4,7 @@
         "es2021": true
     },
     "extends": [
-        "plugin:vue/essential",
+        "plugin:vue/recommended",
         "google"
     ],
     "parserOptions": {
@@ -22,6 +22,15 @@
           "baseIndent": 1
         }
       ],
+      "vue/html-indent": [
+        "error",
+        4,
+        {
+          "baseIndent": 1
+        }
+      ],
+      "vue/max-attributes-per-line": "off",
+      "vue/no-v-html": "off",
       "indent": "off",
       "max-len": "off",
       "quotes": [2, "double"]

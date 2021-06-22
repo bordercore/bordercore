@@ -1,20 +1,22 @@
 <template>
-    <div class="modal fade" id="modalAddBookmark" tabindex="-1" role="dialog">
-
+    <div id="modalAddBookmark" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel">Add bookmark</h4>
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                    <h4 id="myModalLabel" class="modal-title">
+                        Add bookmark
+                    </h4>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
-
                     <div class="d-flex flex-column">
                         <form style="width: 95%" @submit.prevent>
                             <div class="form-group row">
                                 <label class="col-form-label col-lg-1">URL</label>
                                 <div class="col-lg-10 d-flex">
-                                    <input class="form-control" type="text" v-model="url" @change="onChange" id="bookmark-search-url" autocomplete="off" placeholder="https://" />
+                                    <input id="bookmark-search-url" v-model="url" class="form-control" type="text" autocomplete="off" placeholder="https://" @change="onChange">
                                 </div>
                                 <div class="col-lg-1">
                                     <div class="spinner-border ml-2" :class="{'d-none': hideSpinner}" role="status">
@@ -25,26 +27,30 @@
                             <div class="form-group row" :class="{'d-none': hideNameInput}">
                                 <label class="col-form-label col-lg-1">Title</label>
                                 <div class="col-lg-10">
-                                    <input class="form-control" :disabled="nameInputIsDisabled" type="text" v-model="name" placeholder="Name" autocomplete="off" />
+                                    <input v-model="name" class="form-control" :disabled="nameInputIsDisabled" type="text" placeholder="Name" autocomplete="off">
                                 </div>
                             </div>
 
                             <div class="row" :class="{'d-none': hideAddButton}">
                                 <div class="col-lg-10 offset-lg-1 d-flex">
                                     <div class="d-flex flex-column">
-                                        <div class="mt-2 text-info"><font-awesome-icon class="mr-1 pt-1 success" icon="exclamation-triangle"></font-awesome-icon> {{ message }}</div>
+                                        <div class="mt-2 text-info">
+                                            <font-awesome-icon class="mr-1 pt-1 success" icon="exclamation-triangle" />
+                                            {{ message }}
+                                        </div>
                                         <div class="mt-2 text-info" :class="{'d-none': hideBookmarkAdded}">
-                                            <font-awesome-icon class="mr-1 pt-1 success" icon="check"></font-awesome-icon> Bookmark successfully added
+                                            <font-awesome-icon class="mr-1 pt-1 success" icon="check" /> Bookmark successfully added
                                         </div>
                                     </div>
                                     <div class="ml-auto">
-                                        <button type="button" class="btn btn-primary" @click="onAdd">Add</button>
+                                        <button type="button" class="btn btn-primary" @click="onAdd">
+                                            Add
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </form>
                     </div>
-
                 </div>
             </div>
         </div>

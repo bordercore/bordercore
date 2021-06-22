@@ -1,26 +1,25 @@
 <template>
     <div>
-        <form class="form-inline" method="get" id="top-search-form">
-            <span class="pr-2" v-if="searchFilter">Filter:
+        <form id="top-search-form" class="form-inline" method="get">
+            <span v-if="searchFilter" class="pr-2">Filter:
                 <span id="top-search-filter-type">
-                {{ searchFilter }}
+                    {{ searchFilter }}
                 </span>
             </span>
             <div class="form-row">
+                <div id="top-search-container" class="col-auto has-search">
+                    <font-awesome-icon icon="search" class="form-control-feedback text-dark" />
 
-                <div class="col-auto has-search" id="top-search-container">
-                    <font-awesome-icon icon="search" class="form-control-feedback text-dark"></font-awesome-icon>
-
-                    <vue-simple-suggest ref="suggestComponent"
-                                        id="top-simple-suggest"
-                                        :accesskey="accesskey"
+                    <vue-simple-suggest id="top-simple-suggest"
+                                        ref="suggestComponent"
                                         v-model="query"
+                                        :accesskey="accesskey"
                                         :display-attribute="displayAttribute"
                                         :value-attribute="valueAttribute"
                                         :list="search"
-                                        :filter-by-query=false
-                                        :debounce=200
-                                        :min-length=2
+                                        :filter-by-query="false"
+                                        :debounce="200"
+                                        :min-length="2"
                                         :max-suggestions="maxSuggestions"
                                         placeholder="Search"
                                         autocomplete="off"
@@ -33,16 +32,13 @@
                         <div slot="suggestion-item" slot-scope="scope">
                             <!-- @*event*.stop="null" handlers are needed to prevent the splitter from being selected -->
                             <span v-if="scope.suggestion.splitter"
-                                  @click.stop=""
                                   class="top-search-splitter"
+                                  @click.stop=""
                             >{{ scope.suggestion.name }}</span>
-                            <span v-else v-html="boldenSuggestion(scope)" class="top-search-suggestion"></span>
+                            <span v-else class="top-search-suggestion" v-html="boldenSuggestion(scope)" />
                         </div>
-
                     </vue-simple-suggest>
-
                 </div>
-
             </div>
         </form>
     </div>
@@ -53,17 +49,24 @@
     import VueSimpleSuggest from "vue-simple-suggest";
 
     export default {
+        components: {
+            VueSimpleSuggest,
+        },
         props: {
             accesskey: {
+                type: String,
                 default: null,
             },
             id: {
+                type: String,
                 default: "simple-suggest",
             },
             displayAttribute: {
+                type: String,
                 default: "value",
             },
             valueAttribute: {
+                type: String,
                 default: "value",
             },
             maxSuggestions: {
@@ -74,11 +77,26 @@
                 default: "",
                 type: String,
             },
-            suggestSearchUrl: String,
-            querySearchUrl: String,
-            noteQuerySearchUrl: String,
-            drillQuerySearchUrl: String,
-            storeInSessionUrl: String,
+            suggestSearchUrl: {
+                default: "",
+                type: String,
+            },
+            querySearchUrl: {
+                default: "",
+                type: String,
+            },
+            noteQuerySearchUrl: {
+                default: "",
+                type: String,
+            },
+            drillQuerySearchUrl: {
+                default: "",
+                type: String,
+            },
+            storeInSessionUrl: {
+                default: "",
+                type: String,
+            },
         },
         data() {
             return {
@@ -198,9 +216,6 @@
                     "",
                 );
             },
-        },
-        components: {
-            VueSimpleSuggest,
         },
     };
 

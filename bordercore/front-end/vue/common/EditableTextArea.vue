@@ -1,29 +1,33 @@
 <template>
-
     <div>
-
         <div v-if="textAreaValue || isEditingNote" :class="[isEditingNote ? 'editing' : '', extraClass]">
-            <slot name="title">
-            </slot>
-            <label class="editable-textarea-label" v-html="textAreaMarkdown" data-toggle="tooltip" data-placement="bottom" title="Doubleclick to edit note" @dblclick="editNote"></label>
-            <textarea id="note" class="editable-textarea px-3" placeholder="Enter note text here" v-model="textAreaValue" @blur="doneEdit()"></textarea>
+            <slot name="title" />
+            <label class="editable-textarea-label" data-toggle="tooltip" data-placement="bottom" title="Doubleclick to edit note" @dblclick="editNote" v-html="textAreaMarkdown" />
+            <textarea id="note" v-model="textAreaValue" class="editable-textarea px-3" placeholder="Enter note text here" @blur="doneEdit()" />
         </div>
         <div v-else class="ml-2" :class="extraClass">
-            <font-awesome-icon icon="plus"></font-awesome-icon>
+            <font-awesome-icon icon="plus" />
             <a href="#" @click="addNote">Add Note</a>
         </div>
-
     </div>
-
 </template>
 
 <script>
 
     export default {
         props: {
-            uuid: String,
-            note: String,
-            editUrl: String,
+            uuid: {
+                type: String,
+                default: "",
+            },
+            note: {
+                type: String,
+                default: "",
+            },
+            editUrl: {
+                type: String,
+                default: "",
+            },
             extraClass: {
                 type: String,
                 default: "mt-4",

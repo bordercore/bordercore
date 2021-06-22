@@ -1,23 +1,21 @@
 <template>
     <div>
-
         <div>
             <card title="Related Bookmarks">
-                <template v-slot:top-right>
+                <template #top-right>
                     <span class="button-plus float-right" @click="chooseBookmark()">
-                        <font-awesome-icon icon="plus"></font-awesome-icon>
+                        <font-awesome-icon icon="plus" />
                     </span>
                 </template>
 
-                <template v-slot:content>
-
-                    <ul class="list-group list-group-flush" id="sort-container-tags">
-                        <draggable v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
+                <template #content>
+                    <ul id="sort-container-tags" class="list-group list-group-flush">
+                        <draggable v-model="bookmarkList" ghost-class="sortable-ghost" draggable=".draggable" @change="onChange">
                             <transition-group type="transition" class="w-100">
-                                <li v-for="(bookmark, index) in bookmarkList" class="list-group-item list-group-item-secondary text-info draggable pl-0" :data-uuid="bookmark.uuid" :key="bookmark.id" v-cloak v-b-hover="handleHover">
+                                <li v-for="(bookmark, index) in bookmarkList" v-cloak :key="bookmark.id" v-b-hover="handleHover" class="list-group-item list-group-item-secondary text-info draggable pl-0" :data-uuid="bookmark.uuid">
                                     <div class="dropdownmenu hidden float-right node-bookmark-menu">
                                         <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center">
-                                            <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
+                                            <font-awesome-icon icon="ellipsis-v" class="burger-menu" />
                                             <div slot="dropdown">
                                                 <a class="dropdown-item" href="#" @click="removeBookmark(bookmark.uuid)">Remove</a>
                                                 <a class="dropdown-item" :href="bookmark.edit_url">Edit</a>
@@ -26,20 +24,21 @@
                                         </dropdown-menu>
                                     </div>
                                     <div class="d-flex">
-                                        <div v-html="bookmark.favicon_url" class="float-left pr-2"></div>
+                                        <div class="float-left pr-2" v-html="bookmark.favicon_url" />
                                         <div>
                                             <a :href="bookmark.url">{{ bookmark.name }}</a>
 
-                                            <div v-if="bookmark.note" v-on:click="activateInEditMode(bookmark, $event.target)" v-show="!bookmark.noteIsEditable" class="node-note">{{ bookmark.note }}</div>
+                                            <div v-show="!bookmark.noteIsEditable" v-if="bookmark.note" class="node-note" @:click="activateInEditMode(bookmark, $event.target)">
+                                                {{ bookmark.note }}
+                                            </div>
                                             <span v-show="bookmark.noteIsEditable">
-                                                <input type="text" class="form-control form-control-sm" id="add-bookmark-input" :value="bookmark.note" placeholder="Add Bookmark" @blur="editNote(bookmark.uuid, $event.target.value)" @keydown.enter="editNote(bookmark.uuid, $event.target.value)" >
+                                                <input id="add-bookmark-input" type="text" class="form-control form-control-sm" :value="bookmark.note" placeholder="Add Bookmark" @blur="editNote(bookmark.uuid, $event.target.value)" @keydown.enter="editNote(bookmark.uuid, $event.target.value)">
                                             </span>
-
                                         </div>
                                     </div>
                                 </li>
-                                <div class="text-secondary" v-if="bookmarkList.length == 0" :key="1" v-cloak>
-                                  No bookmarks
+                                <div v-cloak v-if="bookmarkList.length == 0" :key="1" class="text-secondary">
+                                    No bookmarks
                                 </div>
                             </transition-group>
                         </draggable>
@@ -50,15 +49,12 @@
 
         <bookmark-search
             ref="bookmarkSearch"
-            :getTitleFromUrlUrl="getTitleFromUrlUrl"
-            :createBookmarkUrl="createBookmarkUrl"
-            :questionUuid="questionUuid"
+            :get-title-from-url-url="getTitleFromUrlUrl"
+            :create-bookmark-url="createBookmarkUrl"
+            :question-uuid="questionUuid"
             @addBookmark="addBookmark"
-        >
-        </bookmark-search>
-
+        />
     </div>
-
 </template>
 
 <script>

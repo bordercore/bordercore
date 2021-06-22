@@ -1,10 +1,9 @@
 <template>
     <div class="card-body" :class="className">
         <slot name="title-slot">
-            <div class="card-title" v-if="title">
+            <div v-if="title" class="card-title">
                 {{ title }}
-                <slot name="top-right">
-                </slot>
+                <slot name="top-right" />
             </div>
         </slot>
         <slot name="content" class="card-content">

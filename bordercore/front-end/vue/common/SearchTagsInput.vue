@@ -7,6 +7,7 @@
         extends: TagsInput,
         props: {
             tagsChangedUrl: {
+                default: "",
                 type: String,
             },
         },

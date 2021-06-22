@@ -1,16 +1,15 @@
 <template>
     <div class="mr-5 text-center">
-        <slot name="title-slot">
-        </slot>
-    <div class="progress-circle">
-      <svg width="120" height="120" viewBox="0 0 120 120">
-        <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke-width="12" />
-        <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke="#7fffd4" stroke-width="12" :stroke-dasharray="strokeDashArray" :stroke-dashoffset="getDashOffset()" />
-        <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px">{{ getProgress() }}%</text>
-      </svg>
+        <slot name="title-slot" />
+        <div class="progress-circle">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke-width="12" />
+                <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke="#7fffd4" stroke-width="12" :stroke-dasharray="strokeDashArray" :stroke-dashoffset="getDashOffset()" />
+                <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px">{{ getProgress() }}%</text>
+            </svg>
+        </div>
+        <span class="text-primary mt-2">{{ count }} {{ getPluralized() }}</span>
     </div>
-    <span class="text-primary mt-2">{{ count }} {{ getPluralized() }}</span>
-  </div>
 </template>
 
 <script>
@@ -19,9 +18,11 @@
         props: {
             count: {
                 default: 0,
+                type: Number,
             },
             progress: {
                 default: 0.0,
+                type: Number,
             },
         },
         data() {

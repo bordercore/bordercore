@@ -4,20 +4,21 @@
              class="text-break"
              :class="{bold: isFolder}"
              @click="toggle"
-             @dblclick="makeFolder">
+             @dblclick="makeFolder"
+        >
             <a :href="getId(item.id)">{{ item.label }}</a>
             <!-- <span v-if="isFolder">[{{ isOpen ? '-' : '+' }}]</span> -->
         </div>
         <ul v-show="isOpen" v-if="isFolder">
             <tree-menu
-                class="item"
                 v-for="(child, index) in item.nodes"
                 :key="index"
+                class="item"
                 :item="child"
                 :depth="depth + 1"
                 @make-folder="$emit('make-folder', $event)"
                 @add-item="$emit('add-item', $event)"
-            ></tree-menu>
+            />
         </ul>
     </li>
 </template>
@@ -26,8 +27,15 @@
 
     export default {
         props: {
-            item: Object,
-            depth: Number,
+            item: {
+                default: function() {
+                },
+                type: Object,
+            },
+            depth: {
+                default: 1,
+                type: Number,
+            },
         },
         data: function() {
             return {

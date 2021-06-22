@@ -4,19 +4,19 @@
             ref="tagsInputComponent"
             v-model="tag"
             :tags="tags"
-            @tags-changed=tagsChanged
             :autocomplete-items="filteredItems"
             :autofocus="autofocus"
             :add-only-from-autocomplete="false"
             :placeholder="placeHolder"
             :disabled="disabled"
             :max-tags="maxTags"
+            @tags-changed="tagsChanged"
         >
             <div slot="autocomplete-item" slot-scope="scope" @click="scope.performAdd(scope.item)">
                 <div>{{ scope.item.text }}</div>
             </div>
         </vue-tags-input>
-        <input type="hidden" :name="name" :value="tagsCommaSeparated" />
+        <input type="hidden" :name="name" :value="tagsCommaSeparated">
     </div>
 </template>
 
@@ -26,8 +26,12 @@
 
     export default {
 
+        components: {
+            VueTagsInput,
+        },
         props: {
             autofocus: {
+                type: Boolean,
                 default: false,
             },
             searchUrl: {
@@ -62,8 +66,38 @@
                 autocompleteItems: [],
             };
         },
+        computed: {
+            tagsCommaSeparated: function() {
+                // Be sure to use the 'text' field rather than 'value'.
+                //  The 'value' field only exists for existing tags that
+                //  are added by autocomplete, not new tags typed in
+                //  by the user.
+                return this.tags.map((x) => x.text).join(",");
+            },
+            filteredItems() {
+                return this.autocompleteItems.filter((i) => {
+                    return i.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1;
+                });
+            },
+        },
         watch: {
             "tag": "initItems",
+        },
+        mounted() {
+            // The initial set of tags can either be passed in via an event
+            //  or read from the DOM, depending on the value of the prop
+            //  "getTagsFromEvent".
+
+            if (this.getTagsFromEvent) {
+                EventBus.$on("addTags", (payload) => {
+                    this.tags = payload;
+                });
+            } else {
+                const initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
+                if (initialTags) {
+                    this.tags = initialTags;
+                }
+            }
         },
         methods: {
             tagsChanged(newTags) {
@@ -84,39 +118,6 @@
                     "",
                 );
             },
-        },
-        mounted() {
-            // The initial set of tags can either be passed in via an event
-            //  or read from the DOM, depending on the value of the prop
-            //  "getTagsFromEvent".
-
-            if (this.getTagsFromEvent) {
-                EventBus.$on("addTags", (payload) => {
-                    this.tags = payload;
-                });
-            } else {
-                const initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
-                if (initialTags) {
-                    this.tags = initialTags;
-                }
-            }
-        },
-        computed: {
-            tagsCommaSeparated: function() {
-                // Be sure to use the 'text' field rather than 'value'.
-                //  The 'value' field only exists for existing tags that
-                //  are added by autocomplete, not new tags typed in
-                //  by the user.
-                return this.tags.map((x) => x.text).join(",");
-            },
-            filteredItems() {
-                return this.autocompleteItems.filter((i) => {
-                    return i.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1;
-                });
-            },
-        },
-        components: {
-            VueTagsInput,
         },
 
     };

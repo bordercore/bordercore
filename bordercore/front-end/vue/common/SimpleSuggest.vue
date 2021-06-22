@@ -1,16 +1,16 @@
 <template>
     <div>
-        <vue-simple-suggest ref="suggestComponent"
-                            :id="id"
-                            :accesskey="accesskey"
+        <vue-simple-suggest :id="id"
+                            ref="suggestComponent"
                             v-model="query"
+                            :accesskey="accesskey"
                             :display-attribute="displayAttribute"
                             :value-attribute="valueAttribute"
                             :list="search"
                             :name="name"
-                            :filter-by-query=true
-                            :debounce=200
-                            :min-length=2
+                            :filter-by-query="true"
+                            :debounce="200"
+                            :min-length="2"
                             :max-suggestions="maxSuggestions"
                             :placeholder="placeHolder"
                             autocomplete="off"
@@ -22,7 +22,7 @@
                             @hover="onHover"
         >
             <div slot="suggestion-item" slot-scope="scope">
-                <span v-html="boldenSuggestion(scope)"></span>
+                <span v-html="boldenSuggestion(scope)" />
             </div>
         </vue-simple-suggest>
     </div>
@@ -33,20 +33,28 @@
     import VueSimpleSuggest from "vue-simple-suggest";
 
     export default {
+        components: {
+            VueSimpleSuggest,
+        },
         props: {
             autofocus: {
+                type: Boolean,
                 default: false,
             },
             accesskey: {
+                type: String,
                 default: null,
             },
             id: {
+                type: String,
                 default: "simple-suggest",
             },
             displayAttribute: {
+                type: String,
                 default: "value",
             },
             valueAttribute: {
+                type: String,
                 default: "value",
             },
             maxSuggestions: {
@@ -54,12 +62,15 @@
                 type: Number,
             },
             searchUrl: {
+                type: String,
                 default: "search-url",
             },
             placeHolder: {
+                type: String,
                 default: "Name",
             },
             name: {
+                type: String,
                 default: "search",
             },
 
@@ -134,9 +145,6 @@
                     this.$parent.onHover(evt);
                 }
             },
-        },
-        components: {
-            VueSimpleSuggest,
         },
     };
 
