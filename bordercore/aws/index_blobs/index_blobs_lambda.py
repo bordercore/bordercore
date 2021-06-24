@@ -32,7 +32,7 @@ def handler(event, context):
 
             file_changed = sns_record["s3"].get("file_changed", True)
 
-            # If this was triggered by S3, then parse the sha1sum from the S3 key.
+            # If this was triggered by S3, then parse the uuid from the S3 key.
             # Otherwise this must have been called from Django, in which case the
             # uuid was passed in instead.
             try:
@@ -40,21 +40,21 @@ def handler(event, context):
                 key = sns_record["s3"]["object"]["key"]
                 log.info(f"key: {key}")
 
-                # blobs/d9/d941cfc33c4b40a8c3e576a33343b7adfb7bac69/
-                pattern = re.compile(r"^blobs/\w\w/([0-9a-f]{40})/")
+                # blobs/af351cc4-3b8b-47d5-8048-85e5fb5abe19/cover.jpg
+                pattern = re.compile(r"^blobs/(.*?)/")
 
                 matches = pattern.match(key)
                 if matches and matches.group(1):
-                    sha1sum = matches.group(1)
+                    uuid = matches.group(1)
                 else:
                     # TODO Throw more specific exception
-                    raise Exception(f"Can't parse sha1sum from key: {key}")
+                    raise Exception(f"Can't parse uuid from key: {key}")
 
                 if PurePath(key).name == "cover.jpg" or PurePath(key).name.startswith("cover-"):
                     log.info("Skipping blob")
                     continue
 
-                index_blob_es(sha1sum=sha1sum, file_changed=file_changed)
+                index_blob_es(uuid=uuid, file_changed=file_changed)
 
             except KeyError:
                 uuid = sns_record["s3"]["uuid"]

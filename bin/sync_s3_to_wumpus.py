@@ -85,7 +85,7 @@ def copy_object_to_wumpus(info):
         logger.info("  Skipping. File already exists.")
     else:
         logger.info(file_path)
-        matches = re.compile(r".*/(blobs/\w\w/[0-9a-f]{40})/(.*)").match(file_path)
+        matches = re.compile(r".*/(blobs/.*?)/(.*)").match(file_path)
         dirs = matches.group(1)
         filename = matches.group(2)
 

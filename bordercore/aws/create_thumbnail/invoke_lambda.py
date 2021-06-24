@@ -26,7 +26,7 @@ def invoke(uuid):
                         "name": "bordercore-blobs",
                     },
                     "object": {
-                        "key": f"blobs/{blob.sha1sum[:2]}/{blob.sha1sum}/{blob.file}"
+                        "key": f"blobs/{blob.uuid}/{blob.file}"
                     }
                 }
             }

@@ -309,20 +309,20 @@ def test_blobs_in_s3_exist_in_db():
 
     s3_resource = boto3.resource("s3")
 
-    unique_sha1sums = {}
+    unique_uuids = {}
 
     paginator = s3_resource.meta.client.get_paginator("list_objects")
     page_iterator = paginator.paginate(Bucket=bucket_name)
 
     for page in page_iterator:
         for key in page["Contents"]:
-            m = re.search(r"^blobs/\w{2}/(\w{40})/", str(key["Key"]))
+            m = re.search(r"^blobs/(.*?)/", str(key["Key"]))
             if m:
-                unique_sha1sums[m.group(1)] = True
+                unique_uuids[m.group(1)] = True
 
-    for key in unique_sha1sums.keys():
+    for key in unique_uuids.keys():
         try:
-            Blob.objects.get(sha1sum=key)
+            Blob.objects.get(uuid=key)
         except ObjectDoesNotExist:
             raise ObjectDoesNotExist(f"Blob found in S3 but not in DB: {key}")
 
@@ -337,10 +337,9 @@ def test_images_have_thumbnails():
     for blob in Blob.objects.filter(~Q(file="")):
 
         if is_image(blob.file):
-            key = "{}/{}/{}/cover.jpg".format(
+            key = "{}/{}/cover.jpg".format(
                 settings.MEDIA_ROOT,
-                blob.sha1sum[0:2],
-                blob.sha1sum,
+                blob.uuid,
             )
             try:
                 s3_client.head_object(Bucket=bucket_name, Key=key)
@@ -371,20 +370,20 @@ def test_elasticsearch_blobs_exist_in_s3(es):
 
     s3_resource = boto3.resource("s3")
 
-    unique_sha1sums = {}
+    unique_uuids = {}
 
     paginator = s3_resource.meta.client.get_paginator("list_objects")
     page_iterator = paginator.paginate(Bucket=bucket_name)
 
     for page in page_iterator:
         for key in page["Contents"]:
-            m = re.search(r"^blobs/\w{2}/(\w{40})/", str(key["Key"]))
+            m = re.search(r"^blobs/(.*?)/", str(key["Key"]))
             if m:
-                unique_sha1sums[m.group(1)] = True
+                unique_uuids[m.group(1)] = True
 
     for blob in found:
-        if not blob["_source"]["sha1sum"] in unique_sha1sums:
-            assert False, f"blob {blob['_source']['sha1sum']} exists in Elasticsearch but not in S3"
+        if not blob["_source"]["uuid"] in unique_uuids:
+            assert False, f"blob {blob['_source']['uuid']} exists in Elasticsearch but not in S3"
 
 
 @pytest.mark.wumpus
@@ -398,10 +397,10 @@ def test_blobs_in_s3_exist_on_filesystem():
 
     for page in page_iterator:
         for key in page["Contents"]:
-            m = re.search(r"^(blobs/\w{2}/\w{40})/(.+)", str(key["Key"]))
+            m = re.search(r"^blobs/.*?/(.+)", str(key["Key"]))
             if m:
                 file_path = f"{BLOB_DIR}/{key['Key']}"
-                filename = m.group(2)
+                filename = m.group(1)
                 if not Path(file_path).exists() and filename not in ILLEGAL_FILENAMES:
                     assert False, f"blob {key['Key']} exists in S3 but not on the filesystem"
 
@@ -420,7 +419,7 @@ def test_blobs_on_filesystem_exist_in_s3():
     # Create a hash of all blobs in S3 for later lookup
     for page in page_iterator:
         for key in page["Contents"]:
-            m = re.search(r"^(blobs/\w{2}/\w{40})/(.+)", str(key["Key"]))
+            m = re.search(r"^blobs/.*?/.+", str(key["Key"]))
             if m:
                 file_path = f"{BLOB_DIR}/{key['Key']}"
                 blobs[file_path] = True

@@ -9,9 +9,9 @@ from tag.models import Tag  # isort:skip
 from blob.models import Blob  # isort:skip
 
 
-def test_get_s3_key_from_sha1sum(blob_image_factory):
-    s3_key = Blob.get_s3_key_from_sha1sum(blob_image_factory.sha1sum, blob_image_factory.file)
-    assert s3_key == f"blobs/{blob_image_factory.sha1sum[:2]}/{blob_image_factory.sha1sum}/{blob_image_factory.file}"
+def test_get_s3_key_from_uuid(blob_image_factory):
+    s3_key = Blob.get_s3_key_from_uuid(blob_image_factory.uuid, blob_image_factory.file)
+    assert s3_key == f"blobs/{blob_image_factory.uuid}/{blob_image_factory.file}"
 
 
 def test_get_urls(blob_image_factory):
@@ -33,6 +33,7 @@ def test_doctype(blob_image_factory, blob_text_factory):
     assert blob_image_factory.doctype == "image"
     assert blob_text_factory.doctype == "document"
 
+
 def test_get_metadata(blob_image_factory):
 
     metadata = blob_image_factory.get_metadata()
@@ -46,12 +47,12 @@ def test_get_content_type():
 
 def test_get_parent_dir(blob_image_factory):
     parent_dir = blob_image_factory.get_parent_dir()
-    assert parent_dir == f"blobs/{blob_image_factory.sha1sum[:2]}/{blob_image_factory.sha1sum}"
+    assert parent_dir == f"blobs/{blob_image_factory.uuid}"
 
 
 def test_get_url(blob_image_factory):
     url = blob_image_factory.get_url()
-    assert url == f"{blob_image_factory.sha1sum[:2]}/{blob_image_factory.sha1sum}/{quote_plus(str(blob_image_factory.file))}"
+    assert url == f"{blob_image_factory.uuid}/{quote_plus(str(blob_image_factory.file))}"
 
 
 def test_get_name(blob_image_factory):
@@ -93,6 +94,7 @@ def test_is_ingestible_file(blob_image_factory):
     assert Blob.is_ingestible_file("file.png") is False
     assert Blob.is_ingestible_file("file.pdf") is True
 
+
 def test_get_cover_info(blob_image_factory, blob_pdf_factory):
 
     cover_info = blob_image_factory.get_cover_info()
@@ -100,13 +102,13 @@ def test_get_cover_info(blob_image_factory, blob_pdf_factory):
     assert cover_info["width"] == 1600
 
     cover_info = blob_image_factory.get_cover_info(size="small")
-    assert cover_info["url"] == "https://blobs.bordercore.com/1c/1ce691807b81b83c89c157f89de08da3815bb550/cover.jpg"
+    assert cover_info["url"] == f"https://blobs.bordercore.com/{blob_image_factory.uuid}/cover.jpg"
 
     cover_info_pdf = blob_pdf_factory.get_cover_info()
-    assert cover_info_pdf["url"] == "https://blobs.bordercore.com/c3/c315bac6f171d8e9cf52613d89a950b5161d8c16/cover-large.jpg"
+    assert cover_info_pdf["url"] == f"https://blobs.bordercore.com/{blob_pdf_factory.uuid}/cover-large.jpg"
 
     cover_info_pdf = blob_pdf_factory.get_cover_info(size="small")
-    assert cover_info_pdf["url"] == "https://blobs.bordercore.com/c3/c315bac6f171d8e9cf52613d89a950b5161d8c16/cover.jpg"
+    assert cover_info_pdf["url"] == f"https://blobs.bordercore.com/{blob_pdf_factory.uuid}/cover.jpg"
 
     assert Blob.get_cover_info_static(blob_pdf_factory.user, None) == {"url": ""}
 

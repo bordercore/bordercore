@@ -336,8 +336,8 @@ class SearchTagDetailView(ListView):
                 result = {
                     "sha1sum": match["_source"]["sha1sum"],
                     "filename": match["_source"].get("filename", ""),
-                    "url": Blob.get_s3_key_from_sha1sum(
-                        match["_source"]["sha1sum"],
+                    "url": Blob.get_s3_key_from_uuid(
+                        match["_source"]["uuid"],
                         match["_source"].get("filename", "")
                     ),
                     "cover_url": Blob.get_cover_info_static(

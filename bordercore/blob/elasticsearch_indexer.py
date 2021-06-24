@@ -128,7 +128,7 @@ def get_blob_info(**kwargs):
 def get_blob_contents_from_s3(blob):
 
     blob_contents = BytesIO()
-    s3_key = f'{S3_KEY_PREFIX}/{blob["sha1sum"][:2]}/{blob["sha1sum"]}/{blob["file"]}'
+    s3_key = f'{S3_KEY_PREFIX}/{blob["uuid"]}/{blob["file"]}'
     s3client.download_fileobj(S3_BUCKET_NAME, s3_key, blob_contents)
 
     blob_contents.seek(0)

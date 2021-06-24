@@ -15,9 +15,8 @@ from storages.backends.s3boto3 import S3Boto3Storage
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.files.storage import FileSystemStorage
 from django.db import models
-from django.db.models.signals import post_save, pre_delete
+from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch.dispatcher import receiver
 
 from collection.models import Collection
@@ -57,50 +56,18 @@ ILLEGAL_FILENAMES = [
 log = logging.getLogger(f"bordercore.{__name__}")
 
 
-# Override FileSystemStorage to get better control of how files are named
-class BlobFileSystemStorage(FileSystemStorage):
-    def get_available_name(self, name, max_length=None):
-        if max_length and len(name) > max_length:
-            raise(Exception("name's length is greater than max_length"))
-        return name
-
-    # Override this to prevent Django from cleaning the name (eg replacing spaces with underscores)
-    def get_valid_name(self, name):
-        return name
-
-    def _save(self, name, content):
-        if self.exists(name):
-            # if the file exists, do not call the superclasses _save method
-            return name
-        # if the file is new, DO call it
-        return super()._save(name, content)
-
-
 class DownloadableS3Boto3Storage(S3Boto3Storage):
 
     # Override this to prevent Django from cleaning the name (eg replacing spaces with underscores)
     def get_valid_name(self, name):
         return name
 
-    def _save(self, name, content):
-        """
-        Override _save() to set a custom S3 location for the object
-        """
-
-        hasher = hashlib.sha1()
-        for chunk in content.chunks():
-            hasher.update(chunk)
-        sha1sum = hasher.hexdigest()
-
-        self.location = "blobs/{}/{}".format(sha1sum[0:2], sha1sum)
-        return super()._save(name, content)
-
 
 class Blob(TimeStampedModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     content = models.TextField(null=True)
     name = models.TextField(null=True)
-    sha1sum = models.CharField(max_length=40, unique=True, blank=True, null=True)
+    sha1sum = models.CharField(max_length=40, blank=True, null=True)
     file = models.FileField(max_length=500, storage=DownloadableS3Boto3Storage(), blank=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     note = models.TextField(null=True, blank=True)
@@ -112,15 +79,20 @@ class Blob(TimeStampedModel):
     is_indexed = models.BooleanField(default=True)
     documents = models.ManyToManyField("self", blank=True)
 
+    class Meta:
+        unique_together = (
+            ("sha1sum", "user")
+        )
+
     def __str__(self):
         return self.name or ""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Save the sha1sum so that when it changes by a blob edit
+        # Save the filename so that when it changes by a blob edit
         #  in save() we know what the original was.
-        setattr(self, "__original_sha1sum", getattr(self, 'sha1sum'))
+        setattr(self, "__original_filename", self.file.name)
 
     @staticmethod
     def get_content_type(argument):
@@ -140,13 +112,13 @@ class Blob(TimeStampedModel):
         return switcher.get(argument, "")
 
     def get_parent_dir(self):
-        return "{}/{}/{}".format(settings.MEDIA_ROOT, self.sha1sum[0:2], self.sha1sum)
+        return f"{settings.MEDIA_ROOT}/{self.uuid}"
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
 
     def get_url(self):
-        return f"{self.sha1sum[0:2]}/{self.sha1sum}/{quote_plus(str(self.file))}"
+        return f"{self.uuid}/{quote_plus(str(self.file))}"
 
     def get_name(self, remove_edition_string=False, use_filename_if_present=False):
         name = self.name
@@ -201,12 +173,12 @@ class Blob(TimeStampedModel):
             return f"{date}T00:00"
 
     @staticmethod
-    def get_s3_key_from_sha1sum(sha1sum, file):
-        return "{}/{}/{}/{}".format(settings.MEDIA_ROOT, sha1sum[0:2], sha1sum, file)
+    def get_s3_key_from_uuid(uuid, file):
+        return "{}/{}/{}".format(settings.MEDIA_ROOT, uuid, file)
 
     def get_s3_key(self):
         if self.file:
-            return "{}/{}/{}/{}".format(settings.MEDIA_ROOT, self.sha1sum[0:2], self.sha1sum, self.file)
+            return f"{settings.MEDIA_ROOT}/{self.uuid}/{self.file}"
         else:
             return None
 
@@ -291,29 +263,12 @@ class Blob(TimeStampedModel):
         if self.sha1sum:
 
             # This is set in __init__
-            sha1sum_orig = getattr(self, '__original_sha1sum')
-
-            sha1sum_new = self.sha1sum
-            if sha1sum_orig is not None and sha1sum_orig != sha1sum_new:
-                log.info(f"Updating file from sha1sum={sha1sum_orig} to sha1sum={sha1sum_new}")
-                self.change_file(sha1sum_orig)
-
-    def change_file(self, old_sha1sum):
-
-        # Sanity check to prevent unwanted deletions
-        pattern = re.compile(r"\b[0-9a-f]{40}\b")
-        if not re.match(pattern, old_sha1sum):
-            log.error(f"Trying to update a sha1sum, but given invalid sha1sum: {old_sha1sum}")
-            return
-
-        dir_old = f"{settings.MEDIA_ROOT}/{old_sha1sum[:2]}/{old_sha1sum}"
-
-        s3 = boto3.resource("s3")
-        my_bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
-
-        for fn in my_bucket.objects.filter(Prefix=dir_old):
-            log.info(f"Deleting key {fn.key}")
-            s3.Object(settings.AWS_STORAGE_BUCKET_NAME, fn.key).delete()
+            filename_orig = getattr(self, "__original_filename")
+            if filename_orig != self.file.name:
+                key = f"{self.get_parent_dir()}/{filename_orig}"
+                log.info(f"File name changed detected. Deleting old file: {key}")
+                s3 = boto3.resource("s3")
+                s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key).delete()
 
     def has_been_modified(self):
         """
@@ -415,7 +370,7 @@ class Blob(TimeStampedModel):
         info = {}
         url = None
 
-        prefix = settings.COVER_URL + f"{self.sha1sum[:2]}/{self.sha1sum}"
+        prefix = settings.COVER_URL + f"{self.uuid}"
 
         file_extension = PurePath(self.file.name).suffix
 
@@ -468,11 +423,10 @@ class Blob(TimeStampedModel):
             ]
         }
 
-        response = client.publish(
+        client.publish(
             TopicArn="arn:aws:sns:us-east-1:192218769908:NewS3Blob",
             Message=json.dumps(message),
         )
-        # TODO: Handle response errors
 
     def tree(self):
         return defaultdict(self.tree)
@@ -588,7 +542,7 @@ def set_s3_metadata_file_modified(sender, instance, **kwargs):
     Store a file's modification time as S3 metadata after it's saved.
     """
 
-    # instance.file_modified will be "None" or non-existentif we're
+    # instance.file_modified will be "None" or non-existent if we're
     # editing a blob's information, but not changing the blob itself.
     # In that case we don't want to update its "file_modified" metadata.
     if not instance.file or not hasattr(instance, "file_modified"):
@@ -611,12 +565,19 @@ def set_s3_metadata_file_modified(sender, instance, **kwargs):
     )
 
 
+@receiver(pre_save, sender=Blob)
+def mymodel_pre_save(sender, instance, **kwargs):
+
+    # Use a custom S3 location for the blob, based on the blob's UUID
+    instance.file.storage.location = f"blobs/{instance.uuid}"
+
+
 @receiver(pre_delete, sender=Blob)
 def mymodel_delete_s3(sender, instance, **kwargs):
 
     if instance.file:
 
-        dir = "{}/{}/{}".format(settings.MEDIA_ROOT, instance.sha1sum[0:2], instance.sha1sum)
+        dir = f"{settings.MEDIA_ROOT}/{instance.uuid}"
         s3 = boto3.resource("s3")
         my_bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
 

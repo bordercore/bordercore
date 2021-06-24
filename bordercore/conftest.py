@@ -484,7 +484,7 @@ def handle_s3_info_image(s3_resource, s3_bucket, blob, file_path, cover_filename
     s3_resource.meta.client.upload_file(
         str(filepath_cover),
         settings.AWS_STORAGE_BUCKET_NAME,
-        f"{settings.MEDIA_ROOT}/{blob.sha1sum[:2]}/{blob.sha1sum}/{cover_filename}",
+        f"{settings.MEDIA_ROOT}/{blob.uuid}/{cover_filename}",
         ExtraArgs={'Metadata': {"image-width": str(width_cover),
                                 "image-height": str(height_cover),
                                 "cover-image": "Yes"}}
@@ -500,7 +500,7 @@ def handle_s3_info_pdf(s3_resource, s3_bucket, blob, file_path, cover_filename):
     s3_resource.meta.client.upload_file(
         str(filepath_cover),
         settings.AWS_STORAGE_BUCKET_NAME,
-        f"{settings.MEDIA_ROOT}/{blob.sha1sum[:2]}/{blob.sha1sum}/{cover_filename}",
+        f"{settings.MEDIA_ROOT}/{blob.uuid}/{cover_filename}",
         ExtraArgs={'Metadata': {"image-width": str(width_cover),
                                 "image-height": str(height_cover),
                                 "cover-image": "Yes"}}

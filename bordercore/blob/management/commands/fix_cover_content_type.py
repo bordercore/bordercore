@@ -17,8 +17,8 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--sha1sum",
-            help="The sha1sum of the blob to fix",
+            "--uuid",
+            help="The uuid of the blob to fix",
         )
         parser.add_argument(
             "--dry-run",
@@ -27,7 +27,7 @@ class Command(BaseCommand):
         )
 
     @atomic
-    def handle(self, *args, sha1sum, dry_run, **kwargs):
+    def handle(self, *args, uuid, dry_run, **kwargs):
 
         s3_resource = boto3.resource("s3")
 
@@ -37,11 +37,11 @@ class Command(BaseCommand):
         for page in page_iterator:
             for key in page["Contents"]:
 
-                m = re.search(r"^blobs/\w{2}/(\w{40})/(cover.*)", str(key["Key"]))
+                m = re.search(r"^blobs/(.*?)/(cover.*)", str(key["Key"]))
 
                 if m:
 
-                    if not sha1sum or (sha1sum and sha1sum == m.group(1)):
+                    if not uuid or (uuid and uuid == m.group(1)):
                         response = s3_resource.meta.client.head_object(Bucket=self.bucket_name, Key=key["Key"])
 
                         if response["ContentType"] != "image/jpeg":

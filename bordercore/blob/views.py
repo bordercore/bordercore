@@ -30,6 +30,7 @@ from lib.util import is_image, is_pdf
 
 log = logging.getLogger(f"bordercore.{__name__}")
 
+
 @method_decorator(login_required, name="dispatch")
 class BlobListView(ListView):
 
@@ -104,6 +105,7 @@ class BlobCreateView(CreateView):
         obj = form.save(commit=False)
         obj.user = self.request.user
         obj.file_modified = form.cleaned_data['file_modified']
+
         obj.save()
 
         # Take care of the tags.  Create any that are new.
@@ -170,7 +172,7 @@ class BlobDetailView(DetailView):
         context["date"] = self.object.get_date()
 
         if self.object.sha1sum:
-            context["aws_url"] = f"https://s3.console.aws.amazon.com/s3/buckets/{settings.AWS_STORAGE_BUCKET_NAME}/blobs/{self.object.sha1sum[:2]}/{self.object.sha1sum}/"
+            context["aws_url"] = f"https://s3.console.aws.amazon.com/s3/buckets/{settings.AWS_STORAGE_BUCKET_NAME}/blobs/{self.object.uuid}/"
             try:
                 context["cover_info"] = self.object.get_cover_info()
             except ClientError:
@@ -207,7 +209,6 @@ class BlobDetailView(DetailView):
         )
 
         return context
-
 
     def get_queryset(self):
         return Blob.objects.filter(user=self.request.user)
@@ -273,9 +274,13 @@ class BlobUpdateView(UpdateView):
             if (new_filename != old_filename):
 
                 try:
-                    key_root = f"{settings.MEDIA_ROOT}/{blob.sha1sum[0:2]}/{blob.sha1sum}"
+                    key_root = f"{settings.MEDIA_ROOT}/{blob.uuid}"
                     s3 = boto3.resource("s3")
-                    s3.Object(settings.AWS_STORAGE_BUCKET_NAME, f"{key_root}/{new_filename}").copy_from(CopySource=f"{settings.AWS_STORAGE_BUCKET_NAME}/{key_root}/{old_filename}")
+                    s3.Object(
+                        settings.AWS_STORAGE_BUCKET_NAME, f"{key_root}/{new_filename}"
+                    ).copy_from(
+                        CopySource=f"{settings.AWS_STORAGE_BUCKET_NAME}/{key_root}/{old_filename}"
+                    )
                     s3.Object(settings.AWS_STORAGE_BUCKET_NAME, f"{key_root}/{old_filename}").delete()
 
                     blob.file = new_filename
@@ -425,10 +430,11 @@ def parse_date(request, input_date):
     return JsonResponse({'output_date': response,
                          'error': error})
 
+
 @login_required
 def get_recent_blobs(request):
 
-    blob_list =  Blob.objects.filter(user=request.user). \
+    blob_list = Blob.objects.filter(user=request.user). \
         prefetch_related("tags", "metadata_set"). \
         order_by("-created")[:10]
 
