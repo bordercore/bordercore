@@ -109,6 +109,28 @@
 
         </div>
 
+        <div class="modal fade" id="modalDelete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">Delete Collection</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    </div>
+
+                    <div class="modal-body">
+                        Are you sure you want to delete the collection <strong>[[ getSelectedCollectionName() ]]</strong>?
+                    </div>
+
+                    <div class="modal-footer justify-content-end">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <input id="btn-action" class="btn btn-primary" type="button" value="Confirm" @click="deleteCollection" />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
     </div>
 
 {% endblock %}
@@ -210,18 +232,33 @@
                     );
 
                 },
+                getSelectedCollectionName() {
+                    if (this.selectedUuid) {
+                        const index = this.items.findIndex(x => x.uuid === this.selectedUuid);
+                        return this.items[index].name;
+                    } else {
+                        return "";
+                    }
+                },
                 onClickDelete(uuid) {
+                    this.selectedUuid = uuid;
+                    $("#modalDelete").modal("show")
+                },
+                deleteCollection() {
 
                     let self = this;
-                    this.selectedUuid = uuid;
 
-                    axios.delete("{% url 'collection-detail' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', uuid))
+                    axios.delete("{% url 'collection-detail' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', this.selectedUuid))
                          .then((response) => {
 
                              // Remove the deleted item from the list
                              const index = self.items.findIndex(x => x.uuid === self.selectedUuid)
                              const collectionName = self.items[index].name;
                              self.items.splice(index, 1);
+
+                             self.selectedUuid = null;
+
+                             $("#modalDelete").modal("hide")
 
                              this.$bvToast.toast(`Collection ${collectionName} deleted`, {
                                  title: "Info",
