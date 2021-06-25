@@ -294,7 +294,7 @@
                     evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
                 },
                 onClickRemove(uuid) {
-                    axios.delete("{% url 'playlistitem-list' %}" + uuid)
+                    axios.delete("{% url 'playlistitem-detail' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', uuid))
                          .then((response) => {
 
                              this.$bvToast.toast("Song deleted from playlist", {

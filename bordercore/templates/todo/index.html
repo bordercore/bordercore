@@ -272,8 +272,8 @@
                 onClickDelete(item, index, evt) {
 
                     let selectedUuid = item;
-
-                    axios.delete("{% url 'todo-list' %}" + selectedUuid)
+                    console.log("got here!!!");
+                    axios.delete("{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', selectedUuid))
                          .then((response) => {
 
                              this.$bvToast.toast("Todo task deleted", {
