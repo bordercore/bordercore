@@ -32,10 +32,6 @@
 
                     </div>
 
-                    <h2 id="name" class="pl-0 text-break">
-                        {{ caption }}
-                    </h2>
-
                     <h5>{{ blob.get_edition_string }}</h5>
 
                     {% if subtitle %}
@@ -57,7 +53,7 @@
                     {% endif  %}
 
                     {% if blob.tags.all %}
-                        <div class="mt-5 mb-3">
+                        <div class="mt-3 mb-3">
                             Tags:
                             {% for tag in blob.tags.all %}
                                 <a class="badge badge-info" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
@@ -89,7 +85,7 @@
                             {% if elasticsearch_info.content_type %}
                                 <div>
                                     <strong>Object Type</strong>
-                                        {{ elasticsearch_info.content_type }}
+                                    {{ elasticsearch_info.content_type }}
                                 </div>
                             {% endif %}
 
@@ -195,6 +191,10 @@
                 <div id="vue-messages">
                     {% include "common/show_messages.html" %}
                 </div>
+
+                <h2 id="name" class="pl-0 text-break">
+                    {{ caption }}
+                </h2>
 
                 {% if elasticsearch_info.content_type == "Video" %}
 
