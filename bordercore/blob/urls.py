@@ -55,4 +55,9 @@ urlpatterns = [
         view=views.get_recent_blobs,
         name="get_recent_blobs"
     ),
+    path(
+        route="cover_info/<uuid:uuid>",
+        view=views.BlobCoverInfoView.as_view(),
+        name="cover_info"
+    ),
 ]

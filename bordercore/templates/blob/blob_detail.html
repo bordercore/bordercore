@@ -186,20 +186,6 @@
 
             </div>
 
-            {% if cover_info %}
-                <div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                    <div class="modal-dialog modal-dialog-centered w-75 mw-100" role="document">
-                        <div class="modal-content">
-                            <div class="modal-body">
-                                <div>
-                                    <img src="{{ cover_info.url }}" class="w-100"/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
-
         </div> <!-- End first column -->
 
         <div class="col-lg-9 h-100 overflow-auto" id="vue-app-content">
@@ -230,11 +216,9 @@
                     </div>
                 {% endif %}
 
-                {% if cover_info %}
-                    <img src="{{ cover_info.url }}" height="{{ cover_info.height_cropped }}" width="{{ cover_info.width_cropped }}" data-toggle="modal" data-target="#myModal3" />
-                {% endif %}
-
-                <br /><br />
+                <blob-detail-cover :initial-cover-info="{{ cover_info|safe }}"
+                                   cover-url="{% url "blob:cover_info" object.uuid %}"
+                />
 
             </div>
 
@@ -257,7 +241,7 @@
                     right: true,
                     show: false,
                     isPinnedNote: {{ is_pinned_note|yesno:"true,false" }},
-                    tree: {{ tree|safe }}
+                    tree: {{ tree|safe }},
                 }
             },
             methods: {
@@ -308,6 +292,9 @@
 
         new Vue({
             el: "#vue-app-content",
+            components: {
+                BlobDetailCover,
+            },
             methods: {
                 getContent() {
                     content = markdown.render("{{ blob.content|escapejs }}");

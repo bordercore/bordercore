@@ -171,6 +171,7 @@ class BlobDetailView(DetailView):
 
         context["date"] = self.object.get_date()
 
+        context["cover_info"] = {}
         if self.object.sha1sum:
             context["aws_url"] = f"https://s3.console.aws.amazon.com/s3/buckets/{settings.AWS_STORAGE_BUCKET_NAME}/blobs/{self.object.uuid}/"
             try:
@@ -304,6 +305,25 @@ class BlobUpdateView(UpdateView):
         messages.add_message(self.request, messages.INFO, 'Blob updated')
 
         return HttpResponseRedirect(reverse('blob:detail', kwargs={'uuid': str(blob.uuid)}))
+
+
+@method_decorator(login_required, name="dispatch")
+class BlobCoverInfoView(DetailView):
+
+    model = Blob
+    slug_field = "uuid"
+    slug_url_kwarg = "uuid"
+
+    def get(self, request, *args, **kwargs):
+
+        try:
+            cover_info = self.get_object().get_cover_info()
+        except ClientError:
+            cover_info = {}
+        return JsonResponse(cover_info, safe=False)
+
+    def get_queryset(self):
+        return Blob.objects.filter(user=self.request.user)
 
 
 # Metadata objects are not handled by the form -- handle them manually

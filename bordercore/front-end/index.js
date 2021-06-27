@@ -143,5 +143,9 @@ import AddToPlaylist from "./vue/music/AddToPlaylist.vue";
 Vue.component("AddToPlaylist", AddToPlaylist);
 window.AddToPlaylist = AddToPlaylist;
 
+import BlobDetailCover from "./vue/blob/BlobDetailCover.vue";
+Vue.component("BlobDetailCover", BlobDetailCover);
+window.BlobDetailCover = BlobDetailCover;
+
 import PerfectScrollbar from "perfect-scrollbar";
 window.PerfectScrollbar = PerfectScrollbar;
