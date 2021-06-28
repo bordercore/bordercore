@@ -39,13 +39,17 @@ class Tag(models.Model):
         sort_order_user_tag.delete()
 
     @staticmethod
-    def search(user, query, search_notes_only=False):
+    def search(user, query, search_notes_only=False, model_filter=None):
 
         args = {}
 
         # Only retrieve tags which have been applied to at least one note
         if search_notes_only:
             args["blob__is_note"] = True
+
+        # Only retrieve tags which as associated with a certain model
+        if model_filter:
+            args[f"{model_filter}__isnull"] = False
 
         tag_list = [
             {

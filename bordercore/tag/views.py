@@ -11,8 +11,14 @@ from tag.models import Tag
 def tag_search(request):
 
     query = unquote(request.GET.get("query", None))
+    model_filter = request.GET.get("model_filter", None)
 
-    results = Tag.search(request.user, query, request.GET.get("type", None) == "note")
+    results = Tag.search(
+        request.user,
+        query,
+        request.GET.get("type", None) == "note",
+        model_filter
+    )
 
     return JsonResponse(results, safe=False)
 
