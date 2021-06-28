@@ -14,12 +14,6 @@ def test_get_s3_key_from_uuid(blob_image_factory):
     assert s3_key == f"blobs/{blob_image_factory.uuid}/{blob_image_factory.file}"
 
 
-def test_get_urls(blob_image_factory):
-    urls = blob_image_factory.get_urls()
-    assert urls[0]["domain"] == "www.bordercore.com"
-    assert urls[0]["url"] == "https://www.bordercore.com"
-
-
 def test_get_edition_string(blob_image_factory):
 
     assert blob_image_factory.get_edition_string() == "Second Edition"
@@ -36,8 +30,10 @@ def test_doctype(blob_image_factory, blob_text_factory):
 
 def test_get_metadata(blob_image_factory):
 
-    metadata = blob_image_factory.get_metadata()
+    metadata, urls = blob_image_factory.get_metadata()
     assert "John Smith" in [value for key, value in metadata.items()]
+    assert urls[0]["domain"] == "www.bordercore.com"
+    assert urls[0]["url"] == "https://www.bordercore.com"
 
 
 def test_get_content_type():
@@ -80,10 +76,6 @@ def test_get_linked_blobs(blob_pdf_factory):
 
 def test_get_date(blob_image_factory):
     assert blob_image_factory.get_date() == "March 04, 2021"
-
-
-def test_get_detail_page_metadata(blob_image_factory):
-    assert blob_image_factory.get_detail_page_metadata() == {"Artist": "John Smith, Jane Doe"}
 
 
 def test_has_thumbnail_url(blob_image_factory):

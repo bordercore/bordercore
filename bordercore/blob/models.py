@@ -182,28 +182,25 @@ class Blob(TimeStampedModel):
         else:
             return None
 
-    def get_urls(self):
-
-        return [
-            {
-                "url": x.value,
-                "domain": urlparse(x.value).netloc
-            }
-            for x
-            in self.metadata_set.filter(name="Url")
-        ]
-
     def get_metadata(self):
 
         metadata = {}
+        urls = []
 
         for x in self.metadata_set.all():
+            if x.name == "Url":
+                urls.append(
+                    {
+                        "url": x.value,
+                        "domain": urlparse(x.value).netloc
+                    }
+                )
             if metadata.get(x.name, None):
                 metadata[x.name] = ", ".join([metadata[x.name], x.value])
             else:
                 metadata[x.name] = x.value
 
-        return metadata
+        return metadata, urls
 
     def get_elasticsearch_info(self):
 
@@ -316,10 +313,6 @@ class Blob(TimeStampedModel):
 
     def get_date(self):
         return get_date_from_pattern({"gte": self.date})
-
-    def get_detail_page_metadata(self):
-        return {key: value for (key, value) in self.get_metadata().items()
-                if key not in ["is_book", "Url", "Publication Date", "Subtitle", "Name", "Author"]}
 
     def has_thumbnail_url(self):
         try:

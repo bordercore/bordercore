@@ -63,6 +63,9 @@
 
     export default {
 
+        components: {
+            BookmarkSearch,
+        },
         props: {
             questionUuid: {
                 default: "",
@@ -106,6 +109,9 @@
                 bookmarkList: [],
                 show: false,
             };
+        },
+        mounted() {
+            this.getBookmarkList();
         },
         methods: {
             getBookmarkList() {
@@ -242,12 +248,6 @@
                     }
                 }
             },
-        },
-        mounted() {
-            this.getBookmarkList();
-        },
-        components: {
-            BookmarkSearch,
         },
     };
 

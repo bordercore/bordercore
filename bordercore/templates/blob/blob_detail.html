@@ -34,15 +34,15 @@
 
                     <h5>{{ blob.get_edition_string }}</h5>
 
-                    {% if subtitle %}
+                    {% if metadata|dict_get:"Subtitle" %}
                         <div id="blob_subtitle">
-                            {{ subtitle }}
+                            {{ metadata|dict_get:"Subtitle" }}
                         </div>
                     {% endif %}
 
-                    {% if author %}
+                    {% if metadata|dict_get:"Author" %}
                         <div class="mt-2">
-                            by <span id="author">{{ author }}</span>
+                            by <span id="author">{{ metadata|dict_get:"Author" }}</span>
                         </div>
                     {% endif %}
 
@@ -52,14 +52,16 @@
                         </div>
                     {% endif  %}
 
-                    {% if blob.tags.all %}
-                        <div class="mt-3 mb-3">
-                            Tags:
-                            {% for tag in blob.tags.all %}
-                                <a class="badge badge-info" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+                    {% for tag in blob.tags.all %}
+                        {% if forloop.first %}
+                            <div class="mt-3 mb-3">
+                                Tags:
+                        {% endif %}
+                        <a class="badge badge-info" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
+                        {% if forloop.last %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
 
                     {% if urls %}
                         <div class="mb-3">
@@ -69,11 +71,11 @@
                         </div>
                     {% endif %}
 
-                    {% if show_metadata and metadata.items %}
+                    {% if show_metadata and metadata_misc.items %}
 
                         <div class="highlight-box mb-3">
 
-                            {% for key, values in metadata.items %}
+                            {% for key, values in metadata_misc.items %}
                                 {% if key != "Subtitle" %}
                                     <div>
                                         <strong class="metadata_name">{{ key }}</strong>

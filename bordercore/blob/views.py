@@ -161,13 +161,20 @@ class BlobDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["metadata"] = self.object.get_detail_page_metadata()
+        context["metadata"], context["urls"] = self.object.get_metadata()
 
-        context["author"] = self.object.get_metadata().get("Author", None)
-
-        context["subtitle"] = self.object.get_metadata().get("Subtitle", None)
-
-        context["urls"] = self.object.get_urls()
+        context["metadata_misc"] = {
+            key: value for (key, value)
+            in context["metadata"].items()
+            if key not in [
+                "is_book",
+                "Url",
+                "Publication Date",
+                "Subtitle",
+                "Name",
+                "Author"
+            ]
+        }
 
         context["date"] = self.object.get_date()
 
