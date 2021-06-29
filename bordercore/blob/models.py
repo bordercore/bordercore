@@ -535,10 +535,10 @@ def set_s3_metadata_file_modified(sender, instance, **kwargs):
     Store a file's modification time as S3 metadata after it's saved.
     """
 
-    # instance.file_modified will be "None" or non-existent if we're
-    # editing a blob's information, but not changing the blob itself.
+    # instance.file_modified will be "None" if we're editing a blob's
+    # information or renaming the file, but not changing the file itself.
     # In that case we don't want to update its "file_modified" metadata.
-    if not instance.file or not hasattr(instance, "file_modified"):
+    if not instance.file or not instance.file_modified:
         return
 
     s3 = boto3.resource("s3")

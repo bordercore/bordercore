@@ -34,9 +34,14 @@ class Command(BaseCommand):
             help="Dry run. Take no action",
             action="store_true"
         )
+        parser.add_argument(
+            "--verbose",
+            help="Increase verbosity",
+            action="store_true"
+        )
 
     @atomic
-    def handle(self, *args, uuid, modified_time, dry_run, **kwargs):
+    def handle(self, *args, uuid, modified_time, dry_run, verbose, **kwargs):
 
         if modified_time and not uuid:
             raise CommandError("If you specify a modified_time, you must also specify a uuid")
@@ -46,14 +51,15 @@ class Command(BaseCommand):
             blobs = Blob.objects.filter(uuid=uuid)
         else:
             # All blobs
-            blobs = Blob.objects.exclude(is_indexed=False).filter(~Q(file="")).order_by("created")
+            blobs = Blob.objects.filter(~Q(file="")).order_by("created")
 
         for blob_info in blobs:
 
             key = blob_info.get_s3_key()
             file_path = f"{self.BLOB_DIR}/{key}"
 
-            self.stdout.write(f"{blob_info} file_path={file_path}")
+            if verbose:
+                self.stdout.write(f"{blob_info} file_path={file_path}")
 
             s3_resource = boto3.resource("s3")
 
@@ -65,13 +71,12 @@ class Command(BaseCommand):
                 if not modified_time:
                     modified_time_file = int(os.stat(file_path).st_mtime)
 
-                if not modified_time_s3 or modified_time_file != int(modified_time_s3):
+                if not modified_time_s3 or modified_time_s3 == "None" or modified_time_file != int(modified_time_s3):
                     self.stdout.write(f"{blob_info.uuid} File modification timestamp does not match. Fixing. mtime_s3={modified_time_s3}, mtime_file={modified_time_file}")
-
                     if not dry_run:
                         blob_info.file_modified = modified_time_file
                         set_s3_metadata_file_modified(None, blob_info)
-                else:
+                elif verbose:
                     self.stdout.write(self.style.WARNING(f"{blob_info.uuid} S3 file modification timestamp exists and matches filesystem. Nothing to do."))
 
             else:
