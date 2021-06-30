@@ -7,6 +7,12 @@ Globals:
         Timeout: 360
 
 Parameters:
+  EFSMountPointParameter:
+    Type: String
+    Description: The EFS mount point on the file system
+  EFSAccessPointParameter:
+    Type: String
+    Description: The EFS access point
   ElasticsearchEndpointParameter:
     Type: String
     Description: The Elasticsearch endpoint
@@ -35,7 +41,13 @@ Resources:
             Environment:
                 Variables:
                     DRF_TOKEN: !Ref DRFTokenParameter
+                    EFS_DIR:
+                      Ref: EFSMountPointParameter
                     ELASTICSEARCH_ENDPOINT: !Ref ElasticsearchEndpointParameter
+            FileSystemConfigs:
+                - Arn: !Sub "arn:aws:elasticfilesystem:us-east-1:${AWS::AccountId}:access-point/${EFSAccessPointParameter}"
+                  LocalMountPath:
+                      Ref: EFSMountPointParameter
 
     LambdaFunctionLogGroup:
         Type: "AWS::Logs::LogGroup"

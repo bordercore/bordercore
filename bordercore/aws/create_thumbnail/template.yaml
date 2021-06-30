@@ -59,7 +59,6 @@ Resources:
                 SubnetIds:
                     - !Ref Subnet1Parameter
                     - !Ref Subnet2Parameter
-
             FileSystemConfigs:
                 - Arn: !Sub "arn:aws:elasticfilesystem:us-east-1:${AWS::AccountId}:access-point/${EFSAccessPointParameter}"
                   LocalMountPath:

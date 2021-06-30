@@ -111,6 +111,40 @@ def test_documents_with_dates(es):
     assert found["total"]["value"] == 0, f"{found['total']['value']} documents fail this test, uuid={found['hits'][0]['_id']}"
 
 
+def test_videos_with_durations(es):
+    "Assert that all videos have a duration"
+    search_object = {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "bool": {
+                            "must_not": [
+                                {
+                                    "exists": {
+                                        "field": "duration"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "wildcard": {
+                            "content_type": "**video**"
+                        }
+                    }
+                ]
+            }
+        },
+        "from": 0, "size": 10000,
+        "_source": ["uuid"]
+    }
+
+    found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]
+
+    assert found["total"]["value"] == 0, f"{found['total']['value']} videos fail this test, uuid={found['hits'][0]['_id']}"
+
+
 def test_dates_with_unixtimes(es):
     "Assert that all documents with dates also have a date_unixtime field"
     search_object = {

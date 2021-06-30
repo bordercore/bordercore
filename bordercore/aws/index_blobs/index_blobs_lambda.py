@@ -60,7 +60,7 @@ def handler(event, context):
                 uuid = sns_record["s3"]["uuid"]
                 if uuid is None:
                     raise Exception(f"No uuid found in SNS event: {record['Sns']['Message']}")
-                print(f"uuid: {uuid}")
+                log.info(f"uuid: {uuid}")
                 index_blob_es(uuid=uuid, file_changed=file_changed)
 
         log.info("Lambda finished")

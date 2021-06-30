@@ -106,10 +106,20 @@ class Blob(TimeStampedModel):
             "image/jpeg": "Image",
             "image/png": "Image",
             "video/mp4": "Video",
-            "video/webm": "Video"
+            "video/webm": "Video",
+            "video/x-m4v": "Video"
         }
 
         return switcher.get(argument, "")
+
+    @staticmethod
+    def get_duration_humanized(duration):
+        duration = str(datetime.timedelta(seconds=int(duration)))
+
+        # Remove any leading "0:0" or "0:"
+        duration = re.sub(r"^(0\:0)|^0\:", "", duration)
+
+        return duration
 
     def get_parent_dir(self):
         return f"{settings.MEDIA_ROOT}/{self.uuid}"
@@ -226,7 +236,7 @@ class Blob(TimeStampedModel):
                     ]
                 }
             },
-            "_source": ["author", "task", "content_type", "doctype", "note", "filename", "bordercore_id", "attr_is_book", "last_modified", "name", "num_pages", "tags", "sha1sum", "size", "url"]
+            "_source": ["author", "task", "content_type", "doctype", "duration", "note", "filename", "bordercore_id", "attr_is_book", "last_modified", "name", "num_pages", "tags", "sha1sum", "size", "url"]
         }
 
         results = es.search(index=settings.ELASTICSEARCH_INDEX, body=query)["hits"]["hits"][0]
@@ -236,6 +246,9 @@ class Blob(TimeStampedModel):
 
         if "size" in results["_source"]:
             results["_source"]["size"] = humanize.naturalsize(results["_source"]["size"])
+
+        if "duration" in results["_source"]:
+            results["_source"]["duration"] = Blob.get_duration_humanized(results["_source"]["duration"])
 
         return {**results["_source"], "id": results["_id"]}
 

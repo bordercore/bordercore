@@ -48,7 +48,7 @@ def remove_non_ascii_characters(input_string, default="Default"):
     return output_string
 
 
-# Putting these two functions here rather than in blob/models.py so
+# Putting these functions here rather than in blob/models.py so
 #  that AWS lambdas can easily re-use them
 
 def is_image(file):
@@ -65,6 +65,15 @@ def is_pdf(file):
     if file:
         file_extension = PurePath(str(file)).suffix
         if file_extension[1:].lower() in ["pdf"]:
+            return True
+    return False
+
+
+def is_video(file):
+
+    if file:
+        file_extension = PurePath(str(file)).suffix
+        if file_extension[1:].lower() in ["avi", "flv", "m4v", "mkv", "mp4", "webm"]:
             return True
     return False
 

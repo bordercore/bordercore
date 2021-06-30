@@ -3,6 +3,8 @@ import io
 import logging
 import os
 import re
+import subprocess
+import uuid
 from datetime import datetime
 from io import BytesIO
 from pathlib import PurePath
@@ -18,7 +20,7 @@ from elasticsearch_dsl.connections import connections
 from PyPDF2 import PdfFileReader
 from PyPDF2.utils import PdfReadError
 
-from lib.util import is_pdf
+from lib.util import is_pdf, is_video
 
 ES_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT", "localhost")
 ES_PORT = 9200
@@ -26,6 +28,9 @@ ES_INDEX_NAME = "bordercore"
 
 S3_KEY_PREFIX = "blobs"
 S3_BUCKET_NAME = "bordercore-blobs"
+
+EFS_DIR = os.environ.get("EFS_DIR", "/tmp")
+BLOBS_DIR = f"{EFS_DIR}/blobs"
 
 DRF_TOKEN = os.environ.get("DRF_TOKEN")
 
@@ -173,6 +178,25 @@ def get_range_from_date(date):
     return range
 
 
+def get_duration(filename):
+
+    result = subprocess.run(
+        [
+            "ffprobe",
+            "-v",
+            "error",
+            "-show_entries",
+            "format=duration",
+            "-of",
+            "default=noprint_wrappers=1:nokey=1",
+            filename
+        ],
+        capture_output=True
+    )
+
+    return float(result.stdout)
+
+
 def get_num_pages(content):
 
     input_pdf = PdfFileReader(io.BytesIO(content), strict=False)
@@ -239,7 +263,23 @@ def index_blob(**kwargs):
         article.size = len(contents)
         log.info(f"Size: {article.size}")
 
-        article.content_type = magic.from_buffer(contents, mime=True)
+        # Dump the blob contents to a file. We do this rather than process in
+        #  memory because some large blobs are too big to handle this way.
+        filename = f"{BLOBS_DIR}/{uuid.uuid4()}-{str(blob_info['file'])}"
+        with open(filename, "wb") as file:
+            newFileByteArray = bytearray(contents)
+            file.write(newFileByteArray)
+
+        article.content_type = magic.from_file(filename, mime=True)
+
+        if is_video(blob_info["file"]):
+            try:
+                article.duration = get_duration(filename)
+                log.info(f"Video duration: {article.duration}")
+            except Exception as e:
+                log.error(f"Exception determing video duration: {e}")
+
+        os.remove(filename)
 
         if is_pdf(blob_info["file"]):
             try:

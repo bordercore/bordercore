@@ -71,7 +71,7 @@
                         </div>
                     {% endif %}
 
-                    {% if show_metadata and metadata_misc.items %}
+                    {% if show_metadata %}
 
                         <div class="highlight-box mb-3">
 
@@ -96,12 +96,18 @@
                                     <strong>Size</strong>
                                     <small>{{ elasticsearch_info.size }}</small>
                                 </div>
-                            {% if elasticsearch_info.num_pages %}
-                                <div>
-                                    <strong>Pages</strong>
-                                    <small>{{ elasticsearch_info.num_pages }}</small>
-                                </div>
-                            {% endif %}
+                                {% if elasticsearch_info.num_pages %}
+                                    <div>
+                                        <strong>Pages</strong>
+                                        <small>{{ elasticsearch_info.num_pages }}</small>
+                                    </div>
+                                {% endif %}
+                                {% if elasticsearch_info.duration %}
+                                    <div>
+                                        <strong>Duration</strong>
+                                        <small>{{ elasticsearch_info.duration }}</small>
+                                    </div>
+                                {% endif %}
                             {% endif %}
 
                         </div>

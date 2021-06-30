@@ -87,6 +87,14 @@ def test_is_ingestible_file(blob_image_factory):
     assert Blob.is_ingestible_file("file.pdf") is True
 
 
+def test_duration_humanized():
+    assert Blob.get_duration_humanized(8.356) == "0:08"
+    assert Blob.get_duration_humanized(18.356) == "0:18"
+    assert Blob.get_duration_humanized(218.356) == "3:38"
+    assert Blob.get_duration_humanized(918.356) == "15:18"
+    assert Blob.get_duration_humanized(6918.356) == "1:55:18"
+
+
 def test_get_cover_info(blob_image_factory, blob_pdf_factory):
 
     cover_info = blob_image_factory.get_cover_info()
