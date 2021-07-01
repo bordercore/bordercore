@@ -120,6 +120,8 @@ def get_blob_info(**kwargs):
 
     for x in info["metadata_set"]:
         for key, value in x.items():
+            if not key or not value:
+                continue
             existing = metadata.get(key.lower(), [])
             existing.append(value)
             metadata[key.lower()] = existing
