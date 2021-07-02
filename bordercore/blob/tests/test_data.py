@@ -706,6 +706,12 @@ def test_blobs_have_proper_metadata():
             assert False, f"blob uuid={blob.uuid} has no proper 'Content-Type' metadata"
 
 
+def test_no_empty_blob_metadata():
+    "Assert that no blobs have empty metadata"
+    m = MetaData.objects.filter(Q(name="") or Q(value=""))
+    assert len(m) == 0, f"Empty metadata found: count={len(m)}, uuid={m.first().blob.uuid}"
+
+
 def test_blobs_have_size_field(es):
     "Assert that all blobs have a size field"
     search_object = {

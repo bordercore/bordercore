@@ -344,7 +344,10 @@ def handle_metadata(blob, request):
         p = re.compile(r"^\d+_(.*)")
         m = p.match(key)
         if m:
-            new_metadata, created = MetaData.objects.get_or_create(user=request.user, name=m.group(1), value=value.strip(), blob=blob)
+            name = m.group(1)
+            if name == "" or value.strip() == "":
+                continue
+            new_metadata, created = MetaData.objects.get_or_create(user=request.user, name=name, value=value.strip(), blob=blob)
             if created:
                 new_metadata.save()
 
