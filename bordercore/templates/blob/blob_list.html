@@ -131,7 +131,7 @@
                 getRecentBlobs() {
                     doGet(
                         this,
-                        "{% url "blob:get_recent_blobs" %}",
+                        "{% url "blob:recent_blobs" %}",
                         (response) => {
                             this.blobList = response.data.blobList;
                             this.docTypes = response.data.docTypes;
@@ -146,7 +146,7 @@
                             });
 
                         },
-                        "Error getting note"
+                        "Error getting recent blobs"
                     );
                 },
             },

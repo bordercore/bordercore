@@ -51,9 +51,9 @@ urlpatterns = [
         name="slideshow"
     ),
     path(
-        route="get_recent_blobs",
-        view=views.get_recent_blobs,
-        name="get_recent_blobs"
+        route="recent_blobs",
+        view=views.recent_blobs,
+        name="recent_blobs"
     ),
     path(
         route="cover_info/<uuid:uuid>",
