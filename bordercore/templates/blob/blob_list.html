@@ -24,13 +24,13 @@
         </div>
 
         <ul class="blob-list-nav list-group list-group-horizontal list-unstyled pl-5 ml-3">
-            <li v-for="nav in navAll" v-if="nav === 'All' || doctypeCount(nav) > 0" class="px-5 m-3 mx-auto justify-content-center" v-bind:class="{ 'nav-selected': nav === navCurrent }" @click="onClick(nav)">
+            <li v-for="nav in navAll" v-if="nav === 'All' || doctypeCount(nav) > 0" class="px-5 m-3 mx-auto justify-content-center" v-bind:class="{ 'nav-selected': nav === navCurrent }" @click="onClickNav(nav)">
                 <span class="text-center"><a href="#" v-cloak>[[ nav ]]</a></span><span class="ml-1 badge badge-info" v-html="doctypeCount(nav)"></span>
             </li>
         </ul>
 
         <div class="d-flex flex-row flex-wrap ml-3">
-            <div v-for="blob in blobList" class="blob-list float-left mb-2 p-3 w-25" :data-doctype="blob.doctype">
+            <div v-for="blob in blobList" class="blob-list float-left mb-2 p-3 w-25" @click="onClickBlob(blob.url)" :data-doctype="blob.doctype">
 
                 <div class="d-flex flex-column h-100">
 
@@ -105,7 +105,10 @@
                         return delta + " " + pluralize("day", delta) + " ago";
                     }
                 },
-                onClick(doctype) {
+                onClickBlob(url) {
+                    window.location = url;
+                },
+                onClickNav(doctype) {
 
                     this.navCurrent = doctype;
 
