@@ -224,9 +224,11 @@
                     </div>
                 {% endif %}
 
-                <blob-detail-cover :initial-cover-info="{{ cover_info|safe }}"
-                                   cover-url="{% url "blob:cover_info" object.uuid %}"
-                />
+                {% if blob.sha1sum %}
+                    <blob-detail-cover :initial-cover-info="{{ cover_info|safe }}"
+                                       cover-url="{% url "blob:cover_info" object.uuid %}"
+                    />
+                {% endif %}
 
             </div>
 
