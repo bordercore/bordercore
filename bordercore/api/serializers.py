@@ -52,7 +52,7 @@ class BlobSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Blob
-        fields = ["content", "date", "file", "id", "importance",
+        fields = ["created", "content", "date", "file", "id", "importance",
                   "is_private", "is_note", "metadata_set", "modified", "name",
                   "note", "sha1sum", "tags", "user", "uuid"]
 
@@ -80,7 +80,7 @@ class BlobSha1sumSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Blob
-        fields = ["content", "date", "documents", "file", "id", "importance",
+        fields = ["created", "content", "date", "documents", "file", "id", "importance",
                   "is_private", "is_note", "metadata_set", "modified",
                   "name", "note", "sha1sum", "tags", "user", "uuid"]
 

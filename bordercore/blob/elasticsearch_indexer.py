@@ -65,6 +65,7 @@ class ESBlob(Document_ES):
     url = Text()
     importance = Integer()
     date_unixtime = Long()
+    created_date = Text()
     last_modified = Text()
 
     class Index:
@@ -238,6 +239,7 @@ def index_blob(**kwargs):
         note=blob_info["note"],
         importance=blob_info["importance"],
         date_unixtime=get_unixtime_from_string(blob_info["date"]),
+        created_date=blob_info["created"],
         last_modified=blob_info["modified"],
         **blob_info["metadata"]
     )
