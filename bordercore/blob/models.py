@@ -368,7 +368,7 @@ class Blob(TimeStampedModel):
         else:
             return False
 
-    def get_cover_info(self, size="large", max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
+    def get_cover_info(self, size="large", max_cover_image_width=MAX_COVER_IMAGE_WIDTH, get_info=True):
 
         if self.sha1sum is None:
             return {"url": ""}
@@ -387,10 +387,12 @@ class Blob(TimeStampedModel):
             if file_extension[1:].lower() in ["gif", "jpg", "jpeg", "png"]:
                 # For the large version, use the image itself
                 url = f"{settings.MEDIA_URL}{self.get_s3_key()}"
-                info = Blob.get_image_dimensions(self.get_s3_key(), max_cover_image_width)
+                if get_info:
+                    info = Blob.get_image_dimensions(self.get_s3_key(), max_cover_image_width)
             else:
                 url = f"{prefix}/cover-{size}.jpg"
-                info = Blob.get_image_dimensions(f"{PurePath(self.get_s3_key()).parent}/cover-{size}.jpg", max_cover_image_width)
+                if get_info:
+                    info = Blob.get_image_dimensions(f"{PurePath(self.get_s3_key()).parent}/cover-{size}.jpg", max_cover_image_width)
 
         info["url"] = url
 
