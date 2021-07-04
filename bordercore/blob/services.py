@@ -64,10 +64,16 @@ def get_recent_blobs(user, limit=10):
 
     doctypes = defaultdict(int)
 
-    blob_list = []
+    # Prefetch all matched blobs from the database in one query, rather
+    #  than using a separate query for each one in the loop below.
+    uuid_list = [x["_source"]["uuid"] for x in results["hits"]["hits"]]
+    blob_list = Blob.objects.filter(uuid__in=uuid_list).prefetch_related("tags", "metadata_set")
+
+    returned_blob_list = []
 
     for match in results["hits"]["hits"]:
-        blob = Blob.objects.get(uuid=match["_source"]["uuid"])
+
+        blob = next(x for x in blob_list if str(x.uuid) == match["_source"]["uuid"])
         delta = timezone.now() - blob.modified
 
         props = {
@@ -87,11 +93,11 @@ def get_recent_blobs(user, limit=10):
             props["content_size"] = humanize.naturalsize(match["_source"]["size"])
 
         if is_image(blob.file) or is_pdf(blob.file):
-            props["cover_url"] = blob.get_cover_info(size="large").get("url", None)
+            props["cover_url"] = blob.get_cover_info(size="large", get_info=False).get("url", None)
 
-        blob_list.append(props)
+        returned_blob_list.append(props)
 
         doctypes[blob.doctype] += 1
         doctypes["all"] = len(results["hits"]["hits"])
 
-    return blob_list, doctypes
+    return returned_blob_list, doctypes
