@@ -23,22 +23,20 @@ def handler(event, context):
         for record in event["Records"]:
 
             sns_record = json.loads(record["Sns"]["Message"])["Records"][0]
-            bucket = sns_record["s3"]["bucket"]["name"]
-            log.info(f"bucket: {bucket}")
 
             # Ignore object delete events
-            if sns_record.get("eventName", None) == "ObjectRemoved:Delete":
+            if sns_record.get("eventName", None) == "ObjectRemoved:DeleteMarkerCreated":
                 continue
 
             file_changed = sns_record["s3"].get("file_changed", True)
 
             # If this was triggered by S3, then parse the uuid from the S3 key.
             # Otherwise this must have been called from Django, in which case the
-            # uuid was passed in instead.
-            try:
+            # uuid was passed in directly instead.
+            if "object" in sns_record["s3"]:
 
                 key = sns_record["s3"]["object"]["key"]
-                log.info(f"key: {key}")
+                log.info(f"Lambda triggered by S3, key: {key}")
 
                 # blobs/af351cc4-3b8b-47d5-8048-85e5fb5abe19/cover.jpg
                 pattern = re.compile(r"^blobs/(.*?)/")
@@ -51,17 +49,16 @@ def handler(event, context):
                     raise Exception(f"Can't parse uuid from key: {key}")
 
                 if PurePath(key).name == "cover.jpg" or PurePath(key).name.startswith("cover-"):
-                    log.info("Skipping blob")
+                    log.info("Not indexing cover image.")
                     continue
 
-                index_blob_es(uuid=uuid, file_changed=file_changed)
-
-            except KeyError:
+            else:
                 uuid = sns_record["s3"]["uuid"]
                 if uuid is None:
                     raise Exception(f"No uuid found in SNS event: {record['Sns']['Message']}")
-                log.info(f"uuid: {uuid}")
-                index_blob_es(uuid=uuid, file_changed=file_changed)
+                log.info(f"Lambda triggered by Django, uuid: {uuid}")
+
+            index_blob_es(uuid=uuid, file_changed=file_changed)
 
         log.info("Lambda finished")
 

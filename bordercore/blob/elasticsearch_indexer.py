@@ -113,7 +113,7 @@ def get_blob_info(**kwargs):
     r = session.get(f"https://www.bordercore.com/api/{prefix}/{param}/", headers=headers)
 
     if r.status_code != 200:
-        raise Exception(f"Error when accessing Bordercore REST API: status code={r.status_code}")
+        raise Exception(f"Error when accessing Bordercore REST API: status code={r.status_code}, prefix={prefix}, param={param}")
 
     info = r.json()
 
