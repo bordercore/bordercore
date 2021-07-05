@@ -201,7 +201,7 @@ class BlobDetailView(DetailView):
 
         context["collection_list"] = self.object.get_collection_info()
 
-        if "content_type" in context or self.object.sha1sum or context["metadata"]:
+        if "content_type" in context or self.object.sha1sum or context["metadata_misc"]:
             context["show_metadata"] = True
         else:
             context["show_metadata"] = False
