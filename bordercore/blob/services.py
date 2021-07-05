@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from blob.models import Blob
-from lib.util import is_image, is_pdf
+from lib.util import is_image, is_pdf, is_video
 
 
 def get_recent_blobs(user, limit=10):
@@ -92,7 +92,7 @@ def get_recent_blobs(user, limit=10):
         if "size" in match["_source"]:
             props["content_size"] = humanize.naturalsize(match["_source"]["size"])
 
-        if is_image(blob.file) or is_pdf(blob.file):
+        if is_image(blob.file) or is_pdf(blob.file) or is_video(blob.file):
             props["cover_url"] = blob.get_cover_info(size="large", get_info=False).get("url", None)
 
         returned_blob_list.append(props)
