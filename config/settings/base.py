@@ -88,6 +88,7 @@ AWS_STORAGE_BUCKET_NAME = "bordercore-blobs"
 AWS_BUCKET_NAME_MUSIC = "bordercore-music"
 AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
 AWS_LOCATION = "django"
+INDEX_BLOB_TOPIC_ARN = "arn:aws:sns:us-east-1:192218769908:IndexBlob"
 
 os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 

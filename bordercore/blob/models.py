@@ -433,7 +433,7 @@ class Blob(TimeStampedModel):
         }
 
         client.publish(
-            TopicArn="arn:aws:sns:us-east-1:192218769908:NewS3Blob",
+            TopicArn=settings.INDEX_BLOB_TOPIC_ARN,
             Message=json.dumps(message),
         )
 
