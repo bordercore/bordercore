@@ -274,9 +274,10 @@ class Blob(TimeStampedModel):
 
             # This is set in __init__
             filename_orig = getattr(self, "__original_filename")
-            if filename_orig != self.file.name:
+            if filename_orig and filename_orig != self.file.name:
                 key = f"{self.get_parent_dir()}/{filename_orig}"
                 log.info(f"File name changed detected. Deleting old file: {key}")
+                log.info(f"{filename_orig} != {self.file.name}")
                 s3 = boto3.resource("s3")
                 s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key).delete()
 
