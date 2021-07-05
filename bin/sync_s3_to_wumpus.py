@@ -61,6 +61,11 @@ def delete_object_from_wumpus(info):
         logger.info("  Skipping. File is cover image.")
         return
 
+    # Amazon sends us "delete" events for the directory, for
+    #  some reason. Ignore them.
+    if key.is_dir():
+        return
+
     # Remove the file
     if key.exists():
         key.unlink()
@@ -118,8 +123,8 @@ if not info["object"]:
     #  there is nothing for us to do.
     sys.exit(0)
 
-if info["eventName"] == "ObjectRemoved:Delete":
+if info["eventName"] == "ObjectRemoved:DeleteMarkerCreated":
     delete_object_from_wumpus(info)
-else:
+elif info["eventName"] == "ObjectCreated:Put":
     logger.info(f"Downloading new object: {info['object']['key']}")
     copy_object_to_wumpus(info)
