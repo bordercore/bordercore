@@ -10,19 +10,30 @@
 
     <div class="row no-gutters h-100" id="vue-app">
 
+        {% if not collection_is_not_empty %}
+
+            <div class="card-grid ml-2">
+                <h3>
+                    Your music library is empty. Feel free to add a song to begin your collection.
+                </h3>
+                <div>
+                    <a href="{% url 'music:create' %}" class="btn btn-primary" role="button"><font-awesome-icon icon="plus" class="mr-2"></font-awesome-icon>Add song</a>
+                </div>
+            </div>
+
+        {% else %}
+
         <div class="col-lg-3 d-flex flex-column">
 
-            <card title="Featured Album" class-name="flex-grow-0">
-
-                <template v-slot:content>
-                    {% if random_albums %}
+            {% if random_albums %}
+                <card title="Featured Album" class-name="flex-grow-0">
+                    <template v-slot:content>
                         <table class="table table-borderless">
                             <tr>
                                 <td>
                                     <a href="{% url 'music:album_detail' random_albums.uuid %}">
                                         <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ random_albums.uuid }}" height="150" width="150" />
                                     </a>
-
                                 </td>
                                 <td>
                                     <strong>{{ random_albums.artist }}</strong>
@@ -31,9 +42,9 @@
                                 </td>
                             </tr>
                         </table>
-                    {% endif %}
-                </template>
-            </card>
+                    </template>
+                </card>
+            {% endif %}
 
             <card title="Playlists" class-name="flex-grow-0">
 
@@ -56,8 +67,8 @@
 
             </card>
 
+            {% if recent_songs %}
             <card title="Recently Played Songs">
-
                 <template v-slot:content>
                     <ul class="list-group interior-borders">
                         {% for song in recent_songs %}
@@ -65,8 +76,8 @@
                         {% endfor %}
                     </ul>
                 </template>
-
             </card>
+            {% endif %}
 
         </div>
 
@@ -139,7 +150,6 @@
                 </template>
             </card>
             </div>
-
 
         </div>
 
@@ -238,6 +248,8 @@
         </form>
 
     </div>
+
+    {% endif %}
 
 {% endblock %}
 

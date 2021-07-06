@@ -29,8 +29,6 @@ from lib.util import remove_non_ascii_characters
 from .forms import PlaylistForm, SongForm
 from .models import Album, Listen, Playlist, PlaylistItem, Song
 
-MUSIC_ROOT = "/home/media/music"
-
 
 @login_required
 def music_list(request):
@@ -38,15 +36,20 @@ def music_list(request):
     # Get a list of recently played songs
     recent_songs = Listen.objects.filter(user=request.user).select_related("song").distinct().order_by("-created")[:10]
 
-    # Get a random album
+    # Get a random album to feature
     random_albums = None
     random_album_info = Album.objects.filter(user=request.user).order_by("?")
     if random_album_info:
         random_albums = random_album_info.first()
 
-    playlists = Playlist.objects.annotate(num_songs=Count("playlistitem"))
+    # Get all playlists and their song counts
+    playlists = Playlist.objects.filter(user=request.user).annotate(num_songs=Count("playlistitem"))
 
+    # Get a list of recently added albums
     recent_albums = Album.objects.filter(user=request.user).order_by("-created")[:12]
+
+    # Verify that the user has at least one song in their collection
+    collection_is_not_empty = Song.objects.filter(user=request.user).exists()
 
     return render(request, "music/index.html",
                   {
@@ -57,6 +60,7 @@ def music_list(request):
                       "playlists": playlists,
                       "title": "Music List",
                       "MEDIA_URL_MUSIC": settings.MEDIA_URL_MUSIC,
+                      "collection_is_not_empty": collection_is_not_empty
                   })
 
 
