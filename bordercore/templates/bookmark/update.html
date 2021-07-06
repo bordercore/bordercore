@@ -6,62 +6,108 @@
 
 {% block content %}
 
-    <div id="vue-messages">
-       {% include "common/show_messages.html" %}
-    </div>
+    <div class="row no-gutters h-100" id="vue-app">
 
-<p class="lead offset-lg-2">
-    {{ form.instance.url|favicon|safe }} {{ action }} Bookmark
-</p>
+        <div>
+           {% include "common/show_messages.html" %}
+        </div>
 
-<form id="bookmark-form" action="{{ request.path }}" method="post">
+        <div class="col-lg-3 d-flex flex-column">
 
-    {% csrf_token %}
-
-    {% for field in form %}
-
-        <div class="form-group {% if field.errors %}error{% endif %} row">
-
-            <label class="bold col-lg-2 col-form-label text-right">{{ field.label }}</label>
-
-            <div class="col-lg-7">
-                {% if field.label == 'Tags' %}
-                    <tags-input search-url="{% url 'tag:search' %}?query=">
-                    </tags-input>
-                {% elif field.label == "Url" %}
-                    <input
-                        type="url"
-                        name="url"
-                        value="{{ field.value|default:'' }}"
-                        class="form-control"
-                        required
-                        id="id_url"
-                        {% if action == "Create" %}
-                            @blur="onBlur"
-                        {% endif %}
-                        autocomplete="off"
-                    />
-                    <div class="form-error">{{ field.errors.0 }}</div>
-                {% else %}
-                  {{ field }}
-                  {% for error in field.errors %}
-                      <span class="form-error">{{ error }}</span>
-                  {% endfor %}
-                {% endif %}
+            <div v-if="related_questions.length > 0" class="d-flex flex-grow-1">
+                <card title="Related Questions">
+                    <template v-slot:content>
+                        <ul class="list-group interior-borders">
+                            <li v-for="question in related_questions" class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
+                                <div class="d-flex">
+                                    <div class="mt-1 mr-2">
+                                        <font-awesome-icon icon="question" class="text-success"></font-awesome-icon>
+                                    </div>
+                                    <div>
+                                        <span v-html="question.question" @click="onClick(question.url)"></span>
+                                        <div>
+                                            <span v-for="tag in question.tags" class="badge badge-info mr-2">[[ tag.tag ]]</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </template>
+                </card>
             </div>
+            <div v-else class="d-flex flex-grow-1">
+                <div class="card-body">
+                </div>
+            </div>
+
         </div>
 
-    {% endfor %}
+        <div class="col-lg-9">
 
-    <div class="form-group">
-        <div class="col-lg-5 offset-lg-2">
-            <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}" />
-            <input class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" @click="onClickDelete" />
-            <a class="btn btn-secondary" href="{% url 'bookmark:overview' %}">Cancel</a>
+            <div class="right-column">
+                <div class="card-body right-column">
+
+                    <p class="lead offset-lg-2">
+                        {{ form.instance.url|favicon|safe }} {{ action }} Bookmark
+                    </p>
+
+                    <form action="{{ request.path }}" method="post">
+
+                        {% csrf_token %}
+
+                        {% for field in form %}
+
+                            <div class="form-group {% if field.errors %}error{% endif %} row">
+                                <label class="bold col-lg-2 col-form-label text-right">
+                                    {{ field.label }}
+                                </label>
+                                <div class="col-lg-7">
+
+                                    {% if field.label == 'Tags' %}
+                                        <tags-input search-url="{% url 'tag:search' %}?query=">
+                                        </tags-input>
+                                    {% elif field.label == "Url" %}
+                                        <input
+                                            type="url"
+                                            name="url"
+                                            value="{{ field.value|default:'' }}"
+                                            class="form-control"
+                                            required
+                                            id="id_url"
+                                            {% if action == "Create" %}
+                                                @blur="onBlur"
+                                            {% endif %}
+                                            autocomplete="off"
+                                        />
+                                        <div class="form-error">{{ field.errors.0 }}</div>
+                                    {% else %}
+                                        {{ field }}
+                                        {% for error in field.errors %}
+                                            <span class="form-error">{{ error }}</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        {% endfor %}
+
+                        <div class="form-group">
+                            <div class="col-lg-5 offset-lg-2">
+                                <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}" />
+                                <input class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" @click="onClickDelete" />
+                                <a class="btn btn-secondary" href="{% url 'bookmark:overview' %}">Cancel</a>
+                            </div>
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
         </div>
+
     </div>
-
-</form>
 
 {% endblock %}
 
@@ -76,15 +122,30 @@
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
         new Vue({
-            el: "#bookmark-form",
+            el: "#vue-app",
             components: {
                 TagsInput
             },
             data() {
                 return {
                     {% if bookmark.uuid %}
-                    uuid: "{{ bookmark.uuid }}"
+                    uuid: "{{ bookmark.uuid }}",
                     {% endif %}
+                    related_questions: [
+                        {% for question in related_questions %}
+                        {
+                            question: markdown.render("{{ question.question|escapejs }}"),
+                            url: "{% url 'drill:detail' question.uuid %}",
+                            tags: [
+                                {% for tag in question.tags.all %}
+                                {
+                                    tag: "{{ tag }}",
+                                },
+                                {% endfor %}
+                            ]
+                        },
+                        {% endfor %}
+                    ]
                 }
             },
             methods: {
@@ -117,12 +178,11 @@
                         "Error getting title from url"
                     );
 
+                },
+                onClick(url) {
+                    window.location = url;
                 }
             }
-        });
-
-        new Vue({
-            el: "#vue-messages",
         });
 
     </script>

@@ -83,6 +83,7 @@ class BookmarkUpdateView(UpdateView, FormValidMixin):
         context = super().get_context_data(**kwargs)
         context["action"] = "Update"
         context["tags"] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
+        context["related_questions"] = self.object.question_set.all()
         return context
 
     def get_form_kwargs(self):
