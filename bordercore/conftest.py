@@ -153,7 +153,7 @@ def browser():
     display = Display(visible=0, size=(1366, 768))
     display.start()
 
-    driver = webdriver.Firefox(executable_path="/opt/bin/geckodriver")
+    driver = webdriver.Firefox(executable_path="/opt/bin/geckodriver", log_path="/tmp/geckodriver.log")
 
     # Fails with "Message: Service /opt/google/chrome/chrome unexpectedly exited. Status code was: 0"
     # driver = webdriver.Chrome(executable_path="/opt/google/chrome/chrome")
@@ -485,7 +485,7 @@ def handle_s3_info_image(s3_resource, s3_bucket, blob, file_path, cover_filename
         str(filepath_cover),
         settings.AWS_STORAGE_BUCKET_NAME,
         f"{settings.MEDIA_ROOT}/{blob.uuid}/{cover_filename}",
-        ExtraArgs={'Metadata': {"image-width": str(width_cover),
+        ExtraArgs={"Metadata": {"image-width": str(width_cover),
                                 "image-height": str(height_cover),
                                 "cover-image": "Yes"}}
     )
@@ -501,7 +501,7 @@ def handle_s3_info_pdf(s3_resource, s3_bucket, blob, file_path, cover_filename):
         str(filepath_cover),
         settings.AWS_STORAGE_BUCKET_NAME,
         f"{settings.MEDIA_ROOT}/{blob.uuid}/{cover_filename}",
-        ExtraArgs={'Metadata': {"image-width": str(width_cover),
+        ExtraArgs={"Metadata": {"image-width": str(width_cover),
                                 "image-height": str(height_cover),
                                 "cover-image": "Yes"}}
     )
