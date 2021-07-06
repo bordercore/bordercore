@@ -80,8 +80,8 @@
                         {% for song in song_list %}
                         {
                             "uuid": "{{ song.uuid }}",
-                            "title": "{{ song.title }}",
-                            "artist": "{{ song.artist }}",
+                            "title": "{{ song.title|safe }}",
+                            "artist": "{{ song.artist|safe }}",
                             "year": "{{ song.year|default:'' }}",
                             "length": "{{ song.length }}",
                         },
