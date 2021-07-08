@@ -1064,6 +1064,10 @@ div.CodeMirror-focused {
 .vue-simple-suggest.designed .suggestions .suggest-item.hover {
   background-color: #2874d5 !important;
   color: #fff !important;
+
+  b {
+    color: $vue-simple-suggest-item-hover-bold-color !important;
+  }
 }
 
 .vue-simple-suggest.designed .suggestions .suggest-item.selected {
