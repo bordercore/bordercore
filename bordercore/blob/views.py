@@ -117,7 +117,7 @@ class BlobCreateView(CreateView):
 
         handle_linked_collection(obj, self.request)
 
-        handle_add_collection(obj, self.request)
+        handle_add_to_collection(obj, self.request)
 
         obj.index_blob()
 
@@ -355,9 +355,17 @@ def handle_metadata(blob, request):
 
 def handle_linked_blob(blob, request):
 
-    if request.POST.get('linked_blob', ''):
-        blob_list = [{'id': int(request.POST['linked_blob']), 'added': int(datetime.datetime.now().strftime("%s"))},
-                     {'id': blob.id, 'added': int(datetime.datetime.now().strftime("%s"))}]
+    if request.POST.get("linked_blob", ""):
+        blob_list = [
+            {
+                "id": int(request.POST["linked_blob"]),
+                "added": int(datetime.datetime.now().strftime("%s"))
+            },
+            {
+                "id": blob.id,
+                "added": int(datetime.datetime.now().strftime("%s"))
+            }
+        ]
         collection = Collection(blob_list=blob_list, user=request.user, is_private=True)
         collection.save()
 
@@ -371,7 +379,7 @@ def handle_linked_collection(blob, request):
         collection.save()
 
 
-def handle_add_collection(blob, request):
+def handle_add_to_collection(blob, request):
 
     if request.POST.get('collection_id', ''):
         collection = Collection.objects.get(user=request.user, id=int(request.POST['collection_id']))
@@ -381,6 +389,8 @@ def handle_add_collection(blob, request):
         else:
             collection.blob_list = [blob]
         collection.save()
+
+        collection.create_collection_thumbnail()
 
 
 @login_required
@@ -439,6 +449,8 @@ def collection_mutate(request):
         message = f"Removed from collection '{collection.name}'"
 
     collection.save()
+
+    collection.create_collection_thumbnail()
 
     return JsonResponse({"status": "OK", "message": message}, safe=False)
 

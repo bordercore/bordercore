@@ -377,7 +377,7 @@ class Blob(TimeStampedModel):
         info = {}
         url = None
 
-        prefix = settings.COVER_URL + f"{self.uuid}"
+        prefix = settings.COVER_URL + f"blobs/{self.uuid}"
 
         file_extension = PurePath(self.file.name).suffix
 

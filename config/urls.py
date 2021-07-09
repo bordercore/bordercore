@@ -12,6 +12,7 @@ from api.views import (AlbumViewSet, BlobSha1sumViewSet, BlobViewSet,
                        UserViewSet)
 from book.views import BookListView
 from bordercore.api.views import PlaylistItemViewSet, PlaylistViewSet
+from collection.views import get_images
 from feed.views import update_feed_list
 from homepage.views import handler403, handler404, handler500
 
@@ -60,12 +61,8 @@ router.register(r"users", UserViewSet, "user")
 urlpatterns += [
     url(r"^api/", include(router.urls)),
     path("api/feeds/update_feed_list/<uuid:feed_uuid>/", update_feed_list),
+    path("api/collections/images/<uuid:collection_uuid>/", get_images),
     path("", include("rest_framework.urls", namespace="rest_framework"))
-]
-
-# Include any API calls that call outside the usual DRF "CRUD" operations
-urlpatterns += [
-    path("api/feeds/update_feed_list/<uuid:feed_uuid>/", update_feed_list),
 ]
 
 handler403 = "homepage.views.handler403"

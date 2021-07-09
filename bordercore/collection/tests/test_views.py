@@ -33,27 +33,6 @@ def test_collection_detail(auto_login_user, collection):
     assert resp.status_code == 200
 
 
-def test_collection_get_info(auto_login_user, collection):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("collection:get_info")
-    resp = client.get(f"{url}?query_type=uuid&uuid={collection.uuid}")
-
-    assert resp.status_code == 200
-
-    url = urls.reverse("collection:get_info")
-    resp = client.get(f"{url}?query_type=name&name={collection.name}")
-
-    assert resp.status_code == 200
-
-    # Test for an object that doesn't exist
-    url = urls.reverse("collection:get_info")
-    resp = client.get(f"{url}?query_type=uuid&uuid=00000000-0000-0000-0000-000000000000")
-
-    assert resp.status_code == 200
-
-
 def test_sort_collection(auto_login_user, collection):
 
     _, client = auto_login_user()

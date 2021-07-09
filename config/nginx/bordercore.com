@@ -96,7 +96,7 @@ server {
 
     location / {
 
-        proxy_pass https://bordercore-blobs.s3.amazonaws.com/blobs/;
+        proxy_pass https://bordercore-blobs.s3.amazonaws.com/;
         proxy_set_header Host bordercore-blobs.s3.amazonaws.com;
         proxy_intercept_errors on;
         proxy_redirect off;
@@ -106,6 +106,24 @@ server {
         error_page 403 =200 /default-cover.png;
 
         location /default-cover.png {
+            internal;
+            root /var/www/html;
+        }
+
+    }
+
+   location /collections/ {
+
+        proxy_pass https://bordercore-blobs.s3.amazonaws.com/collections/;
+        proxy_set_header Host bordercore-blobs.s3.amazonaws.com;
+        proxy_intercept_errors on;
+        proxy_redirect off;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        error_page 403 =200 /default-cover.png;
+
+        location /collections/default-cover.png {
             internal;
             root /var/www/html;
         }

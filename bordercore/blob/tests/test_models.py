@@ -102,13 +102,13 @@ def test_get_cover_info(blob_image_factory, blob_pdf_factory):
     assert cover_info["width"] == 1600
 
     cover_info = blob_image_factory.get_cover_info(size="small")
-    assert cover_info["url"] == f"https://blobs.bordercore.com/{blob_image_factory.uuid}/cover.jpg"
+    assert cover_info["url"] == f"https://blobs.bordercore.com/blobs/{blob_image_factory.uuid}/cover.jpg"
 
     cover_info_pdf = blob_pdf_factory.get_cover_info()
-    assert cover_info_pdf["url"] == f"https://blobs.bordercore.com/{blob_pdf_factory.uuid}/cover-large.jpg"
+    assert cover_info_pdf["url"] == f"https://blobs.bordercore.com/blobs/{blob_pdf_factory.uuid}/cover-large.jpg"
 
     cover_info_pdf = blob_pdf_factory.get_cover_info(size="small")
-    assert cover_info_pdf["url"] == f"https://blobs.bordercore.com/{blob_pdf_factory.uuid}/cover.jpg"
+    assert cover_info_pdf["url"] == f"https://blobs.bordercore.com/blobs/{blob_pdf_factory.uuid}/cover.jpg"
 
     assert Blob.get_cover_info_static(blob_pdf_factory.user, None) == {"url": ""}
 

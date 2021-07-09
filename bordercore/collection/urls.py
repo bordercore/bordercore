@@ -26,9 +26,9 @@ urlpatterns = [
         name="detail"
     ),
     path(
-        route="get_info/",
-        view=views.get_info,
-        name="get_info"
+        route="delete/<uuid:collection_uuid>/",
+        view=views.CollectionDeleteView.as_view(),
+        name="delete"
     ),
     path(
         route="get_blob/<int:collection_id>/<int:blob_position>/",

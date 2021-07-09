@@ -1,8 +1,12 @@
 from __future__ import unicode_literals
 
+import json
 import uuid
 
+import boto3
+
 from django.apps import apps
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Case, CharField, JSONField, Value, When
@@ -26,6 +30,14 @@ class Collection(TimeStampedModel):
 
     def __str__(self):
         return self.name
+
+    def delete(self):
+
+        # Delete the collection's thumbnail image in S3
+        s3 = boto3.resource("s3")
+        s3.Object(settings.AWS_STORAGE_BUCKET_NAME, f"collections/{self.uuid}.jpg").delete()
+
+        super().delete()
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
@@ -98,3 +110,44 @@ class Collection(TimeStampedModel):
         else:
 
             return []
+
+    def get_random_blobs(self):
+
+        Blob = apps.get_model("blob", "Blob")
+
+        if self.blob_list:
+
+            blob_ids = [x["id"] for x in self.blob_list]
+
+            blob_list = Blob.objects.filter(id__in=blob_ids).\
+                filter(file__iregex=r'\.(gif|jpg|pdf|png)$').\
+                values("uuid", "file").\
+                order_by("?")[:4]
+            return blob_list
+
+        else:
+
+            return []
+
+    def create_collection_thumbnail(self):
+
+        # Generate a fresh cover image for the collection
+        client = boto3.client("sns")
+
+        message = {
+            "Records": [
+                {
+                    "s3": {
+                        "bucket": {
+                            "name": settings.AWS_STORAGE_BUCKET_NAME,
+                        },
+                        "collection_uuid": str(self.uuid)
+                    }
+                }
+            ]
+        }
+
+        client.publish(
+            TopicArn=settings.CREATE_COLLECTION_THUMBNAIL_TOPIC_ARN,
+            Message=json.dumps(message),
+        )

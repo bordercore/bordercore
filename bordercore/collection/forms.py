@@ -15,18 +15,18 @@ class CollectionForm(ModelForm):
 
         # If this form has a model attached, get the tags and display them separated by commas
         if self.instance.id:
-            self.initial['tags'] = self.instance.get_tags()
+            self.initial["tags"] = self.instance.get_tags()
 
-        self.fields['tags'] = ModelCommaSeparatedChoiceField(
+        self.fields["tags"] = ModelCommaSeparatedChoiceField(
             request=self.request,
             required=False,
             queryset=Tag.objects.filter(user=self.request.user),
-            to_field_name='name')
+            to_field_name="name")
 
     class Meta:
         model = Collection
-        fields = ('name', 'description')
+        fields = ("name", "description")
         widgets = {
-            'description': Textarea(attrs={'class': 'form-control'}),
-            'name': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'})
+            "description": Textarea(attrs={"class": "form-control"}),
+            "name": TextInput(attrs={"class": "form-control", "autocomplete": "off"})
         }

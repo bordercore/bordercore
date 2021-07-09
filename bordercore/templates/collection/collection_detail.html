@@ -19,6 +19,8 @@
 
     <div class="row no-gutters h-100" id="vue-app">
 
+        {% include "common/show_messages.html" %}
+
         <div class="col-lg-3 d-flex flex-column">
 
             <div class="card-body">
@@ -28,9 +30,15 @@
                     <br />
                 {% endif %}
 
+                {% if blob_list %}
                 <button type="submit" class="btn btn-primary" id="show-gallery" data-toggle="modal" data-target="#gallery" v-cloak>
                     <font-awesome-icon icon="image" class="mr-2"></font-awesome-icon>Gallery
                 </button>
+
+                <br />
+                {% endif %}
+
+                <a href="{% url 'blob:create' %}?collection_id={{ collection.id }}" class="btn btn-primary mt-2" role="button"><font-awesome-icon icon="plus" class="mr-2"></font-awesome-icon>Add Blob</a>
 
             </div>
 
@@ -46,9 +54,15 @@
 
                         <div class="d-flex">
                             <h3>{{ collection.name }}</h3>
-                            <div class="mr-2 ml-auto">
-                                <add-button url="{% url 'blob:create' %}?collection_id={{ collection.id }}"></add-button>
-                            </div>
+
+                            <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="bookmark-dropdown text-center ml-auto mr-2 mt-2">
+                                <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
+                                <div slot="dropdown" id="collection-detail-menu">
+                                    <a class="dropdown-item" href="#" @click="onClickUpdate">Update</a>
+                                    <a class="dropdown-item" href="#" @click="onClickDelete">Delete</a>
+                                </div>
+                            </dropdown-menu>
+
                         </div>
 
                     </template>
@@ -78,7 +92,9 @@
                             </blob-list>
 
                            {% if not blob_list %}
-                               <div class="alert alert-warning" role="alert">Nothing in this collection</div>
+                               <h5 class="text-info">
+                                   This collection is empty.
+                               </h5>
                            {% endif %}
 
                         </div>
@@ -102,6 +118,78 @@
             </div>
         </div>
 
+        <form action="{% url 'collection:update' collection.uuid %}" method="post" id="form-collection-edit">
+            {% csrf_token %}
+            <div class="modal fade" id="modalUpdate" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="myModalLabel">Update Collection</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body">
+                        {% for field in form %}
+                            <div class="form-group{% if field.errors %} error{% endif %} row">
+                                <label class="col-lg-3 col-form-label" for="inputTitle">{{ field.label }}</label>
+
+                                <div class="col-lg-7">
+
+                            {% if field.label == "Tags" %}
+
+                                <tags-input
+                                    search-url="{% url 'tag:search' %}?query="
+                                >
+                                </tags-input>
+
+                            {% else %}
+
+                                {{ field }}
+                                {% for error in field.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+
+                            {% endif %}
+
+                                </div>
+
+                            </div>
+                        {% endfor %}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <input id="btn-action" class="btn btn-primary" type="submit" name="Go" value="Update" />
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <form action="{% url 'collection:delete' collection.uuid %}" method="post" id="form-collection-edit">
+            {% csrf_token %}
+            <div class="modal fade" id="modalDelete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="myModalLabel">Delete Collection</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        </div>
+
+                        <div class="modal-body">
+                        Are you sure you want to delete this collection?
+                        </div>
+
+                        <div class="modal-footer justify-content-end">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <input class="btn btn-primary" type="submit" value="Confirm" />
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+
     </div>
 
 {% endblock %}
@@ -110,12 +198,16 @@
 
     {{ block.super }}
 
+    {{ tags|json_script:"initial-tags"|default:"" }}
+
     <script type="text/javascript">
 
         current_index = 0;
         size_of_collection = {{ blob_list|length }};
 
         Vue.mixin({ delimiters: ["[[", "]]"] });
+
+        const EventBus = new Vue();
 
         const BlobList = {
             data() {
@@ -155,13 +247,32 @@
                     );
 
                 }
+            },
+            mounted() {
+                document.getElementById("id_name").value = "{{ collection.name }}";
+                document.getElementById("id_description").value = "{{ collection.description }}";
+                }
             }
-        }
 
         new Vue({
             el: "#vue-app",
             components: {
-                BlobList
+                BlobList,
+                TagsInput
+            },
+            data() {
+                return {
+                    show: false,
+                    right: true,
+                }
+            },
+            methods: {
+                onClickUpdate() {
+                    $("#modalUpdate").modal("show")
+                },
+                onClickDelete() {
+                    $("#modalDelete").modal("show")
+                },
             },
             mounted() {
 

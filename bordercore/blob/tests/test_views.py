@@ -8,6 +8,7 @@ from django import urls
 from django.db.models import signals
 
 from blob.models import Blob
+from collection.models import Collection
 
 try:
     from bs4 import BeautifulSoup
@@ -30,6 +31,19 @@ def monkeypatch_blob(monkeypatch):
     monkeypatch.setattr(Elasticsearch, "delete", mock)
     monkeypatch.setattr(Blob, "get_elasticsearch_info", mock)
     monkeypatch.setattr(Blob, "index_blob", mock)
+
+
+@pytest.fixture
+def monkeypatch_collection(monkeypatch):
+    """
+    Prevent the collection object from interacting with AWS by
+    patching out a method.
+    """
+
+    def mock(*args, **kwargs):
+        pass
+
+    monkeypatch.setattr(Collection, "create_collection_thumbnail", mock)
 
 
 @factory.django.mute_signals(signals.post_save)
@@ -121,7 +135,7 @@ def test_blob_metadata_name_search(auto_login_user, blob_image_factory):
     assert resp.status_code == 200
 
 
-def test_blob_collection_mutate(auto_login_user, blob_text_factory, collection):
+def test_blob_collection_mutate(monkeypatch_collection, auto_login_user, blob_text_factory, collection):
 
     _, client = auto_login_user()
 

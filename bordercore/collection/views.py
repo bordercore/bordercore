@@ -1,14 +1,18 @@
 import re
 
 from botocore.errorfactory import ClientError
+from rest_framework.decorators import api_view
 
+from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.dateformat import format
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, FormMixin, UpdateView
+from django.views.generic.edit import (CreateView, DeleteView, FormMixin,
+                                       UpdateView)
 from django.views.generic.list import ListView
 
 from blob.models import Blob
@@ -21,7 +25,6 @@ IMAGE_TYPE_LIST = ["jpeg", "gif", "png"]
 @method_decorator(login_required, name="dispatch")
 class CollectionListView(FormMixin, ListView):
 
-    context_object_name = "info"
     form_class = CollectionForm
 
     # Override this method so that we can pass the request object to the form
@@ -39,27 +42,30 @@ class CollectionListView(FormMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        info = []
+        for collection in context["object_list"]:
+            collection.updated = format(collection.modified, "Y-m-d")
+            collection.objectcount = len(collection.blob_list) if collection.blob_list else 0
+            collection.cover_url = f"{settings.COVER_URL}collections/{collection.uuid}.jpg",
 
-        for myobject in context["object_list"]:
-            info.append(dict(name=myobject.name,
-                             tags=myobject.get_tags(),
-                             updated=format(myobject.modified, "Y-m-d"),
-                             objectcount=len(myobject.blob_list) if myobject.blob_list else 0,
-                             uuid=myobject.uuid))
-
-        context["info"] = info
         context["title"] = "Collection List"
 
         return context
 
 
 @method_decorator(login_required, name="dispatch")
-class CollectionDetailView(DetailView):
+class CollectionDetailView(FormMixin, DetailView):
 
     model = Collection
     slug_field = "uuid"
     slug_url_kwarg = "collection_uuid"
+    form_class = CollectionForm
+
+    # Override this method so that we can pass the request object to the form
+    #  so that we have access to it in CollectionForm.__init__()
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -76,7 +82,7 @@ class CollectionDetailView(DetailView):
             except ClientError:
                 pass
 
-        context["nav"] = "collection"
+        context["tags"] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         context["title"] = f"Collection Detail :: {self.object.name}"
 
         return context
@@ -114,9 +120,9 @@ class CollectionCreateView(CreateView):
 
 @method_decorator(login_required, name="dispatch")
 class CollectionUpdateView(UpdateView):
+
     model = Collection
     form_class = CollectionForm
-    success_url = reverse_lazy("collection:list")
     slug_field = "uuid"
     slug_url_kwarg = "collection_uuid"
 
@@ -133,44 +139,56 @@ class CollectionUpdateView(UpdateView):
 
     def form_valid(self, form):
 
-        obj = form.save(commit=False)
-        obj.user = self.request.user
+        object = form.save(commit=False)
+        object.user = self.request.user
 
         # Delete all existing tags first
-        obj.tags.clear()
+        object.tags.clear()
 
         # Then add all tags specified
         for tag in form.cleaned_data["tags"]:
-            obj.tags.add(tag)
+            object.tags.add(tag)
 
-        obj.save()
+        object.save()
+
+        messages.add_message(
+            self.request,
+            messages.INFO,
+            "Collection updated"
+        )
 
         return HttpResponseRedirect(self.get_success_url())
 
+    def get_success_url(self):
+        return reverse("collection:detail", kwargs={"collection_uuid": self.object.uuid})
 
-@login_required
-def get_info(request):
 
-    from django.core.exceptions import ObjectDoesNotExist
+@method_decorator(login_required, name='dispatch')
+class CollectionDeleteView(DeleteView):
 
-    info = ""
+    model = Collection
+    form_class = CollectionForm
+    slug_field = "uuid"
+    slug_url_kwarg = "collection_uuid"
 
-    try:
-        if request.GET.get("query_type", "") == "uuid":
-            match = Collection.objects.get(user=request.user, uuid=request.GET["uuid"])
-        else:
-            match = Collection.objects.get(user=request.user, name=request.GET["name"])
-        if match:
-            info = {
-                "name": match.name,
-                "description": match.description,
-                "uuid": match.uuid,
-                "tags": [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in match.tags.all()]
-            }
-    except ObjectDoesNotExist:
-        info = {}
+    # Verify that the user is the owner of the task
+    def get_object(self, queryset=None):
+        obj = super().get_object()
+        if not obj.user == self.request.user:
+            raise Http404
+        return obj
 
-    return JsonResponse(info)
+    def delete(self, request, *args, **kwargs):
+        response = super().delete(request, *args, **kwargs)
+        messages.add_message(
+            self.request,
+            messages.INFO,
+            f"Collection <strong>{self.object.name}</strong> deleted"
+        )
+        return response
+
+    def get_success_url(self):
+        return reverse("collection:list")
 
 
 @login_required
@@ -193,3 +211,23 @@ def get_blob(request, collection_id, blob_position):
     collection = Collection.objects.get(pk=collection_id)
 
     return JsonResponse(collection.get_blob(blob_position))
+
+
+@api_view(["GET"])
+def get_images(request, collection_uuid):
+    """
+    Get four random blobs from a collection, to be used in
+    creating a thumbnail image.
+    """
+    blob_list = Collection.objects.get(uuid=str(collection_uuid)).get_random_blobs()
+
+    return JsonResponse(
+        [
+            {
+                "uuid": x["uuid"],
+                "filename": x["file"]
+            }
+            for x in blob_list
+        ],
+        safe=False
+    )

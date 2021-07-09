@@ -21,41 +21,23 @@
         </div>
 
         <div class="card-grid ml-3">
-
-            <b-table
-                hover
-                primary-key="uuid"
-                :items="items"
-                :fields="fields"
-                select-mode="single"
-                @row-hovered="rowHovered"
-                @row-unhovered="rowUnHovered"
-                selected-variant="info"
-                sort-by="updated"
-                sort-desc
-            >
-                <template #cell(name)="data">
-                    <a :href="data.item.collection_url">[[ data.value ]]</a>
-                </template>
-
-                <template #cell(updated)="data">
-                [[ getDate(data.value) ]]
-                </template>
-
-                <template #cell(uuid)="data">
-                    <div class="hover-target hidden">
-                        <dropdown-menu v-model="show" :right="true" transition="translate-fade-down" class="text-center">
-                            <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
-                            <div slot="dropdown">
-                                <a class="dropdown-item" href="#" @click="onClickUpdate(data.value)">Update</a>
-                                <a class="dropdown-item" href="#" @click="onClickDelete(data.value)">Delete</a>
+            <div class="d-flex flex-column">
+                <div class="d-flex flex-wrap">
+                    <div v-for="collection in items" class="collection-container text-center hoverable p-3" @click="onClickCollection(collection.url)">
+                        <div class="position-relative collection mx-auto">
+                            <img :src="collection.cover_url" />
+                            <div class="collection-cover-container position-absolute" v-html="getBlobCount(collection.objectcount)">
                             </div>
-                        </dropdown-menu>
+                        </div>
+                        <div class="text-truncate">
+                            <a :href="collection.url">[[ collection.name ]]</a>
+                        </div>
                     </div>
-                </template>
+                </div>
+            </div>
+        </div>
 
-            </b-table>
-
+        <div class="card-grid ml-3">
 
             <form action="{% url 'collection:list' %}" method="post" id="form-collection-edit">
                 <div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -109,28 +91,6 @@
 
         </div>
 
-        <div class="modal fade" id="modalDelete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-
-                    <div class="modal-header">
-                        <h4 class="modal-title" id="myModalLabel">Delete Collection</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    </div>
-
-                    <div class="modal-body">
-                        Are you sure you want to delete the collection <strong>[[ getSelectedCollectionName() ]]</strong>?
-                    </div>
-
-                    <div class="modal-footer justify-content-end">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <input id="btn-action" class="btn btn-primary" type="button" value="Confirm" @click="deleteCollection" />
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
     </div>
 
 {% endblock %}
@@ -150,57 +110,21 @@
             data() {
                 return {
                     items: [
-                        {% for collection in info %}
+                        {% for collection in collection_list %}
                         {
                             "name": "{{ collection.name }}",
-                            "collection_url": "{% url 'collection:detail' collection.uuid %}",
+                            "url": "{% url 'collection:detail' collection.uuid %}",
                             "tags": "{{ collection.tags }}",
                             "updated": "{{ collection.updated }}",
                             "objectcount": {{ collection.objectcount }},
+                            "cover_url": "{{ collection.cover_url.0|safe }}",
                             "uuid": "{{ collection.uuid }}"
                         },
                         {% endfor %}
                     ],
-                    fields: [
-                        {
-                            key: "name",
-                            sortable: true
-                        },
-                        {
-                            key: "tags",
-                            sortable: true
-                        },
-                        {
-                            key: "updated",
-                            class: "text-center",
-                            sortable: true,
-                            sortDirection: "desc"
-                        },
-                        {
-                            key: "objectcount",
-                            label: "Object Count",
-                            class: "text-center",
-                            sortable: true,
-                            sortDirection: "desc"
-                        },
-                        {
-                            key: "uuid",
-                            label: "",
-                            tdClass: "text-center align-middle",
-                            thClass: "col-action",
-                        },
-                    ],
-                    selectedUuid: null,
-                    show: false,
                 }
             },
             methods: {
-                rowHovered(item, index, evt) {
-                    evt.currentTarget.querySelector(".hover-target").classList.remove("hidden");
-                },
-                rowUnHovered(item, index, evt) {
-                    evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
-                },
                 onClickCreate(evt) {
 
                     document.getElementById("id_name").value = "";
@@ -213,68 +137,12 @@
                     window.setTimeout(() => { document.getElementById("id_name").focus() }, 500);
 
                 },
-                onClickUpdate(uuid) {
-
-                    doGet(
-                        this,
-                        `{% url 'collection:get_info' %}?uuid=${uuid}&query_type=uuid`,
-                        (response) => {
-                            nameEl = document.getElementById("id_name");
-                            nameEl.value = response.data.name;
-                            document.getElementById("id_description").value = response.data.description;
-                            EventBus.$emit("addTags", response.data.tags);
-                            document.getElementById("action-type").innerHTML = "Update";
-                            document.getElementById("btn-action").value = "Update";
-                            document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection:update' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', uuid));
-                            $("#modalAdd").modal("show");
-                        },
-                        ""
-                    );
-
+                onClickCollection(url) {
+                    window.location = url;
                 },
-                getSelectedCollectionName() {
-                    if (this.selectedUuid) {
-                        const index = this.items.findIndex(x => x.uuid === this.selectedUuid);
-                        return this.items[index].name;
-                    } else {
-                        return "";
-                    }
+                getBlobCount(count) {
+                    return count + " " + pluralize("blob", count);
                 },
-                onClickDelete(uuid) {
-                    this.selectedUuid = uuid;
-                    $("#modalDelete").modal("show")
-                },
-                deleteCollection() {
-
-                    let self = this;
-
-                    axios.delete("{% url 'collection-detail' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', this.selectedUuid))
-                         .then((response) => {
-
-                             // Remove the deleted item from the list
-                             const index = self.items.findIndex(x => x.uuid === self.selectedUuid)
-                             const collectionName = self.items[index].name;
-                             self.items.splice(index, 1);
-
-                             self.selectedUuid = null;
-
-                             $("#modalDelete").modal("hide")
-
-                             this.$bvToast.toast(`Collection ${collectionName} deleted`, {
-                                 title: "Info",
-                                 variant: "info",
-                                 allowHtml: true,
-                             })
-
-                             console.log("Success");
-
-                         }, (error) => {
-                             console.log(error);
-                         });
-                },
-                getDate(date) {
-                    return getFormattedDate(date);
-                }
             },
             components: {
                 TagsInput
