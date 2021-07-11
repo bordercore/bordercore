@@ -62,6 +62,9 @@ class Song(TimeStampedModel):
     tags = models.ManyToManyField(Tag)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 
+    def __str__(self):
+        return self.title
+
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
 
@@ -305,3 +308,6 @@ def remove_playlistitem(sender, instance, **kwargs):
 class Listen(TimeStampedModel):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     song = models.ForeignKey(Song, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.song)
