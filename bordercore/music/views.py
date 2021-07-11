@@ -461,7 +461,8 @@ class RecentSongsListView(ListView):
     def get_queryset(self):
         search_term = self.request.GET.get("tag", None)
 
-        queryset = Song.objects.filter(user=self.request.user)
+        queryset = Song.objects.filter(user=self.request.user)\
+                               .filter(album__isnull=True)
 
         if search_term:
             queryset = queryset.filter(
