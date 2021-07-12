@@ -12,7 +12,7 @@ from mutagen.mp3 import MP3
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q, Sum
+from django.db.models import Q, Sum
 from django.db.models.functions import Coalesce
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
@@ -28,6 +28,7 @@ from lib.util import remove_non_ascii_characters
 
 from .forms import PlaylistForm, SongForm
 from .models import Album, Listen, Playlist, PlaylistItem, Song
+from .services import get_playlist_counts
 
 
 @login_required
@@ -43,7 +44,7 @@ def music_list(request):
         random_albums = random_album_info.first()
 
     # Get all playlists and their song counts
-    playlists = Playlist.objects.filter(user=request.user).annotate(num_songs=Count("playlistitem"))
+    playlists = get_playlist_counts(request.user)
 
     # Get a list of recently added albums
     recent_albums = Album.objects.filter(user=request.user).order_by("-created")[:12]
