@@ -6,10 +6,6 @@
 
 {% block content %}
 
-    <div id="vue-app">
-        {% include "common/show_messages.html" %}
-    </div>
-
     <div class="row no-gutters h-100">
 
         <div class="col-lg-3 d-flex flex-column">
@@ -21,7 +17,7 @@
                     {% if request.GET and search_results %}
 
                         <h4 class="ml-3">
-                                Total matches: <strong>{{ object_list.hits.total.value }}</strong>
+                            Total matches: <strong>{{ object_list.hits.total.value }}</strong>
                         </h4>
 
                         {% if search_results.hits.hits %}
@@ -245,10 +241,6 @@
     <script type="text/javascript" charset="utf-8">
 
         Vue.mixin({ delimiters: ["[[", "]]"] });
-
-        new Vue({
-            el: "#vue-app",
-        });
 
         new Vue({
             el: "#aggregations",

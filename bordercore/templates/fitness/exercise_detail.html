@@ -19,10 +19,6 @@
 
 {% block content %}
 
-    <div id="vue-message">
-        {% include "common/show_messages.html" %}
-    </div>
-
     <div class="row no-gutters h-100" id="vue-app">
 
         <div class="col-lg-3 d-flex flex-column">
@@ -229,10 +225,6 @@
             components: {
                 AddWorkoutForm
             }
-        });
-
-        new Vue({
-            el: "#vue-message",
         });
 
         var data = [

@@ -46,8 +46,6 @@
 
             <div id="vue-app">
 
-                {% include "common/show_messages.html" %}
-
                 {% if request.POST.Go and not form.errors %}
                     <div class="alert alert-success offset-lg-2">Post {{ action }}ed</div>
                 {% endif %}

@@ -4,7 +4,7 @@
 
 {% block nav %}
 
-    <div class="mr-auto align-self-center">
+    <div class="mr-auto align-self-center mb-3">
         <ul class="breadcrumb mb-0 pt-0 pb-0">
             <li class="breadcrumb-item"> <a href="{% url 'drill:list' %}">Drill</a> </li>
             <li class="breadcrumb-item active">{{ action }} Question</li>
@@ -26,8 +26,6 @@
 
                 <search inline-template>
                     <div>
-
-                    {% include "common/show_messages.html" %}
 
                         <div class="form-group row{% if field.errors %} error{% endif %}">
                             <label class="bold col-lg-2 col-form-label text-right" for="inputTitle">Tags</label>

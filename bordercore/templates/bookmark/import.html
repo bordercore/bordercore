@@ -4,10 +4,6 @@
 
 {% block content %}
 
-    <div id="vue-messages">
-        {% include "common/show_messages.html" with width="4" offset="2" %}
-    </div>
-
     <form id="import-form" action="{{ request.path }}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
@@ -61,11 +57,6 @@
                 TagsInput
             }
         });
-
-        new Vue({
-            el: "#vue-messages",
-        });
-
 
     </script>
 

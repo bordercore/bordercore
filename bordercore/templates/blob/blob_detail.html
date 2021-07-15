@@ -194,10 +194,6 @@
 
             <div class="col-lg-12">
 
-                <div id="vue-messages">
-                    {% include "common/show_messages.html" %}
-                </div>
-
                 <h2 id="name" class="pl-0 text-break">
                     {{ caption }}
                 </h2>
@@ -309,10 +305,6 @@
                     return content.replace(/(%#@!(\d+)!@#%)/g, "<a name='section_$2'></a>");
                 },
             }
-        });
-
-        new Vue({
-            el: "#vue-messages",
         });
 
     </script>

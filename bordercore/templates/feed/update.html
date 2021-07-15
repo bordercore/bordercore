@@ -20,8 +20,6 @@
             </div>
         {% endif %}
 
-        {% include "common/show_messages.html" with width=6 %}
-
         <p class="lead offset-lg-2">{{ form.instance.url|favicon|safe }} {{ action }} Feed</p>
 
         <form action="{{ request.path }}" method="post">

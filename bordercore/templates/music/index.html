@@ -4,10 +4,6 @@
 
 {% block content %}
 
-    <div id="vue-messages">
-        {% include "common/show_messages.html" %}
-    </div>
-
     <div class="row no-gutters h-100" id="vue-app">
 
         {% if not collection_is_not_empty %}
@@ -260,10 +256,6 @@
     <script type="text/javascript" charset="utf-8">
 
         Vue.mixin({ delimiters: ["[[", "]]"] });
-
-        new Vue({
-            el: "#vue-messages",
-        });
 
         new Vue({
             el: "#vue-app",
