@@ -307,6 +307,26 @@ class Blob(TimeStampedModel):
             blob_list__contains=[{"id": self.id}],
             is_private=False)
 
+    def add_to_collection(self, user, collection_uuid):
+        """
+        Add this blob to the given collection. Create
+        the collection if necessary.
+        """
+        collection = Collection.objects.get(user=user, uuid=collection_uuid)
+
+        blob = {
+            "id": self.id,
+            "added": int(datetime.datetime.now().strftime("%s"))
+        }
+
+        if collection.blob_list:
+            collection.blob_list.append(blob)
+        else:
+            collection.blob_list = [blob]
+        collection.save()
+
+        collection.create_collection_thumbnail()
+
     def get_linked_blobs(self):
 
         linked_blobs = []

@@ -2,13 +2,10 @@
 #  Does not include the file, if present.
 #  Optionally add it to a collection.
 
-import datetime
-
 from django.core.management.base import BaseCommand
 from django.db.transaction import atomic
 
 from blob.models import Blob, MetaData
-from collection.models import Collection
 
 
 class Command(BaseCommand):
@@ -29,7 +26,7 @@ class Command(BaseCommand):
     def handle(self, *args, uuid, collection_uuid, **kwargs):
 
         original_blob = Blob.objects.get(uuid=uuid)
-        print(f"Cloning blob named '{original_blob.name}'")
+        self.stdout.write(f"Cloning blob named '{original_blob.name}'")
 
         new_blob = Blob.objects.create(
             content=original_blob.content,
@@ -41,7 +38,7 @@ class Command(BaseCommand):
             is_note=original_blob.is_note
         )
 
-        print(f"New blob uuid: {new_blob.uuid}")
+        self.stdout.write(f"New blob uuid: {new_blob.uuid}")
 
         for x in original_blob.metadata_set.all():
             MetaData.objects.create(
@@ -54,13 +51,7 @@ class Command(BaseCommand):
             new_blob.tags.add(x)
 
         if collection_uuid:
-            collection = Collection.objects.get(user=original_blob.user, uuid=collection_uuid)
-            blob_info = {
-                "id": new_blob.id,
-                "added": int(datetime.datetime.now().strftime("%s"))
-            }
-            collection.blob_list.append(blob_info)
-            collection.save()
+            new_blob.add_to_collection(original_blob.user, collection_uuid)
 
         # Add to Elasticsearch
         new_blob.index_blob()

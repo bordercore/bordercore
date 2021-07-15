@@ -60,20 +60,22 @@ class BlobCreateView(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['action'] = 'Create'
+
         if self.request.GET.get('linked_blob', ''):
             linked_blob = Blob.objects.get(user=self.request.user, id=self.request.GET['linked_blob'])
             context['linked_blob'] = linked_blob
             # Grab the initial metadata from the linked blob
             context['metadata'] = linked_blob.metadata_set.all()
+
         if 'linked_collection' in self.request.GET:
             collection_uuid = self.request.GET['linked_collection']
             context['linked_collection_info'] = Collection.objects.get(user=self.request.user, uuid=collection_uuid)
             context['linked_collection_blob_list'] = [Blob.objects.get(user=self.request.user, pk=x['id']) for x in Collection.objects.get(user=self.request.user, uuid=collection_uuid).blob_list]
             # Grab the initial metadata from one of the other blobs in the collection
             context['metadata'] = context['linked_collection_blob_list'][0].metadata_set.all()
-        collection_id = self.request.GET.get('collection_id', '')
-        if collection_id:
-            context['collection_info'] = Collection.objects.get(user=self.request.user, id=collection_id)
+
+        if "collection_uuid" in self.request.GET:
+            context['collection_info'] = Collection.objects.get(user=self.request.user, uuid=self.request.GET["collection_uuid"])
         context['title'] = 'Create Blob'
 
         return context
@@ -117,7 +119,8 @@ class BlobCreateView(CreateView):
 
         handle_linked_collection(obj, self.request)
 
-        handle_add_to_collection(obj, self.request)
+        if "collection_uuid" in self.request.POST:
+            obj.add_to_collection(self.request.user, self.request.POST.get("collection_uuid"))
 
         obj.index_blob()
 
@@ -377,20 +380,6 @@ def handle_linked_collection(blob, request):
         blob = {'id': blob.id, 'added': int(datetime.datetime.now().strftime("%s"))}
         collection.blob_list.append(blob)
         collection.save()
-
-
-def handle_add_to_collection(blob, request):
-
-    if request.POST.get('collection_id', ''):
-        collection = Collection.objects.get(user=request.user, id=int(request.POST['collection_id']))
-        blob = {'id': blob.id, 'added': int(datetime.datetime.now().strftime("%s"))}
-        if collection.blob_list:
-            collection.blob_list.append(blob)
-        else:
-            collection.blob_list = [blob]
-        collection.save()
-
-        collection.create_collection_thumbnail()
 
 
 @login_required
