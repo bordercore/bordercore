@@ -19,7 +19,7 @@ from django.db import models
 from django.db.models.signals import post_save, pre_delete, pre_save
 from django.dispatch.dispatcher import receiver
 
-from collection.models import Collection
+from collection.models import Collection, SortOrderCollectionBlob
 from lib.mixins import TimeStampedModel
 from lib.time_utils import get_date_from_pattern
 from lib.util import is_image
@@ -304,7 +304,7 @@ class Blob(TimeStampedModel):
     def get_collection_info(self):
         return Collection.objects.filter(
             user=self.user,
-            blob_list__contains=[{"id": self.id}],
+            blobs__uuid=self.uuid,
             is_private=False)
 
     def add_to_collection(self, user, collection_uuid):
@@ -312,18 +312,10 @@ class Blob(TimeStampedModel):
         Add this blob to the given collection. Create
         the collection if necessary.
         """
+
         collection = Collection.objects.get(user=user, uuid=collection_uuid)
-
-        blob = {
-            "id": self.id,
-            "added": int(datetime.datetime.now().strftime("%s"))
-        }
-
-        if collection.blob_list:
-            collection.blob_list.append(blob)
-        else:
-            collection.blob_list = [blob]
-        collection.save()
+        so = SortOrderCollectionBlob(collection=collection, blob=self)
+        so.save()
 
         collection.create_collection_thumbnail()
 
@@ -331,8 +323,16 @@ class Blob(TimeStampedModel):
 
         linked_blobs = []
 
-        for collection in Collection.objects.filter(user=self.user, blob_list__contains=[{"id": self.id}]):
-            blob_list = Blob.objects.filter(user=self.user, pk__in=[x["id"] for x in collection.blob_list if x["id"] != self.id])
+        for collection in Collection.objects.filter(
+                user=self.user,
+                blobs__uuid=self.uuid
+        ).prefetch_related("blobs"):
+            blob_list = Blob.objects.filter(
+                user=self.user,
+                uuid__in=[
+                    x.uuid for x in collection.blobs.all() if x.uuid != self.uuid
+                ]
+            ).select_related("user")
             if collection.is_private:
                 linked_blobs.append(
                     {
@@ -558,9 +558,8 @@ class Blob(TimeStampedModel):
             log.warning(f"Tried to delete blob, but can't find it in elasticsearch: {self.uuid}")
 
         # Delete from any collections
-        for collection in Collection.objects.filter(user=self.user, blob_list__contains=[{'id': self.id}]):
-            collection.blob_list = [x for x in collection.blob_list if x['id'] != self.id]
-            collection.save()
+        for so in SortOrderCollectionBlob.objects.filter(blob=self):
+            so.delete()
 
         super().delete()
 

@@ -28,6 +28,10 @@
                     <br />
                 {% endif %}
 
+                <div class="mb-3">
+                    <strong>Updated</strong> {{ collection.modified|date:"F j, Y" }}
+                </div>
+
                 {% if blob_list %}
                 <button type="submit" class="btn btn-primary" id="show-gallery" data-toggle="modal" data-target="#gallery" v-cloak>
                     <font-awesome-icon icon="image" class="mr-2"></font-awesome-icon>Gallery
@@ -77,11 +81,7 @@
 
                                                 <div class="collection-item">[[ blob.name ]]</div>
 
-                                    {% if blob.collection_note %}
-
-                                        <img src="{{ STATIC_URL }}img/note.png" height="16" width="16" data-toggle="popover" data-content="[[ blob.collection_note ]]"/>
-
-                                    {% endif %}
+                                                <img v-if="blob.collection_note !== ''" src="{{ STATIC_URL }}img/note.png" height="16" width="16" data-toggle="popover" :data-content="blob.collection_note"/>
 
                                             </li>
                                         </draggable>
@@ -215,8 +215,8 @@
                         {
                             id: {{ blob.id }},
                             uuid: "{{ blob.uuid }}",
-                            name: "{{ blob.name|safe }}",
-                            collection_note: "{{ blob.collection_note }}",
+                            name: "{{ blob.name|escapejs|safe }}",
+                            collection_note: "{{ blob.collection_note|default:'' }}",
                             url: "{% url 'blob:detail' blob.uuid %}",
                             cover_url: "{{ blob.cover_url }}"
                         },
@@ -235,8 +235,8 @@
                         this,
                         "{% url "collection:sort" %}",
                         {
-                            "collection_id": {{ collection.id }},
-                            "blob_id": evt.moved.element.id,
+                            "collection_uuid": "{{ collection.uuid }}",
+                            "blob_uuid": evt.moved.element.uuid,
                             "position": new_position
                         },
                         () => {},
@@ -296,7 +296,7 @@
 
                         }
 
-                        axios.get("{% url "collection:get_blob" collection.id 666 %}".replace(/666/, current_index))
+                        axios.get("{% url "collection:get_blob" collection.uuid 666 %}".replace(/666/, current_index))
                              .then(response => {
                                  document.getElementById("gallery_image").setAttribute("src", response.data.cover_info.url);
                              })

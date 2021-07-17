@@ -23,7 +23,7 @@
                                         <a class="dropdown-item" href="#" @click="handleCopySha1sum('{{ blob.sha1sum }}')">Copy Sha1sum</a>
                                         <a class="dropdown-item" href="{{ aws_url }}">S3 Link</a>
                                     {% endif %}
-                                    <a class="dropdown-item" href="{% url 'blob:create' %}?linked_blob={{ blob.id }}">Link to New Blob</a>
+                                    <a class="dropdown-item" href="{% url 'blob:create' %}?linked_blob_uuid={{ blob.uuid }}">Link to New Blob</a>
                                     {% if blob.is_note %}
                                         <a class="dropdown-item" href="#" @click="onClick">[[pinnedButtonValue ]]</a>
                                     {% endif %}

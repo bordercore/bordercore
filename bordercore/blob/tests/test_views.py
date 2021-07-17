@@ -142,16 +142,16 @@ def test_blob_collection_mutate(monkeypatch_collection, auto_login_user, blob_te
     url = urls.reverse("blob:collection_mutate")
 
     resp = client.post(url, {
-        "blob_id": blob_text_factory.id,
-        "collection_id": collection.id,
+        "blob_uuid": blob_text_factory.uuid,
+        "collection_uuid": collection.uuid,
         "mutation": "add"
     })
 
     assert resp.status_code == 200
 
     resp = client.post(url, {
-        "blob_id": blob_text_factory.id,
-        "collection_id": collection.id,
+        "blob_uuid": blob_text_factory.uuid,
+        "collection_uuid": collection.uuid,
         "mutation": "delete"
     })
 

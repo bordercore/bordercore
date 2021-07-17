@@ -1,7 +1,6 @@
 import datetime
 import json
 import logging
-import random
 import re
 
 import boto3
@@ -22,7 +21,7 @@ from django.views.generic.list import ListView
 from blob.forms import BlobForm
 from blob.models import Blob, MetaData
 from blob.services import get_recent_blobs
-from collection.models import Collection
+from collection.models import Collection, SortOrderCollectionBlob
 from lib.time_utils import parse_date_from_string
 
 log = logging.getLogger(f"bordercore.{__name__}")
@@ -45,9 +44,9 @@ class BlobListView(ListView):
         }
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class BlobCreateView(CreateView):
-    template_name = 'blob/update.html'
+    template_name = "blob/update.html"
     form_class = BlobForm
 
     # Override this method so that we can pass the request object to the form
@@ -59,44 +58,62 @@ class BlobCreateView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['action'] = 'Create'
+        context["action"] = "Create"
 
-        if self.request.GET.get('linked_blob', ''):
-            linked_blob = Blob.objects.get(user=self.request.user, id=self.request.GET['linked_blob'])
-            context['linked_blob'] = linked_blob
-            # Grab the initial metadata from the linked blob
-            context['metadata'] = linked_blob.metadata_set.all()
+        if "linked_blob_uuid" in self.request.GET:
+            linked_blob = Blob.objects.get(user=self.request.user, uuid=self.request.GET["linked_blob_uuid"])
+            context["linked_blob"] = linked_blob
 
-        if 'linked_collection' in self.request.GET:
-            collection_uuid = self.request.GET['linked_collection']
-            context['linked_collection_info'] = Collection.objects.get(user=self.request.user, uuid=collection_uuid)
-            context['linked_collection_blob_list'] = [Blob.objects.get(user=self.request.user, pk=x['id']) for x in Collection.objects.get(user=self.request.user, uuid=collection_uuid).blob_list]
-            # Grab the initial metadata from one of the other blobs in the collection
-            context['metadata'] = context['linked_collection_blob_list'][0].metadata_set.all()
+            # Grab the initial metadata and tags from the linked blob
+            context["metadata"] = linked_blob.metadata_set.all()
+            context["tags"] = [
+                {
+                    "text": x.name,
+                    "value": x.name,
+                    "is_meta": x.is_meta
+                } for x in linked_blob.tags.all()
+            ]
+
+        if "linked_collection" in self.request.GET:
+            collection = Collection.objects.get(user=self.request.user, uuid=self.request.GET["linked_collection"])
+            context["linked_collection_info"] = collection
+            context["linked_collection_blob_list"] = collection.blobs.all()
+
+            # Grab the initial metadata and tags from one of the other blobs in the collection
+            context["metadata"] = context["linked_collection_blob_list"][0].metadata_set.all()
+            context["tags"] = [
+                {
+                    "text": x.name,
+                    "value": x.name,
+                    "is_meta": x.is_meta
+                } for x in context["linked_collection_blob_list"][0].tags.all()
+            ]
 
         if "collection_uuid" in self.request.GET:
-            context['collection_info'] = Collection.objects.get(user=self.request.user, uuid=self.request.GET["collection_uuid"])
-        context['title'] = 'Create Blob'
+            context["collection_info"] = Collection.objects.get(user=self.request.user, uuid=self.request.GET["collection_uuid"])
+
+        context["title"] = "Create Blob"
 
         return context
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
 
-        if self.request.GET.get('is_note', False):
-            form.initial['is_note'] = True
-        if self.request.GET.get('linked_blob', False):
-            blob = Blob.objects.get(user=self.request.user, pk=int(self.request.GET.get('linked_blob')))
-            form.initial['tags'] = ','.join([x.name for x in blob.tags.all()])
-            form.initial['date'] = blob.date
-            form.initial['name'] = blob.name
-        if self.request.GET.get('linked_collection', False):
-            collection_uuid = self.request.GET['linked_collection']
-            blob_id = Collection.objects.get(user=self.request.user, uuid=collection_uuid).blob_list[0]['id']
-            blob = Blob.objects.get(user=self.request.user, pk=blob_id)
-            form.initial['tags'] = ','.join([x.name for x in blob.tags.all()])
-            form.initial['date'] = blob.date
-            form.initial['name'] = blob.name
+        if "is_note" in self.request.GET:
+            form.initial["is_note"] = True
+
+        if "linked_blob" in self.request.GET:
+            blob = Blob.objects.get(user=self.request.user, pk=int(self.request.GET.get("linked_blob")))
+            form.initial["tags"] = ",".join([x.name for x in blob.tags.all()])
+            form.initial["date"] = blob.date
+            form.initial["name"] = blob.name
+
+        if "linked_collection" in self.request.GET:
+            collection_uuid = self.request.GET["linked_collection"]
+            blob_uuid = Collection.objects.get(user=self.request.user, uuid=collection_uuid).blobs.all()[0].uuid
+            blob = Blob.objects.get(user=self.request.user, uuid=blob_uuid)
+            form.initial["date"] = blob.date
+            form.initial["name"] = blob.name
 
         return form
 
@@ -222,9 +239,9 @@ class BlobDetailView(DetailView):
         return Blob.objects.filter(user=self.request.user)
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class BlobUpdateView(UpdateView):
-    template_name = 'blob/update.html'
+    template_name = "blob/update.html"
     form_class = BlobForm
 
     # Override this method so that we can pass the request object to the form
@@ -236,48 +253,48 @@ class BlobUpdateView(UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['sha1sum'] = self.kwargs.get('sha1sum')
+        context["sha1sum"] = self.kwargs.get("sha1sum")
 
         try:
-            context['cover_info'] = self.object.get_cover_info(max_cover_image_width=400)
+            context["cover_info"] = self.object.get_cover_info(max_cover_image_width=400)
         except ClientError:
             log.warn(f"No S3 cover image found for id={self.object.id}")
 
-        context['metadata'] = self.object.metadata_set.exclude(name="is_book")
+        context["metadata"] = self.object.metadata_set.exclude(name="is_book")
 
-        if [x for x in self.object.metadata_set.all() if x.name == 'is_book']:
-            context['is_book'] = True
+        if [x for x in self.object.metadata_set.all() if x.name == "is_book"]:
+            context["is_book"] = True
 
-        context['is_private'] = self.object.is_private
-        context['is_note'] = self.object.is_note
-        context['collections_other'] = Collection.objects.filter(Q(user=self.request.user)
-                                                                 & ~Q(blob_list__contains=[{'id': self.object.id}])
+        context["is_private"] = self.object.is_private
+        context["is_note"] = self.object.is_note
+        context["collections_other"] = Collection.objects.filter(Q(user=self.request.user)
+                                                                 & ~Q(blobs__uuid=self.object.uuid)
                                                                  & Q(is_private=False))
-        context['action'] = 'Update'
-        context['title'] = 'Blob Update :: {}'.format(self.object.get_name(remove_edition_string=True))
-        context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
+        context["action"] = "Update"
+        context["title"] = "Blob Update :: {}".format(self.object.get_name(remove_edition_string=True))
+        context["tags"] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
 
     def get(self, request, **kwargs):
-        self.object = Blob.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
+        self.object = Blob.objects.get(user=self.request.user, uuid=self.kwargs.get("uuid"))
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         context = self.get_context_data(object=self.object, form=form)
         return render(request, self.template_name, context)
 
     def get_object(self, queryset=None):
-        obj = Blob.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
+        obj = Blob.objects.get(user=self.request.user, uuid=self.kwargs.get("uuid"))
         return obj
 
     def form_valid(self, form):
         blob = form.instance
 
-        file_changed = False if 'file' not in form.changed_data else True
+        file_changed = False if "file" not in form.changed_data else True
 
         # Only check for a renamed file if the file itself hasn't changed
         if not file_changed:
             old_filename = str(form.instance.file)
-            new_filename = form.cleaned_data['filename']
+            new_filename = form.cleaned_data["filename"]
 
             if (new_filename != old_filename):
 
@@ -298,7 +315,7 @@ class BlobUpdateView(UpdateView):
                     from django.forms import ValidationError
                     raise ValidationError("Error: {}".format(e))
 
-        blob.file_modified = form.cleaned_data['file_modified']
+        blob.file_modified = form.cleaned_data["file_modified"]
 
         # Delete all existing tags
         blob.tags.clear()
@@ -309,9 +326,9 @@ class BlobUpdateView(UpdateView):
 
         self.object.index_blob(file_changed)
 
-        messages.add_message(self.request, messages.INFO, 'Blob updated')
+        messages.add_message(self.request, messages.INFO, "Blob updated")
 
-        return HttpResponseRedirect(reverse('blob:detail', kwargs={'uuid': str(blob.uuid)}))
+        return HttpResponseRedirect(reverse("blob:detail", kwargs={"uuid": str(blob.uuid)}))
 
 
 @method_decorator(login_required, name="dispatch")
@@ -351,43 +368,43 @@ def handle_metadata(blob, request):
             if created:
                 new_metadata.save()
 
-    if request.POST.get('is_book', ''):
-        new_metadata = MetaData(user=request.user, name='is_book', value='true', blob=blob)
+    if request.POST.get("is_book", ""):
+        new_metadata = MetaData(user=request.user, name="is_book", value="true", blob=blob)
         new_metadata.save()
 
 
 def handle_linked_blob(blob, request):
 
-    if request.POST.get("linked_blob", ""):
-        blob_list = [
-            {
-                "id": int(request.POST["linked_blob"]),
-                "added": int(datetime.datetime.now().strftime("%s"))
-            },
-            {
-                "id": blob.id,
-                "added": int(datetime.datetime.now().strftime("%s"))
-            }
-        ]
-        collection = Collection(blob_list=blob_list, user=request.user, is_private=True)
+    if "linked_blob_uuid" in request.POST:
+
+        # Create the private collection
+        collection = Collection(user=request.user, is_private=True)
         collection.save()
+
+        # Now add the current blob to this collection
+        so = SortOrderCollectionBlob(collection=collection, blob=blob)
+        so.save()
+
+        # Finally add the linked blob to this collection
+        blob = Blob.objects.get(user=request.user, uuid=request.POST["linked_blob_uuid"])
+        so = SortOrderCollectionBlob(collection=collection, blob=blob)
+        so.save()
 
 
 def handle_linked_collection(blob, request):
 
-    if request.POST.get('linked_collection', ''):
-        collection = Collection.objects.get(user=request.user, uuid=request.POST['linked_collection'])
-        blob = {'id': blob.id, 'added': int(datetime.datetime.now().strftime("%s"))}
-        collection.blob_list.append(blob)
-        collection.save()
+    if "linked_collection" in request.POST:
+        collection = Collection.objects.get(user=request.user, uuid=request.POST["linked_collection"])
+        so = SortOrderCollectionBlob(collection=collection, blob=blob)
+        so.save()
 
 
 @login_required
 def metadata_name_search(request):
 
-    m = MetaData.objects.filter(user=request.user).values('name').filter(name__icontains=request.GET['query']).distinct('name').order_by('name'.lower())
+    m = MetaData.objects.filter(user=request.user).values("name").filter(name__icontains=request.GET["query"]).distinct("name").order_by("name".lower())
 
-    return_data = [{'value': x['name']} for x in m]
+    return_data = [{"value": x["name"]} for x in m]
 
     return JsonResponse(return_data, safe=False)
 
@@ -399,9 +416,7 @@ def slideshow(request):
     to display in a slideshow
     """
 
-    c = Collection.objects.filter(name="To Display").first()
-
-    blob = Blob.objects.get(pk=random.choice(c.blob_list)["id"])
+    blob = Collection.objects.get(name="To Display").blobs.all().order_by("?")[0]
 
     content_type = None
     try:
@@ -417,25 +432,24 @@ def slideshow(request):
 @login_required
 def collection_mutate(request):
 
-    blob_id = int(request.POST['blob_id'])
-    collection = Collection.objects.get(user=request.user, id=int(request.POST['collection_id']))
-    mutation = request.POST['mutation']
+    blob_uuid = request.POST["blob_uuid"]
+    collection = Collection.objects.get(user=request.user, uuid=request.POST["collection_uuid"])
+    mutation = request.POST["mutation"]
 
-    message = ''
+    if mutation == "add":
 
-    if mutation == 'add':
-        blob = {'id': blob_id, 'added': int(datetime.datetime.now().strftime("%s"))}
-        if collection.blob_list:
-            if [x for x in collection.blob_list if x['id'] == blob_id]:
-                message = 'Blob already in collection'
-            else:
-                collection.blob_list.insert(0, blob)
+        if SortOrderCollectionBlob.objects.filter(collection=collection, blob__uuid=blob_uuid).exists():
+            message = "Blob already in collection <strong>{collection.name}</strong>"
         else:
-            collection.blob_list = [blob]
-        message = f"Added to collection '{collection.name}'"
-    elif mutation == 'delete':
-        collection.blob_list = [x for x in collection.blob_list if x['id'] != blob_id]
-        message = f"Removed from collection '{collection.name}'"
+            blob = Blob.objects.get(uuid=blob_uuid)
+            so = SortOrderCollectionBlob(collection=collection, blob=blob)
+            so.save()
+            message = f"Added to collection <strong>{collection.name}</strong>"
+
+    elif mutation == "delete":
+        so = SortOrderCollectionBlob.objects.get(collection=collection, blob__uuid=blob_uuid)
+        so.delete()
+        message = f"Removed from collection <strong>{collection.name}</strong>"
 
     collection.save()
 
@@ -455,8 +469,8 @@ def parse_date(request, input_date):
     except ValueError as e:
         error = str(e)
 
-    return JsonResponse({'output_date': response,
-                         'error': error})
+    return JsonResponse({"output_date": response,
+                         "error": error})
 
 
 @login_required

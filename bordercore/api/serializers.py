@@ -98,7 +98,7 @@ class BookmarkSerializer(serializers.ModelSerializer):
 class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
-        fields = ["blob_list", "description", "is_private", "name", "tags"]
+        fields = ["blobs", "description", "is_private", "name", "tags"]
 
 
 class FeedSerializer(serializers.ModelSerializer):

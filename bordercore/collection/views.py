@@ -1,5 +1,3 @@
-import re
-
 from botocore.errorfactory import ClientError
 from rest_framework.decorators import api_view
 
@@ -7,7 +5,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponseRedirect, JsonResponse
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils.dateformat import format
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
@@ -17,7 +15,7 @@ from django.views.generic.list import ListView
 
 from blob.models import Blob
 from collection.forms import CollectionForm
-from collection.models import Collection
+from collection.models import Collection, SortOrderCollectionBlob
 
 IMAGE_TYPE_LIST = ["jpeg", "gif", "png"]
 
@@ -36,15 +34,14 @@ class CollectionListView(FormMixin, ListView):
 
     def get_queryset(self):
         return Collection.objects.filter(user=self.request.user). \
-            filter(is_private=False). \
-            prefetch_related("tags")
+            filter(is_private=False)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         for collection in context["object_list"]:
             collection.updated = format(collection.modified, "Y-m-d")
-            collection.objectcount = len(collection.blob_list) if collection.blob_list else 0
+            collection.objectcount = collection.blobs.count()
             collection.cover_url = f"{settings.COVER_URL}collections/{collection.uuid}.jpg",
 
         context["title"] = "Collection List"
@@ -72,17 +69,21 @@ class CollectionDetailView(FormMixin, DetailView):
 
         blob_list = self.object.get_blob_list()
 
-        for blob in blob_list:
-            blob.name = re.sub("[\n\r]", "", blob.name)
-
         if blob_list:
             context["blob_list"] = blob_list
             try:
-                context["first_blob_cover_info"] = Blob.get_cover_info_static(user=self.request.user, sha1sum=context["blob_list"].first().sha1sum)
+                context["first_blob_cover_info"] = Blob.get_cover_info_static(user=self.request.user, sha1sum=blob_list[0]["sha1sum"])
             except ClientError:
                 pass
 
-        context["tags"] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
+        context["tags"] = [
+            {
+                "text": x.name,
+                "value": x.name,
+                "is_meta": x.is_meta
+            } for x in self.object.tags.all()
+        ]
+
         context["title"] = f"Collection Detail :: {self.object.name}"
 
         return context
@@ -194,21 +195,20 @@ class CollectionDeleteView(DeleteView):
 @login_required
 def sort_collection(request):
 
-    collection_id = int(request.POST["collection_id"])
-    blob_id = int(request.POST["blob_id"])
+    collection_uuid = request.POST["collection_uuid"]
+    blob_uuid = request.POST["blob_uuid"]
     new_position = int(request.POST["position"])
 
-    collection = Collection.objects.get(user=request.user, id=collection_id)
-
-    collection.sort(blob_id, new_position)
+    so = SortOrderCollectionBlob.objects.get(collection__uuid=collection_uuid, blob__uuid=blob_uuid)
+    SortOrderCollectionBlob.reorder(so, new_position)
 
     return JsonResponse({"status": "OK"}, safe=False)
 
 
 @login_required
-def get_blob(request, collection_id, blob_position):
+def get_blob(request, collection_uuid, blob_position):
 
-    collection = Collection.objects.get(pk=collection_id)
+    collection = Collection.objects.get(uuid=collection_uuid)
 
     return JsonResponse(collection.get_blob(blob_position))
 

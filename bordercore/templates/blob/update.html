@@ -46,8 +46,8 @@
                     <div class="form-group w-75">
                         <add-to-collection-dropdown inline-template>
                             <select class="form-control" @change="onChange">
-                                <option>Add to collection</option>
-                                <option v-for="c in collection_list" :value="c.id">[[ c.name ]]</option>
+                                <option value="">Add to collection</option>
+                                <option v-for="c in collection_list" :value="c.uuid">[[ c.name ]]</option>
                             </select>
                         </add-to-collection-dropdown>
                     </div>
@@ -57,7 +57,7 @@
                             <remove-from-collection-dropdown inline-template>
                                 <select class="form-control" @change="onChange">
                                     <option>Remove from collection</option>
-                                    <option v-for="c in collection_list" :value="c.id">[[ c.name ]]</option>
+                                    <option v-for="c in collection_list" :value="c.uuid">[[ c.name ]]</option>
                                 </select>
                             </remove-from-collection-dropdown>
                         </div>
@@ -140,8 +140,14 @@
                     {% csrf_token %}
 
                     <input type="hidden" name="metadata" id="input-metadata" />
-                    <input type="hidden" name="linked_blob" value="{{ linked_blob.id }}" />
-                    <input type="hidden" name="linked_collection" value="{{ linked_collection_info.uuid }}" />
+
+                    {% if linked_blob %}
+                        <input type="hidden" name="linked_blob_uuid" value="{{ linked_blob.uuid }}" />
+                    {% endif %}
+
+                    {% if linked_collection_info %}
+                        <input type="hidden" name="linked_collection" value="{{ linked_collection_info.uuid }}" />
+                    {% endif %}
 
                     {% if collection_info %}
                         <input type="hidden" name="collection_uuid" value="{{ collection_info.uuid }}" />
@@ -341,7 +347,7 @@
                     collection_list: [
                         {% for collection in collections_other %}
                         {
-                            id: "{{ collection.id }}",
+                            uuid: "{{ collection.uuid }}",
                             name: "{{ collection.name }}"
                         },
                         {% endfor %}
@@ -350,7 +356,9 @@
             },
             methods: {
                 onChange(evt) {
-                    this.$parent.mutateCollection(this.$el.value, "add");
+                    if (this.$el.value !== "") {
+                        this.$parent.mutateCollection(this.$el.value, "add");
+                    }
                 }
             }
         }
@@ -362,7 +370,7 @@
                     collection_list: [
                         {% for collection in object.get_collection_info %}
                         {
-                            id: "{{ collection.id }}",
+                            uuid: "{{ collection.uuid }}",
                             name: "{{ collection.name }}"
                         },
                         {% endfor %}
@@ -567,14 +575,14 @@
             },
             methods: {
 
-                mutateCollection(collection_id, mutation_type) {
+                mutateCollection(collection_uuid, mutation_type) {
 
                     doPost(
                         this,
                         "{% url "blob:collection_mutate" %}",
                         {
-                            "blob_id": {{ object.id|default:0 }},
-                            "collection_id": collection_id,
+                            "blob_uuid": "{{ object.uuid|default:'' }}",
+                            "collection_uuid": collection_uuid,
                             "mutation": mutation_type
                         },
                         (response) => {},
@@ -703,22 +711,6 @@
                     title: "Toggle Fullscreen",
                 },
             ]
-        });
-
-    </script>
-
-    <script type="text/javascript">
-
-        $(document).ready(function() {
-
-            {% for tag in linked_blob.tags.all %}
-            $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
-            {% endfor %}
-
-            {% for tag in linked_collection_blob_list.0.tags.all %}
-            $("#id_tags").tagsinput("add", {value: "{{ tag.name }}", name: "{{ tag.name }}", is_meta: {{ tag.is_meta|lower}}});
-            {% endfor %}
-
         });
 
     </script>

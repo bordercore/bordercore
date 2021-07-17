@@ -33,7 +33,6 @@ class TodoManager(models.Manager):
 
         return filter_priority_options
 
-
     def created_counts(self, user):
         """
         Return todo counts, grouped by creation date.

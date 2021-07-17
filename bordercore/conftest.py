@@ -40,6 +40,7 @@ from node.models import SortOrderNodeBookmark, SortOrderNodeBlob  # isort:skip
 from node.tests.factories import NodeFactory  # isort:skip
 from tag.tests.factories import TagFactory  # isort:skip
 from todo.tests.factories import TodoFactory  #isort:skip
+from collection.models import SortOrderCollectionBlob  #isort:skip
 
 try:
     from moto import mock_s3
@@ -245,14 +246,11 @@ def collection(blob_image_factory, blob_pdf_factory):
     tag_2 = TagFactory(name="django")
     collection.tags.add(tag_1, tag_2)
 
-    collection.blob_list = [
-        {
-            "id": x.id,
-            "added": int(datetime.datetime.now().strftime("%s"))
-        }
-        for x in [blob_image_factory, blob_pdf_factory]
-    ]
-    collection.save()
+    so = SortOrderCollectionBlob(collection=collection, blob=blob_image_factory)
+    so.save()
+    so = SortOrderCollectionBlob(collection=collection, blob=blob_pdf_factory)
+    so.save()
+
     yield collection
 
 
