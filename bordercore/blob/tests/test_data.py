@@ -497,59 +497,21 @@ def test_elasticsearch_blobs_exist_in_db(es):
         assert Blob.objects.filter(uuid=blob["_source"]["uuid"]).count() == 1, f"blob {blob['_source']['uuid']} exists in Elasticsearch but not in database"
 
 
-# def test_blob_permissions():
-#     "Assert that all blobs are owned by www-data and all directories have permissions 775"
-#     import os
-#     from os import stat
-#     from pwd import getpwuid
+@pytest.mark.wumpus
+def test_blob_permissions():
+    "Assert that all blobs are owned by jerrell and all directories have permissions 775"
+    from os import stat
+    from pwd import getpwuid
 
-#     owners = ("celery", "www-data")
-#     walk_dir = "/home/media/blobs/"
-#     TODO: Use pathlib instead of os.path
-#     for root, subdirs, files in os.walk(walk_dir):
-#         for subdir in subdirs:
-#             dir_path = os.path.join(root, subdir)
-#             permissions = oct(stat(dir_path).st_mode & 0o777)
-#             assert permissions == "0o775", "directory is not 775 {}: {}".format(dir_path, permissions)
-#         for filename in files:
-#             file_path = os.path.join(root, filename)
-#             assert getpwuid(stat(file_path).st_uid).pw_name in owners, "file not owned by {}: {}".format(owners, file_path)
+    owner = "jerrell"
+    walk_dir = "/home/media/blobs/"
 
-
-def test_collection_blobs_exists_in_db():
-    "Assert that all blobs currently in collections actually exist in the database"
-    collections = Collection.objects.filter(blob_list__isnull=False)
-
-    for c in collections:
-        for blob in c.blob_list:
-            assert Blob.objects.filter(pk=blob["id"]).count() > 0, "blob_id {} does not exist in the database".format(blob["id"])
-
-
-def test_collection_blobs_exists_in_elasticsearch(es):
-    "Assert that all blobs currently in collections actually exist in Elasticsearch"
-
-    blobs_not_indexed = [x.uuid for x in Blob.objects.filter(is_indexed=False).only("uuid")]
-
-    collections = Collection.objects.filter(blob_list__isnull=False)
-
-    for c in collections:
-        for blob_info in c.blob_list:
-
-            blob = Blob.objects.get(pk=blob_info["id"])
-            if blob.uuid in blobs_not_indexed:
-                continue
-
-            search_object = {
-                "query": {
-                    "term": {
-                        "uuid": blob.uuid
-                    }
-                },
-                "_source": ["uuid"]
-            }
-
-            found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["total"]["value"]
-            assert found == 1, f"blob found in a collection but not in Elasticsearch, uuid={blob.uuid}"
+    for file in Path(walk_dir).glob("**/*"):
+        if file.is_dir():
+            permissions = oct(stat(file).st_mode & 0o777)
+            assert permissions == "0o775", f"Directory is not 775 {file}: {permissions}"
+        elif file.is_file():
+            assert getpwuid(stat(file).st_uid).pw_name == owner, f"File not owned by {owner}: {file}"
 
 
 def test_blob_metadata_exists_in_elasticsearch(es):
