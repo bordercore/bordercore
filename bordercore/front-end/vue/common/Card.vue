@@ -1,5 +1,5 @@
 <template>
-    <div class="card-body" :class="className">
+    <div class="card-body">
         <slot name="title-slot">
             <div v-if="title" class="card-title">
                 {{ title }}
@@ -18,10 +18,6 @@
         props: {
             title: {
                 default: "Card Title",
-                type: String,
-            },
-            className: {
-                default: "",
                 type: String,
             },
         },

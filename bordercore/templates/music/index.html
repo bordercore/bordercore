@@ -22,7 +22,7 @@
         <div class="col-lg-3 d-flex flex-column">
 
             {% if random_albums %}
-                <card title="Featured Album" class-name="flex-grow-0">
+                <card title="Featured Album" class="flex-grow-0">
                     <template v-slot:content>
                         <table class="table table-borderless">
                             <tr>
@@ -42,7 +42,7 @@
                 </card>
             {% endif %}
 
-            <card title="Playlists" class-name="flex-grow-0">
+            <card title="Playlists" class="flex-grow-0">
 
                 <template v-slot:content>
 
@@ -86,7 +86,7 @@
                             <div class="card-title">Recently Added Albums</div>
 
                             <div class="mr-2 ml-auto">
-                                <add-button url="{% url 'music:create' %}"></add-button>
+                                <add-button :href="'{% url 'music:create' %}'"></add-button>
                             </div>
 
                         </div>

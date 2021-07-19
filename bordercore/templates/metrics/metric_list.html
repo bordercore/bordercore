@@ -40,7 +40,7 @@
 
             <div class="col-lg-3 d-flex flex-column">
 
-                <card title="Unit Tests" class-name="flex-grow-0" id="popover-target-unit">
+                <card title="Unit Tests" class="flex-grow-0" id="popover-target-unit">
                     <template v-slot:content>
                         <div class="d-flex">
                             <div class="flex-grow-1">
@@ -80,7 +80,7 @@
                     <span v-html="unit.test_output"></span>
                 </b-popover>
 
-                <card title="Wumpus Tests" class-name="flex-grow-0" id="popover-target-wumpus">
+                <card title="Wumpus Tests" class="flex-grow-1" id="popover-target-wumpus">
                     <template v-slot:content>
                         <div class="d-flex">
                             <div class="flex-grow-1">
@@ -124,7 +124,7 @@
 
             <div class="col-lg-3 d-flex flex-column">
 
-                <card title="Functional Tests" class-name="flex-grow-0" id="popover-target-functional">
+                <card title="Functional Tests" class="flex-grow-0" id="popover-target-functional">
 
                     <template v-slot:content>
                         <div class="d-flex">
@@ -166,7 +166,7 @@
                     <span v-html="functional.test_output"></span>
                 </b-popover>
 
-                <card title="Code Coverage" class-name="flex-grow-0">
+                <card title="Code Coverage" class="flex-grow-1">
 
                     <template v-slot:content>
                         <div class="d-flex">
@@ -195,7 +195,7 @@
 
             <div class="col-lg-3 d-flex flex-column">
 
-                <div class="right-column flex-grow-0">
+                <div class="right-column d-flex flex-grow-1">
 
                     <card title="Data Quality Tests" id="popover-target-data">
                         <template v-slot:content>
