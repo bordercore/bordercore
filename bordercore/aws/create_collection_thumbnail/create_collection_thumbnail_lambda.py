@@ -6,17 +6,12 @@ import subprocess
 import boto3
 import requests
 
-# from requests_aws4auth import AWS4Auth
-
 logging.getLogger().setLevel(logging.INFO)
 log = logging.getLogger(__name__)
 
 EFS_DIR = os.environ.get("EFS_DIR", "/tmp")
 DRF_TOKEN = os.environ.get("DRF_TOKEN")
 S3_BUCKET_NAME = "bordercore-blobs"
-
-# credentials = boto3.Session().get_credentials()
-# awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, os.environ["AWS_REGION"], "es", session_token=credentials.token)
 
 s3_client = boto3.client("s3")
 
@@ -82,7 +77,6 @@ def handler(event, context):
                 log.info(f"create-cover.sh result: {result}")
 
                 # Upload the resulting thumbnail back to S3
-                # width, height = Image.open(cover).size
                 s3_client.upload_file(
                     f"{EFS_DIR}/collections/{thumbnail_filename}",
                     S3_BUCKET_NAME,

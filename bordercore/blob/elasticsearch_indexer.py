@@ -46,7 +46,7 @@ FILE_TYPES_TO_INGEST = [
 logging.getLogger().setLevel(logging.INFO)
 log = logging.getLogger(__name__)
 
-s3client = boto3.client("s3")
+s3_client = boto3.client("s3")
 
 
 class ESBlob(Document_ES):
@@ -137,7 +137,7 @@ def get_blob_contents_from_s3(blob):
 
     blob_contents = BytesIO()
     s3_key = f'{S3_KEY_PREFIX}/{blob["uuid"]}/{blob["file"]}'
-    s3client.download_fileobj(S3_BUCKET_NAME, s3_key, blob_contents)
+    s3_client.download_fileobj(S3_BUCKET_NAME, s3_key, blob_contents)
 
     blob_contents.seek(0)
     return blob_contents.read()

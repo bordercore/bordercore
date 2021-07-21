@@ -32,7 +32,7 @@
                                                 {{ bookmark.note }}
                                             </div>
                                             <span v-show="bookmark.noteIsEditable">
-                                                <input id="add-bookmark-input" type="text" class="form-control form-control-sm" :value="bookmark.note" placeholder="Add Bookmark" @blur="editNote(bookmark.uuid, $event.target.value)" @keydown.enter="editNote(bookmark.uuid, $event.target.value)">
+                                                <input id="add-bookmark-input" type="text" class="form-control form-control-sm" :value="bookmark.note" placeholder="Add Note" @blur="editNote(bookmark.uuid, $event.target.value)" @keydown.enter="editNote(bookmark.uuid, $event.target.value)">
                                             </span>
                                         </div>
                                     </div>

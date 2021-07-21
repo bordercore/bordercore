@@ -162,12 +162,11 @@ class Bookmark(TimeStampedModel):
 def tags_changed(sender, **kwargs):
 
     if kwargs["action"] == "post_add":
-        if kwargs["action"] == "post_add":
-            bookmark = kwargs["instance"]
+        bookmark = kwargs["instance"]
 
-            for tag_id in kwargs["pk_set"]:
-                so = SortOrderTagBookmark(tag=Tag.objects.get(pk=tag_id), bookmark=bookmark)
-                so.save()
+        for tag_id in kwargs["pk_set"]:
+            so = SortOrderTagBookmark(tag=Tag.objects.get(pk=tag_id), bookmark=bookmark)
+            so.save()
 
 
 m2m_changed.connect(tags_changed, sender=Bookmark.tags.through)

@@ -161,7 +161,7 @@ class Todo(TimeStampedModel):
                 }
             },
             "from": 0, "size": 1000,
-            "_source":[
+            "_source": [
                 "date",
                 "last_modified",
                 "name",
