@@ -218,7 +218,7 @@
                     </div>
                 {% endif %}
 
-                {% if blob.sha1sum %}
+                {% if blob.sha1sum and elasticsearch_info.content_type != "Video" %}
                     <blob-detail-cover :initial-cover-info="{{ cover_info }}"
                                        cover-url="{% url "blob:cover_info" object.uuid %}"
                     />
