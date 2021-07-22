@@ -66,8 +66,8 @@ def test_get_tags(blob_image_factory):
 
 
 def test_get_collection_info(collection, blob_pdf_factory):
-    assert len(blob_pdf_factory.get_collection_info()) == 1
-    assert blob_pdf_factory.get_collection_info().first().name == "collection_0"
+    assert len(blob_pdf_factory.get_collection_info()) == 2
+    assert blob_pdf_factory.get_collection_info().first().name == "To Display"
 
 
 def test_get_linked_blobs(blob_pdf_factory):

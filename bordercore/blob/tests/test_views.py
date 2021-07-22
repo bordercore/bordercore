@@ -46,6 +46,17 @@ def monkeypatch_collection(monkeypatch):
     monkeypatch.setattr(Collection, "create_collection_thumbnail", mock)
 
 
+def test_blob_list(auto_login_user, blob_text_factory):
+
+    _, client = auto_login_user()
+
+    # The empty form
+    url = urls.reverse("blob:list")
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+
+
 @factory.django.mute_signals(signals.post_save)
 def test_blob_create(monkeypatch_blob, auto_login_user):
 
@@ -135,6 +146,16 @@ def test_blob_metadata_name_search(auto_login_user, blob_image_factory):
     assert resp.status_code == 200
 
 
+def test_blob_slideshow(auto_login_user, blob_text_factory, blob_image_factory, collection):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("blob:slideshow")
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+
+
 def test_blob_collection_mutate(monkeypatch_collection, auto_login_user, blob_text_factory, collection):
 
     _, client = auto_login_user()
@@ -143,7 +164,7 @@ def test_blob_collection_mutate(monkeypatch_collection, auto_login_user, blob_te
 
     resp = client.post(url, {
         "blob_uuid": blob_text_factory.uuid,
-        "collection_uuid": collection.uuid,
+        "collection_uuid": collection[0].uuid,
         "mutation": "add"
     })
 
@@ -151,7 +172,7 @@ def test_blob_collection_mutate(monkeypatch_collection, auto_login_user, blob_te
 
     resp = client.post(url, {
         "blob_uuid": blob_text_factory.uuid,
-        "collection_uuid": collection.uuid,
+        "collection_uuid": collection[0].uuid,
         "mutation": "delete"
     })
 

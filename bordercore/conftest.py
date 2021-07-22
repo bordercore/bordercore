@@ -143,6 +143,7 @@ def bookmark(tag):
     bookmark_3.tags.add(tag[0])
     bookmark_2.tags.add(tag[0])
     bookmark_1.tags.add(tag[0])
+    bookmark_1.tags.add(tag[1])
 
     yield [bookmark_1, bookmark_2, bookmark_3, bookmark_4, bookmark_5]
 
@@ -240,18 +241,22 @@ def fitness(auto_login_user):
 @pytest.fixture()
 def collection(blob_image_factory, blob_pdf_factory):
 
-    collection = CollectionFactory()
+    collection_0 = CollectionFactory()
 
     tag_1 = TagFactory(name="linux")
     tag_2 = TagFactory(name="django")
-    collection.tags.add(tag_1, tag_2)
+    collection_0.tags.add(tag_1, tag_2)
 
-    so = SortOrderCollectionBlob(collection=collection, blob=blob_image_factory)
+    so = SortOrderCollectionBlob(collection=collection_0, blob=blob_image_factory)
     so.save()
-    so = SortOrderCollectionBlob(collection=collection, blob=blob_pdf_factory)
+    so = SortOrderCollectionBlob(collection=collection_0, blob=blob_pdf_factory)
     so.save()
 
-    yield collection
+    collection_1 = CollectionFactory(name="To Display")
+    so = SortOrderCollectionBlob(collection=collection_1, blob=blob_pdf_factory)
+    so.save()
+
+    yield [collection_0, collection_1]
 
 
 @pytest.fixture()

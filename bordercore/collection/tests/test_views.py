@@ -21,15 +21,15 @@ def test_collection_detail(auto_login_user, collection):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("collection:detail", kwargs={"collection_uuid": collection.uuid})
+    url = urls.reverse("collection:detail", kwargs={"collection_uuid": collection[0].uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200
 
-    for blob in SortOrderCollectionBlob.objects.filter(collection=collection):
+    for blob in SortOrderCollectionBlob.objects.filter(collection=collection[0]):
         blob.delete()
 
-    url = urls.reverse("collection:detail", kwargs={"collection_uuid": collection.uuid})
+    url = urls.reverse("collection:detail", kwargs={"collection_uuid": collection[0].uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200
@@ -41,8 +41,8 @@ def test_sort_collection(auto_login_user, collection):
 
     url = urls.reverse("collection:sort")
     resp = client.post(url, {
-        "collection_uuid": collection.uuid,
-        "blob_uuid": collection.blobs.all()[0].uuid,
+        "collection_uuid": collection[0].uuid,
+        "blob_uuid": collection[0].blobs.all()[0].uuid,
         "position": "3"
     })
 
@@ -54,7 +54,7 @@ def test_get_blob(auto_login_user, collection):
     _, client = auto_login_user()
 
     url = urls.reverse("collection:get_blob", kwargs={
-        "collection_uuid": collection.uuid,
+        "collection_uuid": collection[0].uuid,
         "blob_position": 1,
     })
     resp = client.get(url)
@@ -80,7 +80,7 @@ def test_update_collection(auto_login_user, collection):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("collection:update", kwargs={"collection_uuid": collection.uuid})
+    url = urls.reverse("collection:update", kwargs={"collection_uuid": collection[0].uuid})
     resp = client.post(url, {
         "name": "New name",
         "tags": "django"
@@ -93,7 +93,7 @@ def test_delete_collection(auto_login_user, collection):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("collection-detail", kwargs={"uuid": collection.uuid})
+    url = urls.reverse("collection-detail", kwargs={"uuid": collection[0].uuid})
     resp = client.delete(url)
 
     assert resp.status_code == 204
