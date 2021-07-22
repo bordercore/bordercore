@@ -121,7 +121,7 @@
                                             <td class="bookmark-list-link p-2">
                                                 <a :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.name) ]]</a>
                                                 <a v-if="bookmark.lastResponseCode != 200" class="form-error ml-3" target="wayback" :href="'https://web.archive.org/web/1000/' + bookmark.url">[[ bookmark.lastResponseCode ]]</a>
-                                                <i v-if="bookmark.note != null && bookmark.note != ''" class="fa fa-clipboard"></i>
+                                                <font-awesome-icon v-if="bookmark.note != null && bookmark.note != ''" icon="sticky-note" /> [[ ]]
                                                 <a v-for="tag in bookmark.tags" v-if="tag != selectedTagName" class="badge badge-info ml-2" @click.prevent="onClick" href="">[[ tag ]]</a>
                                             </td>
                                         </tr>
