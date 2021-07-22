@@ -4,7 +4,7 @@ from django import urls
 
 from homepage import views
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
 
 @pytest.fixture

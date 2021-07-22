@@ -10,7 +10,7 @@ from django.db.models import signals
 
 from drill.models import Question, SortOrderDrillBookmark
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
 
 @pytest.fixture

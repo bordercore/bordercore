@@ -4,7 +4,7 @@ from django import urls
 
 from collection.models import SortOrderCollectionBlob
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
 
 def test_collection_list(auto_login_user, collection):

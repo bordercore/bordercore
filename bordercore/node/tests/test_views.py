@@ -5,7 +5,7 @@ from django import urls
 
 from node.models import SortOrderNodeBlob, SortOrderNodeBookmark
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
 
 @pytest.fixture
@@ -21,7 +21,6 @@ def monkeypatch_node(monkeypatch):
                 "hits": []
             }
         }
-
 
     monkeypatch.setattr(Elasticsearch, "search", mock)
 

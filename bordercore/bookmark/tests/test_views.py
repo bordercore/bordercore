@@ -7,7 +7,7 @@ from django import urls
 
 from bookmark.models import Bookmark
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
 
 @pytest.fixture

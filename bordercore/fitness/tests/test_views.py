@@ -4,7 +4,7 @@ import pytest
 
 from django import urls
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
 
 def test_fitness_exercise_detail(auto_login_user, fitness):
