@@ -375,15 +375,15 @@ class BookmarkListTagView(BookmarkListView):
         for x in queryset:
             bookmarks.append(
                 {
-                    "uuid": x.uuid,
-                    "created": x.created.strftime("%B %d, %Y"),
-                    "createdYear": x.created.strftime("%Y"),
-                    "url": x.url,
-                    "name": re.sub("[\n\r]", "", x.name),
-                    "last_response_code": x.last_response_code,
+                    "uuid": x.bookmark.uuid,
+                    "created": x.bookmark.created.strftime("%B %d, %Y"),
+                    "createdYear": x.bookmark.created.strftime("%Y"),
+                    "url": x.bookmark.url,
+                    "name": re.sub("[\n\r]", "", x.bookmark.name),
+                    "last_response_code": x.bookmark.last_response_code,
                     "note": x.note,
-                    "favicon_url": x.get_favicon_url(size=16),
-                    "tags": [x.name for x in x.tags.all()]
+                    "favicon_url": x.bookmark.get_favicon_url(size=16),
+                    "tags": [tag.name for tag in x.bookmark.tags.all()]
                 }
             )
 
@@ -397,8 +397,8 @@ class BookmarkListTagView(BookmarkListView):
 
     def get_queryset(self):
 
-        bookmarks = Bookmark.get_tagged_bookmarks(self.request.user, self.kwargs.get("tag_filter"))
-        return bookmarks
+        return SortOrderTagBookmark.objects.filter(tag__name=self.kwargs.get("tag_filter"))\
+                                           .select_related("bookmark")
 
 
 @login_required

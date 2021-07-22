@@ -144,20 +144,6 @@ class Bookmark(TimeStampedModel):
         else:
             return ""
 
-    @staticmethod
-    def get_tagged_bookmarks(user, tag_name):
-
-        bookmark_info = [(x.bookmark, x.note) for x in SortOrderTagBookmark.objects.filter(tag__name=tag_name).select_related("bookmark")]
-
-        # If there is an associated note, add it to the bookmark object
-        sorted_bookmarks = []
-        for bookmarks in bookmark_info:
-            if bookmarks[1]:
-                bookmarks[0].note = bookmarks[1]
-            sorted_bookmarks.append(bookmarks[0])
-
-        return sorted_bookmarks
-
 
 def tags_changed(sender, **kwargs):
 
