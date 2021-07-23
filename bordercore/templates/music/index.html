@@ -28,7 +28,7 @@
                             <tr>
                                 <td>
                                     <a href="{% url 'music:album_detail' random_albums.uuid %}">
-                                        <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ random_albums.uuid }}" height="150" width="150" />
+                                        <img src="{{ IMAGES_URL }}album_artwork/{{ random_albums.uuid }}" height="150" width="150" />
                                     </a>
                                 </td>
                                 <td>
@@ -107,7 +107,7 @@
 
                                     <td class="w-25 hoverable p-2">
                                         <a href="{% url 'music:album_detail' album.uuid %}">
-                                            <img src="{{ MEDIA_URL_MUSIC }}artwork/{{ album.uuid }}" height="150" width="150" /> <br />
+                                            <img src="{{ IMAGES_URL }}album_artwork/{{ album.uuid }}" height="150" width="150" /> <br />
                                         </a>
                                         <div class="mt-1"><strong>{{ album.title }}</strong></div>
                                         <div class="text-light">{{ album.artist }}</div>

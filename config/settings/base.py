@@ -121,11 +121,11 @@ STATICFILES_FINDERS = (
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 MEDIA_ROOT = 'blobs'
 
-# URL that handles the media served from MEDIA_ROOT. Make sure to use a
-# trailing slash.
+# URLs that handle the media served from AWS. Make sure to use a trailing slash.
 MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
 COVER_URL = 'https://blobs.bordercore.com/'
 MEDIA_URL_MUSIC = f'https://{AWS_BUCKET_NAME_MUSIC}.s3.amazonaws.com/'
+IMAGES_URL = 'https://images.bordercore.com/'
 
 ROOT_URLCONF = 'config.urls'
 

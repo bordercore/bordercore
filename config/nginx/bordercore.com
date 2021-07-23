@@ -83,10 +83,13 @@ server {
 
     }
 
+
+    ssl_certificate /etc/letsencrypt/live/blobs.bordercore.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/blobs.bordercore.com/privkey.pem; # managed by Certbot
 }
 
 # Proxy cover images. We do this so that we can return a
-#  default image if one is missing from S3
+#  default image if one is missing from S3.
 server {
 
     listen 443;
@@ -112,7 +115,7 @@ server {
 
     }
 
-   location /collections/ {
+    location /collections/ {
 
         proxy_pass https://bordercore-blobs.s3.amazonaws.com/collections/;
         proxy_set_header Host bordercore-blobs.s3.amazonaws.com;
@@ -130,4 +133,37 @@ server {
 
     }
 
+    ssl_certificate /etc/letsencrypt/live/blobs.bordercore.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/blobs.bordercore.com/privkey.pem; # managed by Certbot
+}
+
+# Proxy album artwork images. We do this so that we can return a
+#  default image if one is missing from S3.
+server {
+
+    listen 443;
+    listen [::]:443;
+
+    server_name images.bordercore.com;
+
+    location /album_artwork/ {
+
+        proxy_pass https://bordercore-music.s3.amazonaws.com/artwork/;
+        proxy_set_header Host bordercore-music.s3.amazonaws.com;
+        proxy_intercept_errors on;
+        proxy_redirect off;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        error_page 403 =200 /album_artwork/artwork/default-album-artwork.jpg;
+
+        location /album_artwork/artwork/default-album-artwork.jpg {
+            internal;
+            root /var/www/html;
+        }
+
+    }
+
+    ssl_certificate /etc/letsencrypt/live/blobs.bordercore.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/blobs.bordercore.com/privkey.pem; # managed by Certbot
 }

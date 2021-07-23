@@ -60,7 +60,7 @@ def music_list(request):
                       "random_albums": random_albums,
                       "playlists": playlists,
                       "title": "Music List",
-                      "MEDIA_URL_MUSIC": settings.MEDIA_URL_MUSIC,
+                      "IMAGES_URL": settings.IMAGES_URL,
                       "collection_is_not_empty": collection_is_not_empty
                   })
 
@@ -104,7 +104,7 @@ class ArtistDetailView(TemplateView):
             "album_list": albums,
             "song_list": song_list,
             "compilation_album_list": compilation_songs,
-            "MEDIA_URL_MUSIC": settings.MEDIA_URL_MUSIC
+            "IMAGES_URL": settings.IMAGES_URL,
         }
 
 
@@ -139,7 +139,7 @@ class AlbumDetailView(DetailView):
         return {
             **context,
             "song_list": song_list,
-            "MEDIA_URL_MUSIC": settings.MEDIA_URL_MUSIC
+            "IMAGES_URL": settings.IMAGES_URL,
         }
 
     def get_queryset(self):
