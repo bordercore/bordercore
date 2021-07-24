@@ -4,11 +4,10 @@ const CompressionPlugin = require("compression-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const FixStyleOnlyEntriesPlugin = require("webpack-fix-style-only-entries");
 const StylelintPlugin = require("stylelint-webpack-plugin");
-const VueLoaderPlugin = require("vue-loader/lib/plugin")
+const VueLoaderPlugin = require("vue-loader/lib/plugin");
 
 module.exports = (env, argv) => {
-
-    let devMode = argv.mode == "development";
+    const devMode = argv.mode == "development";
 
     config = {
         entry: {
@@ -24,15 +23,15 @@ module.exports = (env, argv) => {
         mode: "production",
         resolve: {
             alias: {
-                vue$: "vue/dist/vue.esm.js"
-            }
+                vue$: "vue/dist/vue.esm.js",
+            },
         },
         plugins: [
             // new BundleAnalyzerPlugin({analyzerPort: 9999}),
 
             // Lint my SCSS
             new StylelintPlugin({
-                files: "static/scss/**.scss"
+                files: "static/scss/**.scss",
             }),
 
             // Remove the boilerplate JS files from chunks of CSS only entries
@@ -41,7 +40,7 @@ module.exports = (env, argv) => {
             // Compress the JavaScript bundles
             new CompressionPlugin({
                 test: /\.js$/i,
-                deleteOriginalAssets: true
+                deleteOriginalAssets: true,
             }),
 
             // Extract generated CSS into separate files
@@ -51,7 +50,7 @@ module.exports = (env, argv) => {
 
             // Responsible for cloning any other rules you have defined and applying them
             //  to the corresponding language blocks in .vue files
-            new VueLoaderPlugin()
+            new VueLoaderPlugin(),
         ],
         module: {
             rules: [
@@ -71,15 +70,15 @@ module.exports = (env, argv) => {
                     test: /\.css$/,
                     use: [
                         "vue-style-loader",
-                        "css-loader"
-                    ]
+                        "css-loader",
+                    ],
                 },
                 {
                     test: /\.vue$/,
-                    loader: "vue-loader"
-                }
-            ]
-        }
+                    loader: "vue-loader",
+                },
+            ],
+        },
     };
 
     if (devMode) {
@@ -87,5 +86,4 @@ module.exports = (env, argv) => {
     }
 
     return config;
-
-}
+};
