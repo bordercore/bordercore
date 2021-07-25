@@ -423,7 +423,7 @@
         const FileUpload = {
             data() {
                 return {
-                    filename: "{{ form.filename.value|safe|default:"" }}",
+                    filename: "{{ form.filename.value|default:""|escapejs }}",
                     lastModified: null
                 }
             },
