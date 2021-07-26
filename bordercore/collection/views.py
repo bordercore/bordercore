@@ -17,8 +17,6 @@ from blob.models import Blob
 from collection.forms import CollectionForm
 from collection.models import Collection, SortOrderCollectionBlob
 
-IMAGE_TYPE_LIST = ["jpeg", "gif", "png"]
-
 
 @method_decorator(login_required, name="dispatch")
 class CollectionListView(FormMixin, ListView):
@@ -34,7 +32,7 @@ class CollectionListView(FormMixin, ListView):
 
     def get_queryset(self):
         return Collection.objects.filter(user=self.request.user). \
-            filter(is_private=False)
+            filter(is_private=False).order_by("-modified")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

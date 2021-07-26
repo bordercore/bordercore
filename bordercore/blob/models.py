@@ -309,13 +309,29 @@ class Blob(TimeStampedModel):
 
     def add_to_collection(self, user, collection_uuid):
         """
-        Add this blob to the given collection. Create
-        the collection if necessary.
+        Add this blob to the given collection.
         """
 
         collection = Collection.objects.get(user=user, uuid=collection_uuid)
+        collection.modified = datetime.datetime.now()
+        collection.save()
+
         so = SortOrderCollectionBlob(collection=collection, blob=self)
         so.save()
+
+        collection.create_collection_thumbnail()
+
+    def delete_from_collection(self, user, collection_uuid):
+        """
+        Remove this blob from the given collection
+        """
+
+        collection = Collection.objects.get(user=user, uuid=collection_uuid)
+        collection.modified = datetime.datetime.now()
+        collection.save()
+
+        so = SortOrderCollectionBlob.objects.get(collection__uuid=collection_uuid, blob__uuid=self.uuid)
+        so.delete()
 
         collection.create_collection_thumbnail()
 
