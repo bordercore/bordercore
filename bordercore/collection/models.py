@@ -83,7 +83,7 @@ class Collection(TimeStampedModel):
 
     def get_random_blobs(self):
 
-        return self.blobs.filter(file__iregex=r"\.(gif|jpg|pdf|png)$").\
+        return self.blobs.filter(file__iregex=r"\.(gif|jpg|jpeg|pdf|png)$").\
             values("uuid", "file").\
             order_by("?")[:4]
 
