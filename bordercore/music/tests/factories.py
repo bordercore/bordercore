@@ -5,7 +5,7 @@ from faker import Factory as FakerFactory
 from django.db.models import signals
 
 from accounts.tests.factories import UserFactory
-from music.models import Album, Song, SongSource
+from music.models import Album, Playlist, Song, SongSource
 
 faker = FakerFactory.create()
 
@@ -42,6 +42,25 @@ class SongFactory(factory.DjangoModelFactory):
     track = FuzzyInteger(1, 10)
     year = FuzzyInteger(1970, 2020)
     source = factory.SubFactory(SongSourceFactory)
+    length = FuzzyInteger(100, 400)
+    user = factory.SubFactory(UserFactory)
+
+    @factory.post_generation
+    def tags(obj, create, extracted, **kwargs):
+
+        if not create:
+            return
+
+
+@factory.django.mute_signals(signals.post_save)
+class PlaylistFactory(factory.DjangoModelFactory):
+
+    class Meta:
+        model = Playlist
+
+    name = factory.Sequence(lambda n: f"playlist_{n}")
+    size = FuzzyInteger(1, 50)
+    type = "manual"
     user = factory.SubFactory(UserFactory)
 
     @factory.post_generation

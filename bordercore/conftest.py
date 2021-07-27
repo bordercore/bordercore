@@ -29,18 +29,18 @@ from blob.tests.factories import BlobFactory  # isort:skip
 from bookmark.tests.factories import BookmarkFactory  # isort:skip
 from collection.tests.factories import CollectionFactory  # isort:skip
 from django.contrib.auth.models import Group  # isort:skip
-from drill.models import SortOrderDrillBookmark # isort:skip
+from drill.models import SortOrderDrillBookmark  # isort:skip
 from drill.tests.factories import QuestionFactory  # isort:skip
 from fitness.models import Exercise, ExerciseUser, Muscle, MuscleGroup, Data  # isort:skip
 from feed.tests.factories import FeedFactory  # isort:skip
 from metrics.models import Metric, MetricData  # isort:skip
-from music.models import Listen, SongSource  # isort:skip
-from music.tests.factories import SongFactory, AlbumFactory  # isort:skip
+from music.models import Listen, SongSource, PlaylistItem  # isort:skip
+from music.tests.factories import SongFactory, AlbumFactory, PlaylistFactory  # isort:skip
 from node.models import SortOrderNodeBookmark, SortOrderNodeBlob  # isort:skip
 from node.tests.factories import NodeFactory  # isort:skip
 from tag.tests.factories import TagFactory  # isort:skip
-from todo.tests.factories import TodoFactory  #isort:skip
-from collection.models import SortOrderCollectionBlob  #isort:skip
+from todo.tests.factories import TodoFactory  # isort:skip
+from collection.models import SortOrderCollectionBlob  # isort:skip
 
 try:
     from moto import mock_s3
@@ -385,13 +385,14 @@ def song_source(auto_login_user):
 
 
 @pytest.fixture()
-def song(auto_login_user, song_source):
+def song(auto_login_user, song_source, tag):
 
     user, _ = auto_login_user()
 
     album = AlbumFactory()
 
     song_0 = SongFactory()
+    song_0.tags.add(tag[0])
     song_1 = SongFactory(album=album)
     song_2 = SongFactory()
 
@@ -399,6 +400,26 @@ def song(auto_login_user, song_source):
     listen.save()
 
     yield [song_0, song_1, song_2]
+
+
+@pytest.fixture()
+def playlist(auto_login_user, song, tag):
+
+    user, _ = auto_login_user()
+
+    # Create a "manual" playlist
+    playlist_0 = PlaylistFactory(user=user)
+    playlistitem = PlaylistItem(playlist=playlist_0, song=song[0])
+    playlistitem.save()
+    playlistitem = PlaylistItem(playlist=playlist_0, song=song[1])
+    playlistitem.save()
+
+    # Create a "smart" playlist
+    playlist_1 = PlaylistFactory(user=user, type="tag")
+    playlist_1.parameters = {"tag": tag[0].name}
+    playlist_1.save()
+
+    yield [playlist_0, playlist_1]
 
 
 @pytest.fixture()

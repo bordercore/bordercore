@@ -6,7 +6,7 @@ import factory
 import pytest
 
 from django import urls
-from django.db.models import signals
+from django.db.models import query, signals
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
@@ -72,6 +72,13 @@ def test_music_create(s3_resource, s3_bucket, auto_login_user, song, song_source
 
     user, client = auto_login_user()
 
+    # The empty form
+    url = urls.reverse("music:create")
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+
+    # Adding a new song
     mp3 = Path(__file__).parent / "resources/Mysterious Lights.mp3"
 
     hasher = hashlib.sha1()
@@ -106,6 +113,17 @@ def test_music_create(s3_resource, s3_bucket, auto_login_user, song, song_source
     assert resp.status_code == 302
 
 
+@factory.django.mute_signals(signals.pre_delete)
+def test_music_delete(auto_login_user, song):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("music:delete", kwargs={"uuid": song[0].uuid})
+    resp = client.post(url)
+
+    assert resp.status_code == 302
+
+
 def test_music_recent_songs(auto_login_user, song):
 
     _, client = auto_login_user()
@@ -127,11 +145,108 @@ def test_music_get_song_info(auto_login_user, song):
     assert resp.status_code == 200
 
 
-def test_music_search_tag(auto_login_user, song):
+def test_music_search_tag(auto_login_user, song, tag):
 
     _, client = auto_login_user()
 
     url = urls.reverse("music:search_tag")
-    resp = client.get(f"{url}?tag=sythnwave")
+    resp = client.get(f"{url}?tag={tag[0].name}")
 
     assert resp.status_code == 200
+
+
+def test_music_playlist_detail(auto_login_user, playlist):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("music:playlist_detail", kwargs={"uuid": playlist[0].uuid})
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+
+
+def test_music_playlist_create(auto_login_user, song):
+
+    _, client = auto_login_user()
+
+    # The empty form
+    url = urls.reverse("music:playlist_create")
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+
+    # The submitted form
+    url = urls.reverse("music:playlist_create")
+    resp = client.post(url, {
+        "name": "Test Playlist",
+        "type": "manual",
+        "tag": "django",
+    })
+
+    assert resp.status_code == 302
+
+
+def test_music_playlist_delete(auto_login_user, playlist):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("music:delete_playlist", kwargs={"uuid": playlist[0].uuid})
+    resp = client.post(url, {
+        "Go": "Confirm"
+    })
+
+    assert resp.status_code == 302
+
+
+def test_music_get_playlist(auto_login_user, playlist):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("music:get_playlist", kwargs={"uuid": playlist[0].uuid})
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+    url = urls.reverse("music:get_playlist", kwargs={"uuid": playlist[1].uuid})
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+
+
+def test_music_sort_playlist(auto_login_user, playlist):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("music:sort_playlist")
+    resp = client.post(url, {
+        "playlistitem_uuid": playlist[0].playlistitem_set.all()[0].uuid,
+        "position": 2
+    })
+
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "OK"
+
+
+def test_music_search_playlists(auto_login_user, playlist):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("music:search_playlists")
+    resp = client.get(f"{url}?query=playlist")
+
+    assert resp.status_code == 200
+    assert len(resp.json()) == 1
+    assert resp.json()[0]["uuid"] == str(playlist[0].uuid)
+
+
+def test_music_add_to_playlist(auto_login_user, playlist, song):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("music:add_to_playlist")
+    resp = client.post(url, {
+        "playlist_uuid": playlist[0].uuid,
+        "song_uuid": song[2].uuid
+    })
+
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "OK"
