@@ -24,7 +24,7 @@
 
             <div class="card-grid ml-2">
 
-                <img src="{{ IMAGES_URL }}album_artwork/{{ album.uuid }}" class="mw-100" height="400" width="400" />
+                <img src="{{ IMAGES_URL }}album_artwork/{{ album.uuid }}?cache_buster={{ request.GET.cache_buster }}" class="mw-100" height="400" width="400" />
 
                 {% if album.note %}
                     <h5 class="mt-3" v-html="getNote('{{ object.note }}')"></h5>
@@ -61,49 +61,65 @@
 
             <div class="card-grid ml-2">
 
-                <div class="right-column">
+                <div class="right-column" v-b-hover="handleHoverMenu">
 
-                    <h1>{{ album.title }}</h1>
-                    <h3><a href="{% url 'music:artist_detail' album.artist %}">{{ album.artist }}</a></h3>
-                    <h6>{{ album.year }}</h6>
-                    {% if album.original_release_year != album.year %}
-                    <h5>Originally released {{ album.original_release_year }}</h5>
-                    {% endif %}
+                    <div>
 
-                    <b-table
-                        hover
-                        primary-key="uuid"
-                        :items="songList"
-                        :fields="fields"
-                        selectable
-                        select-mode="single"
-                        @row-clicked="rowClicked"
-                        @row-hovered="rowHovered"
-                        @row-unhovered="rowUnHovered"
-                        selected-variant="info"
-                        sort-by="track"
-                        ref="table"
-                    >
+                        <div class="d-flex">
+                            <h1>
+                                {{ album.title }}
+                            </h1>
+                            <drop-down-menu
+                                ref="dropDownMenu"
+                                id="album-detail-menu"
+                                :links="albumDetailMenuItems"
+                            >
+                            </drop-down-menu>
+                        </div>
 
-                        <template #cell(title)="data">
-                            <span v-html="data.value"></span>
-                            <span class="pl-2 table-note" v-html="data.item.note"></span>
-                        </template>
+                        <h3><a href="{% url 'music:artist_detail' album.artist %}">{{ album.artist }}</a></h3>
 
-                        <template #cell(uuid)="data">
-                            <div class="hover-target hidden">
-                                <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="text-center">
-                                    <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
-                                    <div slot="dropdown">
-                                        <a class="dropdown-item" href="#" @click="onClickUpdate(data.value)">Update</a>
-                                        <a class="dropdown-item" href="#" @click="onClickAddToPlaylist(data.value)">Add to playlist</a>
-                                    </div>
-                                </dropdown-menu>
-                            </div>
-                        </template>
+                        <h6>{{ album.year }}</h6>
 
-                    </b-table>
+                        {% if album.original_release_year != album.year %}
+                            <h5>Originally released {{ album.original_release_year }}</h5>
+                        {% endif %}
 
+                        <b-table
+                            hover
+                            primary-key="uuid"
+                            :items="songList"
+                            :fields="fields"
+                            selectable
+                            select-mode="single"
+                            @row-clicked="rowClicked"
+                            @row-hovered="rowHovered"
+                            @row-unhovered="rowUnHovered"
+                            selected-variant="info"
+                            sort-by="track"
+                            ref="table"
+                        >
+
+                            <template #cell(title)="data">
+                                <span v-html="data.value"></span>
+                                <span class="pl-2 table-note" v-html="data.item.note"></span>
+                            </template>
+
+                            <template #cell(uuid)="data">
+                                <div class="hover-target hidden">
+                                    <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="text-center">
+                                        <font-awesome-icon icon="ellipsis-v" class="burger-menu" /></font-awesome-icon>
+                                        <div slot="dropdown">
+                                            <a class="dropdown-item" href="#" @click="onClickUpdate(data.value)">Update</a>
+                                            <a class="dropdown-item" href="#" @click="onClickAddToPlaylist(data.value)">Add to playlist</a>
+                                        </div>
+                                    </dropdown-menu>
+                                </div>
+                            </template>
+
+                        </b-table>
+
+                    </div>
                 </div>
 
             </div>
@@ -118,6 +134,73 @@
         >
         </add-to-playlist>
 
+        <form action="{% url 'music:album_update' album.uuid %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="modal fade" id="modalUpdateAlbum" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="myModalLabel">Update Album</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body">
+
+                            {% for field in form %}
+
+                            {% if field.label == "Tags" %}
+
+                            <div class="form-group row">
+                                <label class="col-lg-4 col-form-label font-weight-bold text-right">Tags</label>
+                                <div class="col-lg-8">
+                                    <tags-input
+                                        search-url="{% url 'tag:search' %}?query="
+                                    >
+                                    </tags-input>
+                                </div>
+                            </div>
+
+                            {% elif field.label == "Cover image" %}
+
+                            <div class="form-group row">
+                                <label class="col-lg-4 col-form-label font-weight-bold text-right">Cover Image</label>
+                                <div class="col-lg-8 input-group">
+                                    <input type="text" name="filename" :value="filename" class="form-control" autocomplete="off" />
+                                    <span class="input-group-append">
+                                        <label class="btn btn-primary">Choose image
+                                            <input type="file" name="cover_image" hidden accept="image/*" @change="onCoverImageSelect" />
+                                        </label>
+                                    </span>
+                                </div>
+                            </div>
+
+                            {% else %}
+
+                        <div class="form-group{% if field.errors %} error{% endif %} row">
+                            <label class="col-lg-4 col-form-label font-weight-bold text-right">{{ field.label }}</label>
+
+                            <div class="col-lg-8">
+                                {{ field }}
+                                {% for error in field.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+
+                        </div>
+
+                            {% endif %}
+                            {% endfor %}
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <input id="btn-action" class="btn btn-primary" type="submit" name="Go" value="Update" />
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+
     </div>
 
 {% endblock %}
@@ -125,6 +208,8 @@
 {% block javascript %}
 
     {{ block.super }}
+
+    {{ tags|json_script:"initial-tags"|default:"" }}
 
     <script type="text/javascript" charset="utf-8">
 

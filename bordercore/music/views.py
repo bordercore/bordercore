@@ -1,5 +1,7 @@
+import io
 import os
 import re
+import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import unquote
@@ -20,13 +22,14 @@ from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.edit import (CreateView, DeleteView, ModelFormMixin,
+                                       UpdateView)
 from django.views.generic.list import ListView
 
 from lib.time_utils import convert_seconds
 from lib.util import remove_non_ascii_characters
 
-from .forms import PlaylistForm, SongForm
+from .forms import AlbumForm, PlaylistForm, SongForm
 from .models import Album, Listen, Playlist, PlaylistItem, Song
 from .services import get_playlist_counts
 
@@ -109,16 +112,23 @@ class ArtistDetailView(TemplateView):
 
 
 @method_decorator(login_required, name="dispatch")
-class AlbumDetailView(DetailView):
+class AlbumDetailView(ModelFormMixin, DetailView):
 
     model = Album
     slug_field = "uuid"
     slug_url_kwarg = "uuid"
+    form_class = AlbumForm
+
+    # Override this method so that we can pass the request object to the form
+    #  so that we have access to it in AlbumForm.__init__()
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["a"] = self.object
         s = Song.objects.filter(user=self.request.user, album=self.object).order_by("track")
 
         song_list = []
@@ -149,6 +159,80 @@ class AlbumDetailView(DetailView):
 
     def get_queryset(self):
         return Album.objects.filter(user=self.request.user)
+
+
+@method_decorator(login_required, name="dispatch")
+class AlbumUpdateView(UpdateView):
+
+    model = Album
+    form_class = AlbumForm
+    slug_field = "uuid"
+    slug_url_kwarg = "album_uuid"
+    template_name = "music/album_detail.html"
+
+    # Override this method so that we can pass the request object to the form
+    #  so that we have access to it in AlbumForm.__init__()
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
+
+    def form_valid(self, form):
+
+        if "cover_image" in self.request.FILES:
+            self.handle_cover_image(form)
+
+        song = form.instance
+
+        # Delete all existing tags
+        song.tags.clear()
+
+        # Then add the tags specified in the form
+        for tag in form.cleaned_data["tags"]:
+            song.tags.add(tag)
+
+        self.object = form.save()
+
+        messages.add_message(
+            self.request,
+            messages.INFO,
+            "Album updated"
+        )
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+
+        url = reverse(
+            "music:album_detail",
+            kwargs={
+                "uuid": self.object.uuid
+            }
+        )
+
+        # If we've uploaded a cover image, add a random UUID to the
+        #  url to force the browser to evict the old image from cache
+        #  so the new one is immediately visible.
+        if "cover_image" in self.get_form_kwargs()["files"]:
+            url = url + f"?cache_buster={uuid.uuid4()}"
+
+        return url
+
+    def handle_cover_image(self, form):
+        """
+        Upload the album's cover image to S3
+        """
+
+        s3_client = boto3.client("s3")
+
+        key = f"artwork/{self.object.uuid}"
+        fo = io.BytesIO(self.request.FILES["cover_image"].read())
+        s3_client.upload_fileobj(
+            fo,
+            settings.AWS_BUCKET_NAME_MUSIC,
+            key,
+            ExtraArgs={"ContentType": "image/jpeg"}
+        )
 
 
 @method_decorator(login_required, name="dispatch")
@@ -197,7 +281,6 @@ class SongUpdateView(UpdateView):
             success_url = self.request.POST["return_url"]
         else:
             success_url = self.success_url
-        print(success_url)
 
         return HttpResponseRedirect(success_url)
 

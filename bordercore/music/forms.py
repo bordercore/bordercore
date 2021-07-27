@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.forms import (ModelChoiceField, ModelForm, NumberInput, Select,
                           Textarea, TextInput)
-from django.forms.fields import BooleanField, CharField
+from django.forms.fields import BooleanField, CharField, FileField
 from django.utils.safestring import mark_safe
 
 from lib.fields import ModelCommaSeparatedChoiceField
@@ -134,4 +134,37 @@ class PlaylistForm(ModelForm):
             "note": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
             "size": NumberInput(attrs={"class": "form-control", "autocomplete": "off"}),
             "type": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
+        }
+
+
+class AlbumForm(ModelForm):
+
+    cover_image = FileField()
+
+    def __init__(self, *args, **kwargs):
+
+        # The request object is passed in from a view's PlaylistForm() constructor
+        self.request = kwargs.pop("request", None)
+
+        super().__init__(*args, **kwargs)
+
+        self.fields["cover_image"].required = False
+
+        if self.instance.id:
+            self.initial["tags"] = self.instance.get_tags()
+
+        self.fields["tags"] = ModelCommaSeparatedChoiceField(
+            request=self.request,
+            required=False,
+            queryset=Tag.objects.filter(user=self.request.user),
+            to_field_name="name")
+
+    class Meta:
+        model = Album
+        fields = ("title", "artist", "year", "note")
+        widgets = {
+            "title": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
+            "artist": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
+            "year": NumberInput(attrs={"class": "form-control", "autocomplete": "off"}),
+            "note": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
         }
