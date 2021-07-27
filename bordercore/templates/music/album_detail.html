@@ -221,12 +221,14 @@
 
         new Vue({
             el: "#vue-nav",
+            name: "Nav"
         });
 
         new Vue({
             el: "#vue-app",
             components: {
-                AddToPlaylist
+                AddToPlaylist,
+                DropDownMenu,
             },
             data() {
                 return {
@@ -265,6 +267,15 @@
                     continuousPlay: false,
                     show: false,
                     right: true,
+                    filename: null,
+                    albumDetailMenuItems: [
+                        {
+                            id: uuidv4(),
+                            title: "Update Album",
+                            url: "#",
+                            clickHandler: this.handleUpdateAlbum,
+                        }
+                    ]
                 }
             },
             methods: {
@@ -302,6 +313,15 @@
                              vid.src = response.data.url;
                              vid.play()
                          })
+                },
+                handleHoverMenu(hovered) {
+                    this.$refs.dropDownMenu.hide = !hovered;
+                },
+                handleUpdateAlbum() {
+                    $("#modalUpdateAlbum").modal("show")
+                },
+                onCoverImageSelect(evt) {
+                    this.filename = evt.target.files[0].name;
                 }
             },
             mounted() {

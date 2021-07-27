@@ -48,7 +48,7 @@
 
         <div class="col-lg-9">
 
-            <div class="right-column">
+            <div class="right-column" v-b-hover="handleHoverMenu">
 
                 <card>
 
@@ -57,13 +57,12 @@
                         <div class="d-flex">
                             <h3>{{ collection.name }}</h3>
 
-                            <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="bookmark-dropdown text-center ml-auto mr-2 mt-2">
-                                <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
-                                <div slot="dropdown" id="collection-detail-menu">
-                                    <a class="dropdown-item" href="#" @click="onClickUpdate">Update</a>
-                                    <a class="dropdown-item" href="#" @click="onClickDelete">Delete</a>
-                                </div>
-                            </dropdown-menu>
+                            <drop-down-menu
+                                ref="dropDownMenu"
+                                id="collection-detail-menu"
+                                :links="collectionDetailMenuItems"
+                            >
+                            </drop-down-menu>
 
                         </div>
 
@@ -256,12 +255,25 @@
             el: "#vue-app",
             components: {
                 BlobList,
+                DropDownMenu,
                 TagsInput
             },
             data() {
                 return {
-                    show: false,
-                    right: true,
+                    collectionDetailMenuItems: [
+                        {
+                            id: uuidv4(),
+                            title: "Update",
+                            url: "#",
+                            clickHandler: this.onClickUpdate,
+                        },
+                        {
+                            id: uuidv4(),
+                            title: "Delete",
+                            url: "#",
+                            clickHandler: this.onClickDelete,
+                        },
+                    ]
                 }
             },
             methods: {
@@ -271,6 +283,9 @@
                 onClickDelete() {
                     $("#modalDelete").modal("show")
                 },
+                handleHoverMenu(hovered) {
+                    this.$refs.dropDownMenu.hide = !hovered;
+                 },
             },
             mounted() {
 

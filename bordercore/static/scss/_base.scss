@@ -170,6 +170,7 @@ button:focus {
   border: 1px solid $gray-900;
   box-shadow: 0 0.25rem 1.5rem rgba(0, 0, 0, 0.24);
   color: $dropdown-menu-color;
+  margin-top: 0.5rem;
 }
 
 .dropdown-item {
@@ -187,13 +188,12 @@ button:focus {
 // The round, target point that spawns the dropdown menu below it
 .dropdownmenu {
   color: $dropdown-color;
-  font-size: 0.75rem;
+  font-size: 1rem;
   position: absolute;
   right: -0.5rem;
   top: -0.5rem;
-  padding: 0.2rem 0.25rem 0.25rem 0.25rem;
-  width: 1.6rem;
-  height: 1.5rem;
+  padding: 0.25rem 0.25rem 0.25rem 0.25rem;
+  width: 2rem;
 
   &:hover {
     background: lighten($dropdown-hover-background-color, 5%);
@@ -1000,8 +1000,8 @@ a.tag {
 }
 
 #collection-detail-menu {
-  right: 0.5rem;
-  top: 2.5rem;
+  right: 2rem;
+  top: 1rem;
 }
 
 .collection-item {
@@ -1034,6 +1034,11 @@ audio {
 
 #audio_player audio {
   width: 25rem;
+}
+
+#album-detail-menu {
+  right: 2rem;
+  top: 1rem;
 }
 
 /* CodeMirror */
