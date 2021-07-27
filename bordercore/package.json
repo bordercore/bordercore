@@ -54,6 +54,7 @@
         "pluralize": "^8.0.0",
         "popper.js": "^1.16.0",
         "sortablejs": "^1.12.0",
+        "uuid": "^8.3.2",
         "vue": "^2.6.11",
         "vue-sidebar-menu": "^4.7.4",
         "vue-simple-suggest": "git+https://github.com/bordercore/vue-simple-suggest.git",

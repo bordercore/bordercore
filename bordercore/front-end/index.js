@@ -85,6 +85,9 @@ window.hljs = hljs;
 import markdownit from "markdown-it";
 window.markdownit = markdownit;
 
+import {v4 as uuidv4} from "uuid";
+window.uuidv4 = uuidv4;
+
 import {doGet, doPost, getFormattedDate, getMarkdown} from "./util.js";
 window.doGet = doGet;
 window.doPost = doPost;
@@ -134,6 +137,10 @@ window.DrillBookmarks = DrillBookmarks;
 import AddButton from "./vue/common/AddButton.vue";
 Vue.component("AddButton", AddButton);
 window.AddButton = AddButton;
+
+import DropDownMenu from "./vue/common/DropDownMenu.vue";
+Vue.component("DropDownMenu", DropDownMenu);
+window.DropDownMenu = DropDownMenu;
 
 import VueSidebarMenu from "vue-sidebar-menu";
 import "vue-sidebar-menu/dist/vue-sidebar-menu.css";

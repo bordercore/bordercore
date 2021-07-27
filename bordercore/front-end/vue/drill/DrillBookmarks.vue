@@ -15,7 +15,7 @@
                                 <li v-for="(bookmark, index) in bookmarkList" v-cloak :key="bookmark.id" v-b-hover="handleHover" class="list-group-item list-group-item-secondary text-info draggable pl-0" :data-uuid="bookmark.uuid">
                                     <div class="dropdownmenu hidden float-right node-bookmark-menu">
                                         <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center">
-                                            <font-awesome-icon icon="ellipsis-v" class="burger-menu" />
+                                            <font-awesome-icon icon="ellipsis-v" />
                                             <div slot="dropdown">
                                                 <a class="dropdown-item" href="#" @click="removeBookmark(bookmark.uuid)">Remove</a>
                                                 <a class="dropdown-item" :href="bookmark.edit_url">Edit</a>

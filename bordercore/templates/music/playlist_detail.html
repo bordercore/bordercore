@@ -38,7 +38,7 @@
                     <h2 class="text-info">{{ playlist.name }}</h2>
                     <div class="ml-auto">
                         <dropdown-menu v-model="showDropdownPlaylist" :right="true" transition="translate-fade-down" class="bookmark-dropdown text-center mr-2 mt-1">
-                            <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
+                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                             <div slot="dropdown" class="position: absolute">
                                 <a class="dropdown-item" href="#" @click="onClickDelete">Delete</a>
                             </div>
@@ -97,7 +97,7 @@
                     <template #cell(playlistitem_uuid)="data">
                         <div class="hover-target hidden">
                             <dropdown-menu v-model="showDropdownSong" :right="true" transition="translate-fade-down" class="text-center">
-                                <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
+                                <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                 <div slot="dropdown">
                                     <a class="dropdown-item" href="#" @click="onClickRemove(data.value)">Remove from playlist</a>
                                     <a class="dropdown-item" href="#" @click="onClickUpdate(data.item.song_uuid)">Update</a>

@@ -96,7 +96,7 @@
                     <template #cell(uuid)="data">
                         <div class="hover-target hidden">
                             <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="text-center">
-                                <font-awesome-icon icon="ellipsis-v" class="burger-menu"></font-awesome-icon>
+                                <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                 <div slot="dropdown">
                                     <a class="dropdown-item" href="#" @click="onClickUpdate(data.value)">Update</a>
                                     <a class="dropdown-item" href="#" @click="onClickDelete(data.value)">Delete</a>

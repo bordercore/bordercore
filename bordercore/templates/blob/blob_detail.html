@@ -15,8 +15,8 @@
                 <div>
                     <div class="dropdownmenu hidden" id="blob-detail-menu">
 
-                        <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center" :right="right" ref="foobar">
-                            <font-awesome-icon icon="ellipsis-v" class="burger-menu text-center"></font-awesome-icon>
+                        <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center" :right="right">
+                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                             <div slot="dropdown" class="mt-0">
                                 <a class="dropdown-item" href="{% url 'blob:update' blob.uuid %}">Update</a>
                                     {% if blob.sha1sum and request.user|is_in_group:"Admin" %}
