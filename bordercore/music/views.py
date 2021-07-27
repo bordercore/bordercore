@@ -139,6 +139,11 @@ class AlbumDetailView(DetailView):
         return {
             **context,
             "song_list": song_list,
+            "tags": [
+                {
+                    "text": x.name, "value": x.name, "is_meta": x.is_meta
+                } for x in self.object.tags.all()
+            ],
             "IMAGES_URL": settings.IMAGES_URL,
         }
 

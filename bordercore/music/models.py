@@ -31,10 +31,14 @@ class Album(TimeStampedModel):
     original_release_year = models.IntegerField(null=True)
     compilation = models.BooleanField(default=False)
     note = models.TextField(null=True, blank=True)
+    tags = models.ManyToManyField(Tag)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     class Meta:
         unique_together = ("title", "artist")
+
+    def get_tags(self):
+        return ", ".join([tag.name for tag in self.tags.all()])
 
 
 class SongSource(TimeStampedModel):
