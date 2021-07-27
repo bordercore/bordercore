@@ -172,7 +172,7 @@
                     <div class="col-lg-5 offset-lg-2">
                         <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}">
                         <input class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="submit" name="Go" value="Delete" @click="onClickDelete">
-                        <a class="btn btn-secondary" href="{% url 'music:list' %}">Cancel</a>
+                        <a class="btn btn-secondary" {% if request.GET.return_url %}href="{{ request.GET.return_url }}" {% else %}href="{% url 'music:list' %}"{% endif %}>Cancel</a>
                     </div>
                 </div>
 
