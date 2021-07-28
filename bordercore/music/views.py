@@ -717,7 +717,7 @@ class CreatePlaylist(CreateView):
         playlist.parameters = {
             x: self.request.POST[x]
             for x in
-            ["tag", "start_year", "end_year"]
+            ["tag", "start_year", "end_year", "exclude_albums"]
             if x in self.request.POST and self.request.POST[x] != ""
         }
         playlist.save()
@@ -780,16 +780,22 @@ def get_playlist(request, uuid):
 def get_playlist_songs_smart(playlist, size):
 
     if playlist.type == "tag":
-        song_list = Song.objects.filter(tags__name=playlist.parameters["tag"]).order_by("?")
-    elif playlist.type == "recent":
-        song_list = Song.objects.all().order_by("-created")
+        song_list = Song.objects.filter(tags__name=playlist.parameters["tag"])
     elif playlist.type == "time":
         song_list = Song.objects.filter(
             year__gte=playlist.parameters["start_year"],
             year__lte=playlist.parameters["end_year"],
-        ).order_by("?")
+        )
     else:
         raise ValueError(f"Playlist type not supported: {playlist.type}")
+
+    if "exclude_albums" in playlist.parameters:
+        song_list = song_list.exclude(album__isnull=False)
+
+    if playlist.type == "recent":
+        song_list = Song.objects.all().order_by("-created")
+    else:
+        song_list = song_list.order_by("?")
 
     if size:
         song_list = song_list[:size]
