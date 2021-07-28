@@ -91,6 +91,10 @@ hr {
   background-color: $primary;
 }
 
+.drill-text strong {
+  color: #ff00ea;
+}
+
 .wrapper {
   background: radial-gradient(farthest-side at 10% 0, $background-color, #17193b);
 }

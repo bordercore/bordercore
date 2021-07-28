@@ -102,13 +102,10 @@
                 <div class="card-body right-column">
 
                     <div class="d-flex">
-                        <h3 class="table-borders markdown">
-                            <div v-html="getQuestion()">
+                        <h3 class="drill-text table-borders markdown" v-html="getQuestion()" />
+                            <div class="ml-auto pt-4">
+                                <font-awesome-icon icon="heart" :class="heartClass" @click="onClick" data-toggle="tooltip" data-placement="bottom" :title="toolTip"></font-awesome-icon>
                             </div>
-                        </h3>
-                        <div class="ml-auto pt-4">
-                            <font-awesome-icon icon="heart" :class="heartClass" @click="onClick" data-toggle="tooltip" data-placement="bottom" :title="toolTip"></font-awesome-icon>
-                        </div>
                     </div>
 
                     {% if object.tags.all %}

@@ -57,6 +57,10 @@ $vue-simple-suggest-item-hover-bold-color: #1a4beb;
   background-color: #b0e1ff
 }
 
+.drill-text strong {
+  color: #0040ff;
+}
+
 // Import highlight.js CSS
 @import "../../../node_modules/highlight.js/styles/atelier-dune-light.css";
 
