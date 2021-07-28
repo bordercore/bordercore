@@ -81,7 +81,7 @@
             },
             methods: {
                 getContent(blob) {
-                    return markdown.render(blob.content);
+                    return markdown.render(blob.content||"");
                 },
                 getNormalizedDoctype(doctype) {
                     doctype = doctype.toLowerCase();
