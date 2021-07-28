@@ -99,7 +99,7 @@
                             <template v-slot:content>
                                 <editable-text-area
                                     uuid="{{ object.uuid }}"
-                                    :note="note"
+                                    v-model:note="note"
                                     edit-url="{% url 'node:edit_note' %}"
                                     ref="note"
                                 >

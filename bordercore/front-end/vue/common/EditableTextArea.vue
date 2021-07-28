@@ -16,11 +16,11 @@
 
     export default {
         props: {
-            uuid: {
-                type: String,
+            value: {
                 default: "",
+                type: String,
             },
-            note: {
+            uuid: {
                 type: String,
                 default: "",
             },
@@ -37,7 +37,7 @@
             return {
                 isEditingNote: false,
                 minNumberRows: 10,
-                textAreaValue: this.note,
+                textAreaValue: this.value,
             };
         },
         computed: {
@@ -117,6 +117,8 @@
                         "note": this.textAreaValue,
                     },
                     (response) => {
+                        // Let the parent element know about the new value
+                        this.$emit("input", this.textAreaValue);
                     },
                     "",
                     "",
