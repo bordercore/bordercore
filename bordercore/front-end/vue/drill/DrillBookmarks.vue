@@ -18,8 +18,9 @@
                                             <font-awesome-icon icon="ellipsis-v" />
                                             <div slot="dropdown">
                                                 <a class="dropdown-item" href="#" @click="removeBookmark(bookmark.uuid)">Remove</a>
-                                                <a class="dropdown-item" :href="bookmark.edit_url">Edit</a>
-                                                <a v-if="!bookmark.note" class="dropdown-item" href="#" @click="addNote(bookmark.uuid, index)">Add note</a>
+                                                <a class="dropdown-item" :href="bookmark.edit_url">Edit Bookmark</a>
+                                                <a v-if="!bookmark.note" class="dropdown-item" href="#" @click="addNote(bookmark.uuid)">Add note</a>
+                                                <a v-if="bookmark.note" class="dropdown-item" href="#" @click="activateInEditMode(bookmark, index)">Edit note</a>
                                             </div>
                                         </dropdown-menu>
                                     </div>
@@ -28,11 +29,11 @@
                                         <div>
                                             <a :href="bookmark.url">{{ bookmark.name }}</a>
 
-                                            <div v-show="!bookmark.noteIsEditable" v-if="bookmark.note" class="node-note" @:click="activateInEditMode(bookmark, $event.target)">
+                                            <div v-show="!bookmark.noteIsEditable" v-if="bookmark.note" class="node-note" @click="activateInEditMode(bookmark, index)">
                                                 {{ bookmark.note }}
                                             </div>
                                             <span v-show="bookmark.noteIsEditable">
-                                                <input id="add-bookmark-input" ref="input" type="text" class="form-control form-control-sm" :value="bookmark.note" placeholder="Add Note" @blur="editNote(bookmark.uuid, $event.target.value)" @keydown.enter="editNote(bookmark.uuid, $event.target.value)">
+                                                <input id="add-bookmark-input" ref="input" type="text" class="form-control form-control-sm" :value="bookmark.note" placeholder="Add Note" autocomplete="off" @blur="editNote(bookmark.uuid, $event.target.value)" @keydown.enter="editNote(bookmark.uuid, $event.target.value)">
                                             </span>
                                         </div>
                                     </div>
@@ -155,17 +156,15 @@
                     "",
                 );
             },
-            activateInEditMode(bookmark, event) {
-                const isId = (value) => value.id == bookmark.id;
-                const index = this.bookmarkList.findIndex(isId);
-
+            activateInEditMode(bookmark, index) {
                 this.$set(this.bookmarkList[index], "noteIsEditable", true);
 
+                self = this;
                 setTimeout( () => {
-                    event.nextElementSibling.querySelector("input").focus();
+                    self.$refs.input[index].focus();
                 }, 100);
             },
-            addNote(bookmarkUuid, index) {
+            addNote(bookmarkUuid) {
                 for (const bookmark of this.bookmarkList) {
                     if (bookmark.uuid == bookmarkUuid) {
                         bookmark.noteIsEditable = true;
