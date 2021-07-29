@@ -14,6 +14,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.views.generic.base import View
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
@@ -348,6 +349,16 @@ class BlobCoverInfoView(DetailView):
 
     def get_queryset(self):
         return Blob.objects.filter(user=self.request.user)
+
+
+@method_decorator(login_required, name="dispatch")
+class BlobCloneView(View):
+
+    def get(self, request, *args, **kwargs):
+        original_blob = Blob.objects.get(uuid=kwargs["uuid"])
+        new_blob = original_blob.clone()
+        messages.add_message(self.request, messages.INFO, "New blob successfully cloned")
+        return HttpResponseRedirect(reverse("blob:detail", kwargs={"uuid": new_blob.uuid}))
 
 
 # Metadata objects are not handled by the form -- handle them manually

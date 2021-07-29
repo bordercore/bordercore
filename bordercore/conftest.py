@@ -28,6 +28,7 @@ from accounts.tests.factories import TEST_PASSWORD, UserFactory  # isort:skip
 from blob.tests.factories import BlobFactory  # isort:skip
 from bookmark.tests.factories import BookmarkFactory  # isort:skip
 from collection.tests.factories import CollectionFactory  # isort:skip
+from collection.models import Collection  # isort:skip
 from django.contrib.auth.models import Group  # isort:skip
 from drill.models import SortOrderDrillBookmark  # isort:skip
 from drill.tests.factories import QuestionFactory  # isort:skip
@@ -80,6 +81,19 @@ def auto_login_user(client, blob_text_factory):
         return user, client
 
     return make_auto_login
+
+
+@pytest.fixture
+def monkeypatch_collection(monkeypatch):
+    """
+    Prevent the collection object from interacting with Elasticsearch by
+    patching out various methods.
+    """
+
+    def mock(*args, **kwargs):
+        pass
+
+    monkeypatch.setattr(Collection, "create_collection_thumbnail", mock)
 
 
 @pytest.fixture()
@@ -239,7 +253,7 @@ def fitness(auto_login_user):
 
 
 @pytest.fixture()
-def collection(blob_image_factory, blob_pdf_factory):
+def collection(monkeypatch_collection, blob_image_factory, blob_pdf_factory):
 
     collection_0 = CollectionFactory()
 

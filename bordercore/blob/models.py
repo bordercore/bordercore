@@ -445,6 +445,42 @@ class Blob(TimeStampedModel):
 
         return b.get_cover_info(size, max_cover_image_width)
 
+    def clone(self, include_collections=True):
+        """
+        Create a copy of the current blob, including all its metadata and
+        collection memberships.
+        """
+
+        new_blob = Blob.objects.create(
+            content=self.content,
+            name=f"Copy of {self.name}",
+            user=self.user,
+            date=self.date,
+            importance=self.importance,
+            is_private=self.is_private,
+            is_note=self.is_note
+        )
+
+        for x in self.metadata_set.all():
+            MetaData.objects.create(
+                user=self.user,
+                name=x.name,
+                value=x.value,
+                blob=new_blob)
+
+        for tag in self.tags.all():
+            new_blob.tags.add(tag)
+
+        if include_collections:
+            for collection in Collection.objects.filter(blobs__uuid=self.uuid):
+                new_blob.add_to_collection(self.user, collection.uuid)
+
+        # Add to Elasticsearch
+        new_blob.index_blob()
+
+        return new_blob
+
+
     def index_blob(self, file_changed=True):
         """
         Index the blob into Elasticsearch, but only if there is no

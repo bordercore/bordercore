@@ -2,6 +2,10 @@ from urllib.parse import quote_plus
 
 import django
 
+from collection.models import Collection
+
+from .test_views import monkeypatch_blob
+
 django.setup()
 
 from django.contrib.auth.models import User  # isort:skip
@@ -111,6 +115,23 @@ def test_get_cover_info(blob_image_factory, blob_pdf_factory):
     assert cover_info_pdf["url"] == f"https://blobs.bordercore.com/blobs/{blob_pdf_factory.uuid}/cover.jpg"
 
     assert Blob.get_cover_info_static(blob_pdf_factory.user, None) == {"url": ""}
+
+
+def test_clone(monkeypatch_blob, blob_pdf_factory, collection):
+
+    cloned_blob = blob_pdf_factory.clone()
+    assert cloned_blob.date == blob_pdf_factory.date
+    assert cloned_blob.tags.all().count() == blob_pdf_factory.tags.all().count()
+    assert cloned_blob.metadata_set.all().count() == blob_pdf_factory.metadata_set.all().count()
+
+    for metadata in blob_pdf_factory.metadata_set.all():
+        assert metadata.name in [x.name for x in cloned_blob.metadata_set.all()]
+
+    for tag in blob_pdf_factory.tags.all():
+        assert tag in cloned_blob.tags.all()
+
+    for c in Collection.objects.filter(blobs__uuid=blob_pdf_factory.uuid):
+        assert cloned_blob in c.blobs.all()
 
 
 def count_nodes(nodes, root_node=True):
