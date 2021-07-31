@@ -48,8 +48,8 @@ class SearchListView(ListView):
             "total_results": object_list["hits"]["total"]["value"]
         }
 
-        paginator["has_previous"] = True if page != 1 else False
-        paginator["has_next"] = True if page != paginator["num_pages"] else False
+        paginator["has_previous"] = page != 1
+        paginator["has_next"] = page != paginator["num_pages"]
 
         paginator["previous_page_number"] = page - 1
         paginator["next_page_number"] = page + 1
@@ -74,7 +74,7 @@ class SearchListView(ListView):
             aggregations.append({"doctype": x["key"], "count": x["doc_count"]})
         return aggregations
 
-    def get_queryset(self, **kwargs):
+    def get_queryset(self):
 
         # Store the "sort" field in the user's session
         self.request.session["search_sort_by"] = self.request.GET.get("sort", None)
@@ -160,9 +160,9 @@ class SearchListView(ListView):
 
         # Django templates don't allow variables with underscores, so
         #  change the "_source" key to "source"
-        for index, x in enumerate(results["hits"]["hits"]):
-            t = results["hits"]["hits"][index]
-            t["source"] = t.pop("_source")
+        for index, _ in enumerate(results["hits"]["hits"]):
+            match = results["hits"]["hits"][index]
+            match["source"] = match.pop("_source")
 
         return results
 
@@ -179,10 +179,6 @@ class SearchListView(ListView):
         if context["search_results"]:
 
             for match in context["search_results"]["hits"]["hits"]:
-
-                # if match["source"]["doctype"] == "note":
-                #     if context["info"]["highlighting"][match["id"]].get("document_body"):
-                #         note = context["info"]["highlighting"][match["id"]]["document_body"][0]
 
                 match["source"]["creators"] = get_creators(match["source"])
                 match["source"]["date"] = get_date_from_pattern(match["source"].get("date", None))
@@ -309,6 +305,7 @@ class SearchTagDetailView(ListView):
                         "question",
                         "sha1sum",
                         "tags",
+                        "title",
                         "url",
                         "uuid"]
         }
@@ -419,8 +416,8 @@ def sort_results(matches):
     #  the order matches appear in the search results
     types = {
         "Tag": [],
-        "Song": [],
         "Artist": [],
+        "Song": [],
         "Album": [],
         "Book": [],
         "Drill": [],
@@ -458,50 +455,48 @@ def get_link(doc_type, match):
 
     if doc_type == "Bookmark":
         return match["url"]
-    elif doc_type == "Song":
-        if "album_uuid" in match:
-            return reverse("music:album_detail", kwargs={"uuid": match["album_uuid"]})
-        else:
-            return reverse("music:artist_detail", kwargs={"artist": match["artist"]})
-    elif doc_type == "Artist":
+    if doc_type == "Song":
         return reverse("music:artist_detail", kwargs={"artist": match["artist"]})
-    elif doc_type == "Album":
-        return reverse("music:album_detail", kwargs={"uuid": match["album_uuid"]})
-    elif doc_type in ("Blob", "Book", "Document", "Note"):
+    if doc_type == "Album":
+        return reverse("music:album_detail", kwargs={"uuid": match["uuid"]})
+    if doc_type == "Artist":
+        return reverse("music:artist_detail", kwargs={"artist": match["artist"]})
+    if doc_type in ("Blob", "Book", "Document", "Note"):
         return reverse("blob:detail", kwargs={"uuid": match["uuid"]})
-    elif doc_type == "Drill":
+    if doc_type == "Drill":
         return reverse("drill:detail", kwargs={"uuid": match["uuid"]})
-    elif doc_type == "Todo":
+    if doc_type == "Todo":
         return reverse("todo:update", kwargs={"uuid": match["uuid"]})
-    else:
-        return ""
+
+    return ""
 
 
-def get_tag_link(doc_type, tag):
+def get_tag_link(doc_types, tag):
 
-    if doc_type == "note":
+    if "note" in doc_types:
         return reverse("search:notes") + f"?tagsearch={tag}"
-    elif doc_type == "bookmark":
+    if "bookmark" in doc_types:
         return reverse("bookmark:overview") + f"?tag={tag}"
-    elif doc_type == "drill":
+    if "drill" in doc_types:
         return reverse("drill:start_study_session_tag", kwargs={"tag": tag})
-    elif doc_type == "song":
+    if "song" in doc_types or "album" in doc_types:
         return reverse("music:search_tag") + f"?tag={tag}"
-    else:
-        return reverse("search:kb_search_tag_detail", kwargs={"taglist": tag})
+
+    return reverse("search:kb_search_tag_detail", kwargs={"taglist": tag})
 
 
 def get_name(doc_type, match):
+
     if doc_type == "Song":
         return f"{match['title']} - {match['artist']}"
-    elif doc_type == "Artist":
+    if doc_type == "Artist":
         return match["artist"]
-    elif doc_type == "Album":
-        return match["album"]
-    elif doc_type == "Drill":
+    if doc_type == "Album":
+        return match["title"]
+    if doc_type == "Drill":
         return match["question"][:30]
-    else:
-        return match["name"].title()
+
+    return match["name"].title()
 
 
 def get_doctype(match):
@@ -513,8 +508,8 @@ def get_doctype(match):
         # There could be multiple highlighted fields. For now,
         #  pick the first one.
         return highlight_fields[0].title()
-    else:
-        return match["_source"]["doctype"].title()
+
+    return match["_source"]["doctype"].title()
 
 
 def is_cached():
@@ -550,14 +545,18 @@ def search_tags_and_names(request):
     )
 
     search_term = request.GET["term"].lower()
-    doc_type = request.GET.get("filter", None)
+
+    if "filter" in request.GET:
+        doc_types = [request.GET.get("filter")]
+    else:
+        doc_types = []
 
     # The front-end filter is a catch-all "Music", but the actual
     #  Elasticsearch doctype is "song"
-    if doc_type == "music":
-        doc_type = "song"
+    if "music" in doc_types:
+        doc_types = ["album", "song"]
 
-    results_name = search_names(request, es, doc_type, search_term)
+    results_name = search_names(request, es, doc_types, search_term)
 
     matches = []
 
@@ -580,13 +579,13 @@ def search_tags_and_names(request):
             )
 
     # Add tag search results to the list of matches
-    matches.extend(search_tags(request, es, doc_type, search_term))
+    matches.extend(search_tags(request, es, doc_types, search_term))
 
     return JsonResponse(sort_results(matches), safe=False)
 
 
 @login_required
-def search_names(request, es, doc_type, search_term):
+def search_names(request, es, doc_types, search_term):
 
     search_terms = re.split(r"\s+", search_term)
 
@@ -638,7 +637,7 @@ def search_names(request, es, doc_type, search_term):
                         },
                         {
                             "wildcard": {
-                                "album": {
+                                "title": {
                                     "value": f"*{one_term}*",
                                 }
                             }
@@ -671,26 +670,32 @@ def search_names(request, es, doc_type, search_term):
 
     search_object["highlight"] = {
         "fields": {
-            "album": {},
             "name": {},
             "artist": {}
         }
     }
 
-    if doc_type:
+    if len(doc_types) > 1:
         search_object["query"]["bool"]["must"].append(
             {
-                "term": {
-                    "doctype": doc_type
+                "bool": {
+                    "should": [
+                        {
+                            "term": {
+                                "doctype": x
+                            }
+                        }
+                        for x in doc_types
+                    ]
                 }
-            },
+            }
         )
 
     return es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 
 
 @login_required
-def search_tags(request, es, doc_type, search_term):
+def search_tags(request, es, doc_types, search_term):
 
     search_terms = re.split(r"\s+", unquote(search_term))
 
@@ -749,13 +754,20 @@ def search_tags(request, es, doc_type, search_term):
             }
         )
 
-    if doc_type:
+    if len(doc_types) > 1:
         search_object["query"]["bool"]["must"].append(
             {
-                "term": {
-                    "doctype": doc_type
+                "bool": {
+                    "should": [
+                        {
+                            "term": {
+                                "doctype": x
+                            }
+                        }
+                        for x in doc_types
+                    ]
                 }
-            },
+            }
         )
 
     results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
@@ -768,7 +780,7 @@ def search_tags(request, es, doc_type, search_term):
                                "object_type": "Tag",
                                "value": tag_result["key"],
                                "id": tag_result["key"],
-                               "link": get_tag_link(doc_type, tag_result["key"]),
+                               "link": get_tag_link(doc_types, tag_result["key"]),
                            }
                            )
     return matches

@@ -10,6 +10,7 @@ from music.models import Album, Playlist, Song, SongSource
 faker = FakerFactory.create()
 
 
+@factory.django.mute_signals(signals.post_save)
 class AlbumFactory(factory.DjangoModelFactory):
 
     class Meta:

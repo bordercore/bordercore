@@ -650,7 +650,9 @@ def get_song_id3_info(request):
 
 @method_decorator(login_required, name="dispatch")
 class SearchTagListView(ListView):
-
+    """
+    Return a list of songs and albums which have a given tag
+    """
     template_name = "music/tag_search.html"
 
     def get_queryset(self):
@@ -675,10 +677,27 @@ class SearchTagListView(ListView):
                 }
             )
 
+        album_list = []
+
+        for match in Album.objects.filter(
+                user=self.request.user,
+                tags__name=self.request.GET["tag"]
+        ).order_by("-year"):
+            album_list.append(
+                {
+                    "uuid": match.uuid,
+                    "title": match.title,
+                    "artist": match.artist,
+                    "year": match.year,
+                }
+            )
+
         return {
             **context,
             "tag_name": self.request.GET["tag"],
-            "song_list": song_list
+            "song_list": song_list,
+            "album_list": album_list,
+            "IMAGES_URL": settings.IMAGES_URL,
         }
 
 

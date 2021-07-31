@@ -109,8 +109,8 @@ def test_sort_results():
 
 def test_get_name():
 
-    assert get_name("Song", {"artist": "U2", "title": "The Joshua Tree"}) == "The Joshua Tree - U2"
-    assert get_name("Album", {"album": "The Joshua Tree"}) == "The Joshua Tree"
+    assert get_name("Song", {"artist": "U2", "title": "Running to Stand Still"}) == "Running to Stand Still - U2"
+    assert get_name("Album", {"artist": "U2", "title": "The Joshua Tree"}) == "The Joshua Tree"
     assert get_name("Artist", {"artist": "U2"}) == "U2"
     assert get_name("Book", {"name": "War and Peace"}) == "War And Peace"
     assert get_name("Book", {"name": "war and peace"}) == "War And Peace"

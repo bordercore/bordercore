@@ -40,6 +40,47 @@ class Album(TimeStampedModel):
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
 
+    def index_album(self, es=None):
+
+        if not es:
+            es = Elasticsearch(
+                [settings.ELASTICSEARCH_ENDPOINT],
+                verify_certs=False
+            )
+
+        doc = {
+            "uuid": self.uuid,
+            "bordercore_id": self.id,
+            "title": self.title,
+            "artist": self.artist,
+            "year": self.year,
+            "original_release_year": self.original_release_year,
+            "compilation": self.compilation,
+            "tags": [tag.name for tag in self.tags.all()],
+            "note": self.note,
+            "last_modified": self.modified,
+            "doctype": "album",
+            "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
+            "date_unixtime": self.created.strftime("%s"),
+            "user_id": self.user.id
+        }
+
+        es.index(
+            index=settings.ELASTICSEARCH_INDEX,
+            id=self.uuid,
+            body=doc
+        )
+
+
+@receiver(post_save, sender=Album)
+def post_save_wrapper(sender, instance, **kwargs):
+    """
+    This should be called anytime an album is created or updated.
+    """
+
+    # Index the album in Elasticsearch
+    instance.index_album()
+
 
 class SongSource(TimeStampedModel):
     name = models.TextField()
