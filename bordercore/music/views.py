@@ -26,6 +26,7 @@ from django.views.generic.edit import (CreateView, DeleteView, ModelFormMixin,
                                        UpdateView)
 from django.views.generic.list import ListView
 
+from lib.mixins import FormRequestMixin
 from lib.time_utils import convert_seconds
 from lib.util import remove_non_ascii_characters
 
@@ -112,19 +113,12 @@ class ArtistDetailView(TemplateView):
 
 
 @method_decorator(login_required, name="dispatch")
-class AlbumDetailView(ModelFormMixin, DetailView):
+class AlbumDetailView(FormRequestMixin, ModelFormMixin, DetailView):
 
     model = Album
     slug_field = "uuid"
     slug_url_kwarg = "uuid"
     form_class = AlbumForm
-
-    # Override this method so that we can pass the request object to the form
-    #  so that we have access to it in AlbumForm.__init__()
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -162,20 +156,13 @@ class AlbumDetailView(ModelFormMixin, DetailView):
 
 
 @method_decorator(login_required, name="dispatch")
-class AlbumUpdateView(UpdateView):
+class AlbumUpdateView(FormRequestMixin, UpdateView):
 
     model = Album
     form_class = AlbumForm
     slug_field = "uuid"
     slug_url_kwarg = "album_uuid"
     template_name = "music/album_detail.html"
-
-    # Override this method so that we can pass the request object to the form
-    #  so that we have access to it in AlbumForm.__init__()
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
 
     def form_valid(self, form):
 
@@ -236,7 +223,7 @@ class AlbumUpdateView(UpdateView):
 
 
 @method_decorator(login_required, name="dispatch")
-class SongUpdateView(UpdateView):
+class SongUpdateView(FormRequestMixin, UpdateView):
 
     model = Song
     template_name = "music/create_song.html"
@@ -244,13 +231,6 @@ class SongUpdateView(UpdateView):
     success_url = reverse_lazy("music:list")
     slug_field = "uuid"
     slug_url_kwarg = "song_uuid"
-
-    # Override this method so that we can pass the request object to the form
-    #  so that we have access to it in SongForm.__init__()
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -286,18 +266,11 @@ class SongUpdateView(UpdateView):
 
 
 @method_decorator(login_required, name="dispatch")
-class SongCreateView(CreateView):
+class SongCreateView(FormRequestMixin, CreateView):
     model = Song
     template_name = "music/create_song.html"
     form_class = SongForm
     success_url = reverse_lazy("music:create")
-
-    # Override this method so that we can pass the request object to the form
-    #  so that we have access to it in SongForm.__init__()
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -716,17 +689,10 @@ class PlaylistDetailView(DetailView):
 
 
 @method_decorator(login_required, name="dispatch")
-class CreatePlaylist(CreateView):
+class CreatePlaylist(FormRequestMixin, CreateView):
     model = Playlist
     form_class = PlaylistForm
     template_name = "music/index.html"
-
-    # Override this method so that we can pass the request object to the form
-    #  so that we have access to it in SongForm.__init__()
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
 
     def form_valid(self, form):
 

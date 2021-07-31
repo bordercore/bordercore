@@ -11,6 +11,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
+from lib.mixins import FormRequestMixin
 from tag.models import SortOrderTagTodo, Tag
 from todo.forms import TodoForm
 from todo.models import Todo
@@ -68,7 +69,7 @@ class TodoTaskList(ListView):
             if priority:
                 queryset = queryset.filter(priority=priority)
             if time:
-                 queryset = queryset.filter(created__gt=(timezone.now() - timedelta(days=int(time))))
+                queryset = queryset.filter(created__gt=(timezone.now() - timedelta(days=int(time))))
             if tag_name:
                 queryset = queryset.filter(tag__name=tag_name)
 
@@ -126,20 +127,13 @@ class TodoTaskList(ListView):
 
 
 @method_decorator(login_required, name='dispatch')
-class TodoDetailView(UpdateView):
+class TodoDetailView(FormRequestMixin, UpdateView):
     model = Todo
     template_name = 'todo/update.html'
     form_class = TodoForm
     success_url = reverse_lazy('todo:list')
     slug_field = 'uuid'
     slug_url_kwarg = 'uuid'
-
-    # Override this method so that we can pass the request object to the form
-    #  so that we have access to it in TodoForm.__init__()
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -188,7 +182,7 @@ class TodoDetailView(UpdateView):
 
 
 @method_decorator(login_required, name='dispatch')
-class TodoCreateView(CreateView):
+class TodoCreateView(FormRequestMixin, CreateView):
     template_name = 'todo/update.html'
     form_class = TodoForm
 
@@ -200,13 +194,6 @@ class TodoCreateView(CreateView):
         if 'tagsearch' in self.request.GET and self.request.GET['tagsearch']:
             context['tags'] = [{'text': self.request.GET['tagsearch'], 'value': self.request.GET['tagsearch'], 'is_meta': False}]
         return context
-
-    # Override this method so that we can pass the request object to the form
-    #  so that we have access to it in TodoForm.__init__()
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['request'] = self.request
-        return kwargs
 
     def form_valid(self, form):
 

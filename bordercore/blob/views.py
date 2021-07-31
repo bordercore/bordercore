@@ -23,6 +23,7 @@ from blob.forms import BlobForm
 from blob.models import Blob, MetaData
 from blob.services import get_recent_blobs
 from collection.models import Collection, SortOrderCollectionBlob
+from lib.mixins import FormRequestMixin
 from lib.time_utils import parse_date_from_string
 
 log = logging.getLogger(f"bordercore.{__name__}")
@@ -46,16 +47,9 @@ class BlobListView(ListView):
 
 
 @method_decorator(login_required, name="dispatch")
-class BlobCreateView(CreateView):
+class BlobCreateView(FormRequestMixin, CreateView):
     template_name = "blob/update.html"
     form_class = BlobForm
-
-    # Override this method so that we can pass the request object to the form
-    #  so that we have access to it in QuestionForm.__init__()
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -241,16 +235,9 @@ class BlobDetailView(DetailView):
 
 
 @method_decorator(login_required, name="dispatch")
-class BlobUpdateView(UpdateView):
+class BlobUpdateView(FormRequestMixin, UpdateView):
     template_name = "blob/update.html"
     form_class = BlobForm
-
-    # Override this method so that we can pass the request object to the form
-    #  so that we have access to it in BlobForm.__init__()
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -16,6 +16,18 @@ class TimeStampedModel(models.Model):
         abstract = True
 
 
+class FormRequestMixin():
+    """
+    Use this mixin to pass the request object to a form so that we
+    have access to it in the constructor and clean_* methods.
+    """
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
+
+
 class SortOrderMixin(models.Model):
 
     sort_order = models.IntegerField(default=1)

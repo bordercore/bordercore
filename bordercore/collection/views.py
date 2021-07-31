@@ -16,19 +16,13 @@ from django.views.generic.list import ListView
 from blob.models import Blob
 from collection.forms import CollectionForm
 from collection.models import Collection, SortOrderCollectionBlob
+from lib.mixins import FormRequestMixin
 
 
 @method_decorator(login_required, name="dispatch")
-class CollectionListView(FormMixin, ListView):
+class CollectionListView(FormRequestMixin, FormMixin, ListView):
 
     form_class = CollectionForm
-
-    # Override this method so that we can pass the request object to the form
-    #  so that we have access to it in CollectionForm.__init__()
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
 
     def get_queryset(self):
         return Collection.objects.filter(user=self.request.user). \
@@ -48,19 +42,12 @@ class CollectionListView(FormMixin, ListView):
 
 
 @method_decorator(login_required, name="dispatch")
-class CollectionDetailView(FormMixin, DetailView):
+class CollectionDetailView(FormRequestMixin, FormMixin, DetailView):
 
     model = Collection
     slug_field = "uuid"
     slug_url_kwarg = "collection_uuid"
     form_class = CollectionForm
-
-    # Override this method so that we can pass the request object to the form
-    #  so that we have access to it in CollectionForm.__init__()
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -88,16 +75,9 @@ class CollectionDetailView(FormMixin, DetailView):
 
 
 @method_decorator(login_required, name="dispatch")
-class CollectionCreateView(CreateView):
+class CollectionCreateView(FormRequestMixin, CreateView):
     template_name = "collection/collection_list.html"
     form_class = CollectionForm
-
-    # Override this method so that we can pass the request object to the form
-    #  so that we have access to it in CollectionForm.__init__()
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
 
     def form_valid(self, form):
 
@@ -118,19 +98,12 @@ class CollectionCreateView(CreateView):
 
 
 @method_decorator(login_required, name="dispatch")
-class CollectionUpdateView(UpdateView):
+class CollectionUpdateView(FormRequestMixin, UpdateView):
 
     model = Collection
     form_class = CollectionForm
     slug_field = "uuid"
     slug_url_kwarg = "collection_uuid"
-
-    # Override this method so that we can pass the request object to the form
-    #  so that we have access to it in CollectionForm.__init__()
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
 
     def get_queryset(self):
         base_qs = super().get_queryset()

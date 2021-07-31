@@ -22,10 +22,11 @@ from accounts.forms import UserProfileForm
 from accounts.models import (SortOrderUserNote, SortOrderUserTag, UserProfile,
                              pinned_tags_has_changed)
 from blob.models import Blob
+from lib.mixins import FormRequestMixin
 
 
 @method_decorator(login_required, name='dispatch')
-class UserProfileUpdateView(UpdateView):
+class UserProfileUpdateView(FormRequestMixin, UpdateView):
     template_name = 'prefs/index.html'
     form_class = UserProfileForm
 
@@ -36,13 +37,6 @@ class UserProfileUpdateView(UpdateView):
         context['title'] = 'Preferences'
         context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.pinned_tags.all()[::-1]]
         return context
-
-    # Override this method so that we can pass the request object to the form
-    #  so that we have access to it in UserProfileForm.__init__()
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
 
     def get_object(self, queryset=None):
         return UserProfile.objects.get(user=self.request.user)

@@ -24,6 +24,7 @@ from django.views.generic.edit import ModelFormMixin
 from accounts.models import SortOrderUserTag
 from bookmark.forms import BookmarkForm
 from bookmark.models import Bookmark
+from lib.mixins import FormRequestMixin
 from lib.util import get_pagination_range, parse_title_from_url
 from tag.models import SortOrderTagBookmark, Tag
 
@@ -71,7 +72,7 @@ class FormValidMixin(ModelFormMixin):
         return super().form_valid(form)
 
 
-class BookmarkUpdateView(UpdateView, FormValidMixin):
+class BookmarkUpdateView(FormRequestMixin, UpdateView, FormValidMixin):
     model = Bookmark
     slug_field = "uuid"
     slug_url_kwarg = "uuid"
@@ -86,16 +87,9 @@ class BookmarkUpdateView(UpdateView, FormValidMixin):
         context["related_questions"] = self.object.question_set.all()
         return context
 
-    def get_form_kwargs(self):
-        # Pass the request object to the form so that we have access to it
-        #  in a clean_* method
-        kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
-
 
 @method_decorator(login_required, name="dispatch")
-class BookmarkCreateView(CreateView, FormValidMixin):
+class BookmarkCreateView(FormRequestMixin, CreateView, FormValidMixin):
     template_name = "bookmark/update.html"
     form_class = BookmarkForm
     success_url = reverse_lazy("bookmark:overview")
@@ -104,13 +98,6 @@ class BookmarkCreateView(CreateView, FormValidMixin):
         context = super().get_context_data(**kwargs)
         context["action"] = "Create"
         return context
-
-    def get_form_kwargs(self):
-        # Pass the request object to the form so that we have access to it
-        #  in a clean_* method
-        kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
 
 
 @method_decorator(login_required, name="dispatch")

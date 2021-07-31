@@ -20,6 +20,7 @@ from django.views.generic.list import ListView
 from accounts.models import SortOrderDrillTag
 from bookmark.models import Bookmark
 from drill.forms import QuestionForm
+from lib.mixins import FormRequestMixin
 from lib.util import parse_title_from_url
 from tag.models import Tag
 
@@ -83,16 +84,9 @@ class DrillSearchListView(ListView):
 
 
 @method_decorator(login_required, name='dispatch')
-class QuestionCreateView(CreateView):
+class QuestionCreateView(FormRequestMixin, CreateView):
     template_name = 'drill/question_edit.html'
     form_class = QuestionForm
-
-    # Override this method so that we can pass the request object to the form
-    #  so that we have access to it in QuestionForm.__init__()
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -190,20 +184,13 @@ class QuestionDetailView(DetailView):
 
 
 @method_decorator(login_required, name='dispatch')
-class QuestionUpdateView(UpdateView):
+class QuestionUpdateView(FormRequestMixin, UpdateView):
     model = Question
     slug_field = 'uuid'
     slug_url_kwarg = 'uuid'
 
     form_class = QuestionForm
     template_name = 'drill/question_edit.html'
-
-    # Override this method so that we can pass the request object to the form
-    #  so that we have access to it in QuestionForm.__init__()
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
