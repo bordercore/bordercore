@@ -78,6 +78,10 @@ em {
   color: $white;
 }
 
+.gray {
+  color: #b6b6b6;
+}
+
 // The close button for Bootstrap modals
 .modal-header .close {
   color: $white;
@@ -97,6 +101,18 @@ hr {
 
 .wrapper {
   background: radial-gradient(farthest-side at 10% 0, $background-color, #17193b);
+}
+
+.notice-big {
+  background-color: #094167;
+
+  span {
+    color: #67b9f0;
+  }
+
+  .message {
+    color: #fff;
+  }
 }
 
 // Import highlight.js CSS

@@ -122,6 +122,14 @@
         <span class="failed-test-count pt-1">1</span>
         <span class="failed-test-count mt-2 mb-2 pt-1">42</span>
 
+        <h4 class="mt-5">Negative Search Results</h4>
+
+        <search-no-result class="right-column">
+            <template v-slot:message>
+                Search found nothing matching <strong>{{ tag_name }}</strong>
+            </template>
+        </search-no-result>
+
     </div>
 
 {% endblock %}

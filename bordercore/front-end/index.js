@@ -118,6 +118,10 @@ import Card from "./vue/common/Card.vue";
 Vue.component("Card", Card);
 window.Card = Card;
 
+import SearchNoResult from "./vue/common/SearchNoResult.vue";
+Vue.component("SearchNoResult", SearchNoResult);
+window.SearchNoResult = SearchNoResult;
+
 import TreeMenu from "./vue/common/TreeMenu.vue";
 Vue.component("TreeMenu", TreeMenu);
 window.TreeMenu = TreeMenu;

@@ -61,6 +61,18 @@ $vue-simple-suggest-item-hover-bold-color: #1a4beb;
   color: #0040ff;
 }
 
+.notice-big {
+  background-color: #cdd8e3;
+
+  span {
+    color: #021f3c;
+  }
+
+  .message {
+    color: text-white #bf8040;
+  }
+}
+
 // Import highlight.js CSS
 @import "../../../node_modules/highlight.js/styles/atelier-dune-light.css";
 
