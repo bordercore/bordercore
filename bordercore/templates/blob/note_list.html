@@ -68,11 +68,12 @@
             </div>
 
             <div v-if="notes.length === 0" class="right-column card-grid" v-cloak>
+                <search-no-result class="right-column">
+                    <template v-slot:message>
+                        No notes found matching search criteria.
+                    </template>
+                </search-no-result>
 
-                <b-alert :show=true :variant="'warning'">
-                    <font-awesome-icon class="mr-1" icon="exclamation-triangle"></font-awesome-icon>
-                        No notes found
-                </b-alert>
                 <a class="btn btn-primary ml-2 mr-4 float-right right-column" href="{% url 'blob:create' %}?is_note=true">Add note</a>
             </div>
 
