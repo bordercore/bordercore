@@ -14,11 +14,12 @@ from mutagen.mp3 import MP3
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q, Sum
+from django.db.models import OuterRef, Q, Subquery, Sum
 from django.db.models.functions import Coalesce
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic.base import TemplateView
 from django.views.generic.detail import DetailView
@@ -702,7 +703,7 @@ class CreatePlaylist(FormRequestMixin, CreateView):
         playlist.parameters = {
             x: self.request.POST[x]
             for x in
-            ["tag", "start_year", "end_year", "exclude_albums"]
+            ["tag", "start_year", "end_year", "exclude_albums", "exclude_recent"]
             if x in self.request.POST and self.request.POST[x] != ""
         }
         playlist.save()
@@ -776,6 +777,17 @@ def get_playlist_songs_smart(playlist, size):
 
     if "exclude_albums" in playlist.parameters:
         song_list = song_list.exclude(album__isnull=False)
+
+    if "exclude_recent" in playlist.parameters:
+
+        latest = Listen.objects.filter(song=OuterRef("pk")).order_by("-created")
+
+        song_list = song_list.annotate(
+            latest_result=Subquery(latest.values("created")[:1])
+        ).filter(
+            Q(latest_result__isnull=True)
+            | Q(latest_result__lte=timezone.now() - timedelta(days=int(playlist.parameters["exclude_recent"])))
+        )
 
     if playlist.type == "recent":
         song_list = Song.objects.all().order_by("-created")

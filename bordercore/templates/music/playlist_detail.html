@@ -28,25 +28,7 @@
                     </audio>
                 </div>
             </div>
-        </div>
-
-        <div class="col-lg-9">
-
-            <div class="card-grid ml-2">
-
-                <div class="d-flex">
-                    <h2 class="text-info">{{ playlist.name }}</h2>
-                    <div class="ml-auto">
-                        <dropdown-menu v-model="showDropdownPlaylist" :right="true" transition="translate-fade-down" class="bookmark-dropdown text-center mr-2 mt-1">
-                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                            <div slot="dropdown" class="position: absolute">
-                                <a class="dropdown-item" href="#" @click="onClickDelete">Delete</a>
-                            </div>
-                        </dropdown-menu>
-                    </div>
-                </div>
-
-                <h6>{{ playlist.note }}</h6>
+            <div class="card-body">
 
                 {% if playlist.type == "tag" %}
 
@@ -66,6 +48,34 @@
                         Songs between the years <strong class="text-primary">{{ playlist.parameters.start_year }}</strong> and <strong class="text-primary">{{ playlist.parameters.end_year }}</strong>
                     </div>
 
+                {% endif %}
+
+        {% if playlist.parameters.exclude_recent %}
+            not listened to within the past <strong class="text-primary">{{ playlist.parameters.exclude_recent }}</strong> days
+        {% endif %}
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-9">
+
+            <div class="card-grid ml-2">
+
+                <div class="d-flex">
+                    <h2 class="text-info">{{ playlist.name }}</h2>
+                    <div class="ml-auto">
+                        <dropdown-menu v-model="showDropdownPlaylist" :right="true" transition="translate-fade-down" class="bookmark-dropdown text-center mr-2 mt-1">
+                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+                            <div slot="dropdown" class="position: absolute">
+                                <a class="dropdown-item" href="#" @click="onClickDelete">Delete</a>
+                            </div>
+                        </dropdown-menu>
+                    </div>
+                </div>
+
+                {% if playlist.note %}
+                    <h6>{{ playlist.note }}</h6>
                 {% endif %}
 
                 <small v-if="songCount > 0"><strong>[[ songCount ]]</strong> [[ songCountPluralized ]], <strong v-html="totalTime"></strong></small>
