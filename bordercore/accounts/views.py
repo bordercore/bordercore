@@ -148,7 +148,7 @@ def sort_pinned_notes(request):
     s = SortOrderUserNote.objects.get(userprofile=request.user.userprofile, note__uuid=note_uuid)
     SortOrderUserNote.reorder(s, new_position)
 
-    return HttpResponse(json.dumps("OK"), content_type="application/json")
+    return JsonResponse({"status": "OK"}, safe=False)
 
 
 @login_required
@@ -159,14 +159,23 @@ def pin_note(request):
 
     note = Blob.objects.get(user=request.user, uuid=uuid)
 
+    message = ""
+    status = ""
+
     if remove:
         sort_order = SortOrderUserNote.objects.get(userprofile=request.user.userprofile, note=note)
         sort_order.delete()
+        status = "OK"
     else:
-        c = SortOrderUserNote(userprofile=request.user.userprofile, note=note)
-        c.save()
+        if SortOrderUserNote.objects.filter(userprofile=request.user.userprofile, note=note).exists():
+            message = "That note is already pinned."
+            status = "Not OK"
+        else:
+            c = SortOrderUserNote(userprofile=request.user.userprofile, note=note)
+            c.save()
+            status = "OK"
 
-    return JsonResponse({"status": "OK"}, safe=False)
+    return JsonResponse({"status": status, "message": message}, safe=False)
 
 
 @login_required

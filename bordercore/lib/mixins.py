@@ -59,15 +59,17 @@ class SortOrderMixin(models.Model):
 
         filter_kwargs = {self.field_name: getattr(self, self.field_name)}
 
-        # Don't do this for new objects
-        if self.pk is None:
-            self.get_queryset().filter(
-                **filter_kwargs
-            ).update(
-                sort_order=F("sort_order") + 1
-            )
+        with transaction.atomic():
 
-        super().save(*args, **kwargs)
+            # Don't do this for new objects
+            if self.pk is None:
+                self.get_queryset().filter(
+                    **filter_kwargs
+                ).update(
+                    sort_order=F("sort_order") + 1
+                )
+
+            super().save(*args, **kwargs)
 
     def reorder(self, new_order):
 
