@@ -51,7 +51,15 @@
                 {% endif %}
 
         {% if playlist.parameters.exclude_recent %}
-            not listened to within the past <strong class="text-primary">{{ playlist.parameters.exclude_recent }}</strong> days
+            <div>
+                not listened to within the past <strong class="text-primary">{{ playlist.parameters.exclude_recent }}</strong> days
+            </div>
+        {% endif %}
+
+        {% if playlist.parameters.exclude_albums %}
+            <div>
+                not on an album
+            </div>
         {% endif %}
 
             </div>
