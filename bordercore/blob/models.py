@@ -316,8 +316,7 @@ class Blob(TimeStampedModel):
         collection.modified = datetime.datetime.now()
         collection.save()
 
-        so = SortOrderCollectionBlob(collection=collection, blob=self)
-        so.save()
+        collection.add_blob(self)
 
         collection.create_collection_thumbnail()
 

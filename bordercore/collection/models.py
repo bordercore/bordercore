@@ -33,6 +33,11 @@ class Collection(TimeStampedModel):
     def __str__(self):
         return self.name
 
+    def add_blob(self, blob):
+
+        so = SortOrderCollectionBlob(collection=self, blob=blob)
+        so.save()
+
     def delete(self):
 
         # Delete the collection's thumbnail image in S3

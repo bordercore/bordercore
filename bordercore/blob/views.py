@@ -380,21 +380,18 @@ def handle_linked_blob(blob, request):
         collection.save()
 
         # Now add the current blob to this collection
-        so = SortOrderCollectionBlob(collection=collection, blob=blob)
-        so.save()
+        collection.add_blob(blob)
 
         # Finally add the linked blob to this collection
         blob = Blob.objects.get(user=request.user, uuid=request.POST["linked_blob_uuid"])
-        so = SortOrderCollectionBlob(collection=collection, blob=blob)
-        so.save()
+        collection.add_blob(blob)
 
 
 def handle_linked_collection(blob, request):
 
     if "linked_collection" in request.POST:
         collection = Collection.objects.get(user=request.user, uuid=request.POST["linked_collection"])
-        so = SortOrderCollectionBlob(collection=collection, blob=blob)
-        so.save()
+        collection.add_blob(blob)
 
 
 @login_required

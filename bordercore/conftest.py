@@ -41,7 +41,6 @@ from node.models import SortOrderNodeBookmark, SortOrderNodeBlob  # isort:skip
 from node.tests.factories import NodeFactory  # isort:skip
 from tag.tests.factories import TagFactory  # isort:skip
 from todo.tests.factories import TodoFactory  # isort:skip
-from collection.models import SortOrderCollectionBlob  # isort:skip
 
 try:
     from moto import mock_s3
@@ -261,14 +260,11 @@ def collection(monkeypatch_collection, blob_image_factory, blob_pdf_factory):
     tag_2 = TagFactory(name="django")
     collection_0.tags.add(tag_1, tag_2)
 
-    so = SortOrderCollectionBlob(collection=collection_0, blob=blob_image_factory)
-    so.save()
-    so = SortOrderCollectionBlob(collection=collection_0, blob=blob_pdf_factory)
-    so.save()
+    collection_0.add_blob(blob_image_factory)
+    collection_0.add_blob(blob_pdf_factory)
 
     collection_1 = CollectionFactory(name="To Display")
-    so = SortOrderCollectionBlob(collection=collection_1, blob=blob_pdf_factory)
-    so.save()
+    collection_1.add_blob(blob_pdf_factory)
 
     yield [collection_0, collection_1]
 
