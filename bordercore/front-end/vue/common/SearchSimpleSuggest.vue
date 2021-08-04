@@ -28,6 +28,8 @@
                                         @keydown.native="onKeyDown"
                                         @select="select"
                                         @keydown.native.enter.prevent="onEnter"
+                                        @blur="onBlur"
+
                     >
                         <div slot="suggestion-item" slot-scope="scope">
                             <!-- @*event*.stop="null" handlers are needed to prevent the splitter from being selected -->
@@ -193,6 +195,9 @@
                 } else if (evt.key === "a" && evt.altKey) {
                     document.getElementById("top-simple-suggest").select();
                 }
+            },
+            onBlur(evt) {
+                this.$refs.suggestComponent.setText("");
             },
             handleFilter(objectType) {
                 if (this.searchFilter === objectType) {
