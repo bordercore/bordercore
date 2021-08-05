@@ -96,7 +96,7 @@ class ArtistDetailView(TemplateView):
 
         for song in songs:
             song_list.append(dict(uuid=song.uuid,
-                                  year=song.year,
+                                  year_effective=song.original_year or song.year,
                                   title=song.title,
                                   length=convert_seconds(song.length),
                                   artist=song.artist,

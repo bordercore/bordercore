@@ -200,7 +200,7 @@
                         {% for song in song_list %}
                         {
                             "uuid": "{{ song.uuid }}",
-                            "year": "{{ song.year|default:'' }}",
+                            "year": "{{ song.year_effective|default:'' }}",
                             "title": "{{ song.title|safe }}",
                             "length": "{{ song.length }}",
                             "note": "{{ song.note|safe }}",

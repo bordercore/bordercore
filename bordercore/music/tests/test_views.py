@@ -204,11 +204,10 @@ def test_music_get_playlist(auto_login_user, playlist):
 
     url = urls.reverse("music:get_playlist", kwargs={"uuid": playlist[0].uuid})
     resp = client.get(url)
-
     assert resp.status_code == 200
+
     url = urls.reverse("music:get_playlist", kwargs={"uuid": playlist[1].uuid})
     resp = client.get(url)
-
     assert resp.status_code == 200
 
 

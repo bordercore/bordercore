@@ -28,6 +28,7 @@ class SongForm(ModelForm):
         self.fields["track"].required = False
         self.fields["note"].required = False
         self.fields["year"].required = False
+        self.fields["original_year"].required = False
         self.fields["tags"].required = False
 
         self.fields["album_name"].required = False
@@ -105,14 +106,15 @@ class SongForm(ModelForm):
 
     class Meta:
         model = Song
-        fields = ("title", "artist", "track", "year", "tags", "album_name", "compilation", "note", "source", "length", "id")
+        fields = ("title", "artist", "track", "year", "original_year", "tags", "album_name", "compilation", "note", "source", "length", "id")
         widgets = {
             "title": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
             "artist": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
             "note": Textarea(attrs={"rows": 2, "class": "form-control"}),
             "source": Select(),
             "track": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
-            "year": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
+            "year": NumberInput(attrs={"class": "form-control", "autocomplete": "off"}),
+            "original_year": NumberInput(attrs={"class": "form-control", "autocomplete": "off"}),
         }
 
 

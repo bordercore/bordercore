@@ -37,6 +37,9 @@ class Album(TimeStampedModel):
     class Meta:
         unique_together = ("title", "artist")
 
+    def __str__(self):
+        return self.title
+
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
 
@@ -231,8 +234,8 @@ class Song(TimeStampedModel):
                                                title=song_info["album_name"],
                                                artist=album_artist)
             except ObjectDoesNotExist:
-                pass
-            if not album_info:
+
+                print("creating new album")
                 # No existing album found. Create a new one.
                 album_info = Album(user=user,
                                    title=song_info["album_name"],

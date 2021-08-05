@@ -34,10 +34,12 @@ def get_playlist_songs_smart(playlist, size):
     if playlist.type == "tag":
         song_list = Song.objects.filter(tags__name=playlist.parameters["tag"])
     elif playlist.type == "time":
-        song_list = Song.objects.filter(
-            year__gte=playlist.parameters["start_year"],
-            year__lte=playlist.parameters["end_year"],
-        )
+        song_list = Song.objects.annotate(
+            year_effective=Coalesce("original_year", "year")). \
+            filter(
+                year_effective__gte=playlist.parameters["start_year"],
+                year_effective__lte=playlist.parameters["end_year"],
+            )
     else:
         raise ValueError(f"Playlist type not supported: {playlist.type}")
 
@@ -74,7 +76,7 @@ def get_playlist_songs_smart(playlist, size):
             "artist": x.artist,
             "title": x.title,
             "note": x.note,
-            "year": x.year,
+            "year": getattr(x, "year_effective", "year"),
             "length": convert_seconds(x.length)
         }
         for i, x
