@@ -29,15 +29,17 @@
                                         @select="select"
                                         @keydown.native.enter.prevent="onEnter"
                                         @blur="onBlur"
-
                     >
                         <div slot="suggestion-item" slot-scope="scope">
-                            <!-- @*event*.stop="null" handlers are needed to prevent the splitter from being selected -->
+                            <!-- @*event*.stop="" handlers are needed to prevent the splitter from being selected -->
                             <span v-if="scope.suggestion.splitter"
                                   class="top-search-splitter"
                                   @click.stop=""
                             >{{ scope.suggestion.name }}</span>
-                            <span v-else class="top-search-suggestion" v-html="boldenSuggestion(scope)" />
+                            <span v-else class="top-search-suggestion">
+                                <font-awesome-icon v-if="scope.suggestion.important === 10" icon="heart" class="text-danger mr-1" />
+                                <span class="d-inline" v-html="boldenSuggestion(scope)" />
+                            </span>
                         </div>
                     </vue-simple-suggest>
                 </div>
@@ -138,7 +140,6 @@
                 const {suggestion, query} = scope;
 
                 const result = this.$refs.suggestComponent.displayProperty(suggestion);
-
                 if (!suggestion.object_type) {
                     return result;
                 }
@@ -149,7 +150,7 @@
 
                 const boldResult = result.replace(new RegExp("(.*?)(" + texts.join("|") + ")(.*?)", "gi"), "$1<b class='text-primary'>$2</b>$3");
 
-                return "<em class=\"top-search-object-type\">" + suggestion.object_type + "</em> - " + boldResult;
+                return ` <em class="top-search-object-type">${suggestion.object_type}</em> - ${boldResult}`;
             },
             select(datum) {
                 window.location = datum.link;

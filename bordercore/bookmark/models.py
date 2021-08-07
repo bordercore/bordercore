@@ -15,11 +15,12 @@ from lib.mixins import TimeStampedModel
 from tag.models import SortOrderTagBookmark, Tag
 
 
-# This custom field lets us use a checkbox on the form, which, if checked,
-#  results in a blob of JSON stored in the database rather than
-#  the usual boolean value.
 class DailyBookmarkJSONField(JSONField):
-
+    """
+    This custom field lets us use a checkbox on the form, which, if checked,
+    results in a blob of JSON stored in the database rather than
+    the usual boolean value.
+    """
     def to_python(self, value):
         if value is True:
             return json.loads('{"viewed": "false"}')

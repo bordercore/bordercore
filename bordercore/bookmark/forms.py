@@ -1,9 +1,10 @@
 from django.contrib.postgres.forms import JSONField
-from django.forms import (CheckboxInput, ModelForm, Select, Textarea,
-                          TextInput, URLInput, ValidationError)
+from django.forms import (CheckboxInput, ModelForm, Textarea, TextInput,
+                          URLInput, ValidationError)
 
 from bookmark.models import Bookmark
-from lib.fields import ModelCommaSeparatedChoiceField
+from lib.fields import (CheckboxIntegerField, ModelCommaSeparatedChoiceField,
+                        important_check_test)
 from tag.models import Tag
 
 
@@ -54,6 +55,8 @@ class BookmarkForm(ModelForm):
 
         self.fields['note'].required = False
         self.fields['tags'].required = False
+        self.fields['importance'].required = False
+        self.fields['importance'].label = 'Important'
 
         # If this form has a model attached, get the tags and display them separated by commas
         if self.instance.id:
@@ -80,10 +83,11 @@ class BookmarkForm(ModelForm):
             'url': URLInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'name': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),
-            'importance': Select(attrs={'class': 'form-control', 'autocomplete': 'off'}, choices=((1, 'Normal'), (5, 'High'), (10, 'Highest'))),
+            'importance': CheckboxInput(check_test=important_check_test, attrs={'class': 'align-middle mt-2'}),
             'daily': DailyCheckboxInput(check_test=daily_check_test, attrs={'class': 'align-middle mt-2'}),
             'is_pinned': DailyCheckboxInput(attrs={'class': 'align-middle mt-2'})
         }
         field_classes = {
             'daily': CheckboxJSONField,
+            'importance': CheckboxIntegerField
         }

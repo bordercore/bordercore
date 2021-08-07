@@ -49,6 +49,10 @@ class FormValidMixin(ModelFormMixin):
 
         bookmark = form.instance
         bookmark.user = self.request.user
+
+        if "importance" in self.request.POST:
+            bookmark.importance = 10
+
         bookmark.save()
 
         with transaction.atomic():
@@ -148,7 +152,12 @@ def snarf_link(request):
 @login_required
 def get_tags_used_by_bookmarks(request):
 
-    tags = Tag.objects.filter(user=request.user, bookmark__user=request.user, name__icontains=request.GET.get("query", ""), bookmark__isnull=False).distinct("name")
+    tags = Tag.objects.filter(
+        user=request.user,
+        bookmark__user=request.user,
+        name__icontains=request.GET.get("query", ""),
+        bookmark__isnull=False
+    ).distinct("name")
 
     return JsonResponse([{"value": x.name, "is_meta": x.is_meta} for x in tags], safe=False)
 
@@ -483,6 +492,7 @@ def get_title_from_url(request):
             "title": title[1]
         }
     )
+
 
 @login_required
 def search(request):

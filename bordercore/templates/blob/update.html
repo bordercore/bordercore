@@ -155,7 +155,7 @@
 
                     {% for field in form.visible_fields %}
 
-                        {% if field.label != 'Filename' and field.name != 'is_private' and field.name != 'is_note' %}
+                        {% if field.label != 'Filename' and field.name != 'is_private' and field.name != 'is_note'  and field.name != 'importance' %}
 
                             <div class="form-group{% if field.errors %}error{% endif %} row">
                                 <label class="bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">{{ field.label }}</label>
@@ -229,6 +229,13 @@
                     {% endfor %}
 
                     <div class="row form-group offset-lg-2 form-inline {% if field.errors %}error{% endif %}">
+
+                        <div class="col-lg-3 form-group">
+                            <div class="form-check">
+                                <label class="form-check-label bold">Important</label>
+                                <input class="form-check-input ml-3" type="checkbox"{% if form.importance.value == 10 %} checked="checked"{% endif %} name="importance" id="importance" />
+                            </div>
+                        </div>
 
                         <div class="col-lg-3 form-group">
                             <div class="form-check">

@@ -3,14 +3,15 @@ import hashlib
 import re
 
 from django import forms
-from django.forms import (ModelForm, Select, Textarea, TextInput,
+from django.forms import (CheckboxInput, ModelForm, Textarea, TextInput,
                           ValidationError)
 from django.forms.fields import CharField, IntegerField
 from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 
 from blob.models import ILLEGAL_FILENAMES, Blob
-from lib.fields import ModelCommaSeparatedChoiceField
+from lib.fields import (CheckboxIntegerField, ModelCommaSeparatedChoiceField,
+                        important_check_test)
 from tag.models import Tag
 
 
@@ -32,6 +33,7 @@ class BlobForm(ModelForm):
         self.fields['note'].required = False
         self.fields['tags'].required = False
         self.fields['name'].required = False
+        self.fields['importance'].required = False
 
         if self.instance.id:
             self.fields['filename'].initial = self.instance.file
@@ -132,5 +134,9 @@ class BlobForm(ModelForm):
             'content': Textarea(attrs={'rows': 5, 'class': 'form-control'}),
             'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),
             'name': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-            'importance': Select(attrs={'class': 'form-control', 'autocomplete': 'off'}, choices=((1, 'Normal'), (5, 'High'), (10, 'Highest')))
+            'importance': CheckboxInput(check_test=important_check_test, attrs={'class': 'align-middle mt-2'}),
+
+        }
+        field_classes = {
+            'importance': CheckboxIntegerField
         }

@@ -1,6 +1,17 @@
-from django.forms import ModelMultipleChoiceField, TextInput
+from django.forms import IntegerField, ModelMultipleChoiceField, TextInput
 
 from tag.models import Tag
+
+
+def important_check_test(value):
+    """
+    Interpret a 1 value from the database as not important, and leave the checkbox unchecked.
+    Otherwise it's important and checked.
+    """
+    if value == 1:
+        return False
+    else:
+        return True
 
 
 # http://stackoverflow.com/questions/5608576/django-enter-a-list-of-values-form-error-when-rendering-a-manytomanyfield-as-a
@@ -32,3 +43,17 @@ class ModelCommaSeparatedChoiceField(ModelMultipleChoiceField):
             if created:
                 newtag.save()
         return super().clean(value)
+
+
+class CheckboxIntegerField(IntegerField):
+    """
+    This custom field lets us use a checkbox on the form, which, if checked,
+    results in an integer of 1 or 10, representing importance, stored in the
+    database rather than the usual boolean value.
+    """
+    def to_python(self, value):
+
+        if value is True:
+            return 10
+        else:
+            return 1

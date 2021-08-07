@@ -546,7 +546,7 @@ def search_tags_and_names(request):
 
     search_term = request.GET["term"].lower()
 
-    if "filter" in request.GET:
+    if request.GET.get("filter", "") != "":
         doc_types = [request.GET.get("filter")]
     else:
         doc_types = []
@@ -572,9 +572,11 @@ def search_tags_and_names(request):
                     "object_type": object_type,
                     "value": name,
                     "uuid": match["_source"].get("uuid"),
+                    "important": match["_source"].get("importance"),
                     "id": match["_id"],
                     "url": match["_source"].get("url", None),
-                    "link": get_link(object_type, match["_source"])
+                    "link": get_link(object_type, match["_source"]),
+                    "score": match["_score"]
                 }
             )
 
@@ -591,14 +593,22 @@ def search_names(request, es, doc_types, search_term):
 
     search_object = {
         "query": {
-            "bool": {
-                "must": [
-                    {
-                        "term": {
-                            "user_id": request.user.id
-                        }
+            "function_score": {
+                "field_value_factor": {
+                    "field": "importance",
+                    "missing": 1
+                },
+                "query": {
+                    "bool": {
+                        "must": [
+                            {
+                                "term": {
+                                    "user_id": request.user.id
+                                }
+                            }
+                        ]
                     }
-                ]
+                }
             }
         },
         "from": 0, "size": 100,
@@ -624,7 +634,7 @@ def search_names(request, es, doc_types, search_term):
     # Separate query into terms based on whitespace and
     #  and treat it like an "AND" boolean search
     for one_term in search_terms:
-        search_object["query"]["bool"]["must"].append(
+        search_object["query"]["function_score"]["query"]["bool"]["must"].append(
             {
                 "bool": {
                     "should": [
@@ -675,8 +685,8 @@ def search_names(request, es, doc_types, search_term):
         }
     }
 
-    if len(doc_types) > 1:
-        search_object["query"]["bool"]["must"].append(
+    if len(doc_types) > 0:
+        search_object["query"]["function_score"]["query"]["bool"]["must"].append(
             {
                 "bool": {
                     "should": [
@@ -780,7 +790,7 @@ def search_tags(request, es, doc_types, search_term):
                                "object_type": "Tag",
                                "value": tag_result["key"],
                                "id": tag_result["key"],
-                               "link": get_tag_link(doc_types, tag_result["key"]),
+                               "link": get_tag_link(doc_types, tag_result["key"])
                            }
                            )
     return matches
