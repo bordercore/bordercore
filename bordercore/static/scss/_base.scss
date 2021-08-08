@@ -933,8 +933,12 @@ a.tag {
 }
 
 .progress-circle {
-  circle {
-    stroke: $drill-progress-circle-color;
+  circle.circle-partial {
+    stroke: $drill-progress-circle-partial-color;
+  }
+
+  circle.circle-full {
+    stroke: $drill-progress-circle-full-color;
   }
 
   text {
@@ -1182,8 +1186,20 @@ body {
   font-family: 'Poppins', sans-serif;
 }
 
-a:hover {
-  color: $link-hover-color;
+a {
+  text-decoration-color: transparent;
+  transition: all 0.25s cubic-bezier(0.455, 0.03, 0.515, 0.955);
+  text-underline-offset: 0.25rem;
+
+  &:hover {
+    text-decoration-color: $link-decoration-color;
+  }
+
+  &.text-success {
+    &:hover {
+      color: $link-color !important;
+    }
+  }
 }
 
 p {

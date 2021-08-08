@@ -3,8 +3,8 @@
         <slot name="title-slot" />
         <div class="progress-circle">
             <svg width="120" height="120" viewBox="0 0 120 120">
-                <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke-width="12" />
-                <circle cx="60" cy="60" :r="circleRadius" fill="none" stroke="#7fffd4" stroke-width="12" :stroke-dasharray="strokeDashArray" :stroke-dashoffset="getDashOffset()" />
+                <circle class="circle-full" cx="60" cy="60" :r="circleRadius" fill="none" stroke-width="12" />
+                <circle class="circle-partial" cx="60" cy="60" :r="circleRadius" fill="none" stroke-width="12" :stroke-dasharray="strokeDashArray" :stroke-dashoffset="getDashOffset()" />
                 <text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="30px">{{ getProgress() }}%</text>
             </svg>
         </div>
