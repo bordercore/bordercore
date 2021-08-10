@@ -165,6 +165,7 @@ button:focus {
 
 /* Dropdown Menus */
 
+// Used internally by vue-dropdown-menu's DropdownMenu.vue
 .dropdown-menu.show {
   background-color: $dropdown-menu-background-color;
   border: 1px solid $gray-900;
@@ -181,8 +182,18 @@ button:focus {
   }
 }
 
-.dropdown-menu-user {
-  cursor: pointer;
+// Extra content after the dropdown item's name
+.dropdown-item-extra {
+  color: $white;
+  background-color: $info;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: bold;
+  width: 1.25rem;
+  height: 1.25rem;
+  line-height: 0.75rem;
+  text-align: center;
+  padding-top: 0.25rem;
 }
 
 // The round, target point that spawns the dropdown menu below it
@@ -543,18 +554,6 @@ pre {
   left: 1rem;
 }
 
-.failed-test-count {
-  color: $white;
-  background-color: $info;
-  border-radius: 50%;
-  font-size: 0.75rem;
-  font-weight: bold;
-  width: 1.25rem;
-  height: 1.25rem;
-  line-height: 0.75rem;
-  text-align: center;
-}
-
 /* Bookmarks */
 
 .bookmark-list-date {
@@ -713,7 +712,7 @@ h2#name {
 }
 
 #blob-detail-menu {
-  right: 0.5rem;
+  right: 0;
   top: 0.5rem;
 }
 
@@ -778,6 +777,10 @@ h2#name {
 
 .col-action {
   width: 4rem;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 
 .cursor-grab {
@@ -1001,11 +1004,6 @@ a.tag {
       bottom: -0.01rem;
     }
   }
-}
-
-#collection-detail-menu {
-  right: 2rem;
-  top: 1rem;
 }
 
 .collection-item {

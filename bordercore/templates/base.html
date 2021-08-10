@@ -69,28 +69,22 @@
                                 </search-simple-suggest>
 
                                 <div class="col-auto" v-cloak>
-                                    <span class="dropdown-menu-user mr-2">
-                                        <dropdown-menu
-                                            v-model="show"
-                                            :right="right"
-                                            transition="translate-fade-down"
-                                            class="text-center"
-                                        >
-                                            <span class="align-middle pt-2">Hello <strong>{{ user.get_username }}</strong></span>
-                                            <div slot="dropdown">
-                                                <a class="dropdown-item pl-3" href="{% url 'accounts:prefs' %}"><font-awesome-icon icon="briefcase" class="mr-2"></font-awesome-icon>Preferences</a>
-                                                {% if request.user|is_in_group:"Admin" %}
-                                                    <a class="dropdown-item pl-3" href="{% url 'metrics:list' %}"><font-awesome-icon icon="chart-bar" class="mr-2"></font-awesome-icon>Metrics <span class="failed-test-count pt-1" v-if="failed_test_count > 0">[[ failed_test_count ]]</span></a>
-                                                {% endif %}
-                                                <a class="dropdown-item pl-3" href="#" @click="showHelp"><font-awesome-icon icon="question" class="mr-2"></font-awesome-icon>Help</a>
-                                                <a class="dropdown-item pl-3" href="{% url 'accounts:logout' %}"><font-awesome-icon icon="sign-out-alt" class="mr-2"></font-awesome-icon>Logout</a>
-                                            </div>
+                                    <drop-down-menu
+                                        :links="userMenuItems"
+                                        :initial-hide="false"
+                                    >
+                                        <template slot="top">
+                                            <span class="align-middle pt-2">
+                                                Hello <strong>{{ user.get_username }}</strong>
+                                            </span>
                                             {% if request.user|is_in_group:"Admin" %}
-                                                <span class="failed-test-count align-middle ml-2 mt-2 pt-1" v-if="failed_test_count > 0">[[ failed_test_count ]]</span>
+                                                <span class="dropdown-item-extra align-middle ml-2 mt-2" v-if="failed_test_count > 0">
+                                                    [[ failed_test_count ]]
+                                                </span>
                                             {% endif %}
-                                            <span class="align-middle ml-2 mt-2"><font-awesome-icon icon="angle-down"></font-awesome-icon></span>
-                                        </dropdown-menu>
-                                    </span>
+                                            <font-awesome-icon icon="angle-down" class="align-middle ml-2 mt-2" />
+                                        </template>
+                                    </drop-down-menu>
                                 </div>
 
                             </div>
@@ -170,12 +164,45 @@
 
                 new Vue({
                     el: "#top-search",
+                    components: {
+                        DropDownMenu,
+                    },
                     data() {
                         return {
                             collapsed: false,
                             show: false,
                             right: true,
-                            failed_test_count: {{ failed_test_count }}
+                            failed_test_count: {{ failed_test_count }},
+                            userMenuItems: [
+                                {
+                                    id: uuidv4(),
+                                    title: "Preferences",
+                                    url: "{% url 'accounts:prefs' %}",
+                                    icon: "briefcase"
+                                },
+                                {% if request.user|is_in_group:"Admin" %}
+                                {
+                                    id: uuidv4(),
+                                    title: "Metrics",
+                                    url: "{% url 'accounts:prefs' %}",
+                                    icon: "chart-bar",
+                                    extra: {{ failed_test_count }}
+                                },
+                                {% endif %}
+                                {
+                                    id: uuidv4(),
+                                    title: "Help",
+                                    url: "#",
+                                    icon: "question",
+                                    clickHandler: this.showHelp
+                                },
+                                {
+                                    id: uuidv4(),
+                                    title: "Logout",
+                                    url: "{% url 'accounts:logout' %}",
+                                    icon: "sign-out-alt",
+                                },
+                            ]
                         }
                     },
                     methods: {
@@ -361,7 +388,7 @@
                                     }
                                     {% endif %}
                                 },
-                            ]
+                            ],
                         }
                     },
                     methods: {
