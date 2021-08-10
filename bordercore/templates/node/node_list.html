@@ -8,7 +8,7 @@
 
 {% block content %}
 
-    <div class="card-grid ml-3" id="vue-app">
+    <div class="card-grid ml-3">
 
         <div class="d-flex flex-row flex-wrap">
         {% for node in nodes %}
@@ -30,33 +30,5 @@
         </div>
 
     </div>
-
-{% endblock %}
-
-{% block javascript %}
-
-    {{ block.super }}
-
-    <script type="text/javascript">
-
-        axios.defaults.xsrfCookieName = "csrftoken"
-        axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
-
-        Vue.mixin({ delimiters: ["[[", "]]"] });
-
-        new Vuex.Store({
-            state: {
-            },
-            getters: {},
-            mutations: {},
-        });
-
-        new Vue({
-            el: "#vue-app",
-            components: {
-            }
-        });
-
-    </script>
 
 {% endblock %}
