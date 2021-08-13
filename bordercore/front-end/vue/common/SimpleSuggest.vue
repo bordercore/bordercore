@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div :class="wrapperClass">
         <vue-simple-suggest :id="id"
                             ref="suggestComponent"
                             v-model="query"
@@ -9,7 +9,7 @@
                             :list="search"
                             :name="name"
                             :filter-by-query="true"
-                            :debounce="200"
+                            :debounce="debounce"
                             :min-length="2"
                             :max-suggestions="maxSuggestions"
                             :placeholder="placeHolder"
@@ -73,7 +73,14 @@
                 type: String,
                 default: "search",
             },
-
+            wrapperClass: {
+                type: String,
+                default: "",
+            },
+            debounce: {
+                type: Number,
+                default: 200,
+            },
         },
         data() {
             return {
