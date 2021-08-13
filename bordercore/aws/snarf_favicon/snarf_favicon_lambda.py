@@ -14,6 +14,8 @@ favicon_key = "django/img/favicons"
 
 s3_resource = boto3.resource("s3")
 
+MAX_AGE = 2592000
+
 
 def get_domain(url):
 
@@ -64,7 +66,7 @@ def handler(event, context):
                 raise Exception(f"favicon image size is zero for {domain}")
 
             object = s3_resource.Object(bucket_name, f"{favicon_key}/{domain}.ico")
-            object.put(Body=r.content, ACL="public-read")
+            object.put(Body=r.content, ACL="public-read", CacheControl=f"max-age={MAX_AGE}")
 
         log.info("Lambda finished")
 

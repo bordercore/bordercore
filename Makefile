@@ -1,4 +1,5 @@
 S3=s3://bordercore-blobs/django
+MAX_AGE=2592000
 
 install:
 	pip install --upgrade pip && pip install -r requirements.txt
@@ -14,13 +15,13 @@ webpack_build: check-env
 
 webpack_aws: check-env
 	cd $(BORDERCORE_HOME)
-	aws s3 cp static/dist/css/theme-dark.css $(S3)/css/ &&
-	aws s3 cp static/dist/css/theme-dark.min.css $(S3)/css/ &&
-	aws s3 cp static/dist/css/theme-light.css $(S3)/css/ &&
-	aws s3 cp static/dist/css/theme-light.min.css $(S3)/css/ &&
-	aws s3 cp static/dist/css/vue-sidebar-menu.min.css $(S3)/css/ &&
-	aws s3 cp static/dist/js/javascript-bundle.js.gz $(S3)/js/ --content-encoding gzip &&
-	aws s3 cp static/dist/js/javascript-bundle.min.js.gz $(S3)/js/ --content-encoding gzip
+	aws s3 cp static/dist/css/theme-dark.css $(S3)/css/ --cache-control max-age=$(MAX_AGE) &&
+	aws s3 cp static/dist/css/theme-dark.min.css $(S3)/css/ --cache-control max-age=$(MAX_AGE) &&
+	aws s3 cp static/dist/css/theme-light.css $(S3)/css/ --cache-control max-age=$(MAX_AGE) &&
+	aws s3 cp static/dist/css/theme-light.min.css $(S3)/css/ --cache-control max-age=$(MAX_AGE) &&
+	aws s3 cp static/dist/css/vue-sidebar-menu.min.css $(S3)/css/ --cache-control max-age=$(MAX_AGE) &&
+	aws s3 cp static/dist/js/javascript-bundle.js.gz $(S3)/js/ --cache-control max-age=$(MAX_AGE) --content-encoding gzip &&
+	aws s3 cp static/dist/js/javascript-bundle.min.js.gz $(S3)/js/ --cache-control max-age=$(MAX_AGE) --content-encoding gzip
 
 check-env:
 ifndef BORDERCORE_HOME
