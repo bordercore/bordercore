@@ -167,7 +167,7 @@
                                 >
                                     <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                     <div slot="dropdown">
-                                        <a class="dropdown-item" href="#" @click="chooseTag()">Add tag</a>
+                                        <a class="dropdown-item" href="#" @click="chooseTag()">Manage Tags</a>
                                     </div>
                                 </dropdown-menu>
                             </span>
@@ -176,11 +176,11 @@
 
                     <template v-slot:content>
                         <ul class="list-unstyled">
-                            <li v-for="tag in tagList" class="d-flex px-2">
+                            <li v-for="tag in $store.state.tagList" class="d-flex px-2">
                                 <div class="flex-fill"><a :href="tag.url">[[ tag.name ]]</a></div>
                                 <div class="text-info">[[ tag.progress ]]%</div>
                             </li>
-                            <li v-if="!tagList.length"><a href="#" @click="chooseTag()">Add a tag</a></li>
+                            <li v-if="!$store.state.tagList.length"><a href="#" @click="chooseTag()">Add a tag</a></li>
                         </ul>
                     </template>
                 </card>
@@ -225,32 +225,49 @@
                 </card>
             </div>
 
-            <tag-search inline-template ref="tagSearch">
-                <div class="modal fade" id="modalAddTag" tabindex="-1" role="dialog">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h4 class="modal-title" id="myModalLabel">Add tag</h4>
-                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+            <div class="modal fade" id="modalAddTag" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="myModalLabel">Manage Tags</h4>
+                            <button type="button" class="close close-button" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-row align-items-center">
+                                <div class="form-row mx-1 w-100">
+                                    <simple-suggest
+                                        ref="simpleSuggest"
+                                        search-url="{% url 'drill:search_tags' %}?query="
+                                        place-holder="Add Tag"
+                                        wrapper-class="w-100"
+                                        :debounce="500"
+                                    >
+                                    </simple-suggest>
+                                </div>
                             </div>
-                            <div class="modal-body">
-                                <form method="get" autocomplete="off">
-                                    <div class="form-row align-items-center">
-                                        <div class="form-row">
-                                            <simple-suggest
-                                                ref="simpleSuggest"
-                                                search-url="{% url 'drill:search_tags' %}?query="
-                                                place-holder="Tag Search"
-                                            >
-                                            </simple-suggest>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
+                            <ul class="list-unstyled p-2 mb-0 wide-list">
+                                <draggable v-model="$store.state.tagList" @change="onDrag">
+                                    <transition-group type="transition">
+                                        <li v-for="tag in $store.state.tagList" :key="tag.name" class="px-2 py-1">
+                                            <div class="d-flex">
+                                                <div>
+                                                    [[ tag.name ]]
+                                                </div>
+                                                <div class="ml-auto my-auto">
+                                                    <font-awesome-icon icon="times-circle" class="list-delete" @click="onClickDelete(tag.name)" />
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </transition-group>
+                                </draggable>
+                            </ul>
+                        </div>
+                        <div class="modal-footer justify-content-end">
+                            <input class="btn btn-primary" type="button" value="Done" data-dismiss="modal" />
                         </div>
                     </div>
                 </div>
-            </tag-search>
+            </div>
 
         </div>
 
@@ -333,6 +350,14 @@
 
         const EventBus = new Vue();
 
+        const store = new Vuex.Store({
+            state: {
+                tagList: [],
+            },
+            getters: {},
+            mutations: {},
+        });
+
         new Vue({
             el: "#vue-app-left"
         });
@@ -355,36 +380,18 @@
             },
         });
 
-        const TagSearch = {
-            methods: {
-                select(selection) {
-
-                    EventBus.$emit("add-tag", selection.value);
-                    $("#modalAddTag").modal("hide");
-
-                    this.$nextTick(() => {
-                        this.$refs.simpleSuggest.$refs.suggestComponent.$el.querySelector("input").blur();
-                        this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
-                    });
-
-                },
-            },
-            components: {
-                SimpleSuggest
-            }
-        };
-
         new Vue({
             el: "#pinned_tags",
+            name: "Pinned Tags",
+            store,
             components: {
-                TagSearch
+                SimpleSuggest,
             },
             data() {
                 return {
                     show: false,
                     right: true,
                     interactive: true,
-                    tagList: [],
                 }
             },
             methods: {
@@ -394,7 +401,7 @@
                         this,
                         "{% url "drill:get_pinned_tags" %}",
                         (response) => {
-                            this.tagList = response.data.tag_list;
+                            this.$store.state.tagList = response.data.tag_list;
                         },
                         "Error getting pinned tags"
                     );
@@ -413,7 +420,7 @@
                 chooseTag() {
 
                     $("#modalAddTag").modal("show");
-                    setTimeout( () => { this.$refs.tagSearch.$refs.simpleSuggest.$refs.suggestComponent.input.focus(); }, 500)
+                    setTimeout( () => { this.$refs.simpleSuggest.$refs.suggestComponent.input.focus(); }, 500)
 
                 },
 
@@ -427,8 +434,58 @@
                         (response) => {
                             this.getTagList();
                         },
-                        "Tag added",
+                        "",
                         ""
+                    );
+
+                },
+
+                select(selection) {
+
+                    EventBus.$emit("add-tag", selection.value);
+
+                    this.$nextTick(() => {
+                        this.$refs.simpleSuggest.$refs.suggestComponent.$el.querySelector("input").blur();
+                        this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
+                    });
+
+                },
+
+                onClickDelete(tag) {
+
+                    doPost(
+                        this,
+                        url = "{% url "drill:unpin_tag" %}",
+                        {
+                            "tag": tag,
+                        },
+                        (response) => {
+                            this.getTagList();
+                        },
+                        "",
+                        ""
+                    );
+
+                },
+
+                onDrag(evt) {
+
+                    tag_name = evt.moved.element.name;
+
+                    // The backend expects the ordering to begin
+                    // with 1, not 0, so add 1.
+                    new_position = evt.moved.newIndex + 1;
+
+                    doPost(
+                        this,
+                        "{% url "drill:sort_pinned_tags" %}",
+                        {
+                            "tag_name": tag_name,
+                            "new_position": new_position,
+                        },
+                        () => {},
+                        "",
+                        "",
                     );
 
                 }
@@ -475,8 +532,8 @@
                             window.location = "{% url 'drill:start_study_session_search' 666 %}".replace(/666/, search_term);
                         }
                     }
+                }
             }
-        }
         });
 
     </script>

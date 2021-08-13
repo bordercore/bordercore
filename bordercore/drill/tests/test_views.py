@@ -238,7 +238,7 @@ def test_drill_pin_tag(auto_login_user, question, tag):
 
     url = urls.reverse("drill:pin_tag")
     resp = client.post(url, {
-        "tag": tag[0].name
+        "tag": tag[2].name
     })
 
     assert json.loads(resp.content)["status"] == "OK"
@@ -246,10 +246,46 @@ def test_drill_pin_tag(auto_login_user, question, tag):
 
     url = urls.reverse("drill:pin_tag")
     resp = client.post(url, {
+        "tag": tag[2].name
+    })
+
+    assert json.loads(resp.content)["status"] == "Error"
+    assert resp.status_code == 200
+
+
+@factory.django.mute_signals(signals.post_save)
+def test_drill_unpin_tag(auto_login_user, question, tag):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("drill:unpin_tag")
+    resp = client.post(url, {
+        "tag": tag[0].name
+    })
+
+    assert json.loads(resp.content)["status"] == "OK"
+    assert resp.status_code == 200
+
+    resp = client.post(url, {
         "tag": tag[0].name
     })
 
     assert json.loads(resp.content)["status"] == "Error"
+    assert resp.status_code == 200
+
+
+@factory.django.mute_signals(signals.post_save)
+def test_sort_pinned_tags(auto_login_user, question, tag):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("drill:sort_pinned_tags")
+    resp = client.post(url, {
+        "tag_name": tag[0].name,
+        "new_position": 1
+    })
+
+    assert json.loads(resp.content)["status"] == "OK"
     assert resp.status_code == 200
 
 

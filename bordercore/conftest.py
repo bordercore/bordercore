@@ -23,7 +23,7 @@ except (ModuleNotFoundError, NameError, django.core.exceptions.AppRegistryNotRea
 
 django.setup()
 
-from accounts.models import SortOrderUserTag, SortOrderUserNote, SortOrderUserFeed  # isort:skip
+from accounts.models import SortOrderUserTag, SortOrderUserNote, SortOrderUserFeed, SortOrderDrillTag  # isort:skip
 from accounts.tests.factories import TEST_PASSWORD, UserFactory  # isort:skip
 from blob.tests.factories import BlobFactory  # isort:skip
 from bookmark.tests.factories import BookmarkFactory  # isort:skip
@@ -64,7 +64,7 @@ def aws_credentials():
 
 
 @pytest.fixture
-def auto_login_user(client, blob_text_factory):
+def auto_login_user(client, blob_text_factory, tag):
 
     def make_auto_login(user=None):
 
@@ -75,6 +75,9 @@ def auto_login_user(client, blob_text_factory):
             # Make the user an admin
             admin_group, _ = Group.objects.get_or_create(name="Admin")
             admin_group.user_set.add(user)
+
+            SortOrderDrillTag.objects.get_or_create(userprofile=user.userprofile, tag=tag[0])
+            SortOrderDrillTag.objects.get_or_create(userprofile=user.userprofile, tag=tag[1])
 
         client.login(username=user.username, password=TEST_PASSWORD)
         return user, client

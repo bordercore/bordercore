@@ -434,6 +434,49 @@ def pin_tag(request):
 
 
 @login_required
+def unpin_tag(request):
+
+    tag_name = request.POST["tag"]
+
+    if not SortOrderDrillTag.objects.filter(userprofile=request.user.userprofile, tag__name=tag_name).exists():
+
+        response = {
+            "status": "Error",
+            "message": "That tag is not pinned."
+        }
+
+    else:
+
+        so = SortOrderDrillTag.objects.get(userprofile=request.user.userprofile, tag__name=tag_name)
+        so.delete()
+
+        response = {
+            "status": "OK"
+        }
+
+    return JsonResponse(response)
+
+
+@login_required
+def sort_pinned_tags(request):
+    """
+    Move a given pinned tag to a new position in a sorted list
+    """
+
+    tag_name = request.POST["tag_name"]
+    new_position = int(request.POST["new_position"])
+
+    so = SortOrderDrillTag.objects.get(tag__name=tag_name, userprofile=request.user.userprofile)
+    SortOrderDrillTag.reorder(so, new_position)
+
+    response = {
+        "status": "OK"
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
 def is_favorite_mutate(request):
 
     question_uuid = request.POST["question_uuid"]

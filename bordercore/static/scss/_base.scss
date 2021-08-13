@@ -81,6 +81,10 @@
   background: lighten($background-color-dark, 4%);
 }
 
+.close-button {
+  color: $close-button-hover-color;
+}
+
 /*
    Common components
 */
@@ -124,7 +128,6 @@
 
 .hoverable {
   border-radius: 0.5rem;
-  transition: 0.5s;
 
   &:hover {
     background-color: lighten($background-color-dark, 5%);
@@ -144,6 +147,17 @@
   li {
     border-left: none;
     border-right: none;
+  }
+}
+
+.list-delete {
+  display: none;
+  color: $white;
+
+  &:hover {
+    transform: scale(1.1);
+
+    @extend .close-button;
   }
 }
 
@@ -425,11 +439,6 @@ $nav-tabs-link-hover-border-color: $nav-tabs-border-color;
   color: #495057;
   transition: 2s;
   transition-delay: 1s;
-}
-
-#id_content.foobar {
-  height: 30em;
-  transition: height 1s ease-out;
 }
 
 /* Markdown */
@@ -871,6 +880,29 @@ a.tag {
 }
 
 /* Sortable */
+
+.wide-list {
+  span {
+    width: 100%;
+  }
+
+  li {
+    /* Chrome adds unwanted corners to the edges of
+       rounded elements during drag and drop, so only
+       use rounded borders for Mozilla. */
+    @-moz-document url-prefix() {
+      border-radius: 0.5rem;
+    }
+
+    &:hover {
+      background-color: lighten($background-color-dark, 5%);
+
+      .list-delete {
+        display: block;
+      }
+    }
+  }
+}
 
 /* The element you've chosen to drag */
 .sortable-chosen {
