@@ -1,3 +1,4 @@
+import html
 from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
@@ -48,7 +49,11 @@ class MetricListView(UserPassesTestMixin, ListView):
 
                 context[self.test_types[metric.name]] = metric
                 if metric.name != "Bordercore Test Coverage":
-                    metric.latest_result["test_output"] = metric.latest_result["test_output"].replace("\\n", "<br />")
+                    metric.latest_result["test_output"] = html.escape(
+                        metric.latest_result["test_output"]
+                    ).replace(
+                        "\\n", "<br />"
+                    )
                 if metric.name == "Bordercore Test Coverage":
                     metric.latest_result["line_rate"] = int(round(float(metric.latest_result["line_rate"]) * 100, 0))
 
