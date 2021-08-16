@@ -155,6 +155,9 @@ import AddToPlaylist from "./vue/music/AddToPlaylist.vue";
 Vue.component("AddToPlaylist", AddToPlaylist);
 window.AddToPlaylist = AddToPlaylist;
 
+import CreateUpdatePlaylist from "./vue/music/CreateUpdatePlaylist.vue";
+window.CreateUpdatePlaylist = CreateUpdatePlaylist;
+
 import BlobDetailCover from "./vue/blob/BlobDetailCover.vue";
 Vue.component("BlobDetailCover", BlobDetailCover);
 window.BlobDetailCover = BlobDetailCover;

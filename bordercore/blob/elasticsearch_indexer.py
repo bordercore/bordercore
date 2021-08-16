@@ -244,11 +244,11 @@ def index_blob(**kwargs):
         **blob_info["metadata"]
     )
 
+    if blob_info["date"] is not None:
+        fields["date"] = get_range_from_date(blob_info["date"])
+
     article = ESBlob(**fields)
     article.meta.id = blob_info["uuid"]
-
-    if blob_info["date"] is not None:
-        article.date = get_range_from_date(blob_info["date"])
 
     pipeline_args = {}
 

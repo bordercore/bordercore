@@ -1,4 +1,5 @@
 import io
+import json
 import os
 import re
 import uuid
@@ -15,6 +16,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.forms.models import model_to_dict
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
@@ -31,8 +33,7 @@ from lib.util import remove_non_ascii_characters
 
 from .forms import AlbumForm, PlaylistForm, SongForm
 from .models import Album, Listen, Playlist, PlaylistItem, Song
-from .services import (get_playlist_counts, get_playlist_songs_manual,
-                       get_playlist_songs_smart)
+from .services import get_playlist_counts, get_playlist_songs
 
 
 @login_required
@@ -683,16 +684,26 @@ class PlaylistDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        obj_dict = model_to_dict(self.object)
+        obj_dict["uuid"] = str(self.object.uuid)
+
         return {
-            **context
+            **context,
+            "playlist_json": json.dumps(obj_dict)
         }
 
 
 @method_decorator(login_required, name="dispatch")
-class CreatePlaylist(FormRequestMixin, CreateView):
+class CreatePlaylistView(FormRequestMixin, CreateView):
+
     model = Playlist
     form_class = PlaylistForm
     template_name = "music/index.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 
     def form_valid(self, form):
 
@@ -707,11 +718,67 @@ class CreatePlaylist(FormRequestMixin, CreateView):
         }
         playlist.save()
 
+        if playlist.type != "manual":
+            playlist.populate()
+
         self.success_url = reverse_lazy("playlist_detail", kwargs={"uuid": playlist.uuid})
         return super().form_valid(form)
 
     def get_success_url(self):
         return reverse("music:playlist_detail", kwargs={"uuid": self.object.uuid})
+
+
+@method_decorator(login_required, name="dispatch")
+class UpdatePlaylistView(FormRequestMixin, UpdateView):
+
+    model = Playlist
+    form_class = PlaylistForm
+    slug_field = "uuid"
+    slug_url_kwarg = "playlist_uuid"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["tags"] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
+        return context
+
+    def form_valid(self, form):
+        playlist = form.save()
+
+        # Deal with any changed parameters that could possibly
+        #  refresh the song list.
+        if playlist.type != "manual" and \
+           (
+               "size" in form.changed_data
+               or self.request.POST.get("exclude_albums", "") != playlist.parameters.get("exclude_albums", "")
+               or self.request.POST.get("exclude_recent", "") != playlist.parameters.get("exclude_recent", "")
+           ):
+
+            parameters = {
+                x: self.request.POST[x]
+                for x in
+                ["start_year", "end_year", "exclude_albums", "exclude_recent"]
+                if x in self.request.POST and self.request.POST[x] != ""
+            }
+
+            # We don't allow changing the tag, so it won't be included in
+            #  the POST args. Add it here.
+            if playlist.type == "tag":
+                parameters["tag"] = playlist.parameters["tag"]
+
+            playlist.parameters = parameters
+            playlist.save()
+
+            playlist.populate(refresh=True)
+
+        messages.add_message(
+            self.request, messages.INFO,
+            "Playlist updated"
+        )
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse("music:playlist_detail", kwargs={'uuid': self.object.uuid})
 
 
 @method_decorator(login_required, name="dispatch")
@@ -742,10 +809,7 @@ def get_playlist(request, uuid):
 
     song_list = []
 
-    if playlist.type == "manual":
-        song_list = get_playlist_songs_manual(playlist)
-    else:
-        song_list = get_playlist_songs_smart(playlist, playlist.size)
+    song_list = get_playlist_songs(playlist)
 
     total_time = humanize.precisedelta(
         timedelta(seconds=song_list["playtime"]),

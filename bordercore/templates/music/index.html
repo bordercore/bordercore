@@ -149,144 +149,11 @@
 
         <form action="{% url 'music:playlist_create' %}" method="post">
             {% csrf_token %}
-            <div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title" id="myModalLabel"><span id="action-type">Create</span> Playlist</h4>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        </div>
-                        <div class="modal-body">
-
-                            <div class="form-group row">
-                                <label class="col-lg-4 col-form-label" for="inputTitle">Name</label>
-                                <div class="col-lg-8">
-                                    <input type="text" name="name" autocomplete="off" maxlength="200" required="required" id="id_name" class="form-control">
-                                </div>
-                            </div>
-
-                            <div class="form-group row">
-                                <label class="col-lg-4 col-form-label" for="inputTitle">Note</label>
-                                <div class="col-lg-8">
-                                    <textarea name="note" cols="40" rows="3" id="id_note" class="form-control"></textarea>
-                                </div>
-                            </div>
-
-                            <hr class="mb-1" />
-
-                            <div class="music-playlist-section">
-                                Playlist Type
-                            </div>
-
-                            <div class="form-group row mt-3">
-                                <div class="col-lg-12">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="type" value="manual" v-model="smartType" checked>
-                                        <label class="form-check-label d-flex" for="type">
-                                            Manually Add Songs
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-group row mt-3">
-                                <div class="col-lg-4">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="type" value="tag" v-model="smartType">
-                                        <label class="form-check-label d-flex" for="type">
-                                                Tag
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-lg-8">
-                                    <tags-input id="smart-list-tag" ref="smartListTag" search-url="{% url 'music:search_tags' %}?query=" name="tag" place-holder="Tag name" :disabled="!playlistTypeIsTag" :max-tags="1"></tags-input>
-                                </div>
-                            </div>
-
-                            <div class="form-group row mt-3">
-                                <div class="col-lg-12">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="type" value="recent" v-model="smartType">
-                                        <label class="form-check-label d-flex" for="type">
-                                            Recently Added Songs
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-group row mt-3">
-                                <div class="col-lg-4">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="type" value="time" v-model="smartType">
-                                        <div class="from-check-label text-nowrap">
-                                            Time period
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-8">
-                                    <label class="form-check-label d-flex">
-                                        <input class="form-control mr-1" type="number" name="start_year" size="4" placeholder="Start year" autocomplete="off" :disabled="!playlistTypeIsTimePeriod" v-model="startYear" />
-                                        <input class="form-control ml-1" type="number" name="end_year" size="4" placeholder="End year" autocomplete="off" :disabled="!playlistTypeIsTimePeriod" v-model="endYear" />
-                                    </label>
-                                </div>
-                            </div>
-
-                            <hr class="mb-1" />
-
-                            <div class="music-playlist-section">
-                                Filter
-                            </div>
-
-                            <div class="form-group row mt-3">
-                                <label class="col-lg-4 col-form-label">Size</label>
-                                <div class="col-lg-8">
-                                    <select class="form-control" name="size">
-                                        <option value="">Unlimited</option>
-                                        <option value="5">5</option>
-                                        <option value="10">10</option>
-                                        <option value="20" selected>20</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-group row mt-3">
-                                <label class="col-lg-4 col-form-label">Exclude Recent Listens</label>
-                                <div class="col-lg-8">
-                                    <select class="form-control" name="exclude_recent">
-                                        <option value="">No limit</option>
-                                        <option value="1">Past Day</option>
-                                        <option value="2">Past Two Days</option>
-                                        <option value="3">Past Three Days</option>
-                                        <option value="7">Past Week</option>
-                                        <option value="30">Past Month</option>
-                                        <option value="90">Past 3 Months</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-group row mt-3">
-                                <div class="col-lg-12">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="exclude_albums">
-                                        <label class="form-check-label">
-                                                Exclude albums
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                        <div class="modal-footer justify-content-end">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                            <input id="btn-action" class="btn btn-primary" type="submit" name="Go" value="Create" :disabled="disabledCreateButton" />
-                        </div>
-
-                    </div>
-                </div>
-            </div>
+            <create-update-playlist
+                tag-search-url="{% url 'music:search_tags' %}"
+            />
         </form>
+
     </div>
 
         {% endif %}
@@ -305,6 +172,9 @@
 
         new Vue({
             el: "#vue-app",
+            components: {
+                CreateUpdatePlaylist
+            },
             data() {
                 return {
                     fields: [
@@ -323,9 +193,6 @@
                             thClass: "text-center"
                         },
                     ],
-                    smartType: "manual",
-                    startYear: undefined,
-                    endYear: undefined
                 }
             },
             methods: {
@@ -339,29 +206,10 @@
                     })
                 },
                 onClickCreate(evt) {
-                    $("#modalAdd").modal("show")
+                    $("#modalCreateUpdate").modal("show")
                     window.setTimeout(() => { document.getElementById("id_name").focus() }, 500);
                 },
             },
-            computed: {
-                disabledCreateButton() {
-                    if (this.smartType === "tag"
-                        && (this.$refs.smartListTag && this.$refs.smartListTag.tags.length === 0)) {
-                            return true;
-                    } else if (this.smartType === "time"
-                               && (!this.startYear || !this.endYear)
-                               ||  parseInt(this.endYear) < parseInt(this.startYear)) {
-                        return true;
-                               }
-                    return false;
-                },
-                playlistTypeIsTag() {
-                    return this.smartType === "tag"
-                },
-                playlistTypeIsTimePeriod() {
-                    return this.smartType === "time"
-                },
-            }
         });
 
     </script>

@@ -6,7 +6,7 @@ import factory
 import pytest
 
 from django import urls
-from django.db.models import query, signals
+from django.db.models import signals
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
 

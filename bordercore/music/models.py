@@ -1,6 +1,7 @@
 import hashlib
 import os
 import uuid
+from datetime import timedelta
 
 import boto3
 import humanize
@@ -12,10 +13,12 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.db.models import Count, JSONField
+from django.db.models import Count, JSONField, OuterRef, Q, Subquery
+from django.db.models.functions import Coalesce
 from django.db.models.signals import post_delete, post_save, pre_delete
 from django.dispatch.dispatcher import receiver
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from lib.mixins import SortOrderMixin, TimeStampedModel
@@ -330,6 +333,55 @@ class Playlist(TimeStampedModel):
         choices=PlaylistType.choices,
         default=PlaylistType.MANUAL,
     )
+
+    def populate(this, refresh=False):
+
+        if this.type == "manual":
+            raise ValueError("You cannot call populate() on a manual playlist.")
+
+        # If refresh is true, then populate the playlist with all new songs
+        if refresh:
+            PlaylistItem.objects.filter(playlist=this).delete()
+
+        if this.type == "tag":
+            song_list = Song.objects.filter(tags__name=this.parameters["tag"])
+        elif this.type == "time":
+            song_list = Song.objects.annotate(
+                year_effective=Coalesce("original_year", "year")). \
+                filter(
+                    year_effective__gte=this.parameters["start_year"],
+                    year_effective__lte=this.parameters["end_year"],
+                )
+        else:
+            raise ValueError(f"Playlist type not supported: {this.type}")
+
+        if "exclude_albums" in this.parameters:
+            song_list = song_list.exclude(album__isnull=False)
+
+        if "exclude_recent" in this.parameters:
+
+            latest = Listen.objects.filter(song=OuterRef("pk")).order_by("-created")
+
+            song_list = song_list.annotate(
+                latest_result=Subquery(latest.values("created")[:1])
+            ).filter(
+                Q(latest_result__isnull=True)
+                | Q(latest_result__lte=timezone.now() - timedelta(days=int(this.parameters["exclude_recent"])))
+            )
+
+        if this.type == "recent":
+            song_list = Song.objects.all().order_by("-created")
+        else:
+            song_list = song_list.order_by("?")
+
+        if this.size:
+            song_list = song_list[:this.size]
+
+        # This seems like a good candidate for bulk_create(), but that will
+        #  result in all new items having sort_order=1
+        for song in song_list:
+            playlistitem = PlaylistItem(playlist=this, song=song)
+            playlistitem.save()
 
 
 class PlaylistItem(TimeStampedModel, SortOrderMixin):

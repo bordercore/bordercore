@@ -52,7 +52,7 @@
 
         {% if playlist.parameters.exclude_recent %}
             <div>
-                not listened to within the past <strong class="text-primary">{{ playlist.parameters.exclude_recent }}</strong> days
+                not listened to within the past <strong class="text-primary">{{ playlist.parameters.exclude_recent }}</strong> day{{ playlist.parameters.exclude_recent|pluralize }}
             </div>
         {% endif %}
 
@@ -76,6 +76,7 @@
                         <dropdown-menu v-model="showDropdownPlaylist" :right="true" transition="translate-fade-down" class="bookmark-dropdown text-center mr-2 mt-1">
                             <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                             <div slot="dropdown" class="position: absolute">
+                                <a class="dropdown-item" href="#" @click="onClickUpdatePlaylist">Update</a>
                                 <a class="dropdown-item" href="#" @click="onClickDelete">Delete</a>
                             </div>
                         </dropdown-menu>
@@ -118,7 +119,7 @@
                                 <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                 <div slot="dropdown">
                                     <a class="dropdown-item" href="#" @click="onClickRemove(data.value)">Remove from playlist</a>
-                                    <a class="dropdown-item" href="#" @click="onClickUpdate(data.item.song_uuid)">Update</a>
+                                    <a class="dropdown-item" href="#" @click="onClickUpdateSong(data.item.song_uuid)">Update</a>
                                 </div>
                             </dropdown-menu>
                         </div>
@@ -157,6 +158,15 @@
             </div>
         </form>
 
+        <form action="{% url 'music:playlist_update' playlist.uuid %}" method="post">
+            {% csrf_token %}
+            <create-update-playlist
+                tag-search-url="{% url 'music:search_tags' %}"
+                action="Update"
+                :playlist="JSON.parse('{{ playlist_json }}')"
+            />
+        </form>
+
     </div>
 
 {% endblock %}
@@ -164,6 +174,8 @@
 {% block javascript %}
 
     {{ block.super }}
+
+    {{ tags|json_script:"initial-tags"|default:"" }}
 
     <script type="text/javascript">
 
@@ -229,6 +241,9 @@
 
         const table = new Vue({
             el: "#vue-app",
+            components: {
+                CreateUpdatePlaylist
+            },
             data() {
                 return {
                     songList: [],
@@ -324,7 +339,7 @@
                          });
 
                 },
-                onClickUpdate(uuid) {
+                onClickUpdateSong(uuid) {
                     window.location="{% url 'music:update' '00000000-0000-0000-0000-000000000000' %}?return_url={{ request.get_full_path }}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
                  },
                 playCurrentlySelectedSong() {
@@ -337,6 +352,10 @@
                 },
                 onClickDelete() {
                     $("#modalDelete").modal("show")
+                },
+                onClickUpdatePlaylist() {
+                    $("#modalCreateUpdate").modal("show")
+                    window.setTimeout(() => { document.getElementById("id_name").focus() }, 500);
                 },
             },
             computed: {

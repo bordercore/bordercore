@@ -77,8 +77,8 @@ def test_books_with_tags(es):
     assert found['total']['value'] == 0, f"{found}['total']['value'] books found without tags, uuid={found['hits'][0]['_id']}"
 
 
-def test_documents_with_dates(es):
-    "Assert that all documents have a date"
+def test_documents_and_notes_with_dates(es):
+    "Assert that all documents and notes have a date"
     search_object = {
         "query": {
             "bool": {
@@ -90,13 +90,29 @@ def test_documents_with_dates(es):
                                     "exists": {
                                         "field": "date_unixtime"
                                     }
+                                },
+                                {
+                                    "exists": {
+                                        "field": "date"
+                                    }
                                 }
                             ]
                         }
                     },
                     {
-                        "term": {
-                            "doctype": "document"
+                        "bool": {
+                            "should": [
+                                {
+                                    "term": {
+                                        "doctype": "document"
+                                    }
+                                },
+                                {
+                                    "term": {
+                                        "doctype": "note"
+                                    }
+                                }
+                            ]
                         }
                     }
                 ]

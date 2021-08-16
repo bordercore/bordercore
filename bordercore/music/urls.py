@@ -72,8 +72,13 @@ urlpatterns = [
     ),
     path(
         route="playlist_create",
-        view=views.CreatePlaylist.as_view(),
+        view=views.CreatePlaylistView.as_view(),
         name="playlist_create"
+    ),
+    path(
+        route="playlist_update/<uuid:playlist_uuid>/",
+        view=views.UpdatePlaylistView.as_view(),
+        name="playlist_update"
     ),
     path(
         route="get_playlist/<uuid:uuid>",
