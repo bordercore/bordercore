@@ -62,9 +62,10 @@
 
         <div class="col-lg-9">
             <div class="right-column">
-                <div class="card-body">
+                <div class="card-body" v-cloak>
 
-                    <h3 class="drill-text table-borders markdown" v-html="getQuestion()" />
+                    <h3 class="drill-text table-borders markdown" v-html="getQuestion()">
+                    </h3>
                     {% if question.tags.all %}
                         Tags:
                         {% for tag in question.tags.all %}
@@ -73,7 +74,7 @@
                         <br /><br />
                     {% endif %}
                     <hr class="divider" />
-                    <h3 class="drill-text table-borders markdown" v-html="getAnswer()" />
+                    <h3 class="drill-text table-borders markdown" v-html="getAnswer()">
                     </h3>
 
                     <a href="{% url 'drill:record_response' question.uuid 'good' %}" class="btn btn-primary" role="button">Good</a>
