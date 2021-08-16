@@ -79,7 +79,7 @@ class Album(TimeStampedModel):
 
 
 @receiver(post_save, sender=Album)
-def post_save_wrapper(sender, instance, **kwargs):
+def post_save_wrapper_album(sender, instance, **kwargs):
     """
     This should be called anytime an album is created or updated.
     """
@@ -286,7 +286,7 @@ class Song(TimeStampedModel):
 
 
 @receiver(post_save, sender=Song)
-def post_save_wrapper(sender, instance, **kwargs):
+def post_save_wrapper_song(sender, instance, **kwargs):
     """
     This should be called anytime a song is created or updated.
     """
