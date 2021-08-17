@@ -434,16 +434,16 @@ def collection_mutate(request):
     if mutation == "add":
 
         if SortOrderCollectionBlob.objects.filter(collection=collection, blob__uuid=blob_uuid).exists():
-            message = "Blob already in collection <strong>{collection.name}</strong>"
+            message = "Blob already in collection '{collection.name}'"
         else:
             blob = Blob.objects.get(uuid=blob_uuid)
             blob.add_to_collection(request.user, collection.uuid)
-            message = f"Added to collection <strong>{collection.name}</strong>"
+            message = f"Added to collection '{collection.name}'"
 
     elif mutation == "delete":
         blob = Blob.objects.get(uuid=blob_uuid)
         blob.delete_from_collection(request.user, collection.uuid)
-        message = f"Removed from collection <strong>{collection.name}</strong>"
+        message = f"Removed from collection '{collection.name}'"
 
     return JsonResponse({"status": "OK", "message": message}, safe=False)
 

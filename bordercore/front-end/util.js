@@ -10,7 +10,8 @@ export function doGet(scope, url, callback, errorMsg) {
     axios.get(url)
         .then((response) => {
             if (response.data.status && response.data.status != "OK") {
-                scope.$bvToast.toast(errorMsg, {
+                const vNodesMsg = getErrorMessage(scope, errorMsg);
+                scope.$bvToast.toast(vNodesMsg, {
                     title: "Error!",
                     autoHideDelay: 5000,
                     variant: "danger",
@@ -86,6 +87,27 @@ export function doPost(scope, url, params, callback, successMsg, errorMsg) {
             console.error(error);
         });
 }
+
+/**
+ * Return a Vue Vnode containing a formatted error message
+ * @param {string} vue Vue component
+ * @param {string} errorMsg the error message to display
+ * @return {VNodes} the new Vnode
+ */
+function getErrorMessage(vue, errorMsg) {
+    const h = vue.$createElement;
+    const vNodesMsg = [
+        h("font-awesome-icon", {
+            props: {
+                icon: "exclamation-triangle",
+            },
+        }),
+        h("span", {"class": ["ml-2"]}, [errorMsg]),
+    ];
+
+    return vNodesMsg;
+}
+
 
 /**
  * Return a formatted date.
