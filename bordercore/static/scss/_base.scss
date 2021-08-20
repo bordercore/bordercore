@@ -1252,6 +1252,13 @@ span {
   display: inline-block;
 }
 
+.icon-hover {
+  &:hover {
+    color: $primary;
+    transform: scale(1.1);
+  }
+}
+
 /* Sidebar */
 
 .sidebar-icon {
