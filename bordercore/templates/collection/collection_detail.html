@@ -76,7 +76,7 @@
                                 <div>
                                     <ul class="list-group list-group-horizontal text-center list-unstyled collection-sortable">
                                         <draggable v-model="blob_list" @change="onChange" ghost-class="collection_ghost_class" animation="500" forceFallback="true">
-                                            <li v-for="blob in blob_list" :key="blob.id" class="hoverable float-left p-3">
+                                            <li v-for="blob in blob_list" :key="blob.id" class="hoverable cursor-pointer float-left p-3" @click="onClick(blob.url)">
                                                 <a :href="[[ blob.url ]]"><img :src="[[ blob.cover_url ]]" /></a>
 
                                                 <div class="collection-item">[[ blob.name ]]</div>
@@ -244,7 +244,10 @@
                         ""
                     );
 
-                }
+                },
+                onClick(url) {
+                    window.location=url;
+                },
             },
             mounted() {
                 document.getElementById("id_name").value = "{{ collection.name }}";
