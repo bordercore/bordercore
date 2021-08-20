@@ -180,7 +180,7 @@ class Blob(TimeStampedModel):
             # If the date has a time, remove it. The vuejs-datepicker widget will reject it.
             return datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S").strftime("%Y-%m-%dT00:00")
         else:
-            return f"{date}T00:00"
+            return f"{date}"
 
     @staticmethod
     def get_s3_key_from_uuid(uuid, file):
@@ -478,7 +478,6 @@ class Blob(TimeStampedModel):
         new_blob.index_blob()
 
         return new_blob
-
 
     def index_blob(self, file_changed=True):
         """
