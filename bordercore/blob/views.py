@@ -204,10 +204,8 @@ class BlobDetailView(DetailView):
         try:
             context["elasticsearch_info"] = self.object.get_elasticsearch_info()
         except IndexError:
-            if int(datetime.datetime.now().strftime("%s")) - int(self.object.created.strftime("%s")) < 60:
-                # Give Elasticsearch up to a minute to index the blob
-                messages.add_message(self.request, messages.INFO, "New blob not yet indexed in Elasticsearch")
-            else:
+            # Give Elasticsearch up to a minute to index the blob
+            if int(datetime.datetime.now().strftime("%s")) - int(self.object.created.strftime("%s")) > 60:
                 messages.add_message(self.request, messages.ERROR, "Blob not found in Elasticsearch")
 
         context["caption"] = self.object.get_name(remove_edition_string=True)
