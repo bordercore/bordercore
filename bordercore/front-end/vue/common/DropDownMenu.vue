@@ -37,7 +37,7 @@
         data() {
             return {
                 showMenu: false,
-                hide: this.initialHide
+                hide: this.initialHide,
             };
         },
     };

@@ -176,14 +176,14 @@
 
                             {% elif field.label == 'Date' %}
 
-                                <date-input inline-template>
+                                <date-input v-if="getDateFormat()==='standard'" inline-template>
                                     <div class="col-lg-2 input-group">
                                         <div id="dateapp">
                                             <vuejs-datepicker
                                                 :bootstrap-styling="true"
                                                 :format="customFormatter"
                                                 :typeable="true"
-                                                :value="date"
+                                                :value="$store.state.date"
                                                 name="date"
                                                 id="id_date"
                                                 calendar-class="calendar"
@@ -197,6 +197,20 @@
                                         </div>
                                     </div>
                                 </date-input>
+                                <div class="col-lg-2 input-group" v-else style="width: 100px;">
+                                    <input v-model="$store.state.date" class="form-control" type="number" name="date" size="4" placeholder="Year" autocomplete="off">
+                                </div>
+
+                                <div class="d-flex align-items-center">
+                                    <drop-down-menu
+                                        ref="dropDownMenu"
+                                        :links="dateFormatMenuItems"
+                                        :initial-hide="false"
+                                        class="calendar-date-format-menu"
+                                    >
+                                    </drop-down-menu>
+                                </div>
+
 
                             {% elif field.label == 'Content' %}
 
@@ -348,6 +362,14 @@
 
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
+        const store = new Vuex.Store({
+            state: {
+                date: "{{ form.date.value }}"
+            },
+            getters: {},
+            mutations: {},
+        });
+
         const AddToCollectionDropdown = {
             data() {
                 return {
@@ -448,11 +470,6 @@
         }
 
         const DateInput = {
-            data() {
-                return {
-                    date: "{{ form.date.value }}"
-                }
-            },
             components: {
                 Datepicker
             },
@@ -604,12 +621,72 @@
 
         new Vue({
             el: "#vue-app-right",
+            store,
             components: {
                 FileUpload,
                 DateInput,
+                DropDownMenu,
                 ContentTextArea,
                 MetadataWrapper,
                 TagsInput
+            },
+            data() {
+                return {
+                    dateFormat: "standard",
+                    dateFormatMenuItems: [
+                        {
+                            id: uuidv4(),
+                            title: "Date Format: Standard",
+                            format: "standard",
+                            url: "#",
+                            clickHandler: this.onClickDateFormatStandard,
+                        },
+                        {
+                            id: uuidv4(),
+                            title: "Date Format: Year",
+                            format: "year",
+                            url: "#",
+                            clickHandler: this.onClickDateFormatYear,
+                        },
+                    ]
+                }
+            },
+            methods: {
+                getDateFormat() {
+                    return this.dateFormat;
+                },
+                onClickDateFormatStandard() {
+                    this.dateFormat = "standard";
+                    this.$store.state.date = this.$store.state.date + "-01-01T00:00";
+                    this.addCheckMarkToDateFormatMenu();
+                },
+                onClickDateFormatYear() {
+                    this.dateFormat = "year";
+                    const date = new Date(this.$store.state.date);
+                    this.$store.state.date = date.getFullYear();
+                    this.addCheckMarkToDateFormatMenu();
+                },
+                addCheckMarkToDateFormatMenu() {
+                    // Indicate the current date format with a checkmark. Remove
+                    //  it if it's set for any other item.
+                    const self = this;
+                    this.dateFormatMenuItems.forEach(function(item) {
+                        if (item.format === self.dateFormat) {
+                            item.icon = "check";
+                        } else {
+                            item.icon = undefined;
+                        }
+                    })
+                },
+
+            },
+            mounted() {
+                const found = this.$store.state.date.match(/^(\d\d\d\d)T00:00$/);
+                if (found) {
+                    this.$store.state.date = found[1];
+                    this.dateFormat = "year";
+                }
+                this.addCheckMarkToDateFormatMenu();
             }
         });
 
