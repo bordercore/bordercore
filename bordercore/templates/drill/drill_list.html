@@ -98,7 +98,7 @@
             <div class="mb-2 ml-3">
                 <simple-suggest
                     ref="simpleSuggest"
-                    search-url="{% url 'drill:search_tags' %}?drill_only=true&query="
+                    search-url="{% url 'tag:search' %}?doctype=drill&query="
                     place-holder="Tag Search"
                 >
                 </simple-suggest>
@@ -237,7 +237,7 @@
                                 <div class="form-row mx-1 w-100">
                                     <simple-suggest
                                         ref="simpleSuggest"
-                                        search-url="{% url 'drill:search_tags' %}?query="
+                                        search-url="{% url 'tag:search' %}?doctype=drill&query="
                                         place-holder="Add Tag"
                                         wrapper-class="w-100"
                                         :debounce="500"
@@ -305,7 +305,7 @@
                         <input class="form-check-input" type="radio" name="flexRadioDefault" value="tag-needing-review" v-model="picked">
                         <label class="form-check-label d-flex" for="flexRadioDefault1">
                             <div class="mr-3">Tag</div>
-                            <tags-input search-url="{% url 'tag:search' %}?model_filter=question&query=" id="tag-name" place-holder="Tag name"></tags-input>
+                            <tags-input search-url="{% url 'tag:search' %}?doctype=drill&query=" id="tag-name" place-holder="Tag name"></tags-input>
                         </label>
                     </div>
 

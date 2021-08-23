@@ -96,11 +96,6 @@ urlpatterns = [
         name="sort_playlist"
     ),
     path(
-        route="search_tags",
-        view=views.search_tags,
-        name="search_tags"
-    ),
-    path(
         route="search_playlists/",
         view=views.search_playlists,
         name="search_playlists"

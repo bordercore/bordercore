@@ -46,11 +46,6 @@ urlpatterns = [
         name="search"
     ),
     path(
-        route="search_tags/",
-        view=views.search_tags,
-        name="search_tags"
-    ),
-    path(
         route="answer/<uuid:uuid>/",
         view=views.show_answer,
         name="answer"

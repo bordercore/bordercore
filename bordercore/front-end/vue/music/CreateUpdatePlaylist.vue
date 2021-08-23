@@ -54,7 +54,7 @@
                                 </div>
                             </div>
                             <div class="col-lg-8">
-                                <tags-input id="smart-list-tag" ref="smartListTag" :search-url="tagSearchUrl + '?query='" name="tag" place-holder="Tag name" :disabled="!playlistTypeIsTag" :max-tags="1" />
+                                <tags-input id="smart-list-tag" ref="smartListTag" :search-url="tagSearchUrl + '&query='" name="tag" place-holder="Tag name" :disabled="!playlistTypeIsTag" :max-tags="1" />
                             </div>
                         </div>
 

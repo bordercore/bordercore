@@ -301,7 +301,7 @@ def show_answer(request, uuid):
                       "title": "Drill :: Show Answer",
                       "study_session_progress": Question.get_study_session_progress(request.session)
                   }
-    )
+                  )
 
 
 @login_required
@@ -311,88 +311,6 @@ def record_response(request, uuid, response):
     question.record_response(response)
 
     return get_next_question(request)
-
-
-@login_required
-def search_tags(request):
-
-    es = Elasticsearch(
-        [settings.ELASTICSEARCH_ENDPOINT],
-        verify_certs=False
-    )
-
-    search_term = request.GET["query"].lower()
-
-    search_terms = re.split(r"\s+", unquote(search_term))
-
-    search_object = {
-        "query": {
-            "bool": {
-                "must": [
-                    {
-                        "term": {
-                            "user_id": request.user.id
-                        }
-                    },
-                ]
-            }
-        },
-        "aggs": {
-            "Distinct Tags": {
-                "terms": {
-                    "field": "tags.keyword",
-                    "size": 1000
-                }
-            }
-        },
-        "from": 0, "size": 0,
-        "_source": ["tags"]
-    }
-
-    # Separate query into terms based on whitespace and
-    #  and treat it like an "AND" boolean search
-    for one_term in search_terms:
-        search_object["query"]["bool"]["must"].append(
-            {
-                "bool": {
-                    "should": [
-                        {
-                            "wildcard": {
-                                "tags": {
-                                    "value": f"*{one_term}*",
-                                }
-                            }
-                        }
-                    ]
-                }
-            }
-        )
-
-    # If "drill_only" is passed in, then limit our search
-    #  to tags attached to questions, rather than all tags
-    if "drill_only" in request.GET:
-        search_object["query"]["bool"]["must"].append(
-            {
-                "term": {
-                    "doctype": "drill"
-                }
-            },
-        )
-
-    results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
-
-    matches = []
-    for tag_result in results["aggregations"]["Distinct Tags"]["buckets"]:
-        if tag_result["key"].lower().find(search_term.lower()) != -1:
-            matches.append({
-                "value": tag_result["key"],
-                "id": tag_result["key"],
-                "info": Question.get_tag_progress(request.user, tag_result["key"]),
-                "link": reverse("drill:start_study_session_tag", kwargs={"tag": tag_result["key"]})
-            }
-            )
-
-    return JsonResponse(matches, safe=False)
 
 
 @login_required

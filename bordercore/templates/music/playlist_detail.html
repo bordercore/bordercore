@@ -161,7 +161,7 @@
         <form action="{% url 'music:playlist_update' playlist.uuid %}" method="post">
             {% csrf_token %}
             <create-update-playlist
-                tag-search-url="{% url 'music:search_tags' %}"
+                tag-search-url="{% url 'tag:search' %}?doctype=song"
                 action="Update"
                 :playlist="JSON.parse('{{ playlist_json }}')"
             />

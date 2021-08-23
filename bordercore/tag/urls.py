@@ -6,8 +6,8 @@ app_name = "tag"
 
 urlpatterns = [
     path(
-        route="search/",
-        view=views.tag_search,
+        route="search",
+        view=views.search,
         name="search"
     ),
     path(

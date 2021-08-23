@@ -150,7 +150,7 @@
         <form action="{% url 'music:playlist_create' %}" method="post">
             {% csrf_token %}
             <create-update-playlist
-                tag-search-url="{% url 'music:search_tags' %}"
+                tag-search-url="{% url 'tag:search' %}?doctype=song"
             />
         </form>
 
