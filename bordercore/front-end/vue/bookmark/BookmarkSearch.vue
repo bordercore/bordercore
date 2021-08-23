@@ -12,7 +12,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="d-flex flex-column">
-                        <form style="width: 95%" @submit.prevent>
+                        <form @submit.prevent>
                             <div class="form-group row">
                                 <label class="col-form-label col-lg-1">URL</label>
                                 <div class="col-lg-10 d-flex">
