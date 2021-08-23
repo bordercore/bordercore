@@ -8,7 +8,22 @@ import pytest
 from django import urls
 from django.db.models import signals
 
+from music.models import Song
+
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
+
+
+@pytest.fixture
+def monkeypatch_song(monkeypatch):
+    """
+    Prevent the song object from interacting with Elasticsearch by
+    patching out various methods.
+    """
+
+    def mock(*args, **kwargs):
+        pass
+
+    monkeypatch.setattr(Song, "delete", mock)
 
 
 def test_music_list(auto_login_user, song):
@@ -114,7 +129,7 @@ def test_music_create(s3_resource, s3_bucket, auto_login_user, song, song_source
 
 
 @factory.django.mute_signals(signals.pre_delete)
-def test_music_delete(auto_login_user, song):
+def test_music_delete(monkeypatch_song, auto_login_user, song):
 
     _, client = auto_login_user()
 
