@@ -255,7 +255,7 @@
                     evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
                 },
                 onClickUpdate(uuid) {
-                    window.location="{% url 'music:update' '00000000-0000-0000-0000-000000000000' %}?return_url={{ request.get_full_path }}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
+                    window.location="{% url 'music:update' '00000000-0000-0000-0000-000000000000' %}?return_url={{ request.get_full_path|safe }}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
                 },
                 onClickAddToPlaylist(uuid) {
                     this.$refs.addToPlaylist.openModal(uuid);
