@@ -1,11 +1,8 @@
 import signal
 import sys
 
-import elasticsearch.exceptions
 import urllib3
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import bulk
-from elasticsearch_dsl.connections import connections
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -14,7 +11,6 @@ from django.db.transaction import atomic
 from blob.elasticsearch_indexer import index_blob
 
 from blob.models import Blob  # isort:skip
-
 
 urllib3.disable_warnings()
 
@@ -66,98 +62,84 @@ class Command(BaseCommand):
             action="store_true"
         )
 
+    def get_missing_blob_ids(self, expected, found):
+
+        found_ids = [x["_id"] for x in found["hits"]["hits"]]
+        return [x for x in expected if str(x.uuid) not in found_ids]
+
+    def get_blobs_from_es(self):
+
+        search_object = {
+            "query": {
+                "bool": {
+                    "should": [
+                        {
+                            "term": {
+                                "doctype": "blob"
+                            }
+                        },
+                        {
+                            "term": {
+                                "doctype": "document"
+                            }
+                        },
+                        {
+                            "term": {
+                                "doctype": "note"
+                            }
+                        },
+                        {
+                            "term": {
+                                "doctype": "book"
+                            }
+                        },
+                    ]
+                }
+            },
+            "size": 10000,
+            "_source": ["uuid"]
+        }
+
+        found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+
+        blobs = {}
+        for match in found["hits"]["hits"]:
+            blobs[match["_source"]["uuid"]] = True
+
+        return blobs
+
+    def find_missing_blobs(self, create_connection, limit):
+
+        self.stdout.write("Getting blob list from Elasticsearch...")
+
+        blobs_in_es = self.get_blobs_from_es()
+
+        self.stdout.write("Getting blob list from the database...")
+
+        blobs_in_db = Blob.objects.filter(is_indexed=True) \
+                                  .only("uuid", "name") \
+                                  .values()
+
+        blobs_indexed = 0
+
+        self.stdout.write("Getting missing blob list...")
+
+        missing_blobs = [x for x in blobs_in_db if str(x["uuid"]) not in blobs_in_es]
+
+        self.stdout.write(f"Found {len(missing_blobs)} missing blobs...")
+
+        for blob in missing_blobs:
+            self.stdout.write(f"{blob['uuid']} {blob['name']}")
+            index_blob(uuid=blob["uuid"], create_connection=create_connection)
+            blobs_indexed = blobs_indexed + 1
+            if blobs_indexed == limit:
+                return
+
     @atomic
     def handle(self, *args, uuid, force, create_connection, limit, verbose, **kwargs):
 
-        last_blob = None
-
         if uuid:
-            # A single blob
-            blobs = Blob.objects.filter(uuid=uuid)
+            blob = Blob.objects.get(uuid=uuid)
+            index_blob(uuid=blob.uuid, create_connection=create_connection)
         else:
-            # All blobs
-            blobs = Blob.objects.filter(is_indexed=True).order_by("created")
-            last_blob = self.get_last_blob()
-
-            # Use this to only include "ingestible" file types
-            # blobs = Blob.objects.exclude(is_indexed=False).filter(file__iregex=r".(azw3|chm|epub|html|pdf|txt)$").order_by("created")
-
-        blob = None
-
-        go = True if uuid else False
-
-        blob_count = 0
-
-        self.blob_batch = []
-
-        for blob_info in blobs:
-
-            try:
-
-                if verbose:
-                    self.stdout.write(f"{blob_count} {blob_info.uuid}")
-
-                if go and not force and self.blob_exists_in_es(blob_info.uuid):
-                    if verbose:
-                        self.stdout.write(f"{blob_info.uuid} Blob already indexed. Not re-indexing")
-                    continue
-
-                if last_blob != "" and not go:
-                    if str(blob_info.uuid) == last_blob:
-                        go = True
-                    continue
-                else:
-                    blob_count = blob_count + 1
-                    if blob_count > limit:
-                        break
-                    index_blob(uuid=blob_info.uuid, create_connection=create_connection)
-
-                self.stdout.write(f"{blob_info.uuid} {blob_info.file} {blob_info.name}")
-
-                self.write_checkpoint(blob_info.uuid)
-
-            except elasticsearch.exceptions.TransportError as e:
-                self.stdout.write(f"{blob_info.uuid} Elasticsearch Error: {e}")
-                import traceback
-                self.stdout.write(traceback.format_exc())
-                sys.exit(1)
-            except Exception as e:
-                self.stdout.write(f"Type of error: {type(e)}")
-                self.stdout.write(f"{blob_info.uuid} Exception: {e}")
-                import traceback
-                self.stdout.write(traceback.format_exc())
-                sys.exit(1)
-
-        if blob:
-            self.write_checkpoint(str(blob["uuid"]))
-
-    def write_checkpoint(self, uuid):
-        with open(self.LAST_BLOB_FILE, "w") as file:
-            file.write(str(uuid))
-
-    def get_last_blob(self):
-
-        try:
-            with open(self.LAST_BLOB_FILE, "r") as file:
-                last_blob = file.read().strip()
-            self.stdout.write(f"Reading checkpoint from {self.LAST_BLOB_FILE} to resume where we left off...")
-        except FileNotFoundError:
-            return ""
-        return last_blob
-
-    def blob_exists_in_es(self, uuid):
-
-        search_object = {"query": {"term": {"uuid": uuid}}, "_source": ["uuid"]}
-        results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
-        return int(results["hits"]["total"]["value"])
-
-    def add_to_batch(self, blob, ingestible=False):
-
-        self.blob_batch.append(blob)
-        if len(self.blob_batch) == self.BATCH_SIZE:
-            if ingestible:
-                # bulk(connections.get_connection(), (d.to_dict(True) for d in blob_batch), max_chunk_bytes=1268032, chunk_size=1, pipeline="attachment")
-                bulk(connections.get_connection(), (d.to_dict(True) for d in self.blob_batch), max_chunk_bytes=1268032, pipeline="attachment")
-            else:
-                bulk(connections.get_connection(), (d.to_dict(True) for d in self.blob_batch))
-            self.blob_batch = []
+            self.find_missing_blobs(create_connection, limit)
