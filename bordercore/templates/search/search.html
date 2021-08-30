@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
-{% load dict_get %}
+{% load domain %}
+
+{% load favicon %}
 
 {% block title %} Search {% endblock %}
 
@@ -154,14 +156,21 @@
 
                                     {% if match.source.doctype == 'drill' %}
 
-                                        <h4 class="{% if match.source.importance == 10 %} search-result-important{% endif %}">
-                                            <font-awesome-icon icon="graduation-cap"></font-awesome-icon>
-                                            Drill: <a href="{% url 'drill:detail' match.source.uuid %}">{{ match.source.question }}</a>
-                                        </h4>
+                                        <div class="mr-2 mt-1">
+                                            <font-awesome-icon icon="graduation-cap" class="text-light" />
+                                        </div>
 
-                                        {% for tag in match.source.tags %}
-                                            <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
-                                        {% endfor %}
+                                        <div class="d-flex flex-column">
+                                            <h4 class="{% if match.source.importance == 10 %} search-result-important{% endif %}">
+                                            Drill: <a href="{% url 'drill:detail' match.source.uuid %}">{{ match.source.question }}</a>
+                                            </h4>
+
+                                            <div>
+                                            {% for tag in match.source.tags %}
+                                                <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
+                                            {% endfor %}
+                                            </div>
+                                        </div>
 
                                     {% elif match.source.doctype == 'todo' %}
 
@@ -183,10 +192,16 @@
                                             <h4>
                                                 <a href="{{ match.source.url }}">{{ match.source.name }}</a>
                                             </h4>
+                                            <div class="d-flex mb-2 align-items-center text-primary">
+                                                {{ match.source.url|favicon|safe }}
+                                                <div class="ml-2">
+                                                    {{ match.source.url|domain }}
+                                                </div>
+                                            </div>
                                             <div>
-                                            {% for tag in match.source.tags %}
-                                                <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
-                                            {% endfor %}
+                                                {% for tag in match.source.tags %}
+                                                    <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
+                                                {% endfor %}
                                             </div>
                                         </div>
 
@@ -221,24 +236,29 @@
 
                                             <h5 v-pre>{{ match.highlight.contents.0|safe }}</h5>
                                             <div>
-                                            {% for tag in match.source.tags %}
-                                                <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
-                                            {% endfor %}
+                                                {% for tag in match.source.tags %}
+                                                    <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
+                                                {% endfor %}
                                             </div>
                                         </div>
 
                                     {% elif match.source.doctype == 'song' %}
 
-                                        <h4>
-                                            <font-awesome-icon icon="music"></font-awesome-icon>
-                                            <a href="{% url 'music:artist_detail' match.source.artist %}">{{ match.source.title|default:"Title" }}</a>
-                                        </h4>
+                                        <div class="mr-2 mt-1">
+                                            <font-awesome-icon icon="music" class="text-light" />
+                                        </div>
+                                        <div class="d-flex flex-column">
+                                            <h4>
+                                                <a href="{% url 'music:artist_detail' match.source.artist %}">{{ match.source.title|default:"Title" }}</a>
+                                            </h4>
 
-                                        <h5>{{ match.source.note|safe }}</h5>
-
-                                        {% for tag in match.source.tags %}
-                                            <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
-                                        {% endfor %}
+                                            <h5>{{ match.source.note|safe }}</h5>
+                                            <div>
+                                                {% for tag in match.source.tags %}
+                                                    <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
 
                                     {% else %}
 
