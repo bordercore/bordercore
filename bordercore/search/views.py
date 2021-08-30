@@ -116,6 +116,7 @@ class SearchListView(ListView):
                     "contents": {},
                 },
                 "number_of_fragments": 1,
+                "fragment_size": 200,
                 "order": "score"
             },
             "sort": {sort_field: {"order": "desc"}},
