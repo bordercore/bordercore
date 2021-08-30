@@ -11,7 +11,24 @@
                 "format":"yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM||yyyy||epoch_second"
             },
             "name": { "type":"text" },
-            "contents": { "type":"text" },
+            "contents": {
+              "type":"text",
+              "index_options" : "offsets"
+            },
+            "attachment": {
+              "properties": {
+                "content": {
+                  "type": "text",
+                  "index_options": "offsets",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                }
+              }
+            },
             "doctype": { "type":"keyword" },
             "content_type": { "type":"keyword" },
             "tags": {
