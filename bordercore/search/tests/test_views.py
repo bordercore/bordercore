@@ -22,33 +22,6 @@ django.setup()
 
 
 @patch("search.views.Elasticsearch")
-def test_search(mock_elasticsearch, auto_login_user):
-
-    _, client = auto_login_user()
-
-    filepath = Path(__file__).parent / "resources/search_results.json"
-
-    with open(filepath) as f:
-        data = json.load(f)
-
-    instance = mock_elasticsearch.return_value
-    instance.search.return_value = data
-
-    url = urls.reverse("search:search")
-    resp = client.get(f"{url}?search=carl+sagan")
-
-    assert resp.status_code == 200
-
-    # soup = BeautifulSoup(resp.content, "html.parser")
-
-    # matches = soup.select("h4")
-    # assert len(matches) == 40
-
-    # match = soup.select("h4 a")[0].text
-    # assert data["hits"]["hits"][0]["source"]["name"] == match
-
-
-@patch("search.views.Elasticsearch")
 def test_search_notes(mock_elasticsearch, auto_login_user):
 
     _, client = auto_login_user()

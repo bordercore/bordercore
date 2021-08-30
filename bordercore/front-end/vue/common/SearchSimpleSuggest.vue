@@ -8,7 +8,7 @@
             </span>
             <div class="form-row">
                 <div id="top-search-container" class="col-auto has-search">
-                    <font-awesome-icon icon="search" class="form-control-feedback text-dark" />
+                    <font-awesome-icon icon="search" class="text-dark" />
 
                     <vue-simple-suggest id="top-simple-suggest"
                                         ref="suggestComponent"

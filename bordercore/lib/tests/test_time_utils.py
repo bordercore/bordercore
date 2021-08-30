@@ -62,7 +62,7 @@ def test_get_date_from_pattern():
     assert get_date_from_pattern(date_string) == "January 01, 1999"
 
     date_string = {"gte": "1999-01-01 08:00:00"}
-    assert get_date_from_pattern(date_string) == "January 01, 1999, 08:00 a.m."
+    assert get_date_from_pattern(date_string) == "January 01, 1999"
 
     date_string = {"gte": "[1999-01 TO 1999-02]"}
     assert get_date_from_pattern(date_string) == "1999-01 to 1999-02"

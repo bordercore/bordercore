@@ -110,6 +110,14 @@ class SearchListView(ListView):
                     }
                 }
             },
+            "highlight": {
+                "fields": {
+                    "attachment.content": {},
+                    "contents": {},
+                },
+                "number_of_fragments": 1,
+                "order": "score"
+            },
             "sort": {sort_field: {"order": "desc"}},
             "from": 0, "size": hit_count,
             "_source": ["artist",
@@ -155,14 +163,17 @@ class SearchListView(ListView):
         try:
             results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
         except RequestError as e:
-            messages.add_message(self.request, messages.ERROR, f"Request Error: {e.status_code} {e.error}")
+            messages.add_message(self.request, messages.ERROR, f"Request Error: {e.status_code} {e.info['error']}")
             return []
 
-        # Django templates don't allow variables with underscores, so
-        #  change the "_source" key to "source"
+        # Django templates don't support variables with underscores or dots, so
+        #  we need to transform a few fields
         for index, _ in enumerate(results["hits"]["hits"]):
             match = results["hits"]["hits"][index]
             match["source"] = match.pop("_source")
+            match["score"] = match.pop("_score")
+            if "highlight" in match and "attachment.content" in match["highlight"]:
+                match["highlight"]["attachment_content"] = match["highlight"].pop("attachment.content")
 
         return results
 
@@ -183,6 +194,12 @@ class SearchListView(ListView):
                 match["source"]["creators"] = get_creators(match["source"])
                 match["source"]["date"] = get_date_from_pattern(match["source"].get("date", None))
                 match["source"]["last_modified"] = get_relative_date(match["source"]["last_modified"])
+                if match["source"]["doctype"] == "book":
+                    match["source"]["cover_url"] = Blob.get_cover_info_static(
+                        self.request.user,
+                        match["source"]["sha1sum"],
+                        size="small"
+                    )["url"]
 
             context["aggregations"] = self.get_aggregations(context, "Doctype Filter")
 

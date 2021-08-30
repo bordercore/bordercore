@@ -559,7 +559,7 @@ pre {
   }
 }
 
-#top-search-form .has-search .form-control-feedback {
+#top-search-form .has-search svg {
   left: 1rem;
 }
 
@@ -610,30 +610,68 @@ pre {
 /* The "has-search" rules provide space for a Font Awesome
   search icon inside a search input box */
 
-/* Specifies the distance between the search icon and where
+.has-search {
+  /* Specifies the distance between the search icon and where
    you start typing your search query */
-.has-search .form-control {
-  padding-left: 2rem;
+  .form-control {
+    padding-left: 2rem;
+  }
+
+  /* Absolutely position a search icon inside a search box.
+  For the left position, use a page-specific spacer below. */
+  svg {
+    position: absolute;
+    z-index: 2;
+    display: block;
+    top: 0.7rem;
+    line-height: 2.375rem;
+    text-align: center;
+    pointer-events: none;
+    color: #aaa;
+  }
 }
 
-.has-search .form-control-feedback {
-  position: absolute;
-  z-index: 2;
-  display: block;
-  top: 0.7rem;
-  left: 1.5rem;
-  line-height: 2.375rem;
-  text-align: center;
-  pointer-events: none;
-  color: #aaa;
+.main-search-spacer {
+  left: 0.5rem;
+}
+
+.bookmark-search-spacer {
+  left: 1rem;
+}
+
+/* Search */
+
+.search-input {
+  width: 25rem;
 }
 
 .search-result {
-  padding-left: 1.5rem;
+  border-bottom: 0.1rem solid $blue;
+  margin: 0.5rem 0 0.5rem 1.5rem;
 
-  a {
-    padding-left: 0.5rem;
+  h4 {
+    small {
+      color: #6aa8f6;
+      font-size: 0.75rem;
+    }
   }
+
+  h5 {
+    font-size: 1rem;
+    color: #ddd;
+
+    em {
+      color: yellow;
+    }
+  }
+}
+
+.search-result-date {
+  color: #919ca6;
+}
+
+.search-result-header {
+  color: #6a87f6;
 }
 
 .search-result-important {
@@ -769,6 +807,7 @@ h2#name {
 
   &:hover {
     background-color: $background-color-light;
+    cursor: pointer;
   }
 }
 
@@ -854,29 +893,6 @@ a.tag {
 .table-borderless th {
   border: 0;
   padding: 0.6rem;
-}
-
-/* Search */
-
-.search-box {
-  background-color: $gray-700;
-  border: 1px solid $primary;
-  border-radius: 1rem;
-  box-shadow: 0.75rem 0.75rem 0.5rem -0.06rem rgba(0, 0, 0, 0.54);
-  font-size: 1rem;
-
-  table th:first-child {
-    padding: 0.5rem 1rem 0 1.25rem;
-  }
-
-  table th {
-    font-weight: normal;
-    padding: 0.5rem 1.25rem 0 0.5rem;
-  }
-
-  td {
-    padding: 0.5rem;
-  }
 }
 
 /* Sortable */
@@ -1261,6 +1277,10 @@ span {
     color: $primary;
     transform: scale(1.1);
   }
+}
+
+.w-20 {
+  width: 20%;
 }
 
 /* Sidebar */
