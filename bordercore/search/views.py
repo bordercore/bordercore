@@ -92,14 +92,22 @@ class SearchListView(ListView):
 
         search_object = {
             "query": {
-                "bool": {
-                    "must": [
-                        {
-                            "term": {
-                                "user_id": self.request.user.id
-                            }
+                "function_score": {
+                    "field_value_factor": {
+                        "field": "importance",
+                        "missing": 1
+                    },
+                    "query": {
+                        "bool": {
+                            "must": [
+                                {
+                                    "term": {
+                                        "user_id": self.request.user.id
+                                    }
+                                }
+                            ]
                         }
-                    ]
+                    }
                 }
             },
             "aggs": {
@@ -150,7 +158,7 @@ class SearchListView(ListView):
             }
 
         if search_term:
-            search_object["query"]["bool"]["must"].append(
+            search_object["query"]["function_score"]["query"]["bool"]["must"].append(
                 {
                     "multi_match": {
                         "type": "phrase" if self.request.GET.get("exact_match", None) in ["Yes"] else "best_fields",
@@ -221,7 +229,7 @@ class NoteListView(SearchListView):
 
         search_object["_source"].append("contents")
 
-        search_object["query"]["bool"]["must"].append(
+        search_object["query"]["function_score"]["query"]["bool"]["must"].append(
             {
                 "term": {
                     "doctype": "note"
@@ -231,7 +239,7 @@ class NoteListView(SearchListView):
 
         tagsearch = self.request.GET.get("tagsearch", None)
         if tagsearch:
-            search_object["query"]["bool"]["must"].append(
+            search_object["query"]["function_score"]["query"]["bool"]["must"].append(
                 {
                     "term": {
                         "tags.keyword": tagsearch

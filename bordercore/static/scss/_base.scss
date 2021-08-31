@@ -647,9 +647,17 @@ pre {
 
 .search-result {
   border-bottom: 0.1rem solid $blue;
-  margin: 0.5rem 0 0.5rem 1.5rem;
+  padding: 0.5rem 1.5rem 0.5rem 1.5rem;
+
+  &:hover {
+    background-color: lighten($body-background, 5%);
+  }
 
   h4 {
+    .favorite {
+      font-size: 1rem;
+    }
+
     small {
       color: #6aa8f6;
       font-size: 0.75rem;

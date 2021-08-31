@@ -53,7 +53,7 @@
                     <form action="{% url 'search:search' %}" method="get" autocomplete="off">
 
                         <div class="d-flex">
-                            <div class="d-flex flex-column" _style="width: 600px">
+                            <div class="d-flex flex-column">
                                 <div class="mb-1">
                                     What are you searching for?
                                 </div>
@@ -128,7 +128,7 @@
                 </div>
             </div>
 
-            <div class="right-column">
+            <div>
 
                 {% if request.GET %}
 
@@ -150,11 +150,9 @@
                             {% for match in search_results.hits.hits %}
 
                                 <li class="search-result">
-                                    <div class="d-flex my-3">
+                                    <div class="d-flex my-1">
 
-                                        <!-- <span style="font-size: 10px">{{ match.score }}</span> -->
-
-                                    {% if match.source.doctype == 'drill' %}
+                                    {% if match.source.doctype == "drill" %}
 
                                         <div class="mr-2 mt-1">
                                             <font-awesome-icon icon="graduation-cap" class="text-light" />
@@ -172,7 +170,7 @@
                                             </div>
                                         </div>
 
-                                    {% elif match.source.doctype == 'todo' %}
+                                    {% elif match.source.doctype == "todo" %}
 
                                         <h4>
                                             <font-awesome-icon icon="tasks"></font-awesome-icon>
@@ -183,13 +181,16 @@
                                             <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
                                         {% endfor %}
 
-                                    {% elif match.source.doctype == 'bookmark' %}
+                                    {% elif match.source.doctype == "bookmark" %}
 
                                         <div class="mr-2 mt-1">
-                                            <font-awesome-icon icon="bookmark" class="text-light" />
+                                            <font-awesome-icon icon="bookmark" class="text-light"></font-awesome-icon>
                                         </div>
                                         <div class="d-flex flex-column">
                                             <h4>
+                                                {% if match.source.importance > 1 %}
+                                                    <font-awesome-icon icon="heart" class="favorite" data-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                                {% endif %}
                                                 <a href="{{ match.source.url }}">{{ match.source.name }}</a>
                                             </h4>
                                             <div class="d-flex mb-2 align-items-center text-primary">
@@ -205,13 +206,16 @@
                                             </div>
                                         </div>
 
-                                    {% elif match.source.doctype == 'note' %}
+                                    {% elif match.source.doctype == "note" %}
 
                                         <div class="mr-2 mt-1">
                                             <font-awesome-icon icon="sticky-note" class="text-light" />
                                         </div>
                                         <div class="d-flex flex-column">
                                             <h4>
+                                                {% if match.source.importance > 1 %}
+                                                    <font-awesome-icon icon="heart" class="favorite" data-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                                {% endif %}
                                                 <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.name|default:"Note" }}</a>
                                             </h4>
 
@@ -223,13 +227,16 @@
                                             </div>
                                         </div>
 
-                                    {% elif match.source.doctype == 'document' %}
+                                    {% elif match.source.doctype == "document" %}
 
                                         <div class="mr-2 mt-1">
                                             <font-awesome-icon icon="copy" class="text-light" />
                                         </div>
                                         <div class="d-flex flex-column">
                                             <h4>
+                                                {% if match.source.importance > 1 %}
+                                                    <font-awesome-icon icon="heart" class="favorite" data-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                                {% endif %}
                                                 <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.name|default:"Name" }}</a>
                                                 {% if match.source.creators %} <small>{{ match.source.creators }}</small>{% endif %}
                                             </h4>
@@ -242,7 +249,7 @@
                                             </div>
                                         </div>
 
-                                    {% elif match.source.doctype == 'song' %}
+                                    {% elif match.source.doctype == "song" %}
 
                                         <div class="mr-2 mt-1">
                                             <font-awesome-icon icon="music" class="text-light" />
@@ -267,6 +274,9 @@
                                         </div>
                                         <div class="d-flex flex-column ml-2">
                                             <h4>
+                                                {% if match.source.importance > 1 %}
+                                                    <font-awesome-icon icon="heart" class="favorite" data-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                                {% endif %}
                                                 <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.name|default:"No name" }}</a>
                                                 {% if match.source.creators %} <small>{{ match.source.creators }}</small>{% endif %}
                                             </h4>
@@ -348,10 +358,10 @@
             methods: {
                 select(tag) {
 
-                    if (tag.object_type == 'Tag') {
-                        url = '{% url 'search:kb_search_tag_detail' 666 %}'.replace(/666/, tag.value);
+                    if (tag.object_type == "Tag") {
+                        url = "{% url 'search:kb_search_tag_detail' 666 %}".replace(/666/, tag.value);
                     } else {
-                        url = '{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', tag.uuid);
+                        url = "{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", tag.uuid);
                     }
                     window.location=url;
 
