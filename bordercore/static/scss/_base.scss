@@ -1250,7 +1250,7 @@ a {
   text-underline-offset: 0.25rem;
 
   &:hover {
-    text-decoration-color: $link-decoration-color;
+    color: $link-decoration-color;
   }
 
   &.text-success {

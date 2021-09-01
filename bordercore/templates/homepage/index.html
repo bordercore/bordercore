@@ -64,7 +64,7 @@
                         <template v-slot:content>
                             <ul class="list-group interior-borders">
                                 {% for exercise in overdue_exercises %}
-                                    <li class="list-group-item list-group-item-secondary text-info"><a class="text-success" href="{% url 'fitness:exercise_detail' exercise.exercise.exercise.uuid %}">{{ exercise.exercise.exercise.name }}</a> {{ exercise.lag }} days</li>
+                                    <li class="list-group-item list-group-item-secondary text-info"><a href="{% url 'fitness:exercise_detail' exercise.exercise.exercise.uuid %}">{{ exercise.exercise.exercise.name }}</a> {{ exercise.lag }} days</li>
                                 {% empty %}
                                     <li class="list-group-item list-group-item-secondary">No active exercises.</li>
                                 {% endfor %}
@@ -80,7 +80,7 @@
                         <template v-slot:content>
                             <ul class="list-group interior-borders">
                                 {% for bookmark in daily_bookmarks %}
-                                    <li class="list-group-item list-group-item-secondary {{ bookmark.css_class }}"><a class="text-success" href="{% url 'bookmark:click' bookmark.uuid %}">{{ bookmark.name }}</a></li>
+                                    <li class="list-group-item list-group-item-secondary {{ bookmark.css_class }}"><a href="{% url 'bookmark:click' bookmark.uuid %}">{{ bookmark.name }}</a></li>
                                 {% empty %}
                                     <li class="list-group-item list-group-item-secondary">No bookmarks marked as Daily.</li>
                                 {% endfor %}
@@ -120,7 +120,7 @@
                         {% if bookmarks %}
                             <ul class="list-group interior-borders">
                             {% for bookmark in bookmarks %}
-                                <li class="list-group-item list-group-item-secondary text-success">{{ bookmark.url|favicon:16|safe }} <a class="text-success ml-2" href="{{ bookmark.url }}">{{ bookmark.name }}</a> </li>
+                                <li class="list-group-item list-group-item-secondary text-success">{{ bookmark.url|favicon:16|safe }} <a class="ml-2" href="{{ bookmark.url }}">{{ bookmark.name }}</a> </li>
                             {% endfor %}
                             </ul>
                         {% else %}
