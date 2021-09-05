@@ -1,6 +1,4 @@
 import math
-import re
-from urllib.parse import unquote
 
 from elasticsearch import Elasticsearch, RequestError
 
@@ -203,7 +201,7 @@ class SearchListView(ListView):
                 match["source"]["creators"] = get_creators(match["source"])
                 match["source"]["date"] = get_date_from_pattern(match["source"].get("date", None))
                 match["source"]["last_modified"] = get_relative_date(match["source"]["last_modified"])
-                if match["source"]["doctype"] == "book":
+                if match["source"]["doctype"] in ["book", "blob"]:
                     match["source"]["cover_url"] = Blob.get_cover_info_static(
                         self.request.user,
                         match["source"]["sha1sum"],
@@ -533,7 +531,9 @@ def get_doctype(match):
         highlight_fields = [x if x != "name" else "Song" for x in match["highlight"].keys()]
         # There could be multiple highlighted fields. For now,
         #  pick the first one.
-        return highlight_fields[0].title()
+        # Remove the subfield ".autocomplete" from the result, so
+        #  "artist.autocomplete" becomes "artist".
+        return highlight_fields[0].split(".")[0].title()
 
     return match["_source"]["doctype"].title()
 
@@ -577,8 +577,8 @@ def search_tags_and_names(request):
     else:
         doc_types = []
 
-    # The front-end filter is a catch-all "Music", but the actual
-    #  Elasticsearch doctype is "song"
+    # The front-end filter "Music" translates to the two doctypes
+    #  "album" and "song" in the Elasticsearch index
     if "music" in doc_types:
         doc_types = ["album", "song"]
 
@@ -615,8 +615,6 @@ def search_tags_and_names(request):
 @login_required
 def search_names(request, es, doc_types, search_term):
 
-    search_terms = re.split(r"\s+", search_term)
-
     search_object = {
         "query": {
             "function_score": {
@@ -635,6 +633,12 @@ def search_names(request, es, doc_types, search_term):
                         ]
                     }
                 }
+            }
+        },
+        "highlight": {
+            "fields": {
+                "name.autocomplete": {},
+                "artist.autocomplete": {}
             }
         },
         "from": 0, "size": 100,
@@ -657,59 +661,46 @@ def search_names(request, es, doc_types, search_term):
                     "uuid"]
     }
 
-    # Separate query into terms based on whitespace and
-    #  and treat it like an "AND" boolean search
-    for one_term in search_terms:
-        search_object["query"]["function_score"]["query"]["bool"]["must"].append(
-            {
-                "bool": {
-                    "should": [
-                        {
-                            "wildcard": {
-                                "name": {
-                                    "value": f"*{one_term}*",
-                                }
+    search_object["query"]["function_score"]["query"]["bool"]["must"].append(
+        {
+            "bool": {
+                "should": [
+                    {
+                        "match": {
+                            "name.autocomplete": {
+                                "query": search_term,
+                                "operator": "and"
                             }
-                        },
-                        {
-                            "wildcard": {
-                                "title": {
-                                    "value": f"*{one_term}*",
-                                }
+                        }
+                    },
+                    {
+                        "match": {
+                            "question.autocomplte": {
+                                "query": search_term,
+                                "operator": "and"
                             }
-                        },
-                        {
-                            "wildcard": {
-                                "artist": {
-                                    "value": f"*{one_term}*",
-                                }
+                        }
+                    },
+                    {
+                        "match": {
+                            "title.autocomplete": {
+                                "query": search_term,
+                                "operator": "and"
                             }
-                        },
-                        {
-                            "wildcard": {
-                                "question": {
-                                    "value": f"*{one_term}*",
-                                }
+                        }
+                    },
+                    {
+                        "match": {
+                            "artist.autocomplete": {
+                                "query": search_term,
+                                "operator": "and"
                             }
-                        },
-                        {
-                            "wildcard": {
-                                "title": {
-                                    "value": f"*{one_term}*",
-                                }
-                            }
-                        },
-                    ]
-                }
+                        }
+                    }
+                ]
             }
-        )
-
-    search_object["highlight"] = {
-        "fields": {
-            "name": {},
-            "artist": {}
         }
-    }
+    )
 
     if len(doc_types) > 0:
         search_object["query"]["function_score"]["query"]["bool"]["must"].append(
@@ -732,8 +723,6 @@ def search_names(request, es, doc_types, search_term):
 
 @login_required
 def search_tags(request, es, doc_types, search_term):
-
-    search_terms = re.split(r"\s+", unquote(search_term))
 
     search_object = {
         "query": {
@@ -773,22 +762,22 @@ def search_tags(request, es, doc_types, search_term):
                     "uuid"]
     }
 
-    # Separate query into terms based on whitespace and
-    #  and treat it like an "AND" boolean search
-    for one_term in search_terms:
-        search_object["query"]["bool"]["must"].append(
-            {
-                "bool": {
-                    "should": [
-                        {
-                            "wildcard": {
-                                "tags": f"{one_term}*"
+    search_object["query"]["bool"]["must"].append(
+        {
+            "bool": {
+                "should": [
+                    {
+                        "match": {
+                            "tags.autocomplete": {
+                                "query": search_term,
+                                "operator": "and"
                             }
                         }
-                    ]
-                }
+                    }
+                ]
             }
-        )
+        }
+    )
 
     if len(doc_types) > 1:
         search_object["query"]["bool"]["must"].append(

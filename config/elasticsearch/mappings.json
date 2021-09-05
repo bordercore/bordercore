@@ -1,51 +1,124 @@
 {
-    "mappings": {
-        "properties": {
-            "uuid": { "type":"keyword" },
-            "bordercore_id": { "type":"long" },
-            "sha1sum": { "type":"keyword" },
-            "user_id": { "type":"integer" },
-            "is_private": { "type":"boolean" },
-            "date": {
-                "type":"date_range",
-                "format":"yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM||yyyy||epoch_second"
-            },
-            "name": { "type":"text" },
-            "contents": {
-              "type":"text",
-              "index_options" : "offsets"
-            },
-            "attachment": {
-              "properties": {
-                "content": {
-                  "type": "text",
-                  "index_options": "offsets",
-                  "fields": {
-                    "keyword": {
-                      "type": "keyword",
-                      "ignore_above": 256
-                    }
-                  }
-                }
-              }
-            },
-            "doctype": { "type":"keyword" },
-            "content_type": { "type":"keyword" },
-            "tags": {
-                "type":"text",
-                "fields": {
-                    "keyword": {
-                        "type": "keyword"
-                    }
-                }
-            },
-            "filename": { "type":"text" },
-            "note": { "type":"text" },
-            "url": { "type":"text" },
-            "importance": { "type":"integer" },
-            "date_unixtime": { "type":"long" },
-            "created_date": { "type":"date" },
-            "last_modified": { "type":"date" }
+  "settings": {
+    "index": {
+      "max_ngram_diff": 8
+    },
+    "analysis": {
+      "analyzer": {
+        "ngram_analyzer": {
+          "tokenizer": "ngram_tokenizer",
+          "filter": [
+            "lowercase"
+          ]
         }
+      },
+      "tokenizer": {
+        "ngram_tokenizer": {
+          "type": "ngram",
+          "min_gram": 2,
+          "max_gram": 10,
+          "token_chars": [
+            "letter",
+            "digit"
+          ]
+        }
+      }
     }
+  },
+  "mappings": {
+    "properties": {
+      "uuid": { "type":"keyword" },
+      "bordercore_id": { "type":"long" },
+      "sha1sum": { "type":"keyword" },
+      "user_id": { "type":"integer" },
+      "is_private": { "type":"boolean" },
+      "date": {
+        "type":"date_range",
+        "format":"yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||yyyy-MM||yyyy||epoch_second"
+      },
+      "name": {
+        "type":"text",
+        "fields": {
+          "autocomplete": {
+            "type": "text",
+            "analyzer": "ngram_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "title": {
+        "type":"text",
+        "fields": {
+          "autocomplete": {
+            "type": "text",
+            "analyzer": "ngram_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "contents": {
+        "type":"text",
+        "index_options" : "offsets"
+      },
+      "artist": {
+        "type":"text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          },
+          "autocomplete": {
+            "type": "text",
+            "analyzer": "ngram_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "question": {
+        "type":"text",
+        "fields": {
+          "autocomplete": {
+            "type": "text",
+            "analyzer": "ngram_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "attachment": {
+        "properties": {
+          "content": {
+            "type": "text",
+            "index_options": "offsets",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+        }
+      },
+      "doctype": { "type":"keyword" },
+      "content_type": { "type":"keyword" },
+      "tags": {
+        "type":"text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          },
+          "autocomplete": {
+            "type": "text",
+            "analyzer": "ngram_analyzer",
+            "search_analyzer": "standard"
+          }
+        }
+      },
+      "filename": { "type":"text" },
+      "note": { "type":"text" },
+      "url": { "type":"text" },
+      "importance": { "type":"integer" },
+      "date_unixtime": { "type":"long" },
+      "created_date": { "type":"date" },
+      "last_modified": { "type":"date" }
+    }
+  }
 }

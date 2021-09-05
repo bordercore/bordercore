@@ -38,7 +38,7 @@ def search(user, tag_name, doctype=None):
 
     tag_name = tag_name.lower()
 
-    search_terms = re.split(r"\s+", unquote(tag_name))
+    search_term = unquote(tag_name)
 
     search_object = {
         "query": {
@@ -53,7 +53,7 @@ def search(user, tag_name, doctype=None):
             }
         },
         "aggs": {
-            "Distinct Tags": {
+            "distinct_tags": {
                 "terms": {
                     "field": "tags.keyword",
                     "size": SEARCH_LIMIT
@@ -64,24 +64,22 @@ def search(user, tag_name, doctype=None):
         "_source": ["tags"]
     }
 
-    # Separate the query into terms based on whitespace and
-    #  and treat it like an "AND" boolean search
-    for one_term in search_terms:
-        search_object["query"]["bool"]["must"].append(
-            {
-                "bool": {
-                    "should": [
-                        {
-                            "wildcard": {
-                                "tags": {
-                                    "value": f"*{one_term}*",
-                                }
+    search_object["query"]["bool"]["must"].append(
+        {
+            "bool": {
+                "should": [
+                    {
+                        "match": {
+                            "tags.autocomplete": {
+                                "query": search_term,
+                                "operator": "and"
                             }
                         }
-                    ]
-                }
+                    }
+                ]
             }
-        )
+        }
+    )
 
     # If a doctype is passed in, then limit our search to tags attached
     #  to that particular object type, rather than to all tags.
@@ -97,7 +95,7 @@ def search(user, tag_name, doctype=None):
     results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 
     matches = []
-    for tag_result in results["aggregations"]["Distinct Tags"]["buckets"]:
+    for tag_result in results["aggregations"]["distinct_tags"]["buckets"]:
         if tag_result["key"].lower().find(tag_name) != -1:
             matches.append(
                 {
