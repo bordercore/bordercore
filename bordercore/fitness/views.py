@@ -51,8 +51,9 @@ class ExerciseDetailView(DetailView):
         # Find the date of the most recent workout data
         max_date = max(data, key=lambda item: item.date)
 
-        # Find all the reps for all sets recorded on that day
-        context["reps_latest_workout"] = [x.reps for x in data if x.date.strftime("%Y-%m-%d") == max_date.date.strftime("%Y-%m-%d")]
+        # Find all the reps for all sets recorded on that day.
+        #  Reverse the sort so that the data is sorted by time ascending.
+        context["reps_latest_workout"] = [x.reps for x in data if x.date.strftime("%Y-%m-%d") == max_date.date.strftime("%Y-%m-%d")][::-1]
 
         # Create a unique collection of workout data based on date,
         #  so only one set will be extracted for each workout.
