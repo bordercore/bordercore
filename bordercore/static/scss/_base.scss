@@ -529,6 +529,10 @@ pre {
 .top-search-suggestion {
   padding: 0.6rem;
   width: 100%;
+
+  svg {
+    margin-top: 0.1rem;
+  }
 }
 
 .suggest-item {
