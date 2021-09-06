@@ -101,6 +101,8 @@
   justify-content: center;
   padding: 0;
   border: none;
+
+  /* Comment */
   font: inherit;
   color: inherit;
   cursor: pointer;
@@ -381,26 +383,27 @@ tr.selected {
   padding-left: 1rem + 1.25rem;
 }
 
-$nav-tabs-link-active-border-color: $nav-tabs-border-color $nav-tabs-border-color $nav-tabs-link-active-bg;
-$nav-tabs-link-hover-border-color: $nav-tabs-border-color;
+$nav-tabs-link-active-border-color: 0 0 $nav-highlight-color;
+$nav-tabs-link-hover-border-color: $nav-border-color;
 
 /* Modified from bootstrap/scss/_nav.scss */
 .nav-tabs {
-  border-bottom: $nav-tabs-border-width solid $nav-tabs-border-color;
+  border-bottom: 2px solid $nav-border-color;
 
   .nav-link {
-    border: $nav-tabs-border-width solid transparent;
-
-    @include border-top-radius($nav-tabs-border-radius);
+    border-bottom: 2px solid $background-color-light;
+    color: $nav-not-selected-color;
 
     @include hover-focus() {
-      border-color: $nav-tabs-link-hover-border-color;
+      color: $nav-border-color;
     }
   }
 
   .nav-link.active,
   .nav-item.show .nav-link {
-    border-color: $nav-tabs-link-active-border-color;
+    border-bottom-color: $nav-highlight-color;
+    color: $nav-highlight-color !important;
+    text-shadow: 0 0 1px $nav-highlight-color;
   }
 }
 
@@ -676,6 +679,11 @@ pre {
       color: yellow;
     }
   }
+
+  &.grid {
+    width: 33%;
+    border-bottom: 0;
+  }
 }
 
 .search-result-date {
@@ -694,6 +702,10 @@ pre {
   font-weight: normal;
   color: #c76257;
   font-size: 0.5rem;
+}
+
+.tab-content {
+  border-radius: 0.4rem;
 }
 
 .bookmark-dropdown {
@@ -1181,6 +1193,11 @@ div.CodeMirror-focused {
 }
 
 /* Vue Tags Input VUE */
+
+/* Disabling flex wrap so that the tag list and input are on the same line */
+.ti-tags {
+  flex-wrap: nowrap !important;
+}
 
 /* These apply Bootstrap-like styles to the tags */
 .vue-tags-input .ti-input .ti-tag {

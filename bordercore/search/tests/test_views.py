@@ -127,10 +127,10 @@ def test_search_tag(mock_elasticsearch, auto_login_user, blob_image_factory, blo
 
     soup = BeautifulSoup(resp.content, "html.parser")
 
-    matches = soup.select("#document div.row")
+    matches = soup.select("#document li")
     assert len(matches) == 3
 
-    matches = soup.select("#blob div.row")
+    matches = soup.select("#blob li")
     assert len(matches) == 2
 
 

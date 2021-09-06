@@ -295,8 +295,16 @@ class SearchTagDetailView(ListView):
 
         search_object = {
             "query": {
-                "bool": {
-                    "must": tag_query
+                "function_score": {
+                    "field_value_factor": {
+                        "field": "importance",
+                        "missing": 1
+                    },
+                    "query": {
+                        "bool": {
+                            "must": tag_query
+                        }
+                    }
                 }
             },
             "aggs": {
@@ -313,11 +321,15 @@ class SearchTagDetailView(ListView):
                     }
                 }
             },
-            "sort": {"last_modified": {"order": "desc"}},
+            "sort": [
+                {"importance": {"order": "desc"}},
+                {"last_modified": {"order": "desc"}}
+            ],
             "from": 0, "size": hit_count,
             "_source": ["artist",
                         "author",
                         "content_type",
+                        "contents",
                         "date",
                         "date_unixtime",
                         "doctype",
@@ -350,8 +362,17 @@ class SearchTagDetailView(ListView):
                 "name": match["_source"].get("name", "No Name"),
                 "task": match["_source"].get("name", ""),
                 "url": match["_source"].get("url", ""),
-                "uuid": match["_source"].get("uuid", "")
+                "uuid": match["_source"].get("uuid", ""),
+                "creators": get_creators(match["_source"]),
+                "contents": match["_source"].get("contents", "")[:200],
+                "date": get_date_from_pattern(match["_source"].get("date", None))
             }
+
+            if "tags" in match["_source"]:
+                # Only show tags that were not searched for
+                result["tags"] = [tag for tag in match["_source"]["tags"]
+                                  if tag not in self.kwargs["taglist"]]
+
             if match["_source"].get("sha1sum", ""):
 
                 result = {

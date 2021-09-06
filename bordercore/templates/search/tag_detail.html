@@ -1,40 +1,46 @@
 {% extends "base.html" %}
 
+{% load domain %}
+
 {% load get_doctype %}
-{% load dict_get %}
+
+{% load favicon %}
 
 {% block title %} KB :: Tag Detail {% endblock %}
 
 {% block content %}
 
-    <div class="card-grid ml-3" id="vue-app">
+    <div id="vue-app">
 
-        <div class="row">
-            <div class="col-lg-10">
+        <div class="row no-gutters">
+            <div class="col-lg-12">
+            <div class="right-column">
 
-                <form id="tag-filter-form" class="form-inline" action="{% url 'search:kb_search_tag_detail' tag %}" method="get" autocomplete="off">
-                    <div class="form-group">
+                <div class="card-body mb-3 pb-4">
 
-                        <search-tags-input
-                            :autofocus=true
-                            place-holder="Tag List"
-                            search-url="{% url 'tag:search' %}?query="
-                            tags-changed-url="{% url 'search:kb_search_tag_detail' 666 %}"
-                        >
-                        </search-tags-input>
+                    <form id="tag-filter-form" class="form-inline" action="{% url 'search:kb_search_tag_detail' tag %}" method="get" autocomplete="off">
+                        <div class="form-group">
 
-                    </div>
+                            <search-tags-input
+                                :autofocus=true
+                                place-holder="Tag"
+                                search-url="{% url 'tag:search' %}?query="
+                                tags-changed-url="{% url 'search:kb_search_tag_detail' 666 %}"
+                            >
+                            </search-tags-input>
+
+                        </div>
                 {% if tag_counts %}
-                    <other-tag-counts inline-template>
+                    <related-tag-counts inline-template>
                         <div class="form-group ml-2">
                             <select class="form-control" @change="onChange">
-                                <option value="-1">Other tags</option>
+                                <option value="-1">Related tags</option>
                         {% for tag, count in tag_counts %}
                             <option value="{{ tag }}">{{ tag }} ({{ count }})</option>
                         {% endfor %}
                             </select>
                         </div>
-                    </other-tag-counts>
+                    </related-tag-counts>
                 {% endif %}
                 <meta-tag-list inline-template>
                     <div class="form-group">
@@ -46,94 +52,237 @@
                 {% endfor %}
                     </div>
                 </meta-tag-list>
-                </form>
+                    </form>
+                </div>
+            </div>
             </div>
         </div>
 
         <br />
 
         <tab-list inline-template>
-            <ul class="nav nav-tabs" id="myTab">
-        {% for doctype in doctype_counts %}
-            <li class="nav-item" data-type="{{ doctype.0 }}" @click="onClick">
-                <a class="nav-link" data-toggle="tab" href="#{{ doctype.0 }}">{{ doctype_mapping|get_doctype:doctype.0 }} <span class="badge alert-info">{{ doctype.1 }}</span></a>
-            </li>
-        {% endfor %}
+            <ul class="nav nav-tabs mx-3" id="myTab">
+                {% for doctype in doctype_counts %}
+                    <li class="nav-item" data-type="{{ doctype.0 }}" @click="onClick">
+                        <a class="nav-link" data-toggle="tab" href="#{{ doctype.0 }}">
+                            {{ doctype_mapping|get_doctype:doctype.0 }}
+                            <span class="badge badge-info align-middle ml-2">
+                                {{ doctype.1 }}
+                            </span>
+                        </a>
+                    </li>
+                {% endfor %}
             </ul>
         </tab-list>
 
-        <div class="tab-content pl-3">
+        <div class="tab-content pl-3 right-column h-100 mb-3">
 
             <div id="blob" class="tab-pane fade">
-            {% for match in search_results.matches.blob %}
-                <div class="row mt-2">
-                    <div class="col-lg-12">
-                        {% if match.sha1sum %}
-                            <a href="{{ MEDIA_URL }}{{ match.url|safe }}">
-                                <img src="{{ STATIC_URL }}img/download-2-32.png" width="16" height="16" />
-                            </a>
-                        {% endif %}
-                        {% if match.content_type == 'Image' %}
-                            <img width="32" height="32" src="{{ match.cover_url }}" />
-                        {% endif %}
-                        <a href="{% url 'blob:detail' match.uuid %}">{{ match.name|default:"No Name" }}</a>
-                        {% if match.content_type and match.content_type != 'Image' %}
-                            <span class="list-annotation">{{ match.content_type }}</span>
-                        {% endif %}
-                    </div>
-                </div>
-            {% endfor %}
+                <ul class="list-unstyled d-flex flex-wrap">
+
+                    {% for match in search_results.matches.blob %}
+
+                        <li class="search-result grid py-3">
+                            <div class="d-flex my-1">
+                                <div>
+                                    <img src="{{ match.cover_url }}" />
+                                </div>
+                                <div class="d-flex flex-column ml-2">
+                                    <h4>
+                                        {% if match.importance > 1 %}
+                                            <font-awesome-icon icon="heart" class="favorite" data-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                        {% endif %}
+                                        <a href="{% url 'blob:detail' match.uuid %}">
+                                            {{ match.name|default:"No name" }}
+                                        </a>
+                                    </h4>
+                                    <div>
+                                        {% if match.creators %}
+                                            <small>
+                                                {{ match.creators }}
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="search-result-date text-nowrap">
+                                        {{ match.date }}
+                                    </div>
+                                    <div>
+                                        <div class="mt-2">
+                                            {% for tag in match.tags %}
+                                                <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
             </div>
 
             <div id="book" class="tab-pane fade">
-                <table class="table-borderless">
-                    <tr>
+                <ul class="list-unstyled d-flex flex-wrap">
 
-            {% for match in search_results.matches.book %}
-                {% if forloop.counter0|divisibleby:"3" %}
-                    </tr><tr>
-                {% endif %}
-                <td>
-                    <img src="{{ match.cover_url }}" height="75" width="70"/>
-                    <br/>
-                    <a href="{{ MEDIA_URL }}{{ match.url|safe }}">
-                        <img src="{{ STATIC_URL }}img/download-2-32.png" width="16" height="16" />
-                    </a>
-                    <a href="{% url 'blob:detail' match.uuid %}">{{ match.name }}</a>
-                </td>
-            {% endfor %}
-                </table>
+                    {% for match in search_results.matches.book %}
+
+                        <li class="search-result grid py-3">
+                            <div class="d-flex my-1">
+                                <div>
+                                    <img src="{{ match.cover_url }}" />
+                                </div>
+                                <div class="d-flex flex-column ml-2">
+                                    <h4>
+                                        {% if match.importance > 1 %}
+                                            <font-awesome-icon icon="heart" class="favorite" data-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                        {% endif %}
+                                        <a href="{% url 'blob:detail' match.uuid %}">
+                                            {{ match.name|default:"No name" }}
+                                        </a>
+                                    </h4>
+                                    <div>
+                                        {% if match.creators %}
+                                            <small>
+                                                {{ match.creators }}
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="search-result-date text-nowrap">
+                                        {{ match.date }}
+                                    </div>
+                                    <div>
+                                        <div class="mt-2">
+                                            {% for tag in match.tags %}
+                                                <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
             </div>
 
             <div id="bookmark" class="tab-pane fade">
-            {% for match in search_results.matches.bookmark %}
-                <div class="row mt-2">
-                    <div class="col-lg-12">
-                        <a href="{{ match.url }}">{{ match.name }}</a>
-                    </div>
-                </div>
-            {% endfor %}
+                <ul class="list-unstyled">
+
+                    {% for match in search_results.matches.bookmark %}
+
+                        <li class="search-result">
+                            <div class="d-flex my-1">
+
+                                <div class="mr-2 my-1">
+                                    <font-awesome-icon icon="bookmark" class="text-light"></font-awesome-icon>
+                                </div>
+
+                                <div class="d-flex flex-column">
+                                    <h4>
+                                    {% if match.importance > 1 %}
+                                        <font-awesome-icon icon="heart" class="favorite" data-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                    {% endif %}
+                                    <a href="{{ match.url }}">{{ match.name }}</a>
+                                    </h4>
+                                    <div class="d-flex mb-2 align-items-center text-primary">
+                                    {{ match.url|favicon|safe }}
+                                        <div class="ml-2">
+                                        {{ match.url|domain }}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="mt-2">
+                                            {% for tag in match.tags %}
+                                                <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="search-result-date text-nowrap ml-auto pl-4">
+                                    {{ match.date }}
+                                </div>
+
+                            </div>
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
             </div>
 
-            <div id="document" class="tab-pane fade">
+            <ul id="document" class="tab-pane fade list-unstyled">
+
             {% for match in search_results.matches.document %}
-                <div class="row mt-2">
-                    <div class="col-lg-12">
-                        <a href="{% url 'blob:detail' match.uuid %}">{{ match.name|default:"No Name" }}</a>
-                    </div>
-                </div>
-            {% endfor %}
-            </div>
 
-            <div id="note" class="tab-pane fade">
-            {% for match in search_results.matches.note %}
-                <div class="row mt-2">
-                    <div class="col-lg-12">
-                        <a href="{% url 'blob:detail' match.uuid %}">{{ match.name|default:"Note" }}</a>
+                <li class="search-result">
+                    <div class="d-flex my-1">
+                        <div class="mr-2 mt-1">
+                            <font-awesome-icon icon="sticky-note" class="text-light" />
+                        </div>
+                        <div class="d-flex flex-column">
+                            <h4>
+                                {% if match.importance > 1 %}
+                                    <font-awesome-icon icon="heart" class="favorite" data-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                {% endif %}
+                                <a href="{% url 'blob:detail' match.uuid %}">{{ match.name|default:"No Name" }}</a>
+                            </h4>
+
+                            <h5 v-pre>{{ match.contents|safe }}</h5>
+                                <div class="mt-2">
+                                    {% for tag in match.tags %}
+                                        <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
+                                    {% endfor %}
+                                </div>
+                        </div>
+                        <div class="search-result-date text-nowrap ml-auto pl-4">
+                            {{ match.date }}
+                        </div>
                     </div>
-                </div>
+                </li>
+
             {% endfor %}
-            </div>
+
+            </ul>
+
+            <ul id="note" class="tab-pane fade list-unstyled">
+
+            {% for match in search_results.matches.note %}
+
+                <li class="search-result">
+                    <div class="d-flex my-1">
+
+                        <div class="mr-2 mt-1">
+                            <font-awesome-icon icon="sticky-note" class="text-light" />
+                        </div>
+                        <div class="d-flex flex-column">
+                            <h4>
+                                {% if match.importance > 1 %}
+                                    <font-awesome-icon icon="heart" class="favorite" data-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                {% endif %}
+                                <a href="{% url 'blob:detail' match.uuid %}">{{ match.name|default:"Note" }}</a>
+                            </h4>
+
+                            <h5 v-pre>
+                                {{ match.contents|safe }}
+                            </h5>
+                            <div>
+                                {% for tag in match.tags %}
+                                    <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="search-result-date text-nowrap ml-auto pl-4">
+                            {{ match.date }}
+                        </div>
+                    </div>
+                </li>
+
+            {% endfor %}
+
+            </ul>
 
             <div id="drill" class="tab-pane fade">
             {% for match in search_results.matches.drill %}
@@ -163,6 +312,7 @@
                     </div>
                 </div>
             {% endfor %}
+            </li>
             </div>
 
         </div>
@@ -187,7 +337,7 @@
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
         {% if tag_counts %}
-        const OtherTagCounts = {
+        const RelatedTagCounts = {
             methods: {
                 onChange(evt) {
                     tag_list = get_tag_list_string() + "," + evt.srcElement.value;
@@ -244,7 +394,7 @@
             el: "#vue-app",
             components: {
                 {% if tag_counts %}
-                OtherTagCounts,
+                RelatedTagCounts,
                 {% endif %}
                 TabList,
                 MetaTagList,
