@@ -35,7 +35,7 @@ class Command(BaseCommand):
 
         for blob in Blob.objects.filter(~Q(file="")).order_by("?"):
 
-            key = blob.get_s3_key()
+            key = blob.s3_key
 
             try:
                 s3_client.head_object(Bucket=self.bucket_name, Key=key)

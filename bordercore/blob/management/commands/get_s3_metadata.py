@@ -39,6 +39,6 @@ class Command(BaseCommand):
 
         b = Blob.objects.get(**kwargs)
 
-        obj = s3.Object(bucket_name="bordercore-blobs", key=b.get_s3_key())
+        obj = s3.Object(bucket_name="bordercore-blobs", key=b.s3_key)
 
         self.stdout.write(json.dumps(obj.metadata))

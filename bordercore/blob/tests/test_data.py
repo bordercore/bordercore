@@ -666,7 +666,7 @@ def test_blobs_have_proper_metadata():
 
     for blob in Blob.objects.filter(~Q(file="")):
 
-        obj = s3.Object(bucket_name=bucket_name, key=blob.get_s3_key())
+        obj = s3.Object(bucket_name=bucket_name, key=blob.s3_key)
         try:
             obj.metadata["file-modified"]
         except KeyError:

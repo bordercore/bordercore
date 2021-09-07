@@ -52,7 +52,7 @@ class Command(BaseCommand):
     def index_bookmarks_all(self):
 
         for b in Bookmark.objects.all():
-            self.stdout.write(b.url)
+            self.stdout.write(b.name)
             b.index_bookmark(es)
 
     def index_drill_all(self):

@@ -13,9 +13,11 @@ from tag.models import Tag  # isort:skip
 from blob.models import Blob  # isort:skip
 
 
-def test_get_s3_key_from_uuid(blob_image_factory):
-    s3_key = Blob.get_s3_key_from_uuid(blob_image_factory.uuid, blob_image_factory.file)
+def test_get_s3_key(blob_image_factory):
+    s3_key = Blob.get_s3_key(blob_image_factory.uuid, blob_image_factory.file)
     assert s3_key == f"blobs/{blob_image_factory.uuid}/{blob_image_factory.file}"
+
+    assert blob_image_factory.s3_key == f"blobs/{blob_image_factory.uuid}/{blob_image_factory.file}"
 
 
 def test_get_edition_string(blob_image_factory):

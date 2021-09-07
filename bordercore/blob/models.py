@@ -182,15 +182,15 @@ class Blob(TimeStampedModel):
         else:
             return f"{date}"
 
-    @staticmethod
-    def get_s3_key_from_uuid(uuid, file):
-        return "{}/{}/{}".format(settings.MEDIA_ROOT, uuid, file)
-
-    def get_s3_key(self):
+    @property
+    def s3_key(self):
         if self.file:
-            return f"{settings.MEDIA_ROOT}/{self.uuid}/{self.file}"
-        else:
-            return None
+            return Blob.get_s3_key(self.uuid, self.file)
+        return None
+
+    @staticmethod
+    def get_s3_key(uuid, file):
+        return f"{settings.MEDIA_ROOT}/{uuid}/{file}"
 
     def get_metadata(self):
 
@@ -422,13 +422,13 @@ class Blob(TimeStampedModel):
             # Is the blob itself an image?
             if file_extension[1:].lower() in ["gif", "jpg", "jpeg", "png"]:
                 # For the large version, use the image itself
-                url = f"{settings.MEDIA_URL}{self.get_s3_key()}"
+                url = f"{settings.MEDIA_URL}{self.s3_key}"
                 if get_info:
-                    info = Blob.get_image_dimensions(self.get_s3_key(), max_cover_image_width)
+                    info = Blob.get_image_dimensions(self.s3_key, max_cover_image_width)
             else:
                 url = f"{prefix}/cover-{size}.jpg"
                 if get_info:
-                    info = Blob.get_image_dimensions(f"{PurePath(self.get_s3_key()).parent}/cover-{size}.jpg", max_cover_image_width)
+                    info = Blob.get_image_dimensions(f"{PurePath(self.s3_key).parent}/cover-{size}.jpg", max_cover_image_width)
 
         info["url"] = url
 
@@ -627,7 +627,7 @@ def set_s3_metadata_file_modified(sender, instance, **kwargs):
         return
 
     s3 = boto3.resource("s3")
-    key = instance.get_s3_key()
+    key = instance.s3_key
 
     s3_object = s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key)
 

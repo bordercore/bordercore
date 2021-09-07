@@ -63,7 +63,7 @@ class Command(BaseCommand):
                                     "name": "bordercore-blobs"
                                 },
                                 "object": {
-                                    "key": blob.get_s3_key()
+                                    "key": blob.s3_key
                                 }
                             }
                         }

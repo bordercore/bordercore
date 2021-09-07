@@ -511,7 +511,7 @@ def handle_s3_info_image(s3_resource, s3_bucket, blob, file_path, cover_filename
     filepath_cover = Path(__file__).parent / f"blob/tests/resources/{cover_filename}"
     width_cover, height_cover = Image.open(filepath_cover).size
 
-    key = blob.get_s3_key()
+    key = blob.s3_key
 
     s3_object = s3_resource.Object(settings.AWS_STORAGE_BUCKET_NAME, key)
     s3_object.metadata.update({"image-width": str(width), "image-height": str(height)})

@@ -55,7 +55,7 @@ class Command(BaseCommand):
 
         for blob_info in blobs:
 
-            key = blob_info.get_s3_key()
+            key = blob_info.s3_key
             file_path = f"{self.BLOB_DIR}/{key}"
 
             if verbose:
