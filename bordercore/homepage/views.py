@@ -58,7 +58,11 @@ def homepage(request):
             try:
                 random_image_info = {'blob': random_image,
                                      'uuid': random_image.uuid,
-                                     'cover_info': Blob.get_cover_info_static(request.user, random_image.sha1sum, 'large', 500)}
+                                     'cover_info': Blob.get_cover_info(
+                                         random_image.uuid,
+                                         random_image.file.name,
+                                         'large',
+                                         500)}
             except ClientError as e:
                 messages.add_message(request, messages.ERROR, f"Error getting random image info for uuid={random_image.uuid}: {e}")
     except (ConnectionRefusedError, ConnectionError):
@@ -145,7 +149,7 @@ def get_random_blob(request, content_type):
         },
         'from': 0,
         'size': 1,
-        '_source': ['uuid']
+        '_source': ['filename', 'uuid']
     }
 
     results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)

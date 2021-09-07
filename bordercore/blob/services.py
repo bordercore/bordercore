@@ -93,7 +93,7 @@ def get_recent_blobs(user, limit=10):
             props["content_size"] = humanize.naturalsize(match["_source"]["size"])
 
         if is_image(blob.file) or is_pdf(blob.file) or is_video(blob.file):
-            props["cover_url"] = blob.get_cover_info(size="large", get_info=False).get("url", None)
+            props["cover_url"] = blob.cover_info(size="large", get_info=False).get("url", None)
 
         returned_blob_list.append(props)
 

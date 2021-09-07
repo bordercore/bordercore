@@ -194,7 +194,7 @@ class BlobDetailView(DetailView):
         if self.object.sha1sum:
             context["aws_url"] = f"https://s3.console.aws.amazon.com/s3/buckets/{settings.AWS_STORAGE_BUCKET_NAME}/blobs/{self.object.uuid}/"
             try:
-                context["cover_info"] = self.object.get_cover_info()
+                context["cover_info"] = self.object.cover_info()
             except ClientError:
                 log.warn(f"No S3 cover image found for id={self.object.id}")
 
@@ -242,7 +242,7 @@ class BlobUpdateView(FormRequestMixin, UpdateView):
         context["sha1sum"] = self.kwargs.get("sha1sum")
 
         try:
-            context["cover_info"] = self.object.get_cover_info(max_cover_image_width=400)
+            context["cover_info"] = self.object.cover_info(max_cover_image_width=400)
         except ClientError:
             log.warn(f"No S3 cover image found for id={self.object.id}")
 
@@ -327,7 +327,7 @@ class BlobCoverInfoView(DetailView):
     def get(self, request, *args, **kwargs):
 
         try:
-            cover_info = self.get_object().get_cover_info()
+            cover_info = self.get_object().cover_info()
         except ClientError:
             cover_info = {}
         return JsonResponse(cover_info, safe=False)

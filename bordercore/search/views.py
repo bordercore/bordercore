@@ -133,7 +133,7 @@ class SearchListView(ListView):
                         "date",
                         "date_unixtime",
                         "doctype",
-                        "filepath",
+                        "filename",
                         "importance",
                         "last_modified",
                         "name",
@@ -202,9 +202,9 @@ class SearchListView(ListView):
                 match["source"]["date"] = get_date_from_pattern(match["source"].get("date", None))
                 match["source"]["last_modified"] = get_relative_date(match["source"]["last_modified"])
                 if match["source"]["doctype"] in ["book", "blob"]:
-                    match["source"]["cover_url"] = Blob.get_cover_info_static(
-                        self.request.user,
-                        match["source"]["sha1sum"],
+                    match["source"]["cover_url"] = Blob.get_cover_info(
+                        match["source"]["uuid"],
+                        match["source"]["filename"],
                         size="small"
                     )["url"]
 
@@ -373,7 +373,7 @@ class SearchTagDetailView(ListView):
                 result["tags"] = [tag for tag in match["_source"]["tags"]
                                   if tag not in self.kwargs["taglist"]]
 
-            if match["_source"].get("sha1sum", ""):
+            if "sha1sum" in match["_source"]:
 
                 result = {
                     "sha1sum": match["_source"]["sha1sum"],
@@ -382,9 +382,9 @@ class SearchTagDetailView(ListView):
                         match["_source"]["uuid"],
                         match["_source"].get("filename", "")
                     ),
-                    "cover_url": Blob.get_cover_info_static(
-                        self.request.user,
-                        match["_source"]["sha1sum"],
+                    "cover_url": Blob.get_cover_info(
+                        match["_source"].get("uuid", ""),
+                        match["_source"].get("filename", ""),
                         size="small"
                     )["url"],
                     **result,
@@ -671,7 +671,7 @@ def search_names(request, es, doc_types, search_term):
                     "date",
                     "date_unixtime",
                     "doctype",
-                    "filepath",
+                    "filename",
                     "importance",
                     "name",
                     "question",
@@ -773,7 +773,7 @@ def search_tags(request, es, doc_types, search_term):
                     "date",
                     "date_unixtime",
                     "doctype",
-                    "filepath",
+                    "filename",
                     "importance",
                     "name",
                     "question",

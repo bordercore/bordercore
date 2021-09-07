@@ -57,7 +57,10 @@ class CollectionDetailView(FormRequestMixin, FormMixin, DetailView):
         if blob_list:
             context["blob_list"] = blob_list
             try:
-                context["first_blob_cover_info"] = Blob.get_cover_info_static(user=self.request.user, sha1sum=blob_list[0]["sha1sum"])
+                context["first_blob_cover_info"] = Blob.get_cover_info(
+                    uuid=blob_list[0]["uuid"],
+                    filename=blob_list[0]["filename"]
+                )
             except ClientError:
                 pass
 

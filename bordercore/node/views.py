@@ -63,9 +63,9 @@ def get_blob_list(request, uuid):
                 "url": reverse('blob:detail', kwargs={"uuid": str(x.uuid)}),
                 "uuid": x.uuid,
                 "note": x.sortordernodeblob_set.get(node=node).note,
-                "cover_url": Blob.get_cover_info_static(
-                    request.user,
-                    x.sha1sum,
+                "cover_url": Blob.get_cover_info(
+                    x.uuid,
+                    x.file.name,
                     size="small"
                 )["url"]
             }
@@ -340,7 +340,7 @@ def search_blob_names(request):
                     "date",
                     "date_unixtime",
                     "doctype",
-                    "filepath",
+                    "filename",
                     "importance",
                     "name",
                     "note",
@@ -379,9 +379,9 @@ def search_blob_names(request):
                 "name": match["_source"]["name"],
                 "uuid": match["_source"].get("uuid"),
                 "url": reverse('blob:detail', kwargs={"uuid": str(match["_source"].get("uuid"))}),
-                "cover_url": settings.MEDIA_URL + Blob.get_cover_info_static(
-                    request.user,
-                    match["_source"].get("sha1sum"),
+                "cover_url": settings.MEDIA_URL + Blob.get_cover_info(
+                    match["_source"].get("uuid"),
+                    match["_source"].get("filename"),
                     size="small"
                 )["url"]
             }

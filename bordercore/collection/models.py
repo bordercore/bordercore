@@ -75,10 +75,11 @@ class Collection(TimeStampedModel):
                 {
                     "id": blob.blob.id,
                     "uuid": blob.blob.uuid,
+                    "filename": blob.blob.file.name,
                     "name": re.sub("[\n\r]", "", blob.blob.name),
                     "url": reverse("blob:detail", kwargs={"uuid": blob.blob.uuid}),
                     "sha1sum": blob.blob.sha1sum,
-                    "cover_url": blob.blob.get_cover_info(
+                    "cover_url": blob.blob.cover_info(
                         size="small"
                     ).get("url", None)
                 }
