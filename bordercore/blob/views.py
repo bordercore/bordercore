@@ -403,26 +403,6 @@ def metadata_name_search(request):
 
 
 @login_required
-def slideshow(request):
-    """
-    Select a random blob from the collection "To Display"
-    to display in a slideshow
-    """
-
-    blob = Collection.objects.get(name="To Display").blobs.all().order_by("?")[0]
-
-    content_type = None
-    try:
-        content_type = blob.get_elasticsearch_info()["content_type"]
-    except Exception:
-        log.warning(f"Can't get content type for uuid={blob.uuid}")
-
-    return render(request, "blob/slideshow.html",
-                  {"content_type": content_type,
-                   "blob": blob})
-
-
-@login_required
 def collection_mutate(request):
 
     blob_uuid = request.POST["blob_uuid"]

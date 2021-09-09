@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import json
+import logging
 import re
 import uuid
 
@@ -15,6 +16,8 @@ from django.urls import reverse
 
 from lib.mixins import SortOrderMixin, TimeStampedModel
 from tag.models import Tag
+
+log = logging.getLogger(f"bordercore.{__name__}")
 
 
 class Collection(TimeStampedModel):
@@ -49,16 +52,26 @@ class Collection(TimeStampedModel):
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
 
-    def get_blob(self, position):
+    def get_blob(self, position, randomize=False):
 
-        if (position >= len(self.blobs.all()) or position < 0):
-            return {}
+        so = SortOrderCollectionBlob.objects.filter(collection=self).select_related("blob").select_related("blob__user")
 
-        so = SortOrderCollectionBlob.objects.filter(collection=self).select_related("blob")[position]
+        if randomize:
+            blob = so.order_by("?")[0]
+        else:
+            if (position >= len(self.blobs.all()) or position < 0):
+                return {}
+            blob = so[position]
+
+        content_type = None
+        try:
+            content_type = blob.blob.get_elasticsearch_info()["content_type"]
+        except Exception:
+            log.warning(f"Can't get content type for uuid={blob.blob.uuid}")
 
         return {
-            "blob_id": so.blob.id,
-            "cover_info": so.blob.get_cover_info()
+            "url": f"{settings.MEDIA_URL}blobs/{blob.blob.get_url()}",
+            "content_type": content_type
         }
 
     def get_blob_list(self, limit=None):

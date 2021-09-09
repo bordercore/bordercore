@@ -32,14 +32,6 @@
                     <strong>Updated</strong> {{ collection.modified|date:"F j, Y" }}
                 </div>
 
-                {% if blob_list %}
-                <button type="submit" class="btn btn-primary" id="show-gallery" data-toggle="modal" data-target="#gallery" v-cloak>
-                    <font-awesome-icon icon="image" class="mr-2"></font-awesome-icon>Gallery
-                </button>
-
-                <br />
-                {% endif %}
-
                 <a href="{% url 'blob:create' %}?collection_uuid={{ collection.uuid }}" class="btn btn-primary mt-2" role="button"><font-awesome-icon icon="plus" class="mr-2"></font-awesome-icon>Add Blob</a>
 
             </div>
@@ -102,18 +94,6 @@
 
             </div>
 
-        </div>
-
-        <div class="modal fade" id="gallery" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered w-75 mw-100" role="document">
-                <div class="modal-content">
-                    <div class="modal-body">
-                        <div>
-                            <img class="w-100" id="gallery_image" src="{{ first_blob_cover_info.url }}"/>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <form action="{% url 'collection:update' collection.uuid %}" method="post" id="form-collection-edit">
@@ -188,6 +168,71 @@
             </div>
         </form>
 
+        <div class="modal fade" id="modalSlideShow" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">Begin Slide Show</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    </div>
+
+                    <div class="modal-body">
+                        Slide Show Type:
+
+                        <div class="form-group row mt-3">
+                            <div class="col-lg-12">
+                                <div class="form-check">
+                                    <input v-model="slideShowType" class="form-check-input" type="radio" name="type" value="manual" checked>
+                                    <label class="form-check-label d-flex" for="type">
+                                        Manual
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group row mt-3">
+                            <div class="col-lg-4">
+                                <div class="form-check">
+                                    <input v-model="slideShowType" class="form-check-input" type="radio" name="type" value="automatic">
+                                    <label class="form-check-label d-flex" for="type">
+                                        Automatic
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-8">
+                                <select v-model="slideShowInterval" class="form-control">
+                                    <option v-for="option in slideShowOptions" :key="option.value" :value="option.value">
+                                        [[ option.display ]]
+                                    </option>
+                                </select>
+                                <div class="d-flex flex-column pl-4 mt-2">
+                                    <div>
+                                        Randomize
+                                    </div>
+                                    <input v-model="slideShowRandomize" class="form-check-input" type="checkbox" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer justify-content-end">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <input id="btn-action" class="btn btn-primary" type="button" name="Go" value="Confirm" @click="startSlideShow()" />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div id="overlay" class="d-none">
+            <img class="slide-show" src="" />
+            <video class="slide-show d-none" controls autoplay loop muted>
+                <source src="" type="video/mp4">
+            </video>
+        </div>
+
     </div>
 
 {% endblock %}
@@ -200,8 +245,7 @@
 
     <script type="text/javascript">
 
-        current_index = 0;
-        size_of_collection = {{ blob_list|length }};
+        sizeOfCollection = {{ blob_list|length }};
 
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
@@ -252,8 +296,8 @@
             mounted() {
                 document.getElementById("id_name").value = "{{ collection.name }}";
                 document.getElementById("id_description").value = "{{ collection.description }}";
-                }
             }
+        }
 
         new Vue({
             el: "#vue-app",
@@ -267,6 +311,12 @@
                     collectionDetailMenuItems: [
                         {
                             id: uuidv4(),
+                            title: "Slide Show",
+                            url: "#",
+                            clickHandler: this.onClickSlideShow,
+                        },
+                        {
+                            id: uuidv4(),
                             title: "Update",
                             url: "#",
                             clickHandler: this.onClickUpdate,
@@ -277,48 +327,137 @@
                             url: "#",
                             clickHandler: this.onClickDelete,
                         },
+                    ],
+                    {% if first_blob_info %}
+                    slideShowImageInfo: {{ first_blob_info|safe }},
+                    {% endif %}
+                    slideShowImageIndex: 0,
+                    slideShowType: "manual",
+                    slideShowInterval: "60",
+                    slideShowRandomize: false,
+                    slideShowOptions: [
+                        {
+                            value: "1",
+                            display: "Rotate Every Minute",
+                        },
+                        {
+                            value: "5",
+                            display: "Rotate Every 5 Minutes",
+                        },
+                        {
+                            value: "10",
+                            display: "Rotate Every 10 Minutes",
+                        },
+                        {
+                            value: "30",
+                            display: "Rotate Every 30 Minutes",
+                        },
+                        {
+                            value: "60",
+                            display: "Rotate Every Hour",
+                        },
+                        {
+                            value: "1440",
+                            display: "Rotate Every Day",
+                        },
                     ]
                 }
             },
             methods: {
                 onClickUpdate() {
-                    $("#modalUpdate").modal("show")
+                    $("#modalUpdate").modal("show");
+                },
+                onClickSlideShow() {
+                    $("#modalSlideShow").modal("show");
+                },
+                startSlideShow() {
+                    $("#modalSlideShow").modal("hide");
+
+                    // Hide scrollbars
+                    document.body.style.overflow = "hidden";
+
+                    // Add a black background
+                    document.getElementById("overlay").classList.remove("d-none");
+
+                    if (this.slideShowType === "automatic") {
+                        this.getSlideShowImage();
+                        setInterval( () => {
+                            if (this.slideShowImageIndex === sizeOfCollection - 1) {
+                                this.slideShowImageIndex = 0;
+                            } else {
+                                this.slideShowImageIndex++;
+                            }
+                            this.getSlideShowImage();
+                        }, parseInt(this.slideShowInterval * 1000 * 60));
+                    } else {
+                        this.changeSlideShowImage(this.slideShowImageInfo.url, this.slideShowImageInfo.content_type);
+                    }
+                },
+                getSlideShowImage() {
+
+                    axios.get("{% url "collection:get_blob" collection.uuid 666 %}?randomize=".replace(/666/, this.slideShowImageIndex) + this.slideShowRandomize)
+                         .then(response => {
+                             this.changeSlideShowImage(response.data.url, response.data.content_type);
+                         })
+                },
+                changeSlideShowImage(url, type) {
+                    if (type === "Image") {
+                        document.querySelector("#overlay img").classList.remove("d-none");
+                        document.querySelector("#overlay img").src = url;
+                        document.querySelector("#overlay video").classList.add("d-none");
+                        document.querySelector("#overlay video").src = null;
+                    } else {
+                        document.querySelector("#overlay img").classList.add("d-none");
+                        document.querySelector("#overlay img").src = null;
+                        document.querySelector("#overlay video").classList.remove("d-none");
+                        document.querySelector("#overlay video").src = url;
+                    }
                 },
                 onClickDelete() {
                     $("#modalDelete").modal("show")
                 },
                 handleHoverMenu(hovered) {
                     this.$refs.dropDownMenu.hide = !hovered;
-                 },
+                },
             },
             mounted() {
 
+                let self = this;
+
                 window.addEventListener("keydown", function(e) {
 
-                    if (e.which == 37 || e.which == 39) {
+                    if (e.which == 39) { /* Right arrow */
 
-                        if (e.which == 39) { /* Right arrow */
-
-                            if (current_index == size_of_collection - 1) {
-                                return;
-                            }
-                            current_index++;
-
+                        if (self.slideShowImageIndex === sizeOfCollection - 1) {
+                            self.slideShowImageIndex = 0;
+                        } else {
+                            self.slideShowImageIndex++;
                         }
 
-                        if (e.which == 37) { /* Left arrow */
+                        self.getSlideShowImage();
 
-                            if (current_index == 0) {
-                                return;
-                            }
-                            current_index--;
+                    } else if (e.which == 37) { /* Left arrow */
 
+                        if (self.slideShowImageIndex === 0) {
+                            self.slideShowImageIndex = sizeOfCollection - 1;
+                        } else {
+                            self.slideShowImageIndex--;
                         }
 
-                        axios.get("{% url "collection:get_blob" collection.uuid 666 %}".replace(/666/, current_index))
-                             .then(response => {
-                                 document.getElementById("gallery_image").setAttribute("src", response.data.cover_info.url);
-                             })
+                        self.getSlideShowImage();
+
+
+                    } else if (e.which == 27) { /* Escape */
+
+                        document.querySelector("#overlay img").src = null;
+                        document.querySelector("#overlay video").src = null;
+
+                        // Restore the scrollbars
+                        document.body.style.overflow = "visible";
+
+                        // Remove the back background
+                        document.getElementById("overlay").classList.add("d-none");
+
                     }
                 });
             }

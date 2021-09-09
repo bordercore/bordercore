@@ -46,11 +46,6 @@ urlpatterns = [
         name="parse_date"
     ),
     path(
-        route="slideshow/",
-        view=views.slideshow,
-        name="slideshow"
-    ),
-    path(
         route="recent_blobs",
         view=views.recent_blobs,
         name="recent_blobs"

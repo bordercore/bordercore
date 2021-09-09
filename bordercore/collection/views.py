@@ -1,3 +1,5 @@
+import json
+
 from botocore.errorfactory import ClientError
 from rest_framework.decorators import api_view
 
@@ -57,10 +59,7 @@ class CollectionDetailView(FormRequestMixin, FormMixin, DetailView):
         if blob_list:
             context["blob_list"] = blob_list
             try:
-                context["first_blob_cover_info"] = Blob.get_cover_info(
-                    uuid=blob_list[0]["uuid"],
-                    filename=blob_list[0]["filename"]
-                )
+                context["first_blob_info"] = json.dumps(self.object.get_blob(0, False))
             except ClientError:
                 pass
 
@@ -184,7 +183,8 @@ def get_blob(request, collection_uuid, blob_position):
 
     collection = Collection.objects.get(uuid=collection_uuid)
 
-    return JsonResponse(collection.get_blob(blob_position))
+    randomize = True if request.GET.get("randomize", "") == "true" else False
+    return JsonResponse(collection.get_blob(blob_position, randomize))
 
 
 @api_view(["GET"])

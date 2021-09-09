@@ -347,7 +347,7 @@ tr.selected {
 }
 
 .table-borders th {
-  border-bottom: 3px solid black;
+  border-bottom: 3px solid #ccc;
   padding: 0.6rem;
 }
 
@@ -765,8 +765,16 @@ h2#name {
   list-style-type: none;
 }
 
-#slide-show {
-  background-color: black;
+#overlay {
+  background-color: #000;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 100%;
+  max-height: 100%;
+  z-index: 150;
 }
 
 .slide-show {
@@ -780,6 +788,7 @@ h2#name {
   margin: auto;
   overflow: auto;
   object-fit: contain;
+  z-index: 200;
 }
 
 #blob-detail-menu {
@@ -1350,8 +1359,12 @@ span {
   }
 }
 
-.v-sidebar-menu.vsm_expanded {
-  max-width: 15rem !important;
+.v-sidebar-menu {
+  z-index: 100 !important;
+
+  &.vsm_expanded {
+    max-width: 15rem !important;
+  }
 }
 
 /* CONTENT STYLE */

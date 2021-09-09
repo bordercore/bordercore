@@ -41,8 +41,6 @@ def test_get_tags(collection):
 def test_get_blob(collection):
 
     assert collection[0].get_blob(-1) == {}
-    assert collection[0].get_blob(0)["blob_id"] == 2000
-    assert collection[0].get_blob(1)["blob_id"] == 1000
     assert collection[0].get_blob(3) == {}
 
 

@@ -146,16 +146,6 @@ def test_blob_metadata_name_search(auto_login_user, blob_image_factory):
     assert resp.status_code == 200
 
 
-def test_blob_slideshow(auto_login_user, blob_text_factory, blob_image_factory, collection):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("blob:slideshow")
-    resp = client.get(url)
-
-    assert resp.status_code == 200
-
-
 def test_blob_collection_mutate(monkeypatch_collection, auto_login_user, blob_text_factory, collection):
 
     _, client = auto_login_user()
