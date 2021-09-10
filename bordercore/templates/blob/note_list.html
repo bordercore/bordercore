@@ -132,7 +132,7 @@
                                 {% for tag in note.source.tags %}
                                 {
                                     "tag": "{{ tag }}",
-                                    "url": "{% url 'search:notes' %}"
+                                    "url": "{% url 'search:notes' %}?tagsearch={{ tag }}"
                                 },
                                 {% endfor %}
                             ]
