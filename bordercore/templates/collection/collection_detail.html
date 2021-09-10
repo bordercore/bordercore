@@ -24,12 +24,21 @@
             <div class="card-body">
 
                 {% if collection.description %}
-                    <h2>{{ collection.description }}</h2>
-                    <br />
+                    <h3 class="mb-3">{{ collection.description }}</span></h3>
                 {% endif %}
 
                 <div class="mb-3">
-                    <strong>Updated</strong> {{ collection.modified|date:"F j, Y" }}
+                    <strong>Count</strong>
+                    <span class="text-primary ml-1">
+                        {{ blob_list|length }} blob{{ blob_list|length|pluralize:"s" }}
+                    </span>
+                </div>
+
+                <div class="mb-3">
+                    <strong>Updated</strong>
+                    <span class="text-primary ml-1">
+                        {{ collection.modified|date:"F j, Y" }}
+                    </span>
                 </div>
 
                 <a href="{% url 'blob:create' %}?collection_uuid={{ collection.uuid }}" class="btn btn-primary mt-2" role="button"><font-awesome-icon icon="plus" class="mr-2"></font-awesome-icon>Add Blob</a>
