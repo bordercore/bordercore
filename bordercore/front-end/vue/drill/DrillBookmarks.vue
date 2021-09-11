@@ -92,10 +92,6 @@
                 default: "url",
                 type: String,
             },
-            searchUrl: {
-                default: "url",
-                type: String,
-            },
             getTitleFromUrlUrl: {
                 default: "url",
                 type: String,

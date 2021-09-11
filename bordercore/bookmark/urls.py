@@ -91,9 +91,4 @@ urlpatterns = [
         view=views.BookmarkDeleteView.as_view(),
         name="delete"
     ),
-    path(
-        route="search",
-        view=views.search,
-        name="search"
-    ),
 ]
