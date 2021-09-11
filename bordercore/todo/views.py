@@ -15,6 +15,7 @@ from lib.mixins import FormRequestMixin
 from tag.models import SortOrderTagTodo, Tag
 from todo.forms import TodoForm
 from todo.models import Todo
+from todo.services import search as search_service
 
 
 @method_decorator(login_required, name="dispatch")
@@ -90,7 +91,7 @@ class TodoTaskList(ListView):
         search_term = self.request.GET.get("search", None)
 
         if search_term:
-            tasks = Todo.search(search_term, self.request.user.id)
+            tasks = search_service(self.request.user, search_term)
         else:
             tasks = self.get_queryset().values()
 
@@ -107,9 +108,6 @@ class TodoTaskList(ListView):
                 "url": todo["url"],
                 "uuid": todo["uuid"]
             }
-
-            # if todo.data:
-            #     data = {**data, **todo.data}
 
             info.append(data)
 
