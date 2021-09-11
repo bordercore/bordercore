@@ -650,6 +650,44 @@ def search_names(request, es, doc_types, search_term):
                                 "term": {
                                     "user_id": request.user.id
                                 }
+                            },
+                            {
+                                "bool": {
+                                    "should": [
+                                        {
+                                            "match": {
+                                                "name.autocomplete": {
+                                                    "query": search_term,
+                                                    "operator": "and"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "match": {
+                                                "question.autocomplte": {
+                                                    "query": search_term,
+                                                    "operator": "and"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "match": {
+                                                "title.autocomplete": {
+                                                    "query": search_term,
+                                                    "operator": "and"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "match": {
+                                                "artist.autocomplete": {
+                                                    "query": search_term,
+                                                    "operator": "and"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
                             }
                         ]
                     }
@@ -682,47 +720,6 @@ def search_names(request, es, doc_types, search_term):
                     "uuid"]
     }
 
-    search_object["query"]["function_score"]["query"]["bool"]["must"].append(
-        {
-            "bool": {
-                "should": [
-                    {
-                        "match": {
-                            "name.autocomplete": {
-                                "query": search_term,
-                                "operator": "and"
-                            }
-                        }
-                    },
-                    {
-                        "match": {
-                            "question.autocomplte": {
-                                "query": search_term,
-                                "operator": "and"
-                            }
-                        }
-                    },
-                    {
-                        "match": {
-                            "title.autocomplete": {
-                                "query": search_term,
-                                "operator": "and"
-                            }
-                        }
-                    },
-                    {
-                        "match": {
-                            "artist.autocomplete": {
-                                "query": search_term,
-                                "operator": "and"
-                            }
-                        }
-                    }
-                ]
-            }
-        }
-    )
-
     if len(doc_types) > 0:
         search_object["query"]["function_score"]["query"]["bool"]["must"].append(
             {
@@ -753,6 +750,20 @@ def search_tags(request, es, doc_types, search_term):
                         "term": {
                             "user_id": request.user.id
                         }
+                    },
+                    {
+                        "bool": {
+                            "should": [
+                                {
+                                    "match": {
+                                        "tags.autocomplete": {
+                                            "query": search_term,
+                                            "operator": "and"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
                     }
                 ]
             }
@@ -782,23 +793,6 @@ def search_tags(request, es, doc_types, search_term):
                     "url",
                     "uuid"]
     }
-
-    search_object["query"]["bool"]["must"].append(
-        {
-            "bool": {
-                "should": [
-                    {
-                        "match": {
-                            "tags.autocomplete": {
-                                "query": search_term,
-                                "operator": "and"
-                            }
-                        }
-                    }
-                ]
-            }
-        }
-    )
 
     if len(doc_types) > 1:
         search_object["query"]["bool"]["must"].append(

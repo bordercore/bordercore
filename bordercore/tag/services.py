@@ -48,6 +48,20 @@ def search(user, tag_name, doctype=None):
                             "user_id": user.id
                         }
                     },
+                    {
+                        "bool": {
+                            "should": [
+                                {
+                                    "match": {
+                                        "tags.autocomplete": {
+                                            "query": search_term,
+                                            "operator": "and"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
                 ]
             }
         },
@@ -59,26 +73,10 @@ def search(user, tag_name, doctype=None):
                 }
             }
         },
-        "from": 0, "size": 0,
+        "from": 0,
+        "size": 0,
         "_source": ["tags"]
     }
-
-    search_object["query"]["bool"]["must"].append(
-        {
-            "bool": {
-                "should": [
-                    {
-                        "match": {
-                            "tags.autocomplete": {
-                                "query": search_term,
-                                "operator": "and"
-                            }
-                        }
-                    }
-                ]
-            }
-        }
-    )
 
     # If a doctype is passed in, then limit our search to tags attached
     #  to that particular object type, rather than to all tags.
