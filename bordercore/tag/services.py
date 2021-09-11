@@ -1,4 +1,3 @@
-import re
 from urllib.parse import unquote
 
 from elasticsearch import Elasticsearch

@@ -120,6 +120,7 @@
                                     value-attribute="artist"
                                     search-url="{% url 'music:search_artists' %}?term="
                                     place-holder=""
+                                    :debounce=300
                                 >
                                 </simple-suggest>
                             </div>

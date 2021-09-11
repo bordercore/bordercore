@@ -1,9 +1,16 @@
+from urllib.parse import unquote
+
+from elasticsearch import Elasticsearch
+
+from django.conf import settings
 from django.db.models import Count, Sum
 from django.db.models.functions import Coalesce
 
 from lib.time_utils import convert_seconds
 
 from .models import Playlist, PlaylistItem
+
+SEARCH_LIMIT = 1000
 
 
 def get_playlist_counts(user):
@@ -50,3 +57,66 @@ def get_playlist_songs(playlist):
         "song_list": song_list,
         "playtime": playtime
     }
+
+
+def search(user, artist_name):
+    """
+    Search for artists in Elasticsearch based on a substring.
+    """
+
+    es = Elasticsearch(
+        [settings.ELASTICSEARCH_ENDPOINT],
+        verify_certs=False
+    )
+
+    search_term = unquote(artist_name.lower())
+
+    search_object = {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "term": {
+                            "user_id": user.id
+                        }
+                    },
+                    {
+                        "bool": {
+                            "should": [
+                                {
+                                    "match": {
+                                        "artist.autocomplete": {
+                                            "query": search_term,
+                                            "operator": "and"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "aggs": {
+            "distinct_artists": {
+                "terms": {
+                    "field": "artist.keyword",
+                    "size": SEARCH_LIMIT
+                }
+            }
+        },
+        "from": 0,
+        "size": 0,
+        "_source": [""]
+    }
+
+    results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+
+    return [
+        {
+            "artist": x["key"]
+        }
+        for x
+        in
+        results["aggregations"]["distinct_artists"]["buckets"]
+    ]

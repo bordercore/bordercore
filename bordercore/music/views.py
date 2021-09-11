@@ -5,11 +5,9 @@ import re
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
-from urllib.parse import unquote
 
 import boto3
 import humanize
-from elasticsearch import Elasticsearch
 from mutagen.mp3 import MP3
 
 from django.conf import settings
@@ -30,6 +28,7 @@ from django.views.generic.list import ListView
 from lib.mixins import FormRequestMixin
 from lib.time_utils import convert_seconds
 from lib.util import remove_non_ascii_characters
+from music.services import search as search_service
 
 from .forms import AlbumForm, PlaylistForm, SongForm
 from .models import Album, Listen, Playlist, PlaylistItem, Song
@@ -376,71 +375,9 @@ def handle_s3(song, sha1sum):
 @login_required
 def search_artists(request):
 
-    es = Elasticsearch(
-        [settings.ELASTICSEARCH_ENDPOINT],
-        verify_certs=False
-    )
+    artist = request.GET["term"].lower()
 
-    search_terms = re.split(r"\s+", unquote(request.GET["term"].lower()))
-
-    search_object = {
-        "query": {
-            "bool": {
-                "must": [
-                    {
-                        "term": {
-                            "doctype": "song"
-                        }
-                    },
-                    {
-                        "term": {
-                            "user_id": request.user.id
-                        }
-                    }
-                ]
-            }
-        },
-        "aggs": {
-            "unique_artists": {
-                "terms": {
-                    "field": "artist.keyword",
-                    "size": 100
-                }
-            }
-        },
-        "from": 0, "size": 0,
-        "_source": ["artist"]
-    }
-
-    # Separate query into terms based on whitespace and
-    #  and treat it like an "AND" boolean search
-    for one_term in search_terms:
-        search_object["query"]["bool"]["must"].append(
-            {
-                "bool": {
-                    "should": [
-                        {
-                            "wildcard": {
-                                "artist": {
-                                    "value": f"*{one_term}*",
-                                }
-                            }
-                        }
-                    ]
-                }
-            }
-        )
-
-    results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
-    matches = []
-
-    for match in results["aggregations"]["unique_artists"]["buckets"]:
-
-        matches.append(
-            {
-                "artist": match["key"]
-            }
-        )
+    matches = search_service(request.user, artist)
 
     return JsonResponse(matches, safe=False)
 
@@ -813,5 +750,3 @@ def add_to_playlist(request):
         }
 
     return JsonResponse(response)
-
-
