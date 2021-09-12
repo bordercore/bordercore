@@ -1,9 +1,6 @@
-import datetime
-import re
 import uuid
-from urllib.parse import unquote
 
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, helpers
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -110,26 +107,32 @@ class Todo(TimeStampedModel):
                 verify_certs=False
             )
 
-        doc = {
-            "bordercore_id": self.id,
-            "uuid": self.uuid,
-            "name": self.name,
-            "tags": [tag.name for tag in self.tags.all()],
-            "url": self.url,
-            "note": self.note,
-            "last_modified": self.modified,
-            "priority": self.priority,
-            "doctype": "todo",
-            "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
-            "date_unixtime": self.created.strftime("%s"),
-            "user_id": self.user.id
-        }
+        count, errors = helpers.bulk(es, [self.elasticsearch_document])
 
-        es.index(
-            index=settings.ELASTICSEARCH_INDEX,
-            id=self.uuid,
-            body=doc
-        )
+    @property
+    def elasticsearch_document(self):
+        """
+        Return a representation of the todo suitable for indexing in Elasticsearch
+        """
+
+        return {
+            "_index": settings.ELASTICSEARCH_INDEX,
+            "_id": self.uuid,
+            "_source": {
+                "bordercore_id": self.id,
+                "uuid": self.uuid,
+                "name": self.name,
+                "tags": [tag.name for tag in self.tags.all()],
+                "url": self.url,
+                "note": self.note,
+                "last_modified": self.modified,
+                "priority": self.priority,
+                "doctype": "todo",
+                "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
+                "date_unixtime": self.created.strftime("%s"),
+                "user_id": self.user.id
+            }
+        }
 
 
 @receiver(post_save, sender=Todo)

@@ -3,7 +3,7 @@ import re
 import uuid
 
 import boto3
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, helpers
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -87,27 +87,32 @@ class Bookmark(TimeStampedModel):
                 verify_certs=False
             )
 
-        doc = {
-            "bordercore_id": self.id,
-            "name": self.name,
-            "bordercore_bookmark_note": self.note,
-            "tags": [tag.name for tag in self.tags.all()],
-            "url": self.url,
-            "note": self.note,
-            "importance": self.importance,
-            "last_modified": self.modified,
-            "doctype": "bookmark",
-            "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
-            "date_unixtime": self.created.strftime("%s"),
-            "user_id": self.user.id,
-            "uuid": self.uuid
-        }
+        count, errors = helpers.bulk(es, [self.elasticsearch_document])
 
-        res = es.index(
-            index=settings.ELASTICSEARCH_INDEX,
-            id=f"bordercore_bookmark_{self.id}",
-            body=doc
-        )
+    @property
+    def elasticsearch_document(self):
+        """
+        Return a representation of the bookmark suitable for indexing in Elasticsearch
+        """
+
+        return {
+            "_index": settings.ELASTICSEARCH_INDEX,
+            "_id": f"bordercore_bookmark_{self.id}",
+            "_source": {
+                "bordercore_id": self.id,
+                "name": self.name,
+                "tags": [tag.name for tag in self.tags.all()],
+                "url": self.url,
+                "note": self.note,
+                "importance": self.importance,
+                "last_modified": self.modified,
+                "doctype": "bookmark",
+                "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
+                "date_unixtime": self.created.strftime("%s"),
+                "user_id": self.user.id,
+                "uuid": self.uuid
+            }
+        }
 
     def snarf_favicon(self):
 

@@ -5,7 +5,7 @@ from datetime import timedelta
 
 import boto3
 import humanize
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, helpers
 from mutagen.easyid3 import EasyID3
 from mutagen.mp3 import MP3
 
@@ -54,28 +54,34 @@ class Album(TimeStampedModel):
                 verify_certs=False
             )
 
-        doc = {
-            "uuid": self.uuid,
-            "bordercore_id": self.id,
-            "title": self.title,
-            "artist": self.artist,
-            "year": self.year,
-            "original_release_year": self.original_release_year,
-            "compilation": self.compilation,
-            "tags": [tag.name for tag in self.tags.all()],
-            "note": self.note,
-            "last_modified": self.modified,
-            "doctype": "album",
-            "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
-            "date_unixtime": self.created.strftime("%s"),
-            "user_id": self.user.id
-        }
+        count, errors = helpers.bulk(es, [self.elasticsearch_document])
 
-        es.index(
-            index=settings.ELASTICSEARCH_INDEX,
-            id=self.uuid,
-            body=doc
-        )
+    @property
+    def elasticsearch_document(self):
+        """
+        Return a representation of the album suitable for indexing in Elasticsearch
+        """
+
+        return {
+            "_index": settings.ELASTICSEARCH_INDEX,
+            "_id": self.uuid,
+            "_source": {
+                "uuid": self.uuid,
+                "bordercore_id": self.id,
+                "title": self.title,
+                "artist": self.artist,
+                "year": self.year,
+                "original_release_year": self.original_release_year,
+                "compilation": self.compilation,
+                "tags": [tag.name for tag in self.tags.all()],
+                "note": self.note,
+                "last_modified": self.modified,
+                "doctype": "album",
+                "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
+                "date_unixtime": self.created.strftime("%s"),
+                "user_id": self.user.id
+            }
+        }
 
 
 @receiver(post_save, sender=Album)
@@ -158,31 +164,39 @@ class Song(TimeStampedModel):
                 verify_certs=False
             )
 
+        count, errors = helpers.bulk(es, [self.elasticsearch_document])
+
+    @property
+    def elasticsearch_document(self):
+        """
+        Return a representation of the song suitable for indexing in Elasticsearch
+        """
+
         doc = {
-            "uuid": self.uuid,
-            "bordercore_id": self.id,
-            "title": self.title,
-            "artist": self.artist,
-            "year": self.year,
-            "track": self.track,
-            "tags": [tag.name for tag in self.tags.all()],
-            "note": self.note,
-            "last_modified": self.modified,
-            "doctype": "song",
-            "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
-            "date_unixtime": self.created.strftime("%s"),
-            "user_id": self.user.id
+            "_index": settings.ELASTICSEARCH_INDEX,
+            "_id": self.uuid,
+            "_source": {
+                "uuid": self.uuid,
+                "bordercore_id": self.id,
+                "title": self.title,
+                "artist": self.artist,
+                "year": self.year,
+                "track": self.track,
+                "tags": [tag.name for tag in self.tags.all()],
+                "note": self.note,
+                "last_modified": self.modified,
+                "doctype": "song",
+                "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
+                "date_unixtime": self.created.strftime("%s"),
+                "user_id": self.user.id
+            }
         }
 
         if self.album:
             doc["album"] = self.album.title
             doc["album_uuid"] = self.album.uuid
 
-        es.index(
-            index=settings.ELASTICSEARCH_INDEX,
-            id=self.uuid,
-            body=doc
-        )
+        return doc
 
     @staticmethod
     def get_id3_info(request, messages, song):

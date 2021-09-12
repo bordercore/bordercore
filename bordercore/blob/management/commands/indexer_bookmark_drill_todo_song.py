@@ -1,6 +1,5 @@
 # Re-index all bookmarks or todo tasks in Elasticsearch
-
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, helpers
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -16,6 +15,12 @@ es = Elasticsearch(
     timeout=120,
     verify_certs=False
 )
+
+BATCH_SIZE = 10
+
+
+def chunker(seq, size):
+    return (seq[pos:pos + size] for pos in range(0, len(seq), size))
 
 
 class Command(BaseCommand):
@@ -45,30 +50,62 @@ class Command(BaseCommand):
 
     def index_albums_all(self):
 
-        for album in Album.objects.all():
-            self.stdout.write(album.title)
-            album.index_album(es)
+        for group in chunker(Album.objects.all(), BATCH_SIZE):
+            count, errors = helpers.bulk(es, [x.elasticsearch_document for x in group])
+            self.stdout.write(f"Albums added: {count}")
+
+            if errors:
+                raise IOError(f"Error indexing albums: {errors}")
 
     def index_bookmarks_all(self):
 
-        for b in Bookmark.objects.all():
-            self.stdout.write(b.name)
-            b.index_bookmark(es)
+        es = Elasticsearch(
+            [settings.ELASTICSEARCH_ENDPOINT],
+            verify_certs=False
+        )
+
+        for group in chunker(Bookmark.objects.all(), BATCH_SIZE):
+            count, errors = helpers.bulk(es, [x.elasticsearch_document for x in group])
+            self.stdout.write(f"Bookmarks added: {count}")
+
+            if errors:
+                raise IOError(f"Error indexing bookmarks: {errors}")
 
     def index_drill_all(self):
 
-        for q in Question.objects.all():
-            self.stdout.write(str(q.uuid))
-            q.index_question(es)
+        es = Elasticsearch(
+            [settings.ELASTICSEARCH_ENDPOINT],
+            verify_certs=False
+        )
+
+        for group in chunker(Question.objects.all(), BATCH_SIZE):
+            count, errors = helpers.bulk(es, [x.elasticsearch_document for x in group])
+            self.stdout.write(f"Drill questions added: {count}")
 
     def index_song_all(self):
 
-        for s in Song.objects.all():
-            self.stdout.write(f"{s.artist} - {s.title}")
-            s.index_song(es)
+        es = Elasticsearch(
+            [settings.ELASTICSEARCH_ENDPOINT],
+            verify_certs=False
+        )
+
+        for group in chunker(Song.objects.all(), BATCH_SIZE):
+            count, errors = helpers.bulk(es, [x.elasticsearch_document for x in group])
+            self.stdout.write(f"Songs added: {count}")
+
+            if errors:
+                raise IOError(f"Error indexing songs: {errors}")
 
     def index_todo_all(self):
 
-        for t in Todo.objects.all():
-            self.stdout.write(t.name)
-            t.index_todo(es)
+        es = Elasticsearch(
+            [settings.ELASTICSEARCH_ENDPOINT],
+            verify_certs=False
+        )
+
+        for group in chunker(Todo.objects.all(), BATCH_SIZE):
+            count, errors = helpers.bulk(es, [x.elasticsearch_document for x in group])
+            self.stdout.write(f"Todos added: {count}")
+
+            if errors:
+                raise IOError(f"Error indexing todos: {errors}")

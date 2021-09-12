@@ -1,7 +1,7 @@
 import uuid
 from datetime import timedelta
 
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, helpers
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -182,27 +182,34 @@ class Question(TimeStampedModel):
                 verify_certs=False
             )
 
+        count, errors = helpers.bulk(es, [self.elasticsearch_document])
+
+    @property
+    def elasticsearch_document(self):
+        """
+        Return a representation of the drill question suitable for indexing in Elasticsearch
+        """
         doc = {
-            "uuid": self.uuid,
-            "bordercore_id": self.id,
-            "question": self.question,
-            "answer": self.answer,
-            "tags": [tag.name for tag in self.tags.all()],
-            "last_modified": self.modified,
-            "doctype": "drill",
-            "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
-            "date_unixtime": self.created.strftime("%s"),
-            "user_id": self.user.id
+            "_index": settings.ELASTICSEARCH_INDEX,
+            "_id": self.uuid,
+            "_source": {
+                "uuid": self.uuid,
+                "bordercore_id": self.id,
+                "question": self.question,
+                "answer": self.answer,
+                "tags": [tag.name for tag in self.tags.all()],
+                "last_modified": self.modified,
+                "doctype": "drill",
+                "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
+                "date_unixtime": self.created.strftime("%s"),
+                "user_id": self.user.id
+            }
         }
 
         if self.last_reviewed:
             doc["last_reviewed"] = self.last_reviewed.strftime("%s")
 
-        es.index(
-            index=settings.ELASTICSEARCH_INDEX,
-            id=self.uuid,
-            body=doc
-        )
+        return doc
 
     @staticmethod
     def start_study_session(user, session, session_type, param=None):
