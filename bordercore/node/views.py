@@ -1,9 +1,3 @@
-import re
-from urllib.parse import unquote
-
-from elasticsearch import Elasticsearch
-
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.http import JsonResponse
@@ -15,6 +9,7 @@ from django.views.generic.list import ListView
 
 from blob.models import Blob
 from bookmark.models import Bookmark
+from node.services import search as search_service
 
 from .models import Node, SortOrderNodeBlob, SortOrderNodeBookmark
 
@@ -27,7 +22,7 @@ class NodeListView(ListView):
             .annotate(
                 blob_count=Count("blobs"),
                 bookmark_count=Count("bookmarks")
-                ) \
+            ) \
             .order_by("-modified")
 
     def get_context_data(self, **kwargs):
@@ -293,99 +288,9 @@ def search_bookmarks(request):
 @login_required
 def search_blob_names(request):
 
-    es = Elasticsearch(
-        [settings.ELASTICSEARCH_ENDPOINT],
-        verify_certs=False
-    )
-
     search_term = request.GET["term"].lower()
 
-    search_terms = re.split(r"\s+", unquote(search_term))
-
-    search_object = {
-        "query": {
-            "bool": {
-                "must": [
-                    {
-                        "bool": {
-                            "should": [
-                                {
-                                    "term": {
-                                        "doctype": "book"
-                                    }
-                                },
-                                {
-                                    "term": {
-                                        "doctype": "blob"
-                                    }
-                                },
-                                {
-                                    "term": {
-                                        "doctype": "document"
-                                    }
-                                },
-                            ]
-                        }
-                    },
-                    {
-                        "term": {
-                            "user_id": request.user.id
-                        }
-                    }
-                ]
-            }
-        },
-        "from": 0, "size": 20,
-        "_source": ["author",
-                    "date",
-                    "date_unixtime",
-                    "doctype",
-                    "filename",
-                    "importance",
-                    "name",
-                    "note",
-                    "sha1sum",
-                    "tags",
-                    "uuid"]
-    }
-
-    # Separate query into terms based on whitespace and
-    #  and treat it like an "AND" boolean search
-    for one_term in search_terms:
-        search_object["query"]["bool"]["must"].append(
-            {
-                "bool": {
-                    "should": [
-                        {
-                            "wildcard": {
-                                "name": {
-                                    "value": f"*{one_term}*",
-                                }
-                            }
-                        }
-                    ]
-                }
-            }
-        )
-
-    results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
-
-    matches = []
-    for match in results["hits"]["hits"]:
-        matches.append(
-            {
-                "doctype": match["_source"].get("doctype", ""),
-                "note": match["_source"].get("note", ""),
-                "name": match["_source"]["name"],
-                "uuid": match["_source"].get("uuid"),
-                "url": reverse('blob:detail', kwargs={"uuid": str(match["_source"].get("uuid"))}),
-                "cover_url": settings.MEDIA_URL + Blob.get_cover_info(
-                    match["_source"].get("uuid"),
-                    match["_source"].get("filename"),
-                    size="small"
-                )["url"]
-            }
-        )
+    matches = search_service(request.user, search_term)
 
     return JsonResponse(matches, safe=False)
 
