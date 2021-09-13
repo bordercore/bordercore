@@ -71,7 +71,7 @@ export function doPost(scope, url, params, callback, successMsg, errorMsg) {
                 response.data.message ? response.data.message : successMsg,
                 {
                     title: "Success",
-                    variant: "success",
+                    variant: "info",
                 },
             );
             console.log("Success: ", response.data);

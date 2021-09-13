@@ -179,6 +179,37 @@ button:focus {
   outline: 0;
 }
 
+// Override the color used by Bootstrap
+.toast-header .close {
+  color: #000;
+}
+
+input.form-control,
+select.form-control,
+textarea.form-control,
+div.CodeMirror {
+  color: $form-color;
+  background-color: $form-background-color;
+
+  &:hover {
+    border-color: $form-border-color-hover;
+  }
+
+  &:focus {
+    color: $form-color;
+    background-color: $form-background-color-focus;
+    border-color: $form-border-color-hover;
+  }
+
+  &:disabled {
+    background-color: $form-background-color-disabled;
+  }
+}
+
+.form-control::placeholder {
+  color: $gray-600;
+}
+
 /* Dropdown Menus */
 
 // Used internally by vue-dropdown-menu's DropdownMenu.vue
@@ -1130,14 +1161,14 @@ audio {
 
 /* CodeMirror */
 
-div.CodeMirror {
-  color: $gray-900;
-  background-color: $form-background-color;
+div.CodeMirror-focused {
+  caret-color: $form-color;
+  color: $form-color;
+  background-color: $form-background-color-focus;
 }
 
-div.CodeMirror-focused {
-  background-color: $white;
-  color: $gray-900;
+.CodeMirror-selected {
+  background: $text-selection-background-color !important;
 }
 
 /* Styles for vue-simple-suggest VUE typeahead component */
@@ -1208,48 +1239,57 @@ div.CodeMirror-focused {
   flex-wrap: nowrap !important;
 }
 
-/* These apply Bootstrap-like styles to the tags */
-.vue-tags-input .ti-input .ti-tag {
-  background-color: #2fa4e7 !important;
-  font-size: 75%;
-  font-weight: 700;
-  border-top-left-radius: 0.25rem;
-  border-top-right-radius: 0.25rem;
-  border-bottom-left-radius: 0.25rem;
-  border-bottom-right-radius: 0.25rem;
-  padding: 0.3rem 0.5rem;
-}
-
-.vue-tags-input .ti-new-tag-input {
-  background: transparent;
-  color: #27293d;
-}
-
-.vue-tags-input .ti-input {
-  background-color: $form-background-color;
-  border-top-left-radius: 0.25rem;
-  border-top-right-radius: 0.25rem;
-  border-bottom-left-radius: 0.25rem;
-  border-bottom-right-radius: 0.25rem;
-  padding: 0.37rem 0.75rem;
-}
-
-.vue-tags-input.ti-focus .ti-input {
-  background-color: $white;
-
-  /* Mimic Bootstrap's default focus behavior */
-  border-color: lighten($primary, 25%);
-  box-shadow: 0 0 0 0.2rem rgba($primary, 0.25);
-}
-
-.vue-tags-input .ti-autocomplete {
-  color: $gray-900;
-}
-
 /* Use this for forms */
 .vue-tags-input {
-  background-color: $modal-background-color !important;
+  color: #6ea6e0 !important;
+  background-color: #3e3e6b !important;
   min-width: 100%;
+  border-color: #262c49 !important;
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+  border-bottom-left-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
+
+  .ti-new-tag-input {
+    background: transparent;
+    color: #6ea6e0;
+  }
+
+  .ti-autocomplete {
+    color: #6ea6e0;
+    background: #10163a !important;
+  }
+
+  /* These apply Bootstrap-like styles to the tags */
+  .ti-input .ti-tag {
+    background-color: #2fa4e7 !important;
+    font-size: 75%;
+    font-weight: 700;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    border-bottom-left-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .ti-input {
+    background-color: #3e3e6b;
+    border-color: #262c49 !important;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    border-bottom-left-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
+    padding: 0.37rem 0.75rem;
+  }
+
+  &.ti-focus .ti-input {
+    color: #6ea6e0 !important;
+    background-color: #10163a !important;
+
+    /* Mimic Bootstrap's default focus behavior */
+    border-color: #7fe7c4 !important;
+    box-shadow: 0 0 0 0.2rem rgba($primary, 0.25);
+  }
 }
 
 /* Use this for inputs of arbitrary length */
@@ -1295,14 +1335,6 @@ p {
   font-size: 1.1em;
   font-weight: 300;
   line-height: 1.7em;
-}
-
-.form-control {
-  background-color: $form-background-color;
-}
-
-.form-control::placeholder {
-  color: $gray-600;
 }
 
 i,

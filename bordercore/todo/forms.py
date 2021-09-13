@@ -35,5 +35,5 @@ class TodoForm(ModelForm):
             "priority": Select(attrs={"class": "form-control"}),
             "name": TextInput(attrs={"class": "form-control", "autocomplete": "off", "autofocus": "true"}),
             "note": Textarea(attrs={"class": "form-control", "rows": 2}),
-            "url": TextInput(attrs={"class": "form-control"}),
+            "url": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
         }

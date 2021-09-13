@@ -412,7 +412,7 @@ def collection_mutate(request):
     if mutation == "add":
 
         if SortOrderCollectionBlob.objects.filter(collection=collection, blob__uuid=blob_uuid).exists():
-            message = "Blob already in collection '{collection.name}'"
+            message = f"Blob already in collection '{collection.name}'"
         else:
             blob = Blob.objects.get(uuid=blob_uuid)
             blob.add_to_collection(request.user, collection.uuid)

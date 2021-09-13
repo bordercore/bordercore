@@ -135,7 +135,7 @@
                     </div>
                 {% endif %}
 
-                <form id="form-blob" action="{{ request.path }}" method="post" enctype="multipart/form-data">
+                <form id="form-blob" action="{{ request.path }}" method="post" enctype="multipart/form-data" class="mr-2">
 
                     {% csrf_token %}
 
@@ -163,7 +163,7 @@
                             {% if field.label == 'File' %}
 
                                 <file-upload inline-template>
-                                    <div class="col-lg-8 input-group">
+                                    <div class="col-lg-10 input-group">
                                         <input type="text" name="filename" :value="filename" class="form-control" id="id_filename" autocomplete="off" />
                                         <input type="hidden" name="file_modified" :value="lastModified" />
                                         <span class="input-group-append">
@@ -232,7 +232,7 @@
 
                             {% else %}
                                 <div class="col-lg-10 col-sm-10 align-self-center">
-                    {{ field }}
+                                    {{ field }}
                                 </div>
                             {% endif %}
 
@@ -288,7 +288,7 @@
                                 </div>
 
                                 <div class="col-lg-10 col-sm-10">
-                                    <div class="col-lg-10 input-group">
+                                    <div class="input-group">
                                         <metadata-input @add-metadata=addMetadata inline-template>
                                             <input type="text" id="id_value" class="form-control" placeholder="Value" autocomplete="off" @keydown.enter.prevent="onKeyDown" />
                                         </metadata-input>
@@ -314,7 +314,7 @@
                                         <div class="form-group row">
                                             <label class="bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">[[ m.name ]]</label>
                                             <div class="col-lg-10 col-sm-10">
-                                                <div class="col-lg-10 input-group">
+                                                <div class="input-group">
                                                     <input type="text" :name="m.counter + '_' + m.name" :value="m.value" class="form-control" autocomplete="off" />
                                                     <span class="input-group-append">
                                                         <button class="btn btn-danger btn-remove" type="button" @click="$emit('delete', m.counter)">
