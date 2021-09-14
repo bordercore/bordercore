@@ -47,7 +47,7 @@
 
                 <editable-text-area
                     uuid="{{ object.uuid }}"
-                    note="{{ object.note }}"
+                    v-model:note="note"
                     edit-url="{% url 'fitness:edit_note' %}"
                     extra-class="mt-5"
                 >
@@ -191,7 +191,8 @@
                 return {
                     isEditingNote: false,
                     isActiveExercise: {% if activity_info %}true{% else %}false{% endif %},
-                    showHistoryMessage: {% if activity_info %}true{% else %}false{% endif %}
+                    showHistoryMessage: {% if activity_info %}true{% else %}false{% endif %},
+                    note: "{{ object.note }}"
                 }
             },
             methods: {
