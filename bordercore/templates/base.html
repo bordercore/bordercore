@@ -58,11 +58,7 @@
                                     initial-search-type="{{ request.session.top_search_filter }}"
                                     suggest-search-url="{% url 'search:search_tags_and_names' %}?term="
                                     query-search-url="{% url 'search:search' %}"
-                                    tag-search-url="{% url 'search:kb_search_tag_detail' 666 %}"
-                                    uuid-search-url="{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}"
-                                    note-tag-search-url="{% url 'search:notes' %}?tagsearch="
                                     note-query-search-url="{% url 'search:notes' %}"
-                                    bookmark-tag-search-url="{% url 'bookmark:get_bookmarks_by_tag' 666 %}"
                                     drill-query-search-url="{% url 'drill:search' %}"
                                     store-in-session-url="{% url "accounts:store_in_session" %}"
                                 >
