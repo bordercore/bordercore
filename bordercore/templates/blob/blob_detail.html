@@ -7,13 +7,12 @@
 
 {% block content %}
 
-    <div class="row no-gutters vh-100">
+    <div class="scrollable-panel-container row no-gutters">
 
-        <div class="col-lg-3 overflow-auto">
-
-            <div class="card-body h-100" id="vue-app" v-b-hover="handleHover">
-                <div>
-                    <div class="dropdownmenu hidden" id="blob-detail-menu">
+        <div class="col-lg-3 h-100">
+            <div id="vue-app" class="scrollable-panel-left card-body d-flex flex-column h-100 mb-0" v-b-hover="handleHover">
+                <div class="position-relative">
+                    <div id="blob-detail-menu" class="dropdownmenu hidden">
 
                         <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center" :right="right">
                             <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
@@ -177,8 +176,9 @@
 
                 </div>
 
-                <div v-if="tree['nodes'].length > 0" class="py-2" id="tree-menu">
-                    <ul>
+
+                <div v-if="tree['nodes'].length > 0" class="p-2" id="tree-menu">
+                    <ul class="mb-0">
                         <tree-menu
                             class="item"
                             :item="tree"
@@ -186,7 +186,6 @@
                         ></tree-menu>
                     </ul>
                 </div>
-
             </div>
 
         </div> <!-- End first column -->
