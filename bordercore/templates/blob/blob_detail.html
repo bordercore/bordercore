@@ -10,27 +10,8 @@
     <div class="scrollable-panel-container row no-gutters">
 
         <div class="col-lg-3 h-100">
-            <div id="vue-app" class="scrollable-panel-left card-body d-flex flex-column h-100 mb-0" v-b-hover="handleHover">
+            <div id="vue-app" class="scrollable-panel-left card-body d-flex flex-column h-100 mb-0">
                 <div class="position-relative">
-                    <div id="blob-detail-menu" class="dropdownmenu hidden">
-
-                        <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center" :right="right">
-                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                            <div slot="dropdown" class="mt-0">
-                                <a class="dropdown-item" href="{% url 'blob:update' blob.uuid %}">Update</a>
-                                    {% if blob.sha1sum and request.user|is_in_group:"Admin" %}
-                                        <a class="dropdown-item" href="#" @click="handleCopySha1sum('{{ blob.sha1sum }}')">Copy Sha1sum</a>
-                                        <a class="dropdown-item" href="{{ aws_url }}">S3 Link</a>
-                                    {% endif %}
-                                    <a class="dropdown-item" href="{% url 'blob:create' %}?linked_blob_uuid={{ blob.uuid }}">Link to New Blob</a>
-                                    <a class="dropdown-item" href="{% url 'blob:clone' blob.uuid %}">Clone Blob</a>
-                                    {% if blob.is_note %}
-                                        <a class="dropdown-item" href="#" @click="onClick">[[pinnedButtonValue ]]</a>
-                                    {% endif %}
-                            </div>
-                        </dropdown-menu>
-
-                    </div>
 
                     <h5>{{ blob.get_edition_string }}</h5>
 
@@ -190,9 +171,29 @@
 
         </div> <!-- End first column -->
 
-        <div class="col-lg-9 h-100 overflow-auto" id="vue-app-content">
+        <div class="col-lg-9 h-100 overflow-auto" id="vue-app-content" v-b-hover="handleHover">
 
             <div class="col-lg-12">
+
+                <div id="blob-detail-menu" class="dropdownmenu hidden">
+
+                        <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center" :right="right">
+                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+                            <div slot="dropdown" class="mt-0">
+                                <a class="dropdown-item" href="{% url 'blob:update' blob.uuid %}">Update</a>
+                                    {% if blob.sha1sum and request.user|is_in_group:"Admin" %}
+                                        <a class="dropdown-item" href="#" @click="handleCopySha1sum('{{ blob.sha1sum }}')">Copy Sha1sum</a>
+                                        <a class="dropdown-item" href="{{ aws_url }}">S3 Link</a>
+                                    {% endif %}
+                                    <a class="dropdown-item" href="{% url 'blob:create' %}?linked_blob_uuid={{ blob.uuid }}">Link to New Blob</a>
+                                    <a class="dropdown-item" href="{% url 'blob:clone' blob.uuid %}">Clone Blob</a>
+                                    {% if blob.is_note %}
+                                        <a class="dropdown-item" href="#" @click="onClick">[[pinnedButtonValue ]]</a>
+                                    {% endif %}
+                            </div>
+                        </dropdown-menu>
+
+                    </div>
 
                 <h2 id="name" class="pl-0 text-break">
                     {{ caption }}
@@ -242,21 +243,10 @@
             el: "#vue-app",
             data() {
                 return {
-                    right: true,
-                    show: false,
-                    isPinnedNote: {{ is_pinned_note|yesno:"true,false" }},
                     tree: {{ tree|safe }},
                 }
             },
             methods: {
-                handleHover(hovered, evt) {
-                    evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
-                    if (hovered == true) {
-                        evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
-                    } else {
-                        evt.currentTarget.querySelector(".dropdownmenu").classList.add("hidden");
-                    };
-                },
                 handleCopySha1sum(sha1sum) {
                     navigator.clipboard.writeText(sha1sum)
                     this.$bvToast.toast("Sha1sum copied to clipboard", {
@@ -264,6 +254,25 @@
                         variant: "primary"
                     })
                 },
+                getNote() {
+                    return markdown.render("{{ blob.note|escapejs }}");
+                }
+            },
+        });
+
+        new Vue({
+            el: "#vue-app-content",
+            components: {
+                BlobDetailCover,
+            },
+            data() {
+                return {
+                    right: true,
+                    show: false,
+                    isPinnedNote: {{ is_pinned_note|yesno:"true,false" }},
+                }
+            },
+            methods: {
                 onClick(evt) {
                     payload = {
                         "uuid": "{{ blob.uuid }}"
@@ -283,27 +292,23 @@
                     );
 
                 },
-                getNote() {
-                    return markdown.render("{{ blob.note|escapejs }}");
-                }
+                handleHover(hovered, evt) {
+                    evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
+                    if (hovered == true) {
+                        evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
+                    } else {
+                        evt.currentTarget.querySelector(".dropdownmenu").classList.add("hidden");
+                    };
+                },
+                getContent() {
+                    content = markdown.render("{{ blob.content|escapejs }}");
+                    return content.replace(/(%#@!(\d+)!@#%)/g, "<a name='section_$2'></a>");
+                },
             },
             computed: {
                 pinnedButtonValue: function() {
                     return this.isPinnedNote ? "Unpin note" : "Pin Note"
                 }
-            }
-        });
-
-        new Vue({
-            el: "#vue-app-content",
-            components: {
-                BlobDetailCover,
-            },
-            methods: {
-                getContent() {
-                    content = markdown.render("{{ blob.content|escapejs }}");
-                    return content.replace(/(%#@!(\d+)!@#%)/g, "<a name='section_$2'></a>");
-                },
             }
         });
 
