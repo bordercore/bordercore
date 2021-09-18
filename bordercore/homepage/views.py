@@ -77,7 +77,7 @@ def homepage(request):
     daily_bookmarks = Bookmark.objects.filter(user=request.user, daily__isnull=False)
     for bookmark in daily_bookmarks:
         if bookmark.daily['viewed'] != 'true':
-            bookmark.css_class = "bold"
+            bookmark.css_class = "font-weight-bold"
 
     # Get the default collection
     default_collection = get_default_collection_blobs(request)

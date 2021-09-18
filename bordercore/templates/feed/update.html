@@ -29,7 +29,7 @@
                 <div>
                     {% for field in form %}
                         <div class="form-group{% if field.errors %} error{% endif %} row">
-                            <label class="bold col-lg-2 col-form-label text-right" for="inputTitle">{{ field.label }}</label>
+                            <label class="font-weight-bold col-lg-2 col-form-label text-right" for="inputTitle">{{ field.label }}</label>
                             <div class="col-lg-5">
                                 {% if field.label == "Url" %}
                                     <input type="text" name="url" value="{{ field.value|default:'' }}" class="form-control" required id="id_url" @blur="onBlur" autocomplete="off">

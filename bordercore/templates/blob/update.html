@@ -158,7 +158,7 @@
                         {% if field.label != 'Filename' and field.name != 'is_private' and field.name != 'is_note'  and field.name != 'importance' %}
 
                             <div class="form-group{% if field.errors %}error{% endif %} row">
-                                <label class="bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">{{ field.label }}</label>
+                                <label class="font-weight-bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">{{ field.label }}</label>
 
                             {% if field.label == 'File' %}
 
@@ -246,28 +246,28 @@
 
                         <div class="col-lg-3 form-group">
                             <div class="form-check">
-                                <label class="form-check-label bold">Important</label>
+                                <label class="form-check-label font-weight-bold">Important</label>
                                 <input class="form-check-input ml-3" type="checkbox"{% if form.importance.value == 10 %} checked="checked"{% endif %} name="importance" id="importance" />
                             </div>
                         </div>
 
                         <div class="col-lg-3 form-group">
                             <div class="form-check">
-                                <label class="form-check-label bold">Is note</label>
+                                <label class="form-check-label font-weight-bold">Is note</label>
                                 <input class="form-check-input ml-3" type="checkbox"{% if form.is_note.value == True %} checked="checked"{% endif %} name="is_note" id="id_is_note" />
                             </div>
                         </div>
 
                         <div class="col-lg-3 form-group">
                             <div class="form-check">
-                                <label class="form-check-label bold">Is private</label>
+                                <label class="form-check-label font-weight-bold">Is private</label>
                                 <input class="form-check-input ml-3" type="checkbox"{% if is_private %} checked="checked"{% endif %} name="is_private" id="id_is_private" />
                             </div>
                         </div>
 
                         <div class="col-lg-3 form-group">
                             <div class="form-check">
-                                <label class="form-check-label bold">Is book</label>
+                                <label class="form-check-label font-weight-bold">Is book</label>
                                 <input class="form-check-input ml-3" type="checkbox"{% if is_book %} checked="checked"{% endif %} name="is_book" id="id_is_book" />
                             </div>
                         </div>
@@ -312,7 +312,7 @@
                                 <div>
                                     <div v-for="m in metadata">
                                         <div class="form-group row">
-                                            <label class="bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">[[ m.name ]]</label>
+                                            <label class="font-weight-bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">[[ m.name ]]</label>
                                             <div class="col-lg-10 col-sm-10">
                                                 <div class="input-group">
                                                     <input type="text" :name="m.counter + '_' + m.name" :value="m.value" class="form-control" autocomplete="off" />

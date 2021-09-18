@@ -2,7 +2,7 @@
     <li :class="{'hide-list-element': depth == 0}">
         <div v-if="depth > 0"
              class="text-break"
-             :class="{bold: isFolder}"
+             :class="{'font-weight-bold': isFolder}"
              @click="toggle"
              @dblclick="makeFolder"
         >

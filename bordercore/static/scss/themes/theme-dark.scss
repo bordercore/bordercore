@@ -62,7 +62,7 @@ $modal-background-color: $gray-900;
 $nav-border-color: $white;
 $nav-highlight-color: #0f0;
 $nav-not-selected-color: #888;
-$selected-background-color: $blue;
+$selected-background-color: lighten($background-color, 10%);
 $sidebar-background-color: #343a40;
 $tree-menu-background-color: #161e4e;
 $tree-menu-color: #2fa4e7;

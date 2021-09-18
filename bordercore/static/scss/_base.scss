@@ -1,18 +1,17 @@
-/* The overflow:hidden eliminates the horizontal scrollbar when
-   setting the padding to 0px on the main fluid container
-   https://stackoverflow.com/questions/37978307/bootstrap-container-fluid-padding/50005919
- */
+// The overflow:hidden eliminates the horizontal scrollbar when
+//  setting the padding to 0px on the main fluid container
+//  https://stackoverflow.com/questions/37978307/bootstrap-container-fluid-padding/50005919
 .container-fluid {
   overflow: hidden;
   padding: 0;
 }
 
-/* Used on the last block in a flex column to extend to the bottom of the page */
+// Used on the last block in a flex column to extend to the bottom of the page
 .extend-block {
   flex: 1 0 auto;
 }
 
-/* Add this to the right-most column in a flex grid */
+// Add this to the right-most column in a flex grid
 .right-column {
   margin-right: 1rem;
 }
@@ -85,9 +84,61 @@
   color: $close-button-hover-color;
 }
 
-/*
-   Common components
-*/
+//
+//   Common components
+//
+
+@import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
+
+body {
+  font-family: "Poppins", sans-serif;
+}
+
+a {
+  text-decoration-color: transparent;
+  transition: all 0.25s cubic-bezier(0.455, 0.03, 0.515, 0.955);
+  text-underline-offset: 0.25rem;
+
+  &:hover {
+    color: $link-decoration-color;
+  }
+
+  &.text-success {
+    &:hover {
+      color: $link-color !important;
+    }
+  }
+}
+
+p {
+  font-family: "Poppins", sans-serif;
+  font-size: 1.1em;
+  font-weight: 300;
+  line-height: 1.7em;
+}
+
+i,
+span {
+  display: inline-block;
+}
+
+.selected,
+.selected a,
+.selected a:visited {
+  background-color: $selected-background-color;
+  color: $white;
+}
+
+.icon-hover {
+  &:hover {
+    color: $primary;
+    transform: scale(1.1);
+  }
+}
+
+.w-20 {
+  width: 20%;
+}
 
 .highlight-box {
   background: lighten(#10163a, 5%);
@@ -102,7 +153,7 @@
   padding: 0;
   border: none;
 
-  /* Comment */
+  // Comment
   font: inherit;
   color: inherit;
   cursor: pointer;
@@ -126,6 +177,43 @@
     color: $white;
     outline: 0;
   }
+}
+
+li.active a {
+  color: #fff;
+}
+
+a.tag {
+  &:link {
+    color: white;
+  }
+
+  &:visited {
+    color: white;
+  }
+
+  &:hover {
+    color: white;
+  }
+
+  &:active {
+    color: yellow;
+  }
+}
+
+.scrollable-panel-container {
+  height: 92vh;
+}
+
+.scrollable-panel-left {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.table-borderless td,
+.table-borderless th {
+  border: 0;
+  padding: 0.6rem;
 }
 
 .hoverable {
@@ -173,8 +261,7 @@
   }
 }
 
-// Disable the outline around toast close buttons when you click
-// on them
+// Disable the outline around toast close buttons when you click on them
 button:focus {
   outline: 0;
 }
@@ -210,7 +297,7 @@ div.CodeMirror {
   color: $gray-600;
 }
 
-/* Dropdown Menus */
+// Dropdown Menus
 
 // Used internally by vue-dropdown-menu's DropdownMenu.vue
 .dropdown-menu.show {
@@ -260,7 +347,7 @@ div.CodeMirror {
   }
 }
 
-/* CSS transition for dropdown, top to down */
+// CSS transition for dropdown, top to down
 .translate-fade-down-enter-active,
 .translate-fade-down-leave-active {
   transition: all 250ms;
@@ -285,14 +372,14 @@ div.CodeMirror {
   transform: translateY(0.6rem);
 }
 
-/* Error pages */
+// Error pages
 
 .response-code {
   font-size: 6.25rem;
   font-weight: bold;
 }
 
-/* Login page */
+// Login page
 
 .jumbotron {
   border: 0.12rem solid #fff;
@@ -314,11 +401,11 @@ body.login {
   background-color: $gray-600;
 }
 
-/*
-   Tables
-*/
+//
+// Tables
+//
 
-/* Eliminate the focus effect when selecting a row or column */
+// Eliminate the focus effect when selecting a row or column
 .b-table tr:focus,
 .b-table th:focus {
   outline: 0;
@@ -337,19 +424,19 @@ table.b-table th {
   border-top: 0;
 }
 
-/* BootstrapVue table sort icon: none */
+// BootstrapVue table sort icon: none
 body .table.b-table > tfoot > tr > [aria-sort=none],
 body .table.b-table > thead > tr > th[aria-sort=none] {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' opacity='.3' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' opacity='.3' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important;
 }
 
-/* BootstrapVue table sort icon: ascending */
+// BootstrapVue table sort icon: ascending
 body .table.b-table > tfoot > tr > [aria-sort=ascending],
 body .table.b-table > thead > tr > th[aria-sort=ascending] {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' opacity='.3' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important;
 }
 
-/* BootstrapVue table sort icon: descending */
+// BootstrapVue table sort icon: descending
 body .table.b-table > tfoot > tr > [aria-sort=descending],
 body .table.b-table > thead > tr > [aria-sort=descending] {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' opacity='.3' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important;
@@ -357,18 +444,6 @@ body .table.b-table > thead > tr > [aria-sort=descending] {
 
 .table_header {
   border-radius: 0.25rem;
-}
-
-tr.selected {
-  background-color: $selected-background-color !important;
-  color: $white;
-}
-
-.selected,
-.selected a,
-.selected a:visited {
-  background-color: $selected-background-color;
-  color: $white;
 }
 
 .table-borders table,
@@ -382,15 +457,11 @@ tr.selected {
   padding: 0.6rem;
 }
 
-.bold {
-  font-weight: bold;
-}
-
 .alert-margin {
   margin-left: 0;
 }
 
-/* Animated buttons */
+// Animated buttons
 
 .glyphicon-refresh-animate {
   -animation: spin 0.7s infinite linear;
@@ -407,7 +478,7 @@ tr.selected {
   to { transform: scale(1) rotate(360deg); }
 }
 
-/* Bootstrap modifications */
+// Bootstrap modifications
 
 .breadcrumb {
   background-color: $background-color-light;
@@ -417,7 +488,7 @@ tr.selected {
 $nav-tabs-link-active-border-color: 0 0 $nav-highlight-color;
 $nav-tabs-link-hover-border-color: $nav-border-color;
 
-/* Modified from bootstrap/scss/_nav.scss */
+// Modified from bootstrap/scss/_nav.scss
 .nav-tabs {
   border-bottom: 2px solid $nav-border-color;
 
@@ -452,7 +523,7 @@ $nav-tabs-link-hover-border-color: $nav-border-color;
   background-color: $modal-background-color;
 }
 
-/* Forms */
+// Forms
 .form-error {
   color: $yellow;
   font-weight: bold;
@@ -460,7 +531,7 @@ $nav-tabs-link-hover-border-color: $nav-border-color;
   padding-top: 0.3rem;
 }
 
-/* Used when you want to display text instead of a form field */
+// Used when you want to display text instead of a form field
 .form-no-input {
   padding: 0.4rem 1.25rem;
 }
@@ -475,7 +546,9 @@ $nav-tabs-link-hover-border-color: $nav-border-color;
   transition-delay: 1s;
 }
 
-/* Markdown */
+//
+// Markdown
+//
 
 // This primarily applies to markdown generated by org-mode exported files.
 //  Note the `white-space` selector to preserve newlines.
@@ -505,14 +578,16 @@ pre {
   padding: 0.25rem 0.5rem 0.25rem 0.5rem;
 }
 
-/* Top Title */
+// Top Title
 
 #top-title {
   font-size: 2rem;
   padding-left: $grid-margin;
 }
 
-/* Top Search */
+//
+// Top Search
+//
 
 #top-search {
   background-color: $background-color-dark;
@@ -574,15 +649,14 @@ pre {
 }
 
 #top-search-container {
-  /* Note that we can't simply use ".suggest-item.hover", since a similar
-     selector defined by vue-simple-suggest overrides it via a !important flag */
+  // Note that we can't simply use ".suggest-item.hover", since a similar
+  //   selector defined by vue-simple-suggest overrides it via a !important flag
   .vue-simple-suggest.designed .suggestions .suggest-item.hover {
     background-color: $cyan !important;
   }
 
-  /* Set the padding to zero so that we can programmatically control the background color lower down
-     in the container hierarchy, based on whether an item is a divider or not.
-  */
+  // Set the padding to zero so that we can programmatically control the background color lower down
+  //   in the container hierarchy, based on whether an item is a divider or not.
   .list-group-item {
     padding: 0;
   }
@@ -601,7 +675,9 @@ pre {
   left: 1rem;
 }
 
-/* Bookmarks */
+//
+// Bookmarks
+//
 
 .bookmark-list-date {
   text-align: right;
@@ -645,18 +721,18 @@ pre {
   font-family: Courier, sans-serif;
 }
 
-/* The "has-search" rules provide space for a Font Awesome
-  search icon inside a search input box */
+// The "has-search" rules provide space for a Font Awesome
+//  search icon inside a search input box
 
 .has-search {
-  /* Specifies the distance between the search icon and where
-   you start typing your search query */
+  // Specifies the distance between the search icon and where
+  //   you start typing your search query
   .form-control {
     padding-left: 2rem;
   }
 
-  /* Absolutely position a search icon inside a search box.
-  For the left position, use a page-specific spacer below. */
+  // Absolutely position a search icon inside a search box.
+  // For the left position, use a page-specific spacer below.
   svg {
     position: absolute;
     z-index: 2;
@@ -677,7 +753,9 @@ pre {
   left: 1rem;
 }
 
-/* Search */
+//
+// Search
+//
 
 .search-input {
   width: 25rem;
@@ -743,7 +821,9 @@ pre {
   width: 2.5rem;
 }
 
-/* Blobs */
+//
+// Blobs
+//
 
 .blob-list-nav {
   background-color: $blob-list-nav;
@@ -823,8 +903,7 @@ h2#name {
 }
 
 #blob-detail-menu {
-  right: 0;
-  top: 0.5rem;
+  top: 0.25rem;
 }
 
 #blob_note {
@@ -834,6 +913,10 @@ h2#name {
 }
 
 .blob-content {
+  em {
+    color: #ff0;
+  }
+
   h1 {
     color: $markdown-heading;
     font-size: 2rem;
@@ -860,9 +943,59 @@ h2#name {
   }
 }
 
-/*
-   Todo
-*/
+//
+// Notes
+//
+
+.note-search-result {
+  .note-content {
+    height: 18.75rem;
+    overflow: hidden;
+    font-size: 1rem;
+
+    h1,
+    .h1 {
+      font-size: 3rem * 0.3;
+    }
+
+    h2,
+    .h2 {
+      font-size: 2.5rem * 0.3;
+    }
+
+    h3,
+    .h3 {
+      font-size: 2rem * 0.3;
+    }
+
+    h4,
+    .h4 {
+      font-size: 1.40625rem * 0.3;
+    }
+
+    h5,
+    .h5 {
+      font-size: 1.171875rem * 0.3;
+    }
+
+    h6,
+    .h6 {
+      font-size: 0.9375rem * 0.3;
+    }
+  }
+
+  > li {
+    border-top: 1px solid #00ffd1;
+  }
+
+  li:hover {
+    background-color: $blob-list-hover-background-color;
+  }
+}
+
+//
+// Todo
+//
 
 .tag-list {
   a {
@@ -904,9 +1037,9 @@ h2#name {
   background-color: #7367f0;
 }
 
-/*
-    Fitness
- */
+//
+// Fitness
+//
 
 .last-active {
   width: 17rem;
@@ -917,49 +1050,9 @@ h2#name {
   height: 25rem;
 }
 
-/* Misc */
-
-.success {
-  color: $green;
-}
-
-.failure {
-  color: $red;
-}
-
-#myModal #title {
-  width: 18.75rem;
-}
-
-li.active a {
-  color: #fff;
-}
-
-a.tag {
-  &:link {
-    color: white;
-  }
-
-  &:visited {
-    color: white;
-  }
-
-  &:hover {
-    color: white;
-  }
-
-  &:active {
-    color: yellow;
-  }
-}
-
-.table-borderless td,
-.table-borderless th {
-  border: 0;
-  padding: 0.6rem;
-}
-
-/* Sortable */
+//
+// Sortable
+//
 
 .wide-list {
   span {
@@ -967,9 +1060,9 @@ a.tag {
   }
 
   li {
-    /* Chrome adds unwanted corners to the edges of
-       rounded elements during drag and drop, so only
-       use rounded borders for Mozilla. */
+    // Chrome adds unwanted corners to the edges of
+    //   rounded elements during drag and drop, so only
+    //   use rounded borders for Mozilla.
     @-moz-document url-prefix() {
       border-radius: 0.5rem;
     }
@@ -984,24 +1077,24 @@ a.tag {
   }
 }
 
-/* The element you've chosen to drag */
+// The element you've chosen to drag
 .sortable-chosen {
   background-color: $background-color-dark !important;
 }
 
-/* Disable the ghosting effect */
+// Disable the ghosting effect
 .sortable-ghost {
   opacity: 0 !important;
 }
 
-/* The element you're dragging */
+// The element you're dragging
 .sortable-drag {
   background: $background-color-dark !important;
 }
 
-/*
-   Node
-*/
+//
+// Node
+//
 
 .node-list-stats {
   font-size: 0.75rem;
@@ -1025,18 +1118,18 @@ a.tag {
   top: 0.5rem;
 }
 
-/*
-  Metrics
-*/
+//
+// Metrics
+//
 
 .metric-test-result-popover {
   max-width: 100%;
   width: 50rem;
 }
 
-/*
-  Drill
-*/
+//
+// Drill
+//
 
 #drill-pinned-tags-menu {
   right: 1rem;
@@ -1081,9 +1174,9 @@ a.tag {
   }
 }
 
-/*
-  Collections
-*/
+//
+// Collections
+//
 
 .collection-container {
   width: $collection-list-item-width + 3rem;
@@ -1135,11 +1228,11 @@ a.tag {
   opacity: 0;
 }
 
-/*
-   Music
-*/
+//
+// Music
+//
 
-/* Audio player controls */
+// Audio player controls
 
 audio {
   outline: none;
@@ -1159,7 +1252,11 @@ audio {
   width: 19rem;
 }
 
-/* CodeMirror */
+// CodeMirror
+
+.CodeMirror-cursor {
+  border-left: 1px solid #7fe7c4 !important;
+}
 
 div.CodeMirror-focused {
   caret-color: $form-color;
@@ -1171,9 +1268,9 @@ div.CodeMirror-focused {
   background: $text-selection-background-color !important;
 }
 
-/* Styles for vue-simple-suggest VUE typeahead component */
+// Styles for vue-simple-suggest VUE typeahead component
 
-/* Original: https://unpkg.com/vue-simple-suggest/dist/styles.css */
+// Original: https://unpkg.com/vue-simple-suggest/dist/styles.css
 
 .vue-simple-suggest > ul {
   list-style: none;
@@ -1232,14 +1329,14 @@ div.CodeMirror-focused {
   color: #fff;
 }
 
-/* Vue Tags Input VUE */
+// Vue Tags Input VUE
 
-/* Disabling flex wrap so that the tag list and input are on the same line */
+// Disabling flex wrap so that the tag list and input are on the same line
 .ti-tags {
   flex-wrap: nowrap !important;
 }
 
-/* Use this for forms */
+// Use this for forms
 .vue-tags-input {
   color: #6ea6e0 !important;
   background-color: #3e3e6b !important;
@@ -1260,7 +1357,7 @@ div.CodeMirror-focused {
     background: #10163a !important;
   }
 
-  /* These apply Bootstrap-like styles to the tags */
+  // These apply Bootstrap-like styles to the tags
   .ti-input .ti-tag {
     background-color: #2fa4e7 !important;
     font-size: 75%;
@@ -1286,18 +1383,18 @@ div.CodeMirror-focused {
     color: #6ea6e0 !important;
     background-color: #10163a !important;
 
-    /* Mimic Bootstrap's default focus behavior */
+    // Mimic Bootstrap's default focus behavior
     border-color: #7fe7c4 !important;
     box-shadow: 0 0 0 0.2rem rgba($primary, 0.25);
   }
 }
 
-/* Use this for inputs of arbitrary length */
+// Use this for inputs of arbitrary length
 #tag-filter-form input {
   width: 25rem;
 }
 
-/* vuejs-datepicker */
+// vuejs-datepicker
 .calendar {
   color: $black;
 }
@@ -1306,54 +1403,7 @@ div.CodeMirror-focused {
   width: 2rem;
 }
 
-/* Stock CSS */
-
-@import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
-
-body {
-  font-family: 'Poppins', sans-serif;
-}
-
-a {
-  text-decoration-color: transparent;
-  transition: all 0.25s cubic-bezier(0.455, 0.03, 0.515, 0.955);
-  text-underline-offset: 0.25rem;
-
-  &:hover {
-    color: $link-decoration-color;
-  }
-
-  &.text-success {
-    &:hover {
-      color: $link-color !important;
-    }
-  }
-}
-
-p {
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.1em;
-  font-weight: 300;
-  line-height: 1.7em;
-}
-
-i,
-span {
-  display: inline-block;
-}
-
-.icon-hover {
-  &:hover {
-    color: $primary;
-    transform: scale(1.1);
-  }
-}
-
-.w-20 {
-  width: 20%;
-}
-
-/* Sidebar */
+// Sidebar
 
 .sidebar-icon {
   color: #9a7ba3;
