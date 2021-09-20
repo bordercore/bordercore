@@ -4,40 +4,75 @@
 
 {% block content %}
 
-    <div class="row no-gutters">
+    <div class="scrollable-panel-container row no-gutters">
 
-        <div class="col-lg-3 d-flex flex-column" id="sort-container-notes">
-            <card title="Pinned Notes">
+        <div id="left-panel" class="col-lg-3 h-100">
 
-                <template v-slot:title-slot>
-                    <div class="h3">
-                        Pinned Notes
-                    </div>
-                </template>
+            <div v-if="pinnedNotes.length > 0" class="d-flex flex-column">
+                <card title="Pinned Notes">
 
-                <template v-slot:content>
-                    <ul class="list-group">
-                        <draggable v-model="notes" @change="onChange" ghost-class="sortable-ghost">
-                            <transition-group type="transition">
-                                <div v-for="note in notes" :key="note.uuid" v-cloak>
-                                    <li class="list-group-item list-group-item-secondary" :data-uuid="note.uuid">
-                                        <a :href="note.url">[[ note.name ]]</a>
-                                    </li>
-                                </div>
-                            </transition-group>
-                        </draggable>
+                    <template v-slot:title-slot>
+                        <div class="h3">
+                            Pinned Notes
+                        </div>
+                    </template>
+
+                    <template v-slot:content>
+                        <ul class="list-group">
+                            <draggable v-model="pinnedNotes" @change="onChange" ghost-class="sortable-ghost">
+                                <transition-group type="transition">
+                                    <div v-for="note in pinnedNotes" :key="note.uuid" v-cloak>
+                                        <li class="list-group-item list-group-item-secondary" :data-uuid="note.uuid">
+                                            <a :href="note.url">[[ note.name ]]</a>
+                                        </li>
+                                    </div>
+                                </transition-group>
+                            </draggable>
+                        </ul>
+                        <div v-if="pinnedNotes.length === 0">
+                            No notes found to pin.
+                        </div>
+                    </template>
+
+                </card>
+            </div>
+
+            <div v-if="'{{ request.GET.search }}'" class="scrollable-panel-scrollbar-hover card-body d-flex flex-column h-100">
+
+                <div class="h3 text-info">
+                    {{ object_list.hits.hits|length }} Note{{ object_list.hits.hits|pluralize:"s" }} Found
+                </div>
+
+                <div class="d-flex flex-column">
+                    <ul class="list-unstyled note-search-result">
+                        <li v-for="note in $store.state.notes" class="px-2 py-3 d-flex flex-column" :class="{ 'selected': note.uuid === $store.state.selectedNoteUuid }" @click="onClick(note.uuid)">
+                            <h4 class="text-primary font-weight-bold">
+                                [[ note.name ]]
+                            </h4>
+
+                            <div class="search-result-date mb-1">
+                                [[ note.date ]]
+                            </div>
+
+                            <div v-html="getContent(note)" class="note-content">
+                            </div>
+
+                            <div>
+                                <span v-for="tag in note.tags" :key="tag.tag" class="badge badge-info mr-2">
+                                    [[ tag.tag ]]
+                                </span>
+                            </div>
+                        </li>
                     </ul>
-                    <div v-if="notes.length === 0">
-                        No notes found to pin.
-                    </div>
-                </template>
+                </div>
 
-            </card>
+            </div>
+
         </div>
 
-        <div class="col-lg-9 d-flex flex-column" id="vue-app">
+        <div id="right-panel" class="col-lg-9 h-100 scrollable-panel d-flex flex-column">
 
-            <div v-for="(note,index) in notes" class="right-column">
+            <div v-for="(note,index) in $store.state.notes" :class="{ 'd-none': isSearch && note.uuid !== $store.state.selectedNoteUuid }" class="right-column">
                 <div v-if="index === 0" class="mt-3 float-right" v-cloak>
                     <a class="btn btn-primary ml-2 mr-4 float-right right-column" href="{% url 'blob:create' %}?is_note=true">Add note</a>
                 </div>
@@ -50,10 +85,16 @@
                     </template>
                     <template v-slot:content>
 
-                        <div id="note" class="blob-content table-borders">
+                        <div class="blob-content table-borders">
 
                             <h6 class="text-primary" v-html="note.date">
                             </h6>
+
+                            <div>
+                                <span v-for="tag in note.tags" :key="tag.tag" :href="getTagUrl(tag.tag)" class="badge badge-info mr-2">
+                                    [[ tag.tag ]]
+                                </span>
+                            </div>
 
                             <div class="mt-3" v-html="getContent(note.contents)">
                             </div>
@@ -67,7 +108,7 @@
                 </card>
             </div>
 
-            <div v-if="notes.length === 0" class="card-grid mr-2" v-cloak>
+            <div v-if="$store.state.notes.length === 0" class="card-grid mr-2" v-cloak>
                 <search-no-result class="ml-2">
                     <template v-slot:message>
                         No notes found matching search criteria.
@@ -82,17 +123,17 @@
 
                     {% if object_list and paginator.num_pages > 1 %}
                         <nav class="mb-5 navigation">
-                            <ul class="pagination">
+                            <ul class="pagination justify-content-center">
                                 <li class="page-item{% if not paginator.has_previous %} disabled{% endif %}">
-                                    <a class="page-link" href="?page={{ paginator.previous_page_number }}&tagsearch={{ request.GET.tagsearch }}&search={{ request.GET.search }}">Previous</a>
+                                    <a class="page-link" href="?page={{ paginator.previous_page_number }}&tagsearch={{ request.GET.tagsearch }}">Previous</a>
                                 </li>
                                 <li class="page-item disabled">
-                                    <span class="page-link ">
-            Page <strong>{{ paginator.number }}</strong> of <strong>{{ paginator.num_pages }}</strong>
+                                    <span class="page-link">
+                                        Page <strong>{{ paginator.number }}</strong> of <strong>{{ paginator.num_pages }}</strong>
                                     </span>
                                 </li>
                                 <li class="page-item{% if not paginator.has_next %} disabled{% endif %}">
-                                    <a class="page-link" href="?page={{ paginator.next_page_number }}&tagsearch={{ request.GET.tagsearch }}&search={{ request.GET.search }}">Next</a>
+                                    <a class="page-link" href="?page={{ paginator.next_page_number }}&tagsearch={{ request.GET.tagsearch }}">Next</a>
                                 </li>
                             </ul>
                         </nav>
@@ -116,42 +157,39 @@
 
         Vue.mixin({ delimiters: ["[[", "]]"] });
 
-        new Vue({
-            el: "#vue-app",
-            data() {
-                return {
-                    notes: [
-                        {% for note in object_list.hits.hits %}
-                        {
-                            "uuid": "{{ note.source.uuid }}",
-                            "date": "{{ note.source.date }}",
-                            "name": "{{ note.source.name|default:"Note" }}",
-                            "contents": "{{ note.source.contents|escapejs }}",
-                            "url": "{% url 'blob:detail' note.source.uuid %}",
-                            "tags": [
-                                {% for tag in note.source.tags %}
-                                {
-                                    "tag": "{{ tag }}",
-                                    "url": "{% url 'search:notes' %}?tagsearch={{ tag }}"
-                                },
-                                {% endfor %}
-                            ]
-                        },
-                        {% endfor %}
-                    ]
-                }
+        const store = new Vuex.Store({
+            state: {
+                notes: [
+                    {% for note in object_list.hits.hits %}
+                    {
+                        "uuid": "{{ note.source.uuid }}",
+                        "date": "{{ note.source.date }}",
+                        "name": "{{ note.source.name|default:"Note" }}",
+                        "contents": "{{ note.source.contents|escapejs }}",
+                        "url": "{% url 'blob:detail' note.source.uuid %}",
+                        "tags": [
+                            {% for tag in note.source.tags %}
+                            {
+                                "tag": "{{ tag }}",
+                                "url": "{% url 'search:notes' %}?tagsearch={{ tag }}"
+                            },
+                            {% endfor %}
+                        ]
+                    },
+                    {% endfor %}
+                ],
+                selectedNoteUuid: null
             },
-            methods: {
-                getContent(content) {
-                    return markdown.render(content);
-                }
-            }
+            getters: {},
+            mutations: {},
         });
 
         new Vue({
-            el: '#sort-container-notes',
+            el: "#left-panel",
+            name: "Left Panel",
+            store,
             data: {
-                notes: [
+                pinnedNotes: [
                     {% for note in pinned_notes %}
                     {
                         url: "{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, "{{ note.uuid }}"),
@@ -159,7 +197,7 @@
                         name: "{{ note.name }}"
                     },
                     {% endfor %}
-                ]
+                ],
             },
             methods: {
                 onChange(evt) {
@@ -188,6 +226,40 @@
                           })
                           console.error("Error:", error);
                       });
+                },
+                getContent(note) {
+                    return markdown.render(note.contents.substring(0, 400)||"");
+                },
+                onClick(uuid) {
+                    const found = this.$store.state.notes.find(element => element.uuid === uuid);
+                    this.$store.state.selectedNoteUuid = found.uuid;
+
+                },
+            },
+            mounted() {
+                this.$store.state.selectedNoteUuid = this.$store.state.notes.length > 0 ? this.$store.state.notes[0].uuid : null;
+            }
+        });
+
+        new Vue({
+            el: "#right-panel",
+            name: "Right Panel",
+            store,
+            data() {
+                return {
+                }
+            },
+            methods: {
+                getContent(content) {
+                    return markdown.render(content);
+                },
+                getTagUrl(tag) {
+                    return "{% url 'search:notes' %}?tagsearch=" + tag;
+                }
+            },
+            computed: {
+                isSearch() {
+                    return {% if request.GET.search %}true{% else %}false{% endif %};
                 }
             }
         });

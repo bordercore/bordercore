@@ -64,7 +64,7 @@
 }
 
 ::-webkit-scrollbar {
-  width: 0.7rem;
+  width: 0.5rem;
 }
 
 ::-webkit-scrollbar-track {
@@ -73,7 +73,7 @@
 
 ::-webkit-scrollbar-thumb {
   border-radius: 0.6rem;
-  background-color: lighten($background-color-dark, 2%);
+  background-color: lighten($background-color-dark, 10%);
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -85,7 +85,7 @@
 }
 
 //
-//   Common components
+// Common components
 //
 
 @import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
@@ -205,9 +205,21 @@ a.tag {
   height: 92vh;
 }
 
-.scrollable-panel-left {
+// Show vertical scrollbar if necessary.
+// Hide horizontal scrollbar.
+.scrollable-panel {
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+// Hide all scrollbars.
+// Reveal vertical scrollbar on hover.
+.scrollable-panel-scrollbar-hover {
+  overflow: hidden;
+
+  &:hover {
+    overflow-y: auto;
+  }
 }
 
 .table-borderless td,
@@ -652,7 +664,7 @@ pre {
   // Note that we can't simply use ".suggest-item.hover", since a similar
   //   selector defined by vue-simple-suggest overrides it via a !important flag
   .vue-simple-suggest.designed .suggestions .suggest-item.hover {
-    background-color: $cyan !important;
+    background-color: $selected-background-color !important;
   }
 
   // Set the padding to zero so that we can programmatically control the background color lower down

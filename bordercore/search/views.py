@@ -178,6 +178,11 @@ class SearchListView(ListView):
         for index, _ in enumerate(results["hits"]["hits"]):
             match = results["hits"]["hits"][index]
             match["source"] = match.pop("_source")
+
+            # Highlight matched terms using markdown italicized text when searching
+            if search_term and "contents" in match["source"]:
+                match["source"]["contents"] = match["source"]["contents"].replace(search_term, f"*{search_term}*")
+
             match["score"] = match.pop("_score")
             if "highlight" in match and "attachment.content" in match["highlight"]:
                 match["highlight"]["attachment_content"] = match["highlight"].pop("attachment.content")
@@ -253,7 +258,9 @@ class NoteListView(SearchListView):
 
         page = int(self.request.GET.get("page", 1))
         context["paginator"] = self.get_paginator(page, context["search_results"])
-        context["pinned_notes"] = self.request.user.userprofile.pinned_notes.all().only("name", "uuid").order_by("sortorderusernote__sort_order")
+
+        if "search" not in self.request.GET:
+            context["pinned_notes"] = self.request.user.userprofile.pinned_notes.all().only("name", "uuid").order_by("sortorderusernote__sort_order")
 
         return context
 
