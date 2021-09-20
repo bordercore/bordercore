@@ -61,15 +61,7 @@
 
                                     <font-awesome-icon icon="search" class="main-search-spacer"></font-awesome-icon>
 
-                                    <simple-suggest
-                                        class="search-input"
-                                        :autofocus=true
-                                        ref="simpleSuggest"
-                                        place-holder="Search"
-                                        search-url="{% url 'search:search_tags_and_names' %}?term="
-                                        value="Bogus"
-                                    >
-                                    </simple-suggest>
+                                    <input id="simple-suggest" name="search" placeholder="Search" autocomplete="off" autofocus="autofocus" class="default-input form-control search-box-input" />
 
                                 </div>
                             </div>
@@ -368,12 +360,8 @@
                 },
             },
             mounted() {
-                this.$refs.simpleSuggest.$refs.suggestComponent.isFalseFocus = true;
-                this.$refs.simpleSuggest.$refs.suggestComponent.text = "{{ request.GET.search }}";
+                document.getElementById("simple-suggest").value  = "{{ request.GET.search }}";
             },
-            components: {
-                SimpleSuggest
-            }
         });
 
     </script>
