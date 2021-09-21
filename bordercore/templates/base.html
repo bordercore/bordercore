@@ -214,7 +214,7 @@
                     el: "#sidebar",
                     data() {
                         return {
-                            collapsed: {% if request.session.show_sidebar == "true" %}false{% else %}true{% endif %},
+                            collapsed: {% if request.session.show_sidebar == "false" %}true{% else %}false{% endif %},
                             menu: [
                                 {
                                     header: true,
