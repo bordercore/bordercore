@@ -436,6 +436,12 @@ table.b-table th {
   border-top: 0;
 }
 
+// Selected row
+.table-custom {
+  background-color: $selected-background-color !important;
+  color: $white !important;
+}
+
 // BootstrapVue table sort icon: none
 body .table.b-table > tfoot > tr > [aria-sort=none],
 body .table.b-table > thead > tr > th[aria-sort=none] {
