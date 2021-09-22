@@ -442,6 +442,11 @@ table.b-table th {
   color: $white !important;
 }
 
+.table-hover tr.selected:hover a {
+  background-color: rgba(0, 0, 0, 0.075);
+  transition: none;
+}
+
 // BootstrapVue table sort icon: none
 body .table.b-table > tfoot > tr > [aria-sort=none],
 body .table.b-table > thead > tr > th[aria-sort=none] {
