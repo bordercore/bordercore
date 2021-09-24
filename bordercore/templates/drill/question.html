@@ -74,10 +74,21 @@
             >
             </drill-bookmarks>
 
+            <drill-blobs
+                question-uuid="{{ object.uuid }}"
+                get-blob-list-url="{% url 'drill:get_blob_list' '00000000-0000-0000-0000-000000000000' %}"
+                sort-blob-list-url="{% url 'drill:sort_blob_list' %}"
+                add-blob-url="{% url 'drill:add_blob' %}"
+                remove-blob-url="{% url 'drill:remove_blob' %}"
+                edit-blob-note-url="{% url 'drill:edit_blob_note' %}"
+                search-blob-url="{% url 'search:search_names' %}"
+            >
+            </drill-blobs>
+
             <div class="d-flex flex-grow-1">
                 <card title="Tag Progress">
                     <template v-slot:content>
-                        <div class="d-flex flex-wrap">
+                        <div class="d-flex flex-column justify-content-center">
                         {% for tag in tag_info %}
                             <drill-tag-progress
                                 :count={{ tag.count }}
@@ -116,12 +127,16 @@
                         <br /><br />
                     {% endif %}
 
-                    <a href="{% url 'drill:answer' question.uuid %}" class="btn btn-primary" role="button">Show Answer</a>
-                    <a href="{% url 'drill:study' %}" class="btn btn-primary" role="button">Skip</a>
+                    <div class="d-flex">
 
-                    <form action="{% url 'drill:update' question.uuid %}" class="mt-2 float-right">
-                        <input type="submit" class="btn btn-primary" value="Update">
-                    </form>
+                        <div>
+                            <a href="{% url 'drill:answer' question.uuid %}" class="btn btn-primary" role="button">Show Answer</a>
+                            <a href="{% url 'drill:study' %}" class="btn btn-primary" role="button">Skip</a>
+                        </div>
+                        <form action="{% url 'drill:update' question.uuid %}" class="ml-auto">
+                            <input type="submit" class="btn btn-primary" value="Update">
+                        </form>
+                    </div>
 
                 </div>
             </div>
