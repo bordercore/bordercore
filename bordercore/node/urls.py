@@ -41,11 +41,6 @@ urlpatterns = [
         name="remove_blob"
     ),
     path(
-        route="blob/search/",
-        view=views.search_blob_names,
-        name="search_blob_names"
-    ),
-    path(
         route="blob/sort/",
         view=views.sort_blobs,
         name="sort_blobs"

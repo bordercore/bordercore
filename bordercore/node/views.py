@@ -9,7 +9,6 @@ from django.views.generic.list import ListView
 
 from blob.models import Blob
 from bookmark.models import Bookmark
-from node.services import search as search_service
 
 from .models import Node, SortOrderNodeBlob, SortOrderNodeBookmark
 
@@ -281,16 +280,6 @@ def search_bookmarks(request):
                 "favicon_url": match.get_favicon_url(size=16),
             }
         )
-
-    return JsonResponse(matches, safe=False)
-
-
-@login_required
-def search_blob_names(request):
-
-    search_term = request.GET["term"].lower()
-
-    matches = search_service(request.user, search_term)
 
     return JsonResponse(matches, safe=False)
 

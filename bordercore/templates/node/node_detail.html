@@ -185,7 +185,7 @@
                                             ref="simpleSuggest"
                                             display-attribute="name"
                                             value-attribute="uuid"
-                                            search-url="{% url 'node:search_blob_names' %}?term="
+                                            search-url="{% url 'search:search_names' %}?doc_type=blob,book,document&term="
                                         >
                                         </simple-suggest>
                                     </div>
@@ -432,7 +432,7 @@
                     const { suggestion, query } = scope;
 
                     let result = this.$refs.simpleSuggest.$refs.suggestComponent.displayProperty(suggestion);
-                    result = "<em>" + suggestion.doctype + "</em> - " + result
+                    result = "<em>" + suggestion.object_type + "</em> - " + result
 
                     if (!query) return result;
 

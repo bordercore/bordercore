@@ -21,7 +21,7 @@
                                         ref="simpleSuggest"
                                         display-attribute="name"
                                         value-attribute="uuid"
-                                        :search-url="searchBlobUrl + '?doc_type=book,blob,document&term='"
+                                        :search-url="searchBlobUrl + '&term='"
                                     />
                                 </div>
                             </div>
