@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -8,8 +8,8 @@ import django
 from django import urls
 from django.test import RequestFactory
 
-from search.views import (SearchTagDetailView, get_doctype, get_name,
-                          is_cached, sort_results)
+from search.views import (SearchTagDetailView, get_doc_types_from_request,
+                          get_doctype, get_name, is_cached, sort_results)
 
 try:
     from bs4 import BeautifulSoup
@@ -19,6 +19,26 @@ except ModuleNotFoundError:
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
 django.setup()
+
+
+def test_get_doc_types_from_request():
+
+    request_mock = Mock()
+
+    request_mock.GET = {}
+    assert get_doc_types_from_request(request_mock) == []
+
+    request_mock.GET = {"doc_type": ""}
+    assert get_doc_types_from_request(request_mock) == []
+
+    request_mock.GET = {"doc_type": "music"}
+    assert get_doc_types_from_request(request_mock) == ["album", "song"]
+
+    request_mock.GET = {"doc_type": "book"}
+    assert get_doc_types_from_request(request_mock) == ["book"]
+
+    request_mock.GET = {"doc_type": "blob,book,document"}
+    assert get_doc_types_from_request(request_mock) == ["blob", "book", "document"]
 
 
 @patch("search.views.Elasticsearch")

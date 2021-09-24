@@ -32,7 +32,7 @@ urlpatterns = [
     ),
     path(
         route="names",
-        view=views.search_names_new,
+        view=views.search_names,
         name="search_names"
     ),
 ]

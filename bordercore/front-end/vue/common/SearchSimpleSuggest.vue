@@ -69,11 +69,11 @@
             },
             displayAttribute: {
                 type: String,
-                default: "value",
+                default: "name",
             },
             valueAttribute: {
                 type: String,
-                default: "value",
+                default: "name",
             },
             maxSuggestions: {
                 default: 10,
@@ -122,7 +122,7 @@
             search(query) {
                 try {
                     const url = this.searchUrl;
-                    return axios.get(url + query + "&filter=" + this.searchFilter.toLowerCase())
+                    return axios.get(url + query + "&doc_type=" + this.searchFilter.toLowerCase())
                         .then((response) => {
                             return response.data;
                         });

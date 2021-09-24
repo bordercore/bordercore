@@ -569,6 +569,21 @@ def get_doctype(match):
     return match["_source"]["doctype"].title()
 
 
+def get_doc_types_from_request(request):
+
+    if request.GET.get("doc_type", "") != "":
+        doc_types = request.GET.get("doc_type").split(",")
+    else:
+        doc_types = []
+
+    # The front-end filter "Music" translates to the two doctypes
+    #  "album" and "song" in the Elasticsearch index
+    if "music" in doc_types:
+        doc_types = ["album", "song"]
+
+    return doc_types
+
+
 def is_cached():
 
     cache = {
@@ -596,161 +611,24 @@ def search_tags_and_names(request):
     Endpoint for top-search "auto-complete" matching tags and names
     """
 
-    es = Elasticsearch(
-        [settings.ELASTICSEARCH_ENDPOINT],
-        verify_certs=False
-    )
-
     search_term = request.GET["term"].lower()
 
-    if request.GET.get("filter", "") != "":
-        doc_types = [request.GET.get("filter")]
-    else:
-        doc_types = []
+    doc_types = get_doc_types_from_request(request)
 
-    # The front-end filter "Music" translates to the two doctypes
-    #  "album" and "song" in the Elasticsearch index
-    if "music" in doc_types:
-        doc_types = ["album", "song"]
-
-    results_name = search_names(request, es, doc_types, search_term)
-
-    matches = []
-
-    cache_checker = is_cached()
-
-    for match in results_name["hits"]["hits"]:
-        object_type = get_doctype(match)
-        name = get_name(object_type, match["_source"])
-
-        if not cache_checker(object_type, name):
-            matches.append(
-                {
-                    "object_type": object_type,
-                    "value": name,
-                    "uuid": match["_source"].get("uuid"),
-                    "important": match["_source"].get("importance"),
-                    "id": match["_id"],
-                    "url": match["_source"].get("url", None),
-                    "link": get_link(object_type, match["_source"]),
-                    "score": match["_score"]
-                }
-            )
+    matches = search_names_es(request.user, search_term, doc_types)
 
     # Add tag search results to the list of matches
-    matches.extend(search_tags(request, es, doc_types, search_term))
+    matches.extend(search_tags_es(request.user, search_term, doc_types))
 
     return JsonResponse(sort_results(matches), safe=False)
 
 
-@login_required
-def search_names(request, es, doc_types, search_term):
+def search_tags_es(user, search_term, doc_types):
 
-    search_object = {
-        "query": {
-            "function_score": {
-                "field_value_factor": {
-                    "field": "importance",
-                    "missing": 1
-                },
-                "query": {
-                    "bool": {
-                        "must": [
-                            {
-                                "term": {
-                                    "user_id": request.user.id
-                                }
-                            },
-                            {
-                                "bool": {
-                                    "should": [
-                                        {
-                                            "match": {
-                                                "name.autocomplete": {
-                                                    "query": search_term,
-                                                    "operator": "and"
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "match": {
-                                                "question.autocomplete": {
-                                                    "query": search_term,
-                                                    "operator": "and"
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "match": {
-                                                "title.autocomplete": {
-                                                    "query": search_term,
-                                                    "operator": "and"
-                                                }
-                                            }
-                                        },
-                                        {
-                                            "match": {
-                                                "artist.autocomplete": {
-                                                    "query": search_term,
-                                                    "operator": "and"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        ]
-                    }
-                }
-            }
-        },
-        "highlight": {
-            "fields": {
-                "name.autocomplete": {},
-                "artist.autocomplete": {}
-            }
-        },
-        "from": 0, "size": 100,
-        "_source": ["album_uuid",
-                    "album",
-                    "artist",
-                    "author",
-                    "bordercore_id",
-                    "date",
-                    "date_unixtime",
-                    "doctype",
-                    "filename",
-                    "importance",
-                    "name",
-                    "question",
-                    "sha1sum",
-                    "tags",
-                    "title",
-                    "url",
-                    "uuid"]
-    }
-
-    if len(doc_types) > 0:
-        search_object["query"]["function_score"]["query"]["bool"]["must"].append(
-            {
-                "bool": {
-                    "should": [
-                        {
-                            "term": {
-                                "doctype": x
-                            }
-                        }
-                        for x in doc_types
-                    ]
-                }
-            }
-        )
-
-    return es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
-
-
-@login_required
-def search_tags(request, es, doc_types, search_term):
+    es = Elasticsearch(
+        [settings.ELASTICSEARCH_ENDPOINT],
+        verify_certs=False
+    )
 
     search_object = {
         "query": {
@@ -758,7 +636,7 @@ def search_tags(request, es, doc_types, search_term):
                 "must": [
                     {
                         "term": {
-                            "user_id": request.user.id
+                            "user_id": user.id
                         }
                     },
                     {
@@ -828,7 +706,7 @@ def search_tags(request, es, doc_types, search_term):
             matches.insert(0,
                            {
                                "object_type": "Tag",
-                               "value": tag_result["key"],
+                               "name": tag_result["key"],
                                "id": tag_result["key"],
                                "link": get_tag_link(doc_types, tag_result["key"])
                            }
@@ -837,24 +715,26 @@ def search_tags(request, es, doc_types, search_term):
 
 
 @login_required
-def search_names_new(request):
+def search_names(request):
+
+    search_term = unquote(request.GET["term"].lower())
+
+    doc_types = get_doc_types_from_request(request)
+
+    matches = search_names_es(request.user, search_term, doc_types)
+    return JsonResponse(matches, safe=False)
+
+
+def search_names_es(user, search_term, doc_types):
+    """
+    Search Elasticsearch for objects based on a name, or equivalent field (eg title).
+    Primarily used by autocomplete inputs.
+    """
 
     es = Elasticsearch(
         [settings.ELASTICSEARCH_ENDPOINT],
         verify_certs=False
     )
-
-    search_term = unquote(request.GET["term"].lower())
-
-    if request.GET.get("doc_type", "") != "":
-        doc_types = request.GET.get("doc_type").split(",")
-    else:
-        doc_types = []
-
-    # The front-end filter "Music" translates to the two doctypes
-    #  "album" and "song" in the Elasticsearch index
-    if "music" in doc_types:
-        doc_types = ["album", "song"]
 
     search_object = {
         "query": {
@@ -868,7 +748,7 @@ def search_names_new(request):
                         "must": [
                             {
                                 "term": {
-                                    "user_id": request.user.id
+                                    "user_id": user.id
                                 }
                             },
                             {
@@ -975,6 +855,7 @@ def search_names_new(request):
                     "object_type": doc_type_pretty,
                     "note": match["_source"].get("note", ""),
                     "uuid": match["_source"].get("uuid"),
+                    "id": match["_source"].get("uuid"),
                     "important": match["_source"].get("importance"),
                     "url": match["_source"].get("url", None),
                     "link": get_link(doc_type_pretty, match["_source"]),
@@ -988,4 +869,4 @@ def search_names_new(request):
                     size="small"
                 )["url"]
 
-    return JsonResponse(matches, safe=False)
+    return matches
