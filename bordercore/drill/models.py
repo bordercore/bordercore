@@ -12,6 +12,7 @@ from django.dispatch.dispatcher import receiver
 from django.urls import reverse
 from django.utils import timezone
 
+from blob.models import Blob
 from bookmark.models import Bookmark
 from lib.mixins import SortOrderMixin, TimeStampedModel
 from tag.models import Tag
@@ -53,6 +54,7 @@ class Question(TimeStampedModel):
     is_favorite = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     bookmarks = models.ManyToManyField(Bookmark, through="SortOrderDrillBookmark")
+    blobs = models.ManyToManyField(Blob, through="SortOrderDrillBlob")
 
     objects = DrillManager()
 
@@ -324,4 +326,26 @@ class SortOrderDrillBookmark(SortOrderMixin):
 
 @receiver(pre_delete, sender=SortOrderDrillBookmark)
 def remove_bookmark(sender, instance, **kwargs):
+    instance.handle_delete()
+
+
+class SortOrderDrillBlob(SortOrderMixin):
+
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    blob = models.ForeignKey(Blob, on_delete=models.CASCADE)
+
+    field_name = "question"
+
+    def __str__(self):
+        return f"SortOrder: {self.question}, {self.blob}"
+
+    class Meta:
+        ordering = ("sort_order",)
+        unique_together = (
+            ("question", "blob")
+        )
+
+
+@receiver(pre_delete, sender=SortOrderDrillBlob)
+def remove_blob(sender, instance, **kwargs):
     instance.handle_delete()

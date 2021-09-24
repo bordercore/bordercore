@@ -1,9 +1,7 @@
-{% if request.session.drill_study_session.type == "favorites" %}
-    Studying favorite questions.
-{% elif request.session.drill_study_session.type == "tag-needing-review" %}
-    Studying tag <strong>{{ request.session.drill_study_session.tag }}</strong>.
-{% elif request.session.drill_study_session.type == "random" %}
-    Studying random questions.
-{% endif %}
-
+{% if request.session.drill_study_session.type == "favorites" %}Studying favorite questions.
+{% elif request.session.drill_study_session.type == "tag-needing-review" %}Studying tag <strong>{{ request.session.drill_study_session.tag }}</strong>.
+{% elif request.session.drill_study_session.type == "random" %}Studying random questions.
+{% endif %}{% if request.session.drill_study_session %}
 <strong class="text-info">{{ study_session_progress }}</strong> out of <strong class="text-info">{{ request.session.drill_study_session.list|length }}</strong> questions completed.
+{% else %}Ad-hoc study session
+{% endif %}

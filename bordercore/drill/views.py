@@ -1,10 +1,7 @@
 import re
 from urllib.parse import unquote
 
-from elasticsearch import Elasticsearch
-
 from django import urls
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
@@ -18,13 +15,15 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
 from accounts.models import SortOrderDrillTag
+from blob.models import Blob
 from bookmark.models import Bookmark
 from drill.forms import QuestionForm
 from lib.mixins import FormRequestMixin
 from lib.util import parse_title_from_url
 from tag.models import Tag
 
-from .models import EFACTOR_DEFAULT, Question, SortOrderDrillBookmark
+from .models import (EFACTOR_DEFAULT, Question, SortOrderDrillBlob,
+                     SortOrderDrillBookmark)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -548,6 +547,118 @@ def get_title_from_url(request):
         "title": title,
         "bookmarkUuid": bookmark_uuid,
         "message": message
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def get_blob_list(request, uuid):
+
+    question = Question.objects.get(uuid=uuid, user=request.user)
+    blob_list = list(question.blobs.all().only("name", "id").order_by("sortorderdrillblob__sort_order"))
+
+    response = {
+        "status": "OK",
+        "blob_list": [
+            {
+                "name": x.name,
+                "uuid": x.uuid,
+                "note": x.sortorderdrillblob_set.get(question=question).note,
+                "url": reverse("blob:detail", kwargs={"uuid": x.uuid}),
+                "cover_url": Blob.get_cover_info(
+                    x.uuid,
+                    x.file.name,
+                    size="small"
+                )["url"]
+            }
+            for x
+            in blob_list]
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def sort_blob_list(request):
+    """
+    Move a given blob to a new position in a sorted list
+    """
+
+    question_uuid = request.POST["question_uuid"]
+    blob_uuid = request.POST["blob_uuid"]
+    new_position = int(request.POST["new_position"])
+
+    so = SortOrderDrillBlob.objects.get(question__uuid=question_uuid, blob__uuid=blob_uuid)
+    SortOrderDrillBlob.reorder(so, new_position)
+
+    so.question.modified = timezone.now()
+    so.question.save()
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def add_blob(request):
+
+    question_uuid = request.POST["question_uuid"]
+    blob_uuid = request.POST["blob_uuid"]
+
+    question = Question.objects.get(uuid=question_uuid, user=request.user)
+    blob = Blob.objects.get(uuid=blob_uuid)
+
+    so = SortOrderDrillBlob(question=question, blob=blob)
+    so.save()
+
+    so.question.modified = timezone.now()
+    so.question.save()
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def remove_blob(request):
+
+    question_uuid = request.POST["question_uuid"]
+    blob_uuid = request.POST["blob_uuid"]
+
+    so = SortOrderDrillBlob.objects.get(question__uuid=question_uuid, blob__uuid=blob_uuid)
+    so.delete()
+
+    so.question.modified = timezone.now()
+    so.question.save()
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def edit_blob_note(request):
+
+    question_uuid = request.POST["question_uuid"]
+    blob_uuid = request.POST["blob_uuid"]
+    note = request.POST["note"]
+
+    so = SortOrderDrillBlob.objects.get(question__uuid=question_uuid, blob__uuid=blob_uuid)
+    so.note = note
+    so.save()
+
+    so.question.modified = timezone.now()
+    so.question.save()
+
+    response = {
+        "status": "OK",
     }
 
     return JsonResponse(response)

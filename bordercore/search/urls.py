@@ -30,4 +30,9 @@ urlpatterns = [
         view=views.NoteListView.as_view(),
         name="notes"
     ),
+    path(
+        route="names",
+        view=views.search_names_new,
+        name="search_names"
+    ),
 ]

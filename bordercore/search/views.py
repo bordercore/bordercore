@@ -1,4 +1,5 @@
 import math
+from urllib.parse import unquote
 
 from elasticsearch import Elasticsearch, RequestError
 
@@ -14,6 +15,8 @@ from blob.models import Blob
 from lib.time_utils import get_date_from_pattern, get_relative_date
 from lib.util import truncate
 from tag.models import Tag
+
+SEARCH_LIMIT = 1000
 
 
 def get_creators(matches):
@@ -671,7 +674,7 @@ def search_names(request, es, doc_types, search_term):
                                         },
                                         {
                                             "match": {
-                                                "question.autocomplte": {
+                                                "question.autocomplete": {
                                                     "query": search_term,
                                                     "operator": "and"
                                                 }
@@ -831,3 +834,158 @@ def search_tags(request, es, doc_types, search_term):
                            }
                            )
     return matches
+
+
+@login_required
+def search_names_new(request):
+
+    es = Elasticsearch(
+        [settings.ELASTICSEARCH_ENDPOINT],
+        verify_certs=False
+    )
+
+    search_term = unquote(request.GET["term"].lower())
+
+    if request.GET.get("doc_type", "") != "":
+        doc_types = request.GET.get("doc_type").split(",")
+    else:
+        doc_types = []
+
+    # The front-end filter "Music" translates to the two doctypes
+    #  "album" and "song" in the Elasticsearch index
+    if "music" in doc_types:
+        doc_types = ["album", "song"]
+
+    search_object = {
+        "query": {
+            "function_score": {
+                "field_value_factor": {
+                    "field": "importance",
+                    "missing": 1
+                },
+                "query": {
+                    "bool": {
+                        "must": [
+                            {
+                                "term": {
+                                    "user_id": request.user.id
+                                }
+                            },
+                            {
+                                "bool": {
+                                    "should": [
+                                        {
+                                            "match": {
+                                                "name.autocomplete": {
+                                                    "query": search_term,
+                                                    "operator": "and"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "match": {
+                                                "question.autocomplete": {
+                                                    "query": search_term,
+                                                    "operator": "and"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "match": {
+                                                "title.autocomplete": {
+                                                    "query": search_term,
+                                                    "operator": "and"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "match": {
+                                                "artist.autocomplete": {
+                                                    "query": search_term,
+                                                    "operator": "and"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        "highlight": {
+            "fields": {
+                "name.autocomplete": {},
+                "artist.autocomplete": {}
+            }
+        },
+        "from": 0,
+        "size": SEARCH_LIMIT,
+        "_source": ["album_uuid",
+                    "album",
+                    "artist",
+                    "author",
+                    "bordercore_id",
+                    "date",
+                    "date_unixtime",
+                    "doctype",
+                    "filename",
+                    "importance",
+                    "name",
+                    "note",
+                    "question",
+                    "sha1sum",
+                    "tags",
+                    "title",
+                    "url",
+                    "uuid"]
+    }
+
+    if len(doc_types) > 0:
+        search_object["query"]["function_score"]["query"]["bool"]["must"].append(
+            {
+                "bool": {
+                    "should": [
+                        {
+                            "term": {
+                                "doctype": x
+                            }
+                        }
+                        for x in doc_types
+                    ]
+                }
+            }
+        )
+
+    results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+
+    matches = []
+
+    cache_checker = is_cached()
+
+    for match in results["hits"]["hits"]:
+        doc_type_pretty = get_doctype(match)
+        name = get_name(doc_type_pretty, match["_source"])
+
+        if not cache_checker(doc_type_pretty, name):
+            matches.append(
+                {
+                    "name": name,
+                    "object_type": doc_type_pretty,
+                    "note": match["_source"].get("note", ""),
+                    "uuid": match["_source"].get("uuid"),
+                    "important": match["_source"].get("importance"),
+                    "url": match["_source"].get("url", None),
+                    "link": get_link(doc_type_pretty, match["_source"]),
+                    "score": match["_score"]
+                }
+            )
+            if doc_type_pretty in ["Blob", "Book", "Document"]:
+                matches[-1]["cover_url"] = settings.MEDIA_URL + Blob.get_cover_info(
+                    match["_source"].get("uuid"),
+                    match["_source"].get("filename"),
+                    size="small"
+                )["url"]
+
+    return JsonResponse(matches, safe=False)

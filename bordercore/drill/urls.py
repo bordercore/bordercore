@@ -134,5 +134,30 @@ urlpatterns = [
         route="get_title_from_url",
         view=views.get_title_from_url,
         name="get_title_from_url"
-    )
+    ),
+    path(
+        route="<uuid:uuid>/blob_list",
+        view=views.get_blob_list,
+        name="get_blob_list"
+    ),
+    path(
+        route="blob/sort",
+        view=views.sort_blob_list,
+        name="sort_blob_list"
+    ),
+    path(
+        route="blob/add",
+        view=views.add_blob,
+        name="add_blob"
+    ),
+    path(
+        route="blob/remove",
+        view=views.remove_blob,
+        name="remove_blob"
+    ),
+    path(
+        route="blob/edit_note",
+        view=views.edit_blob_note,
+        name="edit_blob_note"
+    ),
 ]
