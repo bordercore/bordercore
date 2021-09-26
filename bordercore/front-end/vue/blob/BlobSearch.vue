@@ -13,17 +13,14 @@
                 <div class="modal-body">
                     <div class="d-flex flex-column">
                         <form @submit.prevent>
-                            <div class="form-group row">
-                                <label class="col-form-label col-lg-3">Blob name</label>
-                                <div class="form-row col-lg-9">
-                                    <simple-suggest
-                                        id="blob-search-name"
-                                        ref="simpleSuggest"
-                                        display-attribute="name"
-                                        value-attribute="uuid"
-                                        :search-url="searchBlobUrl + '&term='"
-                                    />
-                                </div>
+                            <div class="form-group">
+                                <simple-suggest
+                                    ref="simpleSuggest"
+                                    class="w-100"
+                                    display-attribute="name"
+                                    value-attribute="uuid"
+                                    :search-url="searchBlobUrl + '&term='"
+                                />
                             </div>
                         </form>
                     </div>

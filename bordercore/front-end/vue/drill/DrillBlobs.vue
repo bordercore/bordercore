@@ -125,7 +125,7 @@
             chooseBlob() {
                 $("#modalAddBlob").modal("show");
                 setTimeout( () => {
-                    document.getElementById("blob-search-name").focus();
+                    this.$refs.blob.$refs.simpleSuggest.$refs.suggestComponent.input.focus();
                 }, 500);
             },
             onChange(evt) {

@@ -167,35 +167,34 @@
 
         <blob-search inline-template ref="blobSearch">
             <div class="modal fade" id="modalAddBlob" tabindex="-1" role="dialog">
-
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h4 class="modal-title" id="myModalLabel">Add blob</h4>
-                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">
+                                Add blob
+                            </h4>
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
                         <div class="modal-body">
-
-                            <form id="search" action="" method="get" autocomplete="off">
-
-                                <div class="form-row align-items-center">
-
-                                    <div class="form-row">
+                            <div class="d-flex flex-column">
+                                <form @submit.prevent>
+                                    <div class="form-group">
                                         <simple-suggest
+                                            class="w-100"
                                             ref="simpleSuggest"
                                             display-attribute="name"
                                             value-attribute="uuid"
-                                            search-url="{% url 'search:search_names' %}?doc_type=blob,book,document&term="
+                                            search-url="{% url 'search:search_names' %}?doc_type=blob,book,document,note&term="
                                         >
                                         </simple-suggest>
                                     </div>
-                                </div>
-                            </form>
-
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
         </blob-search>
 
         <bookmark-search inline-template ref="bookmarkSearch">
