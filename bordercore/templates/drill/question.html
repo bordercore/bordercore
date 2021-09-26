@@ -9,7 +9,7 @@
         <div class="mr-auto align-self-center">
             <ul class="breadcrumb mb-0 pt-0 pb-0">
                 <li class="breadcrumb-item"> <a href="{% url 'drill:list' %}"><font-awesome-icon icon="home" class="icon-hover"></font-awesome-icon></a> </li>
-                <li class="breadcrumb-item active"> {% include "drill/nav-session.html" %} </li>
+                <li class="breadcrumb-item active">{% include "drill/nav-session.html" %}</li>
             </ul>
         </div>
 
@@ -119,24 +119,47 @@
                         </div>
                     </div>
 
-                    {% if object.tags.all %}
+                    {% if question.tags.all %}
+
                         Tags:
-                        {% for tag in object.tags.all %}
+                        {% for tag in question.tags.all %}
                             <a class="badge badge-info" href="{% url 'drill:start_study_session_tag' tag.name %}">{{ tag.name }}</a>
                         {% endfor %}
                         <br /><br />
+
                     {% endif %}
 
-                    <div class="d-flex">
+                    {% if show_answer %}
 
-                        <div>
-                            <a href="{% url 'drill:answer' question.uuid %}" class="btn btn-primary" role="button">Show Answer</a>
-                            <a href="{% url 'drill:study' %}" class="btn btn-primary" role="button">Skip</a>
-                        </div>
-                        <form action="{% url 'drill:update' question.uuid %}" class="ml-auto">
+                        <hr class="divider" />
+                        <h3 class="drill-text table-borders markdown" v-html="getAnswer()">
+                        </h3>
+
+                        <a href="{% url 'drill:record_response' question.uuid 'good' %}" class="btn btn-primary" role="button">Good</a>
+                        {% if state_name == 'Reviewing' %}
+                            <a href="{% url 'drill:record_response' question.uuid 'hard' %}" class="btn btn-primary" role="button">Hard</a>
+                        {% endif %}
+                        <a href="{% url 'drill:record_response' question.uuid 'easy' %}" class="btn btn-primary" role="button">Easy</a>
+                        <a href="{% url 'drill:record_response' question.uuid 'again' %}" class="btn btn-primary" role="button">Reset</a>
+                        <a href="{% url 'drill:study' %}" class="btn btn-primary ml-2" role="button">Skip</a>
+
+                        <form action="{% url 'drill:update' question.uuid %}" class="mt-2 float-right">
                             <input type="submit" class="btn btn-primary" value="Update">
                         </form>
-                    </div>
+
+                    {% else %}
+
+                        <div class="d-flex">
+                            <div>
+                                <a href="{% url 'drill:answer' question.uuid %}" class="btn btn-primary" role="button">Show Answer</a>
+                                <a href="{% url 'drill:study' %}" class="btn btn-primary" role="button">Skip</a>
+                            </div>
+                            <form action="{% url 'drill:update' question.uuid %}" class="ml-auto">
+                                <input type="submit" class="btn btn-primary" value="Update">
+                            </form>
+                        </div>
+
+                    {% endif %}
 
                 </div>
             </div>
@@ -194,6 +217,9 @@
                 },
                 getQuestion() {
                     return markdown.render("{{ question.question|escapejs }}")
+                },
+                getAnswer() {
+                    return markdown.render("{{ question.answer|escapejs }}")
                 }
             },
             computed: {

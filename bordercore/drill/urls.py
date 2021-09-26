@@ -42,7 +42,7 @@ urlpatterns = [
     ),
     path(
         route="answer/<uuid:uuid>/",
-        view=views.show_answer,
+        view=views.AnswerDetailView.as_view(),
         name="answer"
     ),
     path(

@@ -119,16 +119,16 @@ class QuestionDeleteView(DeleteView):
         return reverse('drill:add')
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class QuestionDetailView(DetailView):
 
     model = Question
-    slug_field = 'uuid'
-    slug_url_kwarg = 'uuid'
-    template_name = 'drill/question.html'
+    slug_field = "uuid"
+    slug_url_kwarg = "uuid"
+    template_name = "drill/question.html"
 
     def get_object(self, queryset=None):
-        obj = Question.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
+        obj = Question.objects.get(user=self.request.user, uuid=self.kwargs.get("uuid"))
         return obj
 
     def get_context_data(self, **kwargs):
@@ -143,6 +143,34 @@ class QuestionDetailView(DetailView):
             "title": "Drill :: Question Detail",
             "tag_list": ", ".join([x.name for x in self.object.tags.all()]),
             "study_session_progress": Question.get_study_session_progress(self.request.session)
+        }
+
+
+@method_decorator(login_required, name="dispatch")
+class AnswerDetailView(DetailView):
+
+    model = Question
+    slug_field = "uuid"
+    slug_url_kwarg = "uuid"
+    template_name = "drill/question.html"
+
+    def get_object(self, queryset=None):
+        obj = Question.objects.get(user=self.request.user, uuid=self.kwargs.get("uuid"))
+        return obj
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        return {
+            **context,
+            "tag_info": self.object.get_all_tags_progress(),
+            "question": self.object,
+            "state_name": Question.get_state_name(self.object.state),
+            "learning_step_count": self.object.get_learning_step_count(),
+            "title": "Drill :: Question Detail",
+            "tag_list": ", ".join([x.name for x in self.object.tags.all()]),
+            "study_session_progress": Question.get_study_session_progress(self.request.session),
+            "show_answer": True
         }
 
 
@@ -248,23 +276,6 @@ def start_study_session_random(request, count):
 @login_required
 def start_study_session_search(request, search):
     return start_study_session(request, "search", search)
-
-
-@login_required
-def show_answer(request, uuid):
-
-    question = Question.objects.get(user=request.user, uuid=uuid)
-
-    return render(request, "drill/answer.html",
-                  {
-                      "question": question,
-                      "state_name": Question.get_state_name(question.state),
-                      "tag_list": ", ".join([x.name for x in question.tags.all()]),
-                      "learning_step_count": question.get_learning_step_count(),
-                      "title": "Drill :: Show Answer",
-                      "study_session_progress": Question.get_study_session_progress(request.session)
-                  }
-                  )
 
 
 @login_required
