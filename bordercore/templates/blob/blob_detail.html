@@ -108,23 +108,25 @@
                     {% endif %}
 
                     {% if linked_blobs %}
-                        <h4 class="mt-3">Collections</h4>
-                            {% for collection in linked_blobs %}
-                                {{ collection.name }}
-                                <ul class="list-group">
-                                {% for blob in collection.blob_list %}
-                                    <li class="list-group-item list-group-item-secondary text-info">
-                                    {% if blob.has_thumbnail_url %}
-                                        <img src="{{ blob.get_cover_url_small }}" />
-                                    {% endif %}
-                                    <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.name|default:"No Name" }}</a>
-                                    </li>
-                                {% endfor %}
+                        <h4 class="mt-3">
+                            Collections
+                        </h4>
+                        {% for collection in linked_blobs %}
+                            {{ collection.name }}
+                            <ul class="list-group">
+                            {% for blob in collection.blob_list %}
                                 <li class="list-group-item list-group-item-secondary text-info">
-                                    <a class="btn btn-primary" href="{% url 'blob:create' %}?linked_collection={{ collection.uuid }}">Add to Collection</a>
+                                {% if blob.has_thumbnail_url %}
+                                    <img src="{{ blob.get_cover_url_small }}" />
+                                {% endif %}
+                                <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.name|default:"No Name" }}</a>
                                 </li>
-                                </ul>
                             {% endfor %}
+                            <li class="list-group-item list-group-item-secondary text-info">
+                                <a class="btn btn-primary" href="{% url 'blob:create' %}?linked_collection={{ collection.uuid }}">Add to Collection</a>
+                            </li>
+                            </ul>
+                        {% endfor %}
                     {% endif %}
 
                     {% if collection_list %}
@@ -144,6 +146,7 @@
                         {% endif %}
                     </form>
 
+                    <div>
                     {% for blob in blob.get_related_blobs %}
                         {% if forloop.first %}
                             Related blobs:
@@ -154,9 +157,9 @@
                             {% endif %}
                             <li> <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.name|default:"No Name" }}</a> </li>
                     {% endfor %}
+                    </div>
 
                 </div>
-
 
                 <div v-if="tree['nodes'].length > 0" class="p-2" id="tree-menu">
                     <ul class="mb-0">
@@ -167,6 +170,35 @@
                         ></tree-menu>
                     </ul>
                 </div>
+
+                <hr class="filter-divider w-100" />
+
+                <div v-if="related_questions.length > 0">
+
+                    <div class="card-title">
+                        Related Questions
+                    </div>
+
+                    <div class="cursor-pointer">
+                        <ul class="list-group interior-borders">
+                            <li v-for="question in related_questions" class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
+                                <div class="d-flex">
+                                    <div class="mt-1 mr-2">
+                                        <font-awesome-icon icon="question" class="text-success"></font-awesome-icon>
+                                    </div>
+                                    <div>
+                                        <span v-html="question.question" @click="onClick(question.url)"></span>
+                                        <div>
+                                            <span v-for="tag in question.tags" class="badge badge-info mr-2">[[ tag.tag ]]</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+
             </div>
 
         </div> <!-- End first column -->
@@ -244,6 +276,21 @@
             data() {
                 return {
                     tree: {{ tree|safe }},
+                    related_questions: [
+                        {% for question in related_questions %}
+                        {
+                            question: markdown.render("{{ question.question|escapejs }}"),
+                            url: "{% url 'drill:detail' question.uuid %}",
+                            tags: [
+                                {% for tag in question.tags.all %}
+                                {
+                                    tag: "{{ tag }}",
+                                },
+                                {% endfor %}
+                            ]
+                        },
+                        {% endfor %}
+                    ]
                 }
             },
             methods: {
@@ -256,6 +303,9 @@
                 },
                 getNote() {
                     return markdown.render("{{ blob.note|escapejs }}");
+                },
+                onClick(url) {
+                    window.location = url;
                 }
             },
         });

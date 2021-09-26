@@ -5,9 +5,7 @@ from urllib.parse import unquote
 
 import lxml.html as lh
 import pytz
-from elasticsearch import Elasticsearch
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist

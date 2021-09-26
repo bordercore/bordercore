@@ -219,6 +219,8 @@ class BlobDetailView(DetailView):
         else:
             context["show_metadata"] = False
 
+        context["related_questions"] = self.object.question_set.all()
+
         context["tree"] = json.dumps(
             {
                 "label": "Root",
