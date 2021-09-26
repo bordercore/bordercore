@@ -1,6 +1,7 @@
 <template>
     <div>
         <form id="top-search-form" class="form-inline" method="get">
+            <input type="hidden" name="doctype">
             <span v-if="searchFilter" class="pr-2">Filter:
                 <span id="top-search-filter-type">
                     {{ searchFilter }}
@@ -174,6 +175,7 @@
                 } else if (this.searchFilter === "Bookmark") {
                     form.action = this.bookmarkQuerySearchUrl;
                 } else if (this.searchFilter === "Drill") {
+                    form.doctype.value = "drill";
                     form.action = this.drillQuerySearchUrl;
                 } else {
                     form.action = this.querySearchUrl;

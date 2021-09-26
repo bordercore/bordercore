@@ -41,11 +41,6 @@ urlpatterns = [
         name="is_favorite_mutate"
     ),
     path(
-        route="search/",
-        view=views.DrillSearchListView.as_view(),
-        name="search"
-    ),
-    path(
         route="answer/<uuid:uuid>/",
         view=views.show_answer,
         name="answer"

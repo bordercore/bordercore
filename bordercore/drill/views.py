@@ -1,10 +1,8 @@
-import re
 from urllib.parse import unquote
 
 from django import urls
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -45,40 +43,6 @@ class DrillListView(ListView):
             "favorite_questions_progress": Question.objects.favorite_questions_progress(self.request.user),
             "total_progress": Question.objects.total_tag_progress(self.request.user),
             "study_session_progress": Question.get_study_session_progress(self.request.session)
-        }
-
-
-@method_decorator(login_required, name="dispatch")
-class DrillSearchListView(ListView):
-
-    template_name = "drill/search.html"
-
-    def get_queryset(self):
-        search_term = self.request.GET["search"]
-
-        return Question.objects.filter(Q(question__icontains=search_term)
-                                       | Q(answer__icontains=search_term)) \
-                               .prefetch_related("tags")
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        search_term = self.request.GET["search"]
-
-        info = []
-
-        for question in context["object_list"]:
-            info.append(dict(tags=", ".join([x.name for x in question.tags.all()]),
-                             uuid=question.uuid,
-                             question=re.sub("[\n\r\"]", "", question.question),
-                             answer=re.sub("[\n\r\"]", "", question.answer)))
-
-        return {
-            **context,
-            "cols": ["tags", "uuid", "question", "answer"],
-            "search": search_term,
-            "info": info,
-            "title": "Drill Search"
         }
 
 

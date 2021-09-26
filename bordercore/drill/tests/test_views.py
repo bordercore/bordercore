@@ -35,16 +35,6 @@ def test_drill_list(auto_login_user, question):
     assert resp.status_code == 200
 
 
-def test_drill_search_list(auto_login_user, question):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("drill:search")
-    resp = client.get(f"{url}?search=foobar")
-
-    assert resp.status_code == 200
-
-
 @factory.django.mute_signals(signals.post_save)
 def test_drill_create(auto_login_user, question):
 
