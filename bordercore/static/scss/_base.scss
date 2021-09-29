@@ -85,7 +85,7 @@
 }
 
 //
-// Common components
+// Common selectors
 //
 
 @import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
@@ -141,7 +141,7 @@ span {
 }
 
 .highlight-box {
-  background: lighten(#10163a, 5%);
+  background: lighten($background-color-dark, 5%);
   padding: 1em;
   border-radius: 0.7rem;
 }
@@ -271,6 +271,18 @@ a.tag {
   &:hover {
     background-color: $button-plus-hover-background-color;
   }
+}
+
+.fader::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: linear-gradient(to bottom, rgba($background-color-dark, 0), rgba($background-color-dark, 1) 90%);
+  width: 100%;
+  height: 4em;
 }
 
 // Disable the outline around toast close buttons when you click on them
@@ -1017,6 +1029,11 @@ h2#name {
   }
 }
 
+.note-content {
+  max-height: 500px;
+  overflow: hidden;
+}
+
 //
 // Todo
 //
@@ -1378,7 +1395,7 @@ div.CodeMirror-focused {
 
   .ti-autocomplete {
     color: #6ea6e0;
-    background: #10163a !important;
+    background: $background-color-dark !important;
   }
 
   // These apply Bootstrap-like styles to the tags
@@ -1405,7 +1422,7 @@ div.CodeMirror-focused {
 
   &.ti-focus .ti-input {
     color: #6ea6e0 !important;
-    background-color: #10163a !important;
+    background-color: $background-color-dark !important;
 
     // Mimic Bootstrap's default focus behavior
     border-color: #7fe7c4 !important;
