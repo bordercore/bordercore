@@ -252,7 +252,6 @@ class Song(TimeStampedModel):
                                                artist=album_artist)
             except ObjectDoesNotExist:
 
-                print("creating new album")
                 # No existing album found. Create a new one.
                 album_info = Album(user=user,
                                    title=song_info["album_name"],
