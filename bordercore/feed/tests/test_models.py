@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import pytest
@@ -42,6 +43,8 @@ def test_get_current_feed(auto_login_user, feed):
 
     # Test for a non-existent current. This should
     #  return the first feed
+    # The test emits a warning we'd like to ignore
+    logging.disable(logging.WARNING)
     session = {"current_feed": 666}
     assert Feed.get_current_feed(user, session) == {
         "id": feed[2].id,
