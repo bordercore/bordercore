@@ -158,7 +158,20 @@
 
     {{ block.super }}
 
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+
     <script type="text/javascript">
+
+        window.MathJax = {
+            tex: {
+                inlineMath: [ ["\\(","\\)"], ["$$", "$$"] ],
+                displayMath: [ ["\\[","\\]"] ],
+                processEscapes: true,
+                processEnvironments: true
+            },
+        };
 
         // Should match CSS class "note-content"
         const NOTE_MAX_HEIGHT = 500;
