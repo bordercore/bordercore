@@ -2,18 +2,19 @@
     <li :class="{'hide-list-element': depth == 0}">
         <div v-if="depth > 0"
              class="text-break"
-             :class="{'font-weight-bold': isFolder}"
+             :class="{'tree-folder': isFolder}"
              @click="toggle"
              @dblclick="makeFolder"
         >
             <a :href="getId(item.id)">{{ item.label }}</a>
             <!-- <span v-if="isFolder">[{{ isOpen ? '-' : '+' }}]</span> -->
         </div>
-        <ul v-show="isOpen" v-if="isFolder">
+        <ul v-show="isOpen" v-if="isFolder" class="mb-0">
             <tree-menu
                 v-for="(child, index) in item.nodes"
                 :key="index"
                 class="item"
+                :initial-open="depth < 0 ? true : false"
                 :item="child"
                 :depth="depth + 1"
                 @make-folder="$emit('make-folder', $event)"
@@ -36,10 +37,14 @@
                 default: 1,
                 type: Number,
             },
+            initialOpen: {
+                default: true,
+                type: Boolean,
+            },
         },
         data: function() {
             return {
-                isOpen: true,
+                isOpen: this.initialOpen,
             };
         },
         computed: {

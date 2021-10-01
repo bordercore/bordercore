@@ -896,14 +896,28 @@ h2#name {
   color: $teal;
 }
 
-#tree-menu {
+.tree-menu {
   background-color: $tree-menu-background-color;
   border-radius: 0.6rem;
 
   ul {
     padding-left: 1em;
     line-height: 1.5em;
+
+    li::marker {
+      color: #4591ff;
+      content: "• ";
+    }
   }
+
+  a {
+    color: $tree-menu-color;
+  }
+}
+
+.tree-folder a {
+  color: $tree-menu-folder-color;
+  font-weight: bold;
 }
 
 .hide-list-element {
@@ -1029,7 +1043,7 @@ h2#name {
   }
 }
 
-.note-content {
+.note-content-truncated {
   max-height: 500px;
   overflow: hidden;
 }

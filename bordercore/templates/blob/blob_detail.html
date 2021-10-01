@@ -9,8 +9,8 @@
 
     <div class="scrollable-panel-container row no-gutters">
 
-        <div class="col-lg-3 h-100">
-            <div id="vue-app" class="scrollable-panel card-body d-flex flex-column h-100 mb-0">
+        <div class="col-lg-3 h-100 d-flex flex-column">
+            <div id="vue-app" class="scrollable-panel card-body d-flex flex-column h-100">
                 <div>
 
                     <h5>{{ blob.get_edition_string }}</h5>
@@ -161,19 +161,17 @@
 
                 </div>
 
-                <div v-if="tree['nodes'].length > 0" class="p-2" id="tree-menu">
-                    <ul class="mb-0">
-                        <tree-menu
-                            class="item"
-                            :item="tree"
-                            :depth="0"
-                        ></tree-menu>
-                    </ul>
+                <div v-if="tree['nodes'].length > 0" class="p-2 tree-menu">
+                    <tree-menu
+                        class="item"
+                        :item="tree"
+                        :depth="0"
+                    ></tree-menu>
                 </div>
 
-                <hr class="filter-divider w-100" />
-
                 <div v-if="related_questions.length > 0">
+
+                    <hr class="filter-divider w-100 mt-0" />
 
                     <div class="card-title">
                         Related Questions
