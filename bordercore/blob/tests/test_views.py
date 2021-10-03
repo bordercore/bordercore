@@ -125,15 +125,13 @@ def test_blob_detail(monkeypatch_blob, auto_login_user, blob):
 
     soup = BeautifulSoup(resp.content, "html.parser")
 
-    assert soup.select("div#vue-app-content h2#name")[0].findAll(text=True)[0].strip() == blob.get_name(remove_edition_string=True)
+    assert soup.select("div#vue-right-panel h2#name")[0].findAll(text=True)[0].strip() == blob.get_name(remove_edition_string=True)
 
     url = [x.value for x in blob.metadata_set.all() if x.name == "Url"][0]
     assert soup.select("strong a")[0].findAll(text=True)[0] == urlparse(url).netloc
 
     author = [x.value for x in blob.metadata_set.all() if x.name == "Author"][0]
-    assert soup.select("span#author")[0].findAll(text=True)[0] == author
-
-    assert soup.select("span.metadata_value")[0].findAll(text=True)[0] == "John Smith, Jane Doe"
+    assert author in [x for sublist in soup.select("span") for x in sublist]
 
 
 def test_blob_metadata_name_search(auto_login_user, blob_image_factory):

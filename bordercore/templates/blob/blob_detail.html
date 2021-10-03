@@ -10,10 +10,12 @@
     <div class="scrollable-panel-container row no-gutters">
 
         <div class="col-lg-3 h-100 d-flex flex-column">
-            <div id="vue-app" class="scrollable-panel card-body d-flex flex-column h-100">
+            <div id="vue-left-panel" class="scrollable-panel card-body d-flex flex-column h-100">
                 <div>
 
-                    <h5>{{ blob.get_edition_string }}</h5>
+                    <h5>
+                        {{ blob.get_edition_string }}
+                    </h5>
 
                     {% if metadata|dict_get:"Subtitle" %}
                         <div id="blob_subtitle">
@@ -23,7 +25,7 @@
 
                     {% if metadata|dict_get:"Author" %}
                         <div class="mt-2">
-                            by <span id="author">{{ metadata|dict_get:"Author" }}</span>
+                            by <span class="text-info">{{ metadata|dict_get:"Author" }}</span>
                         </div>
                     {% endif %}
 
@@ -54,44 +56,56 @@
 
                     {% if show_metadata %}
 
-                        <div class="highlight-box mb-3">
+                    <transition name="fade">
+                        <div v-if="Object.keys($store.state.elasticsearchInfo).length !== 0 || Object.keys(metadata_misc).length !== 0" class="highlight-box mb-3">
 
-                            {% for key, values in metadata_misc.items %}
-                                {% if key != "Subtitle" %}
-                                    <div>
-                                        <strong class="metadata_name">{{ key }}</strong>
-                                        <span class="metadata_value">{{ values }}</span>
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-
-                            {% if elasticsearch_info.content_type %}
-                                <div>
-                                    <strong>Object Type</strong>
-                                    {{ elasticsearch_info.content_type }}
+                            <div v-for="(value, name) in metadata_misc" class="d-flex">
+                                <div class="text-info mr-2">
+                                    [[ name ]]
                                 </div>
-                            {% endif %}
-
-                            {% if blob.sha1sum %}
                                 <div>
-                                    <strong>Size</strong>
-                                    <small>{{ elasticsearch_info.size }}</small>
+                                    [[ value ]]
                                 </div>
-                                {% if elasticsearch_info.num_pages %}
-                                    <div>
-                                        <strong>Pages</strong>
-                                        <small>{{ elasticsearch_info.num_pages }}</small>
-                                    </div>
-                                {% endif %}
-                                {% if elasticsearch_info.duration %}
-                                    <div>
-                                        <strong>Duration</strong>
-                                        <small>{{ elasticsearch_info.duration }}</small>
-                                    </div>
-                                {% endif %}
-                            {% endif %}
+                            </div>
+
+                            <div v-if="$store.state.elasticsearchInfo.content_type" class="d-flex">
+                                <div class="text-info mr-2">
+                                    Object Type
+                                </div>
+                                <div>
+                                    [[ $store.state.elasticsearchInfo.content_type ]]
+                                </div>
+                            </div>
+
+                            <div v-if="$store.state.elasticsearchInfo.size" class="d-flex">
+                                <div class="text-info mr-2">
+                                    Size
+                                </div>
+                                <div>
+                                    [[ $store.state.elasticsearchInfo.size ]]
+                                </div>
+                            </div>
+
+                            <div v-if="$store.state.elasticsearchInfo.num_pages" class="d-flex">
+                                <div class="text-info mr-2">
+                                    Pages
+                                </div>
+                                <div>
+                                    [[ $store.state.elasticsearchInfo.num_pages ]]
+                                </div>
+                            </div>
+
+                            <div v-if="$store.state.elasticsearchInfo.duration" class="d-flex">
+                                <div class="text-info mr-2">
+                                    Duration
+                                </div>
+                                <div>
+                                    [[ $store.state.elasticsearchInfo.duration ]]
+                                </div>
+                            </div>
 
                         </div>
+                    </transition>
 
                     {% endif %}
 
@@ -201,7 +215,7 @@
 
         </div> <!-- End first column -->
 
-        <div class="col-lg-9 h-100 overflow-auto" id="vue-app-content" v-b-hover="handleHover">
+        <div class="col-lg-9 h-100 overflow-auto" id="vue-right-panel" v-b-hover="handleHover">
 
             <div class="col-lg-12">
 
@@ -229,31 +243,25 @@
                     {{ caption }}
                 </h2>
 
-                {% if elasticsearch_info.content_type == "Video" %}
+                <video v-if="$store.state.elasticsearchInfo.content_type === 'Video'" class="video-fit" controls muted>
+                    <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="video/mp4">
+                </video>
 
-                    <video class="slide_show w-100" controls muted>
-                        <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="video/mp4">
-                    </video>
-
-                {% elif elasticsearch_info.content_type == "Audio" %}
-
-                    <audio controls controlsList="nodownload">
-                        <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="audio/mpeg">
-                                Your browser does not support the audio tag.
-                    </audio>
-
-                {% endif %}
+                <audio v-if="$store.state.elasticsearchInfo.content_type === 'Audio'" controls controlsList="nodownload">
+                    <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="audio/mpeg">
+                    Your browser does not support the audio tag.
+                </audio>
 
                 {% if blob.content %}
                     <div class="blob-content table-borders" id="blob-detail-content" v-html="getContent()">
                     </div>
                 {% endif %}
 
-                {% if blob.sha1sum and elasticsearch_info.content_type != "Video" %}
-                    <blob-detail-cover :initial-cover-info="{{ cover_info }}"
-                                       cover-url="{% url "blob:cover_info" object.uuid %}"
-                    />
-                {% endif %}
+                <blob-detail-cover
+                    v-if="$store.state.elasticsearchInfo.sha1sum && $store.state.elasticsearchInfo.content_type !== 'Video'"
+                    :initial-cover-info="{{ cover_info }}"
+                    cover-url="{% url "blob:cover_info" object.uuid %}"
+                />
 
             </div>
 
@@ -275,6 +283,14 @@
 
     <script type="text/javascript">
 
+        const store = new Vuex.Store({
+            state: {
+                elasticsearchInfo: {{ elasticsearch_info|safe|default:"{}" }},
+            },
+            getters: {},
+            mutations: {},
+        });
+
         {% if blob.is_note %}
         window.MathJax = {
             tex: {
@@ -287,10 +303,15 @@
         {% endif %}
 
         new Vue({
-            el: "#vue-app",
+            el: "#vue-left-panel",
+            name: "Left Panel",
+            store,
             data() {
                 return {
+                    getBlobInfoAttemptIntervals: [1000, 3000, 6000],
+                    getBlobInfoAttempts: 0,
                     tree: {{ tree|safe }},
+                    metadata_misc: {{ metadata_misc|safe|default:"{}" }},
                     related_questions: [
                         {% for question in related_questions %}
                         {
@@ -321,12 +342,43 @@
                 },
                 onClick(url) {
                     window.location = url;
-                }
+                },
+                getBlobInfo() {
+                    this.getBlobInfoAttempts++;
+                    console.log(`Retrieving blob info, attempt #${this.getBlobInfoAttempts}`);
+                    doGet(
+                        this,
+                        "{% url 'blob:get_elasticsearch_info' blob.uuid %}",
+                        (response) => {
+                            if (Object.keys(response.data.info).length !== 0) {
+                                this.$store.state.elasticsearchInfo = response.data.info;
+                            } else {
+                                // Keep trying to retrieve the blob's info until we run out of attempts
+                                if (this.getBlobInfoAttempts <= this.getBlobInfoAttemptIntervals.length) {
+                                    setTimeout( () => {
+                                        this.getBlobInfo();
+                                    }, this.getBlobInfoAttemptIntervals[this.getBlobInfoAttempts-1]);
+                                }
+                            }
+                        },
+                        "Error getting blob info",
+                        "{{ csrf_token }}",
+                    );
+                },
             },
+            mounted() {
+                {% if not elasticsearch_info %}
+                setTimeout( () => {
+                    this.getBlobInfo();
+                }, this.getBlobInfoAttemptIntervals[this.getBlobAttempts]);
+                {% endif %}
+            }
         });
 
         new Vue({
-            el: "#vue-app-content",
+            el: "#vue-right-panel",
+            name: "Right Content Panel",
+            store,
             components: {
                 BlobDetailCover,
             },
@@ -374,7 +426,7 @@
                 pinnedButtonValue: function() {
                     return this.isPinnedNote ? "Unpin note" : "Pin Note"
                 }
-            }
+            },
         });
 
     </script>

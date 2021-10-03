@@ -51,6 +51,11 @@ urlpatterns = [
         name="recent_blobs"
     ),
     path(
+        route="elasticsearch_info/<uuid:uuid>",
+        view=views.get_elasticsearch_info,
+        name="get_elasticsearch_info"
+    ),
+    path(
         route="cover_info/<uuid:uuid>",
         view=views.BlobCoverInfoView.as_view(),
         name="cover_info"

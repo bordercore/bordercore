@@ -236,7 +236,24 @@ class Blob(TimeStampedModel):
                     ]
                 }
             },
-            "_source": ["author", "task", "content_type", "doctype", "duration", "note", "filename", "bordercore_id", "attr_is_book", "last_modified", "name", "num_pages", "tags", "sha1sum", "size", "url"]
+            "_source": [
+                "attr_is_book",
+                "author",
+                "bordercore_id",
+                "content_type",
+                "doctype",
+                "duration",
+                "filename",
+                "last_modified",
+                "name",
+                "note",
+                "num_pages",
+                "tags",
+                "task",
+                "sha1sum",
+                "size",
+                "url"
+            ]
         }
 
         results = es.search(index=settings.ELASTICSEARCH_INDEX, body=query)["hits"]["hits"][0]
@@ -391,7 +408,7 @@ class Blob(TimeStampedModel):
                 info["width_cropped"] = max_cover_image_width
 
         except KeyError as e:
-            log.warning(f"Warning: Object has no metadata {e}")
+            log.warning(f"Warning: Object has no S3 metadata {e}")
 
         return info
 
