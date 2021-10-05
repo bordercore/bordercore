@@ -33,7 +33,7 @@
         data() {
             return {
                 coverInfo: {},
-                getCoverImageAttemptIntervals: [1000, 3000],
+                getCoverImageAttemptIntervals: [1000, 3000, 6000],
                 getCoverImageAttempts: 0,
             };
         },
