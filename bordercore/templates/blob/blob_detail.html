@@ -330,13 +330,6 @@
                 }
             },
             methods: {
-                handleCopySha1sum(sha1sum) {
-                    navigator.clipboard.writeText(sha1sum)
-                    this.$bvToast.toast("Sha1sum copied to clipboard", {
-                        title: "Info",
-                        variant: "primary"
-                    })
-                },
                 getNote() {
                     return markdown.render("{{ blob.note|escapejs }}");
                 },
@@ -390,6 +383,13 @@
                 }
             },
             methods: {
+                handleCopySha1sum(sha1sum) {
+                    navigator.clipboard.writeText(sha1sum)
+                    this.$bvToast.toast("Sha1sum copied to clipboard", {
+                        title: "Info",
+                        variant: "primary"
+                    })
+                },
                 onClick(evt) {
                     payload = {
                         "uuid": "{{ blob.uuid }}"
