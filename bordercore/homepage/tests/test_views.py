@@ -17,7 +17,7 @@ def monkeypatch_homepage(monkeypatch):
     def mock(*args, **kwargs):
         pass
 
-    monkeypatch.setattr(views, "get_random_blob", mock)
+    monkeypatch.setattr(views, "get_random_image", mock)
 
 
 def test_homepage(monkeypatch_homepage, auto_login_user, bookmark, question, todo):

@@ -26,57 +26,42 @@ from todo.models import Todo
 @login_required
 def homepage(request):
 
-    quote = Quote.objects.order_by('?').first()
+    quote = Quote.objects.order_by("?").first()
 
     # Get any 'pinned' bookmarks
     pinned_bookmarks = Bookmark.objects.filter(user=request.user, is_pinned=True)
 
-    # if request.user.userprofile.orgmode_file:
-    #     try:
-    #         tree = PyOrgMode.OrgDataStructure()
-    #         tree.load_from_file(request.user.userprofile.orgmode_file)
-    #         startnode = PyOrgMode.OrgDataStructure.get_nodes_by_tag(tree.root, "todo", [])
-    #         nodes = PyOrgMode.OrgDataStructure.get_nodes_by_priority(startnode[0], "A", [])
-    #         for node in nodes:
-    #             tasks.append({'task': PyOrgMode.OrgDataStructure.parse_heading(node.heading)['heading'],
-    #                           'tag': node.tags,
-    #                           'date': get_date(node),
-    #                           'parent_category': PyOrgMode.OrgDataStructure.parse_heading(node.parent.heading)['heading']})
-    #     except AttributeError as e:
-    #         log.info("AttributeError: %s" % e)
-
     tasks = Todo.objects.filter(user=request.user, priority=Todo.get_priority_value("High")).prefetch_related("tags")[:5]
 
     # Get some recently played music
-    music = Listen.objects.filter(user=request.user).select_related("song").distinct().order_by('-created')[:3]
+    music = Listen.objects.filter(user=request.user).select_related("song").distinct().order_by("-created")[:3]
 
     # Choose a random image
     random_image_info = None
     try:
-        random_image = get_random_blob(request, 'image/*')
+        random_image = get_random_image(request, "image/*")
         if random_image:
             try:
-                random_image_info = {'blob': random_image,
-                                     'uuid': random_image.uuid,
-                                     'cover_info': Blob.get_cover_info(
-                                         random_image.uuid,
-                                         random_image.file.name,
-                                         'large',
+                random_image_info = {**random_image,
+                                     "cover_info": Blob.get_cover_info(
+                                         random_image["uuid"],
+                                         random_image["filename"],
+                                         "large",
                                          500)}
             except ClientError as e:
-                messages.add_message(request, messages.ERROR, f"Error getting random image info for uuid={random_image.uuid}: {e}")
+                messages.add_message(request, messages.ERROR, f"Error getting random image info for uuid={random_image['uuid']}: {e}")
     except (ConnectionRefusedError, ConnectionError):
-        messages.add_message(request, messages.ERROR, 'Cannot connect to Elasticsearch')
+        messages.add_message(request, messages.ERROR, "Cannot connect to Elasticsearch")
     except ObjectDoesNotExist:
-        messages.add_message(request, messages.ERROR, 'Blob found in Elasticsearch but not the DB')
+        messages.add_message(request, messages.ERROR, "Blob found in Elasticsearch but not the DB")
 
     # Get the most recent untagged bookmarks
-    bookmarks = Bookmark.objects.filter(user=request.user, tags__isnull=True).order_by('-created')[:10]
+    bookmarks = Bookmark.objects.filter(user=request.user, tags__isnull=True).order_by("-created")[:10]
 
     # Get the list of 'daily' bookmarks
     daily_bookmarks = Bookmark.objects.filter(user=request.user, daily__isnull=False)
     for bookmark in daily_bookmarks:
-        if bookmark.daily['viewed'] != 'true':
+        if bookmark.daily["viewed"] != "true":
             bookmark.css_class = "font-weight-bold"
 
     # Get the default collection
@@ -84,18 +69,18 @@ def homepage(request):
 
     overdue_exercises = ExerciseUser.get_overdue_exercises(request.user)
 
-    return render(request, 'homepage/index.html',
-                  {'quote': quote,
-                   'tasks': tasks,
-                   'music': music,
-                   'daily_bookmarks': daily_bookmarks,
-                   'pinned_bookmarks': pinned_bookmarks,
-                   'random_image_info': random_image_info,
-                   'bookmarks': bookmarks,
-                   'default_collection': default_collection,
-                   'overdue_exercises': sorted(overdue_exercises, key=lambda x: x['lag'], reverse=True),
-                   'drill_total_progress': Question.objects.total_tag_progress(request.user),
-                   'title': 'Homepage'})
+    return render(request, "homepage/index.html",
+                  {"quote": quote,
+                   "tasks": tasks,
+                   "music": music,
+                   "daily_bookmarks": daily_bookmarks,
+                   "pinned_bookmarks": pinned_bookmarks,
+                   "random_image_info": random_image_info,
+                   "bookmarks": bookmarks,
+                   "default_collection": default_collection,
+                   "overdue_exercises": sorted(overdue_exercises, key=lambda x: x["lag"], reverse=True),
+                   "drill_total_progress": Question.objects.total_tag_progress(request.user),
+                   "title": "Homepage"})
 
 
 @login_required
@@ -110,7 +95,7 @@ def get_calendar_events(request):
     return JsonResponse(events, safe=False)
 
 
-def get_random_blob(request, content_type):
+def get_random_image(request, content_type):
 
     es = Elasticsearch(
         [settings.ELASTICSEARCH_ENDPOINT],
@@ -149,13 +134,17 @@ def get_random_blob(request, content_type):
         },
         'from': 0,
         'size': 1,
-        '_source': ['filename', 'uuid']
+        '_source': [
+            'filename',
+            'name',
+            'uuid'
+        ]
     }
 
     results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 
     if results["hits"]["hits"]:
-        return Blob.objects.get(user=request.user, uuid=results["hits"]["hits"][0]["_source"]["uuid"])
+        return results["hits"]["hits"][0]["_source"]
     else:
         return None
 

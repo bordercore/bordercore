@@ -202,7 +202,7 @@
                         {% if random_image_info %}
                             <template v-slot:title-slot>
                                 <div class="card-title">
-                                    <a href="{% url 'blob:detail' random_image_info.uuid %}">{{ random_image_info.blob.name }}</a>
+                                    <a href="{% url 'blob:detail' random_image_info.uuid %}">{{ random_image_info.name }}</a>
                                 </div>
                             </template>
                         {% endif %}
