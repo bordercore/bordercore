@@ -69,6 +69,7 @@ class BlobSha1sumViewSet(viewsets.ModelViewSet):
 class BookmarkViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = BookmarkSerializer
+    lookup_field = "uuid"
 
     def get_queryset(self):
         return Bookmark.objects.filter(user=self.request.user)

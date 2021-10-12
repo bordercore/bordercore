@@ -12,20 +12,9 @@
                     <ul id="sort-container-tags" class="list-group list-group-flush">
                         <draggable v-model="bookmarkList" ghost-class="sortable-ghost" draggable=".draggable" @change="onChange">
                             <transition-group type="transition" class="w-100">
-                                <li v-for="(bookmark, index) in bookmarkList" v-cloak :key="bookmark.id" v-b-hover="handleHover" class="list-group-item list-group-item-secondary text-info draggable pl-0" :data-uuid="bookmark.uuid">
-                                    <div class="dropdownmenu hidden float-right node-bookmark-menu">
-                                        <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center">
-                                            <font-awesome-icon icon="ellipsis-v" />
-                                            <div slot="dropdown">
-                                                <a class="dropdown-item" href="#" @click="removeBookmark(bookmark.uuid)">Remove</a>
-                                                <a class="dropdown-item" :href="bookmark.edit_url">Edit Bookmark</a>
-                                                <a v-if="!bookmark.note" class="dropdown-item" href="#" @click="addNote(bookmark.uuid)">Add note</a>
-                                                <a v-if="bookmark.note" class="dropdown-item" href="#" @click="activateInEditMode(bookmark, index)">Edit note</a>
-                                            </div>
-                                        </dropdown-menu>
-                                    </div>
+                                <li v-for="(bookmark, index) in bookmarkList" v-cloak :key="bookmark.id" v-b-hover="handleHover" class="list-group-item list-group-item-secondary text-info draggable px-0" :data-uuid="bookmark.uuid">
                                     <div class="d-flex">
-                                        <div class="float-left pr-2" v-html="bookmark.favicon_url" />
+                                        <div class="pr-2" v-html="bookmark.favicon_url" />
                                         <div>
                                             <a :href="bookmark.url">{{ bookmark.name }}</a>
 
@@ -33,8 +22,19 @@
                                                 {{ bookmark.note }}
                                             </div>
                                             <span v-show="bookmark.noteIsEditable">
-                                                <input id="add-bookmark-input" ref="input" type="text" class="form-control form-control-sm" :value="bookmark.note" placeholder="Add Note" autocomplete="off" @blur="editNote(bookmark.uuid, $event.target.value)" @keydown.enter="editNote(bookmark.uuid, $event.target.value)">
+                                                <input id="add-bookmark-input" ref="input" type="text" class="form-control form-control-sm" :value="bookmark.note" placeholder="" autocomplete="off" @blur="editNote(bookmark.uuid, $event.target.value)" @keydown.enter="editNote(bookmark.uuid, $event.target.value)">
                                             </span>
+                                        </div>
+                                        <div class="dropdownmenu">
+                                            <dropdown-menu v-model="show" transition="translate-fade-down" class="hidden">
+                                                <font-awesome-icon icon="ellipsis-v" />
+                                                <div slot="dropdown">
+                                                    <a class="dropdown-item" href="#" @click="removeBookmark(bookmark.uuid)">Remove</a>
+                                                    <a class="dropdown-item" :href="bookmark.edit_url">Edit Bookmark</a>
+                                                    <a v-if="!bookmark.note" class="dropdown-item" href="#" @click="addNote(bookmark.uuid)">Add note</a>
+                                                    <a v-if="bookmark.note" class="dropdown-item" href="#" @click="activateInEditMode(bookmark, index)">Edit note</a>
+                                                </div>
+                                            </dropdown-menu>
                                         </div>
                                     </div>
                                 </li>
@@ -187,11 +187,10 @@
                 );
             },
             handleHover(hovered, evt) {
-                evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
                 if (hovered == true) {
-                    evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
+                    evt.currentTarget.querySelector(".dropdown").classList.remove("hidden");
                 } else {
-                    evt.currentTarget.querySelector(".dropdownmenu").classList.add("hidden");
+                    evt.currentTarget.querySelector(".dropdown").classList.add("hidden");
                 };
             },
             removeBookmark(bookmarkUuid) {

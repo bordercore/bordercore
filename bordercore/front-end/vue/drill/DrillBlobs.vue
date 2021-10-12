@@ -12,17 +12,7 @@
                     <ul id="sort-container-tags" class="list-group list-group-flush">
                         <draggable v-model="blobList" ghost-class="sortable-ghost" draggable=".draggable" @change="onChange">
                             <transition-group type="transition" class="w-100">
-                                <li v-for="(blob, index) in blobList" v-cloak :key="blob.uuid" v-b-hover="handleHover" class="list-group-item list-group-item-secondary text-info draggable pl-0" :data-uuid="blob.uuid">
-                                    <div class="dropdownmenu hidden float-right node-blob-menu">
-                                        <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center">
-                                            <font-awesome-icon icon="ellipsis-v" />
-                                            <div slot="dropdown">
-                                                <a class="dropdown-item" href="#" @click="removeBlob(blob.uuid)">Remove</a>
-                                                <a v-if="!blob.note" class="dropdown-item" href="#" @click="addNote(blob.uuid)">Add note</a>
-                                                <a v-else class="dropdown-item" href="#" @click="activateInEditMode(blob, index)">Edit note</a>
-                                            </div>
-                                        </dropdown-menu>
-                                    </div>
+                                <li v-for="(blob, index) in blobList" v-cloak :key="blob.uuid" v-b-hover="handleHover" class="list-group-item list-group-item-secondary text-info draggable px-0" :data-uuid="blob.uuid">
                                     <div class="d-flex">
                                         <div class="pr-2">
                                             <img :src="[[ blob.cover_url ]]" height="75" width="70">
@@ -35,8 +25,19 @@
                                                 {{ blob.note }}
                                             </div>
                                             <span v-show="blob.noteIsEditable">
-                                                <input id="add-blob-input" ref="input" type="text" class="form-control form-control-sm" :value="blob.note" placeholder="Add Note" autocomplete="off" @blur="editNote(blob.uuid, $event.target.value)" @keydown.enter="editNote(blob.uuid, $event.target.value)">
+                                                <input id="add-blob-input" ref="input" type="text" class="form-control form-control-sm" :value="blob.note" placeholder="" autocomplete="off" @blur="editNote(blob.uuid, $event.target.value)" @keydown.enter="editNote(blob.uuid, $event.target.value)">
                                             </span>
+                                        </div>
+
+                                        <div class="dropdownmenu">
+                                            <dropdown-menu v-model="show" transition="translate-fade-down" class="hidden">
+                                                <font-awesome-icon icon="ellipsis-v" />
+                                                <div slot="dropdown">
+                                                    <a class="dropdown-item" href="#" @click="removeBlob(blob.uuid)">Remove</a>
+                                                    <a v-if="!blob.note" class="dropdown-item" href="#" @click="addNote(blob.uuid)">Add note</a>
+                                                    <a v-else class="dropdown-item" href="#" @click="activateInEditMode(blob, index)">Edit note</a>
+                                                </div>
+                                            </dropdown-menu>
                                         </div>
                                     </div>
                                 </li>
@@ -183,11 +184,10 @@
                 );
             },
             handleHover(hovered, evt) {
-                evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
                 if (hovered == true) {
-                    evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
+                    evt.currentTarget.querySelector(".dropdown").classList.remove("hidden");
                 } else {
-                    evt.currentTarget.querySelector(".dropdownmenu").classList.add("hidden");
+                    evt.currentTarget.querySelector(".dropdown").classList.add("hidden");
                 };
             },
             removeBlob(blobUuid) {

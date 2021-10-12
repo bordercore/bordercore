@@ -10,33 +10,36 @@
 
         <div class="col-lg-3 d-flex flex-column">
 
-            <div class="card-body" id="vue-app-left">
+            <div id="vue-pinned-tags" class="card-body">
 
                 <add-note inline-template>
                     <div id="bookmark-sidebar" >
                         <form>
                             <div class="form-group">
                                 <label class="col-form-label">Note</label>
-                                <textarea class="form-control" id="note" rows="9" v-model="note"></textarea>
+                                <textarea id="note" class="form-control" rows="9" v-model="note"></textarea>
                             </div>
                             <button id="btn-add-note" type="button" class="btn btn-primary" @click="onClick">Add</button>
                         </form>
                     </div>
                 </add-note>
 
-                <ul class="list-group flex-column w-100" id="sort-container-tags">
+                <h4>Pinned Tags</h4>
+
+                <ul id="sort-container-tags" class="list-group flex-column w-100">
                     <tag-list inline-template>
                         <div>
                             <draggable v-model="pinnedTags" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
                                 <transition-group type="transition" class="w-100">
-                                    <li v-for="tag in pinnedTags" class="list-group-item list-group-item-secondary" :class="{ active: tag.isActive, draggable: tag.isDraggable, 'bookmark-tag-list-header': tag.isHeader }" :data-id="tag.id" :key="tag.id" v-cloak>
-                                        <template v-if="tag.isHeader">
+                                    <li v-for="tag in pinnedTags" class="tag-list pl-2 py-1 pr-1 d-flex" :class="{ 'selected rounded-sm': tag.isActive, draggable: tag.isDraggable }" @click.prevent="onClick" :data-tag="tag.name" :data-id="tag.id" :key="tag.id" v-cloak>
+                                        <div class="pl-2">
                                             [[ tag.name ]]
-                                        </template>
-                                        <template v-else>
-                                            <a href="" @click.prevent="onClick" :data-tag="tag.name">[[ tag.name ]]</a>
-                                        </template>
-                                        <span v-if="tag.count" class="ml-2 badge" :class="{ 'badge-light': tag.isActive, 'badge-info': !tag.isActive }">[[ tag.count ]]</span>
+                                        </div>
+                                        <div v-if="tag.count" class="ml-auto pr-2">
+                                            <span class="px-2 badge badge-pill"  :class="{ 'badge-light': tag.isActive, 'badge-info': !tag.isActive }">
+                                                [[ tag.count ]]
+                                            </span>
+                                        </div>
                                     </li>
                                 </transition-group>
                             </draggable>
@@ -50,14 +53,14 @@
 
         <div class="col-lg-9">
 
-            <div class="ml-2 mb-3" id="vue-app-top">
+            <div id="vue-app-top" class="ml-2 mb-3">
 
-                <div class="d-flex">
+                <div class="d-flex mr-3">
 
-                    <form class="form-inline" role="form" id="search-form" method="get" @submit.prevent>
+                    <form id="search-form" class="form-inline" role="form" method="get" @submit.prevent>
                         {% csrf_token %}
 
-                        <input type="hidden" id="add-to-remote-from-pinned-tagname" name="tag" />
+                        <input id="add-to-remote-from-pinned-tagname" type="hidden" name="tag" />
 
                         <div class="form-group has-search">
                             <font-awesome-icon icon="search" class="bookmark-search-spacer"></font-awesome-icon>
@@ -77,8 +80,6 @@
 
                     <button-group inline-template @get-page="getPage">
                         <div class="btn-group ml-3">
-                            <input type="button" class="btn btn-secondary" id="btn-update" value="Update" :disabled="buttonsDisabled" @click="onClickUpdate" />
-                            <input type="button" class="btn btn-secondary" id="btn-delete" value="Delete" :disabled="buttonsDisabled" @click="onClickDelete" />
                             <input v-if="unPinButtonVisible" type="button" class="btn btn-secondary" value="Unpin" @click="unPin" v-cloak />
                             <input v-if="pinButtonVisible" type="button" class="btn btn-secondary" value="Pin" @click="pin" v-cloak />
                         </div>
@@ -89,38 +90,49 @@
                         </add-button>
                     </div>
 
-                    <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="bookmark-dropdown text-center ml-auto mr-2 mt-2">
-                        <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                        <div slot="dropdown">
-                            <a class="dropdown-item" href="{% url 'bookmark:import' %}" >Import</a>
-                            <a class="dropdown-item" href="#" @click="randomize">Randomize</a>
-                        </div>
-                    </dropdown-menu>
+                    <div class="dropdownmenu">
+                        <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="my-auto">
+                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+                            <div slot="dropdown">
+                                <a class="dropdown-item" href="{% url 'bookmark:import' %}" >Import</a>
+                                <a class="dropdown-item" href="#" @click="randomize">Randomize</a>
+                            </div>
+                        </dropdown-menu>
+                    </div>
 
                 </div>
 
             </div>
 
-            <div class="card-grid ml-2" id="vue-app-right">
+            <div id="vue-right-panel" class="card-grid ml-2">
 
-                <bookmark-list inline-template @paginate="paginate" ref="bookmarkList">
+                <bookmark-list inline-template @paginate="paginate" @get-page="getPage" ref="bookmarkList">
                     <div class="row">
                         <div class="col-lg-12">
-                            <table>
+                            <table class="w-100">
                                 <tbody is="draggable" v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" :disabled="disableSort">
                                     <transition-group type="transition">
-                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="bookmark-list" @click="onClick" v-cloak>
+                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="bookmark-list w-100" @click="onClick" @mouseover="rowHovered" @mouseleave="rowUnHovered" v-cloak>
                                             <td class="bookmark-list-date p-2 text-info">
                                                 <span>[[ bookmark.created ]]</span>
                                             </td>
                                             <td class="bookmark-list-favicon p-2">
                                                 <span v-html="bookmark.favicon_url"></span>
                                             </td>
-                                            <td class="bookmark-list-link p-2">
+                                            <td class="bookmark-list-link w-100 p-2">
                                                 <a :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.name) ]]</a>
-                                                <a v-if="bookmark.lastResponseCode != 200" class="form-error ml-3" target="wayback" :href="'https://web.archive.org/web/1000/' + bookmark.url">[[ bookmark.lastResponseCode ]]</a>
-                                                <font-awesome-icon v-if="bookmark.note != null && bookmark.note != ''" icon="sticky-note" /> [[ ]]
-                                                <a v-for="tag in bookmark.tags" v-if="tag != selectedTagName" class="badge badge-info ml-2" @click.prevent="onClick" href="">[[ tag ]]</a>
+                                                <font-awesome-icon v-if="bookmark.note != null && bookmark.note != ''" icon="sticky-note">
+                                                </font-awesome-icon>
+                                                <a v-for="tag in bookmark.tags" v-if="tag != selectedTagName" class="badge badge-info ml-2" @click.prevent="onClick" href="#">[[ tag ]]</a>
+                                            </td>
+                                            <td class="dropdownmenu small mr-4">
+                                                <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="hidden">
+                                                    <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+                                                    <div slot="dropdown">
+                                                        <a class="dropdown-item" href="#" @click="onClickUpdate(bookmark.uuid)">Update</a>
+                                                        <a class="dropdown-item" href="#" @click="onClickDelete(bookmark.uuid)">Delete</a>
+                                                    </div>
+                                                </dropdown-menu>
                                             </td>
                                         </tr>
                                     </transition-group>
@@ -206,16 +218,12 @@
         const store = new Vuex.Store({
             state: {
                 pinButtonVisible: false,
-                buttonsDisabled: true,
                 selectedTagName: null,
                 unPinButtonVisible: false
             },
             getters: {
                 pinButtonVisible: state => {
                     return state.pinButtonVisible
-                },
-                buttonsDisabled: state => {
-                    return state.buttonsDisabled
                 },
                 unPinButtonVisible: state => {
                     return state.unPinButtonVisible
@@ -228,9 +236,6 @@
                 pinButtonVisible (state, payload) {
                     state.pinButtonVisible = payload
                 },
-                changeButtonsDisabled (state, payload) {
-                    state.buttonsDisabled = payload
-                },
                 unPinButtonVisible (state, payload) {
                     state.unPinButtonVisible = payload
                 },
@@ -241,32 +246,8 @@
         });
 
         const ButtonGroup = {
-            computed: mapGetters(["pinButtonVisible", "buttonsDisabled", "unPinButtonVisible"]),
+            computed: mapGetters(["pinButtonVisible", "unPinButtonVisible"]),
             methods: {
-                onClickDelete(evt) {
-
-                    var bookmarkEl = document.querySelector("tr.bookmark-list.selected");
-                    var selectedUuid = bookmarkEl.dataset.uuid;
-
-                    var self = this;
-
-                    axios.delete("{% url 'bookmark:delete' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', selectedUuid))
-                         .then(() => {
-
-                             this.$store.commit("changeButtonsDisabled", true)
-
-                             if (this.$store.getters.selectedTagName) {
-                                 document.getElementById("bookmark-sidebar").classList.remove("show");
-                             }
-
-                             self.$emit("get-page", 1);
-
-                         })
-                },
-                onClickUpdate(evt) {
-                    var selectedUuid = document.querySelector("tr.bookmark-list.selected").dataset.uuid;
-                    window.location="{% url 'bookmark:update' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', selectedUuid);
-                },
                 pin(evt) {
                     const tagName = this.$parent.$refs.search.$refs.simpleSuggest.$refs.suggestComponent.text
                     document.getElementById("add-to-remote-from-pinned-tagname").value = tagName;
@@ -375,6 +356,8 @@
                 return {
                     bookmarkList: [],
                     disableSort: true,
+                    show: false,
+                    right: true,
                 }
             },
             methods: {
@@ -392,10 +375,6 @@
                             document.getElementById("bookmark-sidebar").classList.remove("show");
                         }
 
-                        element.classList.remove("selected");
-
-                        this.$store.commit("changeButtonsDisabled", true)
-
                     } else {
 
                         if (this.$store.getters.selectedTagName) {
@@ -411,16 +390,8 @@
 
                             EventBus.$emit("setNoteValue", noteValue);
 
-                            document.getElementById("bookmark-sidebar").classList.add("show");
+                            // document.getElementById("bookmark-sidebar").classList.add("show");
                         }
-
-                        const currentlySelected = document.querySelector("tr.bookmark-list.selected");
-                        if (currentlySelected) {
-                            currentlySelected.classList.remove("selected");
-                        }
-                        element.classList.add("selected");
-
-                        this.$store.commit("changeButtonsDisabled", false)
 
                     }
 
@@ -517,6 +488,35 @@
                          .finally(function () {
                          });
                 },
+                rowHovered(evt) {
+                    evt.currentTarget.querySelector(".dropdown").classList.remove("hidden");
+                },
+                rowUnHovered(evt) {
+                    evt.currentTarget.querySelector(".dropdown").classList.add("hidden");
+                },
+                onClickUpdate(uuid) {
+                    window.location="{% url 'bookmark:update' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
+                },
+                onClickDelete(uuid) {
+
+                    var self = this;
+
+                    axios.delete("{% url 'bookmark-detail' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', uuid))
+                         .then(() => {
+
+                             if (this.$store.getters.selectedTagName) {
+                                 document.getElementById("bookmark-sidebar").classList.remove("show");
+                             }
+
+                             this.$bvToast.toast("Bookmark deleted", {
+                                 title: "Info",
+                                 variant: "primary"
+                             })
+
+                             self.$emit("get-page", 1);
+
+                         })
+                },
             },
             mounted() {
 
@@ -548,7 +548,8 @@
         }
 
         new Vue({
-            el: "#vue-app-right",
+            el: "#vue-right-panel",
+            name: "Right Panel",
             store,
             components: {
                 BookmarkList,
@@ -638,13 +639,6 @@
                     pinnedTags: [
                         {
                             id: -1,
-                            name: "Pinned Tags",
-                            isHeader: true,
-                            isActive: false,
-                            isDraggable: false,
-                        },
-                        {
-                            id: -2,
                             name: "Untagged",
                             isActive: true,
                             isDraggable: false,
@@ -700,16 +694,12 @@
 
                     tagId = evt.moved.element.id;
 
-                    // The backend expects the ordering to begin
-                    // with 1, not 0, so add 1.
-                    newPosition = evt.moved.newIndex - 1;
-
                     doPost(
                         this,
                         "{% url "bookmark:sort_pinned_tags" %}",
                         {
                             "tag_id": tagId,
-                            "new_position": newPosition
+                            "new_position": evt.moved.newIndex
                         },
                         () => {},
                         "",
@@ -748,7 +738,8 @@
         };
 
         new Vue({
-            el: "#vue-app-left",
+            el: "#vue-pinned-tags",
+            name: "Pinned Tags",
             store,
             components: {
                 AddNote,

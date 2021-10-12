@@ -68,6 +68,7 @@
                                     <drop-down-menu
                                         :links="userMenuItems"
                                         :initial-hide="false"
+                                        :support-hover-target="false"
                                     >
                                         <template slot="top">
                                             <span class="align-middle pt-2">
@@ -160,6 +161,7 @@
 
                 new Vue({
                     el: "#top-search",
+                    name: "Top Bar",
                     components: {
                         DropDownMenu,
                     },

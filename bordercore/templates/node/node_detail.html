@@ -41,16 +41,7 @@
                                 <ul class="list-group list-group-flush" id="sort-container-tags">
                                     <draggable v-model="blobList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
                                         <transition-group type="transition" class="w-100">
-                                            <li v-for="(blob, index) in blobList" class="list-group-item list-group-item-secondary text-info draggable" :data-uuid="blob.uuid" :key="blob.uuid" v-cloak v-b-hover="handleHover">
-                                                <div class="dropdownmenu hidden float-right node-blob-menu">
-                                                    <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center">
-                                                        <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                                                        <div slot="dropdown">
-                                                            <a class="dropdown-item" href="#" @click="removeBlob(blob.uuid)">Remove</a>
-                                                            <a v-if="!blob.note" class="dropdown-item" href="#" @click="addNote(blob.uuid, index)">Add note</a>
-                                                        </div>
-                                                    </dropdown-menu>
-                                                </div>
+                                            <li v-for="(blob, index) in blobList" class="list-group-item list-group-item-secondary text-info draggable pr-0" :data-uuid="blob.uuid" :key="blob.uuid" v-cloak v-b-hover="handleHover">
 
                                                 <div class="d-flex">
 
@@ -62,9 +53,20 @@
                                                         <a :href="blob.url">[[ blob.name ]]</a>
                                                         <div v-if="blob.note" @click="activateInEditMode(blob, $event.target)" v-show="!blob.noteIsEditable" class="node-note">[[ blob.note ]]</div>
                                                         <span v-show="blob.noteIsEditable">
-                                                            <input type="text" class="form-control form-control-sm" :value="blob.note" ref="input" placeholder="Add Note" @blur="editNote(blob.uuid, $event.target.value)" @keydown.enter="editNote(blob.uuid, $event.target.value)" >
+                                                            <input type="text" class="form-control form-control-sm" :value="blob.note" ref="input" placeholder="" @blur="editNote(blob.uuid, $event.target.value)" @keydown.enter="editNote(blob.uuid, $event.target.value)" >
                                                         </span>
                                                     </div>
+
+                                                    <div class="dropdownmenu">
+                                                        <dropdown-menu v-model="show" transition="translate-fade-down" class="hidden">
+                                                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+                                                            <div slot="dropdown">
+                                                                <a class="dropdown-item" href="#" @click="removeBlob(blob.uuid)">Remove</a>
+                                                                <a v-if="!blob.note" class="dropdown-item" href="#" @click="addNote(blob.uuid, index)">Add note</a>
+                                                            </div>
+                                                        </dropdown-menu>
+                                                    </div>
+
                                                 </div>
 
                                             </li>
@@ -84,16 +86,18 @@
                     <note inline-template ref="note">
                         <card v-b-hover="handleHover">
                             <template v-slot:title-slot>
-                                <div class="card-title position-relative" v-cloak>
-                                    Notes
-                                    <span class="dropdownmenu hidden float-right" v-if="note !== null">
-                                        <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center">
+                                <div class="card-title d-flex" v-cloak>
+                                    <div>
+                                        Notes
+                                    </div>
+                                    <div class="dropdownmenu" v-if="note !== null">
+                                        <dropdown-menu v-model="show" transition="translate-fade-down" class="hidden">
                                             <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                             <div slot="dropdown">
                                                 <a v-if="note" class="dropdown-item" href="#" @click="editNote()">Edit note</a>
                                             </div>
                                         </dropdown-menu>
-                                    </span>
+                                    </didspan>
                                 </div>
                             </template>
                             <template v-slot:content>
@@ -128,28 +132,30 @@
                                 <ul class="list-group list-group-flush" id="sort-container-tags">
                                     <draggable v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
                                         <transition-group type="transition" class="w-100">
-                                            <li v-for="(bookmark, index) in bookmarkList" class="list-group-item list-group-item-secondary text-info draggable" :data-uuid="bookmark.id" :key="bookmark.id" v-cloak v-b-hover="handleHover">
-                                                <div class="dropdownmenu hidden float-right node-bookmark-menu">
-                                                    <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center">
-                                                        <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                                                        <div slot="dropdown">
-                                                            <a class="dropdown-item" href="#" @click="removeBookmark(bookmark.id)">Remove</a>
-                                                            <a v-if="!bookmark.note" class="dropdown-item" href="#" @click="addNote(bookmark.id, index)">Add note</a>
-                                                        </div>
-                                                    </dropdown-menu>
-                                                </div>
-                                                <div class="d-flex">
-                                                    <div v-html="bookmark.favicon_url" class="float-left pr-2"></div>
-                                                    <div>
+                                            <li v-for="(bookmark, index) in bookmarkList" class="list-group-item list-group-item-secondary text-info draggable pr-0" :data-uuid="bookmark.id" :key="bookmark.id" v-cloak v-b-hover="handleHover">
+                                                    <div class="d-flex">
+                                                        <div v-html="bookmark.favicon_url" class="pr-2"></div>
+                                                        <div>
                                                         <a :href="bookmark.url">[[ bookmark.name ]]</a>
 
                                                         <div v-if="bookmark.note" v-on:click="activateInEditMode(bookmark, $event.target)" v-show="!bookmark.noteIsEditable" class="node-note" v-html="getNote(bookmark.note)"></div>
                                                         <span v-show="bookmark.noteIsEditable">
-                                                            <input type="text" class="form-control form-control-sm" :value="bookmark.note" ref="input" placeholder="Add Bookmark" @blur="editNote(bookmark.id, $event.target.value)" @keydown.enter="editNote(bookmark.id, $event.target.value)" >
+                                                            <input type="text" class="form-control form-control-sm" :value="bookmark.note" ref="input" placeholder="" @blur="editNote(bookmark.id, $event.target.value)" @keydown.enter="editNote(bookmark.id, $event.target.value)" >
                                                         </span>
+                                                        </div>
 
+                                                    <div class="dropdownmenu d-flex">
+                                                        <dropdown-menu v-model="show" transition="translate-fade-down" class="hidden">
+                                                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+                                                            <div slot="dropdown">
+                                                                <a class="dropdown-item" href="#" @click="removeBookmark(bookmark.id)">Remove</a>
+                                                                <a v-if="!bookmark.note" class="dropdown-item" href="#" @click="addNote(bookmark.id, index)">Add note</a>
+                                                            </div>
+                                                        </dropdown-menu>
                                                     </div>
+
                                                 </div>
+
                                             </li>
                                             <div class="text-secondary" v-if="bookmarkList.length == 0" :key="1" v-cloak>
                                                 No links
@@ -302,11 +308,11 @@
 
                 },
                 handleHover(hovered, evt) {
-                    evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
+
                     if (hovered == true) {
-                        evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
+                        evt.currentTarget.querySelector(".dropdown").classList.remove("hidden");
                     } else {
-                        evt.currentTarget.querySelector(".dropdownmenu").classList.add("hidden");
+                        evt.currentTarget.querySelector(".dropdown").classList.add("hidden");
                     };
                 },
                 activateInEditMode(blob, event) {
@@ -534,11 +540,11 @@
 
                 },
                 handleHover(hovered, evt) {
-                    evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
-                    if (hovered == true) {
-                        evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
+
+                    if (hovered === true) {
+                        evt.currentTarget.querySelector(".dropdown").classList.remove("hidden");
                     } else {
-                        evt.currentTarget.querySelector(".dropdownmenu").classList.add("hidden");
+                        evt.currentTarget.querySelector(".dropdown").classList.add("hidden");
                     };
                 },
                 removeBookmark(bookmark_id) {
@@ -667,11 +673,10 @@
                         return;
                     }
 
-                    evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
                     if (hovered == true) {
-                        evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
+                        evt.currentTarget.querySelector(".dropdown").classList.remove("hidden");
                     } else {
-                        evt.currentTarget.querySelector(".dropdownmenu").classList.add("hidden");
+                        evt.currentTarget.querySelector(".dropdown").classList.add("hidden");
                     };
                 }
             },
