@@ -219,7 +219,11 @@
 
             <div class="col-lg-12">
 
-                <div id="blob-detail-menu" class="dropdownmenu hidden">
+                <div class="d-flex">
+                    <h2 id="name" class="pl-0 text-break">
+                    {{ caption }}
+                    </h2>
+                    <div class="dropdownmenu hidden">
 
                         <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center" :right="right">
                             <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
@@ -238,12 +242,9 @@
                         </dropdown-menu>
 
                     </div>
+                </div>
 
-                <h2 id="name" class="pl-0 text-break">
-                    {{ caption }}
-                </h2>
-
-                <video v-if="$store.state.elasticsearchInfo.content_type === 'Video'" class="video-fit" controls muted>
+                <video v-if="$store.state.elasticsearchInfo.content_type === 'Video'" controls muted>
                     <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="video/mp4">
                 </video>
 

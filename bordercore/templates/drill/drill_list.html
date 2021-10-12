@@ -156,9 +156,11 @@
             <div class="right-column">
                 <card title="Pinned Tags" v-b-hover="handleHover">
                     <template v-slot:title-slot>
-                        <div class="card-title">
-                            Pinned Tags
-                            <span class="dropdownmenu hidden float-right mr-2" id="drill-pinned-tags-menu" v-cloak>
+                        <div class="card-title d-flex align-items-center">
+                            <div>
+                                Pinned Tags
+                            </div>
+                            <div class="dropdownmenu hidden" v-cloak>
                                 <dropdown-menu
                                     v-model="show"
                                     :right="right"
@@ -170,7 +172,7 @@
                                         <a class="dropdown-item" href="#" @click="chooseTag()">Manage Tags</a>
                                     </div>
                                 </dropdown-menu>
-                            </span>
+                            </div>
                         </div>
                     </template>
 

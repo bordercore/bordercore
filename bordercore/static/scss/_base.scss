@@ -73,11 +73,11 @@
 
 ::-webkit-scrollbar-thumb {
   border-radius: 0.6rem;
-  background-color: lighten($background-color-dark, 10%);
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: lighten($background-color-dark, 4%);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .close-button {
@@ -242,7 +242,7 @@ a.tag {
   border-radius: 0.5rem;
 
   &:hover {
-    background-color: lighten($background-color-dark, 5%);
+    background-color: rgba(0, 0, 0, 0.2);
   }
 }
 
@@ -668,14 +668,14 @@ pre {
 }
 
 #top-search input:hover {
-  background-color: #fff;
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 #top-search input:focus {
   width: 25rem;
   padding-left: 2rem;
-  color: #000;
-  background-color: #fff;
+  color: $form-color;
+  background-color: $form-background-color;
   border-color: #66cc75;
   cursor: auto;
   box-shadow: 0 0 0.3rem rgba(109, 207, 246, 0.5);
@@ -814,10 +814,6 @@ pre {
   left: 0.5rem;
 }
 
-.bookmark-search-spacer {
-  left: 1rem;
-}
-
 //
 // Search
 //
@@ -906,7 +902,7 @@ pre {
   }
 
   &:hover {
-    background-color: $blob-list-hover-background-color;
+    background-color: rgba(0, 0, 0, 0.2);
   }
 }
 
@@ -975,11 +971,6 @@ h2#name {
   overflow: auto;
   object-fit: contain;
   z-index: 200;
-}
-
-#blob-detail-menu {
-  right: 0.5rem;
-  top: 0.25rem;
 }
 
 #blob_note {
@@ -1065,7 +1056,7 @@ h2#name {
   }
 
   li:hover {
-    background-color: $blob-list-hover-background-color;
+    background-color: rgba(0, 0, 0, 0.2);
   }
 }
 
@@ -1149,7 +1140,7 @@ h2#name {
     }
 
     &:hover {
-      background-color: lighten($background-color-dark, 5%);
+      background-color: rgba(0, 0, 0, 0.2);
 
       .list-delete {
         display: block;
@@ -1201,11 +1192,6 @@ h2#name {
 //
 // Drill
 //
-
-#drill-pinned-tags-menu {
-  right: 1rem;
-  top: 1rem;
-}
 
 .favorite {
   color: #f00;
@@ -1312,11 +1298,6 @@ audio {
 
 #audio_player audio {
   width: 25rem;
-}
-
-#album-detail-menu {
-  right: 2rem;
-  top: 1rem;
 }
 
 .album {

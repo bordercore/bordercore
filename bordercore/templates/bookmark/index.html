@@ -53,7 +53,7 @@
 
         <div class="col-lg-9">
 
-            <div id="vue-app-top" class="ml-2 mb-3">
+            <div id="vue-app-top" class="ml-3 mb-3">
 
                 <div class="d-flex mr-3">
 
@@ -63,7 +63,7 @@
                         <input id="add-to-remote-from-pinned-tagname" type="hidden" name="tag" />
 
                         <div class="form-group has-search">
-                            <font-awesome-icon icon="search" class="bookmark-search-spacer"></font-awesome-icon>
+                            <font-awesome-icon icon="search" class="ml-2 text-info"></font-awesome-icon>
                             <search inline-template @search-term="searchTerm" @search-tag="searchTag" @get-page="getPage" ref="search">
                                 <div>
                                     <simple-suggest
@@ -121,9 +121,10 @@
                                             </td>
                                             <td class="bookmark-list-link w-100 p-2">
                                                 <a :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.name) ]]</a>
-                                                <font-awesome-icon v-if="bookmark.note != null && bookmark.note != ''" icon="sticky-note">
-                                                </font-awesome-icon>
                                                 <a v-for="tag in bookmark.tags" v-if="tag != selectedTagName" class="badge badge-info ml-2" @click.prevent="onClick" href="#">[[ tag ]]</a>
+                                                <div v-if="bookmark.note != null && bookmark.note != ''" class="table-note">
+                                                    [[ bookmark.note ]]
+                                                </div>
                                             </td>
                                             <td class="dropdownmenu small mr-4">
                                                 <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="hidden">
