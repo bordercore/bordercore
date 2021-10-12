@@ -126,7 +126,7 @@
 
                     {% if not search_results.hits.hits and not messages %}
 
-                        <search-no-result class="ml-4">
+                        <search-no-result class="ml-4 mr-3">
                             <template v-slot:message>
                             </template>
                         </search-no-result>
@@ -360,7 +360,7 @@
                 },
             },
             mounted() {
-                document.getElementById("simple-suggest").value  = "{{ request.GET.search }}";
+                document.getElementById("simple-suggest").value  = "{{ request.GET.search|safe|escapejs }}";
             },
         });
 
