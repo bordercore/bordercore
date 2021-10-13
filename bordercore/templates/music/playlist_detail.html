@@ -20,14 +20,7 @@
     <div class="row no-gutters h-100" id="vue-app">
 
         <div class="col-lg-3 d-flex flex-column">
-            <div class="ml-3 d-flex">
-                <div class="mt-3" id="audio_player">
-                    <audio controls controlsList="nodownload" id="player" class="mw-100" ref="audioPlayer">
-                        <source src="" type="audio/mpeg" />
-                        Your browser does not support the audio tag.
-                    </audio>
-                </div>
-            </div>
+
             <div class="card-body">
 
                 {% if playlist.type == "tag" %}
@@ -50,17 +43,28 @@
 
                 {% endif %}
 
-        {% if playlist.parameters.exclude_recent %}
-            <div>
-                not listened to within the past <strong class="text-primary">{{ playlist.parameters.exclude_recent }}</strong> day{{ playlist.parameters.exclude_recent|pluralize }}
-            </div>
-        {% endif %}
+                {% if playlist.parameters.exclude_recent %}
 
-        {% if playlist.parameters.exclude_albums %}
-            <div>
-                not on an album
-            </div>
-        {% endif %}
+                    <div>
+                        not listened to within the past <strong class="text-primary">{{ playlist.parameters.exclude_recent }}</strong> day{{ playlist.parameters.exclude_recent|pluralize }}
+                    </div>
+
+                {% endif %}
+
+                {% if playlist.parameters.exclude_albums %}
+
+                    <div>
+                        not on an album
+                    </div>
+
+                {% endif %}
+
+                <div class="mt-3" id="audio_player">
+                    <audio controls controlsList="nodownload" id="player" class="mw-100" ref="audioPlayer">
+                        <source src="" type="audio/mpeg" />
+                        Your browser does not support the audio tag.
+                    </audio>
+                </div>
 
             </div>
 
@@ -71,26 +75,24 @@
             <div class="card-grid ml-2">
 
                 <div class="d-flex">
-                    <h2 class="text-info">{{ playlist.name }}</h2>
-                    <div class="ml-auto">
-                        <dropdown-menu v-model="showDropdownPlaylist" :right="true" transition="translate-fade-down" class="bookmark-dropdown text-center mr-2 mt-1">
-                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                            <div slot="dropdown" class="position: absolute">
-                                <a class="dropdown-item" href="#" @click="onClickUpdatePlaylist">Update</a>
-                                <a class="dropdown-item" href="#" @click="onClickDelete">Delete</a>
-                            </div>
-                        </dropdown-menu>
-                    </div>
+                    <h2 class="text-info">
+                        {{ playlist.name }}
+                    </h2>
+                    <drop-down-menu
+                        :links="playlistMenuItems"
+                        class="dropdownmenu"
+                    >
+                    </drop-down-menu>
                 </div>
 
                 {% if playlist.note %}
                     <h6>{{ playlist.note }}</h6>
                 {% endif %}
 
-                <small v-if="songCount > 0"><strong>[[ songCount ]]</strong> [[ songCountPluralized ]], <strong v-html="totalTime"></strong></small>
+                <small v-if="songCount > 0" class="text-primary ml-2"><strong>[[ songCount ]]</strong> [[ songCountPluralized ]], <strong v-html="totalTime"></strong></small>
             </div>
 
-            <div class="right-column">
+            <div class="right-column ml-3">
 
                 <b-table
                     hover
@@ -293,6 +295,20 @@
                     showDropdownPlaylist: false,
                     showDropdownSong: false,
                     hover: true,
+                    playlistMenuItems: [
+                        {
+                            id: uuidv4(),
+                            title: "Update",
+                            url: "#",
+                            clickHandler: this.onClickUpdatePlaylist,
+                        },
+                        {
+                            id: uuidv4(),
+                            title: "Delete",
+                            url: "#",
+                            clickHandler: this.onClickDelete,
+                        }
+                    ]
                 }
             },
             methods: {
