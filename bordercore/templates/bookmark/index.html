@@ -660,15 +660,11 @@
             },
             methods: {
                 onClick(evt) {
-                    const tagName = evt.srcElement.dataset.tag;
+                    const tagName = evt.currentTarget.dataset.tag;
                     this.selectedTag = tagName;
 
                     for (tag of this.pinnedTags) {
-                        if (tag.name == tagName) {
-                            tag.isActive = true;
-                        } else {
-                            tag.isActive = false;
-                        }
+                        tag.isActive = tag.name === tagName;
                     }
 
                     if (tagName == "Untagged") {

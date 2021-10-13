@@ -8,6 +8,7 @@ import pytz
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -377,7 +378,7 @@ class BookmarkListTagView(BookmarkListView):
                     "last_response_code": x.bookmark.last_response_code,
                     "note": x.note,
                     "favicon_url": x.bookmark.get_favicon_url(size=16),
-                    "tags": [tag.name for tag in x.bookmark.tags.all()]
+                    "tags": x.tags
                 }
             )
 
@@ -391,8 +392,10 @@ class BookmarkListTagView(BookmarkListView):
 
     def get_queryset(self):
 
-        return SortOrderTagBookmark.objects.filter(tag__name=self.kwargs.get("tag_filter"))\
-                                           .select_related("bookmark")
+        return SortOrderTagBookmark.objects.filter(tag__name=self.kwargs.get("tag_filter")) \
+                                           .annotate(tags=ArrayAgg("bookmark__tags__name")) \
+                                           .select_related("bookmark") \
+                                           .order_by("sort_order")
 
 
 @login_required
