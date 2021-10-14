@@ -392,8 +392,9 @@
 
                 EventBus.$on("onEnded", payload => {
 
-                    // Find next song in list to play
-                    let index = this.songList.findIndex(x => x.song_uuid === currentlyPlayingSongUuid);
+                    // Find next song in list to play. Use "computedItems" to
+                    //  account for table sorting.
+                    let index = this.$refs.table.computedItems.findIndex(x => x.song_uuid === currentlyPlayingSongUuid);
                     index = index + 1;
 
                     if (this.continuousPlay && index < this.songList.length) {
