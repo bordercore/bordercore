@@ -143,8 +143,8 @@
                                     <dropdown-menu v-model="show" :right="true" transition="translate-fade-down" class="text-center">
                                         <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                         <div slot="dropdown">
-                                            <a class="dropdown-item" href="#" @click="onClickUpdate(data.value)">Update</a>
-                                            <a class="dropdown-item" href="#" @click="onClickAddToPlaylist(data.value)">Add to playlist</a>
+                                            <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(data.value)">Update</a>
+                                            <a class="dropdown-item" href="#" @click.prevent="onClickAddToPlaylist(data.value)">Add to playlist</a>
                                         </div>
                                     </dropdown-menu>
                                 </div>

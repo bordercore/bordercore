@@ -120,8 +120,8 @@
                             <dropdown-menu v-model="showDropdownSong" :right="true" transition="translate-fade-down" class="text-center">
                                 <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                 <div slot="dropdown">
-                                    <a class="dropdown-item" href="#" @click="onClickRemove(data.value)">Remove from playlist</a>
-                                    <a class="dropdown-item" href="#" @click="onClickUpdateSong(data.item.song_uuid)">Update</a>
+                                    <a class="dropdown-item" href="#" @click.prevent="onClickRemove(data.value)">Remove from playlist</a>
+                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdateSong(data.item.song_uuid)">Update</a>
                                 </div>
                             </dropdown-menu>
                         </div>

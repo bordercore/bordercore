@@ -29,10 +29,10 @@
                                             <dropdown-menu v-model="show" transition="translate-fade-down" class="hidden">
                                                 <font-awesome-icon icon="ellipsis-v" />
                                                 <div slot="dropdown">
-                                                    <a class="dropdown-item" href="#" @click="removeBookmark(bookmark.uuid)">Remove</a>
+                                                    <a class="dropdown-item" href="#" @click.prevent="removeBookmark(bookmark.uuid)">Remove</a>
                                                     <a class="dropdown-item" :href="bookmark.edit_url">Edit Bookmark</a>
-                                                    <a v-if="!bookmark.note" class="dropdown-item" href="#" @click="addNote(bookmark.uuid)">Add note</a>
-                                                    <a v-if="bookmark.note" class="dropdown-item" href="#" @click="activateInEditMode(bookmark, index)">Edit note</a>
+                                                    <a v-if="!bookmark.note" class="dropdown-item" href="#" @click.prevent="addNote(bookmark.uuid)">Add note</a>
+                                                    <a v-if="bookmark.note" class="dropdown-item" href="#" @click.prevent="activateInEditMode(bookmark, index)">Edit note</a>
                                                 </div>
                                             </dropdown-menu>
                                         </div>

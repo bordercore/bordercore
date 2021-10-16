@@ -33,9 +33,9 @@
                                             <dropdown-menu v-model="show" transition="translate-fade-down" class="hidden">
                                                 <font-awesome-icon icon="ellipsis-v" />
                                                 <div slot="dropdown">
-                                                    <a class="dropdown-item" href="#" @click="removeBlob(blob.uuid)">Remove</a>
-                                                    <a v-if="!blob.note" class="dropdown-item" href="#" @click="addNote(blob.uuid)">Add note</a>
-                                                    <a v-else class="dropdown-item" href="#" @click="activateInEditMode(blob, index)">Edit note</a>
+                                                    <a class="dropdown-item" href="#" @click.prevent="removeBlob(blob.uuid)">Remove</a>
+                                                    <a v-if="!blob.note" class="dropdown-item" href="#" @click.prevent="addNote(blob.uuid)">Add note</a>
+                                                    <a v-else class="dropdown-item" href="#" @click.prevent="activateInEditMode(blob, index)">Edit note</a>
                                                 </div>
                                             </dropdown-menu>
                                         </div>
