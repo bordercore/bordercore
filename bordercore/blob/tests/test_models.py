@@ -101,22 +101,6 @@ def test_duration_humanized():
     assert Blob.get_duration_humanized(6918.356) == "1:55:18"
 
 
-def test_get_cover_info(blob_image_factory, blob_pdf_factory):
-
-    cover_info = blob_image_factory.cover_info()
-    assert cover_info["height"] == 1689
-    assert cover_info["width"] == 1600
-
-    cover_info = blob_image_factory.cover_info(size="small")
-    assert cover_info["url"] == f"https://blobs.bordercore.com/blobs/{blob_image_factory.uuid}/cover.jpg"
-
-    cover_info_pdf = blob_pdf_factory.cover_info()
-    assert cover_info_pdf["url"] == f"https://blobs.bordercore.com/blobs/{blob_pdf_factory.uuid}/cover-large.jpg"
-
-    cover_info_pdf = blob_pdf_factory.cover_info(size="small")
-    assert cover_info_pdf["url"] == f"https://blobs.bordercore.com/blobs/{blob_pdf_factory.uuid}/cover.jpg"
-
-
 def test_clone(monkeypatch_blob, blob_pdf_factory, collection):
 
     cloned_blob = blob_pdf_factory.clone()

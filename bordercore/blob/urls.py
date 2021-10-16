@@ -56,11 +56,6 @@ urlpatterns = [
         name="get_elasticsearch_info"
     ),
     path(
-        route="cover_info/<uuid:uuid>",
-        view=views.BlobCoverInfoView.as_view(),
-        name="cover_info"
-    ),
-    path(
         route="clone/<uuid:uuid>",
         view=views.BlobCloneView.as_view(),
         name="clone"

@@ -1,13 +1,12 @@
 <template>
-    <div>
-        <img v-if="coverInfo" :src="coverInfo.url" :height="coverInfo.height_cropped" :width="coverInfo.width_cropped" data-toggle="modal" data-target="#myModal3">
-
-        <div v-if="coverInfo" id="myModal3" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="blob-detail-cover-image">
+        <img class="cover_image h-100 w-100" :src="coverUrl" data-toggle="modal" data-target="#myModal3" @error="loadCoverImage()">
+        <div id="myModal3" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
             <div class="modal-dialog modal-dialog-centered w-75 mw-100" role="document">
                 <div class="modal-content">
                     <div class="modal-body">
                         <div>
-                            <img :src="coverInfo.url" class="w-100">
+                            <img class="cover_image w-100" :src="coverUrl">
                         </div>
                     </div>
                 </div>
@@ -20,54 +19,52 @@
 
     export default {
         props: {
-            initialCoverInfo: {
-                default: function() {
-                },
-                type: Object,
-            },
             coverUrl: {
+                default: "",
+                type: String,
+            },
+            getCoverUrl: {
                 default: "",
                 type: String,
             },
         },
         data() {
             return {
-                coverInfo: {},
                 getCoverImageAttemptIntervals: [1000, 3000, 6000],
                 getCoverImageAttempts: 0,
             };
         },
-        mounted() {
-            this.coverInfo = this.initialCoverInfo;
-            if (Object.keys(this.coverInfo).length === 0) {
+        methods: {
+            loadCoverImage() {
                 // New blobs might not have cover images yet.
                 // Try three times to retrieve one before giving up.
+
+                // While we do this, hide the broken images (inline and modal)
+                for (const element of document.getElementsByClassName("cover_image")) {
+                    element.style.display = "none";
+                }
+
                 setTimeout( () => {
                     this.getCoverImage();
                 }, this.getCoverImageAttemptIntervals[this.getCoverImageAttempts]);
-            }
-        },
-        methods: {
+            },
             getCoverImage() {
                 this.getCoverImageAttempts++;
+
+                if (this.getCoverImageAttempts > this.getCoverImageAttemptIntervals.length) {
+                    return;
+                }
                 console.log(`Retrieving cover image, attempt #${this.getCoverImageAttempts}`);
-                doGet(
-                    this,
-                    this.coverUrl,
-                    (response) => {
-                        if (response.data.url) {
-                            this.coverInfo = response.data;
-                        } else {
-                            // Keep trying to retrieve the cover image until we run out of attempts
-                            if (this.getCoverImageAttempts <= this.getCoverImageAttemptIntervals.length) {
-                                setTimeout( () => {
-                                    this.getCoverImage();
-                                }, this.getCoverImageAttemptIntervals[this.getCoverImageAttempts-1]);
-                            }
-                        }
-                    },
-                    "Error getting cover info",
-                );
+
+                // Add a datetime to bust the cache
+                for (const element of document.getElementsByClassName("cover_image")) {
+                    element.src = this.coverUrl + "&nocache=" + new Date().getTime();
+                }
+
+                // Reveal the image
+                for (const element of document.getElementsByClassName("cover_image")) {
+                    element.style.display = "inline";
+                }
             },
         },
     };

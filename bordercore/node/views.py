@@ -57,11 +57,11 @@ def get_blob_list(request, uuid):
                 "url": reverse('blob:detail', kwargs={"uuid": str(x.uuid)}),
                 "uuid": x.uuid,
                 "note": x.sortordernodeblob_set.get(node=node).note,
-                "cover_url": Blob.get_cover_info(
+                "cover_url": Blob.get_cover_url_static(
                     x.uuid,
                     x.file.name,
                     size="small"
-                )["url"]
+                )
             }
             for x
             in blob_list]

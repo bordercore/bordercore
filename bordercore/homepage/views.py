@@ -42,12 +42,14 @@ def homepage(request):
         random_image = get_random_image(request, "image/*")
         if random_image:
             try:
-                random_image_info = {**random_image,
-                                     "cover_info": Blob.get_cover_info(
-                                         random_image["uuid"],
-                                         random_image["filename"],
-                                         "large",
-                                         500)}
+                random_image_info = {
+                    **random_image,
+                    "url": Blob.get_cover_url_static(
+                        random_image["uuid"],
+                        random_image["filename"],
+                        "large",
+                    ),
+                }
             except ClientError as e:
                 messages.add_message(request, messages.ERROR, f"Error getting random image info for uuid={random_image['uuid']}: {e}")
     except (ConnectionRefusedError, ConnectionError):

@@ -541,11 +541,11 @@ def get_blob_list(request, uuid):
                 "uuid": x.uuid,
                 "note": x.sortorderdrillblob_set.get(question=question).note,
                 "url": reverse("blob:detail", kwargs={"uuid": x.uuid}),
-                "cover_url": Blob.get_cover_info(
+                "cover_url": Blob.get_cover_url_static(
                     x.uuid,
                     x.file.name,
                     size="small"
-                )["url"]
+                )
             }
             for x
             in blob_list]

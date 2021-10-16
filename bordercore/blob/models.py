@@ -387,31 +387,6 @@ class Blob(TimeStampedModel):
         except Exception:
             return False
 
-    def get_cover_url_small(self):
-        return self.get_cover_info(self.user, self.sha1sum, size='small')['url']
-
-    @staticmethod
-    def get_image_dimensions(s3_key, max_cover_image_width=MAX_COVER_IMAGE_WIDTH):
-
-        info = {}
-
-        s3 = boto3.resource("s3")
-        obj = s3.Object(bucket_name=settings.AWS_STORAGE_BUCKET_NAME, key=s3_key)
-
-        try:
-
-            info["width"] = int(obj.metadata["image-width"])
-            info["height"] = int(obj.metadata["image-height"])
-
-            if info["width"] > max_cover_image_width:
-                info["height_cropped"] = int(max_cover_image_width * info["height"] / info["width"])
-                info["width_cropped"] = max_cover_image_width
-
-        except KeyError as e:
-            log.warning(f"Warning: Object has no S3 metadata {e}")
-
-        return info
-
     @staticmethod
     def is_ingestible_file(filename):
 
@@ -421,17 +396,9 @@ class Blob(TimeStampedModel):
         else:
             return False
 
-    def cover_info(self, size="large", max_cover_image_width=MAX_COVER_IMAGE_WIDTH, get_info=True):
-
-        return Blob.get_cover_info(self.uuid, self.file.name, size, max_cover_image_width, get_info)
-
-    @staticmethod
-    def get_cover_info(uuid, filename, size="large", max_cover_image_width=MAX_COVER_IMAGE_WIDTH, get_info=True):
-
-        info = {}
+    def get_cover_url_static(uuid, filename, size="large"):
 
         prefix = settings.COVER_URL + f"blobs/{uuid}"
-
         file_extension = PurePath(filename).suffix
         s3_key = Blob.get_s3_key(uuid, filename)
 
@@ -442,16 +409,16 @@ class Blob(TimeStampedModel):
             if file_extension[1:].lower() in ["gif", "jpg", "jpeg", "png"]:
                 # For the large version, use the image itself
                 url = f"{settings.MEDIA_URL}{s3_key}"
-                if get_info:
-                    info = Blob.get_image_dimensions(s3_key, max_cover_image_width)
             else:
                 url = f"{prefix}/cover-{size}.jpg"
-                if get_info:
-                    info = Blob.get_image_dimensions(f"{PurePath(s3_key).parent}/cover-{size}.jpg", max_cover_image_width)
 
-        info["url"] = url
+        return url
 
-        return info
+    def get_cover_url(self, size="large"):
+        return Blob.get_cover_url_static(self.uuid, self.file.name, size)
+
+    def get_cover_url_small(self):
+        return self.get_cover_url(size="small")
 
     def clone(self, include_collections=True):
         """

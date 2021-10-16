@@ -210,11 +210,11 @@ class SearchListView(ListView):
                 match["source"]["date"] = get_date_from_pattern(match["source"].get("date", None))
                 match["source"]["last_modified"] = get_relative_date(match["source"]["last_modified"])
                 if match["source"]["doctype"] in ["book", "blob"]:
-                    match["source"]["cover_url"] = Blob.get_cover_info(
+                    match["source"]["cover_url"] = Blob.get_cover_url_static(
                         match["source"]["uuid"],
                         match["source"]["filename"],
                         size="small"
-                    )["url"]
+                    )
 
             context["aggregations"] = self.get_aggregations(context, "Doctype Filter")
 
@@ -392,11 +392,11 @@ class SearchTagDetailView(ListView):
                         match["_source"]["uuid"],
                         match["_source"].get("filename", "")
                     ),
-                    "cover_url": Blob.get_cover_info(
+                    "cover_url": Blob.get_cover_url_static(
                         match["_source"].get("uuid", ""),
                         match["_source"].get("filename", ""),
                         size="small"
-                    )["url"],
+                    ),
                     **result,
                 }
 
@@ -863,10 +863,10 @@ def search_names_es(user, search_term, doc_types):
                 }
             )
             if doc_type_pretty in ["Blob", "Book", "Document"]:
-                matches[-1]["cover_url"] = settings.MEDIA_URL + Blob.get_cover_info(
+                matches[-1]["cover_url"] = settings.MEDIA_URL + Blob.get_cover_url_static(
                     match["_source"].get("uuid"),
                     match["_source"].get("filename"),
                     size="small"
-                )["url"]
+                )
 
     return matches

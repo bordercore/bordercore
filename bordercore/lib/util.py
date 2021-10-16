@@ -55,7 +55,7 @@ def is_image(file):
 
     if file:
         file_extension = PurePath(str(file)).suffix
-        if file_extension[1:].lower() in ["gif", "jpg", "jpeg", "png"]:
+        if file_extension[1:].lower() in ["bmp", "gif", "jpg", "jpeg", "png", "tiff"]:
             return True
     return False
 

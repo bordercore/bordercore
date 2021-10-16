@@ -1007,6 +1007,15 @@ h2#name {
   }
 }
 
+.blob-detail-cover-image {
+  height: 85vh;
+
+  img {
+    object-fit: contain;
+    object-position: left top;
+  }
+}
+
 //
 // Notes
 //

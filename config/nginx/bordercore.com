@@ -106,7 +106,10 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
-        error_page 403 =200 /default-cover.png;
+        # Don't serve back a default image if "nodefault=1" is passed in
+        if ($args !~ nodefault=1) {
+            error_page 403 =200 /default-cover.png;
+        }
 
         location /default-cover.png {
             internal;

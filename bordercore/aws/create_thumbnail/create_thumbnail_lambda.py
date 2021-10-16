@@ -44,7 +44,6 @@ import boto3
 from PIL import Image
 
 from lib.thumbnails import create_thumbnail
-from lib.util import is_image
 
 logging.getLogger().setLevel(logging.INFO)
 log = logging.getLogger(__name__)
@@ -56,25 +55,6 @@ s3_resource = boto3.resource("s3")
 EFS_DIR = os.environ.get("EFS_DIR", "/tmp")
 BLOBS_DIR = f"{EFS_DIR}/blobs"
 COVERS_DIR = f"{EFS_DIR}/covers"
-
-
-def set_s3_metadata_image_dimensions(bucket, key, file_path):
-    """
-    """
-    width, height = Image.open(file_path).size
-
-    s3_object = s3_resource.Object(bucket, key)
-    s3_object.metadata.update({"image-width": str(width)})
-    s3_object.metadata.update({"image-height": str(height)})
-
-    # Note: since "Content-Type" is system-defined metadata, it will be reset
-    #  to "binary/octent-stream" if you don't explicitly specify it.
-    s3_object.copy_from(
-        ContentType=s3_object.content_type,
-        CopySource={"Bucket": bucket, "Key": key},
-        Metadata=s3_object.metadata,
-        MetadataDirective="REPLACE"
-    )
 
 
 def is_cover_image(bucket, key):
@@ -146,11 +126,6 @@ def handler(event, context):
                                "ContentType": "image/jpeg"}
                 )
                 os.remove(cover)
-
-            # If the object is an image (or is a cover image from the original
-            #  object), store its dimensions as S3 metadata
-            if is_image(download_path):
-                set_s3_metadata_image_dimensions(bucket, key, download_path)
 
             os.remove(download_path)
 

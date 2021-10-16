@@ -674,12 +674,6 @@ def test_blobs_have_proper_metadata():
 
         assert obj.metadata["file-modified"] != "None", f"blob uuid={blob.uuid} has 'file-modified' = 'None"
 
-        if is_image(blob.file):
-            try:
-                obj.metadata["image-height"]
-            except KeyError:
-                assert False, f"image uuid={blob.uuid} has no 'image-height' S3 metadata"
-
         if obj.content_type == "binary/octet-stream":
             assert False, f"blob uuid={blob.uuid} has no proper 'Content-Type' metadata"
 

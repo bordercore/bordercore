@@ -260,8 +260,7 @@
 
                 <blob-detail-cover
                     v-if="$store.state.elasticsearchInfo.sha1sum && $store.state.elasticsearchInfo.content_type !== 'Video'"
-                    :initial-cover-info="{{ cover_info }}"
-                    cover-url="{% url "blob:cover_info" object.uuid %}"
+                    cover-url="{{ blob.get_cover_url }}?nodefault=1"
                 />
 
             </div>

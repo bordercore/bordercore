@@ -179,33 +179,32 @@ class BlobDetailView(DetailView):
             {
                 key: value for (key, value)
                 in context["metadata"].items()
-                if key not in [
-                        "is_book",
-                        "Url",
-                        "Publication Date",
-                        "Subtitle",
-                        "Name",
-                        "Author"
+                if key not in
+                [
+                    "is_book",
+                    "Url",
+                    "Publication Date",
+                    "Subtitle",
+                    "Name",
+                    "Author"
                 ]
             }
         )
 
         context["date"] = self.object.get_date()
 
-        context["cover_info"] = {}
         if self.object.sha1sum:
             context["aws_url"] = f"https://s3.console.aws.amazon.com/s3/buckets/{settings.AWS_STORAGE_BUCKET_NAME}/blobs/{self.object.uuid}/"
-            try:
-                context["cover_info"] = self.object.cover_info()
-            except ClientError:
-                log.warn(f"No S3 cover image found for id={self.object.id}")
 
         if self.object.is_note:
             context["is_pinned_note"] = self.object.is_pinned_note()
 
         try:
+
             context["elasticsearch_info"] = json.dumps(self.object.get_elasticsearch_info())
+
         except IndexError:
+
             # Give Elasticsearch up to a minute to index the blob
             if int(datetime.datetime.now().strftime("%s")) - int(self.object.created.strftime("%s")) > 60:
                 messages.add_message(self.request, messages.ERROR, "Blob not found in Elasticsearch")
@@ -245,18 +244,14 @@ class BlobUpdateView(FormRequestMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context["sha1sum"] = self.kwargs.get("sha1sum")
 
-        try:
-            context["cover_info"] = self.object.cover_info(max_cover_image_width=400)
-        except ClientError:
-            log.warn(f"No S3 cover image found for id={self.object.id}")
+        if self.object.sha1sum:
+            context["cover_url"] = self.object.get_cover_url()
 
         context["metadata"] = self.object.metadata_set.exclude(name="is_book")
 
         if [x for x in self.object.metadata_set.all() if x.name == "is_book"]:
             context["is_book"] = True
 
-        context["is_private"] = self.object.is_private
-        context["is_note"] = self.object.is_note
         context["collections_other"] = Collection.objects.filter(Q(user=self.request.user)
                                                                  & ~Q(blobs__uuid=self.object.uuid)
                                                                  & Q(is_private=False))
@@ -273,8 +268,7 @@ class BlobUpdateView(FormRequestMixin, UpdateView):
         return render(request, self.template_name, context)
 
     def get_object(self, queryset=None):
-        obj = Blob.objects.get(user=self.request.user, uuid=self.kwargs.get("uuid"))
-        return obj
+        return Blob.objects.get(user=self.request.user, uuid=self.kwargs.get("uuid"))
 
     def form_valid(self, form):
         blob = form.instance
@@ -319,25 +313,6 @@ class BlobUpdateView(FormRequestMixin, UpdateView):
         messages.add_message(self.request, messages.INFO, "Blob updated")
 
         return HttpResponseRedirect(reverse("blob:detail", kwargs={"uuid": str(blob.uuid)}))
-
-
-@method_decorator(login_required, name="dispatch")
-class BlobCoverInfoView(DetailView):
-
-    model = Blob
-    slug_field = "uuid"
-    slug_url_kwarg = "uuid"
-
-    def get(self, request, *args, **kwargs):
-
-        try:
-            cover_info = self.get_object().cover_info()
-        except ClientError:
-            cover_info = {}
-        return JsonResponse(cover_info, safe=False)
-
-    def get_queryset(self):
-        return Blob.objects.filter(user=self.request.user)
 
 
 @method_decorator(login_required, name="dispatch")

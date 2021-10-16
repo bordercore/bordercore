@@ -33,12 +33,11 @@
 
                 {% if object %}
 
-                    {% if cover_info %}
+                    {% if object.sha1sum %}
                         <img
-                            id="amazon-cover-image"
-                            src="{{ cover_info.url }}"
-                            height="{{ cover_info.height_cropped }}"
-                            width="{{ cover_info.width_cropped }}"
+                            src="{{ cover_url }}"
+                            height="auto"
+                            width="400"
                             class="mw-100 mb-3"
                         />
                     {% endif %}
@@ -261,7 +260,7 @@
                         <div class="col-lg-3 form-group">
                             <div class="form-check">
                                 <label class="form-check-label font-weight-bold">Is private</label>
-                                <input class="form-check-input ml-3" type="checkbox"{% if is_private %} checked="checked"{% endif %} name="is_private" id="id_is_private" />
+                                <input class="form-check-input ml-3" type="checkbox"{% if object.is_private %} checked="checked"{% endif %} name="is_private" id="id_is_private" />
                             </div>
                         </div>
 
