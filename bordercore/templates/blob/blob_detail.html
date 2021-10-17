@@ -244,9 +244,11 @@
                     </div>
                 </div>
 
-                <video v-if="$store.state.elasticsearchInfo.content_type === 'Video'" controls muted>
-                    <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="video/mp4">
-                </video>
+                <div v-if="$store.state.elasticsearchInfo.content_type === 'Video'" class="blob-detail-cover-image">
+                    <video class="h-100 w-100" controls muted>
+                        <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="video/mp4">
+                    </video>
+                </div>
 
                 <audio v-if="$store.state.elasticsearchInfo.content_type === 'Audio'" controls controlsList="nodownload">
                     <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="audio/mpeg">
