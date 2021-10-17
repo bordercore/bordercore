@@ -362,8 +362,6 @@
             methods: {
                 onClick(evt) {
 
-                    evt.srcElement.parentElement.classList.add("active");
-
                     doPost(
                         this,
                         "{% url "accounts:store_in_session" %}",
