@@ -400,7 +400,7 @@ class Blob(TimeStampedModel):
 
         prefix = settings.COVER_URL + f"blobs/{uuid}"
         file_extension = PurePath(filename).suffix
-        s3_key = Blob.get_s3_key(uuid, filename)
+        s3_key = Blob.get_s3_key(uuid, quote_plus(filename))
 
         if size != "large":
             url = f"{prefix}/cover.jpg"
