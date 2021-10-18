@@ -40,7 +40,7 @@
                             <div class="mt-3 mb-3">
                                 Tags:
                         {% endif %}
-                        <a class="badge badge-info" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
+                        <a class="tag" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
                         {% if forloop.last %}
                             </div>
                         {% endif %}

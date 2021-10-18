@@ -329,6 +329,21 @@ div.CodeMirror {
   color: $gray-600;
 }
 
+.tag, .ti-input .ti-tag {
+  padding: 0 0.43rem 0.06rem 0.42rem;
+  border: 0.12rem solid #364b76;
+  margin: 0 3px 0 0;
+  background-color: #25335b !important;
+  border-radius: 1.5rem !important;
+  color: #80b5ea !important;
+
+  &:hover {
+    background-color: #1f61eb !important;
+    color: #fff !important;
+    text-decoration: none;
+  }
+}
+
 // Dropdown Menus
 
 // Used internally by vue-dropdown-menu's DropdownMenu.vue
@@ -1408,18 +1423,6 @@ div.CodeMirror-focused {
   .ti-autocomplete {
     background: $background-color-dark !important;
     color: #6ea6e0;
-  }
-
-  // These apply Bootstrap-like styles to the tags
-  .ti-input .ti-tag {
-    padding: 0.3rem 0.5rem;
-    background-color: #2fa4e7 !important;
-    border-bottom-left-radius: 0.25rem;
-    border-bottom-right-radius: 0.25rem;
-    border-top-left-radius: 0.25rem;
-    border-top-right-radius: 0.25rem;
-    font-size: 75%;
-    font-weight: 700;
   }
 
   .ti-input {

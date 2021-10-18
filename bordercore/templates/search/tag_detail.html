@@ -110,7 +110,7 @@
                                     <div>
                                         <div class="mt-2">
                                             {% for tag in match.tags %}
-                                                <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
+                                                <a href="{% url 'search:kb_search_tag_detail' tag %}" class="tag">{{ tag }}</a>
                                             {% endfor %}
                                         </div>
                                     </div>
@@ -196,7 +196,7 @@
                                     <div>
                                         <div class="mt-2">
                                             {% for tag in match.tags %}
-                                                <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
+                                                <a href="{% url 'search:kb_search_tag_detail' tag %}" class="tag">{{ tag }}</a>
                                             {% endfor %}
                                         </div>
                                     </div>
@@ -234,7 +234,7 @@
                             <h5 v-pre>{{ match.contents|safe }}</h5>
                                 <div class="mt-2">
                                     {% for tag in match.tags %}
-                                        <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
+                                        <a href="{% url 'search:kb_search_tag_detail' tag %}" class="tag">{{ tag }}</a>
                                     {% endfor %}
                                 </div>
                         </div>
@@ -271,7 +271,7 @@
                             </h5>
                             <div>
                                 {% for tag in match.tags %}
-                                    <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
+                                    <a href="{% url 'search:kb_search_tag_detail' tag %}" class="tag">{{ tag }}</a>
                                 {% endfor %}
                             </div>
                         </div>

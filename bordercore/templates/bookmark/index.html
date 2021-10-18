@@ -121,7 +121,7 @@
                                             </td>
                                             <td class="bookmark-list-link w-100 p-2">
                                                 <a :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.name) ]]</a>
-                                                <a v-for="tag in bookmark.tags" v-if="tag != selectedTagName" class="badge badge-info ml-2" @click.prevent="onClick" href="#">[[ tag ]]</a>
+                                                <a v-for="tag in bookmark.tags" v-if="tag != selectedTagName" class="tag ml-2" @click.prevent="onClick" href="#">[[ tag ]]</a>
                                                 <div v-if="bookmark.note != null && bookmark.note != ''" class="table-note">
                                                     [[ bookmark.note ]]
                                                 </div>

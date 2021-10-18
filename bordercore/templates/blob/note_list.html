@@ -58,7 +58,7 @@
                             </div>
 
                             <div>
-                                <span v-for="tag in note.tags" :key="tag.tag" class="badge badge-info mr-2">
+                                <span v-for="tag in note.tags" :key="tag.tag" class="tag mr-2">
                                     [[ tag.tag ]]
                                 </span>
                             </div>
@@ -91,11 +91,6 @@
                             </h6>
 
                             <div>
-                                <span v-for="tag in note.tags" :key="tag.tag" :href="getTagUrl(tag.tag)" class="badge badge-info mr-2">
-                                    [[ tag.tag ]]
-                                </span>
-                            </div>
-                            <div>
                                 <div class="position-relative">
     <div :class="{ 'note-content-truncated': !isSearchResult }" class="mt-3" v-html="getContent(note.contents)" ref="note">
                                     </div>
@@ -105,7 +100,7 @@
                                 </div>
                             </div>
                             <span v-for="tag in note.tags" class="mr-2">
-                                <a id="tag" class="badge badge-info" :href="tag.url" v-html="tag.tag"></a>
+                                <a id="tag" class="tag" :href="tag.url" v-html="tag.tag"></a>
                             </span>
                         </div>
 
