@@ -399,14 +399,13 @@ class Blob(TimeStampedModel):
     def get_cover_url_static(uuid, filename, size="large"):
 
         prefix = settings.COVER_URL + f"blobs/{uuid}"
-        file_extension = PurePath(filename).suffix
         s3_key = Blob.get_s3_key(uuid, quote_plus(filename))
 
         if size != "large":
             url = f"{prefix}/cover.jpg"
         else:
             # Is the blob itself an image?
-            if file_extension[1:].lower() in ["gif", "jpg", "jpeg", "png"]:
+            if is_image(filename):
                 # For the large version, use the image itself
                 url = f"{settings.MEDIA_URL}{s3_key}"
             else:
