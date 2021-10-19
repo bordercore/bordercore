@@ -14,6 +14,8 @@ from django.db.models.signals import m2m_changed
 from lib.mixins import TimeStampedModel
 from tag.models import SortOrderTagBookmark, Tag
 
+from .managers import BookmarkManager
+
 
 class DailyBookmarkJSONField(JSONField):
     """
@@ -42,6 +44,8 @@ class Bookmark(TimeStampedModel):
     importance = models.IntegerField(default=1)
 
     created = models.DateTimeField(db_index=True, auto_now_add=True)
+
+    objects = BookmarkManager()
 
     def __str__(self):
         return self.name

@@ -58,7 +58,7 @@ def homepage(request):
         messages.add_message(request, messages.ERROR, "Blob found in Elasticsearch but not the DB")
 
     # Get the most recent untagged bookmarks
-    bookmarks = Bookmark.objects.filter(user=request.user, tags__isnull=True).order_by("-created")[:10]
+    bookmarks = Bookmark.objects.bare_bookmarks(request.user, 50)
 
     # Get the list of 'daily' bookmarks
     daily_bookmarks = Bookmark.objects.filter(user=request.user, daily__isnull=False)
