@@ -1,3 +1,4 @@
+import json
 import math
 from urllib.parse import unquote
 
@@ -215,7 +216,9 @@ class SearchListView(ListView):
                         match["source"]["filename"],
                         size="small"
                     )
-
+                # Bookmarks are rendered by a Vue component, which requires json
+                if match["source"]["doctype"] == "bookmark":
+                    match["json"] = json.dumps(match["source"])
             context["aggregations"] = self.get_aggregations(context, "Doctype Filter")
 
         context["title"] = "Search"

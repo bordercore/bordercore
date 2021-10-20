@@ -175,28 +175,11 @@
 
                                     {% elif match.source.doctype == "bookmark" %}
 
-                                        <div class="mr-2 mt-1">
-                                            <font-awesome-icon icon="bookmark" class="text-light"></font-awesome-icon>
-                                        </div>
-                                        <div class="d-flex flex-column">
-                                            <h4>
-                                                {% if match.source.importance > 1 %}
-                                                    <font-awesome-icon icon="heart" class="favorite" data-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
-                                                {% endif %}
-                                                <a href="{{ match.source.url }}">{{ match.source.name }}</a>
-                                            </h4>
-                                            <div class="d-flex mb-2 align-items-center text-primary">
-                                                {{ match.source.url|favicon|safe }}
-                                                <div class="ml-2">
-                                                    {{ match.source.url|domain }}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                {% for tag in match.source.tags %}
-                                                    <a href="{% url 'search:kb_search_tag_detail' tag %}" class="tag">{{ tag }}</a>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
+                                        <bookmark
+                                            :bookmark="JSON.parse('{{ match.json|escapejs }}')"
+                                            tag-url="{% url 'search:kb_search_tag_detail' 666 %}"
+                                        >
+                                        </bookmark>
 
                                     {% elif match.source.doctype == "note" %}
 

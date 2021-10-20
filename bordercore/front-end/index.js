@@ -131,6 +131,10 @@ import BookmarkSearch from "./vue/bookmark/BookmarkSearch.vue";
 Vue.component("BookmarkSearch", BookmarkSearch);
 window.BookmarkSearch = BookmarkSearch;
 
+import Bookmark from "./vue/bookmark/Bookmark.vue";
+Vue.component("Bookmark", Bookmark);
+window.Bookmark = Bookmark;
+
 import BlobSearch from "./vue/blob/BlobSearch.vue";
 Vue.component("BlobSearch", BlobSearch);
 window.BlobSearch = BlobSearch;
