@@ -1,5 +1,5 @@
 <template>
-    <div :class="wrapperClass">
+    <div :class="wrapperClass" class="search-with-doctypes">
         <vue-simple-suggest :id="id"
                             ref="suggestComponent"
                             v-model="query"
@@ -22,7 +22,19 @@
                             @hover="onHover"
         >
             <div slot="suggestion-item" slot-scope="scope">
-                <span v-html="boldenSuggestion(scope)" />
+                <!-- @*event*.stop="" handlers are needed to prevent the splitter from being selected -->
+                <div v-if="scope.suggestion.splitter"
+                     class="top-search-splitter"
+                     @click.stop=""
+                >
+                    {{ scope.suggestion.name }}
+                </div>
+                <div v-else class="top-search-suggestion">
+                    <span v-if="scope.suggestion.important === 10" class="mr-1">
+                        <font-awesome-icon icon="heart" class="text-danger" />
+                    </span>
+                    <span class="d-inline" v-html="boldenSuggestion(scope)" />
+                </div>
             </div>
         </vue-simple-suggest>
     </div>
@@ -128,7 +140,7 @@
                 if (!query) return result;
 
                 const texts = query.split(/[\s-_/\\|\.]/gm).filter((t) => !!t) || [""];
-                return result.replace(new RegExp("(.*?)(" + texts.join("|") + ")(.*?)", "gi"), "$1<b class='text-primary'>$2</b>$3");
+                return result.replace(new RegExp("(.*?)(" + texts.join("|") + ")(.*?)", "gi"), "$1<b class='matched'>$2</b>$3");
             },
             select(datum) {
                 if (typeof this.$parent.select !== "function") {

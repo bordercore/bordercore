@@ -97,6 +97,10 @@
                 default: "url",
                 type: String,
             },
+            recentBlobsUrl: {
+                default: "url",
+                type: String,
+            },
         },
         data() {
             return {
@@ -128,6 +132,27 @@
                 setTimeout( () => {
                     this.$refs.blob.$refs.simpleSuggest.$refs.suggestComponent.input.focus();
                 }, 500);
+
+                const suggest = this.$refs.blob.$refs.simpleSuggest.$refs.suggestComponent;
+
+                if (suggest.suggestions.length === 0) {
+                    doGet(
+                        this,
+                        this.recentBlobsUrl,
+                        (response) => {
+                            suggest.suggestions = response.data.blobList;
+                            suggest.suggestions.unshift(
+                                {
+                                    uuid: "__Recent",
+                                    name: "Recent",
+                                    splitter: true,
+                                    value: "Bogus",
+                                },
+                            );
+                        },
+                    );
+                }
+                suggest.listShown = true;
             },
             onChange(evt) {
                 const blobUuid = evt.moved.element.uuid;
@@ -178,6 +203,7 @@
                     },
                     (response) => {
                         this.getBlobList();
+                        this.$refs.blob.$refs.simpleSuggest.$refs.suggestComponent.selected = null;
                     },
                     "",
                     "",

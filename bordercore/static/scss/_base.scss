@@ -719,11 +719,18 @@ pre {
 }
 
 .top-search-suggestion {
+  overflow: hidden;
   width: 100%;
   padding: 0.6rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 
   svg {
     margin-top: 0.1rem;
+  }
+
+  .matched {
+    color: $primary;
   }
 }
 
@@ -731,7 +738,7 @@ pre {
   background-color: $gray-900;
 }
 
-#top-search-container {
+.search-with-doctypes {
   // Note that we can't simply use ".suggest-item.hover", since a similar
   //   selector defined by vue-simple-suggest overrides it via a !important flag
   .vue-simple-suggest.designed .suggestions .suggest-item.hover {
@@ -741,16 +748,12 @@ pre {
   // Set the padding to zero so that we can programmatically control the background color lower down
   //   in the container hierarchy, based on whether an item is a divider or not.
   .list-group-item {
-    padding: 0;
+    padding: 0 !important;
   }
 
   .vue-simple-suggest.designed .suggestions {
-    padding: 0.3rem;
-    color: $green;
-  }
-
-  .suggest-item.hover .top-search-object-type {
-    color: $light-blue;
+    padding: 0 !important;
+    color: $green !important;
   }
 }
 
@@ -1393,7 +1396,6 @@ div.CodeMirror-focused {
 
 .vue-simple-suggest.designed .suggestions .suggest-item.hover {
   background-color: #2874d5 !important;
-  color: #fff !important;
 
   b {
     color: $vue-simple-suggest-item-hover-bold-color !important;
