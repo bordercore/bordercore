@@ -583,18 +583,25 @@ def add_blob(request):
     question_uuid = request.POST["question_uuid"]
     blob_uuid = request.POST["blob_uuid"]
 
-    question = Question.objects.get(uuid=question_uuid, user=request.user)
-    blob = Blob.objects.get(uuid=blob_uuid)
-
-    so = SortOrderDrillBlob(question=question, blob=blob)
-    so.save()
-
-    so.question.modified = timezone.now()
-    so.question.save()
-
     response = {
         "status": "OK",
+        "message": ""
     }
+
+    if SortOrderDrillBlob.objects.filter(question__uuid=question_uuid, blob__uuid=blob_uuid).exists():
+        response = {
+            "message": "Blob already related to this question",
+            "status": "Warning"
+        }
+    else:
+        question = Question.objects.get(uuid=question_uuid, user=request.user)
+        blob = Blob.objects.get(uuid=blob_uuid)
+
+        so = SortOrderDrillBlob(question=question, blob=blob)
+        so.save()
+
+        so.question.modified = timezone.now()
+        so.question.save()
 
     return JsonResponse(response)
 
