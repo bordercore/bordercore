@@ -437,7 +437,7 @@
                     const { suggestion, query } = scope;
 
                     let result = this.$refs.simpleSuggest.$refs.suggestComponent.displayProperty(suggestion);
-                    result = "<em>" + suggestion.object_type + "</em> - " + result
+                    result = "<em>" + suggestion.doctype + "</em> - " + result
 
                     if (!query) return result;
 

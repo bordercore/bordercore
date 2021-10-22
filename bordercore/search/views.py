@@ -487,7 +487,7 @@ def sort_results(matches):
     }
 
     for match in matches:
-        types[match["object_type"]].append(match)
+        types[match["doctype"]].append(match)
 
     # Remove empty categories
     result = {key: value for (key, value) in types.items() if len(value) > 0}
@@ -594,15 +594,15 @@ def is_cached():
         "Album": {}
     }
 
-    def check_cache(object_type, value):
+    def check_cache(doctype, value):
 
-        if object_type not in ["Artist", "Album"]:
+        if doctype not in ["Artist", "Album"]:
             return False
 
-        if value in cache[object_type]:
+        if value in cache[doctype]:
             return True
 
-        cache[object_type][value] = True
+        cache[doctype][value] = True
         return False
 
     return check_cache
@@ -708,7 +708,7 @@ def search_tags_es(user, search_term, doc_types):
         if tag_result["key"].lower().find(search_term.lower()) != -1:
             matches.insert(0,
                            {
-                               "object_type": "Tag",
+                               "doctype": "Tag",
                                "name": tag_result["key"],
                                "id": tag_result["key"],
                                "link": get_tag_link(doc_types, tag_result["key"])
@@ -855,7 +855,7 @@ def search_names_es(user, search_term, doc_types):
             matches.append(
                 {
                     "name": name,
-                    "object_type": doc_type_pretty,
+                    "doctype": doc_type_pretty,
                     "note": match["_source"].get("note", ""),
                     "uuid": match["_source"].get("uuid"),
                     "id": match["_source"].get("uuid"),

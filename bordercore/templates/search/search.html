@@ -333,7 +333,7 @@
             methods: {
                 select(tag) {
 
-                    if (tag.object_type == "Tag") {
+                    if (tag.doctype == "Tag") {
                         url = "{% url 'search:kb_search_tag_detail' 666 %}".replace(/666/, tag.value);
                     } else {
                         url = "{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", tag.uuid);

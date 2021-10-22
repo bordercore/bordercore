@@ -73,15 +73,15 @@ def test_sort_results():
 
     matches = [
         {
-            "object_type": "Bookmark",
+            "doctype": "Bookmark",
             "value": "http://python.org"
         },
         {
-            "object_type": "Tag",
+            "doctype": "Tag",
             "value": "python"
         },
         {
-            "object_type": "Note",
+            "doctype": "Note",
             "value": "Running Emacs Inside Docker"
         },
     ]
@@ -90,12 +90,12 @@ def test_sort_results():
 
     assert response[0]["splitter"] is True
     assert response[1]["value"] == "python"
-    assert response[1]["object_type"] == "Tag"
+    assert response[1]["doctype"] == "Tag"
     assert response[2]["splitter"] is True
-    assert response[3]["object_type"] == "Note"
+    assert response[3]["doctype"] == "Note"
     assert response[3]["value"] == "Running Emacs Inside Docker"
     assert response[4]["splitter"] is True
-    assert response[5]["object_type"] == "Bookmark"
+    assert response[5]["doctype"] == "Bookmark"
     assert response[5]["value"] == "http://python.org"
     assert len(response) == 6
 

@@ -119,11 +119,11 @@
 
                 let result = this.$refs.suggestComponent.displayProperty(suggestion);
 
-                if (!suggestion.object_type) {
+                if (!suggestion.doctype) {
                     return result;
                 }
 
-                result = "<em>" + suggestion.object_type + "</em> - " + result;
+                result = "<em class='top-search-object-type'>" + suggestion.doctype + "</em> - " + result;
 
                 if (!query) return result;
 

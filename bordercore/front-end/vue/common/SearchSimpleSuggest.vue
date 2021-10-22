@@ -143,7 +143,7 @@
                 const {suggestion, query} = scope;
 
                 const result = this.$refs.suggestComponent.displayProperty(suggestion);
-                if (!suggestion.object_type) {
+                if (!suggestion.doctype) {
                     return result;
                 }
 
@@ -153,7 +153,7 @@
 
                 const boldResult = result.replace(new RegExp("(.*?)(" + texts.join("|") + ")(.*?)", "gi"), "$1<b class='text-primary'>$2</b>$3");
 
-                return ` <em class="top-search-object-type">${suggestion.object_type}</em> - ${boldResult}`;
+                return ` <em class="top-search-object-type">${suggestion.doctype}</em> - ${boldResult}`;
             },
             select(datum) {
                 window.location = datum.link;
