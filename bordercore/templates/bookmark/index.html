@@ -110,7 +110,7 @@
                             <table class="w-100">
                                 <tbody is="draggable" v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" :disabled="disableSort">
                                     <transition-group type="transition">
-                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="bookmark-list w-100" @click="onClick" @mouseover="rowHovered" @mouseleave="rowUnHovered" v-cloak>
+                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="bookmark-list w-100" @click="onClick" @mouseenter="rowHovered" @mouseleave="rowUnHovered" v-cloak>
                                             <td class="bookmark-list-date p-2 text-info">
                                                 <span>[[ bookmark.created ]]</span>
                                             </td>
