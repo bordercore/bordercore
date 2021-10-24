@@ -113,17 +113,14 @@ class BlobCreateView(FormRequestMixin, CreateView):
         return form
 
     def form_valid(self, form):
+
         obj = form.save(commit=False)
         obj.user = self.request.user
         obj.file_modified = form.cleaned_data['file_modified']
-
         obj.save()
 
-        # Take care of the tags.  Create any that are new.
-        for tag in form.cleaned_data['tags']:
-            obj.tags.add(tag)
-
-        obj.save()
+        # Save the tags
+        form.save_m2m()
 
         handle_metadata(obj, self.request)
 
@@ -257,7 +254,7 @@ class BlobUpdateView(FormRequestMixin, UpdateView):
                                                                  & Q(is_private=False))
         context["action"] = "Update"
         context["title"] = "Blob Update :: {}".format(self.object.get_name(remove_edition_string=True))
-        context["tags"] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
+        context["tags"] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
 
     def get(self, request, **kwargs):

@@ -13,7 +13,7 @@
         },
         methods: {
             tagsChanged(newTags) {
-                const tags = newTags.map((x) => x.value).join(",");
+                const tags = newTags.map((x) => x.text).join(",");
                 window.location = this.tagsChangedUrl.replace("666", tags);
             },
         },

@@ -34,7 +34,7 @@ class UserProfileUpdateView(FormRequestMixin, UpdateView):
         context['groups'] = ', '.join([x.name for x in self.request.user.groups.all()])
         context['nav'] = 'prefs'
         context['title'] = 'Preferences'
-        context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.pinned_tags.all()[::-1]]
+        context['tags'] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.pinned_tags.all()[::-1]]
         return context
 
     def get_object(self, queryset=None):

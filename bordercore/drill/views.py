@@ -64,7 +64,6 @@ class QuestionCreateView(FormRequestMixin, CreateView):
             context['tags'] = [
                 {
                     "text": tag.name,
-                    "value": tag.name,
                     "is_meta": tag.is_meta,
                     "classes": "badge badge-info",
                 }
@@ -187,7 +186,7 @@ class QuestionUpdateView(FormRequestMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['action'] = 'Update'
         context['title'] = 'Drill :: Question Update'
-        context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
+        context['tags'] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
 
     def form_valid(self, form):

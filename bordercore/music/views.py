@@ -145,7 +145,7 @@ class AlbumDetailView(FormRequestMixin, ModelFormMixin, DetailView):
             "song_list": song_list,
             "tags": [
                 {
-                    "text": x.name, "value": x.name, "is_meta": x.is_meta
+                    "text": x.name, "is_meta": x.is_meta
                 } for x in self.object.tags.all()
             ],
             "IMAGES_URL": settings.IMAGES_URL,
@@ -236,7 +236,7 @@ class SongUpdateView(FormRequestMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context["action"] = "Update"
         context["song_length_pretty"] = convert_seconds(self.object.length)
-        context["tags"] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
+        context["tags"] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         context["tag_counts"] = Song.get_song_tags(self.request.user)
         return context
 
@@ -602,7 +602,7 @@ class UpdatePlaylistView(FormRequestMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["tags"] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
+        context["tags"] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
 
     def form_valid(self, form):

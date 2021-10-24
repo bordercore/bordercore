@@ -82,17 +82,6 @@ def test_delete(bookmark, tag):
     assert tbso.sort_order == 1
 
 
-def test_search(tag, auto_login_user):
-
-    user, _ = auto_login_user()
-
-    assert tag[0].name in [x["text"] for x in Tag.search(user, "djang")]
-    assert len(Tag.search(user, "djang")) == 1
-
-    assert len(Tag.search(user, "postg")) == 0
-    assert len(Tag.search(user, "djang", True)) == 0
-
-
 def test_pin(auto_login_user, tag):
 
     user, _ = auto_login_user()

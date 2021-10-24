@@ -192,8 +192,6 @@ def test_tag_list_js(auto_login_user):
 
     assert len(results) == 2
     assert results[0]["text"] == "django"
-    assert results[0]["value"] == "django"
     assert results[0]["is_meta"] == "false"
     assert results[1]["text"] == "video"
-    assert results[1]["value"] == "video"
     assert results[1]["is_meta"] == "false"

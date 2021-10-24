@@ -73,10 +73,6 @@
         },
         computed: {
             tagsCommaSeparated: function() {
-                // Be sure to use the 'text' field rather than 'value'.
-                //  The 'value' field only exists for existing tags that
-                //  are added by autocomplete, not new tags typed in
-                //  by the user.
                 return this.tags.map((x) => x.text).join(",");
             },
             filteredItems() {

@@ -38,46 +38,6 @@ class Tag(models.Model):
         sort_order_user_tag.delete()
 
     @staticmethod
-    def search(user, query, search_notes_only=False, model_filter=None):
-
-        args = {}
-
-        # Only retrieve tags which have been applied to at least one note
-        if search_notes_only:
-            args["blob__is_note"] = True
-
-        # Only retrieve tags which as associated with a certain model
-        if model_filter:
-            args[f"{model_filter}__isnull"] = False
-
-        tag_list = [
-            {
-                "text": x.name,
-                "value": x.name,
-                "is_meta": x.is_meta
-            } for x in Tag.objects.filter(
-                Q(user=user)
-                & Q(name__icontains=query),
-                **args
-            ).distinct("name")
-        ]
-
-        tag_alias_list = [
-            {
-                "text": f"{x.name} ({x.tag.name})",
-                "value": x.tag.name,
-                "is_alias": True
-            } for x in TagAlias.objects.filter(
-                Q(user=user)
-                & Q(name__icontains=query)
-            )
-        ]
-
-        tag_alias_list.extend(tag_list)
-
-        return tag_alias_list
-
-    @staticmethod
     def get_meta_tags(user):
         tags = cache.get('meta_tags')
         if not tags:
