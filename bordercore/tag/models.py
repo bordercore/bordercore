@@ -2,7 +2,6 @@ from django.apps import apps
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
-from django.db.models import Q
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 

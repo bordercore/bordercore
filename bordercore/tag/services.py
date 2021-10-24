@@ -6,6 +6,7 @@ from django.conf import settings
 from django.urls import reverse
 
 from drill.models import Question
+from tag.models import TagAlias
 
 SEARCH_LIMIT = 1000
 
@@ -22,6 +23,20 @@ def get_additional_info(doctype, user, tag_result):
             "link": reverse("drill:start_study_session_tag", kwargs={"tag": tag_result["key"]})
         }
     return {}
+
+
+def get_aliases(user, name):
+
+    tag_aliases = TagAlias.objects.filter(name__contains=name)
+
+    return [
+        {
+            "text": x.tag.name,
+            "display": f"{x.name} -> {x.tag}"
+        }
+        for x in
+        tag_aliases
+    ]
 
 
 def search(user, tag_name, doctype=None):
@@ -102,4 +117,5 @@ def search(user, tag_name, doctype=None):
                 }
             )
 
+    matches.extend(get_aliases(user, search_term))
     return matches

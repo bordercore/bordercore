@@ -13,7 +13,12 @@
             @tags-changed="tagsChanged"
         >
             <div slot="autocomplete-item" slot-scope="scope" @click="scope.performAdd(scope.item)">
-                <div>{{ scope.item.text }}</div>
+                <div v-if="scope.item.display">
+                    {{ scope.item.display }}
+                </div>
+                <div v-else>
+                    {{ scope.item.text }}
+                </div>
             </div>
         </vue-tags-input>
         <input type="hidden" :name="name" :value="tagsCommaSeparated">
@@ -112,7 +117,7 @@
                     this.searchUrl + this.tag,
                     (response) => {
                         this.autocompleteItems = response.data.map((a) => {
-                            return {text: a.text, value: a.value};
+                            return {text: a.text, display: a.display};
                         });
                     },
                     "",
