@@ -25,14 +25,34 @@ def get_additional_info(doctype, user, tag_result):
     return {}
 
 
-def get_aliases(user, name):
+def get_tag_link(doc_types, tag):
 
-    tag_aliases = TagAlias.objects.filter(name__contains=name)
+    if "note" in doc_types:
+        return reverse("search:notes") + f"?tagsearch={tag}"
+    if "bookmark" in doc_types:
+        return reverse("bookmark:overview") + f"?tag={tag}"
+    if "drill" in doc_types:
+        return reverse("drill:start_study_session_tag", kwargs={"tag": tag})
+    if "song" in doc_types or "album" in doc_types:
+        return reverse("music:search_tag") + f"?tag={tag}"
 
+    return reverse("search:kb_search_tag_detail", kwargs={"taglist": tag})
+
+
+def get_tag_aliases(user, name, doc_types=[]):
+
+    tag_aliases = TagAlias.objects.filter(name__contains=name).select_related("tag")
+
+    # Some fields contain the same value since two different searches call
+    #  this method and expect different field names for the same data.
     return [
         {
+            "doctype": "Tag",
             "text": x.tag.name,
-            "display": f"{x.name} -> {x.tag}"
+            "id": f"{x.name} -> {x.tag}",
+            "display": f"{x.name} -> {x.tag}",
+            "name": f"{x.name} -> {x.tag}",
+            "link": get_tag_link(doc_types, x.tag.name)
         }
         for x in
         tag_aliases
@@ -116,5 +136,5 @@ def search(user, tag_name, doctype=None):
                 }
             )
 
-    matches.extend(get_aliases(user, search_term))
+    matches.extend(get_tag_aliases(user, search_term))
     return matches

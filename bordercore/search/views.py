@@ -16,6 +16,7 @@ from blob.models import Blob
 from lib.time_utils import get_date_from_pattern, get_relative_date
 from lib.util import truncate
 from tag.models import Tag
+from tag.services import get_tag_aliases, get_tag_link
 
 SEARCH_LIMIT = 1000
 
@@ -528,20 +529,6 @@ def get_link(doc_type, match):
     return ""
 
 
-def get_tag_link(doc_types, tag):
-
-    if "note" in doc_types:
-        return reverse("search:notes") + f"?tagsearch={tag}"
-    if "bookmark" in doc_types:
-        return reverse("bookmark:overview") + f"?tag={tag}"
-    if "drill" in doc_types:
-        return reverse("drill:start_study_session_tag", kwargs={"tag": tag})
-    if "song" in doc_types or "album" in doc_types:
-        return reverse("music:search_tag") + f"?tag={tag}"
-
-    return reverse("search:kb_search_tag_detail", kwargs={"taglist": tag})
-
-
 def get_name(doc_type, match):
 
     if doc_type == "Song":
@@ -713,6 +700,8 @@ def search_tags_es(user, search_term, doc_types):
                                "link": get_tag_link(doc_types, tag_result["key"])
                            }
                            )
+
+    matches.extend(get_tag_aliases(user, search_term))
     return matches
 
 
