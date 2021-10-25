@@ -5,24 +5,7 @@ import pytest
 
 from django import urls
 
-from bookmark.models import Bookmark
-
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
-
-
-@pytest.fixture
-def monkeypatch_bookmark(monkeypatch):
-    """
-    Prevent the bookmark object from interacting with external services by
-    patching out the Bookmark.index_bookmark() and Bookmark.snarf_favicon()
-    methods
-    """
-
-    def mock(*args, **kwargs):
-        pass
-    monkeypatch.setattr(Bookmark, "index_bookmark", mock)
-    monkeypatch.setattr(Bookmark, "snarf_favicon", mock)
-    monkeypatch.setattr(Bookmark, "delete", mock)
 
 
 def test_bookmark_click(auto_login_user, bookmark):

@@ -9,7 +9,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import JSONField
-from django.db.models.signals import m2m_changed
+from django.db.models.signals import m2m_changed, post_delete, post_save
+from django.dispatch.dispatcher import receiver
 
 from lib.mixins import TimeStampedModel
 from tag.models import SortOrderTagBookmark, Tag
@@ -166,3 +167,38 @@ def tags_changed(sender, **kwargs):
 
 
 m2m_changed.connect(tags_changed, sender=Bookmark.tags.through)
+
+
+@receiver(post_save, sender=Bookmark)
+def post_save_wrapper(sender, instance, created, **kwargs):
+    if created:
+        generate_cover_image(instance)
+
+
+def generate_cover_image(instance):
+
+    # TODO: move this to settings
+    SNS_TOPIC = "arn:aws:sns:us-east-1:192218769908:chromda"
+    client = boto3.client("sns")
+
+    message = {
+        "url": instance.url,
+        "s3key": f"bookmarks/{instance.uuid}.png"
+    }
+
+    client.publish(
+        TopicArn=SNS_TOPIC,
+        Message=json.dumps(message),
+    )
+
+
+@receiver(post_delete, sender=Bookmark)
+def delete_cover_image(sender, instance, **kwargs):
+    """
+    After deletion, remove the bookmark's cover image from S3
+    """
+
+    s3 = boto3.resource("s3")
+    key = f"bookmarks/{instance.uuid}.png"
+
+    s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key).delete()

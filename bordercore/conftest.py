@@ -25,7 +25,9 @@ django.setup()
 
 from accounts.models import SortOrderUserTag, SortOrderUserNote, SortOrderUserFeed, SortOrderDrillTag  # isort:skip
 from accounts.tests.factories import TEST_PASSWORD, UserFactory  # isort:skip
-from blob.tests.factories import BlobFactory  # isort:skip
+from blob.tests.factories import BlobFactory  # isort:skipt
+from bookmark.models import Bookmark  # isort:skip
+from bookmark import models as bookmark_models  # isort:skip
 from bookmark.tests.factories import BookmarkFactory  # isort:skip
 from collection.tests.factories import CollectionFactory  # isort:skip
 from collection.models import Collection  # isort:skip
@@ -98,6 +100,22 @@ def monkeypatch_collection(monkeypatch):
     monkeypatch.setattr(Collection, "create_collection_thumbnail", mock)
 
 
+@pytest.fixture
+def monkeypatch_bookmark(monkeypatch):
+    """
+    Prevent the bookmark objects from interacting with external services
+    AWS and Elasticsearch
+    """
+
+    def mock(*args, **kwargs):
+        pass
+
+    monkeypatch.setattr(bookmark_models, "generate_cover_image", mock)
+    monkeypatch.setattr(Bookmark, "index_bookmark", mock)
+    monkeypatch.setattr(Bookmark, "snarf_favicon", mock)
+    monkeypatch.setattr(Bookmark, "delete", mock)
+
+
 @pytest.fixture()
 def blob_image_factory(db, s3_resource, s3_bucket):
 
@@ -148,7 +166,7 @@ def blob_text_factory(db, s3_resource, s3_bucket):
 
 
 @pytest.fixture()
-def bookmark(tag):
+def bookmark(tag, monkeypatch_bookmark):
 
     bookmark_1 = BookmarkFactory(daily={"viewed": "false"})
     bookmark_2 = BookmarkFactory()
