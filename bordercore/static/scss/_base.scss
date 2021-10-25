@@ -342,6 +342,7 @@ div.CodeMirror {
   border-radius: 1.5rem !important;
   color: #80b5ea !important;
   line-height: 2;
+  white-space: nowrap;
 
   &:hover {
     background-color: #1f61eb !important;
