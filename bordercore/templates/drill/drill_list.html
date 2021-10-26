@@ -98,16 +98,18 @@
             <div class="mb-2 ml-3">
                 <simple-suggest
                     ref="simpleSuggest"
+                    display-attribute="display"
+                    value-attribute="display"
                     search-url="{% url 'tag:search' %}?doctype=drill&query="
                     place-holder="Tag Search"
                 >
                 </simple-suggest>
             </div>
 
-            <div class="d-flex flex-grow-1" v-if="tag.value">
+            <div class="d-flex flex-grow-1" v-if="tag.text">
                 <card>
                     <template v-slot:title-slot>
-                        <h6><a :href="tag.link">[[ tag.value ]]</a></h6>
+                        <h6><a :href="tag.link">[[ tag.text ]]</a></h6>
                     </template>
                     <template v-slot:content>
                         <div class="d-flex">
@@ -378,6 +380,9 @@
             methods: {
                 select(datum) {
                     this.tag = datum;
+                },
+                boldenSuggestion(scope) {
+                    return scope.suggestion.display;
                 }
             },
         });
