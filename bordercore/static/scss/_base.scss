@@ -161,7 +161,11 @@ span {
   box-shadow: 1px 1px 5px #4b00ff, -1px -1px 5px #4b00ff;
 }
 
-.button-add {
+.list-header-border {
+  border-bottom: 0.25rem solid purple
+}
+
+.circle {
   display: flex;
   width: 2.5rem;
   height: 2.5rem;
@@ -171,6 +175,11 @@ span {
   border: none;
   background-color: $info;
   border-radius: 1.5rem;
+  color: $white;
+}
+
+.button-add {
+  @extend .circle;
   color: inherit;
   cursor: pointer;
   font: inherit;
@@ -597,6 +606,10 @@ $nav-tabs-link-hover-border-color: $nav-border-color;
   margin: 0 0 1rem 1rem;
   background-color: $background-color-dark;
   border-radius: 0.4rem;
+
+  .side-panel {
+    width: 18.75rem;
+  }
 }
 
 .list-group-item-secondary {

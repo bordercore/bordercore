@@ -3,15 +3,17 @@ from urllib.parse import unquote
 from elasticsearch import Elasticsearch
 
 from django.conf import settings
+from django.db.models import Count
 from django.urls import reverse
 
 from drill.models import Question
-from tag.models import TagAlias
+
+from .models import Tag, TagAlias
 
 SEARCH_LIMIT = 1000
 
 
-def get_additional_info(doctype, user, tag_result):
+def get_additional_info(doctype, user, tag_name):
     """
     Return additional information for each search result
     based on the doctype.
@@ -19,8 +21,8 @@ def get_additional_info(doctype, user, tag_result):
 
     if doctype == "drill":
         return {
-            "info": Question.get_tag_progress(user, tag_result["key"]),
-            "link": reverse("drill:start_study_session_tag", kwargs={"tag": tag_result["key"]})
+            "info": Question.get_tag_progress(user, tag_name),
+            "link": reverse("drill:start_study_session_tag", kwargs={"tag": tag_name})
         }
     return {}
 
@@ -52,11 +54,30 @@ def get_tag_aliases(user, name, doc_types=[]):
             "id": f"{x.name} -> {x.tag}",
             "display": f"{x.name} -> {x.tag}",
             "name": f"{x.name} -> {x.tag}",
-            "link": get_tag_link(doc_types, x.tag.name)
+            "link": get_tag_link(doc_types, x.tag.name),
+            **get_additional_info(doc_types, user, x.tag.name)
         }
         for x in
         tag_aliases
     ]
+
+
+def get_random_tag_info(user):
+
+    tag = Tag.objects.filter(user=user).order_by("?").first()
+
+    info = Tag.objects.filter(name=tag.name) \
+                      .annotate(
+                          Count("blob", distinct=True),
+                          Count("bookmark", distinct=True),
+                          Count("album", distinct=True),
+                          Count("collection", distinct=True),
+                          Count("todo", distinct=True),
+                          Count("question", distinct=True),
+                          Count("song", distinct=True)
+                      ).first()
+
+    return info
 
 
 def search(user, tag_name, doctype=None):
@@ -131,10 +152,11 @@ def search(user, tag_name, doctype=None):
         if tag_result["key"].lower().find(tag_name) != -1:
             matches.append(
                 {
+                    "display": tag_result["key"],
                     "text": tag_result["key"],
-                    **get_additional_info(doctype, user, tag_result)
+                    **get_additional_info(doctype, user, tag_result["key"])
                 }
             )
 
-    matches.extend(get_tag_aliases(user, search_term))
+    matches.extend(get_tag_aliases(user, search_term, "drill"))
     return matches

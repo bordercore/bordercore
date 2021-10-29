@@ -9,7 +9,7 @@ from collection.models import Collection
 from drill.models import Question
 from feed.models import Feed, FeedItem
 from music.models import Album, Playlist, PlaylistItem, Song, SongSource
-from tag.models import Tag
+from tag.models import Tag, TagAlias
 from todo.models import Todo
 
 
@@ -159,6 +159,14 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ["id", "is_meta", "name", "url", "user"]
+
+
+class TagAliasSerializer(serializers.ModelSerializer):
+    tag = TagSerializer()
+
+    class Meta:
+        model = TagAlias
+        fields = ["uuid", "name", "tag", "user"]
 
 
 class TodoSerializer(serializers.ModelSerializer):

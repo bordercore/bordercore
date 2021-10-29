@@ -8,7 +8,7 @@ from collection.models import Collection
 from drill.models import Question
 from feed.models import Feed, FeedItem
 from music.models import Album, Playlist, PlaylistItem, Song, SongSource
-from tag.models import Tag
+from tag.models import Tag, TagAlias
 from todo.models import Todo
 
 from .serializers import (AlbumSerializer, BlobSerializer,
@@ -16,8 +16,9 @@ from .serializers import (AlbumSerializer, BlobSerializer,
                           CollectionSerializer, FeedItemSerializer,
                           FeedSerializer, PlaylistItemSerializer,
                           PlaylistSerializer, QuestionSerializer,
-                          SongSerializer, SongSourceSerializer, TagSerializer,
-                          TodoSerializer, UserSerializer)
+                          SongSerializer, SongSourceSerializer,
+                          TagAliasSerializer, TagSerializer, TodoSerializer,
+                          UserSerializer)
 
 
 class AlbumViewSet(viewsets.ModelViewSet):
@@ -167,6 +168,15 @@ class TagNameViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Tag.objects.filter(user=self.request.user)
+
+
+class TagAliasViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = TagAliasSerializer
+    lookup_field = "uuid"
+
+    def get_queryset(self):
+        return TagAlias.objects.filter(user=self.request.user).select_related("tag")
 
 
 class TodoViewSet(viewsets.ModelViewSet):

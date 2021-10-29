@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% load dict_get %}
+
+{% block title %} Tags {% endblock %}
+
+{% block content %}
+
+    <div class="row no-gutters h-100" id="vue-app">
+
+        <div class="col-lg-3 d-flex flex-column">
+
+            <div class="card-body">
+
+                <h4>Random Tag: <strong class="text-primary">{{ random_tag_info }}</strong></h4>
+
+                <div class="d-flex flex-column">
+
+                    <div class="list-header-border mb-2 pb-2 mt-4">
+                        Objects using this tag
+                    </div>
+
+                    {% if random_tag_info.blob__count %}
+                        <div>
+                            Blobs: <span class="text-info">{{ random_tag_info.blob__count }}</span>
+                        </div>
+                    {% endif %}
+                    {% if random_tag_info.bookmark__count %}
+                        <div>
+                            Bookmarks: <span class="text-info">{{ random_tag_info.bookmark__count }}</span>
+                        </div>
+                    {% endif %}
+                    {% if random_tag_info.todo__count %}
+                        <div>
+                            Todos: <span class="text-info">{{ random_tag_info.todo__count }}</span>
+                        </div>
+                    {% endif %}
+                    {% if random_tag_info.question__count %}
+                        <div>
+                            Questions: <span class="text-info">{{ random_tag_info.question__count }}</span>
+                        </div>
+                    {% endif %}
+                    {% if random_tag_info.song__count %}
+                        <div>
+                            Songs: <span class="text-info">{{ random_tag_info.song__count }}</span>
+                        </div>
+                    {% endif %}
+                    {% if random_tag_info.album__album %}
+                        <div>
+                            Albums: <span class="text-info">{{ random_tag_info.album__count }}</span>
+                        </div>
+                    {% endif %}
+                    {% if random_tag_info.collection__count %}
+                        <div>
+                            Collections: <span class="text-info">{{ random_tag_info.collection__count }}</span>
+                        </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-9">
+
+            <div class="right-column">
+                <card>
+                    <template v-slot:title-slot>
+                        <div class="d-flex">
+                            <h4>
+                            Tag Aliases
+                            </h4>
+                            <div class="ml-auto mr-2">
+                                <div class="button-add" @click="openModal">
+                                    <font-awesome-icon icon="plus" class="text-emphasis" />
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    <template v-slot:content>
+
+                        <div class="d-flex">
+
+                            <div class="side-panel highlight-box mt-5 mr-5">
+                                <div class="circle mr-3 mb-2">
+                                    <font-awesome-icon icon="info"></font-awesome-icon>
+                                </div>
+                                Tag aliases are labels you can assign as synonyms for tags.
+                                <br /><br />
+                                An example might be the alias <span class="text-primary">math</span> for the tag <span class="text-primary">mathematics</span>
+                            </div>
+
+                            <b-table
+                                :hover="hover"
+                                primary-key="id"
+                                :items="items"
+                                :fields="fields"
+                                @row-hovered="rowHovered"
+                                @row-unhovered="rowUnHovered"
+                                :sorting="items"
+                                sort-by="name"
+                                show-empty
+                                empty-text="No tag aliases found"
+                            >
+
+                                <template #cell(uuid)="data">
+                                    <div class="hover-target hidden">
+                                        <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="text-center">
+                                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+                                            <div slot="dropdown">
+                                                <a class="dropdown-item" href="#" @click.prevent="onClickDelete(data.value)">Delete</a>
+                                            </div>
+                                        </dropdown-menu>
+                                    </div>
+                                </template>
+
+                            </b-table>
+
+                        </div>
+
+                    </template>
+                </card>
+            </div>
+
+            <div class="modal fade" id="modal-tagalias" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="myModalLabel">Add Tag Alias</h4>
+                            <button type="button" class="close close-button" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-row align-items-center">
+                                <div class="mx-1 d-flex">
+                                    <simple-suggest
+                                        id="tag-alias-name"
+                                        ref="tagAliasSuggest"
+                                        display-attribute="text"
+                                        value-attribute="text"
+                                        search-url="{% url 'tag:search' %}?query="
+                                        place-holder="Tag"
+                                        wrapper-class="w-100 mr-3"
+                                        :debounce="500"
+                                    >
+                                    </simple-suggest>
+                                    <input v-model="addAliasAliasName" class="form-control" type="text" name="alias" autocomplete="off" placeholder="Alias" @keydown.enter="addAlias" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer align-items-start align-items-center">
+
+                            <div class="mt-2 text-info">
+                                <font-awesome-icon v-if="addAliasMessage" class="mr-1 pt-1 success" icon="exclamation-triangle" />
+                            {{ addAliasMessage }}
+                            </div>
+
+                            <a class="mr-2 ml-auto" href="#" data-dismiss="modal">Cancel</a>
+                            <input class="btn btn-primary" type="button" value="Add" @click="addAlias" />
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" charset="utf-8">
+
+        Vue.mixin({ delimiters: ["[[", "]]"] });
+
+        const EventBus = new Vue();
+
+        const table = new Vue({
+            el: "#vue-app",
+            components: {
+                SimpleSuggest,
+            },
+            data() {
+                return {
+                    filterSearch: "",
+                    items: [
+                    ],
+                    fields: [
+                        {
+                            key: "tag.name",
+                            label: "Tag",
+                            sortable: true,
+                        },
+                        {
+                            key: "name",
+                            label: "Alias",
+                            sortable: true,
+                        },
+                        {
+                            key: "uuid",
+                            label: "",
+                            tdClass: "text-center align-top",
+                            thClass: "col-action",
+                        },
+                    ],
+                    show: false,
+                    right: true,
+                    hover: true,
+                    addAliasTagName: "",
+                    addAliasAliasName: "",
+                    addAliasMessage: "",
+                }
+            },
+            methods: {
+                getTagAliasList() {
+                    doGet(
+                        this,
+                        "{% url 'tagalias-list' %}",
+                        (response) => {
+                            this.items = response.data.results;
+                        },
+                        "Error retrieving tag alias list"
+                    );
+                },
+                rowHovered(item, index, evt) {
+                    evt.currentTarget.querySelector(".hover-target").classList.remove("hidden");
+                },
+                rowUnHovered(item, index, evt) {
+                    evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
+                },
+                onClickDelete(item, index, evt) {
+
+                    const selectedUuid = item;
+                    axios.delete("{% url 'tagalias-detail' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', selectedUuid))
+                         .then((response) => {
+
+                             this.$bvToast.toast("Tag alias deleted", {
+                                 title: "Info",
+                                 variant: "primary"
+                             })
+
+                             this.getTagAliasList();
+
+                             console.log("Success");
+                         }, (error) => {
+                             console.log(error);
+                         });
+
+                },
+                getTagClass(tag) {
+                    if (tag === this.filterTag) {
+                        return "selected rounded-sm"
+                    }
+                },
+                openModal() {
+                    $("#modal-tagalias").modal("show");
+                    setTimeout( () => { this.$refs.tagAliasSuggest.$refs.suggestComponent.input.focus(); }, 500)
+                },
+                select(datum) {
+                    this.addAliasTagName = datum.text;
+                    setTimeout( () => { document.querySelector("input[name='alias']").focus(); }, 50)
+                },
+                resetModal() {
+                    this.$refs.tagAliasSuggest.$refs.suggestComponent.clearSuggestions();
+                    this.$refs.tagAliasSuggest.$refs.suggestComponent.setText("");
+                    this.addAliasAliasName = "";
+                },
+                addAlias() {
+
+                    doPost(
+                        this,
+                        "{% url 'tag:add_alias' %}",
+                        {
+                            "tag_name": this.addAliasTagName,
+                            "alias_name": this.addAliasAliasName,
+                        },
+                        () => {
+                            this.resetModal();
+                            $("#modal-tagalias").modal("hide");
+                            this.getTagAliasList();
+                        },
+                        "Tag alias added",
+                        "",
+                    );
+
+                }
+            },
+            mounted() {
+
+                this.getTagAliasList();
+
+            }
+        });
+
+    </script>
+
+{% endblock %}

@@ -369,6 +369,18 @@
                                     {% endif %}
                                 },
                                 {
+                                    href: "{% url 'tag:list' %}",
+                                    title: "Tags",
+                                    alias: "/tag/list",
+                                    icon: {
+                                        element: "font-awesome-icon",
+                                        attributes: {
+                                            icon: "tags",
+                                        },
+                                        class: "sidebar-icon"
+                                    },
+                                },
+                                {
                                     href: "{% url 'fitness:summary' %}",
                                     title: "Fitness",
                                     alias: "/fitness/*",

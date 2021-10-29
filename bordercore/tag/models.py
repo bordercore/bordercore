@@ -1,3 +1,5 @@
+import uuid
+
 from django.apps import apps
 from django.contrib.auth.models import User
 from django.core.cache import cache
@@ -91,6 +93,7 @@ def remove_bookmark(sender, instance, **kwargs):
 
 
 class TagAlias(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.TextField(unique=True)
     tag = models.OneToOneField(Tag, on_delete=models.PROTECT)
     user = models.ForeignKey(User, on_delete=models.PROTECT)

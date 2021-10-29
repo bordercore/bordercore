@@ -8,8 +8,8 @@ from django.urls import include, path
 from api.views import (AlbumViewSet, BlobSha1sumViewSet, BlobViewSet,
                        BookmarkViewSet, CollectionViewSet, FeedItemViewSet,
                        FeedViewSet, QuestionViewSet, SongSourceViewSet,
-                       SongViewSet, TagNameViewSet, TagViewSet, TodoViewSet,
-                       UserViewSet)
+                       SongViewSet, TagAliasViewSet, TagNameViewSet,
+                       TagViewSet, TodoViewSet, UserViewSet)
 from book.views import BookListView
 from bordercore.api.views import PlaylistItemViewSet, PlaylistViewSet
 from collection.views import get_images
@@ -54,6 +54,7 @@ router.register(r"songsources", SongSourceViewSet, "songsource")
 router.register(r"playlists", PlaylistViewSet, "playlist")
 router.register(r"playlistitems", PlaylistItemViewSet, "playlistitem")
 router.register(r"tags", TagViewSet, "tag")
+router.register(r"tagaliases", TagAliasViewSet, "tagalias")
 router.register(r"tagnames", TagNameViewSet, "tagname")
 router.register(r"todos", TodoViewSet, "todo")
 router.register(r"users", UserViewSet, "user")

@@ -20,4 +20,14 @@ urlpatterns = [
         view=views.unpin,
         name="unpin"
     ),
+    path(
+        route="list",
+        view=views.TagListView.as_view(),
+        name="list"
+    ),
+    path(
+        route="add_alias",
+        view=views.add_alias,
+        name="add_alias"
+    ),
 ]
