@@ -3,7 +3,7 @@ import pytest
 import django
 
 from lib.util import (get_missing_blob_ids, get_missing_bookmark_ids,
-                      get_pagination_range, is_image, is_pdf,
+                      get_pagination_range, is_image, is_pdf, is_video,
                       remove_non_ascii_characters, truncate)
 
 django.setup()
@@ -192,6 +192,15 @@ def test_util_is_pdf():
 
     file = "path/to/file.pdf"
     assert is_pdf(file) is True
+
+    file = "path/to/file.gif"
+    assert is_pdf(file) is False
+
+
+def test_util_is_video():
+
+    file = "path/to/file.mp4"
+    assert is_video(file) is True
 
     file = "path/to/file.gif"
     assert is_pdf(file) is False
