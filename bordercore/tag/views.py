@@ -36,8 +36,9 @@ def search(request):
 
     tag_name = request.GET["query"].lower()
     doctype = request.GET.get("doctype", None)
+    skip_tag_aliases = request.GET.get("skip_tag_aliases", False)
 
-    matches = search_service(request.user, tag_name, doctype)
+    matches = search_service(request.user, tag_name, doctype, skip_tag_aliases)
 
     return JsonResponse(matches, safe=False)
 

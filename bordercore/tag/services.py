@@ -80,7 +80,7 @@ def get_random_tag_info(user):
     return info
 
 
-def search(user, tag_name, doctype=None):
+def search(user, tag_name, doctype=None, skip_tag_aliases=False):
     """
     Search for tags attached to objects based on a substring in Elasticsearch.
     Optionally limit the search to objects of a specific doctype.
@@ -158,5 +158,7 @@ def search(user, tag_name, doctype=None):
                 }
             )
 
-    matches.extend(get_tag_aliases(user, search_term, "drill"))
+    if not skip_tag_aliases:
+        matches.extend(get_tag_aliases(user, search_term, doctype))
+
     return matches
