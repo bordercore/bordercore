@@ -67,7 +67,7 @@ def get_recent_blobs(user, limit=10):
     # Prefetch all matched blobs from the database in one query, rather
     #  than using a separate query for each one in the loop below.
     uuid_list = [x["_source"]["uuid"] for x in results["hits"]["hits"]]
-    blob_list = Blob.objects.filter(uuid__in=uuid_list).prefetch_related("tags", "metadata_set")
+    blob_list = Blob.objects.filter(uuid__in=uuid_list).prefetch_related("tags", "metadata")
 
     returned_blob_list = []
 

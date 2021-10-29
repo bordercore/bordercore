@@ -27,7 +27,7 @@ def test_get_blob_info(blob_image_factory):
 
     blob_info = {
         "name": blob_image_factory.name,
-        "metadata_set": [
+        "metadata": [
             {
                 "Url": "https://www.bordercore.com"
             },
@@ -46,14 +46,6 @@ def test_get_blob_info(blob_image_factory):
             "author": ["John Smith"],
             "url": ["https://www.bordercore.com"]
         },
-        "metadata_set": [
-            {
-                "Url": "https://www.bordercore.com"
-            },
-            {
-                "Author": "John Smith"
-            }
-        ],
     }
 
     url = f"https://www.bordercore.com/api/sha1sums/{blob_image_factory.sha1sum}/"
@@ -67,14 +59,6 @@ def test_get_blob_info(blob_image_factory):
             "author": ["John Smith"],
             "url": ["https://www.bordercore.com"]
         },
-        "metadata_set": [
-            {
-                "Url": "https://www.bordercore.com"
-            },
-            {
-                "Author": "John Smith"
-            }
-        ],
     }
 
 

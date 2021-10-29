@@ -60,7 +60,7 @@ class BlobCreateView(FormRequestMixin, CreateView):
             context["linked_blob"] = linked_blob
 
             # Grab the initial metadata and tags from the linked blob
-            context["metadata"] = linked_blob.metadata_set.all()
+            context["metadata"] = linked_blob.metadata.all()
             context["tags"] = [
                 {
                     "text": x.name,
@@ -75,7 +75,7 @@ class BlobCreateView(FormRequestMixin, CreateView):
             context["linked_collection_blob_list"] = collection.blobs.all()
 
             # Grab the initial metadata and tags from one of the other blobs in the collection
-            context["metadata"] = context["linked_collection_blob_list"][0].metadata_set.all()
+            context["metadata"] = context["linked_collection_blob_list"][0].metadata.all()
             context["tags"] = [
                 {
                     "text": x.name,
@@ -244,9 +244,9 @@ class BlobUpdateView(FormRequestMixin, UpdateView):
         if self.object.sha1sum:
             context["cover_url"] = self.object.get_cover_url()
 
-        context["metadata"] = self.object.metadata_set.exclude(name="is_book")
+        context["metadata"] = self.object.metadata.exclude(name="is_book")
 
-        if [x for x in self.object.metadata_set.all() if x.name == "is_book"]:
+        if [x for x in self.object.metadata.all() if x.name == "is_book"]:
             context["is_book"] = True
 
         context["collections_other"] = Collection.objects.filter(Q(user=self.request.user)
@@ -325,7 +325,7 @@ class BlobCloneView(View):
 # Metadata objects are not handled by the form -- handle them manually
 def handle_metadata(blob, request):
 
-    metadata_old = blob.metadata_set.all()
+    metadata_old = blob.metadata.all()
     for i in metadata_old:
         i.delete()
 

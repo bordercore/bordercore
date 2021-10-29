@@ -106,10 +106,10 @@ def test_clone(monkeypatch_blob, blob_pdf_factory, collection):
     cloned_blob = blob_pdf_factory.clone()
     assert cloned_blob.date == blob_pdf_factory.date
     assert cloned_blob.tags.all().count() == blob_pdf_factory.tags.all().count()
-    assert cloned_blob.metadata_set.all().count() == blob_pdf_factory.metadata_set.all().count()
+    assert cloned_blob.metadata.all().count() == blob_pdf_factory.metadata.all().count()
 
-    for metadata in blob_pdf_factory.metadata_set.all():
-        assert metadata.name in [x.name for x in cloned_blob.metadata_set.all()]
+    for metadata in blob_pdf_factory.metadata.all():
+        assert metadata.name in [x.name for x in cloned_blob.metadata.all()]
 
     for tag in blob_pdf_factory.tags.all():
         assert tag in cloned_blob.tags.all()

@@ -47,13 +47,13 @@ class BlobSerializer(serializers.ModelSerializer):
 
     uuid = serializers.UUIDField()
     file = BlobFileField(read_only=True)
-    metadata_set = BlobMetaDataField(many=True, read_only=True)
+    metadata = BlobMetaDataField(many=True, read_only=True)
     tags = BlobTagsField(queryset=Tag.objects.all(), many=True)
 
     class Meta:
         model = Blob
         fields = ["created", "content", "date", "file", "id", "importance",
-                  "is_private", "is_note", "metadata_set", "modified", "name",
+                  "is_private", "is_note", "metadata", "modified", "name",
                   "note", "sha1sum", "tags", "user", "uuid"]
 
     # Override __init__ so that we can parse an optional "fields" searcharg
@@ -75,13 +75,13 @@ class BlobSerializer(serializers.ModelSerializer):
 class BlobSha1sumSerializer(serializers.ModelSerializer):
 
     file = BlobFileField(read_only=True)
-    metadata_set = BlobMetaDataField(many=True, read_only=True)
+    metadata = BlobMetaDataField(many=True, read_only=True)
     tags = BlobTagsField(many=True, read_only=True)
 
     class Meta:
         model = Blob
         fields = ["created", "content", "date", "documents", "file", "id", "importance",
-                  "is_private", "is_note", "metadata_set", "modified",
+                  "is_private", "is_note", "metadata", "modified",
                   "name", "note", "sha1sum", "tags", "user", "uuid"]
 
 

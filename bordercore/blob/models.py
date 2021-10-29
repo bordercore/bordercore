@@ -158,7 +158,7 @@ class Blob(TimeStampedModel):
     def doctype(self):
         if self.is_note is True:
             return "note"
-        elif "is_book" in [x.name for x in self.metadata_set.all()]:
+        elif "is_book" in [x.name for x in self.metadata.all()]:
             return "book"
         elif is_image(self.file):
             return "image"
@@ -197,7 +197,7 @@ class Blob(TimeStampedModel):
         metadata = {}
         urls = []
 
-        for x in self.metadata_set.all():
+        for x in self.metadata.all():
             if x.name == "Url":
                 urls.append(
                     {
@@ -435,7 +435,7 @@ class Blob(TimeStampedModel):
             is_note=self.is_note
         )
 
-        for x in self.metadata_set.all():
+        for x in self.metadata.all():
             MetaData.objects.create(
                 user=self.user,
                 name=x.name,
@@ -646,7 +646,7 @@ def mymodel_delete_s3(sender, instance, **kwargs):
 class MetaData(TimeStampedModel):
     name = models.TextField()
     value = models.TextField()
-    blob = models.ForeignKey(Blob, on_delete=models.CASCADE)
+    blob = models.ForeignKey(Blob, on_delete=models.CASCADE, related_name="metadata")
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     def __str__(self):

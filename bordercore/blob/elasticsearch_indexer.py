@@ -119,7 +119,7 @@ def get_blob_info(**kwargs):
 
     metadata = {}
 
-    for x in info["metadata_set"]:
+    for x in info["metadata"]:
         for key, value in x.items():
             if not key or not value:
                 continue

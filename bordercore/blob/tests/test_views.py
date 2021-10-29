@@ -127,10 +127,10 @@ def test_blob_detail(monkeypatch_blob, auto_login_user, blob):
 
     assert soup.select("div#vue-right-panel h2#name")[0].findAll(text=True)[0].strip() == blob.get_name(remove_edition_string=True)
 
-    url = [x.value for x in blob.metadata_set.all() if x.name == "Url"][0]
+    url = [x.value for x in blob.metadata.all() if x.name == "Url"][0]
     assert soup.select("strong a")[0].findAll(text=True)[0] == urlparse(url).netloc
 
-    author = [x.value for x in blob.metadata_set.all() if x.name == "Author"][0]
+    author = [x.value for x in blob.metadata.all() if x.name == "Author"][0]
     assert author in [x for sublist in soup.select("span") for x in sublist]
 
 
