@@ -75,7 +75,9 @@ class Command(BaseCommand):
 
             bookmark.tags.add(tag_target)
             bookmark.tags.remove(tag_source)
-            bookmark.index_bookmark()
+
+            if not dry_run:
+                bookmark.index_bookmark()
 
         # Update todos
         todos = Todo.objects.filter(tags=tag_source, user=user)
@@ -97,10 +99,12 @@ class Command(BaseCommand):
         if count > 0:
             self.stdout.write(f"Updating {count} blob{pluralize(count)}")
 
-        for blob in blobs:
+        for blob in blobs[:1]:
             blob.tags.add(tag_target)
             blob.tags.remove(tag_source)
-            blob.index_blob()
+
+            if not dry_run:
+                blob.index_blob()
 
         # Update collections
         collections = Collection.objects.filter(tags=tag_source, user=user)
