@@ -25,7 +25,7 @@ class DrillManager(models.Manager):
         return Tag.objects.only("id", "name") \
                           .filter(user=user, question__isnull=False) \
                           .annotate(last_reviewed=Min("question__last_reviewed")) \
-                          .order_by("-last_reviewed")
+                          .order_by(F("last_reviewed").asc(nulls_first=True))
 
     def total_tag_progress(self, user):
         """
