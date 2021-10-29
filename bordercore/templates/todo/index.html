@@ -272,7 +272,6 @@
                 onClickDelete(item, index, evt) {
 
                     let selectedUuid = item;
-                    console.log("got here!!!");
                     axios.delete("{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', selectedUuid))
                          .then((response) => {
 

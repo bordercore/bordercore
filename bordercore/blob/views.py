@@ -4,7 +4,6 @@ import logging
 import re
 
 import boto3
-from botocore.errorfactory import ClientError
 
 from django.conf import settings
 from django.contrib import messages
