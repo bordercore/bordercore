@@ -118,7 +118,8 @@
       "importance": { "type":"integer" },
       "date_unixtime": { "type":"long" },
       "created_date": { "type":"date" },
-      "last_modified": { "type":"date" }
+      "last_modified": { "type":"date" },
+      "metadata": { "type":"object" }
     }
   }
 }

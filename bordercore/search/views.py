@@ -166,7 +166,7 @@ class SearchListView(ListView):
                     "multi_match": {
                         "type": "phrase" if self.request.GET.get("exact_match", None) in ["Yes"] else "best_fields",
                         "query": search_term,
-                        "fields": ["answer", "artist", "author", "attachment.content", "contents", "name", "question", "sha1sum", "title", "uuid"],
+                        "fields": ["answer", "metadata.artist", "metadata.author", "attachment.content", "contents", "name", "question", "sha1sum", "title", "uuid"],
                         "operator": boolean_type,
                     }
                 }

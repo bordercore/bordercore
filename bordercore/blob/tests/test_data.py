@@ -250,7 +250,7 @@ def test_books_with_author(es):
                             "must_not": [
                                 {
                                     "exists": {
-                                        "field": "author"
+                                        "field": "metadata.author"
                                     }
                                 }
                             ]
@@ -556,7 +556,7 @@ def test_blob_metadata_exists_in_elasticsearch(es):
                         },
                         {
                             "match": {
-                                f"{x.name.lower()}": {
+                                f"metadata.{x.name.lower()}": {
                                     "query": x.value,
                                     "operator": "and"
                                 }

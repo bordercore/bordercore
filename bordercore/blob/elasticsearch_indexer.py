@@ -117,6 +117,8 @@ def get_blob_info(**kwargs):
 
     info = r.json()
 
+    # Extract the blob's metadata and store it separately, since it will
+    #  be indexed in its own Elasticsearch field
     metadata = {}
 
     for x in info["metadata"]:
@@ -126,6 +128,9 @@ def get_blob_info(**kwargs):
             existing = metadata.get(key.lower(), [])
             existing.append(value)
             metadata[key.lower()] = existing
+
+    # Now that we have a separate copy, remove the blob's metadata from the main object
+    info.pop("metadata", None)
 
     return {
         **info,
@@ -241,7 +246,7 @@ def index_blob(**kwargs):
         date_unixtime=get_unixtime_from_string(blob_info["date"]),
         created_date=blob_info["created"],
         last_modified=blob_info["modified"],
-        **blob_info["metadata"]
+        metadata=blob_info["metadata"],
     )
 
     if blob_info["date"] is not None:
