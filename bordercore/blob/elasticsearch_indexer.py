@@ -306,4 +306,4 @@ def index_blob(**kwargs):
         article.save(**pipeline_args)
 
     else:
-        article.update(doc_as_upsert=True, **fields)
+        article.save()
