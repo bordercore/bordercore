@@ -97,7 +97,6 @@ body {
 a {
   text-decoration-color: transparent;
   text-underline-offset: 0.25rem;
-  transition: all 0.25s cubic-bezier(0.455, 0.03, 0.515, 0.955);
 
   &:hover {
     color: $link-decoration-color;
@@ -122,9 +121,7 @@ span {
   display: inline-block;
 }
 
-.selected,
-.selected a,
-.selected a:visited {
+.selected, {
   background-color: $selected-background-color;
   color: $white;
 }
@@ -785,10 +782,15 @@ pre {
 // Bookmarks
 //
 
-.bookmark-list {
+.bookmark-list,
+.bookmark-list a {
   &:hover {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: #1e233a;
   }
+}
+
+.bookmark-list:hover a {
+  background-color: #1e233a;
 }
 
 .bookmark-list-date {

@@ -107,7 +107,7 @@
                 <bookmark-list inline-template @paginate="paginate" @get-page="getPage" ref="bookmarkList">
                     <div class="row">
                         <div class="col-lg-12">
-                            <table class="w-100">
+                            <table id="bookmark-list" class="w-100">
                                 <tbody is="draggable" v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" :disabled="disableSort">
                                     <transition-group type="transition">
                                         <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="bookmark-list w-100" @click="onClick" @mouseenter="rowHovered" @mouseleave="rowUnHovered" v-cloak>
@@ -354,6 +354,7 @@
             data() {
                 return {
                     bookmarkList: [],
+                    selectedBookmarkUuid: null,
                     disableSort: true,
                     show: false,
                     right: true,
@@ -516,8 +517,75 @@
 
                          })
                 },
+                getNextBookmark() {
+                    const index = this.bookmarkList.findIndex( (e) => e.uuid === this.selectedBookmarkUuid );
+                    if (index < this.bookmarkList.length - 1) {
+                        return this.bookmarkList[index + 1].uuid;
+                    }
+                },
+                getPreviousBookmark() {
+                    const index = this.bookmarkList.findIndex( (e) => e.uuid === this.selectedBookmarkUuid );
+                    if (index > 0) {
+                        return this.bookmarkList[index - 1].uuid;
+                    }
+                },
+                selectBookmark() {
+                    document.querySelectorAll("#bookmark-list tr").forEach(row => {
+                        row.classList.remove("selected");
+                    });
+
+                    document.querySelector("#bookmark-list tr[data-uuid='" + this.selectedBookmarkUuid + "']").classList.add("selected");
+                },
             },
             mounted() {
+
+                let self = this;
+
+                window.addEventListener("keydown", function(e) {
+
+                    if (e.which === 40 && e.altKey) { /* Alt-Down arrow */
+
+                        if (!self.selectedBookmarkUuid) {
+                            self.selectedBookmarkUuid = self.bookmarkList[0].uuid;
+                        } else {
+                            self.selectedBookmarkUuid = self.getNextBookmark();
+                        }
+                        self.selectBookmark();
+
+                    } else if (e.which === 38 && e.altKey) { /* Alt-Up arrow */
+
+                        if (!self.selectedBookmarkUuid) {
+                            self.selectedBookmarkUuid = self.bookmarkList[self.bokmarkList.length - 1].uuid;
+                        } else {
+                            self.selectedBookmarkUuid = self.getPreviousBookmark();
+                        }
+                        self.selectBookmark();
+
+                    } else if (e.which === 68) { /* D */
+
+                        const index = self.bookmarkList.findIndex( (e) => e.uuid === self.selectedBookmarkUuid );
+                        const nextBookmark = self.getNextBookmark();
+                        self.onClickDelete(self.bookmarkList[index].uuid);
+                        self.selectedBookmarkUuid = nextBookmark;
+                        self.selectBookmark();
+
+                    } else if (e.which === 79) { /* O */
+
+                        const index = self.bookmarkList.findIndex( (e) => e.uuid === self.selectedBookmarkUuid );
+                        window.open(self.bookmarkList[index].url, "_blank");
+                        self.onClickDelete(self.bookmarkList[index].uuid);
+                        self.selectedBookmarkUuid = null;
+
+                    } else if (e.which === 27) { /* Escape */
+
+                        self.selectedBookmarkUuid = null;
+                        document.querySelectorAll("#bookmark-list tr").forEach(row => {
+                            row.classList.remove("selected");
+                        });
+
+                    }
+
+                });
 
                 EventBus.$on("add-note", payload => {
 
@@ -743,5 +811,17 @@
         });
 
     </script>
+
+{% endblock %}
+
+{% block help %}
+
+    <div class="d-none" id="help-text">
+# Keyboard Shortcuts
+- **Alt-Up**, **Alt-Down** *-* Select a bookmark
+- **D** *-* Delete the selected bookmark
+- **O** *-*  Open and delete the selected bookmark
+- **Escape** *-* Unselect the selected bookmark
+    </div>
 
 {% endblock %}
