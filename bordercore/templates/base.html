@@ -127,11 +127,14 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title" id="myModalLabel">Help</h4>
+                        <h4 class="modal-title" id="myModalLabel">
+                            <font-awesome-icon icon="question" class="text-info mr-2"></font-awesome-icon>
+                            Help
+                        </h4>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     </div>
-                    <div class="modal-body" id="modal-body">
-                            Help!
+                    <div class="modal-body" id="modal-body-help">
+                        Help!
                     </div>
                 </div>
             </div>
@@ -206,7 +209,7 @@
                     methods: {
                         showHelp(evt) {
                             const helpText = document.getElementById("help-text").innerHTML;
-                            document.getElementById("modal-body").innerHTML = markdown.render(helpText);
+                            document.getElementById("modal-body-help").innerHTML = markdown.render(helpText);
                             $("#modalHelp").modal("show");
                         }
                     }
@@ -463,6 +466,11 @@
 
                 new Vue({
                     el: "#vue-messages",
+                });
+
+                new Vue({
+                    name: "Help Modal",
+                    el: "#modalHelp",
                 });
 
             </script>

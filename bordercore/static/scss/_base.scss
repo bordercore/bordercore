@@ -483,6 +483,22 @@ body.login {
   background-color: $gray-600;
 }
 
+// Help
+
+#modal-body-help {
+  h1 {
+    color: #4ccf77;
+    font-size: 1rem;
+    text-transform: uppercase;
+  }
+  strong {
+    color: #00ffd1;
+  }
+  em {
+    color: yellow;
+  }
+}
+
 //
 // Tables
 //
