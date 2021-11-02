@@ -454,7 +454,7 @@ class Blob(TimeStampedModel):
 
         return new_blob
 
-    def index_blob(self, file_changed=True):
+    def index_blob(self, file_changed=True, new_blob=True):
         """
         Index the blob into Elasticsearch, but only if there is no
         file associated with it. If there is, then a lambda will be
@@ -471,7 +471,8 @@ class Blob(TimeStampedModel):
                             "name": settings.AWS_STORAGE_BUCKET_NAME
                         },
                         "uuid": str(self.uuid),
-                        "file_changed": file_changed
+                        "file_changed": file_changed,
+                        "new_blob": new_blob
                     }
                 }
             ]

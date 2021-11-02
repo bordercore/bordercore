@@ -29,6 +29,7 @@ def handler(event, context):
                 continue
 
             file_changed = sns_record["s3"].get("file_changed", True)
+            new_blob = sns_record["s3"].get("new_blob", True)
 
             # If this was triggered by S3, then parse the uuid from the S3 key.
             # Otherwise this must have been called from Django, in which case the
@@ -58,7 +59,7 @@ def handler(event, context):
                     raise Exception(f"No uuid found in SNS event: {record['Sns']['Message']}")
                 log.info(f"Lambda triggered by Django, uuid: {uuid}")
 
-            index_blob_es(uuid=uuid, file_changed=file_changed)
+            index_blob_es(uuid=uuid, file_changed=file_changed, new_blob=new_blob)
 
         log.info("Lambda finished")
 

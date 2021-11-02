@@ -212,10 +212,29 @@ def get_num_pages(content):
     return input_pdf.getNumPages()
 
 
+def delete_metadata(es, uuid):
+
+    q = {
+        "query": {
+            "term": {
+                "uuid": uuid
+            }
+        },
+        "script": {
+            "source": "ctx._source.remove(\"metadata\")",
+            "lang": "painless"
+        }
+    }
+
+    result = es.update_by_query(body=q, index=ES_INDEX_NAME)
+
+
 def index_blob(**kwargs):
 
+    es = None
+
     if kwargs.get("create_connection", True):
-        connections.create_connection(
+        es = connections.create_connection(
             hosts=[{"host": ES_ENDPOINT, "port": ES_PORT}],
             use_ssl=False,
             timeout=1200,
@@ -306,4 +325,9 @@ def index_blob(**kwargs):
         article.save(**pipeline_args)
 
     else:
-        article.save()
+        if not kwargs.get("new_blob", True):
+            # For existing blobs, remove any existing metadata first before updating,
+            #  in case the user is deleting some of it.
+            delete_metadata(es, article.uuid)
+
+        article.update(doc_as_upsert=True, **fields)
