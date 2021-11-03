@@ -175,6 +175,19 @@ span {
   color: $white;
 }
 
+.button-icon {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-color: #fff;
+  background-color: #161e4e;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 6px #4b00ff, 0 1px 3px #4b00ff;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
 .button-add {
   @extend .circle;
   color: inherit;

@@ -40,7 +40,7 @@ window.jQuery= jQuery;
 import "bootstrap";
 
 import {library} from "@fortawesome/fontawesome-svg-core";
-import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faCopy, faEllipsisV, faExclamationTriangle, faHeart, faHome, faImage, faInfo, faGraduationCap, faLink, faMusic, faNewspaper, faPlus, faQuestion, faRunning, faSearch, faSignOutAlt, faStickyNote, faTags, faTasks, faTimesCircle} from "@fortawesome/free-solid-svg-icons";
+import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faHeart, faHome, faImage, faInfo, faGraduationCap, faLink, faMusic, faNewspaper, faPlus, faQuestion, faRunning, faSearch, faSignOutAlt, faStickyNote, faTags, faTasks, faTimesCircle} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 library.add(faAlignLeft);
 library.add(faAngleDown);
@@ -55,6 +55,7 @@ library.add(faCalendarAlt);
 library.add(faChartBar);
 library.add(faCheck);
 library.add(faCopy);
+library.add(faDownload);
 library.add(faEllipsisV);
 library.add(faExclamationTriangle);
 library.add(faHeart);
