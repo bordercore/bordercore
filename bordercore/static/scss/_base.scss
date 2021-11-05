@@ -72,12 +72,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: #25335b;
   border-radius: 0.6rem;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.2);
+  background-color: lighten(#25335b, 5%);
 }
 
 .close-button {
@@ -244,13 +244,19 @@ a.tag {
   overflow-y: auto;
 }
 
-// Hide all scrollbars.
+// Hide all scrollbars by default.
 // Reveal vertical scrollbar on hover.
 .scrollable-panel-scrollbar-hover {
   overflow: hidden;
 
   &:hover {
-    overflow-y: auto;
+    // "overlay" not supported by Firefox
+    @supports not( -moz-appearance:none ){
+      overflow-y: overlay;
+    }
+    @supports ( -moz-appearance:none ){
+      overflow-y: auto;
+    }
   }
 }
 
