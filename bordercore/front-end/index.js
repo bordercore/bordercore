@@ -40,7 +40,7 @@ window.jQuery= jQuery;
 import "bootstrap";
 
 import {library} from "@fortawesome/fontawesome-svg-core";
-import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faHeart, faHome, faImage, faInfo, faGraduationCap, faLink, faMusic, faNewspaper, faPlus, faQuestion, faRunning, faSearch, faSignOutAlt, faStickyNote, faTags, faTasks, faTimesCircle} from "@fortawesome/free-solid-svg-icons";
+import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faHeart, faHome, faImage, faInfo, faGraduationCap, faLink, faLock, faMusic, faNewspaper, faPlus, faQuestion, faRunning, faSearch, faSignOutAlt, faStickyNote, faTags, faTasks, faTimesCircle} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 library.add(faAlignLeft);
 library.add(faAngleDown);
@@ -64,6 +64,7 @@ library.add(faImage);
 library.add(faInfo);
 library.add(faGraduationCap);
 library.add(faLink);
+library.add(faLock);
 library.add(faMusic);
 library.add(faNewspaper);
 library.add(faPlus);
@@ -176,6 +177,10 @@ window.CreateUpdatePlaylist = CreateUpdatePlaylist;
 import BlobDetailCover from "./vue/blob/BlobDetailCover.vue";
 Vue.component("BlobDetailCover", BlobDetailCover);
 window.BlobDetailCover = BlobDetailCover;
+
+import IconButton from "./vue/common/IconButton.vue";
+Vue.component("IconButton", IconButton);
+window.IconButton = IconButton;
 
 import PerfectScrollbar from "perfect-scrollbar";
 window.PerfectScrollbar = PerfectScrollbar;

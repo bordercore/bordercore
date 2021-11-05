@@ -41,7 +41,7 @@
                         />
                     {% endif %}
 
-                    <div class="form-group w-75">
+                    <div class="form-group">
                         <add-to-collection-dropdown inline-template>
                             <select class="form-control" @change="onChange">
                                 <option value="">Add to collection</option>
@@ -51,7 +51,7 @@
                     </div>
 
                     {% if object.get_collection_info %}
-                        <div class="form-group w-75">
+                        <div class="form-group">
                             <remove-from-collection-dropdown inline-template>
                                 <select class="form-control" @change="onChange">
                                     <option>Remove from collection</option>
@@ -61,36 +61,76 @@
                         </div>
                     {% endif %}
 
-                    <form action="{% url 'blob:delete' object.uuid %}" method="post">
-
-                        {% csrf_token %}
-
-                        <input type="hidden" name="uuid" value="{{ object.uuid }}" />
-                        <button type="submit" class="btn btn-warning">
-                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete
-                        </button>
-
-                    </form>
-
-                    <hr/>
-
                 {% endif %}
 
-                <div class="row">
-                    <div class="col-lg-4 mt-3">
+                <div class="d-flex mt-2">
+                    <icon-button
+                        label="Important"
+                        icon="heart"
+                        :initial-enabled="{% if form.importance.value == 10 %}true{% else %}false{% endif %}"
+                        form-name="importance"
+                        @enable-option="updateFormValue"
+                    >
+                    </icon-button>
+                    <icon-button
+                        label="Note"
+                        icon="sticky-note"
+                        :initial-enabled="{% if form.is_note.value == True %}true{% else %}false{% endif %}"
+                        form-name="is_note"
+                        @enable-option="updateFormValue"
+                    >
+                    </icon-button>
+                    <icon-button
+                        label="Book"
+                        icon="book"
+                        :initial-enabled="{% if is_book == True %}true{% else %}false{% endif %}"
+                        form-name="is_book"
+                        @enable-option="updateFormValue"
+                    >
+                    </icon-button>
+                    <icon-button
+                        label="Private"
+                        icon="lock"
+                        :initial-enabled="{% if form.is_private.value == True %}true{% else %}false{% endif %}"
+                        form-name="is_private"
+                        @enable-option="updateFormValue"
+                    >
+                    </icon-button>
+                </div>
+
+                <div class="mt-3">
+                    <button type="button" class="btn btn-primary" @click="submitForm">
+                        {{ action }}
+                    </button>
+                </div>
+
+                <hr class="filter-divider w-100" />
+
+                <div class="d-flex">
+                    <div>
                         <cleanup-filename-button inline-template>
                             <input type="button" class="btn btn-secondary" value="Cleanup Filename" @click="onClick" />
                         </cleanup-filename-button>
                     </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-4 mt-3">
+                    <div class="ml-3">
                         <upper-case-first-button inline-template>
                             <input type="button" class="btn btn-secondary" value="Upper Case First" @click="onClick" />
                         </upper-case-first-button>
                     </div>
                 </div>
+
+                {% if object %}
+                <form class="mt-3" action="{% url 'blob:delete' object.uuid %}" method="post">
+
+                    {% csrf_token %}
+
+                    <input type="hidden" name="uuid" value="{{ object.uuid }}" />
+                    <button type="submit" class="btn btn-warning">
+                        <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete
+                    </button>
+
+                </form>
+                {% endif %}
 
                 {% if collection_info %}
 
@@ -134,6 +174,11 @@
                 {% endif %}
 
                 <form id="form-blob" action="{{ request.path }}" method="post" enctype="multipart/form-data" class="mr-2">
+
+                    <input type="hidden" name="importance" value="{% if form.importance.value == 10 %}on{% endif %}" />
+                    <input type="hidden" name="is_note" value="{% if form.is_note.value %}on{% endif %}" />
+                    <input type="hidden" name="is_private" value="{% if form.is_private.value %}on{% endif %}" />
+                    <input type="hidden" name="is_book" value="{% if is_book %}on{% endif %}" />
 
                     {% csrf_token %}
 
@@ -199,12 +244,12 @@
                                     <input v-model="$store.state.date" class="form-control" type="number" name="date" size="4" placeholder="Year" autocomplete="off">
                                 </div>
 
-                                <div class="d-flex align-items-center">
+                                <div>
                                     <drop-down-menu
                                         ref="dropDownMenu"
                                         :links="dateFormatMenuItems"
                                         :initial-hide="false"
-                                        class="calendar-date-format-menu"
+                                        class="dropdownmenu calendar-date-format-menu d-flex align-items-center justify-content-center"
                                     >
                                     </drop-down-menu>
                                 </div>
@@ -239,38 +284,6 @@
                         {% endif %}
 
                     {% endfor %}
-
-                    <div class="row form-group offset-lg-2 form-inline {% if field.errors %}error{% endif %}">
-
-                        <div class="col-lg-3 form-group">
-                            <div class="form-check">
-                                <label class="form-check-label font-weight-bold">Important</label>
-                                <input class="form-check-input ml-3" type="checkbox"{% if form.importance.value == 10 %} checked="checked"{% endif %} name="importance" id="importance" />
-                            </div>
-                        </div>
-
-                        <div class="col-lg-3 form-group">
-                            <div class="form-check">
-                                <label class="form-check-label font-weight-bold">Is note</label>
-                                <input class="form-check-input ml-3" type="checkbox"{% if form.is_note.value == True %} checked="checked"{% endif %} name="is_note" id="id_is_note" />
-                            </div>
-                        </div>
-
-                        <div class="col-lg-3 form-group">
-                            <div class="form-check">
-                                <label class="form-check-label font-weight-bold">Is private</label>
-                                <input class="form-check-input ml-3" type="checkbox"{% if object.is_private %} checked="checked"{% endif %} name="is_private" id="id_is_private" />
-                            </div>
-                        </div>
-
-                        <div class="col-lg-3 form-group">
-                            <div class="form-check">
-                                <label class="form-check-label font-weight-bold">Is book</label>
-                                <input class="form-check-input ml-3" type="checkbox"{% if is_book %} checked="checked"{% endif %} name="is_book" id="id_is_book" />
-                            </div>
-                        </div>
-
-                    </div>
 
                     <metadata-wrapper inline-template>
                         <div>
@@ -327,12 +340,6 @@
                             </metadata-list>
                         </div>
                     </metadata-wrapper>
-
-                    <div class="form-group">
-                        <div class="col-lg-3 offset-lg-2">
-                            <input class="btn btn-primary btn-lg" type="submit" name="Go" value="{{ action }}" />
-                        </div>
-                    </div>
 
                 </form>
 
@@ -612,6 +619,19 @@
                         ""
                     );
 
+                },
+
+                submitForm() {
+                    document.getElementById("form-blob").submit();
+                },
+
+                updateFormValue(property, value) {
+                    if (property === "important") {
+                        document.getElementById("form-blob").elements[property].value = 10;
+                    } else {
+                        // Simulate a form checkbox value
+                        document.getElementById("form-blob").elements[property].value = value ? "on" : "";
+                    }
                 }
 
             }
