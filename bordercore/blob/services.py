@@ -89,7 +89,7 @@ def get_recent_blobs(user, limit=10):
             "url": reverse("blob:detail", kwargs={"uuid": blob.uuid}),
             "delta_days": delta.days,
             "uuid": blob.uuid,
-            "doctype": blob.doctype.title(),
+            "doctype": blob.doctype,
         }
 
         if blob.content:
