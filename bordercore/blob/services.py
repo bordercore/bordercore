@@ -73,7 +73,14 @@ def get_recent_blobs(user, limit=10):
 
     for match in results["hits"]["hits"]:
 
-        blob = next(x for x in blob_list if str(x.uuid) == match["_source"]["uuid"])
+        try:
+            blob = next(x for x in blob_list if str(x.uuid) == match["_source"]["uuid"])
+        except StopIteration:
+            # Handle a race condition in which a blob has just been deleted by the user
+            #  but the corresponding document in Elasticsearch is still in the
+            #  process of being removed.
+            continue
+
         delta = timezone.now() - blob.modified
 
         props = {
