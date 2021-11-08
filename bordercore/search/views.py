@@ -36,12 +36,12 @@ def get_creators(matches):
     return ", ".join(creators)
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class SearchListView(ListView):
 
-    template_name = 'search/search.html'
-    context_object_name = 'search_results'
-    RESULT_COUNT_PER_PAGE = 100
+    template_name = "search/search.html"
+    context_object_name = "search_results"
+    RESULT_COUNT_PER_PAGE = 10
 
     def get_paginator(self, page, object_list):
 
@@ -59,17 +59,6 @@ class SearchListView(ListView):
 
         return paginator
 
-    def get_hit_count(self):
-
-        hit_count = self.request.GET.get("rows", None)
-
-        if hit_count == "No limit":
-            hit_count = 1000000
-        elif hit_count is None:
-            hit_count = self.RESULT_COUNT_PER_PAGE
-
-        return hit_count
-
     def get_aggregations(self, context, aggregation):
 
         aggregations = []
@@ -84,14 +73,16 @@ class SearchListView(ListView):
 
         search_term = self.request.GET.get("search", None)
         sort_field = self.request.GET.get("sort", "date_unixtime")
-        hit_count = self.get_hit_count()
         boolean_type = self.request.GET.get("boolean_search_type", "AND")
         doctype = self.request.GET.get("doctype", None)
 
         es = Elasticsearch(
             [settings.ELASTICSEARCH_ENDPOINT],
-            verify_certs=False
+            verify_certs=False,
+            timeout=30
         )
+
+        offset = (int(self.request.GET.get("page", 1)) - 1) * self.RESULT_COUNT_PER_PAGE
 
         search_object = {
             "query": {
@@ -131,7 +122,8 @@ class SearchListView(ListView):
                 "order": "score"
             },
             "sort": {sort_field: {"order": "desc"}},
-            "from": 0, "size": hit_count,
+            "from": offset,
+            "size": self.RESULT_COUNT_PER_PAGE,
             "_source": ["artist",
                         "author",
                         "bordercore_id",
@@ -166,7 +158,18 @@ class SearchListView(ListView):
                     "multi_match": {
                         "type": "phrase" if self.request.GET.get("exact_match", None) in ["Yes"] else "best_fields",
                         "query": search_term,
-                        "fields": ["answer", "metadata.artist", "metadata.author", "attachment.content", "contents", "name", "question", "sha1sum", "title", "uuid"],
+                        "fields": [
+                            "answer",
+                            "metadata.artist",
+                            "metadata.author",
+                            "attachment.content",
+                            "contents",
+                            "name",
+                            "question",
+                            "sha1sum",
+                            "title",
+                            "uuid"
+                        ],
                         "operator": boolean_type,
                     }
                 }
@@ -222,6 +225,9 @@ class SearchListView(ListView):
                     match["json"] = json.dumps(match["source"])
             context["aggregations"] = self.get_aggregations(context, "Doctype Filter")
 
+            page = int(self.request.GET.get("page", 1))
+            context["paginator"] = json.dumps(self.get_paginator(page, context["search_results"]))
+
         context["title"] = "Search"
         return context
 
@@ -264,7 +270,7 @@ class NoteListView(SearchListView):
         context = super().get_context_data(**kwargs)
 
         page = int(self.request.GET.get("page", 1))
-        context["paginator"] = self.get_paginator(page, context["search_results"])
+        context["paginator"] = json.dumps(self.get_paginator(page, context["search_results"]))
 
         if "search" not in self.request.GET:
             context["pinned_notes"] = self.request.user.userprofile.pinned_notes.all().only("name", "uuid").order_by("sortorderusernote__sort_order")
@@ -276,13 +282,12 @@ class NoteListView(SearchListView):
 class SearchTagDetailView(ListView):
 
     template_name = "search/tag_detail.html"
-    RESULT_COUNT_PER_PAGE = 100
+    RESULT_COUNT_PER_PAGE = 10
     context_object_name = "search_results"
 
     def get_queryset(self):
 
         taglist = self.kwargs.get("taglist", "").split(",")
-        hit_count = 1000
 
         es = Elasticsearch(
             [settings.ELASTICSEARCH_ENDPOINT],
@@ -339,7 +344,8 @@ class SearchTagDetailView(ListView):
                 {"importance": {"order": "desc"}},
                 {"last_modified": {"order": "desc"}}
             ],
-            "from": 0, "size": hit_count,
+            "from": 0,
+            "size": self.RESULT_COUNT_PER_PAGE,
             "_source": ["artist",
                         "author",
                         "content_type",
