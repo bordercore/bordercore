@@ -184,3 +184,7 @@ window.IconButton = IconButton;
 
 import PerfectScrollbar from "perfect-scrollbar";
 window.PerfectScrollbar = PerfectScrollbar;
+
+import Pagination from "./vue/common/Pagination.vue";
+Vue.component("Pagination", Pagination);
+window.Pagination = Pagination;

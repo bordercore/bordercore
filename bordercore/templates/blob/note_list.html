@@ -92,7 +92,7 @@
 
                             <div>
                                 <div class="position-relative">
-    <div :class="{ 'note-content-truncated': !isSearchResult }" class="mt-3" v-html="getContent(note.contents)" ref="note">
+                                    <div :class="{ 'note-content-truncated': !isSearchResult }" class="mt-3" v-html="getContent(note.contents)" ref="note">
                                     </div>
                                 </div>
                                 <div class="text-center" ref="expander">
@@ -119,27 +119,20 @@
             </div>
 
             <div v-else class="row">
+
                 <div class="col-lg-12 card-grid ml-4">
 
-                    {% if object_list and paginator.num_pages > 1 %}
-                        <nav class="mb-5 navigation">
-                            <ul class="pagination justify-content-center">
-                                <li class="page-item{% if not paginator.has_previous %} disabled{% endif %}">
-                                    <a class="page-link" href="?page={{ paginator.previous_page_number }}&tagsearch={{ request.GET.tagsearch }}">Previous</a>
-                                </li>
-                                <li class="page-item disabled">
-                                    <span class="page-link">
-                                        Page <strong>{{ paginator.number }}</strong> of <strong>{{ paginator.num_pages }}</strong>
-                                    </span>
-                                </li>
-                                <li class="page-item{% if not paginator.has_next %} disabled{% endif %}">
-                                    <a class="page-link" href="?page={{ paginator.next_page_number }}&tagsearch={{ request.GET.tagsearch }}">Next</a>
-                                </li>
-                            </ul>
-                        </nav>
-                    {% endif %}
+                    <pagination
+                        :paginator="paginator"
+                        :num-objects="$store.state.notes.length"
+                        {% if request.GET.tagsearch %}
+                            search-args="&tagsearch={{ request.GET.tagsearch }}"
+                        {% endif %}
+                    >
+                    </pagination>
 
                 </div>
+
             </div>
 
         </div>
@@ -261,8 +254,12 @@
             el: "#right-panel",
             name: "Right Content Panel",
             store,
+            components: {
+                Pagination
+            },
             data() {
                 return {
+                    paginator: JSON.parse("{{ paginator|escapejs }}"),
                     isSearchResult: {% if request.GET.search %}true{% else %}false{% endif %}
                 }
             },
