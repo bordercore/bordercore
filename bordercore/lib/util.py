@@ -78,21 +78,34 @@ def is_video(file):
     return False
 
 
-def get_pagination_range(current_page_num, num_pages, paginate_by):
+def get_pagination_range(page_number, num_pages, paginate_by):
     """
     Get a range of pages based on the current page and the maximum number
     of pages, used for a navigation UI.
+
+    page_number: the current page number
+    num_pages: the total number of pages in the result set
+    paginate_by: the number of navigation pages to display before
+                 and after the current page
     """
 
-    max_pagination_range = 5
+    # The maximum range is twice the "paginate_by" value plus 1, the current page.
+    # If this exceeds the total number of pages, use that instead.
+    max_range = min(num_pages, paginate_by * 2 + 1)
 
-    x = range(current_page_num - paginate_by, current_page_num + paginate_by + 1)
+    # Try to create a range that extends below and above the current
+    #  page by "paginate_by" number of pages.
+    x = range(page_number - paginate_by, page_number + paginate_by + 1)
 
     if x[0] <= 0:
-        x = range(1, min(max_pagination_range, num_pages) + 1)
+        # If the lower bound is below zero, create a new range that begins at one
+        # and extends out to max_range or the number of pages, whichever is smaller.
+        x = range(1, min(max_range, num_pages) + 1)
 
     if x[-1] - (paginate_by - 1) >= num_pages:
-        x = range(x[0] - paginate_by, max(max_pagination_range, num_pages) + 1)
+        # If the upper bound exceeds the number of pages, create a new range that
+        # extends out to max_range or the number of pages, whichever is larger.
+        x = range(max(1, x[0] - paginate_by), max(max_range, num_pages + 1))
 
     return list(x)
 

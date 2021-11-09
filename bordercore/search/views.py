@@ -14,7 +14,7 @@ from django.views.generic.list import ListView
 
 from blob.models import Blob
 from lib.time_utils import get_date_from_pattern, get_relative_date
-from lib.util import truncate
+from lib.util import get_pagination_range, truncate
 from tag.models import Tag
 from tag.services import get_tag_aliases, get_tag_link
 
@@ -43,12 +43,23 @@ class SearchListView(ListView):
     context_object_name = "search_results"
     RESULT_COUNT_PER_PAGE = 10
 
-    def get_paginator(self, page, object_list):
+    def get_paginator(self, page, num_results):
+
+        if num_results == 0:
+            return {}
+
+        num_pages = int(math.ceil(num_results / self.RESULT_COUNT_PER_PAGE))
+        paginate_by = 2
 
         paginator = {
-            "number": page,
-            "num_pages": int(math.ceil(object_list["hits"]["total"]["value"] / self.RESULT_COUNT_PER_PAGE)),
-            "total_results": object_list["hits"]["total"]["value"]
+            "page_number": page,
+            "num_pages": num_pages,
+            "total_results": num_results,
+            "range": get_pagination_range(
+                page,
+                num_pages,
+                paginate_by
+            )
         }
 
         paginator["has_previous"] = page != 1
@@ -226,7 +237,10 @@ class SearchListView(ListView):
             context["aggregations"] = self.get_aggregations(context, "Doctype Filter")
 
             page = int(self.request.GET.get("page", 1))
-            context["paginator"] = json.dumps(self.get_paginator(page, context["search_results"]))
+
+            context["paginator"] = json.dumps(
+                self.get_paginator(page, context["search_results"]["hits"]["total"]["value"])
+            )
 
         context["title"] = "Search"
         return context
@@ -270,7 +284,9 @@ class NoteListView(SearchListView):
         context = super().get_context_data(**kwargs)
 
         page = int(self.request.GET.get("page", 1))
-        context["paginator"] = json.dumps(self.get_paginator(page, context["search_results"]))
+        context["paginator"] = json.dumps(
+            self.get_paginator(page, context["search_results"]["hits"]["total"]["value"])
+        )
 
         if "search" not in self.request.GET:
             context["pinned_notes"] = self.request.user.userprofile.pinned_notes.all().only("name", "uuid").order_by("sortorderusernote__sort_order")

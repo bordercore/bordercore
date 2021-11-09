@@ -216,3 +216,15 @@ def test_get_pagination_range():
 
     x = get_pagination_range(60, 60, 2)
     assert x == [56, 57, 58, 59, 60]
+
+    x = get_pagination_range(4, 4, 2)
+    assert x == [1, 2, 3, 4]
+
+    x = get_pagination_range(1, 4, 2)
+    assert x == [1, 2, 3, 4]
+
+    x = get_pagination_range(1, 3, 2)
+    assert x == [1, 2, 3]
+
+    x = get_pagination_range(3, 3, 2)
+    assert x == [1, 2, 3]

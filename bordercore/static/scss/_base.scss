@@ -233,6 +233,21 @@ a.tag {
   }
 }
 
+.pagination {
+  box-shadow: #92bde8 0px 2px 4px 0px;
+}
+
+.pagination-divider {
+  display: flex;
+  width: 0.1rem;
+  align-items: center;
+  background-color: $pagination-bg;
+
+  div {
+    background-color: #443fa2;
+  }
+}
+
 .scrollable-panel-container {
   height: 92vh;
 }

@@ -266,18 +266,13 @@
 
                         </ul>
 
-                        <div class="row">
+                        <div class="d-flex justify-content-center">
 
-                            <div class="col-lg-12 card-grid ml-4">
-
-                                <pagination
-                                    :paginator="JSON.parse('{{ paginator|escapejs }}')"
-                                    :num-objects={{ search_results.hits.total.value }}
-                                    :search-args="getSearchArgs()"
-                                >
-                                </pagination>
-
-                            </div>
+                            <pagination
+                                :paginator="JSON.parse('{{ paginator|escapejs }}')"
+                                :num-objects={{ search_results.hits.total.value }}
+                            >
+                            </pagination>
 
                         </div>
 
@@ -335,15 +330,6 @@
         new Vue({
             el: "#search",
             methods: {
-                getSearchArgs() {
-                    let urlSearchParams = new URLSearchParams(window.location.search);
-
-                    // The Pagination Vue component will add the "page" searcharg, so we
-                    //  need to delete it first.
-                    urlSearchParams.delete("page");
-
-                    return "&" + urlSearchParams;
-                },
                 select(tag) {
 
                     if (tag.doctype == "Tag") {

@@ -148,44 +148,48 @@
                     </div>
                 </bookmark-list>
 
-                <pagination class="ml-3" inline-template :pagination="pagination" @get-page="getPage" v-cloak>
-                    <div class="row" v-if="pagination.num_pages > 1">
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination">
-                                <li v-if="pagination.previous_page_number" class="page-item"><a class="page-link" @click.prevent="$emit('get-page', pagination.previous_page_number)" href="">Previous</a></li>
-                                <li v-else class="disabled page-item"><a class="page-link" href="">Previous</a></li>
+                <div class="d-flex justify-content-center">
 
-                                <template v-if="pagination.page_number - pagination.paginate_by > 1">
-                                    <li class="page-item"><a class="page-link" @click.prevent="$emit('get-page', 1)" href="">1</a></li>
-                                    <li v-if="pagination.page_number != pagination.paginate_by + 2" class="disabled page-item"><a class="page-link" href="">...</a></li>
-                                </template>
+                    <pagination class="ml-3 mt-3" inline-template :pagination="pagination" @get-page="getPage" v-cloak>
+                        <div class="row" v-if="pagination.num_pages > 1">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination">
+                                    <li v-if="pagination.previous_page_number" class="page-item"><a class="page-link" @click.prevent="$emit('get-page', pagination.previous_page_number)" href="">Previous</a></li>
+                                    <li v-else class="disabled page-item"><a class="page-link" href="">Previous</a></li>
 
-                                <template v-for="page in pagination.range">
-
-                                    <template v-if="pagination.page_number == page">
-                                        <li class="disabled page-item">
-                                            <a class="page-link" href="">[[ page ]]</a>
-                                        </li>
-                                    </template>
-                                    <template v-else>
-                                        <li class="page-item">
-                                            <a class="page-link" @click.prevent="$emit('get-page', page)" href="">[[ page ]]</a>
-                                        </li>
+                                    <template v-if="pagination.page_number - pagination.paginate_by > 1">
+                                        <li class="page-item"><a class="page-link" @click.prevent="$emit('get-page', 1)" href="">1</a></li>
+                                        <li v-if="pagination.page_number != pagination.paginate_by + 2" class="disabled page-item"><a class="page-link" href="">...</a></li>
                                     </template>
 
-                                </template>
+                                    <template v-for="page in pagination.range">
 
-                                <template v-if="pagination.num_pages - pagination.page_number > pagination.paginate_by">
-                                    <li v-if="pagination.num_pages - pagination.page_number != pagination.paginate_by + 1"  class="disabled page-item"><a class="page-link" href="">...</a></li>
-                                    <li class="page-item"><a class="page-link" @click.prevent="$emit('get-page', pagination.num_pages)" href="">[[ pagination.num_pages ]]</a></li>
-                                </template>
+                                        <template v-if="pagination.page_number == page">
+                                            <li class="disabled page-item">
+                                                <a class="page-link" href="">[[ page ]]</a>
+                                            </li>
+                                        </template>
+                                        <template v-else>
+                                            <li class="page-item">
+                                                <a class="page-link" @click.prevent="$emit('get-page', page)" href="">[[ page ]]</a>
+                                            </li>
+                                        </template>
 
-                                <li v-if="pagination.next_page_number" class="page-item"><a class="page-link" @click.prevent="$emit('get-page', pagination.next_page_number)" href="">Next</a></li>
-                                <li v-else class="disabled page-item"><a class="page-link" href="">Next</a></li>
-                            </ul>
-                        </nav>
-                    </div>
-                </pagination>
+                                    </template>
+
+                                    <template v-if="pagination.num_pages - pagination.page_number > pagination.paginate_by">
+                                        <li v-if="pagination.num_pages - pagination.page_number != pagination.paginate_by + 1"  class="disabled page-item"><a class="page-link" href="">...</a></li>
+                                        <li class="page-item"><a class="page-link" @click.prevent="$emit('get-page', pagination.num_pages)" href="">[[ pagination.num_pages ]]</a></li>
+                                    </template>
+
+                                    <li v-if="pagination.next_page_number" class="page-item"><a class="page-link" @click.prevent="$emit('get-page', pagination.next_page_number)" href="">Next</a></li>
+                                    <li v-else class="disabled page-item"><a class="page-link" href="">Next</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </pagination>
+
+                </div>
 
             </div>
 
