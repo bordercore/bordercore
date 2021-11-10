@@ -122,7 +122,7 @@ span {
 }
 
 .selected, {
-  background-color: $selected-background-color;
+  background-color: $selected-bg;
   color: $white;
 }
 
@@ -153,7 +153,7 @@ span {
 
 .highlight-box {
   padding: 1em;
-  background: lighten($background-color-dark, 5%);
+  background: lighten($bg-dark, 5%);
   border-radius: 0.7rem;
   box-shadow: 1px 1px 5px #4b00ff, -1px -1px 5px #4b00ff;
 }
@@ -322,7 +322,7 @@ a.tag {
   border-radius: 0.25rem;
 
   &:hover {
-    background-color: $button-plus-hover-background-color;
+    background-color: $button-plus-hover-bg;
   }
 }
 
@@ -333,7 +333,7 @@ a.tag {
   left: 0;
   width: 100%;
   height: 4em;
-  background-image: linear-gradient(to bottom, rgba($background-color-dark, 0), rgba($background-color-dark, 1) 90%);
+  background-image: linear-gradient(to bottom, rgba($bg-dark, 0), rgba($bg-dark, 1) 90%);
   content: "";
   pointer-events: none;
 }
@@ -352,7 +352,7 @@ input.form-control,
 select.form-control,
 textarea.form-control,
 div.CodeMirror {
-  background-color: $form-background-color;
+  background-color: $form-bg;
   color: $form-color;
 
   &:hover {
@@ -361,12 +361,12 @@ div.CodeMirror {
 
   &:focus {
     border-color: $form-border-color-hover;
-    background-color: $form-background-color-focus;
+    background-color: $form-bg-focus;
     color: $form-color;
   }
 
   &:disabled {
-    background-color: $form-background-color-disabled;
+    background-color: $form-bg-disabled;
   }
 }
 
@@ -401,7 +401,7 @@ div.CodeMirror {
 .dropdown-menu.show {
   border: 1px solid $gray-900;
   margin-top: -0.1rem;
-  background-color: $dropdown-menu-background-color;
+  background-color: $dropdown-menu-bg;
   box-shadow: 0 0.25rem 1.5rem rgba(0, 0, 0, 0.24);
   color: $dropdown-menu-color;
 }
@@ -410,7 +410,7 @@ div.CodeMirror {
   color: $white;
 
   &:hover {
-    background-color: $text-selection-background-color;
+    background-color: $text-selection-bg;
     color: $white;
   }
 }
@@ -583,7 +583,7 @@ table.b-table th {
 
 // Selected row
 .table-custom {
-  background-color: $selected-background-color !important;
+  background-color: $selected-bg !important;
   color: $white !important;
 }
 
@@ -650,7 +650,7 @@ body .table.b-table > thead > tr > [aria-sort=descending] {
 
 .breadcrumb {
   padding-left: 1rem + 1.25rem;
-  background-color: $background-color-light;
+  background-color: $bg-light;
 }
 
 $nav-tabs-link-active-border-color: 0 0 $nav-highlight-color;
@@ -661,7 +661,7 @@ $nav-tabs-link-hover-border-color: $nav-border-color;
   border-bottom: 2px solid $nav-border-color;
 
   .nav-link {
-    border-bottom: 2px solid $background-color-light;
+    border-bottom: 2px solid $bg-light;
     color: $nav-not-selected-color;
 
     @include hover-focus() {
@@ -680,7 +680,7 @@ $nav-tabs-link-hover-border-color: $nav-border-color;
 .card-body {
   @extend .card-box-shadow;
   margin: 0 0 1rem 1rem;
-  background-color: $background-color-dark;
+  background-color: $bg-dark;
   border-radius: 0.4rem;
 
   .side-panel {
@@ -693,7 +693,7 @@ $nav-tabs-link-hover-border-color: $nav-border-color;
 }
 
 .modal-content {
-  background-color: $modal-background-color;
+  background-color: $modal-bg;
 }
 
 // Forms
@@ -730,7 +730,7 @@ blockquote > p {
   padding: 0.5rem 0 0.5rem 0.5rem;
   border-left: 0.25rem solid $markdown-blockquote-border-left;
   margin: 0.5rem;
-  background-color: $markdown-blockquote-background-color;
+  background-color: $markdown-blockquote-bg;
   white-space: pre-line;
 }
 
@@ -739,7 +739,7 @@ pre {
   padding-left: 0.8rem;
   border-top: 0.05rem solid $markdown-border-color;
   border-bottom: 0.05rem solid $markdown-border-color;
-  background: $markdown-background-color;
+  background: $markdown-bg;
 }
 
 // Inline code. Exclude code in pre blocks, since
@@ -747,7 +747,7 @@ pre {
 
 *:not(pre) > code {
   padding: 0.25rem 0.5rem 0.25rem 0.5rem;
-  background-color: $markdown-code-background-color;
+  background-color: $markdown-code-bg;
   color: $markdown-code-color;
 }
 
@@ -765,7 +765,7 @@ pre {
 #top-search {
   @extend .card-box-shadow;
   margin: $grid-margin $grid-margin $grid-margin $grid-margin;
-  background-color: $background-color-dark;
+  background-color: $bg-dark;
   border-radius: 0.4rem;
 }
 
@@ -784,7 +784,7 @@ pre {
   width: 25rem;
   padding-left: 2rem;
   border-color: #66cc75;
-  background-color: $form-background-color;
+  background-color: $form-bg;
   box-shadow: 0 0 0.3rem rgba(109, 207, 246, 0.5);
   color: $form-color;
   cursor: auto;
@@ -833,7 +833,7 @@ pre {
   // Note that we can't simply use ".suggest-item.hover", since a similar
   //   selector defined by vue-simple-suggest overrides it via a !important flag
   .vue-simple-suggest.designed .suggestions .suggest-item.hover {
-    background-color: $selected-background-color !important;
+    background-color: $selected-bg !important;
   }
 
   // Set the padding to zero so that we can programmatically control the background color lower down
@@ -944,7 +944,7 @@ pre {
   border-bottom: 0.1rem solid $blue;
 
   &:hover {
-    background-color: lighten($body-background, 5%);
+    background-color: lighten($body-bg, 5%);
   }
 
   h4 {
@@ -1198,7 +1198,7 @@ h2#name {
   }
 
   &:hover {
-    background-color: $background-color-light;
+    background-color: $bg-light;
     cursor: pointer;
   }
 }
@@ -1274,7 +1274,7 @@ h2#name {
 
 // The element you've chosen to drag
 .sortable-chosen {
-  background-color: $background-color-dark !important;
+  background-color: $bg-dark !important;
 }
 
 // Disable the ghosting effect
@@ -1284,7 +1284,7 @@ h2#name {
 
 // The element you're dragging
 .sortable-drag {
-  background: $background-color-dark !important;
+  background: $bg-dark !important;
 }
 
 //
@@ -1434,13 +1434,13 @@ audio {
 }
 
 div.CodeMirror-focused {
-  background-color: $form-background-color-focus;
+  background-color: $form-bg-focus;
   caret-color: $form-color;
   color: $form-color;
 }
 
 .CodeMirror-selected {
-  background: $text-selection-background-color !important;
+  background: $text-selection-bg !important;
 }
 
 // Styles for vue-simple-suggest VUE typeahead component
@@ -1480,7 +1480,7 @@ div.CodeMirror-focused {
 }
 
 .vue-simple-suggest.designed .suggestions .suggest-item {
-  background-color: $vue-simple-suggest-item-background-color;
+  background-color: $vue-simple-suggest-item-bg;
   cursor: pointer;
   user-select: none;
 }
@@ -1522,7 +1522,7 @@ div.CodeMirror-focused {
   }
 
   .ti-autocomplete {
-    background: $background-color-dark !important;
+    background: $bg-dark !important;
     color: #6ea6e0;
   }
 
@@ -1540,7 +1540,7 @@ div.CodeMirror-focused {
     // Mimic Bootstrap's default focus behavior
     border-color: #7fe7c4 !important;
 
-    background-color: $background-color-dark !important;
+    background-color: $bg-dark !important;
     box-shadow: 0 0 0 0.2rem rgba($primary, 0.25);
     color: #6ea6e0 !important;
   }
