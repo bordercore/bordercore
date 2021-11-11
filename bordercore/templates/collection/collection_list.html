@@ -24,7 +24,7 @@
                     <div v-for="collection in items" class="collection-container text-center hoverable p-3" @click="onClickCollection(collection.url)">
                         <div class="position-relative collection mx-auto">
                             <img :src="collection.cover_url" />
-                            <div class="collection-cover-container position-absolute" v-html="getBlobCount(collection.objectcount)">
+                            <div class="collection-cover-container position-absolute" v-html="getBlobCount(collection.num_blobs)">
                             </div>
                         </div>
                         <div class="text-truncate">
@@ -113,9 +113,8 @@
                             "name": "{{ collection.name }}",
                             "url": "{% url 'collection:detail' collection.uuid %}",
                             "tags": "{{ collection.tags }}",
-                            "updated": "{{ collection.updated }}",
-                            "objectcount": {{ collection.objectcount }},
-                            "cover_url": "{{ collection.cover_url.0|safe }}",
+                            "num_blobs": {{ collection.num_blobs }},
+                            "cover_url": "{{ cover_url }}collections/{{ collection.uuid }}.jpg",
                             "uuid": "{{ collection.uuid }}"
                         },
                         {% endfor %}

@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.utils.dateformat import format
@@ -15,7 +16,6 @@ from django.views.generic.edit import (CreateView, DeleteView, FormMixin,
                                        UpdateView)
 from django.views.generic.list import ListView
 
-from blob.models import Blob
 from collection.forms import CollectionForm
 from collection.models import Collection, SortOrderCollectionBlob
 from lib.mixins import FormRequestMixin
@@ -27,17 +27,20 @@ class CollectionListView(FormRequestMixin, FormMixin, ListView):
     form_class = CollectionForm
 
     def get_queryset(self):
-        return Collection.objects.filter(user=self.request.user). \
-            filter(is_private=False).order_by("-modified")
+
+        query = Collection.objects.filter(user=self.request.user). \
+            filter(is_private=False)
+
+        query = query.annotate(num_blobs=Count("blobs"))
+
+        query = query.order_by("-modified")
+
+        return query
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        for collection in context["object_list"]:
-            collection.updated = format(collection.modified, "Y-m-d")
-            collection.objectcount = collection.blobs.count()
-            collection.cover_url = f"{settings.COVER_URL}collections/{collection.uuid}.jpg",
-
+        context["cover_url"] = settings.COVER_URL
         context["title"] = "Collection List"
 
         return context
