@@ -9,7 +9,6 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
-from django.utils.dateformat import format
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import (CreateView, DeleteView, FormMixin,
@@ -30,6 +29,9 @@ class CollectionListView(FormRequestMixin, FormMixin, ListView):
 
         query = Collection.objects.filter(user=self.request.user). \
             filter(is_private=False)
+
+        if "query" in self.request.GET:
+            query = query.filter(name__icontains=self.request.GET.get("query"))
 
         query = query.annotate(num_blobs=Count("blobs"))
 
@@ -205,6 +207,39 @@ def get_images(request, collection_uuid):
                 "filename": x["file"]
             }
             for x in blob_list
+        ],
+        safe=False
+    )
+
+
+@login_required
+def search(request):
+
+    query = Collection.objects.filter(user=request.user). \
+        filter(is_private=False)
+
+    if "query" in request.GET:
+        query = query.filter(name__icontains=request.GET.get("query"))
+
+    if "blob_uuid" in request.GET:
+        query = query.filter(blobs__uuid__in=[request.GET.get("blob_uuid")])
+
+    if "exclude_blob_uuid" in request.GET:
+        query = query.exclude(blobs__uuid__in=[request.GET.get("exclude_blob_uuid")])
+
+    query = query.annotate(num_blobs=Count("blobs"))
+
+    collection_list = query.order_by("-modified")
+
+    return JsonResponse(
+        [
+            {
+                "name": x.name,
+                "uuid": x.uuid,
+                "num_blobs": x.num_blobs,
+                "url": reverse("collection:detail", kwargs={"collection_uuid": x.uuid})
+            }
+            for x in collection_list
         ],
         safe=False
     )

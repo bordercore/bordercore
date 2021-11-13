@@ -97,3 +97,37 @@ def test_delete_collection(auto_login_user, collection):
     resp = client.delete(url)
 
     assert resp.status_code == 204
+
+
+def test_search(auto_login_user, collection, blob_image_factory, blob_pdf_factory):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("collection:search")
+    resp = client.get(f"{url}?query=Display")
+
+    assert resp.status_code == 200
+
+    payload = resp.json()
+
+    assert len(payload) == 1
+
+    assert payload[0]["name"] == collection[1].name
+    assert payload[0]["num_blobs"] == 1
+
+
+def test_collection_blob_list(auto_login_user, collection, blob_image_factory, blob_pdf_factory):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("collection:get_blob_list", kwargs={"collection_uuid": collection[0].uuid})
+    resp = client.get(f"{url}?query=Display")
+
+    assert resp.status_code == 200
+
+    payload = resp.json()
+
+    assert len(payload) == 2
+
+    assert blob_image_factory.name in [x["name"] for x in payload]
+    assert blob_pdf_factory.name in [x["name"] for x in payload]

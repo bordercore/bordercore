@@ -829,10 +829,16 @@ pre {
   background-color: $gray-900;
 }
 
+.suggestion-item-disabled {
+  cursor: not-allowed;
+}
+
 .search-with-doctypes {
   // Note that we can't simply use ".suggest-item.hover", since a similar
-  //   selector defined by vue-simple-suggest overrides it via a !important flag
-  .vue-simple-suggest.designed .suggestions .suggest-item.hover {
+  //  selector defined by vue-simple-suggest overrides it via a !important flag
+  //  Also, don't use this selector if the selection is disabled, indicated by
+  //  the presence of a ".suggestion-item-disabled" class.
+  .vue-simple-suggest.designed .suggestions .suggest-item.hover .top-search-suggestion:not(.suggestion-item-disabled) {
     background-color: $selected-bg !important;
   }
 
@@ -1491,8 +1497,6 @@ div.CodeMirror-focused {
 }
 
 .vue-simple-suggest.designed .suggestions .suggest-item.hover {
-  background-color: #2874d5 !important;
-
   b {
     color: $vue-simple-suggest-item-hover-bold-color !important;
   }

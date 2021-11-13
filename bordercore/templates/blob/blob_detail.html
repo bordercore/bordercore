@@ -143,16 +143,15 @@
                         {% endfor %}
                     {% endif %}
 
-                    {% if collection_list %}
-                        <div class="row mt-3">
-                            <div class="col-lg-12">
-                                    In collection{% if collection_list|length > 1 %}s{% else %}{% endif %}:
-                                    {% for collection in collection_list %}
-                                        <a href="{% url 'collection:detail' collection.uuid %}">{{ collection.name }}{% if not forloop.last %}, {% endif %}</a>
-                                    {% endfor %}
-                            </div>
+                    <div v-if="$store.state.collectionList.length > 0" class="row mt-3">
+                        <div class="col-lg-12">
+                                In collections:
+
+                            <a v-for="(collection, index) in $store.state.collectionList" :href="collection.url">
+                                    [[ collection.name ]]<span v-if="index !== $store.state.collectionList.length - 1">, </span>
+                            </a>
                         </div>
-                    {% endif %}
+                    </div>
 
                     {% if blob.sha1sum %}
                         <a class="button-icon mt-3" href="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" role="button">
@@ -233,6 +232,7 @@
                                         <a class="dropdown-item" href="#" @click.prevent="handleCopySha1sum('{{ blob.sha1sum }}')">Copy Sha1sum</a>
                                         <a class="dropdown-item" href="{{ aws_url }}">S3 Link</a>
                                     {% endif %}
+                                    <a class="dropdown-item" href="#" @click.prevent="handleAddToCollection()">Add to Collection</a>
                                     <a class="dropdown-item" href="{% url 'blob:create' %}?linked_blob_uuid={{ blob.uuid }}">Link to New Blob</a>
                                     <a class="dropdown-item" href="{% url 'blob:clone' blob.uuid %}">Clone Blob</a>
                                     {% if blob.is_note %}
@@ -263,7 +263,17 @@
                 <blob-detail-cover
                     v-if="$store.state.elasticsearchInfo.sha1sum && $store.state.elasticsearchInfo.content_type !== 'Video'"
                     cover-url="{{ blob.get_cover_url }}?nodefault=1"
-                />
+                >
+                </blob-detail-cover>
+
+                <add-to-collection
+                    ref="addToCollection"
+                    blob-uuid="{{ blob.uuid }}"
+                    search-url="{% url 'collection:search' %}?exclude_blob_uuid={{ blob.uuid }}&query="
+                    collection-mutate-url="{% url 'blob:collection_mutate' %}"
+                    @add-to-collection="getCollectionList"
+                >
+                </add-to-collection>
 
             </div>
 
@@ -285,9 +295,20 @@
 
     <script type="text/javascript">
 
+        const EventBus = new Vue();
+
         const store = new Vuex.Store({
             state: {
                 elasticsearchInfo: {{ elasticsearch_info|safe|default:"{}" }},
+                collectionList: [
+                    {% for collection in collection_list %}
+                    {
+                        "uuid": "{{ collection.uuid }}",
+                        "name": "{{ collection.name }}",
+                        "url": "{% url 'collection:detail' collection.uuid %}"
+                    },
+                    {% endfor %}
+                ]
             },
             getters: {},
             mutations: {},
@@ -375,6 +396,7 @@
             name: "Right Content Panel",
             store,
             components: {
+                AddToCollection,
                 BlobDetailCover,
             },
             data() {
@@ -391,6 +413,20 @@
                         title: "Info",
                         variant: "primary"
                     })
+                },
+                handleAddToCollection() {
+                    $("#modalAddToCollection").modal("show");
+                    setTimeout( () => { this.$refs.addToCollection.$refs.simpleSuggest.$refs.suggestComponent.input.focus(); }, 500);
+                },
+                getCollectionList() {
+                    doGet(
+                        this,
+                        "{% url "collection:search" %}?blob_uuid={{ blob.uuid }}",
+                        (response) => {
+                            this.$store.state.collectionList = response.data;
+                        },
+                        "Error getting collection list"
+                    );
                 },
                 onClick(evt) {
                     payload = {
@@ -429,8 +465,28 @@
                     return this.isPinnedNote ? "Unpin note" : "Pin Note"
                 }
             },
+            mounted() {
+
+                let self = this;
+
+                window.addEventListener("keydown", function(e) {
+                    if (e.which === 67 && e.altKey) { /* Alt-C */
+                        self.handleAddToCollection();
+                    }
+                });
+
+            }
         });
 
     </script>
+
+{% endblock %}
+
+{% block help %}
+
+    <div class="d-none" id="help-text">
+# Keyboard Shortcuts
+- **Alt-C** *-* Add to collection
+    </div>
 
 {% endblock %}

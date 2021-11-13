@@ -180,6 +180,10 @@ import BlobDetailCover from "./vue/blob/BlobDetailCover.vue";
 Vue.component("BlobDetailCover", BlobDetailCover);
 window.BlobDetailCover = BlobDetailCover;
 
+import AddToCollection from "./vue/blob/AddToCollection.vue";
+Vue.component("AddToCollection", AddToCollection);
+window.AddToCollection = AddToCollection;
+
 import IconButton from "./vue/common/IconButton.vue";
 Vue.component("IconButton", IconButton);
 window.IconButton = IconButton;
