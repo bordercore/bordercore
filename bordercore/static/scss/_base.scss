@@ -348,6 +348,10 @@ button:focus {
   color: #000;
 }
 
+.toast {
+  @extend .card-box-shadow;
+}
+
 input.form-control,
 select.form-control,
 textarea.form-control,
