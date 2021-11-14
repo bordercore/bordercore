@@ -243,3 +243,12 @@ def search(request):
         ],
         safe=False
     )
+
+
+@login_required
+def get_blob_list(request, collection_uuid):
+
+    collection = Collection.objects.get(uuid=collection_uuid)
+    blob_list = collection.get_blob_list()
+
+    return JsonResponse(blob_list, safe=False)

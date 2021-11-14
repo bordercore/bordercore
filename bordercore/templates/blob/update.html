@@ -41,17 +41,6 @@
                         />
                     {% endif %}
 
-                    {% if object.get_collection_info %}
-                        <div class="form-group">
-                            <remove-from-collection-dropdown inline-template>
-                                <select class="form-control" @change="onChange">
-                                    <option>Remove from collection</option>
-                                    <option v-for="c in collection_list" :value="c.uuid">[[ c.name ]]</option>
-                                </select>
-                            </remove-from-collection-dropdown>
-                        </div>
-                    {% endif %}
-
                 {% endif %}
 
                 <div class="d-flex mt-2">
@@ -366,28 +355,6 @@
             mutations: {},
         });
 
-        {% if object and object.get_collection_info %}
-        const RemoveFromCollectionDropdown = {
-            data() {
-                return {
-                    collection_list: [
-                        {% for collection in object.get_collection_info %}
-                        {
-                            uuid: "{{ collection.uuid }}",
-                            name: "{{ collection.name }}"
-                        },
-                        {% endfor %}
-                    ]
-                }
-            },
-            methods: {
-                onChange(evt) {
-                    this.$parent.mutateCollection(this.$el.value, "delete");
-                }
-            }
-        }
-        {% endif %}
-
         const CleanupFilenameButton = {
             methods: {
                 async onClick(evt) {
@@ -564,9 +531,6 @@
         new Vue({
             el: "#vue-app-left",
             components: {
-                {% if object and object.get_collection_info %}
-                RemoveFromCollectionDropdown,
-                {% endif %}
                 CleanupFilenameButton,
                 UpperCaseFirstButton
             },

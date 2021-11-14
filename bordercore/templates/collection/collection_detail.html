@@ -77,12 +77,22 @@
                                 <div>
                                     <ul class="list-group list-group-horizontal text-center list-unstyled collection-sortable">
                                         <draggable v-model="blob_list" @change="onChange" ghost-class="collection_ghost_class" animation="500" forceFallback="true">
-                                            <li v-for="blob in blob_list" :key="blob.id" class="hoverable cursor-pointer float-left p-3" @click="onClick(blob.url)">
-                                                <a :href="[[ blob.url ]]"><img :src="[[ blob.cover_url ]]" /></a>
+                                            <li v-for="blob in blob_list" :key="blob.id" class="collection-item hoverable cursor-pointer float-left p-3">
+                                                <button type="button" class="collection-item-delete close" data-dismiss="modal" aria-label="Close" @click="removeBlob(blob.uuid)">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                                <div class="d-flex flex-column h-100" @click="onClick(blob.url)">
+                                                    <a :href="[[ blob.url ]]">
+                                                        <img :src="[[ blob.cover_url ]]" />
+                                                    </a>
 
-                                                <div class="collection-item">[[ blob.name ]]</div>
+                                                    <div class="collection-item-name mt-auto">
+                                                    [[ blob.name ]]
+                                                    </div>
 
-                                                <img v-if="blob.collection_note !== ''" src="{{ STATIC_URL }}img/note.png" height="16" width="16" data-toggle="popover" :data-content="blob.collection_note"/>
+                                                    <img v-if="blob.collection_note" src="{{ STATIC_URL }}img/note.png" height="16" width="16" data-toggle="popover" :data-content="blob.collection_note"/>
+
+                                                </div>
 
                                             </li>
                                         </draggable>
@@ -301,6 +311,34 @@
                 onClick(url) {
                     window.location=url;
                 },
+                removeBlob(uuid) {
+
+                    doPost(
+                        this,
+                        "{% url "blob:collection_mutate" %}",
+                        {
+                            "blob_uuid": uuid,
+                            "collection_uuid": "{{ collection.uuid }}",
+                            "mutation": "delete"
+                        },
+                        (response) => {
+                            this.getBlobList();
+                        },
+                        "Blob removed from collection",
+                        ""
+                    );
+
+                },
+                getBlobList() {
+                    doGet(
+                        this,
+                        "{% url 'collection:get_blob_list' collection.uuid %}",
+                        (response) => {
+                            this.blob_list = response.data;
+                        },
+                        "Error getting blob list"
+                    );
+                }
             },
             mounted() {
                 document.getElementById("id_name").value = "{{ collection.name }}";

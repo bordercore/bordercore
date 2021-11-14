@@ -45,4 +45,9 @@ urlpatterns = [
         view=views.search,
         name="search"
     ),
+    path(
+        route="get_blob_list/<uuid:collection_uuid>/",
+        view=views.get_blob_list,
+        name="get_blob_list"
+    ),
 ]

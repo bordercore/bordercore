@@ -1398,10 +1398,26 @@ h2#name {
 }
 
 .collection-item {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  position: relative;
+
+  .collection-item-name {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+  .collection-item-delete {
+    position: absolute;
+    top: 0.35rem;
+    right: 0.35rem;
+    display: none;
+  }
+
+  &:hover {
+    .collection-item-delete {
+      display: block;
+    }
+  }
 }
 
 .collection-sortable li {
