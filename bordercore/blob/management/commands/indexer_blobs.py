@@ -41,8 +41,9 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--force",
-            help="Force indexing even if the blob exists in Elasticsearch",
-            action="store_true"
+            help="Force indexing even if the blob already exists in Elasticsearch",
+            action="store_true",
+            default=False
         )
         parser.add_argument(
             "--limit",
@@ -108,11 +109,11 @@ class Command(BaseCommand):
 
         return blobs
 
-    def find_missing_blobs(self, create_connection, limit):
+    def find_missing_blobs(self, force, create_connection, limit):
 
-        self.stdout.write("Getting blob list from Elasticsearch...")
-
-        blobs_in_es = self.get_blobs_from_es()
+        if not force:
+            self.stdout.write("Getting blob list from Elasticsearch...")
+            blobs_in_es = self.get_blobs_from_es()
 
         self.stdout.write("Getting blob list from the database...")
 
@@ -122,11 +123,12 @@ class Command(BaseCommand):
 
         blobs_indexed = 0
 
-        self.stdout.write("Getting missing blob list...")
-
-        missing_blobs = [x for x in blobs_in_db if str(x["uuid"]) not in blobs_in_es]
-
-        self.stdout.write(f"Found {len(missing_blobs)} missing blobs...")
+        if force:
+            missing_blobs = blobs_in_db
+        else:
+            self.stdout.write("Getting missing blob list...")
+            missing_blobs = [x for x in blobs_in_db if str(x["uuid"]) not in blobs_in_es]
+            self.stdout.write(f"Found {len(missing_blobs)} missing blobs...")
 
         for blob in missing_blobs:
             self.stdout.write(f"{blob['uuid']} {blob['name']}")
@@ -142,4 +144,4 @@ class Command(BaseCommand):
             blob = Blob.objects.get(uuid=uuid)
             index_blob(uuid=blob.uuid, create_connection=create_connection)
         else:
-            self.find_missing_blobs(create_connection, limit)
+            self.find_missing_blobs(force, create_connection, limit)
