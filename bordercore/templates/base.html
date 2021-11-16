@@ -45,7 +45,7 @@
                         <div id="top-search" class="row">
 
                             <div class="col-lg-5 card-grid my-auto" id="top-title">
-                                Bordercore :: {% block title %} {% endblock %}
+                                <span v-if="$store.state.collapsed">Bordercore :: </span>{% block title %} {% endblock %}
                             </div>
 
                             <div class="col-lg-7 my-auto d-flex justify-content-end">
@@ -114,7 +114,7 @@
         </div>
 
         <div id="sidebar">
-            <sidebar-menu @toggle-collapse="onToggleCollapse" @item-click="onItemClick" :menu="menu" :collapsed="collapsed" ref="sidebar" />
+            <sidebar-menu @toggle-collapse="onToggleCollapse" @item-click="onItemClick" :menu="menu" :collapsed="$store.state.collapsed" ref="sidebar" />
             <span slot="toggle-icon">
                 <font-awesome-icon icon="arrows-alt-h"></font-awesome-icon>
             </span>
@@ -155,6 +155,23 @@
 
                 Vue.mixin({ delimiters: ["[[", "]]"] });
 
+                const mapGetters = Vuex.mapGetters;
+
+                // Use the name 'storeBase' to avoid conflict with stores in child templates
+                const storeBase = new Vuex.Store({
+                    state: {
+                        collapsed: {% if request.session.show_sidebar == "false" %}true{% else %}false{% endif %},
+                    },
+                    getters: {},
+                    mutations: {
+                        collapsed (state, payload) {
+                            console.log("state: " + state);
+                            console.log("payload: " + payload);
+                            state.collapsed = payload;
+                        }
+                    },
+                });
+
                 const timestamp = new Date().getTime()
 
                 {% if user.userprofile.sidebar_image %}
@@ -164,13 +181,13 @@
 
                 new Vue({
                     el: "#top-search",
+                    store: storeBase,
                     name: "Top Bar",
                     components: {
                         DropDownMenu,
                     },
                     data() {
                         return {
-                            collapsed: false,
                             show: false,
                             right: true,
                             failed_test_count: {{ failed_test_count }},
@@ -212,14 +229,14 @@
                             document.getElementById("modal-body-help").innerHTML = markdown.render(helpText);
                             $("#modalHelp").modal("show");
                         }
-                    }
+                    },
                 });
 
                 new Vue({
                     el: "#sidebar",
+                    store: storeBase,
                     data() {
                         return {
-                            collapsed: {% if request.session.show_sidebar == "false" %}true{% else %}false{% endif %},
                             menu: [
                                 {
                                     header: true,
@@ -404,10 +421,13 @@
                             ],
                         }
                     },
+                    computed: {
+                        ...mapGetters(["collapsed"]),
+                    },
                     methods: {
                         onToggleCollapse(collapsed) {
 
-                            this.collapsed = collapsed;
+                            this.$store.commit("collapsed", collapsed);
                             const wrapper = document.querySelector(".wrapper");
                             if (collapsed) {
                                 wrapper.classList.add("collapsed");
@@ -480,7 +500,7 @@
         {% block help %}
 
             <div class="d-none" id="help-text">
-Bordercore is a place to organize all your information.
+                Bordercore is a place to organize all your information.
             </div>
         {% endblock %}
 
