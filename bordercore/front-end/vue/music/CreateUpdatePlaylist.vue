@@ -130,9 +130,6 @@
                 </div>
 
                 <div class="modal-footer justify-content-end">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        Cancel
-                    </button>
                     <input id="btn-action" class="btn btn-primary" type="submit" name="Go" :value="action" :disabled="disabledCreateButton">
                 </div>
             </div>

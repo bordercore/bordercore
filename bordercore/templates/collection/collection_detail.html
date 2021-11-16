@@ -65,13 +65,12 @@
                                 class="dropdownmenu"
                             >
                             </drop-down-menu>
-
                         </div>
 
                     </template>
 
                     <template v-slot:content>
-                        <div class="card-body ml-2">
+                        <div class="ml-2">
 
                             <blob-list inline-template>
                                 <div>
@@ -121,7 +120,9 @@
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h4 class="modal-title" id="myModalLabel">Update Collection</h4>
+                            <h4 class="modal-title" id="myModalLabel">
+                                Update Collection
+                            </h4>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                         </div>
                         <div class="modal-body">
@@ -129,7 +130,7 @@
                             <div class="form-group{% if field.errors %} error{% endif %} row">
                                 <label class="col-lg-3 col-form-label" for="inputTitle">{{ field.label }}</label>
 
-                                <div class="col-lg-7">
+                                <div class="col-lg-9">
 
                             {% if field.label == "Tags" %}
 
@@ -153,7 +154,6 @@
                         {% endfor %}
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                             <input id="btn-action" class="btn btn-primary" type="submit" name="Go" value="Update" />
                         </div>
 
@@ -237,7 +237,6 @@
                     </div>
 
                     <div class="modal-footer justify-content-end">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                         <input id="btn-action" class="btn btn-primary" type="button" name="Go" value="Confirm" @click="startSlideShow()" />
                     </div>
 

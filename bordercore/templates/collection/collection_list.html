@@ -38,20 +38,22 @@
         <div class="card-grid ml-3">
 
             <form action="{% url 'collection:list' %}" method="post" id="form-collection-edit">
+                {% csrf_token %}
                 <div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h4 class="modal-title" id="myModalLabel"><span id="action-type">Create</span> Collection</h4>
+                                <h4 class="modal-title" id="myModalLabel">
+                                    <span id="action-type">Create</span> Collection
+                                </h4>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                             </div>
                             <div class="modal-body">
-                    {% csrf_token %}
                     {% for field in form %}
                         <div class="form-group{% if field.errors %} error{% endif %} row">
                             <label class="col-lg-3 col-form-label" for="inputTitle">{{ field.label }}</label>
 
-                            <div class="col-lg-7">
+                            <div class="col-lg-9">
 
                             {% if field.label == 'Tags' %}
 
@@ -77,8 +79,6 @@
 
                             </div>
                             <div class="modal-footer">
-                                <label id="feedback"></label>
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                 <input id="btn-action" class="btn btn-primary" type="submit" name="Go" value="Create" />
                             </div>
 
