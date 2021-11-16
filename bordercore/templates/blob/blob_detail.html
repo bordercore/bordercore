@@ -417,7 +417,7 @@
                 },
                 handleAddToCollection() {
                     $("#modalAddToCollection").modal("show");
-                    setTimeout( () => { this.$refs.addToCollection.$refs.simpleSuggest.$refs.suggestComponent.input.focus(); }, 500);
+                    setTimeout( () => { this.$refs.addToCollection.$refs.suggestComponent.input.focus(); }, 500);
                 },
                 getCollectionList() {
                     doGet(

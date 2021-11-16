@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.db.models import Count, Exists, OuterRef
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -225,7 +225,9 @@ def search(request):
         query = query.filter(blobs__uuid__in=[request.GET.get("blob_uuid")])
 
     if "exclude_blob_uuid" in request.GET:
-        query = query.exclude(blobs__uuid__in=[request.GET.get("exclude_blob_uuid")])
+        contains_blob = Collection.objects.filter(uuid=OuterRef("uuid")) \
+                                          .filter(blobs__uuid__in=[request.GET.get("exclude_blob_uuid")])
+        query = query.annotate(contains_blob=Exists(contains_blob))
 
     query = query.annotate(num_blobs=Count("blobs"))
 
@@ -237,7 +239,9 @@ def search(request):
                 "name": x.name,
                 "uuid": x.uuid,
                 "num_blobs": x.num_blobs,
-                "url": reverse("collection:detail", kwargs={"collection_uuid": x.uuid})
+                "url": reverse("collection:detail", kwargs={"collection_uuid": x.uuid}),
+                "cover_url": f"{settings.COVER_URL}collections/{x.uuid}.jpg",
+                "contains_blob": getattr(x, "contains_blob", None)
             }
             for x in collection_list
         ],

@@ -12,17 +12,41 @@
                 </div>
                 <div class="modal-body">
                     <div class="d-flex flex-column">
-                        <form @submit.prevent>
-                            <div class="form-group">
-                                <simple-suggest
-                                    ref="simpleSuggest"
-                                    class="w-100"
-                                    display-attribute="name"
-                                    value-attribute="uuid"
-                                    :search-url="searchUrl"
-                                />
-                            </div>
-                        </form>
+                        <div class="search-with-doctypes form-group">
+                            <vue-simple-suggest
+                                ref="suggestComponent"
+                                display-attribute="name"
+                                value-attribute="uuid"
+                                :list="search"
+                                name="search"
+                                :filter-by-query="true"
+                                :debounce="200"
+                                :min-length="2"
+                                :max-suggestions="20"
+                                placeholder="Name"
+                                :styles="autoCompleteStyle"
+                                autocomplete="off"
+                                :autofocus="false"
+                                @select="select"
+                            >
+                                <div slot="suggestion-item" slot-scope="{ suggestion }">
+                                    <div :class="{'suggestion-item-disabled': suggestion.contains_blob}" class="top-search-suggestion d-flex align-items-center" @click.stop="onClick(suggestion)">
+                                        <div>
+                                            <img class="mr-2" width="50" height="50" :src="suggestion.cover_url">
+                                        </div>
+                                        <div class="mr-1">
+                                            {{ displayProperty(suggestion) }}
+                                        </div>
+                                        <div class="text-primary mx-1">
+                                            <small>{{ suggestion.num_blobs }} blobs</small>
+                                        </div>
+                                        <div v-if="suggestion.contains_blob" class="text-warning ml-auto">
+                                            Added
+                                        </div>
+                                    </div>
+                                </div>
+                            </vue-simple-suggest>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -32,8 +56,13 @@
 
 <script>
 
+    import VueSimpleSuggest from "vue-simple-suggest";
+
     export default {
 
+        components: {
+            VueSimpleSuggest,
+        },
         props: {
             blobUuid: {
                 default: "",
@@ -52,19 +81,40 @@
             return {
                 name: "",
                 collectionList: [],
+                autoCompleteStyle: {
+                    vueSimpleSuggest: "position-relative",
+                    inputWrapper: "",
+                    defaultInput: "form-control search-box-input",
+                    suggestions: "position-absolute list-group z-1000",
+                    suggestItem: "list-group-item",
+                },
             };
         },
         methods: {
-            boldenSuggestion(scope) {
-                if (!scope) return scope;
-
-                const {suggestion} = scope;
-
-                const result = this.$refs.simpleSuggest.$refs.suggestComponent.displayProperty(suggestion);
-
-                return result + " - <span class='text-primary'>" + suggestion.num_blobs + " blobs</span>";
+            displayProperty: function(suggestion) {
+                return this.$refs.suggestComponent.displayProperty(suggestion);
+            },
+            onClick(suggestion) {
+                if (!suggestion.contains_blob) {
+                    this.select(suggestion);
+                }
+            },
+            search(query) {
+                try {
+                    const url = this.searchUrl;
+                    return axios.get(url + query)
+                                .then((response) => {
+                                    return response.data;
+                                });
+                } catch (error) {
+                    console.log(`Error: ${error}`);
+                }
             },
             select(selection) {
+                // Don't allow selecting a collection the blob is already part of
+                if (selection.contains_blob) {
+                    return;
+                }
                 doPost(
                     this,
                     this.collectionMutateUrl,
@@ -79,8 +129,8 @@
                         $("#modalAddToCollection").modal("hide");
 
                         this.$nextTick(() => {
-                            this.$refs.simpleSuggest.$refs.suggestComponent.$el.querySelector("input").blur();
-                            this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
+                            this.$refs.suggestComponent.$el.querySelector("input").blur();
+                            this.$refs.suggestComponent.setText("");
                         });
                     },
                     "",
