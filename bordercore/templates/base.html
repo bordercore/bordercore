@@ -155,6 +155,8 @@
 
                 Vue.mixin({ delimiters: ["[[", "]]"] });
 
+                const EventBus = new Vue();
+
                 const mapGetters = Vuex.mapGetters;
 
                 // Use the name 'storeBase' to avoid conflict with stores in child templates
@@ -165,8 +167,6 @@
                     getters: {},
                     mutations: {
                         collapsed (state, payload) {
-                            console.log("state: " + state);
-                            console.log("payload: " + payload);
                             state.collapsed = payload;
                         }
                     },

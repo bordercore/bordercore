@@ -249,10 +249,6 @@
         axios.defaults.xsrfCookieName = "csrftoken"
         axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
 
-        Vue.mixin({ delimiters: ["[[", "]]"] });
-
-        const EventBus = new Vue();
-
         const store = new Vuex.Store({
             state: {
                 nodeUuid: "{{ object.uuid }}",

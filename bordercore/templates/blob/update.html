@@ -345,8 +345,6 @@
 
         var metadata_count = {{ metadata|length }};
 
-        Vue.mixin({ delimiters: ["[[", "]]"] });
-
         const store = new Vuex.Store({
             state: {
                 date: "{{ form.date.value }}"

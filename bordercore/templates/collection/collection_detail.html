@@ -265,10 +265,6 @@
 
         sizeOfCollection = {{ blob_list|length }};
 
-        Vue.mixin({ delimiters: ["[[", "]]"] });
-
-        const EventBus = new Vue();
-
         const BlobList = {
             data() {
                 return {

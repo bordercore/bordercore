@@ -212,10 +212,6 @@
         //  that initiates a tag search.
         disableTermSearch = false;
 
-        Vue.mixin({ delimiters: ["[[", "]]"] });
-
-        const EventBus = new Vue();
-
         const store = new Vuex.Store({
             state: {
                 pinButtonVisible: false,

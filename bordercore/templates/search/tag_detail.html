@@ -335,8 +335,6 @@
             return initialTags.map(x => x.text).join(",")
         }
 
-        Vue.mixin({ delimiters: ["[[", "]]"] });
-
         {% if tag_counts %}
         const RelatedTagCounts = {
             methods: {
