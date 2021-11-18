@@ -27,21 +27,21 @@ def get_additional_info(doctype, user, tag_name):
     return {}
 
 
-def get_tag_link(doc_types, tag):
+def get_tag_link(doc_type, tag):
 
-    if "note" in doc_types:
+    if doc_type == "note":
         return reverse("search:notes") + f"?tagsearch={tag}"
-    if "bookmark" in doc_types:
+    if doc_type == "bookmark":
         return reverse("bookmark:overview") + f"?tag={tag}"
-    if "drill" in doc_types:
+    if doc_type == "drill":
         return reverse("drill:start_study_session_tag", kwargs={"tag": tag})
-    if "song" in doc_types or "album" in doc_types:
+    if doc_type == "song" or doc_type == "album":
         return reverse("music:search_tag") + f"?tag={tag}"
 
     return reverse("search:kb_search_tag_detail", kwargs={"taglist": tag})
 
 
-def get_tag_aliases(user, name, doc_types=[]):
+def get_tag_aliases(user, name, doc_type=None):
 
     tag_aliases = TagAlias.objects.filter(name__contains=name).select_related("tag")
 
@@ -54,8 +54,8 @@ def get_tag_aliases(user, name, doc_types=[]):
             "id": f"{x.name} -> {x.tag}",
             "display": f"{x.name} -> {x.tag}",
             "name": f"{x.name} -> {x.tag}",
-            "link": get_tag_link(doc_types, x.tag.name),
-            **get_additional_info(doc_types, user, x.tag.name)
+            "link": get_tag_link(doc_type, x.tag.name),
+            **get_additional_info(doc_type, user, x.tag.name)
         }
         for x in
         tag_aliases
