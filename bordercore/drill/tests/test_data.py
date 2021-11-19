@@ -1,11 +1,10 @@
 import pytest
-from elasticsearch import Elasticsearch
 
 import django
 from django.conf import settings
 
 from drill.models import Question
-from lib.util import get_missing_blob_ids
+from lib.util import get_elasticsearch_connection, get_missing_blob_ids
 
 pytestmark = pytest.mark.data_quality
 
@@ -15,12 +14,7 @@ django.setup()
 @pytest.fixture()
 def es():
 
-    es = Elasticsearch(
-        [settings.ELASTICSEARCH_ENDPOINT],
-        timeout=120,
-        verify_certs=False
-    )
-
+    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
     yield es
 
 

@@ -7,6 +7,7 @@ from pathlib import Path
 import boto3
 import botocore
 import pytest
+import responses
 from PIL import Image
 
 import django
@@ -25,7 +26,8 @@ django.setup()
 
 from accounts.models import SortOrderUserTag, SortOrderUserNote, SortOrderUserFeed, SortOrderDrillTag  # isort:skip
 from accounts.tests.factories import TEST_PASSWORD, UserFactory  # isort:skip
-from blob.tests.factories import BlobFactory  # isort:skipt
+from api.serializers import BlobSerializer  # isort:skip
+from blob.tests.factories import BlobFactory  # isort:skip
 from bookmark.models import Bookmark  # isort:skip
 from bookmark import models as bookmark_models  # isort:skip
 from bookmark.tests.factories import BookmarkFactory  # isort:skip
@@ -50,6 +52,9 @@ except ModuleNotFoundError:
     # Don't worry if this import doesn't exist in production
     pass
 
+# Note: this import must come *after* the mock_s3 import, otherwise
+#  the s3 mock won't work
+from blob.elasticsearch_indexer import index_blob  # isort:skip
 
 # Disable the Debug Toolbar and thereby prevent it
 #  from interfering with functional and views tests
@@ -131,6 +136,13 @@ def blob_image_factory(db, s3_resource, s3_bucket):
     cover_filename = "cover.jpg"
     handle_file_info(blob, file_path, cover_filename)
     handle_s3_info_image(s3_resource, s3_bucket, blob, file_path, cover_filename)
+
+    url = f"https://www.bordercore.com/api/blobs/{blob.uuid}/"
+    serializer = BlobSerializer(blob)
+    responses.add(responses.GET, url,
+                  json=serializer.data, status=200)
+    index_blob(uuid=blob.uuid, create_connection=True)
+
     yield blob
 
 

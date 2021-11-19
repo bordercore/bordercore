@@ -10,7 +10,7 @@ from urllib.parse import quote_plus, urlparse
 
 import boto3
 import humanize
-from elasticsearch import Elasticsearch, NotFoundError
+from elasticsearch import NotFoundError
 from storages.backends.s3boto3 import S3Boto3Storage
 
 from django.conf import settings
@@ -22,7 +22,7 @@ from django.dispatch.dispatcher import receiver
 from collection.models import Collection, SortOrderCollectionBlob
 from lib.mixins import TimeStampedModel
 from lib.time_utils import get_date_from_pattern
-from lib.util import is_image
+from lib.util import get_elasticsearch_connection, is_image
 from tag.models import Tag
 
 EDITIONS = {'1': 'First',
@@ -214,10 +214,7 @@ class Blob(TimeStampedModel):
 
     def get_elasticsearch_info(self):
 
-        es = Elasticsearch(
-            [settings.ELASTICSEARCH_ENDPOINT],
-            verify_certs=False
-        )
+        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         query = {
             "query": {
@@ -573,10 +570,7 @@ class Blob(TimeStampedModel):
 
         # Delete from Elasticsearch
 
-        es = Elasticsearch(
-            [settings.ELASTICSEARCH_ENDPOINT],
-            verify_certs=False
-        )
+        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         try:
             es.delete(index=settings.ELASTICSEARCH_INDEX, id=self.uuid)

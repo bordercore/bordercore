@@ -1,12 +1,11 @@
 from urllib.parse import unquote
 
-from elasticsearch import Elasticsearch
-
 from django.conf import settings
 from django.db.models import Count, Sum
 from django.db.models.functions import Coalesce
 
 from lib.time_utils import convert_seconds
+from lib.util import get_elasticsearch_connection
 
 from .models import Playlist, PlaylistItem
 
@@ -64,10 +63,7 @@ def search(user, artist_name):
     Search for artists in Elasticsearch based on a substring.
     """
 
-    es = Elasticsearch(
-        [settings.ELASTICSEARCH_ENDPOINT],
-        verify_certs=False
-    )
+    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
     search_term = unquote(artist_name.lower())
 

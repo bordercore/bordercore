@@ -4,6 +4,7 @@ import pytest
 import responses
 from elasticsearch_dsl import Range
 
+from api.serializers import BlobSerializer, BlobSha1sumSerializer
 from blob.elasticsearch_indexer import (get_blob_info, get_doctype,
                                         get_num_pages, get_range_from_date,
                                         get_unixtime_from_string,
@@ -24,42 +25,24 @@ def test_is_ingestible_file():
 def test_get_blob_info(blob_image_factory):
 
     url = f"https://www.bordercore.com/api/blobs/{blob_image_factory.uuid}/"
-
-    blob_info = {
-        "name": blob_image_factory.name,
-        "metadata": [
-            {
-                "Url": "https://www.bordercore.com"
-            },
-            {
-                "Author": "John Smith"
-            }
-        ]
-    }
-
+    serializer = BlobSerializer(blob_image_factory)
     responses.add(responses.GET, url,
-                  json=blob_info, status=200)
+                  json=serializer.data, status=200)
 
-    assert get_blob_info(uuid=blob_image_factory.uuid) == {
-        "name": blob_image_factory.name,
-        "metadata": {
-            "author": ["John Smith"],
-            "url": ["https://www.bordercore.com"]
-        },
-    }
+    blob_info = get_blob_info(uuid=blob_image_factory.uuid)
+    assert blob_info["name"] == blob_image_factory.name
+    assert set(blob_info["tags"]) == set([x.name for x in blob_image_factory.tags.all()])
+    assert set(blob_info["metadata"]) == set([x.name.lower() for x in blob_image_factory.metadata.all()])
 
     url = f"https://www.bordercore.com/api/sha1sums/{blob_image_factory.sha1sum}/"
-
+    serializer = BlobSha1sumSerializer(blob_image_factory)
     responses.add(responses.GET, url,
-                  json=blob_info, status=200)
+                  json=serializer.data, status=200)
 
-    assert get_blob_info(sha1sum=blob_image_factory.sha1sum) == {
-        "name": blob_image_factory.name,
-        "metadata": {
-            "author": ["John Smith"],
-            "url": ["https://www.bordercore.com"]
-        },
-    }
+    blob_info = get_blob_info(sha1sum=blob_image_factory.sha1sum)
+    assert blob_info["name"] == blob_image_factory.name
+    assert set(blob_info["tags"]) == set([x.name for x in blob_image_factory.tags.all()])
+    assert set(blob_info["metadata"]) == set([x.name.lower() for x in blob_image_factory.metadata.all()])
 
 
 def test_get_unixtime_from_string():

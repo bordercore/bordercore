@@ -5,15 +5,15 @@ import re
 import sys
 from pathlib import Path
 
-from elasticsearch import Elasticsearch
 from PyPDF2 import PdfFileReader
 from PyPDF2.utils import PdfReadError
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.transaction import atomic
 
 from blob.models import Blob
-from lib.util import is_pdf
+from lib.util import get_elasticsearch_connection, is_pdf
 
 
 class Command(BaseCommand):
@@ -21,7 +21,6 @@ class Command(BaseCommand):
 
     BLOB_DIR = "/home/media"
     index_name = "bordercore"
-    endpoint = "http://localhost:9200"
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -33,7 +32,7 @@ class Command(BaseCommand):
     @atomic
     def handle(self, *args, limit, **kwargs):
 
-        self.es = Elasticsearch([self.endpoint], verify_certs=False)
+        self.es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         count = 0
 

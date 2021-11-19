@@ -5,7 +5,7 @@ from datetime import timedelta
 
 import boto3
 import humanize
-from elasticsearch import Elasticsearch, helpers
+from elasticsearch import helpers
 from mutagen.easyid3 import EasyID3
 from mutagen.mp3 import MP3
 
@@ -23,6 +23,7 @@ from django.utils.translation import gettext_lazy as _
 
 from lib.mixins import SortOrderMixin, TimeStampedModel
 from lib.time_utils import convert_seconds
+from lib.util import get_elasticsearch_connection
 from tag.models import Tag
 
 
@@ -49,10 +50,7 @@ class Album(TimeStampedModel):
     def index_album(self, es=None):
 
         if not es:
-            es = Elasticsearch(
-                [settings.ELASTICSEARCH_ENDPOINT],
-                verify_certs=False
-            )
+            es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         count, errors = helpers.bulk(es, [self.elasticsearch_document])
 
@@ -127,10 +125,7 @@ class Song(TimeStampedModel):
 
     def delete(self):
 
-        es = Elasticsearch(
-            [settings.ELASTICSEARCH_ENDPOINT],
-            verify_certs=False
-        )
+        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         request_body = {
             "query": {
@@ -159,10 +154,7 @@ class Song(TimeStampedModel):
     def index_song(self, es=None):
 
         if not es:
-            es = Elasticsearch(
-                [settings.ELASTICSEARCH_ENDPOINT],
-                verify_certs=False
-            )
+            es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         count, errors = helpers.bulk(es, [self.elasticsearch_document])
 

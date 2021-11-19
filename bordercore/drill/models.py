@@ -1,7 +1,7 @@
 import uuid
 from datetime import timedelta
 
-from elasticsearch import Elasticsearch, helpers
+from elasticsearch import helpers
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -15,6 +15,7 @@ from django.utils import timezone
 from blob.models import Blob
 from bookmark.models import Bookmark
 from lib.mixins import SortOrderMixin, TimeStampedModel
+from lib.util import get_elasticsearch_connection
 from tag.models import Tag
 
 from .managers import DrillManager
@@ -147,10 +148,7 @@ class Question(TimeStampedModel):
 
     def delete(self):
 
-        es = Elasticsearch(
-            [settings.ELASTICSEARCH_ENDPOINT],
-            verify_certs=False
-        )
+        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         request_body = {
             "query": {
@@ -179,10 +177,7 @@ class Question(TimeStampedModel):
     def index_question(self, es=None):
 
         if not es:
-            es = Elasticsearch(
-                [settings.ELASTICSEARCH_ENDPOINT],
-                verify_certs=False
-            )
+            es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         count, errors = helpers.bulk(es, [self.elasticsearch_document])
 

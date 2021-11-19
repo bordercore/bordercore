@@ -14,7 +14,6 @@ class MetaDataFactory(factory.DjangoModelFactory):
         model = MetaData
 
 
-@factory.django.mute_signals(signals.post_save)
 class BlobFactory(factory.DjangoModelFactory):
 
     class Meta:

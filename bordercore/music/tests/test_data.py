@@ -3,12 +3,11 @@ import re
 import boto3
 import pytest
 from botocore.errorfactory import ClientError
-from elasticsearch import Elasticsearch
 
 import django
 from django.conf import settings
 
-from lib.util import get_missing_blob_ids
+from lib.util import get_elasticsearch_connection, get_missing_blob_ids
 from music.models import Album, Song
 
 pytestmark = pytest.mark.data_quality
@@ -24,12 +23,7 @@ s3_client = boto3.client("s3")
 @pytest.fixture()
 def es():
 
-    es = Elasticsearch(
-        [settings.ELASTICSEARCH_ENDPOINT],
-        timeout=120,
-        verify_certs=False
-    )
-
+    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
     yield es
 
 

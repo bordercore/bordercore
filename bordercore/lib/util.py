@@ -1,8 +1,25 @@
+import os
 import string
 from pathlib import PurePath
 
 import requests
+from elasticsearch import RequestsHttpConnection
+from elasticsearch_dsl.connections import connections
 from lxml import html
+
+
+def get_elasticsearch_connection(host=None):
+
+    if not host:
+        host = os.environ.get("ELASTICSEARCH_ENDPOINT", "localhost")
+
+    return connections.create_connection(
+        hosts=[host],
+        use_ssl=False,
+        timeout=1200,
+        verify_certs=True,
+        connection_class=RequestsHttpConnection,
+    )
 
 
 def get_missing_blob_ids(expected, found):

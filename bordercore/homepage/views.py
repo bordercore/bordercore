@@ -1,7 +1,6 @@
 import re
 
 from botocore.errorfactory import ClientError
-from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ConnectionError
 from PyOrgMode import PyOrgMode
 
@@ -18,6 +17,7 @@ from cal.models import Calendar
 from collection.models import Collection
 from drill.models import Question
 from fitness.models import ExerciseUser
+from lib.util import get_elasticsearch_connection
 from music.models import Listen
 from quote.models import Quote
 from todo.models import Todo
@@ -99,10 +99,7 @@ def get_calendar_events(request):
 
 def get_random_image(request, content_type):
 
-    es = Elasticsearch(
-        [settings.ELASTICSEARCH_ENDPOINT],
-        verify_certs=False
-    )
+    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
     search_object = {
         'query': {

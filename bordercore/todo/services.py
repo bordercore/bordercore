@@ -1,9 +1,9 @@
 import datetime
 from urllib.parse import unquote
 
-from elasticsearch import Elasticsearch
-
 from django.conf import settings
+
+from lib.util import get_elasticsearch_connection
 
 SEARCH_LIMIT = 1000
 
@@ -13,10 +13,7 @@ def search(user, todo_name):
     Search for artists in Elasticsearch based on a substring.
     """
 
-    es = Elasticsearch(
-        [settings.ELASTICSEARCH_ENDPOINT],
-        verify_certs=False
-    )
+    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
     search_term = unquote(todo_name.lower())
 

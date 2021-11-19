@@ -5,14 +5,14 @@ from pathlib import Path
 import boto3
 import pytest
 from botocore.errorfactory import ClientError
-from elasticsearch import Elasticsearch
 
 import django
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
-from lib.util import get_missing_blob_ids, get_missing_metadata_ids, is_image
+from lib.util import (get_elasticsearch_connection, get_missing_blob_ids,
+                      get_missing_metadata_ids, is_image)
 
 logging.getLogger("elasticsearch").setLevel(logging.ERROR)
 
@@ -34,12 +34,7 @@ bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 @pytest.fixture()
 def es():
 
-    es = Elasticsearch(
-        [settings.ELASTICSEARCH_ENDPOINT],
-        timeout=120,
-        verify_certs=False
-    )
-
+    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
     yield es
 
 

@@ -2,17 +2,13 @@
 
 import sys
 
-from elasticsearch import Elasticsearch
-
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.transaction import atomic
 
-es = Elasticsearch(
-    [settings.ELASTICSEARCH_ENDPOINT],
-    timeout=120,
-    verify_certs=False
-)
+from lib.util import get_elasticsearch_connection
+
+es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
 
 class Command(BaseCommand):
@@ -38,7 +34,7 @@ class Command(BaseCommand):
     @atomic
     def handle(self, *args, uuid, field, value, **kwargs):
 
-        self.es = Elasticsearch([settings.ELASTICSEARCH_ENDPOINT], timeout=120, verify_certs=False)
+        self.es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         content_type_old = self.get_current_value(uuid, field)
         self.stdout.write(f"Current content type: {content_type_old}")

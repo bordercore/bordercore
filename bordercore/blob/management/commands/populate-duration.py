@@ -5,23 +5,19 @@ import json
 import sys
 
 import boto3
-from elasticsearch import Elasticsearch
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.transaction import atomic
 
 from blob.models import Blob
+from lib.util import get_elasticsearch_connection
 
 client = boto3.client("lambda")
 
 function_name = "IndexBlob"
 
-es = Elasticsearch(
-    [settings.ELASTICSEARCH_ENDPOINT],
-    timeout=120,
-    verify_certs=False
-)
+es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
 
 class Command(BaseCommand):
@@ -37,8 +33,6 @@ class Command(BaseCommand):
 
     @atomic
     def handle(self, *args, limit, **kwargs):
-
-        self.es = Elasticsearch([settings.ELASTICSEARCH_ENDPOINT], timeout=120, verify_certs=False)
 
         count = 0
 

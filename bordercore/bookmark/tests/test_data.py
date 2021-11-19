@@ -1,11 +1,10 @@
 import pytest
-from elasticsearch import Elasticsearch
 
 import django
 from django.conf import settings
 from django.db.models import Q
 
-from lib.util import get_missing_bookmark_ids
+from lib.util import get_elasticsearch_connection, get_missing_bookmark_ids
 
 pytestmark = pytest.mark.data_quality
 
@@ -17,12 +16,7 @@ from bookmark.models import Bookmark  # isort:skip
 @pytest.fixture()
 def es():
 
-    es = Elasticsearch(
-        [settings.ELASTICSEARCH_ENDPOINT],
-        timeout=120,
-        verify_certs=False
-    )
-
+    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
     yield es
 
 

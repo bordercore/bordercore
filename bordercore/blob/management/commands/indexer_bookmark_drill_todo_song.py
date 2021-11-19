@@ -1,20 +1,18 @@
 # Re-index all bookmarks or todo tasks in Elasticsearch
-from elasticsearch import Elasticsearch, helpers
+from elasticsearch import helpers
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.transaction import atomic
+
+from lib.util import get_elasticsearch_connection
 
 from todo.models import Todo  # isort:skip
 from bookmark.models import Bookmark  # isort:skip
 from music.models import Album, Song  # isort:skip
 from drill.models import Question  # isort:skip
 
-es = Elasticsearch(
-    [settings.ELASTICSEARCH_ENDPOINT],
-    timeout=120,
-    verify_certs=False
-)
+es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
 BATCH_SIZE = 10
 
@@ -59,10 +57,7 @@ class Command(BaseCommand):
 
     def index_bookmarks_all(self):
 
-        es = Elasticsearch(
-            [settings.ELASTICSEARCH_ENDPOINT],
-            verify_certs=False
-        )
+        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         for group in chunker(Bookmark.objects.all(), BATCH_SIZE):
             count, errors = helpers.bulk(es, [x.elasticsearch_document for x in group])
@@ -73,10 +68,7 @@ class Command(BaseCommand):
 
     def index_drill_all(self):
 
-        es = Elasticsearch(
-            [settings.ELASTICSEARCH_ENDPOINT],
-            verify_certs=False
-        )
+        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         for group in chunker(Question.objects.all(), BATCH_SIZE):
             count, errors = helpers.bulk(es, [x.elasticsearch_document for x in group])
@@ -84,10 +76,7 @@ class Command(BaseCommand):
 
     def index_song_all(self):
 
-        es = Elasticsearch(
-            [settings.ELASTICSEARCH_ENDPOINT],
-            verify_certs=False
-        )
+        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         for group in chunker(Song.objects.all(), BATCH_SIZE):
             count, errors = helpers.bulk(es, [x.elasticsearch_document for x in group])
@@ -98,10 +87,7 @@ class Command(BaseCommand):
 
     def index_todo_all(self):
 
-        es = Elasticsearch(
-            [settings.ELASTICSEARCH_ENDPOINT],
-            verify_certs=False
-        )
+        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         for group in chunker(Todo.objects.all(), BATCH_SIZE):
             count, errors = helpers.bulk(es, [x.elasticsearch_document for x in group])

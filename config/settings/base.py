@@ -217,7 +217,7 @@ LOGIN_URL = "/accounts/login/"
 
 # Elasticsearch config
 ELASTICSEARCH_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT", "http://localhost:9200")
-ELASTICSEARCH_INDEX = "bordercore"
+ELASTICSEARCH_INDEX = os.environ.get("ELASTICSEARCH_INDEX", "bordercore")
 
 LOGGING = {
     'version': 1,

@@ -2,7 +2,7 @@ import json
 import math
 from urllib.parse import unquote
 
-from elasticsearch import Elasticsearch, RequestError
+from elasticsearch import RequestError
 
 from django.conf import settings
 from django.contrib import messages
@@ -14,7 +14,8 @@ from django.views.generic.list import ListView
 
 from blob.models import Blob
 from lib.time_utils import get_date_from_pattern, get_relative_date
-from lib.util import get_pagination_range, truncate
+from lib.util import (get_elasticsearch_connection, get_pagination_range,
+                      truncate)
 from tag.models import Tag
 from tag.services import get_tag_aliases, get_tag_link
 
@@ -87,11 +88,7 @@ class SearchListView(ListView):
         boolean_type = self.request.GET.get("boolean_search_type", "AND")
         doctype = self.request.GET.get("doctype", None)
 
-        es = Elasticsearch(
-            [settings.ELASTICSEARCH_ENDPOINT],
-            verify_certs=False,
-            timeout=30
-        )
+        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         offset = (int(self.request.GET.get("page", 1)) - 1) * self.RESULT_COUNT_PER_PAGE
 
@@ -305,10 +302,7 @@ class SearchTagDetailView(ListView):
 
         taglist = self.kwargs.get("taglist", "").split(",")
 
-        es = Elasticsearch(
-            [settings.ELASTICSEARCH_ENDPOINT],
-            verify_certs=False
-        )
+        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         # Use the keyword field for an exact match
         tag_query = [
@@ -636,10 +630,7 @@ def search_tags_and_names(request):
 
 def search_tags_es(user, search_term, doc_types):
 
-    es = Elasticsearch(
-        [settings.ELASTICSEARCH_ENDPOINT],
-        verify_certs=False
-    )
+    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
     search_object = {
         "query": {
@@ -744,10 +735,7 @@ def search_names_es(user, search_term, doc_types):
     Primarily used by autocomplete inputs.
     """
 
-    es = Elasticsearch(
-        [settings.ELASTICSEARCH_ENDPOINT],
-        verify_certs=False
-    )
+    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
     search_object = {
         "query": {

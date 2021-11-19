@@ -12,19 +12,15 @@ from pathlib import PurePath
 import boto3
 import magic
 import requests
-from elasticsearch import RequestsHttpConnection
 from elasticsearch_dsl import Boolean, DateRange
 from elasticsearch_dsl import Document as Document_ES
 from elasticsearch_dsl import Integer, Long, Range, Text
-from elasticsearch_dsl.connections import connections
 from PyPDF2 import PdfFileReader
 from PyPDF2.utils import PdfReadError
 
-from lib.util import is_pdf, is_video
+from lib.util import get_elasticsearch_connection, is_pdf, is_video
 
-ES_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT", "localhost")
-ES_PORT = 9200
-ES_INDEX_NAME = "bordercore"
+ELASTICSEARCH_INDEX = os.environ.get("ELASTICSEARCH_INDEX", "bordercore")
 
 S3_KEY_PREFIX = "blobs"
 S3_BUCKET_NAME = "bordercore-blobs"
@@ -69,7 +65,7 @@ class ESBlob(Document_ES):
     last_modified = Text()
 
     class Index:
-        name = ES_INDEX_NAME
+        name = ELASTICSEARCH_INDEX
 
 
 def get_doctype(blob, metadata):
@@ -226,21 +222,14 @@ def delete_metadata(es, uuid):
         }
     }
 
-    result = es.update_by_query(body=q, index=ES_INDEX_NAME)
+    es.update_by_query(body=q, index=ELASTICSEARCH_INDEX)
 
 
 def index_blob(**kwargs):
 
     es = None
-
     if kwargs.get("create_connection", True):
-        es = connections.create_connection(
-            hosts=[{"host": ES_ENDPOINT, "port": ES_PORT}],
-            use_ssl=False,
-            timeout=1200,
-            verify_certs=True,
-            connection_class=RequestsHttpConnection,
-        )
+        es = get_elasticsearch_connection()
 
     blob_info = get_blob_info(**kwargs)
 

@@ -1,6 +1,6 @@
 import uuid
 
-from elasticsearch import Elasticsearch, helpers
+from elasticsearch import helpers
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -10,6 +10,7 @@ from django.db.models.signals import m2m_changed, post_save
 from django.dispatch.dispatcher import receiver
 
 from lib.mixins import TimeStampedModel
+from lib.util import get_elasticsearch_connection
 from tag.models import SortOrderTagTodo, Tag
 
 from .managers import TodoManager
@@ -70,10 +71,7 @@ class Todo(TimeStampedModel):
 
     def delete(self):
 
-        es = Elasticsearch(
-            [settings.ELASTICSEARCH_ENDPOINT],
-            verify_certs=False
-        )
+        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         request_body = {
             "query": {
@@ -102,10 +100,7 @@ class Todo(TimeStampedModel):
     def index_todo(self, es=None):
 
         if not es:
-            es = Elasticsearch(
-                [settings.ELASTICSEARCH_ENDPOINT],
-                verify_certs=False
-            )
+            es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         count, errors = helpers.bulk(es, [self.elasticsearch_document])
 

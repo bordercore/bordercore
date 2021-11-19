@@ -2,23 +2,19 @@ import signal
 import sys
 
 import urllib3
-from elasticsearch import Elasticsearch
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.transaction import atomic
 
 from blob.elasticsearch_indexer import index_blob
+from lib.util import get_elasticsearch_connection
 
 from blob.models import Blob  # isort:skip
 
 urllib3.disable_warnings()
 
-es = Elasticsearch(
-    [settings.ELASTICSEARCH_ENDPOINT],
-    timeout=120,
-    verify_certs=False
-)
+es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
 
 def handler(signum, frame):

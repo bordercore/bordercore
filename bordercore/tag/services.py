@@ -1,12 +1,11 @@
 from urllib.parse import unquote
 
-from elasticsearch import Elasticsearch
-
 from django.conf import settings
 from django.db.models import Count
 from django.urls import reverse
 
 from drill.models import Question
+from lib.util import get_elasticsearch_connection
 
 from .models import Tag, TagAlias
 
@@ -86,10 +85,7 @@ def search(user, tag_name, doctype=None, skip_tag_aliases=False):
     Optionally limit the search to objects of a specific doctype.
     """
 
-    es = Elasticsearch(
-        [settings.ELASTICSEARCH_ENDPOINT],
-        verify_certs=False
-    )
+    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
     tag_name = tag_name.lower()
 

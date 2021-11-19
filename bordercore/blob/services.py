@@ -1,14 +1,13 @@
 from collections import defaultdict
 
 import humanize
-from elasticsearch import Elasticsearch
 
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 
 from blob.models import Blob
-from lib.util import is_image, is_pdf, is_video
+from lib.util import get_elasticsearch_connection, is_image, is_pdf, is_video
 
 
 def get_recent_blobs(user, limit=10):
@@ -55,10 +54,7 @@ def get_recent_blobs(user, limit=10):
         "_source": ["created_date", "size", "uuid"]
     }
 
-    es = Elasticsearch(
-        [settings.ELASTICSEARCH_ENDPOINT],
-        verify_certs=False
-    )
+    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
     results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 

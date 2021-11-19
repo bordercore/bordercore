@@ -1,8 +1,9 @@
 import pytest
-from elasticsearch import Elasticsearch
 
 import django
 from django.conf import settings
+
+from lib.util import get_elasticsearch_connection
 
 pytestmark = pytest.mark.data_quality
 
@@ -15,12 +16,7 @@ from tag.models import Tag  # isort:skip
 @pytest.fixture()
 def es():
 
-    es = Elasticsearch(
-        [settings.ELASTICSEARCH_ENDPOINT],
-        timeout=120,
-        verify_certs=False
-    )
-
+    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
     yield es
 
 
