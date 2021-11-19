@@ -185,8 +185,8 @@ class Song(TimeStampedModel):
         }
 
         if self.album:
-            doc["album"] = self.album.title
-            doc["album_uuid"] = self.album.uuid
+            doc["_source"]["album"] = self.album.title
+            doc["_source"]["album_uuid"] = str(self.album.uuid)
 
         return doc
 
