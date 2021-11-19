@@ -1,5 +1,10 @@
 S3=s3://bordercore-blobs/django
 MAX_AGE=2592000
+ELASTICSEARCH_INDEX_TEST=bordercore_test
+ELASTICSEARCH_ENDPOINT_TEST=http://localhost:9201
+
+
+export env_var := MyEnvVariable
 
 install:
 	pip install --upgrade pip && pip install -r requirements.txt
@@ -36,12 +41,15 @@ test_data:
 	$(VIRTUALENV)python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test-list data
 
 test_unit:
+	ELASTICSEARCH_INDEX=$(ELASTICSEARCH_INDEX_TEST) ELASTICSEARCH_ENDPOINT=$(ELASTICSEARCH_ENDPOINT_TEST) \
 	$(VIRTUALENV)python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test-list unit --coverage
 
 test_wumpus:
 	$(VIRTUALENV)python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test-list wumpus
 
 test_functional:
+# Configure functional tests to use a test instance of Elasticsearch. Don't use production.
+	ELASTICSEARCH_INDEX=$(ELASTICSEARCH_INDEX_TEST) ELASTICSEARCH_ENDPOINT=$(ELASTICSEARCH_ENDPOINT_TEST) \
 	$(VIRTUALENV)python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test-list functional
 
 lint:
