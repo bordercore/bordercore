@@ -134,6 +134,9 @@ class Question(TimeStampedModel):
         self.last_reviewed = timezone.now()
         self.save()
 
+        response = QuestionResponse(question=self, response=response)
+        response.save()
+
     def get_all_tags_progress(self):
         """
         Get review progress for all tags assocated with this question.
@@ -300,6 +303,13 @@ def post_save_wrapper(sender, instance, **kwargs):
 
     # Index the question and answer in Elasticsearch
     instance.index_question()
+
+
+class QuestionResponse(models.Model):
+
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    response = models.TextField(blank=False, null=False)
+    date = models.DateTimeField(auto_now_add=True)
 
 
 class SortOrderDrillBookmark(SortOrderMixin):
