@@ -185,6 +185,19 @@
 
     </div>
 
+    <div id="modalProcessing" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-processing modal-dialog modal-sm modal-dialog-centered" role="document">
+            <h4 class="modal-content p-3 d-flex flex-row justify-content-center">
+                <div>
+                    Processing...
+                </div>
+                <div class="spinner-border ml-2 text-info" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </h4>
+        </div>
+    </div>
+
 {% endblock %}
 
 {% block javascript %}
@@ -263,6 +276,8 @@
                     let formData = new FormData();
                     formData.append("song", song);
 
+                    $("#modalProcessing").modal("show");
+
                     axios.post("{% url "music:get_song_id3_info" %}", formData, {
                         headers: {
                             "Content-Type": "multipart/form-data"
@@ -285,6 +300,13 @@
                         this.$store.state.sampleRate = response.data.sample_rate;
                         this.$store.state.bitRate = response.data.bit_rate;
                         this.sha1sum = response.data.sha1sum;
+
+                        // Wait a tiny amount before closing the modal. If the song upload happens
+                        //  really fast, then "hide" could be called too quickly after "show",
+                        //  which prevents the modal from closing.
+                        window.setTimeout(() => {
+                            $("#modalProcessing").modal("hide");
+                        }, 100);
                     });
                 },
                 select() {},
