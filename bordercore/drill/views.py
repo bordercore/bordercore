@@ -83,11 +83,8 @@ class QuestionCreateView(FormRequestMixin, CreateView):
         obj.efactor = EFACTOR_DEFAULT
         obj.save()
 
-        # Take care of the tags.  Create any that are new.
-        for tag in form.cleaned_data['tags']:
-            obj.tags.add(tag)
-
-        obj.save()
+        # Save the tags
+        form.save_m2m()
 
         review_url = urls.reverse("drill:detail", kwargs={"uuid": obj.uuid})
         messages.add_message(

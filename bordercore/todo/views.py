@@ -199,11 +199,8 @@ class TodoCreateView(FormRequestMixin, CreateView):
         obj.user = self.request.user
         obj.save()
 
-        # Take care of the tags.  Create any that are new.
-        for tag in form.cleaned_data['tags']:
-            obj.tags.add(tag)
-
-        obj.save()
+        # Save the tags
+        form.save_m2m()
 
         return HttpResponseRedirect(self.get_success_url())
 

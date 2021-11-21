@@ -285,9 +285,8 @@ class SongCreateView(FormRequestMixin, CreateView):
         song.user = self.request.user
         song.save()
 
-        # Take care of the tags.  Create any that are new.
-        for tag in form.cleaned_data["tags"]:
-            song.tags.add(tag)
+        # Save the tags
+        form.save_m2m()
 
         # If an album name was specified, associate it with the song
         if album_info:

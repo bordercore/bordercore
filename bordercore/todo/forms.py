@@ -30,7 +30,7 @@ class TodoForm(ModelForm):
 
     class Meta:
         model = Todo
-        fields = ("name", "priority", "note", "url")
+        fields = ("name", "priority", "note", "tags", "url")
         widgets = {
             "priority": Select(attrs={"class": "form-control"}),
             "name": TextInput(attrs={"class": "form-control", "autocomplete": "off", "autofocus": "true"}),
