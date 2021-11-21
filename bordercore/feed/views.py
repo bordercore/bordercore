@@ -65,10 +65,9 @@ def feed_update(request, feed_uuid=None):
         if request.POST["Go"] in ["Update", "Create"]:
             form = FeedForm(request.POST, instance=feed)
             if form.is_valid():
-                newform = form.save(commit=False)
-                newform.user = request.user
-                newform.save()
-                form.save_m2m()
+                obj = form.save(commit=False)
+                obj.user = request.user
+                obj.save()
 
                 if request.POST["Go"] == "Create":
                     so = SortOrderUserFeed(userprofile=request.user.userprofile, feed=form.instance)
