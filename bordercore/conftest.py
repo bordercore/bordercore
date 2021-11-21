@@ -197,19 +197,18 @@ def bookmark(tag, monkeypatch_bookmark):
 @pytest.fixture(scope="session")
 def browser():
 
-    # Set screen resolution to 1366 x 768 like most 15" laptops
-    display = Display(visible=0, size=(1366, 768))
-    display.start()
+    if not os.environ.get("DISABLE_HEADLESS_DISPLAY", None):
+        # Set screen resolution to 1366 x 768 like most 15" laptops
+        display = Display(visible=0, size=(1366, 768))
+        display.start()
 
     driver = webdriver.Firefox(executable_path="/opt/bin/geckodriver", log_path="/tmp/geckodriver.log")
 
-    # Fails with "Message: Service /opt/google/chrome/chrome unexpectedly exited. Status code was: 0"
-    # driver = webdriver.Chrome(executable_path="/opt/google/chrome/chrome")
-
     yield driver
 
-    # Quit the Xvfb display
-    display.stop()
+    if not os.environ.get("DISABLE_HEADLESS_DISPLAY", None):
+        # Quit the Xvfb display
+        display.stop()
 
     driver.quit()
 
