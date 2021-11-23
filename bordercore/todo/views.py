@@ -197,10 +197,15 @@ class TodoCreateView(FormRequestMixin, CreateView):
 
         obj = form.save(commit=False)
         obj.user = self.request.user
-        obj.save()
+
+        # Don't index in ES because the tags aren't saved yet
+        obj.save(index_es=False)
 
         # Save the tags
         form.save_m2m()
+
+        # Save again, this time index in ES
+        obj.save()
 
         return HttpResponseRedirect(self.get_success_url())
 

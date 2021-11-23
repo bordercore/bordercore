@@ -6,8 +6,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Count, JSONField, Max
-from django.db.models.signals import m2m_changed, post_save
-from django.dispatch.dispatcher import receiver
+from django.db.models.signals import m2m_changed
 
 from lib.mixins import TimeStampedModel
 from lib.util import get_elasticsearch_connection
@@ -69,6 +68,17 @@ class Todo(TimeStampedModel):
 
         return counts
 
+    def save(self, *args, **kwargs):
+
+        # Remove any custom parameters before calling the parent class
+        index_es = kwargs.pop("index_es", True)
+
+        super().save(*args, **kwargs)
+
+        # Index the todo item in Elasticsearch
+        if index_es:
+            self.index_todo()
+
     def delete(self):
 
         es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
@@ -128,16 +138,6 @@ class Todo(TimeStampedModel):
                 "user_id": self.user.id
             }
         }
-
-
-@receiver(post_save, sender=Todo)
-def post_save_wrapper(sender, instance, **kwargs):
-    """
-    This should be called anytime a todo task is added or updated.
-    """
-
-    # Index the todo item in Elasticsearch
-    instance.index_todo()
 
 
 def tags_changed(sender, **kwargs):
