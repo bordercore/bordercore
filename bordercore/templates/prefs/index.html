@@ -84,6 +84,11 @@
                                     name="pinned_tags"
                                 >
                                 </tags-input>
+                            {% elif field.name == 'instagram_credentials' %}
+                                <div class="d-flex">
+                                    <input type="text" name="instagram_username" value="{{ instagram_username }}" class="form-control mr-2" placeholder="Username" autocomplete="off">
+                                    <input type="password" name="instagram_password" value="{{ instagram_password }}" class="form-control ml-2" placeholder="Password" autocomplete="off">
+                                </div>
                             {% else %}
                                 {{ field }}
                             {% endif %}
@@ -99,9 +104,9 @@
 
                     {% endfor %}
 
-                    <div class="form-group">
-                        <div class="col-lg-3 offset-lg-2">
-                            <input class="btn btn-secondary" type="submit" name="Go" value="Update">
+                    <div class="form-group row">
+                        <div class="col-lg-1 offset-lg-6">
+                            <input class="btn btn-primary mr-1" type="submit" name="Go" value="Update">
                         </div>
                     </div>
 

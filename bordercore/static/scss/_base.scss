@@ -58,6 +58,24 @@
   display: none;
 }
 
+.message-error {
+  background: linear-gradient(90deg, rgba(121,9,9,1) 0%, rgba(38,34,70,1) 54%);
+  background-color: #262246;
+
+  strong {
+    color: #00ffd1;
+  }
+}
+
+.message-info {
+  background: rgb(16,49,58);
+  background: linear-gradient(90deg, rgba(16,49,58,1) 0%, rgba(38,34,70,1) 100%);
+
+  strong {
+    color: #00ffd1;
+  }
+}
+
 /* Used to hide mustached content before Vue has loaded */
 [v-cloak] {
   display: none;
@@ -1145,6 +1163,10 @@ h2#name {
     object-fit: contain;
     object-position: left top;
   }
+}
+
+#blob-import-icon {
+  width: 6.25rem;
 }
 
 //

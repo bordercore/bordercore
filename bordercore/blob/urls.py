@@ -60,4 +60,9 @@ urlpatterns = [
         view=views.BlobCloneView.as_view(),
         name="clone"
     ),
+    path(
+        route="import",
+        view=views.BlobImportView.as_view(),
+        name="import"
+    ),
 ]

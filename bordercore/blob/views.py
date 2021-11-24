@@ -20,7 +20,7 @@ from django.views.generic.list import ListView
 
 from blob.forms import BlobForm
 from blob.models import Blob, MetaData
-from blob.services import get_recent_blobs
+from blob.services import get_recent_blobs, import_blob
 from collection.models import Collection, SortOrderCollectionBlob
 from lib.mixins import FormRequestMixin
 from lib.time_utils import parse_date_from_string
@@ -319,6 +319,31 @@ class BlobCloneView(View):
         new_blob = original_blob.clone()
         messages.add_message(self.request, messages.INFO, "New blob successfully cloned")
         return HttpResponseRedirect(reverse("blob:detail", kwargs={"uuid": new_blob.uuid}))
+
+
+@method_decorator(login_required, name="dispatch")
+class BlobImportView(View):
+    template_name = "blob/import.html"
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name, {})
+
+    def post(self, request, *args, **kwargs):
+
+        url = request.POST.get("url", None)
+
+        try:
+            blob_uuid = import_blob(request.user, url)
+        except Exception as e:
+            messages.add_message(request, messages.ERROR, e)
+
+        if not messages.get_messages(request):
+            return HttpResponseRedirect(reverse("blob:detail", kwargs={"uuid": blob_uuid}))
+        else:
+            context = {
+                "hide_messages": True
+            }
+            return render(request, self.template_name, context)
 
 
 # Metadata objects are not handled by the form -- handle them manually

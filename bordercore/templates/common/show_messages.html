@@ -9,10 +9,10 @@
 
         <div class="card-grid ml-2 mr-2">
 
-            <b-alert :show=true :variant="'{{ message.tags|get_message_level }}'">
+            <div class="message-{{ message.tags }}">
                 <font-awesome-icon class="mr-1" icon="exclamation-triangle"></font-awesome-icon>
-            {{ message|safe }}
-            </b-alert>
+                {{ message|safe }}
+            </div>
 
         </div>
 

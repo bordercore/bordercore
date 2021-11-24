@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% load get_message_level %}
+
+{% block title %} Blob :: Import {% endblock %}
+
+{% block content %}
+
+    <div class="row no-gutters h-100">
+
+        <div class="col-lg-3 d-flex flex-column">
+
+            <div class="left-panel-gradient card-body d-flex flex-column">
+                <div>
+                    Import blobs from external sites.
+                </div>
+                <div class="mt-2">
+                    Sites supported:
+                    <ul>
+                        <li><span class="text-info">Instagram</span></li>
+                        <li><span class="text-info">Artstation</span></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-9" id="vue-right-panel">
+
+            <div class="right-column">
+
+                {% for message in messages %}
+                    <div class="message-{{ message.tags }} card-body ml-3 p-3">
+                        <font-awesome-icon class="mr-1" icon="exclamation-triangle"></font-awesome-icon>
+                        {{ message|safe }}
+                    </div>
+                {% endfor %}
+
+                <div class="card-body">
+
+                    <div class="d-flex align-items-center">
+                        <div id="blob-import-icon" class="mr-3">
+                            <img height="80" width="80" src="{{ STATIC_URL }}img/website.jpg" />
+                        </div>
+
+                        <div class="w-100">
+
+                            <form @submit.prevent id="import-blob-form" method="post" action="{% url 'blob:import' %}">
+                                {% csrf_token %}
+
+                                <div class="row">
+                                    <h3 class="col-lg-12 mb-4">
+                                        Enter the url representing the blob you'd like to import.
+                                    </h3>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <input class="form-control" name="url" value="{{ request.POST.url }}" type="text" placeholder="Url" autocomplete="off" />
+                                        <div class="d-flex mt-3">
+                                            <button type="submit" class="btn btn-primary" @click="checkEmpty()">Import</button>
+                                            <div :class="{'d-none': !isProcessing}" class="spinner-border ml-3 text-info" role="status">
+                                                <span class="sr-only">Loading...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" charset="utf-8">
+
+        new Vue({
+            el: "#vue-right-panel",
+            name: "Right Panel",
+            data() {
+                return {
+                    isProcessing: false,
+                }
+            },
+            methods: {
+                checkEmpty() {
+                    const url = document.getElementsByName("url")[0].value;
+                    if (url !== "") {
+                        this.isProcessing = true;
+                        document.getElementById("import-blob-form").submit()
+                    }
+                }
+            },
+            mounted() {
+                document.getElementsByName("url")[0].focus();
+            }
+        });
+
+    </script>
+
+{% endblock %}

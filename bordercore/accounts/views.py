@@ -35,6 +35,11 @@ class UserProfileUpdateView(FormRequestMixin, UpdateView):
         context['nav'] = 'prefs'
         context['title'] = 'Preferences'
         context['tags'] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.pinned_tags.all()[::-1]]
+
+        if self.request.user.userprofile.instagram_credentials:
+            context["instagram_username"] = self.request.user.userprofile.instagram_credentials.get("username", "")
+            context["instagram_password"] = self.request.user.userprofile.instagram_credentials.get("password", "")
+
         return context
 
     def get_object(self, queryset=None):
@@ -61,7 +66,16 @@ class UserProfileUpdateView(FormRequestMixin, UpdateView):
                     c = SortOrderUserTag(userprofile=userprofile, tag=tag)
                     c.save()
 
-        self.object = form.save()
+        object = form.save(commit=False)
+
+        if self.request.POST.get("instagram_username", None) and self.request.POST.get("instagram_password", None):
+            object.instagram_credentials = {
+                "username": self.request.POST["instagram_username"],
+                "password": self.request.POST["instagram_password"]
+            }
+
+        object.save()
+
         context = self.get_context_data(form=form)
         context["message"] = "Preferences updated"
         return self.render_to_response(context)

@@ -22,6 +22,7 @@ class UserProfile(models.Model):
     pinned_drill_tags = models.ManyToManyField(Tag, through="SortOrderDrillTag", related_name="pinned_drill_tags")
     orgmode_file = models.TextField(null=True)
     google_calendar = JSONField(blank=True, null=True)
+    instagram_credentials = JSONField(blank=True, null=True)
     homepage_default_collection = models.OneToOneField(Collection, related_name='default_collection', null=True, on_delete=models.PROTECT)
     sidebar_image = models.TextField(blank=True, null=True)
 

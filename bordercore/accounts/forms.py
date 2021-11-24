@@ -44,7 +44,15 @@ class UserProfileForm(ModelForm):
 
     class Meta:
         model = UserProfile
-        fields = ('theme', 'sidebar_image', 'pinned_tags', 'homepage_default_collection', 'orgmode_file', 'google_calendar')
+        fields = (
+            'theme',
+            'sidebar_image',
+            'pinned_tags',
+            'homepage_default_collection',
+            'instagram_credentials',
+            'orgmode_file',
+            'google_calendar'
+        )
         widgets = {
             'google_calendar': Textarea(attrs={'class': 'form-control'}),
             'orgmode_file': TextInput(attrs={'class': 'form-control'}),

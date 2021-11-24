@@ -98,9 +98,11 @@
 
                     <div class="col-lg-12">
 
-                        <div id="vue-messages">
-                            {% include "common/show_messages.html" %}
-                        </div>
+                        {% if not hide_messages %}
+                            <div id="vue-messages">
+                                {% include "common/show_messages.html" %}
+                            </div>
+                        {% endif %}
 
                         {% block content %}
                         {% endblock %}
@@ -343,7 +345,12 @@
                                             href: "{% url 'collection:list' %}",
                                             title: "Collections",
                                             alias: "/collection/*",
-                                        }
+                                        },
+                                        {
+                                            href: "{% url 'blob:import' %}",
+                                            title: "Import",
+                                            alias: "/blob/import/",
+                                        },
                                     ]
                                 },
                                 {
@@ -484,9 +491,11 @@
                     }
                 });
 
+                {% if not hide_messages %}
                 new Vue({
                     el: "#vue-messages",
                 });
+                {% endif %}
 
                 new Vue({
                     name: "Help Modal",
