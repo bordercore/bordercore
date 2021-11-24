@@ -232,8 +232,8 @@
                         {
                             uuid: "{{ song.uuid }}",
                             track: {{ song.track }},
-                            title: "{{ song.title|safe }}",
-                            note: "{{ song.note|safe }}",
+                            title: "{{ song.title|safe|escapejs }}",
+                            note: "{{ song.note|safe|escapejs }}",
                             length: "{{ song.length }}"
                         },
                         {% endfor %}
