@@ -15,6 +15,7 @@ from instaloader import Post
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.files import File
+from django.core.files.temp import NamedTemporaryFile
 from django.urls import reverse
 from django.utils import timezone
 
@@ -274,18 +275,20 @@ def import_artstation(user, parsed_url):
     opener.addheaders = [("User-agent", "Bordercore/1.0")]
     urllib.request.install_opener(opener)
 
-    urllib.request.urlretrieve(result["assets"][0]["image_url"], filename)
+    temp_file = NamedTemporaryFile(delete=True)
+
+    urllib.request.urlretrieve(result["assets"][0]["image_url"], temp_file.name)
 
     blob = Blob(
         user=user,
         name=result["title"],
         date=date,
-        sha1sum=get_sha1sum(filename)
+        sha1sum=get_sha1sum(temp_file.name)
     )
-    blob.file_modified = int(os.path.getmtime(str(filename)))
+    blob.file_modified = int(os.path.getmtime(str(temp_file.name)))
     blob.save()
 
-    myfile = File(open(filename, "rb"))
+    myfile = File(open(temp_file.name, "rb"))
     blob.file.save(filename, myfile)
 
     url = result["permalink"]
@@ -293,8 +296,6 @@ def import_artstation(user, parsed_url):
 
     MetaData.objects.create(user=user, name="Url", value=url, blob=blob)
     MetaData.objects.create(user=user, name="Artist", value=artist_name, blob=blob)
-
-    os.remove(filename)
 
     blob.index_blob()
 
