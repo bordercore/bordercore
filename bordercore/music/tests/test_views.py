@@ -122,9 +122,6 @@ def test_music_create(s3_resource, s3_bucket, auto_login_user, song, song_source
             "Go": "Create"
         })
 
-    with open("/tmp/create-song-test-result.html", "wb") as foo:
-        foo.write(resp.content)
-
     assert resp.status_code == 302
 
 
