@@ -102,6 +102,7 @@ class Blob(TimeStampedModel):
             "application/pdf": "PDF",
             "application/x-mobipocket-ebook": "E-Book",
             "audio/mpeg": "Audio",
+            "audio/x-wav": "Audio",
             "image/gif": "Image",
             "image/jpeg": "Image",
             "image/png": "Image",
