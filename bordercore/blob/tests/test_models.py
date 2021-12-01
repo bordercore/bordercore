@@ -83,9 +83,7 @@ def test_get_linked_blobs(blob_pdf_factory):
 def test_get_date(blob_image_factory):
     assert blob_image_factory.get_date() == "March 04, 2021"
 
-
-def test_has_thumbnail_url(blob_image_factory):
-    assert blob_image_factory.has_thumbnail_url() is False
+    assert blob_image_factory.get_date() == datetime.datetime.strptime(blob_image_factory.date, '%Y-%m-%d').strftime('%B %d, %Y')
 
 
 def test_is_ingestible_file(blob_image_factory):

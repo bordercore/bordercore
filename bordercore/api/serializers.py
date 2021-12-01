@@ -81,7 +81,7 @@ class BlobSha1sumSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Blob
-        fields = ["created", "content", "date", "documents", "file", "id", "importance",
+        fields = ["created", "content", "date", "blobs", "file", "id", "importance",
                   "is_private", "is_note", "metadata", "modified",
                   "name", "note", "sha1sum", "tags", "user", "uuid"]
 

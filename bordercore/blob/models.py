@@ -77,7 +77,7 @@ class Blob(TimeStampedModel):
     is_private = models.BooleanField(default=False)
     is_note = models.BooleanField(default=False)
     is_indexed = models.BooleanField(default=True)
-    documents = models.ManyToManyField("self", blank=True)
+    blobs = models.ManyToManyField("self", blank=True)
 
     class Meta:
         unique_together = (
@@ -308,10 +308,16 @@ class Blob(TimeStampedModel):
             return False
 
     def get_related_blobs(self):
-        related_blobs = []
-        for blob in self.documents.all():
-            related_blobs.append({"uuid": blob.uuid, "name": blob.name})
-        return related_blobs
+        return [
+            {
+                "uuid": blob.uuid,
+                "name": blob.name,
+                "cover_url": blob.get_cover_url_small()
+            }
+
+            for blob in
+            self.blobs.all()
+        ]
 
     def is_pinned_note(self):
         return self in self.user.userprofile.pinned_notes.all()
@@ -377,13 +383,6 @@ class Blob(TimeStampedModel):
 
     def get_date(self):
         return get_date_from_pattern({"gte": self.date})
-
-    def has_thumbnail_url(self):
-        try:
-            _ = self.cover_info(self.user, size='small')['url']
-            return True
-        except Exception:
-            return False
 
     @staticmethod
     def is_ingestible_file(filename):

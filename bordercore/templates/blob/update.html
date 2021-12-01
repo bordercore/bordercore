@@ -122,8 +122,16 @@
                 {% endif %}
 
                 {% if linked_blob %}
-                    <br /><br />
-                    Linking to <a href="{% url 'blob:detail' linked_blob.uuid %}">{{ linked_blob.name|default:"Blob" }}</a>
+                    <div class="highlight-box d-flex align-items-center mt-5">
+                        {% if linked_blob.thumbnail_url %}
+                            <img src="{{ linked_blob.thumbnail_url }}" />
+                        {% endif %}
+                        <h5 class="d-flex justify-content-center ml-2 w-100">
+                            <div>
+                            Linking to <a href="{% url 'blob:detail' linked_blob.uuid %}">{{ linked_blob.name|default:"Blob" }}</a>
+                            </div>
+                        </h5>
+                    </div>
                 {% endif %}
 
                 {% if linked_collection_blob_list %}

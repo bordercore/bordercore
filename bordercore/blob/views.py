@@ -57,6 +57,7 @@ class BlobCreateView(FormRequestMixin, CreateView):
         if "linked_blob_uuid" in self.request.GET:
             linked_blob = Blob.objects.get(user=self.request.user, uuid=self.request.GET["linked_blob_uuid"])
             context["linked_blob"] = linked_blob
+            context["linked_blob"].thumbnail_url = linked_blob.get_cover_url_small()
 
             # Grab the initial metadata and tags from the linked blob
             context["metadata"] = linked_blob.metadata.all()
@@ -123,7 +124,9 @@ class BlobCreateView(FormRequestMixin, CreateView):
 
         handle_metadata(obj, self.request)
 
-        handle_linked_blob(obj, self.request)
+        if "linked_blob_uuid" in self.request.POST:
+            linked_blob = Blob.objects.get(uuid=self.request.POST["linked_blob_uuid"])
+            obj.blobs.add(linked_blob)
 
         handle_linked_collection(obj, self.request)
 
@@ -367,22 +370,6 @@ def handle_metadata(blob, request):
     if request.POST.get("is_book", ""):
         new_metadata = MetaData(user=request.user, name="is_book", value="true", blob=blob)
         new_metadata.save()
-
-
-def handle_linked_blob(blob, request):
-
-    if "linked_blob_uuid" in request.POST:
-
-        # Create the private collection
-        collection = Collection(user=request.user, is_private=True)
-        collection.save()
-
-        # Now add the current blob to this collection
-        collection.add_blob(blob)
-
-        # Finally add the linked blob to this collection
-        blob = Blob.objects.get(user=request.user, uuid=request.POST["linked_blob_uuid"])
-        collection.add_blob(blob)
 
 
 def handle_linked_collection(blob, request):
