@@ -3,9 +3,7 @@ import os
 import subprocess
 from pathlib import PurePath
 
-from pdf2image import convert_from_path
 from PIL import Image
-from PyPDF2 import PdfFileReader, PdfFileWriter
 
 from .util import is_image, is_pdf, is_video
 
@@ -40,6 +38,11 @@ def create_thumbnail_from_image(infile, outdir):
 
 
 def create_thumbnail_from_pdf(infile, outdir, page_number=1):
+
+    # Isolate the import here so other functions from this module
+    #  can be imported without requiring these dependencies.
+    from PyPDF2 import PdfFileReader, PdfFileWriter
+    from pdf2image import convert_from_path
 
     page_number = page_number - 1
 
@@ -106,3 +109,18 @@ def create_small_cover_image(cover_large, outdir):
         im.save(f"{outdir}-cover.jpg", "JPEG")
     except IOError:
         print(f"Cannot create small thumbnail for {cover_large}")
+
+
+def create_bookmark_thumbnail(cover_large, out_file):
+    """
+    Resize the large cover png to create a small (thumbnail) png
+    """
+
+    size = 128, 128
+
+    try:
+        im = Image.open(cover_large)
+        im.thumbnail(size)
+        im.save(out_file, "PNG")
+    except IOError:
+        print(f"Cannot create thumbnail for {cover_large}")

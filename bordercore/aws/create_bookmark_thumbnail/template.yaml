@@ -1,0 +1,115 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Create Thumbnails from generated bookmark images
+
+Globals:
+    Function:
+        Timeout: 900
+
+
+Parameters:
+    EFSMountPointParameter:
+        Type: String
+        Description: The EFS mount point on the file system
+    EFSAccessPointParameter:
+        Type: String
+        Description: The EFS access point
+    SecurityGroupParameter:
+        Type: String
+        Description: The VPC security group that lambda is in
+    Subnet1Parameter:
+        Type: String
+        Description: The first VPC subnet
+    Subnet2Parameter:
+        Type: String
+        Description: The second VPC subnet
+
+Resources:
+
+    CreateBookmarkThumbnailFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: .
+            FunctionName: CreateBookmarkThumbnail
+            Handler: create_bookmark_thumbnail_lambda.handler
+            MemorySize: 1024
+            Runtime: python3.7
+            Role: !GetAtt CreateBookmarkThumbnailLambdaRole.Arn
+            Environment:
+                Variables:
+                    BUCKET_NAME: bordercore-blobs
+                    EFS_DIR:
+                      Ref: EFSMountPointParameter
+            VpcConfig:
+                SecurityGroupIds:
+                    - !Ref SecurityGroupParameter
+                SubnetIds:
+                    - !Ref Subnet1Parameter
+                    - !Ref Subnet2Parameter
+            FileSystemConfigs:
+                - Arn: !Sub "arn:aws:elasticfilesystem:us-east-1:${AWS::AccountId}:access-point/${EFSAccessPointParameter}"
+                  LocalMountPath:
+                      Ref: EFSMountPointParameter
+
+    LambdaFunctionLogGroup:
+        Type: "AWS::Logs::LogGroup"
+        DependsOn: "CreateBookmarkThumbnailFunction"
+        Properties:
+            RetentionInDays: 90
+            LogGroupName: !Join ["", ["/aws/lambda/", !Ref CreateBookmarkThumbnailFunction]]
+
+    # Add a permission for the lambda to be invoked by S3
+    CreateBookmarkThumbnailLambdaPermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: "lambda:InvokeFunction"
+            FunctionName: !Ref CreateBookmarkThumbnailFunction
+            Principal: s3.amazonaws.com
+            SourceArn: !Sub "arn:aws:s3:::bordercore-blobs"
+            SourceAccount: !Ref AWS::AccountId
+
+    CreateBookmarkThumbnailLambdaRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: 2012-10-17
+                Statement:
+                    - Effect: "Allow"
+                      Principal:
+                          Service:
+                              - "lambda.amazonaws.com"
+                      Action:
+                          - "sts:AssumeRole"
+
+            Policies:
+            - PolicyName: WriteToS3
+              PolicyDocument:
+                  Statement:
+                      - Effect: "Allow"
+                        Action:
+                            - s3:GetObject
+                            - s3:PutObject
+                        Resource:
+                            - "arn:aws:s3:::bordercore-blobs"
+                            - "arn:aws:s3:::bordercore-blobs/*"
+
+            - PolicyName: LambdaWriteToLogs
+              PolicyDocument:
+                  Statement:
+                      - Effect: "Allow"
+                        Action:
+                            - "logs:CreateLogGroup"
+                            - "logs:CreateLogStream"
+                            - "logs:PutLogEvents"
+                            - "logs:DescribeLogStreams"
+                        Resource:
+                            - "arn:aws:logs:*:*:*"
+            ManagedPolicyArns:
+            - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+
+
+Outputs:
+
+    CreateBookmarkThumbnailFunction:
+      Description: "Create thumbnails from generated bookmark images"
+      Value: !GetAtt CreateBookmarkThumbnailFunction.Arn

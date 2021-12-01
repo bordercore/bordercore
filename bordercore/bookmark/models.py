@@ -190,10 +190,13 @@ def generate_cover_image(instance):
 @receiver(post_delete, sender=Bookmark)
 def delete_cover_image(sender, instance, **kwargs):
     """
-    After deletion, remove the bookmark's cover image from S3
+    After deletion, remove the bookmark's cover images from S3
     """
 
     s3 = boto3.resource("s3")
-    key = f"bookmarks/{instance.uuid}.png"
 
+    key = f"bookmarks/{instance.uuid}.png"
+    s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key).delete()
+
+    key = f"bookmarks/{instance.uuid}-small.png"
     s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key).delete()

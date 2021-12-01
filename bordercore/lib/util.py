@@ -3,12 +3,14 @@ import string
 from pathlib import PurePath
 
 import requests
-from elasticsearch import RequestsHttpConnection
-from elasticsearch_dsl.connections import connections
-from lxml import html
 
 
 def get_elasticsearch_connection(host=None):
+
+    # Isolate the import here so other functions from this module
+    #  can be imported without requiring these dependencies.
+    from elasticsearch import RequestsHttpConnection
+    from elasticsearch_dsl.connections import connections
 
     if not host:
         host = os.environ.get("ELASTICSEARCH_ENDPOINT", "localhost")
@@ -128,6 +130,10 @@ def get_pagination_range(page_number, num_pages, paginate_by):
 
 
 def parse_title_from_url(url):
+
+    # Isolate the import here so other functions from this module
+    #  can be imported without requiring these dependencies.
+    from lxml import html
 
     headers = {"user-agent": "Bordercore/1.0"}
     r = requests.get(url, headers=headers)
