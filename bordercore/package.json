@@ -80,6 +80,7 @@
                 {
                     "ignoreProperties": [
                         "/^-animation$/",
+                        "/^accent-color$/",
                         "/^webkit-transform$/",
                         "/^ms-transform$/"
                     ]

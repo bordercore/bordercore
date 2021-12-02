@@ -127,6 +127,13 @@ a {
   }
 }
 
+input[type="radio"],
+input[type="checkbox"] {
+  width: 1em;
+  height: 1rem;
+  accent-color: #00ffd1;
+}
+
 p {
   font-family: "Poppins", sans-serif;
   font-size: 1.1em;
