@@ -1,20 +1,12 @@
-import json
-from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
 
 import django
-from django import urls
 from django.test import RequestFactory
 
 from search.views import (SearchTagDetailView, get_doc_types_from_request,
                           get_doctype, get_name, is_cached, sort_results)
-
-try:
-    from bs4 import BeautifulSoup
-except ModuleNotFoundError:
-    pass
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
@@ -39,34 +31,6 @@ def test_get_doc_types_from_request():
 
     request_mock.GET = {"doc_type": "blob,book,document"}
     assert get_doc_types_from_request(request_mock) == ["blob", "book", "document"]
-
-
-@patch("search.views.Elasticsearch")
-def test_search_notes(mock_elasticsearch, auto_login_user):
-
-    _, client = auto_login_user()
-
-    filepath = Path(__file__).parent / "resources/search_results_notes.json"
-
-    with open(filepath) as f:
-        data = json.load(f)
-
-    instance = mock_elasticsearch.return_value
-    instance.search.return_value = data
-
-    url = urls.reverse("search:notes")
-    resp = client.get(f"{url}?search=linux")
-
-    assert resp.status_code == 200
-
-    # soup = BeautifulSoup(resp.content, "html.parser")
-
-    # match = soup.select("div#vue-app card")[0]["title"]
-    # assert data["hits"]["hits"][0]["source"]["name"] == match
-
-    # matches = soup.select("div#note:nth-of-type(0) a#tag")
-    # for tag in matches:
-    #     assert tag.findAll(text=True)[0] in data["hits"]["hits"][0]["source"]["tags"]
 
 
 def test_sort_results():
@@ -125,33 +89,6 @@ def test_is_cached():
     assert cache_checker("Artist", "U2") is True
     assert cache_checker("Album", "The Joshau Tree") is False
     assert cache_checker("Book", "War and Peace") is False
-
-
-@patch("search.views.Elasticsearch")
-def test_search_tag(mock_elasticsearch, auto_login_user, blob_image_factory, blob_pdf_factory):
-
-    _, client = auto_login_user()
-
-    filepath = Path(__file__).parent / "resources/search_results_tags.json"
-
-    with open(filepath) as f:
-        data = json.load(f)
-
-    instance = mock_elasticsearch.return_value
-    instance.search.return_value = data
-
-    url = urls.reverse("search:kb_search_tag_detail", kwargs={"taglist": "carl sagan"})
-    resp = client.get(url)
-
-    assert resp.status_code == 200
-
-    soup = BeautifulSoup(resp.content, "html.parser")
-
-    matches = soup.select("#document li")
-    assert len(matches) == 3
-
-    matches = soup.select("#blob li")
-    assert len(matches) == 2
 
 
 def test_get_doc_counts():

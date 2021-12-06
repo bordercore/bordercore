@@ -54,3 +54,45 @@ class SearchPage:
         """
         element = self.browser.find_elements(*self.SEARCH_RESULT_TAG)
         return [x.get_attribute("innerHTML") for x in element]
+
+
+class TagSearchPage:
+
+    SEARCH_INPUT = (By.CSS_SELECTOR, "input[placeholder='Tag']")
+    SEARCH_TAG_RESULT = (By.CSS_SELECTOR, "li[class='search-result']")
+
+    def __init__(self, browser):
+        self.browser = browser
+
+    def search_input(self):
+        """
+        Find the search form input
+        """
+        return self.browser.find_element(*self.SEARCH_INPUT)
+
+    def search_tag_result_count(self):
+        """
+        Find the search result tag list
+        """
+        return len(self.browser.find_elements(*self.SEARCH_TAG_RESULT))
+
+
+class NoteSearchPage:
+
+    SEARCH_INPUT = (By.CSS_SELECTOR, "input[id='top-simple-suggest']")
+    SEARCH_RESULT_COUNT = (By.CSS_SELECTOR, "#left-panel h3")
+
+    def __init__(self, browser):
+        self.browser = browser
+
+    def search_input(self):
+        """
+        Find the search form input
+        """
+        return self.browser.find_element(*self.SEARCH_INPUT)
+
+    def search_result_count(self):
+        """
+        Find the search result count
+        """
+        element = self.browser.find_elements(*self.SEARCH_RESULT_COUNT)
