@@ -38,7 +38,7 @@ class UserProfile(models.Model):
     )
 
     def get_tags(self):
-        return ", ".join([tag.name for tag in self.pinned_tags.all()])
+        return ", ".join([tag.name for tag in self.pinned_tags.all().order_by("sortorderusertag__sort_order")])
 
     def __str__(self):
         return self.user.username
