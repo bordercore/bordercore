@@ -52,7 +52,7 @@ def test_accounts_sort_pinned_notes(auto_login_user, blob_text_factory):
 
     url = urls.reverse("accounts:sort_pinned_notes")
     resp = client.post(url, {
-        "note_uuid": blob_text_factory.uuid,
+        "note_uuid": blob_text_factory[0].uuid,
         "new_position": "1"
     })
 
@@ -65,7 +65,7 @@ def test_accounts_pin_note(auto_login_user, blob_image_factory):
 
     url = urls.reverse("accounts:pin_note")
     resp = client.post(url, {
-        "uuid": blob_image_factory.uuid
+        "uuid": blob_image_factory[0].uuid
     })
 
     assert resp.status_code == 200
@@ -77,7 +77,7 @@ def test_accounts_unpin_note(auto_login_user, blob_text_factory):
 
     url = urls.reverse("accounts:pin_note")
     resp = client.post(url, {
-        "uuid": blob_text_factory.uuid,
+        "uuid": blob_text_factory[0].uuid,
         "remove": "true"
     })
 

@@ -2,17 +2,18 @@ import datetime
 import hashlib
 import os
 from datetime import timedelta
+from io import BytesIO
 from pathlib import Path
 
 import boto3
 import botocore
+import factory
 import pytest
 import responses
 from PIL import Image
 
 import django
 from django.conf import settings
-from django.core.files import File
 
 try:
     from pyvirtualdisplay import Display
@@ -27,7 +28,8 @@ django.setup()
 from accounts.models import SortOrderUserTag, SortOrderUserNote, SortOrderUserFeed, SortOrderDrillTag  # isort:skip
 from accounts.tests.factories import TEST_PASSWORD, UserFactory  # isort:skip
 from api.serializers import BlobSerializer  # isort:skip
-from blob.tests.factories import BlobFactory  # isort:skip
+from blob.models import MetaData  # isort:skip
+from blob.tests.factories import BlobFactory, MetaDataFactory  # isort:skip
 from bookmark.models import Bookmark  # isort:skip
 from bookmark import models as bookmark_models  # isort:skip
 from bookmark.tests.factories import BookmarkFactory  # isort:skip
@@ -77,7 +79,7 @@ def auto_login_user(client, blob_text_factory, tag):
 
         if user is None:
             user = UserFactory()
-            SortOrderUserNote.objects.get_or_create(userprofile=user.userprofile, note=blob_text_factory)
+            SortOrderUserNote.objects.get_or_create(userprofile=user.userprofile, note=blob_text_factory[0])
 
             # Make the user an admin
             admin_group, _ = Group.objects.get_or_create(name="Admin")
@@ -122,59 +124,112 @@ def monkeypatch_bookmark(monkeypatch):
 
 
 @pytest.fixture()
-def blob_image_factory(db, s3_resource, s3_bucket):
+def blob_note(db, s3_resource, s3_bucket):
 
-    blob = BlobFactory(
-        date="2021-03-04",
-        id=1000,
-        uuid="0bb4914e-cd3c-4d6b-9d72-0454adf00260",
-        name="Vaporwave Wallpaper 2E",
+    blob_1 = BlobFactory(
+        is_note=True,
+        metadata=3,
+        tags=("django", "linux", "video"),
+    )
+    blob_2 = BlobFactory(
+        is_note=True,
+        metadata=3,
         tags=("django", "linux", "video"),
     )
 
-    file_path = "blob/tests/resources/test_blob.jpg"
-    cover_filename = "cover.jpg"
-    handle_file_info(blob, file_path, cover_filename)
-    handle_s3_info_image(s3_resource, s3_bucket, blob, file_path, cover_filename)
+    _index_blob(blob_1)
+    _index_blob(blob_2)
 
-    url = f"https://www.bordercore.com/api/blobs/{blob.uuid}/"
-    serializer = BlobSerializer(blob)
-    responses.add(responses.GET, url,
-                  json=serializer.data, status=200)
-    index_blob(uuid=blob.uuid, create_connection=True)
+    yield blob_1, blob_2
 
-    yield blob
+
+@pytest.fixture()
+def blob_image_factory(db, s3_resource, s3_bucket):
+
+    blob = BlobFactory.create(
+        metadata=3,
+        tags=("django", "linux", "video"),
+    )
+
+    MetaData.objects.create(
+        user=blob.user,
+        blob=blob,
+        name="Author",
+        value=factory.Faker("text", max_nb_chars=40),
+    )
+
+    image_bytes = b"mybinarydata"
+    img = BytesIO(image_bytes)
+    img.name = factory.Faker("file_name", category="image").generate()
+    blob.file_modified = 1638644921
+    blob.file.save(img.name, img)
+    blob.sha1sum = hashlib.sha1(image_bytes).hexdigest()
+
+    _index_blob(blob)
+
+    yield [blob]
 
 
 @pytest.fixture()
 def blob_pdf_factory(db, s3_resource, s3_bucket):
 
-    blob = BlobFactory(
-        date="1996-11-19",
-        id=2000,
-        uuid="4158cf58-306c-42d7-9c98-07d3a96a1d8b",
-        name="Bleached Album Notes",
+    blob = BlobFactory.create(
+        metadata=3,
         tags=("django", "linux", "video"),
     )
 
-    file_path = "blob/tests/resources/test_blob.pdf"
-    cover_filename = "cover-large.jpg"
-    handle_file_info(blob, file_path, cover_filename)
-    handle_s3_info_pdf(s3_resource, s3_bucket, blob, file_path, cover_filename)
-    yield blob
+    MetaData.objects.create(
+        user=blob.user,
+        blob=blob,
+        name="Author",
+        value=factory.Faker("text", max_nb_chars=40),
+    )
+
+    pdf_bytes = b"mybinarydata"
+    img = BytesIO(pdf_bytes)
+    img.name = factory.Faker("file_name", extension="pdf").generate()
+    blob.file_modified = 1638644921
+    blob.file.save(img.name, img)
+    blob.sha1sum = hashlib.sha1(pdf_bytes).hexdigest()
+
+    _index_blob(blob)
+
+    yield [blob]
 
 
 @pytest.fixture()
 def blob_text_factory(db, s3_resource, s3_bucket):
 
-    blob = BlobFactory(
-        id=3000,
-        uuid="7ef28ad2-ee89-4bf7-8a58-4bdfb74424e2",
-        name="Sample blob with no sha1sum",
-        tags=("django"),
-    )
+    blob_list = []
 
-    yield blob
+    for i in range(3):
+        blob = BlobFactory.create(
+            tags=("django", "linux"),
+        )
+
+        MetaData.objects.create(
+            user=blob.user,
+            blob=blob,
+            name="Author",
+            value=factory.Faker("text", max_nb_chars=40),
+        )
+
+        _index_blob(blob)
+
+        blob_list.append(blob)
+
+    yield blob_list
+
+
+def _index_blob(blob):
+
+    url = f"https://www.bordercore.com/api/blobs/{blob.uuid}/"
+    serializer = BlobSerializer(blob)
+    responses.add(responses.GET, url,
+                  json=serializer.data, status=200)
+
+    index_blob(uuid=blob.uuid, create_connection=True)
+
 
 
 @pytest.fixture()
@@ -292,11 +347,11 @@ def collection(monkeypatch_collection, blob_image_factory, blob_pdf_factory):
     tag_2 = TagFactory(name="django")
     collection_0.tags.add(tag_1, tag_2)
 
-    collection_0.add_blob(blob_image_factory)
-    collection_0.add_blob(blob_pdf_factory)
+    collection_0.add_blob(blob_image_factory[0])
+    collection_0.add_blob(blob_pdf_factory[0])
 
     collection_1 = CollectionFactory(name="To Display")
-    collection_1.add_blob(blob_pdf_factory)
+    collection_1.add_blob(blob_pdf_factory[0])
 
     yield [collection_0, collection_1]
 
@@ -358,9 +413,9 @@ def node(bookmark, blob_image_factory, blob_pdf_factory):
     so = SortOrderNodeBookmark(node=node, bookmark=bookmark[1])
     so.save()
 
-    so = SortOrderNodeBlob(node=node, blob=blob_image_factory)
+    so = SortOrderNodeBlob(node=node, blob=blob_image_factory[0])
     so.save()
-    so = SortOrderNodeBlob(node=node, blob=blob_pdf_factory)
+    so = SortOrderNodeBlob(node=node, blob=blob_pdf_factory[0])
     so.save()
 
     yield node
@@ -476,7 +531,6 @@ def sort_order_user_tag(auto_login_user, tag):
     sort_order = SortOrderUserTag(userprofile=user.userprofile, tag=tag[2])
     sort_order.save()
 
-
 @pytest.fixture()
 def tag():
 
@@ -508,28 +562,6 @@ def todo():
     task_3.tags.add(tag_2)
 
     yield task_3
-
-
-def handle_file_info(blob, file_path, cover_filename):
-
-    filepath = Path(__file__).parent / file_path
-    filename = Path(filepath).name
-
-    filepath_cover = Path(__file__).parent / f"blob/tests/resources/{cover_filename}"
-
-    width_cover, height_cover = Image.open(filepath_cover).size
-
-    hasher = hashlib.sha1()
-    with open(filepath, "rb") as f:
-        buf = f.read()
-        hasher.update(buf)
-        sha1sum = hasher.hexdigest()
-
-    blob.sha1sum = sha1sum
-    blob.file_modified = int(os.path.getmtime(str(filepath)))
-
-    f = open(filepath, "rb")
-    blob.file.save(filename, File(f))
 
 
 def handle_s3_info_image(s3_resource, s3_bucket, blob, file_path, cover_filename):

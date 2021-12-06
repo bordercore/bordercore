@@ -1,5 +1,4 @@
 import pytest
-from elasticsearch import Elasticsearch
 
 from django import urls
 
@@ -28,9 +27,9 @@ def test_node_detail(auto_login_user, node, blob_image_factory, blob_pdf_factory
     assert resp.status_code == 200
 
     # Test a node with no objects
-    s = SortOrderNodeBlob.objects.get(node__uuid=node.uuid, blob__uuid=blob_image_factory.uuid)
+    s = SortOrderNodeBlob.objects.get(node__uuid=node.uuid, blob__uuid=blob_image_factory[0].uuid)
     s.delete()
-    s = SortOrderNodeBlob.objects.get(node__uuid=node.uuid, blob__uuid=blob_pdf_factory.uuid)
+    s = SortOrderNodeBlob.objects.get(node__uuid=node.uuid, blob__uuid=blob_pdf_factory[0].uuid)
     s.delete()
     url = urls.reverse("node:detail", kwargs={"uuid": node.uuid})
     resp = client.get(url)
@@ -55,7 +54,7 @@ def test_sort_blobs(auto_login_user, node, blob_image_factory):
     url = urls.reverse("node:sort_blobs")
     resp = client.post(url, {
         "node_uuid": node.uuid,
-        "blob_uuid": blob_image_factory.uuid,
+        "blob_uuid": blob_image_factory[0].uuid,
         "new_position": "2"
     })
 
@@ -67,13 +66,13 @@ def test_add_blob(auto_login_user, node, blob_image_factory):
     _, client = auto_login_user()
 
     # First delete the blob, then add it back via the view
-    s = SortOrderNodeBlob.objects.get(node__uuid=node.uuid, blob__uuid=blob_image_factory.uuid)
+    s = SortOrderNodeBlob.objects.get(node__uuid=node.uuid, blob__uuid=blob_image_factory[0].uuid)
     s.delete()
 
     url = urls.reverse("node:add_blob")
     resp = client.post(url, {
         "node_uuid": node.uuid,
-        "blob_uuid": blob_image_factory.uuid
+        "blob_uuid": blob_image_factory[0].uuid
     })
 
     assert resp.status_code == 200
@@ -86,7 +85,7 @@ def test_remove_blob(auto_login_user, node, blob_image_factory):
     url = urls.reverse("node:remove_blob")
     resp = client.post(url, {
         "node_uuid": node.uuid,
-        "blob_uuid": blob_image_factory.uuid
+        "blob_uuid": blob_image_factory[0].uuid
     })
 
     assert resp.status_code == 200
@@ -99,7 +98,7 @@ def test_edit_blob_note(auto_login_user, node, blob_image_factory):
     url = urls.reverse("node:edit_blob_note")
     resp = client.post(url, {
         "node_uuid": node.uuid,
-        "blob_uuid": blob_image_factory.uuid,
+        "blob_uuid": blob_image_factory[0].uuid,
         "note": "Sample Note"
     })
 

@@ -1,4 +1,5 @@
-from urllib.parse import quote_plus
+import datetime
+from urllib.parse import quote_plus, urlparse
 
 import django
 
@@ -14,32 +15,38 @@ from blob.models import Blob  # isort:skip
 
 
 def test_get_s3_key(blob_image_factory):
-    s3_key = Blob.get_s3_key(blob_image_factory.uuid, blob_image_factory.file)
-    assert s3_key == f"blobs/{blob_image_factory.uuid}/{blob_image_factory.file}"
+    s3_key = Blob.get_s3_key(blob_image_factory[0].uuid, blob_image_factory[0].file)
+    assert s3_key == f"blobs/{blob_image_factory[0].uuid}/{blob_image_factory[0].file}"
 
-    assert blob_image_factory.s3_key == f"blobs/{blob_image_factory.uuid}/{blob_image_factory.file}"
+    assert blob_image_factory[0].s3_key == f"blobs/{blob_image_factory[0].uuid}/{blob_image_factory[0].file}"
 
 
 def test_get_edition_string(blob_image_factory):
 
-    assert blob_image_factory.get_edition_string() == "Second Edition"
+    blob_image_factory[0].name = "Introduction to Electrodynamics 4E"
+    assert blob_image_factory[0].get_edition_string() == "Fourth Edition"
 
-    blob_image_factory.name = "Name"
-    assert blob_image_factory.get_edition_string() == ""
+    blob_image_factory[0].name = "Name"
+    assert blob_image_factory[0].get_edition_string() == ""
 
 
 def test_doctype(blob_image_factory, blob_text_factory):
 
-    assert blob_image_factory.doctype == "image"
-    assert blob_text_factory.doctype == "document"
+    blob_image_factory[0].file = "foo.jpg"
+    assert blob_image_factory[0].doctype == "image"
+
+    blob_image_factory[0].file = "foo.pdf"
+    assert blob_text_factory[0].doctype == "document"
 
 
 def test_get_metadata(blob_image_factory):
 
-    metadata, urls = blob_image_factory.get_metadata()
-    assert "John Smith" in [value for key, value in metadata.items()]
-    assert urls[0]["domain"] == "www.bordercore.com"
-    assert urls[0]["url"] == "https://www.bordercore.com"
+    metadata, urls = blob_image_factory[0].get_metadata()
+    assert blob_image_factory[0].metadata.first().value in [value for key, value in metadata.items()]
+
+    url = blob_image_factory[0].metadata.filter(name="Url").first()
+    assert urls[0]["url"] == url.value
+    assert urls[0]["domain"] == urlparse(url.value).netloc
 
 
 def test_get_content_type():
@@ -48,42 +55,41 @@ def test_get_content_type():
 
 
 def test_get_parent_dir(blob_image_factory):
-    parent_dir = blob_image_factory.get_parent_dir()
-    assert parent_dir == f"blobs/{blob_image_factory.uuid}"
+    parent_dir = blob_image_factory[0].get_parent_dir()
+    assert parent_dir == f"blobs/{blob_image_factory[0].uuid}"
 
 
 def test_get_url(blob_image_factory):
-    url = blob_image_factory.get_url()
-    assert url == f"{blob_image_factory.uuid}/{quote_plus(str(blob_image_factory.file))}"
+    url = blob_image_factory[0].get_url()
+    assert url == f"{blob_image_factory[0].uuid}/{quote_plus(str(blob_image_factory[0].file))}"
 
 
 def test_get_name(blob_image_factory):
 
-    assert blob_image_factory.get_name() == "Vaporwave Wallpaper 2E"
-    assert blob_image_factory.get_name(remove_edition_string=True) == "Vaporwave Wallpaper"
+    blob_image_factory[0].name = "Vaporwave Wallpaper 2E"
+    assert blob_image_factory[0].get_name() == "Vaporwave Wallpaper 2E"
+    assert blob_image_factory[0].get_name(remove_edition_string=True) == "Vaporwave Wallpaper"
 
-    blob_image_factory.name = ""
-    assert blob_image_factory.get_name(use_filename_if_present=True) == blob_image_factory.file
-    assert blob_image_factory.get_name() == "No name"
+    blob_image_factory[0].name = ""
+    assert blob_image_factory[0].get_name(use_filename_if_present=True) == blob_image_factory[0].file
+    assert blob_image_factory[0].get_name() == "No name"
 
 
 def test_get_tags(blob_image_factory):
-    assert blob_image_factory.get_tags() == "django, linux, video"
+    assert blob_image_factory[0].get_tags() == "django, linux, video"
 
 
 def test_get_collection_info(collection, blob_pdf_factory):
-    assert len(blob_pdf_factory.get_collection_info()) == 2
-    assert blob_pdf_factory.get_collection_info().first().name == "To Display"
+    assert len(blob_pdf_factory[0].get_collection_info()) == 2
+    assert blob_pdf_factory[0].get_collection_info().first().name == "To Display"
 
 
 def test_get_linked_blobs(blob_pdf_factory):
-    assert len(blob_pdf_factory.get_linked_blobs()) == 0
+    assert len(blob_pdf_factory[0].get_linked_blobs()) == 0
 
 
 def test_get_date(blob_image_factory):
-    assert blob_image_factory.get_date() == "March 04, 2021"
-
-    assert blob_image_factory.get_date() == datetime.datetime.strptime(blob_image_factory.date, '%Y-%m-%d').strftime('%B %d, %Y')
+    assert blob_image_factory[0].get_date() == datetime.datetime.strptime(blob_image_factory[0].date, '%Y-%m-%d').strftime('%B %d, %Y')
 
 
 def test_is_ingestible_file(blob_image_factory):
@@ -101,18 +107,18 @@ def test_duration_humanized():
 
 def test_clone(monkeypatch_blob, blob_pdf_factory, collection):
 
-    cloned_blob = blob_pdf_factory.clone()
-    assert cloned_blob.date == blob_pdf_factory.date
-    assert cloned_blob.tags.all().count() == blob_pdf_factory.tags.all().count()
-    assert cloned_blob.metadata.all().count() == blob_pdf_factory.metadata.all().count()
+    cloned_blob = blob_pdf_factory[0].clone()
+    assert cloned_blob.date == blob_pdf_factory[0].date
+    assert cloned_blob.tags.all().count() == blob_pdf_factory[0].tags.all().count()
+    assert cloned_blob.metadata.all().count() == blob_pdf_factory[0].metadata.all().count()
 
-    for metadata in blob_pdf_factory.metadata.all():
+    for metadata in blob_pdf_factory[0].metadata.all():
         assert metadata.name in [x.name for x in cloned_blob.metadata.all()]
 
-    for tag in blob_pdf_factory.tags.all():
+    for tag in blob_pdf_factory[0].tags.all():
         assert tag in cloned_blob.tags.all()
 
-    for c in Collection.objects.filter(blobs__uuid=blob_pdf_factory.uuid):
+    for c in Collection.objects.filter(blobs__uuid=blob_pdf_factory[0].uuid):
         assert cloned_blob in c.blobs.all()
 
 
@@ -123,20 +129,20 @@ def count_nodes(nodes, root_node=True):
 
 def test_parse_nodes(blob_text_factory):
 
-    blob_text_factory.content = ""
-    tree = blob_text_factory.get_tree()
+    blob_text_factory[0].content = ""
+    tree = blob_text_factory[0].get_tree()
     assert count_nodes(tree) == 0
 
-    blob_text_factory.content = """
+    blob_text_factory[0].content = """
     # Node 1
     """
-    tree = blob_text_factory.get_tree()
+    tree = blob_text_factory[0].get_tree()
     assert count_nodes(tree) == 1
     assert tree[0]["id"] == 1
     assert tree[0]["label"] == "Node 1"
     assert tree[0]["nodes"] == []
 
-    blob_text_factory.content = """
+    blob_text_factory[0].content = """
     ### Node 1
     Content
     #### Subnode 1a
@@ -144,7 +150,7 @@ def test_parse_nodes(blob_text_factory):
     ### Node 2
     """
 
-    tree = blob_text_factory.get_tree()
+    tree = blob_text_factory[0].get_tree()
     assert count_nodes(tree) == 3
     assert tree[0]["id"] == 1
     assert tree[0]["label"] == "Node 1"
@@ -155,7 +161,7 @@ def test_parse_nodes(blob_text_factory):
     assert tree[1]["label"] == "Node 2"
     assert tree[1]["nodes"] == []
 
-    blob_text_factory.content = """
+    blob_text_factory[0].content = """
     ## Node 1
     ### Subnode 1a
     ### Subnode 1b
@@ -166,7 +172,7 @@ def test_parse_nodes(blob_text_factory):
     ### Subnode 3a
     """
 
-    tree = blob_text_factory.get_tree()
+    tree = blob_text_factory[0].get_tree()
     assert count_nodes(tree) == 8
     assert tree[0]["id"] == 1
     assert tree[0]["label"] == "Node 1"

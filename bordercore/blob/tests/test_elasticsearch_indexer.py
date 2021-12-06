@@ -24,25 +24,25 @@ def test_is_ingestible_file():
 
 def test_get_blob_info(blob_image_factory):
 
-    url = f"https://www.bordercore.com/api/blobs/{blob_image_factory.uuid}/"
-    serializer = BlobSerializer(blob_image_factory)
+    url = f"https://www.bordercore.com/api/blobs/{blob_image_factory[0].uuid}/"
+    serializer = BlobSerializer(blob_image_factory[0])
     responses.add(responses.GET, url,
                   json=serializer.data, status=200)
 
-    blob_info = get_blob_info(uuid=blob_image_factory.uuid)
-    assert blob_info["name"] == blob_image_factory.name
-    assert set(blob_info["tags"]) == set([x.name for x in blob_image_factory.tags.all()])
-    assert set(blob_info["metadata"]) == set([x.name.lower() for x in blob_image_factory.metadata.all()])
+    blob_info = get_blob_info(uuid=blob_image_factory[0].uuid)
+    assert blob_info["name"] == blob_image_factory[0].name
+    assert set(blob_info["tags"]) == set([x.name for x in blob_image_factory[0].tags.all()])
+    assert set(blob_info["metadata"]) == set([x.name.lower() for x in blob_image_factory[0].metadata.all()])
 
-    url = f"https://www.bordercore.com/api/sha1sums/{blob_image_factory.sha1sum}/"
-    serializer = BlobSha1sumSerializer(blob_image_factory)
+    url = f"https://www.bordercore.com/api/sha1sums/{blob_image_factory[0].sha1sum}/"
+    serializer = BlobSha1sumSerializer(blob_image_factory[0])
     responses.add(responses.GET, url,
                   json=serializer.data, status=200)
 
-    blob_info = get_blob_info(sha1sum=blob_image_factory.sha1sum)
-    assert blob_info["name"] == blob_image_factory.name
-    assert set(blob_info["tags"]) == set([x.name for x in blob_image_factory.tags.all()])
-    assert set(blob_info["metadata"]) == set([x.name.lower() for x in blob_image_factory.metadata.all()])
+    blob_info = get_blob_info(sha1sum=blob_image_factory[0].sha1sum)
+    assert blob_info["name"] == blob_image_factory[0].name
+    assert set(blob_info["tags"]) == set([x.name for x in blob_image_factory[0].tags.all()])
+    assert set(blob_info["metadata"]) == set([x.name.lower() for x in blob_image_factory[0].metadata.all()])
 
 
 def test_get_unixtime_from_string():

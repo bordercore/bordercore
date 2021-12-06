@@ -83,7 +83,7 @@ def test_blob_delete(monkeypatch_blob, auto_login_user, blob_text_factory):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("blob:delete", kwargs={"uuid": blob_text_factory.uuid})
+    url = urls.reverse("blob:delete", kwargs={"uuid": blob_text_factory[0].uuid})
     resp = client.post(url)
 
     assert resp.status_code == 302
@@ -95,13 +95,13 @@ def test_blob_update(monkeypatch_blob, auto_login_user, blob_text_factory):
     _, client = auto_login_user()
 
     # The empty form
-    url = urls.reverse("blob:update", kwargs={"uuid": blob_text_factory.uuid})
+    url = urls.reverse("blob:update", kwargs={"uuid": blob_text_factory[0].uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200
 
     # The submitted form
-    url = urls.reverse("blob:update", kwargs={"uuid": blob_text_factory.uuid})
+    url = urls.reverse("blob:update", kwargs={"uuid": blob_text_factory[0].uuid})
     resp = client.post(url, {
         "name": "Name Changed",
         "note": "Note Changed",
@@ -113,24 +113,23 @@ def test_blob_update(monkeypatch_blob, auto_login_user, blob_text_factory):
 
 
 @pytest.mark.parametrize("blob", [pytest.lazy_fixture("blob_image_factory"), pytest.lazy_fixture("blob_text_factory")])
-def test_blob_detail(monkeypatch_blob, auto_login_user, blob):
-    """Verify we redirect to the memes page when a user is logged in"""
+def test_blob_detail(auto_login_user, blob):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("blob:detail", args=(blob.uuid,))
+    url = urls.reverse("blob:detail", args=(blob[0].uuid,))
     resp = client.get(url)
 
     assert resp.status_code == 200
 
     soup = BeautifulSoup(resp.content, "html.parser")
 
-    assert soup.select("div#vue-right-panel h2#name")[0].findAll(text=True)[0].strip() == blob.get_name(remove_edition_string=True)
+    assert soup.select("div#vue-right-panel h2#name")[0].findAll(text=True)[0].strip() == blob[0].get_name(remove_edition_string=True)
 
-    url = [x.value for x in blob.metadata.all() if x.name == "Url"][0]
+    url = [x.value for x in blob[0].metadata.all() if x.name == "Url"][0]
     assert soup.select("strong a")[0].findAll(text=True)[0] == urlparse(url).netloc
 
-    author = [x.value for x in blob.metadata.all() if x.name == "Author"][0]
+    author = [x.value for x in blob[0].metadata.all() if x.name == "Author"][0]
     assert author in [x for sublist in soup.select("span") for x in sublist]
 
 
@@ -151,7 +150,7 @@ def test_blob_collection_mutate(monkeypatch_collection, auto_login_user, blob_te
     url = urls.reverse("blob:collection_mutate")
 
     resp = client.post(url, {
-        "blob_uuid": blob_text_factory.uuid,
+        "blob_uuid": blob_text_factory[0].uuid,
         "collection_uuid": collection[0].uuid,
         "mutation": "add"
     })
@@ -159,7 +158,7 @@ def test_blob_collection_mutate(monkeypatch_collection, auto_login_user, blob_te
     assert resp.status_code == 200
 
     resp = client.post(url, {
-        "blob_uuid": blob_text_factory.uuid,
+        "blob_uuid": blob_text_factory[0].uuid,
         "collection_uuid": collection[0].uuid,
         "mutation": "delete"
     })

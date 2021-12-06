@@ -19,35 +19,29 @@ class BlobFactory(factory.DjangoModelFactory):
     class Meta:
         model = Blob
 
+    name = factory.Faker("text", max_nb_chars=30)
     user = factory.SubFactory(UserFactory)
-
+    date = factory.Faker("date")
     content = factory.Faker("text")
     note = factory.Faker("text")
 
-    md1 = factory.RelatedFactory(
-        MetaDataFactory,
-        "blob",
-        name="Url",
-        value="https://www.bordercore.com",
-        user=user)
-    md2 = factory.RelatedFactory(
-        MetaDataFactory,
-        "blob",
-        name="Author",
-        value="John Smith",
-        user=user)
-    md3 = factory.RelatedFactory(
-        MetaDataFactory,
-        "blob",
-        name="Artist",
-        value="John Smith",
-        user=user)
-    md4 = factory.RelatedFactory(
-        MetaDataFactory,
-        "blob",
-        name="Artist",
-        value="Jane Doe",
-        user=user)
+    @factory.post_generation
+    def metadata(self, create, extracted, **kwargs):
+
+        if extracted:
+            for x in range(extracted):
+                MetaDataFactory(
+                    blob=self,
+                    name=factory.Faker("text", max_nb_chars=5),
+                    value=factory.Faker("text", max_nb_chars=40),
+                    user=self.user
+                )
+        MetaDataFactory(
+            blob=self,
+            name="Url",
+            value=factory.Faker("url"),
+            user=self.user
+        )
 
     @factory.post_generation
     def tags(self, create, extracted, **kwargs):
@@ -55,6 +49,5 @@ class BlobFactory(factory.DjangoModelFactory):
         if not create:
             return
 
-        if extracted:
-            for tag in extracted:
-                self.tags.add(TagFactory(name=tag))
+        for tag in extracted:
+            self.tags.add(TagFactory(name=tag))

@@ -12,7 +12,7 @@ def test_get_tags(sort_order_user_tag):
 
     user = User.objects.get(username=TEST_USERNAME)
 
-    assert user.userprofile.get_tags() == "django, video, linux"
+    assert user.userprofile.get_tags() == "linux, video, django"
 
 
 def test_reorder(sort_order_user_tag, tag):
