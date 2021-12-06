@@ -269,7 +269,15 @@
                             title: "Update Album",
                             url: "#",
                             clickHandler: this.handleUpdateAlbum,
+                        },
+                        {% if not album.song_set.all %}
+                        {
+                            id: uuidv4(),
+                            title: "Delete Album",
+                            url: "#",
+                            clickHandler: this.handleDeleteAlbum,
                         }
+                        {% endif %}
                     ]
                 }
             },
@@ -314,6 +322,14 @@
                 },
                 handleUpdateAlbum() {
                     $("#modalUpdateAlbum").modal("show")
+                },
+                handleDeleteAlbum() {
+                    axios.delete("{% url 'album-detail' object.uuid %}")
+                         .then((response) => {
+                             window.location = "{% url 'music:list' %}";
+                         }, (error) => {
+                             console.log(error);
+                         });
                 },
                 onCoverImageSelect(evt) {
                     this.filename = evt.target.files[0].name;

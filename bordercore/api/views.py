@@ -1,6 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
+from django.contrib import messages
+
 from accounts.models import User
 from blob.models import Blob
 from bookmark.models import Bookmark
@@ -24,9 +26,17 @@ from .serializers import (AlbumSerializer, BlobSerializer,
 class AlbumViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = AlbumSerializer
+    lookup_field = "uuid"
 
     def get_queryset(self):
         return Album.objects.filter(user=self.request.user)
+
+    def perform_destroy(self, instance):
+        """
+        Use this DRF hook to add a message to the user.
+        """
+        instance.delete()
+        messages.add_message(self.request, messages.INFO, "Album successfully deleted")
 
 
 class BlobViewSet(viewsets.ModelViewSet):
