@@ -1,6 +1,5 @@
-from django.contrib.postgres.forms import JSONField
-from django.forms import (CheckboxInput, ModelForm, Textarea, TextInput,
-                          URLInput, ValidationError)
+from django.forms import (CheckboxInput, JSONField, ModelForm, Textarea,
+                          TextInput, URLInput, ValidationError)
 
 from bookmark.models import Bookmark
 from lib.fields import (CheckboxIntegerField, ModelCommaSeparatedChoiceField,
