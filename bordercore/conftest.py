@@ -64,6 +64,15 @@ os.environ["DISABLE_DEBUG_TOOLBAR"] = "1"
 
 
 @pytest.fixture()
+def temp_blob_directory():
+    """
+    Create the temporary directory needed by the Elasticsearch indexer
+    """
+    BLOBS_DIR = f"{os.environ.get('EFS_DIR', '/tmp')}/blobs"
+    os.makedirs(BLOBS_DIR, exist_ok=True)
+
+
+@pytest.fixture()
 def aws_credentials():
     """Mocked AWS Credentials for moto."""
     os.environ["AWS_ACCESS_KEY_ID"] = "testing"
@@ -124,7 +133,7 @@ def monkeypatch_bookmark(monkeypatch):
 
 
 @pytest.fixture()
-def blob_note(db, s3_resource, s3_bucket):
+def blob_note(temp_blob_directory, db, s3_resource, s3_bucket):
 
     blob_1 = BlobFactory(
         is_note=True,
@@ -144,7 +153,7 @@ def blob_note(db, s3_resource, s3_bucket):
 
 
 @pytest.fixture()
-def blob_image_factory(db, s3_resource, s3_bucket):
+def blob_image_factory(temp_blob_directory, db, s3_resource, s3_bucket):
 
     blob = BlobFactory.create(
         metadata=3,
@@ -171,7 +180,7 @@ def blob_image_factory(db, s3_resource, s3_bucket):
 
 
 @pytest.fixture()
-def blob_pdf_factory(db, s3_resource, s3_bucket):
+def blob_pdf_factory(temp_blob_directory, db, s3_resource, s3_bucket):
 
     blob = BlobFactory.create(
         metadata=3,
