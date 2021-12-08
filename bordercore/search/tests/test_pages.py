@@ -5,8 +5,7 @@ import pytest
 from django.urls import reverse
 
 try:
-    from .pages.search import SearchPage, TagSearchPage, NoteSearchPage
-    from selenium.webdriver.common.action_chains import ActionChains
+    from .pages.search import SearchPage, TagSearchPage
     from selenium.webdriver.common.keys import Keys
 except (ModuleNotFoundError, NameError):
     # Don't worry if these imports don't exist in production

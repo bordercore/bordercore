@@ -16,8 +16,6 @@ from storages.backends.s3boto3 import S3Boto3Storage
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models.signals import pre_delete, pre_save
-from django.dispatch.dispatcher import receiver
 
 from collection.models import Collection, SortOrderCollectionBlob
 from lib.mixins import TimeStampedModel

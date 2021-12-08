@@ -9,8 +9,6 @@ from .test_views import monkeypatch_blob
 
 django.setup()
 
-from django.contrib.auth.models import User  # isort:skip
-from tag.models import Tag  # isort:skip
 from blob.models import Blob  # isort:skip
 
 

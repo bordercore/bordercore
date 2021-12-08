@@ -1,5 +1,3 @@
-from accounts.tests.factories import TEST_PASSWORD, TEST_USERNAME
-
 try:
     from selenium.webdriver.common.by import By
 except ModuleNotFoundError:

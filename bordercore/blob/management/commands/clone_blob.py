@@ -5,7 +5,7 @@
 from django.core.management.base import BaseCommand
 from django.db.transaction import atomic
 
-from blob.models import Blob, MetaData
+from blob.models import Blob
 
 
 class Command(BaseCommand):

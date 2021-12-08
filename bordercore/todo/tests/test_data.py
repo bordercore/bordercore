@@ -10,7 +10,6 @@ pytestmark = pytest.mark.data_quality
 django.setup()
 
 from todo.models import Todo  # isort:skip
-from tag.models import Tag  # isort:skip
 
 
 @pytest.fixture()

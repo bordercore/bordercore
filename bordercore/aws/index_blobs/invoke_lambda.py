@@ -8,8 +8,6 @@ import django
 
 django.setup()
 
-from blob.models import Blob  # isort:skip
-
 client = boto3.client("lambda")
 
 

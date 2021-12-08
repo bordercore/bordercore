@@ -21,7 +21,6 @@ pytestmark = pytest.mark.data_quality
 django.setup()
 
 from blob.models import Blob, ILLEGAL_FILENAMES, MetaData   # isort:skip
-from collection.models import Collection  # isort:skip
 from drill.models import Question  # isort:skip
 from tag.models import Tag  # isort:skip
 

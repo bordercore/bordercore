@@ -9,7 +9,6 @@ import django
 django.setup()
 
 from feed.models import Feed, FeedItem  # isort:skip
-from accounts.models import UserProfile  # isort:skip
 
 pytestmark = pytest.mark.django_db
 

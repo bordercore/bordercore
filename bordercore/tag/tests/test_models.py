@@ -4,7 +4,7 @@ import django
 
 django.setup()
 
-from tag.models import SortOrderTagBookmark, Tag  # isort:skip
+from tag.models import SortOrderTagBookmark  # isort:skip
 
 pytestmark = pytest.mark.django_db
 

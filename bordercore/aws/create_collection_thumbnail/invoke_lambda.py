@@ -1,6 +1,5 @@
 import argparse
 import json
-import pprint
 
 import boto3
 
@@ -8,8 +7,6 @@ import django
 from django.conf import settings
 
 django.setup()
-
-from blob.models import Blob  # isort:skip
 
 client = boto3.client("lambda")
 

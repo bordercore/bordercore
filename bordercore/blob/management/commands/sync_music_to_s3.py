@@ -1,5 +1,3 @@
-import os
-import os.path
 import string
 from pathlib import Path
 

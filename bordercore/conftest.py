@@ -29,7 +29,7 @@ from accounts.models import SortOrderUserTag, SortOrderUserNote, SortOrderUserFe
 from accounts.tests.factories import TEST_PASSWORD, UserFactory  # isort:skip
 from api.serializers import BlobSerializer  # isort:skip
 from blob.models import MetaData  # isort:skip
-from blob.tests.factories import BlobFactory, MetaDataFactory  # isort:skip
+from blob.tests.factories import BlobFactory  # isort:skip
 from bookmark.models import Bookmark  # isort:skip
 from bookmark.tests.factories import BookmarkFactory  # isort:skip
 from collection.tests.factories import CollectionFactory  # isort:skip
