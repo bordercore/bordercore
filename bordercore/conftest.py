@@ -31,7 +31,6 @@ from api.serializers import BlobSerializer  # isort:skip
 from blob.models import MetaData  # isort:skip
 from blob.tests.factories import BlobFactory, MetaDataFactory  # isort:skip
 from bookmark.models import Bookmark  # isort:skip
-from bookmark import models as bookmark_models  # isort:skip
 from bookmark.tests.factories import BookmarkFactory  # isort:skip
 from collection.tests.factories import CollectionFactory  # isort:skip
 from collection.models import Collection  # isort:skip
@@ -126,7 +125,7 @@ def monkeypatch_bookmark(monkeypatch):
     def mock(*args, **kwargs):
         pass
 
-    monkeypatch.setattr(bookmark_models, "generate_cover_image", mock)
+    monkeypatch.setattr(Bookmark, "generate_cover_image", mock)
     monkeypatch.setattr(Bookmark, "index_bookmark", mock)
     monkeypatch.setattr(Bookmark, "snarf_favicon", mock)
     monkeypatch.setattr(Bookmark, "delete", mock)

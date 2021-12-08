@@ -9,8 +9,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import JSONField
-from django.db.models.signals import m2m_changed, post_delete, post_save
-from django.dispatch.dispatcher import receiver
+from django.db.models.signals import m2m_changed
 
 from lib.mixins import TimeStampedModel
 from lib.util import get_elasticsearch_connection
@@ -55,7 +54,20 @@ class Bookmark(TimeStampedModel):
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
 
+    def save(self, *args, **kwargs):
+
+        new_object = True if not self.id else False
+
+        super().save(*args, **kwargs)
+
+        # Only generate a cover image when the bookmark is first
+        #  saved by checking for the existence of an id
+        if new_object:
+            self.generate_cover_image()
+
     def delete(self):
+
+        super().delete()
 
         es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
@@ -70,7 +82,7 @@ class Bookmark(TimeStampedModel):
                         },
                         {
                             "term": {
-                                "bordercore_id": self.id
+                                "uuid": self.uuid
                             }
                         },
                     ]
@@ -80,7 +92,36 @@ class Bookmark(TimeStampedModel):
 
         es.delete_by_query(index=settings.ELASTICSEARCH_INDEX, body=request_body)
 
-        super().delete()
+        self.delete_cover_image()
+
+    def generate_cover_image(self):
+
+        # TODO: move this to settings
+        SNS_TOPIC = "arn:aws:sns:us-east-1:192218769908:chromda"
+        client = boto3.client("sns")
+
+        message = {
+            "url": self.url,
+            "s3key": f"bookmarks/{self.uuid}.png"
+        }
+
+        client.publish(
+            TopicArn=SNS_TOPIC,
+            Message=json.dumps(message),
+        )
+
+    def delete_cover_image(self):
+        """
+        After deletion, remove the bookmark's cover images from S3
+        """
+
+        s3 = boto3.resource("s3")
+
+        key = f"bookmarks/{self.uuid}.png"
+        s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key).delete()
+
+        key = f"bookmarks/{self.uuid}-small.png"
+        s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key).delete()
 
     def index_bookmark(self, es=None):
 
@@ -162,41 +203,3 @@ def tags_changed(sender, **kwargs):
 
 
 m2m_changed.connect(tags_changed, sender=Bookmark.tags.through)
-
-
-@receiver(post_save, sender=Bookmark)
-def post_save_wrapper(sender, instance, created, **kwargs):
-    if created:
-        generate_cover_image(instance)
-
-
-def generate_cover_image(instance):
-
-    # TODO: move this to settings
-    SNS_TOPIC = "arn:aws:sns:us-east-1:192218769908:chromda"
-    client = boto3.client("sns")
-
-    message = {
-        "url": instance.url,
-        "s3key": f"bookmarks/{instance.uuid}.png"
-    }
-
-    client.publish(
-        TopicArn=SNS_TOPIC,
-        Message=json.dumps(message),
-    )
-
-
-@receiver(post_delete, sender=Bookmark)
-def delete_cover_image(sender, instance, **kwargs):
-    """
-    After deletion, remove the bookmark's cover images from S3
-    """
-
-    s3 = boto3.resource("s3")
-
-    key = f"bookmarks/{instance.uuid}.png"
-    s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key).delete()
-
-    key = f"bookmarks/{instance.uuid}-small.png"
-    s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key).delete()

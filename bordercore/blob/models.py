@@ -16,7 +16,7 @@ from storages.backends.s3boto3 import S3Boto3Storage
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models.signals import post_save, pre_delete, pre_save
+from django.db.models.signals import pre_delete, pre_save
 from django.dispatch.dispatcher import receiver
 
 from collection.models import Collection, SortOrderCollectionBlob
@@ -269,6 +269,9 @@ class Blob(TimeStampedModel):
 
     def save(self, *args, **kwargs):
 
+        # Use a custom S3 location for the blob, based on the blob's UUID
+        self.file.storage.location = f"blobs/{self.uuid}"
+
         # We rely on the readable() method to determine if we're
         #  adding a new file or editing an existing one. If it's
         #  new, we have access to the file since it was just
@@ -295,6 +298,33 @@ class Blob(TimeStampedModel):
                 log.info(f"{filename_orig} != {self.file.name}")
                 s3 = boto3.resource("s3")
                 s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key).delete()
+
+        # self.file_modified will be "None" if we're editing a blob's
+        # information or renaming the file, but not changing the file itself.
+        # In that case we don't want to update its "file_modified" metadata.
+        if self.file and self.file_modified:
+            self.set_s3_metadata_file_modified()
+
+    def set_s3_metadata_file_modified(self):
+        """
+        Store a file's modification time as S3 metadata after it's saved.
+        """
+
+        s3 = boto3.resource("s3")
+        key = self.s3_key
+
+        s3_object = s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key)
+
+        s3_object.metadata.update({"file-modified": str(self.file_modified)})
+
+        # Note: since "Content-Type" is system-defined metadata, it will be reset
+        #  to "binary/octent-stream" if you don't explicitly specify it.
+        s3_object.copy_from(
+            ContentType=s3_object.content_type,
+            CopySource={"Bucket": settings.AWS_STORAGE_BUCKET_NAME, "Key": key},
+            Metadata=s3_object.metadata,
+            MetadataDirective="REPLACE"
+        )
 
     def has_been_modified(self):
         """
@@ -568,8 +598,9 @@ class Blob(TimeStampedModel):
 
     def delete(self):
 
-        # Delete from Elasticsearch
+        super().delete()
 
+        # Delete from Elasticsearch
         es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         try:
@@ -581,61 +612,20 @@ class Blob(TimeStampedModel):
         for so in SortOrderCollectionBlob.objects.filter(blob=self):
             so.delete()
 
-        super().delete()
+        # Delete from S3
+        if self.file:
 
+            dir = f"{settings.MEDIA_ROOT}/{self.uuid}"
+            s3 = boto3.resource("s3")
+            my_bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
 
-@receiver(post_save, sender=Blob)
-def set_s3_metadata_file_modified(sender, instance, **kwargs):
-    """
-    Store a file's modification time as S3 metadata after it's saved.
-    """
+            # TODO: Add sanity check to prevent unwanted deletes?
+            for fn in my_bucket.objects.filter(Prefix=dir):
+                log.info(f"Deleting blob {fn}")
+                fn.delete()
 
-    # instance.file_modified will be "None" if we're editing a blob's
-    # information or renaming the file, but not changing the file itself.
-    # In that case we don't want to update its "file_modified" metadata.
-    if not instance.file or not instance.file_modified:
-        return
-
-    s3 = boto3.resource("s3")
-    key = instance.s3_key
-
-    s3_object = s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key)
-
-    s3_object.metadata.update({"file-modified": str(instance.file_modified)})
-
-    # Note: since "Content-Type" is system-defined metadata, it will be reset
-    #  to "binary/octent-stream" if you don't explicitly specify it.
-    s3_object.copy_from(
-        ContentType=s3_object.content_type,
-        CopySource={"Bucket": settings.AWS_STORAGE_BUCKET_NAME, "Key": key},
-        Metadata=s3_object.metadata,
-        MetadataDirective="REPLACE"
-    )
-
-
-@receiver(pre_save, sender=Blob)
-def mymodel_pre_save(sender, instance, **kwargs):
-
-    # Use a custom S3 location for the blob, based on the blob's UUID
-    instance.file.storage.location = f"blobs/{instance.uuid}"
-
-
-@receiver(pre_delete, sender=Blob)
-def mymodel_delete_s3(sender, instance, **kwargs):
-
-    if instance.file:
-
-        dir = f"{settings.MEDIA_ROOT}/{instance.uuid}"
-        s3 = boto3.resource("s3")
-        my_bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
-
-        # TODO: Add sanity check to prevent unwanted deletes?
-        for fn in my_bucket.objects.filter(Prefix=dir):
-            log.info(f"Deleting blob {fn}")
-            fn.delete()
-
-        # Pass false so FileField doesn't save the model.
-        instance.file.delete(False)
+            # Pass false so FileField doesn't save the model.
+            self.file.delete(False)
 
 
 class MetaData(TimeStampedModel):

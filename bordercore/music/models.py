@@ -15,7 +15,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models import Count, JSONField, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
-from django.db.models.signals import post_delete, post_save, pre_delete
+from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
 from django.urls import reverse
 from django.utils import timezone
@@ -81,15 +81,39 @@ class Album(TimeStampedModel):
             }
         }
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
 
-@receiver(post_save, sender=Album)
-def post_save_wrapper_album(sender, instance, **kwargs):
-    """
-    This should be called anytime an album is created or updated.
-    """
+        # Index the album in Elasticsearch
+        self.index_album()
 
-    # Index the album in Elasticsearch
-    instance.index_album()
+    def delete(self):
+
+        es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
+
+        request_body = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "doctype": "album"
+                            }
+                        },
+                        {
+                            "term": {
+                                "uuid": self.uuid
+                            }
+                        },
+
+                    ]
+                }
+            }
+        }
+
+        es.delete_by_query(index=settings.ELASTICSEARCH_INDEX, body=request_body)
+
+        super().delete()
 
 
 class SongSource(TimeStampedModel):
@@ -123,7 +147,15 @@ class Song(TimeStampedModel):
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # Index the song in Elasticsearch
+        self.index_song()
+
     def delete(self):
+
+        super().delete()
 
         es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
@@ -149,7 +181,13 @@ class Song(TimeStampedModel):
 
         es.delete_by_query(index=settings.ELASTICSEARCH_INDEX, body=request_body)
 
-        super().delete()
+        # Delete from S3
+        s3_client = boto3.client("s3")
+
+        s3_client.delete_object(
+            Bucket=settings.AWS_BUCKET_NAME_MUSIC,
+            Key=f"songs/{self.uuid}"
+        )
 
     def index_song(self, es=None):
 
@@ -288,30 +326,6 @@ class Song(TimeStampedModel):
             key=lambda s: s["count"],
             reverse=True
         )
-
-
-@receiver(post_save, sender=Song)
-def post_save_wrapper_song(sender, instance, **kwargs):
-    """
-    This should be called anytime a song is created or updated.
-    """
-
-    # Index the song in Elasticsearch
-    instance.index_song()
-
-
-@receiver(post_delete, sender=Song)
-def mymodel_delete_s3(sender, instance, **kwargs):
-    """
-    Remove the song from S3 after the model is deleted
-    """
-
-    s3_client = boto3.client("s3")
-
-    s3_client.delete_object(
-        Bucket=settings.AWS_BUCKET_NAME_MUSIC,
-        Key=f"songs/{instance.uuid}"
-    )
 
 
 class Playlist(TimeStampedModel):

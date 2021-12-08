@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import F, Max, Q
-from django.db.models.signals import post_save, pre_delete
+from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
 from django.urls import reverse
 from django.utils import timezone
@@ -148,6 +148,12 @@ class Question(TimeStampedModel):
             info.append(Question.get_tag_progress(self.user, tag.name))
 
         return info
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # Index the question and answer in Elasticsearch
+        self.index_question()
 
     def delete(self):
 
@@ -293,16 +299,6 @@ class Question(TimeStampedModel):
             "url": reverse("drill:start_study_session_tag", kwargs={"tag": tag}),
             "count": count
         }
-
-
-@receiver(post_save, sender=Question)
-def post_save_wrapper(sender, instance, **kwargs):
-    """
-    This should be called anytime a question is created or updated.
-    """
-
-    # Index the question and answer in Elasticsearch
-    instance.index_question()
 
 
 class QuestionResponse(models.Model):

@@ -33,10 +33,6 @@ class SortOrderMixin(models.Model):
     sort_order = models.IntegerField(default=1)
     note = models.TextField(blank=True, null=True)
 
-    def delete(self):
-
-        super().delete()
-
     def handle_delete(self):
 
         try:
