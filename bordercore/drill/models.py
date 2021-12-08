@@ -158,28 +158,7 @@ class Question(TimeStampedModel):
     def delete(self):
 
         es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
-
-        request_body = {
-            "query": {
-                "bool": {
-                    "must": [
-                        {
-                            "term": {
-                                "doctype": "drill"
-                            }
-                        },
-                        {
-                            "term": {
-                                "uuid": self.uuid
-                            }
-                        },
-
-                    ]
-                }
-            }
-        }
-
-        es.delete_by_query(index=settings.ELASTICSEARCH_INDEX, body=request_body)
+        es.delete(index=settings.ELASTICSEARCH_INDEX, id=self.uuid)
 
         super().delete()
 

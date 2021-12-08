@@ -90,28 +90,7 @@ class Album(TimeStampedModel):
     def delete(self):
 
         es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
-
-        request_body = {
-            "query": {
-                "bool": {
-                    "must": [
-                        {
-                            "term": {
-                                "doctype": "album"
-                            }
-                        },
-                        {
-                            "term": {
-                                "uuid": self.uuid
-                            }
-                        },
-
-                    ]
-                }
-            }
-        }
-
-        es.delete_by_query(index=settings.ELASTICSEARCH_INDEX, body=request_body)
+        es.delete(index=settings.ELASTICSEARCH_INDEX, id=self.uuid)
 
         super().delete()
 
@@ -157,29 +136,9 @@ class Song(TimeStampedModel):
 
         super().delete()
 
+        # Delete from Elasticsearch
         es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
-
-        request_body = {
-            "query": {
-                "bool": {
-                    "must": [
-                        {
-                            "term": {
-                                "doctype": "song"
-                            }
-                        },
-                        {
-                            "term": {
-                                "uuid": self.uuid
-                            }
-                        },
-
-                    ]
-                }
-            }
-        }
-
-        es.delete_by_query(index=settings.ELASTICSEARCH_INDEX, body=request_body)
+        es.delete(index=settings.ELASTICSEARCH_INDEX, id=self.uuid)
 
         # Delete from S3
         s3_client = boto3.client("s3")

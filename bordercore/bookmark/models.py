@@ -70,27 +70,7 @@ class Bookmark(TimeStampedModel):
         super().delete()
 
         es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
-
-        request_body = {
-            "query": {
-                "bool": {
-                    "must": [
-                        {
-                            "term": {
-                                "doctype": "bookmark"
-                            }
-                        },
-                        {
-                            "term": {
-                                "uuid": self.uuid
-                            }
-                        },
-                    ]
-                }
-            }
-        }
-
-        es.delete_by_query(index=settings.ELASTICSEARCH_INDEX, body=request_body)
+        es.delete(index=settings.ELASTICSEARCH_INDEX, id=self.uuid)
 
         self.delete_cover_image()
 
@@ -138,7 +118,7 @@ class Bookmark(TimeStampedModel):
 
         return {
             "_index": settings.ELASTICSEARCH_INDEX,
-            "_id": f"bordercore_bookmark_{self.id}",
+            "_id": self.uuid,
             "_source": {
                 "bordercore_id": self.id,
                 "name": self.name,
