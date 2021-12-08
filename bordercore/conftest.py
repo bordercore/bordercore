@@ -103,6 +103,24 @@ def auto_login_user(client, blob_text_factory, tag):
 
 
 @pytest.fixture
+def monkeypatch_blob(monkeypatch):
+    """
+    Prevent the blob object from interacting with Elasticsearch by
+    patching out various methods.
+    """
+
+    def mock(*args, **kwargs):
+        pass
+
+    from elasticsearch import Elasticsearch
+    from blob.models import Blob
+
+    monkeypatch.setattr(Elasticsearch, "delete", mock)
+    monkeypatch.setattr(Blob, "get_elasticsearch_info", mock)
+    monkeypatch.setattr(Blob, "index_blob", mock)
+
+
+@pytest.fixture
 def monkeypatch_collection(monkeypatch):
     """
     Prevent the collection object from interacting with Elasticsearch by

@@ -2,12 +2,10 @@ from urllib.parse import urlparse
 
 import factory
 import pytest
-from elasticsearch import Elasticsearch
 
 from django import urls
 from django.db.models import signals
 
-from blob.models import Blob
 from collection.models import Collection
 
 try:
@@ -16,21 +14,6 @@ except ModuleNotFoundError:
     pass
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
-
-
-@pytest.fixture
-def monkeypatch_blob(monkeypatch):
-    """
-    Prevent the blob object from interacting with Elasticsearch by
-    patching out various methods.
-    """
-
-    def mock(*args, **kwargs):
-        pass
-
-    monkeypatch.setattr(Elasticsearch, "delete", mock)
-    monkeypatch.setattr(Blob, "get_elasticsearch_info", mock)
-    monkeypatch.setattr(Blob, "index_blob", mock)
 
 
 @pytest.fixture

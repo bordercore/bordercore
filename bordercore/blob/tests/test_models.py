@@ -5,8 +5,6 @@ import django
 
 from collection.models import Collection
 
-from .test_views import monkeypatch_blob
-
 django.setup()
 
 from blob.models import Blob  # isort:skip
