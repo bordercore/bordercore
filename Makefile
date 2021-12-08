@@ -2,6 +2,7 @@ S3=s3://bordercore-blobs/django
 MAX_AGE=2592000
 ELASTICSEARCH_INDEX_TEST=bordercore_test
 ELASTICSEARCH_ENDPOINT_TEST=http://localhost:9201
+MAPPINGS=$(BORDERCORE_HOME)/../config/elasticsearch/mappings.json
 
 
 export env_var := MyEnvVariable
@@ -35,7 +36,6 @@ endif
 
 test:
 	python -m pytest -vv --cov=lib --cov=cli tests/*.py
-#	python -m pytest --nbval-lax notebook.ipynb
 
 test_data:
 	$(VIRTUALENV)python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test-list data
@@ -52,7 +52,7 @@ test_functional:
 	ELASTICSEARCH_INDEX=$(ELASTICSEARCH_INDEX_TEST) ELASTICSEARCH_ENDPOINT=$(ELASTICSEARCH_ENDPOINT_TEST) \
 	$(VIRTUALENV)python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test-list functional
 
-lint:
-	pylint --disable=R,C hello cli
-
-all: install lint test
+reset_elasticsearch:
+# Delete the Elasticsearch test instance and re-populate its mappings
+	curl -XDELETE "$(ELASTICSEARCH_ENDPOINT_TEST)/$(ELASTICSEARCH_INDEX_TEST)/"
+	curl -XPUT $(ELASTICSEARCH_ENDPOINT_TEST)/$(ELASTICSEARCH_INDEX_TEST) -H "Content-Type: application/json" -d @$(MAPPINGS)
