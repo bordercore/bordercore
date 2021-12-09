@@ -608,10 +608,6 @@ class Blob(TimeStampedModel):
         except NotFoundError:
             log.warning(f"Tried to delete blob, but can't find it in elasticsearch: {self.uuid}")
 
-        # Delete from any collections
-        for so in SortOrderCollectionBlob.objects.filter(blob=self):
-            so.delete()
-
         # Delete from S3
         if self.file:
 
