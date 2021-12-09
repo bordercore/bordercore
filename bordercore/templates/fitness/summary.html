@@ -81,7 +81,7 @@
                             {% if exercise.last_active %}
                             "last_active": new Date("{{ exercise.last_active|date:"Y-m-d" }}"),
                             {% endif %}
-                            {% if exercise.delta_days %}
+                            {% if exercise.delta_days is not None %}
                             "delta_days": {{ exercise.delta_days }},
                             {% endif %}
                             "overdue": "{{ exercise.overdue }}"
