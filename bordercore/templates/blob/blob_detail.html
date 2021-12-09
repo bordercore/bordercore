@@ -160,22 +160,28 @@
                         </a>
                     {% endif %}
 
-                    <h5 class="mt-3">
-                    {% for blob in blob.get_related_blobs %}
-                        {% if forloop.first %}
-                            <div class="list-header-border mb-2 pb-2 mt-4">
-                            </div>
-                            <div class="mb-3">
-                                Related blobs
-                            </div>
-                        {% endif %}
-                        <div class="hoverable d-flex align-items-center mb-2 p-2">
-                            <img src="{{ blob.cover_url }}" />
-                            <div class="d-flex justify-content-center ml-2 w-100">
-                                <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.name|default:"No Name" }}</a>
-                            </div>
+                    <h5 v-if="relatedBlobList" class="mt-3">
+                        <div class="list-header-border mb-2 pb-2 mt-4">
                         </div>
-                    {% endfor %}
+                        <div class="mb-3">
+                            Related Blobs
+                        </div>
+                        <div v-for="blob in relatedBlobList" class="hoverable d-flex align-items-center mb-2 p-2" v-b-hover="handleHover">
+                            <img :src="blob.cover_url" />
+                            <div class="d-flex justify-content-center ml-2 w-100">
+                                <a :href="blob.url">[[ blob.name ]]</a>
+                            </div>
+
+                            <div class="dropdownmenu">
+                                <dropdown-menu v-model="showBlobMenu" transition="translate-fade-down" class="hidden">
+                                    <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+                                    <div slot="dropdown">
+                                        <a class="dropdown-item" href="#" @click.prevent="unlinkBlob(blob.uuid)">Unlink</a>
+                                    </div>
+                                </dropdown-menu>
+                            </div>
+
+                        </div>
                     </h5>
 
                 </div>
@@ -335,6 +341,7 @@
             store,
             data() {
                 return {
+                    relatedBlobList: [],
                     getBlobInfoAttemptIntervals: [1000, 3000, 6000],
                     getBlobInfoAttempts: 0,
                     tree: {{ tree|safe }},
@@ -353,7 +360,8 @@
                             ]
                         },
                         {% endfor %}
-                    ]
+                    ],
+                    showBlobMenu: false
                 }
             },
             methods: {
@@ -385,6 +393,34 @@
                         "{{ csrf_token }}",
                     );
                 },
+                getRelatedBlobList() {
+                    doGet(
+                        this,
+                        "{% url "blob:related_blobs" object.uuid %}",
+                        (response) => {
+                            this.relatedBlobList = response.data.blob_list;
+                        },
+                        "Error getting related blob list"
+                    );
+                },
+                handleHover(hovered,evt) {
+                    evt.currentTarget.querySelector(".dropdown").classList.toggle("hidden");
+                },
+                unlinkBlob(uuid) {
+                    doPost(
+                        this,
+                        "{% url "blob:unlink" %}",
+                        {
+                            "blob_1_uuid": "{{ object.uuid }}",
+                            "blob_2_uuid": uuid,
+                        },
+                        (response) => {
+                            this.getRelatedBlobList();
+                        },
+                        "Blob unlinked",
+                        ""
+                    );
+                }
             },
             mounted() {
                 {% if not elasticsearch_info %}
@@ -392,6 +428,7 @@
                     this.getBlobInfo();
                 }, this.getBlobInfoAttemptIntervals[this.getBlobAttempts]);
                 {% endif %}
+                this.getRelatedBlobList();
             }
         });
 

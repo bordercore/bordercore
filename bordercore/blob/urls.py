@@ -65,4 +65,14 @@ urlpatterns = [
         view=views.BlobImportView.as_view(),
         name="import"
     ),
+    path(
+        route="related_blobs/<uuid:uuid>",
+        view=views.get_related_blobs,
+        name="related_blobs"
+    ),
+    path(
+        route="unlink",
+        view=views.unlink,
+        name="unlink"
+    ),
 ]

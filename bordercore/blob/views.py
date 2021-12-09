@@ -462,3 +462,38 @@ def get_elasticsearch_info(request, uuid):
     }
 
     return JsonResponse(response, safe=False)
+
+
+def get_related_blobs(request, uuid):
+    """
+    Get all related blobs for a given blob.
+    """
+
+    blob = Blob.objects.get(uuid=uuid, user=request.user)
+
+    response = {
+        "status": "OK",
+        "blob_list": blob.get_related_blobs(),
+    }
+
+    return JsonResponse(response)
+
+
+def unlink(request):
+    """
+    Remove a relationship between two blobs.
+    """
+
+    blob_1_uuid = request.POST["blob_1_uuid"]
+    blob_2_uuid = request.POST["blob_2_uuid"]
+
+    blob_1 = Blob.objects.get(uuid=blob_1_uuid)
+    blob_2 = Blob.objects.get(uuid=blob_2_uuid)
+
+    blob_1.blobs.remove(blob_2)
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)

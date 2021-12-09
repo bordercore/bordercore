@@ -16,6 +16,7 @@ from storages.backends.s3boto3 import S3Boto3Storage
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
+from django.urls import reverse
 
 from collection.models import Collection, SortOrderCollectionBlob
 from lib.mixins import TimeStampedModel
@@ -340,6 +341,7 @@ class Blob(TimeStampedModel):
             {
                 "uuid": blob.uuid,
                 "name": blob.name,
+                "url": reverse('blob:detail', kwargs={"uuid": str(blob.uuid)}),
                 "cover_url": blob.get_cover_url_small()
             }
 
