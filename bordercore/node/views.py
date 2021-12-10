@@ -1,5 +1,4 @@
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
 from django.http import JsonResponse
 from django.urls import reverse
 from django.utils import timezone
@@ -11,18 +10,14 @@ from blob.models import Blob
 from bookmark.models import Bookmark
 
 from .models import Node, SortOrderNodeBlob, SortOrderNodeBookmark
+from .services import get_node_list
 
 
 @method_decorator(login_required, name="dispatch")
 class NodeListView(ListView):
 
     def get_queryset(self):
-        return Node.objects.filter(user=self.request.user) \
-            .annotate(
-                blob_count=Count("blobs"),
-                bookmark_count=Count("bookmarks")
-            ) \
-            .order_by("-modified")
+        return get_node_list(self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
