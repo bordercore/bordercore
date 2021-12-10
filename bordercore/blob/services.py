@@ -143,11 +143,12 @@ def parse_shortcode(shortcode):
 
     patterns = [
         r"^https://www.artstation.com/artwork/([^\/]*)/*",
-        r"^https://www.instagram.com/p/([^\/]*)/*",
+        r"^https://www.instagram.com/\w\w?/([^\/]*)/*",
         r"^([\w\d]+)$"
     ]
 
     # url = "https://www.instagram.com/p/CPLicD6K1uv/?utm_source=ig_web_copy_link"
+    # url = "https://www.instagram.com/tv/CWbejF6DD9B/?utm_source=ig_web_copy_link"
     # url = "https://www.artstation.com/artwork/CPLicD6K1uv/"
     # url = "CPLicD6K1uv"
 

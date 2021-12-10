@@ -5,6 +5,8 @@ def test_parse_shortcode():
 
     assert parse_shortcode("https://www.instagram.com/p/CUA4IQcARX2/") == "CUA4IQcARX2"
 
+    assert parse_shortcode("https://www.instagram.com/tv/CWbejF6DD9B/") == "CWbejF6DD9B"
+
     assert parse_shortcode("https://www.instagram.com/p/CWixXZTLWgf/?utm_source=ig_web_copy_link") == "CWixXZTLWgf"
 
     assert parse_shortcode("https://www.artstation.com/artwork/0XQTnK") == "0XQTnK"
