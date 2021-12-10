@@ -172,7 +172,7 @@
                                 <a :href="blob.url">[[ blob.name ]]</a>
                             </div>
 
-                            <div class="dropdownmenu">
+                            <div class="dropdownmenu d-flex">
                                 <dropdown-menu v-model="showBlobMenu" transition="translate-fade-down" class="hidden">
                                     <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                     <div slot="dropdown">
@@ -226,7 +226,7 @@
 
         </div> <!-- End first column -->
 
-        <div class="col-lg-9 h-100 overflow-auto" id="vue-right-panel" v-b-hover="handleHover">
+        <div class="col-lg-9 h-100 overflow-auto" id="vue-right-panel">
 
             <div class="col-lg-12">
 
@@ -234,7 +234,7 @@
                     <h2 id="name" class="pl-0 text-break">
                     {{ caption }}
                     </h2>
-                    <div class="dropdownmenu hidden">
+                    <div class="dropdownmenu d-flex">
 
                         <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center" :right="right">
                             <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
@@ -487,14 +487,6 @@
                         ""
                     );
 
-                },
-                handleHover(hovered, evt) {
-                    evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
-                    if (hovered == true) {
-                        evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
-                    } else {
-                        evt.currentTarget.querySelector(".dropdownmenu").classList.add("hidden");
-                    };
                 },
                 getContent() {
                     content = markdown.render("{{ blob.content|escapejs }}");

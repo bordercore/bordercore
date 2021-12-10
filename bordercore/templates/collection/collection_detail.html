@@ -49,7 +49,7 @@
 
         <div class="col-lg-9">
 
-            <div class="right-column" v-b-hover="handleHoverMenu">
+            <div class="right-column">
 
                 <card>
 
@@ -457,9 +457,6 @@
                 },
                 onClickDelete() {
                     $("#modalDelete").modal("show")
-                },
-                handleHoverMenu(hovered) {
-                    this.$refs.dropDownMenu.hide = !hovered;
                 },
             },
             mounted() {

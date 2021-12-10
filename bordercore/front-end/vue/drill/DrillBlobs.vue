@@ -210,11 +210,7 @@
                 );
             },
             handleHover(hovered, evt) {
-                if (hovered == true) {
-                    evt.currentTarget.querySelector(".dropdown").classList.remove("hidden");
-                } else {
-                    evt.currentTarget.querySelector(".dropdown").classList.add("hidden");
-                };
+                evt.currentTarget.querySelector(".dropdown").classList.toggle("hidden");
             },
             removeBlob(blobUuid) {
                 doPost(

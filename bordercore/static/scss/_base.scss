@@ -483,7 +483,6 @@ div.CodeMirror {
 
 // The round, target point that spawns the dropdown menu below it
 .dropdownmenu {
-  display: flex;
   width: 2.5rem;
   min-width: 2.5rem;
   height: 2.5rem;
@@ -1330,6 +1329,10 @@ h2#name {
 // Node
 //
 
+.node-bookmark {
+  height: 3.5rem;
+}
+
 .node-list-stats {
   font-size: 0.75rem;
 }
@@ -1354,6 +1357,10 @@ h2#name {
 //
 // Drill
 //
+
+#pinned-tags {
+  height: 2.5rem;
+}
 
 .favorite {
   color: #f00;

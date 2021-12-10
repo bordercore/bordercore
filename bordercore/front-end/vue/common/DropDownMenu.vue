@@ -1,5 +1,5 @@
 <template>
-    <div :class="[hide ? 'hidden' : '']" class="cursor-pointer">
+    <div :class="[hide ? 'hidden' : '']" class="d-flex cursor-pointer">
         <dropdown-menu v-model="showMenu" transition="translate-fade-down" class="text-center" :right="right">
             <slot name="top">
                 <font-awesome-icon icon="ellipsis-v" />

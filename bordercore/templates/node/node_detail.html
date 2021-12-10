@@ -57,8 +57,8 @@
                                                         </span>
                                                     </div>
 
-                                                    <div class="dropdownmenu">
-                                                        <dropdown-menu v-model="show" transition="translate-fade-down" class="hidden">
+                                                    <div class="dropdownmenu hidden">
+                                                        <dropdown-menu v-model="show" transition="translate-fade-down">
                                                             <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                                             <div slot="dropdown">
                                                                 <a class="dropdown-item" href="#" @click.prevent="removeBlob(blob.uuid)">Remove</a>
@@ -90,7 +90,7 @@
                                     <div>
                                         Notes
                                     </div>
-                                    <div class="dropdownmenu" v-if="note !== null">
+                                    <div class="dropdownmenu d-flex" v-if="note !== ''">
                                         <dropdown-menu v-model="show" transition="translate-fade-down" class="hidden">
                                             <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                             <div slot="dropdown">
@@ -132,20 +132,20 @@
                                 <ul class="list-group list-group-flush" id="sort-container-tags">
                                     <draggable v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
                                         <transition-group type="transition" class="w-100">
-                                            <li v-for="(bookmark, index) in bookmarkList" class="list-group-item list-group-item-secondary text-info draggable pr-0" :data-uuid="bookmark.id" :key="bookmark.id" v-cloak v-b-hover="handleHover">
-                                                    <div class="d-flex">
-                                                        <div v-html="bookmark.favicon_url" class="pr-2"></div>
-                                                        <div>
+                                            <li v-for="(bookmark, index) in bookmarkList" class="node-bookmark list-group-item list-group-item-secondary text-info draggable p-0 mt-2" :data-uuid="bookmark.id" :key="bookmark.id" v-cloak v-b-hover="handleHover">
+                                                <div class="d-flex">
+                                                    <div v-html="bookmark.favicon_url" class="pr-2"></div>
+                                                    <div>
                                                         <a :href="bookmark.url">[[ bookmark.name ]]</a>
 
                                                         <div v-if="bookmark.note" v-on:click="activateInEditMode(bookmark, $event.target)" v-show="!bookmark.noteIsEditable" class="node-note" v-html="getNote(bookmark.note)"></div>
                                                         <span v-show="bookmark.noteIsEditable">
                                                             <input type="text" class="form-control form-control-sm" :value="bookmark.note" ref="input" placeholder="" @blur="editNote(bookmark.id, $event.target.value)" @keydown.enter="editNote(bookmark.id, $event.target.value)" >
                                                         </span>
-                                                        </div>
+                                                    </div>
 
-                                                    <div class="dropdownmenu d-flex">
-                                                        <dropdown-menu v-model="show" transition="translate-fade-down" class="hidden">
+                                                    <div class="dropdownmenu hidden">
+                                                        <dropdown-menu v-model="show" transition="translate-fade-down">
                                                             <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                                             <div slot="dropdown">
                                                                 <a class="dropdown-item" href="#" @click.prevent="removeBookmark(bookmark.id)">Remove</a>
@@ -305,12 +305,7 @@
 
                 },
                 handleHover(hovered, evt) {
-
-                    if (hovered == true) {
-                        evt.currentTarget.querySelector(".dropdown").classList.remove("hidden");
-                    } else {
-                        evt.currentTarget.querySelector(".dropdown").classList.add("hidden");
-                    };
+                    evt.currentTarget.querySelector(".dropdownmenu").classList.toggle("d-flex");
                 },
                 activateInEditMode(blob, event) {
 
@@ -537,12 +532,7 @@
 
                 },
                 handleHover(hovered, evt) {
-
-                    if (hovered === true) {
-                        evt.currentTarget.querySelector(".dropdown").classList.remove("hidden");
-                    } else {
-                        evt.currentTarget.querySelector(".dropdown").classList.add("hidden");
-                    };
+                    evt.currentTarget.querySelector(".dropdownmenu").classList.toggle("d-flex");
                 },
                 removeBookmark(bookmark_id) {
 
@@ -665,16 +655,10 @@
                     }
                 },
                 handleHover(hovered, evt) {
-
                     if (! this.note) {
                         return;
                     }
-
-                    if (hovered == true) {
-                        evt.currentTarget.querySelector(".dropdown").classList.remove("hidden");
-                    } else {
-                        evt.currentTarget.querySelector(".dropdown").classList.add("hidden");
-                    };
+                    evt.currentTarget.querySelector(".dropdown").classList.toggle("hidden");
                 }
             },
             mounted() {

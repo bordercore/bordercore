@@ -61,7 +61,7 @@
 
             <div class="card-grid ml-2">
 
-                <div class="right-column" v-b-hover="handleHoverMenu">
+                <div class="right-column">
 
                     <div>
 
@@ -316,9 +316,6 @@
                              vid.src = response.data.url;
                              vid.play()
                          })
-                },
-                handleHoverMenu(hovered) {
-                    this.$refs.dropDownMenu.hide = !hovered;
                 },
                 handleUpdateAlbum() {
                     $("#modalUpdateAlbum").modal("show")

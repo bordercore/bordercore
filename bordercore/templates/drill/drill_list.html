@@ -158,7 +158,7 @@
             <div class="right-column">
                 <card title="Pinned Tags" v-b-hover="handleHover">
                     <template v-slot:title-slot>
-                        <div class="card-title d-flex align-items-center">
+                        <div id="pinned-tags" class="card-title d-flex align-items-center">
                             <div>
                                 Pinned Tags
                             </div>
@@ -413,13 +413,7 @@
                 },
 
                 handleHover(hovered, evt) {
-
-                    evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
-                    if (hovered == true) {
-                        evt.currentTarget.querySelector(".dropdownmenu").classList.remove("hidden");
-                    } else {
-                        evt.currentTarget.querySelector(".dropdownmenu").classList.add("hidden");
-                    };
+                    evt.currentTarget.querySelector(".dropdownmenu").classList.toggle("d-flex");
                 },
 
                 chooseTag() {
