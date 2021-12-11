@@ -96,7 +96,7 @@
                         <template v-slot:content>
                             <ul class="list-group interior-borders">
                                 {% for bookmark in pinned_bookmarks %}
-                                    <li class="list-group-item list-group-item-secondary"><a href="{{ bookmark.url }}">{{ bookmark.name }}</a> </li>
+                                    <li id="pinned-bookmarks" class="list-group-item list-group-item-secondary"><a href="{{ bookmark.url }}">{{ bookmark.name }}</a> </li>
                                 {% empty %}
                                     <li class="list-group-item list-group-item-secondary">No pinned bookmarks.</li>
                                 {% endfor %}

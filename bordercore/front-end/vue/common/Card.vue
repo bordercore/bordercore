@@ -1,9 +1,11 @@
 <template>
     <div class="card-body">
         <slot name="title-slot">
-            <div v-if="title" class="card-title">
+            <div v-if="title" class="card-title d-flex">
                 {{ title }}
-                <slot name="top-right" />
+                <div class="ml-auto">
+                    <slot name="top-right" />
+                </div>
             </div>
         </slot>
         <slot name="content" class="card-content">

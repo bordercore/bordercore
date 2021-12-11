@@ -54,5 +54,5 @@ def test_homepage_no_fixtures(login, live_server, browser, settings):
     # There should be no recent untagged bookmarks
     assert page.bookmarks_count() == 0
 
-    # There should be one pinned bookmark
-    assert page.pinned_bookmarks_count() == 1
+    # There should be no pinned bookmarks
+    assert page.pinned_bookmarks_count() == 0
