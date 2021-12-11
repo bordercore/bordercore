@@ -170,34 +170,16 @@ def blob_note(temp_blob_directory, db, s3_resource, s3_bucket):
 
 
 @pytest.fixture()
-def blob_image_factory(temp_blob_directory, db, s3_resource, s3_bucket):
-
-    blob = BlobFactory.create(
-        metadata=3,
-        tags=("django", "linux", "video"),
-    )
-
-    MetaData.objects.create(
-        user=blob.user,
-        blob=blob,
-        name="Author",
-        value=factory.Faker("text", max_nb_chars=40),
-    )
-
-    image_bytes = b"mybinarydata"
-    img = BytesIO(image_bytes)
-    img.name = factory.Faker("file_name", category="image").generate()
-    blob.file_modified = 1638644921
-    blob.file.save(img.name, img)
-    blob.sha1sum = hashlib.sha1(image_bytes).hexdigest()
-
-    _index_blob(blob)
-
-    yield [blob]
+def blob_pdf_factory(temp_blob_directory, db, s3_resource, s3_bucket):
+    yield _create_blob(extension="pdf")
 
 
 @pytest.fixture()
-def blob_pdf_factory(temp_blob_directory, db, s3_resource, s3_bucket):
+def blob_image_factory(temp_blob_directory, db, s3_resource, s3_bucket):
+    yield _create_blob(category="image")
+
+
+def _create_blob(**file_info):
 
     blob = BlobFactory.create(
         metadata=3,
@@ -208,19 +190,19 @@ def blob_pdf_factory(temp_blob_directory, db, s3_resource, s3_bucket):
         user=blob.user,
         blob=blob,
         name="Author",
-        value=factory.Faker("text", max_nb_chars=40),
+        value=factory.Faker("text", max_nb_chars=40).generate(),
     )
 
     pdf_bytes = b"mybinarydata"
     img = BytesIO(pdf_bytes)
-    img.name = factory.Faker("file_name", extension="pdf").generate()
+    img.name = factory.Faker("file_name", **file_info).generate()
     blob.file_modified = 1638644921
     blob.file.save(img.name, img)
     blob.sha1sum = hashlib.sha1(pdf_bytes).hexdigest()
 
     _index_blob(blob)
 
-    yield [blob]
+    return [blob]
 
 
 @pytest.fixture()
@@ -237,7 +219,7 @@ def blob_text_factory(db, s3_resource, s3_bucket):
             user=blob.user,
             blob=blob,
             name="Author",
-            value=factory.Faker("text", max_nb_chars=40),
+            value=factory.Faker("text", max_nb_chars=40).generate(),
         )
 
         _index_blob(blob)
