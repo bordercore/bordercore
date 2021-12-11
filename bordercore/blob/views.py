@@ -19,7 +19,7 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
 from blob.forms import BlobForm
-from blob.models import Blob, MetaData
+from blob.models import Blob, MetaData, RecentlyViewedBlob
 from blob.services import get_recent_blobs, import_blob
 from collection.models import Collection, SortOrderCollectionBlob
 from lib.mixins import FormRequestMixin
@@ -171,6 +171,8 @@ class BlobDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        RecentlyViewedBlob.add(self.request.user, self.object)
 
         context["metadata"], context["urls"] = self.object.get_metadata()
 
