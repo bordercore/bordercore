@@ -27,13 +27,13 @@
             <div class="col-lg-4 d-flex flex-column">
 
                 <div>
-                    <blob-list inline-template ref="blobList">
+                    <blob-list inline-template ref="blobList" v-b-hover="handleHover">
 
                         <card title="Blobs">
                             <template v-slot:top-right>
-                                <span class="button-plus float-right" @click="chooseBlob()">
-                                    <font-awesome-icon icon="plus"></font-awesome-icon>
-                                </span>
+                                <div class="node-add-button">
+                                    <add-button href="#" :click-handler="chooseBlob" class="hover-target d-none"></add-button>
+                                </div>
                             </template>
 
                             <template v-slot:content>
@@ -118,13 +118,13 @@
             <div class="col-lg-4 d-flex flex-column">
 
                 <div>
-                    <bookmark-list inline-template ref="bookmarkList">
+                    <bookmark-list inline-template ref="bookmarkList" v-b-hover="handleHover">
 
                         <card title="Links">
                             <template v-slot:top-right>
-                                <span class="button-plus float-right" @click="chooseBookmark()">
-                                    <font-awesome-icon icon="plus"></font-awesome-icon>
-                                </span>
+                                <div class="node-add-button">
+                                    <add-button href="#" :click-handler="chooseBookmark" class="hover-target d-none"></add-button>
+                                </div>
                             </template>
 
                             <template v-slot:content>
@@ -675,6 +675,11 @@
                 BlobSearch,
                 BookmarkSearch,
                 Note
+            },
+            methods: {
+                handleHover(hovered, evt) {
+                    evt.currentTarget.querySelector(".hover-target").classList.toggle("d-flex");
+                },
             },
             mounted() {
 
