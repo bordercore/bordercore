@@ -29,7 +29,7 @@ class AlbumViewSet(viewsets.ModelViewSet):
     lookup_field = "uuid"
 
     def get_queryset(self):
-        return Album.objects.filter(user=self.request.user)
+        return Album.objects.filter(user=self.request.user).prefetch_related("tags")
 
     def perform_destroy(self, instance):
         """
@@ -132,9 +132,10 @@ class QuestionViewSet(viewsets.ModelViewSet):
 class SongViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = SongSerializer
+    lookup_field = "uuid"
 
     def get_queryset(self):
-        return Song.objects.filter(user=self.request.user)
+        return Song.objects.filter(user=self.request.user).prefetch_related("tags")
 
 
 class SongSourceViewSet(viewsets.ModelViewSet):

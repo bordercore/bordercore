@@ -16,8 +16,8 @@ from todo.models import Todo
 class AlbumSerializer(serializers.ModelSerializer):
     class Meta:
         model = Album
-        fields = ["artist", "comment", "compilation", "original_release_year",
-                  "title", "year"]
+        fields = ["artist", "compilation", "note", "original_release_year",
+                  "tags", "title", "year"]
 
 
 class BlobFileField(serializers.RelatedField):
@@ -133,7 +133,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 class SongSerializer(serializers.ModelSerializer):
     class Meta:
         model = Song
-        fields = ["album", "artist", "comment", "last_time_played", "length",
+        fields = ["album", "artist", "last_time_played", "length", "note",
                   "original_album", "original_year", "source", "tags",
                   "times_played", "title", "track", "uuid", "year"]
 
