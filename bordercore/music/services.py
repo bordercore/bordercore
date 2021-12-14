@@ -34,7 +34,11 @@ def get_playlist_counts(user):
 
 def get_playlist_songs(playlist):
 
-    playtime = PlaylistItem.objects.filter(playlist=playlist).aggregate(total_time=Coalesce(Sum("song__length"), 0))["total_time"]
+    playtime = PlaylistItem.objects.filter(
+        playlist=playlist
+    ).aggregate(
+        total_time=Coalesce(Sum("song__length"), 0)
+    )["total_time"]
 
     song_list = [
         {
@@ -49,7 +53,7 @@ def get_playlist_songs(playlist):
         }
         for x
         in PlaylistItem.objects.filter(playlist=playlist)
-        .select_related("song")
+        .select_related("song").order_by("sort_order")
     ]
 
     return {
