@@ -39,6 +39,10 @@
                 default: "",
                 type: String,
             },
+            recentBlobsUrl: {
+                default: "url",
+                type: String,
+            },
         },
         data() {
             return {
@@ -47,9 +51,36 @@
             };
         },
         methods: {
+            openModal() {
+                $("#modalAddBlob").modal("show");
+                setTimeout( () => {
+                    this.$refs.simpleSuggest.$refs.suggestComponent.input.focus();
+                }, 500);
+
+                const suggest = this.$refs.simpleSuggest.$refs.suggestComponent;
+
+                if (suggest.suggestions.length === 0) {
+                    doGet(
+                        this,
+                        this.recentBlobsUrl,
+                        (response) => {
+                            suggest.suggestions = response.data.blobList;
+                            suggest.suggestions.unshift(
+                                {
+                                    uuid: "__Recent",
+                                    name: "Recent",
+                                    splitter: true,
+                                    value: "Bogus",
+                                },
+                            );
+                        },
+                    );
+                }
+                suggest.listShown = true;
+            },
             select(selection) {
-                // The blob gets added in the parent component
-                this.$emit("addBlob", selection.uuid);
+                // The parent component receives the blob uuid
+                this.$emit("select-blob", selection.uuid);
                 $("#modalAddBlob").modal("hide");
 
                 this.$nextTick(() => {
