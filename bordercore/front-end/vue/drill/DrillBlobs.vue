@@ -12,13 +12,13 @@
                     <ul id="sort-container-tags" class="list-group list-group-flush">
                         <draggable v-model="blobList" ghost-class="sortable-ghost" draggable=".draggable" @change="onChange">
                             <transition-group type="transition" class="w-100">
-                                <li v-for="(blob, index) in blobList" v-cloak :key="blob.uuid" v-b-hover="handleHover" class="list-group-item list-group-item-secondary text-info draggable px-0" :data-uuid="blob.uuid">
-                                    <div class="d-flex">
-                                        <div class="pr-2">
+                                <li v-for="(blob, index) in blobList" v-cloak :key="blob.uuid" v-b-hover="handleHover" class="text-info draggable d-flex align-items-center p-2" :data-uuid="blob.uuid">
+                                    <div class="d-flex align-items-center w-100">
+                                        <div class="align-self-start pr-2">
                                             <img :src="[[ blob.cover_url ]]" height="75" width="70">
                                         </div>
 
-                                        <div>
+                                        <div class="d-flex flex-column justify-content-center w-100">
                                             <a :href="blob.url">{{ blob.name }}</a>
 
                                             <div v-show="!blob.noteIsEditable" v-if="blob.note" class="node-note" @click="activateInEditMode(blob, index)">
@@ -29,7 +29,7 @@
                                             </span>
                                         </div>
 
-                                        <div class="dropdownmenu">
+                                        <div class="dropdownmenu d-flex">
                                             <dropdown-menu v-model="show" transition="translate-fade-down" class="hidden">
                                                 <font-awesome-icon icon="ellipsis-v" />
                                                 <div slot="dropdown">
