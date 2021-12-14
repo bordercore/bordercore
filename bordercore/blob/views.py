@@ -481,6 +481,26 @@ def get_related_blobs(request, uuid):
     return JsonResponse(response)
 
 
+def link(request):
+    """
+    Add a relationshiop between two blobs.
+    """
+
+    blob_1_uuid = request.POST["blob_1_uuid"]
+    blob_2_uuid = request.POST["blob_2_uuid"]
+
+    blob_1 = Blob.objects.get(uuid=blob_1_uuid)
+    blob_2 = Blob.objects.get(uuid=blob_2_uuid)
+
+    blob_1.blobs.add(blob_2)
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
 def unlink(request):
     """
     Remove a relationship between two blobs.

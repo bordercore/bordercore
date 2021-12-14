@@ -228,11 +228,19 @@
 
         <div class="col-lg-9 h-100 overflow-auto" id="vue-right-panel">
 
+            <blob-search
+                ref="blobSelect"
+                search-blob-url="{% url 'search:search_names' %}?doc_type=blob,book,document,note"
+                recent-blobs-url="{% url 'blob:recent_blobs' %}"
+                @select-blob="selectBlob"
+            >
+            </blob-search>
+
             <div class="col-lg-12">
 
                 <div class="d-flex">
                     <h2 id="name" class="pl-0 text-break">
-                    {{ caption }}
+                        {{ caption }}
                     </h2>
                     <div class="dropdownmenu d-flex">
 
@@ -246,6 +254,7 @@
                                     {% endif %}
                                     <a class="dropdown-item" href="#" @click.prevent="handleAddToCollection()">Add to Collection</a>
                                     <a class="dropdown-item" href="{% url 'blob:create' %}?linked_blob_uuid={{ blob.uuid }}">Link to New Blob</a>
+                                    <a class="dropdown-item" href="#" @click.prevent="handleLinkToExistingBlob()">Link to Existing Blob</a>
                                     <a class="dropdown-item" href="{% url 'blob:clone' blob.uuid %}">Clone Blob</a>
                                     {% if blob.is_note %}
                                         <a class="dropdown-item" href="#" @click.prevent="onClick">[[pinnedButtonValue ]]</a>
@@ -256,7 +265,7 @@
                     </div>
                 </div>
 
-                <div v-if="$store.state.elasticsearchInfo.content_type === 'Video'" class="blob-detail-cover-image">
+                <div v-if="$store.state.elasticsearchInfo.content_type === 'Video'" class="blob-detail-cover-image" v-cloak>
                     <video class="h-100 w-100" controls muted>
                         <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="video/mp4">
                     </video>
@@ -429,6 +438,11 @@
                 }, this.getBlobInfoAttemptIntervals[this.getBlobAttempts]);
                 {% endif %}
                 this.getRelatedBlobList();
+
+                EventBus.$on("get-related-blob-list", () => {
+                    this.getRelatedBlobList();
+                });
+
             }
         });
 
@@ -439,6 +453,7 @@
             components: {
                 AddToCollection,
                 BlobDetailCover,
+                BlobSearch,
             },
             data() {
                 return {
@@ -458,6 +473,24 @@
                 handleAddToCollection() {
                     $("#modalAddToCollection").modal("show");
                     setTimeout( () => { this.$refs.addToCollection.$refs.suggestComponent.input.focus(); }, 500);
+                },
+                handleLinkToExistingBlob() {
+                    this.$refs.blobSelect.openModal();
+                },
+                selectBlob(blobUuid) {
+                    doPost(
+                        this,
+                        "{% url "blob:link" %}",
+                        {
+                            "blob_1_uuid": "{{ object.uuid }}",
+                            "blob_2_uuid": blobUuid,
+                        },
+                        (response) => {
+                            EventBus.$emit("get-related-blob-list");
+                        },
+                        "The two blobs are now linked",
+                        ""
+                    );
                 },
                 getCollectionList() {
                     doGet(

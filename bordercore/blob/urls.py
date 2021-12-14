@@ -71,6 +71,11 @@ urlpatterns = [
         name="related_blobs"
     ),
     path(
+        route="link",
+        view=views.link,
+        name="link"
+    ),
+    path(
         route="unlink",
         view=views.unlink,
         name="unlink"
