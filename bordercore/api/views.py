@@ -48,7 +48,7 @@ class BlobViewSet(viewsets.ModelViewSet):
         """
         Only the owner of the blob or the service user has access
         """
-        if self.request.user == User.objects.get(username="service_user"):
+        if self.request.user.username == "service_user":
             return Blob.objects.all()
         else:
             return Blob.objects.filter(user=self.request.user)
@@ -71,7 +71,7 @@ class BlobSha1sumViewSet(viewsets.ModelViewSet):
         """
         Only the owner of the blob or the service user has access
         """
-        if self.request.user == User.objects.get(username="service_user"):
+        if self.request.user.username == "service_user":
             return Blob.objects.all()
         else:
             return Blob.objects.filter(user=self.request.user)
