@@ -97,24 +97,15 @@
 
     {{ block.super }}
 
+    {{ collection_list|json_script:"collection_list" }}
+
     <script type="text/javascript" charset="utf-8">
 
         new Vue({
             el: "#vue-app",
             data() {
                 return {
-                    items: [
-                        {% for collection in collection_list %}
-                        {
-                            "name": "{{ collection.name }}",
-                            "url": "{% url 'collection:detail' collection.uuid %}",
-                            "tags": "{{ collection.tags }}",
-                            "num_blobs": {{ collection.num_blobs }},
-                            "cover_url": "{{ cover_url }}collections/{{ collection.uuid }}.jpg",
-                            "uuid": "{{ collection.uuid }}"
-                        },
-                        {% endfor %}
-                    ],
+                    items: JSON.parse(document.getElementById("collection_list").textContent),
                 }
             },
             methods: {

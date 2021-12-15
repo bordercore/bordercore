@@ -42,6 +42,16 @@ class CollectionListView(FormRequestMixin, FormMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        context["collection_list"] = [
+            {
+                "uuid": c.uuid,
+                "name": c.name,
+                "url": reverse("collection:detail", kwargs={"collection_uuid": c.uuid}),
+                "num_blobs": c.num_blobs,
+                "cover_url": f"{settings.COVER_URL}collections/{c.uuid}.jpg"
+            } for c in self.object_list
+
+        ]
         context["cover_url"] = settings.COVER_URL
         context["title"] = "Collection List"
 
