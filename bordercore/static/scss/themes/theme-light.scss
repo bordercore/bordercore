@@ -59,6 +59,8 @@ $nav-border-color: $gray-500;
 $nav-highlight-color: #0f0;
 $nav-not-selected-color: #888;
 $selected-bg: $cyan;
+$strong-color: #0040ff;
+$text-highlight: #6ac2f6;
 $tree-menu-color: #d2e0ee;
 $tree-menu-folder-color: #f00;
 $vue-simple-suggest-item-bg: $gray-300;
@@ -66,10 +68,6 @@ $vue-simple-suggest-item-hover-bold-color: #1a4beb;
 
 .table_header {
   background-color: #b0e1ff
-}
-
-.drill-text strong {
-  color: #0040ff;
 }
 
 .notice-big {

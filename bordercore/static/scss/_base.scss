@@ -1062,7 +1062,7 @@ pre {
 }
 
 h2#name {
-  color: #6ac2f6;
+  color: $text-highlight;
 }
 
 #blob_subtitle {
@@ -1130,6 +1130,10 @@ h2#name {
 .blob-content {
   em {
     color: #ff0;
+  }
+
+  strong {
+    color: $strong-color;
   }
 
   h1 {
@@ -1364,6 +1368,12 @@ h2#name {
 
 #pinned-tags {
   height: 2.5rem;
+}
+
+.drill-text {
+  strong {
+    color: $strong-color;
+  }
 }
 
 .favorite {

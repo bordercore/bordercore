@@ -65,6 +65,8 @@ $nav-border-color: $white;
 $nav-highlight-color: #0f0;
 $nav-not-selected-color: #888;
 $selected-bg: lighten($bg-color, 10%);
+$strong-color: #ff00ea;
+$text-highlight: #6ac2f6;
 $tree-menu-color: #2fa4e7;
 $tree-menu-folder-color: #00eaff;
 $vue-simple-suggest-item-bg: $gray-900;
@@ -101,10 +103,6 @@ h4 {
 
 hr {
   background-color: $primary;
-}
-
-.drill-text strong {
-  color: #ff00ea;
 }
 
 .music-playlist-section {
