@@ -24,7 +24,7 @@ from django.urls import reverse
 from collection.models import Collection, SortOrderCollectionBlob
 from lib.mixins import TimeStampedModel
 from lib.time_utils import get_date_from_pattern
-from lib.util import get_elasticsearch_connection, is_image
+from lib.util import get_elasticsearch_connection, is_image, is_video
 from tag.models import Tag
 
 EDITIONS = {'1': 'First',
@@ -351,6 +351,12 @@ class Blob(TimeStampedModel):
             for blob in
             self.blobs.all()
         ]
+
+    def is_image(self):
+        return is_image(self.file)
+
+    def is_video(self):
+        return is_video(self.file)
 
     def is_pinned_note(self):
         return self in self.user.userprofile.pinned_notes.all()

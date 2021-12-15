@@ -265,11 +265,13 @@
                     </div>
                 </div>
 
-                <div v-if="$store.state.elasticsearchInfo.content_type === 'Video'" class="blob-detail-cover-image" v-cloak>
+                {% if blob.is_video %}
+                <div class="blob-detail-cover-image" v-cloak>
                     <video class="h-100 w-100" controls muted>
                         <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="video/mp4">
                     </video>
                 </div>
+                {% endif %}
 
                 <audio v-if="$store.state.elasticsearchInfo.content_type === 'Audio'" controls controlsList="nodownload">
                     <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="audio/mpeg">
@@ -281,11 +283,12 @@
                     </div>
                 {% endif %}
 
+                {% if blob.is_image %}
                 <blob-detail-cover
-                    v-if="$store.state.elasticsearchInfo.sha1sum && $store.state.elasticsearchInfo.content_type !== 'Video'"
                     cover-url="{{ blob.get_cover_url }}?nodefault=1"
                 >
                 </blob-detail-cover>
+                {% endif %}
 
                 <add-to-collection
                     ref="addToCollection"
