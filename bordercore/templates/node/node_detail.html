@@ -171,7 +171,7 @@
 
         </div>
 
-        <blob-search inline-template ref="blobSearch">
+        <blob-select inline-template ref="blobSelect">
             <div class="modal fade" id="modalAddBlob" tabindex="-1" role="dialog">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
@@ -202,7 +202,7 @@
                     </div>
                 </div>
             </div>
-        </blob-search>
+        </blob-select>
 
         <bookmark-search inline-template ref="bookmarkSearch">
             <div class="modal fade" id="modalAddBookmark" tabindex="-1" role="dialog">
@@ -281,7 +281,7 @@
                 },
                 chooseBlob() {
                     $("#modalAddBlob").modal("show");
-                    setTimeout( () => { this.$parent.$refs.blobSearch.$refs.simpleSuggest.$refs.suggestComponent.input.focus(); }, 500)
+                    setTimeout( () => { this.$parent.$refs.blobSelect.$refs.simpleSuggest.$refs.suggestComponent.input.focus(); }, 500)
                 },
                 onChange(evt) {
 
@@ -409,7 +409,7 @@
             }
         }
 
-        const BlobSearch = {
+        const BlobSelect = {
             methods: {
                 select(selection) {
 
@@ -672,7 +672,7 @@
             components: {
                 BlobList,
                 BookmarkList,
-                BlobSearch,
+                BlobSelect,
                 BookmarkSearch,
                 Note
             },

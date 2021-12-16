@@ -141,9 +141,9 @@ import Bookmark from "./vue/bookmark/Bookmark.vue";
 Vue.component("Bookmark", Bookmark);
 window.Bookmark = Bookmark;
 
-import BlobSearch from "./vue/blob/BlobSearch.vue";
-Vue.component("BlobSearch", BlobSearch);
-window.BlobSearch = BlobSearch;
+import BlobSelect from "./vue/blob/BlobSelect.vue";
+Vue.component("BlobSelect", BlobSelect);
+window.BlobSelect = BlobSelect;
 
 import DrillTagProgress from "./vue/common/DrillTagProgress.vue";
 Vue.component("DrillTagProgress", DrillTagProgress);

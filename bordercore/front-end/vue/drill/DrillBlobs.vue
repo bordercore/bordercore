@@ -51,7 +51,7 @@
             </card>
         </div>
 
-        <blob-search
+        <blob-select
             ref="blobSelect"
             :search-blob-url="searchBlobUrl"
             :recent-blobs-url="recentBlobsUrl"
@@ -62,12 +62,12 @@
 
 <script>
 
-    import BlobSearch from "../blob/BlobSearch.vue";
+    import BlobSelect from "../blob/BlobSelect.vue";
 
     export default {
 
         components: {
-            BlobSearch,
+            BlobSelect,
         },
         props: {
             questionUuid: {
