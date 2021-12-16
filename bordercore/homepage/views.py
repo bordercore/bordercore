@@ -13,10 +13,10 @@ from django.shortcuts import render
 
 from blob.models import Blob
 from bookmark.models import Bookmark
-from cal.models import Calendar
 from collection.models import Collection
 from drill.models import Question
 from fitness.models import ExerciseUser
+from lib.calendar_events import Calendar
 from lib.util import get_elasticsearch_connection
 from music.models import Listen
 from quote.models import Quote
