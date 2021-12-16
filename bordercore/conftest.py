@@ -193,12 +193,16 @@ def _create_blob(**file_info):
         value=factory.Faker("text", max_nb_chars=40).generate(),
     )
 
-    pdf_bytes = b"mybinarydata"
-    img = BytesIO(pdf_bytes)
+    # Insure that the bytes are unique per blob, since we need
+    #  each sha1sum to also be unique.
+    file_string = f"mybinarydata{blob.uuid}"
+    file_bytes = bytes(file_string, "utf-8")
+    img = BytesIO(file_bytes)
     img.name = factory.Faker("file_name", **file_info).generate()
     blob.file_modified = 1638644921
     blob.file.save(img.name, img)
-    blob.sha1sum = hashlib.sha1(pdf_bytes).hexdigest()
+    blob.sha1sum = hashlib.sha1(file_bytes).hexdigest()
+    blob.save()
 
     _index_blob(blob)
 
@@ -237,7 +241,6 @@ def _index_blob(blob):
                   json=serializer.data, status=200)
 
     index_blob(uuid=blob.uuid, create_connection=True)
-
 
 
 @pytest.fixture()

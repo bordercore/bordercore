@@ -3,7 +3,6 @@ from rest_framework.permissions import IsAuthenticated
 
 from django.contrib import messages
 
-from accounts.models import User
 from blob.models import Blob
 from bookmark.models import Bookmark
 from collection.models import Collection
@@ -19,8 +18,7 @@ from .serializers import (AlbumSerializer, BlobSerializer,
                           FeedSerializer, PlaylistItemSerializer,
                           PlaylistSerializer, QuestionSerializer,
                           SongSerializer, SongSourceSerializer,
-                          TagAliasSerializer, TagSerializer, TodoSerializer,
-                          UserSerializer)
+                          TagAliasSerializer, TagSerializer, TodoSerializer)
 
 
 class AlbumViewSet(viewsets.ModelViewSet):
@@ -29,7 +27,11 @@ class AlbumViewSet(viewsets.ModelViewSet):
     lookup_field = "uuid"
 
     def get_queryset(self):
-        return Album.objects.filter(user=self.request.user).prefetch_related("tags")
+        return Album.objects.filter(
+            user=self.request.user
+        ).prefetch_related(
+            "tags"
+        )
 
     def perform_destroy(self, instance):
         """
@@ -51,7 +53,13 @@ class BlobViewSet(viewsets.ModelViewSet):
         if self.request.user.username == "service_user":
             return Blob.objects.all()
         else:
-            return Blob.objects.filter(user=self.request.user)
+            return Blob.objects.filter(
+                user=self.request.user
+            ).prefetch_related(
+                "blobs",
+                "metadata",
+                "tags"
+            )
 
     def perform_create(self, serializer):
         instance = serializer.save()
@@ -74,7 +82,17 @@ class BlobSha1sumViewSet(viewsets.ModelViewSet):
         if self.request.user.username == "service_user":
             return Blob.objects.all()
         else:
-            return Blob.objects.filter(user=self.request.user)
+            return Blob.objects.filter(
+                user=self.request.user
+            ).prefetch_related(
+                "blobs",
+                "metadata",
+                "tags"
+            )
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        instance.index_blob()
 
 
 class BookmarkViewSet(viewsets.ModelViewSet):
@@ -100,7 +118,11 @@ class CollectionViewSet(viewsets.ModelViewSet):
     lookup_field = "uuid"
 
     def get_queryset(self):
-        return Collection.objects.filter(user=self.request.user)
+        return Collection.objects.filter(
+            user=self.request.user
+        ).prefetch_related(
+            "tags", "blobs"
+        )
 
 
 class FeedViewSet(viewsets.ModelViewSet):
@@ -117,6 +139,9 @@ class FeedItemViewSet(viewsets.ModelViewSet):
     serializer_class = FeedItemSerializer
     queryset = FeedItem.objects.filter()
 
+    def get_queryset(self):
+        return FeedItem.objects.all().select_related("feed")
+
 
 class QuestionViewSet(viewsets.ModelViewSet):
     """
@@ -124,9 +149,14 @@ class QuestionViewSet(viewsets.ModelViewSet):
     """
     permission_classes = [IsAuthenticated]
     serializer_class = QuestionSerializer
+    lookup_field = "uuid"
 
     def get_queryset(self):
-        return Question.objects.filter(user=self.request.user)
+        return Question.objects.filter(
+            user=self.request.user
+        ).prefetch_related(
+            "tags"
+        )
 
 
 class SongViewSet(viewsets.ModelViewSet):
@@ -135,7 +165,11 @@ class SongViewSet(viewsets.ModelViewSet):
     lookup_field = "uuid"
 
     def get_queryset(self):
-        return Song.objects.filter(user=self.request.user).prefetch_related("tags")
+        return Song.objects.filter(
+            user=self.request.user
+        ).prefetch_related(
+            "tags"
+        )
 
 
 class SongSourceViewSet(viewsets.ModelViewSet):
@@ -143,7 +177,7 @@ class SongSourceViewSet(viewsets.ModelViewSet):
     serializer_class = SongSourceSerializer
 
     def get_queryset(self):
-        return SongSource.objects.filter(user=self.request.user)
+        return SongSource.objects.all()
 
 
 class PlaylistViewSet(viewsets.ModelViewSet):
@@ -187,7 +221,11 @@ class TagAliasViewSet(viewsets.ModelViewSet):
     lookup_field = "uuid"
 
     def get_queryset(self):
-        return TagAlias.objects.filter(user=self.request.user).select_related("tag")
+        return TagAlias.objects.filter(
+            user=self.request.user
+        ).select_related(
+            "tag"
+        )
 
 
 class TodoViewSet(viewsets.ModelViewSet):
@@ -196,12 +234,8 @@ class TodoViewSet(viewsets.ModelViewSet):
     lookup_field = "uuid"
 
     def get_queryset(self):
-        return Todo.objects.filter(user=self.request.user)
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
-    serializer_class = UserSerializer
-
-    def get_queryset(self):
-        return User.objects.all()
+        return Todo.objects.filter(
+            user=self.request.user
+        ).prefetch_related(
+            "tags"
+        )

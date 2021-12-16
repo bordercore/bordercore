@@ -9,7 +9,7 @@ from api.views import (AlbumViewSet, BlobSha1sumViewSet, BlobViewSet,
                        BookmarkViewSet, CollectionViewSet, FeedItemViewSet,
                        FeedViewSet, QuestionViewSet, SongSourceViewSet,
                        SongViewSet, TagAliasViewSet, TagNameViewSet,
-                       TagViewSet, TodoViewSet, UserViewSet)
+                       TagViewSet, TodoViewSet)
 from book.views import BookListView
 from bordercore.api.views import PlaylistItemViewSet, PlaylistViewSet
 from collection.views import get_images
@@ -57,7 +57,6 @@ router.register(r"tags", TagViewSet, "tag")
 router.register(r"tagaliases", TagAliasViewSet, "tagalias")
 router.register(r"tagnames", TagNameViewSet, "tagname")
 router.register(r"todos", TodoViewSet, "todo")
-router.register(r"users", UserViewSet, "user")
 
 urlpatterns += [
     url(r"^api/", include(router.urls)),
