@@ -140,7 +140,7 @@
                                         </div>
 
                                         <div class="d-flex flex-column">
-                                            <h4 class="{% if match.source.importance == 10 %} search-result-important{% endif %}">
+                                            <h4 v-pre class="{% if match.source.importance == 10 %} search-result-important{% endif %}">
                                             Drill: <a href="{% url 'drill:detail' match.source.uuid %}">{{ match.source.question }}</a>
                                             </h4>
 
