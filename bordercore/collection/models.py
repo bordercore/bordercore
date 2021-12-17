@@ -98,11 +98,14 @@ class Collection(TimeStampedModel):
 
         return blob_list
 
-    def get_random_blobs(self):
+    def get_recent_images(self, limit=4):
+        """
+        Return a list of the most recent images added to this collection
+        """
 
         return self.blobs.filter(file__iregex=r"\.(gif|jpg|jpeg|pdf|png)$").\
             values("uuid", "file").\
-            order_by("?")[:4]
+            order_by("-created")[:limit]
 
     def create_collection_thumbnail(self):
 
@@ -132,6 +135,7 @@ class SortOrderCollectionBlob(SortOrderMixin):
 
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE)
     blob = models.ForeignKey("blob.Blob", on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True)
 
     field_name = "collection"
 

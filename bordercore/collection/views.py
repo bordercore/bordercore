@@ -202,10 +202,10 @@ def get_blob(request, collection_uuid, blob_position):
 @api_view(["GET"])
 def get_images(request, collection_uuid):
     """
-    Get four random blobs from a collection, to be used in
+    Get four recent images from a collection, to be used in
     creating a thumbnail image.
     """
-    blob_list = Collection.objects.get(uuid=str(collection_uuid)).get_random_blobs()
+    blob_list = Collection.objects.get(uuid=str(collection_uuid)).get_recent_images()
 
     return JsonResponse(
         [

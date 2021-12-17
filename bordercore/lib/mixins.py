@@ -4,7 +4,7 @@ from django.db.models import F
 
 
 class TimeStampedModel(models.Model):
-    """ TimeStampedModel
+    """
     An abstract base class model that provides "created" and "modified" fields.
     """
     created = models.DateTimeField(auto_now_add=True)
