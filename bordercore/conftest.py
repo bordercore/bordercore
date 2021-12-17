@@ -542,6 +542,7 @@ def sort_order_user_tag(auto_login_user, tag):
     sort_order = SortOrderUserTag(userprofile=user.userprofile, tag=tag[2])
     sort_order.save()
 
+
 @pytest.fixture()
 def tag():
 

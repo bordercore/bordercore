@@ -10,11 +10,20 @@ django.setup()
 from blob.models import Blob  # isort:skip
 
 
-def test_get_s3_key(blob_image_factory):
+def test_get_s3_key(blob_image_factory, blob_text_factory):
     s3_key = Blob.get_s3_key(blob_image_factory[0].uuid, blob_image_factory[0].file)
     assert s3_key == f"blobs/{blob_image_factory[0].uuid}/{blob_image_factory[0].file}"
 
     assert blob_image_factory[0].s3_key == f"blobs/{blob_image_factory[0].uuid}/{blob_image_factory[0].file}"
+
+    assert blob_text_factory[0].s3_key is None
+
+
+def test_get_doctype(blob_image_factory, blob_note, blob_text_factory):
+
+    assert blob_image_factory[0].doctype == "image"
+    assert blob_note[0].doctype == "note"
+    assert blob_text_factory[0].doctype == "document"
 
 
 def test_get_edition_string(blob_image_factory):
@@ -73,6 +82,10 @@ def test_get_name(blob_image_factory):
 
 def test_get_tags(blob_image_factory):
     assert blob_image_factory[0].get_tags() == "django, linux, video"
+
+
+def test_is_pinned_note(blob_note):
+    assert blob_note[0].is_pinned_note() is False
 
 
 def test_get_collection_info(collection, blob_pdf_factory):

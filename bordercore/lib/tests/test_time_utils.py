@@ -102,3 +102,4 @@ def test_parse_date_from_string():
 def test_get_javascript_date():
 
     assert get_javascript_date("2015-05-27 03:44:00") == "2015-05-27T00:00"
+    assert get_javascript_date("2015-05-27") == "2015-05-27"
