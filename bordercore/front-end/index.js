@@ -194,3 +194,7 @@ window.PerfectScrollbar = PerfectScrollbar;
 import Pagination from "./vue/common/Pagination.vue";
 Vue.component("Pagination", Pagination);
 window.Pagination = Pagination;
+
+// Wait 10 seconds after selecting a song to play
+//  for it to be marked as "listened to".
+window.MUSIC_LISTEN_TIMEOUT = 10000;

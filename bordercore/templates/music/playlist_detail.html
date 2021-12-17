@@ -355,13 +355,19 @@
                 },
                 onClickUpdateSong(uuid) {
                     window.location="{% url 'music:update' '00000000-0000-0000-0000-000000000000' %}?return_url={{ request.get_full_path }}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
-                 },
+                },
                 playCurrentlySelectedSong() {
                     axios.get("{% url 'music:get_song_info' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', currentlyPlayingSongUuid))
                          .then(response => {
                              let vid = document.getElementById("player");
                              vid.src = response.data.url;
-                             vid.play()
+                             vid.play();
+                             setTimeout(this.markSongAsListenedTo, MUSIC_LISTEN_TIMEOUT);
+                         })
+                },
+                markSongAsListenedTo() {
+                    axios.get("{% url 'music:mark_song_as_listened_to' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', currentlyPlayingSongUuid))
+                         .then(response => {
                          })
                 },
                 onClickDelete() {

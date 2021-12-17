@@ -457,8 +457,25 @@ def get_song_info(request, uuid):
 
     song = Song.objects.get(user=request.user, uuid=uuid)
 
-    # Indicate that this song has been listened to, but only if we're in production
+    file_location = f"{settings.MEDIA_URL_MUSIC}songs/{song.uuid}"
+
+    results = {
+        "title": song.title,
+        "url": file_location
+    }
+
+    return JsonResponse(results)
+
+
+@login_required
+def mark_song_as_listened_to(request, uuid):
+    """
+    Indicate that this song has been listened to, but only if we're in production
+    """
+
     if not settings.DEBUG:
+        song = Song.objects.get(user=request.user, uuid=uuid)
+
         if song.times_played:
             song.times_played = song.times_played + 1
         else:
@@ -469,12 +486,11 @@ def get_song_info(request, uuid):
 
         Listen(song=song, user=request.user).save()
 
-    file_location = f"{settings.MEDIA_URL_MUSIC}songs/{song.uuid}"
-
-    results = {"title": song.title,
-               "url": file_location}
-
-    return JsonResponse(results)
+    return JsonResponse(
+        {
+            "status": "OK"
+        }
+    )
 
 
 @login_required

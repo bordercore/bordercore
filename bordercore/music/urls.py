@@ -46,6 +46,11 @@ urlpatterns = [
         name="get_song_info"
     ),
     path(
+        route="mark_song_as_listened_to/<uuid:uuid>",
+        view=views.mark_song_as_listened_to,
+        name="mark_song_as_listened_to"
+    ),
+    path(
         route="tag/",
         view=views.SearchTagListView.as_view(),
         name="search_tag"
