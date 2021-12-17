@@ -12,6 +12,7 @@ from django.utils.safestring import mark_safe
 from blob.models import ILLEGAL_FILENAMES, Blob
 from lib.fields import (CheckboxIntegerField, ModelCommaSeparatedChoiceField,
                         important_check_test)
+from lib.time_utils import get_javascript_date
 from tag.models import Tag
 
 
@@ -42,7 +43,7 @@ class BlobForm(ModelForm):
             self.initial['tags'] = self.instance.get_tags()
 
             # Add 'T00:00' to force JavaScript to use localtime
-            self.initial['date'] = self.instance.get_cleaned_date(self.instance.date) + 'T00:00'
+            self.initial['date'] = get_javascript_date(self.instance.date) + 'T00:00'
         else:
             self.fields['filename'].disabled = True
 

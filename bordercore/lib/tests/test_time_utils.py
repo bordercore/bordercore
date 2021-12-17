@@ -5,7 +5,8 @@ import pytest
 import pytz
 
 from lib.time_utils import (cleanup, convert_seconds, get_date_from_pattern,
-                            get_relative_date, parse_date_from_string)
+                            get_javascript_date, get_relative_date,
+                            parse_date_from_string)
 
 
 def test_cleanup():
@@ -96,3 +97,8 @@ def test_parse_date_from_string():
     date_string = "Jann 1, 1999"  # Misspelling
     with pytest.raises(ValueError):
         parse_date_from_string(date_string)
+
+
+def test_get_javascript_date():
+
+    assert get_javascript_date("2015-05-27 03:44:00") == "2015-05-27T00:00"
