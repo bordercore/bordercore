@@ -283,12 +283,10 @@
                     </div>
                 {% endif %}
 
-                {% if blob.is_image %}
                 <blob-detail-cover
                     cover-url="{{ blob.get_cover_url }}?nodefault=1"
                 >
                 </blob-detail-cover>
-                {% endif %}
 
                 <add-to-collection
                     ref="addToCollection"
