@@ -26,15 +26,15 @@ def get_additional_info(doctype, user, tag_name):
     return {}
 
 
-def get_tag_link(doc_type, tag):
+def get_tag_link(doc_types, tag):
 
-    if doc_type == "note":
+    if "note" in doc_types:
         return reverse("search:notes") + f"?tagsearch={tag}"
-    if doc_type == "bookmark":
+    if "bookmark" in doc_types:
         return reverse("bookmark:overview") + f"?tag={tag}"
-    if doc_type == "drill":
+    if "drill" in doc_types:
         return reverse("drill:start_study_session_tag", kwargs={"tag": tag})
-    if doc_type == "song" or doc_type == "album":
+    if "song" in doc_types or "albunm" in doc_types:
         return reverse("music:search_tag") + f"?tag={tag}"
 
     return reverse("search:kb_search_tag_detail", kwargs={"taglist": tag})
