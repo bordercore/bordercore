@@ -22,6 +22,10 @@ server {
         root /usr/share/nginx/html/letsencrypt;
     }
 
+    location /favicon.ico {
+        root /var/www/html;
+    }
+
     location /favicons {
 
         proxy_pass https://bordercore-blobs.s3.amazonaws.com/django/img/favicons;
