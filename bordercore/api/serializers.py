@@ -96,10 +96,26 @@ class BookmarkSerializer(serializers.ModelSerializer):
                   "last_response_code", "note", "name", "url", "user", "uuid"]
 
 
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ["id", "is_meta", "name", "url", "user"]
+
+
 class CollectionSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True, required=False)
+
     class Meta:
         model = Collection
         fields = ["blobs", "description", "is_private", "name", "tags"]
+
+    def create(self, validated_data):
+        """
+        Override create() so we can add the required
+        user field to the validated data.
+        """
+        validated_data["user_id"] = self.context["request"].user.id
+        return Collection.objects.create(**validated_data)
 
 
 class FeedSerializer(serializers.ModelSerializer):
@@ -154,12 +170,6 @@ class PlaylistItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlaylistItem
         fields = ["uuid", "playlist", "song"]
-
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ["id", "is_meta", "name", "url", "user"]
 
 
 class TagAliasSerializer(serializers.ModelSerializer):

@@ -6,13 +6,13 @@
                     <h4 id="myModalLabel" class="modal-title">
                         Add blob to collection
                     </h4>
-                    <button type="button" class="close" data-dismiss="modal">
+                    <button type="button" class="close" data-dismiss="modal" @click="closeModal">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div class="d-flex flex-column">
-                        <div class="search-with-doctypes form-group">
+                        <div id="search-collections" :class="{'d-none': !hideAddCollection}" class="search-with-doctypes form-group mb-0">
                             <vue-simple-suggest
                                 ref="suggestComponent"
                                 display-attribute="name"
@@ -23,7 +23,7 @@
                                 :debounce="200"
                                 :min-length="2"
                                 :max-suggestions="20"
-                                placeholder="Name"
+                                placeholder="Search collections"
                                 :styles="autoCompleteStyle"
                                 autocomplete="off"
                                 :autofocus="false"
@@ -46,6 +46,17 @@
                                     </div>
                                 </div>
                             </vue-simple-suggest>
+                            <div class="mt-3">
+                                <button class="btn btn-primary d-flex ml-auto" @click="showCreateNewCollection">
+                                    Create new collection
+                                </button>
+                            </div>
+                        </div>
+                        <div id="add-collection" :class="{'d-none': hideAddCollection}">
+                            <input class="form-control mb-3" type="text" name="collection-name" placeholder="Collection name" autocomplete="off">
+                            <button class="btn btn-primary d-flex ml-auto" @click="createNewCollection">
+                                Create
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -76,6 +87,10 @@
                 default: "",
                 type: String,
             },
+            addCollectionUrl: {
+                default: "",
+                type: String,
+            },
         },
         data() {
             return {
@@ -88,6 +103,7 @@
                     suggestions: "position-absolute list-group z-1000",
                     suggestItem: "list-group-item",
                 },
+                hideAddCollection: true,
             };
         },
         methods: {
@@ -115,16 +131,19 @@
                 if (selection.contains_blob) {
                     return;
                 }
+                this.addBlobToCollection(selection.uuid);
+            },
+            addBlobToCollection(collectionUuid) {
                 doPost(
                     this,
                     this.collectionMutateUrl,
                     {
                         "blob_uuid": this.blobUuid,
-                        "collection_uuid": selection.uuid,
+                        "collection_uuid": collectionUuid,
                         "mutation": "add",
                     },
                     (response) => {
-                        this.$emit("add-to-collection", selection.uuid);
+                        this.$emit("add-to-collection", collectionUuid);
 
                         $("#modalAddToCollection").modal("hide");
 
@@ -136,6 +155,43 @@
                     "",
                     "",
                 );
+            },
+            showCreateNewCollection() {
+                this.hideAddCollection = false;
+                setTimeout( () => {
+                    document.querySelector("#add-collection input").focus();
+                }, 100);
+            },
+            createNewCollection() {
+                const name = document.querySelector("#add-collection input").value;
+
+                doPost(
+                    this,
+                    this.addCollectionUrl,
+                    {
+                        "name": name,
+                    },
+                    (response) => {
+                        const collectionUuid = response.data.uuid;
+
+                        this.addBlobToCollection(collectionUuid);
+
+                        this.$emit("add-to-collection", collectionUuid);
+
+                        $("#modalAddToCollection").modal("hide");
+                        this.hideAddCollection = true;
+
+                        this.$nextTick(() => {
+                            this.$refs.suggestComponent.$el.querySelector("input").blur();
+                            this.$refs.suggestComponent.setText("");
+                        });
+                    },
+                    "",
+                    "",
+                );
+            },
+            closeModal() {
+                this.hideAddCollection = true;
             },
         },
 

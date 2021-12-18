@@ -293,6 +293,7 @@
                     blob-uuid="{{ blob.uuid }}"
                     search-url="{% url 'collection:search' %}?exclude_blob_uuid={{ blob.uuid }}&query="
                     collection-mutate-url="{% url 'blob:collection_mutate' %}"
+                    add-collection-url="{% url 'collection-list' %}"
                     @add-to-collection="getCollectionList"
                 >
                 </add-to-collection>

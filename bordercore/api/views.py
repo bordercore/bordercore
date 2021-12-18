@@ -124,6 +124,21 @@ class CollectionViewSet(viewsets.ModelViewSet):
             "tags", "blobs"
         )
 
+    def perform_create(self, serializer):
+        instance = serializer.save()
+
+        # Save a copy of the new object so we can reference it in create()
+        self._instance = instance
+
+    def create(self, request, *args, **kwargs):
+        response = super(CollectionViewSet, self).create(request, *args, **kwargs)
+        response.data = {
+            "status": "OK",
+            "id": self._instance.id,
+            "uuid": self._instance.uuid
+        }
+        return response
+
 
 class FeedViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
