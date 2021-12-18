@@ -15,9 +15,9 @@
 
         <div class="right-column">
             {% if object.tags.all %}
-                <a href="{% url 'drill:add_with_tag' object.tags.all.0 %}" class="btn btn-primary" role="button"><font-awesome-icon icon="plus" class="mr-2"></font-awesome-icon>Add Question</a>
+                <add-button :href="'{% url 'drill:add_with_tag' object.tags.all.0 %}'"></add-button>
             {% else %}
-                <a href="{% url 'drill:add' %}" class="btn btn-primary" role="button"><font-awesome-icon icon="plus" class="mr-2"></font-awesome-icon>Add Question</a>
+                <add-button :href="'{% url 'drill:add' %}'"></add-button>
             {% endif %}
         </div>
 
