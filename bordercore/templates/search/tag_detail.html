@@ -300,7 +300,7 @@
             {% for match in search_results.matches.song %}
                 <div class="row mt-2">
                     <div class="col-lg-12">
-                        <a href="{% url 'music:artist_detail' match.artist %}">{{ match.artist }} - {{ match.name }}</a>
+                        <a href="{% url 'music:artist_detail' match.artist %}">{{ match.artist }} - {{ match.title }}</a>
                     </div>
                 </div>
             {% endfor %}
