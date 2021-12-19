@@ -30,7 +30,7 @@ class Collection(TimeStampedModel):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     blobs = models.ManyToManyField("blob.Blob", through="SortOrderCollectionBlob")
     tags = models.ManyToManyField(Tag)
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(blank=True, default="")
     is_private = models.BooleanField(default=False)
 
     def __str__(self):
