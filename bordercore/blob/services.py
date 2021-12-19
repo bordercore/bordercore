@@ -142,8 +142,8 @@ def parse_shortcode(shortcode):
     """
 
     patterns = [
-        r"^https://www.artstation.com/artwork/([^\/]*)/*",
-        r"^https://www.instagram.com/\w\w?/([^\/]*)/*",
+        r"^https://www.artstation.com/artwork/([^\/]+)/*",
+        r"^https://www.instagram.com/\w+/([^\/]+)/*",
         r"^([\w\d]+)$"
     ]
 

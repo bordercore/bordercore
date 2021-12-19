@@ -12,7 +12,7 @@ def test_parse_shortcode():
     assert parse_shortcode("https://www.artstation.com/artwork/0XQTnK") == "0XQTnK"
 
     try:
-        parse_shortcode("https://www.instagram.com/bogus/")
+        parse_shortcode("https://www.instagram.com/42/")
     except Exception:
         pass
     else:
