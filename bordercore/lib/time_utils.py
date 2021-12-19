@@ -199,9 +199,6 @@ def get_javascript_date(date):
     Add "T00:00" so that JavaScript will use localtime rather than UTC.
     """
 
-    if date is None:
-        return ""
-
     if re.compile(r"^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d").match(date):
         # If the date has a time, remove it. The vuejs-datepicker widget will reject it.
         return datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S").strftime("%Y-%m-%dT00:00")
