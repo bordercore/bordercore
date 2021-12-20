@@ -30,17 +30,14 @@
                     <h5 class="mt-3" v-html="getNote('{{ object.note }}')"></h5>
                 {% endif %}
 
-                <div class="mt-3" id="audio_player">
-                    <audio controls controlsList="nodownload" id="player" class="mw-100" ref="audioPlayer">
-                        <source src="" type="audio/mpeg" />
-                        Your browser does not support the audio tag.
-                    </audio>
-                </div>
-
-                <div class="ml-4 mt-1">
-                    <input type="checkbox" id="continuous_play" @change="onCheck">
-                    <label for="continuous_play">Continous Play</label>
-                </div>
+                <audio-player
+                    ref="audioPlayer"
+                    :track-list="songList"
+                    song-url="{{ MEDIA_URL_MUSIC }}songs/"
+                    mark-listened-to-url="{% url 'music:mark_song_as_listened_to' '00000000-0000-0000-0000-000000000000' %}"
+                    @current-song="selectRow"
+                >
+                </audio-player>
 
                 {% for tag in album.tags.all %}
                     {% if forloop.first %}
@@ -212,8 +209,6 @@
 
     <script type="text/javascript" charset="utf-8">
 
-        let currentlyPlayingSongUuid = null;
-
         new Vue({
             el: "#vue-nav",
             name: "Nav"
@@ -259,7 +254,6 @@
                             thClass: "col-action",
                         },
                     ],
-                    continuousPlay: false,
                     show: false,
                     right: true,
                     filename: null,
@@ -287,8 +281,15 @@
                     //  clicked on the "on hover" context menu. In that case,
                     //  don't play the song.
                     if (evt.srcElement.nodeName === "TD") {
-                        currentlyPlayingSongUuid = item.uuid;
-                        this.playCurrentlySelectedSong();
+                        this.$refs.audioPlayer.playTrack(item.uuid);
+                    }
+                },
+                selectRow(index) {
+                    // Select a row based on index number. If the index is -1,
+                    // assume we only want to deselect any currently selected row.
+                    this.$refs.table.clearSelected();
+                    if (index != -1) {
+                        this.$refs.table.selectRow(index);
                     }
                 },
                 rowHovered(item, index, evt) {
@@ -303,25 +304,8 @@
                 onClickAddToPlaylist(uuid) {
                     this.$refs.addToPlaylist.openModal(uuid);
                 },
-                onCheck(evt) {
-                    this.continuousPlay = evt.srcElement.checked;
-                },
                 getNote(note) {
                     return markdown.render(note);
-                },
-                playCurrentlySelectedSong() {
-                    axios.get("{% url 'music:get_song_info' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', currentlyPlayingSongUuid))
-                       .then(response => {
-                           let vid = document.getElementById("player");
-                           vid.src = response.data.url;
-                           vid.play()
-                           setTimeout(this.markSongAsListenedTo, MUSIC_LISTEN_TIMEOUT);
-                       })
-                },
-                markSongAsListenedTo() {
-                    axios.get("{% url 'music:mark_song_as_listened_to' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', currentlyPlayingSongUuid))
-                         .then(response => {
-                         })
                 },
                 handleUpdateAlbum() {
                     $("#modalUpdateAlbum").modal("show")
@@ -338,31 +322,7 @@
                     this.filename = evt.target.files[0].name;
                 }
             },
-            mounted() {
-
-                EventBus.$on("onEnded", payload => {
-
-                    // Find next song in list to play
-                    let index = this.songList.findIndex(x => x.uuid === currentlyPlayingSongUuid);
-                    index = index + 1;
-
-                    if (this.continuousPlay && index < this.songList.length) {
-                        currentlyPlayingSongUuid = this.songList[index].uuid;
-                        this.$refs.table.selectRow(index);
-                        this.playCurrentlySelectedSong();
-                    } else {
-                        this.$refs.table.unselectRow(index - 1);
-                    }
-
-                });
-
-            }
-
         });
-
-        document.getElementById("player").onended = function(evt) {
-            EventBus.$emit("onEnded");
-        };
 
     </script>
 

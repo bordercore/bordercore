@@ -173,6 +173,10 @@ import AddToPlaylist from "./vue/music/AddToPlaylist.vue";
 Vue.component("AddToPlaylist", AddToPlaylist);
 window.AddToPlaylist = AddToPlaylist;
 
+import AudioPlayer from "./vue/music/AudioPlayer.vue";
+Vue.component("AudioPlayer", AudioPlayer);
+window.AudioPlayer = AudioPlayer;
+
 import CreateUpdatePlaylist from "./vue/music/CreateUpdatePlaylist.vue";
 window.CreateUpdatePlaylist = CreateUpdatePlaylist;
 
