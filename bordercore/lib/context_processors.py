@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from bookmark.models import Bookmark
 from fitness.models import ExerciseUser
 from metrics.models import Metric
@@ -29,4 +31,17 @@ def get_counts(request):
         "exercise_count": exercise_count,
         "todo_count": todo_count,
         "failed_test_count": failed_test_count
+    }
+
+
+def set_constants(request):
+    """
+    Get counts to display as badges on the left nav bar
+    """
+
+    if not request.user.is_authenticated:
+        return {}
+
+    return {
+        "MEDIA_URL_MUSIC": settings.MEDIA_URL_MUSIC
     }
