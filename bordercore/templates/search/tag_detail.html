@@ -267,8 +267,8 @@
                                 <a href="{% url 'blob:detail' match.uuid %}">{{ match.name|default:"Note" }}</a>
                             </h4>
 
-                            <h5 v-pre>
-                                {{ match.contents|safe }}
+                            <h5>
+                                {{ match.contents }}
                             </h5>
                             <div>
                                 {% for tag in match.tags %}
