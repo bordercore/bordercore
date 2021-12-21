@@ -154,9 +154,11 @@
             <div class="card-grid ml-2" id="vue-app-right">
 
                 {% if form.errors %}
-                    <div class="col-lg-10 offset-lg-2">
+                    <div class="col-lg-10 offset-lg-2 pl-1">
                     {% for field,error in form.errors.items %}
-                        <div class="alert alert-danger">{{ error }}</div>
+                        <div class="message-error card-body ml-0 p-3">
+                            <strong class="text-white">Errors</strong> {{ error|safe }}
+                    </div>
                     {% endfor %}
                     </div>
                 {% endif %}
