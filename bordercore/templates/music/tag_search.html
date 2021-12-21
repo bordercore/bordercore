@@ -37,12 +37,14 @@
             <div class="card-grid ml-2">
 
                 {% if song_list %}
-                <div id="audio_player">
-                    <audio controls controlsList="nodownload" id="player" class="mw-100">
-                        <source src="" type="audio/mpeg" />
-                        Your browser does not support the audio tag.
-                    </audio>
-                </div>
+                    <audio-player
+                        ref="audioPlayer"
+                        :track-list="songList"
+                        song-url="{{ MEDIA_URL_MUSIC }}songs/"
+                        mark-listened-to-url="{% url 'music:mark_song_as_listened_to' '00000000-0000-0000-0000-000000000000' %}"
+                        @current-song="selectRow"
+                    >
+                    </audio-player>
                 {% endif %}
 
             </div>
@@ -157,7 +159,6 @@
             el: "#vue-app",
             data() {
                 return {
-                    currentlyPlayingSongUuid: null,
                     songList: [
                         {% for song in song_list %}
                         {
@@ -191,44 +192,20 @@
             },
             methods: {
                 rowSelected(evt) {
-
                     if (evt.length > 0) {
-
-                        this.currentlyPlayingSongUuid = evt[0].uuid;
-
-                        axios.get("{% url 'music:get_song_info' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', this.currentlyPlayingSongUuid))
-                             .then(response => {
-                                 let vid = document.getElementById("player");
-                                 vid.src = response.data.url;
-                                 vid.play();
-                                 setTimeout(this.markSongAsListenedTo, MUSIC_LISTEN_TIMEOUT);
-                             })
-
-                    } else {
-                        this.currentlyPlayingSongUuid = null;
+                        this.$refs.audioPlayer.playTrack(evt[0].uuid);
                     }
                 },
-                markSongAsListenedTo() {
-                    axios.get("{% url 'music:mark_song_as_listened_to' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', this.currentlyPlayingSongUuid))
-                         .then(response => {
-                         })
+                selectRow(index) {
+                    // Select a row based on index number. If the index is -1,
+                    // assume we only want to deselect any currently selected row.
+                    this.$refs.table.clearSelected();
+                    if (index != -1) {
+                        this.$refs.table.selectRow(index);
+                    }
                 },
             },
-            mounted() {
-
-                EventBus.$on("onEnded", payload => {
-                    this.$refs.table.clearSelected();
-                });
-
-            }
-
         });
-
-        {% if song_list %}
-        document.getElementById("player").onended = function(evt) {
-            EventBus.$emit("onEnded");
-        };
-        {% endif %}
 
     </script>
 

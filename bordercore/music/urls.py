@@ -41,11 +41,6 @@ urlpatterns = [
         name="recent_songs"
     ),
     path(
-        route="song/<uuid:uuid>",
-        view=views.get_song_info,
-        name="get_song_info"
-    ),
-    path(
         route="mark_song_as_listened_to/<uuid:uuid>",
         view=views.mark_song_as_listened_to,
         name="mark_song_as_listened_to"

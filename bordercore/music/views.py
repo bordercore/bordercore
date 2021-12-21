@@ -13,7 +13,7 @@ from mutagen.mp3 import MP3
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import F, Q
 from django.forms.models import model_to_dict
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
@@ -80,10 +80,23 @@ class ArtistDetailView(TemplateView):
         artist_name = self.kwargs.get("artist")
 
         # Get all albums by this artist
-        albums = Album.objects.filter(user=self.request.user, artist=artist_name).order_by("-original_release_year")
+        albums = Album.objects.filter(
+            user=self.request.user,
+            artist=artist_name
+        ).order_by(
+            "-original_release_year"
+        )
 
         # Get all songs by this artist that do not appear on an album
-        songs = Song.objects.filter(user=self.request.user, artist=artist_name).filter(album__isnull=True)
+        songs = Song.objects.filter(
+            user=self.request.user,
+            artist=artist_name
+        ).filter(
+            album__isnull=True
+        ).order_by(
+            F("year").desc(nulls_last=True),
+            "title"
+        )
 
         # Get all songs by this artist that do appear on compilation album
         compilation_songs = Album.objects.filter(
@@ -453,21 +466,6 @@ def get_song_location(song):
 
 
 @login_required
-def get_song_info(request, uuid):
-
-    song = Song.objects.get(user=request.user, uuid=uuid)
-
-    file_location = f"{settings.MEDIA_URL_MUSIC}songs/{song.uuid}"
-
-    results = {
-        "title": song.title,
-        "url": file_location
-    }
-
-    return JsonResponse(results)
-
-
-@login_required
 def mark_song_as_listened_to(request, uuid):
     """
     Indicate that this song has been listened to, but only if we're in production
@@ -511,7 +509,13 @@ class SearchTagListView(ListView):
     def get_queryset(self):
         tag_name = self.request.GET["tag"]
 
-        return Song.objects.filter(user=self.request.user, tags__name=tag_name)
+        return Song.objects.filter(
+            user=self.request.user,
+            tags__name=tag_name
+        ).order_by(
+            F("year").desc(nulls_last=True),
+            "title"
+        )
 
     def get_context_data(self, **kwargs):
 

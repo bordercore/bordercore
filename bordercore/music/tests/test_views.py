@@ -146,17 +146,6 @@ def test_music_recent_songs(auto_login_user, song):
     assert resp.status_code == 200
 
 
-@factory.django.mute_signals(signals.post_save)
-def test_music_get_song_info(auto_login_user, song):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("music:get_song_info", kwargs={"uuid": song[1].uuid})
-    resp = client.get(url)
-
-    assert resp.status_code == 200
-
-
 def test_music_search_tag(auto_login_user, song, tag):
 
     _, client = auto_login_user()
