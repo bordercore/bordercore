@@ -59,8 +59,6 @@ class BlobForm(ModelForm):
     filename = CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
     file_modified = IntegerField(required=False, widget=forms.HiddenInput())
 
-    # TODO: Should I (can I) use separate clean_<field> functions
-    #  rather than one clean() function?
     def clean(self):
         cleaned_data = super().clean()
 

@@ -23,7 +23,7 @@ from blob.models import Blob, MetaData, RecentlyViewedBlob
 from blob.services import get_recent_blobs, import_blob
 from collection.models import Collection, SortOrderCollectionBlob
 from lib.mixins import FormRequestMixin
-from lib.time_utils import parse_date_from_string
+from lib.time_utils import get_javascript_date, parse_date_from_string
 
 log = logging.getLogger(f"bordercore.{__name__}")
 
@@ -49,6 +49,17 @@ class BlobListView(ListView):
 class BlobCreateView(FormRequestMixin, CreateView):
     template_name = "blob/update.html"
     form_class = BlobForm
+
+    def form_invalid(self, form):
+        """If the form is invalid, render the invalid form."""
+
+        # Add 'T00:00' to force JavaScript to use localtime
+        form["date"].value = get_javascript_date(form["date"].value()) + "T00:00"
+
+        if form["importance"].value():
+            form["importance"].value = 10
+
+        return self.render_to_response(self.get_context_data(form=form))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -86,6 +97,21 @@ class BlobCreateView(FormRequestMixin, CreateView):
 
         if "collection_uuid" in self.request.GET:
             context["collection_info"] = Collection.objects.get(user=self.request.user, uuid=self.request.GET["collection_uuid"])
+
+        # In case of a form error, we need to return the user's
+        #  submitted data by populating some of the form fields
+        #  that aren't handled automatically by Django's form object.
+        #  Some fields are also handled in form_invalid().
+        context["metadata"] = get_metadata_from_form(self.request)
+
+        if self.request.POST.get("tags", "") != "":
+            context["tags"] = [
+                {"text": x}
+                for x in self.request.POST["tags"].split(",")
+            ]
+
+        if self.request.POST.get("is_book", "") == "on":
+            context["is_book"] = True
 
         context["title"] = "Create Blob"
 
@@ -358,20 +384,45 @@ def handle_metadata(blob, request):
     for i in metadata_old:
         i.delete()
 
-    for key, value in request.POST.items():
-        p = re.compile(r"^\d+_(.*)")
-        m = p.match(key)
-        if m:
-            name = m.group(1)
-            if name == "" or value.strip() == "":
-                continue
-            new_metadata, created = MetaData.objects.get_or_create(user=request.user, name=name, value=value.strip(), blob=blob)
-            if created:
-                new_metadata.save()
+    metadata = get_metadata_from_form(request)
+    for pair in metadata:
+        new_metadata, created = MetaData.objects.get_or_create(
+            blob=blob,
+            user=request.user,
+            name=pair["name"],
+            value=pair["value"]
+        )
+        if created:
+            new_metadata.save()
 
     if request.POST.get("is_book", ""):
         new_metadata = MetaData(user=request.user, name="is_book", value="true", blob=blob)
         new_metadata.save()
+
+
+def get_metadata_from_form(request):
+    """
+    Extract metadata from POST args into a list
+    """
+    metadata = []
+
+    p = re.compile(r"^\d+_(.*)")
+
+    for key, value in request.POST.items():
+        m = p.match(key)
+        if m:
+            name = m.group(1).strip()
+            value = value.strip()
+            if name == "" or value == "":
+                continue
+            metadata.append(
+                {
+                    "name": name,
+                    "value": value
+                }
+            )
+
+    return metadata
 
 
 def handle_linked_collection(blob, request):
