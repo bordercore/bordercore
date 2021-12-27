@@ -12,13 +12,13 @@ from .models import Tag, TagAlias
 SEARCH_LIMIT = 1000
 
 
-def get_additional_info(doctype, user, tag_name):
+def get_additional_info(doc_types, user, tag_name):
     """
     Return additional information for each search result
-    based on the doctype.
+    based on the doctypes.
     """
 
-    if doctype == "drill":
+    if "drill" in doc_types:
         return {
             "info": Question.get_tag_progress(user, tag_name),
             "link": reverse("drill:start_study_session_tag", kwargs={"tag": tag_name})
@@ -26,7 +26,7 @@ def get_additional_info(doctype, user, tag_name):
     return {}
 
 
-def get_tag_link(doc_types, tag):
+def get_tag_link(tag, doc_types=[]):
 
     if "note" in doc_types:
         return reverse("search:notes") + f"?tagsearch={tag}"
@@ -40,7 +40,7 @@ def get_tag_link(doc_types, tag):
     return reverse("search:kb_search_tag_detail", kwargs={"taglist": tag})
 
 
-def get_tag_aliases(user, name, doc_type=None):
+def get_tag_aliases(user, name, doc_types=[]):
 
     tag_aliases = TagAlias.objects.filter(name__contains=name).select_related("tag")
 
@@ -53,8 +53,8 @@ def get_tag_aliases(user, name, doc_type=None):
             "id": f"{x.name} -> {x.tag}",
             "display": f"{x.name} -> {x.tag}",
             "name": f"{x.name} -> {x.tag}",
-            "link": get_tag_link(doc_type, x.tag.name),
-            **get_additional_info(doc_type, user, x.tag.name)
+            "link": get_tag_link(x.tag.name, doc_types),
+            **get_additional_info(doc_types, user, x.tag.name)
         }
         for x in
         tag_aliases
@@ -79,7 +79,7 @@ def get_random_tag_info(user):
     return info
 
 
-def search(user, tag_name, doctype=None, skip_tag_aliases=False):
+def search(user, tag_name, doc_types=[], skip_tag_aliases=False):
     """
     Search for tags attached to objects based on a substring in Elasticsearch.
     Optionally limit the search to objects of a specific doctype.
@@ -130,13 +130,13 @@ def search(user, tag_name, doctype=None, skip_tag_aliases=False):
         "_source": ["tags"]
     }
 
-    # If a doctype is passed in, then limit our search to tags attached
-    #  to that particular object type, rather than to all tags.
-    if doctype:
+    # If a doctype list is passed in, then limit our search to tags attached
+    #  to those particular object types, rather than to all tags.
+    for doc_type in doc_types:
         search_object["query"]["bool"]["must"].append(
             {
                 "term": {
-                    "doctype": doctype
+                    "doctype": doc_type
                 }
             },
         )
@@ -150,11 +150,11 @@ def search(user, tag_name, doctype=None, skip_tag_aliases=False):
                 {
                     "display": tag_result["key"],
                     "text": tag_result["key"],
-                    **get_additional_info(doctype, user, tag_result["key"])
+                    **get_additional_info(doc_types, user, tag_result["key"])
                 }
             )
 
     if not skip_tag_aliases:
-        matches.extend(get_tag_aliases(user, search_term, doctype))
+        matches.extend(get_tag_aliases(user, search_term, doc_types))
 
     return matches

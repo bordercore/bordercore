@@ -713,7 +713,7 @@ def search_tags_es(user, search_term, doc_types):
                                "doctype": "Tag",
                                "name": tag_result["key"],
                                "id": tag_result["key"],
-                               "link": get_tag_link(doc_types, tag_result["key"])
+                               "link": get_tag_link(tag_result["key"], doc_types)
                            }
                            )
 
