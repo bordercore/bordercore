@@ -256,6 +256,8 @@ class BlobDetailView(DetailView):
             }
         )
 
+        context["title"] = self.object.get_name(remove_edition_string=True)
+
         return context
 
     def get_queryset(self):
