@@ -114,8 +114,14 @@
                                         <a href="{% url 'music:album_detail' album.uuid %}">
                                             <img src="{{ IMAGES_URL }}album_artwork/{{ album.uuid }}" height="150" width="150" /> <br />
                                         </a>
-                                        <div class="mt-1"><strong>{{ album.title }}</strong></div>
-                                        <div class="text-light">{{ album.artist }}</div>
+                                        <div class="mt-1 font-weight-bold">
+                                            {{ album.title }}
+                                        </div>
+                                        <div class="text-light">
+                                            <a href="{% url 'music:artist_detail' album.artist %}">
+                                                {{ album.artist }}
+                                            </a>
+                                        </div>
                                     </td>
 
                                 {% endfor %}
