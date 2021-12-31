@@ -31,7 +31,7 @@ from lib.util import remove_non_ascii_characters
 from music.services import search as search_service
 
 from .forms import AlbumForm, PlaylistForm, SongForm
-from .models import Album, Listen, Playlist, PlaylistItem, Song
+from .models import Album, Artist, Listen, Playlist, PlaylistItem, Song
 from .services import get_playlist_counts, get_playlist_songs
 
 
@@ -39,19 +39,22 @@ from .services import get_playlist_counts, get_playlist_songs
 def music_list(request):
 
     # Get a list of recently played songs
-    recent_songs = Listen.objects.filter(user=request.user).select_related("song").distinct().order_by("-created")[:10]
+    recent_songs = Listen.objects.filter(
+        user=request.user
+    ).select_related(
+        "song"
+    ).select_related(
+        "song__artist"
+    ).distinct().order_by("-created")[:10]
 
     # Get a random album to feature
-    random_albums = None
-    random_album_info = Album.objects.filter(user=request.user).order_by("?")
-    if random_album_info:
-        random_albums = random_album_info.first()
+    random_album = Album.objects.filter(user=request.user).select_related("artist").order_by("?").first()
 
     # Get all playlists and their song counts
     playlists = get_playlist_counts(request.user)
 
     # Get a list of recently added albums
-    recent_albums = Album.objects.filter(user=request.user).order_by("-created")[:12]
+    recent_albums = Album.objects.filter(user=request.user).select_related("artist").order_by("-created")[:12]
 
     # Verify that the user has at least one song in their collection
     collection_is_not_empty = Song.objects.filter(user=request.user).exists()
@@ -61,7 +64,7 @@ def music_list(request):
                       "cols": ["Date", "artist", "title", "id"],
                       "recent_songs": recent_songs,
                       "recent_albums": recent_albums,
-                      "random_albums": random_albums,
+                      "random_album": random_album,
                       "playlists": playlists,
                       "title": "Music List",
                       "IMAGES_URL": settings.IMAGES_URL,
@@ -77,12 +80,14 @@ class ArtistDetailView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        artist_name = self.kwargs.get("artist")
+        artist_uuid = self.kwargs.get("artist_uuid")
+
+        artist = Artist.objects.get(uuid=artist_uuid)
 
         # Get all albums by this artist
         albums = Album.objects.filter(
             user=self.request.user,
-            artist=artist_name
+            artist=artist
         ).order_by(
             "-original_release_year"
         )
@@ -90,7 +95,7 @@ class ArtistDetailView(TemplateView):
         # Get all songs by this artist that do not appear on an album
         songs = Song.objects.filter(
             user=self.request.user,
-            artist=artist_name
+            artist=artist
         ).filter(
             album__isnull=True
         ).order_by(
@@ -101,8 +106,8 @@ class ArtistDetailView(TemplateView):
         # Get all songs by this artist that do appear on compilation album
         compilation_songs = Album.objects.filter(
             Q(user=self.request.user)
-            & Q(song__artist=artist_name)
-            & ~Q(artist=artist_name)
+            & Q(song__artist=artist)
+            & ~Q(artist=artist)
         ).distinct("song__album")
 
         song_list = []
@@ -117,7 +122,7 @@ class ArtistDetailView(TemplateView):
 
         return {
             **context,
-            "artist_name": artist_name,
+            "artist_name": artist.name,
             "album_list": albums,
             "song_list": song_list,
             "compilation_album_list": compilation_songs,
@@ -142,7 +147,7 @@ class AlbumDetailView(FormRequestMixin, ModelFormMixin, DetailView):
 
         for song in s:
             if self.object.compilation:
-                display_title = song.title + " - " + song.artist
+                display_title = song.title + " - " + song.artist.name
             else:
                 display_title = song.title
             song_list.append(dict(uuid=song.uuid,
@@ -352,7 +357,7 @@ def handle_s3(song, sha1sum):
         key,
         ExtraArgs={
             "Metadata": {
-                "artist": remove_non_ascii_characters(song.artist, default="Artist"),
+                "artist": remove_non_ascii_characters(song.artist.name, default="Artist"),
                 "title": remove_non_ascii_characters(song.title, default="Title")
             }
         }
@@ -400,8 +405,9 @@ class RecentSongsListView(ListView):
     def get_queryset(self):
         search_term = self.request.GET.get("tag", None)
 
-        queryset = Song.objects.filter(user=self.request.user)\
-                               .filter(album__isnull=True)
+        queryset = Song.objects.filter(user=self.request.user) \
+                               .filter(album__isnull=True) \
+                               .select_related("artist")
 
         if search_term:
             queryset = queryset.filter(
@@ -422,10 +428,10 @@ class RecentSongsListView(ListView):
                 {
                     "uuid": match.uuid,
                     "title": match.title,
-                    "artist": match.artist,
+                    "artist": match.artist.name,
                     "year": match.year,
                     "length": convert_seconds(match.length),
-                    "artist_url": reverse("music:artist_detail", kwargs={"artist": match.artist})
+                    "artist_url": reverse("music:artist_detail", kwargs={"artist_uuid": match.artist.uuid})
                 }
             )
 

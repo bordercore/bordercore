@@ -8,7 +8,7 @@
         <div class="mr-auto align-self-center">
             <ul class="breadcrumb mb-0 pt-0 pb-0">
                 <li class="breadcrumb-item"> <a href="{% url 'music:list' %}"><font-awesome-icon icon="home" class="icon-hover"></font-awesome-icon></a> </li>
-                <li class="breadcrumb-item"> <a href="{% url 'music:artist_detail' album.artist %}">{{ album.artist }}</a> </li>
+                <li class="breadcrumb-item"> <a href="{% url 'music:artist_detail' album.artist.uuid %}">{{ album.artist.name }}</a> </li>
                 <li class="breadcrumb-item active">{{ album.title }}</li>
             </ul>
         </div>
@@ -73,7 +73,7 @@
                                 </drop-down-menu>
                             </div>
                             <h3>
-                                <a href="{% url 'music:artist_detail' album.artist %}">{{ album.artist }}</a>
+                                <a href="{% url 'music:artist_detail' album.artist.uuid %}">{{ album.artist.name }}</a>
                             </h3>
 
                             <h6>{{ album.year }}</h6>
@@ -157,6 +157,29 @@
                                         >
                                         </tags-input>
                                     </div>
+                                </div>
+
+                            {% elif field.label == "Artist" %}
+
+                                <div class="form-group{% if field.errors %} error{% endif %} row">
+                                    <label class="col-lg-4 col-form-label font-weight-bold text-right">Artist</label>
+
+                                    <div class="col-lg-8">
+                                        <simple-suggest
+                                            id="id_artist"
+                                            name="artist"
+                                            ref="simpleSuggest"
+                                            display-attribute="artist"
+                                            value-attribute="artist"
+                                            search-url="{% url 'music:search_artists' %}?term="
+                                            place-holder=""
+                                            :debounce=300
+                                        >
+                                        </simple-suggest>
+                                    </div>
+                                    {% for error in field.errors %}
+                                        <span class="form-error">{{ error }}</span>
+                                    {% endfor %}
                                 </div>
 
                             {% elif field.label == "Cover image" %}
@@ -325,6 +348,9 @@
                     this.filename = evt.target.files[0].name;
                 }
             },
+            mounted() {
+                this.$refs.simpleSuggest.$refs.suggestComponent.text = "{{ form.instance.artist.name }}";
+            }
         });
 
     </script>

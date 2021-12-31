@@ -356,24 +356,27 @@ class SearchTagDetailView(ListView):
             ],
             "from": 0,
             "size": self.RESULT_COUNT_PER_PAGE,
-            "_source": ["artist",
-                        "author",
-                        "content_type",
-                        "contents",
-                        "date",
-                        "date_unixtime",
-                        "doctype",
-                        "filename",
-                        "importance",
-                        "bordercore_id",
-                        "last_modified",
-                        "name",
-                        "question",
-                        "sha1sum",
-                        "tags",
-                        "title",
-                        "url",
-                        "uuid"]
+            "_source": [
+                "artist",
+                "artist_uuid",
+                "author",
+                "content_type",
+                "contents",
+                "date",
+                "date_unixtime",
+                "doctype",
+                "filename",
+                "importance",
+                "bordercore_id",
+                "last_modified",
+                "name",
+                "question",
+                "sha1sum",
+                "tags",
+                "title",
+                "url",
+                "uuid"
+            ]
         }
 
         results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
@@ -388,6 +391,7 @@ class SearchTagDetailView(ListView):
 
             result = {
                 "artist": match["_source"].get("artist", ""),
+                "artist_uuid": match["_source"].get("artist_uuid", ""),
                 "question": truncate(match["_source"].get("question", "")),
                 "name": match["_source"].get("name", "No Name"),
                 "task": match["_source"].get("name", ""),
@@ -533,11 +537,11 @@ def get_link(doc_type, match):
         if "album_uuid" in match:
             return reverse("music:album_detail", kwargs={"uuid": match["album_uuid"]})
         else:
-            return reverse("music:artist_detail", kwargs={"artist": match["artist"]})
+            return reverse("music:artist_detail", kwargs={"artist_uuid": match["artist_uuid"]})
     if doc_type == "Album":
         return reverse("music:album_detail", kwargs={"uuid": match["uuid"]})
     if doc_type == "Artist":
-        return reverse("music:artist_detail", kwargs={"artist": match["artist"]})
+        return reverse("music:artist_detail", kwargs={"artist_uuid": match["artist_uuid"]})
     if doc_type in ("Blob", "Book", "Document", "Note"):
         return reverse("blob:detail", kwargs={"uuid": match["uuid"]})
     if doc_type == "Drill":
@@ -809,6 +813,7 @@ def search_names_es(user, search_term, doc_types):
         "_source": ["album_uuid",
                     "album",
                     "artist",
+                    "artist_uuid",
                     "author",
                     "bordercore_id",
                     "date",

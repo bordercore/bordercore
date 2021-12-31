@@ -45,7 +45,7 @@ def get_playlist_songs(playlist):
             "playlistitem_uuid": x.uuid,
             "uuid": x.song.uuid,
             "sort_order": x.sort_order,
-            "artist": x.song.artist,
+            "artist": x.song.artist.name,
             "title": x.song.title,
             "note": x.song.note,
             "year": x.song.year,

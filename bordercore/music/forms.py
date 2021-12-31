@@ -8,13 +8,16 @@ from django.utils.safestring import mark_safe
 from lib.fields import ModelCommaSeparatedChoiceField
 from tag.models import Tag
 
-from .models import Album, Playlist, Song, SongSource
+from .models import Album, Artist, Playlist, Song, SongSource
 
 
 class SongForm(ModelForm):
 
     sha1sum = CharField()
     album_name = CharField()
+    artist = CharField(widget=forms.TextInput(
+        attrs={"class": "form-control"}
+    ))
     compilation = BooleanField()
 
     def __init__(self, *args, **kwargs):
@@ -49,6 +52,7 @@ class SongForm(ModelForm):
         # If this form has a model attached, get the tags and display them separated by commas
         if self.instance.id:
             self.initial["tags"] = self.instance.get_tags()
+            self.initial["artist"] = Artist.objects.get(pk=self.instance.artist.id)
 
         self.fields["tags"] = ModelCommaSeparatedChoiceField(
             request=self.request,
@@ -76,6 +80,15 @@ class SongForm(ModelForm):
 
         return album_name
 
+    def clean_artist(self):
+        """
+        Instead of this field displaying a foreign key id, we want to
+        show the artist name instead.
+        """
+        data = self.cleaned_data["artist"].strip()
+        artist, _ = Artist.objects.get_or_create(name=data, user=self.request.user)
+        return artist
+
     def clean_year(self):
         year = self.cleaned_data.get("year")
         if not year and self.data.get("album_name"):
@@ -84,7 +97,7 @@ class SongForm(ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        for field in ["title", "artist", "note", "album_name"]:
+        for field in ["title", "note", "album_name"]:
             if field in cleaned_data:
                 cleaned_data[field] = cleaned_data[field].strip()
 
@@ -92,11 +105,13 @@ class SongForm(ModelForm):
             song = Song.objects.filter(
                 user=self.request.user,
                 title=cleaned_data["title"],
-                artist=cleaned_data["artist"]
+                artist__name=cleaned_data["artist"]
             )
             if song:
-                listen_url = Song.get_song_url(song[0])
-                raise ValidationError(mark_safe(f"Error: <a href='{listen_url}'>A song</a> with this title and artist already exists."))
+                song_url = Song.get_song_url(song.first())
+                raise ValidationError(
+                    mark_safe(f"Error: <a href='{song_url}'>A song</a> with this title and artist already exists.")
+                )
 
         return cleaned_data
 
@@ -141,6 +156,9 @@ class PlaylistForm(ModelForm):
 
 class AlbumForm(ModelForm):
 
+    artist = CharField(widget=forms.TextInput(
+        attrs={"class": "form-control"}
+    ))
     cover_image = FileField()
 
     def __init__(self, *args, **kwargs):
@@ -154,6 +172,7 @@ class AlbumForm(ModelForm):
 
         if self.instance.id:
             self.initial["tags"] = self.instance.get_tags()
+            self.initial["artist"] = Artist.objects.get(pk=self.instance.artist.id)
 
         self.fields["tags"] = ModelCommaSeparatedChoiceField(
             request=self.request,
@@ -161,12 +180,20 @@ class AlbumForm(ModelForm):
             queryset=Tag.objects.filter(user=self.request.user),
             to_field_name="name")
 
+    def clean_artist(self):
+        """
+        Instead of this field displaying a foreign key id, we want to
+        show the artist name instead.
+        """
+        data = self.cleaned_data["artist"]
+        artist, _ = Artist.objects.get_or_create(name=data, user=self.request.user)
+        return artist
+
     class Meta:
         model = Album
         fields = ("title", "artist", "year", "note")
         widgets = {
             "title": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
-            "artist": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
             "year": NumberInput(attrs={"class": "form-control", "autocomplete": "off"}),
             "note": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
         }

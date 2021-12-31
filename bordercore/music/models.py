@@ -27,10 +27,22 @@ from lib.util import get_elasticsearch_connection
 from tag.models import Tag
 
 
+class Artist(TimeStampedModel):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    name = models.TextField()
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    class Meta:
+        unique_together = ("name", "user")
+
+    def __str__(self):
+        return self.name
+
+
 class Album(TimeStampedModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     title = models.TextField()
-    artist = models.TextField()
+    artist = models.ForeignKey(Artist, on_delete=models.PROTECT)
     year = models.IntegerField()
     original_release_year = models.IntegerField(null=True)
     compilation = models.BooleanField(default=False)
@@ -67,7 +79,8 @@ class Album(TimeStampedModel):
                 "uuid": self.uuid,
                 "bordercore_id": self.id,
                 "title": self.title,
-                "artist": self.artist,
+                "artist": self.artist.name,
+                "artist_uuid": self.artist.uuid,
                 "year": self.year,
                 "original_release_year": self.original_release_year,
                 "compilation": self.compilation,
@@ -106,7 +119,7 @@ class SongSource(TimeStampedModel):
 class Song(TimeStampedModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     title = models.TextField()
-    artist = models.TextField()
+    artist = models.ForeignKey(Artist, on_delete=models.PROTECT)
     album = models.ForeignKey(Album, null=True, on_delete=models.PROTECT)
     track = models.IntegerField(null=True)
     year = models.IntegerField(null=True)
@@ -168,14 +181,18 @@ class Song(TimeStampedModel):
                 "uuid": self.uuid,
                 "bordercore_id": self.id,
                 "title": self.title,
-                "artist": self.artist,
+                "artist": self.artist.name,
+                "artist_uuid": self.artist.uuid,
                 "year": self.year,
                 "track": self.track,
                 "tags": [tag.name for tag in self.tags.all()],
                 "note": self.note,
                 "last_modified": self.modified,
                 "doctype": "song",
-                "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
+                "date": {
+                    "gte": self.created.strftime("%Y-%m-%d %H:%M:%S"),
+                    "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")
+                },
                 "date_unixtime": self.created.strftime("%s"),
                 "user_id": self.user.id
             }
@@ -240,11 +257,13 @@ class Song(TimeStampedModel):
                                                title=song_info["album_name"],
                                                artist=album_artist)
             except ObjectDoesNotExist:
-
                 # No existing album found. Create a new one.
+
+                artist, _ = Artist.objects.get_or_create(name=album_artist, user=user)
+
                 album_info = Album(user=user,
                                    title=song_info["album_name"],
-                                   artist=album_artist,
+                                   artist=artist,
                                    year=song_info["year"],
                                    original_release_year=song_info.get("original_release_year", None) or song_info["year"],
                                    compilation=song_info["compilation"])
@@ -266,7 +285,7 @@ class Song(TimeStampedModel):
         if song.album:
             listen_url = reverse("music:album_detail", args=[song.album.uuid])
         else:
-            listen_url = reverse("music:artist_detail", args=[song.artist])
+            listen_url = reverse("music:artist_detail", args=[song.artist.uuid])
 
         return listen_url
 

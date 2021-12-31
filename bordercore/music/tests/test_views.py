@@ -76,7 +76,7 @@ def test_music_artist_detail(auto_login_user, song):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("music:artist_detail", kwargs={"artist": song[1].artist})
+    url = urls.reverse("music:artist_detail", kwargs={"artist_uuid": song[1].artist.uuid})
     resp = client.get(url)
 
     assert resp.status_code == 200

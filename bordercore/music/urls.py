@@ -31,7 +31,7 @@ urlpatterns = [
         name="album_update"
     ),
     path(
-        route="artist/<str:artist>/",
+        route="artist/<uuid:artist_uuid>/",
         view=views.ArtistDetailView.as_view(),
         name="artist_detail"
     ),

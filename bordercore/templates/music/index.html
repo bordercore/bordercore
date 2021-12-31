@@ -21,20 +21,20 @@
 
         <div class="col-lg-3 d-flex flex-column">
 
-            {% if random_albums %}
+            {% if random_album %}
                 <card title="Featured Album" class="flex-grow-0">
                     <template v-slot:content>
                         <table class="table table-borderless">
                             <tr>
                                 <td>
-                                    <a href="{% url 'music:album_detail' random_albums.uuid %}">
-                                        <img src="{{ IMAGES_URL }}album_artwork/{{ random_albums.uuid }}" height="150" width="150" />
+                                    <a href="{% url 'music:album_detail' random_album.uuid %}">
+                                        <img src="{{ IMAGES_URL }}album_artwork/{{ random_album.uuid }}" height="150" width="150" />
                                     </a>
                                 </td>
                                 <td>
-                                    <strong>{{ random_albums.artist }}</strong>
+                                    <strong>{{ random_album.title }}</strong>
                                     <br />
-                                    {{ random_albums.title }}
+                                    {{ random_album.artist }}
                                 </td>
                             </tr>
                         </table>
@@ -71,7 +71,7 @@
                 <template v-slot:content>
                     <ul class="list-group interior-borders">
                         {% for song in recent_songs %}
-                            <li class="list-group-item list-group-item-secondary text-info">{{ song.song.title}} <strong>{{ song.song.artist }}</strong></li>
+                            <li class="list-group-item list-group-item-secondary text-info">{{ song.song.title}} <strong>{{ song.song.artist.name }}</strong></li>
                         {% endfor %}
                     </ul>
                 </template>
@@ -118,8 +118,8 @@
                                             {{ album.title }}
                                         </div>
                                         <div class="text-light">
-                                            <a href="{% url 'music:artist_detail' album.artist %}">
-                                                {{ album.artist }}
+                                            <a href="{% url 'music:artist_detail' album.artist.uuid %}">
+                                                {{ album.artist.name }}
                                             </a>
                                         </div>
                                     </td>

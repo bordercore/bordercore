@@ -4,6 +4,7 @@ from django import urls
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
+
 def test_accounts_prefs(auto_login_user):
 
     _, client = auto_login_user()
