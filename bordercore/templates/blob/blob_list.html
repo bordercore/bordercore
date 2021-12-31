@@ -38,7 +38,7 @@
 
                     <a v-if="blob.cover_url" :href="blob.url"><img class="w-100" :src="blob.cover_url" /></a>
 
-                    <div v-if="blob.doctype === 'Note' || blob.doctype === 'Document'" class="blob-content" v-html="getContent(blob)"></div>
+                    <div v-if="blob.doctype === 'note' || blob.doctype === 'document'" class="blob-content" v-html="getContent(blob)"></div>
 
                     <div class="blob-info d-flex justify-content-between mt-auto">
                         <div class="text-primary mr-auto">[[ getDeltaDays(blob.delta_days) ]]</div>
