@@ -394,6 +394,7 @@ class SearchTagDetailView(ListView):
                 "artist_uuid": match["_source"].get("artist_uuid", ""),
                 "question": truncate(match["_source"].get("question", "")),
                 "name": match["_source"].get("name", "No Name"),
+                "title": match["_source"].get("title", "No Title"),
                 "task": match["_source"].get("name", ""),
                 "url": match["_source"].get("url", ""),
                 "uuid": match["_source"].get("uuid", ""),
