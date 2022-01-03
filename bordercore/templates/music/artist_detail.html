@@ -12,7 +12,7 @@
                         <font-awesome-icon icon="home" class="icon-hover"></font-awesome-icon>
                     </a>
                 </li>
-                <li class="breadcrumb-item active">{{ artist_name }}</li>
+                <li class="breadcrumb-item active">{{ artist.name }}</li>
             </ul>
         </div>
     </div>
@@ -26,6 +26,12 @@
         <div class="col-lg-3 d-flex flex-column">
 
             <div class="card-grid ml-2">
+
+            {% if artist_image %}
+                <div>
+                    <img id="artist_image" src="{{ IMAGES_URL }}artist_images/{{ artist.uuid }}" class="mw-100" />
+                </div>
+            {% endif %}
 
             {% if song_list %}
                 <audio-player
@@ -48,9 +54,18 @@
 
                 <div class="card-grid ml-2">
 
-                    <h2 class="ml-3">
-                        {{ artist_name }}
-                    </h2>
+                    <div class="d-flex">
+                        <h2 class="ml-3">
+                            {{ artist.name }}
+                        </h2>
+
+                        <drop-down-menu
+                            ref="dropDownMenu"
+                            :links="artistDetailMenuItems"
+                            class="dropdownmenu"
+                        >
+                        </drop-down-menu>
+                    </div>
 
                     {% if album_list %}
 
@@ -199,6 +214,37 @@
 
         </div>
 
+        <div class="modal fade" id="modalUpdateArtistImage" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">Update Artist Image</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="form-group row">
+                            <label class="col-lg-4 col-form-label font-weight-bold text-right">Artist Image</label>
+                            <div class="col-lg-8 input-group">
+                                <input type="text" name="filename" :value="artistDetailFilename" class="form-control" autocomplete="off" />
+                                <span class="input-group-append">
+                                    <label class="btn btn-primary">Choose image
+                                        <input id="id_image" type="file" name="cover_image" hidden accept="image/*" @change="onArtistImageSelect" />
+                                    </label>
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <input id="btn-action" class="btn btn-primary" data-dismiss="modal" type="button" value="Update" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 {% endblock %}
@@ -251,6 +297,15 @@
                             thClass: "col-action",
                         },
                     ],
+                    artistDetailFilename: null,
+                    artistDetailMenuItems: [
+                        {
+                            id: uuidv4(),
+                            title: "Update Artist Image",
+                            url: "#",
+                            clickHandler: this.handleUpdateArtistImage,
+                        },
+                    ],
                     show: false,
                 }
             },
@@ -283,6 +338,25 @@
                 onClickAddToPlaylist(uuid) {
                     this.$refs.addToPlaylist.openModal(uuid);
                 },
+                handleUpdateArtistImage() {
+                    $("#modalUpdateArtistImage").modal("show")
+                },
+                onArtistImageSelect(evt) {
+                    let image = document.getElementById("id_image").files[0];
+                    let formData = new FormData();
+                    formData.append("artist_uuid", "{{ artist.uuid }}");
+                    formData.append("image", image);
+
+                    axios.post("{% url "music:update_artist_image" %}", formData, {
+                        headers: {
+                            "Content-Type": "multipart/form-data"
+                        }
+                    }).then(response => {
+                        this.artistDetailFilename = evt.target.files[0].name;
+                        const artistImage = document.getElementById("artist_image");
+                        artistImage.src = artistImage.src + "?" + new Date().getTime();
+                    });
+                }
             },
         });
 

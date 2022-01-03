@@ -105,4 +105,9 @@ urlpatterns = [
         view=views.add_to_playlist,
         name="add_to_playlist"
     ),
+    path(
+        route="update_artist_image",
+        view=views.update_artist_image,
+        name="update_artist_image"
+    ),
 ]

@@ -122,7 +122,8 @@ class ArtistDetailView(TemplateView):
 
         return {
             **context,
-            "artist_name": artist.name,
+            "artist_image": True,
+            "artist": artist,
             "album_list": albums,
             "song_list": song_list,
             "compilation_album_list": compilation_songs,
@@ -378,7 +379,7 @@ def handle_s3(song, sha1sum):
             fh.write(artwork[0].data)
             fh.close()
 
-            key = f"artwork/{song.album.uuid}"
+            key = f"album_artwork/{song.album.uuid}"
             s3_client.upload_file(
                 artwork_file,
                 settings.AWS_BUCKET_NAME_MUSIC,
@@ -746,6 +747,7 @@ def search_playlists(request):
 @login_required
 def add_to_playlist(request):
     """
+    Add a song to a playlist
     """
 
     playlist_uuid = request.POST["playlist_uuid"]
@@ -773,5 +775,32 @@ def add_to_playlist(request):
         response = {
             "status": "OK"
         }
+
+    return JsonResponse(response)
+
+
+@login_required
+def update_artist_image(request):
+    """
+    Update the image displayed on the artist detail page
+    """
+
+    artist_uuid = request.POST["artist_uuid"]
+    image = request.FILES["image"]
+
+    s3_client = boto3.client("s3")
+
+    key = f"artist_images/{artist_uuid}"
+    fo = io.BytesIO(image.read())
+    s3_client.upload_fileobj(
+        fo,
+        settings.AWS_BUCKET_NAME_MUSIC,
+        key,
+        ExtraArgs={"ContentType": "image/jpeg"}
+    )
+
+    response = {
+        "status": "OK"
+    }
 
     return JsonResponse(response)
