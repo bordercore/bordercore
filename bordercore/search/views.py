@@ -295,7 +295,7 @@ class NoteListView(SearchListView):
 class SearchTagDetailView(ListView):
 
     template_name = "search/tag_detail.html"
-    RESULT_COUNT_PER_PAGE = 10
+    RESULT_COUNT_PER_PAGE = 1000
     context_object_name = "search_results"
 
     def get_queryset(self):
