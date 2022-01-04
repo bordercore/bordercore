@@ -236,8 +236,6 @@ class BlobDetailView(DetailView):
             if int(datetime.datetime.now().strftime("%s")) - int(self.object.created.strftime("%s")) > 60:
                 messages.add_message(self.request, messages.ERROR, "Blob not found in Elasticsearch")
 
-        context["caption"] = self.object.get_name(remove_edition_string=True)
-
         context["linked_blobs"] = self.object.get_linked_blobs()
 
         context["collection_list"] = self.object.get_collection_info()
@@ -256,7 +254,7 @@ class BlobDetailView(DetailView):
             }
         )
 
-        context["title"] = self.object.get_name(remove_edition_string=True)
+        context["name"] = self.object.get_name(remove_edition_string=True)
 
         return context
 
