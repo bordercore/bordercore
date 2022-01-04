@@ -128,8 +128,8 @@ def import_blob(user, url):
 
     if domain == "instagram.com":
         return import_instagram(user, parsed_url)
-    elif domain == "newyorktimes.com":
-        return import_newyorktimes(user, parsed_url)
+    elif domain == "nytimes.com":
+        return import_newyorktimes(user, url)
     elif domain == "artstation.com":
         return import_artstation(user, parsed_url)
     else:
@@ -195,7 +195,7 @@ def parse_date(date):
 def import_instagram(user, parsed_url):
 
     if not user.userprofile.instagram_credentials:
-        raise ValueError("Please provide your Instagram credentials in  <a href='" + reverse('accounts:prefs') + "'>preferences</a>.")
+        raise ValueError("Please provide your Instagram credentials in <a href='" + reverse('accounts:prefs') + "'>preferences</a>.")
 
     L = instaloader.Instaloader(download_videos=True)
 
@@ -319,40 +319,31 @@ def get_authors(author_list):
     return return_list
 
 
-def import_newyorktimes(user, title):
+def import_newyorktimes(user, url):
 
-    t = datetime.datetime.now()
-    month = t.strftime("%m")
-    if month.startswith("0"):
-        month = month[1:]
+    api_key = user.userprofile.nytimes_api_key
+    if not api_key:
+        raise ValueError("Please provide your NYTimes API key in <a href='" + reverse('accounts:prefs') + "'>preferences</a>.")
 
-    t = datetime.datetime.now()
-    year = t.strftime("%Y")
+    # Remove any extraneous search-args from the url
+    url = url.split("?")[0]
 
-    # TODO: Add this to prefs
-    API_KEY = ""
-
-    url = f"https://api.nytimes.com/svc/archive/v1/{year}/{month}.json?api-key={API_KEY}"
+    url = f"https://api.nytimes.com/svc/search/v2/articlesearch.json?api-key={api_key}&fq=web_url:(\"{url}\")"
     r = requests.get(url)
     result = r.json()
 
-    matches = []
+    if result["status"] == "ERROR":
+        raise ValueError(f"There was an error retrieving the article: {result['errors']}")
 
-    for foo in result["response"]["docs"]:
-        if title.lower() in foo["headline"]["main"].lower():
-            matches.append(foo)
+    matches = result["response"]["docs"]
 
     if len(matches) > 1:
-        print("Error: found more than one article matching that title")
         for article in matches:
             print(article["headline"]["main"])
-        raise ValueError()
+        raise ValueError("Error: found more than one article matching that url")
 
     if len(matches) == 0:
-        print("Error: no articles found matching that title")
-        raise ValueError()
-
-    print(matches[0])
+        raise ValueError("Error: no articles found matching that url")
 
     date = datetime.datetime.strptime(matches[0]["pub_date"], "%Y-%m-%dT%H:%M:%S%z").strftime("%Y-%m-%d")
 
