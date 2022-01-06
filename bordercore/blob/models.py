@@ -165,6 +165,8 @@ class Blob(TimeStampedModel):
             return "book"
         elif is_image(self.file):
             return "image"
+        elif is_video(self.file):
+            return "video"
         elif self.sha1sum is not None:
             return "blob"
         else:
