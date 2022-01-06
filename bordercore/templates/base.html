@@ -48,7 +48,7 @@
                                 <span v-if="$store.state.collapsed">Bordercore :: </span>{% block title %} {% endblock %}
                             </div>
 
-                            <div class="col-lg-7 my-auto d-flex justify-content-end">
+                            <div class="col-lg-7 my-auto d-flex justify-content-end align-items-center">
 
                                 <search-simple-suggest
                                     ref="simpleSuggest"
@@ -64,6 +64,12 @@
                                 >
                                 </search-simple-suggest>
 
+                                <recent-blobs
+                                    :blob-list="recentBlobs"
+                                    blob-detail-url="{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}"
+                                >
+                                </recent-blobs>
+
                                 <div class="col-auto" v-cloak>
                                     <drop-down-menu
                                         :links="userMenuItems"
@@ -71,15 +77,15 @@
                                         :support-hover-target="false"
                                     >
                                         <template slot="top">
-                                            <span class="align-middle pt-2">
+                                            <span class="align-middle">
                                                 Hello <strong>{{ user.get_username }}</strong>
                                             </span>
                                             {% if request.user|is_in_group:"Admin" %}
-                                                <span class="dropdown-item-extra align-middle ml-2 mt-2" v-if="failed_test_count > 0">
+                                                <span class="dropdown-item-extra align-middle ml-2" v-if="failed_test_count > 0">
                                                     [[ failed_test_count ]]
                                                 </span>
                                             {% endif %}
-                                            <font-awesome-icon icon="angle-down" class="align-middle ml-2 mt-2" />
+                                            <font-awesome-icon icon="angle-down" class="align-middle ml-2" />
                                         </template>
                                     </drop-down-menu>
                                 </div>
@@ -149,6 +155,8 @@
             {% else %}
                 <script type="text/javascript" src="{{ STATIC_URL }}js/javascript-bundle.min.js.gz"></script>
             {% endif %}
+
+            {{ recent_blobs.0|json_script:"recent_blobs" }}
 
             <script type="text/javascript">
 
@@ -222,7 +230,8 @@
                                     url: "{% url 'accounts:logout' %}",
                                     icon: "sign-out-alt",
                                 },
-                            ]
+                            ],
+                            recentBlobs: JSON.parse(document.getElementById("recent_blobs").textContent),
                         }
                     },
                     methods: {

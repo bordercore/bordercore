@@ -40,7 +40,7 @@ window.jQuery= jQuery;
 import "bootstrap";
 
 import {library} from "@fortawesome/fontawesome-svg-core";
-import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faChevronLeft, faChevronRight, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faHeart, faHome, faImage, faInfo, faGraduationCap, faLink, faLock, faMusic, faNewspaper, faPlus, faQuestion, faRunning, faSearch, faSignOutAlt, faStickyNote, faTags, faTasks, faTimesCircle} from "@fortawesome/free-solid-svg-icons";
+import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faChevronLeft, faChevronRight, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faFileAlt, faHeart, faHome, faImage, faInfo, faGraduationCap, faLink, faLock, faMusic, faNewspaper, faObjectGroup, faPlus, faQuestion, faRunning, faSearch, faSignOutAlt, faStickyNote, faTags, faTasks, faTimesCircle} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 library.add(faAlignLeft);
 library.add(faAngleDown);
@@ -60,6 +60,7 @@ library.add(faCopy);
 library.add(faDownload);
 library.add(faEllipsisV);
 library.add(faExclamationTriangle);
+library.add(faFileAlt);
 library.add(faHeart);
 library.add(faHome);
 library.add(faImage);
@@ -69,6 +70,7 @@ library.add(faLink);
 library.add(faLock);
 library.add(faMusic);
 library.add(faNewspaper);
+library.add(faObjectGroup);
 library.add(faPlus);
 library.add(faQuestion);
 library.add(faRunning);
@@ -183,6 +185,10 @@ window.CreateUpdatePlaylist = CreateUpdatePlaylist;
 import BlobDetailCover from "./vue/blob/BlobDetailCover.vue";
 Vue.component("BlobDetailCover", BlobDetailCover);
 window.BlobDetailCover = BlobDetailCover;
+
+import RecentBlobs from "./vue/blob/RecentBlobs.vue";
+Vue.component("RecentBlobs", RecentBlobs);
+window.RecentBlobs = RecentBlobs;
 
 import AddToCollection from "./vue/blob/AddToCollection.vue";
 Vue.component("AddToCollection", AddToCollection);

@@ -1,5 +1,6 @@
 from django.conf import settings
 
+from blob.services import get_recent_blobs as get_recent_blobs_service
 from bookmark.models import Bookmark
 from fitness.models import ExerciseUser
 from metrics.models import Metric
@@ -31,6 +32,18 @@ def get_counts(request):
         "exercise_count": exercise_count,
         "todo_count": todo_count,
         "failed_test_count": failed_test_count
+    }
+
+
+def get_recent_blobs(request):
+    """
+    """
+
+    if not request.user.is_authenticated:
+        return {}
+
+    return {
+        "recent_blobs": get_recent_blobs_service(request.user, skip_content=True)
     }
 
 

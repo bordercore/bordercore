@@ -484,7 +484,8 @@ def parse_date(request, input_date):
 @login_required
 def recent_blobs(request):
 
-    blob_list, doctypes = get_recent_blobs(request.user)
+    skip_content = True if request.GET.get("skip_content", None) else False
+    blob_list, doctypes = get_recent_blobs(request.user, skip_content=skip_content)
 
     response = {
         "blobList": blob_list,

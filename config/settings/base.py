@@ -206,6 +206,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'context_processors.get_counts',
                 'context_processors.set_constants',
+                'context_processors.get_recent_blobs',
             ]
         },
     },

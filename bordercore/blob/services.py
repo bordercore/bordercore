@@ -23,7 +23,7 @@ from blob.models import Blob, MetaData
 from lib.util import get_elasticsearch_connection, is_image, is_pdf, is_video
 
 
-def get_recent_blobs(user, limit=10):
+def get_recent_blobs(user, limit=10, skip_content=False):
     """
     Return an annotated list of the most recently created blobs,
     along with counts of their doctypes.
@@ -101,7 +101,7 @@ def get_recent_blobs(user, limit=10):
             "doctype": blob.doctype,
         }
 
-        if blob.content:
+        if blob.content and not skip_content:
             props["content"] = blob.content[:10000]
             props["content_size"] = humanize.naturalsize(len(blob.content))
 
@@ -110,6 +110,7 @@ def get_recent_blobs(user, limit=10):
 
         if is_image(blob.file) or is_pdf(blob.file) or is_video(blob.file):
             props["cover_url"] = blob.get_cover_url(size="large")
+            props["cover_url_small"] = blob.get_cover_url(size="small")
 
         returned_blob_list.append(props)
 
