@@ -64,7 +64,7 @@ def get_recent_blobs(user, limit=10, skip_content=False):
         },
         "sort": {"created_date": {"order": "desc"}},
         "from": 0, "size": limit,
-        "_source": ["created_date", "size", "uuid"]
+        "_source": ["created_date", "size", "uuid", "name"]
     }
 
     es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
@@ -72,6 +72,7 @@ def get_recent_blobs(user, limit=10, skip_content=False):
     results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 
     doctypes = defaultdict(int)
+    doctypes["all"] = len(results["hits"]["hits"])
 
     # Prefetch all matched blobs from the database in one query, rather
     #  than using a separate query for each one in the loop below.
@@ -115,7 +116,6 @@ def get_recent_blobs(user, limit=10, skip_content=False):
         returned_blob_list.append(props)
 
         doctypes[blob.doctype] += 1
-        doctypes["all"] = len(results["hits"]["hits"])
 
     return returned_blob_list, doctypes
 
