@@ -8,7 +8,7 @@
         <div class="mr-auto align-self-center">
             <ul class="breadcrumb mb-0 pt-0 pb-0">
                 <li class="breadcrumb-item"> <a href="{% url 'collection:list' %}">Collection List</a> </li>
-                <li class="breadcrumb-item active">{{ collection.name }}</li>
+                <li class="breadcrumb-item active">{{ collection.name|default:"Anonymous collection" }}</li>
             </ul>
         </div>
     </div>
