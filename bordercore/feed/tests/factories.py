@@ -32,6 +32,4 @@ class FeedFactory(factory.DjangoModelFactory):
 
     @factory.post_generation
     def create_feed_items(obj, create, extracted, **kwargs):
-        FeedItemFactory(feed=obj)
-        FeedItemFactory(feed=obj)
-        FeedItemFactory(feed=obj)
+        FeedItemFactory.create_batch(3, feed=obj)
