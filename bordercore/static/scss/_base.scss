@@ -1091,7 +1091,10 @@ pre {
   border-bottom: 5px solid $blue;
 }
 
-h2#name {
+#blob-name {
+  background: rgb(16,22,58);
+  background: linear-gradient(90deg, rgba(16,22,58,1) 35%, rgba(32,37,63,0.16850490196078427) 100%);
+  border-radius: 0.4rem;
   color: $text-highlight;
 }
 
@@ -1196,8 +1199,20 @@ h2#name {
   height: 85vh;
 
   img {
+    cursor: pointer;
     object-fit: contain;
     object-position: left top;
+  }
+}
+
+.blob-detail-cover-image-with-content {
+  width: 50%;
+  padding-left: 1rem;
+  margin-left: 1rem;
+  float: right;
+
+  img {
+    cursor: pointer;
   }
 }
 

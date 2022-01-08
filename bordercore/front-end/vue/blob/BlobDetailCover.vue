@@ -1,5 +1,5 @@
 <template>
-    <div class="blob-detail-cover-image">
+    <div :class="imageClass">
         <img class="cover_image h-100 w-100" :src="coverUrl" data-toggle="modal" data-target="#myModal3" @error="loadCoverImage()">
         <div id="myModal3" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
             <div class="modal-dialog modal-dialog-centered w-75 mw-100" role="document">
@@ -27,12 +27,25 @@
                 default: "",
                 type: String,
             },
+            fullSize: {
+                default: true,
+                type: Boolean,
+            },
         },
         data() {
             return {
                 getCoverImageAttemptIntervals: [1000, 3000, 6000],
                 getCoverImageAttempts: 0,
             };
+        },
+        computed: {
+            imageClass() {
+                if (this.fullSize) {
+                    return "blob-detail-cover-image";
+                } else {
+                    return "blob-detail-cover-image-with-content";
+                }
+            },
         },
         methods: {
             loadCoverImage() {
