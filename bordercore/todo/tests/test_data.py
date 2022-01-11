@@ -60,7 +60,7 @@ def test_todo_tags_match_elasticsearch(es):
                                 "uuid": task.uuid
                             }
                         },
-                        tag_query
+                        *tag_query
                     ]
                 }
             },

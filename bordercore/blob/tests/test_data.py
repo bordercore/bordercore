@@ -622,7 +622,7 @@ def test_blob_tags_match_elasticsearch(es):
                                 "uuid": str(b.uuid)
                             }
                         },
-                        [
+                        *[
                             {
                                 "term": {
                                     "tags.keyword": x.name
