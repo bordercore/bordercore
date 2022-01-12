@@ -338,8 +338,6 @@ def import_newyorktimes(user, url):
     matches = result["response"]["docs"]
 
     if len(matches) > 1:
-        for article in matches:
-            print(article["headline"]["main"])
         raise ValueError("Error: found more than one article matching that url")
 
     if len(matches) == 0:

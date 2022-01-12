@@ -1,9 +1,13 @@
 import factory
+from faker import Factory as FakerFactory
 
 from django.contrib.auth.models import User
 from django.db.models import signals
 
 from accounts.models import UserProfile
+
+faker = FakerFactory.create()
+
 
 TEST_USERNAME = "testuser"
 TEST_PASSWORD = "testpassword"
@@ -24,7 +28,13 @@ class UserFactory(factory.DjangoModelFactory):
     @factory.post_generation
     def create_userprofile(obj, create, extracted, **kwargs):
 
-        UserProfile.objects.get_or_create(
+        userprofile, _ = UserProfile.objects.get_or_create(
             user=obj,
-            theme="light"
+            theme="light",
         )
+        userprofile.instagram_credentials = {
+            "username": faker.text(max_nb_chars=20),
+            "password": faker.password()
+        }
+        userprofile.nytimes_api_key = faker.text(max_nb_chars=32)
+        userprofile.save()
