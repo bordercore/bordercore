@@ -364,12 +364,12 @@ class BlobImportView(View):
         url = request.POST.get("url", None)
 
         try:
-            blob_uuid = import_blob(request.user, url)
+            blob = import_blob(request.user, url)
         except Exception as e:
             messages.add_message(request, messages.ERROR, e)
 
         if not messages.get_messages(request):
-            return HttpResponseRedirect(reverse("blob:detail", kwargs={"uuid": blob_uuid}))
+            return HttpResponseRedirect(reverse("blob:detail", kwargs={"uuid": blob.uuid}))
         else:
             context = {
                 "hide_messages": True

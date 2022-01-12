@@ -181,7 +181,7 @@ def get_sha1sum(filename):
 def parse_date(date):
     """
     Return the date without the time portion.
-    For example, if given '2021-08-15', return '2021-08-15 23:40:56'
+    For example, if given '2021-08-15 23:40:56', return '2021-08-15'
     """
     patterns = [r"^(\d\d\d\d-\d\d-\d\d)", r"^(\d\d\d\d-\d\d-\d\d)"]
 
@@ -211,7 +211,7 @@ def import_instagram(user, parsed_url):
         elif str(e).find("does not exist") != -1:
             raise ValueError("Login error. Please check your Instagram username in <a href='" + reverse('accounts:prefs') + "'>preferences</a>.")
         else:
-            raise Exception(e)
+            raise Exception(f"{type(e)}: {e}")
 
     short_code = parse_shortcode(parsed_url.geturl())
 
@@ -237,7 +237,7 @@ def import_instagram(user, parsed_url):
 
     date = parse_date(post.date)
 
-    user = User.objects.get(username="jerrell")
+    user = User.objects.get(username=user.username)
     blob = Blob(
         user=user,
         name=post.caption,
@@ -259,7 +259,7 @@ def import_instagram(user, parsed_url):
 
     blob.index_blob()
 
-    return blob.uuid
+    return blob
 
 
 def import_artstation(user, parsed_url):
@@ -275,8 +275,7 @@ def import_artstation(user, parsed_url):
 
     date = parse_date(result["created_at"])
 
-    user = User.objects.get(username="jerrell")
-
+    user = User.objects.get(username=user.username)
     filename = os.path.basename(urlparse(result["assets"][0]["image_url"]).path)
 
     opener = urllib.request.build_opener()
@@ -307,7 +306,7 @@ def import_artstation(user, parsed_url):
 
     blob.index_blob()
 
-    return blob.uuid
+    return blob
 
 
 def get_authors(author_list):
@@ -348,7 +347,7 @@ def import_newyorktimes(user, url):
 
     date = datetime.datetime.strptime(matches[0]["pub_date"], "%Y-%m-%dT%H:%M:%S%z").strftime("%Y-%m-%d")
 
-    user = User.objects.get(username="jerrell")
+    user = User.objects.get(username=user.username)
     blob = Blob(
         user=user,
         name=matches[0]["headline"]["main"],
@@ -368,4 +367,4 @@ def import_newyorktimes(user, url):
 
     blob.index_blob()
 
-    return blob.uuid
+    return blob
