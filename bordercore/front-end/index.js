@@ -97,9 +97,15 @@ window.markdownit = markdownit;
 import {v4 as uuidv4} from "uuid";
 window.uuidv4 = uuidv4;
 
-import {doGet, doPost, getFormattedDate, getMarkdown} from "./util.js";
+import {
+    getReasonPhrase,
+} from "http-status-codes";
+window.getReasonPhrase = getReasonPhrase;
+
+import {doGet, doPost, doPut, getFormattedDate, getMarkdown} from "./util.js";
 window.doGet = doGet;
 window.doPost = doPost;
+window.doPut = doPut;
 window.getFormattedDate = getFormattedDate;
 window.markdown = getMarkdown();
 
@@ -189,6 +195,10 @@ window.BlobDetailCover = BlobDetailCover;
 import RecentBlobs from "./vue/blob/RecentBlobs.vue";
 Vue.component("RecentBlobs", RecentBlobs);
 window.RecentBlobs = RecentBlobs;
+
+import CreateUpdateFeed from "./vue/feed/CreateUpdateFeed.vue";
+Vue.component("CreateUpdateFeed", CreateUpdateFeed);
+window.CreateUpdateFeed = CreateUpdateFeed;
 
 import AddToCollection from "./vue/blob/AddToCollection.vue";
 Vue.component("AddToCollection", AddToCollection);

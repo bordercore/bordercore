@@ -3,6 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from django.contrib import messages
 
+from accounts.models import SortOrderUserFeed
 from blob.models import Blob
 from bookmark.models import Bookmark
 from collection.models import Collection
@@ -147,6 +148,37 @@ class FeedViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Feed.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        so = SortOrderUserFeed(userprofile=self.request.user.userprofile, feed=instance)
+        so.save()
+
+        # Save a copy of the new object so we can reference it in create()
+        self._instance = instance
+
+    def create(self, request, *args, **kwargs):
+        response = super(FeedViewSet, self).create(request, *args, **kwargs)
+        response.data = {
+            "status": "OK",
+            "feed_info": {
+                "id": self._instance.id,
+                "uuid": self._instance.uuid,
+                "name": self._instance.name,
+                "homepage": self._instance.homepage,
+                "lastCheck": "N/A",
+                "feedItems": []
+            }
+        }
+        return response
+
+    def perform_destroy(self, instance):
+        # If we're deleting the user's currently viewed feed, delete that from the session
+        current_feed = self.request.session.get("current_feed")
+        if current_feed and int(current_feed) == instance.id:
+            self.request.session.pop("current_feed")
+
+        instance.delete()
 
 
 class FeedItemViewSet(viewsets.ModelViewSet):

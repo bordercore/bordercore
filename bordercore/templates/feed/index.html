@@ -10,14 +10,22 @@
 
             <div class="col-lg-3 d-flex flex-column">
                 <feed-info inline-template>
-                    <card title="Feed Info">
+                    <card title="">
+                        <template v-slot:title-slot>
+                            <div class="d-flex">
+                                <h3>Feed Info</h3>
+                            </div>
+                            <hr />
+                        </template>
                         <template v-slot:content>
-                            <strong>Updated</strong>: [[ currentFeed.lastCheck ]]
-                            <br />
-                            <strong>Status</strong>: <font-awesome-icon class="ml-1" :class="status.class" :icon="status.font"></font-awesome-icon>
-                            <br />
+                            <div>
+                                <strong>Updated</strong>: [[ $store.state.currentFeed.lastCheck ]]
+                            </div>
+                            <div>
+                                <strong>Status</strong>: <font-awesome-icon class="ml-1" :class="status.class" :icon="status.font"></font-awesome-icon>
+                            </div>
                             <div class="mt-3">
-                                <add-button :href="'{% url 'feed:create' %}'">
+                                <add-button href="#" :click-handler="handleCreateFeed">
                                 </add-button>
                             </div>
                         </template>
@@ -27,7 +35,9 @@
 
             <div class="col-lg-3 d-flex flex-column">
                 <div class="card-body">
-                    <h3>Feed List</h3>
+                    <div class="d-flex">
+                        <h3>Feed List</h3>
+                    </div>
                     <hr />
                     <ul id="sort-container" class="feed-list">
                         <feed-list inline-template>
@@ -35,13 +45,13 @@
                                 <draggable v-model="feedList" @change="onChange" ghost-class="collection_sortable-ghost" animation="500" forceFallback="true">
                                     <transition-group type="transition">
                                         <li v-for="feed in feedList" :key="feed.id" v-cloak>
-                                            <a href="#" :data-id="feed.id" @click="onClick(feed)">[[ feed.name ]]</a>
-                                            <span v-if="feed.lastResponseCode !== 200" class="list-annotation">[[ feed.lastResponseCode ]]</span>
+                                            <a href="#" :data-id="feed.id" @click.prevent="onClick(feed)">[[ feed.name ]]</a>
+                                            <span v-if="feed.lastResponse !== 'OK'" class="list-annotation">[[ feed.lastResponseCode ]]</span>
                                         </li>
                                     </transition-group>
                                 </draggable>
                                 <div class="text-secondary" v-if="feedList.length === 0" v-cloak>
-                                            No feeds found. <a href="{% url 'feed:create' %}">Add one here.</a>
+                                    No feeds found. <a href="#" @click.prevent="handleUpdateFeed('Update')">Add one here.</a>
                                 </div>
                             </div>
                         </feed-list>
@@ -51,20 +61,69 @@
 
             <div class="col-lg-6 d-flex flex-column">
                 <div class="d-flex right-column flex-grow-1">
-                    <url-list inline-template>
-                        <div class="card-body">
-                            <h3 id="feed-title" v-cloak><a :href="currentFeed.homepage">[[ currentFeed.name ]]</a></h3>
-                            <hr />
-                            <ul>
-                                <li v-for="url in currentFeed.feedItems" v-cloak>
-                                    <a :href="url.link">[[ url.title ]]</a>
-                                </li>
-                            </ul>
+                    <feed-item-list inline-template>
+                        <div class="w-100">
+                            <div class="card-body">
+                                <div class="d-flex">
+                                    <h3 id="feed-title" v-cloak>
+                                        <a :href="$store.state.currentFeed.homepage">[[ $store.state.currentFeed.name ]]</a>
+                                    </h3>
+                                    <drop-down-menu
+                                        ref="dropDownMenu"
+                                        :links="feedDetailMenuItems"
+                                        class="dropdownmenu"
+                                    >
+                                    </drop-down-menu>
+                                </div>
+                                <hr />
+                                <ul>
+                                    <li v-for="url in $store.state.currentFeed.feedItems" v-cloak>
+                                        <a :href="url.link">[[ url.title ]]</a>
+                                    </li>
+                                    <div v-if="$store.state.currentFeed.feedItems?.length == 0">
+                                         No feed items found.
+                                    </div>
+                                </ul>
+                            </div>
+                            <div id="modalDeleteFeed" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h4 id="myModalLabel" class="modal-title">
+                                                Delete Feed
+                                            </h4>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+
+                                        <div class="modal-body">
+                                            Are you sure you want to delete this feed?
+                                        </div>
+
+                                        <div class="modal-footer justify-content-end">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                Cancel
+                                            </button>
+                                            <input id="btn-action" class="btn btn-primary" type="button" value="Confirm" @click="handleDeleteFeedConfirmation">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </url-list>
+                    </feed-item-list>
                 </div>
             </div>
         </div>
+
+        <create-update-feed
+            ref="updateFeed"
+            update-feed-url="{% url 'feed-detail' '00000000-0000-0000-0000-000000000000' %}"
+            create-feed-url="{% url 'feed-list' %}"
+            feed-check-url="{% url 'feed:check_url' 666 %}"
+        >
+        </create-update-feed>
+
     </div>
 
 {% endblock %}
@@ -75,15 +134,25 @@
 
     <script type="text/javascript">
 
+        const store = new Vuex.Store({
+            state: {
+                currentFeed: {},
+            },
+            getters: {},
+            mutations: {},
+        });
+
         const FeedInfo = {
-            data() {
-                return {
-                    currentFeed: 0,
+            methods: {
+                handleCreateFeed() {
+                    // The actual "create feed" method is located in another
+                    // component, so use an event to indirectly call it.
+                    EventBus.$emit("createFeed");
                 }
             },
             computed: {
                 status: function() {
-                    if (this.currentFeed.lastResponseCode === 200) {
+                    if (this.$store.state.currentFeed.lastResponse === "OK") {
                         return {
                             "class": "text-success",
                             "font": "check"
@@ -99,7 +168,7 @@
             mounted() {
 
                 EventBus.$on("showFeed", feed => {
-                    this.currentFeed = feed;
+                    this.$store.state.currentFeed = feed;
                 });
 
             }
@@ -112,10 +181,12 @@
                         {% for feed in object_list %}
                         {
                             id: {{ feed.id }},
+                            uuid: "{{ feed.uuid }}",
                             name: "{{ feed.name }}",
-                            lastCheck: "{{ feed.last_check }}",
-                            lastResponseCode: {{ feed.last_response_code|default:-1 }},
+                            lastCheck: "{{ feed.last_check|default:'N/A' }}",
+                            lastResponse: {% if feed.last_response_code %}getReasonPhrase( {{ feed.last_response_code }} ){% else %}""{% endif %},
                             homepage: "{{ feed.homepage }}",
+                            url: "{{ feed.url }}",
                             feedItems: [
                                 {% for feed_item in feed.feeditem_set.all %}
                                 {
@@ -126,7 +197,7 @@
                             ]
                         },
                         {% endfor %}
-                    ]
+                    ],
                 }
             },
             methods: {
@@ -168,6 +239,24 @@
                 }
             },
             mounted() {
+
+                EventBus.$on("deleteFeed", (feedUuid) => {
+                    for (i = 0; i < this.feedList.length; i++) {
+                        if (this.feedList[i].uuid == feedUuid) {
+                            this.feedList.splice(i, 1);
+                        }
+                    }
+
+                    // Now that the current feed is deleted, we need to select a
+                    //  different current feed. Select the first in the list.
+                    this.$store.state.currentFeed = this.feedList[0];
+
+                });
+
+                EventBus.$on("addFeed", (feedInfo) => {
+                    this.feedList.unshift(feedInfo);
+                });
+
                 currentFeed = this.feedList.find(element => element.id === {{ current_feed|safe }}.id);
 
                 this.$nextTick(() => {
@@ -176,16 +265,62 @@
             }
         };
 
-        const UrlList = {
+        const FeedItemList = {
             data() {
                 return {
-                    currentFeed: 0,
+                    feedDetailMenuItems: [
+                        {
+                            id: uuidv4(),
+                            title: "Update Feed",
+                            url: "#",
+                            clickHandler: this.handleUpdateFeed,
+                        },
+                        {
+                            id: uuidv4(),
+                            title: "Delete Feed",
+                            url: "#",
+                            clickHandler: this.handleDeleteFeed,
+                        }
+                    ]
                 }
+            },
+            methods: {
+                handleUpdateFeed(evt, action="Update") {
+                    this.$parent.$refs.updateFeed.setAction(action);
+                    if (action === "Update") {
+                        this.$parent.$refs.updateFeed.feedInfo = this.$store.state.currentFeed;
+                    } else {
+                        this.$parent.$refs.updateFeed.feedInfo = {};
+                    }
+                    $("#modalUpdateFeed").modal("show")
+                },
+                handleDeleteFeed() {
+                    $("#modalDeleteFeed").modal("show")
+                },
+                handleDeleteFeedConfirmation() {
+                    const self = this;
+                    axios.delete("{% url 'feed-detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", this.$store.state.currentFeed.uuid))
+                         .then((response) => {
+                             this.$bvToast.toast("Feed deleted", {
+                                 title: "Info",
+                                 variant: "primary",
+                             });
+                             EventBus.$emit("deleteFeed", this.$store.state.currentFeed.uuid);
+                             $("#modalDeleteFeed").modal("hide");
+                             console.log("Success");
+                         }, (error) => {
+                             console.log(error);
+                         });
+                },
             },
             mounted() {
 
                 EventBus.$on("showFeed", feed => {
-                    this.currentFeed = feed;
+                    this.$store.state.currentFeed = feed;
+                });
+
+                EventBus.$on("createFeed", () => {
+                    this.handleUpdateFeed(null, "Create");
                 });
 
             }
@@ -193,11 +328,12 @@
 
         new Vue({
             el: "#vue-app",
+            store,
             components: {
                 FeedInfo,
                 FeedList,
-                UrlList
-            }
+                FeedItemList
+            },
         });
 
     </script>

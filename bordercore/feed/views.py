@@ -5,16 +5,12 @@ import feedparser
 import requests
 from rest_framework.decorators import api_view
 
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import render
-from django.urls import reverse
+from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
 from accounts.models import SortOrderUserFeed
-from feed.forms import FeedForm
 from feed.models import Feed
 
 
@@ -46,57 +42,6 @@ def sort_feed(request):
     SortOrderUserFeed.reorder(s, new_position)
 
     return JsonResponse({"status": "OK"}, safe=False)
-
-
-@login_required
-def feed_update(request, feed_uuid=None):
-
-    feed = None
-
-    if feed_uuid:
-        feed = Feed.objects.get(uuid=feed_uuid)
-        action = "Update"
-        title = f"Feed Update :: {feed.name}"
-    else:
-        action = "Create"
-        title = "Feed Create"
-
-    if request.method == "POST":
-        if request.POST["Go"] in ["Update", "Create"]:
-            form = FeedForm(request.POST, instance=feed)
-            if form.is_valid():
-                obj = form.save(commit=False)
-                obj.user = request.user
-                obj.save()
-
-                if request.POST["Go"] == "Create":
-                    so = SortOrderUserFeed(userprofile=request.user.userprofile, feed=form.instance)
-                    so.save()
-
-                messages.add_message(request, messages.INFO, "Feed " + request.POST["Go"].lower() + "ed")
-                return HttpResponseRedirect(reverse("feed:list"))
-
-        elif request.POST["Go"] == "Delete":
-
-            # If we're deleting the user's currently viewed feed, delete that from the session
-            current_feed = request.session.get("current_feed")
-            if current_feed and int(current_feed) == feed.id:
-                request.session.pop("current_feed")
-
-            feed.delete()
-            messages.add_message(request, messages.INFO, "Feed deleted")
-            return HttpResponseRedirect(reverse("feed:list"))
-
-    else:
-        form = FeedForm()
-
-    if feed_uuid:
-        form = FeedForm(instance=feed)
-
-    return render(request, "feed/update.html",
-                  {"action": action,
-                   "form": form,
-                   "title": title})
 
 
 @api_view(["GET"])

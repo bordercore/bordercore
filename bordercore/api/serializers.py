@@ -124,6 +124,14 @@ class FeedSerializer(serializers.ModelSerializer):
         model = Feed
         fields = ["homepage", "last_check", "last_response_code", "name", "url"]
 
+    def create(self, validated_data):
+        """
+        Override create() so we can add the required
+        user field to the validated data.
+        """
+        validated_data["user_id"] = self.context["request"].user.id
+        return Feed.objects.create(**validated_data)
+
 
 class FeedItemSerializer(serializers.ModelSerializer):
     feed = FeedSerializer()

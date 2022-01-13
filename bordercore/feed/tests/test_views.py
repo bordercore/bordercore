@@ -2,6 +2,8 @@ import pytest
 
 from django import urls
 
+from feed.models import Feed
+
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
 
@@ -15,43 +17,18 @@ def test_feed_list(auto_login_user, feed):
     assert resp.status_code == 200
 
 
-def test_feed_create(auto_login_user, feed):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("feed:create")
-    resp = client.get(url)
-
-    assert resp.status_code == 200
-
-
-def test_feed_update(auto_login_user, feed):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("feed:update", kwargs={"feed_uuid": feed[0].uuid})
-    resp = client.post(url, {
-        "Go": "Update",
-        "name": "Feed Name Changed",
-        "url": "https://www.bordercore.com/rss",
-        "homepage": "https://www.bordercore.com"
-    })
-
-    assert resp.status_code == 302
-
-
 def test_feed_delete(auto_login_user, feed):
 
     _, client = auto_login_user()
 
     feed[0].feeditem_set.all().delete()
 
-    url = urls.reverse("feed:update", kwargs={"feed_uuid": feed[0].uuid})
-    resp = client.post(url, {
-        "Go": "Delete",
-    })
+    url = urls.reverse("feed-detail", kwargs={"uuid": feed[0].uuid})
+    resp = client.delete(url)
 
-    assert resp.status_code == 302
+    assert resp.status_code == 204
+
+    assert Feed.objects.filter(uuid=feed[0].uuid).count() == 0
 
 
 def test_sort_feed(auto_login_user, feed):

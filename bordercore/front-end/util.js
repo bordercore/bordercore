@@ -89,6 +89,55 @@ export function doPost(scope, url, params, callback, successMsg, errorMsg) {
 }
 
 /**
+ * Use axios to perform an HTTP PUT call.
+ * @param {string} scope The Vue scope.
+ * @param {string} url The url to request.
+ * @param {string} params The parameters for the POST body.
+ * @param {string} callback An optional callback function.
+ * @param {string} successMsg The message to display on success.
+ * @param {string} errorMsg The message to display on error.
+ */
+export function doPut(scope, url, params, callback, successMsg, errorMsg) {
+    const bodyFormData = new URLSearchParams();
+
+    for (const [key, value] of Object.entries(params)) {
+        bodyFormData.append(key, value);
+    }
+
+    axios(url, {
+        method: "PUT",
+        data: bodyFormData,
+    }).then((response) => {
+        if (response.status != 200) {
+            scope.$bvToast.toast(response.data.message, {
+                title: "Error",
+                noAutoHide: true,
+                variant: "danger",
+            });
+            console.log("Error: ", response.statusText);
+        } else {
+            scope.$bvToast.toast(
+                response.data.message ? response.data.message : successMsg,
+                {
+                    title: "Success",
+                    variant: "info",
+                },
+            );
+            console.log("Success: ", response.data);
+            callback(response);
+        }
+    })
+        .catch((error) => {
+            scope.$bvToast.toast(error.message, {
+                title: "Error",
+                noAutoHide: true,
+                variant: "danger",
+            });
+            console.error(error);
+        });
+}
+
+/**
  * Return a Vue Vnode containing a formatted error message
  * @param {string} vue Vue component
  * @param {string} errorMsg the error message to display
