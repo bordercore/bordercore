@@ -149,6 +149,10 @@ import Bookmark from "./vue/bookmark/Bookmark.vue";
 Vue.component("Bookmark", Bookmark);
 window.Bookmark = Bookmark;
 
+import RelatedBookmarksList from "./vue/bookmark/RelatedBookmarksList.vue";
+Vue.component("RelatedBookmarksList", RelatedBookmarksList);
+window.RelatedBookmarksList = RelatedBookmarksList;
+
 import BlobSelect from "./vue/blob/BlobSelect.vue";
 Vue.component("BlobSelect", BlobSelect);
 window.BlobSelect = BlobSelect;

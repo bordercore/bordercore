@@ -80,4 +80,29 @@ urlpatterns = [
         view=views.unlink,
         name="unlink"
     ),
+    path(
+        route="<uuid:uuid>/bookmark_list",
+        view=views.get_bookmark_list,
+        name="get_bookmark_list"
+    ),
+    path(
+        route="blob/sort",
+        view=views.sort_bookmark_list,
+        name="sort_bookmark_list"
+    ),
+    path(
+        route="blob/add_bookmark",
+        view=views.add_bookmark,
+        name="add_bookmark"
+    ),
+    path(
+        route="bookmark/remove",
+        view=views.remove_bookmark,
+        name="remove_bookmark"
+    ),
+    path(
+        route="bookmark/edit_note",
+        view=views.edit_bookmark_note,
+        name="edit_bookmark_note"
+    ),
 ]

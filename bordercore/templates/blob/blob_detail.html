@@ -162,6 +162,20 @@
                         </a>
                     {% endif %}
 
+                    <related-bookmarks-list
+                        ref="relatedBookmarksList"
+                        blob-uuid="{{ object.uuid }}"
+                        get-bookmark-list-url="{% url 'blob:get_bookmark_list' object.uuid %}"
+                        search-bookmark-url="{% url 'bookmark:search' %}"
+                        remove-bookmark-url="{% url 'blob:remove_bookmark' %}"
+                        sort-bookmark-list-url="{% url 'blob:sort_bookmark_list' %}"
+                        edit-bookmark-note-url="{% url 'blob:edit_bookmark_note' %}"
+                        :show-add-button="false"
+                        extra-class="embedded-card mt-3"
+                        @select-bookmark="selectBookmark"
+                    >
+                    </related-bookmarks-list>
+
                     <h5 v-if="relatedBlobList.length > 0" class="mt-3">
                         <div class="list-header-border mb-2 pb-2 mt-4">
                         </div>
@@ -258,6 +272,7 @@
                                     <a class="dropdown-item" href="#" @click.prevent="handleAddToCollection()">Add to Collection</a>
                                     <a class="dropdown-item" href="{% url 'blob:create' %}?linked_blob_uuid={{ blob.uuid }}">Link to New Blob</a>
                                     <a class="dropdown-item" href="#" @click.prevent="handleLinkToExistingBlob()">Link to Existing Blob</a>
+                                    <a class="dropdown-item" href="#" @click.prevent="handleLinkToBookmark()">Link to Bookmark</a>
                                     <a class="dropdown-item" href="{% url 'blob:clone' blob.uuid %}">Clone Blob</a>
                                     {% if blob.is_note %}
                                         <a class="dropdown-item" href="#" @click.prevent="onClick">[[pinnedButtonValue ]]</a>
@@ -420,6 +435,23 @@
                         "Error getting related blob list"
                     );
                 },
+                selectBookmark(bookmarkUuid) {
+
+                    doPost(
+                        this,
+                        "{% url "blob:add_bookmark" %}",
+                        {
+                            "blob_uuid": "{{ object.uuid }}",
+                            "bookmark_uuid": bookmarkUuid,
+                        },
+                        (response) => {
+                            this.$refs.relatedBookmarksList.getBookmarkList();
+                        },
+                        "Bookmark added",
+                        ""
+                    );
+
+                },
                 handleHover(hovered,evt) {
                     evt.currentTarget.querySelector(".dropdown").classList.toggle("hidden");
                 },
@@ -449,6 +481,10 @@
 
                 EventBus.$on("get-related-blob-list", () => {
                     this.getRelatedBlobList();
+                });
+
+                EventBus.$on("open-bookmarks-modal", () => {
+                    this.$refs.relatedBookmarksList.openModal();
                 });
 
             }
@@ -484,6 +520,9 @@
                 },
                 handleLinkToExistingBlob() {
                     this.$refs.blobSelect.openModal();
+                },
+                handleLinkToBookmark() {
+                    EventBus.$emit("open-bookmarks-modal");
                 },
                 selectBlob(blobUuid) {
                     doPost(

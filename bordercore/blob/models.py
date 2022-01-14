@@ -21,8 +21,9 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.urls import reverse
 
+from bookmark.models import Bookmark
 from collection.models import Collection, SortOrderCollectionBlob
-from lib.mixins import TimeStampedModel
+from lib.mixins import SortOrderMixin, TimeStampedModel
 from lib.time_utils import get_date_from_pattern
 from lib.util import get_elasticsearch_connection, is_image, is_video
 from tag.models import Tag
@@ -80,6 +81,7 @@ class Blob(TimeStampedModel):
     is_note = models.BooleanField(default=False)
     is_indexed = models.BooleanField(default=True)
     blobs = models.ManyToManyField("self", blank=True)
+    bookmarks = models.ManyToManyField(Bookmark, through="SortOrderBlobBookmark")
 
     class Meta:
         unique_together = (
@@ -631,6 +633,28 @@ class MetaData(TimeStampedModel):
 
     class Meta:
         unique_together = ('name', 'value', 'blob')
+
+
+class SortOrderBlobBookmark(SortOrderMixin):
+
+    blob = models.ForeignKey(Blob, on_delete=models.CASCADE)
+    bookmark = models.ForeignKey(Bookmark, on_delete=models.CASCADE)
+
+    field_name = "blob"
+
+    def __str__(self):
+        return f"SortOrder: {self.blob}, {self.bookmark}"
+
+    class Meta:
+        ordering = ("sort_order",)
+        unique_together = (
+            ("blob", "bookmark")
+        )
+
+
+@receiver(pre_delete, sender=SortOrderBlobBookmark)
+def remove_bookmark(sender, instance, **kwargs):
+    instance.handle_delete()
 
 
 class RecentlyViewedBlob(TimeStampedModel):

@@ -23,6 +23,7 @@ from django.views.generic.edit import ModelFormMixin
 from accounts.models import SortOrderUserTag
 from bookmark.forms import BookmarkForm
 from bookmark.models import Bookmark
+from bookmark.services import search as search_service
 from lib.mixins import FormRequestMixin
 from lib.util import get_pagination_range, parse_title_from_url
 from tag.models import SortOrderTagBookmark, Tag
@@ -493,3 +494,12 @@ def get_title_from_url(request):
             "title": title[1]
         }
     )
+
+
+@login_required
+def search(request):
+
+    search_term = request.GET["term"].lower()
+    matches = search_service(request.user, search_term)
+
+    return JsonResponse(matches, safe=False)

@@ -746,6 +746,15 @@ $nav-tabs-link-hover-border-color: $nav-border-color;
   }
 }
 
+// This is a card inside another card and
+//  therefore should no no left margin. Contrast
+//  with the vanilla .card selector above.
+.embedded-card {
+  .card-body {
+    margin: 0 0 1rem 0;
+  }
+}
+
 .list-group-item-secondary {
   background-color: $list-group-item-secondary;
 }
