@@ -25,7 +25,7 @@
                                                 <input id="add-bookmark-input" ref="input" type="text" class="form-control form-control-sm" :value="bookmark.note" placeholder="" autocomplete="off" @blur="editNote(bookmark.uuid, $event.target.value)" @keydown.enter="editNote(bookmark.uuid, $event.target.value)">
                                             </span>
                                         </div>
-                                        <div class="dropdownmenu">
+                                        <div class="dropdownmenu d-flex">
                                             <dropdown-menu v-model="show" transition="translate-fade-down" class="hidden">
                                                 <font-awesome-icon icon="ellipsis-v" />
                                                 <div slot="dropdown">

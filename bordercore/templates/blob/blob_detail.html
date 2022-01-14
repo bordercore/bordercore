@@ -189,7 +189,7 @@
                             </div>
 
                             <div class="dropdownmenu d-flex">
-                                <dropdown-menu v-model="showBlobMenu" transition="translate-fade-down" class="hidden">
+                                <dropdown-menu v-model="showBlobMenu" transition="translate-fade-down" class="hidden" :right="true">
                                     <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                     <div slot="dropdown">
                                         <a class="dropdown-item" href="#" @click.prevent="unlinkBlob(blob.uuid)">Unlink</a>
