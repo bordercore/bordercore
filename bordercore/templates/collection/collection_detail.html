@@ -336,8 +336,8 @@
                 }
             },
             mounted() {
-                document.getElementById("id_name").value = "{{ collection.name }}";
-                document.getElementById("id_description").value = "{{ collection.description }}";
+                document.getElementById("id_name").value = "{{ collection.name|safe }}";
+                document.getElementById("id_description").value = "{{ collection.description|safe }}";
             }
         }
 
