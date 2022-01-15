@@ -31,6 +31,8 @@ window.pluralize = pluralize;
 
 import axios from "axios";
 window.axios = axios;
+axios.defaults.xsrfCookieName = "csrftoken";
+axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
 
 import $ from "jquery";
 import jQuery from "jquery";

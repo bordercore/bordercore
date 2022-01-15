@@ -222,9 +222,6 @@
 
     <script type="text/javascript">
 
-        axios.defaults.xsrfCookieName = "csrftoken"
-        axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
-
         const store = new Vuex.Store({
             state: {
                 nodeUuid: "{{ object.uuid }}",
