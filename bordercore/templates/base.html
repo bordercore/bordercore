@@ -288,8 +288,8 @@
                                         class: "sidebar-icon"
                                     },
                                     badge: {
-                                        text: "0",
-                                        class: "vsm--badge_default"
+                                        text: "",
+                                        class: ""
                                     }
                                 },
                                 {
@@ -472,8 +472,9 @@
                                 "{% url "bookmark:get_new_bookmarks_count" 666 %}".replace(/666/, timestamp),
                                 (response) => {
                                     count = response.data.count;
-                                    self.menu.find(item => item.title === "Bookmarks").badge.text = count;
-
+                                    const item = self.menu.find(item => item.title === "Bookmarks");
+                                    item.badge.text = count;
+                                    item.badge.class = count === 0 ? "d-none" : "vsm--badge_default";
                                 },
                                 "Error getting new bookmarks count"
                             );
