@@ -3,8 +3,8 @@
 
         <dropdown-menu v-model="showMenu" transition="translate-fade-down" class="text-center" :right="true">
 
-            <span class="glow ml-2">
-                <font-awesome-icon icon="object-group" />
+            <span class="ml-2">
+                <font-awesome-icon class="glow" icon="object-group" />
             </span>
 
             <div slot="dropdown" class="recent-blobs px-2">
