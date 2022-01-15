@@ -289,13 +289,7 @@
                         <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="video/mp4">
                     </video>
                 </div>
-                {% endif %}
-
-                <audio v-if="$store.state.elasticsearchInfo.content_type === 'Audio'" controls controlsList="nodownload">
-                    <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="audio/mpeg">
-                    Your browser does not support the audio tag.
-                </audio>
-
+                {% else %}
                 <blob-detail-cover
                     cover-url="{{ blob.get_cover_url }}?nodefault=1"
                     {% if blob.content %}
@@ -303,6 +297,12 @@
                     {% endif %}
                 >
                 </blob-detail-cover>
+                {% endif %}
+
+                <audio v-if="$store.state.elasticsearchInfo.content_type === 'Audio'" controls controlsList="nodownload">
+                    <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="audio/mpeg">
+                    Your browser does not support the audio tag.
+                </audio>
 
                 {% if blob.content %}
                     <div class="blob-content table-borders" id="blob-detail-content" v-html="getContent()">
