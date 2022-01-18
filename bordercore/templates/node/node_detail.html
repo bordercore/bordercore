@@ -124,12 +124,12 @@
                         get-bookmark-list-url="{% url 'node:get_bookmark_list' object.uuid %}"
                         search-bookmark-url="{% url 'bookmark:search' %}"
                         add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
+                        :update-modified="true"
                         remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"
                         sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
                         edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}"
                         :show-add-button="true"
                         extra-class="embedded-card ml-3"
-                        @select-bookmark="selectBookmark"
                     >
                     </related-bookmarks-list>
                 </div>
@@ -295,26 +295,6 @@
 
                 this.getBlobList();
 
-            }
-        }
-
-        const BookmarkList = {
-            methods: {
-                selectBookmark(bookmark_uuid) {
-                    doPost(
-                        this,
-                        "{% url "node:add_bookmark" %}",
-                        {
-                            "node_uuid": this.$store.state.nodeUuid,
-                            "bookmark_uuid": bookmark_uuid,
-                        },
-                        (response) => {
-                            this.getBookmarkList();
-                        },
-                        "Bookmark added",
-                        ""
-                    );
-                },
             }
         }
 

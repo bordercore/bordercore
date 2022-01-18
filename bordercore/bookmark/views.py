@@ -527,6 +527,7 @@ def get_query_info(POST):
 def add_related_bookmark(request):
 
     bookmark_uuid = request.POST["bookmark_uuid"]
+    update_modified = request.POST.get("updated_modified", False)
 
     query_info = get_query_info(request.POST)
 
@@ -538,8 +539,9 @@ def add_related_bookmark(request):
     )
     so.save()
 
-    so.node.modified = timezone.now()
-    so.node.save()
+    if update_modified:
+        so.node.modified = timezone.now()
+        so.node.save()
 
     response = {
         "status": "OK",
@@ -552,6 +554,7 @@ def add_related_bookmark(request):
 def remove_related_bookmark(request):
 
     bookmark_uuid = request.POST["bookmark_uuid"]
+    update_modified = request.POST.get("updated_modified", False)
 
     query_info = get_query_info(request.POST)
     so = query_info["sort_order_model"].objects.get(
@@ -561,8 +564,9 @@ def remove_related_bookmark(request):
 
     so.delete()
 
-    so.node.modified = timezone.now()
-    so.node.save()
+    if update_modified:
+        so.node.modified = timezone.now()
+        so.node.save()
 
     response = {
         "status": "OK",
@@ -581,6 +585,7 @@ def sort_related_bookmarks(request):
     # Sample 'model_name' parameter: 'node.Node'
 
     bookmark_uuid = request.POST["bookmark_uuid"]
+    update_modified = request.POST.get("updated_modified", False)
     new_position = int(request.POST["new_position"])
 
     query_info = get_query_info(request.POST)
@@ -591,11 +596,9 @@ def sort_related_bookmarks(request):
 
     query_info["sort_order_model"].reorder(so, new_position)
 
-    # Generalize this beyond 'node'
-    # Make this code optional, since we don't want to mark, say, blobs
-    #  as being modified when we sort their related bookmarks
-    so.node.modified = timezone.now()
-    so.node.save()
+    if update_modified:
+        so.node.modified = timezone.now()
+        so.node.save()
 
     response = {
         "status": "OK",
@@ -608,6 +611,7 @@ def sort_related_bookmarks(request):
 def edit_related_bookmark_note(request):
 
     bookmark_uuid = request.POST["bookmark_uuid"]
+    update_modified = request.POST.get("updated_modified", False)
     note = request.POST["note"]
 
     query_info = get_query_info(request.POST)
@@ -619,8 +623,9 @@ def edit_related_bookmark_note(request):
     so.note = note
     so.save()
 
-    so.node.modified = timezone.now()
-    so.node.save()
+    if update_modified:
+        so.node.modified = timezone.now()
+        so.node.save()
 
     response = {
         "status": "OK",

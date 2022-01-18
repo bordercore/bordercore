@@ -164,15 +164,16 @@
 
                     <related-bookmarks-list
                         ref="relatedBookmarksList"
-                        blob-uuid="{{ object.uuid }}"
+                        object-uuid="{{ object.uuid }}"
+                        model-name="blob.Blob"
                         get-bookmark-list-url="{% url 'blob:get_bookmark_list' object.uuid %}"
                         search-bookmark-url="{% url 'bookmark:search' %}"
-                        remove-bookmark-url="{% url 'blob:remove_bookmark' %}"
-                        sort-bookmark-list-url="{% url 'blob:sort_bookmark_list' %}"
-                        edit-bookmark-note-url="{% url 'blob:edit_bookmark_note' %}"
+                        add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
+                        remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"
+                        sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
+                        edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}"
                         :show-add-button="false"
                         extra-class="embedded-card mt-3"
-                        @select-bookmark="selectBookmark"
                     >
                     </related-bookmarks-list>
 
@@ -434,23 +435,6 @@
                         },
                         "Error getting related blob list"
                     );
-                },
-                selectBookmark(bookmarkUuid) {
-
-                    doPost(
-                        this,
-                        "{% url "blob:add_bookmark" %}",
-                        {
-                            "blob_uuid": "{{ object.uuid }}",
-                            "bookmark_uuid": bookmarkUuid,
-                        },
-                        (response) => {
-                            this.$refs.relatedBookmarksList.getBookmarkList();
-                        },
-                        "Bookmark added",
-                        ""
-                    );
-
                 },
                 handleHover(hovered,evt) {
                     evt.currentTarget.querySelector(".dropdown").classList.toggle("hidden");

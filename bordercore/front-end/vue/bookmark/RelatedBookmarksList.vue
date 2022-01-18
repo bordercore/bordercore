@@ -86,6 +86,10 @@
                 default: "",
                 type: String,
             },
+            updateModified: {
+                default: false,
+                type: Boolean,
+            },
             removeBookmarkUrl: {
                 default: "",
                 type: String,
@@ -160,9 +164,14 @@
                 }, 500);
             },
             selectBookmark(bookmarkUuid) {
+                let url = this.addBookmarkUrl;
+                if (this.updateModified) {
+                    url = url + "?update_modified=true";
+                }
+
                 doPost(
                     this,
-                    this.addBookmarkUrl,
+                    url,
                     {
                         "object_uuid": this.objectUuid,
                         "model_name": this.modelName,

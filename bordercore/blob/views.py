@@ -19,10 +19,8 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
 from blob.forms import BlobForm
-from blob.models import (Blob, MetaData, RecentlyViewedBlob,
-                         SortOrderBlobBookmark)
+from blob.models import Blob, MetaData, RecentlyViewedBlob
 from blob.services import get_recent_blobs, import_blob
-from bookmark.models import Bookmark
 from collection.models import Collection, SortOrderCollectionBlob
 from lib.mixins import FormRequestMixin
 from lib.time_utils import get_javascript_date, parse_date_from_string
@@ -599,88 +597,6 @@ def get_bookmark_list(request, uuid):
             }
             for x
             in bookmark_list]
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def sort_bookmark_list(request):
-    """
-    Move a given bookmark to a new position in a sorted list
-    """
-
-    blob_uuid = request.POST["blob_uuid"]
-    bookmark_uuid = request.POST["bookmark_uuid"]
-    new_position = int(request.POST["new_position"])
-
-    so = SortOrderBlobBookmark.objects.get(
-        blob__uuid=blob_uuid,
-        bookmark__uuid=bookmark_uuid
-    )
-    SortOrderBlobBookmark.reorder(so, new_position)
-
-    response = {
-        "status": "OK",
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def add_bookmark(request):
-
-    blob_uuid = request.POST["blob_uuid"]
-    bookmark_uuid = request.POST["bookmark_uuid"]
-
-    blob = Blob.objects.get(uuid=blob_uuid, user=request.user)
-    bookmark = Bookmark.objects.get(uuid=bookmark_uuid)
-
-    so = SortOrderBlobBookmark(blob=blob, bookmark=bookmark)
-    so.save()
-
-    response = {
-        "status": "OK",
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def remove_bookmark(request):
-
-    blob_uuid = request.POST["blob_uuid"]
-    bookmark_uuid = request.POST["bookmark_uuid"]
-
-    so = SortOrderBlobBookmark.objects.get(
-        blob__uuid=blob_uuid,
-        bookmark__uuid=bookmark_uuid
-    )
-    so.delete()
-
-    response = {
-        "status": "OK",
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def edit_bookmark_note(request):
-
-    blob_uuid = request.POST["blob_uuid"]
-    bookmark_uuid = request.POST["bookmark_uuid"]
-    note = request.POST["note"]
-
-    so = SortOrderBlobBookmark.objects.get(
-        blob__uuid=blob_uuid,
-        bookmark__uuid=bookmark_uuid
-    )
-    so.note = note
-    so.save()
-
-    response = {
-        "status": "OK",
     }
 
     return JsonResponse(response)
