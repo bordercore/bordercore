@@ -143,6 +143,10 @@ import TreeMenu from "./vue/common/TreeMenu.vue";
 Vue.component("TreeMenu", TreeMenu);
 window.TreeMenu = TreeMenu;
 
+import BookmarkSelect from "./vue/bookmark/BookmarkSelect.vue";
+Vue.component("BookmarkSelect", BookmarkSelect);
+window.BookmarkSelect = BookmarkSelect;
+
 import BookmarkSearch from "./vue/bookmark/BookmarkSearch.vue";
 Vue.component("BookmarkSearch", BookmarkSearch);
 window.BookmarkSearch = BookmarkSearch;
