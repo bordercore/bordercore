@@ -3,7 +3,7 @@ import json
 import os
 import re
 import uuid
-from datetime import datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 
 import boto3
@@ -480,16 +480,7 @@ def mark_song_as_listened_to(request, uuid):
 
     if not settings.DEBUG:
         song = Song.objects.get(user=request.user, uuid=uuid)
-
-        if song.times_played:
-            song.times_played = song.times_played + 1
-        else:
-            song.times_played = 1
-
-        song.last_time_played = datetime.now()
-        song.save()
-
-        Listen(song=song, user=request.user).save()
+        song.listen_to()
 
     return JsonResponse(
         {

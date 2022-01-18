@@ -1,7 +1,7 @@
 import hashlib
 import os
 import uuid
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 import boto3
 import humanize
@@ -203,6 +203,18 @@ class Song(TimeStampedModel):
             doc["_source"]["album_uuid"] = str(self.album.uuid)
 
         return doc
+
+    def listen_to(self):
+        """
+        Increment a song's 'times played' counter and update
+        its 'last time played' timestamp.
+        """
+
+        self.times_played = self.times_played + 1
+        self.last_time_played = datetime.now()
+        self.save()
+
+        Listen(song=self, user=self.user).save()
 
     @staticmethod
     def get_id3_info(request, messages, song):

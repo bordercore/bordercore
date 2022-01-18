@@ -156,6 +156,19 @@ def test_music_search_tag(auto_login_user, song, tag):
     assert resp.status_code == 200
 
 
+def test_mark_song_as_listened_to(auto_login_user, song):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse(
+        "music:mark_song_as_listened_to",
+        kwargs={"uuid": song[0].uuid}
+    )
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+
+
 def test_music_playlist_detail(auto_login_user, playlist):
 
     _, client = auto_login_user()
