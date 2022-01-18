@@ -163,6 +163,7 @@ def get_bookmark_list(request, uuid):
                 "name": x.name,
                 "url": x.url,
                 "id": x.id,
+                "uuid": x.uuid,
                 "favicon_url": x.get_favicon_url(size=16),
                 "note": x.sortordernodebookmark_set.get(node=node).note,
             }
@@ -174,36 +175,13 @@ def get_bookmark_list(request, uuid):
 
 
 @login_required
-def sort_bookmarks(request):
-    """
-    Move a given bookmark to a new position in a sorted list
-    """
-
-    node_uuid = request.POST["node_uuid"]
-    bookmark_id = request.POST["bookmark_id"]
-    new_position = int(request.POST["new_position"])
-
-    so = SortOrderNodeBookmark.objects.get(node__uuid=node_uuid, bookmark__id=bookmark_id)
-    SortOrderNodeBookmark.reorder(so, new_position)
-
-    so.node.modified = timezone.now()
-    so.node.save()
-
-    response = {
-        "status": "OK",
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
 def add_bookmark(request):
 
     node_uuid = request.POST["node_uuid"]
-    bookmark_id = int(request.POST["bookmark_id"])
+    bookmark_uuid = request.POST["bookmark_uuid"]
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
-    bookmark = Bookmark.objects.get(id=bookmark_id)
+    bookmark = Bookmark.objects.get(uuid=bookmark_uuid)
 
     so = SortOrderNodeBookmark(node=node, bookmark=bookmark)
     so.save()
@@ -216,67 +194,6 @@ def add_bookmark(request):
     }
 
     return JsonResponse(response)
-
-
-@login_required
-def remove_bookmark(request):
-
-    node_uuid = request.POST["node_uuid"]
-    bookmark_id = request.POST["bookmark_id"]
-
-    so = SortOrderNodeBookmark.objects.get(node__uuid=node_uuid, bookmark__id=bookmark_id)
-    so.delete()
-
-    so.node.modified = timezone.now()
-    so.node.save()
-
-    response = {
-        "status": "OK",
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def edit_bookmark_note(request):
-
-    node_uuid = request.POST["node_uuid"]
-    bookmark_id = int(request.POST["bookmark_id"])
-    note = request.POST["note"]
-
-    so = SortOrderNodeBookmark.objects.get(node__uuid=node_uuid, bookmark__id=bookmark_id)
-    so.note = note
-    so.save()
-
-    so.node.modified = timezone.now()
-    so.node.save()
-
-    response = {
-        "status": "OK",
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def search_bookmarks(request):
-
-    results = Bookmark.objects.filter(user=request.user).filter(name__icontains=request.GET["term"])
-    matches = []
-
-    for match in results:
-
-        matches.append(
-            {
-                "id": match.id,
-                "url": match.url,
-                "note": match.note,
-                "name": match.name,
-                "favicon_url": match.get_favicon_url(size=16),
-            }
-        )
-
-    return JsonResponse(matches, safe=False)
 
 
 @login_required

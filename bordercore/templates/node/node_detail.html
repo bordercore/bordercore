@@ -116,92 +116,24 @@
             </div> <!-- - End first column -->
 
             <div class="col-lg-4 d-flex flex-column">
-
-                <div>
-                    <bookmark-list inline-template ref="bookmarkList" v-b-hover="handleHover">
-
-                        <card title="Links">
-                            <template v-slot:top-right>
-                                <div class="node-add-button">
-                                    <add-button href="#" :click-handler="chooseBookmark" class="hover-target d-none"></add-button>
-                                </div>
-                            </template>
-
-                            <template v-slot:content>
-
-                                <ul class="list-group list-group-flush" id="sort-container-tags">
-                                    <draggable v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
-                                        <transition-group type="transition" class="w-100">
-                                            <li v-for="(bookmark, index) in bookmarkList" class="node-bookmark list-group-item list-group-item-secondary text-info draggable p-0 mt-2" :data-uuid="bookmark.id" :key="bookmark.id" v-cloak v-b-hover="handleHover">
-                                                <div class="d-flex">
-                                                    <div v-html="bookmark.favicon_url" class="pr-2"></div>
-                                                    <div>
-                                                        <a :href="bookmark.url">[[ bookmark.name ]]</a>
-
-                                                        <div v-if="bookmark.note" v-on:click="activateInEditMode(bookmark, $event.target)" v-show="!bookmark.noteIsEditable" class="node-note" v-html="getNote(bookmark.note)"></div>
-                                                        <span v-show="bookmark.noteIsEditable">
-                                                            <input type="text" class="form-control form-control-sm" :value="bookmark.note" ref="input" placeholder="" @blur="editNote(bookmark.id, $event.target.value)" @keydown.enter="editNote(bookmark.id, $event.target.value)" >
-                                                        </span>
-                                                    </div>
-
-                                                    <div class="dropdownmenu hidden">
-                                                        <dropdown-menu v-model="show" transition="translate-fade-down">
-                                                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                                                            <div slot="dropdown">
-                                                                <a class="dropdown-item" href="#" @click.prevent="removeBookmark(bookmark.id)">Remove</a>
-                                                                <a v-if="!bookmark.note" class="dropdown-item" href="#" @click.prevent="addNote(bookmark.id, index)">Add note</a>
-                                                            </div>
-                                                        </dropdown-menu>
-                                                    </div>
-
-                                                </div>
-
-                                            </li>
-                                            <div class="text-secondary" v-if="bookmarkList.length == 0" :key="1" v-cloak>
-                                                No links
-                                            </div>
-                                        </transition-group>
-                                    </draggable>
-                                </ul>
-                            </template>
-                        </card>
-                    </bookmark-list>
+                <div v-b-hover="handleHover">
+                    <related-bookmarks-list
+                        ref="relatedBookmarksList"
+                        object-uuid="{{ object.uuid }}"
+                        model-name="node.Node"
+                        get-bookmark-list-url="{% url 'node:get_bookmark_list' object.uuid %}"
+                        search-bookmark-url="{% url 'bookmark:search' %}"
+                        add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
+                        remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"
+                        sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
+                        edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}"
+                        :show-add-button="true"
+                        extra-class="embedded-card ml-3"
+                        @select-bookmark="selectBookmark"
+                    >
+                    </related-bookmarks-list>
                 </div>
             </div>
-
-            </div>
-
-            <bookmark-search inline-template ref="bookmarkSearch">
-                <div class="modal fade" id="modalAddBookmark" tabindex="-1" role="dialog">
-
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h4 class="modal-title" id="myModalLabel">Add bookmark</h4>
-                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
-                            </div>
-                            <div class="modal-body">
-
-                                <form id="search" action="" method="get" autocomplete="off">
-                                    <div class="form-row align-items-center">
-
-                                        <div class="form-row">
-                                            <simple-suggest
-                                                ref="simpleSuggest"
-                                                display-attribute="name"
-                                                value-attribute="name"
-                                                search-url="{% url 'node:search_bookmarks' %}?term="
-                                            >
-                                            </simple-suggest>
-                                        </div>
-                                    </div>
-                                </form>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </bookmark-search>
 
             <blob-select
                 ref="blobSelect"
@@ -209,6 +141,8 @@
                 recent-blobs-url="{% url "blob:recent_blobs" %}"
                 @select-blob="selectBlob"
             />
+
+            </div>
 
         </div>
 
@@ -365,85 +299,14 @@
         }
 
         const BookmarkList = {
-            data() {
-                return {
-                    bookmarkList: [],
-                    show: false
-                }
-            },
             methods: {
-                getBookmarkList() {
-                    doGet(
-                        this,
-                        "{% url "node:get_bookmark_list" object.uuid %}",
-                        (response) => {
-                            this.bookmarkList = response.data.bookmark_list;
-
-                            // Let Vue know that each blob's "noteIsEditable" property is reactive
-                            for (bookmark of this.bookmarkList) {
-                                this.$set(bookmark, "noteIsEditable", false);
-                            }
-                        },
-                        "Error getting bookmark list"
-                    );
-                },
-                chooseBookmark() {
-                    $("#modalAddBookmark").modal("show");
-                    setTimeout( () => { this.$parent.$refs.bookmarkSearch.$refs.simpleSuggest.$refs.suggestComponent.input.focus(); }, 500)
-                },
-                onChange(evt) {
-
-                    bookmarkId = evt.moved.element.id;
-
-                    // The backend expects the ordering to begin
-                    // with 1, not 0, so add 1.
-                    newPosition = evt.moved.newIndex + 1;
-
-                    doPost(
-                        this,
-                        "{% url "node:sort_bookmarks" %}",
-                        {
-                            "node_uuid": this.$store.state.nodeUuid,
-                            "bookmark_id": bookmarkId,
-                            "new_position": newPosition
-                        },
-                        () => {},
-                        "",
-                        ""
-                    );
-
-                },
-                activateInEditMode(bookmark, event) {
-
-                    const isId = (value) => value.id == bookmark.id;
-                    const index = this.bookmarkList.findIndex(isId);
-
-                    this.$set(this.bookmarkList[index], "noteIsEditable", true);
-
-                    setTimeout( () => { event.nextElementSibling.querySelector("input").focus() }, 100)
-
-                },
-                addNote(bookmark_id, index) {
-
-                    for (bookmark of this.bookmarkList) {
-                        if (bookmark.id == bookmark_id) {
-                            bookmark.noteIsEditable = true;
-                        }
-                    }
-
-                    this.$nextTick(() => {
-                        this.$refs.input[index].focus();
-                    })
-
-                },
-                addBookmark(bookmark_id) {
-
+                selectBookmark(bookmark_uuid) {
                     doPost(
                         this,
                         "{% url "node:add_bookmark" %}",
                         {
                             "node_uuid": this.$store.state.nodeUuid,
-                            "bookmark_id": bookmark_id,
+                            "bookmark_uuid": bookmark_uuid,
                         },
                         (response) => {
                             this.getBookmarkList();
@@ -451,103 +314,9 @@
                         "Bookmark added",
                         ""
                     );
-
                 },
-                handleHover(hovered, evt) {
-                    evt.currentTarget.querySelector(".dropdownmenu").classList.toggle("d-flex");
-                },
-                removeBookmark(bookmark_id) {
-
-                    doPost(
-                        this,
-                        "{% url "node:remove_bookmark" %}",
-                        {
-                            "node_uuid": this.$store.state.nodeUuid,
-                            "bookmark_id": bookmark_id
-                        },
-                        (response) => {
-                            this.getBookmarkList();
-                        },
-                        "Bookmark removed",
-                        ""
-                    );
-
-                },
-                getNote(note) {
-                    return markdown.render(note);
-                },
-                editNote(bookmark_id, note) {
-
-                    if (this.editingNote) {
-                        return;
-                    }
-                    this.editingNote = true;
-
-                    for (bookmark of this.bookmarkList) {
-                        if (bookmark.id == bookmark_id) {
-
-                            // If the note hasn't changed, abort
-                            if (note == bookmark.note) {
-                                bookmark.noteIsEditable = false;
-                                this.editingNote = false;
-                                return;
-                            }
-
-                            doPost(
-                                this,
-                                "{% url "node:edit_bookmark_note" %}",
-                                {
-                                    "node_uuid": this.$store.state.nodeUuid,
-                                    "bookmark_id": bookmark.id,
-                                    "note": note
-                                },
-                                (response) => {
-                                    this.getBookmarkList();
-                                },
-                                "",
-                                ""
-                            );
-
-                            this.editingNote = false;
-
-                        }
-                    }
-                }
-            },
-            mounted() {
-                this.getBookmarkList();
             }
         }
-
-        const BookmarkSearch = {
-            methods: {
-                select(selection) {
-
-                    EventBus.$emit("add-bookmark", selection.id);
-                    $("#modalAddBookmark").modal("hide");
-
-                    this.$nextTick(() => {
-                        this.$refs.simpleSuggest.$refs.suggestComponent.$el.querySelector("input").blur();
-                        this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
-                    });
-
-
-                },
-                boldenSuggestion(scope) {
-
-                    if (!scope) return scope;
-
-                    const { suggestion, query } = scope;
-
-                    let result = this.$refs.simpleSuggest.$refs.suggestComponent.displayProperty(suggestion);
-
-                    if (!query) return result;
-
-                    const texts = query.split(/[\s-_/\\|\.]/gm).filter(t => !!t) || [''];
-                    return result.replace(new RegExp('(.*?)(' + texts.join('|') + ')(.*?)','gi'), '$1<b>$2</b>$3');
-                }
-            }
-        };
 
         const Note = {
             data() {
@@ -593,12 +362,25 @@
             store,
             components: {
                 BlobList,
-                BookmarkList,
                 BlobSelect,
-                BookmarkSearch,
-                Note
+                Note,
             },
             methods: {
+                selectBookmark(bookmark_uuid) {
+                    doPost(
+                        this,
+                        "{% url "node:add_bookmark" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                            "bookmark_uuid": bookmark_uuid,
+                        },
+                        (response) => {
+                            this.getBookmarkList();
+                        },
+                        "Bookmark added",
+                        ""
+                    );
+                },
                 handleHover(hovered, evt) {
                     evt.currentTarget.querySelector(".hover-target").classList.toggle("d-flex");
                 },

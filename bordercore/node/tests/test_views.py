@@ -115,20 +115,6 @@ def test_get_bookmark_list(auto_login_user, node):
     assert resp.status_code == 200
 
 
-def test_sort_bookmarks(auto_login_user, node, bookmark):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("node:sort_bookmarks")
-    resp = client.post(url, {
-        "node_uuid": node.uuid,
-        "bookmark_id": bookmark[0].id,
-        "new_position": "2"
-    })
-
-    assert resp.status_code == 200
-
-
 def test_add_bookmark(auto_login_user, node, bookmark):
 
     _, client = auto_login_user()
@@ -140,45 +126,8 @@ def test_add_bookmark(auto_login_user, node, bookmark):
     url = urls.reverse("node:add_bookmark")
     resp = client.post(url, {
         "node_uuid": node.uuid,
-        "bookmark_id": bookmark[0].id
+        "bookmark_uuid": bookmark[0].uuid
     })
-
-    assert resp.status_code == 200
-
-
-def test_remove_bookmark(auto_login_user, node, bookmark):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("node:remove_bookmark")
-    resp = client.post(url, {
-        "node_uuid": node.uuid,
-        "bookmark_id": bookmark[0].id
-    })
-
-    assert resp.status_code == 200
-
-
-def test_edit_bookmark_note(auto_login_user, node, bookmark):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("node:edit_bookmark_note")
-    resp = client.post(url, {
-        "node_uuid": node.uuid,
-        "bookmark_id": bookmark[0].id,
-        "note": "Sample Note"
-    })
-
-    assert resp.status_code == 200
-
-
-def test_search_bookmarks(auto_login_user, node):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("node:search_bookmarks")
-    resp = client.get(f"{url}?term=Bookmark")
 
     assert resp.status_code == 200
 

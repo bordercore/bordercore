@@ -51,29 +51,9 @@ urlpatterns = [
         name="add_bookmark"
     ),
     path(
-        route="bookmark/edit_note/",
-        view=views.edit_bookmark_note,
-        name="edit_bookmark_note"
-    ),
-    path(
-        route="bookmark/remove/",
-        view=views.remove_bookmark,
-        name="remove_bookmark"
-    ),
-    path(
         route="blob/add/",
         view=views.add_blob,
         name="add_blob"
-    ),
-    path(
-        route="bookmark/sort/",
-        view=views.sort_bookmarks,
-        name="sort_bookmarks"
-    ),
-    path(
-        route="bookmark/search/",
-        view=views.search_bookmarks,
-        name="search_bookmarks"
     ),
     path(
         route="edit_note/",
