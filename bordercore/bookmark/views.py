@@ -6,6 +6,8 @@ from urllib.parse import unquote
 import lxml.html as lh
 import pytz
 
+from django.apps import apps
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.aggregates import ArrayAgg
@@ -16,6 +18,7 @@ from django.db.models import Count
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 from django.views.generic.edit import ModelFormMixin
@@ -503,3 +506,124 @@ def search(request):
     matches = search_service(request.user, search_term)
 
     return JsonResponse(matches, safe=False)
+
+
+def get_query_info(POST):
+
+    object_uuid = POST["object_uuid"]
+    app_name, model_name = POST["model_name"].split(".")
+
+    SortOrderModel = apps.get_model(app_name, f"SortOrder{model_name}Bookmark")
+    ObjectModel = apps.get_model(app_name, model_name)
+    object = ObjectModel.objects.get(uuid=object_uuid)
+
+    return {
+        "sort_order_model": SortOrderModel,
+        "kwargs": {app_name: object}
+    }
+
+
+@login_required
+def add_related_bookmark(request):
+
+    bookmark_uuid = request.POST["bookmark_uuid"]
+
+    query_info = get_query_info(request.POST)
+
+    bookmark = Bookmark.objects.get(uuid=bookmark_uuid)
+
+    so = query_info["sort_order_model"](
+        **query_info["kwargs"],
+        bookmark=bookmark
+    )
+    so.save()
+
+    so.node.modified = timezone.now()
+    so.node.save()
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def remove_related_bookmark(request):
+
+    bookmark_uuid = request.POST["bookmark_uuid"]
+
+    query_info = get_query_info(request.POST)
+    so = query_info["sort_order_model"].objects.get(
+        **query_info["kwargs"],
+        bookmark__uuid=bookmark_uuid
+    )
+
+    so.delete()
+
+    so.node.modified = timezone.now()
+    so.node.save()
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def sort_related_bookmarks(request):
+    """
+    Move a given bookmark to a new position in a sorted list
+    """
+
+    # 'app_name' must match field_name in the 'SortOrder__Bookmark' class
+    # Sample 'model_name' parameter: 'node.Node'
+
+    bookmark_uuid = request.POST["bookmark_uuid"]
+    new_position = int(request.POST["new_position"])
+
+    query_info = get_query_info(request.POST)
+    so = query_info["sort_order_model"].objects.get(
+        **query_info["kwargs"],
+        bookmark__uuid=bookmark_uuid
+    )
+
+    query_info["sort_order_model"].reorder(so, new_position)
+
+    # Generalize this beyond 'node'
+    # Make this code optional, since we don't want to mark, say, blobs
+    #  as being modified when we sort their related bookmarks
+    so.node.modified = timezone.now()
+    so.node.save()
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def edit_related_bookmark_note(request):
+
+    bookmark_uuid = request.POST["bookmark_uuid"]
+    note = request.POST["note"]
+
+    query_info = get_query_info(request.POST)
+    so = query_info["sort_order_model"].objects.get(
+        **query_info["kwargs"],
+        bookmark__uuid=bookmark_uuid
+    )
+
+    so.note = note
+    so.save()
+
+    so.node.modified = timezone.now()
+    so.node.save()
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)

@@ -2,9 +2,9 @@
     <div :class="extraClass">
         <card :title="title">
             <template #top-right>
-                <span v-if="showAddButton" class="button-plus float-right" @click="chooseBookmark()">
-                    <font-awesome-icon icon="plus" />
-                </span>
+                <div v-if="showAddButton" class="node-add-button">
+                    <add-button href="#" :click-handler="openModal" class="hover-target d-none" />
+                </div>
             </template>
 
             <template #content>
@@ -45,74 +45,11 @@
                 </ul>
             </template>
         </card>
-        <div id="modalAddBookmark" class="modal fade" tabindex="-1" role="dialog">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 id="myModalLabel" class="modal-title">
-                            Select bookmark
-                        </h4>
-                        <button type="button" class="close" data-dismiss="modal">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="d-flex flex-column">
-                            <form v-if="mode==='search'" @submit.prevent>
-                                <div class="form-group">
-                                    <simple-suggest
-                                        ref="simpleSuggest"
-                                        class="w-100"
-                                        display-attribute="name"
-                                        value-attribute="uuid"
-                                        place-holder="Url or Title"
-                                        :search-url="searchBookmarkUrl + '?term='"
-                                    />
-                                </div>
-                            </form>
-                            <form v-else @submit.prevent>
-                                <div class="form-group row">
-                                    <label class="col-form-label col-lg-1">URL</label>
-                                    <div class="col-lg-10 d-flex">
-                                        <input id="bookmark-search-url" v-model="url" class="form-control" type="text" autocomplete="off" placeholder="https://" @change="onChange">
-                                    </div>
-                                    <div class="col-lg-1">
-                                        <div class="spinner-border ml-2" :class="{'d-none': hideSpinner}" role="status">
-                                            <span class="sr-only">Loading...</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="form-group row" :class="{'d-none': hideNameInput}">
-                                    <label class="col-form-label col-lg-1">Title</label>
-                                    <div class="col-lg-10">
-                                        <input v-model="name" class="form-control" :disabled="nameInputIsDisabled" type="text" placeholder="Name" autocomplete="off">
-                                    </div>
-                                </div>
-
-                                <div class="row" :class="{'d-none': hideAddButton}">
-                                    <div class="col-lg-10 offset-lg-1 d-flex">
-                                        <div class="d-flex flex-column">
-                                            <div class="mt-2 text-info">
-                                                <font-awesome-icon class="mr-1 pt-1 success" icon="exclamation-triangle" />
-                                                {{ message }}
-                                            </div>
-                                            <div class="mt-2 text-info" :class="{'d-none': hideBookmarkAdded}">
-                                                <font-awesome-icon class="mr-1 pt-1 success" icon="check" /> Bookmark successfully added
-                                            </div>
-                                        </div>
-                                        <div class="ml-auto">
-                                            <button type="button" class="btn btn-primary" @click="onAdd">
-                                                Add
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <bookmark-select
+            ref="bookmarkSearch"
+            :search-url="searchBookmarkUrl"
+            @select-bookmark="selectBookmark"
+        />
     </div>
 </template>
 
@@ -121,6 +58,14 @@
     export default {
 
         props: {
+            objectUuid: {
+                default: "",
+                type: String,
+            },
+            modelName: {
+                default: "",
+                type: String,
+            },
             blobUuid: {
                 default: "",
                 type: String,
@@ -134,6 +79,10 @@
                 type: String,
             },
             searchBookmarkUrl: {
+                default: "",
+                type: String,
+            },
+            addBookmarkUrl: {
                 default: "",
                 type: String,
             },
@@ -173,7 +122,7 @@
             getBookmarkList() {
                 doGet(
                     this,
-                    this.getBookmarkListUrl.replace(/00000000-0000-0000-0000-000000000000/, this.blobUuid),
+                    this.getBookmarkListUrl.replace(/00000000-0000-0000-0000-000000000000/, this.objectUuid),
                     (response) => {
                         this.bookmarkList = response.data.bookmark_list;
 
@@ -190,7 +139,8 @@
                     this,
                     this.removeBookmarkUrl,
                     {
-                        "blob_uuid": this.blobUuid,
+                        "object_uuid": this.objectUuid,
+                        "model_name": this.modelName,
                         "bookmark_uuid": bookmarkUuid,
                     },
                     (response) => {
@@ -206,8 +156,24 @@
             openModal() {
                 $("#modalAddBookmark").modal("show");
                 setTimeout( () => {
-                    this.$refs.simpleSuggest.$refs.suggestComponent.input.focus();
+                    this.$refs.bookmarkSearch.$refs.simpleSuggest.$refs.suggestComponent.input.focus();
                 }, 500);
+            },
+            selectBookmark(bookmarkUuid) {
+                doPost(
+                    this,
+                    this.addBookmarkUrl,
+                    {
+                        "object_uuid": this.objectUuid,
+                        "model_name": this.modelName,
+                        "bookmark_uuid": bookmarkUuid,
+                    },
+                    (response) => {
+                        this.getBookmarkList();
+                    },
+                    "Bookmark added",
+                    "",
+                );
             },
             onSort(evt) {
                 const bookmarkUuid = evt.moved.element.uuid;
@@ -220,7 +186,8 @@
                     this,
                     this.sortBookmarkListUrl,
                     {
-                        "blob_uuid": this.blobUuid,
+                        "object_uuid": this.objectUuid,
+                        "model_name": this.modelName,
                         "bookmark_uuid": bookmarkUuid,
                         "new_position": newPosition,
                     },
@@ -230,8 +197,12 @@
                 );
             },
             select(selection) {
+                // TODO -- HACK!
+                this.selectBookmark(selection.uuid);
+
                 // The parent component receives the bookmark uuid and takes action
-                this.$emit("select-bookmark", selection.uuid);
+                /* this.$emit("select-bookmark", selection.uuid); */
+
                 $("#modalAddBookmark").modal("hide");
 
                 this.$nextTick(() => {
@@ -277,7 +248,8 @@
                             this,
                             this.editBookmarkNoteUrl,
                             {
-                                "blob_uuid": this.blobUuid,
+                                "object_uuid": this.objectUuid,
+                                "model_name": this.modelName,
                                 "bookmark_uuid": bookmark.uuid,
                                 "note": note,
                             },
