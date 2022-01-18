@@ -1,9 +1,8 @@
 from rest_framework import routers
 
 from django.conf import settings
-from django.conf.urls import url
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 
 from api.views import (AlbumViewSet, BlobSha1sumViewSet, BlobViewSet,
                        BookmarkViewSet, CollectionViewSet, FeedItemViewSet,
@@ -59,7 +58,7 @@ router.register(r"tagnames", TagNameViewSet, "tagname")
 router.register(r"todos", TodoViewSet, "todo")
 
 urlpatterns += [
-    url(r"^api/", include(router.urls)),
+    re_path(r"^api/", include(router.urls)),
     path("api/feeds/update_feed_list/<uuid:feed_uuid>/", update_feed_list),
     path("api/collections/images/<uuid:collection_uuid>/", get_images),
     path("", include("rest_framework.urls", namespace="rest_framework"))
