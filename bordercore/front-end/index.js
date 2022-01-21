@@ -147,10 +147,6 @@ import BookmarkSelect from "./vue/bookmark/BookmarkSelect.vue";
 Vue.component("BookmarkSelect", BookmarkSelect);
 window.BookmarkSelect = BookmarkSelect;
 
-import BookmarkSearch from "./vue/bookmark/BookmarkSearch.vue";
-Vue.component("BookmarkSearch", BookmarkSearch);
-window.BookmarkSearch = BookmarkSearch;
-
 import Bookmark from "./vue/bookmark/Bookmark.vue";
 Vue.component("Bookmark", Bookmark);
 window.Bookmark = Bookmark;
@@ -166,10 +162,6 @@ window.BlobSelect = BlobSelect;
 import DrillTagProgress from "./vue/common/DrillTagProgress.vue";
 Vue.component("DrillTagProgress", DrillTagProgress);
 window.DrillTagProgress = DrillTagProgress;
-
-import DrillBookmarks from "./vue/drill/DrillBookmarks.vue";
-Vue.component("DrillBookmarks", DrillBookmarks);
-window.DrillBookmarks = DrillBookmarks;
 
 import DrillBlobs from "./vue/drill/DrillBlobs.vue";
 Vue.component("DrillBlobs", DrillBlobs);

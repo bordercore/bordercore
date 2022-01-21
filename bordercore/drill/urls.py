@@ -106,26 +106,6 @@ urlpatterns = [
         name="get_bookmark_list"
     ),
     path(
-        route="bookmark/sort",
-        view=views.sort_bookmark_list,
-        name="sort_bookmark_list"
-    ),
-    path(
-        route="bookmark/add",
-        view=views.add_bookmark,
-        name="add_bookmark"
-    ),
-    path(
-        route="bookmark/remove",
-        view=views.remove_bookmark,
-        name="remove_bookmark"
-    ),
-    path(
-        route="bookmark/edit_note",
-        view=views.edit_bookmark_note,
-        name="edit_bookmark_note"
-    ),
-    path(
         route="get_title_from_url",
         view=views.get_title_from_url,
         name="get_title_from_url"

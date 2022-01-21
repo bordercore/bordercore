@@ -20,8 +20,7 @@ from lib.mixins import FormRequestMixin
 from lib.util import parse_title_from_url
 from tag.models import Tag
 
-from .models import (EFACTOR_DEFAULT, Question, SortOrderDrillBlob,
-                     SortOrderDrillBookmark)
+from .models import EFACTOR_DEFAULT, Question, SortOrderDrillBlob
 
 
 @method_decorator(login_required, name='dispatch')
@@ -386,7 +385,7 @@ def is_favorite_mutate(request):
 def get_bookmark_list(request, uuid):
 
     question = Question.objects.get(uuid=uuid, user=request.user)
-    bookmark_list = list(question.bookmarks.all().only("name", "id").order_by("sortorderdrillbookmark__sort_order"))
+    bookmark_list = list(question.bookmarks.all().only("name", "id").order_by("sortorderquestionbookmark__sort_order"))
 
     response = {
         "status": "OK",
@@ -397,96 +396,11 @@ def get_bookmark_list(request, uuid):
                 "id": x.id,
                 "uuid": x.uuid,
                 "favicon_url": x.get_favicon_url(size=16),
-                "note": x.sortorderdrillbookmark_set.get(question=question).note,
+                "note": x.sortorderquestionbookmark_set.get(question=question).note,
                 "edit_url": reverse("bookmark:update", kwargs={"uuid": x.uuid})
             }
             for x
             in bookmark_list]
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def sort_bookmark_list(request):
-    """
-    Move a given bookmark to a new position in a sorted list
-    """
-
-    question_uuid = request.POST["question_uuid"]
-    bookmark_uuid = request.POST["bookmark_uuid"]
-    new_position = int(request.POST["new_position"])
-
-    so = SortOrderDrillBookmark.objects.get(question__uuid=question_uuid, bookmark__uuid=bookmark_uuid)
-    SortOrderDrillBookmark.reorder(so, new_position)
-
-    so.question.modified = timezone.now()
-    so.question.save()
-
-    response = {
-        "status": "OK",
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def add_bookmark(request):
-
-    question_uuid = request.POST["question_uuid"]
-    bookmark_uuid = request.POST["bookmark_uuid"]
-
-    question = Question.objects.get(uuid=question_uuid, user=request.user)
-    bookmark = Bookmark.objects.get(uuid=bookmark_uuid)
-
-    so = SortOrderDrillBookmark(question=question, bookmark=bookmark)
-    so.save()
-
-    so.question.modified = timezone.now()
-    so.question.save()
-
-    response = {
-        "status": "OK",
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def remove_bookmark(request):
-
-    question_uuid = request.POST["question_uuid"]
-    bookmark_uuid = request.POST["bookmark_uuid"]
-
-    so = SortOrderDrillBookmark.objects.get(question__uuid=question_uuid, bookmark__uuid=bookmark_uuid)
-    so.delete()
-
-    so.question.modified = timezone.now()
-    so.question.save()
-
-    response = {
-        "status": "OK",
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def edit_bookmark_note(request):
-
-    question_uuid = request.POST["question_uuid"]
-    bookmark_uuid = request.POST["bookmark_uuid"]
-    note = request.POST["note"]
-
-    so = SortOrderDrillBookmark.objects.get(question__uuid=question_uuid, bookmark__uuid=bookmark_uuid)
-    so.note = note
-    so.save()
-
-    so.question.modified = timezone.now()
-    so.question.save()
-
-    response = {
-        "status": "OK",
     }
 
     return JsonResponse(response)
@@ -509,7 +423,6 @@ def get_title_from_url(request):
     else:
         try:
             title = parse_title_from_url(url)[1]
-            message = "Bookmark not found in Bordercore."
         except Exception as e:
             message = str(e)
 

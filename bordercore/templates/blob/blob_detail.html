@@ -167,13 +167,16 @@
                         object-uuid="{{ object.uuid }}"
                         model-name="blob.Blob"
                         get-bookmark-list-url="{% url 'blob:get_bookmark_list' object.uuid %}"
+                        create-bookmark-url="{% url 'bookmark-list' %}"
                         search-bookmark-url="{% url 'bookmark:search' %}"
+                        get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
                         add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
                         remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"
                         sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
                         edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}"
                         :show-add-button="false"
                         extra-class="embedded-card mt-3"
+                        :show-empty-list="false"
                     >
                     </related-bookmarks-list>
 

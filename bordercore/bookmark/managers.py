@@ -13,5 +13,5 @@ class BookmarkManager(models.Manager):
         return Bookmark.objects.filter(
             user=user,
             tags__isnull=True,
-            sortorderdrillbookmark__isnull=True
+            sortorderquestionbookmark__isnull=True
         ).order_by("-created")[:limit]

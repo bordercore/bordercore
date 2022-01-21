@@ -1,7 +1,7 @@
 <template>
     <div :class="extraClass">
-        <transition name="fade">
-            <card v-if="bookmarkList.length > 0" :title="title">
+        <transition :name="transitionName">
+            <card v-if="bookmarkList.length > 0 || showEmptyList" :title="title">
                 <template #top-right>
                     <div v-if="showAddButton" class="node-add-button">
                         <add-button href="#" :click-handler="openModal" class="hover-target d-none" />
@@ -50,6 +50,8 @@
         <bookmark-select
             ref="bookmarkSearch"
             :search-url="searchBookmarkUrl"
+            :create-bookmark-url="createBookmarkUrl"
+            :get-title-from-url-url="getTitleFromUrlUrl"
             @select-bookmark="selectBookmark"
         />
     </div>
@@ -84,6 +86,14 @@
                 default: "",
                 type: String,
             },
+            getTitleFromUrlUrl: {
+                default: "",
+                type: String,
+            },
+            createBookmarkUrl: {
+                default: "",
+                type: String,
+            },
             addBookmarkUrl: {
                 default: "",
                 type: String,
@@ -111,6 +121,14 @@
             extraClass: {
                 default: "",
                 type: String,
+            },
+            transitionName: {
+                default: "fade",
+                type: String,
+            },
+            showEmptyList: {
+                default: true,
+                type: Boolean,
             },
         },
         data() {
@@ -156,8 +174,16 @@
                     "",
                 );
             },
-            handleHover(hovered, evt) {
-                evt.currentTarget.querySelector(".dropdown").classList.toggle("hidden");
+            handleHover(isHovered, evt) {
+                const classList = evt.currentTarget.querySelector(".dropdown").classList;
+                // Note: I've found that using a more concise "toggle" command
+                //  can cause the button's state to become out of sync, so instead
+                //  I choose to be more specific instead.
+                if (isHovered) {
+                    classList.remove("hidden");
+                } else {
+                    classList.add("hidden");
+                }
             },
             openModal() {
                 $("#modalAddBookmark").modal("show");
@@ -206,20 +232,6 @@
                     "",
                     "",
                 );
-            },
-            select(selection) {
-                // TODO -- HACK!
-                this.selectBookmark(selection.uuid);
-
-                // The parent component receives the bookmark uuid and takes action
-                /* this.$emit("select-bookmark", selection.uuid); */
-
-                $("#modalAddBookmark").modal("hide");
-
-                this.$nextTick(() => {
-                    this.$refs.simpleSuggest.$refs.suggestComponent.$el.querySelector("input").blur();
-                    this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
-                });
             },
             activateInEditMode(bookmark, index) {
                 this.$set(this.bookmarkList[index], "noteIsEditable", true);

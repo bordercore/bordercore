@@ -35,7 +35,7 @@ from bookmark.tests.factories import BookmarkFactory  # isort:skip
 from collection.tests.factories import CollectionFactory  # isort:skip
 from collection.models import Collection  # isort:skip
 from django.contrib.auth.models import Group  # isort:skip
-from drill.models import SortOrderDrillBookmark  # isort:skip
+from drill.models import SortOrderQuestionBookmark  # isort:skip
 from drill.tests.factories import QuestionFactory  # isort:skip
 from fitness.models import Exercise, ExerciseUser, Muscle, MuscleGroup, Data  # isort:skip
 from feed.tests.factories import FeedFactory  # isort:skip
@@ -443,9 +443,9 @@ def question(tag, bookmark):
     question_0.tags.add(tag[0])
     question_0.tags.add(tag[1])
 
-    so = SortOrderDrillBookmark(question=question_0, bookmark=bookmark[0])
+    so = SortOrderQuestionBookmark(question=question_0, bookmark=bookmark[0])
     so.save()
-    so = SortOrderDrillBookmark(question=question_0, bookmark=bookmark[1])
+    so = SortOrderQuestionBookmark(question=question_0, bookmark=bookmark[1])
     so.save()
 
     yield [question_0, question_1, question_2, question_3]

@@ -8,7 +8,7 @@ import responses
 from django import urls
 from django.db.models import signals
 
-from drill.models import Question, SortOrderDrillBookmark
+from drill.models import Question
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
@@ -325,77 +325,6 @@ def test_drill_get_bookmark_list(auto_login_user, question):
 
     assert json.loads(resp.content)["status"] == "OK"
     assert resp.status_code == 200
-
-
-@factory.django.mute_signals(signals.post_save)
-def test_drill_sort_bookmark_list(auto_login_user, question, bookmark):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("drill:sort_bookmark_list")
-    resp = client.post(url, {
-        "question_uuid": question[0].uuid,
-        "bookmark_uuid": bookmark[0].uuid,
-        "new_position": 2
-    })
-
-    assert json.loads(resp.content)["status"] == "OK"
-    assert resp.status_code == 200
-
-
-@factory.django.mute_signals(signals.post_save)
-def test_add_bookmark(auto_login_user, question, bookmark):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("drill:add_bookmark")
-    resp = client.post(url, {
-        "question_uuid": question[0].uuid,
-        "bookmark_uuid": bookmark[2].uuid,
-    })
-
-    assert json.loads(resp.content)["status"] == "OK"
-    assert resp.status_code == 200
-
-    assert len(SortOrderDrillBookmark.objects.filter(question=question[0])) == 3
-
-
-@factory.django.mute_signals(signals.post_save)
-def test_remove_bookmark(auto_login_user, question, bookmark):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("drill:remove_bookmark")
-    resp = client.post(url, {
-        "question_uuid": question[0].uuid,
-        "bookmark_uuid": bookmark[1].uuid,
-    })
-
-    assert json.loads(resp.content)["status"] == "OK"
-    assert resp.status_code == 200
-
-    assert len(SortOrderDrillBookmark.objects.filter(question=question[0])) == 1
-
-
-@factory.django.mute_signals(signals.post_save)
-def test_edit_bookmark_note(auto_login_user, question, bookmark):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("drill:edit_bookmark_note")
-    resp = client.post(url, {
-        "question_uuid": question[0].uuid,
-        "bookmark_uuid": bookmark[1].uuid,
-        "note": "New note"
-    })
-
-    assert json.loads(resp.content)["status"] == "OK"
-    assert resp.status_code == 200
-
-    assert SortOrderDrillBookmark.objects.get(
-        question=question[0],
-        bookmark=bookmark[1]
-    ).note == "New note"
 
 
 @responses.activate
