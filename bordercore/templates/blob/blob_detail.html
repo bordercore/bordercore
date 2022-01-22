@@ -180,29 +180,29 @@
                     >
                     </related-bookmarks-list>
 
-                    <h5 v-if="relatedBlobList.length > 0" class="mt-3">
-                        <div class="list-header-border mb-2 pb-2 mt-4">
-                        </div>
-                        <div class="mb-3">
+                    <card v-if="relatedBlobList.length > 0" class="ml-0">
+                        <template #title-slot>
                             Related Blobs
-                        </div>
-                        <div v-for="blob in relatedBlobList" class="hoverable d-flex align-items-center mb-2 p-2" v-b-hover="handleHover">
-                            <img :src="blob.cover_url" />
-                            <div class="d-flex justify-content-center ml-2 w-100">
-                                <a :href="blob.url">[[ blob.name ]]</a>
-                            </div>
+                        </template>
+                        <template #content>
+                            <div v-for="blob in relatedBlobList" class="hoverable d-flex align-items-center mb-2 p-2" v-b-hover="handleHover">
+                                <img :src="blob.cover_url" />
+                                <div class="d-flex justify-content-center ml-2 w-100">
+                                    <a :href="blob.url">[[ blob.name ]]</a>
+                                </div>
 
-                            <div class="dropdownmenu d-flex">
-                                <dropdown-menu v-model="showBlobMenu" transition="translate-fade-down" class="hidden" :right="true">
-                                    <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                                    <div slot="dropdown">
-                                        <a class="dropdown-item" href="#" @click.prevent="unlinkBlob(blob.uuid)">Unlink</a>
-                                    </div>
-                                </dropdown-menu>
-                            </div>
+                                <div class="dropdownmenu d-flex">
+                                    <dropdown-menu v-model="showBlobMenu" transition="translate-fade-down" class="hidden" :right="true">
+                                        <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+                                        <div slot="dropdown">
+                                            <a class="dropdown-item" href="#" @click.prevent="unlinkBlob(blob.uuid)">Unlink</a>
+                                        </div>
+                                    </dropdown-menu>
+                                </div>
 
-                        </div>
-                    </h5>
+                            </div>
+                        </template>
+                    </card>
 
                 </div>
 
