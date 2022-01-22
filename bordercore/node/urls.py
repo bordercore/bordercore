@@ -21,11 +21,6 @@ urlpatterns = [
         name="get_blob_list"
     ),
     path(
-        route="<uuid:uuid>/bookmark_list/",
-        view=views.get_bookmark_list,
-        name="get_bookmark_list"
-    ),
-    path(
         route="<uuid:uuid>/note/",
         view=views.get_note,
         name="get_note"

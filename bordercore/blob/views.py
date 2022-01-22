@@ -571,32 +571,3 @@ def unlink(request):
     }
 
     return JsonResponse(response)
-
-
-@login_required
-def get_bookmark_list(request, uuid):
-
-    blob = Blob.objects.get(uuid=uuid, user=request.user)
-    bookmark_list = list(blob.bookmarks.all().only(
-        "name",
-        "id"
-    ).order_by(
-        "sortorderblobbookmark__sort_order"
-    ))
-
-    response = {
-        "status": "OK",
-        "bookmark_list": [
-            {
-                "name": x.name,
-                "url": x.url,
-                "uuid": x.uuid,
-                "favicon_url": x.get_favicon_url(size=16),
-                "note": x.sortorderblobbookmark_set.get(blob=blob).note,
-                "edit_url": reverse("bookmark:update", kwargs={"uuid": x.uuid})
-            }
-            for x
-            in bookmark_list]
-    }
-
-    return JsonResponse(response)

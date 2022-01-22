@@ -151,30 +151,6 @@ def edit_blob_note(request):
 
 
 @login_required
-def get_bookmark_list(request, uuid):
-
-    node = Node.objects.get(uuid=uuid, user=request.user)
-    bookmark_list = list(node.bookmarks.all().only("name", "id").order_by("sortordernodebookmark__sort_order"))
-
-    response = {
-        "status": "OK",
-        "bookmark_list": [
-            {
-                "name": x.name,
-                "url": x.url,
-                "id": x.id,
-                "uuid": x.uuid,
-                "favicon_url": x.get_favicon_url(size=16),
-                "note": x.sortordernodebookmark_set.get(node=node).note,
-            }
-            for x
-            in bookmark_list]
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
 def add_bookmark(request):
 
     node_uuid = request.POST["node_uuid"]

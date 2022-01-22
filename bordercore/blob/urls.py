@@ -80,9 +80,4 @@ urlpatterns = [
         view=views.unlink,
         name="unlink"
     ),
-    path(
-        route="<uuid:uuid>/bookmark_list",
-        view=views.get_bookmark_list,
-        name="get_bookmark_list"
-    ),
 ]

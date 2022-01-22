@@ -311,22 +311,6 @@ def test_drill_is_favorite_mutate(auto_login_user, question, tag):
     assert question_refreshed.is_favorite is False
 
 
-def test_drill_get_bookmark_list(auto_login_user, question):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse(
-        "drill:get_bookmark_list",
-        kwargs={
-            "uuid": question[0].uuid
-        }
-    )
-    resp = client.get(url)
-
-    assert json.loads(resp.content)["status"] == "OK"
-    assert resp.status_code == 200
-
-
 @responses.activate
 def test_get_title_from_url(auto_login_user, bookmark):
 

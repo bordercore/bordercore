@@ -105,16 +105,6 @@ def test_edit_blob_note(auto_login_user, node, blob_image_factory):
     assert resp.status_code == 200
 
 
-def test_get_bookmark_list(auto_login_user, node):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("node:get_bookmark_list", kwargs={"uuid": node.uuid})
-    resp = client.get(url)
-
-    assert resp.status_code == 200
-
-
 def test_add_bookmark(auto_login_user, node, bookmark):
 
     _, client = auto_login_user()

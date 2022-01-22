@@ -382,31 +382,6 @@ def is_favorite_mutate(request):
 
 
 @login_required
-def get_bookmark_list(request, uuid):
-
-    question = Question.objects.get(uuid=uuid, user=request.user)
-    bookmark_list = list(question.bookmarks.all().only("name", "id").order_by("sortorderquestionbookmark__sort_order"))
-
-    response = {
-        "status": "OK",
-        "bookmark_list": [
-            {
-                "name": x.name,
-                "url": x.url,
-                "id": x.id,
-                "uuid": x.uuid,
-                "favicon_url": x.get_favicon_url(size=16),
-                "note": x.sortorderquestionbookmark_set.get(question=question).note,
-                "edit_url": reverse("bookmark:update", kwargs={"uuid": x.uuid})
-            }
-            for x
-            in bookmark_list]
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
 def get_title_from_url(request):
 
     url = unquote(request.GET["url"])

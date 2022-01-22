@@ -101,11 +101,6 @@ urlpatterns = [
         name="sort_pinned_tags"
     ),
     path(
-        route="<uuid:uuid>/bookmark_list",
-        view=views.get_bookmark_list,
-        name="get_bookmark_list"
-    ),
-    path(
         route="get_title_from_url",
         view=views.get_title_from_url,
         name="get_title_from_url"

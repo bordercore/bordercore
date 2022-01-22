@@ -166,7 +166,7 @@
                         ref="relatedBookmarksList"
                         object-uuid="{{ object.uuid }}"
                         model-name="blob.Blob"
-                        get-bookmark-list-url="{% url 'blob:get_bookmark_list' object.uuid %}"
+                        get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=blob.Blob"
                         create-bookmark-url="{% url 'bookmark-list' %}"
                         search-bookmark-url="{% url 'bookmark:search' %}"
                         get-title-from-url-url="{% url 'drill:get_title_from_url' %}"

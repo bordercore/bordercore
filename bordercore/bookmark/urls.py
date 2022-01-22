@@ -116,4 +116,9 @@ urlpatterns = [
         view=views.edit_related_bookmark_note,
         name="edit_related_bookmark_note"
     ),
+    path(
+        route="<uuid:uuid>/bookmark_list/",
+        view=views.get_related_bookmark_list,
+        name="get_related_bookmark_list"
+    ),
 ]

@@ -17,7 +17,7 @@ from django.db import transaction
 from django.db.models import Count
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
@@ -350,7 +350,8 @@ class BookmarkListView(ListView):
                     "last_response_code": x.last_response_code,
                     "note": x.note,
                     "favicon_url": x.get_favicon_url(size=16),
-                    "tags": [x.name for x in x.tags.all()]
+                    "tags": [x.name for x in x.tags.all()],
+                    "thumbnail_url": f"{settings.COVER_URL}bookmarks/{x.uuid}-small.png"
                 }
             )
 
@@ -512,41 +513,77 @@ def search(request):
     return JsonResponse(matches, safe=False)
 
 
-def get_query_info(POST):
+def get_query_info(params):
 
-    object_uuid = POST["object_uuid"]
-    app_name, model_name = POST["model_name"].split(".")
+    object_uuid = params["object_uuid"]
+    app_name, model_name = params["model_name"].split(".")
 
     SortOrderModel = apps.get_model(app_name, f"SortOrder{model_name}Bookmark")
     ObjectModel = apps.get_model(app_name, model_name)
     object = ObjectModel.objects.get(uuid=object_uuid)
     field_name = SortOrderModel.field_name
 
-    return {
-        "sort_order_model": SortOrderModel,
-        "kwargs": {field_name: object}
+    return SortOrderModel, {field_name: object}, model_name
+
+
+@login_required
+def get_related_bookmark_list(request, uuid):
+
+    params = {
+        "object_uuid": uuid,
+        "model_name": request.GET["model_name"]
     }
+
+    sort_order_model, kwargs, model_name = get_query_info(params)
+
+    app_name, model_name = request.GET["model_name"].split(".")
+    ObjectModel = apps.get_model(app_name, model_name)
+    object = ObjectModel.objects.get(uuid=uuid, user=request.user)
+    order_by = f"sortorder{model_name}bookmark__sort_order".lower()
+
+    bookmark_list = list(object.bookmarks.all().only(
+        "name",
+        "id"
+    ).order_by(
+        order_by
+    ))
+
+    response = {
+        "status": "OK",
+        "bookmark_list": [
+            {
+                "name": x.name,
+                "url": x.url,
+                "uuid": x.uuid,
+                "favicon_url": x.get_favicon_url(size=16),
+                "note": getattr(x, f"sortorder{model_name}bookmark_set".lower()).get(**kwargs).note,
+                "edit_url": reverse("bookmark:update", kwargs={"uuid": x.uuid})
+            }
+            for x
+            in bookmark_list]
+    }
+
+    return JsonResponse(response)
 
 
 @login_required
 def add_related_bookmark(request):
 
     bookmark_uuid = request.POST["bookmark_uuid"]
-    update_modified = request.POST.get("updated_modified", False)
+    update_modified = request.GET.get("update_modified", False)
+    bookmark = Bookmark.objects.get(uuid=bookmark_uuid, user=request.user)
 
-    query_info = get_query_info(request.POST)
-
-    bookmark = Bookmark.objects.get(uuid=bookmark_uuid)
-
-    so = query_info["sort_order_model"](
-        **query_info["kwargs"],
+    sort_order_model, kwargs, model_name = get_query_info(request.POST)
+    so = sort_order_model(
+        **kwargs,
         bookmark=bookmark
     )
     so.save()
 
     if update_modified:
-        so.node.modified = timezone.now()
-        so.node.save()
+        object = getattr(so, model_name.lower())
+        object.modified = timezone.now()
+        object.save()
 
     response = {
         "status": "OK",
@@ -559,19 +596,20 @@ def add_related_bookmark(request):
 def remove_related_bookmark(request):
 
     bookmark_uuid = request.POST["bookmark_uuid"]
-    update_modified = request.POST.get("updated_modified", False)
+    update_modified = request.GET.get("update_modified", False)
 
-    query_info = get_query_info(request.POST)
-    so = query_info["sort_order_model"].objects.get(
-        **query_info["kwargs"],
+    sort_order_model, kwargs, model_name = get_query_info(request.POST)
+    so = sort_order_model.objects.get(
+        **kwargs,
         bookmark__uuid=bookmark_uuid
     )
 
     so.delete()
 
     if update_modified:
-        so.node.modified = timezone.now()
-        so.node.save()
+        object = getattr(so, model_name.lower())
+        object.modified = timezone.now()
+        object.save()
 
     response = {
         "status": "OK",
@@ -590,20 +628,21 @@ def sort_related_bookmarks(request):
     # Sample 'model_name' parameter: 'node.Node'
 
     bookmark_uuid = request.POST["bookmark_uuid"]
-    update_modified = request.POST.get("updated_modified", False)
+    update_modified = request.GET.get("update_modified", False)
     new_position = int(request.POST["new_position"])
 
-    query_info = get_query_info(request.POST)
-    so = query_info["sort_order_model"].objects.get(
-        **query_info["kwargs"],
+    sort_order_model, kwargs, model_name = get_query_info(request.POST)
+    so = sort_order_model.objects.get(
+        **kwargs,
         bookmark__uuid=bookmark_uuid
     )
 
-    query_info["sort_order_model"].reorder(so, new_position)
+    sort_order_model.reorder(so, new_position)
 
     if update_modified:
-        so.node.modified = timezone.now()
-        so.node.save()
+        object = getattr(so, model_name.lower())
+        object.modified = timezone.now()
+        object.save()
 
     response = {
         "status": "OK",
@@ -616,12 +655,12 @@ def sort_related_bookmarks(request):
 def edit_related_bookmark_note(request):
 
     bookmark_uuid = request.POST["bookmark_uuid"]
-    update_modified = request.POST.get("updated_modified", False)
+    update_modified = request.GET.get("update_modified", False)
     note = request.POST["note"]
 
-    query_info = get_query_info(request.POST)
-    so = query_info["sort_order_model"].objects.get(
-        **query_info["kwargs"],
+    sort_order_model, kwargs, model_name = get_query_info(request.POST)
+    so = sort_order_model.objects.get(
+        **kwargs,
         bookmark__uuid=bookmark_uuid
     )
 
@@ -629,8 +668,9 @@ def edit_related_bookmark_note(request):
     so.save()
 
     if update_modified:
-        so.node.modified = timezone.now()
-        so.node.save()
+        object = getattr(so, model_name.lower())
+        object.modified = timezone.now()
+        object.save()
 
     response = {
         "status": "OK",
