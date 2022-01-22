@@ -1,5 +1,5 @@
 <template>
-    <div :class="extraClass">
+    <div v-b-hover="hoverAddButton" :class="extraClass">
         <transition :name="transitionName">
             <card v-if="bookmarkList.length > 0 || showEmptyList" :title="title">
                 <template #top-right>
@@ -12,7 +12,7 @@
                     <ul id="sort-container-tags" class="list-group list-group-flush">
                         <draggable v-model="bookmarkList" ghost-class="sortable-ghost" draggable=".draggable" @change="onSort">
                             <transition-group type="transition" class="w-100">
-                                <li v-for="(bookmark, index) in bookmarkList" v-cloak :key="bookmark.uuid" v-b-hover="handleHover" class="list-group-item list-group-item-secondary text-info draggable px-0" :data-uuid="bookmark.uuid">
+                                <li v-for="(bookmark, index) in bookmarkList" v-cloak :key="bookmark.uuid" v-b-hover="hoverDropdown" class="list-group-item list-group-item-secondary text-info draggable px-0" :data-uuid="bookmark.uuid">
                                     <div class="d-flex">
                                         <div class="pr-2" v-html="bookmark.favicon_url" />
                                         <div>
@@ -26,7 +26,7 @@
                                             </span>
                                         </div>
                                         <div class="dropdownmenu d-flex">
-                                            <dropdown-menu v-model="showDropdown" transition="translate-fade-down" class="hidden" :right="true">
+                                            <dropdown-menu v-model="showDropdown" transition="translate-fade-down" class="d-none" :right="true">
                                                 <font-awesome-icon icon="ellipsis-v" />
                                                 <div slot="dropdown">
                                                     <a class="dropdown-item" href="#" @click.prevent="removeBookmark(bookmark.uuid)">Remove</a>
@@ -174,15 +174,24 @@
                     "",
                 );
             },
-            handleHover(isHovered, evt) {
-                const classList = evt.currentTarget.querySelector(".dropdown").classList;
+            hoverDropdown(isHovered, evt) {
+                this.handleHover(isHovered, evt, ".dropdown");
+            },
+            hoverAddButton(isHovered, evt) {
+                this.handleHover(isHovered, evt, ".hover-target");
+            },
+            handleHover(isHovered, evt, selector) {
+                const target = evt.currentTarget.querySelector(selector);
+                if (target === null) {
+                    return;
+                }
                 // Note: I've found that using a more concise "toggle" command
                 //  can cause the button's state to become out of sync, so instead
                 //  I choose to be more specific instead.
                 if (isHovered) {
-                    classList.remove("hidden");
+                    target.classList.remove("d-none");
                 } else {
-                    classList.add("hidden");
+                    target.classList.add("d-none");
                 }
             },
             openModal() {
