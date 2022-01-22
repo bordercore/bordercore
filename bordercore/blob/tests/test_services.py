@@ -10,9 +10,6 @@ from blob.services import (get_authors, get_recent_blobs, import_artstation,
                            import_instagram, import_newyorktimes, parse_date,
                            parse_shortcode)
 
-# from django.core.files.temp import NamedTemporaryFile
-
-
 faker = FakerFactory.create()
 
 

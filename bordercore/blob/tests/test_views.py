@@ -6,6 +6,7 @@ import pytest
 from django import urls
 from django.db.models import signals
 
+from blob.models import Blob
 from collection.models import Collection
 
 try:
@@ -41,7 +42,7 @@ def test_blob_list(auto_login_user, blob_text_factory):
 
 
 @factory.django.mute_signals(signals.post_save)
-def test_blob_create(monkeypatch_blob, auto_login_user):
+def test_blob_create(monkeypatch_blob, auto_login_user, blob_text_factory):
 
     _, client = auto_login_user()
 
@@ -59,6 +60,29 @@ def test_blob_create(monkeypatch_blob, auto_login_user):
     })
 
     assert resp.status_code == 302
+
+    # A blob linked to an existing blob -- empty form
+    url = urls.reverse("blob:create")
+    resp = client.get(url, {
+        "tags": "django",
+        "importance": 1,
+        "linked_blob_uuid": blob_text_factory[0].uuid
+    })
+
+    assert resp.status_code == 200
+
+    # A blob linked to an existing blob -- submitted form
+    url = urls.reverse("blob:create")
+    resp = client.post(url, {
+        "tags": "django",
+        "importance": 1,
+        "linked_blob_uuid": blob_text_factory[0].uuid
+    })
+
+    assert resp.status_code == 302
+
+    new_blob = Blob.objects.all().order_by("-created")[0]
+    assert new_blob.blobs.first().uuid == blob_text_factory[0].uuid
 
 
 @factory.django.mute_signals(signals.pre_delete)

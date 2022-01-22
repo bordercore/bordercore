@@ -8,7 +8,7 @@ import pytest
 from django import urls
 from django.db.models import signals
 
-from music.models import Song
+from music.models import Album, Playlist, Song
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
@@ -70,6 +70,29 @@ def test_music_album_detail(auto_login_user, song):
     resp = client.get(url)
 
     assert resp.status_code == 200
+
+
+def test_music_album_update(auto_login_user, song):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("music:album_update", kwargs={"album_uuid": song[1].album.uuid})
+    resp = client.post(url, {
+        "title": "New Album Title",
+        "artist": "New Artist",
+        "year": "2013",
+        "note": "New Note",
+        "tags": "django",
+    })
+
+    assert resp.status_code == 302
+
+    updated_album = Album.objects.get(uuid=song[1].album.uuid)
+    assert updated_album.title == "New Album Title"
+    assert updated_album.artist.name == "New Artist"
+    assert updated_album.year == 2013
+    assert updated_album.note == "New Note"
+    assert "django" in [x.name for x in updated_album.tags.all()]
 
 
 def test_music_artist_detail(auto_login_user, song):
@@ -191,6 +214,7 @@ def test_music_playlist_create(auto_login_user, song):
 
     # The submitted form
     url = urls.reverse("music:playlist_create")
+
     resp = client.post(url, {
         "name": "Test Playlist",
         "type": "manual",
@@ -198,6 +222,25 @@ def test_music_playlist_create(auto_login_user, song):
     })
 
     assert resp.status_code == 302
+
+
+def test_music_playlist_update(auto_login_user, playlist):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("music:playlist_update", kwargs={"playlist_uuid": playlist[0].uuid})
+    resp = client.post(url, {
+        "name": "Test Playlist New Name",
+        "note": "New Note",
+        "type": "manual",
+        "tag": "django",
+    })
+
+    assert resp.status_code == 302
+
+    updated_playlist = Playlist.objects.get(uuid=playlist[0].uuid)
+    assert updated_playlist.name == "Test Playlist New Name"
+    assert updated_playlist.note == "New Note"
 
 
 def test_music_playlist_delete(auto_login_user, playlist):

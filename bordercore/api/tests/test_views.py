@@ -1,4 +1,8 @@
+from faker import Factory as FakerFactory
+
 from django import urls
+
+faker = FakerFactory.create()
 
 
 def test_album_viewset(auto_login_user, song):
@@ -52,6 +56,16 @@ def test_bookmark_viewset(auto_login_user, bookmark):
     resp = client.get(url)
     assert resp.status_code == 200
 
+    url = urls.reverse("bookmark-list")
+    resp = client.post(
+        url,
+        {
+            "url": faker.url(),
+            "name": faker.text(max_nb_chars=32)
+        }
+    )
+    assert resp.status_code == 201
+
 
 def test_collection_viewset(auto_login_user, collection):
 
@@ -65,6 +79,15 @@ def test_collection_viewset(auto_login_user, collection):
     resp = client.get(url)
     assert resp.status_code == 200
 
+    url = urls.reverse("collection-list")
+    resp = client.post(
+        url,
+        {
+            "name": faker.text(max_nb_chars=32),
+        }
+    )
+    assert resp.status_code == 201
+
 
 def test_feed_viewset(auto_login_user, feed):
 
@@ -77,6 +100,17 @@ def test_feed_viewset(auto_login_user, feed):
     url = urls.reverse("feed-detail", kwargs={"uuid": feed[0].uuid})
     resp = client.get(url)
     assert resp.status_code == 200
+
+    url = urls.reverse("feed-list")
+    resp = client.post(
+        url,
+        {
+            "homepage": faker.url(),
+            "name": faker.text(max_nb_chars=32),
+            "url": faker.url()
+        }
+    )
+    assert resp.status_code == 201
 
 
 def test_feeditem_viewset(auto_login_user, feed):
