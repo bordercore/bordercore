@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import F, Q
 from django.forms.models import model_to_dict
 from django.http import Http404, HttpResponseRedirect, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic.base import TemplateView
@@ -795,3 +795,37 @@ def update_artist_image(request):
     }
 
     return JsonResponse(response)
+
+
+@login_required
+def missing_artist_images(request):
+    """
+    Temp view to return an artist without an image in S3
+    """
+
+    s3_resource = boto3.resource("s3")
+
+    unique_uuids = {}
+
+    paginator = s3_resource.meta.client.get_paginator("list_objects")
+    page_iterator = paginator.paginate(Bucket="bordercore-music")
+
+    for page in page_iterator:
+        for key in page["Contents"]:
+            m = re.search(r"^artist_images/(.*)", str(key["Key"]))
+            if m:
+                unique_uuids[m.group(1)] = True
+
+    # artists = Artist.objects.all().order_by("?")
+
+    # Focus on artist associated with albums
+    artists = Artist.objects.filter(album__isnull=False).order_by("?")
+
+    for artist in artists:
+        if str(artist.uuid) not in unique_uuids:
+            return redirect(reverse(
+                "music:artist_detail",
+                kwargs={"artist_uuid": artist.uuid}
+            ))
+
+    return render(request, "music/index.html")

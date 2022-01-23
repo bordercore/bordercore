@@ -110,4 +110,9 @@ urlpatterns = [
         view=views.update_artist_image,
         name="update_artist_image"
     ),
+    path(
+        route="missing_artist_images",
+        view=views.missing_artist_images,
+        name="missing_artist_images"
+    ),
 ]
