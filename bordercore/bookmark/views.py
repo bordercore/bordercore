@@ -92,6 +92,16 @@ class BookmarkUpdateView(FormRequestMixin, UpdateView, FormValidMixin):
         context["action"] = "Update"
         context["tags"] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         context["related_questions"] = self.object.question_set.all()
+        context["related_blobs"] = [
+            {
+                "uuid": b.uuid,
+                "name": b.name,
+                "url": reverse("blob:detail", kwargs={"uuid": b.uuid}),
+                "cover_url": b.get_cover_url_small(),
+                "tags": [x.name for x in b.tags.all()]
+            } for b in self.object.blob_set.all()
+        ]
+
         return context
 
 
