@@ -1,10 +1,15 @@
 import json
 
 import pytest
+from faker import Factory as FakerFactory
 
 from django import urls
 
+from fitness.models import Exercise
+
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
+
+faker = FakerFactory.create()
 
 
 def test_fitness_exercise_detail(auto_login_user, fitness):
@@ -57,3 +62,21 @@ def test_fitness_change_active_status(auto_login_user, fitness):
     })
 
     assert resp.status_code == 200
+
+
+def test_edit_note(auto_login_user, fitness):
+
+    _, client = auto_login_user()
+
+    note = faker.text()
+
+    url = urls.reverse("fitness:edit_note")
+    resp = client.post(url, {
+        "uuid": fitness[0].uuid,
+        "note": note
+    })
+
+    assert resp.status_code == 200
+
+    updated_exercise = Exercise.objects.get(uuid=fitness[0].uuid)
+    assert updated_exercise.note == note
