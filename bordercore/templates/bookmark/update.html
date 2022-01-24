@@ -10,7 +10,7 @@
 
         <div class="col-lg-3 d-flex flex-column">
 
-            <div v-if="related_questions.length > 0" class="d-flex _flex-grow-1" :class="{'flex-grow-1': related_blobs.length === 0}">
+            <div v-if="related_questions.length > 0" class="d-flex" :class="{'flex-grow-1': related_blobs.length === 0 && related_nodes.length === 0}">
                 <card title="Related Questions">
                     <template v-slot:content>
                         <ul class="list-group interior-borders cursor-pointer">
@@ -32,7 +32,7 @@
                 </card>
             </div>
 
-            <div v-if="related_blobs.length > 0" class="d-flex flex-grow-1">
+            <div v-if="related_blobs.length > 0" class="d-flex" :class="{'flex-grow-1': related_nodes.length === 0}">
                 <card title="Related Blobs">
                     <template v-slot:content>
                         <ul class="list-group interior-borders cursor-pointer">
@@ -48,11 +48,31 @@
                                 <div class="mt-3">
                                     <span v-for="tag in blob.tags" class="badge badge-info mr-2">[[ tag ]]</span>
                                 </div>
-
                             </li>
                         </ul>
                     </template>
                 </card>
+            </div>
+
+            <div v-if="related_nodes.length > 0" class="d-flex flex-grow-1">
+                <card title="Related Nodes">
+                    <template v-slot:content>
+                        <ul class="list-group interior-borders cursor-pointer">
+                            <li v-for="node in related_nodes" class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
+                                <div class="d-flex align-items-center pl-3">
+                                    <div class="d-flex w-100">
+                                        <a :href="node.url">[[ node.name ]]</a>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </template>
+                </card>
+            </div>
+
+            <div v-if="related_questions.length === 0 && related_blobs.length === 0 && related_nodes.length === 0" class="d-flex flex-grow-1">
+                <div class="card-body">
+                </div>
             </div>
 
         </div>
@@ -132,6 +152,7 @@
 
     {{ tags|json_script:"initial-tags"|default:"" }}
     {{ related_blobs|json_script:"related_blobs" }}
+    {{ related_nodes|json_script:"related_nodes" }}
 
     <script type="text/javascript">
 
@@ -161,6 +182,7 @@
                         {% endfor %}
                     ],
                     related_blobs: JSON.parse(document.getElementById("related_blobs").textContent),
+                    related_nodes: JSON.parse(document.getElementById("related_nodes").textContent),
                 }
             },
             methods: {
