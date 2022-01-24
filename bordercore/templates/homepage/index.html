@@ -143,8 +143,6 @@
                                 <ul class="list-group list-group-horizontal text-center list-unstyled">
                                     <li class="mx-2" v-for="blob in blob_list" :key="blob.id">
                                         <a :href="[[ blob.url ]]"><img :src="[[ blob.cover_url ]]" /></a>
-                                        <br/>
-                                        <a :href="[[ blob.url ]]">[[ blob.name ]]</a> {% if blob.collection_note %}<img src="{{ STATIC_URL }}img/note.png" height="16" width="16" data-toggle="popover" data-content="[[ blob.collection_note ]]"/>{% endif %}
                                     </li>
                                 </ul>
                             </template>

@@ -89,8 +89,6 @@
                                                     [[ blob.name ]]
                                                     </div>
 
-                                                    <img v-if="blob.collection_note" src="{{ STATIC_URL }}img/note.png" height="16" width="16" data-toggle="popover" :data-content="blob.collection_note"/>
-
                                                 </div>
 
                                             </li>
@@ -274,7 +272,6 @@
                             id: {{ blob.id }},
                             uuid: "{{ blob.uuid }}",
                             name: "{{ blob.name|escapejs|safe }}",
-                            collection_note: "{{ blob.collection_note|default:'' }}",
                             url: "{% url 'blob:detail' blob.uuid %}",
                             cover_url: "{{ blob.cover_url }}"
                         },
