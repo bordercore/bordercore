@@ -282,7 +282,13 @@ def overview(request):
 
     sorted_bookmarks = []
 
-    untagged_count = Bookmark.objects.filter(user=request.user, tags__isnull=True, sortorderquestionbookmark__isnull=True).count()
+    untagged_count = Bookmark.objects.filter(
+        user=request.user,
+        tags__isnull=True,
+        sortorderquestionbookmark__isnull=True,
+        sortordernodebookmark__isnull=True,
+        sortorderblobbookmark__isnull=True,
+    ).count()
 
     pinned_tags = request.user.userprofile.pinned_tags.all().annotate(bookmark_count=Count("sortordertagbookmark")).order_by("sortorderusertag__sort_order")
 
@@ -311,7 +317,8 @@ class BookmarkListView(ListView):
             query = query.filter(
                 tags__isnull=True,
                 sortorderquestionbookmark__isnull=True,
-                sortordernodebookmark__isnull=True
+                sortordernodebookmark__isnull=True,
+                sortorderblobbookmark__isnull=True
             )
 
         query = query.prefetch_related("tags")
