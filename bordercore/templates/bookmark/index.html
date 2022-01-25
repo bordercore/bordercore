@@ -124,14 +124,16 @@
                                                     [[ bookmark.note ]]
                                                 </div>
                                             </td>
-                                            <td class="dropdownmenu small mr-4">
-                                                <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="hidden">
-                                                    <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                                                    <div slot="dropdown">
-                                                        <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(bookmark.uuid)">Update</a>
-                                                        <a class="dropdown-item" href="#" @click.prevent="onClickDelete(bookmark.uuid)">Delete</a>
-                                                    </div>
-                                                </dropdown-menu>
+                                            <td>
+                                                <div class="dropdownmenu small mr-4">
+                                                    <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="hidden">
+                                                        <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+                                                        <div slot="dropdown">
+                                                            <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(bookmark.uuid)">Update</a>
+                                                            <a class="dropdown-item" href="#" @click.prevent="onClickDelete(bookmark.uuid)">Delete</a>
+                                                        </div>
+                                                    </dropdown-menu>
+                                                </div>
                                             </td>
                                         </tr>
                                     </transition-group>

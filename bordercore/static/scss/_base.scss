@@ -451,7 +451,7 @@ div.CodeMirror {
   color: $white;
 
   &:hover {
-    background-color: $text-selection-bg;
+    background-color: $text-selection-bg !important;
     color: $white;
   }
 }
