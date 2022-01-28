@@ -122,6 +122,14 @@
                         </div>
                     {% endif %}
 
+                    <div v-if="tree['nodes'].length > 0" class="mt-3 p-2 tree-menu highlight-box">
+                        <tree-menu
+                            class="item"
+                            :item="tree"
+                            :depth="0"
+                        ></tree-menu>
+                    </div>
+
                     {% if linked_blobs %}
                         <h4 class="mt-3">
                             Collections
@@ -204,14 +212,6 @@
                         </template>
                     </card>
 
-                </div>
-
-                <div v-if="tree['nodes'].length > 0" class="mt-3 p-2 tree-menu highlight-box">
-                    <tree-menu
-                        class="item"
-                        :item="tree"
-                        :depth="0"
-                    ></tree-menu>
                 </div>
 
                 <div v-if="related_questions.length > 0">
