@@ -20,12 +20,18 @@
                 :tbody-tr-class="rowClass"
             >
                 <template #cell(exercise)="data">
-                    <a :href="data.item.exercise_url">[[ data.value ]]</a>
+                    <a :href="data.item.exercise_url">
+                        [[ data.value ]]
+                    </a>
                 </template>
                 <template #cell(last_active)="data">
-                    <div v-if="data.value">
-                        <span class="float-left">[[ getDate(data.value) ]]</span>
-                        <span class="float-right">[[ getInterval(data) ]]</span>
+                    <div v-if="data.value" class="d-flex">
+                        <div class="text-nowrap mr-3">
+                            [[ getDate(data.value) ]]
+                        </div>
+                        <div class="text-nowrap ml-auto">
+                            [[ getInterval(data) ]]
+                        </div>
                     </div>
                     <div v-else>Never</div>
                 </template>
@@ -46,9 +52,13 @@
                 </template>
 
                 <template #cell(last_active)="data">
-                    <div v-if="data.value">
-                        <span class="float-left">[[ data.value ]]</span>
-                        <span class="float-right">[[ getInterval(data) ]]</span>
+                    <div v-if="data.value" class="d-flex">
+                        <div class="text-nowrap mr-3">
+                            [[ data.value ]]
+                        </div>
+                        <div class="text-nowrap ml-auto">
+                            [[ getInterval(data) ]]
+                        </div>
                     </div>
                     <div v-else>Never</div>
 

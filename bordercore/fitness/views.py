@@ -22,54 +22,25 @@ class ExerciseDetailView(DetailView):
     slug_url_kwarg = "exercise_uuid"
 
     def get_context_data(self, **kwargs):
+
         context = super().get_context_data(**kwargs)
-        context["uuid"] = self.object.uuid
+
         try:
-            workout_data = Data.objects.filter(user=self.request.user, exercise__id=self.object.id).order_by("-date")[:70]
-            context["recent_data"] = workout_data[0]
-            context["delta_days"] = int((int(datetime.datetime.now().strftime("%s")) - int(context["recent_data"].date.strftime("%s"))) / 86400) + 1
+            last_workout = self.object.last_workout(self.request.user)
         except IndexError:
             pass
-        context["activity_info"] = ExerciseUser.objects.filter(user=self.request.user, exercise__id=self.object.id)
-        context["nav"] = "fitness"
-        context["title"] = f"Exercise Detail :: {self.object.name}"
 
-        plot_data = self.get_plot_data(context, workout_data)
-        context["labels"] = plot_data[0]
-        context["plotdata"] = plot_data[1]
-
-        return context
-
-    def get_plot_data(self, context, data):
-
-        if not data:
-            return ([], [])
-
-        # A workout is defined as all the data recorded for a specific date,
-        #  regardless of time of day.
-
-        # Find the date of the most recent workout data
-        max_date = max(data, key=lambda item: item.date)
-
-        # Find all the reps for all sets recorded on that day.
-        #  Reverse the sort so that the data is sorted by time ascending.
-        context["reps_latest_workout"] = [x.reps for x in data if x.date.strftime("%Y-%m-%d") == max_date.date.strftime("%Y-%m-%d")][::-1]
-
-        # Create a unique collection of workout data based on date,
-        #  so only one set will be extracted for each workout.
-
-        seen = set()
-        unique_workout_data = [
-            x
-            for x
-            in data
-            if x.date.strftime("Y-%m-%d") not in seen
-            and not seen.add(x.date.strftime("Y-%m-%d"))
-        ]
-        plotdata = [x.weight for x in unique_workout_data]
-        labels = [x.date.strftime("%b %d") for x in unique_workout_data]
-
-        return (json.dumps(labels[::-1]), json.dumps(plotdata[::-1]))
+        return {
+            **context,
+            **last_workout,
+            "title": f"Exercise Detail :: {self.object.name}",
+            "labels": last_workout["plot_data"][0],
+            "plotdata": last_workout["plot_data"][1],
+            "activity_info": ExerciseUser.objects.filter(
+                user=self.request.user,
+                exercise__id=self.object.id
+            )
+        }
 
 
 @login_required
@@ -79,7 +50,13 @@ def fitness_add(request, exercise_uuid):
 
     if request.method == "POST":
         for datum in json.loads(request.POST["workout-data"]):
-            new_data = Data(weight=datum[0], reps=datum[1], user=request.user, exercise=exercise)
+            new_data = Data(
+                weight=datum["weight"],
+                duration=datum["duration"],
+                reps=datum["reps"],
+                user=request.user,
+                exercise=exercise
+            )
             new_data.save()
         messages.add_message(request, messages.INFO, f"Added workout data for exercise <strong>{exercise}</strong>")
 
@@ -130,7 +107,6 @@ def fitness_summary(request):
 
     return render(request, "fitness/summary.html", {"active_exercises": active_exercises,
                                                     "inactive_exercises": inactive_exercises,
-                                                    "nav": "fitness",
                                                     "title": "Fitness Summary"})
 
 
@@ -149,6 +125,7 @@ def change_active_status(request):
         eu.save()
 
     return JsonResponse({"status": "OK"}, safe=False)
+
 
 @login_required
 def edit_note(request):

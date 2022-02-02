@@ -1,8 +1,9 @@
 import Vue from "vue";
 window.Vue = Vue;
 
-import {AlertPlugin, PopoverPlugin, TablePlugin, ToastPlugin, VBHoverPlugin} from "bootstrap-vue";
+import {AlertPlugin, FormInputPlugin, PopoverPlugin, TablePlugin, ToastPlugin, VBHoverPlugin} from "bootstrap-vue";
 Vue.use(AlertPlugin);
+Vue.use(FormInputPlugin);
 Vue.use(PopoverPlugin);
 Vue.use(TablePlugin);
 Vue.use(ToastPlugin);
@@ -216,6 +217,19 @@ window.PerfectScrollbar = PerfectScrollbar;
 import Pagination from "./vue/common/Pagination.vue";
 Vue.component("Pagination", Pagination);
 window.Pagination = Pagination;
+
+import {BarController, BarElement, Chart, CategoryScale, LinearScale, Title} from "chart.js";
+window.Chart = Chart;
+Chart.register(
+    BarController,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    Title,
+);
+
+import Rainbow from "rainbowvis.js";
+window.Rainbow = Rainbow;
 
 // Wait 10 seconds after selecting a song to play
 //  for it to be marked as "listened to".

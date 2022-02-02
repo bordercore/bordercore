@@ -28,7 +28,13 @@ def test_fitness_add(auto_login_user, fitness):
 
     url = urls.reverse("fitness:add", kwargs={"exercise_uuid": fitness[0].uuid})
     resp = client.post(url, {
-        "workout-data": json.dumps([[230, 7], [230, 6], [230, 5]])
+        "workout-data": json.dumps(
+            [
+                {"weight": 230, "reps": 7, "duration": 0},
+                {"weight": 230, "reps": 6, "duration": 0},
+                {"weight": 230, "reps": 5, "duration": 0},
+            ]
+        )
     })
 
     assert resp.status_code == 302

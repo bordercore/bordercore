@@ -2,15 +2,19 @@
 
 {% load dict_get %}
 
-{% block title %} Exercise :: Detail {% endblock %}
+{% block title %} {{ object.name }} {% endblock %}
 
 {% block nav %}
 
     <div class="d-flex mb-3">
         <div class="mr-auto align-self-center">
             <ul class="breadcrumb mb-0 pt-0 pb-0">
-                <li class="breadcrumb-item"> <a href="{% url 'fitness:summary' %}">Exercises</a> </li>
-                <li class="breadcrumb-item active"> {{ object.name }} </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'fitness:summary' %}">Exercises</a>
+                </li>
+                <li class="breadcrumb-item active">
+                    {{ object.name }}
+                </li>
             </ul>
         </div>
     </div>
@@ -19,131 +23,202 @@
 
 {% block content %}
 
-    <div class="row no-gutters h-100" id="vue-app">
+    <div class="row no-gutters h-100">
 
-        <div class="col-lg-3 d-flex flex-column">
+        <div class="col-lg-3 d-flex flex-column" id="vue-app-left">
 
-            <div class="card-body">
-
-                <div v-if="showHistoryMessage" class="text-info mb-2">
-                    You've been doing this exercise since <br />
-                    <strong>{{ activity_info.0.started|date:"N j, Y" }}</strong>
-                </div>
-
-                <div class="text-info mb-4">
-                    Last workout: <br/>
-                    <strong>{{ recent_data.date|date:"N j, Y" }} - {{ delta_days }} day{{ delta_days|pluralize:"s" }} ago</strong>
-                </div>
-
-                <button type="submit" class="btn btn-primary" @click=onClick v-cloak>
-                    <font-awesome-icon v-if="isActiveExercise" icon="check" class="mr-2"></font-awesome-icon>[[ activeButtonValue ]]
-                </button>
-
-                {% if object.description %}
-                    <h5 class="highlight-box mt-5">
-                        {{ object.description|safe }}
-                    </h5>
-                {% endif %}
-
-                <editable-text-area
-                    uuid="{{ object.uuid }}"
-                    v-model:note="note"
-                    edit-url="{% url 'fitness:edit_note' %}"
-                    extra-class="mt-5"
-                >
-                    <template v-slot:title>
-                        <div class="font-weight-bold text-info">
-                                Note
-                        </div>
-                    </template>
-                </editable-text-area>
-
-            </div>
-
-        </div>
-
-        <div class="col-lg-9">
-
-            <div class="card-grid ml-2">
-
-                <h1>{{ object.name }}</h1>
-
-                <div class="row">
-                    <div class="col-lg-6">
-
-                        <input type="hidden" name="exercise_uuid" value="{{ object.uuid }}" />
-
+            <card title="" class="flex-grow-0">
+                <template #content>
+                    <div v-if="showHistoryMessage" class="text-info mb-2">
+                        You've been doing this exercise since <br />
+                        <strong class="text-white">
+                            {{ activity_info.0.started|date:"N j, Y" }}
+                        </strong>
                     </div>
-                </div>
+                    <button type="submit" class="btn btn-primary" @click=onClick v-cloak>
+                        <font-awesome-icon v-if="isActiveExercise" icon="check" class="mr-2"></font-awesome-icon>[[ activeButtonValue ]]
+                    </button>
+                </template>
+            </card>
 
-                <div class="mt-3" id="exercise-detail-chart"></div>
+            <card title="" class="flex-grow-0">
+                <template #title-slot>
+                    <div class="card-title text-primary">
+                        Last Workout
+                    </div>
+                </template>
+                <template #content>
+                    <div class="text-info mb-4">
+                        <strong class="text-white">
+                            {{ recent_data.0.date|date:"N j, Y" }} - {{ delta_days }} day{{ delta_days|pluralize:"s" }} ago
+                        </strong>
+                        <canvas id="last_workout_weights" class="mt-3" :class="{'d-none': hideLastWorkoutWeights}">
+                        </canvas>
+                        <canvas id="last_workout_duration" class="mt-3" :class="{'d-none': hideLastWorkoutDuration}">
+                        </canvas>
+                        <canvas id="last_workout_reps" class="mt-3">
+                        </canvas>
+                    </div>
+                </template>
+            </card>
 
-                    {% if reps_latest_workout %}
-                        <div class="m-3">
-                            Reps last workout: <strong>{{ reps_latest_workout|join:", " }}</strong>
+            <card title="" class="flex-grow-1" v-b-hover="handleNoteCardHover">
+                <template #content>
+
+                    <div class="d-flex">
+                    <div>
+                    {% if object.description %}
+                        <div class="d-flex flex-column">
+                            <div class="card-title text-primary">
+                                Description
+                            </div>
+                            <div>
+                                {{ object.description|safe }}
+                            </div>
                         </div>
                     {% endif %}
 
-                    <div class="card">
-                        <add-workout-form inline-template>
-                            <div>
-                                <div class="card-header bg-info text-white">Add a new workout</div>
-                                <div class="card-body">
-
-                                    <form id="form-workout" class="form-inline" action="{% url 'fitness:add' exercise.uuid %}" method="post" autocomplete="off">
-
-                                        {% csrf_token %}
-
-                                        <input type="hidden" name="workout-data" :value="workoutDataJson" />
-
-                                        <div class="form-group">
-                                            <label>Weight</label>
-                                            <input class="form-control mx-3" type="text" name="weight" size="5" v-model="weight" />
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label>Reps</label>
-                                            <input class="form-control mx-3" type="text" name="reps" size="5" v-model="reps" />
-                                        </div>
-
-                                        <input class="btn btn-secondary" type="button" name="Go" value="Add" @click="onClick" />
-                                        <input class="btn btn-primary ml-3" id="btn-submit" :disabled="submitIsDisabled" type="submit" name="Go" value="Submit" />
-
-                                    </form>
-
-                                    <div class="row mt-4">
-
-                                        <div class="col-lg-5">
-                                            <table class="table table-bordered">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Weight</th>
-                                                        <th>Reps</th>
-                                                    </tr>
-                                                </thead>
-                                                <tr v-for="set in workoutData" v-cloak>
-                                                    <td>[[ set[0] ]]</td>
-                                                    <td>[[ set[1] ]]</td>
-                                                </tr>
-                                                <tr v-if="workoutData.length == 0" class="text-center">
-                                                    <td colspan="2">
-                                    No workout data.
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                        </div>
-
-                                    </div>
-
-                                </div>
+                    <editable-text-area
+                        ref="note"
+                        uuid="{{ object.uuid }}"
+                        v-model:note="note"
+                        edit-url="{% url 'fitness:edit_note' %}"
+                        extra-class=""
+                    >
+                        <template v-slot:title>
+                            <div class="card-title text-primary mt-3">
+                                Note
                             </div>
-                        </add-workout-form>
+                        </template>
+                    </editable-text-area>
+                    </div>
+                    <div class="dropdownmenu hidden hover-target float-right">
+                        <dropdown-menu v-model="showNoteMenu" transition="translate-fade-down">
+                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+                            <div slot="dropdown">
+                                <a v-if="note" class="dropdown-item" href="#" @click.prevent="addNote()">Edit note</a>
+                                <a v-if="!note" class="dropdown-item" href="#" @click.prevent="addNote()">Add note</a>
+                            </div>
+                        </dropdown-menu>
+                    </div>
                     </div>
 
-            </div>
+                </template>
+            </card>
 
         </div>
 
+        <div class="col-lg-9 d-flex flex-column" id="vue-app-right">
+
+            <workout-graph inline-template>
+                <card title="" class="flex-grow-0 mr-3 pt-5">
+                    <template #content>
+                        <canvas id="exercise-detail-chart" class="w-100"></canvas>
+                    </template>
+                </card>
+            </workout-graph>
+
+            <div class="d-flex flex-grow-1">
+
+                <add-workout-form inline-template>
+                    <card title="" class="w-50">
+                        <template #title-slot>
+                            <div class="card-title text-primary">
+                                Add New Workout Data
+                            </div>
+                        </template>
+                        <template #content>
+                            <div class="d-flex flex-column">
+                                <form id="form-workout" class="form-inline" action="{% url 'fitness:add' exercise.uuid %}" method="post">
+                                {% csrf_token %}
+
+                                    <input type="hidden" name="workout-data" :value="workoutDataJson" />
+
+                                {% if latest_weight.0 %}
+                                    <div class="form-group">
+                                        <label>Weight</label>
+                                        <input class="form-control mx-3" type="text" name="weight" size="3" v-model="weight" />
+                                    </div>
+                                {% endif %}
+
+                                {% if latest_duration.0 %}
+                                <div class="form-group">
+                                    <label>Duration</label>
+                                    <input class="form-control mx-3" type="text" name="duration" size="3" v-model="duration" />
+                                </div>
+                                {% endif %}
+
+                                <div class="form-group">
+                                    <label>Reps</label>
+                                    <input class="form-control mx-3" type="text" name="reps" size="3" v-model="reps" />
+                                </div>
+
+                                <input class="btn btn-secondary" type="button" name="Go" value="Add" :disabled="addIsDisabled" @click="onClick" />
+                                <input class="btn btn-primary ml-3" :class="{'d-none': submitIsHidden}" id="btn-submit" type="submit" name="Go" value="Submit" />
+
+                                </form>
+
+                                <div class="row mt-4 justify-content-center">
+                                    <div class="col-lg-5">
+                                        <b-table
+                                            :items="items"
+                                            :fields="fields"
+                                            show-empty
+                                            empty-text="No workout data"
+                                        >
+                                            <template #cell(weight)="data">
+                                                <div class="text-center">
+                                                    <b-form-input v-if="items[data.index].isEdit && selectedCell === 'weight'" type="number" v-model="items[data.index].weight" @blur="onBlur(data.index)"></b-form-input>
+                                                    <span v-else @click="editCellHandler(data, 'weight')">
+                                                        [[ data.value ]]
+                                                    </span>
+                                                </div>
+                                            </template>
+                                            <template #cell(duration)="data">
+                                                <div class="text-center">
+                                                    <b-form-input v-if="items[data.index].isEdit && selectedCell === 'duration'" type="number" v-model="items[data.index].duration" @blur="onBlur(data.index)"></b-form-input>
+                                                    <span v-else @click="editCellHandler(data, 'duration')">
+                                                        [[ data.value ]]
+                                                    </span>
+                                                </div>
+                                            </template>
+                                            <template #cell(reps)="data">
+                                                <div class="text-center">
+                                                    <b-form-input v-if="items[data.index].isEdit && selectedCell === 'reps'" type="number" v-model="items[data.index].reps" @blur="onBlur(data.index)"></b-form-input>
+                                                    <span v-else @click="editCellHandler(data, 'reps')">
+                                                        [[ data.value ]]
+                                                    </span>
+                                                </div>
+                                            </template>
+                                        </b-table>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </card>
+                </add-workout-form>
+
+                <card title="" class="w-50 mr-3">
+                    <template #title-slot>
+                        <div class="d-flex">
+                            <div class="card-title text-primary">
+                                Muscles Targeted: <span class="text-info">{{ object.muscle.muscle_group }}, {{ object.muscle }}</span>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template #content>
+                        <div class="h-100">
+                            <ul>
+                                <li>Bench Press</li>
+                                <li>Muscle Ups</li>
+                                <li>One-Arm Row</li>
+                            </ul>
+                        </div>
+                    </template>
+                </card>
+            </div>
+        </div>
     </div>
 
 {% endblock %}
@@ -152,47 +227,16 @@
 
     {{ block.super }}
 
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-
     <script type="text/javascript" charset="utf-8">
 
-        const AddWorkoutForm = {
-            data() {
-                return {
-                    {% if recent_data %}
-                    weight: {{ recent_data.weight }},
-                    reps: {{ reps_latest_workout|last }},
-                    {% else %}
-                    weight: 0,
-                    reps: 0,
-                    {% endif %}
-                    workoutData: [],
-                    submitIsDisabled: true
-                }
-            },
-            methods: {
-                onClick(evt) {
-
-                    this.workoutData.push([this.weight, this.reps]);
-                    this.submitIsDisabled = false;
-
-                }
-            },
-            computed: {
-                workoutDataJson() {
-                    return JSON.stringify(this.workoutData);
-                }
-            }
-        }
-
         new Vue({
-            el: "#vue-app",
+            el: "#vue-app-left",
             data() {
                 return {
-                    isEditingNote: false,
                     isActiveExercise: {% if activity_info %}true{% else %}false{% endif %},
                     showHistoryMessage: {% if activity_info %}true{% else %}false{% endif %},
-                    note: "{{ object.note|escapejs }}"
+                    note: "{{ object.note|escapejs }}",
+                    showNoteMenu: false,
                 }
             },
             methods: {
@@ -215,52 +259,318 @@
                         "",
                         ""
                     );
-
+                },
+                handleNoteCardHover(hovered, evt) {
+                    evt.currentTarget.querySelector(".hover-target").classList.toggle("d-flex");
+                },
+                addNote() {
+                    this.$refs.note.isEditingNote = true;
                 }
             },
             computed: {
                 activeButtonValue: function() {
                     return this.isActiveExercise ? "Active" : "Activate Exercise"
-                }
+                },
+                hideLastWorkoutWeights: function() {
+                    return {% if latest_weight.0 > 0 %}false{% else %}true{% endif %};
+                },
+                hideLastWorkoutDuration: function() {
+                    return {% if latest_duration.0 > 0 %}false{% else %}true{% endif %};
+                },
             },
-            components: {
-                AddWorkoutForm
-            }
         });
 
-        var data = [
-            {
-                x: {{ labels|safe }},
-                y: {{ plotdata|safe }},
-                type: 'bar',
-                marker: {
-                    color: 'rgb(158,202,225)',
-                    opacity: 0.6,
-                    line: {
-                        color: 'rbg(8,48,107)',
-                        width: 1.5
+        function getGradient(numberOfItems) {
+            // The Rainbow object is from the RainbowVis-JS package
+            let rainbow = new Rainbow();
+            rainbow.setNumberRange(1, numberOfItems);
+            rainbow.setSpectrum("#0000ff", "#00065e");
+
+            let colorArray = [];
+            for (let i = 1; i <= numberOfItems; i++) {
+                const hexColour = rainbow.colourAt(i);
+                colorArray.push(`#${hexColour}`);
+            }
+            return colorArray;
+        }
+
+        function showGraphValues(ctx, chartInstance, data, color) {
+            ctx.textAlign = "center";
+            ctx.textBaseline = "bottom";
+            ctx.fillStyle = color;
+            ctx.font="bold 24px Arial";
+            data.datasets.forEach(function(dataset, i) {
+                var meta = chartInstance.chart.getDatasetMeta(i);
+                meta.data.forEach(function(bar, index) {
+                    var data = dataset.data[index];
+                    ctx.fillText(data, bar.x, bar.y + 40);
+                });
+            });
+        }
+
+        function getRecentWorkoutGraphOptions(label) {
+
+            return {
+                events: [], // Disable 'on-hover' events
+                borderRadius: "10",
+                animation: {
+                    onComplete : function(chartInstance) {
+                        const ctx = this.ctx;
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "bottom";
+                        ctx.fillStyle = "#000";
+                        ctx.font="bold 24px Arial";
+                        this.data.datasets.forEach(function(dataset, i) {
+                            var meta = chartInstance.chart.getDatasetMeta(i);
+                            meta.data.forEach(function(bar, index) {
+                                var data = dataset.data[index];
+                                ctx.fillText(data, bar.x, bar.y + 40);
+                            });
+                        });
+                    },
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: label,
+                        color: "#fff",
+                        font: {
+                            size: "16px"
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: "#00c8ff",
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: "#00c8ff",
+                        }
                     }
                 }
             }
-        ];
 
-        var layout = {
-            title: 'Workout Data',
-            yaxis: {
-                title: 'Weight',
-                titlefont: {
-                    size: 16,
-                    color: 'rgb(107, 107, 107)'
+        }
+
+        const WorkoutGraph = {
+            mounted() {
+
+                const scaleYText = "{% if recent_data.0.weight %}Weight{% else %}Duration{% endif %}";
+
+                const ctx = document.getElementById("exercise-detail-chart").getContext("2d");
+                const myChart = new Chart(ctx, {
+                    type: "bar",
+                    data: {
+                        labels: {{ labels|safe }},
+                        datasets: [
+                            {
+                                data: {{ plotdata|safe }},
+                                backgroundColor: function(context) {
+                                    const chart = context.chart;
+                                    const {ctx, chartArea} = chart;
+
+                                    if (!chartArea) {
+                                        // This case happens on initial chart load
+                                        return;
+                                    }
+                                    return getGradient({{ plotdata }}.length);
+                                },
+                            }
+                        ]
+                    },
+                    options: {
+                        events: [], // Disable 'on-hover' events
+                        borderRadius: "10",
+                        animation: {
+                            onComplete : function(chartInstance) {
+                                const ctx = this.ctx;
+                                ctx.textAlign = "center";
+                                ctx.textBaseline = "bottom";
+                                ctx.fillStyle = "#fff";
+                                ctx.font="bold 24px Arial";
+                                this.data.datasets.forEach(function(dataset, i) {
+                                    var meta = chartInstance.chart.getDatasetMeta(i);
+                                    meta.data.forEach(function(bar, index) {
+                                        var data = dataset.data[index];
+                                        ctx.fillText(data, bar.x, bar.y + 40);
+                                    });
+                                });
+                            },
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: "Workout Data",
+                                color: "#fff",
+                                font: {
+                                    size: "24px"
+                                }
+                            },
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    color: "#00c8ff",
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: scaleYText,
+                                    color: "#00ffd1",
+                                    font: {
+                                        family: "Poppins",
+                                        size: 24,
+                                        lineHeight: 1.2,
+                                    },
+                                },
+                                ticks: {
+                                    color: "#00c8ff",
+                                }
+                            }
+                        },
+                        font: {
+                            size: 14,
+                        }
+                    }
+                });
+
+                let sets = Array.apply(0, Array({{ latest_weight|length }})).map(function(_,b) { return b + 1; });
+                const labels = sets.map(x => `Set ${x}`);
+
+                const ctx_last_workout = document.getElementById("last_workout_weights").getContext("2d");
+                const lastWorkoutChartWeight = new Chart(ctx_last_workout, {
+                    type: "bar",
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                backgroundColor: "#00ffd1",
+                                data: {{ latest_weight|safe }},
+                                label: "Weight",
+                            },
+                        ]
+                    },
+                    options: getRecentWorkoutGraphOptions("Weight"),
+                });
+
+                const ctx_last_workout_reps = document.getElementById("last_workout_reps").getContext("2d");
+                const lastWorkoutChartReps = new Chart(ctx_last_workout_reps, {
+                    type: "bar",
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                backgroundColor: "#00ffd1",
+                                data: {{ latest_reps|safe }},
+                                label: "Reps",
+                            },
+                        ]
+                    },
+                    options: getRecentWorkoutGraphOptions("Reps"),
+
+                });
+
+                const ctx_last_workout_duration = document.getElementById("last_workout_duration").getContext("2d");
+                const lastWorkoutChartDuration = new Chart(ctx_last_workout_duration, {
+                    type: "bar",
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                backgroundColor: "#00ffd1",
+                                data: {{ latest_duration|safe }},
+                                label: "Duration",
+                            },
+                        ]
+                    },
+                    options: getRecentWorkoutGraphOptions("Duration"),
+                });
+
+            },
+        };
+
+        const AddWorkoutForm = {
+            data() {
+                return {
+                    weight: {% if recent_data %}{{ latest_weight|first|default:0 }}{% else %}0{% endif %},
+                    reps: {% if recent_data %}{{ latest_reps|first|default:0 }}{% else %}0{% endif %},
+                    duration: {% if recent_data %}{{ latest_duration|first|default:0 }}{% else %}0{% endif %},
+                    items: [],
+                    fields: [
+                        {% if recent_data.0.weight %}
+                        {
+                            key: "weight",
+                            label: "Weight",
+                            thClass: "text-center",
+                            tdClass: "w-50"
+                        },
+                        {% elif recent_data.0.duration %}
+                        {
+                            key: "duration",
+                            label: "Duration",
+                            thClass: "text-center",
+                            tdClass: "w-50"
+                        },
+                        {% endif %}
+                        {
+                            key: "reps",
+                            label: "Reps",
+                            thClass: "text-center",
+                            tdClass: "w-50",
+                        }
+                    ],
+                    selectedCell: null
+                }
+            },
+            methods: {
+                onBlur(index) {
+                    this.items[index].isEdit = false;
                 },
-                tickfont: {
-                    size: 14,
-                    color: 'rgb(107, 107, 107)'
+                onClick(evt) {
+                    this.items.push(
+                        {
+                            "weight": this.weight,
+                            "duration": this.duration,
+                            "reps": this.reps
+                        }
+                    );
+                },
+                editCellHandler(data, name) {
+                    this.items = this.items.map(item => ({...item, isEdit: false}));
+                    this.items[data.index].isEdit = true;
+                    this.selectedCell = name
+                }
+            },
+            computed: {
+                workoutDataJson() {
+                    return JSON.stringify(this.items);
+                },
+                submitIsHidden() {
+                    return this.items.length === 0;
+                },
+                addIsDisabled() {
+                    return this.weight == 0 && this.duration == 0 && this.reps == 0;
                 }
             }
         };
 
-
-        Plotly.newPlot('exercise-detail-chart', data, layout);
+        new Vue({
+            el: "#vue-app-right",
+            components: {
+                AddWorkoutForm,
+                WorkoutGraph,
+            }
+        });
 
     </script>
 
