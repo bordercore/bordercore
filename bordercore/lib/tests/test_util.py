@@ -3,8 +3,8 @@ import pytest
 import django
 
 from lib.util import (get_missing_blob_ids, get_missing_bookmark_ids,
-                      get_pagination_range, is_image, is_pdf, is_video,
-                      remove_non_ascii_characters, truncate)
+                      get_pagination_range, is_audio, is_image, is_pdf,
+                      is_video, remove_non_ascii_characters, truncate)
 
 django.setup()
 
@@ -203,7 +203,16 @@ def test_util_is_video():
     assert is_video(file) is True
 
     file = "path/to/file.gif"
-    assert is_pdf(file) is False
+    assert is_video(file) is False
+
+
+def test_util_is_audio():
+
+    file = "path/to/file.mp3"
+    assert is_audio(file) is True
+
+    file = "path/to/file.gif"
+    assert is_audio(file) is False
 
 
 def test_get_pagination_range():

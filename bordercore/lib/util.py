@@ -97,6 +97,15 @@ def is_video(file):
     return False
 
 
+def is_audio(file):
+
+    if file:
+        file_extension = PurePath(str(file)).suffix
+        if file_extension[1:].lower() in ["mp3", "wav"]:
+            return True
+    return False
+
+
 def get_pagination_range(page_number, num_pages, paginate_by):
     """
     Get a range of pages based on the current page and the maximum number
