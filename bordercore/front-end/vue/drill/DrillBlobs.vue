@@ -1,18 +1,18 @@
 <template>
     <div>
         <div>
-            <card title="Related Blobs">
+            <card v-b-hover="hoverAddButton" title="Related Blobs">
                 <template #top-right>
-                    <span class="button-plus float-right" @click="chooseBlob()">
-                        <font-awesome-icon icon="plus" />
-                    </span>
+                    <div class="node-add-button">
+                        <add-button href="#" :click-handler="chooseBlob" class="hover-target d-none" />
+                    </div>
                 </template>
 
                 <template #content>
                     <ul id="sort-container-tags" class="list-group list-group-flush">
                         <draggable v-model="blobList" ghost-class="sortable-ghost" draggable=".draggable" @change="onChange">
                             <transition-group type="transition" class="w-100">
-                                <li v-for="(blob, index) in blobList" v-cloak :key="blob.uuid" v-b-hover="handleHover" class="text-info draggable d-flex align-items-center p-2" :data-uuid="blob.uuid">
+                                <li v-for="(blob, index) in blobList" v-cloak :key="blob.uuid" v-b-hover="hoverDropdown" class="text-info draggable d-flex align-items-center p-2" :data-uuid="blob.uuid">
                                     <div class="d-flex align-items-center w-100">
                                         <div class="align-self-start pr-2">
                                             <img :src="[[ blob.cover_url ]]" height="75" width="70">
@@ -186,8 +186,25 @@
                     "",
                 );
             },
-            handleHover(hovered, evt) {
-                evt.currentTarget.querySelector(".dropdown").classList.toggle("hidden");
+            hoverDropdown(isHovered, evt) {
+                this.handleHover(isHovered, evt, ".dropdown");
+            },
+            hoverAddButton(isHovered, evt) {
+                this.handleHover(isHovered, evt, ".hover-target");
+            },
+            handleHover(isHovered, evt, selector) {
+                const target = evt.currentTarget.querySelector(selector);
+                if (target === null) {
+                    return;
+                }
+                // Note: I've found that using a more concise "toggle" command
+                //  can cause the button's state to become out of sync, so instead
+                //  I choose to be more specific instead.
+                if (isHovered) {
+                    target.classList.remove("d-none");
+                } else {
+                    target.classList.add("d-none");
+                }
             },
             removeBlob(blobUuid) {
                 doPost(
