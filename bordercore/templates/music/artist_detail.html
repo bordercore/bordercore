@@ -311,10 +311,10 @@
             },
             methods: {
                 rowClicked(item, index, evt) {
-                    // If we found anthing other than a TD element, we've
+                    // If we found anthing other than a SPAN or TD element, we've
                     //  clicked on the "on hover" context menu. In that case,
                     //  don't play the song.
-                    if (evt.srcElement.nodeName === "TD") {
+                    if (["SPAN", "TD"].includes(evt.srcElement.nodeName)) {
                         this.$refs.audioPlayer.playTrack(item.uuid);
                     }
                 },
