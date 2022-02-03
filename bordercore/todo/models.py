@@ -37,7 +37,7 @@ class Todo(TimeStampedModel):
     )
 
     def get_tags(self):
-        return ", ".join([tag.name for tag in self.tags.all()])
+        return ", ".join([tag.name for tag in self.tags.all().order_by("name")])
 
     @staticmethod
     def get_priority_name(priority_value):
