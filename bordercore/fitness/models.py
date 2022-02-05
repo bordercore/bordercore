@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models import F, Max, Q
+from django.db.models import F, Max, OuterRef, Q, Subquery
 from django.utils import timezone
 
 
@@ -28,6 +28,7 @@ class Exercise(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.TextField(unique=True)
     muscle = models.ForeignKey(Muscle, on_delete=models.PROTECT)
+    muscle_new = models.ManyToManyField(Muscle, through="SortOrderExerciseMuscle", related_name="muscle")
     description = models.TextField(blank=True)
     note = models.TextField(blank=True)
 
@@ -36,22 +37,14 @@ class Exercise(models.Model):
 
     def last_workout(self, user):
 
-        workout_data = Data.objects.filter(
+        workout = Workout.objects.filter(
             user=user,
             exercise__id=self.id
         ).order_by(
             "-date"
-        )[:70]
+        ).first()
 
-        # What's the latest date for which we have workout data?
-        last_workout_date = workout_data[0].date.astimezone().strftime("%Y-%m-%d")
-
-        # Get all workout data from that day
-        recent_data = [
-            x
-            for x in workout_data
-            if x.date.astimezone().strftime("%Y-%m-%d") == last_workout_date
-        ]
+        recent_data = workout.data_set.all()
 
         info = {
             "recent_data": recent_data,
@@ -59,48 +52,71 @@ class Exercise(models.Model):
             "latest_weight": [x.weight or 0 for x in recent_data][::-1],
             "latest_duration": [x.duration or 0 for x in recent_data][::-1],
             "delta_days": int((int(datetime.datetime.now().strftime("%s")) - int(recent_data[0].date.strftime("%s"))) / 86400) + 1,
-            "plot_data": self.get_plot_data(user, datetime.datetime.now())
         }
 
         return info
 
-    def get_plot_data(self, user, start_date, interval=timedelta(weeks=8)):
+    def get_plot_data(self, user, start_date, count=8, interval=timedelta(weeks=8)):
 
-        workout_data = Data.objects.filter(
-            user=user,
-            exercise__id=self.id
-        ).filter(
-            Q(date__gte=(start_date - interval))
-        ).order_by(
-            "-date"
+        workout_data = Data.objects.filter(workout=OuterRef("pk"), user=user)
+
+        raw_data = Workout.objects.filter(exercise__id=self.id) \
+                                  .filter(date__lt=start_date) \
+                                  .annotate(reps=Subquery(workout_data.values("reps")[:1])) \
+                                  .annotate(weight=Subquery(workout_data.values("weight")[:1])) \
+                                  .annotate(duration=Subquery(workout_data.values("duration")[:1])) \
+                                  .order_by("-date")[:count]
+
+        if [x.weight for x in raw_data if x.weight and x.weight > 0]:
+            plotdata = [x.weight for x in raw_data]
+        elif [x.duration for x in raw_data if x.duration and x.duration > 0]:
+            plotdata = [x.duration for x in raw_data]
+        else:
+            plotdata = [x.reps for x in raw_data]
+        labels = [x.date.strftime("%b %d") for x in raw_data]
+
+        return (
+            json.dumps(labels[::-1]),
+            json.dumps(plotdata[::-1]),
+            list(raw_data)[-1].date.strftime("%Y-%m-%d"))
+
+
+class SortOrderExerciseMuscle(models.Model):
+
+    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
+    muscle = models.ForeignKey(Muscle, on_delete=models.CASCADE)
+    note = models.TextField(blank=True, null=True)
+
+    WEIGHTS = [
+        ("primary", "primary"),
+        ("secondary", "secondary"),
+    ]
+
+    theme = models.CharField(
+        max_length=20,
+        choices=WEIGHTS,
+        default="primary",
+    )
+
+    def __str__(self):
+        return f"SortOrderExerciseMuscle: {self.exercise}, {self.muscle}"
+
+    class Meta:
+        unique_together = (
+            ("exercise", "muscle")
         )
 
-        # Create a unique collection of workout data based on date,
-        #  so only one set will be extracted for each workout.
 
-        seen = set()
-        unique_workout_data = [
-            x
-            for x
-            in workout_data
-            if x.date.strftime("Y-%m-%d") not in seen
-            and not seen.add(x.date.strftime("Y-%m-%d"))
-        ]
-        if [x.weight for x in unique_workout_data if x.weight and x.weight > 0]:
-            plotdata = [x.weight for x in unique_workout_data]
-        elif [x.duration for x in unique_workout_data if x.duration and x.duration > 0]:
-            plotdata = [x.duration for x in unique_workout_data]
-        else:
-            plotdata = [x.reps for x in unique_workout_data]
-        labels = [x.date.strftime("%b %d") for x in unique_workout_data]
-
-        return (json.dumps(labels[::-1]), json.dumps(plotdata[::-1]))
-
+class Workout(models.Model):
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    exercise = models.ForeignKey(Exercise, on_delete=models.PROTECT)
+    date = models.DateTimeField(auto_now_add=True)
+    note = models.TextField(blank=True, null=True)
 
 
 class Data(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
-    exercise = models.ForeignKey(Exercise, on_delete=models.PROTECT)
+    workout = models.ForeignKey(Workout, on_delete=models.PROTECT, null=True)
     date = models.DateTimeField(auto_now_add=True)
     weight = models.FloatField(blank=True, null=True)
     reps = models.IntegerField()
@@ -126,7 +142,7 @@ class ExerciseUser(models.Model):
     def get_overdue_exercises(user, count_only=False):
 
         exercises = ExerciseUser.objects.annotate(
-            max=Max("exercise__data__date")) \
+            max=Max("exercise__workout__data__date")) \
             .filter(Q(interval__lt=(timezone.now() - F("max")) + timedelta(days=1))) \
             .filter(user=user) \
             .order_by(F("max"))

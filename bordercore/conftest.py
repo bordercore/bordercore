@@ -37,7 +37,7 @@ from collection.models import Collection  # isort:skip
 from django.contrib.auth.models import Group  # isort:skip
 from drill.models import SortOrderQuestionBookmark  # isort:skip
 from drill.tests.factories import QuestionFactory  # isort:skip
-from fitness.models import Exercise, ExerciseUser, Muscle, MuscleGroup, Data  # isort:skip
+from fitness.models import Exercise, ExerciseUser, Muscle, MuscleGroup, Data, Workout  # isort:skip
 from feed.tests.factories import FeedFactory  # isort:skip
 from metrics.models import Metric, MetricData  # isort:skip
 from music.models import Listen, SongSource, PlaylistItem  # isort:skip
@@ -321,10 +321,11 @@ def fitness(auto_login_user):
     note = "### Trying to make some **gains**"
     exercise_0 = Exercise.objects.create(name="Bench Press", muscle=muscle, note=note)
     ExerciseUser.objects.create(user=user, exercise=exercise_0, started=datetime.datetime.now(), interval=timedelta(days=2))
-    Data.objects.create(user=user, exercise=exercise_0, weight=200, reps=8)
-    Data.objects.create(user=user, exercise=exercise_0, weight=205, reps=8)
-    Data.objects.create(user=user, exercise=exercise_0, weight=210, reps=8)
-    Data.objects.create(user=user, exercise=exercise_0, weight=220, reps=8)
+    workout = Workout.objects.create(user=user, exercise=exercise_0)
+    Data.objects.create(user=user, workout=workout, weight=200, reps=8)
+    Data.objects.create(user=user, workout=workout, weight=205, reps=8)
+    Data.objects.create(user=user, workout=workout, weight=210, reps=8)
+    Data.objects.create(user=user, workout=workout, weight=220, reps=8)
 
     muscle_group = MuscleGroup.objects.create(name="Back")
     muscle = Muscle.objects.create(name="Latissimus Dorsi", muscle_group=muscle_group)
@@ -335,14 +336,15 @@ def fitness(auto_login_user):
     exercise_2 = Exercise.objects.create(name="Squats", muscle=muscle)
 
     ExerciseUser.objects.create(user=user, exercise=exercise_2, interval=timedelta(days=2))
+    workout = Workout.objects.create(user=user, exercise=exercise_2)
 
     # Force this exercise to be overdue
-    data = Data.objects.create(user=user, exercise=exercise_2, weight=200, reps=8)
+    data = Data.objects.create(user=user, workout=workout, weight=200, reps=8)
     data.date = data.date - timedelta(days=3)
     data.save()
 
     # Force this exercise to be overdue
-    data = Data.objects.create(user=user, exercise=exercise_2, weight=205, reps=8)
+    data = Data.objects.create(user=user, workout=workout, weight=205, reps=8)
     data.date = data.date - timedelta(days=3)
     data.save()
 

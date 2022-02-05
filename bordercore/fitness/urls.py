@@ -29,5 +29,10 @@ urlpatterns = [
         route="edit_note/",
         view=views.edit_note,
         name="edit_note"
+    ),
+    path(
+        route="get_workout_data",
+        view=views.get_workout_data,
+        name="get_workout_data"
     )
 ]

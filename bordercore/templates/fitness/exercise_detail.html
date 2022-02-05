@@ -109,10 +109,14 @@
         </div>
 
         <div class="col-lg-9 d-flex flex-column" id="vue-app-right">
-
             <workout-graph inline-template>
                 <card title="" class="flex-grow-0 mr-3 pt-5">
                     <template #content>
+                        <div class="d-flex">
+                            <div class="ml-auto">
+                                <input class="btn btn-secondary" type="button" name="Go" value="Previous" :disabled="false" @click="onPaginateWorkoutData" />
+                            </div>
+                        </div>
                         <canvas id="exercise-detail-chart" class="w-100"></canvas>
                     </template>
                 </card>
@@ -359,6 +363,13 @@
         }
 
         const WorkoutGraph = {
+            data() {
+                return {
+                    date: "{% now "Y-m-d" %}",
+                    last_workout_date: "{{ last_workout_date }}",
+                    myChart: null,
+                };
+            },
             mounted() {
 
                 const scaleYText = "{% if recent_data.0.weight %}Weight{% else %}Duration{% endif %}";
@@ -444,6 +455,8 @@
                     }
                 });
 
+                this.myChart = myChart;
+
                 let sets = Array.apply(0, Array({{ latest_weight|length }})).map(function(_,b) { return b + 1; });
                 const labels = sets.map(x => `Set ${x}`);
 
@@ -497,6 +510,24 @@
                 });
 
             },
+            methods: {
+                onPaginateWorkoutData() {
+                    doGet(
+                        this,
+                        "{% url 'fitness:get_workout_data' %}?uuid={{ object.uuid }}&date=" + this.last_workout_date,
+                        (response) => {
+                            this.last_workout_date = response.data.workout_data[2];
+                            this.myChart.data.labels = JSON.parse(response.data.workout_data[0]);
+                            this.myChart.data.datasets[0].data = JSON.parse(response.data.workout_data[1]);
+                            this.myChart.update();
+                        },
+                        "Error getting workout data",
+                    );
+                },
+                isDisabled() {
+                    return false;
+                }
+            }
         };
 
         const AddWorkoutForm = {

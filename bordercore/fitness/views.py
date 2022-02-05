@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 
-from fitness.models import Data, Exercise, ExerciseUser
+from .models import Data, Exercise, ExerciseUser, Workout
 
 
 @method_decorator(login_required, name="dispatch")
@@ -30,12 +30,14 @@ class ExerciseDetailView(DetailView):
         except IndexError:
             pass
 
+        plot_data = self.object.get_plot_data(self.request.user, datetime.datetime.now())
         return {
             **context,
             **last_workout,
             "title": f"Exercise Detail :: {self.object.name}",
-            "labels": last_workout["plot_data"][0],
-            "plotdata": last_workout["plot_data"][1],
+            "labels": plot_data[0],
+            "plotdata": plot_data[1],
+            "last_workout_date": plot_data[2],
             "activity_info": ExerciseUser.objects.filter(
                 user=self.request.user,
                 exercise__id=self.object.id
@@ -49,13 +51,19 @@ def fitness_add(request, exercise_uuid):
     exercise = Exercise.objects.get(uuid=exercise_uuid)
 
     if request.method == "POST":
+
+        workout = Workout(
+            user=request.user,
+            exercise=exercise
+        )
+        workout.save()
         for datum in json.loads(request.POST["workout-data"]):
             new_data = Data(
+                workout=workout,
                 weight=datum["weight"],
                 duration=datum["duration"],
                 reps=datum["reps"],
-                user=request.user,
-                exercise=exercise
+                user=request.user
             )
             new_data.save()
         messages.add_message(request, messages.INFO, f"Added workout data for exercise <strong>{exercise}</strong>")
@@ -70,7 +78,7 @@ def fitness_summary(request):
         .filter(user=request.user)
 
     exercises = Exercise.objects.annotate(
-        last_active=Max("data__date", filter=Q(data__user=request.user)),
+        last_active=Max("workout__data__date", filter=Q(workout__data__user=request.user)),
         is_active=Subquery(newest.values("started")[:1]),
         interval=Subquery(newest.values("interval")[:1])) \
         .order_by(F("last_active")) \
@@ -139,6 +147,27 @@ def edit_note(request):
 
     response = {
         "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def get_workout_data(request):
+
+    exercise_uuid = request.GET["uuid"]
+    date = request.GET["date"]
+
+    exercise = Exercise.objects.get(uuid=exercise_uuid)
+
+    workout_data = exercise.get_plot_data(
+        request.user,
+        datetime.datetime.strptime(date, "%Y-%m-%d")
+    )
+
+    response = {
+        "status": "OK",
+        "workout_data": workout_data,
     }
 
     return JsonResponse(response)
