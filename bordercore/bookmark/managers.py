@@ -4,14 +4,24 @@ from django.db import models
 
 class BookmarkManager(models.Manager):
 
-    def bare_bookmarks(self, user, limit=10):
+    def bare_bookmarks(self, user, limit=10, sort=True):
         """
         Return all untagged bookmarks not associated with other objects
         """
         Bookmark = apps.get_model("bookmark", "Bookmark")
 
-        return Bookmark.objects.filter(
+        query = Bookmark.objects.filter(
             user=user,
             tags__isnull=True,
-            sortorderquestionbookmark__isnull=True
-        ).order_by("-created")[:limit]
+            sortorderquestionbookmark__isnull=True,
+            sortordernodebookmark__isnull=True,
+            sortorderblobbookmark__isnull=True,
+        )
+
+        if sort:
+            query = query.order_by("-created")
+
+        if limit:
+            query = query[:limit]
+
+        return query

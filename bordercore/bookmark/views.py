@@ -282,12 +282,10 @@ def overview(request):
 
     sorted_bookmarks = []
 
-    untagged_count = Bookmark.objects.filter(
-        user=request.user,
-        tags__isnull=True,
-        sortorderquestionbookmark__isnull=True,
-        sortordernodebookmark__isnull=True,
-        sortorderblobbookmark__isnull=True,
+    bare_count = Bookmark.objects.bare_bookmarks(
+        request.user,
+        limit=None,
+        sort=False
     ).count()
 
     pinned_tags = request.user.userprofile.pinned_tags.all().annotate(bookmark_count=Count("sortordertagbookmark")).order_by("sortorderusertag__sort_order")
@@ -295,7 +293,7 @@ def overview(request):
     return render(request, "bookmark/index.html",
                   {
                       "bookmarks": sorted_bookmarks,
-                      "untagged_count": untagged_count,
+                      "untagged_count": bare_count,
                       "pinned_tags": pinned_tags,
                       "tag": request.GET.get("tag", None)
                   })
