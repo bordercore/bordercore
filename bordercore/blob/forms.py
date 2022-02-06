@@ -43,7 +43,8 @@ class BlobForm(ModelForm):
             self.initial['tags'] = self.instance.get_tags()
 
             # Add 'T00:00' to force JavaScript to use localtime
-            self.initial['date'] = get_javascript_date(self.instance.date) + 'T00:00'
+            if self.instance.date:
+                self.initial['date'] = get_javascript_date(self.instance.date) + 'T00:00'
         else:
             self.fields['filename'].disabled = True
 
