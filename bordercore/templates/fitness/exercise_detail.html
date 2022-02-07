@@ -110,12 +110,23 @@
 
         <div class="col-lg-9 d-flex flex-column" id="vue-app-right">
             <workout-graph inline-template>
-                <card title="" class="flex-grow-0 mr-3 pt-5">
+                <card title="" class="flex-grow-0 mr-3 pt-3">
                     <template #content>
                         <div class="d-flex">
-                            <div class="ml-auto">
-                                <input class="btn btn-secondary" type="button" name="Go" value="Previous" :disabled="false" @click="onPaginateWorkoutData" />
-                            </div>
+                            <h5 class="ml-auto">
+                                <a v-if="paginator.has_previous" href="#" @click.prevent="paginate('prev')">
+                                    <font-awesome-icon icon="chevron-left" class="text-emphasis glow icon-hover" />
+                                </a>
+                                <span v-else>
+                                    <font-awesome-icon icon="chevron-left" class="text-emphasis icon-disabled" />
+                                </span>
+                                <a v-if="paginator.has_next" href="#" @click.prevent="paginate('next')" class="ml-1">
+                                    <font-awesome-icon icon="chevron-right" class="text-emphasis glow icon-hover" />
+                                </a>
+                                <span v-else>
+                                    <font-awesome-icon icon="chevron-right" class="text-emphasis icon-disabled" />
+                                </span>
+                            </h5>
                         </div>
                         <canvas id="exercise-detail-chart" class="w-100"></canvas>
                     </template>
@@ -366,22 +377,23 @@
             data() {
                 return {
                     date: "{% now "Y-m-d" %}",
-                    last_workout_date: "{{ last_workout_date }}",
                     myChart: null,
+                    paginator: {{ plotdata.paginator|safe }},
                 };
             },
             mounted() {
 
-                const scaleYText = "{% if recent_data.0.weight %}Weight{% else %}Duration{% endif %}";
+                const scaleYText = "{% if recent_data.0.weight %}Weight{% elif recent_data.0.duration %}Duration{% else %}Reps{% endif %}";
 
                 const ctx = document.getElementById("exercise-detail-chart").getContext("2d");
                 const myChart = new Chart(ctx, {
                     type: "bar",
                     data: {
-                        labels: {{ labels|safe }},
+                        labels: {{ plotdata.labels|safe }},
                         datasets: [
                             {
-                                data: {{ plotdata|safe }},
+                                data: {{ plotdata.plotdata|safe }},
+                                barThickness: 40,
                                 backgroundColor: function(context) {
                                     const chart = context.chart;
                                     const {ctx, chartArea} = chart;
@@ -390,7 +402,7 @@
                                         // This case happens on initial chart load
                                         return;
                                     }
-                                    return getGradient({{ plotdata }}.length);
+                                    return getGradient({{ plotdata.plotdata }}.length);
                                 },
                             }
                         ]
@@ -420,8 +432,10 @@
                                 text: "Workout Data",
                                 color: "#fff",
                                 font: {
-                                    size: "24px"
-                                }
+                                    family: "Poppins",
+                                    size: 48,
+                                    weight: "normal",
+                                },
                             },
                             legend: {
                                 display: false
@@ -429,11 +443,21 @@
                         },
                         scales: {
                             x: {
+                                grid: {
+                                    color: "#21295c",
+                                },
                                 ticks: {
                                     color: "#00c8ff",
+                                    font: {
+                                        family: "Poppins",
+                                        size: 16,
+                                    },
                                 }
                             },
                             y: {
+                                grid: {
+                                    color: "#21295c",
+                                },
                                 title: {
                                     display: true,
                                     text: scaleYText,
@@ -441,11 +465,14 @@
                                     font: {
                                         family: "Poppins",
                                         size: 24,
-                                        lineHeight: 1.2,
                                     },
                                 },
                                 ticks: {
                                     color: "#00c8ff",
+                                    font: {
+                                        family: "Poppins",
+                                        size: 16,
+                                    },
                                 }
                             }
                         },
@@ -511,15 +538,22 @@
 
             },
             methods: {
-                onPaginateWorkoutData() {
+                paginate(direction) {
+                    let pageNumber;
+                    if (direction === "prev") {
+                        pageNumber = this.paginator.previous_page_number;
+                    } else {
+                        pageNumber = this.paginator.next_page_number;
+                    }
+
                     doGet(
                         this,
-                        "{% url 'fitness:get_workout_data' %}?uuid={{ object.uuid }}&date=" + this.last_workout_date,
+                        "{% url 'fitness:get_workout_data' %}?uuid={{ object.uuid }}&page_number=" + pageNumber,
                         (response) => {
-                            this.last_workout_date = response.data.workout_data[2];
-                            this.myChart.data.labels = JSON.parse(response.data.workout_data[0]);
-                            this.myChart.data.datasets[0].data = JSON.parse(response.data.workout_data[1]);
+                            this.myChart.data.labels = JSON.parse(response.data.workout_data.labels);
+                            this.myChart.data.datasets[0].data = JSON.parse(response.data.workout_data.plotdata);
                             this.myChart.update();
+                            this.paginator = JSON.parse(response.data.workout_data.paginator);
                         },
                         "Error getting workout data",
                     );

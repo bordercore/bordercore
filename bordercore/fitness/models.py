@@ -4,6 +4,7 @@ import uuid
 from datetime import timedelta
 
 from django.contrib.auth.models import User
+from django.core.paginator import Paginator
 from django.db import models
 from django.db.models import F, Max, OuterRef, Q, Subquery
 from django.utils import timezone
@@ -56,16 +57,19 @@ class Exercise(models.Model):
 
         return info
 
-    def get_plot_data(self, user, start_date, count=8, interval=timedelta(weeks=8)):
+    def get_plot_data(self, user, count=12, page_number=1):
 
-        workout_data = Data.objects.filter(workout=OuterRef("pk"), user=user)
+        workout_data = Data.objects.filter(workout=OuterRef("pk"))
 
         raw_data = Workout.objects.filter(exercise__id=self.id) \
-                                  .filter(date__lt=start_date) \
                                   .annotate(reps=Subquery(workout_data.values("reps")[:1])) \
                                   .annotate(weight=Subquery(workout_data.values("weight")[:1])) \
                                   .annotate(duration=Subquery(workout_data.values("duration")[:1])) \
-                                  .order_by("-date")[:count]
+                                  .order_by("-date")
+
+        p = Paginator(raw_data, count).page(page_number)
+
+        raw_data = p.object_list
 
         if [x.weight for x in raw_data if x.weight and x.weight > 0]:
             plotdata = [x.weight for x in raw_data]
@@ -75,10 +79,17 @@ class Exercise(models.Model):
             plotdata = [x.reps for x in raw_data]
         labels = [x.date.strftime("%b %d") for x in raw_data]
 
-        return (
-            json.dumps(labels[::-1]),
-            json.dumps(plotdata[::-1]),
-            list(raw_data)[-1].date.strftime("%Y-%m-%d"))
+        return {
+            "labels": json.dumps(labels[::-1]),
+            "plotdata": json.dumps(plotdata[::-1]),
+            "paginator": json.dumps({
+                "page_number": page_number,
+                "has_previous": p.has_next(),
+                "has_next": p.has_previous(),
+                "previous_page_number": p.next_page_number() if p.has_next() else None,
+                "next_page_number": p.previous_page_number() if p.has_previous() else None,
+            })
+        }
 
 
 class SortOrderExerciseMuscle(models.Model):
@@ -115,8 +126,7 @@ class Workout(models.Model):
 
 
 class Data(models.Model):
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
-    workout = models.ForeignKey(Workout, on_delete=models.PROTECT, null=True)
+    workout = models.ForeignKey(Workout, on_delete=models.PROTECT)
     date = models.DateTimeField(auto_now_add=True)
     weight = models.FloatField(blank=True, null=True)
     reps = models.IntegerField()

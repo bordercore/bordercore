@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import F, Max, OuterRef, Q, Subquery
+from django.db.models import F, Max, OuterRef, Subquery
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
@@ -30,14 +30,12 @@ class ExerciseDetailView(DetailView):
         except IndexError:
             pass
 
-        plot_data = self.object.get_plot_data(self.request.user, datetime.datetime.now())
+        plot_data = self.object.get_plot_data(self.request.user)
         return {
             **context,
             **last_workout,
+            "plotdata": plot_data,
             "title": f"Exercise Detail :: {self.object.name}",
-            "labels": plot_data[0],
-            "plotdata": plot_data[1],
-            "last_workout_date": plot_data[2],
             "activity_info": ExerciseUser.objects.filter(
                 user=self.request.user,
                 exercise__id=self.object.id
@@ -63,7 +61,6 @@ def fitness_add(request, exercise_uuid):
                 weight=datum["weight"],
                 duration=datum["duration"],
                 reps=datum["reps"],
-                user=request.user
             )
             new_data.save()
         messages.add_message(request, messages.INFO, f"Added workout data for exercise <strong>{exercise}</strong>")
@@ -78,9 +75,10 @@ def fitness_summary(request):
         .filter(user=request.user)
 
     exercises = Exercise.objects.annotate(
-        last_active=Max("workout__data__date", filter=Q(workout__data__user=request.user)),
+        last_active=Max("workout__data__date"),
         is_active=Subquery(newest.values("started")[:1]),
         interval=Subquery(newest.values("interval")[:1])) \
+        .filter(workout__user=request.user) \
         .order_by(F("last_active")) \
         .select_related()
 
@@ -156,13 +154,13 @@ def edit_note(request):
 def get_workout_data(request):
 
     exercise_uuid = request.GET["uuid"]
-    date = request.GET["date"]
+    page_number = int(request.GET.get("page_number", 1))
 
     exercise = Exercise.objects.get(uuid=exercise_uuid)
 
     workout_data = exercise.get_plot_data(
         request.user,
-        datetime.datetime.strptime(date, "%Y-%m-%d")
+        page_number=page_number
     )
 
     response = {
