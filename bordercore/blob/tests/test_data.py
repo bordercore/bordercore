@@ -234,7 +234,7 @@ def test_books_with_names(es):
 
 
 def test_books_with_author(es):
-    "Assert that all books have at least one author"
+    "Assert that all books have at least one author or editor"
     search_object = {
         "query": {
             "bool": {
@@ -245,6 +245,11 @@ def test_books_with_author(es):
                                 {
                                     "exists": {
                                         "field": "metadata.author"
+                                    }
+                                },
+                                {
+                                    "exists": {
+                                        "field": "metadata.editor"
                                     }
                                 }
                             ]
