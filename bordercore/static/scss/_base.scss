@@ -1340,7 +1340,16 @@ pre {
 }
 
 #muscles-targeted .small {
-  font-size: 12px;
+  font-size: 0.75rem;
+}
+
+#note .dropdownmenu {
+  position: absolute;
+  right: 0.62rem;
+
+  .dropdown-menu.show {
+    top: 2rem !important;
+  }
 }
 
 //

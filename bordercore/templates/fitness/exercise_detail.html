@@ -62,7 +62,7 @@
                 </template>
             </card>
 
-            <card title="" class="flex-grow-1" v-b-hover="handleNoteCardHover">
+            <card title="" id="note" class="flex-grow-1" v-b-hover="handleNoteCardHover">
                 <template #content>
 
                     <div class="d-flex">
@@ -84,6 +84,7 @@
                         v-model:note="note"
                         edit-url="{% url 'fitness:edit_note' %}"
                         extra-class=""
+                        :hide-add-button="true"
                     >
                         <template v-slot:title>
                             <div class="card-title text-primary mt-3">
@@ -92,7 +93,7 @@
                         </template>
                     </editable-text-area>
                     </div>
-                    <div class="dropdownmenu hidden hover-target float-right">
+                    <div class="dropdownmenu hidden hover-target">
                         <dropdown-menu v-model="showNoteMenu" transition="translate-fade-down">
                             <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                             <div slot="dropdown">
@@ -174,7 +175,7 @@
                                 </form>
 
                                 <div class="row mt-4 justify-content-center">
-                                    <div class="col-lg-5">
+                                    <div class="col-lg-8">
                                         <b-table
                                             :items="items"
                                             :fields="fields"
@@ -237,6 +238,9 @@
                     </template>
 
                     <template #content>
+                        <div class="card-title text-primary h-010">
+                            Related Exercises:
+                        </div>
                         <div class="h-100">
                             <ul>
                                 <li>Bench Press</li>
