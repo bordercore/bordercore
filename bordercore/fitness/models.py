@@ -1,6 +1,7 @@
 import datetime
 import json
 import uuid
+from collections import defaultdict
 from datetime import timedelta
 
 from django.contrib.auth.models import User
@@ -28,13 +29,21 @@ class Muscle(models.Model):
 class Exercise(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.TextField(unique=True)
-    muscle = models.ForeignKey(Muscle, on_delete=models.PROTECT)
-    muscle_new = models.ManyToManyField(Muscle, through="SortOrderExerciseMuscle", related_name="muscle")
+    muscle = models.ManyToManyField(Muscle, through="SortOrderExerciseMuscle", related_name="muscle")
     description = models.TextField(blank=True)
     note = models.TextField(blank=True)
 
     def __str__(self):
         return self.name
+
+    def get_targeted_muscles(self):
+
+        muscles = defaultdict(list)
+
+        for x in SortOrderExerciseMuscle.objects.filter(exercise=self).select_related("muscle"):
+            muscles[x.target].append(x.muscle)
+
+        return muscles
 
     def last_workout(self, user):
 
@@ -103,7 +112,7 @@ class SortOrderExerciseMuscle(models.Model):
         ("secondary", "secondary"),
     ]
 
-    theme = models.CharField(
+    target = models.CharField(
         max_length=20,
         choices=WEIGHTS,
         default="primary",

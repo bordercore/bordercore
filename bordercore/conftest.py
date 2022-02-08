@@ -319,32 +319,35 @@ def fitness(auto_login_user):
     muscle_group = MuscleGroup.objects.create(name="Chest")
     muscle = Muscle.objects.create(name="Pectoralis Major", muscle_group=muscle_group)
     note = "### Trying to make some **gains**"
-    exercise_0 = Exercise.objects.create(name="Bench Press", muscle=muscle, note=note)
+    exercise_0 = Exercise.objects.create(name="Bench Press", note=note)
+    exercise_0.muscle.add(muscle)
     ExerciseUser.objects.create(user=user, exercise=exercise_0, started=datetime.datetime.now(), interval=timedelta(days=2))
     workout = Workout.objects.create(user=user, exercise=exercise_0)
-    Data.objects.create(user=user, workout=workout, weight=200, reps=8)
-    Data.objects.create(user=user, workout=workout, weight=205, reps=8)
-    Data.objects.create(user=user, workout=workout, weight=210, reps=8)
-    Data.objects.create(user=user, workout=workout, weight=220, reps=8)
+    Data.objects.create(workout=workout, weight=200, reps=8)
+    Data.objects.create(workout=workout, weight=205, reps=8)
+    Data.objects.create(workout=workout, weight=210, reps=8)
+    Data.objects.create(workout=workout, weight=220, reps=8)
 
     muscle_group = MuscleGroup.objects.create(name="Back")
     muscle = Muscle.objects.create(name="Latissimus Dorsi", muscle_group=muscle_group)
-    exercise_1 = Exercise.objects.create(name="Pull Ups", muscle=muscle)
+    exercise_1 = Exercise.objects.create(name="Pull Ups")
+    exercise_1.muscle.add(muscle)
 
     muscle_group = MuscleGroup.objects.create(name="Legs")
     muscle = Muscle.objects.create(name="Glutes", muscle_group=muscle_group)
-    exercise_2 = Exercise.objects.create(name="Squats", muscle=muscle)
+    exercise_2 = Exercise.objects.create(name="Squats")
+    exercise_2.muscle.add(muscle)
 
     ExerciseUser.objects.create(user=user, exercise=exercise_2, interval=timedelta(days=2))
     workout = Workout.objects.create(user=user, exercise=exercise_2)
 
     # Force this exercise to be overdue
-    data = Data.objects.create(user=user, workout=workout, weight=200, reps=8)
+    data = Data.objects.create(workout=workout, weight=200, reps=8)
     data.date = data.date - timedelta(days=3)
     data.save()
 
     # Force this exercise to be overdue
-    data = Data.objects.create(user=user, workout=workout, weight=205, reps=8)
+    data = Data.objects.create(workout=workout, weight=205, reps=8)
     data.date = data.date - timedelta(days=3)
     data.save()
 

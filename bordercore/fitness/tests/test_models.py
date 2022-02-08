@@ -10,7 +10,7 @@ def test_fitness_str(auto_login_user, fitness):
     user, _ = auto_login_user()
 
     assert str(fitness[0]) == "Bench Press"
-    assert str(fitness[0].muscle) == "Pectoralis Major"
+    assert "Pectoralis Major" in [x.name for x in fitness[0].muscle.all()]
 
     assert str(ExerciseUser.objects.get(user=user, exercise=fitness[2])) == "Squats"
 

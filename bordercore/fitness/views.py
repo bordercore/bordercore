@@ -80,7 +80,7 @@ def fitness_summary(request):
         interval=Subquery(newest.values("interval")[:1])) \
         .filter(workout__user=request.user) \
         .order_by(F("last_active")) \
-        .select_related()
+        .prefetch_related("muscle", "muscle__muscle_group")
 
     active_exercises = []
     inactive_exercises = []

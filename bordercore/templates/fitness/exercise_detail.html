@@ -213,11 +213,25 @@
                     </card>
                 </add-workout-form>
 
-                <card title="" class="w-50 mr-3">
+                <card title="" id="muscles-targeted" class="w-50 mr-3">
                     <template #title-slot>
                         <div class="d-flex">
                             <div class="card-title text-primary">
-                                Muscles Targeted: <span class="text-info">{{ object.muscle.muscle_group }}, {{ object.muscle }}</span>
+                                Muscles Targeted:
+                                <ul>
+                                    {% for muscle in object.get_targeted_muscles.primary %}
+                                        <li>
+                                            <span class="text-info">{{ muscle }}</span>
+                                            <span class="small text-muted">PRIMARY</span>
+                                        </li>
+                                    {% endfor %}
+                                    {% for muscle in object.get_targeted_muscles.secondary %}
+                                        <li>
+                                            <span class="text-info">{{ muscle }}</span>
+                                            <span class="small text-muted">SECONDARY</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
                             </div>
                         </div>
                     </template>
