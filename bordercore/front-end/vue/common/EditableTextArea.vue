@@ -5,9 +5,11 @@
             <label class="editable-textarea-label w-100" data-toggle="tooltip" data-placement="bottom" title="Doubleclick to edit note" @dblclick="editNote" v-html="textAreaMarkdown" />
             <textarea id="note" v-model="textAreaValue" class="editable-textarea px-3" placeholder="Enter note text here" @blur="doneEdit()" />
         </div>
-        <div v-else class="ml-2" :class="extraClass">
-            <font-awesome-icon icon="plus" />
-            <a href="#" @click="addNote">Add Note</a>
+        <div v-else>
+            <div v-if="!hideAddButton" class="ml-2" :class="extraClass">
+                <font-awesome-icon icon="plus" />
+                <a href="#" @click="addNote">Add Note</a>
+            </div>
         </div>
     </div>
 </template>
@@ -31,6 +33,10 @@
             extraClass: {
                 type: String,
                 default: "mt-4",
+            },
+            hideAddButton: {
+                type: Boolean,
+                default: false,
             },
         },
         data() {
