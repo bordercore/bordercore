@@ -3,7 +3,7 @@
         <div v-if="textAreaValue || isEditingNote" :class="[isEditingNote ? 'editing' : '', extraClass]">
             <slot name="title" />
             <label class="editable-textarea-label w-100" data-toggle="tooltip" data-placement="bottom" title="Doubleclick to edit note" @dblclick="editNote" v-html="textAreaMarkdown" />
-            <textarea id="note" v-model="textAreaValue" class="editable-textarea px-3" placeholder="Enter note text here" @blur="doneEdit()" />
+            <textarea id="note" v-model="textAreaValue" class="editable-textarea px-3" placeholder="Enter note text here" @blur="onBlur()" />
         </div>
         <div v-else>
             <div v-if="!hideAddButton" class="ml-2" :class="extraClass">
@@ -108,13 +108,16 @@
                     document.getElementById("note").focus();
                 });
             },
-            doneEdit() {
+            onBlur() {
                 // If the note hasn't changed, abort
                 if (this.beforeEditCache == this.textAreaValue) {
                     this.isEditingNote = false;
                     return;
                 }
-
+                this.updateNote();
+                this.isEditingNote = false;
+            },
+            updateNote() {
                 doPost(
                     this,
                     this.editUrl,
@@ -129,13 +132,15 @@
                     "",
                     "",
                 );
-
-                this.isEditingNote = false;
             },
             addNote() {
                 this.$nextTick(() => {
                     this.editNote();
                 });
+            },
+            deleteNote() {
+                this.textAreaValue = "";
+                this.updateNote();
             },
         },
     };
