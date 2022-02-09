@@ -31,11 +31,21 @@ class ExerciseDetailView(DetailView):
             pass
 
         plot_data = self.object.get_plot_data(self.request.user)
+
+        related_exercises = [
+            {
+                "uuid": x.uuid,
+                "name": x.name,
+                "last_active": x.last_active.strftime("%Y-%m-%d") if x.last_active else "Never"
+            } for x in self.object.get_related_exercises()
+        ]
+
         return {
             **context,
             **last_workout,
             "plotdata": plot_data,
             "title": f"Exercise Detail :: {self.object.name}",
+            "related_exercises": related_exercises,
             "activity_info": ExerciseUser.objects.filter(
                 user=self.request.user,
                 exercise__id=self.object.id

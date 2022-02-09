@@ -100,6 +100,19 @@ class Exercise(models.Model):
             })
         }
 
+    def get_related_exercises(self):
+        """
+        Get a list of related exercises, based on muscles targeted
+        """
+
+        return Exercise.objects.annotate(
+            last_active=Max("workout__data__date")
+        ).filter(
+            muscle__in=self.muscle.all()
+        ).exclude(
+            id=self.id
+        ).distinct().order_by(F("last_active").desc(nulls_last=True))
+
 
 class SortOrderExerciseMuscle(models.Model):
 
