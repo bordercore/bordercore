@@ -122,9 +122,15 @@
                         <dropdown-menu v-model="showNoteMenu" transition="translate-fade-down">
                             <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                             <div slot="dropdown">
-                                <a v-if="note" class="dropdown-item" href="#" @click.prevent="addNote()">Edit note</a>
-                                <a v-if="!note" class="dropdown-item" href="#" @click.prevent="addNote()">Add note</a>
-                                <a v-if="note" class="dropdown-item" href="#" @click.prevent="deleteNote()">Delete note</a>
+                                <a v-if="note" class="dropdown-item" href="#" @click.prevent="addNote()">
+                                    <font-awesome-icon icon="pencil-alt" class="text-primary mr-3"></font-awesome-icon>Edit note
+                                </a>
+                                <a v-if="!note" class="dropdown-item" href="#" @click.prevent="addNote()">
+                                    <font-awesome-icon icon="plus" class="text-primary mr-3"></font-awesome-icon>Add note
+                                </a>
+                                <a v-if="note" class="dropdown-item" href="#" @click.prevent="deleteNote()">
+                                    <font-awesome-icon icon="trash-alt" class="text-primary mr-3"></font-awesome-icon>Delete note
+                                </a>
                             </div>
                         </dropdown-menu>
                     </div>

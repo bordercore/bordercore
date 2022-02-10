@@ -43,7 +43,7 @@ window.jQuery= jQuery;
 import "bootstrap";
 
 import {library} from "@fortawesome/fontawesome-svg-core";
-import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faExchangeAlt, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faChevronLeft, faChevronRight, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faFileAlt, faHeart, faHome, faImage, faInfo, faGraduationCap, faLink, faLock, faMusic, faNewspaper, faObjectGroup, faPlus, faQuestion, faRunning, faSearch, faSignOutAlt, faStickyNote, faTags, faTasks, faTimesCircle} from "@fortawesome/free-solid-svg-icons";
+import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faExchangeAlt, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faChevronLeft, faChevronRight, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faFileAlt, faHeart, faHome, faImage, faInfo, faGraduationCap, faLink, faLock, faMusic, faNewspaper, faObjectGroup, faPencilAlt, faPlus, faQuestion, faRunning, faSearch, faSignOutAlt, faStickyNote, faTags, faTasks, faTimesCircle, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 library.add(faAlignLeft);
 library.add(faAngleDown);
@@ -75,6 +75,7 @@ library.add(faLock);
 library.add(faMusic);
 library.add(faNewspaper);
 library.add(faObjectGroup);
+library.add(faPencilAlt);
 library.add(faPlus);
 library.add(faQuestion);
 library.add(faRunning);
@@ -84,6 +85,7 @@ library.add(faTags);
 library.add(faSignOutAlt);
 library.add(faTasks);
 library.add(faTimesCircle);
+library.add(faTrashAlt);
 Vue.component("font-awesome-icon", FontAwesomeIcon);
 
 import {format} from "date-fns";
