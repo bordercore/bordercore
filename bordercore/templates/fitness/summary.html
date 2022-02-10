@@ -14,7 +14,7 @@
                 hover
                 primary-key="uuid"
                 :items="items_active"
-                :fields="fields"
+                :fields="fields_active"
                 sort-by="overdue"
                 :sort-compare="sortCompare"
                 :tbody-tr-class="rowClass"
@@ -23,6 +23,9 @@
                     <a :href="data.item.exercise_url">
                         [[ data.value ]]
                     </a>
+                    <span v-if="data.item.overdue === '2'" class="ml-3">
+                        OVERDUE
+                    </span>
                 </template>
                 <template #cell(last_active)="data">
                     <div v-if="data.value" class="d-flex">
@@ -43,7 +46,7 @@
                 hover
                 primary-key="uuid"
                 :items="items_inactive"
-                :fields="fields"
+                :fields="fields_inactive"
                 sort-by="exercise"
             >
 
@@ -86,7 +89,7 @@
                         {
                             "exercise_url": "{% url 'fitness:exercise_detail' exercise.uuid %}",
                             "exercise": "{{ exercise.name|escapejs }}",
-                            "muscle_group": "{{ exercise.muscle.muscle_group }}",
+                            "muscle_group": "{{ exercise.muscle.all.0.muscle_group }}",
                             "frequency": "{{ exercise.frequency.days }} day{{ exercise.frequency.days|pluralize:"s" }}",
                             {% if exercise.last_active %}
                             "last_active": new Date("{{ exercise.last_active|date:"Y-m-d" }}"),
@@ -103,7 +106,7 @@
                         {
                             "exercise_url": "{% url 'fitness:exercise_detail' exercise.uuid %}",
                             "exercise": "{{ exercise.name|escapejs }}",
-                            "muscle_group": "{{ exercise.muscle.muscle_group }}",
+                            "muscle_group": "{{ exercise.muscle.all.0.muscle_group }}",
                             "last_active": "{{ exercise.last_active|date:"N j, Y" }}",
                             {% if exercise.delta_days %}
                             "delta_days": {{ exercise.delta_days }},
@@ -112,7 +115,7 @@
                         },
                         {% endfor %}
                     ],
-                    fields: [
+                    fields_active: [
                         {
                             key: "exercise"
                         },
@@ -129,7 +132,22 @@
                             label: "Last Workout",
                             class: "last-active text-center"
                         },
+                    ],
+                    fields_inactive: [
+                        {
+                            key: "exercise"
+                        },
+                        {
+                            key: "muscle_group",
+                            class: "text-center"
+                        },
+                        {
+                            key: "last_active",
+                            label: "Last Workout",
+                            class: "last-active text-center"
+                        },
                     ]
+
                 }
             },
             methods: {
@@ -146,6 +164,7 @@
                 rowClass(item, type) {
                     if (!item || type !== "row") return
                     if (item.overdue === "1") return "selected"
+                    if (item.overdue === "2") return "overdue"
                 },
                 sortCompare(aRow, bRow, key, sortDesc) {
 

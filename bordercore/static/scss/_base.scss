@@ -1331,6 +1331,14 @@ pre {
 // Fitness
 //
 
+.overdue {
+  background-color: #333;
+
+  span {
+    color: #f00;
+  }
+}
+
 .last-active {
   width: 17rem;
 }
