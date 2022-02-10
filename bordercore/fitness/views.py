@@ -179,3 +179,16 @@ def get_workout_data(request):
     }
 
     return JsonResponse(response)
+
+
+@login_required
+def update_frequency(request):
+
+    uuid = request.POST["uuid"]
+    frequency = int(request.POST["frequency"])
+
+    eu = ExerciseUser.objects.get(user=request.user, exercise__uuid=uuid)
+    eu.interval = timedelta(days=frequency)
+    eu.save()
+
+    return JsonResponse({"status": "OK"}, safe=False)

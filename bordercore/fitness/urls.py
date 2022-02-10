@@ -34,5 +34,10 @@ urlpatterns = [
         route="get_workout_data",
         view=views.get_workout_data,
         name="get_workout_data"
-    )
+    ),
+    path(
+        route="update_frequency",
+        view=views.update_frequency,
+        name="update_frequency"
+    ),
 ]
