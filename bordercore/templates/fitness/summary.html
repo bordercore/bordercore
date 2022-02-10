@@ -30,7 +30,7 @@
                             [[ getDate(data.value) ]]
                         </div>
                         <div class="text-nowrap ml-auto">
-                            [[ getInterval(data) ]]
+                            [[ getFrequency(data) ]]
                         </div>
                     </div>
                     <div v-else>Never</div>
@@ -57,7 +57,7 @@
                             [[ data.value ]]
                         </div>
                         <div class="text-nowrap ml-auto">
-                            [[ getInterval(data) ]]
+                            [[ getFrequency(data) ]]
                         </div>
                     </div>
                     <div v-else>Never</div>
@@ -87,7 +87,7 @@
                             "exercise_url": "{% url 'fitness:exercise_detail' exercise.uuid %}",
                             "exercise": "{{ exercise.name|escapejs }}",
                             "muscle_group": "{{ exercise.muscle.muscle_group }}",
-                            "interval": "{{ exercise.interval.days }} day{{ exercise.interval.days|pluralize:"s" }}",
+                            "frequency": "{{ exercise.frequency.days }} day{{ exercise.frequency.days|pluralize:"s" }}",
                             {% if exercise.last_active %}
                             "last_active": new Date("{{ exercise.last_active|date:"Y-m-d" }}"),
                             {% endif %}
@@ -121,7 +121,7 @@
                             class: "text-center"
                         },
                         {
-                            key: "interval",
+                            key: "frequency",
                             class: "text-center"
                         },
                         {
@@ -133,7 +133,7 @@
                 }
             },
             methods: {
-                getInterval(row) {
+                getFrequency(row) {
                     if (row.item.delta_days === 0) {
                         return "Today";
                     } else {

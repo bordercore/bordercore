@@ -87,7 +87,7 @@ def fitness_summary(request):
     exercises = Exercise.objects.annotate(
         last_active=Max("workout__data__date"),
         is_active=Subquery(newest.values("started")[:1]),
-        interval=Subquery(newest.values("interval")[:1])) \
+        frequency=Subquery(newest.values("frequency")[:1])) \
         .filter(workout__user=request.user) \
         .order_by(F("last_active")) \
         .prefetch_related("muscle", "muscle__muscle_group")
@@ -101,9 +101,9 @@ def fitness_summary(request):
 
             # To determine when an exercise is overdue, convert the current datetime and the
             #  exercise's last active datetime to days since the epoch, then add one. If
-            #  that exceeds the exercises's interval, it's overdue.
-            if e.interval and (timezone.now() - datetime.datetime(1970, 1, 1).astimezone()).days - \
-               (e.last_active - datetime.datetime(1970, 1, 1).astimezone()).days + 1 > e.interval.days:
+            #  that exceeds the exercises's frequency, it's overdue.
+            if e.frequency and (timezone.now() - datetime.datetime(1970, 1, 1).astimezone()).days - \
+               (e.last_active - datetime.datetime(1970, 1, 1).astimezone()).days + 1 > e.frequency.days:
                 e.overdue = 1
             else:
                 e.overdue = 0
@@ -188,7 +188,7 @@ def update_frequency(request):
     frequency = int(request.POST["frequency"])
 
     eu = ExerciseUser.objects.get(user=request.user, exercise__uuid=uuid)
-    eu.interval = timedelta(days=frequency)
+    eu.frequency = timedelta(days=frequency)
     eu.save()
 
     return JsonResponse({"status": "OK"}, safe=False)

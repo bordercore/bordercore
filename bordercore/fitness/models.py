@@ -162,7 +162,7 @@ class ExerciseUser(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     exercise = models.ForeignKey(Exercise, on_delete=models.PROTECT)
     started = models.DateTimeField(auto_now_add=True)
-    interval = models.DurationField(default=timedelta(days=7), blank=False, null=False)
+    frequency = models.DurationField(default=timedelta(days=7), blank=False, null=False)
 
     class Meta:
         unique_together = ("user", "exercise")
@@ -175,7 +175,7 @@ class ExerciseUser(models.Model):
 
         exercises = ExerciseUser.objects.annotate(
             max=Max("exercise__workout__data__date")) \
-            .filter(Q(interval__lt=(timezone.now() - F("max")) + timedelta(days=1))) \
+            .filter(Q(frequency__lt=(timezone.now() - F("max")) + timedelta(days=1))) \
             .filter(user=user) \
             .order_by(F("max"))
 
