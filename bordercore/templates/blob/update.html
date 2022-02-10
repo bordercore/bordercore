@@ -209,39 +209,41 @@
 
                             {% elif field.label == 'Date' %}
 
-                                <date-input v-if="getDateFormat()==='standard'" inline-template>
-                                    <div class="col-lg-2 input-group">
-                                        <div id="dateapp">
-                                            <vuejs-datepicker
-                                                :bootstrap-styling="true"
-                                                :format="customFormatter"
-                                                :typeable="true"
-                                                :value="$store.state.date"
-                                                name="date"
-                                                id="id_date"
-                                                calendar-class="calendar"
-                                            >
-                                                <span slot="afterDateInput" class="input-group-append">
-                                                    <div class="input-group-text">
-                                                        <font-awesome-icon icon="calendar-alt"></font-awesome-icon>
-                                                    </div>
-                                                </span>
-                                            </vuejs-datepicker>
+                                <div class="col-lg-8 input-group">
+                                    <date-input v-if="getDateFormat()==='standard'" inline-template>
+                                        <div>
+                                            <div id="dateapp">
+                                                <vuejs-datepicker
+                                                    :bootstrap-styling="true"
+                                                    :format="customFormatter"
+                                                    :typeable="true"
+                                                    :value="$store.state.date"
+                                                    name="date"
+                                                    id="id_date"
+                                                    calendar-class="calendar"
+                                                >
+                                                    <span slot="afterDateInput" class="input-group-append">
+                                                        <div class="input-group-text">
+                                                            <font-awesome-icon icon="calendar-alt"></font-awesome-icon>
+                                                        </div>
+                                                    </span>
+                                                </vuejs-datepicker>
+                                            </div>
                                         </div>
+                                    </date-input>
+                                    <div v-else>
+                                        <input id="date_year" v-model="$store.state.date" class="form-control" type="number" name="date" size="4" placeholder="Year" autocomplete="off">
                                     </div>
-                                </date-input>
-                                <div v-else class="col-lg-2 input-group">
-                                    <input v-model="$store.state.date" class="form-control" type="number" name="date" size="4" placeholder="Year" autocomplete="off">
-                                </div>
 
-                                <div>
-                                    <drop-down-menu
-                                        ref="dropDownMenu"
-                                        :links="dateFormatMenuItems"
-                                        :initial-hide="false"
-                                        class="dropdownmenu calendar-date-format-menu d-flex align-items-center justify-content-center"
-                                    >
-                                    </drop-down-menu>
+                                    <div>
+                                        <drop-down-menu
+                                            ref="dropDownMenu"
+                                            :links="dateFormatMenuItems"
+                                            :initial-hide="false"
+                                            class="dropdownmenu calendar-date-format-menu d-flex align-items-center justify-content-center"
+                                        >
+                                        </drop-down-menu>
+                                    </div>
                                 </div>
 
 
