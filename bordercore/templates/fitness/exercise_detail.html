@@ -87,7 +87,7 @@
                 </template>
             </card>
 
-            <card title="" id="note" class="flex-grow-1" v-b-hover="handleNoteCardHover">
+            <card title="" class="absolute flex-grow-1" v-b-hover="handleNoteCardHover">
                 <template #content>
 
                     <div class="d-flex">
@@ -124,6 +124,7 @@
                             <div slot="dropdown">
                                 <a v-if="note" class="dropdown-item" href="#" @click.prevent="addNote()">Edit note</a>
                                 <a v-if="!note" class="dropdown-item" href="#" @click.prevent="addNote()">Add note</a>
+                                <a v-if="note" class="dropdown-item" href="#" @click.prevent="deleteNote()">Delete note</a>
                             </div>
                         </dropdown-menu>
                     </div>
@@ -241,20 +242,20 @@
                                 {% if latest_weight.0 %}
                                     <div class="form-group">
                                         <label>Weight</label>
-                                        <input class="form-control mx-3" type="text" name="weight" size="3" v-model="weight" />
+                                        <input class="form-control mx-3" type="text" name="weight" size="3" v-model="weight" autocomplete="off" />
                                     </div>
                                 {% endif %}
 
                                 {% if latest_duration.0 %}
                                 <div class="form-group">
                                     <label>Duration</label>
-                                    <input class="form-control mx-3" type="text" name="duration" size="3" v-model="duration" />
+                                    <input class="form-control mx-3" type="text" name="duration" size="3" v-model="duration" autocomplete="off" />
                                 </div>
                                 {% endif %}
 
                                 <div class="form-group">
                                     <label>Reps</label>
-                                    <input class="form-control mx-3" type="text" name="reps" size="3" v-model="reps" />
+                                    <input class="form-control mx-3" type="text" name="reps" size="3" v-model="reps" autocomplete="off" />
                                 </div>
 
                                 <input class="btn btn-secondary" type="button" name="Go" value="Add" :disabled="addIsDisabled" @click="onClick" />
@@ -303,7 +304,7 @@
                 </add-workout-form>
 
                 <card title="" id="muscles-targeted" class="w-50 mr-3">
-                    <template #title-slot>
+                    <template #content>
                         <div class="d-flex">
                             <div class="card-title text-primary">
                                 Muscles Targeted:
@@ -390,7 +391,14 @@
                     evt.currentTarget.querySelector(".hover-target").classList.toggle("d-flex");
                 },
                 addNote() {
-                    this.$refs.note.isEditingNote = true;
+                    this.$refs.note.editNote();
+
+                    this.$nextTick(() => {
+                        document.getElementById("note").focus();
+                    })
+                },
+                deleteNote() {
+                    this.$refs.note.deleteNote();
                 },
                 onClickSwitchExercise(evt) {
                     $("#modalSwitchExercise").modal("show");
