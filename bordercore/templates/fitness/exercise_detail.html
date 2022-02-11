@@ -209,6 +209,13 @@
                 <card title="" class="flex-grow-0 mr-3 pt-3">
                     <template #content>
                         <div class="d-flex">
+                            <div>
+                                <div class="btn-group" role="group" aria-label="Basic example">
+                                    <button type="button" class="btn btn-primary" :class="{'active': currentPlotData === 'reps' }" @click="switchPlot('reps')">Reps</button>
+                                    <button v-if="Object.keys(plotdata).includes('weight')" type="button" class="btn btn-primary" :class="{'active': currentPlotData === 'weight' }" @click="switchPlot('weight')">Weight</button>
+                                    <button v-if="Object.keys(plotdata).includes('duration')" type="button" class="btn btn-primary" :class="{'active': currentPlotData === 'duration' }" @click="switchPlot('duration')">Duration</button>
+                                </div>
+                            </div>
                             <h5 class="ml-auto">
                                 <a v-if="paginator.has_previous" href="#" @click.prevent="paginate('prev')">
                                     <font-awesome-icon icon="chevron-left" class="text-emphasis glow icon-hover" />
@@ -571,11 +578,13 @@
                     date: "{% now "Y-m-d" %}",
                     myChart: null,
                     paginator: {{ plotdata.paginator|safe }},
+                    plotdata: {{ plotdata.plotdata|safe }},
+                    currentPlotData: "{{ plotdata.initial_plot }}"
                 };
             },
             mounted() {
 
-                const scaleYText = "{% if recent_data.0.weight %}Weight{% elif recent_data.0.duration %}Duration{% else %}Reps{% endif %}";
+                const scaleYText = "{{ plotdata.initial_plot|capfirst }}";
 
                 const ctx = document.getElementById("exercise-detail-chart").getContext("2d");
                 const myChart = new Chart(ctx, {
@@ -584,7 +593,7 @@
                         labels: {{ plotdata.labels|safe }},
                         datasets: [
                             {
-                                data: {{ plotdata.plotdata|safe }},
+                                data: this.plotdata[this.currentPlotData],
                                 barThickness: 40,
                                 backgroundColor: function(context) {
                                     const chart = context.chart;
@@ -594,7 +603,8 @@
                                         // This case happens on initial chart load
                                         return;
                                     }
-                                    return getGradient({{ plotdata.plotdata }}.length);
+                                    // I wish I could re-use plotdata from this Vue component's data() method, but I don't know how to access it. In this function's context 'this' refers to the window object, not the Vue component
+                                    return getGradient({{ plotdata.plotdata|safe }}.{{plotdata.initial_plot}}.length);
                                 },
                             }
                         ]
@@ -743,15 +753,24 @@
                         "{% url 'fitness:get_workout_data' %}?uuid={{ object.uuid }}&page_number=" + pageNumber,
                         (response) => {
                             this.myChart.data.labels = JSON.parse(response.data.workout_data.labels);
-                            this.myChart.data.datasets[0].data = JSON.parse(response.data.workout_data.plotdata);
+                            this.myChart.data.datasets[0].data = JSON.parse(response.data.workout_data.plotdata)[this.currentPlotData];
                             this.myChart.update();
                             this.paginator = JSON.parse(response.data.workout_data.paginator);
                         },
                         "Error getting workout data",
                     );
                 },
+                switchPlot(dataset) {
+                    this.currentPlotData = dataset;
+                    this.myChart.data.datasets[0].data = this.plotdata[dataset];
+                    this.myChart.options.scales.y.title.text = this.capitalizeFirstLetter(dataset);
+                    this.myChart.update();
+                },
                 isDisabled() {
                     return false;
+                },
+                capitalizeFirstLetter(string) {
+                    return string.charAt(0).toUpperCase() + string.slice(1);
                 }
             }
         };
@@ -826,7 +845,7 @@
             components: {
                 AddWorkoutForm,
                 WorkoutGraph,
-            }
+            },
         });
 
     </script>

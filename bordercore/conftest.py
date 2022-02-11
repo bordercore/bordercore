@@ -1,6 +1,7 @@
 import datetime
 import hashlib
 import os
+import random
 from datetime import timedelta
 from io import BytesIO
 from pathlib import Path
@@ -322,6 +323,16 @@ def fitness(auto_login_user):
     exercise_0 = Exercise.objects.create(name="Bench Press", note=note)
     exercise_0.muscle.add(muscle)
     ExerciseUser.objects.create(user=user, exercise=exercise_0, started=datetime.datetime.now(), frequency=timedelta(days=2))
+
+    # Generate a bunch of workouts for one exercise, helpful for
+    #  testing pagination
+    for i in range(10):
+        workout = Workout.objects.create(user=user, exercise=exercise_0)
+        Data.objects.create(workout=workout, weight=random.randint(200, 220), reps=random.randint(7, 12))
+        Data.objects.create(workout=workout, weight=random.randint(200, 220), reps=random.randint(7, 12))
+        Data.objects.create(workout=workout, weight=random.randint(200, 220), reps=random.randint(7, 12))
+        Data.objects.create(workout=workout, weight=random.randint(200, 220), reps=random.randint(7, 12))
+
     workout = Workout.objects.create(user=user, exercise=exercise_0)
     Data.objects.create(workout=workout, weight=200, reps=8)
     Data.objects.create(workout=workout, weight=205, reps=8)
@@ -351,7 +362,24 @@ def fitness(auto_login_user):
     data.date = data.date - timedelta(days=3)
     data.save()
 
-    yield [exercise_0, exercise_1, exercise_2]
+    # Add a related exercise to exercise_0
+    exercise_3 = Exercise.objects.create(name="Push Ups", note=note)
+    muscle = Muscle.objects.get(name="Pectoralis Major")
+    exercise_3.muscle.add(muscle)
+
+    # Add an exercise with a duration
+    muscle_group = MuscleGroup.objects.get(name="Back")
+    muscle = Muscle.objects.get(name="Latissimus Dorsi", muscle_group=muscle_group)
+    exercise_4 = Exercise.objects.create(name="Dead Hang")
+    exercise_4.muscle.add(muscle)
+    for i in range(10):
+        workout = Workout.objects.create(user=user, exercise=exercise_4)
+        Data.objects.create(workout=workout, duration=random.randint(90, 120), reps=random.randint(1, 2))
+        Data.objects.create(workout=workout, duration=random.randint(90, 120), reps=random.randint(1, 2))
+        Data.objects.create(workout=workout, duration=random.randint(90, 120), reps=random.randint(1, 2))
+        Data.objects.create(workout=workout, duration=random.randint(90, 120), reps=random.randint(1, 2))
+
+    yield [exercise_0, exercise_1, exercise_2, exercise_3, exercise_4]
 
 
 @pytest.fixture()

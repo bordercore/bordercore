@@ -80,17 +80,22 @@ class Exercise(models.Model):
 
         raw_data = p.object_list
 
+        initial_plot = "reps"
+        plotdata = {}
+        plotdata["reps"] = [x.reps for x in raw_data][::-1]
+
         if [x.weight for x in raw_data if x.weight and x.weight > 0]:
-            plotdata = [x.weight for x in raw_data]
+            plotdata["weight"] = [x.weight for x in raw_data][::-1]
+            initial_plot = "weight"
         elif [x.duration for x in raw_data if x.duration and x.duration > 0]:
-            plotdata = [x.duration for x in raw_data]
-        else:
-            plotdata = [x.reps for x in raw_data]
+            plotdata["duration"] = [x.duration for x in raw_data][::-1]
+            initial_plot = "duration"
         labels = [x.date.strftime("%b %d") for x in raw_data]
 
         return {
             "labels": json.dumps(labels[::-1]),
-            "plotdata": json.dumps(plotdata[::-1]),
+            "plotdata": json.dumps(plotdata),
+            "initial_plot": initial_plot,
             "paginator": json.dumps({
                 "page_number": page_number,
                 "has_previous": p.has_next(),
