@@ -361,6 +361,8 @@ class Playlist(TimeStampedModel):
                     year_effective__gte=this.parameters["start_year"],
                     year_effective__lte=this.parameters["end_year"],
                 )
+        elif this.type == "recent":
+            song_list = Song.objects.all().order_by("-created")
         else:
             raise ValueError(f"Playlist type not supported: {this.type}")
 
@@ -378,9 +380,8 @@ class Playlist(TimeStampedModel):
                 | Q(latest_result__lte=timezone.now() - timedelta(days=int(this.parameters["exclude_recent"])))
             )
 
-        if this.type == "recent":
-            song_list = Song.objects.all().order_by("-created")
-        else:
+        # If we're not returning recently added songs, randomize the final list
+        if this.type != "recent":
             song_list = song_list.order_by("?")
 
         if this.size:
