@@ -6,7 +6,7 @@
             </slot>
             <div slot="dropdown">
                 <a v-for="link in links" :key="link.id" :href="link.url" class="dropdown-item" v-on="link.clickHandler ? { click: link.clickHandler } : {}">
-                    <font-awesome-icon v-if="link.icon" :icon="link.icon" class="mr-2" />
+                    <font-awesome-icon v-if="link.icon" :icon="link.icon" class="text-primary mr-2" />
                     {{ link.title }}
                     <span v-if="link.extra" class="dropdown-item-extra">
                         {{ link.extra }}

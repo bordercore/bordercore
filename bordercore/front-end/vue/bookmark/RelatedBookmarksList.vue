@@ -29,10 +29,18 @@
                                             <dropdown-menu v-model="showDropdown" transition="translate-fade-down" class="d-none" :right="true">
                                                 <font-awesome-icon icon="ellipsis-v" />
                                                 <div slot="dropdown">
-                                                    <a class="dropdown-item" href="#" @click.prevent="removeBookmark(bookmark.uuid)">Remove</a>
-                                                    <a class="dropdown-item" :href="bookmark.edit_url">Edit Bookmark</a>
-                                                    <a v-if="!bookmark.note" class="dropdown-item" href="#" @click.prevent="addNote(bookmark.uuid)">Add note</a>
-                                                    <a v-if="bookmark.note" class="dropdown-item" href="#" @click.prevent="activateInEditMode(bookmark, index)">Edit note</a>
+                                                    <a class="dropdown-item" href="#" @click.prevent="removeBookmark(bookmark.uuid)">
+                                                        <font-awesome-icon icon="times" class="text-primary mr-3" />Remove
+                                                    </a>
+                                                    <a class="dropdown-item" :href="bookmark.edit_url">
+                                                        <font-awesome-icon icon="pencil-alt" class="text-primary mr-3" />Edit Bookmark
+                                                    </a>
+                                                    <a v-if="!bookmark.note" class="dropdown-item" href="#" @click.prevent="addNote(bookmark.uuid)">
+                                                        <font-awesome-icon icon="plus" class="text-primary mr-3" />Add note
+                                                    </a>
+                                                    <a v-if="bookmark.note" class="dropdown-item" href="#" @click.prevent="activateInEditMode(bookmark, index)">
+                                                        <font-awesome-icon icon="pencil-alt" class="text-primary mr-3" />Edit note
+                                                    </a>
                                                 </div>
                                             </dropdown-menu>
                                         </div>

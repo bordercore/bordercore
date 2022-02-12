@@ -112,7 +112,9 @@
                                         <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="text-center">
                                             <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                             <div slot="dropdown">
-                                                <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(data.value)">Update</a>
+                                                <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(data.value)">
+                                                    <font-awesome-icon icon="pencil-alt" class="text-primary mr-3" />Update
+                                                </a>
                                                 <a class="dropdown-item" href="#" @click.prevent="onClickAddToPlaylist(data.value)">Add to playlist</a>
                                             </div>
                                         </dropdown-menu>
@@ -289,6 +291,7 @@
                             title: "Update Album",
                             url: "#",
                             clickHandler: this.handleUpdateAlbum,
+                            icon: "pencil-alt"
                         },
                         {% if not album.song_set.all %}
                         {
@@ -296,6 +299,7 @@
                             title: "Delete Album",
                             url: "#",
                             clickHandler: this.handleDeleteAlbum,
+                            icon: "times"
                         }
                         {% endif %}
                     ]

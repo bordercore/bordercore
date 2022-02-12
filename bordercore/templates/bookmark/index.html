@@ -92,8 +92,12 @@
                         <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="my-auto">
                             <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                             <div slot="dropdown">
-                                <a class="dropdown-item" href="{% url 'bookmark:import' %}" >Import</a>
-                                <a class="dropdown-item" href="#" @click.prevent="randomize">Randomize</a>
+                                <a class="dropdown-item" href="{% url 'bookmark:import' %}">
+                                    <font-awesome-icon icon="file-import" class="text-primary mr-3"></font-awesome-icon>Import
+                                </a>
+                                <a class="dropdown-item" href="#" @click.prevent="randomize">
+                                    <font-awesome-icon icon="random" class="text-primary mr-3"></font-awesome-icon>Randomize
+                                </a>
                             </div>
                         </dropdown-menu>
                     </div>

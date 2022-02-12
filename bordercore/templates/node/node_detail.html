@@ -61,8 +61,12 @@
                                                         <dropdown-menu v-model="show" transition="translate-fade-down">
                                                             <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                                             <div slot="dropdown">
-                                                                <a class="dropdown-item" href="#" @click.prevent="removeBlob(blob.uuid)">Remove</a>
-                                                                <a v-if="!blob.note" class="dropdown-item" href="#" @click.prevent="addNote(blob.uuid, index)">Add note</a>
+                                                                <a class="dropdown-item" href="#" @click.prevent="removeBlob(blob.uuid)">
+                                                                    <font-awesome-icon icon="times" class="text-primary mr-3"></font-awesome-icon>Remove
+                                                                </a>
+                                                                <a v-if="!blob.note" class="dropdown-item" href="#" @click.prevent="addNote(blob.uuid, index)">
+                                                                    <font-awesome-icon icon="plus" class="text-primary mr-3"></font-awesome-icon>Add note
+                                                                </a>
                                                             </div>
                                                         </dropdown-menu>
                                                     </div>
