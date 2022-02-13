@@ -28,7 +28,11 @@
             <div class="card-grid ml-2">
 
             {% if artist_image %}
-                <div>
+                <div
+                    @drop.prevent="handleImageDrop($event)"
+                    @dragover.prevent
+                    @dragenter.prevent
+                >
                     <img id="artist_image" src="{{ IMAGES_URL }}artist_images/{{ artist.uuid }}" class="mw-100" />
                 </div>
             {% endif %}
@@ -247,6 +251,12 @@
 
     </div>
 
+    {% block help %}
+        <div class="d-none" id="help-text">
+*Note:* You can drag an image file onto the artist image to change it.
+        </div>
+    {% endblock %}
+
 {% endblock %}
 
 {% block javascript %}
@@ -342,8 +352,17 @@
                 handleUpdateArtistImage() {
                     $("#modalUpdateArtistImage").modal("show")
                 },
+                handleImageDrop(evt) {
+                    let image = evt.dataTransfer.files[0]
+                    if (image.type.indexOf("image/") >= 0) {
+                        this.uploadArtistImage(image);
+                    }
+                },
                 onArtistImageSelect(evt) {
                     let image = document.getElementById("id_image").files[0];
+                    this.uploadArtistImage(image);
+                },
+                uploadArtistImage(image) {
                     let formData = new FormData();
                     formData.append("artist_uuid", "{{ artist.uuid }}");
                     formData.append("image", image);
@@ -353,11 +372,11 @@
                             "Content-Type": "multipart/form-data"
                         }
                     }).then(response => {
-                        this.artistDetailFilename = evt.target.files[0].name;
+                        this.artistDetailFilename = image.name;
                         const artistImage = document.getElementById("artist_image");
                         artistImage.src = artistImage.src + "?" + new Date().getTime();
                     });
-                }
+                },
             },
         });
 
