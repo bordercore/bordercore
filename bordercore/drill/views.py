@@ -20,7 +20,8 @@ from lib.mixins import FormRequestMixin
 from lib.util import parse_title_from_url
 from tag.models import Tag
 
-from .models import EFACTOR_DEFAULT, Question, SortOrderDrillBlob
+from .models import (EFACTOR_DEFAULT, Question, SortOrderDrillBlob,
+                     SortOrderQuestionBookmark)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -85,6 +86,8 @@ class QuestionCreateView(FormRequestMixin, CreateView):
         # Save the tags
         form.save_m2m()
 
+        handle_related_bookmarks(obj, self.request)
+
         review_url = urls.reverse("drill:detail", kwargs={"uuid": obj.uuid})
         messages.add_message(
             self.request,
@@ -94,6 +97,19 @@ class QuestionCreateView(FormRequestMixin, CreateView):
 
     def get_success_url(self):
         return reverse('drill:add')
+
+
+def handle_related_bookmarks(question, request):
+
+    uuids = request.POST.get("related-bookmarks", None)
+
+    if not uuids:
+        return
+
+    for uuid in uuids.split(","):
+        bookmark = Bookmark.objects.get(uuid=uuid)
+        so = SortOrderQuestionBookmark(question=question, bookmark=bookmark)
+        so.save()
 
 
 @method_decorator(login_required, name='dispatch')

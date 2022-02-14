@@ -138,6 +138,10 @@
                 default: true,
                 type: Boolean,
             },
+            newQuestion: {
+                default: false,
+                type: Boolean,
+            },
         },
         data() {
             return {
@@ -148,7 +152,9 @@
             };
         },
         mounted() {
-            this.getBookmarkList();
+            if (!this.newQuestion) {
+                this.getBookmarkList();
+            }
         },
         methods: {
             getBookmarkList() {
@@ -158,7 +164,7 @@
                     (response) => {
                         this.bookmarkList = response.data.bookmark_list;
 
-                        // Let Vue know that each blob's "noteIsEditable" property is reactive
+                        // Let Vue know that each bookmark's "noteIsEditable" property is reactive
                         for (const bookmark of this.bookmarkList) {
                             this.$set(bookmark, "noteIsEditable", false);
                         }
@@ -167,6 +173,12 @@
                 );
             },
             removeBookmark(bookmarkUuid) {
+                if (this.newQuestion) {
+                    const newBookmarkList = this.bookmarkList.filter((x) => x.uuid !== bookmarkUuid);
+                    this.bookmarkList = newBookmarkList;
+                    return;
+                }
+
                 doPost(
                     this,
                     this.removeBookmarkUrl,
@@ -208,8 +220,16 @@
                     this.$refs.bookmarkSearch.$refs.simpleSuggest.$refs.suggestComponent.input.focus();
                 }, 500);
             },
-            selectBookmark(bookmarkUuid) {
+            selectBookmark(bookmark) {
                 let url = this.addBookmarkUrl;
+
+                if (this.newQuestion) {
+                    this.bookmarkList.push(bookmark);
+                    // Let Vue know that the bookmark's "noteIsEditable" property is reactive
+                    this.$set(bookmark, "noteIsEditable", false);
+                    return;
+                }
+
                 if (this.updateModified) {
                     url = url + "?update_modified=true";
                 }
@@ -220,7 +240,7 @@
                     {
                         "object_uuid": this.objectUuid,
                         "model_name": this.modelName,
-                        "bookmark_uuid": bookmarkUuid,
+                        "bookmark_uuid": bookmark.uuid,
                     },
                     (response) => {
                         this.getBookmarkList();
@@ -235,6 +255,10 @@
                 // The backend expects the ordering to begin
                 // with 1, not 0, so add 1.
                 const newPosition = evt.moved.newIndex + 1;
+
+                if (this.newQuestion) {
+                    return;
+                }
 
                 doPost(
                     this,
@@ -284,22 +308,25 @@
                             return;
                         }
 
-                        doPost(
-                            this,
-                            this.editBookmarkNoteUrl,
-                            {
-                                "object_uuid": this.objectUuid,
-                                "model_name": this.modelName,
-                                "bookmark_uuid": bookmark.uuid,
-                                "note": note,
-                            },
-                            (response) => {
-                                this.getBookmarkList();
-                            },
-                            "",
-                            "",
-                        );
-
+                        if (this.newQuestion) {
+                            bookmark.note = note;
+                        } else {
+                            doPost(
+                                this,
+                                this.editBookmarkNoteUrl,
+                                {
+                                    "object_uuid": this.objectUuid,
+                                    "model_name": this.modelName,
+                                    "bookmark_uuid": bookmark.uuid,
+                                    "note": note,
+                                },
+                                (response) => {
+                                    this.getBookmarkList();
+                                },
+                                "",
+                                "",
+                            );
+                        }
                         this.editingNote = false;
                     }
                 }

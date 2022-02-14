@@ -132,7 +132,7 @@
         methods: {
             select(selection) {
                 // The parent component receives the bookmark uuid and takes action
-                this.$emit("select-bookmark", selection.uuid);
+                this.$emit("select-bookmark", selection);
 
                 $("#modalAddBookmark").modal("hide");
 

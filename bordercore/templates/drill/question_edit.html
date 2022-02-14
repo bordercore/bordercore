@@ -15,9 +15,36 @@
 
 {% block content %}
 
-    <div class="card-grid">
+    <div class="row no-gutters h-100" id="vue-app">
 
-        <form id="question-form" action="{{ request.path }}" method="post">
+        <div class="col-lg-3 d-flex flex-column">
+
+            <related-bookmarks-list
+                ref="relatedBookmarksList"
+                object-uuid="{{ object.uuid }}"
+                model-name="drill.Question"
+                get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=drill.Question"
+                create-bookmark-url="{% url 'bookmark-list' %}"
+                search-bookmark-url="{% url 'bookmark:search' %}"
+                get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
+                add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
+                :update-modified="true"
+                remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"
+                sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
+                edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}"
+                :show-add-button="true"
+                extra-class="embedded-card ml-3"
+                transition-name=""
+                :new-question="newQuestion"
+            >
+            </related-bookmarks-list>
+
+        </div>
+
+        <div class="col-lg-9">
+
+            <form @submit.prevent id="question-form" action="{{ request.path }}" method="post">
+                <input type="hidden" name="related-bookmarks" />
 
         {% csrf_token %}
 
@@ -47,7 +74,9 @@
             {% else %}
 
                 <div class="form-group{% if field.errors %} error{% endif %} row">
-                    <label class="font-weight-bold col-lg-2 col-form-label text-right" for="inputTitle">{{ field.label }}</label>
+                    <label class="font-weight-bold col-lg-2 col-form-label text-right" for="inputTitle">
+                        {{ field.label }}
+                    </label>
 
                     <div class="col-lg-5">
                         {{ field }}
@@ -63,15 +92,14 @@
 
         <div class="form-group">
             <div class="col-lg-5 offset-lg-2" id="button-wrapper">
-                <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}" />
-                <input v-if="enableDeleteButton" @click="handleClick" class="btn btn-secondary" type="submit" name="Go" value="Delete" />
-                <a class="btn btn-secondary" href="{% url 'drill:list' %}">Cancel</a>
+                <input class="btn btn-primary" type="submit" name="Go" value="{{ action }}" @click="onClickEdit" />
+                <input v-if="enableDeleteButton" @click="onClickDelete" class="btn btn-secondary" type="submit" name="Go" value="Delete" />
+                <a class="btn btn-secondary ml-3" href="{% url 'drill:list' %}">Cancel</a>
             </div>
         </div>
+            </form>
 
-        </form>
-
-    </div>
+        </div>
 
 {% endblock %}
 
@@ -87,23 +115,33 @@
         };
 
         new Vue({
-            el: "#question-form",
-            data() {
-                return {
-                    enableDeleteButton: {% if object.id %}true{% else %}false{% endif %}
-                }
-            },
-            methods: {
-                handleClick: function() {
-                    {% if object.uuid %}
-                    document.getElementById("question-form").action = "{% url 'drill:delete' object.uuid %}";
-                    {% endif %}
-                }
-            },
+            el: "#vue-app",
+            name: "EditQuestion",
             components: {
                 Search,
-                TagsInput
-            }
+                TagsInput,
+            },
+            data() {
+                return {
+                    enableDeleteButton: {% if object.uuid %}true{% else %}false{% endif %},
+                    newQuestion: {% if action == "Add" %}true{% else %}false{% endif %},
+                };
+            },
+            methods: {
+                onClickEdit() {
+                    const uuids = this.$refs.relatedBookmarksList.bookmarkList.map((x) => x.uuid).join(",");
+                    const form = document.getElementById("question-form");
+                    form.elements["related-bookmarks"].value = uuids;
+                    form.submit();
+                },
+                onClickDelete() {
+                    {% if object.uuid %}
+                    const form = document.getElementById("question-form");
+                    form.action = "{% url 'drill:delete' object.uuid %}";
+                    form.submit();
+                    {% endif %}
+                },
+            },
         });
 
     </script>
