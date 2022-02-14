@@ -153,13 +153,17 @@ class Bookmark(TimeStampedModel):
         )
 
     def get_favicon_url(self, size=32):
+        return Bookmark.get_favicon_url_static(self.url, size)
 
-        if not self.url:
+    @staticmethod
+    def get_favicon_url_static(url, size=32):
+
+        if not url:
             return ""
 
         p = re.compile("https?://([^/]*)")
 
-        m = p.match(self.url)
+        m = p.match(url)
 
         if m:
             domain = m.group(1)
