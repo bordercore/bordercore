@@ -1,8 +1,11 @@
 from urllib.parse import unquote
 
 from django.conf import settings
+from django.urls import reverse
 
 from lib.util import get_elasticsearch_connection
+
+from .models import Bookmark
 
 SEARCH_LIMIT = 1000
 
@@ -63,6 +66,8 @@ def search(user, search_term):
             "name": x["_source"]["name"],
             "url": x["_source"]["url"],
             "uuid": x["_source"]["uuid"],
+            "favicon_url": Bookmark.get_favicon_url_static(x["_source"]["url"], size=16),
+            "edit_url": reverse("bookmark:update", kwargs={"uuid": x["_source"]["uuid"]})
         }
         for x
         in
