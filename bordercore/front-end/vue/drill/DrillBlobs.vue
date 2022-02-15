@@ -30,7 +30,7 @@
                                         </div>
 
                                         <div class="dropdownmenu d-flex">
-                                            <dropdown-menu v-model="show" transition="translate-fade-down" class="d-none" :right="true">
+                                            <dropdown-menu ref="editNoteMenu" v-model="show" transition="translate-fade-down" class="d-none" :right="true">
                                                 <font-awesome-icon icon="ellipsis-v" />
                                                 <div slot="dropdown">
                                                     <a class="dropdown-item" href="#" @click.prevent="removeBlob(blob.uuid)">Remove</a>
@@ -166,6 +166,7 @@
 
                 self = this;
                 setTimeout( () => {
+                    this.$refs.editNoteMenu[0].closeMenu();
                     self.$refs.input[index].focus();
                 }, 100);
             },
@@ -177,6 +178,7 @@
                 }
 
                 this.$nextTick(() => {
+                    this.$refs.editNoteMenu[0].closeMenu();
                     this.$refs.input[0].focus();
                 });
             },
@@ -261,6 +263,7 @@
 
                         if (this.newQuestion) {
                             blob.note = note;
+                            blob.noteIsEditable = false;
                         } else {
                             doPost(
                                 this,
