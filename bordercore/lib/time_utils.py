@@ -19,6 +19,14 @@ def cleanup(interval, time_unit):
         return "{} {}s ago".format(interval, time_unit)
 
 
+def get_relative_date_from_date(time):
+    """
+    Get a datetime object and return a pretty string like 'an hour ago',
+    'Yesterday', '3 months ago', 'just now', etc
+    """
+    return get_relative_date(time.strftime("%Y-%m-%dT%H:%M:%S.%f%z"))
+
+
 def get_relative_date(time=False):
     """
     Get a datetime string and return a pretty string like 'an hour ago',
