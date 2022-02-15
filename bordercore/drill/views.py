@@ -1,3 +1,4 @@
+import json
 from urllib.parse import unquote
 
 from django import urls
@@ -87,6 +88,7 @@ class QuestionCreateView(FormRequestMixin, CreateView):
         form.save_m2m()
 
         handle_related_bookmarks(obj, self.request)
+        handle_related_blobs(obj, self.request)
 
         review_url = urls.reverse("drill:detail", kwargs={"uuid": obj.uuid})
         messages.add_message(
@@ -101,14 +103,35 @@ class QuestionCreateView(FormRequestMixin, CreateView):
 
 def handle_related_bookmarks(question, request):
 
-    uuids = request.POST.get("related-bookmarks", None)
+    info = request.POST.get("related-bookmarks", None)
 
-    if not uuids:
+    if not info:
         return
 
-    for uuid in uuids.split(","):
-        bookmark = Bookmark.objects.get(uuid=uuid)
-        so = SortOrderQuestionBookmark(question=question, bookmark=bookmark)
+    for bookmark_info in json.loads(info):
+        bookmark = Bookmark.objects.get(uuid=bookmark_info["uuid"])
+        so = SortOrderQuestionBookmark(
+            question=question,
+            bookmark=bookmark,
+            note=bookmark_info["note"]
+        )
+        so.save()
+
+
+def handle_related_blobs(question, request):
+
+    info = request.POST.get("related-blobs", None)
+
+    if not info:
+        return
+
+    for blob_info in json.loads(info):
+        blob = Blob.objects.get(uuid=blob_info["uuid"])
+        so = SortOrderDrillBlob(
+            question=question,
+            blob=blob,
+            note=blob_info["note"]
+        )
         so.save()
 
 

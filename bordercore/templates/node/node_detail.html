@@ -369,14 +369,13 @@
                 handleHover(hovered, evt) {
                     evt.currentTarget.querySelector(".hover-target").classList.toggle("d-flex");
                 },
-                selectBlob(blobUuid) {
-
+                selectBlob(blob) {
                     doPost(
                         this,
                         "{% url "node:add_blob" %}",
                         {
                             "node_uuid": this.$store.state.nodeUuid,
-                            "blob_uuid": blobUuid,
+                            "blob_uuid": blob.uuid,
                         },
                         (response) => {
                             this.$refs.blobList.getBlobList();

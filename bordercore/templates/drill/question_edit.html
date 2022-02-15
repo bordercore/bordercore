@@ -23,7 +23,9 @@
                 ref="relatedBookmarksList"
                 object-uuid="{{ object.uuid }}"
                 model-name="drill.Question"
-                get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=drill.Question"
+                {% if object.uuid %}
+                    get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=drill.Question"
+                {% endif %}
                 create-bookmark-url="{% url 'bookmark-list' %}"
                 search-bookmark-url="{% url 'bookmark:search' %}"
                 get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
@@ -39,12 +41,27 @@
             >
             </related-bookmarks-list>
 
+            <drill-blobs
+                ref="relatedBlobsList"
+                question-uuid="{{ object.uuid }}"
+                get-blob-list-url="{% url 'drill:get_blob_list' '00000000-0000-0000-0000-000000000000' %}"
+                sort-blob-list-url="{% url 'drill:sort_blob_list' %}"
+                add-blob-url="{% url 'drill:add_blob' %}"
+                remove-blob-url="{% url 'drill:remove_blob' %}"
+                edit-blob-note-url="{% url 'drill:edit_blob_note' %}"
+                search-blob-url="{% url 'search:search_names' %}?doc_type=blob,book,document,note"
+                recent-blobs-url="{% url "blob:recent_blobs" %}"
+                :new-question="newQuestion"
+            >
+            </drill-blobs>
+
         </div>
 
         <div class="col-lg-9">
 
             <form @submit.prevent id="question-form" action="{{ request.path }}" method="post">
                 <input type="hidden" name="related-bookmarks" />
+                <input type="hidden" name="related-blobs" />
 
         {% csrf_token %}
 
@@ -129,9 +146,30 @@
             },
             methods: {
                 onClickEdit() {
-                    const uuids = this.$refs.relatedBookmarksList.bookmarkList.map((x) => x.uuid).join(",");
                     const form = document.getElementById("question-form");
-                    form.elements["related-bookmarks"].value = uuids;
+
+                    bookmarkInfo = [];
+                    this.$refs.relatedBookmarksList.bookmarkList.forEach((x) => {
+                        bookmarkInfo.push(
+                            {
+                                "uuid": x.uuid,
+                                "note": x.note
+                            }
+                        );
+                    });
+                    form.elements["related-bookmarks"].value = JSON.stringify(bookmarkInfo);
+
+                    blobInfo = [];
+                    this.$refs.relatedBlobsList.blobList.forEach((x) => {
+                        blobInfo.push(
+                            {
+                                "uuid": x.uuid,
+                                "note": x.note
+                            }
+                        );
+                    });
+                    form.elements["related-blobs"].value = JSON.stringify(blobInfo);
+
                     form.submit();
                 },
                 onClickDelete() {

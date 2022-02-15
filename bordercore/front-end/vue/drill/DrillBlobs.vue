@@ -10,7 +10,7 @@
 
                 <template #content>
                     <ul id="sort-container-tags" class="list-group list-group-flush">
-                        <draggable v-model="blobList" ghost-class="sortable-ghost" draggable=".draggable" @change="onChange">
+                        <draggable v-model="blobList" ghost-class="sortable-ghost" draggable=".draggable" @change="onSort">
                             <transition-group type="transition" class="w-100">
                                 <li v-for="(blob, index) in blobList" v-cloak :key="blob.uuid" v-b-hover="hoverDropdown" class="text-info draggable d-flex align-items-center p-2" :data-uuid="blob.uuid">
                                     <div class="d-flex align-items-center w-100">
@@ -30,7 +30,7 @@
                                         </div>
 
                                         <div class="dropdownmenu d-flex">
-                                            <dropdown-menu v-model="show" transition="translate-fade-down" class="hidden">
+                                            <dropdown-menu v-model="show" transition="translate-fade-down" class="d-none" :right="true">
                                                 <font-awesome-icon icon="ellipsis-v" />
                                                 <div slot="dropdown">
                                                     <a class="dropdown-item" href="#" @click.prevent="removeBlob(blob.uuid)">Remove</a>
@@ -102,6 +102,10 @@
                 default: "url",
                 type: String,
             },
+            newQuestion: {
+                default: false,
+                type: Boolean,
+            },
         },
         data() {
             return {
@@ -110,7 +114,9 @@
             };
         },
         mounted() {
-            this.getBlobList();
+            if (!this.newQuestion) {
+                this.getBlobList();
+            }
         },
         methods: {
             getBlobList() {
@@ -131,12 +137,16 @@
             chooseBlob() {
                 this.$refs.blobSelect.openModal();
             },
-            onChange(evt) {
+            onSort(evt) {
                 const blobUuid = evt.moved.element.uuid;
 
                 // The backend expects the ordering to begin
                 // with 1, not 0, so add 1.
                 const newPosition = evt.moved.newIndex + 1;
+
+                if (this.newQuestion) {
+                    return;
+                }
 
                 doPost(
                     this,
@@ -170,13 +180,20 @@
                     this.$refs.input[0].focus();
                 });
             },
-            selectBlob(blobUuid) {
+            selectBlob(blob) {
+                if (this.newQuestion) {
+                    this.blobList.push(blob);
+                    // Let Vue know that the blob's "noteIsEditable" property is reactive
+                    this.$set(blob, "noteIsEditable", false);
+                    return;
+                }
+
                 doPost(
                     this,
                     this.addBlobUrl,
                     {
                         "question_uuid": this.questionUuid,
-                        "blob_uuid": blobUuid,
+                        "blob_uuid": blob.uuid,
                     },
                     (response) => {
                         this.getBlobList();
@@ -207,6 +224,12 @@
                 }
             },
             removeBlob(blobUuid) {
+                if (this.newQuestion) {
+                    const newBlobList = this.blobList.filter((x) => x.uuid !== blobUuid);
+                    this.blobList = newBlobList;
+                    return;
+                }
+
                 doPost(
                     this,
                     this.removeBlobUrl,
@@ -236,21 +259,24 @@
                             return;
                         }
 
-                        doPost(
-                            this,
-                            this.editBlobNoteUrl,
-                            {
-                                "question_uuid": this.questionUuid,
-                                "blob_uuid": blobUuid,
-                                "note": note,
-                            },
-                            (response) => {
-                                this.getBlobList();
-                            },
-                            "",
-                            "",
-                        );
-
+                        if (this.newQuestion) {
+                            blob.note = note;
+                        } else {
+                            doPost(
+                                this,
+                                this.editBlobNoteUrl,
+                                {
+                                    "question_uuid": this.questionUuid,
+                                    "blob_uuid": blobUuid,
+                                    "note": note,
+                                },
+                                (response) => {
+                                    this.getBlobList();
+                                },
+                                "",
+                                "",
+                            );
+                        }
                         this.editingNote = false;
                     }
                 }

@@ -80,7 +80,7 @@
             },
             select(selection) {
                 // The parent component receives the blob uuid
-                this.$emit("select-blob", selection.uuid);
+                this.$emit("select-blob", selection);
                 $("#modalAddBlob").modal("hide");
 
                 this.$nextTick(() => {
