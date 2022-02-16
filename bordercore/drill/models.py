@@ -55,7 +55,7 @@ class Question(TimeStampedModel):
     is_favorite = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     bookmarks = models.ManyToManyField(Bookmark, through="SortOrderQuestionBookmark")
-    blobs = models.ManyToManyField(Blob, through="SortOrderDrillBlob")
+    blobs = models.ManyToManyField(Blob, through="SortOrderQuestionBlob")
 
     objects = DrillManager()
 
@@ -309,7 +309,7 @@ def remove_bookmark(sender, instance, **kwargs):
     instance.handle_delete()
 
 
-class SortOrderDrillBlob(SortOrderMixin):
+class SortOrderQuestionBlob(SortOrderMixin):
 
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     blob = models.ForeignKey(Blob, on_delete=models.CASCADE)
@@ -326,6 +326,6 @@ class SortOrderDrillBlob(SortOrderMixin):
         )
 
 
-@receiver(pre_delete, sender=SortOrderDrillBlob)
+@receiver(pre_delete, sender=SortOrderQuestionBlob)
 def remove_blob(sender, instance, **kwargs):
     instance.handle_delete()

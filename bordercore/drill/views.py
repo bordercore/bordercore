@@ -21,7 +21,7 @@ from lib.mixins import FormRequestMixin
 from lib.util import parse_title_from_url
 from tag.models import Tag
 
-from .models import (EFACTOR_DEFAULT, Question, SortOrderDrillBlob,
+from .models import (EFACTOR_DEFAULT, Question, SortOrderQuestionBlob,
                      SortOrderQuestionBookmark)
 
 
@@ -127,7 +127,7 @@ def handle_related_blobs(question, request):
 
     for blob_info in json.loads(info):
         blob = Blob.objects.get(uuid=blob_info["uuid"])
-        so = SortOrderDrillBlob(
+        so = SortOrderQuestionBlob(
             question=question,
             blob=blob,
             note=blob_info["note"]
@@ -454,7 +454,7 @@ def get_title_from_url(request):
 def get_blob_list(request, uuid):
 
     question = Question.objects.get(uuid=uuid, user=request.user)
-    blob_list = list(question.blobs.all().only("name", "id").order_by("sortorderdrillblob__sort_order"))
+    blob_list = list(question.blobs.all().only("name", "id").order_by("sortorderquestionblob__sort_order"))
 
     response = {
         "status": "OK",
@@ -462,7 +462,7 @@ def get_blob_list(request, uuid):
             {
                 "name": x.name,
                 "uuid": x.uuid,
-                "note": x.sortorderdrillblob_set.get(question=question).note,
+                "note": x.sortorderquestionblob_set.get(question=question).note,
                 "url": reverse("blob:detail", kwargs={"uuid": x.uuid}),
                 "cover_url": Blob.get_cover_url_static(
                     x.uuid,
@@ -487,8 +487,8 @@ def sort_blob_list(request):
     blob_uuid = request.POST["blob_uuid"]
     new_position = int(request.POST["new_position"])
 
-    so = SortOrderDrillBlob.objects.get(question__uuid=question_uuid, blob__uuid=blob_uuid)
-    SortOrderDrillBlob.reorder(so, new_position)
+    so = SortOrderQuestionBlob.objects.get(question__uuid=question_uuid, blob__uuid=blob_uuid)
+    SortOrderQuestionBlob.reorder(so, new_position)
 
     so.question.modified = timezone.now()
     so.question.save()
@@ -511,7 +511,7 @@ def add_blob(request):
         "message": ""
     }
 
-    if SortOrderDrillBlob.objects.filter(question__uuid=question_uuid, blob__uuid=blob_uuid).exists():
+    if SortOrderQuestionBlob.objects.filter(question__uuid=question_uuid, blob__uuid=blob_uuid).exists():
         response = {
             "message": "Blob already related to this question",
             "status": "Warning"
@@ -520,7 +520,7 @@ def add_blob(request):
         question = Question.objects.get(uuid=question_uuid, user=request.user)
         blob = Blob.objects.get(uuid=blob_uuid)
 
-        so = SortOrderDrillBlob(question=question, blob=blob)
+        so = SortOrderQuestionBlob(question=question, blob=blob)
         so.save()
 
         so.question.modified = timezone.now()
@@ -535,7 +535,7 @@ def remove_blob(request):
     question_uuid = request.POST["question_uuid"]
     blob_uuid = request.POST["blob_uuid"]
 
-    so = SortOrderDrillBlob.objects.get(question__uuid=question_uuid, blob__uuid=blob_uuid)
+    so = SortOrderQuestionBlob.objects.get(question__uuid=question_uuid, blob__uuid=blob_uuid)
     so.delete()
 
     so.question.modified = timezone.now()
@@ -555,7 +555,7 @@ def edit_blob_note(request):
     blob_uuid = request.POST["blob_uuid"]
     note = request.POST["note"]
 
-    so = SortOrderDrillBlob.objects.get(question__uuid=question_uuid, blob__uuid=blob_uuid)
+    so = SortOrderQuestionBlob.objects.get(question__uuid=question_uuid, blob__uuid=blob_uuid)
     so.note = note
     so.save()
 
