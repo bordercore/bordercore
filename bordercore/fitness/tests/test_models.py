@@ -40,7 +40,7 @@ def test_last_workout(auto_login_user, fitness):
 
     assert workout["latest_reps"] == [8, 8, 8, 8]
     assert workout["latest_duration"] == [0, 0, 0, 0]
-    assert workout["latest_weight"] == [220.0, 210.0, 205.0, 200.0]
+    assert workout["latest_weight"] == [200.0, 205.0, 210.0, 220.0]
     assert workout["delta_days"] == 1
 
 

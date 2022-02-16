@@ -58,9 +58,9 @@ class Exercise(models.Model):
 
         info = {
             "recent_data": recent_data,
-            "latest_reps": [x.reps or 0 for x in recent_data][::-1],
-            "latest_weight": [x.weight or 0 for x in recent_data][::-1],
-            "latest_duration": [x.duration or 0 for x in recent_data][::-1],
+            "latest_reps": [x.reps or 0 for x in recent_data],
+            "latest_weight": [x.weight or 0 for x in recent_data],
+            "latest_duration": [x.duration or 0 for x in recent_data],
             "delta_days": int((int(datetime.datetime.now().strftime("%s")) - int(recent_data[0].date.strftime("%s"))) / 86400) + 1,
         }
 
