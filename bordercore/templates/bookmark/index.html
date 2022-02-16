@@ -76,13 +76,6 @@
 
                     </form>
 
-                    <button-group inline-template @get-page="getPage">
-                        <div class="btn-group ml-3">
-                            <input v-if="unPinButtonVisible" type="button" class="btn btn-secondary" value="Unpin" @click="unPin" v-cloak />
-                            <input v-if="pinButtonVisible" type="button" class="btn btn-secondary" value="Pin" @click="pin" v-cloak />
-                        </div>
-                    </button-group>
-
                     <div class="ml-3">
                         <add-button :href="'{% url 'bookmark:create' %}'">
                         </add-button>
@@ -92,7 +85,11 @@
                         <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="my-auto">
                             <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                             <div slot="dropdown">
-                                <a class="dropdown-item" href="{% url 'bookmark:import' %}">
+                                <a v-if="$store.state.pinnedStatus" class="dropdown-item" href="#" @click.prevent="togglePinStatus">
+                                    <font-awesome-icon icon="thumbtack" class="text-primary mr-3"></font-awesome-icon>
+                                    [[ $store.state.pinnedStatus ]]
+                                </a>
+                                <a class="dropdown-item" href=" url 'bookmark:import' %}">
                                     <font-awesome-icon icon="file-import" class="text-primary mr-3"></font-awesome-icon>Import
                                 </a>
                                 <a class="dropdown-item" href="#" @click.prevent="randomize">
@@ -123,7 +120,7 @@
                                             </td>
                                             <td class="bookmark-list-link w-100 p-2">
                                                 <a :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.name) ]]</a>
-                                                <a v-for="tag in bookmark.tags" v-if="tag != selectedTagName" class="tag ml-2 d-inline-block" @click.prevent="onClick" href="#">[[ tag ]]</a>
+                                                <a v-for="tag in bookmark.tags" v-if="tag != $store.state.selectedTagName" class="tag ml-2 d-inline-block" @click.prevent="onClick" href="#">[[ tag ]]</a>
                                                 <div v-if="bookmark.note != null && bookmark.note != ''" class="table-note">
                                                     [[ bookmark.note ]]
                                                 </div>
@@ -220,62 +217,12 @@
 
         const store = new Vuex.Store({
             state: {
-                pinButtonVisible: false,
+                pinnedStatus: null,
                 selectedTagName: null,
-                unPinButtonVisible: false
             },
-            getters: {
-                pinButtonVisible: state => {
-                    return state.pinButtonVisible
-                },
-                unPinButtonVisible: state => {
-                    return state.unPinButtonVisible
-                },
-                selectedTagName: state => {
-                    return state.selectedTagName
-                },
-            },
-            mutations: {
-                pinButtonVisible (state, payload) {
-                    state.pinButtonVisible = payload
-                },
-                unPinButtonVisible (state, payload) {
-                    state.unPinButtonVisible = payload
-                },
-                selectedTagName (state, payload) {
-                    state.selectedTagName = payload
-                }
-            },
+            getters: {},
+            mutations: {},
         });
-
-        const ButtonGroup = {
-            computed: mapGetters(["pinButtonVisible", "unPinButtonVisible"]),
-            methods: {
-                pin(evt) {
-                    const tagName = this.$parent.$refs.search.$refs.simpleSuggest.$refs.suggestComponent.text
-                    document.getElementById("add-to-remote-from-pinned-tagname").value = tagName;
-                    const form = document.querySelector("#search-form");
-                    form.method = "post";
-                    form.action = "{% url 'tag:pin' %}";
-                    form.submit();
-                },
-                unPin(evt) {
-                    document.getElementById("add-to-remote-from-pinned-tagname").value = this.$store.getters.selectedTagName;
-                    const form = document.querySelector("#search-form");
-                    form.method = "post";
-                    form.action = "{% url 'tag:unpin' %}";
-                    form.submit();
-                }
-
-            },
-            mounted() {
-
-                EventBus.$on("selected-pinned-tag", value => {
-                    this.showRemovePin = value;
-                });
-
-            }
-        };
 
         const Search = {
             methods: {
@@ -299,19 +246,17 @@
                     searchTerm = evt.srcElement.value;
 
                     if (searchTerm) {
-                        this.$store.commit("selectedTagName", searchTerm);
+                        this.$store.state.selectedTagName = searchTerm;
                         this.$emit("search-term", searchTerm);
                         EventBus.$emit("select-pinned-tag", null);
-                        this.$store.commit("pinButtonVisible", false)
-                        this.$store.commit("unPinButtonVisible", false)
+                        this.$store.state.pinnedStatus = null;
                     } else {
                         // If the search box is empty, refresh the list with no filters
                         isFiltered = false;
                         this.$emit("get-page", 1);
                         EventBus.$emit("select-pinned-tag", "Untagged");
-                        this.$store.commit("pinButtonVisible", false)
-                        this.$store.commit("unPinButtonVisible", false)
-                        this.$store.commit("selectedTagName", "");
+                        this.$store.state.pinnedStatus = null;
+                        this.$store.state.selectedTagName = "";
                     }
 
                 }
@@ -331,7 +276,6 @@
                 }
             },
             components: {
-                ButtonGroup,
                 Search
             },
             methods: {
@@ -346,15 +290,29 @@
                 },
                 randomize(evt) {
                     EventBus.$emit("select-pinned-tag", null);
-                    this.$store.commit("pinButtonVisible", false)
-                    this.$store.commit("unPinButtonVisible", false)
+                    this.$store.state.pinnedStatus = null;
                     EventBus.$emit("randomize");
+                },
+                togglePinStatus() {
+                    if (this.$store.state.pinnedStatus === "Pin") {
+                        const tagName = this.$refs.search.$refs.simpleSuggest.$refs.suggestComponent.text
+                        document.getElementById("add-to-remote-from-pinned-tagname").value = tagName;
+                        const form = document.getElementById("search-form");
+                        form.method = "post";
+                        form.action = "{% url 'tag:pin' %}";
+                        form.submit();
+                    } else {
+                        document.getElementById("add-to-remote-from-pinned-tagname").value = this.$store.state.selectedTagName;
+                        const form = document.getElementById("search-form");
+                        form.method = "post";
+                        form.action = "{% url 'tag:unpin' %}";
+                        form.submit();
+                    }
                 }
             }
         });
 
         const BookmarkList = {
-            computed: mapGetters(["selectedTagName"]),
             data() {
                 return {
                     bookmarkList: [],
@@ -375,13 +333,13 @@
                         EventBus.$emit("select-pinned-tag", tag.value);
                     } else if (element.classList.contains("selected")) {
 
-                        if (this.$store.getters.selectedTagName) {
+                        if (this.$store.state.selectedTagName) {
                             document.getElementById("bookmark-sidebar").classList.remove("show");
                         }
 
                     } else {
 
-                        if (this.$store.getters.selectedTagName) {
+                        if (this.$store.state.selectedTagName) {
                             noteValue = "";
 
                             var bookmarkUuid = element.dataset.uuid;
@@ -393,8 +351,6 @@
                             }
 
                             EventBus.$emit("setNoteValue", noteValue);
-
-                            // document.getElementById("bookmark-sidebar").classList.add("show");
                         }
 
                     }
@@ -412,7 +368,7 @@
                         this,
                         "{% url "bookmark:sort" %}",
                         {
-                            "tag": this.$store.getters.selectedTagName,
+                            "tag": this.$store.state.selectedTagName,
                             "bookmark_uuid": bookmarkUuid,
                             "position": newPosition
                         },
@@ -478,7 +434,7 @@
                              if (searchTag != null) {
                                  // Only update the tagFilter here, *after* we have a new set of
                                  // updated bookmarks that's appropriate for this tagFilter
-                                 self.$store.commit("selectedTagName", searchTag);
+                                 self.$store.state.selectedTagName = searchTag;
                              }
 
                              self.bookmarkList = bookmarks;
@@ -508,7 +464,7 @@
                     axios.delete("{% url 'bookmark-detail' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', uuid))
                          .then(() => {
 
-                             if (this.$store.getters.selectedTagName) {
+                             if (this.$store.state.selectedTagName) {
                                  document.getElementById("bookmark-sidebar").classList.remove("show");
                              }
 
@@ -620,7 +576,7 @@
 
         new Vue({
             el: "#vue-right-panel",
-            name: "Right Panel",
+            name: "BookmarkListContainer",
             store,
             components: {
                 BookmarkList,
@@ -678,7 +634,7 @@
                         this,
                         "{% url "bookmark:add_note" %}",
                         {
-                            "tag": this.$store.getters.selectedTagName,
+                            "tag": this.$store.state.selectedTagName,
                             "bookmark_uuid": bookmarkUuid,
                             "note": note
                         },
@@ -705,6 +661,7 @@
         }
 
         const TagList = {
+            store,
             data() {
                 return {
                     pinnedTags: [
@@ -738,15 +695,13 @@
                     }
 
                     if (tagName == "Untagged") {
-                        this.$store.commit("selectedTagName", "");
+                        this.$store.state.selectedTagName = "";
                         isFiltered = false;
                         EventBus.$emit("get-page", 1);
-                        this.$store.commit("pinButtonVisible", false)
-                        this.$store.commit("unPinButtonVisible", false)
+                        this.$store.state.pinnedStatus = null;
                     } else {
                         EventBus.$emit("search-tag", tagName);
-                        this.$store.commit("pinButtonVisible", false)
-                        this.$store.commit("unPinButtonVisible", true)
+                        this.$store.state.pinnedStatus = "UnPin";
                     }
                 },
                 getClassName(tagName) {
@@ -780,11 +735,9 @@
                 EventBus.$on("search-tag", tagName => {
 
                     if (!this.pinnedTags.find(element => element.name == tagName)) {
-                        this.$store.commit("pinButtonVisible", true)
-                        this.$store.commit("unPinButtonVisible", false)
+                        this.$store.state.pinnedStatus = "Pin";
                     } else {
-                        this.$store.commit("pinButtonVisible", false)
-                        this.$store.commit("unPinButtonVisible", true)
+                        this.$store.state.pinnedStatus = "UnPin";
                     }
 
                 });
