@@ -127,6 +127,27 @@ a {
   }
 }
 
+// Override Bootstrap's CSS
+.btn-group {
+  padding: 0.25rem !important;
+
+  .btn {
+    line-height: 1.0;
+    &:focus {
+      box-shadow: none !important;
+      outline: none !important;
+    }
+  }
+
+  :not(.active):hover {
+    transform: translateY(-1px);
+  }
+
+  :not(.active) {
+    background-color: #10163a;
+  }
+}
+
 input[type="radio"],
 input[type="checkbox"] {
   width: 1em;
