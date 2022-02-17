@@ -80,6 +80,8 @@ FILE_UPLOAD_PERMISSIONS = 0o664
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = get_secret('SECRET_KEY')
 
+GOOGLE_API_KEY = get_secret("GOOGLE_API_KEY")
+
 for env in ('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_ASSOCIATE_TAG'):
     os.environ[env] = get_secret(env)
 

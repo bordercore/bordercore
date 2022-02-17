@@ -3,6 +3,7 @@ import re
 import uuid
 
 import boto3
+import requests
 from elasticsearch import helpers
 
 from django.conf import settings
@@ -16,6 +17,8 @@ from lib.util import get_elasticsearch_connection
 from tag.models import SortOrderTagBookmark, Tag
 
 from .managers import BookmarkManager
+
+MAX_AGE = 2592000
 
 
 class DailyBookmarkJSONField(JSONField):
@@ -76,6 +79,10 @@ class Bookmark(TimeStampedModel):
 
     def generate_cover_image(self):
 
+        if self.url.startswith("https://www.youtube.com/watch"):
+            self.generate_youtube_cover_image()
+            return
+
         # TODO: move this to settings
         SNS_TOPIC = "arn:aws:sns:us-east-1:192218769908:chromda"
         client = boto3.client("sns")
@@ -90,6 +97,33 @@ class Bookmark(TimeStampedModel):
             Message=json.dumps(message),
         )
 
+    def generate_youtube_cover_image(self):
+        """
+        Use Google's Youtube API to get the video's thumbnail url.
+        Download it and store in S3.
+        """
+
+        m = re.search(r"https://www.youtube.com/watch\?v=(.*)", self.url)
+        if m:
+            youtube_id = m.group(1)
+            api_key = settings.GOOGLE_API_KEY
+
+            r = requests.get(f"https://www.googleapis.com/youtube/v3/videos?id={youtube_id}&key={api_key}&part=snippet,contentDetails,statistics")
+            video_info = r.json()
+
+            s3_resource = boto3.resource("s3")
+            bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+
+            r = requests.get(video_info["items"][0]["snippet"]["thumbnails"]["default"]["url"])
+            object = s3_resource.Object(bucket_name, f"bookmarks/{self.uuid}.jpg")
+            object.put(
+                Body=r.content,
+                ContentType="image/jpeg",
+                ACL="public-read",
+                CacheControl=f"max-age={MAX_AGE}",
+                Metadata={"cover-image": "Yes"}
+            )
+
     def delete_cover_image(self):
         """
         After deletion, remove the bookmark's cover images from S3
@@ -103,12 +137,23 @@ class Bookmark(TimeStampedModel):
         key = f"bookmarks/{self.uuid}-small.png"
         s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key).delete()
 
+        key = f"bookmarks/{self.uuid}.jpg"
+        s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key).delete()
+
     def index_bookmark(self, es=None):
 
         if not es:
             es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
         count, errors = helpers.bulk(es, [self.elasticsearch_document])
+
+    @property
+    def thumbnail_url(self):
+        base = f"{settings.COVER_URL}bookmarks"
+        if self.url.startswith("https://www.youtube.com/watch"):
+            return f"{base}/{self.uuid}.jpg"
+        else:
+            return f"{base}/{self.uuid}-small.png"
 
     @property
     def elasticsearch_document(self):

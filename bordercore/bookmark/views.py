@@ -7,7 +7,6 @@ import lxml.html as lh
 import pytz
 
 from django.apps import apps
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.aggregates import ArrayAgg
@@ -373,7 +372,7 @@ class BookmarkListView(ListView):
                     "note": x.note,
                     "favicon_url": x.get_favicon_url(size=16),
                     "tags": [x.name for x in x.tags.all()],
-                    "thumbnail_url": f"{settings.COVER_URL}bookmarks/{x.uuid}-small.png"
+                    "thumbnail_url": x.thumbnail_url
                 }
             )
 
