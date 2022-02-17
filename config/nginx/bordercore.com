@@ -140,6 +140,24 @@ server {
 
     }
 
+    location /bookmarks/ {
+
+        proxy_pass https://bordercore-blobs.s3.amazonaws.com/bookmarks/;
+        proxy_set_header Host bordercore-blobs.s3.amazonaws.com;
+        proxy_intercept_errors on;
+        proxy_redirect off;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        error_page 403 =200 /default-cover.png;
+
+        location /bookmarks/default-cover.png {
+            internal;
+            root /var/www/html;
+        }
+
+    }
+
     ssl_certificate /etc/letsencrypt/live/blobs.bordercore.com/fullchain.pem; # managed by Certbot
     ssl_certificate_key /etc/letsencrypt/live/blobs.bordercore.com/privkey.pem; # managed by Certbot
 }

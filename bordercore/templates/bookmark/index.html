@@ -76,6 +76,12 @@
 
                     </form>
 
+                    <div class="btn-group ml-3" role="group" aria-label="List View">
+                        <button type="button" class="btn btn-primary" :class="{'active': $store.state.viewType === 'normal' }" @click="switchViewType('normal')">Normal</button>
+                        <button type="button" class="btn btn-primary" :class="{'active': $store.state.viewType === 'compact' }" @click="switchViewType('compact')">Compact</button>
+                    </div>
+
+
                     <div class="ml-3">
                         <add-button :href="'{% url 'bookmark:create' %}'">
                         </add-button>
@@ -114,6 +120,9 @@
                                         <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="bookmark-list w-100" @click="onClick" @mouseenter="rowHovered" @mouseleave="rowUnHovered" v-cloak>
                                             <td class="bookmark-list-date p-2 text-info">
                                                 <span>[[ bookmark.created ]]</span>
+                                            </td>
+                                            <td v-if="$store.state.viewType !== 'compact'" class="bookmark-list-favicon p-2">
+                                                <img :src="bookmark.thumbnail_url + '?foo=bar'" />
                                             </td>
                                             <td class="bookmark-list-favicon p-2">
                                                 <span v-html="bookmark.favicon_url"></span>
@@ -219,6 +228,7 @@
             state: {
                 pinnedStatus: null,
                 selectedTagName: null,
+                viewType: "{{ request.session.bookmark_view_type|default:'normal' }}",
             },
             getters: {},
             mutations: {},
@@ -292,6 +302,19 @@
                     EventBus.$emit("select-pinned-tag", null);
                     this.$store.state.pinnedStatus = null;
                     EventBus.$emit("randomize");
+                },
+                switchViewType(type) {
+                    this.$store.state.viewType = type;
+                    doPost(
+                        this,
+                        "{% url "accounts:store_in_session" %}",
+                        {
+                            "bookmark_view_type": type
+                        },
+                        (response) => {},
+                        "",
+                        ""
+                    );
                 },
                 togglePinStatus() {
                     if (this.$store.state.pinnedStatus === "Pin") {
