@@ -3,7 +3,7 @@ backports-abc==0.4
 backports.ssl-match-hostname==3.5.0.1
 beautifulsoup4==4.9.0
 billiard==3.6.0.0
-boto3==1.9.156
+boto3==1.9.201
 certifi==2019.6.16
 Django==3.2.5
 djangorestframework==3.13.1
@@ -12,7 +12,7 @@ https://github.com/bordercore/PyOrgMode/archive/master.zip
 elasticsearch==7.0.5
 git+https://github.com/bordercore/elasticsearch-dsl-py.git@7.1.0
 factory-boy==2.12.0
-feedparser==5.2.1
+feedparser==6.0.2
 futures==3.0.3
 google-api-python-client==1.6.2
 httplib2==0.18.0
