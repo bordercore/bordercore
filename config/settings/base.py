@@ -5,8 +5,6 @@ import os
 import sys
 from pathlib import Path
 
-from django.core.exceptions import ImproperlyConfigured
-
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 PROJECT_DIR = BASE_DIR / "bordercore"
@@ -14,19 +12,14 @@ PROJECT_DIR = BASE_DIR / "bordercore"
 sys.path.insert(0, str(PROJECT_DIR / "apps"))
 sys.path.insert(0, str(PROJECT_DIR / "lib"))
 
-# JSON-based secrets module
-with open('{}/config/settings/secrets.json'.format(BASE_DIR)) as f:
-    secrets = json.loads(f.read())
-
-
-def get_secret(setting, secrets=secrets):
-    '''Get the secret variable or return explicit exception.'''
-    try:
-        return secrets[setting]
-    except KeyError:
-        error_msg = 'Set the {0} environment variable'.format(setting)
-        raise ImproperlyConfigured(error_msg)
-
+# Read JSON-based secrets module, if present, and populate the environment
+try:
+    with open('{}/config/settings/secrets.json'.format(BASE_DIR)) as f:
+        # secrets = json.loads(f.read())
+        for key, value in json.loads(f.read()).items():
+            os.environ[key] = value
+except FileNotFoundError:
+    pass
 
 ADMINS = (
     ('F. Jerrell Schivers', 'jerrell@bordercore.com'),
@@ -34,19 +27,12 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-# Set this so we can read it later in some code shared between
-#  Django and a lambda. In the lambda we don't have access to any
-#  Django modules, and thus can't get in the usual way by
-#  importing settings from django.conf. So use the environment
-#  instead.
-os.environ["DATABASE_PASSWORD"] = get_secret('DATABASE_PASSWORD')
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'bordercore',
         'USER': 'bordercore',
-        'PASSWORD': get_secret('DATABASE_PASSWORD'),
+        'PASSWORD': os.environ['DATABASE_PASSWORD'],
         'HOST': 'bordercore.cvkm90zuldto.us-east-1.rds.amazonaws.com',
         'PORT': '',
     }
@@ -78,12 +64,9 @@ USE_TZ = True
 FILE_UPLOAD_PERMISSIONS = 0o664
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = get_secret('SECRET_KEY')
+SECRET_KEY = os.environ['SECRET_KEY']
 
-GOOGLE_API_KEY = get_secret("GOOGLE_API_KEY")
-
-for env in ('AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_ASSOCIATE_TAG'):
-    os.environ[env] = get_secret(env)
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
 
 USE_S3 = True
 AWS_STORAGE_BUCKET_NAME = "bordercore-blobs"

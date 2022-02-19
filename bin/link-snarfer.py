@@ -39,7 +39,7 @@ def get_drf_token():
 
     with open(f"{settings.BASE_DIR}/config/settings/secrets.json") as f:
         secrets = json.loads(f.read())
-    return secrets["DRF_TOKEN"]
+    return secrets["DRF_TOKEN_JERRELL"]
 
 
 def store_email(title, lines):
