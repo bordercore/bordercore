@@ -205,6 +205,8 @@ LOGIN_URL = "/accounts/login/"
 ELASTICSEARCH_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT", "http://localhost:9200")
 ELASTICSEARCH_INDEX = os.environ.get("ELASTICSEARCH_INDEX", "bordercore")
 
+DJANGO_LOG_DIR = os.environ.get("DJANGO_LOG_DIR", "/var/log/django")
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -228,7 +230,7 @@ LOGGING = {
         'file': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': '/var/log/django/error.log',
+            'filename': f'{DJANGO_LOG_DIR}/error.log',
         }
     },
     'loggers': {
