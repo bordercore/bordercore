@@ -88,8 +88,7 @@ class Bookmark(TimeStampedModel):
             self.generate_youtube_cover_image()
             return
 
-        # TODO: move this to settings
-        SNS_TOPIC = "arn:aws:sns:us-east-1:192218769908:chromda"
+        SNS_TOPIC = settings.SNS_TOPIC_ARN
         client = boto3.client("sns")
 
         message = {

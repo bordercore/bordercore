@@ -75,6 +75,7 @@ AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
 AWS_LOCATION = "django"
 INDEX_BLOB_TOPIC_ARN = "arn:aws:sns:us-east-1:192218769908:IndexBlob"
 CREATE_COLLECTION_THUMBNAIL_TOPIC_ARN = "arn:aws:sns:us-east-1:192218769908:CreateCollectionThumbnail"
+SNS_TOPIC_ARN = "arn:aws:sns:us-east-1:192218769908:chromda"
 
 os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 
