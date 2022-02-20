@@ -372,7 +372,8 @@ class BookmarkListView(ListView):
                     "note": x.note,
                     "favicon_url": x.get_favicon_url(size=16),
                     "tags": [x.name for x in x.tags.all()],
-                    "thumbnail_url": x.thumbnail_url
+                    "thumbnail_url": x.thumbnail_url,
+                    "video_duration": x.video_duration
                 }
             )
 

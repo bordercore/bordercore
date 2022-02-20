@@ -1,8 +1,10 @@
 import json
+import logging
 import re
 import uuid
 
 import boto3
+import isodate
 import requests
 from elasticsearch import helpers
 
@@ -13,11 +15,13 @@ from django.db.models import JSONField
 from django.db.models.signals import m2m_changed
 
 from lib.mixins import TimeStampedModel
+from lib.time_utils import convert_seconds
 from lib.util import get_elasticsearch_connection
 from tag.models import SortOrderTagBookmark, Tag
 
 from .managers import BookmarkManager
 
+log = logging.getLogger(f"bordercore.{__name__}")
 MAX_AGE = 2592000
 
 
@@ -46,6 +50,7 @@ class Bookmark(TimeStampedModel):
     last_check = models.DateTimeField(null=True)
     last_response_code = models.IntegerField(null=True)
     importance = models.IntegerField(default=1)
+    data = JSONField(null=True, blank=True)
 
     created = models.DateTimeField(db_index=True, auto_now_add=True)
 
@@ -111,10 +116,22 @@ class Bookmark(TimeStampedModel):
             r = requests.get(f"https://www.googleapis.com/youtube/v3/videos?id={youtube_id}&key={api_key}&part=snippet,contentDetails,statistics")
             video_info = r.json()
 
+            # Store the video duration
+            try:
+                duration = video_info["items"][0]["contentDetails"]["duration"]
+                duration_secs = isodate.parse_duration(duration).seconds
+                if self.data:
+                    self.data["video_duration"] = duration_secs
+                else:
+                    self.data = {"video_duration": duration_secs}
+                self.save()
+            except KeyError as e:
+                log.warn(f"Can't parse duration: {e}")
+
             s3_resource = boto3.resource("s3")
             bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 
-            r = requests.get(video_info["items"][0]["snippet"]["thumbnails"]["default"]["url"])
+            r = requests.get(video_info["items"][0]["snippet"]["thumbnails"]["medium"]["url"])
             object = s3_resource.Object(bucket_name, f"bookmarks/{self.uuid}.jpg")
             object.put(
                 Body=r.content,
@@ -154,6 +171,14 @@ class Bookmark(TimeStampedModel):
             return f"{base}/{self.uuid}.jpg"
         else:
             return f"{base}/{self.uuid}-small.png"
+
+    @property
+    def video_duration(self):
+
+        if self.data and "video_duration" in self.data:
+            return convert_seconds(self.data["video_duration"])
+        else:
+            return ""
 
     @property
     def elasticsearch_document(self):

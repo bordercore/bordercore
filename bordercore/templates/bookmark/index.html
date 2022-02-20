@@ -117,26 +117,29 @@
                             <table id="bookmark-list" class="w-100">
                                 <tbody is="draggable" v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" :disabled="disableSort">
                                     <transition-group type="transition">
-                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="bookmark-list w-100" @click="onClick" @mouseenter="rowHovered" @mouseleave="rowUnHovered" v-cloak>
-                                            <td class="bookmark-list-date p-2 text-info">
+                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="bookmark-list w-100" @click="onClick" @mouseenter="rowHovered" @mouseleave="rowUnHovered" v-b-hover="handleYoutubeHover" v-cloak>
+                                            <td class="bookmark-list-date p-2 text-info align-top">
                                                 <span>[[ bookmark.created ]]</span>
                                             </td>
                                             <td v-if="$store.state.viewType !== 'compact'" class="bookmark-list-favicon p-2">
-                                                <img :src="bookmark.thumbnail_url + '?foo=bar'" />
+                                                <img width="120" height="67" :src="bookmark.thumbnail_url + '?foo=bar'" />
                                             </td>
-                                            <td class="bookmark-list-favicon p-2">
+                                            <td class="bookmark-list-favicon p-2 align-top">
                                                 <span v-html="bookmark.favicon_url"></span>
                                             </td>
-                                            <td class="bookmark-list-link w-100 p-2">
+                                            <td class="bookmark-list-link w-100 p-2 align-top position-relative">
                                                 <a :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.name) ]]</a>
                                                 <a v-for="tag in bookmark.tags" v-if="tag != $store.state.selectedTagName" class="tag ml-2 d-inline-block" @click.prevent="onClick" href="#">[[ tag ]]</a>
                                                 <div v-if="bookmark.note != null && bookmark.note != ''" class="table-note">
                                                     [[ bookmark.note ]]
                                                 </div>
+                                                <div class="yt-hover-target text-secondary position-absolute d-none" v-if="bookmark.url.startsWith('https://www.youtube.com/watch') && $store.state.viewType === 'normal'">
+                                                    Duration: [[ bookmark.video_duration ]]
+                                                </div>
                                             </td>
-                                            <td>
+                                            <td class="p-2">
                                                 <div class="dropdownmenu small mr-4">
-                                                    <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="hidden">
+                                                    <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="d-none">
                                                         <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                                         <div slot="dropdown">
                                                             <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(bookmark.uuid)">Update</a>
@@ -409,6 +412,21 @@
                         return el.innerText
                     });
                 },
+                getVideoDuration(data) {
+                    if (data !== null) {
+                        return data.video_duration;
+                    }
+                },
+                handleYoutubeHover(hovered, evt) {
+                    if (!evt.currentTarget.querySelector(".yt-hover-target")) {
+                        return;
+                    }
+                    if (hovered) {
+                        evt.currentTarget.querySelector(".yt-hover-target").classList.remove("d-none");
+                    } else {
+                        evt.currentTarget.querySelector(".yt-hover-target").classList.add("d-none");
+                    }
+                },
                 getBookmarkList({ pageNumber=null, searchTerm=null, searchTag=null, randomize=false } = {}) {
                     var self = this;
 
@@ -472,10 +490,10 @@
                          });
                 },
                 rowHovered(evt) {
-                    evt.currentTarget.querySelector(".dropdown").classList.remove("hidden");
+                    evt.currentTarget.querySelector(".dropdown").classList.remove("d-none");
                 },
                 rowUnHovered(evt) {
-                    evt.currentTarget.querySelector(".dropdown").classList.add("hidden");
+                    evt.currentTarget.querySelector(".dropdown").classList.add("d-none");
                 },
                 onClickUpdate(uuid) {
                     window.location="{% url 'bookmark:update' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
