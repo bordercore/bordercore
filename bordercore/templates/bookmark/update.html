@@ -10,6 +10,14 @@
 
         <div class="col-lg-3 d-flex flex-column">
 
+            {% if object %}
+            <div class="card-body p-3 flex-grow-0">
+                <div class="d-flex justify-content-center">
+                    <img src="{{ object.thumbnail_url }}?foo=bar" class="mw-100" />
+                </div>
+            </div>
+            {% endif %}
+
             <div v-if="related_questions.length > 0" class="d-flex" :class="{'flex-grow-1': related_blobs.length === 0 && related_nodes.length === 0}">
                 <card title="Related Questions">
                     <template v-slot:content>
