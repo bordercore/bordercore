@@ -71,6 +71,10 @@ def temp_blob_directory():
     BLOBS_DIR = f"{os.environ.get('EFS_DIR', '/tmp')}/blobs"
     os.makedirs(BLOBS_DIR, exist_ok=True)
 
+    yield
+
+    os.rmdir(BLOBS_DIR)
+
 
 @pytest.fixture()
 def aws_credentials():

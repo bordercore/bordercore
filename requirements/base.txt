@@ -16,7 +16,7 @@ feedparser==6.0.2
 futures==3.0.3
 google-api-python-client==1.6.2
 httplib2==0.18.0
-humanize==2.0.0
+humanize==3.7.1
 instaloader==4.8.1
 isodate==0.6.1
 lxml==4.3.3
