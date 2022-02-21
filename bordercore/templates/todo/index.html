@@ -98,8 +98,12 @@
                             <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="text-center">
                                 <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                 <div slot="dropdown">
-                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(data.value)">Update</a>
-                                    <a class="dropdown-item" href="#" @click.prevent="onClickDelete(data.value)">Delete</a>
+                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(data.value)">
+                                        <font-awesome-icon icon="pencil-alt" class="text-primary mr-3"></font-awesome-icon>Update
+                                    </a>
+                                    <a class="dropdown-item" href="#" @click.prevent="onClickDelete(data.value)">
+                                        <font-awesome-icon icon="times" class="text-primary mr-3"></font-awesome-icon>Delete
+                                    </a>
                                 </div>
                             </dropdown-menu>
                         </div>
