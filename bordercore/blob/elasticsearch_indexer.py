@@ -42,8 +42,6 @@ FILE_TYPES_TO_INGEST = [
 logging.getLogger().setLevel(logging.INFO)
 log = logging.getLogger(__name__)
 
-s3_client = boto3.client("s3")
-
 
 class ESBlob(Document_ES):
     uuid = Text()
@@ -105,7 +103,6 @@ def get_blob_info(**kwargs):
 
     # Ignore .netrc files. Useful for local debugging.
     session.trust_env = False
-
     r = session.get(f"https://www.bordercore.com/api/{prefix}/{param}/", headers=headers)
 
     if r.status_code != 200:
@@ -138,6 +135,7 @@ def get_blob_contents_from_s3(blob):
 
     blob_contents = BytesIO()
     s3_key = f'{S3_KEY_PREFIX}/{blob["uuid"]}/{blob["file"]}'
+    s3_client = boto3.client("s3")
     s3_client.download_fileobj(S3_BUCKET_NAME, s3_key, blob_contents)
 
     blob_contents.seek(0)

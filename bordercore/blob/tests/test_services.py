@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 from faker import Factory as FakerFactory
 from instaloader.instaloader import Instaloader
 
+from blob.models import Blob
 from blob.services import (get_authors, get_recent_blobs, import_artstation,
                            import_instagram, import_newyorktimes, parse_date,
                            parse_shortcode)
@@ -63,6 +64,7 @@ def test_import_instagram(auto_login_user, monkeypatch):
 
     mock_post = MockInstaloaderPostResponse(url=url, shortcode=shortcode)
 
+    monkeypatch.setattr(Blob, "index_blob", mock)
     monkeypatch.setattr(Instaloader, "login", mock)
     monkeypatch.setattr(Instaloader, "download_pic", mock)
     monkeypatch.setattr(os, "rename", mock)
@@ -111,6 +113,7 @@ def test_import_artstation(mock_get_sha1sum, mock_requests, auto_login_user, mon
     mock_requests.return_value.json.return_value = artstation_json
 
     monkeypatch.setattr(urllib.request, "urlretrieve", mock)
+    monkeypatch.setattr(Blob, "index_blob", mock)
 
     # TODO: mock NamedTemporaryFile() to prevent a temp file from being created
     # mock_temp_file = MockNamedTemporaryFile()
@@ -171,7 +174,11 @@ def test_import_newyorktimes(mock_requests, auto_login_user, monkeypatch):
         }
     }
 
+    def mock(*args, **kwargs):
+        pass
+
     mock_requests.return_value.json.return_value = newyorktimes_json
+    monkeypatch.setattr(Blob, "index_blob", mock)
 
     blob = import_newyorktimes(user, url)
 

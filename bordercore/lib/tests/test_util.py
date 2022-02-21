@@ -78,7 +78,7 @@ def test_get_missing_blob_ids(auto_login_user):
     assert get_missing_blob_ids(expected, found) == "d77befd1-9172-4872-b527-628217f25d89"
 
 
-def test_get_missing_bookmark_ids(auto_login_user):
+def test_get_missing_bookmark_ids(auto_login_user, monkeypatch):
 
     user, _ = auto_login_user()
 
@@ -106,6 +106,11 @@ def test_get_missing_bookmark_ids(auto_login_user):
             ]
         }
     }
+
+    def mock(*args, **kwargs):
+        pass
+
+    monkeypatch.setattr(Bookmark, "generate_cover_image", mock)
 
     expected = [
         Bookmark.objects.create(
