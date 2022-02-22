@@ -80,7 +80,7 @@ class TagSearchPage:
 class NoteSearchPage:
 
     SEARCH_INPUT = (By.CSS_SELECTOR, "input[id='top-simple-suggest']")
-    SEARCH_RESULT_COUNT = (By.CSS_SELECTOR, "#left-panel h3")
+    SEARCH_RESULT_COUNT = (By.CSS_SELECTOR, "#left-panel ul[class*='note-search-result'] li")
 
     def __init__(self, browser):
         self.browser = browser
@@ -95,4 +95,4 @@ class NoteSearchPage:
         """
         Find the search result count
         """
-        element = self.browser.find_elements(*self.SEARCH_RESULT_COUNT)
+        return len(self.browser.find_elements(*self.SEARCH_RESULT_COUNT))

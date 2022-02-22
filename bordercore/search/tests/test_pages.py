@@ -5,8 +5,9 @@ import pytest
 from django.urls import reverse
 
 try:
-    from .pages.search import SearchPage, TagSearchPage
+    from .pages.search import SearchPage, TagSearchPage, NoteSearchPage
     from selenium.webdriver.common.keys import Keys
+    from selenium.webdriver.common.action_chains import ActionChains
 except (ModuleNotFoundError, NameError):
     # Don't worry if these imports don't exist in production
     pass
@@ -57,7 +58,7 @@ def test_tag_search(blob_text_factory, login, live_server, browser, settings):
 
 
 @pytest.mark.parametrize("login", [reverse("homepage:homepage")], indirect=True)
-def test_note_search(blob_text_factory, login, live_server, browser, settings):
+def test_note_search(blob_note, login, live_server, browser, settings):
 
     page = NoteSearchPage(browser)
 
@@ -65,13 +66,16 @@ def test_note_search(blob_text_factory, login, live_server, browser, settings):
     time.sleep(1)
 
     search_input = page.search_input()
-    search_input.send_keys("django")
+    # Search for the first two words from the note
+    search_input.send_keys(" ".join(blob_note[0].content.split()[:2]))
 
     # Specify notes search
     action = ActionChains(browser)
     action.move_to_element(search_input)
     action.key_down(Keys.ALT).send_keys("n").perform()
 
+    time.sleep(2)
     search_input.send_keys(Keys.RETURN)
 
-    assert page.search_result_count() == 3
+    time.sleep(2)
+    assert page.search_result_count() == 1
