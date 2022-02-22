@@ -25,9 +25,6 @@ ELASTICSEARCH_INDEX = os.environ.get("ELASTICSEARCH_INDEX", "bordercore")
 S3_KEY_PREFIX = "blobs"
 S3_BUCKET_NAME = "bordercore-blobs"
 
-EFS_DIR = os.environ.get("EFS_DIR", "/tmp")
-BLOBS_DIR = f"{EFS_DIR}/blobs"
-
 DRF_TOKEN = os.environ.get("DRF_TOKEN")
 
 FILE_TYPES_TO_INGEST = [
@@ -280,7 +277,8 @@ def index_blob(**kwargs):
 
         # Dump the blob contents to a file. We do this rather than process in
         #  memory because some large blobs are too big to handle this way.
-        filename = f"{BLOBS_DIR}/{uuid.uuid4()}-{str(blob_info['file'])}"
+        EFS_DIR = os.environ.get("EFS_DIR", "/tmp/blobs")
+        filename = f"{EFS_DIR}/{uuid.uuid4()}-{str(blob_info['file'])}"
         with open(filename, "wb") as file:
             newFileByteArray = bytearray(contents)
             file.write(newFileByteArray)

@@ -4,6 +4,7 @@ BUCKET=bordercore-blobs
 TEMPLATE_FILE=packaged.yaml
 SAM=~/.local/bin/sam
 EFS_DIR=/mnt/efs
+BLOB_DIR=/mnt/efs/blobs
 EFS_ACCESS_POINT=fsap-034583ce1fe88d1b4
 
 # We copy the dependencies rather than use symlinks because
@@ -23,4 +24,5 @@ $SAM deploy \
      --capabilities CAPABILITY_IAM \
      --parameter-overrides ParameterKey=DRFTokenParameter,ParameterValue=${DRF_TOKEN} \ ParameterKey=ElasticsearchEndpointParameter,ParameterValue=${ELASTICSEARCH_ENDPOINT} \
      ParameterKey=EFSMountPointParameter,ParameterValue=$EFS_DIR \
+     ParameterKey=BlobDirParameter,ParameterValue=$BLOB_DIR \
      ParameterKey=EFSAccessPointParameter,ParameterValue=$EFS_ACCESS_POINT

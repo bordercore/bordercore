@@ -2,6 +2,7 @@ import datetime
 import hashlib
 import os
 import random
+import tempfile
 from datetime import timedelta
 from io import BytesIO
 from pathlib import Path
@@ -68,12 +69,12 @@ def temp_blob_directory():
     """
     Create the temporary directory needed by the Elasticsearch indexer
     """
-    BLOBS_DIR = f"{os.environ.get('EFS_DIR', '/tmp')}/blobs"
-    os.makedirs(BLOBS_DIR, exist_ok=True)
+    temp_dir = tempfile.TemporaryDirectory()
+    os.environ["EFS_DIR"] = temp_dir.name
 
     yield
 
-    os.rmdir(BLOBS_DIR)
+    # Note: The temp directory is automatically removed once the test has finished
 
 
 @pytest.fixture()

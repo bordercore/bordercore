@@ -114,7 +114,7 @@ def test_duration_humanized():
     assert Blob.get_duration_humanized(6918.356) == "1:55:18"
 
 
-def test_clone(monkeypatch_blob, blob_pdf_factory, collection):
+def test_clone(temp_blob_directory, monkeypatch_blob, blob_pdf_factory, collection):
 
     cloned_blob = blob_pdf_factory[0].clone()
     assert cloned_blob.date == blob_pdf_factory[0].date
