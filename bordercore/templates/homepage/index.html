@@ -156,7 +156,10 @@
                         <template v-slot:content>
                             <ul class="list-group interior-borders">
                                 {% for song in music %}
-                                    <li class="list-group-item list-group-item-secondary text-info">{{ song.song.title }} <strong>{{ song.song.artist }}</strong></li>
+                                    <li class="list-group-item list-group-item-secondary text-info">
+                                        {{ song.title }}
+                                        <a class="ml-2" href="{% url 'music:artist_detail' song.artist.uuid %}">{{ song.artist.name }}</a>
+                                    </li>
                                 {% empty %}
                                     <li class="list-group-item list-group-item-secondary">No music listened to.</li>
                                 {% endfor %}

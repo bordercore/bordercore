@@ -8,6 +8,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import render
 
@@ -18,7 +19,7 @@ from drill.models import Question
 from fitness.models import ExerciseUser
 from lib.calendar_events import Calendar
 from lib.util import get_elasticsearch_connection
-from music.models import Listen
+from music.models import Song
 from quote.models import Quote
 from todo.models import Todo
 
@@ -34,7 +35,13 @@ def homepage(request):
     tasks = Todo.objects.filter(user=request.user, priority=Todo.get_priority_value("High")).prefetch_related("tags")[:5]
 
     # Get some recently played music
-    music = Listen.objects.filter(user=request.user).select_related("song").distinct().order_by("-created")[:3]
+    music = Song.objects.filter(
+        user=request.user
+    ).select_related(
+        "artist"
+    ).order_by(
+        F("last_time_played").desc(nulls_last=True)
+    )[:5]
 
     # Choose a random image
     random_image_info = None

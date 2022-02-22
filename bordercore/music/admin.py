@@ -1,8 +1,7 @@
 from django.contrib import admin
 
-from music.models import Album, Listen, Song, SongSource
+from music.models import Album, Song, SongSource
 
-admin.site.register(Listen)
 admin.site.register(Song)
 admin.site.register(SongSource)
 

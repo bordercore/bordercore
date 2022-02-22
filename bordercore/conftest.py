@@ -41,7 +41,7 @@ from drill.tests.factories import QuestionFactory  # isort:skip
 from fitness.models import Exercise, ExerciseUser, Muscle, MuscleGroup, Data, Workout  # isort:skip
 from feed.tests.factories import FeedFactory  # isort:skip
 from metrics.models import Metric, MetricData  # isort:skip
-from music.models import Listen, SongSource, PlaylistItem  # isort:skip
+from music.models import SongSource, PlaylistItem  # isort:skip
 from music.tests.factories import SongFactory, AlbumFactory, PlaylistFactory  # isort:skip
 from node.models import SortOrderNodeBookmark, SortOrderNodeBlob  # isort:skip
 from node.tests.factories import NodeFactory  # isort:skip
@@ -540,9 +540,6 @@ def song(auto_login_user, song_source, tag):
     song_0.tags.add(tag[0])
     song_1 = SongFactory(album=album)
     song_2 = SongFactory()
-
-    listen = Listen(user=user, song=song_2)
-    listen.save()
 
     yield [song_0, song_1, song_2]
 

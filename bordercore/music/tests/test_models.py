@@ -4,18 +4,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from music.models import Listen, Song
+from music.models import Song
 
 pytestmark = pytest.mark.django_db
-
-
-def test_listen_to(auto_login_user, song):
-
-    song[0].listen_to()
-
-    assert song[0].times_played == 1
-    assert Listen.objects.all().count() == 2
-    assert Listen.objects.first().song == song[0]
 
 
 def test_get_id3_info(auto_login_user, song):

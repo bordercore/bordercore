@@ -31,21 +31,20 @@ from lib.util import remove_non_ascii_characters
 from music.services import search as search_service
 
 from .forms import AlbumForm, PlaylistForm, SongForm
-from .models import Album, Artist, Listen, Playlist, PlaylistItem, Song
+from .models import Album, Artist, Playlist, PlaylistItem, Song
 from .services import get_playlist_counts, get_playlist_songs
 
 
 @login_required
 def music_list(request):
 
-    # Get a list of recently played songs
-    recent_songs = Listen.objects.filter(
+    recent_songs = Song.objects.filter(
         user=request.user
     ).select_related(
-        "song"
-    ).select_related(
-        "song__artist"
-    ).distinct().order_by("-created")[:10]
+        "artist"
+    ).order_by(
+        F("last_time_played").desc(nulls_last=True)
+    )[:10]
 
     # Get a random album to feature
     random_album = Album.objects.filter(user=request.user).select_related("artist").order_by("?").first()
