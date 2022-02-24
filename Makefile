@@ -52,6 +52,11 @@ test_functional: reset_elasticsearch
 	ELASTICSEARCH_INDEX=$(ELASTICSEARCH_INDEX_TEST) ELASTICSEARCH_ENDPOINT=$(ELASTICSEARCH_ENDPOINT_TEST) \
 	$(VIRTUALENV)python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test-list functional
 
+test_coverage:
+	ELASTICSEARCH_INDEX=$(ELASTICSEARCH_INDEX_TEST) ELASTICSEARCH_ENDPOINT=$(ELASTICSEARCH_ENDPOINT_TEST) \
+	$(VIRTUALENV)python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test-list coverage
+
+
 reset_elasticsearch:
 # Delete the Elasticsearch test instance and re-populate its mappings
 	curl --no-progress-meter -XDELETE "$(ELASTICSEARCH_ENDPOINT_TEST)/$(ELASTICSEARCH_INDEX_TEST)/" > /dev/null

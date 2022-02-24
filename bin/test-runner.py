@@ -78,6 +78,23 @@ def run_test(test, coverage, verbose=False):
                 ]
             )
 
+    elif test == "coverage":
+
+        args = {
+            "name": "Bordercore Test Coverage",
+            "command": [
+                f"{os.environ.get('VIRTUALENV')}/pytest",
+                "-n",
+                "5",
+                "-m",
+                "not data_quality",
+                f"{os.environ.get('BORDERCORE_HOME')}/",
+                f"--cov={os.environ.get('BORDERCORE_HOME')}",
+                "--cov-report=html",
+                f"--cov-config={os.environ.get('BORDERCORE_HOME')}/../.coveragerc"
+            ]
+        }
+
     elif test == "functional":
 
         args = {
@@ -126,7 +143,9 @@ def run_test(test, coverage, verbose=False):
         print(f"Running test {args['name']}")
 
     test_output = subprocess.run(args["command"], capture_output=True)
-    parse_test_report(args["name"], str(test_output))
+
+    if coverage:
+        parse_test_report(args["name"], str(test_output))
 
     if test == "unit" and coverage:
         parse_coverage_report()
