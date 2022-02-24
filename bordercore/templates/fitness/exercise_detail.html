@@ -28,11 +28,12 @@
 
         <div class="col-lg-3 d-flex flex-column" id="vue-app-left">
 
-            <card title="" class="absolute flex-grow-0" v-b-hover="handleActivityCardHover">
+            <card title="" class="absolute flex-grow-0" {% if activity_info %}v-b-hover="handleActivityCardHover"{% endif %}>
                 <template #content>
                     <div class="d-flex flex-column">
                         <div v-if="showHistoryMessage" class="text-info mb-2 d-flex flex-column">
                             <div class="d-flex flex-column">
+                                {% if activity_info %}
                                 <div class="d-flex">
                                     <div>
                                       Started
@@ -57,6 +58,7 @@
                                         every [[ frequency ]] days
                                     </strong>
                                 </div>
+                                {% endif %}
                             </div>
                         </div>
                     <div class="mt-3">
@@ -64,6 +66,7 @@
                             <font-awesome-icon v-if="isActiveExercise" icon="check" class="mr-2"></font-awesome-icon>[[ activeButtonValue ]]
                         </button>
                     </div>
+                    {% if activity_info %}
                     <div class="dropdownmenu hidden hover-target">
                         <dropdown-menu v-model="showActivityMenu" transition="translate-fade-down">
                             <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
@@ -77,6 +80,7 @@
                             </div>
                         </dropdown-menu>
                     </div>
+                    {% endif %}
                     </div>
                 </template>
             </card>
@@ -374,6 +378,7 @@
 
         new Vue({
             el: "#vue-app-left",
+            name: "LeftPanel",
             data() {
                 return {
                     isActiveExercise: {% if activity_info %}true{% else %}false{% endif %},
@@ -392,7 +397,7 @@
                             label: "Last Active",
                         }
                     ],
-                    frequency: {{ activity_info.0.frequency.days }}
+                    frequency: {% if activity_info %}{{ activity_info.0.frequency.days }}{% else %}null{% endif %}
                 }
             },
             methods: {

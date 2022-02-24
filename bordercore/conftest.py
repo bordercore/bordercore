@@ -348,6 +348,10 @@ def fitness(auto_login_user):
     muscle = Muscle.objects.create(name="Latissimus Dorsi", muscle_group=muscle_group)
     exercise_1 = Exercise.objects.create(name="Pull Ups")
     exercise_1.muscle.add(muscle)
+    workout = Workout.objects.create(user=user, exercise=exercise_1)
+    Data.objects.create(workout=workout, weight=0, reps=12)
+    Data.objects.create(workout=workout, weight=0, reps=11)
+    Data.objects.create(workout=workout, weight=0, reps=8)
 
     muscle_group = MuscleGroup.objects.create(name="Legs")
     muscle = Muscle.objects.create(name="Glutes", muscle_group=muscle_group)

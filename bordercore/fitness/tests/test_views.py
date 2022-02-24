@@ -21,6 +21,13 @@ def test_fitness_exercise_detail(auto_login_user, fitness):
 
     assert resp.status_code == 200
 
+    # Test an inactive exercise
+
+    url = urls.reverse("fitness:exercise_detail", kwargs={"exercise_uuid": fitness[1].uuid})
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+
 
 def test_fitness_add(auto_login_user, fitness):
 
