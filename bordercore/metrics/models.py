@@ -37,7 +37,8 @@ class Metric(models.Model):
                 if "test_failures" in metric.latest_result:
                     failed_test_count += int(metric.latest_result["test_failures"])
 
-                if metric.name == "Bordercore Test Coverage":
+                if metric.name == "Bordercore Test Coverage" and \
+                   "line_rate" in metric.latest_result:
                     line_rate = int(round(float(metric.latest_result["line_rate"]) * 100, 0))
                     if line_rate < Metric.COVERAGE_MINIMUM:
                         failed_test_count += 1
