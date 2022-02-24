@@ -409,7 +409,9 @@ class BookmarkListTagView(BookmarkListView):
                     "last_response_code": x.bookmark.last_response_code,
                     "note": x.note,
                     "favicon_url": x.bookmark.get_favicon_url(size=16),
-                    "tags": x.tags
+                    "tags": x.tags,
+                    "thumbnail_url": x.bookmark.thumbnail_url,
+                    "video_duration": x.bookmark.video_duration
                 }
             )
 
