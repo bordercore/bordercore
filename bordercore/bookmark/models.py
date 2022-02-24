@@ -93,7 +93,14 @@ class Bookmark(TimeStampedModel):
 
         message = {
             "url": self.url,
-            "s3key": f"bookmarks/{self.uuid}.png"
+            "s3key": f"bookmarks/{self.uuid}.png",
+            "puppeteer": {
+                "screenshot": {
+                    "type": "jpeg",
+                    "quality": 50,
+                    "omitBackground": False
+                }
+            }
         }
 
         client.publish(
