@@ -103,6 +103,8 @@
         methods: {
             tagsChanged(newTags) {
                 this.tags = newTags;
+                // Re-emit this event in case a parent component is interested
+                this.$emit("tags-changed", newTags);
             },
             initItems() {
                 // Set a minimum character count to trigger the ajax call
