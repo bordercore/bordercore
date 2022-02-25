@@ -43,40 +43,49 @@ def test_todo_list(auto_login_user, todo):
 
 
 @factory.django.mute_signals(signals.post_save)
-def test_todo_detail(auto_login_user, todo):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("todo:update", kwargs={"uuid": todo.uuid})
-    resp = client.post(url, {
-        "name": "Sample Task Changed",
-        "priority": "2",
-        "tags": "django"
-    })
-
-    assert resp.status_code == 302
-
-
-@factory.django.mute_signals(signals.post_save)
 def test_todo_create(auto_login_user, todo):
 
     _, client = auto_login_user()
 
-    # The empty form
-    url = urls.reverse("todo:create")
-    resp = client.get(f"{url}?tagsearch=tag_0")
-
-    assert resp.status_code == 200
-
-    # The submitted form
-    url = urls.reverse("todo:create")
+    url = urls.reverse("todo-list")
     resp = client.post(url, {
         "name": "Sample Task",
         "priority": "2",
         "tags": "django"
     })
 
-    assert resp.status_code == 302
+    assert resp.status_code == 201
+
+    uuid = resp.json()["uuid"]
+    todo = Todo.objects.get(uuid=uuid)
+    assert todo.name == "Sample Task"
+    assert todo.priority == 2
+    assert "django" in [x.name for x in todo.tags.all()]
+
+
+@factory.django.mute_signals(signals.post_save)
+def test_todo_update(auto_login_user, todo):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("todo-detail", kwargs={"uuid": todo.uuid})
+    resp = client.put(
+        url,
+        content_type="application/json",
+        data={
+            "todo_uuid": todo.uuid,
+            "name": "New Task Name",
+            "priority": "3",
+            "tags": ["django"]
+        }
+    )
+
+    assert resp.status_code == 200
+
+    todo = Todo.objects.get(uuid=todo.uuid)
+    assert todo.name == "New Task Name"
+    assert todo.priority == 3
+    assert "django" in [x.name for x in todo.tags.all()]
 
 
 def test_todo_delete(monkeypatch_todo, auto_login_user, todo):

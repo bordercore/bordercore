@@ -26,9 +26,9 @@ class TodoManager(models.Manager):
             cache[x["priority"]] = x["count"]
 
         filter_priority_options = [
-            ["1", "High", cache.get(1, 0)],
-            ["3", "Medium", cache.get(2, 0)],
-            ["7", "Low", cache.get(3, 0)]
+            [1, "High", cache.get(1, 0)],
+            [2, "Medium", cache.get(2, 0)],
+            [3, "Low", cache.get(3, 0)]
         ]
 
         return filter_priority_options

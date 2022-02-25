@@ -12,6 +12,7 @@ class TodoPage:
     FIRST_TASK = (By.XPATH, "//div[@id='vue-app']//table/tbody/tr[1]/td[2]/span")
     NO_TASKS = (By.XPATH, "//div[@id='vue-app']//table/tbody/tr[1]/td[1]/div/div")
     PRIORITY_COLUMN = (By.XPATH, "//div[@id='vue-app']//table/thead/tr/th[@class='todo-col-priority']")
+    MEDIUM_PRIORITY_FILTER = (By.CSS_SELECTOR, "div[data-priority='2']")
 
     def __init__(self, browser):
         self.browser = browser
@@ -46,9 +47,14 @@ class TodoPage:
 
     def sort_by_priority(self):
 
-        # breakpoint()
         priority_column = self.browser.find_element(*self.PRIORITY_COLUMN)
         priority_column.click()
 
         todo_element = self.browser.find_elements(*self.FIRST_TASK)
         return todo_element[0].get_attribute("innerHTML")
+
+    def medium_priority_filter(self):
+        """
+        """
+        todo_element = self.browser.find_elements(*self.MEDIUM_PRIORITY_FILTER)
+        return todo_element[0]

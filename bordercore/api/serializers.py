@@ -119,7 +119,6 @@ class CollectionSerializer(serializers.ModelSerializer):
 
 
 class FeedSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Feed
         fields = ["homepage", "last_check", "last_response_code", "name", "url"]
@@ -189,9 +188,54 @@ class TagAliasSerializer(serializers.ModelSerializer):
 
 
 class TodoSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    tags = BlobTagsField(queryset=Tag.objects.all(), many=True)
+
     class Meta:
         model = Todo
-        fields = ["id", "note", "tags", "name", "url", "user", "uuid"]
+        fields = ["id", "note", "tags", "name", "priority", "url", "user", "uuid"]
+
+    def create(self, validated_data):
+
+        validated_data["user_id"] = self.context["request"].user.id
+        tags = validated_data.pop("tags", None)
+
+        # We need to save the task first before adding the m2m
+        #  tags field, so don't index in Elasticsearch just yet.
+        instance = Todo(**validated_data)
+        instance.save(index_es=False)
+
+        if tags:
+            instance.tags.set(
+                [
+                    Tag.objects.get_or_create(name=x, user=self.context["request"].user)[0]
+                    for x in
+                    tags[0].split(",")
+                    if x != ""
+                ]
+            )
+
+        # Save the task again with any tags and index in Elasticsearch
+        instance.save()
+        return instance
+
+    def update(self, instance, validated_data):
+
+        instance.name = validated_data.get("name", instance.name)
+        instance.note = validated_data.get("note", instance.note)
+        instance.priority = validated_data.get("priority", instance.priority)
+        instance.url = validated_data.get("url", instance.url)
+
+        instance.tags.set(
+            [
+                Tag.objects.get_or_create(name=x, user=instance.user)[0]
+                for x in
+                validated_data["tags"][0].split(",")
+                if x != ""
+            ]
+        )
+        instance.save()
+        return instance
 
 
 class UserSerializer(serializers.ModelSerializer):

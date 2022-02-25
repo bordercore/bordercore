@@ -23,7 +23,17 @@ def test_todo(todo, login, live_server, browser, settings):
 
     assert page.title_value() == "Bordercore :: Bordercore"
 
-    # There should be three todo tasks
+    # There should be initially one medium task visible
+    assert page.todo_count() == 1
+
+    # Select 'Medium' to toggle the selection and reveal all tasks
+    medium_priority_filter = page.medium_priority_filter()
+    medium_priority_filter.click()
+
+    # Wait for the browser to refresh after the click
+    time.sleep(1)
+
+    # There should now be three todo tasks
     assert page.todo_count() == 3
 
     # Get the first todo task text

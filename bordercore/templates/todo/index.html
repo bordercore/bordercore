@@ -14,7 +14,7 @@
                 <div v-for="option in filterPriorityOptions" :class="getPriorityClass(option[0])" class="tag-list pl-2 py-1 pr-1 d-flex" @click.prevent="onClickPriority" :data-priority="option[0]">
                     <div>[[ option[1] ]]</div>
                     <div class="ml-auto">
-                        <span class="px-2 badge badge-pill">[[ option[2] ]]</span>
+                        <span class="px-2 badge badge-pill badge-info">[[ option[2] ]]</span>
                     </div>
                 </div>
 
@@ -24,7 +24,7 @@
                 <div v-for="option in filterTimeOptions" :class="getTimeClass(option[0])" class="tag-list pl-2 py-1 pr-1 d-flex" @click.prevent="onClickTime" :data-created="option[0]">
                     <div>[[ option[1] ]]</div>
                     <div class="ml-auto">
-                        <span class="px-2 badge badge-pill">[[ option[2] ]]</span>
+                        <span class="px-2 badge badge-pill badge-info">[[ option[2] ]]</span>
                     </div>
                 </div>
 
@@ -34,7 +34,9 @@
                 {% for tag in tags %}
                     <div class="tag-list pl-2 py-1 pr-1 d-flex" :class="getTagClass('{{ tag.name }}')" @click.prevent="onClickTag" data-tag="{{ tag.name }}">
                         <div>{{ tag.name }}</div>
-                        <div class="ml-auto"><span class="px-2 badge badge-pill {% ifequal tagsearch tag.name %}badge-dark{% else %}badge-info{% endifequal %}">{{ tag.count }}</span></div>
+                        <div class="ml-auto">
+                            <span class="px-2 badge badge-pill {% ifequal tagsearch tag.name %}badge-dark{% else %}badge-info{% endifequal %}">{{ tag.count }}
+                            </span></div>
                     </div>
                 {% empty %}
                     <div class="text-success">No tags found</div>
@@ -59,7 +61,7 @@
                     </form>
 
                     <div class="mr-2">
-                        <add-button :href="'{% url 'todo:create' %}?tagsearch=' + this.filterTag">
+                        <add-button href="#" :click-handler="handleCreateTodo">
                         </add-button>
                     </div>
 
@@ -98,7 +100,7 @@
                             <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="text-center">
                                 <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                 <div slot="dropdown">
-                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(data.value)">
+                                    <a class="dropdown-item" href="#" @click.prevent="handleUpdateTodo(data)">
                                         <font-awesome-icon icon="pencil-alt" class="text-primary mr-3"></font-awesome-icon>Update
                                     </a>
                                     <a class="dropdown-item" href="#" @click.prevent="onClickDelete(data.value)">
@@ -108,7 +110,9 @@
                             </dropdown-menu>
                         </div>
                     </template>
-
+                    <template #cell(priority)="data">
+                        [[ data.item.priority_name ]]
+                    </template>
                     <template #cell(created)="data">
                         [[ getDate(data.value) ]]
                     </template>
@@ -118,6 +122,15 @@
             </div>
 
         </div>
+
+        <create-update-todo
+            ref="updateTodo"
+            :priority-list="JSON.parse('{{ priority_list }}')"
+            update-todo-url="{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}"
+            create-todo-url="{% url 'todo-list' %}"
+            tag-search-url="{% url 'tag:search' %}?query="
+        >
+        </create-update-todo>
 
     </div>
 
@@ -174,10 +187,11 @@
 
         const table = new Vue({
             el: "#vue-app",
+            name: "TodoTable",
             data() {
                 return {
                     filterTag: "{{ filter.todo_filter_tag|default:'' }}",
-                    filterPriority: "{{ filter.todo_filter_priority|default:'' }}",
+                    filterPriority: {{ filter.todo_filter_priority|default:2 }},
                     filterTime: "{{ filter.todo_filter_time|default:'' }}",
                     filterSearch: "",
                     filterCache: {},
@@ -266,9 +280,6 @@
                 rowUnHovered(item, index, evt) {
                     evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
                 },
-                onClickUpdate(item, index, evt) {
-                    window.location="{% url 'todo:update' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, item);
-                },
                 onClickDelete(item, index, evt) {
 
                     let selectedUuid = item;
@@ -318,7 +329,7 @@
                     }
                 },
                 getPriorityClass(priority) {
-                    if (priority === this.filterPriority) {
+                    if (priority === parseInt(this.filterPriority)) {
                         return "selected rounded-sm"
                     }
                 },
@@ -351,6 +362,41 @@
                 },
                 getNote(note) {
                     return markdown.render(note);
+                },
+                handleUpdateTodo(todoInfo) {
+                    this.$refs.updateTodo.setAction("Update");
+                    this.$refs.updateTodo.todoInfo = todoInfo.item;
+                    EventBus.$emit("addTags", todoInfo.item.tags);
+                    $("#modalUpdateTodo").modal("show");
+                    setTimeout( () => {
+                        document.getElementById("id_name").focus();
+                    }, 500);
+                },
+
+                handleCreateTodo() {
+                    this.$refs.updateTodo.setAction("Create");
+
+                    const initialTagList = [
+                        {
+                            "display": this.filterTag,
+                            "text": this.filterTag,
+                        }
+                    ];
+
+                    this.$refs.updateTodo.todoInfo = {
+                        note: "",
+                        priority: this.filterPriority || 2,
+                        tags: initialTagList,
+                    };
+                    if (this.filterTag) {
+                        EventBus.$emit(
+                            "addTags", initialTagList
+                        );
+                    }
+                    $("#modalUpdateTodo").modal("show");
+                    setTimeout( () => {
+                        document.getElementById("id_name").focus();
+                    }, 500);
                 }
             },
             computed: {

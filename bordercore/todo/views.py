@@ -1,3 +1,4 @@
+import json
 import re
 from datetime import timedelta
 
@@ -39,7 +40,8 @@ class TodoListView(ListView):
         return {
             **context,
             "tags": Todo.get_todo_counts(self.request.user),
-            "filter": self.get_filter()
+            "filter": self.get_filter(),
+            "priority_list": json.dumps(Todo.PRIORITY_CHOICES),
         }
 
 
@@ -52,8 +54,8 @@ class TodoTaskList(ListView):
     def get_queryset(self):
 
         priority = self.request.GET.get("priority", None)
-        if priority is not None:
-            self.request.session["todo_filter_priority"] = priority
+        if priority is not None and priority != "":
+            self.request.session["todo_filter_priority"] = int(priority)
 
         time = self.request.GET.get("time", None)
         if time is not None:
@@ -68,7 +70,7 @@ class TodoTaskList(ListView):
             queryset = Todo.objects.filter(user=self.request.user)
 
             if priority:
-                queryset = queryset.filter(priority=priority)
+                queryset = queryset.filter(priority=int(priority))
             if time:
                 queryset = queryset.filter(created__gt=(timezone.now() - timedelta(days=int(time))))
             if tag_name:
@@ -84,6 +86,8 @@ class TodoTaskList(ListView):
 
             queryset = Todo.objects.filter(user=self.request.user).order_by("-created")
 
+        queryset = queryset.prefetch_related("tags")
+
         return queryset
 
     def get(self, request, *args, **kwargs):
@@ -93,20 +97,21 @@ class TodoTaskList(ListView):
         if search_term:
             tasks = search_service(self.request.user, search_term)
         else:
-            tasks = self.get_queryset().values()
-
+            tasks = self.get_queryset()
         info = []
 
         for sort_order, todo in enumerate(tasks, 1):
             data = {
                 "manual_order": "",
                 "sort_order": sort_order,
-                "name": re.sub("[\n\r\"]", "", todo["name"]),
-                "priority": Todo.get_priority_name(todo["priority"]),
-                "created": format(todo["created"], "Y-m-d"),
-                "note": todo["note"] or "",
-                "url": todo["url"],
-                "uuid": todo["uuid"]
+                "name": re.sub("[\n\r\"]", "", todo.name),
+                "priority": todo.priority,
+                "priority_name": Todo.get_priority_name(todo.priority),
+                "created": format(todo.created, "Y-m-d"),
+                "note": todo.note or "",
+                "url": todo.url,
+                "uuid": todo.uuid,
+                "tags": [{"text": x.name, "display": x.name} for x in todo.tags.all()],
             }
 
             info.append(data)

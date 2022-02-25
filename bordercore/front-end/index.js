@@ -214,6 +214,10 @@ import CreateUpdateFeed from "./vue/feed/CreateUpdateFeed.vue";
 Vue.component("CreateUpdateFeed", CreateUpdateFeed);
 window.CreateUpdateFeed = CreateUpdateFeed;
 
+import CreateUpdateTodo from "./vue/todo/CreateUpdateTodo.vue";
+Vue.component("CreateUpdateTodo", CreateUpdateTodo);
+window.CreateUpdateTodo = CreateUpdateTodo;
+
 import AddToCollection from "./vue/blob/AddToCollection.vue";
 Vue.component("AddToCollection", AddToCollection);
 window.AddToCollection = AddToCollection;
