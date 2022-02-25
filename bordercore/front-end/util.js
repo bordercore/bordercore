@@ -52,14 +52,14 @@ export function doPost(scope, url, params, callback, successMsg, errorMsg) {
         method: "POST",
         data: bodyFormData,
     }).then((response) => {
-        if (response.data.status === "Warning") {
+        if (response.data.status && response.data.status === "Warning") {
             scope.$bvToast.toast(response.data.message, {
                 title: "Error",
                 autoHideDelay: 10000,
                 variant: "warning",
             });
             console.log("Warning: ", response.data.message);
-        } else if (response.data.status != "OK") {
+        } else if (response.data.status && response.data.status != "OK") {
             scope.$bvToast.toast(response.data.message, {
                 title: "Error",
                 noAutoHide: true,
