@@ -120,7 +120,14 @@
                         {% if bookmarks %}
                             <ul class="list-group interior-borders scrollable-panel-scrollbar-hover vh-50">
                             {% for bookmark in bookmarks %}
-                                <li class="list-group-item list-group-item-secondary text-success">{{ bookmark.url|favicon:16|safe }} <a class="ml-2" href="{{ bookmark.url }}">{{ bookmark.name }}</a> </li>
+                                <li class="list-group-item list-group-item-secondary text-success d-flex">
+                                    <div>
+                                        {{ bookmark.url|favicon:16|safe }}
+                                    </div>
+                                    <div class="ml-2">
+                                        <a href="{{ bookmark.url }}">{{ bookmark.name }}</a>
+                                    </div>
+                                </li>
                             {% endfor %}
                             </ul>
                         {% else %}
