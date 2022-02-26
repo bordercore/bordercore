@@ -8,7 +8,7 @@
 
         <div class="col-lg-3 d-flex flex-column">
 
-            <div class="card-body">
+            <div class="card-body" v-cloak>
 
                 <h4>Priority</h4>
                 <div v-for="option in filterPriorityOptions" :class="getPriorityClass(option[0])" class="tag-list pl-2 py-1 pr-1 d-flex" @click.prevent="onClickPriority" :data-priority="option[0]">

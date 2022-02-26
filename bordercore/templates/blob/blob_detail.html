@@ -11,7 +11,7 @@
 
         <div class="col-lg-3 h-100 d-flex flex-column">
             <div id="vue-left-panel" class="scrollable-panel card-body d-flex flex-column h-100">
-                <div>
+                <div v-cloak>
 
                     <h5>
                         {{ blob.get_edition_string }}
@@ -214,7 +214,7 @@
 
                 </div>
 
-                <div v-if="related_questions.length > 0">
+                <div v-if="related_questions.length > 0" v-cloak>
 
                     <hr class="filter-divider w-100 mt-0" />
 
@@ -265,7 +265,7 @@
                     <hr />
                     <div class="dropdownmenu d-flex">
 
-                        <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center" :right="right">
+                        <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center" :right="right" v-cloak>
                             <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                             <div slot="dropdown" class="mt-0">
                                 <a class="dropdown-item" href="{% url 'blob:update' blob.uuid %}">
@@ -321,7 +321,7 @@
                 </blob-detail-cover>
                 {% endif %}
 
-                <audio v-if="$store.state.elasticsearchInfo.content_type === 'Audio'" controls controlsList="nodownload">
+                <audio v-if="$store.state.elasticsearchInfo.content_type === 'Audio'" controls controlsList="nodownload" v-cloak>
                     <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="audio/mpeg">
                     Your browser does not support the audio tag.
                 </audio>
