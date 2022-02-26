@@ -1,10 +1,10 @@
-import datetime
 from datetime import timedelta
 
 import factory
 import pytest
 
 from django.db.models import signals
+from django.utils import timezone
 
 from .factories import QuestionFactory
 
@@ -148,7 +148,7 @@ def test_get_tag_progress(question, tag):
     tags_info = Question.get_tag_progress(question[0].user, tag[0])
     assert str(tags_info["name"]) == "django"
     assert tags_info["progress"] == 0
-    assert tags_info["last_reviewed"] == datetime.datetime.now().strftime("%B %d, %Y")
+    assert tags_info["last_reviewed"] == timezone.now().strftime("%B %d, %Y")
     assert tags_info["count"] == 1
 
     question[0].record_response("good")
@@ -156,7 +156,7 @@ def test_get_tag_progress(question, tag):
     tags_info = Question.get_tag_progress(question[0].user, tag[0])
     assert str(tags_info["name"]) == "django"
     assert tags_info["progress"] == 100
-    assert tags_info["last_reviewed"] == datetime.datetime.now().strftime("%B %d, %Y")
+    assert tags_info["last_reviewed"] == timezone.now().strftime("%B %d, %Y")
     assert tags_info["count"] == 1
 
     tags_info = Question.get_tag_progress(question[0].user, tag[2])
