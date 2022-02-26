@@ -74,11 +74,16 @@ class Collection(TimeStampedModel):
             "content_type": content_type
         }
 
-    def get_blob_list(self, limit=None):
+    def get_blob_list(self, request=None, limit=None):
 
         blob_list = []
 
-        so = SortOrderCollectionBlob.objects.filter(collection=self).select_related("blob")
+        queryset = SortOrderCollectionBlob.objects.filter(collection=self)
+
+        if request and "tag" in request.GET:
+            queryset = queryset.filter(blob__tags__name=request.GET["tag"])
+
+        so = queryset.select_related("blob")
 
         if limit:
             so = so[:limit]

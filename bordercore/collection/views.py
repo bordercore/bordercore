@@ -18,6 +18,7 @@ from django.views.generic.list import ListView
 from collection.forms import CollectionForm
 from collection.models import Collection, SortOrderCollectionBlob
 from lib.mixins import FormRequestMixin
+from tag.models import Tag
 
 
 @method_decorator(login_required, name="dispatch")
@@ -69,7 +70,7 @@ class CollectionDetailView(FormRequestMixin, FormMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        blob_list = self.object.get_blob_list()
+        blob_list = self.object.get_blob_list(request=self.request)
 
         if blob_list:
             context["blob_list"] = blob_list
@@ -86,6 +87,20 @@ class CollectionDetailView(FormRequestMixin, FormMixin, DetailView):
             } for x in self.object.tags.all()
         ]
 
+        # Get a list of all tags used by all blobs in this collection,
+        #  along with their total counts
+        context["blob_tags"] = [
+            {
+                "tag": x.name,
+                "blob_count": x.blob_count
+            } for x in Tag.objects.filter(
+                blob__collection__uuid=self.object.uuid
+            ).distinct().annotate(
+                blob_count=Count("blob")
+            ).order_by(
+                "-blob_count"
+            )
+        ]
         context["title"] = f"Collection Detail :: {self.object.name}"
 
         return context
