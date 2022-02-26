@@ -130,7 +130,7 @@ class Blob(TimeStampedModel):
         return f"{settings.MEDIA_ROOT}/{self.uuid}"
 
     def get_tags(self):
-        return ", ".join([tag.name for tag in self.tags.all()])
+        return ", ".join(sorted([tag.name for tag in self.tags.all()]))
 
     def get_url(self):
         return f"{self.uuid}/{quote_plus(str(self.file))}"
