@@ -49,5 +49,6 @@ class BlobFactory(factory.DjangoModelFactory):
         if not create:
             return
 
-        for tag in extracted:
-            self.tags.add(TagFactory(name=tag))
+        if extracted:
+            for tag in extracted:
+                self.tags.add(TagFactory(name=tag))
