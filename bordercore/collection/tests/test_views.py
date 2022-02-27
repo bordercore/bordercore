@@ -129,5 +129,5 @@ def test_collection_blob_list(auto_login_user, collection, blob_image_factory, b
 
     assert len(payload) == 2
 
-    assert blob_image_factory[0].name in [x["name"] for x in payload]
-    assert blob_pdf_factory[0].name in [x["name"] for x in payload]
+    assert blob_image_factory[0].name in [x["name"] for x in payload["blob_list"]]
+    assert blob_pdf_factory[0].name in [x["name"] for x in payload["blob_list"]]

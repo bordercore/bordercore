@@ -70,10 +70,11 @@ class CollectionDetailView(FormRequestMixin, FormMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        blob_list = self.object.get_blob_list(request=self.request)
+        blob_info = self.object.get_blob_list(request=self.request)
 
-        if blob_list:
-            context["blob_list"] = blob_list
+        if blob_info["blob_list"]:
+            context["blob_list"] = blob_info["blob_list"]
+            context["paginator_info"] = blob_info["paginator"]
             try:
                 context["first_blob_info"] = json.dumps(self.object.get_blob(0, False))
             except ClientError:

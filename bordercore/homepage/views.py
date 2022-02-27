@@ -159,10 +159,11 @@ def get_default_collection_blobs(request):
 
     try:
         collection = Collection.objects.get(pk=request.user.userprofile.homepage_default_collection.id)
+        blob_info = collection.get_blob_list(limit=3)
         return {
             "uuid": collection.uuid,
             "name": collection.name,
-            "blob_list": collection.get_blob_list(limit=3)
+            "blob_list": blob_info["blob_list"]
         }
     except AttributeError:
         pass

@@ -24,13 +24,13 @@
             <div class="card-body">
 
                 {% if collection.description %}
-                    <h3 class="mb-3">{{ collection.description }}</span></h3>
+                    <h3 class="mb-3">{{ collection.description }}</h3>
                 {% endif %}
 
-                <div class="mb-3">
+                <div class="mb-3" v-cloak>
                     <strong>Count</strong>
                     <span class="text-primary ml-1">
-                        {{ blob_list|length }} blob{{ blob_list|length|pluralize:"s" }}
+                        [[ $store.state.paginator.count ]] [[ getPluralized() ]]
                     </span>
                 </div>
 
@@ -84,14 +84,31 @@
 
                     <template v-slot:title-slot>
 
-                        <div class="d-flex">
-                            <h3>{{ collection.name }}</h3>
+                        <div class="d-flex align-items-center">
+                            <h3 class="mr-auto">
+                                {{ collection.name }}
+                            </h3>
+
+                            <h5 v-if="needsPagination()" class="mb-0">
+                                <a v-if="$store.state.paginator.has_previous" href="#" @click.prevent="paginate('prev')">
+                                    <font-awesome-icon icon="chevron-left" class="text-emphasis glow icon-hover" />
+                                </a>
+                                <span v-else>
+                                    <font-awesome-icon icon="chevron-left" class="text-emphasis icon-disabled" />
+                                </span>
+                                <a v-if="$store.state.paginator.has_next" href="#" @click.prevent="paginate('next')" class="ml-1">
+                                    <font-awesome-icon icon="chevron-right" class="text-emphasis glow icon-hover" />
+                                </a>
+                                <span v-else>
+                                    <font-awesome-icon icon="chevron-right" class="text-emphasis icon-disabled" />
+                                </span>
+                            </h5>
 
                             <drop-down-menu
                                 ref="dropDownMenu"
                                 id="album-detail-menu"
                                 :links="collectionDetailMenuItems"
-                                class="dropdownmenu"
+                                class="dropdownmenu ml-5"
                             >
                             </drop-down-menu>
                         </div>
@@ -292,6 +309,14 @@
 
     <script type="text/javascript">
 
+        const store = new Vuex.Store({
+            state: {
+                paginator: {{ paginator_info|safe }}
+            },
+            getters: {},
+            mutations: {},
+        });
+
         sizeOfCollection = {{ blob_list|length }};
 
         const BlobList = {
@@ -372,6 +397,7 @@
         new Vue({
             el: "#vue-app",
             name: "BlobListContainer",
+            store,
             components: {
                 BlobList,
                 DropDownMenu,
@@ -478,7 +504,6 @@
                     }
                 },
                 getSlideShowImage() {
-
                     axios.get("{% url "collection:get_blob" collection.uuid 666 %}?randomize=".replace(/666/, this.slideShowImageIndex) + this.slideShowRandomize)
                          .then(response => {
                              this.changeSlideShowImage(response.data.url, response.data.content_type);
@@ -500,7 +525,29 @@
                 onClickDelete() {
                     $("#modalDelete").modal("show")
                 },
+                paginate(direction) {
+                    let pageNumber;
+                    if (direction === "prev") {
+                        pageNumber = this.$store.state.paginator.previous_page_number;
+                    } else {
+                        pageNumber = this.$store.state.paginator.next_page_number;
+                    }
+                    let url = "{% url 'collection:detail' collection.uuid %}?page=" + pageNumber;
+                    if (this.selectedTag) {
+                        url += "&tag=" + this.selectedTag;
+                    }
+                    window.location = url;
+                },
+                needsPagination() {
+                    return this.$store.state.paginator.has_previous || this.$store.state.paginator.has_next;
+                },
+                getPluralized() {
+                    return pluralize("blob", this.$store.state.paginator.count);
+                },
             },
+            computed: {
+            },
+
             mounted() {
 
                 let self = this;

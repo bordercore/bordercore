@@ -9,6 +9,7 @@ import boto3
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.paginator import Paginator
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
@@ -18,6 +19,9 @@ from lib.mixins import SortOrderMixin, TimeStampedModel
 from tag.models import Tag
 
 log = logging.getLogger(f"bordercore.{__name__}")
+
+
+BLOB_COUNT_PER_PAGE = 30
 
 
 class Collection(TimeStampedModel):
@@ -74,7 +78,7 @@ class Collection(TimeStampedModel):
             "content_type": content_type
         }
 
-    def get_blob_list(self, request=None, limit=None):
+    def get_blob_list(self, request=None, limit=BLOB_COUNT_PER_PAGE, page_number=1):
 
         blob_list = []
 
@@ -85,10 +89,13 @@ class Collection(TimeStampedModel):
 
         so = queryset.select_related("blob")
 
-        if limit:
-            so = so[:limit]
+        if request and "page" in request.GET:
+            page_number = request.GET["page"]
 
-        for blob in so:
+        paginator = Paginator(so, limit)
+        page = paginator.page(page_number)
+
+        for blob in page.object_list:
             blob_list.append(
                 {
                     "id": blob.blob.id,
@@ -97,11 +104,23 @@ class Collection(TimeStampedModel):
                     "name": re.sub("[\n\r]", "", blob.blob.name),
                     "url": reverse("blob:detail", kwargs={"uuid": blob.blob.uuid}),
                     "sha1sum": blob.blob.sha1sum,
-                    "cover_url": blob.blob.get_cover_url_small()
+                    "cover_url": blob.blob.get_cover_url_small(),
                 }
             )
 
-        return blob_list
+        paginator_info = {
+            "page_number": page_number,
+            "has_next": page.has_next(),
+            "has_previous": page.has_previous(),
+            "next_page_number": page.next_page_number() if page.has_next() else None,
+            "previous_page_number": page.previous_page_number() if page.has_previous() else None,
+            "count": paginator.count
+        }
+
+        return {
+            "blob_list": blob_list,
+            "paginator": json.dumps(paginator_info)
+        }
 
     def get_recent_images(self, limit=4):
         """

@@ -46,7 +46,7 @@ def test_get_blob(collection):
 
 def test_get_blob_list(collection, blob_image_factory, blob_pdf_factory):
 
-    blob_list = collection[0].get_blob_list()
+    blob_list = collection[0].get_blob_list()["blob_list"]
 
     assert len(blob_list) == 2
     assert blob_list[0]["uuid"] == blob_pdf_factory[0].uuid
