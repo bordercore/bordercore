@@ -1,12 +1,16 @@
+from unittest.mock import Mock
 from urllib.parse import urlparse
 
 import factory
 import pytest
+from faker import Factory as FakerFactory
 
 from django import urls
 from django.db.models import signals
 
 from blob.models import Blob
+from blob.tests.factories import BlobFactory
+from blob.views import get_metadata_from_form, handle_metadata
 from collection.models import Collection
 
 try:
@@ -15,6 +19,8 @@ except ModuleNotFoundError:
     pass
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
+
+faker = FakerFactory.create()
 
 
 @pytest.fixture
@@ -140,6 +146,83 @@ def test_blob_detail(auto_login_user, blob):
     assert author in [x for sublist in soup.select("span") for x in sublist]
 
 
+def test_clone(auto_login_user):
+
+    user, client = auto_login_user()
+
+    blob = BlobFactory()
+
+    url = urls.reverse("blob:clone", kwargs={"uuid": str(blob.uuid)})
+    resp = client.get(url)
+
+    assert resp.status_code == 302
+
+
+def test_handle_metadata(auto_login_user, blob_text_factory, blob_image_factory):
+
+    user, client = auto_login_user()
+
+    request_mock = Mock()
+    request_mock.user = user
+    fake_name = faker.name()
+    fake_url = faker.url()
+
+    request_mock.POST = {
+        "1_Artist": fake_name,
+        "2_Url": fake_url
+    }
+
+    handle_metadata(blob_text_factory[0], request_mock)
+
+    metadata = blob_text_factory[0].metadata.all()
+    assert len(metadata) == 2
+    assert "Artist" in [x.name for x in metadata]
+    assert fake_name in [x.value for x in metadata]
+    assert "Url" in [x.name for x in metadata]
+    assert fake_url in [x.value for x in metadata]
+
+    request_mock.POST = {
+        "1_Author": fake_name,
+        "is_book": "true"
+    }
+
+    handle_metadata(blob_image_factory[0], request_mock)
+
+    metadata = blob_image_factory[0].metadata.all()
+    assert len(metadata) == 2
+    assert "Author" in [x.name for x in metadata]
+    assert fake_name in [x.value for x in metadata]
+    assert "is_book" in [x.name for x in metadata]
+
+
+def test_get_metadata_from_form(auto_login_user):
+
+    request_mock = Mock()
+    fake_name = faker.name()
+    fake_url = faker.url()
+
+    request_mock.POST = {
+        "1_Author": fake_name,
+        "2_Url": fake_url
+    }
+
+    metadata = get_metadata_from_form(request_mock)
+
+    assert len(metadata) == 2
+    assert "Author" in [x["name"] for x in metadata]
+    assert fake_name in [x["value"] for x in metadata]
+    assert "Url" in [x["name"] for x in metadata]
+    assert fake_url in [x["value"] for x in metadata]
+
+    request_mock.POST = {
+        "1_Author": "",
+    }
+
+    metadata = get_metadata_from_form(request_mock)
+
+    assert len(metadata) == 0
+
+
 def test_blob_metadata_name_search(auto_login_user, blob_image_factory):
 
     _, client = auto_login_user()
@@ -181,3 +264,64 @@ def test_blob_parse_date(auto_login_user):
     resp = client.get(url)
 
     assert resp.status_code == 200
+
+
+def test_get_related_blobs(auto_login_user):
+
+    user, client = auto_login_user()
+
+    blob_1 = BlobFactory.create(user=user)
+    blob_2 = BlobFactory.create(user=user)
+
+    blob_1.blobs.add(blob_2)
+
+    url = urls.reverse("blob:related_blobs", kwargs={"uuid": str(blob_1.uuid)})
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+
+    payload = resp.json()
+    assert payload["status"] == "OK"
+    assert len(payload["blob_list"]) == 1
+    assert payload["blob_list"][0]["uuid"] == str(blob_2.uuid)
+
+
+def test_blob_link(auto_login_user):
+
+    user, client = auto_login_user()
+
+    blob_1 = BlobFactory.create(user=user)
+    blob_2 = BlobFactory.create(user=user)
+
+    url = urls.reverse("blob:link")
+    resp = client.post(url, {
+        "blob_1_uuid": blob_1.uuid,
+        "blob_2_uuid": blob_2.uuid,
+    })
+
+    assert resp.status_code == 200
+
+    linked_blob = Blob.objects.get(uuid=blob_1.uuid)
+    assert linked_blob.blobs.count() == 1
+    assert linked_blob.blobs.first() == blob_2
+
+
+def test_blob_unlink(auto_login_user):
+
+    user, client = auto_login_user()
+
+    blob_1 = BlobFactory.create(user=user)
+    blob_2 = BlobFactory.create(user=user)
+
+    blob_1.blobs.add(blob_2)
+
+    url = urls.reverse("blob:unlink")
+    resp = client.post(url, {
+        "blob_1_uuid": blob_1.uuid,
+        "blob_2_uuid": blob_2.uuid,
+    })
+
+    assert resp.status_code == 200
+
+    linked_blob = Blob.objects.get(uuid=blob_1.uuid)
+    assert linked_blob.blobs.count() == 0
