@@ -1,24 +1,26 @@
-[run]
-omit = *test*
-
-[_run]
-omit =
-    #
-    */__init__.py*
-    #
-    *test*
-    #
-    */migrations/*
-    bordercore/blob/test_data.py
-    */env/*
-
 [report]
 omit =
     #
+    # Python __init__.py files
+    #
+
     */__init__.py*
     #
+    # the tests themselves
+    #
     *test*
+
+    #
+    # Django migrations
     #
     */migrations/*
-    bordercore/blob/test_data.py
+
+    #
+    # third-party code
+    #
+    bordercore/apps/rfc3339.py
+
+    #
+    # virtualenv
+    #
     */env/*
