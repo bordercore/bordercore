@@ -541,8 +541,8 @@ def link(request):
     blob_1_uuid = request.POST["blob_1_uuid"]
     blob_2_uuid = request.POST["blob_2_uuid"]
 
-    blob_1 = Blob.objects.get(uuid=blob_1_uuid)
-    blob_2 = Blob.objects.get(uuid=blob_2_uuid)
+    blob_1 = Blob.objects.get(uuid=blob_1_uuid, user=request.user)
+    blob_2 = Blob.objects.get(uuid=blob_2_uuid, user=request.user)
 
     blob_1.blobs.add(blob_2)
 
@@ -561,8 +561,8 @@ def unlink(request):
     blob_1_uuid = request.POST["blob_1_uuid"]
     blob_2_uuid = request.POST["blob_2_uuid"]
 
-    blob_1 = Blob.objects.get(uuid=blob_1_uuid)
-    blob_2 = Blob.objects.get(uuid=blob_2_uuid)
+    blob_1 = Blob.objects.get(uuid=blob_1_uuid, user=request.user)
+    blob_2 = Blob.objects.get(uuid=blob_2_uuid, user=request.user)
 
     blob_1.blobs.remove(blob_2)
 
