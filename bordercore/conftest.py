@@ -59,6 +59,8 @@ except ModuleNotFoundError:
 #  the s3 mock won't work
 from blob.elasticsearch_indexer import index_blob  # isort:skip
 
+GECKO_DRIVER_LOGFILE = "/tmp/geckodriver.log"
+
 # Disable the Debug Toolbar and thereby prevent it
 #  from interfering with functional and views tests
 os.environ["DISABLE_DEBUG_TOOLBAR"] = "1"
@@ -274,9 +276,14 @@ def browser():
         display = Display(visible=0, size=(1366, 768))
         display.start()
 
-    driver = webdriver.Firefox(executable_path="/opt/bin/geckodriver", log_path="/tmp/geckodriver.log")
+    driver = webdriver.Firefox(executable_path="/opt/bin/geckodriver", log_path=GECKO_DRIVER_LOGFILE)
 
     yield driver
+
+    try:
+        os.remove(GECKO_DRIVER_LOGFILE)
+    except OSError:
+        pass
 
     if not os.environ.get("DISABLE_HEADLESS_DISPLAY", None):
         # Quit the Xvfb display

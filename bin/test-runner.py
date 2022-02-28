@@ -52,7 +52,7 @@ def parse_coverage_report():
     data.save()
 
 
-def run_test(test, coverage, verbose=False):
+def run_test(test, coverage_count, verbose=False):
 
     if test == "unit":
 
@@ -69,7 +69,7 @@ def run_test(test, coverage, verbose=False):
             ]
         }
 
-        if coverage:
+        if coverage_count:
             args["command"].extend(
                 [
                     f"--cov={os.environ.get('BORDERCORE_HOME')}",
@@ -81,7 +81,7 @@ def run_test(test, coverage, verbose=False):
     elif test == "coverage":
 
         args = {
-            "name": "Bordercore Test Coverage",
+            "name": "Bordercore Coverage Report",
             "command": [
                 f"{os.environ.get('VIRTUALENV')}/pytest",
                 "-n",
@@ -144,10 +144,9 @@ def run_test(test, coverage, verbose=False):
 
     test_output = subprocess.run(args["command"], capture_output=True)
 
-    if coverage:
-        parse_test_report(args["name"], str(test_output))
+    parse_test_report(args["name"], str(test_output))
 
-    if test == "unit" and coverage:
+    if test == "unit" and coverage_count:
         parse_coverage_report()
 
 
@@ -159,15 +158,15 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("-t", "--test-list", help="The comma-separated list of tests to run.", required=True)
-    parser.add_argument("-c", "--coverage", help="Calculate test coverage.", action="store_true")
+    parser.add_argument("-c", "--coverage-count", help="Calculate test coverage count.", action="store_true")
     parser.add_argument("-v", "--verbose", help="Increase verbosity.", action="store_true")
     args = parser.parse_args()
 
     test_list = args.test_list.split(",")
     verbose = args.verbose
 
-    if args.coverage and "unit" not in test_list:
-        raise ValueError("You must specify the unit tests for test coverage")
+    if args.coverage_count and "unit" not in test_list:
+        raise ValueError("You must specify test type 'unit' for test coverage counts")
 
     for test in test_list:
-        run_test(test, args.coverage, verbose)
+        run_test(test, args.coverage_count, verbose)
