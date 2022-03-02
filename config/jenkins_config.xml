@@ -54,7 +54,13 @@ export DJANGO_SETTINGS_MODULE=config.settings.dev
 export PYTHONPATH=$PYTHONPATH:$WORKSPACE/bordercore:$WORKSPACE
 export DJANGO_LOG_DIR=&quot;/tmp&quot;
 
-ELASTICSEARCH_INDEX=bordercore_test ELASTICSEARCH_ENDPOINT=http://localhost:9201 pytest -m &quot;not data_quality and not functional&quot; $WORKSPACE/bordercore/ -v --tb=short -n 5</command>
+# Install webpack and generate JavaScript bundle
+npm --prefix=./bordercore/ init -y
+npm --prefix=./bordercore/ install webpack webpack-cli --save-dev
+npm --prefix=./bordercore/ run dev
+
+ELASTICSEARCH_INDEX=bordercore_test ELASTICSEARCH_ENDPOINT=http://localhost:9201 pytest -m &quot;not data_quality&quot; $WORKSPACE/bordercore/ -v --tb=short -n 5
+</command>
       <ignoreExitCode>false</ignoreExitCode>
     </jenkins.plugins.shiningpanda.builders.VirtualenvBuilder>
   </builders>
