@@ -1,4 +1,5 @@
 import datetime
+import getpass
 import hashlib
 import os
 import random
@@ -59,7 +60,7 @@ except ModuleNotFoundError:
 #  the s3 mock won't work
 from blob.elasticsearch_indexer import index_blob  # isort:skip
 
-GECKO_DRIVER_LOGFILE = "/tmp/geckodriver.log"
+GECKO_DRIVER_LOGFILE = f"/tmp/geckodriver-{getpass.getuser()}.log"
 
 # Disable the Debug Toolbar and thereby prevent it
 #  from interfering with functional and views tests
@@ -279,11 +280,6 @@ def browser():
     driver = webdriver.Firefox(executable_path="/opt/bin/geckodriver", log_path=GECKO_DRIVER_LOGFILE)
 
     yield driver
-
-    try:
-        os.remove(GECKO_DRIVER_LOGFILE)
-    except OSError:
-        pass
 
     if not os.environ.get("DISABLE_HEADLESS_DISPLAY", None):
         # Quit the Xvfb display
