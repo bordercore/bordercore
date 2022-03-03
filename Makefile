@@ -38,23 +38,23 @@ test:
 	python -m pytest -vv --cov=lib --cov=cli tests/*.py
 
 test_data:
-	$(VIRTUALENV)python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test-list data
+	python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test data
 
 test_unit:
 	ELASTICSEARCH_INDEX=$(ELASTICSEARCH_INDEX_TEST) ELASTICSEARCH_ENDPOINT=$(ELASTICSEARCH_ENDPOINT_TEST) \
-	$(VIRTUALENV)python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test-list unit --coverage-count
+	python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test unit --coverage-count
 
 test_wumpus:
-	$(VIRTUALENV)python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test-list wumpus
+	python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test wumpus
 
 test_functional: reset_elasticsearch
 # Configure functional tests to use a test instance of Elasticsearch. Don't use production.
 	ELASTICSEARCH_INDEX=$(ELASTICSEARCH_INDEX_TEST) ELASTICSEARCH_ENDPOINT=$(ELASTICSEARCH_ENDPOINT_TEST) \
-	$(VIRTUALENV)python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test-list functional
+	python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test functional
 
 test_coverage:
 	ELASTICSEARCH_INDEX=$(ELASTICSEARCH_INDEX_TEST) ELASTICSEARCH_ENDPOINT=$(ELASTICSEARCH_ENDPOINT_TEST) \
-	$(VIRTUALENV)python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test-list coverage
+	python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test coverage
 
 
 reset_elasticsearch:

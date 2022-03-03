@@ -1,9 +1,15 @@
+#
+# Insure that the bin directory from your virtualenv is in your PATH,
+#  since this is where pytest will be found.
+
 import argparse
 import datetime
+import getpass
 import os
 import pathlib
-import subprocess
+import sys
 import xml.etree.ElementTree as ET
+from subprocess import PIPE, STDOUT, Popen
 
 import django
 
@@ -14,8 +20,8 @@ django.setup()
 from metrics.models import Metric, MetricData  # isort:skip
 
 
-TEST_REPORT = "/tmp/test_report.xml"
-COVERAGE_REPORT = "/tmp/coverage.xml"
+TEST_REPORT = f"/tmp/test_report-{getpass.getuser()}.xml"
+COVERAGE_REPORT = f"/tmp/coverage-{getpass.getuser()}.xml"
 
 
 def parse_test_report(test_type, test_output=None):
@@ -59,7 +65,7 @@ def run_test(test, coverage_count, verbose=False):
         args = {
             "name": "Bordercore Unit Tests",
             "command": [
-                f"{os.environ.get('VIRTUALENV')}/pytest",
+                "pytest",
                 "-n",
                 "5",
                 "-m",
@@ -83,7 +89,7 @@ def run_test(test, coverage_count, verbose=False):
         args = {
             "name": "Bordercore Coverage Report",
             "command": [
-                f"{os.environ.get('VIRTUALENV')}/pytest",
+                "pytest",
                 "-n",
                 "5",
                 "-m",
@@ -100,7 +106,7 @@ def run_test(test, coverage_count, verbose=False):
         args = {
             "name": "Bordercore Functional Tests",
             "command": [
-                f"{os.environ.get('VIRTUALENV')}/pytest",
+                "pytest",
                 "-m",
                 "functional",
                 f"--junitxml={TEST_REPORT}",
@@ -113,7 +119,7 @@ def run_test(test, coverage_count, verbose=False):
         args = {
             "name": "Bordercore Wumpus Tests",
             "command": [
-                f"{os.environ.get('VIRTUALENV')}/pytest",
+                "pytest",
                 "-m",
                 "wumpus",
                 f"--junitxml={TEST_REPORT}",
@@ -126,7 +132,7 @@ def run_test(test, coverage_count, verbose=False):
         args = {
             "name": "Bordercore Data Quality Tests",
             "command": [
-                f"{os.environ.get('VIRTUALENV')}/pytest",
+                "pytest",
                 "-n",
                 "3",
                 "-m",
@@ -142,31 +148,34 @@ def run_test(test, coverage_count, verbose=False):
     if verbose:
         print(f"Running test {args['name']}")
 
-    test_output = subprocess.run(args["command"], capture_output=True)
+    out = Popen(args["command"], stderr=STDOUT, stdout=PIPE)
+    test_output, return_code = out.communicate()[0], out.returncode
 
     parse_test_report(args["name"], str(test_output))
 
     if test == "unit" and coverage_count:
         parse_coverage_report()
 
+    return return_code
+
 
 if __name__ == "__main__":
 
-    for env in ("BORDERCORE_HOME", "VIRTUALENV"):
+    for env in ("BORDERCORE_HOME",):
         if env not in os.environ:
             raise TypeError(f"{env} not found in the environment")
 
     parser = argparse.ArgumentParser(description="")
-    parser.add_argument("-t", "--test-list", help="The comma-separated list of tests to run.", required=True)
+    parser.add_argument("-t", "--test", help="The test to run.", required=True)
     parser.add_argument("-c", "--coverage-count", help="Calculate test coverage count.", action="store_true")
     parser.add_argument("-v", "--verbose", help="Increase verbosity.", action="store_true")
     args = parser.parse_args()
 
-    test_list = args.test_list.split(",")
+    test = args.test
     verbose = args.verbose
 
-    if args.coverage_count and "unit" not in test_list:
+    if args.coverage_count and "unit" not in test:
         raise ValueError("You must specify test type 'unit' for test coverage counts")
 
-    for test in test_list:
-        run_test(test, args.coverage_count, verbose)
+    return_code = run_test(test, args.coverage_count, verbose)
+    sys.exit(return_code)
