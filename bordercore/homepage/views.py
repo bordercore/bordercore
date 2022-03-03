@@ -29,7 +29,7 @@ def homepage(request):
 
     quote = Quote.objects.order_by("?").first()
 
-    # Get any 'pinned' bookmarks
+    # Get any "pinned" bookmarks
     pinned_bookmarks = Bookmark.objects.filter(user=request.user, is_pinned=True)
 
     tasks = Todo.objects.filter(user=request.user, priority=Todo.get_priority_value("High")).prefetch_related("tags")[:5]
@@ -67,7 +67,7 @@ def homepage(request):
     # Get the most recent untagged bookmarks
     bookmarks = Bookmark.objects.bare_bookmarks(request.user, limit=50)
 
-    # Get the list of 'daily' bookmarks
+    # Get the list of "daily" bookmarks
     daily_bookmarks = Bookmark.objects.filter(user=request.user, daily__isnull=False)
     for bookmark in daily_bookmarks:
         if bookmark.daily["viewed"] != "true":
@@ -109,13 +109,13 @@ def get_random_image(request, content_type):
     es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
     search_object = {
-        'query': {
+        "query": {
             "function_score": {
                 "random_score": {
                 },
                 "query": {
-                    'bool': {
-                        'must': [
+                    "bool": {
+                        "must": [
                             {
                                 "wildcard": {
                                     "content_type": {
@@ -124,13 +124,13 @@ def get_random_image(request, content_type):
                                 }
                             },
                             {
-                                'term': {
-                                    'user_id': request.user.id
+                                "term": {
+                                    "user_id": request.user.id
                                 }
                             },
                             {
-                                'term': {
-                                    'is_private': False
+                                "term": {
+                                    "is_private": False
                                 }
                             }
                         ]
@@ -138,12 +138,12 @@ def get_random_image(request, content_type):
                 }
             }
         },
-        'from': 0,
-        'size': 1,
-        '_source': [
-            'filename',
-            'name',
-            'uuid'
+        "from": 0,
+        "size": 1,
+        "_source": [
+            "filename",
+            "name",
+            "uuid"
         ]
     }
 
@@ -173,9 +173,9 @@ def get_date(node):
 
     if len(node.content) > 0 and isinstance(node.content[0], PyOrgMode.OrgDrawer.Element):
         property = node.content[0].content[0]
-        if property.name == 'CREATED':
+        if property.name == "CREATED":
             raw_date = property.value
-            matches = re.match(r'\[(\d\d\d\d-\d\d-\d\d).*\]', raw_date)
+            matches = re.match(r"\[(\d\d\d\d-\d\d-\d\d).*\]", raw_date)
             if matches:
                 return matches.group(1)
             else:
