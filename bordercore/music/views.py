@@ -66,7 +66,6 @@ def music_list(request):
                       "random_album": random_album,
                       "playlists": playlists,
                       "title": "Music List",
-                      "IMAGES_URL": settings.IMAGES_URL,
                       "collection_is_not_empty": collection_is_not_empty
                   })
 
@@ -126,7 +125,6 @@ class ArtistDetailView(TemplateView):
             "album_list": albums,
             "song_list": song_list,
             "compilation_album_list": compilation_songs,
-            "IMAGES_URL": settings.IMAGES_URL,
         }
 
 
@@ -166,7 +164,6 @@ class AlbumDetailView(FormRequestMixin, ModelFormMixin, DetailView):
                     "text": x.name, "is_meta": x.is_meta
                 } for x in self.object.tags.all()
             ],
-            "IMAGES_URL": settings.IMAGES_URL,
         }
 
     def get_queryset(self):
@@ -551,7 +548,6 @@ class SearchTagListView(ListView):
             "tag_name": self.request.GET["tag"],
             "song_list": song_list,
             "album_list": album_list,
-            "IMAGES_URL": settings.IMAGES_URL,
         }
 
 

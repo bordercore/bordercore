@@ -56,5 +56,6 @@ def set_constants(request):
         return {}
 
     return {
-        "MEDIA_URL_MUSIC": settings.MEDIA_URL_MUSIC
+        "MEDIA_URL_MUSIC": settings.MEDIA_URL_MUSIC,
+        "IMAGES_URL": settings.IMAGES_URL,
     }
