@@ -42,27 +42,32 @@
                 <div class="row">
                     <div class="col-lg-12">
 
-                        <div id="top-search" class="row">
+                        <div id="top-bar" class="row">
 
-                            <div class="col-lg-5 card-grid my-auto" id="top-title">
+                            <div class="col-lg-8 card-grid my-auto text-truncate" id="top-title">
                                 <span v-if="$store.state.collapsed" v-cloak>Bordercore :: </span>{% block title %} {% endblock %}
                             </div>
 
-                            <div class="col-lg-7 my-auto d-flex justify-content-end align-items-center">
+                            <div class="col-lg-4 my-auto d-flex justify-content-end align-items-center">
+                                <div class="position-relative">
+                                    <top-search
+                                        ref="topSearch"
+                                        value-attribute="id"
+                                        :max-suggestions=20
+                                        accesskey="s"
+                                        initial-search-type="{{ request.session.top_search_filter }}"
+                                        suggest-search-url="{% url 'search:search_tags_and_names' %}?term="
+                                        query-search-url="{% url 'search:search' %}"
+                                        note-query-search-url="{% url 'search:notes' %}"
+                                        drill-query-search-url="{% url 'search:search' %}"
+                                        store-in-session-url="{% url "accounts:store_in_session" %}"
+                                    >
+                                    </top-search>
+                                </div>
 
-                                <search-simple-suggest
-                                    ref="simpleSuggest"
-                                    value-attribute="id"
-                                    :max-suggestions=20
-                                    accesskey="s"
-                                    initial-search-type="{{ request.session.top_search_filter }}"
-                                    suggest-search-url="{% url 'search:search_tags_and_names' %}?term="
-                                    query-search-url="{% url 'search:search' %}"
-                                    note-query-search-url="{% url 'search:notes' %}"
-                                    drill-query-search-url="{% url 'search:search' %}"
-                                    store-in-session-url="{% url "accounts:store_in_session" %}"
-                                >
-                                </search-simple-suggest>
+                                <span id="top-search-icon" @click="openSearchWindow">
+                                    <font-awesome-icon class="top-search-target glow" icon="search" />
+                                </span>
 
                                 <recent-blobs
                                     :blob-list="recentBlobs"
@@ -187,7 +192,7 @@
                 {% endif %}
 
                 new Vue({
-                    el: "#top-search",
+                    el: "#top-bar",
                     store: storeBase,
                     name: "Top Bar",
                     components: {
@@ -236,6 +241,10 @@
                             const helpText = document.getElementById("help-text").innerHTML;
                             document.getElementById("modal-body-help").innerHTML = markdown.render(helpText);
                             $("#modalHelp").modal("show");
+                        },
+                        openSearchWindow() {
+                            this.$refs.topSearch.openSearchWindow();
+                            this.$refs.topSearch.$refs.suggestComponent.input.focus()
                         }
                     },
                 });

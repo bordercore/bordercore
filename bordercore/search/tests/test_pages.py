@@ -65,6 +65,12 @@ def test_note_search(blob_note, login, live_server, browser, settings):
     # Wait for the Vue front-end to load
     time.sleep(1)
 
+    # Click the search icon to reveal the search dialog box
+    top_search_icon = page.top_search_icon()
+    top_search_icon.click()
+
+    time.sleep(1)
+
     search_input = page.search_input()
     # Search for the first two words from the note
     search_input.send_keys(" ".join(blob_note[0].content.split()[:2]))

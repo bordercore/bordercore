@@ -837,24 +837,25 @@ pre {
 //
 
 #top-search {
+  position: absolute;
+  top: -1rem;
+  right: 0;
+}
+
+#top-bar {
   @extend .card-box-shadow;
   margin: $grid-margin $grid-margin $grid-margin $grid-margin;
   background-color: $bg-dark;
   border-radius: 0.4rem;
 }
 
-#top-search input {
-  width: 0.6rem;
+#top-bar input {
+  width: 25rem;
   border-radius: 10em;
   cursor: pointer;
-  transition: all 0.5s;
 }
 
-#top-search input:hover {
-  background-color: rgba(0, 0, 0, 0.2);
-}
-
-#top-search input:focus {
+#top-bar input:focus {
   width: 25rem;
   padding-left: 2rem;
   border-color: #66cc75;
@@ -864,9 +865,17 @@ pre {
   cursor: auto;
 }
 
-#top-search-filter-type {
-  color: $cyan;
-  font-weight: bold;
+#top-search-filter {
+  position: absolute;
+  top: 0.55rem;
+  right: 1rem;
+  font-size: 0.62rem;
+  text-align:center;
+
+  i {
+    position: relative;
+    top: .12rem;
+  }
 }
 
 .top-search-object-type {
@@ -896,6 +905,27 @@ pre {
 
   .matched {
     color: $primary;
+  }
+}
+
+#top-search-filter-options {
+  position: absolute;
+  z-index: 1000;
+  width: 23rem;
+  background-color: #1e2064;
+  border-radius: 0.4rem;
+  box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;
+
+  svg {
+    color: #00ffeb;
+  }
+
+  .top-search-filter-icon {
+    width: 1.5rem;
+  }
+
+  .tag-list:hover {
+    background-color: lighten($bg-light, 5%);
   }
 }
 

@@ -7,7 +7,7 @@ except ModuleNotFoundError:
 
 class SearchPage:
 
-    SEARCH_INPUT = (By.NAME, "search")
+    SEARCH_INPUT = (By.CSS_SELECTOR, "#search input[name='search']")
     SUBMIT_BUTTON = (By.CSS_SELECTOR, "input[type='submit']")
     SEARCH_RESULT_COUNT = (By.CSS_SELECTOR, "h4[class^='search-result-header'] strong")
     SEARCH_RESULT_NAME = (By.CSS_SELECTOR, "li[class='search-result'] h4 a")
@@ -33,7 +33,7 @@ class SearchPage:
         Find the text of the first ask
         """
         element = self.browser.find_element(*self.SEARCH_RESULT_COUNT)
-        return element.get_attribute("innerHTML")
+        return int(element.get_attribute("innerHTML"))
 
     def search_result_name(self):
         """
@@ -81,9 +81,16 @@ class NoteSearchPage:
 
     SEARCH_INPUT = (By.CSS_SELECTOR, "input[id='top-simple-suggest']")
     SEARCH_RESULT_COUNT = (By.CSS_SELECTOR, "#left-panel ul[class*='note-search-result'] li")
+    TOP_SEARCH_ICON = (By.CSS_SELECTOR, "#top-search-icon")
 
     def __init__(self, browser):
         self.browser = browser
+
+    def top_search_icon(self):
+        """
+        Find the search form input
+        """
+        return self.browser.find_element(*self.TOP_SEARCH_ICON)
 
     def search_input(self):
         """

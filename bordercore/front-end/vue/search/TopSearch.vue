@@ -1,12 +1,7 @@
 <template>
-    <div>
+    <div id="top-search" class="d-none">
         <form id="top-search-form" class="form-inline" method="get">
             <input type="hidden" name="doctype">
-            <span v-if="searchFilter" class="pr-2">Filter:
-                <span id="top-search-filter-type">
-                    {{ searchFilter }}
-                </span>
-            </span>
             <div class="form-row">
                 <div class="search-with-doctypes col-auto has-search">
                     <font-awesome-icon icon="search" />
@@ -14,7 +9,7 @@
                     <vue-simple-suggest id="top-simple-suggest"
                                         ref="suggestComponent"
                                         v-model="query"
-                                        :accesskey="accesskey"
+                                        accesskey="s"
                                         :display-attribute="displayAttribute"
                                         :value-attribute="valueAttribute"
                                         :list="search"
@@ -29,7 +24,6 @@
                                         @keydown.native="onKeyDown"
                                         @select="select"
                                         @keydown.native.enter.prevent="onEnter"
-                                        @blur="onBlur"
                     >
                         <div slot="suggestion-item" slot-scope="scope">
                             <!-- @*event*.stop="" handlers are needed to prevent the splitter from being selected -->
@@ -45,9 +39,34 @@
                             </span>
                         </div>
                     </vue-simple-suggest>
+                    <div v-if="searchFilter" id="top-search-filter" class="ti-tag ti-valid">
+                        <div class="tag label label-info d-flex align-items-center" style="line-height: 1.5">
+                            <div>{{ getFilterName(searchFilter) }}</div>
+                            <div>
+                                <a class="ml-1" href="#" @click.prevent="removeFilter()">
+                                    <i class="top-search-target remove glyphicon glyphicon-remove-sign glyphicon-white" />
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </form>
+        <div v-if="query === ''" id="top-search-filter-options" class="ml-3 mt-2 p-3">
+            <div class="text-primary mb-2">
+                <strong>Filter Options</strong>
+            </div>
+            <div class="d-flex flex-column">
+                <div v-for="filter in searchFilterTypes" :key="filter.icon" class="tag-list d-flex p-1" :class="getFilterClass(filter.doctype)" @click.prevent="handleFilter(filter.doctype)">
+                    <div class="top-search-filter-icon d-flex justify-content-center align-items-center">
+                        <font-awesome-icon class="mr-2" :icon="filter.icon" />
+                    </div>
+                    <div>
+                        {{ filter.name }}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -117,16 +136,70 @@
                 },
                 searchFilter: this.initialSearchType,
                 searchUrl: this.suggestSearchUrl,
+                searchFilterTypes: [
+                    {
+                        "name": "Books",
+                        "icon": "book",
+                        "doctype": "book",
+                    },
+                    {
+                        "name": "Bookmarks",
+                        "icon": "bookmark",
+                        "doctype": "bookmark",
+                    },
+                    {
+                        "name": "Notes",
+                        "icon": "sticky-note",
+                        "doctype": "note",
+                    },
+                    {
+                        "name": "Music",
+                        "icon": "music",
+                        "doctype": "music",
+                    },
+                    {
+                        "name": "Drill Questions",
+                        "icon": "graduation-cap",
+                        "doctype": "drill",
+                    },
+                ],
             };
+        },
+        mounted() {
+            const self = this;
+            document.addEventListener("keydown", function(evt) {
+                if (evt.key === "s" && evt.altKey) {
+                    self.openSearchWindow();
+                }
+            } );
+
+            // If a click was detected outside this component, *and*
+            //  the click wasn't on the "Search icon", then hide the
+            //  component.
+            const specifiedElement = document.getElementById("top-search");
+            document.addEventListener("click", function(event) {
+                const isClickInside = specifiedElement.contains(event.target);
+
+                // We check for the search icon by looking for a click on the
+                //  font-awesome 'svg' element, which has a custom 'top-search-target'
+                //  class on it, or the containing 'path' element by looking for a 'svg'
+                //  parent element with the same class.
+                if (!isClickInside &&
+                    !event.target.classList.contains("top-search-target") &&
+                    !event.target.parentElement.classList.contains("top-search-target")
+                ) {
+                    document.getElementById("top-search").classList.add("d-none");
+                }
+            });
         },
         methods: {
             search(query) {
                 try {
                     const url = this.searchUrl;
                     return axios.get(url + query + "&doc_type=" + this.searchFilter.toLowerCase())
-                        .then((response) => {
-                            return response.data;
-                        });
+                                .then((response) => {
+                                    return response.data;
+                                });
                 } catch (error) {
                     console.log(`Error: ${error}`);
                 }
@@ -152,7 +225,6 @@
                 const texts = query.split(/[\s-_/\\|\.]/gm).filter((t) => !!t) || [""];
 
                 const boldResult = result.replace(new RegExp("(.*?)(" + texts.join("|") + ")(.*?)", "gi"), "$1<b class='text-primary'>$2</b>$3");
-
                 return ` <em class="top-search-object-type">${suggestion.doctype}</em> - ${boldResult}`;
             },
             select(datum) {
@@ -170,12 +242,11 @@
 
                 const form = document.getElementById("top-search-form");
 
-                if (this.searchFilter === "Note") {
+                if (this.searchFilter === "note") {
                     form.action = this.noteQuerySearchUrl;
-                } else if (this.searchFilter === "Bookmark") {
+                } else if (this.searchFilter === "bookmark") {
                     form.action = this.bookmarkQuerySearchUrl;
-                } else if (this.searchFilter === "Drill") {
-                    form.doctype.value = "drill";
+                } else if (this.searchFilter === "drill") {
                     form.action = this.drillQuerySearchUrl;
                 } else {
                     form.action = this.querySearchUrl;
@@ -185,31 +256,24 @@
             },
             onKeyDown(evt) {
                 if (evt.code === "KeyN" && evt.altKey) {
-                    this.handleFilter("Note");
+                    this.handleFilter("note");
                 } else if (evt.code === "KeyL" && evt.altKey) {
-                    this.handleFilter("Bookmark");
+                    this.handleFilter("bookmark");
                 } else if (evt.code === "KeyB" && evt.altKey) {
-                    this.handleFilter("Book");
+                    this.handleFilter("book");
                 } else if (evt.code === "KeyM" && evt.altKey) {
-                    this.handleFilter("Music");
+                    this.handleFilter("music");
                     // Hack to prevent Chrome on OS X from submitting the form.
                     // I have no idea why this happens.
                     evt.preventDefault();
                 } else if (evt.code === "KeyD" && evt.altKey) {
-                    this.handleFilter("Drill");
+                    this.handleFilter("drill");
                 } else if (evt.key === "a" && evt.altKey) {
                     document.getElementById("top-simple-suggest").select();
                 }
             },
-            onBlur(evt) {
-                this.$refs.suggestComponent.setText("");
-            },
-            handleFilter(objectType) {
-                if (this.searchFilter === objectType) {
-                    this.searchFilter = "";
-                } else {
-                    this.searchFilter = this.searchFilter === objectType ? "" : objectType;
-                }
+            handleFilter(filter) {
+                this.searchFilter = this.searchFilter === filter ? "" : filter;
                 this.saveSearchFilter(this.searchFilter);
                 this.$refs.suggestComponent.research();
             },
@@ -225,6 +289,23 @@
                     "",
                     "",
                 );
+            },
+            openSearchWindow() {
+                document.getElementById("top-search").classList.remove("d-none");
+            },
+            getFilterClass(filter) {
+                if (filter === this.searchFilter) {
+                    return "selected rounded-sm";
+                }
+            },
+            removeFilter() {
+                this.searchFilter = "";
+            },
+            getFilterName(doctype) {
+                const filter = this.searchFilterTypes.filter((x) => {
+                    return x.doctype === doctype;
+                });
+                return filter.length > 0 ? filter[0].name : "";
             },
         },
     };

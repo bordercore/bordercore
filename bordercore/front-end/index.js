@@ -131,9 +131,9 @@ import SimpleSuggest from "./vue/common/SimpleSuggest.vue";
 Vue.component("SimpleSuggest", SimpleSuggest);
 window.SimpleSuggest = SimpleSuggest;
 
-import SearchSimpleSuggest from "./vue/common/SearchSimpleSuggest.vue";
-Vue.component("SearchSimpleSuggest", SearchSimpleSuggest);
-window.SearchSimpleSuggest = SearchSimpleSuggest;
+import TopSearch from "./vue/search/TopSearch.vue";
+Vue.component("TopSearch", TopSearch);
+window.TopSearch = TopSearch;
 
 import TagsInput from "./vue/common/TagsInput.vue";
 Vue.component("TagsInput", TagsInput);
