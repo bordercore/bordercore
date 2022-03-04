@@ -22,7 +22,8 @@ class MetricListView(UserPassesTestMixin, ListView):
         "Bordercore Functional Tests": "functional",
         "Bordercore Data Quality Tests": "data",
         "Bordercore Wumpus Tests": "wumpus",
-        "Bordercore Test Coverage": "coverage"
+        "Bordercore Test Coverage": "coverage",
+        "Bordercore Coverage Report": "coverage_repot"
     }
 
     def test_func(self):
