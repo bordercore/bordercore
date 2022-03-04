@@ -867,7 +867,7 @@ pre {
 
 #top-search-filter {
   position: absolute;
-  top: 0.55rem;
+  top: 0.4rem;
   right: 1rem;
   font-size: 0.62rem;
   text-align:center;
@@ -1030,7 +1030,7 @@ pre {
 
   // Absolutely position a search icon inside a search box.
   // For the left position, use a page-specific spacer below.
-  svg {
+  svg[data-icon="search"] {
     position: absolute;
     z-index: 2;
     top: 0.7rem;

@@ -3,7 +3,7 @@
         <form id="top-search-form" class="form-inline" method="get">
             <input type="hidden" name="doctype">
             <div class="form-row">
-                <div class="search-with-doctypes col-auto has-search">
+                <div class="search-with-doctypes col-auto has-search mr-1">
                     <font-awesome-icon icon="search" />
 
                     <vue-simple-suggest id="top-simple-suggest"
@@ -39,14 +39,12 @@
                             </span>
                         </div>
                     </vue-simple-suggest>
-                    <div v-if="searchFilter" id="top-search-filter" class="ti-tag ti-valid">
-                        <div class="tag label label-info d-flex align-items-center" style="line-height: 1.5">
-                            <div>{{ getFilterName(searchFilter) }}</div>
-                            <div>
-                                <a class="ml-1" href="#" @click.prevent="removeFilter()">
-                                    <i class="top-search-target remove glyphicon glyphicon-remove-sign glyphicon-white" />
-                                </a>
-                            </div>
+                    <div v-if="searchFilter" id="top-search-filter" class="tag label label-info d-flex align-items-center">
+                        <div>{{ getFilterName(searchFilter) }}</div>
+                        <div>
+                            <a class="ml-1" href="#" @click.prevent="removeFilter()">
+                                <font-awesome-icon icon="times" class="text-primary" />
+                            </a>
                         </div>
                     </div>
                 </div>
