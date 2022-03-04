@@ -18,6 +18,8 @@ from PIL import Image
 import django
 from django.conf import settings
 
+# import todo.models as todo_models
+
 try:
     from pyvirtualdisplay import Display
     from selenium import webdriver
@@ -59,6 +61,9 @@ except ModuleNotFoundError:
 # Note: this import must come *after* the mock_s3 import, otherwise
 #  the s3 mock won't work
 from blob.elasticsearch_indexer import index_blob  # isort:skip
+
+# Add an extra Elasticsearch field to indicate test data
+settings.ELASTICSEARCH_EXTRA_FIELDS["__test__"] = 1
 
 GECKO_DRIVER_LOGFILE = f"/tmp/geckodriver-{getpass.getuser()}.log"
 
@@ -249,7 +254,7 @@ def _index_blob(blob):
     responses.add(responses.GET, url,
                   json=serializer.data, status=200)
 
-    index_blob(uuid=blob.uuid, create_connection=True)
+    index_blob(uuid=blob.uuid, create_connection=True, extra_fields=settings.ELASTICSEARCH_EXTRA_FIELDS)
 
 
 @pytest.fixture()

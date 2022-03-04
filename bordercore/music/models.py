@@ -90,7 +90,8 @@ class Album(TimeStampedModel):
                 "doctype": "album",
                 "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
                 "date_unixtime": self.created.strftime("%s"),
-                "user_id": self.user.id
+                "user_id": self.user.id,
+                **settings.ELASTICSEARCH_EXTRA_FIELDS
             }
         }
 

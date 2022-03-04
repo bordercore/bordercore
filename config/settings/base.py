@@ -206,6 +206,8 @@ LOGIN_URL = "/accounts/login/"
 ELASTICSEARCH_ENDPOINT = os.environ.get("ELASTICSEARCH_ENDPOINT", "http://localhost:9200")
 ELASTICSEARCH_INDEX = os.environ.get("ELASTICSEARCH_INDEX", "bordercore")
 
+ELASTICSEARCH_EXTRA_FIELDS = {}
+
 DJANGO_LOG_DIR = os.environ.get("DJANGO_LOG_DIR", "/var/log/django")
 
 LOGGING = {

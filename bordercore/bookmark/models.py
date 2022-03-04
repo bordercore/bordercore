@@ -207,7 +207,8 @@ class Bookmark(TimeStampedModel):
                 "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
                 "date_unixtime": self.created.strftime("%s"),
                 "user_id": self.user.id,
-                "uuid": self.uuid
+                "uuid": self.uuid,
+                **settings.ELASTICSEARCH_EXTRA_FIELDS
             }
         }
 

@@ -790,3 +790,24 @@ def test_recently_viewed_blob_sort_order():
     )
 
     assert len(duplicates) == 0, f"Multiple sort_order values found in recently viewed blobs: {duplicates[0]}"
+
+
+def test_no_test_data_in_elasticsearch(es):
+    "Assert that there is no test data present, as identified by a '__test__' field"
+    search_object = {
+        "query": {
+            "bool": {
+                "must": {
+                    "exists": {
+                        "field": "__test__"
+                    }
+                },
+            }
+        },
+        "from": 0, "size": 10000,
+        "_source": ["uuid"]
+    }
+
+    found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]
+
+    assert found["total"]["value"] == 0, f"{found['total']['value']} documents with test data found, uuid={found['hits'][0]['_id']}"

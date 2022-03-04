@@ -228,6 +228,10 @@ def index_blob(**kwargs):
 
     blob_info = get_blob_info(**kwargs)
 
+    extra_fields = {}
+    if "extra_fields" in kwargs:
+        extra_fields = kwargs["extra_fields"]
+
     # An empty string causes a Python datetime validation error,
     #  so convert to "None" to avoid this.
     if blob_info["date"] == "":
@@ -250,6 +254,7 @@ def index_blob(**kwargs):
         created_date=blob_info["created"],
         last_modified=blob_info["modified"],
         metadata=blob_info["metadata"],
+        **extra_fields
     )
 
     if blob_info["date"] is not None:
