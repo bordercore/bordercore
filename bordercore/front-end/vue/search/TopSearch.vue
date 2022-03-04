@@ -268,6 +268,8 @@
                     this.handleFilter("drill");
                 } else if (evt.key === "a" && evt.altKey) {
                     document.getElementById("top-simple-suggest").select();
+                } else if (evt.code === "Escape") {
+                    document.getElementById("top-search").classList.add("d-none");
                 }
             },
             handleFilter(filter) {
