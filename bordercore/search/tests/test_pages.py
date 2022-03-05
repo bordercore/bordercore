@@ -29,12 +29,12 @@ def test_search(blob_image_factory, blob_pdf_factory, login, live_server, browse
     submit_button.click()
 
     # Test the number of matches
-    assert page.search_result_count() == "5"
+    assert page.search_result_count() == 1
 
     assert page.search_result_name() == blob_image_factory[0].name
 
     # Test the number of tags for the search result
-    assert page.search_result_tag_count() == 12
+    assert page.search_result_tag_count() == 3
 
     # Get the tag names for the search result
     tag_list = page.search_result_tags()

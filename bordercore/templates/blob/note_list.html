@@ -37,7 +37,7 @@
                 </card>
             </div>
 
-            <div v-if="'{{ request.GET.search }}'" class="scrollable-panel-scrollbar-hover card-body d-flex flex-column h-100">
+            <div v-if="'{{ request.GET.topSearch }}'" class="scrollable-panel-scrollbar-hover card-body d-flex flex-column h-100">
 
                 <div class="h3 text-info">
                     {{ object_list.hits.total.value }} Note{{ object_list.hits.total.value|pluralize:"s" }} Found
@@ -252,7 +252,7 @@
             store,
             data() {
                 return {
-                    isSearchResult: {% if request.GET.search %}true{% else %}false{% endif %}
+                    isSearchResult: {% if request.GET.topSearch %}true{% else %}false{% endif %}
                 }
             },
             methods: {

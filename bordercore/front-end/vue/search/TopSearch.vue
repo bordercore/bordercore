@@ -19,7 +19,7 @@
                                         :max-suggestions="maxSuggestions"
                                         placeholder="Search"
                                         autocomplete="off"
-                                        name="search"
+                                        name="topSearch"
                                         :styles="autoCompleteStyle"
                                         @keydown.native="onKeyDown"
                                         @select="select"
