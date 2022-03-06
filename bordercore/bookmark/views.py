@@ -701,3 +701,27 @@ def edit_related_bookmark_note(request):
     }
 
     return JsonResponse(response)
+
+
+@login_required
+def add_tag(request):
+
+    bookmark_uuid = request.POST["bookmark_uuid"]
+    tag_id = request.POST["tag_id"]
+
+    bookmark = Bookmark.objects.get(uuid=bookmark_uuid)
+    tag = Tag.objects.get(id=tag_id)
+
+    if tag in bookmark.tags.all():
+        response = {
+            "status": "Error",
+            "message": f"Bookmark already has tag {tag}"
+        }
+    else:
+        bookmark.tags.add(tag)
+        bookmark.index_bookmark()
+        response = {
+            "status": "OK",
+        }
+
+    return JsonResponse(response)

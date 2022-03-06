@@ -24,13 +24,13 @@
 
                 <h4>Pinned Tags</h4>
 
-                <ul id="sort-container-tags" class="list-group flex-column w-100">
+                <ul id="sort-container-tags" class="list-group flex-column w-100" v-cloak>
                     <tag-list inline-template>
                         <div>
-                            <draggable v-model="pinnedTags" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
+                            <draggable v-model="pinnedTags" @change="onSortTags" ghost-class="sortable-ghost" draggable=".draggable">
                                 <transition-group type="transition" class="w-100">
-                                    <li v-for="tag in pinnedTags" class="tag-list pl-2 py-1 pr-1 d-flex" :class="{ 'selected rounded-sm': tag.isActive, draggable: tag.isDraggable }" @click.prevent="onClick" :data-tag="tag.name" :data-id="tag.id" :key="tag.id" v-cloak>
-                                        <div class="pl-2">
+                                    <li v-for="tag in pinnedTags" class="tag-list d-flex pl-2 py-1 pr-1" :class="{ 'selected rounded-sm': tag.isActive, draggable: tag.isDraggable }" @click.prevent="onClickTag" :data-tag="tag.name" :data-id="tag.id" :key="tag.id" @dragover="onDragOverTag($event)" @dragleave="onDragLeaveTag($event)" @drop="onAddTagToBookmark($event, tag)">
+                                        <div class="pl-2 text-truncate">
                                             [[ tag.name ]]
                                         </div>
                                         <div v-if="tag.count" class="ml-auto pr-2">
@@ -115,9 +115,9 @@
                     <div class="row">
                         <div class="col-lg-12">
                             <table id="bookmark-list" class="w-100">
-                                <tbody is="draggable" v-model="bookmarkList" @change="onChange" ghost-class="sortable-ghost" :disabled="disableSort">
+                                <tbody is="draggable" v-model="bookmarkList" @change="onSortBookmarks" ghost-class="sortable-ghost" :disabled="disableSort">
                                     <transition-group type="transition">
-                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="bookmark-list w-100" @click="onClick" @mouseenter="rowHovered" @mouseleave="rowUnHovered" v-b-hover="handleYoutubeHover" v-cloak>
+                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="bookmark-list w-100" @click="onClick" @mouseenter="rowHovered" @mouseleave="rowUnHovered" v-b-hover="handleYoutubeHover" v-cloak @dragstart="startDrag($event, bookmark)">
                                             <td class="bookmark-list-date p-2 text-info align-top">
                                                 <span>[[ bookmark.created ]]</span>
                                             </td>
@@ -347,7 +347,7 @@
                 return {
                     bookmarkList: [],
                     selectedBookmarkUuid: null,
-                    disableSort: true,
+                    disableSort: false,
                     show: false,
                     right: true,
                 }
@@ -386,8 +386,13 @@
                     }
 
                 },
-                onChange(evt) {
+                onSortBookmarks(evt) {
 
+                    // Ignore this event if we're not filtering
+                    //  on a tag.
+                    if (!this.$store.state.selectedTagName) {
+                        return;
+                    }
                     bookmarkUuid = evt.moved.element.uuid;
 
                     // The backend expects the ordering to begin
@@ -434,7 +439,7 @@
                 getBookmarkList({ pageNumber=null, searchTerm=null, searchTag=null, randomize=false } = {}) {
                     var self = this;
 
-                    this.disableSort = true;
+                    this.disableSort = false;
                     if (searchTerm != null) {
                         url = "{% url 'bookmark:get_bookmarks_by_keyword' 666 %}".replace(/666/, searchTerm);
                         isFiltered = true;
@@ -541,6 +546,11 @@
 
                     document.querySelector("#bookmark-list tr[data-uuid='" + this.selectedBookmarkUuid + "']").classList.add("selected");
                 },
+                startDrag(evt, bookmark) {
+                    evt.dataTransfer.dropEffect = "move";
+                    evt.dataTransfer.effectAllowed = "move";
+                    evt.dataTransfer.setData("application/x-moz-node", bookmark.uuid);
+                }
             },
             mounted() {
 
@@ -731,7 +741,7 @@
                 }
             },
             methods: {
-                onClick(evt) {
+                onClickTag(evt) {
                     const tagName = evt.currentTarget.dataset.tag;
                     this.selectedTag = tagName;
 
@@ -757,8 +767,40 @@
                         return "badge-info";
                     }
                 },
-                onChange(evt) {
+                onDragOverTag(evt) {
+                    evt.currentTarget.classList.add("hover-tag");
+                },
+                onDragLeaveTag(evt) {
+                    evt.currentTarget.classList.remove("hover-tag");
+                },
+                onAddTagToBookmark(evt, tag) {
+                    evt.currentTarget.classList.remove("hover-tag");
 
+                    // Ignore if we're dragging a bookmark from a tag list
+                    //  onto the same tag.
+                    if (tag.name === this.$store.state.selectedTagName) {
+                        return;
+                    }
+                    const bookmarkUuid = evt.dataTransfer.getData("application/x-moz-node");
+                    doPost(
+                        this,
+                        "{% url "bookmark:add_tag" %}",
+                        {
+                            "tag_id": tag.id,
+                            "bookmark_uuid": bookmarkUuid,
+                        },
+                        (response) => {
+                            EventBus.$emit("get-page", 1);
+                        },
+                        "",
+                        "Error adding tag"
+                    );
+                },
+                onSortTags(evt) {
+                    if (evt.added) {
+                        console.log("Add tag to bookmark uuid = " + evt.added.element.uuid);
+                        return;
+                    }
                     tagId = evt.moved.element.id;
 
                     doPost(
@@ -809,7 +851,7 @@
             components: {
                 AddNote,
                 TagList
-            }
+            },
         });
 
     </script>

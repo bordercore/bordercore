@@ -121,4 +121,9 @@ urlpatterns = [
         view=views.get_related_bookmark_list,
         name="get_related_bookmark_list"
     ),
+    path(
+        route="bookmark/add_tag",
+        view=views.add_tag,
+        name="add_tag"
+    ),
 ]

@@ -966,6 +966,12 @@ pre {
 // Bookmarks
 //
 
+.hover-tag {
+  border: 0.06rem solid #262c49;
+  background-color: #1e233a;
+  color: #ff0;
+}
+
 .bookmark-list,
 .bookmark-list a {
   &:hover {
@@ -1356,6 +1362,7 @@ div #dateapp {
 //
 
 .tag-list {
+  border: 0.06rem solid #10163a;
   a {
     color: $white;
   }

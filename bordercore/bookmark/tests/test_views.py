@@ -9,10 +9,12 @@ from django import urls
 from blob.models import SortOrderBlobBookmark
 from blob.tests.factories import BlobFactory
 from bookmark.models import Bookmark
+from bookmark.tests.factories import BookmarkFactory
 from drill.models import Question, SortOrderQuestionBookmark
 from drill.tests.factories import QuestionFactory
 from node.models import Node, SortOrderNodeBookmark
 from node.tests.factories import NodeFactory
+from tag.tests.factories import TagFactory
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
@@ -371,4 +373,23 @@ def test_edit_related_bookmark_note(auto_login_user, bookmark):
     })
 
     assert node.sortordernodebookmark_set.first().note == note
+    assert resp.status_code == 200
+
+
+def test_add_tag(auto_login_user, bookmark):
+
+    user, client = auto_login_user()
+
+    bookmark = BookmarkFactory(user=user)
+    tag = TagFactory(user=user)
+
+    url = urls.reverse("bookmark:add_tag")
+    resp = client.post(url, {
+        "bookmark_uuid": bookmark.uuid,
+        "tag_id": tag.id
+    })
+
+    updated_bookmark = Bookmark.objects.get(uuid=bookmark.uuid)
+    assert updated_bookmark.tags.count() == 1
+    assert updated_bookmark.tags.first() == tag
     assert resp.status_code == 200
