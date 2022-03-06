@@ -319,7 +319,7 @@ class BookmarkListView(ListView):
             )
 
         query = query.prefetch_related("tags")
-        query = query.only("uuid", "created", "url", "name", "last_response_code", "note")
+        query = query.only("created", "data", "last_response_code", "name", "note", "url", "uuid")
 
         if "random" in self.kwargs:
             query = query.order_by("?")
