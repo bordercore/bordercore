@@ -326,12 +326,12 @@ def test_get_title_from_url(auto_login_user, bookmark):
     )
 
     # Test existing bookmark
-    resp = client.get(f"{url}?url=https://www.bordercore.com")
+    resp = client.get(f"{url}?url={bookmark[0].url}")
     content = json.loads(resp.content)
     assert content["status"] == "OK"
     assert resp.status_code == 200
-    assert content["bookmarkUuid"] == str(bookmark[4].uuid)
-    assert content["title"] == bookmark[4].name
+    assert content["bookmarkUuid"] == str(bookmark[0].uuid)
+    assert content["title"] == bookmark[0].name
 
     # Test new bookmark
     resp = client.get(f"{url}?url=https://www.bordercore.com/bookmarks/")

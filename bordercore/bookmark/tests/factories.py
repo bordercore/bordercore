@@ -10,5 +10,5 @@ class BookmarkFactory(factory.DjangoModelFactory):
         model = Bookmark
 
     name = factory.Sequence(lambda n: f"Bookmark {n}")
-    url = "https://www.bordercore.com"
+    url = factory.Faker("url")
     user = factory.SubFactory(UserFactory)
