@@ -13,6 +13,11 @@ from drill.models import Question, EFACTOR_DEFAULT  # isort:skip
 pytestmark = pytest.mark.django_db
 
 
+def test_str(question):
+
+    assert str(question[0]) == question[0].question
+
+
 def test_get_tags(question):
 
     tags = question[0].get_tags()
