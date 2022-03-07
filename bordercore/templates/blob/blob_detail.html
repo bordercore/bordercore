@@ -529,13 +529,13 @@
                 handleLinkToBookmark() {
                     EventBus.$emit("open-bookmarks-modal");
                 },
-                selectBlob(blobUuid) {
+                selectBlob(blob) {
                     doPost(
                         this,
                         "{% url "blob:link" %}",
                         {
                             "blob_1_uuid": "{{ object.uuid }}",
-                            "blob_2_uuid": blobUuid,
+                            "blob_2_uuid": blob.uuid,
                         },
                         (response) => {
                             EventBus.$emit("get-related-blob-list");
