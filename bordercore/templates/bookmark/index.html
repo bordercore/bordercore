@@ -10,18 +10,6 @@
 
             <div id="vue-pinned-tags" class="card-body">
 
-                <add-note inline-template>
-                    <div id="bookmark-sidebar" >
-                        <form>
-                            <div class="form-group">
-                                <label class="col-form-label">Note</label>
-                                <textarea id="note" class="form-control" rows="9" v-model="note"></textarea>
-                            </div>
-                            <button id="btn-add-note" type="button" class="btn btn-primary" @click="onClick">Add</button>
-                        </form>
-                    </div>
-                </add-note>
-
                 <h4>Pinned Tags</h4>
 
                 <ul id="sort-container-tags" class="list-group flex-column w-100" v-cloak>
@@ -367,22 +355,6 @@
                             document.getElementById("bookmark-sidebar").classList.remove("show");
                         }
 
-                    } else {
-
-                        if (this.$store.state.selectedTagName) {
-                            noteValue = "";
-
-                            var bookmarkUuid = element.dataset.uuid;
-
-                            const found = this.bookmarkList.find(element => element.uuid == bookmarkUuid);
-
-                            if (found) {
-                                noteValue = found.note;
-                            }
-
-                            EventBus.$emit("setNoteValue", noteValue);
-                        }
-
                     }
 
                 },
@@ -514,10 +486,6 @@
                     axios.delete("{% url 'bookmark-detail' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', uuid))
                          .then(() => {
 
-                             if (this.$store.state.selectedTagName) {
-                                 document.getElementById("bookmark-sidebar").classList.remove("show");
-                             }
-
                              this.$bvToast.toast("Bookmark deleted", {
                                  title: "Info",
                                  variant: "primary"
@@ -602,16 +570,6 @@
 
                 });
 
-                EventBus.$on("add-note", payload => {
-
-                    this.bookmarkList.forEach( bookmark => {
-                        if( bookmark.uuid == payload.uuid ) {
-                            bookmark.note = btoa(payload.noteValue);
-                        }
-                    });
-
-                });
-
                 {% if tag %}
                 this.getBookmarkList({searchTag: "{{ tag }}"});
                 {% else %}
@@ -672,48 +630,6 @@
 
             }
         });
-
-        const AddNote = {
-            data() {
-                return {
-                    note: ""
-                }
-            },
-            methods: {
-                onClick(evt) {
-
-                    const note = document.getElementById("note").value;
-                    var bookmarkUuid = document.querySelector("tr.bookmark-list.selected").dataset.uuid;
-
-                    doPost(
-                        this,
-                        "{% url "bookmark:add_note" %}",
-                        {
-                            "tag": this.$store.state.selectedTagName,
-                            "bookmark_uuid": bookmarkUuid,
-                            "note": note
-                        },
-                        (response) => {
-                            payload = {
-                                uuid: bookmarkUuid,
-                                noteValue: note
-                            }
-                            EventBus.$emit("add-note", payload);
-                        },
-                        "",
-                        "Error adding note"
-                    );
-
-                }
-            },
-            mounted() {
-
-                EventBus.$on("setNoteValue", payload => {
-                    this.note = payload;
-                });
-
-            }
-        }
 
         const TagList = {
             store,
@@ -849,7 +765,6 @@
             name: "Pinned Tags",
             store,
             components: {
-                AddNote,
                 TagList
             },
         });

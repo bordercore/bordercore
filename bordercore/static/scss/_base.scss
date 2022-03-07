@@ -1002,24 +1002,6 @@ pre {
   bottom: 0.3rem;
 }
 
-#bookmark-sidebar {
-  position: fixed;
-  z-index: 200;
-  left: -18.75rem;
-  overflow: hidden;
-  width: 18.75rem;
-  height: 25rem;
-  padding: 0.3rem;
-  border: 0.06rem solid #999;
-  background-color: #fff;
-  transition: all 1s ease;
-}
-
-#bookmark-sidebar.show {
-  left: 1.25rem;
-  transition: all 1s ease;
-}
-
 .monospaced {
   font-family: Courier, sans-serif;
 }
