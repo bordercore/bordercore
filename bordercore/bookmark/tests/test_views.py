@@ -376,7 +376,7 @@ def test_edit_related_bookmark_note(auto_login_user, bookmark):
     assert resp.status_code == 200
 
 
-def test_add_tag(auto_login_user, bookmark):
+def test_add_tag(auto_login_user, monkeypatch_bookmark):
 
     user, client = auto_login_user()
 

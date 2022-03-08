@@ -14,7 +14,7 @@ def test_get_tags(bookmark):
     assert tags == "django"
 
 
-def test_get_favicon_url():
+def test_get_favicon_url(monkeypatch_bookmark):
 
     bookmark = BookmarkFactory(url="https://www.bordercore.com")
 
