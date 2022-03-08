@@ -1,7 +1,11 @@
+import re
+
+import boto3
 import pytest
 
 import django
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
 from lib.util import get_elasticsearch_connection, get_missing_bookmark_ids
@@ -11,6 +15,9 @@ pytestmark = pytest.mark.data_quality
 django.setup()
 
 from bookmark.models import Bookmark  # isort:skip
+
+
+bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 
 
 @pytest.fixture()
@@ -136,3 +143,26 @@ def test_bookmark_fields_are_trimmed():
         | Q(note__iregex=r"^\s")
     )
     assert len(bookmarks) == 0, f"{len(bookmarks)} fail this test; example: id={bookmarks[0].id}"
+
+
+def test_bookmark_thumbnails_in_s3_exist_in_db():
+    "Assert that all bookmark thumbanils in S3 also exist in the database"
+
+    s3_resource = boto3.resource("s3")
+
+    unique_uuids = {}
+
+    paginator = s3_resource.meta.client.get_paginator("list_objects")
+    page_iterator = paginator.paginate(Bucket=bucket_name)
+
+    for page in page_iterator:
+        for key in page["Contents"]:
+            m = re.search(r"^bookmarks/(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b)", str(key["Key"]))
+            if m:
+                unique_uuids[m.group(1)] = True
+
+    for key in unique_uuids.keys():
+        try:
+            Bookmark.objects.get(uuid=key)
+        except ObjectDoesNotExist:
+            raise ObjectDoesNotExist(f"Bookmark thumbnail found in S3 but not in DB: {key}")
