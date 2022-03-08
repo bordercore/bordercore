@@ -176,15 +176,16 @@
             //  component.
             const specifiedElement = document.getElementById("top-search");
             document.addEventListener("click", function(event) {
-                const isClickInside = specifiedElement.contains(event.target);
-
+                const isClickInside = specifiedElement.contains(event.target) || specifiedElement.contains(event.target.parentElement);
                 // We check for the search icon by looking for a click on the
                 //  font-awesome 'svg' element, which has a custom 'top-search-target'
                 //  class on it, or the containing 'path' element by looking for a 'svg'
                 //  parent element with the same class.
                 if (!isClickInside &&
                     !event.target.classList.contains("top-search-target") &&
-                    !event.target.parentElement.classList.contains("top-search-target")
+                    !event.target.parentElement.classList.contains("top-search-target") &&
+                    !event.target.classList.contains("fa-times") &&
+                    !event.target.parentElement.classList.contains("fa-times")
                 ) {
                     document.getElementById("top-search").classList.add("d-none");
                 }
