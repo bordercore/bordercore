@@ -37,7 +37,7 @@
 
                     {% for tag in blob.tags.all %}
                         {% if forloop.first %}
-                            <div class="my-3">
+                            <div id="blob-tag-list" class="my-3">
                                 <font-awesome-icon icon="tags" class="text-primary"></font-awesome-icon>
                         {% endif %}
                         <a class="tag" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>

@@ -450,7 +450,6 @@ div.CodeMirror {
   background-color: #25335b !important;
   border-radius: 1.5rem !important;
   color: #80b5ea !important;
-  line-height: 2;
   white-space: nowrap;
 
   &:hover {
@@ -1282,6 +1281,10 @@ div #dateapp {
 
 #date_year {
   width: 7rem;
+}
+
+#blob-tag-list {
+  line-height: 2;
 }
 
 //
