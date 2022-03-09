@@ -17,9 +17,14 @@ def test_html():
     and temporary attributes.
     """
 
-    # Collect all the templates used by Django
+    # Collect all the templates used by Django or Vue
     template_list = []
-    for template_dir in (settings.TEMPLATES[0]["DIRS"]):
+    dir_list = [
+        settings.TEMPLATES[0]["DIRS"],
+        [f"{os.environ['BORDERCORE_HOME']}/front-end/vue"]
+    ]
+
+    for template_dir in ([item for sublist in dir_list for item in sublist]):
         for base_dir, dirnames, filenames in os.walk(template_dir):
             for filename in filenames:
                 template_list.append(os.path.join(base_dir, filename))
