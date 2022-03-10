@@ -61,12 +61,6 @@ urlpatterns = [
         name="get_bookmarks_by_keyword"
     ),
     path(
-        route="list/random/",
-        view=views.BookmarkListView.as_view(),
-        kwargs={"random": True},
-        name="get_bookmarks_by_random"
-    ),
-    path(
         route="list/tag/<str:tag_filter>/",
         view=views.BookmarkListTagView.as_view(),
         name="get_bookmarks_by_tag"

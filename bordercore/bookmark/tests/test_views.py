@@ -123,16 +123,6 @@ def test_bookmark_get_tags_used_by_bookmarks(auto_login_user, bookmark):
     assert resp.status_code == 200
 
 
-def test_bookmark_get_bookmarks_by_random(auto_login_user, bookmark):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("bookmark:get_bookmarks_by_random")
-    resp = client.get(url)
-
-    assert resp.status_code == 200
-
-
 def test_bookmark_overview(auto_login_user, bookmark):
 
     _, client = auto_login_user()

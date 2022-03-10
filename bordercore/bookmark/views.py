@@ -320,11 +320,7 @@ class BookmarkListView(ListView):
 
         query = query.prefetch_related("tags")
         query = query.only("created", "data", "last_response_code", "name", "note", "url", "uuid")
-
-        if "random" in self.kwargs:
-            query = query.order_by("?")
-        else:
-            query = query.order_by("-created")
+        query = query.order_by("-created")
 
         page_number = self.kwargs.get("page_number", 1)
         paginator = Paginator(query, BOOKMARKS_PER_PAGE)

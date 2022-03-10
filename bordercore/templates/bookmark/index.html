@@ -15,14 +15,14 @@
                 <ul id="sort-container-tags" class="list-group flex-column w-100" v-cloak>
                     <tag-list inline-template>
                         <div>
-                            <draggable v-model="pinnedTags" @change="onSortTags" ghost-class="sortable-ghost" draggable=".draggable">
+                            <draggable v-model="$store.state.pinnedTags" @change="onSortTags" ghost-class="sortable-ghost" draggable=".draggable">
                                 <transition-group type="transition" class="w-100">
-                                    <li v-for="tag in pinnedTags" class="tag-list d-flex pl-2 py-1 pr-1" :class="{ 'selected rounded-sm': tag.isActive, draggable: tag.isDraggable }" @click.prevent="onClickTag" :data-tag="tag.name" :data-id="tag.id" :key="tag.id" @dragover="onDragOverTag($event)" @dragleave="onDragLeaveTag($event)" @drop="onAddTagToBookmark($event, tag)">
+                                    <li v-for="tag in $store.state.pinnedTags" class="bookmark-tag-list d-flex pl-2 py-1 pr-1" :class="{ 'selected rounded-sm': tag.name === $store.state.selectedTagName, draggable: tag.isDraggable }" @click.prevent="onClickTag" :data-tag="tag.name" :data-id="tag.id" :key="tag.id" @dragover="onDragOverTag($event)" @dragleave="onDragLeaveTag($event)" @drop="onAddTagToBookmark($event, tag)">
                                         <div class="pl-2 text-truncate">
                                             [[ tag.name ]]
                                         </div>
                                         <div v-if="tag.count" class="ml-auto pr-2">
-                                            <span class="px-2 badge badge-pill"  :class="{ 'badge-light': tag.isActive, 'badge-info': !tag.isActive }">
+                                            <span class="px-2 badge badge-pill badge-info">
                                                 [[ tag.count ]]
                                             </span>
                                         </div>
@@ -37,75 +37,97 @@
 
         </div>
 
-        <div class="col-lg-9">
+        <div id="vue-app-top" class="col-lg-9">
 
-            <div id="vue-app-top" class="ml-3 mb-3">
+            <div class="ml-3">
 
-                <div class="d-flex mr-3">
+                <div id="bookmark-search-form" class="d-flex flex-column mr-3 p-3">
 
-                    <form id="search-form" class="form-inline" role="form" method="get" @submit.prevent>
+                    <div class="d-flex">
+                        <form class="form-inline" role="form" method="get" @submit.prevent>
                         {% csrf_token %}
 
-                        <input id="add-to-remote-from-pinned-tagname" type="hidden" name="tag" />
+                            <input id="add-to-remote-from-pinned-tagname" type="hidden" name="tag" />
 
-                        <div class="form-group has-search">
-                            <font-awesome-icon icon="search" class="ml-2 text-info"></font-awesome-icon>
-                            <search inline-template @search-term="searchTerm" @search-tag="searchTag" @get-page="getPage" ref="search">
-                                <div>
-                                    <simple-suggest
-                                        ref="simpleSuggest"
-                                        place-holder="Search"
-                                        search-url="{% url 'bookmark:get_tags_used_by_bookmarks' %}?query="
-                                    >
-                                    </simple-suggest>
-                                </div>
-                            </search>
+                            <div class="form-group has-search">
+                                <font-awesome-icon icon="search" class="ml-2 text-info"></font-awesome-icon>
+                                <search inline-template @search-term="onTermSearch" @get-page="getPage" ref="search">
+                                    <div class="position-relative">
+                                        <simple-suggest
+                                            id="bookmarkSearch"
+                                            ref="simpleSuggest"
+                                            place-holder="Search term or tag"
+                                            search-url="{% url 'bookmark:get_tags_used_by_bookmarks' %}?query="
+                                        >
+                                        </simple-suggest>
+                                    </div>
+                                </search>
+                            </div>
+
+                        </form>
+
+                        <div class="btn-group ml-3" role="group" aria-label="List View">
+                            <button type="button" class="btn btn-primary" :class="{'active': $store.state.viewType === 'normal' }" @click="switchViewType('normal')">Normal</button>
+                            <button type="button" class="btn btn-primary" :class="{'active': $store.state.viewType === 'compact' }" @click="switchViewType('compact')">Compact</button>
                         </div>
 
-                    </form>
+                        <div class="ml-3">
+                            <add-button :href="'{% url 'bookmark:create' %}'">
+                            </add-button>
+                        </div>
 
-                    <div class="btn-group ml-3" role="group" aria-label="List View">
-                        <button type="button" class="btn btn-primary" :class="{'active': $store.state.viewType === 'normal' }" @click="switchViewType('normal')">Normal</button>
-                        <button type="button" class="btn btn-primary" :class="{'active': $store.state.viewType === 'compact' }" @click="switchViewType('compact')">Compact</button>
+                        <div class="dropdownmenu d-flex">
+                            <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="my-auto">
+                                <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+                                <div slot="dropdown" v-cloak>
+                                    <a v-if="$store.state.selectedTagName && $store.state.selectedTagName !== 'Untagged'" class="dropdown-item" href="#" @click.prevent="togglePinStatus">
+                                        <font-awesome-icon icon="thumbtack" class="text-primary mr-3"></font-awesome-icon>
+                                    [[ getPinnedMenuItem() ]]
+                                    </a>
+                                    <a class="dropdown-item" href=" url 'bookmark:import' %}">
+                                        <font-awesome-icon icon="file-import" class="text-primary mr-3"></font-awesome-icon>Import
+                                    </a>
+                                </div>
+                            </dropdown-menu>
+                        </div>
+
                     </div>
+                    <div v-cloak>
+                        <div class="d-flex mt-1 ml-3">
 
-
-                    <div class="ml-3">
-                        <add-button :href="'{% url 'bookmark:create' %}'">
-                        </add-button>
-                    </div>
-
-                    <div class="dropdownmenu d-flex">
-                        <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="my-auto">
-                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                            <div slot="dropdown">
-                                <a v-if="$store.state.pinnedStatus" class="dropdown-item" href="#" @click.prevent="togglePinStatus">
-                                    <font-awesome-icon icon="thumbtack" class="text-primary mr-3"></font-awesome-icon>
-                                    [[ $store.state.pinnedStatus ]]
-                                </a>
-                                <a class="dropdown-item" href=" url 'bookmark:import' %}">
-                                    <font-awesome-icon icon="file-import" class="text-primary mr-3"></font-awesome-icon>Import
-                                </a>
-                                <a class="dropdown-item" href="#" @click.prevent="randomize">
-                                    <font-awesome-icon icon="random" class="text-primary mr-3"></font-awesome-icon>Randomize
-                                </a>
+                            <div v-if="$store.state.selectedTagName && $store.state.selectedTagName !== 'Untagged'" id="bookmark-search-filter" class="tag label label-info d-flex align-items-center">
+                                <div>Tag: <span class="text-white">[[ $store.state.selectedTagName ]]</span></div>
+                                <div>
+                                    <a class="ml-1" href="#" @click.prevent="removeFilter">
+                                        <font-awesome-icon icon="times" class="text-primary" />
+                                    </a>
+                                </div>
                             </div>
-                        </dropdown-menu>
-                    </div>
 
+                            <div v-if="$store.state.searchTerm" id="bookmark-search-filter" class="tag label label-info d-flex align-items-center">
+                                <div>Term: <span class="text-white">[[ $store.state.searchTerm ]]</span></div>
+                                <div>
+                                    <a class="ml-1" href="#" @click.prevent="removeFilter">
+                                        <font-awesome-icon icon="times" class="text-primary" />
+                                    </a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
 
             </div>
 
-            <div id="vue-right-panel" class="card-grid ml-2">
+            <div class="card-grid ml-2">
 
                 <bookmark-list inline-template @paginate="paginate" @get-page="getPage" ref="bookmarkList">
                     <div class="row">
                         <div class="col-lg-12">
                             <table id="bookmark-list" class="w-100">
-                                <tbody is="draggable" v-model="bookmarkList" @change="onSortBookmarks" ghost-class="sortable-ghost" :disabled="disableSort">
+                                <tbody is="draggable" v-model="bookmarkList" @change="onSortBookmarks" ghost-class="sortable-ghost">
                                     <transition-group type="transition">
-                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="bookmark-list w-100" @click="onClick" @mouseenter="rowHovered" @mouseleave="rowUnHovered" v-b-hover="handleYoutubeHover" v-cloak @dragstart="startDrag($event, bookmark)">
+                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="bookmark-list w-100" @mouseenter="onRowHovered" @mouseleave="onRowUnhovered" v-b-hover="handleYoutubeHover" v-cloak @dragstart="startDrag($event, bookmark)">
                                             <td class="bookmark-list-date p-2 text-info align-top">
                                                 <span>[[ bookmark.created ]]</span>
                                             </td>
@@ -117,7 +139,7 @@
                                             </td>
                                             <td class="bookmark-list-link w-100 p-2 align-top position-relative">
                                                 <a :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.name) ]]</a>
-                                                <a v-for="tag in bookmark.tags" v-if="tag != $store.state.selectedTagName" class="tag ml-2 d-inline-block" @click.prevent="onClick" href="#">[[ tag ]]</a>
+                                                <a v-for="tag in bookmark.tags" v-if="tag != $store.state.selectedTagName" class="tag ml-2 d-inline-block" @click.prevent="onClickTag" href="#">[[ tag ]]</a>
                                                 <div v-if="bookmark.note != null && bookmark.note != ''" class="table-note">
                                                     [[ bookmark.note ]]
                                                 </div>
@@ -212,18 +234,28 @@
 
     <script type="text/javascript">
 
-        var isFiltered = false;
-
-        // When this is set to true, then hitting "Enter" will NOT
-        //  execute a general term search, but instead fire the event
-        //  that initiates a tag search.
-        disableTermSearch = false;
-
         const store = new Vuex.Store({
             state: {
-                pinnedStatus: null,
-                selectedTagName: null,
+                selectedTagName: "Untagged",
+                searchTerm: null,
                 viewType: "{{ request.session.bookmark_view_type|default:'normal' }}",
+                intervalId: null,
+                pinnedTags: [
+                    {
+                        id: -1,
+                        name: "Untagged",
+                        isDraggable: false,
+                        count: {{ untagged_count }},
+                    },
+                    {% for tag in pinned_tags %}
+                    {
+                        id: {{ tag.id }},
+                        name: "{{ tag.name }}",
+                        isDraggable: true,
+                        count: {{ tag.bookmark_count }},
+                    },
+                    {% endfor %}
+                ],
             },
             getters: {},
             mutations: {},
@@ -231,139 +263,56 @@
 
         const Search = {
             methods: {
-                select(tag) {
-                    this.$emit("search-tag", tag.value);
-                    EventBus.$emit("select-pinned-tag", tag.value);
-                    disableTermSearch = false;
-                },
-                onHideList() {
-                    disableTermSearch = false;
-                },
-                onHover() {
-                    disableTermSearch = true;
-                },
                 onEnter(evt) {
-
-                    if (disableTermSearch) {
+                    // If we've hit 'Enter' and we're hovering over a tag suggestion,
+                    //  we don't want to execute a term search, so bail.
+                    if (this.$refs.simpleSuggest.$refs.suggestComponent.hovered) {
                         return;
                     }
-
                     searchTerm = evt.srcElement.value;
 
                     if (searchTerm) {
-                        this.$store.state.selectedTagName = searchTerm;
-                        this.$emit("search-term", searchTerm);
-                        EventBus.$emit("select-pinned-tag", null);
-                        this.$store.state.pinnedStatus = null;
+                        this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
+                        EventBus.$emit("search-term", searchTerm);
                     } else {
                         // If the search box is empty, refresh the list with no filters
-                        isFiltered = false;
-                        this.$emit("get-page", 1);
-                        EventBus.$emit("select-pinned-tag", "Untagged");
-                        this.$store.state.pinnedStatus = null;
-                        this.$store.state.selectedTagName = "";
+                        EventBus.$emit("search-tag", "Untagged");
                     }
 
-                }
+                },
+                select(tag) {
+                    this.$nextTick(() => {
+                        this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
+                        this.$refs.simpleSuggest.$refs.suggestComponent.clearSuggestions();
+                    });
+                    EventBus.$emit("search-tag", tag.value);
+                },
             },
             components: {
                 SimpleSuggest
             }
         };
 
-        new Vue({
-            el: "#vue-app-top",
-            store,
-            data() {
-                return {
-                    show: false,
-                    right: true,
-                }
-            },
-            components: {
-                Search
-            },
-            methods: {
-                getPage(pageNumber) {
-                    EventBus.$emit("get-page", pageNumber);
-                },
-                searchTerm(searchTerm) {
-                    EventBus.$emit("search-term", searchTerm);
-                },
-                searchTag(searchTag) {
-                    EventBus.$emit("search-tag", searchTag);
-                },
-                randomize(evt) {
-                    EventBus.$emit("select-pinned-tag", null);
-                    this.$store.state.pinnedStatus = null;
-                    EventBus.$emit("randomize");
-                },
-                switchViewType(type) {
-                    this.$store.state.viewType = type;
-                    doPost(
-                        this,
-                        "{% url "accounts:store_in_session" %}",
-                        {
-                            "bookmark_view_type": type
-                        },
-                        (response) => {},
-                        "",
-                        ""
-                    );
-                },
-                togglePinStatus() {
-                    if (this.$store.state.pinnedStatus === "Pin") {
-                        const tagName = this.$refs.search.$refs.simpleSuggest.$refs.suggestComponent.text
-                        document.getElementById("add-to-remote-from-pinned-tagname").value = tagName;
-                        const form = document.getElementById("search-form");
-                        form.method = "post";
-                        form.action = "{% url 'tag:pin' %}";
-                        form.submit();
-                    } else {
-                        document.getElementById("add-to-remote-from-pinned-tagname").value = this.$store.state.selectedTagName;
-                        const form = document.getElementById("search-form");
-                        form.method = "post";
-                        form.action = "{% url 'tag:unpin' %}";
-                        form.submit();
-                    }
-                }
-            }
-        });
-
         const BookmarkList = {
             data() {
                 return {
                     bookmarkList: [],
                     selectedBookmarkUuid: null,
-                    disableSort: false,
                     show: false,
                     right: true,
                 }
             },
             methods: {
-                onClick(evt) {
-
-                    element = evt.currentTarget;
-
-                    if (evt.srcElement.classList.contains("badge")) {
-                        const tagName = evt.srcElement.innerHTML;
-                        EventBus.$emit("search-tag", tagName);
-                        EventBus.$emit("select-pinned-tag", tag.value);
-                    } else if (element.classList.contains("selected")) {
-
-                        if (this.$store.state.selectedTagName) {
-                            document.getElementById("bookmark-sidebar").classList.remove("show");
-                        }
-
-                    }
-
+                onClickTag(evt) {
+                    const tagName = evt.srcElement.innerHTML;
+                    EventBus.$emit("search-tag", tagName);
                 },
                 onSortBookmarks(evt) {
 
                     // Ignore this event if we're not filtering
                     //  on a tag.
-                    if (!this.$store.state.selectedTagName) {
-                        return;
+                    if (!this.$store.state.selectedTagName || this.$store.state.selectedTagName === "Untagged") {
+                        return false;
                     }
                     bookmarkUuid = evt.moved.element.uuid;
 
@@ -408,34 +357,15 @@
                         evt.currentTarget.querySelector(".yt-hover-target").classList.add("d-none");
                     }
                 },
-                getBookmarkList({ pageNumber=null, searchTerm=null, searchTag=null, randomize=false } = {}) {
+                getBookmarkList({ pageNumber=1, searchTerm=null, searchTag=null } = {}) {
                     var self = this;
 
-                    this.disableSort = false;
-                    if (searchTerm != null) {
-                        url = "{% url 'bookmark:get_bookmarks_by_keyword' 666 %}".replace(/666/, searchTerm);
-                        isFiltered = true;
-                    } else if (searchTag != null) {
+                    if (searchTag !== null) {
                         url = "{% url 'bookmark:get_bookmarks_by_tag' 666 %}".replace(/666/, searchTag);
-                        isFiltered = true;
-                        this.disableSort = false;
-                    } else if (randomize == true) {
-                        isFiltered = true;
-                        url = "{% url 'bookmark:get_bookmarks_by_random' %}";
+                        self.$store.state.searchTerm = null;
+                    } else if (searchTerm !== null) {
+                        url = "{% url 'bookmark:get_bookmarks_by_keyword' 666 %}".replace(/666/, searchTerm);
                     } else {
-
-                        // If we've executed a search, ignore the automatic timed bookmarks refresh
-                        if (isFiltered) {
-                            return;
-                        }
-
-                        // A null pageNumber is passed in from the setInterval timer, so in that
-                        // case use the current page number. We can't pass in the current page
-                        // number directly from setInterval, since that gets set at page load
-                        // time and can later change if the page number changes.
-                        if (pageNumber == null) {
-                            pageNumber = this.$parent.pageNumber;
-                        }
                         url = "{% url 'bookmark:get_bookmarks_by_page' 666 %}".replace(/666/, pageNumber);
                     }
 
@@ -453,11 +383,22 @@
                                  }
                                  bookmarks.push(bookmark);
                              }
-                             if (searchTag != null) {
+
+                             if (searchTag !== null) {
                                  // Only update the tagFilter here, *after* we have a new set of
                                  // updated bookmarks that's appropriate for this tagFilter
                                  self.$store.state.selectedTagName = searchTag;
+
+                                 // Clear any timeouts to prevent the list from refreshing
+                                 clearTimeout(self.$store.state.intervalId);
+                             } else if (searchTerm !== null) {
+                                 self.$store.state.selectedTagName = null;
+                             } else {
+                                 self.$store.state.selectedTagName = "Untagged";
+                                 self.$store.state.intervalId = window.setTimeout(self.getBookmarkList, 60000, {pageNumber: 1});
                              }
+
+                             self.$store.state.searchTerm = searchTerm;
 
                              self.bookmarkList = bookmarks;
 
@@ -469,12 +410,6 @@
                          })
                          .finally(function () {
                          });
-                },
-                rowHovered(evt) {
-                    evt.currentTarget.querySelector(".dropdown").classList.remove("d-none");
-                },
-                rowUnHovered(evt) {
-                    evt.currentTarget.querySelector(".dropdown").classList.add("d-none");
                 },
                 onClickUpdate(uuid) {
                     window.location="{% url 'bookmark:update' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
@@ -491,9 +426,15 @@
                                  variant: "primary"
                              })
 
-                             self.$emit("get-page", 1);
+                             EventBus.$emit("get-page");
 
                          })
+                },
+                onRowHovered(evt) {
+                    evt.currentTarget.querySelector(".dropdown").classList.remove("d-none");
+                },
+                onRowUnhovered(evt) {
+                    evt.currentTarget.querySelector(".dropdown").classList.add("d-none");
                 },
                 getNextBookmark() {
                     const index = this.bookmarkList.findIndex( (e) => e.uuid === this.selectedBookmarkUuid );
@@ -525,6 +466,12 @@
                 let self = this;
 
                 window.addEventListener("keydown", function(e) {
+
+                    // If the active element isn't the body, it's probably an input,
+                    //   in which case we don't want this event handler to take control.
+                    if (document.activeElement.tagName !== "BODY") {
+                        return;
+                    }
 
                     if (e.which === 40 && e.altKey) { /* Alt-Down arrow */
 
@@ -576,8 +523,6 @@
                 this.getBookmarkList({pageNumber: 1});
                 {% endif %}
 
-                window.setInterval(this.getBookmarkList, 60000, {pageNumber: null});
-
             }
         };
 
@@ -588,32 +533,82 @@
         }
 
         new Vue({
-            el: "#vue-right-panel",
-            name: "BookmarkListContainer",
+            el: "#vue-app-top",
+            name: "BookmarkContainer",
             store,
             components: {
                 BookmarkList,
                 Pagination,
+                Search,
             },
             data() {
                 return {
                     pagination: "",
-                    pageNumber: 1
+                    pageNumber: 1,
+                    show: false,
+                    right: true,
                 }
             },
             methods: {
-                paginate(payload) {
-                    this.pagination = payload;
-                },
                 getPage(pageNumber) {
                     this.pageNumber = pageNumber;
                     this.$refs.bookmarkList.getBookmarkList({pageNumber: pageNumber});
+                },
+                getPage(pageNumber) {
+                    EventBus.$emit("get-page", pageNumber);
+                },
+                getPinnedMenuItem() {
+                    return !this.filteredTagIsPinned() ? "Pin" : "Unpin";
+                },
+                onTermSearch(searchTerm) {
+                    this.$refs.bookmarkList.getBookmarkList({searchTerm: searchTerm});
+                },
+                paginate(payload) {
+                    this.pagination = payload;
+                },
+                removeFilter() {
+                    this.$store.state.searchTerm = null;
+                    EventBus.$emit("search-tag", "Untagged");
+                },
+                switchViewType(type) {
+                    this.$store.state.viewType = type;
+                    doPost(
+                        this,
+                        "{% url "accounts:store_in_session" %}",
+                        {
+                            "bookmark_view_type": type
+                        },
+                        (response) => {},
+                        "",
+                        ""
+                    );
+                },
+                filteredTagIsPinned() {
+                    return this.$store.state.pinnedTags.find(element => element.name == this.$store.state.selectedTagName);
+                },
+                togglePinStatus() {
+                    let formAction = null;
+                    if (this.getPinnedMenuItem() === "Pin") {
+                        document.getElementById("add-to-remote-from-pinned-tagname").value = this.$refs.search.$refs.simpleSuggest.$refs.suggestComponent.text;
+                        formAction = "{% url 'tag:pin' %}";
+                    } else {
+                        document.getElementById("add-to-remote-from-pinned-tagname").value = this.$store.state.selectedTagName;
+                        formAction = "{% url 'tag:unpin' %}";
+                    }
+                    const form = document.querySelector("#bookmark-search-form form");
+                    form.method = "post";
+                    form.action = formAction;
+                    form.submit();
                 },
             },
             mounted() {
 
                 EventBus.$on("search-tag", tagName => {
-                    this.$refs.bookmarkList.getBookmarkList({searchTag: tagName});
+                    if (tagName == "Untagged") {
+                        this.$refs.bookmarkList.getBookmarkList({pageNumber: 1});
+                    } else {
+                        this.$refs.bookmarkList.getBookmarkList({searchTag: tagName});
+                    }
                 });
 
                 EventBus.$on("search-term", searchTerm => {
@@ -624,64 +619,15 @@
                     this.$refs.bookmarkList.getBookmarkList({pageNumber: pageNumber});
                 });
 
-                EventBus.$on("randomize", () => {
-                    this.$refs.bookmarkList.getBookmarkList({randomize: true});
-                });
-
             }
         });
 
         const TagList = {
             store,
-            data() {
-                return {
-                    pinnedTags: [
-                        {
-                            id: -1,
-                            name: "Untagged",
-                            isActive: true,
-                            isDraggable: false,
-                            count: {{ untagged_count }},
-                        },
-                        {% for tag in pinned_tags %}
-                        {
-                            id: {{ tag.id }},
-                            name: "{{ tag.name }}",
-                            isActive: false,
-                            isDraggable: true,
-                            count: {{ tag.bookmark_count }},
-                        },
-                        {% endfor %}
-                    ],
-                    selectedTag: null
-                }
-            },
             methods: {
                 onClickTag(evt) {
                     const tagName = evt.currentTarget.dataset.tag;
-                    this.selectedTag = tagName;
-
-                    for (tag of this.pinnedTags) {
-                        tag.isActive = tag.name === tagName;
-                    }
-
-                    if (tagName == "Untagged") {
-                        this.$store.state.selectedTagName = "";
-                        isFiltered = false;
-                        EventBus.$emit("get-page", 1);
-                        this.$store.state.pinnedStatus = null;
-                    } else {
-                        EventBus.$emit("search-tag", tagName);
-                        this.$store.state.pinnedStatus = "UnPin";
-                    }
-                },
-                getClassName(tagName) {
-
-                    if (tagName == this.selectedTag) {
-                        return "badge-light";
-                    } else {
-                        return "badge-info";
-                    }
+                    EventBus.$emit("search-tag", tagName);
                 },
                 onDragOverTag(evt) {
                     evt.currentTarget.classList.add("hover-tag");
@@ -697,7 +643,17 @@
                     if (tag.name === this.$store.state.selectedTagName) {
                         return;
                     }
+
                     const bookmarkUuid = evt.dataTransfer.getData("application/x-moz-node");
+
+                    // Ignore if we're sorting the tag list instead of
+                    //  dragging a bookmark onto a tag (both events
+                    //  will trigger this handler). That will be taken
+                    //  care of in another handler.
+                    if (!bookmarkUuid) {
+                        return;
+                    }
+
                     doPost(
                         this,
                         "{% url "bookmark:add_tag" %}",
@@ -733,31 +689,6 @@
 
                 }
             },
-            mounted() {
-
-                EventBus.$on("search-tag", tagName => {
-
-                    if (!this.pinnedTags.find(element => element.name == tagName)) {
-                        this.$store.state.pinnedStatus = "Pin";
-                    } else {
-                        this.$store.state.pinnedStatus = "UnPin";
-                    }
-
-                });
-
-                EventBus.$on("select-pinned-tag", tagName => {
-
-                    for (tag of this.pinnedTags) {
-                        if (tag.name == tagName) {
-                            tag.isActive = true;
-                        } else {
-                            tag.isActive = false;
-                        }
-                    }
-
-                });
-
-            }
         };
 
         new Vue({

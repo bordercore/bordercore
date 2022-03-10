@@ -444,7 +444,7 @@ div.CodeMirror {
 }
 
 .tag, .ti-input .ti-tag {
-  padding: 0 0.43rem 0.06rem 0.42rem;
+  padding: 0 0.43rem 0 0.42rem;
   border: 0.12rem solid #364b76;
   margin: 0 3px 0 0;
   background-color: #25335b !important;
@@ -965,6 +965,18 @@ pre {
 // Bookmarks
 //
 
+.bookmark-tag-list {
+  border: 0.06rem solid #10163a;
+  a {
+    color: $white;
+  }
+
+  &:hover {
+    background-color: $bg-light;
+    cursor: pointer;
+  }
+}
+
 .hover-tag {
   border: 0.06rem solid #262c49;
   background-color: #1e233a;
@@ -994,6 +1006,15 @@ pre {
 
 .bookmark-list-link {
   vertical-align: text-bottom;
+}
+
+#bookmark-search-form {
+  background-color: $bg-dark;
+  border-radius: 0.4rem;
+
+  .has-search svg {
+    top: 1.8rem;
+  }
 }
 
 .yt-hover-target {
@@ -1027,6 +1048,10 @@ pre {
     pointer-events: none;
     text-align: center;
   }
+}
+
+#bookmark-search-filter {
+  font-size: 0.8rem;
 }
 
 .main-search-spacer {
@@ -1347,7 +1372,6 @@ div #dateapp {
 //
 
 .tag-list {
-  border: 0.06rem solid #10163a;
   a {
     color: $white;
   }
