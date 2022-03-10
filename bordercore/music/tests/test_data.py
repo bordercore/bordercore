@@ -1,4 +1,5 @@
 import re
+from pathlib import Path
 
 import boto3
 import pytest
@@ -179,3 +180,30 @@ def test_albums_in_db_exist_in_elasticsearch(es):
 
         assert found["hits"]["total"]["value"] == batch_size,\
             "albums found in the database but not in Elasticsearch: " + get_missing_blob_ids(albums[batch:batch + step_size], found)
+
+
+@pytest.mark.wumpus
+def test_song_in_s3_exist_on_filesystem():
+    "Assert that all songs in S3 also exist on the filesystem"
+
+    s3_resource = boto3.resource("s3")
+
+    paginator = s3_resource.meta.client.get_paginator("list_objects")
+    page_iterator = paginator.paginate(Bucket=bucket_name)
+
+    for page in page_iterator:
+        for key in page["Contents"]:
+            match = re.search(r"^songs/(.+)", str(key["Key"]))
+            if match:
+                song = Song.objects.get(uuid=match.group(1))
+                if song.album:
+                    track_number = song.track
+                    if len(str(song.track)) == 1:
+                        track_number = f"0{song.track}"
+                    if song.album.compilation:
+                        path = f"/home/media/music/v/Various/{song.album.title}/{track_number} - {song.title}.mp3"
+                    else:
+                        path = f"/home/media/music/{song.artist.name.lower()[0]}/{song.artist}/{song.album.title}/{track_number} - {song.title}.mp3"
+                else:
+                    path = f"/home/media/music/{song.artist.name.lower()[0]}/{song.artist}/{song.title}.mp3"
+                assert Path(path).is_file(), f"Song in S3 not found on filesystem: {song.uuid} {path}"

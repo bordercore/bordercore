@@ -122,6 +122,8 @@ def run_test(test, coverage_count, verbose=False):
                 "pytest",
                 "-m",
                 "wumpus",
+                "-p",
+                "no:django",
                 f"--junitxml={TEST_REPORT}",
                 f"{os.environ.get('BORDERCORE_HOME')}/"
             ]
