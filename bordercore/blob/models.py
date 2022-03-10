@@ -718,13 +718,17 @@ class RecentlyViewedBlob(TimeStampedModel):
 
 @receiver(pre_delete, sender=Blob)
 def remove_recently_viewed_blob(sender, instance, **kwargs):
+    """
+    Re-order all blobs *after* the deleted one by reducing their sort_order by one
+    """
 
-    sort_order = instance.recentlyviewedblob_set.first().sort_order
+    recent_blob = instance.recentlyviewedblob_set.first()
 
-    # Re-order all blobs *after* the deleted one by reducing their sort_order by one
-    RecentlyViewedBlob.objects.filter(
-        blob__user=instance.user,
-        sort_order__gt=sort_order
-    ).update(
-        sort_order=F("sort_order") - 1
-    )
+    if recent_blob:
+        sort_order = recent_blob.sort_order
+        RecentlyViewedBlob.objects.filter(
+            blob__user=instance.user,
+            sort_order__gt=sort_order
+        ).update(
+            sort_order=F("sort_order") - 1
+        )
