@@ -35,7 +35,7 @@
 
     <body>
 
-        <div class="wrapper">
+        <div class="wrapper {% if request.session.show_sidebar == "false" %}collapsed{% else %}sidebar-transition{% endif %}">
 
             <div class="container-fluid d-flex flex-column" id="content">
 
@@ -498,12 +498,6 @@
                         // Save this so that we can update the scrollbar when expanding items in the sidebar
                         this.ps = ps;
 
-                        const wrapper = document.querySelector(".wrapper");
-                        {% if request.session.show_sidebar == "false" %}
-                        wrapper.classList.add("collapsed");
-                        {% else %}
-                        wrapper.classList.add("sidebar-transition");
-                        {% endif %}
                     }
                 });
 
