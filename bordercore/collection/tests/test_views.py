@@ -2,6 +2,7 @@ import pytest
 
 from django import urls
 
+from blob.tests.factories import BlobFactory
 from collection.models import SortOrderCollectionBlob
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
@@ -19,7 +20,7 @@ def test_collection_list(auto_login_user, collection):
 
 def test_collection_detail(auto_login_user, collection):
 
-    _, client = auto_login_user()
+    user, client = auto_login_user()
 
     url = urls.reverse("collection:detail", kwargs={"collection_uuid": collection[0].uuid})
     resp = client.get(url)
@@ -28,6 +29,15 @@ def test_collection_detail(auto_login_user, collection):
 
     for blob in SortOrderCollectionBlob.objects.filter(collection=collection[0]):
         blob.delete()
+
+    url = urls.reverse("collection:detail", kwargs={"collection_uuid": collection[0].uuid})
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+
+    # Test collections with blobs with no "null" names
+    blob = BlobFactory(user=user, name=None)
+    collection[0].add_blob(blob)
 
     url = urls.reverse("collection:detail", kwargs={"collection_uuid": collection[0].uuid})
     resp = client.get(url)

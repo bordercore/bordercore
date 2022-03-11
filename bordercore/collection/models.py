@@ -101,7 +101,7 @@ class Collection(TimeStampedModel):
                     "id": blob.blob.id,
                     "uuid": blob.blob.uuid,
                     "filename": blob.blob.file.name,
-                    "name": re.sub("[\n\r]", "", blob.blob.name),
+                    "name": re.sub("[\n\r]", "", blob.blob.name) if blob.blob.name else "",
                     "url": reverse("blob:detail", kwargs={"uuid": blob.blob.uuid}),
                     "sha1sum": blob.blob.sha1sum,
                     "cover_url": blob.blob.get_cover_url_small(),

@@ -417,6 +417,13 @@ button:focus {
   @extend .card-box-shadow;
 }
 
+.toast-body {
+  a {
+    color: #78281f;
+    font-weight: bold;
+  }
+}
+
 input.form-control,
 select.form-control,
 textarea.form-control,
@@ -1639,6 +1646,14 @@ div #dateapp {
 .collection_ghost_class {
   border-left: 0;
   opacity: 0;
+}
+
+#collection-list {
+  border-radius: 0.6rem;
+}
+
+.collection-drag-over {
+  background-color: lighten($bg-dark, 5%);
 }
 
 //

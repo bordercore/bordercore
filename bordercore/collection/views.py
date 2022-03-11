@@ -1,4 +1,7 @@
+import datetime
+import hashlib
 import json
+from io import BytesIO
 
 from botocore.errorfactory import ClientError
 from rest_framework.decorators import api_view
@@ -15,6 +18,7 @@ from django.views.generic.edit import (CreateView, DeleteView, FormMixin,
                                        UpdateView)
 from django.views.generic.list import ListView
 
+from blob.models import Blob
 from collection.forms import CollectionForm
 from collection.models import Collection, SortOrderCollectionBlob
 from lib.mixins import FormRequestMixin
@@ -279,3 +283,44 @@ def get_blob_list(request, collection_uuid):
     blob_list = collection.get_blob_list()
 
     return JsonResponse(blob_list, safe=False)
+
+
+@login_required
+def add_blob(request):
+
+    collection_uuid = request.POST["collection_uuid"]
+    file_contents = request.FILES["blob"].read()
+    sha1sum = hashlib.sha1(file_contents).hexdigest()
+
+    dupe_check = Blob.objects.filter(sha1sum=sha1sum, user=request.user)
+
+    if dupe_check:
+
+        blob_url = reverse("blob:detail", kwargs={"uuid": dupe_check.first().uuid})
+        response = {
+            "status": "Error",
+            "message": f"This blob <a href='{blob_url}'>already exists</a>."
+        }
+
+    else:
+
+        blob = Blob.objects.create(
+            user=request.user,
+            date=datetime.datetime.now().strftime("%Y-%m-%d")
+        )
+
+        blob.file_modified = datetime.datetime.now().strftime("%s")
+        blob.file.save(request.FILES["blob"].name, BytesIO(file_contents))
+        blob.sha1sum = hashlib.sha1(file_contents).hexdigest()
+        blob.save()
+
+        blob.index_blob()
+
+        blob.add_to_collection(request.user, collection_uuid)
+
+        response = {
+            "status": "OK",
+            "blob_uuid": blob.uuid
+        }
+
+    return JsonResponse(response)

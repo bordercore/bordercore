@@ -50,4 +50,9 @@ urlpatterns = [
         view=views.get_blob_list,
         name="get_blob_list"
     ),
+    path(
+        route="add_blob",
+        view=views.add_blob,
+        name="add_blob"
+    ),
 ]

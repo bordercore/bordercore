@@ -117,9 +117,8 @@
 
                     <template v-slot:content>
                         <div class="ml-2">
-
                             <blob-list inline-template>
-                                <div>
+                                <div id="collection-list" @drop.prevent="onAddBlob($event)" @dragover.prevent="onDragOverBlob($event)" @dragleave.prevent="onDragLeaveBlob($event)" @dragenter.prevent>
                                     <ul class="list-group list-group-horizontal text-center list-unstyled collection-sortable">
                                         <draggable v-model="blob_list" @change="onChange" ghost-class="collection_ghost_class" animation="500" forceFallback="true">
                                             <li v-for="blob in blob_list" :key="blob.id" class="collection-item hoverable cursor-pointer float-left p-3">
@@ -297,6 +296,25 @@
 
     </div>
 
+    {% block help %}
+        <div class="d-none" id="help-text">
+*Note:* You can drag a file onto the collection list to create a blob and add it to the collection.
+        </div>
+    {% endblock %}
+
+    <div id="modalProcessing" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+        <div class="modal-processing modal-dialog modal-sm modal-dialog-centered" role="document">
+            <h4 class="modal-content p-3 d-flex flex-row justify-content-center">
+                <div>
+                    Processing...
+                </div>
+                <div class="spinner-border ml-2 text-info" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </h4>
+        </div>
+    </div>
+
 {% endblock %}
 
 {% block javascript %}
@@ -336,6 +354,48 @@
                 }
             },
             methods: {
+                onAddBlob(evt) {
+                    document.getElementById("collection-list").classList.remove("collection-drag-over");
+
+                    $("#modalProcessing").modal("show");
+
+                    fileList = evt.dataTransfer.files;
+                    const blob = fileList[0]
+                    let formData = new FormData();
+                    formData.append("blob", blob);
+                    formData.append("collection_uuid", "{{ collection.uuid }}");
+
+                    axios.post("{% url "collection:add_blob" %}", formData, {
+                        headers: {
+                            "Content-Type": "multipart/form-data"
+                        }
+                    }).then(response => {
+                        $("#modalProcessing").modal("hide");
+                        if (response.data.status === "OK") {
+                            const blobUuid = response.data.blob_uuid;
+                            window.location="{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, blobUuid);
+                        } else {
+                            const message = this.$createElement(
+                                'div',
+                                {
+                                    domProps: { innerHTML: response.data.message }
+                                }
+                            )
+                            this.$bvToast.toast(message, {
+                                noAutoHide: true,
+                                title: "Error",
+                                variant: "danger"
+                            });
+                        }
+                    });
+
+                },
+                onDragOverBlob(evt) {
+                    document.getElementById("collection-list").classList.add("collection-drag-over");
+                },
+                onDragLeaveBlob(evt) {
+                    document.getElementById("collection-list").classList.remove("collection-drag-over");
+                },
                 onChange(evt) {
 
                     // The backend expects the ordering to begin
