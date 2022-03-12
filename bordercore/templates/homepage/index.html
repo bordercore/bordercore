@@ -80,7 +80,7 @@
                         <template v-slot:content>
                             <ul class="list-group interior-borders">
                                 {% for bookmark in daily_bookmarks %}
-                                    <li class="list-group-item list-group-item-secondary {{ bookmark.css_class }}"><a href="{% url 'bookmark:click' bookmark.uuid %}">{{ bookmark.name }}</a></li>
+                                    <li class="list-group-item list-group-item-secondary {% if bookmark.daily.viewed == 'false' %}font-weight-bold{% endif %}"><a href="{% url 'bookmark:click' bookmark.uuid %}">{{ bookmark.name }}</a></li>
                                 {% empty %}
                                     <li class="list-group-item list-group-item-secondary">No bookmarks marked as Daily.</li>
                                 {% endfor %}
