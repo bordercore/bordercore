@@ -64,7 +64,7 @@
                         <template v-slot:content>
                             <ul class="list-group interior-borders">
                                 {% for exercise in overdue_exercises %}
-                                    <li class="list-group-item list-group-item-secondary text-info"><a href="{% url 'fitness:exercise_detail' exercise.exercise.exercise.uuid %}">{{ exercise.exercise.exercise.name }}</a> {{ exercise.lag }} days</li>
+                                    <li class="list-group-item list-group-item-secondary text-info"><a href="{% url 'fitness:exercise_detail' exercise.uuid %}">{{ exercise.name }}</a> {{ exercise.delta_days }} days</li>
                                 {% empty %}
                                     <li class="list-group-item list-group-item-secondary">No active exercises.</li>
                                 {% endfor %}

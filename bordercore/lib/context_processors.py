@@ -2,7 +2,7 @@ from django.conf import settings
 
 from blob.services import get_recent_blobs as get_recent_blobs_service
 from bookmark.models import Bookmark
-from fitness.models import ExerciseUser
+from fitness.services import get_overdue_exercises
 from metrics.models import Metric
 from todo.models import Todo
 
@@ -20,7 +20,7 @@ def get_counts(request):
     todo_count = Todo.objects.filter(user=request.user, priority=high_priority).count()
 
     # Get overdue_exercises
-    exercise_count = ExerciseUser.get_overdue_exercises(request.user, count_only=True)
+    exercise_count = get_overdue_exercises(request.user, True)
 
     bookmark_untagged_count = Bookmark.objects.filter(user=request.user, tags__isnull=True).count()
 

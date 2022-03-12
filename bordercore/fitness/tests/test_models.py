@@ -4,6 +4,7 @@ import pytest
 
 from fitness.models import (Exercise, ExerciseUser, Muscle,
                             SortOrderExerciseMuscle)
+from fitness.services import get_overdue_exercises
 
 pytestmark = pytest.mark.django_db
 
@@ -107,10 +108,10 @@ def test_get_overdue_exercises(auto_login_user, fitness):
 
     user, _ = auto_login_user()
 
-    overdue = ExerciseUser.get_overdue_exercises(user)
+    overdue = get_overdue_exercises(user)
 
-    assert overdue[0]["exercise"].exercise == fitness[2]
-    assert overdue[0]["lag"] == 4
+    assert overdue[0] == fitness[2]
+    assert overdue[0].delta_days == 3
 
-    overdue = ExerciseUser.get_overdue_exercises(user, count_only=True)
+    overdue = get_overdue_exercises(user, True)
     assert overdue == 1

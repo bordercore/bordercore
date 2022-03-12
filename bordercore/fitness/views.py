@@ -1,15 +1,14 @@
-import datetime
 import json
 from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import F, Max, OuterRef, Subquery
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
+
+from fitness.services import get_fitness_summary
 
 from .models import Data, Exercise, ExerciseUser, Workout
 
@@ -81,55 +80,10 @@ def fitness_add(request, exercise_uuid):
 @login_required
 def fitness_summary(request):
 
-    newest = ExerciseUser.objects.filter(exercise=OuterRef("pk")) \
-        .filter(user=request.user)
+    exercises = get_fitness_summary(request.user)
 
-    exercises = Exercise.objects.annotate(
-        last_active=Max("workout__data__date"),
-        is_active=Subquery(newest.values("started")[:1]),
-        frequency=Subquery(newest.values("frequency")[:1])) \
-        .filter(workout__user=request.user) \
-        .order_by(F("last_active")) \
-        .prefetch_related("muscle", "muscle__muscle_group")
-
-    active_exercises = []
-    inactive_exercises = []
-
-    for e in exercises:
-
-        if e.last_active:
-
-            # To determine when an exercise is overdue, convert the current datetime and the
-            #  exercise's last active datetime to days since the epoch, then add one. If
-            #  that exceeds the exercises's frequency, it's overdue.
-            if e.frequency:
-                delta = (timezone.now() - datetime.datetime(1970, 1, 1).astimezone()).days - \
-                    (e.last_active - datetime.datetime(1970, 1, 1).astimezone()).days + 1
-                if delta == e.frequency.days + 1:
-                    # Exercise is due today
-                    e.overdue = 1
-                elif delta > e.frequency.days + 1:
-                    # Exercise is overdue
-                    e.overdue = 2
-                else:
-                    # Exercise is not overdue
-                    e.overdue = 0
-
-            delta = timezone.now() - e.last_active
-
-            # Round up to the nearest day
-            if delta.seconds // 3600 >= 12:
-                delta = delta + timedelta(days=1)
-
-            e.delta_days = delta.days
-
-        if e.is_active is not None:
-            active_exercises.append(e)
-        else:
-            inactive_exercises.append(e)
-
-    return render(request, "fitness/summary.html", {"active_exercises": active_exercises,
-                                                    "inactive_exercises": inactive_exercises,
+    return render(request, "fitness/summary.html", {"active_exercises": exercises[0],
+                                                    "inactive_exercises": exercises[1],
                                                     "title": "Fitness Summary"})
 
 

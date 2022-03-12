@@ -7,8 +7,7 @@ from datetime import timedelta
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.db import models
-from django.db.models import F, Max, OuterRef, Q, Subquery
-from django.utils import timezone
+from django.db.models import F, Max, OuterRef, Subquery
 
 
 class MuscleGroup(models.Model):
@@ -174,37 +173,3 @@ class ExerciseUser(models.Model):
 
     def __str__(self):
         return self.exercise.name
-
-    @staticmethod
-    def get_overdue_exercises(user, count_only=False):
-
-        exercises = ExerciseUser.objects.annotate(
-            max=Max("exercise__workout__data__date")) \
-            .filter(Q(frequency__lt=(timezone.now() - F("max")) + timedelta(days=1))) \
-            .filter(user=user) \
-            .order_by(F("max"))
-
-        # Avoid an unnecessary join if we only want the count
-        if not count_only:
-            exercises = exercises.select_related("exercise")
-
-        overdue_exercises = []
-
-        for exercise in exercises:
-            delta = timezone.now() - exercise.max
-
-            # Round up to the nearest day
-            if delta.total_seconds() // 3600 >= 12:
-                delta = delta + timedelta(days=1)
-
-                overdue_exercises.append(
-                    {
-                        "exercise": exercise,
-                        "lag": delta.days
-                    }
-                )
-
-        if count_only:
-            return len(overdue_exercises)
-        else:
-            return overdue_exercises

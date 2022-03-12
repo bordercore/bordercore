@@ -16,7 +16,7 @@ from blob.models import Blob
 from bookmark.models import Bookmark
 from collection.models import Collection
 from drill.models import Question
-from fitness.models import ExerciseUser
+from fitness.services import get_overdue_exercises
 from lib.calendar_events import Calendar
 from lib.util import get_elasticsearch_connection
 from music.models import Song
@@ -76,7 +76,7 @@ def homepage(request):
     # Get the default collection
     default_collection = get_default_collection_blobs(request)
 
-    overdue_exercises = ExerciseUser.get_overdue_exercises(request.user)
+    overdue_exercises = get_overdue_exercises(request.user)
 
     return render(request, "homepage/index.html",
                   {"quote": quote,
@@ -87,7 +87,7 @@ def homepage(request):
                    "random_image_info": random_image_info,
                    "bookmarks": bookmarks,
                    "default_collection": default_collection,
-                   "overdue_exercises": sorted(overdue_exercises, key=lambda x: x["lag"], reverse=True),
+                   "overdue_exercises": sorted(overdue_exercises, key=lambda x: x.delta_days, reverse=True),
                    "drill_total_progress": Question.objects.total_tag_progress(request.user),
                    "title": "Homepage"})
 
