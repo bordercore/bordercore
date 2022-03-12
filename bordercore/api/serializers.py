@@ -53,7 +53,7 @@ class BlobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Blob
         fields = ["created", "content", "date", "file", "id", "importance",
-                  "is_private", "is_note", "metadata", "modified", "name",
+                  "is_note", "metadata", "modified", "name",
                   "note", "sha1sum", "tags", "user", "uuid"]
 
     # Override __init__ so that we can parse an optional "fields" searcharg
@@ -82,7 +82,7 @@ class BlobSha1sumSerializer(serializers.ModelSerializer):
     class Meta:
         model = Blob
         fields = ["created", "content", "date", "blobs", "file", "id", "importance",
-                  "is_private", "is_note", "metadata", "modified",
+                  "is_note", "metadata", "modified",
                   "name", "note", "sha1sum", "tags", "user", "uuid"]
 
 

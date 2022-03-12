@@ -12,7 +12,7 @@ from pathlib import PurePath
 import boto3
 import magic
 import requests
-from elasticsearch_dsl import Boolean, DateRange
+from elasticsearch_dsl import DateRange
 from elasticsearch_dsl import Document as Document_ES
 from elasticsearch_dsl import Integer, Long, Range, Text
 from PyPDF2 import PdfFileReader
@@ -45,7 +45,6 @@ class ESBlob(Document_ES):
     bordercore_id = Long()
     sha1sum = Text()
     user_id = Integer()
-    is_private = Boolean()
     date = DateRange()
     name = Text()
     contents = Text()
@@ -242,7 +241,6 @@ def index_blob(**kwargs):
         bordercore_id=blob_info["id"],
         sha1sum=blob_info["sha1sum"],
         user_id=blob_info["user"],
-        is_private=blob_info["is_private"],
         name=blob_info["name"],
         contents=blob_info["content"],
         doctype=get_doctype(blob_info, blob_info["metadata"]),

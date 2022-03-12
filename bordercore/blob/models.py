@@ -77,7 +77,6 @@ class Blob(TimeStampedModel):
     tags = models.ManyToManyField(Tag)
     date = models.TextField(null=True)
     importance = models.IntegerField(default=1)
-    is_private = models.BooleanField(default=False)
     is_note = models.BooleanField(default=False)
     is_indexed = models.BooleanField(default=True)
     blobs = models.ManyToManyField("self", blank=True)
@@ -459,7 +458,6 @@ class Blob(TimeStampedModel):
             user=self.user,
             date=self.date,
             importance=self.importance,
-            is_private=self.is_private,
             is_note=self.is_note
         )
 

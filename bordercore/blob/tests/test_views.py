@@ -146,11 +146,11 @@ def test_blob_detail(auto_login_user, blob):
     assert author in [x for sublist in soup.select("span") for x in sublist]
 
 
-def test_clone(auto_login_user):
+def test_clone(monkeypatch_blob, auto_login_user):
 
     user, client = auto_login_user()
 
-    blob = BlobFactory()
+    blob = BlobFactory.create(user=user)
 
     url = urls.reverse("blob:clone", kwargs={"uuid": str(blob.uuid)})
     resp = client.get(url)

@@ -124,11 +124,6 @@ def get_random_image(request, content_type):
                                 "term": {
                                     "user_id": request.user.id
                                 }
-                            },
-                            {
-                                "term": {
-                                    "is_private": False
-                                }
                             }
                         ]
                     }
