@@ -79,6 +79,7 @@ class Blob(TimeStampedModel):
     importance = models.IntegerField(default=1)
     is_note = models.BooleanField(default=False)
     is_indexed = models.BooleanField(default=True)
+    math_support = models.BooleanField(default=False)
     blobs = models.ManyToManyField("self", blank=True)
     bookmarks = models.ManyToManyField(Bookmark, through="SortOrderBlobBookmark")
 
@@ -458,7 +459,8 @@ class Blob(TimeStampedModel):
             user=self.user,
             date=self.date,
             importance=self.importance,
-            is_note=self.is_note
+            is_note=self.is_note,
+            math_support=self.math_support
         )
 
         for x in self.metadata.all():

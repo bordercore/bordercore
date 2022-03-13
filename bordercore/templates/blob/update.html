@@ -68,6 +68,14 @@
                         @enable-option="updateFormValue"
                     >
                     </icon-button>
+                    <icon-button
+                        label="Math"
+                        icon="square-root-alt"
+                        :initial-enabled="{% if form.math_support.value == True %}true{% else %}false{% endif %}"
+                        form-name="math_support"
+                        @enable-option="updateFormValue"
+                    >
+                    </icon-button>
                 </div>
 
                 <div class="mt-3">
@@ -160,6 +168,7 @@
                     <input type="hidden" name="importance" value="{% if form.importance.value == 10 %}on{% endif %}" />
                     <input type="hidden" name="is_note" value="{% if form.is_note.value %}on{% endif %}" />
                     <input type="hidden" name="is_book" value="{% if is_book %}on{% endif %}" />
+                    <input type="hidden" name="math_support" value="{% if form.math_support.value %}on{% endif %}" />
 
                     {% csrf_token %}
 
@@ -179,7 +188,7 @@
 
                     {% for field in form.visible_fields %}
 
-                        {% if field.label != 'Filename' and field.name != 'is_note'  and field.name != 'importance' %}
+                        {% if field.label != 'Filename' and field.name != 'is_note' and field.name != 'math_support' and field.name != 'importance' %}
 
                             <div class="form-group{% if field.errors %}error{% endif %} row">
                                 <label class="font-weight-bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">{{ field.label }}</label>

@@ -122,6 +122,7 @@ class BlobCreateView(FormRequestMixin, CreateView):
 
         if "is_note" in self.request.GET:
             form.initial["is_note"] = True
+            form.initial["math_support"] = True
 
         if "linked_blob" in self.request.GET:
             blob = Blob.objects.get(user=self.request.user, pk=int(self.request.GET.get("linked_blob")))
