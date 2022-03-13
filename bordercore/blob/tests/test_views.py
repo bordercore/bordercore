@@ -1,3 +1,4 @@
+import time
 from unittest.mock import Mock
 from urllib.parse import urlparse
 
@@ -10,8 +11,10 @@ from django.db.models import signals
 
 from blob.models import Blob
 from blob.tests.factories import BlobFactory
-from blob.views import get_metadata_from_form, handle_metadata
+from blob.views import (get_metadata_from_form, handle_linked_collection,
+                        handle_metadata)
 from collection.models import Collection
+from collection.tests.factories import CollectionFactory
 
 try:
     from bs4 import BeautifulSoup
@@ -223,6 +226,25 @@ def test_get_metadata_from_form(auto_login_user):
     assert len(metadata) == 0
 
 
+def test_handle_linked_collection(auto_login_user, blob_image_factory):
+
+    user, client = auto_login_user()
+
+    collection = CollectionFactory(user=user)
+
+    request_mock = Mock()
+    request_mock.user = user
+    request_mock.POST = {
+        "linked_collection": collection.uuid
+    }
+
+    handle_linked_collection(blob_image_factory[0], request_mock)
+
+    collection_updated = Collection.objects.get(uuid=collection.uuid)
+
+    assert blob_image_factory[0] in [x for x in collection_updated.blobs.all()]
+
+
 def test_blob_metadata_name_search(auto_login_user, blob_image_factory):
 
     _, client = auto_login_user()
@@ -264,6 +286,35 @@ def test_blob_parse_date(auto_login_user):
     resp = client.get(url)
 
     assert resp.status_code == 200
+
+
+def test_get_elasticsearch_info(auto_login_user):
+
+    user, client = auto_login_user()
+
+    blob = BlobFactory.create(user=user, tags=("django", "linux"),)
+
+    url = urls.reverse("blob:get_elasticsearch_info", kwargs={"uuid": blob.uuid})
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+    assert resp.json() == {"info": {}, "status": "OK"}
+
+    BlobFactory.index_blob(blob)
+
+    # Pause to allow time for the blob to be indexed
+    time.sleep(1)
+
+    url = urls.reverse("blob:get_elasticsearch_info", kwargs={"uuid": blob.uuid})
+    resp_json = client.get(url).json()
+
+    assert resp.status_code == 200
+    assert resp_json["status"] == "OK"
+    assert resp_json["info"]["id"] == str(blob.uuid)
+    assert resp_json["info"]["name"] == blob.name
+    assert resp_json["info"]["filename"] == ""
+    assert resp_json["info"]["note"] == blob.note
+    assert resp_json["info"]["doctype"] == "document"
 
 
 def test_get_related_blobs(auto_login_user):

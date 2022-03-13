@@ -12,7 +12,6 @@ import boto3
 import botocore
 import factory
 import pytest
-import responses
 from PIL import Image
 
 import django
@@ -32,7 +31,6 @@ django.setup()
 
 from accounts.models import SortOrderUserTag, SortOrderUserNote, SortOrderUserFeed, SortOrderDrillTag  # isort:skip
 from accounts.tests.factories import TEST_PASSWORD, UserFactory  # isort:skip
-from api.serializers import BlobSerializer  # isort:skip
 from blob.models import MetaData  # isort:skip
 from blob.tests.factories import BlobFactory  # isort:skip
 from bookmark.models import Bookmark  # isort:skip
@@ -57,10 +55,6 @@ try:
 except ModuleNotFoundError:
     # Don't worry if this import doesn't exist in production
     pass
-
-# Note: this import must come *after* the mock_s3 import, otherwise
-#  the s3 mock won't work
-from blob.elasticsearch_indexer import index_blob  # isort:skip
 
 # Add an extra Elasticsearch field to indicate test data
 settings.ELASTICSEARCH_EXTRA_FIELDS["__test__"] = 1
@@ -177,8 +171,8 @@ def blob_note(temp_blob_directory, db, s3_resource, s3_bucket):
         tags=("django", "linux", "video"),
     )
 
-    _index_blob(blob_1)
-    _index_blob(blob_2)
+    BlobFactory.index_blob(blob_1)
+    BlobFactory.index_blob(blob_2)
 
     yield blob_1, blob_2
 
@@ -218,7 +212,7 @@ def _create_blob(**file_info):
     blob.sha1sum = hashlib.sha1(file_bytes).hexdigest()
     blob.save()
 
-    _index_blob(blob)
+    BlobFactory.index_blob(blob)
 
     return [blob]
 
@@ -240,21 +234,11 @@ def blob_text_factory(db, s3_resource, s3_bucket):
             value=factory.Faker("text", max_nb_chars=40).generate(),
         )
 
-        _index_blob(blob)
+        BlobFactory.index_blob(blob)
 
         blob_list.append(blob)
 
     yield blob_list
-
-
-def _index_blob(blob):
-
-    url = f"https://www.bordercore.com/api/blobs/{blob.uuid}/"
-    serializer = BlobSerializer(blob)
-    responses.add(responses.GET, url,
-                  json=serializer.data, status=200)
-
-    index_blob(uuid=blob.uuid, create_connection=True, extra_fields=settings.ELASTICSEARCH_EXTRA_FIELDS)
 
 
 @pytest.fixture()
