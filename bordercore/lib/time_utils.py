@@ -198,7 +198,7 @@ def parse_date_from_string(input_date):
             # Add hour and minute to force JavaScript to use localtime rather than UTC
             return value(input_date, m).strftime("%Y-%m-%dT00:00")
 
-    return ""
+    raise ValueError(f"Unknown date format: {input_date}")
 
 
 def get_javascript_date(date):

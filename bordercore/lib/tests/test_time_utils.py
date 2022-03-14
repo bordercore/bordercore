@@ -91,8 +91,9 @@ def test_parse_date_from_string():
     date_string = "August 12th, 2001"
     assert parse_date_from_string(date_string) == "2001-08-12T00:00"
 
-    date_string = "Note a date"  # Should match nothing
-    assert parse_date_from_string(date_string) == ""
+    date_string = "Not a date"  # Should match nothing
+    with pytest.raises(ValueError):
+        parse_date_from_string(date_string)
 
     date_string = "Jann 1, 1999"  # Misspelling
     with pytest.raises(ValueError):
