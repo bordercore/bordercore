@@ -40,7 +40,15 @@ class UserProfileForm(ModelForm):
                 required=False,
                 to_field_name="id"
             )
+            self.fields["homepage_image_collection"] = ModelChoiceField(
+                empty_label="All Images",
+                label="Image collection",
+                queryset=collections_list,
+                required=False,
+                to_field_name="id"
+            )
             self.fields["homepage_default_collection"].widget.attrs["class"] = "form-control"
+            self.fields["homepage_image_collection"].widget.attrs["class"] = "form-control"
         else:
             # If the user doesn't have any collections, remove the field
             self.fields.pop("homepage_default_collection")
@@ -52,6 +60,7 @@ class UserProfileForm(ModelForm):
             "sidebar_image",
             "pinned_tags",
             "homepage_default_collection",
+            "homepage_image_collection",
             "nytimes_api_key",
             "instagram_credentials",
             "orgmode_file",

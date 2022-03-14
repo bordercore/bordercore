@@ -101,7 +101,24 @@ def get_calendar_events(request):
     return JsonResponse(events, safe=False)
 
 
-def get_random_image(request, content_type):
+def get_random_image(request, content_type=None):
+    """
+    Get a random image to display on the homepage. If a default
+    collection is specified in user preferences, choose a random
+    image from that. Otherwise choose a random image across all images
+    from Elasticsearch.
+    """
+
+    if request.user.userprofile.homepage_image_collection:
+
+        image = Blob.objects.filter(
+            collection__id=request.user.userprofile.homepage_image_collection.id
+        ).order_by("?").values().first()
+
+        # The field name is 'filename' in Elasticsearch, so that's the common
+        #  name that's used by consumers of this function
+        image["filename"] = image["file"]
+        return image
 
     es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
