@@ -1,5 +1,5 @@
 from django import forms
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ObjectDoesNotExist
 from django.forms import (ModelChoiceField, ModelForm, NumberInput, Select,
                           Textarea, TextInput)
 from django.forms.fields import BooleanField, CharField, FileField
@@ -100,18 +100,6 @@ class SongForm(ModelForm):
         for field in ["title", "note", "album_name"]:
             if field in cleaned_data:
                 cleaned_data[field] = cleaned_data[field].strip()
-
-        if self.request.POST["Go"] == "Create":
-            song = Song.objects.filter(
-                user=self.request.user,
-                title=cleaned_data["title"],
-                artist__name=cleaned_data["artist"]
-            )
-            if song:
-                song_url = Song.get_song_url(song.first())
-                raise ValidationError(
-                    mark_safe(f"Error: <a href='{song_url}'>A song</a> with this title and artist already exists.")
-                )
 
         return cleaned_data
 

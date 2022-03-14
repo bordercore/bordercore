@@ -5,28 +5,51 @@
 {% block content %}
 
     <div class="row no-gutters h-100">
-        <div class="col-lg-3 d-flex flex-column">
+        <div id="vue-song-info" class="col-lg-3 d-flex flex-column">
 
-            <div class="w-100" id="vue-song-info" id="vue-song-info" :class="{'d-none': hideSongInfo}" v-cloak>
+            <div class="w-100" v-cloak>
 
-                <card title="Song Info">
+                <transition name="fade">
+                    <div v-if="$store.state.dupeSongs.length > 0" class="card-body">
+                        <h6 class="text-warning mb-2 text-center">
+                            Possible duplicate songs found
+                        </h6>
+                        <div v-for="dupe in $store.state.dupeSongs" class="my-2">
+                            <hr class="dupe-song-divider" />
+                            <div class="d-flex">
+                                <font-awesome-icon icon="music" class="text-info mt-1"></font-awesome-icon>
+                                <div class="ml-2">
+                                    <a :href="dupe.url" target="bc-dupe-song">[[ dupe.title ]]</a>
+                                    <div v-if="dupe.note" class="dupe-song-note text-truncate">
+                                    [[ dupe.note ]]
+                                    </div>
+                                    <div v-if="dupe.album_name">
+                                        <a class="text-primary" :href="dupe.album_url">[[ dupe.album_name ]]</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </transition>
+
+                <card v-if="$store.state.songLength !== null" title="Song Info">
                     <template v-slot:content>
                         <ul>
-                            <li><strong>Song Length</strong> [[ songLengthPretty ]]</li>
+                            <li>Song Length <span class="ml-1 text-primary">[[ $store.state.songLengthPretty ]]</span></li>
                             {% if action == "Create" %}
-                                <li><strong>Song Size</strong> [[ songSize ]]</li>
-                                <li><strong>Sample Rate</strong> [[ sampleRate ]]</li>
-                                <li><strong>Bit Rate</strong> [[ bitRate ]]</li>
+                                <li>Song Size <span class="ml-1 text-primary">[[ $store.state.songSize ]]</span></li>
+                                <li>Sample Rate <span class="ml-1 text-primary">[[ $store.state.sampleRate ]]</span></li>
+                                <li>Bit Rate <span class="ml-1 text-primary">[[ $store.state.bitRate ]]</span></li>
                             {% endif %}
                         </ul>
                     </template>
                 </card>
 
-                <card title="Total Tag Counts">
+                <card title="Tag Suggestions">
                     <template v-slot:content>
                         <ul class="list-group interior-borders">
                             {% for tag in tag_counts %}
-                                <li class="list-group-item list-group-item-secondary text-info">{{ tag.name}}<span class="ml-2 badge badge-info">{{ tag.count }}</span></li>
+                                <li class="list-group-item list-group-item-secondary text-info">{{ tag.name }}<span class="ml-2 badge badge-info">{{ tag.count }}</span></li>
                             {% endfor %}
                         </ul>
                     </template>
@@ -35,9 +58,15 @@
             </div>
 
             {% if action == "Create" %}
-            <div class="card-body">
-                <div> Choose the local MP3 file containing the song you want to upload. Any embedded <strong>ID3v2</strong> tags will be scanned and the corresponding form fields will be populated. </div>
-            </div>
+                <div v-if="$store.state.songLength === null" class="flex-shrink-0">
+                    <card title="" class="flex-shrink-0">
+                        <template v-slot:content>
+                            <div>
+                                Choose the local MP3 file containing the song you want to upload. Any embedded <strong>ID3v2</strong> tags will be scanned and the corresponding form fields will be populated.
+                            </div>
+                        </template>
+                    </card>
+                </div>
             {% endif %}
 
         </div>
@@ -47,10 +76,10 @@
             <div id="vue-app">
 
                 {% if request.POST.Go and not form.errors %}
-                    <div class="alert alert-success offset-lg-2">Post {{ action }}ed</div>
+                    <div class="alert alert-success offset-lg-3">Post {{ action }}ed</div>
                 {% endif %}
 
-                <p class="lead offset-lg-2 font-weight-bold pl-2">{{ action }} a Song</p>
+                <p class="lead offset-lg-3 font-weight-bold pl-2">{{ action }} a Song</p>
 
                 <form id="song-form" action="{{ request.path }}" method="post">
                     {% csrf_token %}
@@ -58,7 +87,7 @@
 
                 {% if form.non_field_errors %}
                     <div class="row">
-                        <div class="col-lg-5 offset-lg-2">
+                        <div class="col-lg-9 offset-lg-3">
                             <div class="form-error mb-2">
                         {% for error in form.non_field_errors %}
                             {{ error|safe }}
@@ -73,16 +102,16 @@
 
                 {% if action == "Create" %}
                     <div class="form-group row">
-                        <label class="col-lg-2 col-form-label font-weight-bold text-right">File</label>
+                        <label class="col-lg-3 col-form-label font-weight-bold text-right">File</label>
 
-                        <div class="col-lg-5">
+                        <div class="col-lg-9">
                             <div class="input-group">
 
                                 <input type="text" name="filename" :value="filename" class="form-control" id="id_filename" autocomplete="off" />
 
                                 <span class="input-group-append">
                                     <label class="btn btn-primary">Choose song
-                                        <input type="file" id="id_file" name="song" hidden accept="audio/*" @change="onChange" />
+                                        <input type="file" id="id_file" name="song" hidden accept="audio/*" @change="onChange" @blur="onDupeCheck()" />
                                     </label>
                                 </span>
 
@@ -95,9 +124,9 @@
                     {% if field.label == "Tags" %}
 
                         <div class="form-group{% if field.errors %} error{% endif %} row">
-                            <label class="col-lg-2 col-form-label font-weight-bold text-right">Tags</label>
+                            <label class="col-lg-3 col-form-label font-weight-bold text-right">Tags</label>
 
-                            <div class="col-lg-5">
+                            <div class="col-lg-9">
                                 <tags-input search-url="{% url 'tag:search' %}?query=">
                                 </tags-input>
                             </div>
@@ -109,9 +138,9 @@
                     {% elif field.label == "Artist" %}
 
                         <div class="form-group{% if field.errors %} error{% endif %} row">
-                            <label class="col-lg-2 col-form-label font-weight-bold text-right">Artist</label>
+                            <label class="col-lg-3 col-form-label font-weight-bold text-right">Artist</label>
 
-                            <div class="col-lg-5">
+                            <div class="col-lg-9">
                                 <simple-suggest
                                     id="id_artist"
                                     name="artist"
@@ -121,6 +150,7 @@
                                     search-url="{% url 'music:search_artists' %}?term="
                                     place-holder=""
                                     :debounce=300
+                                    @blur="onDupeCheck()"
                                 >
                                 </simple-suggest>
                             </div>
@@ -132,15 +162,15 @@
                     {% elif field.label == 'Compilation' %}
 
                         <div class="form-group{% if field.errors %} error{% endif %} row">
-                            <label class="col-lg-2 col-form-label font-weight-bold text-right">Compilation</label>
-                            <div class="col-lg-5 form-inline">
+                            <label class="col-lg-3 col-form-label font-weight-bold text-right">Compilation</label>
+                            <div class="col-lg-9 form-inline">
                                 <input type="checkbox" name="compilation" id="id_compilation" v-model="isCompilation" />
                             </div>
                         </div>
 
                         <div v-if="isCompilation" class="form-group{% if field.errors %} error{% endif %} row" id="album_artist_field">
-                            <label class="col-lg-2 col-form-label font-weight-bold text-right">Album Artist</label>
-                            <div class="col-lg-5">
+                            <label class="col-lg-3 col-form-label font-weight-bold text-right">Album Artist</label>
+                            <div class="col-lg-9">
                                 <input class="form-control" id="id_album_artist" name="album_artist" type="text" value="Various Artists" autocomplete="off" />
                             </div>
                         </div>
@@ -148,9 +178,9 @@
                     {% elif field.label != 'Length' and field.label != 'Sha1sum' %}
 
                         <div class="form-group{% if field.errors %} error{% endif %} row">
-                            <label class="col-lg-2 col-form-label font-weight-bold text-right">{{ field.label }}</label>
+                            <label class="col-lg-3 col-form-label font-weight-bold text-right">{{ field.label }}</label>
 
-                            <div class="col-lg-5">
+                            <div class="col-lg-9">
                                 {{ field }}
                                 {% for error in field.errors %}
                                     <span class="form-error">{{ error }}</span>
@@ -164,13 +194,13 @@
 
                 {% if form.instance.album.title %}
                     <div class="form-group row">
-                        <label class="col-lg-2 col-form-label font-weight-bold text-right">Album</label>
-                        <label class="col-lg-5 text-left mb-0 form-no-input">{{ form.instance.album.title }}</label>
+                        <label class="col-lg-3 col-form-label font-weight-bold text-right">Album</label>
+                        <label class="col-lg-9 text-left mb-0 form-no-input">{{ form.instance.album.title }}</label>
                     </div>
                 {% endif %}
 
                 <div class="form-group">
-                    <div class="col-lg-5 offset-lg-2">
+                    <div class="col-lg-9 offset-lg-3">
                         <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}">
                         {% if form.instance.id %}
                             <input class="btn btn-secondary" type="submit" name="Go" value="Delete" @click="onClickDelete">
@@ -216,12 +246,14 @@
                 songLength: null,
                 songLengthPretty: null,
                 {% else %}
+                songUuid: "{{ song.uuid }}",
                 songLength: {{ song.length }},
                 songLengthPretty: "{{ song_length_pretty }}",
                 {% endif %}
                 songSize: null,
                 sampleRate: null,
                 bitRate: null,
+                dupeSongs: [],
             },
             getters: {},
             mutations: {},
@@ -229,33 +261,18 @@
 
         new Vue({
             el: "#vue-song-info",
+            name: "songInfo",
             store,
-            computed: {
-                songLengthPretty () {
-                    return this.$store.state.songLengthPretty
-                },
-                songSize () {
-                    return this.$store.state.songSize
-                },
-                sampleRate () {
-                    return this.$store.state.sampleRate
-                },
-                bitRate () {
-                    return this.$store.state.bitRate
-                },
-                hideSongInfo () {
-                    return this.$store.state.songLength === null
-                }
-            }
         });
 
         new Vue({
             el: "#vue-app",
+            name: "songForm",
             store,
             computed: {
-                songLength () {
-                    return this.$store.state.songLength
-                }
+                songLength() {
+                    return this.$store.state.songLength;
+                },
             },
             data() {
                 return {
@@ -263,30 +280,49 @@
                     sha1sum: null,
                     isCompilation: false,
                     {% if action == "Update" %}
-                    uuid: "{{ song.uuid }}"
+                    uuid: "{{ song.uuid }}",
                     {% endif %}
-                }
+                };
             },
             methods: {
+                onDupeCheck() {
+                    const artist = document.getElementById("id_artist").value;
+                    const title = document.getElementById("id_title").value;
+                    if (!artist || !title) {
+                        return;
+                    }
+                    doGet(
+                        this,
+                        "{% url 'music:dupe_song_checker' %}?artist=" + artist + "&title=" + title,
+                        (response) => {
+                            let dupes = response.data.dupes;
+                            if (this.$store.state.songUuid) {
+                                this.$store.state.dupeSongs = dupes.filter((x) => x.uuid !== this.$store.state.songUuid);
+                            } else {
+                                this.$store.state.dupeSongs = dupes;
+                            }
+                        },
+                        "Error checking for duplicate songs",
+                    );
+                },
                 onChange(evt) {
-
-                    var self = this;
+                    const self = this;
 
                     this.filename = evt.target.files[0].name;
 
-                    let song = document.getElementById("id_file").files[0];
-                    let formData = new FormData();
+                    const song = document.getElementById("id_file").files[0];
+                    const formData = new FormData();
                     formData.append("song", song);
 
                     $("#modalProcessing").modal("show");
 
                     axios.post("{% url "music:get_song_id3_info" %}", formData, {
                         headers: {
-                            "Content-Type": "multipart/form-data"
-                        }
-                    }).then(response => {
-                        const array = ["title", "artist", "year", "track", "album_name"]
-                        array.forEach(function (item, index) {
+                            "Content-Type": "multipart/form-data",
+                        },
+                    }).then((response) => {
+                        const array = ["title", "artist", "year", "track", "album_name"];
+                        array.forEach(function(item, index) {
                             data = response.data[item];
                             if (data) {
                                 document.getElementById("id_" + item).value = data;
@@ -308,24 +344,32 @@
                         //  which prevents the modal from closing.
                         window.setTimeout(() => {
                             $("#modalProcessing").modal("hide");
-                        }, 100);
+                        }, 200);
+
+                        this.onDupeCheck();
+
                     });
                 },
                 select() {},
                 onClickDelete(evt) {
                     const formEl = document.getElementById("song-form");
-                    formEl.setAttribute("action", "{% url 'music:delete' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', this.uuid));
+                    formEl.setAttribute("action", "{% url 'music:delete' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", this.uuid));
                     formEl.submit();
                 },
             },
             components: {
-                TagsInput
+                TagsInput,
             },
-            {% if action == "Update" %}
             mounted() {
+                {% if action == "Update" %}
                 this.$refs.simpleSuggest.query = "{{ form.artist.value|safe }}";
-            }
-            {% endif %}
+                {% endif %}
+
+                // The title input is automatically generated by Django,
+                //  so use JavaScript to add an event handler after the fact.
+                const title = document.getElementById("id_title");
+                title.addEventListener("blur", this.onDupeCheck);
+            },
         });
 
     </script>

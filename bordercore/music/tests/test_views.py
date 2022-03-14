@@ -306,3 +306,21 @@ def test_music_add_to_playlist(auto_login_user, playlist, song):
 
     assert resp.status_code == 200
     assert resp.json()["status"] == "OK"
+
+
+def test_music_dupe_song_checker(auto_login_user, song):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("music:dupe_song_checker")
+    resp = client.get(f"{url}?artist=New+Artist&title=New+Title")
+
+    assert resp.status_code == 200
+    assert resp.json()["dupes"] == []
+
+    resp = client.get(f"{url}?artist={song[0].artist}&title={song[0].title}")
+
+    assert resp.status_code == 200
+    response = resp.json()
+    assert response["dupes"][0]["title"] == song[0].title
+    assert response["dupes"][0]["uuid"] == str(song[0].uuid)

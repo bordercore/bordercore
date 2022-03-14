@@ -290,6 +290,7 @@ class SongCreateView(FormRequestMixin, CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["action"] = "Create"
+        context["tag_counts"] = Song.get_song_tags(self.request.user)
         return context
 
     def form_valid(self, form):
@@ -790,6 +791,41 @@ def update_artist_image(request):
     }
 
     return JsonResponse(response)
+
+
+@login_required
+def dupe_song_checker(request):
+    """
+    Given an artist name and song title, look for any
+    possible duplicates.
+    """
+
+    artist = request.GET["artist"]
+    title = request.GET["title"]
+
+    song = Song.objects.filter(
+        user=request.user,
+        title__icontains=title,
+        artist__name__icontains=artist
+    ).select_related("album")
+
+    if song:
+        dupes = [
+            {
+                "title": x.title,
+                "uuid": x.uuid,
+                "url": Song.get_song_url(x),
+                "note": x.note,
+                "album_name": x.album.title if x.album else "",
+                "album_url": reverse("music:album_detail", args=[x.album.uuid]) if x.album else "",
+            }
+            for x in
+            song
+        ]
+    else:
+        dupes = []
+
+    return JsonResponse({"dupes": dupes})
 
 
 @login_required

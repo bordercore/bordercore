@@ -191,9 +191,10 @@ span {
   font-size: 0.75rem;
 }
 
+// CSS Transitions
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 3s;
+  transition: opacity 1.0s ease;
 }
 
 .fade-enter,
@@ -1681,6 +1682,14 @@ audio {
 
 .album {
   width: 19rem;
+}
+
+.dupe-song-divider {
+  background-color: lighten(#10163a, 10%);
+}
+
+.dupe-song-note {
+  font-size: 0.75rem;
 }
 
 // CodeMirror

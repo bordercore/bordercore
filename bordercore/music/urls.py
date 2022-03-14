@@ -115,4 +115,9 @@ urlpatterns = [
         view=views.missing_artist_images,
         name="missing_artist_images"
     ),
+    path(
+        route="dupe_song_checker",
+        view=views.dupe_song_checker,
+        name="dupe_song_checker"
+    ),
 ]
