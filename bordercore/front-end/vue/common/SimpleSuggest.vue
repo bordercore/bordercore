@@ -20,6 +20,7 @@
                             @keydown.native.enter="onEnter"
                             @hide-list="onHideList"
                             @hover="onHover"
+                            @blur="onBlur"
         >
             <div slot="suggestion-item" slot-scope="scope">
                 <!-- @*event*.stop="" handlers are needed to prevent the splitter from being selected -->
@@ -146,6 +147,9 @@
                 } else {
                     this.$parent.select(datum);
                 }
+            },
+            onBlur(evt) {
+                this.$emit("blur", evt);
             },
             onEnter(evt) {
                 if (typeof this.$parent.onEnter === "function") {
