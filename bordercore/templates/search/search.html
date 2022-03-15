@@ -130,7 +130,7 @@
 
                             {% for match in search_results.hits.hits %}
 
-                                <li class="search-result">
+                                <li class="search-result" v-cloak>
                                     <div class="d-flex my-1">
 
                                     {% if match.source.doctype == "drill" %}
