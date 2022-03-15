@@ -49,7 +49,16 @@
                     <template v-slot:content>
                         <ul class="list-group interior-borders">
                             {% for tag in tag_counts %}
-                                <li class="list-group-item list-group-item-secondary text-info">{{ tag.name }}<span class="ml-2 badge badge-info">{{ tag.count }}</span></li>
+                                <li class="tag-list list-group-item list-group-item-secondary text-info d-flex" @click.prevent="onClickTag('{{ tag.name }}')">
+                                    <div class="pl-2 text-truncate">
+                                        {{ tag.name }}
+                                    </div>
+                                    <div class="ml-auto pr-2">
+                                        <span class="px-2 badge badge-pill badge-info">
+                                            {{ tag.count }}
+                                        </span>
+                                    </div>
+                                </li>
                             {% endfor %}
                         </ul>
                     </template>
@@ -127,7 +136,10 @@
                             <label class="col-lg-3 col-form-label font-weight-bold text-right">Tags</label>
 
                             <div class="col-lg-9">
-                                <tags-input search-url="{% url 'tag:search' %}?query=">
+                                <tags-input
+                                    ref="tagsInput"
+                                    id="id_tags"
+                                    search-url="{% url 'tag:search' %}?query=">
                                 </tags-input>
                             </div>
                     {% for error in field.errors %}
@@ -263,6 +275,11 @@
             el: "#vue-song-info",
             name: "songInfo",
             store,
+            methods: {
+                onClickTag(tagName) {
+                    EventBus.$emit("add-tag", tagName);
+                }
+            },
         });
 
         new Vue({
@@ -357,9 +374,6 @@
                     formEl.submit();
                 },
             },
-            components: {
-                TagsInput,
-            },
             mounted() {
                 {% if action == "Update" %}
                 this.$refs.simpleSuggest.query = "{{ form.artist.value|safe }}";
@@ -369,6 +383,16 @@
                 //  so use JavaScript to add an event handler after the fact.
                 const title = document.getElementById("id_title");
                 title.addEventListener("blur", this.onDupeCheck);
+
+                EventBus.$on("add-tag", (tagName) => {
+                    let tagList = document.getElementsByName("tags")[0].value.split(",");
+                    // Ignore if we've already added this tag
+                    if (tagList.includes(tagName)) {
+                        return;
+                    }
+                    this.$refs.tagsInput.addTag(tagName);
+                });
+
             },
         });
 
