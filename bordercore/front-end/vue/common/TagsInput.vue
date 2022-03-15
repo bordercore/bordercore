@@ -27,7 +27,7 @@
 
 <script>
 
-    import VueTagsInput from "@johmun/vue-tags-input";
+    import VueTagsInput, {createTag} from "@johmun/vue-tags-input";
 
     export default {
 
@@ -101,6 +101,10 @@
             }
         },
         methods: {
+            addTag(tagName) {
+                const tag = createTag(tagName, [tagName]);
+                this.$refs.tagsInputComponent.addTag(tag);
+            },
             tagsChanged(newTags) {
                 this.tags = newTags;
                 // Re-emit this event in case a parent component is interested
