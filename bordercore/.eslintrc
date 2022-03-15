@@ -12,6 +12,7 @@
         "sourceType": "module"
     },
     "plugins": [
+        "html",
         "vue"
     ],
     "rules": {
