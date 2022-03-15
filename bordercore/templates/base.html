@@ -70,7 +70,7 @@
                                 </span>
 
                                 <recent-blobs
-                                    :blob-list="recentBlobs"
+                                    :blob-list-info="recentBlobs"
                                     blob-detail-url="{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}"
                                 >
                                 </recent-blobs>
@@ -161,7 +161,7 @@
                 <script type="text/javascript" src="{{ STATIC_URL }}js/javascript-bundle.min.js.gz"></script>
             {% endif %}
 
-            {{ recent_blobs.0|json_script:"recent_blobs" }}
+            {{ recent_blobs|json_script:"recent_blobs" }}
 
             <script type="text/javascript">
 
@@ -247,6 +247,11 @@
                             this.$refs.topSearch.$refs.suggestComponent.input.focus()
                         }
                     },
+                    mounted() {
+                        if (this.recentBlobs.message) {
+                            console.log(this.recentBlobs.message.text);
+                        }
+                    }
                 });
 
                 new Vue({

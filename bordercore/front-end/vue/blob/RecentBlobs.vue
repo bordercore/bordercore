@@ -11,7 +11,7 @@
                 <div class="top-search-splitter">
                     Recent Blobs
                 </div>
-                <a v-for="link in blobList" :key="link.id" :href="link.url" class="dropdown-item d-flex align-items-center" v-on="link.clickHandler ? { click: link.clickHandler } : {}">
+                <a v-for="link in blobListInfo.blobList[0]" :key="link.id" :href="link.url" class="dropdown-item d-flex align-items-center" v-on="link.clickHandler ? { click: link.clickHandler } : {}">
                     <span class="icon d-flex justify-content-center align-items-center">
                         <img v-if="link.doctype === 'image'" :src="link.cover_url_small" class="mw-100 mh-100">
                         <img v-else-if="link.doctype === 'video'" :src="link.cover_url_small" class="mw-100 mh-100">
@@ -23,6 +23,9 @@
                         {{ link.name }}
                     </span>
                 </a>
+                <div v-if="blobListInfo.message" class="text-nowrap">
+                    <strong>Elasticsearch Error</strong>: {{ blobListInfo.message.statusCode }}
+                </div>
             </div>
         </dropdown-menu>
     </span>
@@ -32,9 +35,10 @@
 
     export default {
         props: {
-            blobList: {
-                default: () => [],
-                type: Array,
+            blobListInfo: {
+                default: function() {
+                },
+                type: Object,
             },
             blobDetailUrl: {
                 default: "",
@@ -49,7 +53,7 @@
         computed: {
             menuItems: function() {
                 const self = this;
-                const items = this.blobList.map( function(item) {
+                const items = this.blobListInfo.blobList.map( function(item) {
                     return {
                         id: uuidv4(),
                         title: item.name,

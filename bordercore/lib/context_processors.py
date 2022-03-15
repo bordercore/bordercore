@@ -1,3 +1,5 @@
+from elasticsearch import ConnectionTimeout
+
 from django.conf import settings
 
 from blob.services import get_recent_blobs as get_recent_blobs_service
@@ -42,8 +44,22 @@ def get_recent_blobs(request):
     if not request.user.is_authenticated:
         return {}
 
+    message = None
+
+    try:
+        recent_blobs = get_recent_blobs_service(request.user, skip_content=True)
+    except (ConnectionTimeout) as e:
+        message = {
+            "text": str(e),
+            "statusCode": e.status_code
+        }
+        recent_blobs = []
+
     return {
-        "recent_blobs": get_recent_blobs_service(request.user, skip_content=True)
+        "recent_blobs": {
+            "blobList": recent_blobs,
+            "message": message
+        }
     }
 
 

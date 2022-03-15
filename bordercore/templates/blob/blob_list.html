@@ -49,6 +49,9 @@
 
                 </div>
             </div>
+            <h3 v-if="message" class="text-danger mt-3" v-cloak>
+                Elasticsearch Error: [[ message.statusCode ]]
+            </h3>
 
         </div>
 
@@ -76,7 +79,8 @@
                     ],
                     navCurrent: "All",
                     blobList: [],
-                    docTypes: {}
+                    docTypes: {},
+                    message: null,
                 }
             },
             methods: {
@@ -136,6 +140,7 @@
                         (response) => {
                             this.blobList = response.data.blobList;
                             this.docTypes = response.data.docTypes;
+                            this.message = response.data.message
 
                             this.$nextTick(() => {
                                 document.querySelectorAll(".blob-content :is(h1, h2, h3, h4, h5, h6)").forEach((el) => {

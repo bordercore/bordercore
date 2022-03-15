@@ -4,6 +4,7 @@ import logging
 import re
 
 import boto3
+from elasticsearch import ConnectionTimeout
 
 from django.conf import settings
 from django.contrib import messages
@@ -486,11 +487,22 @@ def parse_date(request, input_date):
 def recent_blobs(request):
 
     skip_content = True if request.GET.get("skip_content", None) else False
-    blob_list, doctypes = get_recent_blobs(request.user, skip_content=skip_content)
+
+    message = None
+    try:
+        blob_list, doctypes = get_recent_blobs(request.user, skip_content=skip_content)
+    except (ConnectionTimeout) as e:
+        message = {
+            "text": str(e),
+            "statusCode": e.status_code
+        }
+        doctypes = []
+        blob_list = []
 
     response = {
         "blobList": blob_list,
         "docTypes": doctypes,
+        "message": message,
         "status": "OK"
     }
 
