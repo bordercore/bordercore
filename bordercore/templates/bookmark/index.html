@@ -127,7 +127,7 @@
                             <table id="bookmark-list" class="w-100">
                                 <tbody is="draggable" v-model="bookmarkList" @change="onSortBookmarks" ghost-class="sortable-ghost">
                                     <transition-group type="transition">
-                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="bookmark-list w-100" @mouseenter="onRowHovered" @mouseleave="onRowUnhovered" v-b-hover="handleYoutubeHover" v-cloak @dragstart="startDrag($event, bookmark)">
+                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="bookmark-list w-100" @mouseenter="onRowHovered" @mouseleave="onRowUnhovered" v-b-hover="handleYoutubeHover" v-cloak @dragstart="startDrag($event, bookmark)" @click="onClickBookmark(bookmark.uuid)">
                                             <td class="bookmark-list-date p-2 text-info align-top">
                                                 <span>[[ bookmark.created ]]</span>
                                             </td>
@@ -306,6 +306,10 @@
                 onClickTag(evt) {
                     const tagName = evt.srcElement.innerHTML;
                     EventBus.$emit("search-tag", tagName);
+                },
+                onClickBookmark(uuid) {
+                    this.selectedBookmarkUuid = uuid;
+                    this.selectBookmark();
                 },
                 onSortBookmarks(evt) {
 
