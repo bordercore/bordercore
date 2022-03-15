@@ -67,7 +67,7 @@ def get_recent_blobs(user, limit=10, skip_content=False):
         "_source": ["created_date", "size", "uuid", "name"]
     }
 
-    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
+    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT, timeout=5)
 
     results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 

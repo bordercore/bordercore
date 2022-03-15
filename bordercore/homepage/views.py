@@ -120,7 +120,7 @@ def get_random_image(request, content_type=None):
         image["filename"] = image["file"]
         return image
 
-    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
+    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT, timeout=5)
 
     search_object = {
         "query": {

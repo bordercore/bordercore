@@ -4,8 +4,10 @@ from pathlib import PurePath
 
 import requests
 
+ELASTICSEARCH_TIMEOUT = 10
 
-def get_elasticsearch_connection(host=None):
+
+def get_elasticsearch_connection(host=None, timeout=ELASTICSEARCH_TIMEOUT):
 
     # Isolate the import here so other functions from this module
     #  can be imported without requiring these dependencies.
@@ -18,7 +20,7 @@ def get_elasticsearch_connection(host=None):
     return connections.create_connection(
         hosts=[host],
         use_ssl=False,
-        timeout=1200,
+        timeout=timeout,
         verify_certs=True,
         connection_class=RequestsHttpConnection,
     )
