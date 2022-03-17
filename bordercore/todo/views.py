@@ -130,61 +130,6 @@ class TodoTaskList(ListView):
 
 
 @method_decorator(login_required, name='dispatch')
-class TodoDetailView(FormRequestMixin, UpdateView):
-    model = Todo
-    template_name = 'todo/update.html'
-    form_class = TodoForm
-    success_url = reverse_lazy('todo:list')
-    slug_field = 'uuid'
-    slug_url_kwarg = 'uuid'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['nav'] = 'todo'
-        context['uuid'] = self.kwargs.get('uuid')
-        context['action'] = 'Update'
-        context['title'] = 'Todo Update :: {}'.format(self.object.name)
-        context['tags'] = [{"text": x.name, "value": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
-        return context
-
-    def get_queryset(self):
-        return Todo.objects.filter(user=self.request.user)
-
-    def form_valid(self, form):
-
-        task = form.instance
-
-        with transaction.atomic():
-
-            # Keep track of the sort order of this task for each
-            #  tag. Once we delete them and add them back,
-            #  restore the original sort order using this hash
-            todo_sort_order = {}
-
-            for tag in task.tags.all():
-                s = SortOrderTagTodo.objects.get(tag=tag, todo=task)
-                todo_sort_order[tag.name] = s.sort_order
-                s.delete()
-
-            # Delete all existing tags
-            task.tags.clear()
-
-            # Then add the tags specified in the form
-            for tag in form.cleaned_data['tags']:
-                task.tags.add(tag)
-                s = SortOrderTagTodo.objects.get(tag=tag, todo=task)
-                # The tag won't be in todo_sort_order if we're
-                #  adding it as new, so check for that.
-                if tag.name in todo_sort_order:
-                    s.reorder(todo_sort_order[tag.name])
-
-        self.object = form.save()
-        context = self.get_context_data(form=form)
-        context["message"] = "Task updated"
-        return HttpResponseRedirect(self.get_success_url())
-
-
-@method_decorator(login_required, name='dispatch')
 class TodoCreateView(FormRequestMixin, CreateView):
     template_name = 'todo/update.html'
     form_class = TodoForm
