@@ -23,6 +23,7 @@ class Todo(TimeStampedModel):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     tags = models.ManyToManyField(Tag)
     data = JSONField(null=True, blank=True)
+    due_date = models.DateTimeField(null=True, blank=True)
 
     objects = TodoManager()
 

@@ -111,6 +111,7 @@ class TodoTaskList(ListView):
                 "note": todo.note or "",
                 "url": todo.url,
                 "uuid": todo.uuid,
+                "due_date": todo.due_date,
                 "tags": [{"text": x.name, "display": x.name} for x in todo.tags.all()],
             }
 
@@ -195,5 +196,20 @@ def sort_todo(request):
 
     s = SortOrderTagTodo.objects.get(tag__name=tag_name, todo__uuid=todo_uuid)
     SortOrderTagTodo.reorder(s, new_position)
+
+    return JsonResponse({"status": "OK"}, safe=False)
+
+
+@login_required
+def reschedule_task(request):
+    """
+    Set the due date for a task to a day from now.
+    """
+
+    todo_uuid = request.POST["todo_uuid"]
+
+    todo = Todo.objects.get(uuid=todo_uuid)
+    todo.due_date = timezone.now() + timedelta(days=1)
+    todo.save()
 
     return JsonResponse({"status": "OK"}, safe=False)

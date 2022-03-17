@@ -190,10 +190,11 @@ class TagAliasSerializer(serializers.ModelSerializer):
 class TodoSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     tags = BlobTagsField(queryset=Tag.objects.all(), many=True)
+    due_date = serializers.DateField(required=False)
 
     class Meta:
         model = Todo
-        fields = ["id", "note", "tags", "name", "priority", "url", "user", "uuid"]
+        fields = ["due_date", "id", "note", "tags", "name", "priority", "url", "user", "uuid"]
 
     def create(self, validated_data):
 
@@ -225,6 +226,7 @@ class TodoSerializer(serializers.ModelSerializer):
         instance.note = validated_data.get("note", instance.note)
         instance.priority = validated_data.get("priority", instance.priority)
         instance.url = validated_data.get("url", instance.url)
+        instance.due_date = validated_data.get("due_date", instance.due_date)
 
         instance.tags.set(
             [

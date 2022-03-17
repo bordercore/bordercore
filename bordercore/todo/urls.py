@@ -24,5 +24,10 @@ urlpatterns = [
         route="get_tasks",
         view=views.TodoTaskList.as_view(),
         name="get_tasks"
+    ),
+    path(
+        route="reschedule_task",
+        view=views.reschedule_task,
+        name="reschedule_task"
     )
 ]

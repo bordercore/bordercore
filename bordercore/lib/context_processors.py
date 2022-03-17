@@ -1,6 +1,7 @@
 from elasticsearch import ConnectionTimeout
 
 from django.conf import settings
+from django.utils import timezone
 
 from blob.services import get_recent_blobs as get_recent_blobs_service
 from bookmark.models import Bookmark
@@ -60,6 +61,32 @@ def get_recent_blobs(request):
             "blobList": recent_blobs,
             "message": message
         }
+    }
+
+
+def get_overdue_tasks(request):
+    """
+    Return a list of todo tasks that are overdue
+    """
+
+    if not request.user.is_authenticated:
+        return {}
+
+    tasks = [
+        {
+            "uuid": x.uuid,
+            "name": x.name,
+            "tags": [x.name for x in x.tags.all()]
+        }
+        for x in
+        Todo.objects.filter(user=request.user, due_date__lt=timezone.now())
+    ]
+
+    # Once retrieved, remove the due dates for all overdue tasks
+    Todo.objects.filter(uuid__in=[x["uuid"] for x in tasks]).update(due_date=None)
+
+    return {
+        "overdue_tasks": tasks
     }
 
 

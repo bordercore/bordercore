@@ -52,6 +52,26 @@
                                         <input id="id_url" v-model="todoInfo.url" type="text" name="url" class="form-control" required autocomplete="off">
                                     </div>
                                 </div>
+                                <div class="form-group row">
+                                    <label class="font-weight-bold col-lg-3 col-form-label text-right" for="dueDate">Due Date</label>
+                                    <div class="col-lg-9">
+                                        <vuejs-datepicker
+                                            id="id_due_date"
+                                            :bootstrap-styling="true"
+                                            :format="customFormatter"
+                                            :typeable="true"
+                                            v-model="todoInfo.due_date"
+                                            name="due_date"
+                                            calendar-class="calendar"
+                                        >
+                                            <span slot="afterDateInput" class="input-group-append">
+                                                <div class="input-group-text">
+                                                    <font-awesome-icon icon="calendar-alt" />
+                                                </div>
+                                            </span>
+                                        </vuejs-datepicker>
+                                    </div>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -138,6 +158,9 @@
             });
         },
         methods: {
+            customFormatter(date) {
+                return format(new Date(date), "YYYY-MM-DD");
+            },
             setAction(action) {
                 this.action = action;
                 this.status = "";
@@ -146,6 +169,7 @@
                 this.todoInfo.tags = newTags;
             },
             onAction() {
+                const dueDate = document.getElementsByName("due_date")[0].value;
                 if (this.action === "Update") {
                     doPut(
                         this,
@@ -157,6 +181,7 @@
                             "note": this.todoInfo.note,
                             "tags": this.todoInfo.tags.map((x) => x.text),
                             "url": this.todoInfo.url || "",
+                            "due_date": dueDate,
                         },
                         () => {
                             this.$parent.getTodoList();
@@ -174,6 +199,7 @@
                             "note": this.todoInfo.note || "",
                             "tags": this.todoInfo.tags.map((x) => x.text),
                             "url": this.todoInfo.url || "",
+                            "due_date": dueDate,
                         },
                         (response) => {
                             this.$parent.getTodoList();

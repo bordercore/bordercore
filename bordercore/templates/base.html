@@ -96,6 +96,14 @@
                                 </div>
 
                             </div>
+
+                            <overdue-tasks
+                                :task-list-prop="overdueTasks"
+                                reschedule-task-url="{% url 'todo:reschedule_task' %}"
+                                delete-todo-url="{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}"
+                            >
+                            </overdue-tasks>
+
                         </div>
 
                     </div>
@@ -162,6 +170,7 @@
             {% endif %}
 
             {{ recent_blobs|json_script:"recent_blobs" }}
+            {{ overdue_tasks|json_script:"overdue_tasks" }}
 
             <script type="text/javascript">
 
@@ -234,6 +243,7 @@
                                 },
                             ],
                             recentBlobs: JSON.parse(document.getElementById("recent_blobs").textContent),
+                            overdueTasks: JSON.parse(document.getElementById("overdue_tasks").textContent),
                         }
                     },
                     methods: {
@@ -250,6 +260,9 @@
                     mounted() {
                         if (this.recentBlobs.message) {
                             console.log(this.recentBlobs.message.text);
+                        }
+                        if (this.overdueTasks.length > 0) {
+                            $("#modalOverdueTasks").modal("show");
                         }
                     }
                 });
