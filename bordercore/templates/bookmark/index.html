@@ -430,7 +430,14 @@
                                  variant: "primary"
                              })
 
-                             EventBus.$emit("get-page");
+                             if (this.$store.state.selectedTagName) {
+                                 if (this.$store.state.selectedTagName === "Untagged") {
+                                     this.getBookmarkList({pageNumber: 1});
+                                 } else
+                                     this.getBookmarkList({searchTag: this.$store.state.selectedTagName});
+                             } else {
+                                 this.getBookmarkList({pageNumber: this.pageNumber});
+                             }
 
                          })
                 },
