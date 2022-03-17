@@ -129,5 +129,12 @@ def tags_changed(sender, **kwargs):
             so = SortOrderTagTodo(tag=Tag.objects.get(user=todo.user, pk=tag_id), todo=todo)
             so.save()
 
+    elif kwargs["action"] == "post_remove":
+        todo = kwargs["instance"]
+
+        for tag_id in kwargs["pk_set"]:
+            so = SortOrderTagTodo.objects.get(tag__id=tag_id, todo=todo)
+            so.delete()
+
 
 m2m_changed.connect(tags_changed, sender=Todo.tags.through)
