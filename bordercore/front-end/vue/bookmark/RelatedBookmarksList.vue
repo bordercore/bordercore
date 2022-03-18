@@ -30,7 +30,7 @@
                                                 <font-awesome-icon icon="ellipsis-v" />
                                                 <div slot="dropdown">
                                                     <a class="dropdown-item" href="#" @click.prevent="removeBookmark(bookmark.uuid)">
-                                                        <font-awesome-icon icon="times" class="text-primary mr-3" />Remove
+                                                        <font-awesome-icon icon="trash-alt" class="text-primary mr-3" />Remove
                                                     </a>
                                                     <a class="dropdown-item" :href="bookmark.edit_url">
                                                         <font-awesome-icon icon="pencil-alt" class="text-primary mr-3" />Edit Bookmark
