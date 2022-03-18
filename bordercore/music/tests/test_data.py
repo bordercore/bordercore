@@ -186,6 +186,9 @@ def test_albums_in_db_exist_in_elasticsearch(es):
 def test_song_in_s3_exist_on_filesystem():
     "Assert that all songs in S3 also exist on the filesystem"
 
+    def sanitize_filename(name):
+        return name.replace("/", "-")
+
     s3_resource = boto3.resource("s3")
 
     paginator = s3_resource.meta.client.get_paginator("list_objects")
@@ -196,6 +199,7 @@ def test_song_in_s3_exist_on_filesystem():
             match = re.search(r"^songs/(.+)", str(key["Key"]))
             if match:
                 song = Song.objects.get(uuid=match.group(1))
+                first_letter_dir = re.sub(r"\W+", "", song.artist.name).lower()[0]
                 if song.album:
                     track_number = song.track
                     if len(str(song.track)) == 1:
@@ -203,7 +207,8 @@ def test_song_in_s3_exist_on_filesystem():
                     if song.album.compilation:
                         path = f"/home/media/music/v/Various/{song.album.title}/{track_number} - {song.title}.mp3"
                     else:
-                        path = f"/home/media/music/{song.artist.name.lower()[0]}/{song.artist}/{song.album.title}/{track_number} - {song.title}.mp3"
+                        path = f"/home/media/music/{first_letter_dir}/{sanitize_filename(song.artist.name)}/{sanitize_filename(song.album.title)}/{track_number} - {sanitize_filename(song.title)}.mp3"
                 else:
-                    path = f"/home/media/music/{song.artist.name.lower()[0]}/{song.artist}/{song.title}.mp3"
+                    path = f"/home/media/music/{first_letter_dir}/{sanitize_filename(song.artist.name)}/{sanitize_filename(song.title)}.mp3"
+
                 assert Path(path).is_file(), f"Song in S3 not found on filesystem: {song.uuid} {path}"
