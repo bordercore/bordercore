@@ -54,6 +54,10 @@ def test_html():
         assert len(count) == 0, f"Found a tag with attribute name '_class' in template {template}"
 
         # Look for any classes with an underscore in the name
-        count = soup.select("div[class*='_']")
+        divs = soup.select("div[class*='_']")
+
+        # This hack discards classes formed by Django conditional logic, which might contain
+        #  underscores that are perfectly fine.
+        count = [x for x in divs if "{%" not in x.attrs["class"]]
 
         assert len(count) == 0, f"Found a class name starting with '_' in template {template}"
