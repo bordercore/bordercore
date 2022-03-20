@@ -1,13 +1,12 @@
 from urllib.parse import unquote
 
 from django.conf import settings
-from django.db.models import Count
 from django.urls import reverse
 
 from drill.models import Question
 from lib.util import get_elasticsearch_connection
 
-from .models import Tag, TagAlias
+from .models import TagAlias
 
 SEARCH_LIMIT = 1000
 
@@ -59,24 +58,6 @@ def get_tag_aliases(user, name, doc_types=[]):
         for x in
         tag_aliases
     ]
-
-
-def get_random_tag_info(user):
-
-    tag = Tag.objects.filter(user=user).order_by("?").first()
-
-    info = Tag.objects.filter(name=tag.name) \
-                      .annotate(
-                          Count("blob", distinct=True),
-                          Count("bookmark", distinct=True),
-                          Count("album", distinct=True),
-                          Count("collection", distinct=True),
-                          Count("todo", distinct=True),
-                          Count("question", distinct=True),
-                          Count("song", distinct=True)
-                      ).first()
-
-    return info
 
 
 def search(user, tag_name, doc_types=[], skip_tag_aliases=False):

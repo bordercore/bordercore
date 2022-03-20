@@ -1708,6 +1708,15 @@ div.CodeMirror-focused {
   background: $text-selection-bg !important;
 }
 
+// Tags
+#tags-search {
+  position: absolute;
+  top: 2rem;
+  right: 2.75rem;
+  width: 12.5rem;
+  box-shadow: 1px 1px 5px #4b00ff, -1px -1px 5px #4b00ff;
+}
+
 // Styles for vue-simple-suggest VUE typeahead component
 
 // Original: https://unpkg.com/vue-simple-suggest/dist/styles.css

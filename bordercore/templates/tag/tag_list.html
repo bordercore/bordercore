@@ -12,7 +12,28 @@
 
             <div class="card-body">
 
-                <h4>Random Tag: <strong class="text-primary">{{ random_tag_info }}</strong></h4>
+                <div class="d-flex">
+                    <h4>
+                        Tag Info
+                    </h4>
+                    <div id="tags-search" class="d-none">
+                        <simple-suggest
+                            ref="simpleSuggest"
+                            class="w-100"
+                            display-attribute="display"
+                            value-attribute="text"
+                            place-holder="Tag name"
+                            search-url="{% url 'tag:search' %}?query="
+                            @blur="onBlur"
+                        />
+                    </div>
+                    <div class="ml-auto d-flex align-items-center" @click="openSearchWindow">
+                        <font-awesome-icon icon="search" class="glow text-emphasis" />
+                    </div>
+                </div>
+                <h4 v-cloak>
+                    <strong class="text-primary">[[ tagInfo.name ]]</strong>
+                </h4>
 
                 <div class="d-flex flex-column">
 
@@ -20,41 +41,27 @@
                         Objects using this tag
                     </div>
 
-                    {% if random_tag_info.blob__count %}
-                        <div>
-                            Blobs: <span class="text-info">{{ random_tag_info.blob__count }}</span>
-                        </div>
-                    {% endif %}
-                    {% if random_tag_info.bookmark__count %}
-                        <div>
-                            Bookmarks: <span class="text-info">{{ random_tag_info.bookmark__count }}</span>
-                        </div>
-                    {% endif %}
-                    {% if random_tag_info.todo__count %}
-                        <div>
-                            Todos: <span class="text-info">{{ random_tag_info.todo__count }}</span>
-                        </div>
-                    {% endif %}
-                    {% if random_tag_info.question__count %}
-                        <div>
-                            Questions: <span class="text-info">{{ random_tag_info.question__count }}</span>
-                        </div>
-                    {% endif %}
-                    {% if random_tag_info.song__count %}
-                        <div>
-                            Songs: <span class="text-info">{{ random_tag_info.song__count }}</span>
-                        </div>
-                    {% endif %}
-                    {% if random_tag_info.album__album %}
-                        <div>
-                            Albums: <span class="text-info">{{ random_tag_info.album__count }}</span>
-                        </div>
-                    {% endif %}
-                    {% if random_tag_info.collection__count %}
-                        <div>
-                            Collections: <span class="text-info">{{ random_tag_info.collection__count }}</span>
-                        </div>
-                    {% endif %}
+                    <div v-if="tagInfo.blob__count" v-cloak>
+                        Blobs: <span class="text-info">[[ tagInfo.blob__count ]]</span>
+                    </div>
+                    <div v-if="tagInfo.bookmark__count" v-cloak>
+                        Bookmarks: <span class="text-info">[[ tagInfo.bookmark__count ]]</span>
+                    </div>
+                    <div v-if="tagInfo.todo__count" v-cloak>
+                        Todos: <span class="text-info">[[ tagInfo.todo__count ]]</span>
+                    </div>
+                    <div v-if="tagInfo.question__count" v-cloak>
+                        Questions: <span class="text-info">[[ tagInfo.question__count ]]</span>
+                    </div>
+                    <div v-if="tagInfo.song__count" v-cloak>
+                        Songs: <span class="text-info">[[ tagInfo.song__count ]]</span>
+                    </div>
+                    <div v-if="tagInfo.album__count" v-cloak>
+                        Albums: <span class="text-info">[[ tagInfo.album__count ]]</span>
+                    </div>
+                    <div v-if="tagInfo.collection__count" v-cloak>
+                        Collections: <span class="text-info">[[ tagInfo.collection__count ]]</span>
+                    </div>
 
                 </div>
 
@@ -171,9 +178,11 @@
 
     {{ block.super }}
 
+    {{ random_tag_info|json_script:"random_tag_info" }}
+
     <script type="text/javascript" charset="utf-8">
 
-        const table = new Vue({
+        new Vue({
             el: "#vue-app",
             components: {
                 SimpleSuggest,
@@ -207,7 +216,12 @@
                     addAliasTagName: "",
                     addAliasAliasName: "",
                     addAliasMessage: "",
-                }
+                    tagInfo: JSON.parse(document.getElementById("random_tag_info").textContent),
+                };
+            },
+            mounted() {
+                this.getTagAliasList();
+                this.getTodoCounts();
             },
             methods: {
                 getTagAliasList() {
@@ -217,8 +231,31 @@
                         (response) => {
                             this.items = response.data.results;
                         },
-                        "Error retrieving tag alias list"
+                        "Error retrieving tag alias list",
                     );
+                },
+                getTodoCounts(tagName) {
+                    let url = "{% url 'tag:get_todo_counts' %}";
+                    if (tagName) {
+                        url = url + "?tag_name=" + tagName;
+                    }
+                    doGet(
+                        this,
+                        url,
+                        (response) => {
+                            this.tagInfo = response.data.info;
+                        },
+                        "Error retrieving tag alias list",
+                    );
+                },
+                onBlur() {
+                    document.getElementById("tags-search").classList.add("d-none");
+                },
+                openSearchWindow() {
+                    document.getElementById("tags-search").classList.remove("d-none");
+                    setTimeout( () => {
+                        this.$refs.simpleSuggest.$refs.suggestComponent.input.focus();
+                    }, 100);
                 },
                 rowHovered(item, index, evt) {
                     evt.currentTarget.querySelector(".hover-target").classList.remove("hidden");
@@ -227,15 +264,13 @@
                     evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
                 },
                 onClickDelete(item, index, evt) {
-
                     const selectedUuid = item;
-                    axios.delete("{% url 'tagalias-detail' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', selectedUuid))
+                    axios.delete("{% url 'tagalias-detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", selectedUuid))
                          .then((response) => {
-
                              this.$bvToast.toast("Tag alias deleted", {
                                  title: "Info",
-                                 variant: "primary"
-                             })
+                                 variant: "primary",
+                             });
 
                              this.getTagAliasList();
 
@@ -243,20 +278,21 @@
                          }, (error) => {
                              console.log(error);
                          });
-
                 },
                 getTagClass(tag) {
                     if (tag === this.filterTag) {
-                        return "selected rounded-sm"
+                        return "selected rounded-sm";
                     }
                 },
                 openModal() {
                     $("#modal-tagalias").modal("show");
-                    setTimeout( () => { this.$refs.tagAliasSuggest.$refs.suggestComponent.input.focus(); }, 500)
+                    setTimeout( () => {
+                        this.$refs.tagAliasSuggest.$refs.suggestComponent.input.focus();
+                    }, 500);
                 },
-                select(datum) {
-                    this.addAliasTagName = datum.text;
-                    setTimeout( () => { document.querySelector("input[name='alias']").focus(); }, 50)
+                select(tagName) {
+                    document.getElementById("tags-search").classList.add("d-none");
+                    this.getTodoCounts(tagName.text);
                 },
                 resetModal() {
                     this.$refs.tagAliasSuggest.$refs.suggestComponent.clearSuggestions();
@@ -264,7 +300,6 @@
                     this.addAliasAliasName = "";
                 },
                 addAlias() {
-
                     doPost(
                         this,
                         "{% url 'tag:add_alias' %}",
@@ -280,14 +315,8 @@
                         "Tag alias added",
                         "",
                     );
-
-                }
+                },
             },
-            mounted() {
-
-                this.getTagAliasList();
-
-            }
         });
 
     </script>

@@ -30,4 +30,9 @@ urlpatterns = [
         view=views.add_alias,
         name="add_alias"
     ),
+    path(
+        route="get_todo_counts",
+        view=views.get_todo_counts,
+        name="get_todo_counts"
+    ),
 ]

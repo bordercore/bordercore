@@ -4,6 +4,7 @@ from django.apps import apps
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
+from django.db.models import Count
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
@@ -26,6 +27,19 @@ class Tag(models.Model):
         unique_together = (
             ("name", "user")
         )
+
+    def get_todo_counts(self):
+
+        return Tag.objects.filter(pk=self.pk) \
+                          .annotate(
+                              Count("blob", distinct=True),
+                              Count("bookmark", distinct=True),
+                              Count("album", distinct=True),
+                              Count("collection", distinct=True),
+                              Count("todo", distinct=True),
+                              Count("question", distinct=True),
+                              Count("song", distinct=True)
+                          ).values()
 
     def pin(self):
 

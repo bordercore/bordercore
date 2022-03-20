@@ -5,7 +5,6 @@ from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
 from .models import Tag, TagAlias
-from .services import get_random_tag_info
 from .services import search as search_service
 
 
@@ -52,14 +51,6 @@ class TagListView(ListView):
     def get_queryset(self):
         return TagAlias.objects.none()
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        return {
-            "random_tag_info": get_random_tag_info(self.request.user),
-            **context,
-        }
-
 
 @login_required
 def add_alias(request):
@@ -87,5 +78,26 @@ def add_alias(request):
             "status": "OK",
             "message": ""
         }
+
+    return JsonResponse(response)
+
+
+@login_required
+def get_todo_counts(request):
+
+    if "tag_name" in request.GET:
+        tag_name = request.GET["tag_name"]
+    else:
+        tag_name = Tag.objects.filter(user=request.user).order_by("?").first().name
+
+    tag = Tag.objects.get(name=tag_name, user=request.user)
+    info = tag.get_todo_counts()[0]
+
+    response = {
+        "status": "OK",
+        "info": {
+            **info
+        }
+    }
 
     return JsonResponse(response)
