@@ -141,7 +141,7 @@
                         {% for tag in tags_needing_review %}
                             <li class="d-flex px-2">
                                 <div class="flex-fill"><a href="{% url 'drill:start_study_session_tag' tag.name %}">{{ tag.name }}</a></div>
-                                <div class="text-info">{{ tag.last_reviewed|date:"F j, Y"|default:"Never" }}</div>
+                                <div class="text-info text-right">{{ tag.last_reviewed|date:"F j, Y"|default:"Never" }}</div>
                             </li>
                          {% empty %}
                             <div class="text-success text-center">Nothing to learn</div>

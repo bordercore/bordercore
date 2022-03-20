@@ -49,7 +49,7 @@
                             {% if state_name != 'New' %}
                                 <li class="d-flex">
                                     <div class="flex-fill font-weight-bold">Last reviewed</div>
-                                    <div class="text-info">{{ question.last_reviewed|date:"F j, Y"|default:"Never" }}</div>
+                                    <div class="text-info text-right">{{ question.last_reviewed|date:"F j, Y"|default:"Never" }}</div>
                                 </li>
                             {% endif %}
                             <li class="d-flex">
@@ -190,16 +190,16 @@
 
         window.MathJax = {
             tex: {
-                inlineMath: [ ["\\(","\\)"], ["$$", "$$"] ],
-                displayMath: [ ["\\[","\\]"] ],
+                inlineMath: [["\\(", "\\)"], ["$$", "$$"]],
+                displayMath: [["\\[", "\\]"]],
                 processEscapes: true,
-                processEnvironments: true
+                processEnvironments: true,
             },
         };
 
         new Vue({
             el: "#vue-nav",
-            name: "Nav"
+            name: "Nav",
         });
 
         new Vue({
@@ -207,7 +207,15 @@
             data() {
                 return {
                     is_favorite: {{ question.is_favorite|yesno:"true,false" }},
-                }
+                };
+            },
+            computed: {
+                heartClass: function() {
+                    return this.is_favorite ? "favorite" : "";
+                },
+                toolTip: function() {
+                    return this.is_favorite ? "Remove this as a favorite" : "Set this as a favorite";
+                },
             },
             methods: {
                 onClick() {
@@ -217,26 +225,18 @@
                         "{% url "drill:is_favorite_mutate" %}",
                         {
                             "question_uuid": "{{ question.uuid }}",
-                            "mutation": this.is_favorite ? "add" : "delete"
+                            "mutation": this.is_favorite ? "add" : "delete",
                         },
                         (response) => {},
-                        ""
+                        "",
                     );
                 },
                 getQuestion() {
-                    return markdown.render("{{ question.question|escapejs }}")
+                    return markdown.render("{{ question.question|escapejs }}");
                 },
                 getAnswer() {
-                    return markdown.render("{{ question.answer|escapejs }}")
+                    return markdown.render("{{ question.answer|escapejs }}");
                 },
-            },
-            computed: {
-                heartClass: function() {
-                    return this.is_favorite ? "favorite" : ""
-                },
-                toolTip: function() {
-                    return this.is_favorite ? "Remove this as a favorite" : "Set this as a favorite"
-                }
             },
 
         });
