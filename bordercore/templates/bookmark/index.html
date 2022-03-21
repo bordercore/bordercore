@@ -121,7 +121,7 @@
 
             <div class="card-grid ml-2">
 
-                <bookmark-list inline-template @paginate="paginate" @get-page="getPage" ref="bookmarkList">
+                <bookmark-list inline-template @get-page="getPage" ref="bookmarkList">
                     <div class="row">
                         <div class="col-lg-12">
                             <table id="bookmark-list" class="w-100">
@@ -179,7 +179,7 @@
 
                 <div class="d-flex justify-content-center">
 
-                    <pagination class="ml-3 mt-3" inline-template :pagination="pagination" @get-page="getPage" v-cloak>
+                    <pagination class="ml-3 mt-3" inline-template @get-page="getPage" ref="paginator" v-cloak>
                         <div class="row" v-if="pagination.num_pages > 1">
                             <nav aria-label="Page navigation">
                                 <ul class="pagination">
@@ -388,26 +388,23 @@
                                  bookmarks.push(bookmark);
                              }
 
+                             self.$store.state.searchTerm = searchTerm;
+                             self.bookmarkList = bookmarks;
+                             self.$parent.$refs.paginator.pagination = response.data.pagination;
+
                              if (searchTag !== null) {
                                  // Only update the tagFilter here, *after* we have a new set of
                                  // updated bookmarks that's appropriate for this tagFilter
                                  self.$store.state.selectedTagName = searchTag;
-
-                                 // Clear any timeouts to prevent the list from refreshing
-                                 clearTimeout(self.$store.state.intervalId);
                              } else if (searchTerm !== null) {
                                  self.$store.state.selectedTagName = null;
                              } else {
                                  self.$store.state.selectedTagName = "Untagged";
-                                 self.$store.state.intervalId = window.setTimeout(self.getBookmarkList, 60000, {pageNumber: 1});
+
+                                 if (self.$parent.$refs.paginator.pagination === "" || self.$parent.$refs.paginator.pagination.page_number === 1) {
+                                     self.$store.state.intervalId = window.setTimeout(self.getBookmarkList, 60000, {pageNumber: pageNumber});
+                                 }
                              }
-
-                             self.$store.state.searchTerm = searchTerm;
-
-                             self.bookmarkList = bookmarks;
-
-                             self.$emit("paginate", response.data.pagination);
-
                          })
                          .catch(function (error) {
                              console.log("Error getting new bookmarks list: " + error);
@@ -538,8 +535,10 @@
         };
 
         const Pagination = {
-            props: {
-                pagination: ""
+            data() {
+                return {
+                    pagination: ""
+                };
             }
         }
 
@@ -554,28 +553,20 @@
             },
             data() {
                 return {
-                    pagination: "",
-                    pageNumber: 1,
                     show: false,
                     right: true,
                 }
             },
             methods: {
                 getPage(pageNumber) {
-                    this.pageNumber = pageNumber;
+                    clearTimeout(this.$store.state.intervalId);
                     this.$refs.bookmarkList.getBookmarkList({pageNumber: pageNumber});
-                },
-                getPage(pageNumber) {
-                    EventBus.$emit("get-page", pageNumber);
                 },
                 getPinnedMenuItem() {
                     return !this.filteredTagIsPinned() ? "Pin" : "Unpin";
                 },
                 onTermSearch(searchTerm) {
                     this.$refs.bookmarkList.getBookmarkList({searchTerm: searchTerm});
-                },
-                paginate(payload) {
-                    this.pagination = payload;
                 },
                 removeFilter() {
                     this.$store.state.searchTerm = null;
@@ -615,6 +606,9 @@
             mounted() {
 
                 EventBus.$on("search-tag", tagName => {
+                    // Clear any timeouts to prevent the list from refreshing
+                    clearTimeout(this.$store.state.intervalId);
+
                     if (tagName == "Untagged") {
                         this.$refs.bookmarkList.getBookmarkList({pageNumber: 1});
                     } else {
@@ -681,7 +675,6 @@
                 },
                 onSortTags(evt) {
                     if (evt.added) {
-                        console.log("Add tag to bookmark uuid = " + evt.added.element.uuid);
                         return;
                     }
                     tagId = evt.moved.element.id;
