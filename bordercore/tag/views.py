@@ -34,8 +34,12 @@ def unpin(request):
 def search(request):
 
     tag_name = request.GET["query"].lower()
-    doctype = request.GET.get("doctype", "")
     skip_tag_aliases = request.GET.get("skip_tag_aliases", False)
+
+    if "doctype" in request.GET:
+        doctype = [request.GET["doctype"]]
+    else:
+        doctype = []
 
     matches = search_service(request.user, tag_name, doctype, skip_tag_aliases)
 
