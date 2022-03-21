@@ -56,6 +56,7 @@ def search(user, todo_name):
             "name",
             "note",
             "priority",
+            "tags",
             "url",
             "uuid"
         ]
@@ -69,6 +70,7 @@ def search(user, todo_name):
             "name": x["_source"]["name"],
             "note": x["_source"]["note"],
             "priority": x["_source"]["priority"],
+            "tags": x["_source"]["tags"],
             "url": x["_source"]["url"],
             "uuid": x["_source"]["uuid"],
         }

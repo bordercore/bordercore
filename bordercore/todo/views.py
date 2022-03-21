@@ -3,13 +3,12 @@ import re
 from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
 from django.http import Http404, HttpResponseRedirect, JsonResponse
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateformat import format
 from django.utils.decorators import method_decorator
-from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.edit import CreateView, DeleteView
 from django.views.generic.list import ListView
 
 from lib.mixins import FormRequestMixin
@@ -90,6 +89,19 @@ class TodoTaskList(ListView):
 
         return queryset
 
+    def get_field(self, object, field_name):
+
+        if type(object) is dict:
+            if field_name in object:
+                return object[field_name]
+            else:
+                return [] if field_name == "tags" else None
+        else:
+            if field_name == "tags":
+                return [x.name for x in object.tags.all()]
+            else:
+                return getattr(object, field_name)
+
     def get(self, request, *args, **kwargs):
 
         search_term = self.request.GET.get("search", None)
@@ -104,15 +116,15 @@ class TodoTaskList(ListView):
             data = {
                 "manual_order": "",
                 "sort_order": sort_order,
-                "name": re.sub("[\n\r\"]", "", todo.name),
-                "priority": todo.priority,
-                "priority_name": Todo.get_priority_name(todo.priority),
-                "created": format(todo.created, "Y-m-d"),
-                "note": todo.note or "",
-                "url": todo.url,
-                "uuid": todo.uuid,
-                "due_date": todo.due_date,
-                "tags": [{"text": x.name, "display": x.name} for x in todo.tags.all()],
+                "name": re.sub("[\n\r\"]", "", self.get_field(todo, "name")),
+                "priority": self.get_field(todo, "priority"),
+                "priority_name": Todo.get_priority_name(self.get_field(todo, "priority")),
+                "created": format(self.get_field(todo, "created"), "Y-m-d"),
+                "note": self.get_field(todo, "note") or "",
+                "url": self.get_field(todo, "url"),
+                "uuid": self.get_field(todo, "uuid"),
+                "due_date": self.get_field(todo, "due_date"),
+                "tags": [{"text": x, "display": x} for x in self.get_field(todo, "tags")]
             }
 
             info.append(data)
