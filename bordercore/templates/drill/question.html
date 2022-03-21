@@ -204,9 +204,11 @@
 
         new Vue({
             el: "#vue-app",
+            name: "Question",
             data() {
                 return {
                     is_favorite: {{ question.is_favorite|yesno:"true,false" }},
+                    mode: "{% if show_answer %}answer{% else %}question{% endif %}",
                 };
             },
             computed: {
@@ -216,6 +218,27 @@
                 toolTip: function() {
                     return this.is_favorite ? "Remove this as a favorite" : "Set this as a favorite";
                 },
+            },
+            mounted() {
+
+                let self = this;
+
+                window.addEventListener("keydown", function(e) {
+                    if (e.which === 39) { /* Right arrow */
+                        window.location = "{% url 'drill:study' %}";
+                    } else if (e.which === 32 && self.mode === "question") { /* Space */
+                        window.location = "{% url 'drill:answer' question.uuid %}";
+                    } else if (e.which === 69 && self.mode === "answer") { /* G */
+                        window.location = "{% url 'drill:record_response' question.uuid 'easy' %}";
+                    } else if (e.which === 71 && self.mode === "answer") { /* G */
+                        window.location = "{% url 'drill:record_response' question.uuid 'good' %}";
+                    } else if (e.which === 72 && self.mode === "answer") { /* H */
+                        window.location = "{% url 'drill:record_response' question.uuid 'hard' %}";
+                    } else if (e.which === 82 && self.mode === "answer") { /* R */
+                        window.location = "{% url 'drill:record_response' question.uuid 'again' %}";
+                    }
+                });
+
             },
             methods: {
                 onClick() {
@@ -242,5 +265,19 @@
         });
 
     </script>
+
+{% endblock %}
+
+{% block help %}
+
+    <div class="d-none" id="help-text">
+# Keyboard Shortcuts
+- **Space** *-* Show Answer
+- **Right-Arrow** *-* Skip
+- **E** *-* Easy
+- **G** *-* Good
+- **H** *-* Hard
+- **R** *-* Reset Question
+    </div>
 
 {% endblock %}
