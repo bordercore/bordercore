@@ -189,6 +189,11 @@ def test_song_in_s3_exist_on_filesystem():
     def sanitize_filename(name):
         return name.replace("/", "-")
 
+    song_cache = {}
+    songs = Song.objects.all().select_related("artist", "album")
+    for song in songs:
+        song_cache[str(song.uuid)] = song
+
     s3_resource = boto3.resource("s3")
 
     paginator = s3_resource.meta.client.get_paginator("list_objects")
@@ -198,17 +203,17 @@ def test_song_in_s3_exist_on_filesystem():
         for key in page["Contents"]:
             match = re.search(r"^songs/(.+)", str(key["Key"]))
             if match:
-                song = Song.objects.get(uuid=match.group(1))
-                first_letter_dir = re.sub(r"\W+", "", song.artist.name).lower()[0]
-                if song.album:
-                    track_number = song.track
-                    if len(str(song.track)) == 1:
-                        track_number = f"0{song.track}"
-                    if song.album.compilation:
-                        path = f"/home/media/music/v/Various/{song.album.title}/{track_number} - {song.title}.mp3"
+                uuid = match.group(1)
+                first_letter_dir = re.sub(r"\W+", "", song_cache[uuid].artist.name).lower()[0]
+                if song_cache[uuid].album:
+                    track_number = song_cache[uuid].track
+                    if len(str(song_cache[uuid].track)) == 1:
+                        track_number = f"0{song_cache[uuid].track}"
+                    if song_cache[uuid].album.compilation:
+                        path = f"/home/media/music/v/Various/{song_cache[uuid].album.title}/{track_number} - {song_cache[uuid].title}.mp3"
                     else:
-                        path = f"/home/media/music/{first_letter_dir}/{sanitize_filename(song.artist.name)}/{sanitize_filename(song.album.title)}/{track_number} - {sanitize_filename(song.title)}.mp3"
+                        path = f"/home/media/music/{first_letter_dir}/{sanitize_filename(song_cache[uuid].artist.name)}/{sanitize_filename(song_cache[uuid].album.title)}/{track_number} - {sanitize_filename(song_cache[uuid].title)}.mp3"
                 else:
-                    path = f"/home/media/music/{first_letter_dir}/{sanitize_filename(song.artist.name)}/{sanitize_filename(song.title)}.mp3"
+                    path = f"/home/media/music/{first_letter_dir}/{sanitize_filename(song_cache[uuid].artist.name)}/{sanitize_filename(song_cache[uuid].title)}.mp3"
 
-                assert Path(path).is_file(), f"Song in S3 not found on filesystem: {song.uuid} {path}"
+                assert Path(path).is_file(), f"Song_Cache[Uuid] in S3 not found on filesystem: {song_cache[uuid].uuid} {path}"
