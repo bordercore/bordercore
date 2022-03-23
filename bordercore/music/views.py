@@ -4,7 +4,6 @@ import os
 import re
 import uuid
 from datetime import timedelta
-from pathlib import Path
 
 import boto3
 import humanize
@@ -439,34 +438,6 @@ class RecentSongsListView(ListView):
         }
 
         return JsonResponse(response)
-
-
-def get_song_location(song):
-
-    song_title = song.title.replace("/", "FORWARDSLASH")
-
-    # If the song is associated with an album, look for it in the album's directory
-    if song.album:
-        if song.album.compilation:
-            artist_name = "Various"
-        else:
-            artist_name = song.artist
-        tracknumber = str(song.track)
-        if len(tracknumber) == 1:
-            tracknumber = "0" + tracknumber
-        file_info = {"url": "/music/{}/{}/{} - {}.mp3".format(artist_name, song.album.title, tracknumber, song_title)}
-    else:
-        file_info = {"url": "/music/{}/{}.mp3".format(song.artist, song_title)}
-
-        if not Path("/home/media/{}".format(file_info["url"])).is_file():
-            # Check this type of file path: /home/media/mp3/Primitives - Crash.mp3
-            file_info = {"url": "/mp3/{} - {}.mp3".format(song.artist, song_title)}
-
-            if not Path("/home/media/{}".format(file_info["url"])).is_file():
-                # Check this type of file path: /home/media/mp3/m/Motley Crue - She's Got Looks That Kill.mp3
-                file_info = {"url": "/mp3/{}/{} - {}.mp3".format(song.artist[0].lower(), song.artist, song_title)}
-
-    return file_info
 
 
 @login_required
