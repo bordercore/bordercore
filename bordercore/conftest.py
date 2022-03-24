@@ -476,6 +476,7 @@ def question(tag, bookmark):
 
     question_0.tags.add(tag[0])
     question_0.tags.add(tag[1])
+    question_0.save()
 
     so = SortOrderQuestionBookmark(question=question_0, bookmark=bookmark[0])
     so.save()
