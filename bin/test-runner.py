@@ -58,7 +58,7 @@ def parse_coverage_report():
     data.save()
 
 
-def run_test(test, coverage_count, verbose=False):
+def run_test(test, verbose=False):
 
     if test == "unit":
 
@@ -75,15 +75,6 @@ def run_test(test, coverage_count, verbose=False):
             ]
         }
 
-        if coverage_count:
-            args["command"].extend(
-                [
-                    f"--cov={os.environ.get('BORDERCORE_HOME')}",
-                    f"--cov-report=xml:{COVERAGE_REPORT}",
-                    f"--cov-config={os.environ.get('BORDERCORE_HOME')}/../.coveragerc"
-                ]
-            )
-
     elif test == "coverage":
 
         args = {
@@ -94,9 +85,11 @@ def run_test(test, coverage_count, verbose=False):
                 "5",
                 "-m",
                 "not data_quality",
+                "-v",
                 f"{os.environ.get('BORDERCORE_HOME')}/",
                 f"--cov={os.environ.get('BORDERCORE_HOME')}",
                 "--cov-report=html",
+                f"--cov-report=xml:{COVERAGE_REPORT}",
                 f"--cov-config={os.environ.get('BORDERCORE_HOME')}/../.coveragerc"
             ]
         }
@@ -155,7 +148,7 @@ def run_test(test, coverage_count, verbose=False):
 
     parse_test_report(args["name"], str(test_output))
 
-    if test == "unit" and coverage_count:
+    if test == "coverage":
         parse_coverage_report()
 
     return return_code
@@ -169,15 +162,11 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("-t", "--test", help="The test to run.", required=True)
-    parser.add_argument("-c", "--coverage-count", help="Calculate test coverage count.", action="store_true")
     parser.add_argument("-v", "--verbose", help="Increase verbosity.", action="store_true")
     args = parser.parse_args()
 
     test = args.test
     verbose = args.verbose
 
-    if args.coverage_count and "unit" not in test:
-        raise ValueError("You must specify test type 'unit' for test coverage counts")
-
-    return_code = run_test(test, args.coverage_count, verbose)
+    return_code = run_test(test, verbose)
     sys.exit(return_code)

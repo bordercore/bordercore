@@ -42,7 +42,7 @@ test_data:
 
 test_unit:
 	ELASTICSEARCH_INDEX=$(ELASTICSEARCH_INDEX_TEST) ELASTICSEARCH_ENDPOINT=$(ELASTICSEARCH_ENDPOINT_TEST) \
-	python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test unit --coverage-count
+	python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test unit
 
 test_wumpus:
 	python3 $(BORDERCORE_HOME)/../bin/test-runner.py --test wumpus
