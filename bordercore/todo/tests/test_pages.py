@@ -23,8 +23,9 @@ def test_todo(todo, login, live_server, browser, settings):
 
     assert page.title_value() == "Bordercore :: Bordercore"
 
-    # There should be initially one medium task visible
-    assert page.todo_count() == 1
+
+    # There should be initially three medium tasks visible
+    assert page.todo_count() == 3
 
     # Select 'Medium' to toggle the selection and reveal all tasks
     medium_priority_filter = page.medium_priority_filter()
@@ -33,14 +34,14 @@ def test_todo(todo, login, live_server, browser, settings):
     # Wait for the browser to refresh after the click
     time.sleep(1)
 
-    # There should now be three todo tasks
-    assert page.todo_count() == 3
+    # There should now be one todo task visible
+    assert page.todo_count() == 1
 
     # Get the first todo task text
     assert page.todo_task_text() == "task_2"
 
     # Sort by priority to find the most important task
-    assert page.sort_by_priority() == "task_1"
+    assert page.sort_by_priority() == "task_2"
 
 
 @pytest.mark.parametrize("login", [reverse("todo:list")], indirect=True)
