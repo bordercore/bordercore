@@ -53,8 +53,8 @@ class TodoTaskList(ListView):
     def get_queryset(self):
 
         priority = self.request.GET.get("priority", None)
-        if priority is not None and priority != "":
-            self.request.session["todo_filter_priority"] = int(priority)
+        if priority is not None:
+            self.request.session["todo_filter_priority"] = priority
 
         time = self.request.GET.get("time", None)
         if time is not None:

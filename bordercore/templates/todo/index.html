@@ -146,28 +146,25 @@
 
         Vue.directive("sortable", {
             update(el, binding, vnode) {
-
-                const sort_items = vnode.data.attrs.sorting;
-                let options = {
-                    handle: ".drag-handle"
+                const sortItems = vnode.data.attrs.sorting;
+                const options = {
+                    handle: ".drag-handle",
                 };
 
-                if (sort_items) {
-
+                if (sortItems) {
                     options.onStart = function sortableStart(evt) {
                         // Disable the table's hover feature will we're dragging and dropping
                         table.hover = false;
-                    }
+                    };
 
                     options.onUpdate = function sortableUpdate(evt) {
-                        const deleted = sort_items.splice(evt.oldIndex, 1);
-                        sort_items.splice(evt.newIndex, 0, deleted[0]);
+                        const deleted = sortItems.splice(evt.oldIndex, 1);
+                        sortItems.splice(evt.newIndex, 0, deleted[0]);
                     };
 
                     options.onEnd = function sortableEnd(evt) {
                         table.hover = true;
                         if (evt.newIndex !== evt.oldIndex) {
-
                             const bodyFormData = new URLSearchParams();
                             bodyFormData.append("todo_uuid", evt.item.dataset.pk);
                             bodyFormData.append("position", evt.newIndex + 1);
@@ -178,11 +175,11 @@
                             // which is captured inside the Vue app elsewhere.
                             EventBus.$emit("todo-sort", bodyFormData);
                         }
-                    }
+                    };
                 }
 
                 sortable = Sortable.create(document.querySelector("tbody"), options);
-            }
+            },
         });
 
         const table = new Vue({
@@ -191,7 +188,7 @@
             data() {
                 return {
                     filterTag: "{{ filter.todo_filter_tag|default:'' }}",
-                    filterPriority: {{ filter.todo_filter_priority|default:2 }},
+                    filterPriority: "{{ filter.todo_filter_priority|default:'' }}",
                     filterTime: "{{ filter.todo_filter_time|default:'' }}",
                     filterSearch: "",
                     filterCache: {},
@@ -211,7 +208,7 @@
                         {
                             key: "priority",
                             sortable: true,
-                            thClass: "todo-col-priority"
+                            thClass: "todo-col-priority",
                         },
                         {
                             key: "created",
@@ -219,21 +216,46 @@
                             class: "text-nowrap",
                             sortable: true,
                             sortDirection: "desc",
-                            thClass: "todo-col-date"
+                            thClass: "todo-col-date",
                         },
                         {
                             key: "uuid",
                             label: "",
                             tdClass: "text-center align-top",
-                            thClass: "col-action"
-                        }
+                            thClass: "col-action",
+                        },
                     ],
                     filterPriorityOptions: null,
                     filterTimeOptions: null,
                     show: false,
                     right: true,
-                    hover: true
-                }
+                    hover: true,
+                };
+            },
+            computed: {
+                isFiltered() {
+                    return this.filterPriority !== "" || this.filterTime !== "";
+                },
+            },
+            mounted() {
+                EventBus.$on("get-todo-list", (payload) => {
+                    this.getTodoList();
+                });
+
+                EventBus.$on("todo-sort", (bodyFormData) => {
+                    bodyFormData.append("tag", this.filterTag);
+                    axios("{% url 'todo:sort' %}", {
+                        method: "POST",
+                        data: bodyFormData,
+                    })
+                        .then((response) => {
+                            console.log("Success");
+                        }, (error) => {
+                            console.log(error);
+                        });
+                });
+
+                this.getTodoList();
             },
             methods: {
                 getTodoList() {
@@ -249,13 +271,12 @@
                             this.filterPriorityOptions = response.data.priority_counts;
                             this.filterTimeOptions = response.data.created_counts;
                         },
-                        "Error todo list"
+                        "Error todo list",
                     );
                 },
                 sortCompare(aRow, bRow, key, sortDesc) {
-
-                    let a = aRow[key]
-                    let b = bRow[key]
+                    let a = aRow[key];
+                    let b = bRow[key];
 
                     if (key === "manualSorting") {
                         a = aRow["sort_order"];
@@ -263,7 +284,6 @@
                     }
 
                     return a < b ? -1 : a > b ? 1 : 0;
-
                 },
                 sortChanged(evt) {
                     if (evt.sortBy === "") {
@@ -281,15 +301,13 @@
                     evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
                 },
                 onClickDelete(item, index, evt) {
-
-                    let selectedUuid = item;
-                    axios.delete("{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', selectedUuid))
+                    const selectedUuid = item;
+                    axios.delete("{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", selectedUuid))
                          .then((response) => {
-
                              this.$bvToast.toast("Todo task deleted", {
                                  title: "Info",
-                                 variant: "primary"
-                             })
+                                 variant: "primary",
+                             });
 
                              EventBus.$emit("get-todo-list");
 
@@ -297,7 +315,6 @@
                          }, (error) => {
                              console.log(error);
                          });
-
                 },
                 onClickTag(evt) {
                     if (this.filterTag == evt.currentTarget.dataset.tag) {
@@ -325,17 +342,17 @@
                 },
                 getTagClass(tag) {
                     if (tag === this.filterTag) {
-                        return "selected rounded-sm"
+                        return "selected rounded-sm";
                     }
                 },
                 getPriorityClass(priority) {
                     if (priority === parseInt(this.filterPriority)) {
-                        return "selected rounded-sm"
+                        return "selected rounded-sm";
                     }
                 },
                 getTimeClass(created) {
                     if (created === this.filterTime) {
-                        return "selected rounded-sm"
+                        return "selected rounded-sm";
                     }
                 },
                 onChange(event) {
@@ -349,11 +366,11 @@
                     if (this.filterSearch === "") {
                         this.filterPriority = this.filterCache.priority;
                         this.filterTime = this.filterCache.time;
-                        this.filterCache = {}
+                        this.filterCache = {};
                     } else {
                         this.filterCache = {
                             "priority": this.filterPriority,
-                            "time": this.filterTime
+                            "time": this.filterTime,
                         };
                         this.filterPriority = "";
                         this.filterTime = "";
@@ -380,7 +397,7 @@
                         {
                             "display": this.filterTag,
                             "text": this.filterTag,
-                        }
+                        },
                     ];
 
                     this.$refs.updateTodo.todoInfo = {
@@ -390,45 +407,15 @@
                     };
                     if (this.filterTag) {
                         EventBus.$emit(
-                            "addTags", initialTagList
+                            "addTags", initialTagList,
                         );
                     }
                     $("#modalUpdateTodo").modal("show");
                     setTimeout( () => {
                         document.getElementById("id_name").focus();
                     }, 500);
-                }
+                },
             },
-            computed: {
-                isFiltered() {
-                    return this.filterPriority !== "" || this.filterTime !== "";
-                }
-            },
-            mounted() {
-
-                EventBus.$on("get-todo-list", payload => {
-                    this.getTodoList();
-                });
-
-                EventBus.$on("todo-sort", bodyFormData => {
-
-                    bodyFormData.append("tag", this.filterTag);
-                    axios("{% url 'todo:sort' %}", {
-                        method: "POST",
-                        data: bodyFormData,
-                    })
-                        .then((response) => {
-                            console.log("Success");
-                        }, (error) => {
-                            console.log(error);
-                        });
-                });
-
-                var el = document.querySelector("tbody");
-
-                this.getTodoList();
-
-            }
         });
 
     </script>
