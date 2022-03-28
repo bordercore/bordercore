@@ -19,6 +19,9 @@ $gray-900: #212529;
 // Import CSS for perfect-scrollbar
 @import "../../css/perfect-scrollbar.css";
 
+// Import CSS for Prism syntax highlighter
+@import "../../../node_modules/prismjs/themes/prism-okaidia.css";
+
 // Custom colors for this theme
 $bg-color: #fff;
 $bg-dark: #d3e8f4;

@@ -46,6 +46,7 @@ import {library} from "@fortawesome/fontawesome-svg-core";
 import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faExchangeAlt, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faChevronLeft, faChevronRight, faClone, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faFileAlt, faFileImport, faHeart, faHome, faImage, faImages, faInfo, faGraduationCap, faLink, faList, faLock, faMusic, faNewspaper, faObjectGroup, faPencilAlt, faPlus, faQuestion, faRandom, faRunning, faSearch, faSignOutAlt, faSquareRootAlt, faStickyNote, faTags, faTasks, faThumbtack, faTimes, faTimesCircle, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {faAws} from "@fortawesome/free-brands-svg-icons";
+import {faPython} from "@fortawesome/free-brands-svg-icons";
 library.add(faAlignLeft);
 library.add(faAngleDown);
 library.add(faAngleRight);
@@ -83,6 +84,7 @@ library.add(faNewspaper);
 library.add(faObjectGroup);
 library.add(faPencilAlt);
 library.add(faPlus);
+library.add(faPython);
 library.add(faQuestion);
 library.add(faRandom);
 library.add(faRunning);
@@ -194,7 +196,6 @@ Vue.component("DropDownMenu", DropDownMenu);
 window.DropDownMenu = DropDownMenu;
 
 import VueSidebarMenu from "vue-sidebar-menu";
-import "vue-sidebar-menu/dist/vue-sidebar-menu.css";
 Vue.use(VueSidebarMenu);
 
 import AddToPlaylist from "./vue/music/AddToPlaylist.vue";
@@ -239,6 +240,9 @@ import Pagination from "./vue/common/Pagination.vue";
 Vue.component("Pagination", Pagination);
 window.Pagination = Pagination;
 
+import PythonConsole from "./vue/common/PythonConsole.vue";
+window.PythonConsole = PythonConsole;
+
 import {BarController, BarElement, Chart, CategoryScale, LinearScale, Title} from "chart.js";
 window.Chart = Chart;
 Chart.register(
@@ -251,6 +255,8 @@ Chart.register(
 
 import Rainbow from "rainbowvis.js";
 window.Rainbow = Rainbow;
+
+import Prism from "prismjs";
 
 // Wait 10 seconds after selecting a song to play
 //  for it to be marked as "listened to".

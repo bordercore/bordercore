@@ -176,15 +176,15 @@ export function getFormattedDate(date, monthFormat="short") {
  */
 export function getMarkdown() {
     const md = markdownit({
-        highlight: function(str, lang) {
-            if (lang && hljs.getLanguage(lang)) {
-                try {
-                    return hljs.highlight(str, {language: lang}).value;
-                } catch (__) {}
-            }
+        // highlight: function(str, lang) {
+        //     if (lang && hljs.getLanguage(lang)) {
+        //         try {
+        //             return hljs.highlight(str, {language: lang}).value;
+        //         } catch (__) {}
+        //     }
 
-            return ""; // use external default escaping
-        },
+        //     return ""; // use external default escaping
+        // },
     });
     return md;
 }
