@@ -169,22 +169,3 @@ export function getFormattedDate(date, monthFormat="short") {
     const options = {year: "numeric", month: monthFormat, day: "numeric"};
     return formattedDate.toLocaleDateString("en-US", options);
 }
-
-/**
- * Return a "markdownit" object for rendering markdown
- * @return {string} The "markdownit" object.
- */
-export function getMarkdown() {
-    const md = markdownit({
-        // highlight: function(str, lang) {
-        //     if (lang && hljs.getLanguage(lang)) {
-        //         try {
-        //             return hljs.highlight(str, {language: lang}).value;
-        //         } catch (__) {}
-        //     }
-
-        //     return ""; // use external default escaping
-        // },
-    });
-    return md;
-}

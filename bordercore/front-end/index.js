@@ -106,11 +106,8 @@ window.format = format;
 import EasyMDE from "easymde";
 window.EasyMDE = EasyMDE;
 
-import hljs from "highlight.js";
-window.hljs = hljs;
-
 import markdownit from "markdown-it";
-window.markdownit = markdownit;
+window.markdown = markdownit();
 
 import {v4 as uuidv4} from "uuid";
 window.uuidv4 = uuidv4;
@@ -120,12 +117,11 @@ import {
 } from "http-status-codes";
 window.getReasonPhrase = getReasonPhrase;
 
-import {doGet, doPost, doPut, getFormattedDate, getMarkdown} from "./util.js";
+import {doGet, doPost, doPut, getFormattedDate} from "./util.js";
 window.doGet = doGet;
 window.doPost = doPost;
 window.doPut = doPut;
 window.getFormattedDate = getFormattedDate;
-window.markdown = getMarkdown();
 
 import EditableTextArea from "./vue/common/EditableTextArea.vue";
 Vue.component("EditableTextArea", EditableTextArea);
