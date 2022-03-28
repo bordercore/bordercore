@@ -48,6 +48,7 @@ class BlobSerializer(serializers.ModelSerializer):
     uuid = serializers.UUIDField()
     file = BlobFileField(read_only=True)
     metadata = BlobMetaDataField(many=True, read_only=True)
+    sha1sum = serializers.CharField(required=False)
     tags = BlobTagsField(queryset=Tag.objects.all(), many=True)
 
     class Meta:
