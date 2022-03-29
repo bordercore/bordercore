@@ -4,7 +4,7 @@
 
 {% block nav %}
 
-    <div class="d-flex mb-3" id="vue-nav">
+    <div class="d-flex mb-3 right-column" id="vue-nav">
 
         <div class="mr-auto align-self-center">
             <ul class="breadcrumb mb-0 pt-0 pb-0">
@@ -13,14 +13,12 @@
             </ul>
         </div>
 
-        <div class="right-column">
-            <drop-down-menu
-                ref="dropDownMenu"
-                :links="questionDetailMenuItems"
-                class="dropdownmenu ml-5"
-            >
-            </drop-down-menu>
-
+        <div class="d-flex align-items-center mr-3">
+            <font-awesome-icon icon="heart" class="icon-hover glow" :class="favoriteClass" @click="onClickFavorite" data-toggle="tooltip" data-placement="bottom" :title="toolTip"></font-awesome-icon>
+            <font-awesome-icon :icon="['fab', 'python']" class="glow text-info ml-3" @click="showPythonConsole" data-toggle="tooltip" data-placement="bottom" title="Open Python Console"></font-awesome-icon>
+            <a href="{% if object.tags.all %}{% url 'drill:add_with_tag' object.tags.all.0 %}{% else %}{% url 'drill:add' %}{% endif %}">
+                <font-awesome-icon icon="plus" class="glow text-info ml-3" data-toggle="tooltip" data-placement="bottom" title="Add a Question"></font-awesome-icon>
+            </a>
         </div>
 
     </div>
@@ -124,9 +122,6 @@
                     <div class="d-flex">
                         <h3 class="drill-text table-borders markdown mw-100 w-100" v-html="getQuestion()">
                         </h3>
-                        <div class="ml-auto">
-                            <font-awesome-icon icon="heart" class="icon-hover" :class="heartClass" @click="onClick" data-toggle="tooltip" data-placement="bottom" :title="toolTip"></font-awesome-icon>
-                        </div>
                     </div>
 
                     {% if question.tags.all %}
@@ -222,24 +217,31 @@
             store,
             data() {
                 return {
-                    questionDetailMenuItems: [
-                        {
-                            id: uuidv4(),
-                            title: "Add Question",
-                            url: {% if object.tags.all %}"{% url 'drill:add_with_tag' object.tags.all.0 %}{% else %}{% url 'drill:add' %}{% endif %}",
-                            icon: "plus",
-                        },
-                        {
-                            id: uuidv4(),
-                            title: "Python Console",
-                            url: "#",
-                            clickHandler: this.showPythonConsole,
-                            icon: [ "fab", "python" ],
-                        }
-                    ],
+                    is_favorite: {{ question.is_favorite|yesno:"true,false" }},
                 }
             },
+            computed: {
+                favoriteClass: function() {
+                    return this.is_favorite ? "favorite" : "text-info";
+                },
+                toolTip: function() {
+                    return this.is_favorite ? "Remove this as a favorite" : "Add this as a favorite";
+                },
+            },
             methods: {
+                onClickFavorite() {
+                    this.is_favorite = !this.is_favorite;
+                    doPost(
+                        this,
+                        "{% url "drill:is_favorite_mutate" %}",
+                        {
+                            "question_uuid": "{{ question.uuid }}",
+                            "mutation": this.is_favorite ? "add" : "delete",
+                        },
+                        (response) => {},
+                        "",
+                    );
+                },
                 showPythonConsole() {
                     this.$store.state.showPythonConsole = true;
                     EventBus.$emit("show-python-console", this.$store.state.showPythonConsole);
@@ -256,17 +258,8 @@
             },
             data() {
                 return {
-                    is_favorite: {{ question.is_favorite|yesno:"true,false" }},
                     mode: "{% if show_answer %}answer{% else %}question{% endif %}",
                 };
-            },
-            computed: {
-                heartClass: function() {
-                    return this.is_favorite ? "favorite" : "";
-                },
-                toolTip: function() {
-                    return this.is_favorite ? "Remove this as a favorite" : "Set this as a favorite";
-                },
             },
             mounted() {
 
@@ -302,19 +295,6 @@
 
             },
             methods: {
-                onClick() {
-                    this.is_favorite = !this.is_favorite;
-                    doPost(
-                        this,
-                        "{% url "drill:is_favorite_mutate" %}",
-                        {
-                            "question_uuid": "{{ question.uuid }}",
-                            "mutation": this.is_favorite ? "add" : "delete",
-                        },
-                        (response) => {},
-                        "",
-                    );
-                },
                 getQuestion() {
                     return markdown.render("{{ question.question|escapejs }}");
                 },
