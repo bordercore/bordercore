@@ -56,15 +56,28 @@ class Collection(TimeStampedModel):
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
 
-    def get_blob(self, position, randomize=False):
+    def get_blob(self, position, direction, randomize=False, tag_name=None):
 
-        so = SortOrderCollectionBlob.objects.filter(collection=self).select_related("blob").select_related("blob__user")
+        so = SortOrderCollectionBlob.objects.filter(
+            collection=self
+        ).select_related(
+            "blob"
+        ).select_related(
+            "blob__user"
+        )
+
+        if tag_name:
+            so = so.filter(blob__tags__name=tag_name)
+
+        count = len(so)
 
         if randomize:
             blob = so.order_by("?")[0]
         else:
-            if (position >= len(self.blobs.all()) or position < 0):
-                return {}
+            if direction == "next":
+                position = 0 if position == count - 1 else position + 1
+            elif direction == "previous":
+                position = count - 1 if position == 0 else position - 1
             blob = so[position]
 
         content_type = None
@@ -75,7 +88,8 @@ class Collection(TimeStampedModel):
 
         return {
             "url": f"{settings.MEDIA_URL}blobs/{blob.blob.get_url()}",
-            "content_type": content_type
+            "content_type": content_type,
+            "index": position
         }
 
     def get_blob_list(self, request=None, limit=BLOB_COUNT_PER_PAGE, page_number=1):

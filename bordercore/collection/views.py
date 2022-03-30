@@ -1,9 +1,7 @@
 import datetime
 import hashlib
-import json
 from io import BytesIO
 
-from botocore.errorfactory import ClientError
 from rest_framework.decorators import api_view
 
 from django.conf import settings
@@ -79,10 +77,6 @@ class CollectionDetailView(FormRequestMixin, FormMixin, DetailView):
         if blob_info["blob_list"]:
             context["blob_list"] = blob_info["blob_list"]
             context["paginator_info"] = blob_info["paginator"]
-            try:
-                context["first_blob_info"] = json.dumps(self.object.get_blob(0, False))
-            except ClientError:
-                pass
 
         context["tags"] = [
             {
@@ -96,6 +90,7 @@ class CollectionDetailView(FormRequestMixin, FormMixin, DetailView):
         #  along with their total counts
         context["blob_tags"] = [
             {
+                "id": x.id,
                 "tag": x.name,
                 "blob_count": x.blob_count
             } for x in Tag.objects.filter(
@@ -211,12 +206,15 @@ def sort_collection(request):
 
 
 @login_required
-def get_blob(request, collection_uuid, blob_position):
+def get_blob(request, collection_uuid):
 
     collection = Collection.objects.get(uuid=collection_uuid)
-
+    direction = request.GET.get("direction", "next")
+    blob_position = int(request.GET.get("position", 0))
+    tag_name = request.GET.get("tag", None)
     randomize = True if request.GET.get("randomize", "") == "true" else False
-    return JsonResponse(collection.get_blob(blob_position, randomize))
+
+    return JsonResponse(collection.get_blob(blob_position, direction, randomize, tag_name))
 
 
 @api_view(["GET"])

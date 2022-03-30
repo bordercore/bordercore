@@ -31,7 +31,7 @@ urlpatterns = [
         name="delete"
     ),
     path(
-        route="get_blob/<uuid:collection_uuid>/<int:blob_position>/",
+        route="get_blob/<uuid:collection_uuid>/",
         view=views.get_blob,
         name="get_blob"
     ),

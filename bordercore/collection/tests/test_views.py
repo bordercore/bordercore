@@ -64,10 +64,9 @@ def test_get_blob(auto_login_user, collection):
     _, client = auto_login_user()
 
     url = urls.reverse("collection:get_blob", kwargs={
-        "collection_uuid": collection[0].uuid,
-        "blob_position": 1,
+        "collection_uuid": collection[0].uuid
     })
-    resp = client.get(url)
+    resp = client.get(f"{url}?position=1")
 
     assert resp.status_code == 200
 

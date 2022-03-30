@@ -40,8 +40,8 @@ def test_get_tags(collection):
 
 def test_get_blob(collection):
 
-    assert collection[0].get_blob(-1) == {}
-    assert collection[0].get_blob(3) == {}
+    next_blob = collection[0].get_blob(-1, "next")
+    assert next_blob["index"] == 0
 
 
 def test_get_blob_list(collection, blob_image_factory, blob_pdf_factory):

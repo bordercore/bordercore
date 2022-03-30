@@ -240,39 +240,64 @@
                     </div>
 
                     <div class="modal-body">
-                        Slide Show Type:
 
-                        <div class="form-group row mt-3">
-                            <div class="col-lg-12">
-                                <div class="form-check">
-                                    <input v-model="slideShowType" class="form-check-input" type="radio" name="type" value="manual" checked>
-                                    <label class="form-check-label d-flex" for="type">
-                                        Manual
-                                    </label>
+                        <div class="collection-slide-show-section p-3">
+
+                            <div class="header text-primary">
+                                Slide Show Type
+                            </div>
+
+                            <div class="form-group row mt-3">
+                                <div class="col-lg-12">
+                                    <div class="form-check">
+                                        <input v-model="slideShowType" class="form-check-input" type="radio" name="type" value="manual" checked>
+                                        <label class="form-check-label d-flex" for="type">
+                                            Manual
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group row mt-3">
+                                <div class="col-lg-4">
+                                    <div class="form-check">
+                                        <input v-model="slideShowType" class="form-check-input" type="radio" name="type" value="automatic">
+                                        <label class="form-check-label d-flex" for="type">
+                                            Automatic
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-8">
+                                    <select v-model="slideShowInterval" class="form-control" :disabled="slideShowType === 'manual'">
+                                        <option v-for="option in slideShowOptions" :key="option.value" :value="option.value">
+                                            [[ option.display ]]
+                                        </option>
+                                    </select>
+                                    <div class="d-flex flex-column pl-4 mt-2">
+                                        <div>
+                                            Randomize
+                                        </div>
+                                        <input v-model="slideShowRandomize" class="form-check-input" type="checkbox" :disabled="slideShowType === 'manual'" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="form-group row mt-3">
-                            <div class="col-lg-4">
-                                <div class="form-check">
-                                    <input v-model="slideShowType" class="form-check-input" type="radio" name="type" value="automatic">
-                                    <label class="form-check-label d-flex" for="type">
-                                        Automatic
-                                    </label>
-                                </div>
+                        <div class="collection-slide-show-section p-3 mt-3">
+                            <div class="header text-primary">
+                                Options
                             </div>
-                            <div class="col-lg-8">
-                                <select v-model="slideShowInterval" class="form-control">
-                                    <option v-for="option in slideShowOptions" :key="option.value" :value="option.value">
-                                        [[ option.display ]]
-                                    </option>
-                                </select>
-                                <div class="d-flex flex-column pl-4 mt-2">
-                                    <div>
-                                        Randomize
-                                    </div>
-                                    <input v-model="slideShowRandomize" class="form-check-input" type="checkbox" />
+
+                            <div class="form-group row mt-3">
+                                <div class="col-lg-4">
+                                    Tag
+                                </div>
+                                <div class="col-lg-8">
+                                    <select id="tag" class="form-control">
+                                        <option v-for="tag in blobTags" :value="tag.tag">
+                                            [[ tag.tag ]]
+                                        </option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -488,10 +513,8 @@
                             icon: "times"
                         },
                     ],
-                    {% if first_blob_info %}
-                    slideShowImageInfo: {{ first_blob_info|safe }},
-                    {% endif %}
-                    slideShowImageIndex: 0,
+                    slideShowImageInfo: {},
+                    slideShowImageIndex: -1,
                     slideShowType: "manual",
                     slideShowInterval: "60",
                     slideShowRandomize: false,
@@ -538,6 +561,7 @@
                     $("#modalUpdate").modal("show");
                 },
                 onClickSlideShow() {
+                    document.getElementById("tag").value = "";
                     $("#modalSlideShow").modal("show");
                 },
                 startSlideShow() {
@@ -549,23 +573,22 @@
                     // Add a black background
                     document.getElementById("overlay").classList.remove("d-none");
 
+                    this.slideShowImageIndex = -1;
+
                     if (this.slideShowType === "automatic") {
                         this.getSlideShowImage();
                         setInterval( () => {
-                            if (this.slideShowImageIndex === sizeOfCollection - 1) {
-                                this.slideShowImageIndex = 0;
-                            } else {
-                                this.slideShowImageIndex++;
-                            }
                             this.getSlideShowImage();
                         }, parseInt(this.slideShowInterval * 1000 * 60));
                     } else {
-                        this.changeSlideShowImage(this.slideShowImageInfo.url, this.slideShowImageInfo.content_type);
+                        this.getSlideShowImage("next");
                     }
                 },
-                getSlideShowImage() {
-                    axios.get("{% url "collection:get_blob" collection.uuid 666 %}?randomize=".replace(/666/, this.slideShowImageIndex) + this.slideShowRandomize)
+                getSlideShowImage(direction = "next") {
+                    const tag = document.getElementById("tag").value;
+                    axios.get("{% url "collection:get_blob" collection.uuid %}" + `?randomize=${this.slideShowRandomize}&position=${this.slideShowImageIndex}&tag=${tag}&direction=${direction}`)
                          .then(response => {
+                             this.slideShowImageIndex = response.data.index;
                              this.changeSlideShowImage(response.data.url, response.data.content_type);
                          })
                 },
@@ -616,23 +639,11 @@
 
                     if (e.which == 39) { /* Right arrow */
 
-                        if (self.slideShowImageIndex === sizeOfCollection - 1) {
-                            self.slideShowImageIndex = 0;
-                        } else {
-                            self.slideShowImageIndex++;
-                        }
-
-                        self.getSlideShowImage();
+                        self.getSlideShowImage("next");
 
                     } else if (e.which == 37) { /* Left arrow */
 
-                        if (self.slideShowImageIndex === 0) {
-                            self.slideShowImageIndex = sizeOfCollection - 1;
-                        } else {
-                            self.slideShowImageIndex--;
-                        }
-
-                        self.getSlideShowImage();
+                        self.getSlideShowImage("previous");
 
 
                     } else if (e.which == 27) { /* Escape */
