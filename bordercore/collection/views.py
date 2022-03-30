@@ -77,6 +77,8 @@ class CollectionDetailView(FormRequestMixin, FormMixin, DetailView):
         if blob_info["blob_list"]:
             context["blob_list"] = blob_info["blob_list"]
             context["paginator_info"] = blob_info["paginator"]
+        else:
+            context["paginator_info"] = {}
 
         context["tags"] = [
             {
