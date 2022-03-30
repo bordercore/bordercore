@@ -1,5 +1,6 @@
-from rest_framework import viewsets
+from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from django.contrib import messages
 
@@ -62,9 +63,20 @@ class BlobViewSet(viewsets.ModelViewSet):
                 "tags"
             )
 
-    def perform_create(self, serializer):
-        instance = serializer.save()
-        instance.index_blob()
+    def create(self, request, *args, **kwargs):
+        """
+        We need to override this to avoid a "unique_together" constraint
+        violation when creating blobs without a sha1sum. The constraint
+        in question is ("sha1sum", "user").
+        """
+        blob = Blob()
+        serializer = self.serializer_class(blob, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            blob.index_blob()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def perform_update(self, serializer):
         instance = serializer.save()
