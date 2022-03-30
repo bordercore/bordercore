@@ -110,27 +110,11 @@ class CollectionSerializer(serializers.ModelSerializer):
         model = Collection
         fields = ["blobs", "description", "is_private", "name", "tags"]
 
-    def create(self, validated_data):
-        """
-        Override create() so we can add the required
-        user field to the validated data.
-        """
-        validated_data["user_id"] = self.context["request"].user.id
-        return Collection.objects.create(**validated_data)
-
 
 class FeedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feed
         fields = ["homepage", "last_check", "last_response_code", "name", "url"]
-
-    def create(self, validated_data):
-        """
-        Override create() so we can add the required
-        user field to the validated data.
-        """
-        validated_data["user_id"] = self.context["request"].user.id
-        return Feed.objects.create(**validated_data)
 
 
 class FeedItemSerializer(serializers.ModelSerializer):
@@ -199,7 +183,6 @@ class TodoSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
 
-        validated_data["user_id"] = self.context["request"].user.id
         tags = validated_data.pop("tags", None)
 
         # We need to save the task first before adding the m2m

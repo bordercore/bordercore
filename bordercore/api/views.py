@@ -126,7 +126,7 @@ class CollectionViewSet(viewsets.ModelViewSet):
         )
 
     def perform_create(self, serializer):
-        instance = serializer.save()
+        instance = serializer.save(user=self.request.user)
 
         # Save a copy of the new object so we can reference it in create()
         self._instance = instance
@@ -150,7 +150,7 @@ class FeedViewSet(viewsets.ModelViewSet):
         return Feed.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        instance = serializer.save()
+        instance = serializer.save(user=self.request.user)
         so = SortOrderUserFeed(userprofile=self.request.user.userprofile, feed=instance)
         so.save()
 
@@ -279,6 +279,9 @@ class TodoViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = TodoSerializer
     lookup_field = "uuid"
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
     def get_queryset(self):
         return Todo.objects.filter(
