@@ -533,7 +533,20 @@ class Blob(TimeStampedModel):
 
         top_level = None
 
+        inside_code_block = False
+
         for line in self.content.split("\n"):
+
+            if line.startswith("```"):
+                inside_code_block = not inside_code_block
+
+            # If we're inside a markdown code block, don't try to parse
+            #  headings, since the '#s' that begin Python comments
+            #  can cause confusion.
+            if inside_code_block:
+                content_out = f"{content_out}{line}\n"
+                continue
+
             x = re.search(r"^(#+)(.*)", line.strip())
             if x:
 
