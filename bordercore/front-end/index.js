@@ -254,6 +254,8 @@ window.Rainbow = Rainbow;
 
 import Prism from "prismjs";
 
+import hotkeys from "hotkeys-js";
+
 // Wait 10 seconds after selecting a song to play
 //  for it to be marked as "listened to".
 window.MUSIC_LISTEN_TIMEOUT = 10000;

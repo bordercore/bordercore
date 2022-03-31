@@ -635,30 +635,27 @@
 
                 let self = this;
 
-                window.addEventListener("keydown", function(e) {
+                hotkeys("right,left,escape", function (event, handler) {
+                    switch (handler.key) {
+                        case "right":
+                            self.getSlideShowImage("next");
+                            break;
+                        case "left":
+                            self.getSlideShowImage("previous");
+                            break;
+                        case "escape":
+                            document.querySelector("#overlay img").src = null;
+                            document.querySelector("#overlay video").src = null;
 
-                    if (e.which == 39) { /* Right arrow */
+                            // Restore the scrollbars
+                            document.body.style.overflow = "visible";
 
-                        self.getSlideShowImage("next");
-
-                    } else if (e.which == 37) { /* Left arrow */
-
-                        self.getSlideShowImage("previous");
-
-
-                    } else if (e.which == 27) { /* Escape */
-
-                        document.querySelector("#overlay img").src = null;
-                        document.querySelector("#overlay video").src = null;
-
-                        // Restore the scrollbars
-                        document.body.style.overflow = "visible";
-
-                        // Remove the back background
-                        document.getElementById("overlay").classList.add("d-none");
-
+                            // Remove the back background
+                            document.getElementById("overlay").classList.add("d-none");
+                            break;
                     }
                 });
+
             }
         });
 

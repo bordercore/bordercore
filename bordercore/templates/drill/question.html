@@ -265,27 +265,50 @@
 
                 let self = this;
 
-                window.addEventListener("keydown", function(e) {
+                hotkeys.filter = function(event) {
+                    // By default hotkeys filters form elements. Eliminate that
+                    // filter so we can capture ctrl-return events from
+                    // the Python console textarea.
+                    return true;
+                }
 
-                    if (e.target.parentElement.classList.contains("code-input")) {
-                        if (e.which === 13 && e.ctrlKey) {
+                hotkeys("ctrl+return,right,space,e,g,h,r", function (event, handler) {
+
+                    if (event.target.parentElement.classList.contains("code-input")) {
+                        if (handler.key === "ctrl+return") {
                             self.$refs.pythonConsole.evaluatePython();
                         }
                         return;
                     }
-
-                    if (e.which === 39) { /* Right arrow */
-                        window.location = "{% url 'drill:study' %}";
-                    } else if (e.which === 32 && self.mode === "question") { /* Space */
-                        window.location = "{% url 'drill:answer' question.uuid %}";
-                    } else if (e.which === 69 && self.mode === "answer") { /* G */
-                        window.location = "{% url 'drill:record_response' question.uuid 'easy' %}";
-                    } else if (e.which === 71 && self.mode === "answer") { /* G */
-                        window.location = "{% url 'drill:record_response' question.uuid 'good' %}";
-                    } else if (e.which === 72 && self.mode === "answer") { /* H */
-                        window.location = "{% url 'drill:record_response' question.uuid 'hard' %}";
-                    } else if (e.which === 82 && self.mode === "answer") { /* R */
-                        window.location = "{% url 'drill:record_response' question.uuid 'again' %}";
+                    switch (handler.key) {
+                        case "right":
+                            window.location = "{% url "drill:study" %}";
+                            break;
+                        case "space":
+                            if (self.mode === "question") {
+                                window.location = "{% url 'drill:answer' question.uuid %}";
+                            }
+                            break;
+                        case "e":
+                            if (self.mode === "answer") {
+                                window.location = "{% url 'drill:record_response' question.uuid 'easy' %}";
+                            }
+                            break;
+                        case "g":
+                            if (self.mode === "answer") {
+                                window.location = "{% url 'drill:record_response' question.uuid 'good' %}";
+                            }
+                            break;
+                        case "h":
+                            if (self.mode === "answer") {
+                                window.location = "{% url 'drill:record_response' question.uuid 'hard' %}";
+                            }
+                            break;
+                        case "r":
+                            if (self.mode === "answer") {
+                                window.location = "{% url 'drill:record_response' question.uuid 'again' %}";
+                            }
+                            break;
                     }
                 });
 

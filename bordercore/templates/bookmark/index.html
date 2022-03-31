@@ -473,56 +473,45 @@
 
                 let self = this;
 
-                window.addEventListener("keydown", function(e) {
-
-                    // If the active element isn't the body, it's probably an input,
-                    //   in which case we don't want this event handler to take control.
-                    if (document.activeElement.tagName !== "BODY") {
-                        return;
+                hotkeys("alt+down,alt+up,d,o,escape", function (event, handler) {
+                    let index = null;
+                    switch (handler.key) {
+                        case "alt+down":
+                            if (!self.selectedBookmarkUuid) {
+                                self.selectedBookmarkUuid = self.bookmarkList[0].uuid;
+                            } else {
+                                self.selectedBookmarkUuid = self.getNextBookmark();
+                            }
+                            self.selectBookmark();
+                            break;
+                        case "alt+up":
+                            if (!self.selectedBookmarkUuid) {
+                                self.selectedBookmarkUuid = self.bookmarkList[self.bokmarkList.length - 1].uuid;
+                            } else {
+                                self.selectedBookmarkUuid = self.getPreviousBookmark();
+                            }
+                            self.selectBookmark();
+                            break;
+                        case "d":
+                            index = self.bookmarkList.findIndex( (e) => e.uuid === self.selectedBookmarkUuid );
+                            const nextBookmark = self.getNextBookmark();
+                            self.onClickDelete(self.bookmarkList[index].uuid);
+                            self.selectedBookmarkUuid = nextBookmark;
+                            self.selectBookmark();
+                            break;
+                        case "o":
+                            index = self.bookmarkList.findIndex( (e) => e.uuid === self.selectedBookmarkUuid );
+                            window.open(self.bookmarkList[index].url, "_blank");
+                            self.onClickDelete(self.bookmarkList[index].uuid);
+                            self.selectedBookmarkUuid = null;
+                            break;
+                        case "escape":
+                            self.selectedBookmarkUuid = null;
+                            document.querySelectorAll("#bookmark-list tr").forEach(row => {
+                                row.classList.remove("selected");
+                            });
+                            break;
                     }
-
-                    if (e.which === 40 && e.altKey) { /* Alt-Down arrow */
-
-                        if (!self.selectedBookmarkUuid) {
-                            self.selectedBookmarkUuid = self.bookmarkList[0].uuid;
-                        } else {
-                            self.selectedBookmarkUuid = self.getNextBookmark();
-                        }
-                        self.selectBookmark();
-
-                    } else if (e.which === 38 && e.altKey) { /* Alt-Up arrow */
-
-                        if (!self.selectedBookmarkUuid) {
-                            self.selectedBookmarkUuid = self.bookmarkList[self.bokmarkList.length - 1].uuid;
-                        } else {
-                            self.selectedBookmarkUuid = self.getPreviousBookmark();
-                        }
-                        self.selectBookmark();
-
-                    } else if (e.which === 68) { /* D */
-
-                        const index = self.bookmarkList.findIndex( (e) => e.uuid === self.selectedBookmarkUuid );
-                        const nextBookmark = self.getNextBookmark();
-                        self.onClickDelete(self.bookmarkList[index].uuid);
-                        self.selectedBookmarkUuid = nextBookmark;
-                        self.selectBookmark();
-
-                    } else if (e.which === 79) { /* O */
-
-                        const index = self.bookmarkList.findIndex( (e) => e.uuid === self.selectedBookmarkUuid );
-                        window.open(self.bookmarkList[index].url, "_blank");
-                        self.onClickDelete(self.bookmarkList[index].uuid);
-                        self.selectedBookmarkUuid = null;
-
-                    } else if (e.which === 27) { /* Escape */
-
-                        self.selectedBookmarkUuid = null;
-                        document.querySelectorAll("#bookmark-list tr").forEach(row => {
-                            row.classList.remove("selected");
-                        });
-
-                    }
-
                 });
 
                 {% if tag %}
