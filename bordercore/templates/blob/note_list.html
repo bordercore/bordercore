@@ -21,7 +21,7 @@
                         <ul class="list-group">
                             <draggable v-model="pinnedNotes" @change="onChange" ghost-class="sortable-ghost">
                                 <transition-group type="transition">
-                                    <div v-for="note in pinnedNotes" :key="note.uuid" v-cloak>
+                                    <div v-for="note in pinnedNotes" :key="note.uuid">
                                         <li class="list-group-item list-group-item-secondary" :data-uuid="note.uuid">
                                             <a :href="note.url">[[ note.name ]]</a>
                                         </li>
@@ -44,7 +44,7 @@
                 </div>
 
                 <div class="d-flex flex-column">
-                    <ul class="list-unstyled note-search-result">
+                    <ul class="list-unstyled note-search-result" v-cloak>
                         <li v-for="note in $store.state.notes" class="px-2 py-3 d-flex flex-column" :class="{ 'selected': note.uuid === $store.state.selectedNoteUuid }" @click="onClick(note.uuid)">
                             <h4 class="text-primary font-weight-bold">
                                 [[ note.name ]]
