@@ -60,7 +60,7 @@ npm --prefix=./bordercore/ init -y
 npm --prefix=./bordercore/ install webpack webpack-cli --save-dev
 npm --prefix=./bordercore/ run dev
 
-make test_functional test_unit
+make test_unit test_functional
 </command>
       <ignoreExitCode>false</ignoreExitCode>
     </jenkins.plugins.shiningpanda.builders.VirtualenvBuilder>
