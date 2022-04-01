@@ -139,3 +139,62 @@ def search(user, tag_name, doc_types=[], skip_tag_aliases=False):
         matches.extend(get_tag_aliases(user, search_term, doc_types))
 
     return matches
+
+
+def find_related_tags(user, tag_name, doc_type):
+    """
+    For a given tag, find the tag counts of all other documents
+    which also have this tag for a given doc type.
+    """
+
+    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
+
+    tag_name = unquote(tag_name.lower())
+
+    search_object = {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "term": {
+                            "user_id": 1
+                        }
+                    },
+                    {
+                        "term": {
+                            "tags.keyword": tag_name
+                        }
+                    },
+                    {
+                        "term": {
+                            "doctype": doc_type
+                        }
+                    }
+                ]
+            }
+        },
+        "aggs": {
+            "distinct_tags": {
+                "terms": {
+                    "field": "tags.keyword",
+                }
+            }
+        },
+        "from": 0,
+        "size": 0,
+        "_source": ["tags"]
+    }
+
+    results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+
+    matches = []
+    for tag_result in results["aggregations"]["distinct_tags"]["buckets"]:
+        if tag_result["key"] != tag_name:
+            matches.append(
+                {
+                    "tag_name": tag_result["key"],
+                    "count": tag_result["doc_count"]
+                }
+            )
+
+    return matches

@@ -1733,6 +1733,12 @@ div.CodeMirror-focused {
   box-shadow: 1px 1px 5px #4b00ff, -1px -1px 5px #4b00ff;
 }
 
+.related-tags {
+  .count {
+    font-size: 0.75rem;
+  }
+}
+
 // Styles for vue-simple-suggest VUE typeahead component
 
 // Original: https://unpkg.com/vue-simple-suggest/dist/styles.css

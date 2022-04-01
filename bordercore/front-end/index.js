@@ -147,6 +147,10 @@ import SearchTagsInput from "./vue/common/SearchTagsInput.vue";
 Vue.component("SearchTagsInput", SearchTagsInput);
 window.SearchTagsInput = SearchTagsInput;
 
+import RelatedTags from "./vue/common/RelatedTags.vue";
+Vue.component("RelatedTags", RelatedTags);
+window.RelatedTags = RelatedTags;
+
 import Card from "./vue/common/Card.vue";
 Vue.component("Card", Card);
 window.Card = Card;

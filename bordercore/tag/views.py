@@ -5,6 +5,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
 from .models import Tag, TagAlias
+from .services import find_related_tags
 from .services import search as search_service
 
 
@@ -102,6 +103,21 @@ def get_todo_counts(request):
         "info": {
             **info
         }
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def get_related_tags(request):
+
+    tag_name = request.GET["tag_name"]
+
+    info = find_related_tags(request.user, tag_name, "drill")
+
+    response = {
+        "status": "OK",
+        "info": info
     }
 
     return JsonResponse(response)

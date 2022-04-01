@@ -93,8 +93,8 @@
             >
             </drill-blobs>
 
-            <div class="d-flex flex-grow-1">
-                <card title="Tag Progress">
+            <div class="d-flex flex-grow-1 flex-column">
+                <card title="Tag Progress" class="flex-grow-0">
                     <template v-slot:content>
                         <div class="d-flex flex-column justify-content-center">
                         {% for tag in tag_info %}
@@ -108,6 +108,16 @@
                             </drill-tag-progress>
                         {% endfor %}
                         </div>
+                    </template>
+                </card>
+                <card title="Related Tags" class="flex-grow-1">
+                    <template v-slot:content>
+                        <related-tags
+                            related-tags-url="{% url 'tag:get_related_tags' %}"
+                            start-study-session-tag-url="{% url 'drill:start_study_session_tag' '666' %}"
+                            tag-name="{{ request.session.drill_study_session.tag }}"
+                        >
+                        </related-tags>
                     </template>
                 </card>
             </div>

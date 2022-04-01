@@ -35,4 +35,9 @@ urlpatterns = [
         view=views.get_todo_counts,
         name="get_todo_counts"
     ),
+    path(
+        route="get_related_tags",
+        view=views.get_related_tags,
+        name="get_related_tags"
+    ),
 ]
