@@ -61,6 +61,8 @@
                                         note-query-search-url="{% url 'search:notes' %}"
                                         drill-query-search-url="{% url 'search:search' %}"
                                         store-in-session-url="{% url "accounts:store_in_session" %}"
+                                        recent-searches="{{ recent_searches }}"
+                                        :recent-searches="recentSearches"
                                     >
                                     </top-search>
                                 </div>
@@ -171,6 +173,7 @@
 
             {{ recent_blobs|json_script:"recent_blobs" }}
             {{ overdue_tasks|json_script:"overdue_tasks" }}
+            {{ recent_searches|json_script:"recent_searches" }}
 
             <script type="text/javascript">
 
@@ -244,6 +247,7 @@
                             ],
                             recentBlobs: JSON.parse(document.getElementById("recent_blobs").textContent),
                             overdueTasks: JSON.parse(document.getElementById("overdue_tasks").textContent),
+                            recentSearches: JSON.parse(document.getElementById("recent_searches").textContent),
                         }
                     },
                     methods: {

@@ -148,6 +148,7 @@ INSTALLED_APPS = (
     'quote',
     'rest_framework',
     'rest_framework.authtoken',
+    'search',
     'storages',
     'todo'
 
@@ -193,6 +194,7 @@ TEMPLATES = [
                 'context_processors.get_counts',
                 'context_processors.set_constants',
                 'context_processors.get_recent_blobs',
+                'context_processors.get_recent_searches',
                 'context_processors.get_overdue_tasks',
             ]
         },

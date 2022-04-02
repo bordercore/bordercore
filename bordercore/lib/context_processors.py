@@ -7,6 +7,7 @@ from blob.services import get_recent_blobs as get_recent_blobs_service
 from bookmark.models import Bookmark
 from fitness.services import get_overdue_exercises
 from metrics.models import Metric
+from search.models import RecentSearch
 from todo.models import Todo
 
 
@@ -61,6 +62,27 @@ def get_recent_blobs(request):
             "blobList": recent_blobs,
             "message": message
         }
+    }
+
+
+def get_recent_searches(request):
+    """
+    """
+
+    if not request.user.is_authenticated:
+        return {}
+
+    recent_searches = RecentSearch.objects.filter(user=request.user)[:10]
+
+    return {
+        "recent_searches": [
+            {
+                "id": x.id,
+                "search_text": x.search_text
+            }
+            for x in
+            recent_searches
+        ]
     }
 
 

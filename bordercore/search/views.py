@@ -19,6 +19,8 @@ from lib.util import (get_elasticsearch_connection, get_pagination_range,
 from tag.models import Tag
 from tag.services import get_tag_aliases, get_tag_link
 
+from .models import RecentSearch
+
 SEARCH_LIMIT = 1000
 
 
@@ -87,6 +89,9 @@ class SearchListView(ListView):
         sort_field = self.request.GET.get("sort", "date_unixtime")
         boolean_type = self.request.GET.get("boolean_search_type", "AND")
         doctype = self.request.GET.get("doctype", None)
+
+        if search_term:
+            RecentSearch.add(self.request.user, search_term)
 
         es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 

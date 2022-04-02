@@ -941,6 +941,10 @@ pre {
   .tag-list:hover {
     background-color: lighten($bg-light, 5%);
   }
+
+  .recent-searches-header {
+    border-top: 1px solid #10163a;
+  }
 }
 
 .suggest-item {

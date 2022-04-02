@@ -64,6 +64,19 @@
                     </div>
                 </div>
             </div>
+            <div class="recent-searches-header text-primary my-2 pt-2">
+                <strong>Recent Searches</strong>
+            </div>
+            <div class="d-flex flex-column">
+                <div v-for="recentSearch in recentSearches" :key="recentSearch.id" class="tag-list d-flex p-1" @click.prevent="handleRecentSearch(recentSearch)">
+                    <div class="top-search-filter-icon d-flex justify-content-center align-items-center">
+                        <font-awesome-icon class="mr-2" icon="search" />
+                    </div>
+                    <div class="text-truncate">
+                        {{ recentSearch.search_text }}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -94,32 +107,36 @@
                 default: "name",
             },
             maxSuggestions: {
-                default: 10,
                 type: Number,
+                default: 10,
             },
             initialSearchType: {
-                default: "",
                 type: String,
+                default: "",
             },
             suggestSearchUrl: {
-                default: "",
                 type: String,
+                default: "",
             },
             querySearchUrl: {
-                default: "",
                 type: String,
+                default: "",
             },
             noteQuerySearchUrl: {
-                default: "",
                 type: String,
+                default: "",
             },
             drillQuerySearchUrl: {
-                default: "",
                 type: String,
+                default: "",
             },
             storeInSessionUrl: {
-                default: "",
                 type: String,
+                default: "",
+            },
+            recentSearches: {
+                type: Array,
+                default: () => [],
             },
         },
         data() {
@@ -277,6 +294,9 @@
                 this.searchFilter = this.searchFilter === filter ? "" : filter;
                 this.saveSearchFilter(this.searchFilter);
                 this.$refs.suggestComponent.research();
+            },
+            handleRecentSearch(searchTerm) {
+                window.location=this.querySearchUrl + "?search=" + searchTerm.search_text;
             },
             saveSearchFilter(searchFilter) {
                 doPost(
