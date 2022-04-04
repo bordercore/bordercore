@@ -3,6 +3,7 @@ from unittest.mock import Mock
 import pytest
 
 import django
+from django import urls
 from django.test import RequestFactory
 
 from search.views import (SearchTagDetailView, get_doc_types_from_request,
@@ -11,6 +12,16 @@ from search.views import (SearchTagDetailView, get_doc_types_from_request,
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
 django.setup()
+
+
+def test_notes_list(auto_login_user):
+
+    user, client = auto_login_user()
+
+    url = urls.reverse("search:notes")
+    resp = client.get(url)
+
+    assert resp.status_code == 200
 
 
 def test_get_doc_types_from_request():
