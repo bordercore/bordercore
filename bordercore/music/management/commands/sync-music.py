@@ -157,6 +157,7 @@ class Command(BaseCommand):
         if album:
             album = self.sanitize_filename(album)
 
+        track_number = None
         if "tracknumber" in id3_info:
             track_number = id3_info["tracknumber"][0].split("/")[0]
             track_number = self.normalize_track_number(track_number)
