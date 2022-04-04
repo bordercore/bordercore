@@ -1895,3 +1895,39 @@ div.CodeMirror-focused {
     max-width: 15rem !important;
   }
 }
+
+
+// Copy button for code
+.code-input,
+pre[class^="language-"] {
+  position: relative;
+
+  &:hover .copy-button {
+    opacity: 1;
+  }
+}
+
+.copy-button {
+  position: absolute;
+  z-index: 2; // Should be higher than the textarea for code console
+  top: .3em;
+  right: .2em;
+  padding: 0 .5em;
+  border: none;
+  background: none;
+  border-radius: .5em;
+  color: #f92aad;
+  font-size: .8em;
+  opacity: 0;
+  text-shadow: 0 0 2px #100c0f, 0 0 5px #dc078e33, 0 0 10px #fff3;
+  transition: opacity 0.3s ease-in-out;
+
+  &:hover {
+    filter: drop-shadow(2px 2px 10px $icon-glow-color) drop-shadow(-2px -2px 10px $icon-glow-color);
+    opacity: 1;
+  }
+
+  &.console {
+    right: 2.3em;
+  }
+}

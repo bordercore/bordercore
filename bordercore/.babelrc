@@ -3,7 +3,6 @@
     [
       "prismjs", {
         "languages": ["javascript", "css", "markup", "python"],
-        "plugins": ["line-numbers"],
         "css": true
       }
     ]

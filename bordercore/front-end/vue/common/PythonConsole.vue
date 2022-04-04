@@ -7,8 +7,8 @@
         <div class="code-input code-input_pre-element-styled">
             <textarea rows="5" spellcheck="false" @input="update" @keydown="checkTab" @scroll="syncScroll" />
 
-            <pre aria-hidden="true"><code class="language-python" />
-            </pre>
+            <!-- Don't place the 'code' block on a new line to avoid whitespace issues -->
+            <pre aria-hidden="true"><code class="language-python" /></pre>
         </div>
 
         <div id="output-container">
