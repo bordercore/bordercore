@@ -1,8 +1,7 @@
 import Vue from "vue";
 window.Vue = Vue;
 
-import {AlertPlugin, PopoverPlugin, ToastPlugin, VBHoverPlugin} from "bootstrap-vue";
-Vue.use(AlertPlugin);
+import {PopoverPlugin, ToastPlugin, VBHoverPlugin} from "bootstrap-vue";
 Vue.use(PopoverPlugin);
 Vue.use(ToastPlugin);
 Vue.use(VBHoverPlugin);
