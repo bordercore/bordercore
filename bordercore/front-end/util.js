@@ -169,3 +169,55 @@ export function getFormattedDate(date, monthFormat="short") {
     const options = {year: "numeric", month: monthFormat, day: "numeric"};
     return formattedDate.toLocaleDateString("en-US", options);
 }
+
+
+/**
+ * Resets the copy button text
+ * @param {string} target The DOM element to reset.
+ */
+function resetCopyButton(target) {
+    target.textContent = "Copy";
+}
+
+
+/**
+ * Create a prism.js hook which adds an "on-hover" copy button to code blocks.
+ */
+export function addCopyButton() {
+    Prism.hooks.add("complete", function(env) {
+    const code = (env.element);
+    const pre = (code.parentNode);
+
+    // If this is the code console, since the autoloader rehighlights and
+    //  calls this function as you type, only add the copy button once.
+    if (pre.parentNode.classList.contains("code-input") && pre.parentNode.querySelector("button.copy-button")) {
+        return;
+    }
+
+    const copyDiv = document.createElement("div");
+    copyDiv.className = "copy-button";
+
+    const button = document.createElement("button");
+    button.className = "copy-button";
+    button.setAttribute("type", "button");
+    button.addEventListener("click", function(evt) {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(code.textContent);
+            linkSpan.textContent = "Copied!";
+            setTimeout(resetCopyButton.bind(null, evt.currentTarget), 5000);
+        }
+    });
+
+    const linkSpan = document.createElement("span");
+    linkSpan.textContent = "Copy";
+    button.appendChild(linkSpan);
+
+    const parentNode = pre.parentNode;
+    if (parentNode.classList.contains("code-input")) {
+        pre.parentNode.appendChild(button);
+        button.classList.add("console");
+    } else {
+        pre.appendChild(button);
+    }
+});
+}
