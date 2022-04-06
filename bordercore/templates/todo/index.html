@@ -68,53 +68,60 @@
                 </div>
 
                 <b-table
-                    :hover="hover"
-                    primary-key="uuid"
-                    :items="items"
-                    :fields="fields"
-                    :sort-compare="sortCompare"
-                    @sort-changed="sortChanged"
-                    @row-hovered="rowHovered"
-                    @row-unhovered="rowUnHovered"
-                    onEnd="onEnd"
-                    v-sortable
-                    :sorting="items"
-                    sort-by="manualSorting"
-                    show-empty
-                    empty-text="No tasks found"
+                    :data="items"
+                    :mobile-cards="false"
+                    :default-sort="['sort_order','asc']"
+                    hoverable
+                    draggable
+                    sort-icon="chevron-up"
+                    @drop="onDrop"
+                    @dragend="onDragEnd"
+                    @dragover="onDragOver"
+                    @dragstart="onDragStart"
+                    @mouseenter="onMouseEnter"
+                    @mouseleave="onMouseLeave"
                 >
 
-                    <template #cell(name)="data">
-                        <span v-html="data.value"></span>
-                        <span v-if="data.item.url"><a class="ml-1" :href="data.item.url"><font-awesome-icon icon="link"></font-awesome-icon></a></span>
-                        <div class="table-note" v-html="getNote(data.item.note)"></div>
-                    </template>
-
-                    <template #cell(manualSorting)="data">
+                    <b-table-column field="sort_order" label="Manual" cell-class="todo-col-manual-sorting drag-handle text-center cursor-grab" header-class="cursor-pointer" sortable v-slot="props">
                         <font-awesome-icon icon="bars"></font-awesome-icon>
-                        <span v-html="data.value"></span>
-                    </template>
+                    </b-table-column>
 
-                    <template #cell(uuid)="data">
+                    <b-table-column field="name" label="Name" sortable header-class="cursor-pointer" v-slot="props">
+                        [[ props.row.name ]]
+                        <span v-if="props.row.url">
+                            <a class="ml-1" :href="props.row.url">
+                                <font-awesome-icon icon="link"></font-awesome-icon>
+                            </a>
+                        </span>
+                        <div class="table-note" v-html="getNote(props.row.note)"></div>
+                    </b-table-column>
+
+                    <b-table-column field="priority" label="Priority" cell-class="todo-col-priority" sortable header-class="cursor-pointer" v-slot="props">
+                        [[ props.row.priority_name ]]
+                    </b-table-column>
+
+                    <b-table-column field="created" label="Date" sortable cell-class="todo-col-date text-nowrap" header-class="cursor-pointer" v-slot="props">
+                        [[ getDate(props.row.created) ]]
+                    </b-table-column>
+
+                    <b-table-column field="uuid" label="" cell-class="col-action" v-slot="props">
                         <div class="hover-target hidden">
                             <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="text-center">
                                 <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                 <div slot="dropdown">
-                                    <a class="dropdown-item" href="#" @click.prevent="handleUpdateTodo(data)">
+                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(props.row)">
                                         <font-awesome-icon icon="pencil-alt" class="text-primary mr-3"></font-awesome-icon>Update
                                     </a>
-                                    <a class="dropdown-item" href="#" @click.prevent="onClickDelete(data.value)">
+                                    <a class="dropdown-item" href="#" @click.prevent="onClickDelete(props.row)">
                                         <font-awesome-icon icon="trash-alt" class="text-primary mr-3"></font-awesome-icon>Delete
                                     </a>
                                 </div>
                             </dropdown-menu>
                         </div>
-                    </template>
-                    <template #cell(priority)="data">
-                        [[ data.item.priority_name ]]
-                    </template>
-                    <template #cell(created)="data">
-                        [[ getDate(data.value) ]]
+                    </b-table-column>
+
+                    <template #empty>
+                        <div class="text-center">No tasks found</div>
                     </template>
 
                 </b-table>
@@ -142,46 +149,6 @@
 
     <script type="text/javascript" charset="utf-8">
 
-        let sortable = null;
-
-        Vue.directive("sortable", {
-            update(el, binding, vnode) {
-                const sortItems = vnode.data.attrs.sorting;
-                const options = {
-                    handle: ".drag-handle",
-                };
-
-                if (sortItems) {
-                    options.onStart = function sortableStart(evt) {
-                        // Disable the table's hover feature will we're dragging and dropping
-                        table.hover = false;
-                    };
-
-                    options.onUpdate = function sortableUpdate(evt) {
-                        const deleted = sortItems.splice(evt.oldIndex, 1);
-                        sortItems.splice(evt.newIndex, 0, deleted[0]);
-                    };
-
-                    options.onEnd = function sortableEnd(evt) {
-                        table.hover = true;
-                        if (evt.newIndex !== evt.oldIndex) {
-                            const bodyFormData = new URLSearchParams();
-                            bodyFormData.append("todo_uuid", evt.item.dataset.pk);
-                            bodyFormData.append("position", evt.newIndex + 1);
-
-                            // We don't have access to the Vue app's "filterTag"
-                            //  data, which we need to send with the Ajax request.
-                            //  So we instead emit a message with a partial payload
-                            // which is captured inside the Vue app elsewhere.
-                            EventBus.$emit("todo-sort", bodyFormData);
-                        }
-                    };
-                }
-
-                sortable = Sortable.create(document.querySelector("tbody"), options);
-            },
-        });
-
         const table = new Vue({
             el: "#vue-app",
             name: "TodoTable",
@@ -193,38 +160,8 @@
                     filterSearch: "",
                     filterCache: {},
                     items: [],
-                    fields: [
-                        {
-                            key: "manualSorting",
-                            label: "Manual",
-                            class: "drag-handle text-center cursor-grab",
-                            sortable: false,
-                            thClass: "todo-col-manual-sorting",
-                        },
-                        {
-                            key: "name",
-                            sortable: true,
-                        },
-                        {
-                            key: "priority",
-                            sortable: true,
-                            thClass: "todo-col-priority",
-                        },
-                        {
-                            key: "created",
-                            label: "Date",
-                            class: "text-nowrap",
-                            sortable: true,
-                            sortDirection: "desc",
-                            thClass: "todo-col-date",
-                        },
-                        {
-                            key: "uuid",
-                            label: "",
-                            tdClass: "text-center align-top",
-                            thClass: "col-action",
-                        },
-                    ],
+                    draggingRow: null,
+                    draggingRowIndex: null,
                     filterPriorityOptions: null,
                     filterTimeOptions: null,
                     show: false,
@@ -238,23 +175,6 @@
                 },
             },
             mounted() {
-                EventBus.$on("get-todo-list", (payload) => {
-                    this.getTodoList();
-                });
-
-                EventBus.$on("todo-sort", (bodyFormData) => {
-                    bodyFormData.append("tag", this.filterTag);
-                    axios("{% url 'todo:sort' %}", {
-                        method: "POST",
-                        data: bodyFormData,
-                    })
-                        .then((response) => {
-                            console.log("Success");
-                        }, (error) => {
-                            console.log(error);
-                        });
-                });
-
                 this.getTodoList();
             },
             methods: {
@@ -274,17 +194,6 @@
                         "Error todo list",
                     );
                 },
-                sortCompare(aRow, bRow, key, sortDesc) {
-                    let a = aRow[key];
-                    let b = bRow[key];
-
-                    if (key === "manualSorting") {
-                        a = aRow["sort_order"];
-                        b = bRow["sort_order"];
-                    }
-
-                    return a < b ? -1 : a > b ? 1 : 0;
-                },
                 sortChanged(evt) {
                     if (evt.sortBy === "") {
                         sortable.option("disabled", false);
@@ -294,22 +203,56 @@
                         this.fields[0].class="drag-handle text-center";
                     }
                 },
-                rowHovered(item, index, evt) {
+                onMouseEnter(row, evt) {
                     evt.currentTarget.querySelector(".hover-target").classList.remove("hidden");
                 },
-                rowUnHovered(item, index, evt) {
+                onMouseLeave(row, evt) {
                     evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
                 },
-                onClickDelete(item, index, evt) {
-                    const selectedUuid = item;
-                    axios.delete("{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", selectedUuid))
+                onDragOver(payload) {
+                    payload.event.dataTransfer.dropEffect = "move";
+                    payload.event.preventDefault();
+                },
+                onDragStart(payload) {
+                    payload.event.currentTarget.classList.add("dragging");
+                    this.draggingRow = payload.row;
+                    this.draggingRowIndex = payload.index;
+                    payload.event.dataTransfer.effectAllowed = "move";
+                },
+                onDragEnd(payload) {
+                    payload.event.currentTarget.classList.remove("dragging");
+                },
+                onDrop(payload) {
+                    const todoUuid = this.draggingRow.uuid;
+                    const newIndex = payload.index;
+
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("todo_uuid", todoUuid);
+                    bodyFormData.append("position", newIndex + 1);
+                    bodyFormData.append("tag", this.filterTag);
+
+                    axios("{% url 'todo:sort' %}", {
+                        method: "POST",
+                        data: bodyFormData,
+                    })
+                        .then((response) => {
+                            console.log("Success");
+                            this.getTodoList();
+                        }, (error) => {
+                            console.log(error);
+                        });
+                },
+                onClickDelete(todoInfo) {
+                    const self = this;
+                    axios.delete("{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", todoInfo.uuid))
                          .then((response) => {
                              this.$bvToast.toast("Todo task deleted", {
                                  title: "Info",
                                  variant: "primary",
                              });
 
-                             EventBus.$emit("get-todo-list");
+                             self.getTodoList();
+                             /* EventBus.$emit("get-todo-list"); */
 
                              console.log("Success");
                          }, (error) => {
@@ -355,10 +298,6 @@
                         return "selected rounded-sm";
                     }
                 },
-                onChange(event) {
-                    this.getTodoList();
-                    sortable.option("disabled", true);
-                },
                 getDate(date) {
                     return getFormattedDate(date);
                 },
@@ -380,10 +319,10 @@
                 getNote(note) {
                     return markdown.render(note);
                 },
-                handleUpdateTodo(todoInfo) {
+                onClickUpdate(todoInfo) {
                     this.$refs.updateTodo.setAction("Update");
-                    this.$refs.updateTodo.todoInfo = todoInfo.item;
-                    EventBus.$emit("addTags", todoInfo.item.tags);
+                    this.$refs.updateTodo.todoInfo = todoInfo;
+                    EventBus.$emit("addTags", todoInfo.tags);
                     $("#modalUpdateTodo").modal("show");
                     setTimeout( () => {
                         document.getElementById("id_name").focus();

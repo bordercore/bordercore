@@ -99,27 +99,38 @@
                             </div>
 
                             <b-table
-                                :hover="hover"
-                                primary-key="id"
-                                :items="items"
-                                :fields="fields"
-                                @row-hovered="rowHovered"
-                                @row-unhovered="rowUnHovered"
-                                :sorting="items"
-                                sort-by="name"
-                                show-empty
-                                empty-text="No tag aliases found"
+                                :data="items"
+                                :mobile-cards="false"
+                                :default-sort="['tag.name']"
+                                hoverable
+                                class="w-100"
+                                @mouseenter="onMouseEnter"
+                                @mouseleave="onMouseLeave"
                             >
 
-                                <template #cell(uuid)="data">
+                                <b-table-column field="tag.name" label="Tag" header-class="cursor-pointer" sortable v-slot="props">
+                                    <span>[[ props.row.tag.name ]]</span>
+                                </b-table-column>
+
+                                <b-table-column field="name" label="Alias" header-class="cursor-pointer" sortable v-slot="props">
+                                    <span>[[ props.row.name ]]</span>
+                                </b-table-column>
+
+                                <b-table-column field="uuid" label="" cell-class="col-action" v-slot="props">
                                     <div class="hover-target hidden">
                                         <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="text-center">
                                             <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                             <div slot="dropdown">
-                                                <a class="dropdown-item" href="#" @click.prevent="onClickDelete(data.value)">Delete</a>
+                                                <a class="dropdown-item" href="#" @click.prevent="onClickDelete(props.row)">Delete</a>
                                             </div>
                                         </dropdown-menu>
                                     </div>
+                                </b-table-column>
+
+                                </template>
+
+                                <template #empty>
+                                    <div class="text-center">No tag aliases found</div>
                                 </template>
 
                             </b-table>
@@ -192,27 +203,8 @@
                     filterSearch: "",
                     items: [
                     ],
-                    fields: [
-                        {
-                            key: "tag.name",
-                            label: "Tag",
-                            sortable: true,
-                        },
-                        {
-                            key: "name",
-                            label: "Alias",
-                            sortable: true,
-                        },
-                        {
-                            key: "uuid",
-                            label: "",
-                            tdClass: "text-center align-top",
-                            thClass: "col-action",
-                        },
-                    ],
                     show: false,
                     right: true,
-                    hover: true,
                     addAliasTagName: "",
                     addAliasAliasName: "",
                     addAliasMessage: "",
@@ -257,10 +249,10 @@
                         this.$refs.simpleSuggest.$refs.suggestComponent.input.focus();
                     }, 100);
                 },
-                rowHovered(item, index, evt) {
+                onMouseEnter(row, evt) {
                     evt.currentTarget.querySelector(".hover-target").classList.remove("hidden");
                 },
-                rowUnHovered(item, index, evt) {
+                onMouseLeave(row, evt) {
                     evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
                 },
                 onClickDelete(item, index, evt) {

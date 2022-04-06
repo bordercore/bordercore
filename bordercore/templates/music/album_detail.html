@@ -88,41 +88,42 @@
                     <card title="">
                         <template v-slot:content>
                             <b-table
-                                hover
-                                primary-key="uuid"
-                                :items="songList"
-                                :fields="fields"
-                                selectable
-                                select-mode="single"
-                                @row-clicked="rowClicked"
-                                @row-hovered="rowHovered"
-                                @row-unhovered="rowUnHovered"
-                                selected-variant="custom"
-                                sort-by="track"
+                                :data="songList"
+                                :mobile-cards="false"
+                                :default-sort="['year','desc']"
+                                hoverable
+                                :selected.sync="selectedSong"
                                 ref="table"
+                                header-class="cursor-pointer"
+                                sort-icon="chevron-up"
+                                @mouseenter="onMouseEnter"
+                                @mouseleave="onMouseLeave"
+                                @cellclick="onSongClicked"
                             >
 
-                                <template #cell(title)="data">
-                                    <span v-html="data.value"></span>
-                                    <span class="pl-2 table-note" v-html="data.item.note"></span>
-                                </template>
+                                    <b-table-column field="title" label="Title" header-class="cursor-pointer" sortable v-slot="props">
+                                        <span>[[ props.row.title ]]</span>
+                                        <span class="pl-2 table-note" v-html="props.row.note"></span>
+                                    </b-table-column>
 
-                                <template #cell(uuid)="data">
-                                    <div class="hover-target hidden">
-                                        <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="text-center">
-                                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                                            <div slot="dropdown">
-                                                <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(data.value)">
-                                                    <font-awesome-icon icon="pencil-alt" class="text-primary mr-3"></font-awesome-icon>Update
-                                                </a>
-                                                <a class="dropdown-item" href="#" @click.prevent="onClickAddToPlaylist(data.value)">
-                                                    <font-awesome-icon icon="plus" class="text-primary mr-3"></font-awesome-icon>Add to playlist
-                                                </a>
-                                            </div>
-                                        </dropdown-menu>
-                                    </div>
-                                </template>
-                            </b-table>
+                                    <b-table-column field="length" label="Length" header-class="cursor-pointer" sortable v-slot="props">
+                                        <span>[[ props.row.length ]]</span>
+                                    </b-table-column>
+
+                                    <b-table-column field="uuid" label="" cell-class="col-action text-center align-middle" v-slot="props">
+                                        <div class="hover-target hidden">
+                                            <dropdown-menu v-model="show" :right="true" transition="translate-fade-down" class="text-center">
+                                                <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+                                                <div slot="dropdown">
+                                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(props.row)">Update</a>
+                                                    <a class="dropdown-item" href="#" @click.prevent="onClickAddToPlaylist(props.row.uuid)">Add to playlist</a>
+                                                </div>
+                                            </dropdown-menu>
+                                        </div>
+                                    </b-table-column>
+
+                                </b-table>
+
                         </template>
                     </card>
                 </div>
@@ -251,39 +252,21 @@
                 DropDownMenu,
             },
             data() {
+                const songList = [
+                    {% for song in song_list %}
+                    {
+                        "uuid": "{{ song.uuid }}",
+                        "year": "{{ song.year_effective|default:'' }}",
+                        "title": "{{ song.title|safe }}",
+                        "length": "{{ song.length }}",
+                        "note": "{{ song.note|safe }}",
+                    },
+                    {% endfor %}
+                ];
+
                 return {
-                    songList: [
-                        {% for song in song_list %}
-                        {
-                            uuid: "{{ song.uuid }}",
-                            track: {{ song.track }},
-                            title: "{{ song.title|safe|escapejs }}",
-                            note: "{{ song.note|safe|escapejs }}",
-                            length: "{{ song.length }}"
-                        },
-                        {% endfor %}
-                    ],
-                    fields: [
-                        {
-                            key: "track",
-                            tdClass: "text-center",
-                            thClass: "col-action text-center",
-                        },
-                        {
-                            key: "title",
-                        },
-                        {
-                            key: "length",
-                            tdClass: "text-center",
-                            thClass: "text-center",
-                        },
-                        {
-                            key: "uuid",
-                            label: "",
-                            tdClass: "text-center align-middle",
-                            thClass: "col-action",
-                        },
-                    ],
+                    songList,
+                    selectedSong: null,
                     show: false,
                     right: true,
                     filename: null,
@@ -308,12 +291,11 @@
                 }
             },
             methods: {
-                rowClicked(item, index, evt) {
-                    // If we found anthing other than a TD element, we've
-                    //  clicked on the "on hover" context menu. In that case,
-                    //  don't play the song.
-                    if (evt.srcElement.nodeName === "TD") {
-                        this.$refs.audioPlayer.playTrack(item.uuid);
+                onSongClicked(row, column, rowIndex, columnIndex) {
+                    // Don't play the song if we've clicked on the
+                    //  'on-hover' menu.
+                    if (columnIndex !== 3) {
+                        this.$refs.audioPlayer.playTrack(row.uuid);
                     }
                 },
                 selectRow(index) {
@@ -324,10 +306,10 @@
                         this.$refs.table.selectRow(index);
                     }
                 },
-                rowHovered(item, index, evt) {
+                onMouseEnter(row, evt) {
                     evt.currentTarget.querySelector(".hover-target").classList.remove("hidden");
                 },
-                rowUnHovered(item, index, evt) {
+                onMouseLeave(row, evt) {
                     evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
                 },
                 onClickUpdate(uuid) {

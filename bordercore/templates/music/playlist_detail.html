@@ -97,36 +97,59 @@
             <div class="right-column ml-3">
 
                 <b-table
-                    hover
-                    primary-key="playlistitem_uuid"
-                    :items="songList"
-                    :fields="fields"
-                    selectable
-                    select-mode="single"
-                    @row-clicked="onRowClicked"
-                    @row-hovered="onRowHovered"
-                    @row-unhovered="onRowUnHovered"
-                    {% if playlist.type == "manual" %}
-                    v-sortable
-                    {% endif %}
-                    :sorting="songList"
-                    selected-variant="custom"
-                    sort-by="sort_order"
-                    show-empty
-                    empty-text="No songs in the playlist"
+                    :data="songList"
+                    :mobile-cards="false"
+                    :default-sort="['sort_order']"
+                    hoverable
+                    draggable
+                    :selected.sync="selectedSong"
+                    sort-icon="chevron-up"
+                    @drop="onDrop"
+                    @dragend="onDragEnd"
+                    @dragover="onDragOver"
+                    @dragstart="onDragStart"
+                    @mouseenter="onMouseEnter"
+                    @mouseleave="onMouseLeave"
+                    @cellclick="onSongClicked"
                     ref="table"
                 >
 
-                    <template #cell(playlistitem_uuid)="data">
+                    {% if playlist.type == "manual" %}
+                    <b-table-column field="sort_order" label="#" cell-class="cursor-grab" header-class="cursor-pointer" {% if playlist.type != "manual" %}sortable{% endif %} v-slot="props">
+                        <span>[[ props.row.sort_order ]]</span>
+                    </b-table-column>
+                    {% endif %}
+
+                    <b-table-column field="title" label="Title" cell-class="cursor-grab" header-class="cursor-pointer" {% if playlist.type != "manual" %}sortable{% endif %} v-slot="props">
+                        <span>[[ props.row.title ]]</span>
+                    </b-table-column>
+
+                    <b-table-column field="artist" label="Artist" cell-class="cursor-grab" header-class="cursor-pointer" {% if playlist.type != "manual" %}sortable{% endif %} v-slot="props">
+                        <span>[[ props.row.artist ]]</span>
+                    </b-table-column>
+
+                    <b-table-column field="year" label="Year" cell-class="cursor-grab text-center" header-class="cursor-pointer text-center" {% if playlist.type != "manual" %}sortable{% endif %} v-slot="props">
+                        <span>[[ props.row.year ]]</span>
+                    </b-table-column>
+
+                    <b-table-column field="length" label="Length" cell-class="cursor-grab text-center" header-class="cursor-pointer text-center" {% if playlist.type != "manual" %}sortable{% endif %} v-slot="props">
+                        <span>[[ props.row.length ]]</span>
+                    </b-table-column>
+
+                    <b-table-column field="uuid" label="" cell-class="col-action text-center align-middle" v-slot="props">
                         <div class="hover-target hidden">
                             <dropdown-menu v-model="showDropdownSong" :right="true" transition="translate-fade-down" class="text-center">
                                 <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
                                 <div slot="dropdown">
-                                    <a class="dropdown-item" href="#" @click.prevent="onClickRemove(data.value)">Remove from playlist</a>
-                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdateSong(data.item.uuid)">Update</a>
+                                    <a class="dropdown-item" href="#" @click.prevent="onClickRemove(props.row.uuid)">Remove from playlist</a>
+                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdateSong(props.row.uuid)">Update</a>
                                 </div>
                             </dropdown-menu>
                         </div>
+                    </b-table-column>
+
+                    <template #empty>
+                        <div class="text-center">No songs in the playlist</div>
                     </template>
 
                 </b-table>
@@ -187,58 +210,6 @@
             el: "#vue-nav",
         });
 
-        {% if playlist.type == "manual" %}
-
-        let sortable = null;
-
-        Vue.directive("sortable", {
-            update(el, binding, vnode) {
-
-                const sort_items = vnode.data.attrs.sorting;
-
-                let options = {};
-
-                if (sort_items) {
-
-                    options.onStart = function sortableStart(evt) {
-                        // Disable the table's hover feature will we're dragging and dropping
-                        table.hover = false;
-                    }
-
-                    options.onUpdate = function sortableUpdate(evt) {
-                        const deleted = sort_items.splice(evt.oldIndex, 1);
-                        sort_items.splice(evt.newIndex, 0, deleted[0]);
-                    };
-
-                    options.onEnd = function sortableEnd(evt) {
-                        table.hover = true;
-                        if (evt.newIndex !== evt.oldIndex) {
-
-                            const bodyFormData = new URLSearchParams();
-                            bodyFormData.append("playlistitem_uuid", evt.item.dataset.pk);
-                            bodyFormData.append("position", evt.newIndex + 1);
-
-                            axios("{% url 'music:sort_playlist' %}", {
-                                method: "POST",
-                                data: bodyFormData,
-                            })
-                                .then((response) => {
-                                    console.log("Success");
-                                    EventBus.$emit("get-playlist");
-                                }, (error) => {
-                                    console.log(error);
-                                });
-
-                        }
-                    }
-                }
-
-                sortable = Sortable.create(document.querySelector("tbody"), options);
-            }
-        });
-
-        {% endif %}
-
         const table = new Vue({
             el: "#vue-app",
             components: {
@@ -247,52 +218,14 @@
             data() {
                 return {
                     songList: [],
-                    fields: [
-                        {% if playlist.type == "manual" %}
-                        {
-                            key: "sort_order",
-                            label: "#",
-                        },
-                        {% endif %}
-                        {
-                            key: "title",
-                            {% if playlist.type != "manual" %}
-                            sortable: true,
-                            {% endif %}
-                        },
-                        {
-                            key: "artist",
-                            {% if playlist.type != "manual" %}
-                            sortable: true,
-                            {% endif %}
-                        },
-                        {
-                            key: "year",
-                            {% if playlist.type != "manual" %}
-                            sortable: true,
-                            {% endif %}
-                        },
-                        {
-                            key: "length",
-                            {% if playlist.type != "manual" %}
-                            sortable: true,
-                            {% endif %}
-                            tdClass: "text-center",
-                            thClass: "text-center",
-                        },
-                        {
-                            key: "playlistitem_uuid",
-                            label: "",
-                            tdClass: "text-center align-middle",
-                            thClass: "col-action",
-                        },
-                    ],
+                    selectedSong: null,
+                    draggingRow: null,
+                    draggingRowIndex: null,
                     menuValue: "",
                     totalTime: 0,
                     continuousPlay: true,
                     showDropdownPlaylist: false,
                     showDropdownSong: false,
-                    hover: true,
                     playlistMenuItems: [
                         {
                             id: uuidv4(),
@@ -323,12 +256,11 @@
                         "Error getting playlist"
                     );
                 },
-                onRowClicked(item, index, evt) {
-                    // If we found anthing other than a TD element, we've
-                    //  clicked on the "on hover" context menu. In that case,
-                    //  don't play the song.
-                    if (evt.srcElement.nodeName === "TD") {
-                        this.$refs.audioPlayer.playTrack(item.uuid);
+                onSongClicked(row, column, rowIndex, columnIndex) {
+                    // Don't play the song if we've clicked on the
+                    //  'on-hover' menu.
+                    if (columnIndex !== 5) {
+                        this.$refs.audioPlayer.playTrack(row.uuid);
                     }
                 },
                 selectRow(index) {
@@ -339,13 +271,47 @@
                         this.$refs.table.selectRow(index);
                     }
                 },
-                onRowHovered(item, index, evt) {
+                onMouseEnter(row, evt) {
                     evt.currentTarget.querySelector(".hover-target").classList.remove("hidden");
                 },
-                onRowUnHovered(item, index, evt) {
+                onMouseLeave(row, evt) {
                     evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
                 },
+                onDragOver(payload) {
+                    payload.event.dataTransfer.dropEffect = "move";
+                    payload.event.preventDefault();
+                },
+                onDragStart(payload) {
+                    payload.event.currentTarget.classList.add("dragging");
+                    this.draggingRow = payload.row;
+                    this.draggingRowIndex = payload.index;
+                    payload.event.dataTransfer.effectAllowed = "move";
+                },
+                onDragEnd(payload) {
+                    payload.event.currentTarget.classList.remove("dragging");
+                },
+                onDrop(payload) {
+                    const playlistItemUuid = this.draggingRow.playlistitem_uuid;
+                    const newIndex = payload.index;
+
+                    const bodyFormData = new URLSearchParams();
+                    bodyFormData.append("playlistitem_uuid", playlistItemUuid);
+                    bodyFormData.append("position", newIndex + 1);
+
+                    axios("{% url 'music:sort_playlist' %}", {
+                        method: "POST",
+                        data: bodyFormData,
+                    })
+                        .then((response) => {
+                            console.log("Success");
+                            this.getPlaylist();
+                        }, (error) => {
+                            console.log(error);
+                        });
+
+                },
                 onClickRemove(uuid) {
+                    const self = this;
                     axios.delete("{% url 'playlistitem-detail' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', uuid))
                          .then((response) => {
 
@@ -354,8 +320,7 @@
                                  variant: "primary"
                              })
 
-                             EventBus.$emit("get-playlist");
-
+                             this.getPlaylist();
                              console.log("Success");
                          }, (error) => {
                              console.log(error);
@@ -383,10 +348,6 @@
             },
             mounted() {
                 this.getPlaylist();
-
-                EventBus.$on("get-playlist", payload => {
-                    this.getPlaylist();
-                });
             }
         });
 

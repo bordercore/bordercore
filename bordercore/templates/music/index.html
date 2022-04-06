@@ -140,17 +140,29 @@
 
                         <div>
                             <b-table
-                                hover
-                                primary-key="uuid"
-                                :items="myProvider"
-                                :fields="fields"
-                                sort-by="year"
-                                sort-desc
+                                :data="songList"
+                                :mobile-cards="false"
+                                hoverable
+                                sort-icon="chevron-up"
                                 ref="table"
                             >
-                                <template #cell(artist)="data">
-                                    <a :href="data.item.artist_url">[[ data.value ]]</a>
-                                </template>
+                                <b-table-column field="title" label="Title" header-class="cursor-pointer" v-slot="props">
+                                    <span>[[ props.row.title ]]</span>
+                                    <span class="pl-2 table-note" v-html="props.row.note"></span>
+                                </b-table-column>
+
+                                <b-table-column field="artist" label="Artist" header-class="cursor-pointer" v-slot="props">
+                                    <a :href="props.row.artist_url">[[ props.row.artist ]]</a>
+                                </b-table-column>
+
+                                <b-table-column field="year" label="Year" header-class="cursor-pointer" v-slot="props">
+                                    <span>[[ props.row.year ]]</span>
+                                </b-table-column>
+
+                                <b-table-column field="length" label="Length" cell-class="text-center" header-class="cursor-pointer text-center" v-slot="props">
+                                    <span>[[ props.row.length ]]</span>
+                                </b-table-column>
+
                             </b-table>
                         </div>
 
@@ -189,23 +201,15 @@
             },
             data() {
                 return {
-                    fields: [
-                        {
-                            key: "year"
-                        },
-                        {
-                            key: "artist"
-                        },
-                        {
-                            key: "title"
-                        },
-                        {
-                            key: "length",
-                            tdClass: "text-center",
-                            thClass: "text-center"
-                        },
-                    ],
+                    songList: [],
                 }
+            },
+            mounted() {
+                const promise = axios.get("{% url "music:recent_songs" %}");
+
+                return promise.then(data => {
+                    this.songList = data.data.song_list;
+                })
             },
             methods: {
                 myProvider(ctx, callback) {

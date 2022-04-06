@@ -125,18 +125,32 @@
                         <template v-slot:content>
 
                             <b-table
-                                hover
-                                primary-key="uuid"
-                                :items="songList"
-                                :fields="fields"
-                                selectable
-                                select-mode="single"
-                                @row-selected="rowSelected"
-                                selected-variant="custom"
-                                sort-by="year"
-                                sort-desc
+                                :data="songList"
+                                :mobile-cards="false"
+                                :default-sort="['year', 'desc']"
+                                hoverable
+                                :selected.sync="selectedSong"
+                                sort-icon="chevron-up"
+                                @select="onSongClicked"
                                 ref="table"
                             >
+
+                                <b-table-column field="title" label="Title" header-class="cursor-pointer" sortable v-slot="props">
+                                    <span>[[ props.row.title ]]</span>
+                                </b-table-column>
+
+                                <b-table-column field="artist" label="Artist" header-class="cursor-pointer" sortable v-slot="props">
+                                    <span>[[ props.row.artist ]]</span>
+                                </b-table-column>
+
+                                <b-table-column field="year" label="Year" header-class="cursor-pointer" sortable v-slot="props">
+                                    <span>[[ props.row.year ]]</span>
+                                </b-table-column>
+
+                                <b-table-column field="length" label="Length" header-class="cursor-pointer" sortable v-slot="props">
+                                    <span>[[ props.row.length ]]</span>
+                                </b-table-column>
+
                             </b-table>
 
                         </template>
@@ -175,31 +189,12 @@
                         },
                         {% endfor %}
                     ],
-                    fields: [
-                        {
-                            key: "title",
-                            sortable: true
-                        },
-                        {
-                            key: "artist",
-                            sortable: true
-                        },
-                        {
-                            key: "year",
-                            sortable: true
-                        },
-                        {
-                            key: "length",
-                            sortable: true
-                        },
-                    ]
+                    selectedSong: null,
                 }
             },
             methods: {
-                rowSelected(evt) {
-                    if (evt.length > 0) {
-                        this.$refs.audioPlayer.playTrack(evt[0].uuid);
-                    }
+                onSongClicked(item) {
+                    this.$refs.audioPlayer.playTrack(item.uuid);
                 },
                 selectRow(index) {
                     // Select a row based on index number. If the index is -1,

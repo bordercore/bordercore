@@ -1,11 +1,9 @@
 import Vue from "vue";
 window.Vue = Vue;
 
-import {AlertPlugin, FormInputPlugin, PopoverPlugin, TablePlugin, ToastPlugin, VBHoverPlugin} from "bootstrap-vue";
+import {AlertPlugin, PopoverPlugin, ToastPlugin, VBHoverPlugin} from "bootstrap-vue";
 Vue.use(AlertPlugin);
-Vue.use(FormInputPlugin);
 Vue.use(PopoverPlugin);
-Vue.use(TablePlugin);
 Vue.use(ToastPlugin);
 Vue.use(VBHoverPlugin);
 
@@ -43,7 +41,7 @@ window.jQuery= jQuery;
 import "bootstrap";
 
 import {library} from "@fortawesome/fontawesome-svg-core";
-import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faExchangeAlt, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faChevronLeft, faChevronRight, faClone, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faFileAlt, faFileImport, faHeart, faHome, faImage, faImages, faInfo, faGraduationCap, faLink, faList, faLock, faMusic, faNewspaper, faObjectGroup, faPencilAlt, faPlus, faQuestion, faRandom, faRunning, faSearch, faSignOutAlt, faSquareRootAlt, faStickyNote, faTags, faTasks, faThumbtack, faTimes, faTimesCircle, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
+import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faExchangeAlt, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faChevronLeft, faChevronRight, faChevronUp, faClone, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faFileAlt, faFileImport, faHeart, faHome, faImage, faImages, faInfo, faGraduationCap, faLink, faList, faLock, faMusic, faNewspaper, faObjectGroup, faPencilAlt, faPlus, faQuestion, faRandom, faRunning, faSearch, faSignOutAlt, faSquareRootAlt, faStickyNote, faTags, faTasks, faThumbtack, faTimes, faTimesCircle, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {faAws} from "@fortawesome/free-brands-svg-icons";
 import {faPython} from "@fortawesome/free-brands-svg-icons";
@@ -63,6 +61,7 @@ library.add(faChartBar);
 library.add(faCheck);
 library.add(faChevronLeft);
 library.add(faChevronRight);
+library.add(faChevronUp);
 library.add(faClone);
 library.add(faCopy);
 library.add(faDownload);
@@ -261,6 +260,16 @@ import {addCopyButton} from "./util.js";
 addCopyButton();
 
 import hotkeys from "hotkeys-js";
+
+import {Table} from "buefy";
+import Buefy from "buefy";
+
+Vue.use(Buefy, {
+    defaultIconComponent: "font-awesome-icon",
+    defaultIconPack: "fa",
+});
+
+Vue.use(Table);
 
 // Wait 10 seconds after selecting a song to play
 //  for it to be marked as "listened to".

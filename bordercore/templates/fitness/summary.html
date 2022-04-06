@@ -11,61 +11,75 @@
             <h1>Active Exercises</h1>
 
             <b-table
-                hover
-                primary-key="uuid"
-                :items="items_active"
-                :fields="fields_active"
-                sort-by="overdue"
-                :sort-compare="sortCompare"
-                :tbody-tr-class="rowClass"
+                :data="items_active"
+                :mobile-cards="false"
+                hoverable
+                default-sort="['overdue','desc']"
+                :row-class="rowClass"
+                sort-icon="chevron-up"
             >
-                <template #cell(exercise)="data">
-                    <a :href="data.item.exercise_url">
-                        [[ data.value ]]
+                <b-table-column field="exercise" label="Exercise" v-slot="props">
+                    <a :href="props.row.exercise_url">
+                        [[ props.row.exercise ]]
                     </a>
-                    <span v-if="data.item.overdue === '2'" class="ml-3">
+                    <span v-if="props.row.overdue === '2'" class="ml-3">
                         OVERDUE
                     </span>
-                </template>
-                <template #cell(last_active)="data">
-                    <div v-if="data.value" class="d-flex">
+                </b-table-column>
+
+                <b-table-column field="muscle_group" label="Muscle Group" cell-class="text-center" header-class="text-center" v-slot="props">
+                    [[ props.row.muscle_group ]]
+                </b-table-column>
+
+                <b-table-column field="frequency" label="Frequency" header-class="text-center" v-slot="props">
+                    [[ props.row.frequency ]]
+                </b-table-column>
+
+                <b-table-column field="last_active" label="Last Workout" header-class="text-center" v-slot="props">
+                    <div v-if="props.row.last_active" class="d-flex">
                         <div class="text-nowrap mr-3">
-                            [[ getDate(data.value) ]]
+                            [[ getDate(props.row.last_active) ]]
                         </div>
                         <div class="text-nowrap ml-auto">
-                            [[ getFrequency(data) ]]
+                            [[ getFrequency(props.row) ]]
                         </div>
                     </div>
                     <div v-else>Never</div>
-                </template>
+                </b-table-column>
+
             </b-table>
 
             <h1>Inactive Exercises</h1>
 
             <b-table
-                hover
-                primary-key="uuid"
-                :items="items_inactive"
-                :fields="fields_inactive"
-                sort-by="exercise"
+                :data="items_inactive"
+                :mobile-cards="false"
+                hoverable
+                :default-sort="['exercise','asc']"
+                sort-icon="chevron-up"
             >
+                <b-table-column field="exercise" label="Exercise" sortable v-slot="props">
+                    <a :href="props.row.exercise_url">
+                        [[ props.row.exercise ]]
+                    </a>
+                </b-table-column>
 
-                <template #cell(exercise)="data">
-                    <a :href="data.item.exercise_url">[[ data.value ]]</a>
-                </template>
+                <b-table-column field="muscle_group" label="Muscle Group" cell-class="text-center" header-class="text-center" v-slot="props">
+                    [[ props.row.muscle_group ]]
+                </b-table-column>
 
-                <template #cell(last_active)="data">
-                    <div v-if="data.value" class="d-flex">
+                <b-table-column field="last_active" label="Last Workout" header-class="text-center" v-slot="props">
+                    <div v-if="props.row.last_active" class="d-flex">
                         <div class="text-nowrap mr-3">
-                            [[ data.value ]]
+                            [[ getDate(props.row.last_active) ]]
                         </div>
                         <div class="text-nowrap ml-auto">
-                            [[ getFrequency(data) ]]
+                            [[ getFrequency(props.row) ]]
                         </div>
                     </div>
                     <div v-else>Never</div>
+                </b-table-column>
 
-                </template>
             </b-table>
 
         </div>
@@ -115,65 +129,24 @@
                         },
                         {% endfor %}
                     ],
-                    fields_active: [
-                        {
-                            key: "exercise"
-                        },
-                        {
-                            key: "muscle_group",
-                            class: "text-center"
-                        },
-                        {
-                            key: "frequency",
-                            class: "text-center"
-                        },
-                        {
-                            key: "last_active",
-                            label: "Last Workout",
-                            class: "last-active text-center"
-                        },
-                    ],
-                    fields_inactive: [
-                        {
-                            key: "exercise"
-                        },
-                        {
-                            key: "muscle_group",
-                            class: "text-center"
-                        },
-                        {
-                            key: "last_active",
-                            label: "Last Workout",
-                            class: "last-active text-center"
-                        },
-                    ]
-
                 }
             },
             methods: {
                 getFrequency(row) {
-                    if (row.item.delta_days === 0) {
+                    if (row.delta_days === 0) {
                         return "Today";
                     } else {
-                        return row.item.delta_days + " " + pluralize("day", row.item.delta_days) + " ago";
+                        return row.delta_days + " " + pluralize("day", row.delta_days) + " ago";
                     }
                 },
                 getDate(date) {
                     return getFormattedDate(date, "long");
                 },
-                rowClass(item, type) {
-                    if (!item || type !== "row") return
-                    if (item.overdue === "1") return "selected"
-                    if (item.overdue === "2") return "overdue"
+                rowClass(row, index) {
+                    if (!row) return;
+                    if (row.overdue === "1") return "selected";
+                    if (row.overdue === "2") return "overdue";
                 },
-                sortCompare(aRow, bRow, key, sortDesc) {
-
-                    const a = aRow[key]
-                    const b = bRow[key]
-
-                    return a < b ? 1 : a > b ? -1 : 0;
-
-                }
             }
         });
 

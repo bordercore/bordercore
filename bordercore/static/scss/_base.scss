@@ -340,6 +340,45 @@ a.tag {
   }
 }
 
+// Buefy tables
+
+.is-invisible {
+  visibility: hidden !important;
+}
+
+.b-table {
+  .icon {
+    transition: transform 150ms ease-out, opacity 86ms ease-out;
+    &.is-desc {
+      transform: rotate(180deg);
+    }
+    &.is-expanded {
+      transform: rotate(90deg);
+    }
+  }
+
+  th {
+    border-top: none;
+    color: $primary;
+
+    .sort-icon {
+      margin-left: 0.5rem;
+      color: #999;
+      font-size: 10px;
+    }
+  }
+
+  table.is-hoverable tr {
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  tr.is-selected {
+    background-color: #37406b;
+  }
+}
+
 .table-borderless td,
 .table-borderless th {
   padding: 0.6rem;
@@ -352,6 +391,10 @@ a.tag {
   &:hover {
     background-color: rgba(0, 0, 0, 0.2);
   }
+}
+
+.dragging {
+  color: #000;
 }
 
 // A list with only interior borders
@@ -1402,11 +1445,11 @@ div #dateapp {
 }
 
 .todo-col-manual-sorting {
-  width: 6rem;
+  width: 7rem;
 }
 
 .todo-col-priority {
-  width: 6rem;
+  width: 7rem;
 }
 
 .todo-col-date {
@@ -1488,21 +1531,6 @@ div #dateapp {
       }
     }
   }
-}
-
-// The element you've chosen to drag
-.sortable-chosen {
-  background-color: $bg-dark !important;
-}
-
-// Disable the ghosting effect
-.sortable-ghost {
-  opacity: 0 !important;
-}
-
-// The element you're dragging
-.sortable-drag {
-  background: $bg-dark !important;
 }
 
 //
@@ -1923,7 +1951,7 @@ pre[class^="language-"] {
   transition: opacity 0.3s ease-in-out;
 
   &:hover {
-    filter: drop-shadow(2px 2px 10px $icon-glow-color) drop-shadow(-2px -2px 10px $icon-glow-color);
+    filter: drop-shadow(2px 2px 10px #f071c1) drop-shadow(-2px -2px 10px #f071c1);
     opacity: 1;
   }
 

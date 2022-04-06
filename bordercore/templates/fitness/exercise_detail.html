@@ -177,14 +177,17 @@
                                 </small>
                             </div>
                             <b-table
-                                :items="relatedExercises"
-                                :fields="relatedExercisesFields"
-                                @row-selected="onSelectRelatedExercise"
-                                hover
-                                selectable
-                                :show-empty="true"
-                                empty-text="No related exercises"
+                                :data="relatedExercises"
+                                :columns="relatedExercisesFields"
+                                sort-icon="chevron-up"
+                                @click="onSelectRelatedExercise"
+                                hoverable
                             >
+
+                                <template #empty>
+                                    <div class="text-center">No related exercises</div>
+                                </template>
+
                             </b-table>
                         </div>
                     </div>
@@ -292,7 +295,7 @@
                                 </div>
                                     </div>
                                     <div class="d-flex flex-column align-items-center w-50 pt-2">
-                                        <input class="btn btn-secondary mb-3" type="button" name="Go" value="Add" :disabled="addIsDisabled" @click="onClick" />
+                                        <input class="btn btn-secondary mb-3" type="button" name="Go" value="Add" :disabled="addIsDisabled" @click="onAddWorkoutData" />
                                         <input class="btn btn-primary" :class="{'d-none': submitIsHidden}" id="btn-submit" type="submit" name="Go" value="Submit" />
                                     </div>
                                 </div>
@@ -303,35 +306,40 @@
                                     <hr />
 
                                     <b-table
-                                        :items="items"
-                                        :fields="fields"
-                                        show-empty
-                                        empty-text="No workout data"
+                                        :data="items"
+                                        :mobile-cards="false"
+                                        sort-icon="chevron-up"
                                     >
-                                        <template #cell(weight)="data">
-                                            <div class="text-center">
-                                                <b-form-input v-if="items[data.index].isEdit && selectedCell === 'weight'" type="number" v-model="items[data.index].weight" @blur="onBlur(data.index)"></b-form-input>
-                                                <span v-else @click="editCellHandler(data, 'weight')">
-                                                    [[ data.value ]]
+
+                                        {% if recent_data.0.weight %}
+                                            <b-table-column field="weight" label="Weight" cell-class="text-center w-50" header-class="text-center cursor-pointer pl-4" v-slot="props">
+                                                <input type="text" class="form-control text-center" size="3" v-if="items[props.row.index - 1].isEdit && selectedCell === 'weight'" type="number" v-model="items[props.row.index - 1].weight" @blur="onBlur(props.row.index - 1)"></input>
+                                                <span v-else @click="editCellHandler(props.row.index - 1, 'weight')">
+                                                    [[ props.row.weight ]]
                                                 </span>
-                                            </div>
-                                        </template>
-                                        <template #cell(duration)="data">
-                                            <div class="text-center">
-                                                <b-form-input v-if="items[data.index].isEdit && selectedCell === 'duration'" type="number" v-model="items[data.index].duration" @blur="onBlur(data.index)"></b-form-input>
-                                                <span v-else @click="editCellHandler(data, 'duration')">
-                                                    [[ data.value ]]
+                                            </b-table-column>
+                                        {% endif %}
+
+                                        {% if recent_data.0.duration %}
+                                            <b-table-column field="duration" label="Duration" cell-class="text-center w-50" header-class="text-center cursor-pointer pl-4" v-slot="props">
+                                                <input type="text" class="form-control text-center" size="3" v-if="items[props.row.index - 1].isEdit && selectedCell === 'duration'" type="number" v-model="items[props.row.index - 1].duration" @blur="onBlur(props.row.index - 1)"></input>
+                                                <span v-else @click="editCellHandler(props.row.index - 1, 'duration')">
+                                                    [[ props.row.duration ]]
                                                 </span>
-                                            </div>
+                                            </b-table-column>
+                                        {% endif %}
+
+                                        <b-table-column field="reps" label="Reps" cell-class="text-center w-50" header-class="text-center cursor-pointer pl-4" v-slot="props">
+                                            <input type="text" class="form-control text-center" size="3" v-if="items[props.row.index - 1].isEdit && selectedCell === 'reps'" type="number" v-model="items[props.row.index - 1].reps" @blur="onBlur(props.row.index - 1)"></input>
+                                            <span v-else @click="editCellHandler(props.row.index - 1, 'reps')">
+                                                [[ props.row.reps ]]
+                                            </span>
+                                        </b-table-column>
+
+                                        <template #empty>
+                                            <div class="text-center">No workout data</div>
                                         </template>
-                                        <template #cell(reps)="data">
-                                            <div class="text-center">
-                                                <b-form-input v-if="items[data.index].isEdit && selectedCell === 'reps'" type="number" v-model="items[data.index].reps" @blur="onBlur(data.index)"></b-form-input>
-                                                <span v-else @click="editCellHandler(data, 'reps')">
-                                                    [[ data.value ]]
-                                                </span>
-                                            </div>
-                                        </template>
+
                                     </b-table>
                                 </div>
                             </div>
@@ -389,11 +397,11 @@
                     relatedExercises: JSON.parse(document.getElementById("related_exercises").textContent),
                     relatedExercisesFields: [
                         {
-                            key: "name",
+                            field: "name",
                             label: "Exercise"
                         },
                         {
-                            key: "last_active",
+                            field: "last_active",
                             label: "Last Active",
                         }
                     ],
@@ -467,8 +475,8 @@
 
                 },
                 onSelectRelatedExercise(evt) {
-                    const uuid = evt[0].uuid;
-                    const name = evt[0].name;
+                    const uuid = evt.uuid;
+                    const name = evt.name;
                     doPost(
                         this,
                         url = "{% url "fitness:change_active_status" %}",
@@ -806,48 +814,28 @@
                     reps: {% if recent_data %}{{ latest_reps|first|default:0 }}{% else %}0{% endif %},
                     duration: {% if recent_data %}{{ latest_duration|first|default:0 }}{% else %}0{% endif %},
                     items: [],
-                    fields: [
-                        {% if recent_data.0.weight %}
-                        {
-                            key: "weight",
-                            label: "Weight",
-                            thClass: "text-center",
-                            tdClass: "w-50"
-                        },
-                        {% elif recent_data.0.duration %}
-                        {
-                            key: "duration",
-                            label: "Duration",
-                            thClass: "text-center",
-                            tdClass: "w-50"
-                        },
-                        {% endif %}
-                        {
-                            key: "reps",
-                            label: "Reps",
-                            thClass: "text-center",
-                            tdClass: "w-50",
-                        }
-                    ],
-                    selectedCell: null
+                    selectedCell: null,
+                    set_count: 0,
                 }
             },
             methods: {
                 onBlur(index) {
                     this.items[index].isEdit = false;
                 },
-                onClick(evt) {
+                onAddWorkoutData(evt) {
+                    this.set_count += 1;
                     this.items.push(
                         {
+                            "index": this.set_count,
                             "weight": this.weight,
                             "duration": this.duration,
                             "reps": this.reps
                         }
                     );
                 },
-                editCellHandler(data, name) {
+                editCellHandler(index, name) {
                     this.items = this.items.map(item => ({...item, isEdit: false}));
-                    this.items[data.index].isEdit = true;
+                    this.items[index].isEdit = true;
                     this.selectedCell = name
                 }
             },
