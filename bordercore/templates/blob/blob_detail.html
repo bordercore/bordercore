@@ -7,7 +7,7 @@
 
 {% block content %}
 
-    <div class="scrollable-panel-container row no-gutters">
+    <div class="scrollable-panel-container row g-0">
 
         <div class="col-lg-3 h-100 d-flex flex-column">
             <div id="vue-left-panel" class="scrollable-panel card-body d-flex flex-column h-100">
@@ -48,7 +48,7 @@
 
                     {% if urls %}
                         <div class="mb-3">
-                            <font-awesome-icon icon="link" class="text-primary mr-1"></font-awesome-icon>
+                            <font-awesome-icon icon="link" class="text-primary me-1"></font-awesome-icon>
                             {% for url in urls %}
                                 <strong><a href="{{ url.url }}">{{ url.domain }}</a></strong>
                             {% endfor %}
@@ -61,7 +61,7 @@
                         <div v-if="Object.keys($store.state.elasticsearchInfo).length !== 0 || Object.keys(metadata_misc).length !== 0" class="highlight-box mb-3">
 
                             <div v-for="(value, name) in metadata_misc" class="d-flex">
-                                <div class="text-info mr-2">
+                                <div class="text-info me-2">
                                     [[ name ]]
                                 </div>
                                 <div>
@@ -70,7 +70,7 @@
                             </div>
 
                             <div v-if="$store.state.elasticsearchInfo.content_type" class="d-flex">
-                                <div class="text-info mr-2">
+                                <div class="text-info me-2">
                                     Object Type
                                 </div>
                                 <div>
@@ -79,7 +79,7 @@
                             </div>
 
                             <div v-if="$store.state.elasticsearchInfo.size" class="d-flex">
-                                <div class="text-info mr-2">
+                                <div class="text-info me-2">
                                     Size
                                 </div>
                                 <div>
@@ -88,7 +88,7 @@
                             </div>
 
                             <div v-if="$store.state.elasticsearchInfo.num_pages" class="d-flex">
-                                <div class="text-info mr-2">
+                                <div class="text-info me-2">
                                     Pages
                                 </div>
                                 <div>
@@ -97,7 +97,7 @@
                             </div>
 
                             <div v-if="$store.state.elasticsearchInfo.duration" class="d-flex">
-                                <div class="text-info mr-2">
+                                <div class="text-info me-2">
                                     Duration
                                 </div>
                                 <div>
@@ -142,7 +142,7 @@
                                 {% if blob.get_cover_url_small %}
                                     <img src="{{ blob.get_cover_url_small }}" />
                                 {% endif %}
-                                    <div class="ml-2">
+                                    <div class="ms-2">
                                         <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.name|default:"No Name" }}</a>
                                     </div>
                                 </li>
@@ -188,25 +188,24 @@
                     >
                     </related-bookmarks-list>
 
-                    <card v-if="relatedBlobList.length > 0" class="ml-0">
+                    <card v-if="relatedBlobList.length > 0" class="ms-0">
                         <template #title-slot>
                             Related Blobs
                         </template>
                         <template #content>
-                            <div v-for="blob in relatedBlobList" class="hoverable d-flex align-items-center mb-2 p-2" v-b-hover="handleHover">
+                            <div v-for="blob in relatedBlobList" class="hoverable d-flex align-items-center mb-2 p-2" @mouseenter="handleHover" @mouseleave="handleHover">
                                 <img :src="blob.cover_url" />
-                                <div class="d-flex justify-content-center ml-2 w-100">
+                                <div class="d-flex justify-content-center ms-2 w-100">
                                     <a :href="blob.url">[[ blob.name ]]</a>
                                 </div>
 
-                                <div class="dropdownmenu d-flex">
-                                    <dropdown-menu v-model="showBlobMenu" transition="translate-fade-down" class="hidden" :right="true">
-                                        <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                                        <div slot="dropdown">
+                                <drop-down-menu :show-on-hover="true">
+                                    <div slot="dropdown">
+                                        <li>
                                             <a class="dropdown-item" href="#" @click.prevent="unlinkBlob(blob.uuid)">Unlink</a>
-                                        </div>
-                                    </dropdown-menu>
-                                </div>
+                                        </li>
+                                    </div>
+                                </drop-down-menu>
 
                             </div>
                         </template>
@@ -226,13 +225,13 @@
                         <ul class="list-group interior-borders">
                             <li v-for="question in related_questions" class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
                                 <div class="d-flex">
-                                    <div class="mt-1 mr-2">
+                                    <div class="mt-1 me-2">
                                         <font-awesome-icon icon="question" class="text-success"></font-awesome-icon>
                                     </div>
                                     <div>
                                         <span v-html="question.question" @click="onClick(question.url)"></span>
                                         <div>
-                                            <span v-for="tag in question.tags" class="badge badge-info mr-2">[[ tag.tag ]]</span>
+                                            <span v-for="tag in question.tags" class="badge bg-info me-2">[[ tag.tag ]]</span>
                                         </div>
                                     </div>
                                 </div>
@@ -256,53 +255,66 @@
             >
             </blob-select>
 
-            <div class="col-lg-12">
+            <div class="col-lg-12 px-3">
 
                 <div class="d-flex">
                     <h2 id="blob-name" class="p-2 mb-3 text-break w-100">
                         {{ name }}
                     </h2>
                     <hr />
-                    <div class="dropdownmenu d-flex">
-
-                        <dropdown-menu v-model="show" transition="translate-fade-down" class="text-center" :right="right" v-cloak>
-                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                            <div slot="dropdown" class="mt-0">
+                    <drop-down-menu v-cloak>
+                        <div slot="dropdown" class="mt-0">
+                            <li>
                                 <a class="dropdown-item" href="{% url 'blob:update' blob.uuid %}">
-                                    <font-awesome-icon icon="pencil-alt" class="text-primary mr-3"></font-awesome-icon>Update
+                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
                                 </a>
+                            </li>
+                            <li>
                                 <a class="dropdown-item" href="#" @click.prevent="handleAddToCollection()">
-                                    <font-awesome-icon icon="plus" class="text-primary mr-3"></font-awesome-icon>Add to Collection
+                                    <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>Add to Collection
                                 </a>
+                            </li>
+                            <li>
                                 <a class="dropdown-item" href="{% url 'blob:create' %}?linked_blob_uuid={{ blob.uuid }}">
-                                    <font-awesome-icon icon="file-alt" class="text-primary mr-3"></font-awesome-icon>Link to New Blob
+                                    <font-awesome-icon icon="file-alt" class="text-primary me-3"></font-awesome-icon>Link to New Blob
                                 </a>
-                                    <a class="dropdown-item" href="#" @click.prevent="handleLinkToExistingBlob()">
-                                        <font-awesome-icon icon="file-alt" class="text-primary mr-3"></font-awesome-icon>Link to Existing Blob
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" @click.prevent="handleLinkToExistingBlob()">
+                                    <font-awesome-icon icon="file-alt" class="text-primary me-3"></font-awesome-icon>Link to Existing Blob
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" @click.prevent="handleLinkToBookmark()">
+                                    <font-awesome-icon icon="link" class="text-primary me-3"></font-awesome-icon>Link to Bookmark
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'blob:clone' blob.uuid %}">
+                                    <font-awesome-icon icon="clone" class="text-primary me-3"></font-awesome-icon>Clone Blob
+                                </a>
+                            </li>
+                            {% if blob.is_note %}
+                                <li>
+                                    <a class="dropdown-item" href="#" @click.prevent="onClick">
+                                        <font-awesome-icon icon="thumbtack" class="text-primary me-3"></font-awesome-icon>[[ pinnedButtonValue ]]
                                     </a>
-                                    <a class="dropdown-item" href="#" @click.prevent="handleLinkToBookmark()">
-                                        <font-awesome-icon icon="link" class="text-primary mr-3"></font-awesome-icon>Link to Bookmark
+                                </li>
+                            {% endif %}
+                            {% if blob.sha1sum and request.user|is_in_group:"Admin" %}
+                                <li>
+                                    <a class="dropdown-item" href="#" @click.prevent="handleCopySha1sum('{{ blob.sha1sum }}')">
+                                        <font-awesome-icon icon="copy" class="text-primary me-3"></font-awesome-icon>Copy Sha1sum
                                     </a>
-                                    <a class="dropdown-item" href="{% url 'blob:clone' blob.uuid %}">
-                                        <font-awesome-icon icon="clone" class="text-primary mr-3"></font-awesome-icon>Clone Blob
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ aws_url }}">
+                                        <font-awesome-icon :icon="[ 'fab', 'aws' ]" class="text-primary me-2"></font-awesome-icon>S3 Link
                                     </a>
-                                    {% if blob.is_note %}
-                                        <a class="dropdown-item" href="#" @click.prevent="onClick">
-                                            <font-awesome-icon icon="thumbtack" class="text-primary mr-3"></font-awesome-icon>[[ pinnedButtonValue ]]
-                                        </a>
-                                    {% endif %}
-                                    {% if blob.sha1sum and request.user|is_in_group:"Admin" %}
-                                        <a class="dropdown-item" href="#" @click.prevent="handleCopySha1sum('{{ blob.sha1sum }}')">
-                                            <font-awesome-icon icon="copy" class="text-primary mr-3"></font-awesome-icon>Copy Sha1sum
-                                        </a>
-                                        <a class="dropdown-item" href="{{ aws_url }}">
-                                            <font-awesome-icon :icon="[ 'fab', 'aws' ]" class="text-primary mr-2"></font-awesome-icon>S3 Link
-                                        </a>
-                                    {% endif %}
-                            </div>
-                        </dropdown-menu>
-
-                    </div>
+                                </li>
+                            {% endif %}
+                        </div>
+                    </drop-down-menu>
                 </div>
 
                 {% if blob.is_video %}
@@ -415,7 +427,6 @@
                         },
                         {% endfor %}
                     ],
-                    showBlobMenu: false
                 }
             },
             methods: {
@@ -457,8 +468,8 @@
                         "Error getting related blob list"
                     );
                 },
-                handleHover(hovered,evt) {
-                    evt.currentTarget.querySelector(".dropdown").classList.toggle("hidden");
+                handleHover(evt) {
+                    evt.currentTarget.querySelector(".dropdown").classList.toggle("d-none");
                 },
                 unlinkBlob(uuid) {
                     doPost(
@@ -506,7 +517,7 @@
             },
             data() {
                 return {
-                    right: true,
+                    right: false,
                     show: false,
                     isPinnedNote: {{ is_pinned_note|yesno:"true,false" }},
                 }
@@ -514,13 +525,16 @@
             methods: {
                 handleCopySha1sum(sha1sum) {
                     navigator.clipboard.writeText(sha1sum)
-                    this.$bvToast.toast("Sha1sum copied to clipboard", {
-                        title: "Info",
-                        variant: "primary"
-                    })
+                    EventBus.$emit(
+                        "toast",
+                        {
+                            "body": "Sha1sum copied to clipboard",
+                        },
+                    );
                 },
                 handleAddToCollection() {
-                    $("#modalAddToCollection").modal("show");
+                    const modal = new Modal("#modalAddToCollection");
+                    modal.show();
                     setTimeout( () => { this.$refs.addToCollection.$refs.suggestComponent.input.focus(); }, 500);
                 },
                 handleLinkToExistingBlob() {

@@ -1,5 +1,5 @@
 <template>
-    <div class="mr-0 text-center">
+    <div class="me-0 text-center">
         <slot name="title-slot" />
         <div class="progress-circle">
             <svg width="120" height="120" viewBox="0 0 120 120">

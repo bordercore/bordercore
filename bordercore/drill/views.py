@@ -66,7 +66,7 @@ class QuestionCreateView(FormRequestMixin, CreateView):
                 {
                     "text": tag.name,
                     "is_meta": tag.is_meta,
-                    "classes": "badge badge-info",
+                    "classes": "badge bg-info",
                 }
             ]
 

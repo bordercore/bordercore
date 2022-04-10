@@ -6,14 +6,12 @@
                     <h4 id="myModalLabel" class="modal-title">
                         Add blob
                     </h4>
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" />
                 </div>
                 <div class="modal-body">
                     <div class="d-flex flex-column">
                         <form @submit.prevent>
-                            <div class="form-group">
+                            <div>
                                 <simple-suggest
                                     ref="simpleSuggest"
                                     class="w-100"
@@ -52,7 +50,8 @@
         },
         methods: {
             openModal() {
-                $("#modalAddBlob").modal("show");
+                const modal = new Modal("#modalAddBlob");
+                modal.show();
                 setTimeout( () => {
                     this.$refs.simpleSuggest.$refs.suggestComponent.input.focus();
                 }, 500);
@@ -81,7 +80,9 @@
             select(selection) {
                 // The parent component receives the blob uuid
                 this.$emit("select-blob", selection);
-                $("#modalAddBlob").modal("hide");
+
+                const modal = Modal.getInstance(document.getElementById("modalAddBlob"));
+                modal.hide();
 
                 this.$nextTick(() => {
                     this.$refs.simpleSuggest.$refs.suggestComponent.$el.querySelector("input").blur();

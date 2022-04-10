@@ -9,9 +9,9 @@ class TodoPage:
 
     TITLE = (By.TAG_NAME, "title")
     TODO_ELEMENTS = (By.XPATH, "//div[@id='vue-app']//table/tbody/tr")
-    FIRST_TASK = (By.XPATH, "//div[@id='vue-app']//table/tbody/tr[1]/td[2]/span")
-    NO_TASKS = (By.XPATH, "//div[@id='vue-app']//table/tbody/tr[1]/td[1]/div/div")
-    PRIORITY_COLUMN = (By.XPATH, "//div[@id='vue-app']//table/thead/tr/th[@class='todo-col-priority']")
+    FIRST_TASK = (By.CSS_SELECTOR, "div#vue-app table tbody tr td:nth-child(2)")
+    NO_TASKS = (By.CSS_SELECTOR, "div#vue-app table tbody tr td")
+    PRIORITY_COLUMN = (By.CSS_SELECTOR, "div#vue-app table thead tr th:nth-child(3)")
     MEDIUM_PRIORITY_FILTER = (By.CSS_SELECTOR, "div[data-priority='2']")
 
     def __init__(self, browser):
@@ -36,14 +36,14 @@ class TodoPage:
         Find the text of the first ask
         """
         todo_element = self.browser.find_elements(*self.FIRST_TASK)
-        return todo_element[0].get_attribute("innerHTML")
+        return todo_element[0].text
 
     def todo_no_tasks_text(self):
         """
         Find the text of the first ask
         """
         todo_element = self.browser.find_elements(*self.NO_TASKS)
-        return todo_element[0].get_attribute("innerHTML")
+        return todo_element[0].text
 
     def sort_by_priority(self):
 
@@ -51,7 +51,7 @@ class TodoPage:
         priority_column.click()
 
         todo_element = self.browser.find_elements(*self.FIRST_TASK)
-        return todo_element[0].get_attribute("innerHTML")
+        return todo_element[0].text
 
     def medium_priority_filter(self):
         """

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <ul class="related-tags list-unstyled ml-2">
+        <ul class="related-tags list-unstyled ms-2">
             <li v-for="tag in info" :key="tag.name" class="mt-3">
                 <a class="tag" :href="startStudySessionTagUrl.replace('666', tag.tag_name)">
                     {{ tag.tag_name }}

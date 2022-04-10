@@ -35,6 +35,12 @@
 
     <body>
 
+        <div id="vue-toast">
+            <toast
+            >
+            </toast>
+        </div>
+
         <div class="wrapper {% if request.session.show_sidebar == "false" %}collapsed{% else %}sidebar-transition{% endif %}">
 
             <div class="container-fluid d-flex flex-column" id="content">
@@ -82,17 +88,18 @@
                                         :links="userMenuItems"
                                         :initial-hide="false"
                                         :support-hover-target="false"
+                                        :show-target="false"
                                     >
-                                        <template slot="top">
-                                            <span class="align-middle">
+                                        <div slot="icon">
+                                            <span class="align-middle ms-2">
                                                 Hello <strong>{{ user.get_username }}</strong>
                                             </span>
                                             {% if request.user|is_in_group:"Admin" %}
-                                                <span class="dropdown-item-extra align-middle ml-2" v-if="failed_test_count > 0">
+                                                <span class="dropdown-item-extra align-middle ms-2" v-if="failed_test_count > 0">
                                                     [[ failed_test_count ]]
                                                 </span>
                                             {% endif %}
-                                            <font-awesome-icon icon="angle-down" class="align-middle ml-2" />
+                                            <font-awesome-icon icon="angle-down" class="align-middle ms-2" />
                                         </template>
                                     </drop-down-menu>
                                 </div>
@@ -115,6 +122,8 @@
                 {% block nav %}
                 {% endblock %}
 
+                </div>
+
                 <div class="row flex-grow-1">
 
                     <div class="col-lg-12">
@@ -128,7 +137,6 @@
                         {% block content %}
                         {% endblock %}
 
-                    </div>
 
                 </div>
 
@@ -151,10 +159,10 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h4 class="modal-title" id="myModalLabel">
-                            <font-awesome-icon icon="question" class="text-info mr-2"></font-awesome-icon>
+                            <font-awesome-icon icon="question" class="text-info me-2"></font-awesome-icon>
                             Help
                         </h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body" id="modal-body-help">
                         Help!
@@ -204,12 +212,13 @@
                 {% endif %}
 
                 new Vue({
+                    el: "#vue-toast",
+                });
+
+                new Vue({
                     el: "#top-bar",
                     store: storeBase,
                     name: "Top Bar",
-                    components: {
-                        DropDownMenu,
-                    },
                     data() {
                         return {
                             show: false,
@@ -254,7 +263,8 @@
                         showHelp(evt) {
                             const helpText = document.getElementById("help-text").innerHTML;
                             document.getElementById("modal-body-help").innerHTML = markdown.render(helpText);
-                            $("#modalHelp").modal("show");
+                            const modal = new Modal("#modalHelp");
+                            modal.show();
                         },
                         openSearchWindow() {
                             this.$refs.topSearch.openSearchWindow();
@@ -262,11 +272,10 @@
                         }
                     },
                     mounted() {
-                        if (this.recentBlobs.message) {
-                            console.log(this.recentBlobs.message.text);
-                        }
+
                         if (this.overdueTasks.length > 0) {
-                            $("#modalOverdueTasks").modal("show");
+                            const modal = new Modal("#modalOverdueTasks");
+                            modal.show();
                         }
                     }
                 });

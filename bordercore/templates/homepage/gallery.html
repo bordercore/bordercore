@@ -23,7 +23,7 @@
 
         <h4 class="mt-5">Homepage Cards</h4>
 
-        <div class="row no-gutters">
+        <div class="row g-0">
 
             <div class="col-lg-4">
 
@@ -36,12 +36,12 @@
                     <template v-slot:content>
                         <ul class="list-group">
                             <li class="list-group-item list-group-item-secondary text-primary">Get stuff done
-                                <span class="badge badge-info ml-1">linux</span>
-                                <span class="badge badge-info">django</span>
+                                <span class="badge bg-info ms-1">linux</span>
+                                <span class="badge bg-info">django</span>
                             </li>
                             <li class="list-group-item list-group-item-secondary text-primary">Get more stuff done
-                                <span class="badge badge-info ml-1">linux</span>
-                                <span class="badge badge-info">django</span>
+                                <span class="badge bg-info ms-1">linux</span>
+                                <span class="badge bg-info">django</span>
                             </li>
                         </ul>
                     </template>
@@ -80,7 +80,7 @@
         <h4 class="mt-5">Breadcrumb Navigation</h4>
 
         <div class="d-flex mb-3">
-            <div class="mr-auto align-self-center">
+            <div class="me-auto align-self-center">
                 <ul class="breadcrumb mb-0 pt-0 pb-0">
                     <li class="breadcrumb-item"><a href="#">Blob Detail</a></li>
                     <li class="breadcrumb-item active">Edit Blob</li>
@@ -143,21 +143,24 @@ class SortOrderTagBookmark(SortOrderMixin):
     def remove_bookmark(sender, instance, **kwargs):
         instance.handle_delete()
 \`\`\`
-                    `
-                }
+                    `,
+                };
             },
             methods: {
                 getContent() {
                     return markdown.render(this.javascript_sample);
                 },
                 createToast(level) {
-                    this.$bvToast.toast("This is a sample toast", {
-                        title: "Toast",
-                        variant: level,
-                        noAutoHide: true
-                    })
-                }
-            }
+                    EventBus.$emit(
+                        "toast",
+                        {
+                            "body": "This is a sample toast",
+                            "variant": "info",
+                            "autoHide": false,
+                        },
+                    );
+                },
+            },
         });
 
     </script>

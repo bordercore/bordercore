@@ -9,7 +9,7 @@
 {% block nav %}
 
     <div class="d-flex mb-3">
-        <div class="mr-auto align-self-center">
+        <div class="me-auto align-self-center">
             <ul class="breadcrumb mb-0 pt-0 pb-0">
                 <li class="breadcrumb-item"> <a href="{% url 'node:list' %}">Nodes</a> </li>
                 <li class="breadcrumb-item active">{{ node.name }}</li>
@@ -23,97 +23,97 @@
 
     <div id="vue-app">
 
-        <div class="row no-gutters h-100">
+        <div class="row g-0 h-100">
             <div class="col-lg-4 d-flex flex-column">
 
                 <div>
-                    <blob-list inline-template ref="blobList" v-b-hover="handleHover">
+                    <blob-list inline-template ref="blobList">
+                        <div @mouseenter="showDropDownMenu = true" @mouseleave="showDropDownMenu = false">
+                            <card title="Blobs">
+                                <template v-slot:top-right>
+                                    <div class="node-add-button">
+                                        <add-button href="#" :click-handler="chooseBlob" :class="{'d-none': !showDropDownMenu}"></add-button>
+                                    </div>
+                                </template>
 
-                        <card title="Blobs">
-                            <template v-slot:top-right>
-                                <div class="node-add-button">
-                                    <add-button href="#" :click-handler="chooseBlob" class="hover-target d-none"></add-button>
-                                </div>
-                            </template>
+                                <template v-slot:content>
 
-                            <template v-slot:content>
+                                    <ul class="list-group list-group-flush interior-borders" id="sort-container-tags">
+                                        <draggable v-model="blobList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
+                                            <transition-group type="transition" class="w-100">
+                                                <li v-for="(blob, index) in blobList" class="list-group-item list-group-item-secondary text-info draggable pe-0" :data-uuid="blob.uuid" :key="blob.uuid" v-cloak @mouseenter="handleHover" @mouseleave="handleHover">
 
-                                <ul class="list-group list-group-flush" id="sort-container-tags">
-                                    <draggable v-model="blobList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
-                                        <transition-group type="transition" class="w-100">
-                                            <li v-for="(blob, index) in blobList" class="list-group-item list-group-item-secondary text-info draggable pr-0" :data-uuid="blob.uuid" :key="blob.uuid" v-cloak v-b-hover="handleHover">
+                                                    <div class="d-flex">
 
-                                                <div class="d-flex">
+                                                        <div class="pe-2">
+                                                            <img :src="[[ blob.cover_url ]]" height="75" width="70" />
+                                                        </div>
 
-                                                    <div class="pr-2">
-                                                        <img :src="[[ blob.cover_url ]]" height="75" width="70" />
-                                                    </div>
+                                                        <div>
+                                                            <a :href="blob.url">[[ blob.name ]]</a>
+                                                            <div v-if="blob.note" @click="activateInEditMode(blob, $event.target)" v-show="!blob.noteIsEditable" class="node-note">[[ blob.note ]]</div>
+                                                            <span v-show="blob.noteIsEditable">
+                                                                <input type="text" class="form-control form-control-sm" :value="blob.note" ref="input" placeholder="" @blur="editNote(blob.uuid, $event.target.value)" @keydown.enter="editNote(blob.uuid, $event.target.value)" >
+                                                            </span>
+                                                        </div>
 
-                                                    <div>
-                                                        <a :href="blob.url">[[ blob.name ]]</a>
-                                                        <div v-if="blob.note" @click="activateInEditMode(blob, $event.target)" v-show="!blob.noteIsEditable" class="node-note">[[ blob.note ]]</div>
-                                                        <span v-show="blob.noteIsEditable">
-                                                            <input type="text" class="form-control form-control-sm" :value="blob.note" ref="input" placeholder="" @blur="editNote(blob.uuid, $event.target.value)" @keydown.enter="editNote(blob.uuid, $event.target.value)" >
-                                                        </span>
-                                                    </div>
-
-                                                    <div class="dropdownmenu hidden">
-                                                        <dropdown-menu v-model="show" transition="translate-fade-down">
-                                                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+                                                        <drop-down-menu :show-on-hover="true">
                                                             <div slot="dropdown">
                                                                 <a class="dropdown-item" href="#" @click.prevent="removeBlob(blob.uuid)">
-                                                                    <font-awesome-icon icon="trash-alt" class="text-primary mr-3"></font-awesome-icon>Remove
+                                                                    <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>Remove
                                                                 </a>
                                                                 <a v-if="!blob.note" class="dropdown-item" href="#" @click.prevent="addNote(blob.uuid, index)">
-                                                                    <font-awesome-icon icon="plus" class="text-primary mr-3"></font-awesome-icon>Add note
+                                                                    <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>Add note
                                                                 </a>
                                                             </div>
-                                                        </dropdown-menu>
+                                                        </drop-down-menu>
+
                                                     </div>
 
-                                                </div>
-
-                                            </li>
-                                            <div class="text-secondary" v-if="blobList.length == 0" :key="1" v-cloak>
+                                                </li>
+                                                <div class="text-secondary" v-if="blobList.length == 0" :key="1" v-cloak>
                                                 Nothing to show
-                                            </div>
-                                        </transition-group>
-                                    </draggable>
-                                </ul>
-                            </template>
-                        </card>
+                                                </div>
+                                            </transition-group>
+                                        </draggable>
+                                    </ul>
+                                </template>
+                            </card>
+                        </div>
                     </blob-list>
-
                 </div>
 
                 <div>
                     <note inline-template ref="note">
-                        <card v-b-hover="handleHover">
-                            <template v-slot:title-slot>
-                                <div class="card-title d-flex" v-cloak>
-                                    <div>
-                                        Notes
+                        <div @mouseenter="handleHover" @mouseleave="handleHover">
+                            <card>
+                                <template v-slot:title-slot>
+                                    <div class="card-title d-flex" v-cloak>
+                                        <div>
+                                            Notes
+                                        </div>
+                                        <div class="ms-auto d-none" v-if="note !== ''">
+                                            <drop-down-menu :show-on-hover="true" class="ms-5">
+                                                <div slot="dropdown">
+                                                    <li>
+                                                        <a v-if="note" class="dropdown-item" href="#" @click.prevent="editNote()">Edit note</a>
+                                                    </li>
+                                                </div>
+                                            </drop-down-menu>
+                                        </div>
                                     </div>
-                                    <div class="dropdownmenu d-flex" v-if="note !== ''">
-                                        <dropdown-menu v-model="show" transition="translate-fade-down" class="hidden">
-                                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                                            <div slot="dropdown">
-                                                <a v-if="note" class="dropdown-item" href="#" @click.prevent="editNote()">Edit note</a>
-                                            </div>
-                                        </dropdown-menu>
-                                    </didspan>
-                                </div>
-                            </template>
-                            <template v-slot:content>
-                                <editable-text-area
-                                    uuid="{{ object.uuid }}"
-                                    v-model:note="note"
-                                    edit-url="{% url 'node:edit_note' %}"
-                                    ref="note"
-                                >
-                                </editable-text-area>
-                            </template>
-                        </card>
+                                </template>
+                                <template v-slot:content>
+                                    <editable-text-area
+                                        uuid="{{ object.uuid }}"
+                                        v-model:note="note"
+                                        edit-url="{% url 'node:edit_note' %}"
+                                        ref="note"
+                                    >
+                                    </editable-text-area>
+                                </template>
+                            </card>
+                        </div>
                     </note>
                 </div>
 
@@ -134,7 +134,7 @@
                     sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
                     edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}"
                     :show-add-button="true"
-                    extra-class="embedded-card ml-3"
+                    extra-class="embedded-card ms-3"
                     transition-name=""
                 >
                 </related-bookmarks-list>
@@ -173,7 +173,8 @@
             data() {
                 return {
                     blobList: [],
-                    show: false
+                    show: false,
+                    showDropDownMenu: false,
                 }
             },
             methods: {
@@ -215,8 +216,14 @@
                     );
 
                 },
-                handleHover(hovered, evt) {
-                    evt.currentTarget.querySelector(".dropdownmenu").classList.toggle("d-flex");
+                handleHover(evt) {
+                    const target = evt.currentTarget.querySelector(".dropdownmenu");
+
+                    if (evt.type === "mouseenter") {
+                        target.classList.remove("d-none");
+                    } else {
+                        target.classList.add("d-none");
+                    }
                 },
                 activateInEditMode(blob, event) {
 
@@ -330,11 +337,11 @@
                     if (input.setSelectionRange) {
                     }
                 },
-                handleHover(hovered, evt) {
+                handleHover(evt) {
                     if (! this.note) {
                         return;
                     }
-                    evt.currentTarget.querySelector(".dropdown").classList.toggle("hidden");
+                    evt.currentTarget.querySelector(".dropdown").classList.toggle("d-none");
                 }
             },
             mounted() {
@@ -366,8 +373,8 @@
                         ""
                     );
                 },
-                handleHover(hovered, evt) {
-                    evt.currentTarget.querySelector(".hover-target").classList.toggle("d-flex");
+                handleHover(evt) {
+                    evt.currentTarget.querySelector(".dropdownmenu").classList.toggle("d-none");
                 },
                 selectBlob(blob) {
                     doPost(

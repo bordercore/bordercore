@@ -8,7 +8,7 @@
 
 {% block content %}
 
-    <div class="row no-gutters h-100">
+    <div class="row g-0 h-100">
 
         <div class="col-lg-3 d-flex flex-column">
 
@@ -25,10 +25,10 @@
                             </h4>
 
                             {% for doctype in aggregations %}
-                                <div class="tag-list pl-2 py-1 pr-1 d-flex" :class="getDoctypeClass('{{ doctype.doctype }}')" @click.prevent="onClick" data-doctype="{{ doctype.doctype }}">
+                                <div class="tag-list ps-2 py-1 pe-1 d-flex" :class="getDoctypeClass('{{ doctype.doctype }}')" @click.prevent="onClick" data-doctype="{{ doctype.doctype }}">
                                     <div>{{ doctype.doctype|title }}</div>
-                                    <div class="ml-auto">
-                                        <span class="px-2 badge badge-pill badge-info">
+                                    <div class="ms-auto">
+                                        <span class="px-2 badge rounded-pill bg-info">
                                             {{ doctype.count }}
                                         </span>
                                     </div>
@@ -46,7 +46,7 @@
 
         <div class="col-lg-9" id="search">
 
-            <div class="right-column ml-2">
+            <div class="right-column ms-2">
 
                 <div class="card-body right-column mb-3 pb-4">
 
@@ -66,7 +66,7 @@
                                 </div>
                             </div>
                             <div class="d-flex w-100">
-                                <div class="d-flex flex-column w-20 ml-3 mr-3">
+                                <div class="d-flex flex-column w-20 ms-3 me-3">
                                     <div class="mb-1">
                                         Boolean Type
                                     </div>
@@ -75,7 +75,7 @@
                                         <option>OR</option>
                                     </select>
                                 </div>
-                                <div class="d-flex flex-column w-20 mr-3">
+                                <div class="d-flex flex-column w-20 me-3">
                                     <div class="mb-1">
                                         Exact Match
                                     </div>
@@ -84,7 +84,7 @@
                                         <option{% if request.GET.exact_match == "Yes" %} selected="selected"{% endif %}>Yes</option>
                                     </select>
                                 </div>
-                                <div class="d-flex flex-column w-20 mr-3">
+                                <div class="d-flex flex-column w-20 me-3">
                                     <div class="mb-1">
                                         Sort By
                                     </div>
@@ -97,7 +97,7 @@
                                         </option>
                                     </select>
                                 </div>
-                                <div class="d-flex flex-column w-20 mr-1">
+                                <div class="d-flex flex-column w-20 me-1">
                                     <div class="mb-4">
                                     </div>
                                     <input class="btn btn-primary" type="submit" name="Go" value="Search" />
@@ -115,14 +115,14 @@
 
                     {% if not search_results.hits.hits and not messages %}
 
-                        <search-no-result class="ml-4 mr-3">
+                        <search-no-result class="ms-4 me-3">
                             <template v-slot:message>
                             </template>
                         </search-no-result>
 
                     {% else %}
 
-                        <h4 class="search-result-header ml-4">
+                        <h4 class="search-result-header ms-4">
                             Total matches: <strong>{{ object_list.hits.total.value }}</strong>
                         </h4>
 
@@ -135,7 +135,7 @@
 
                                     {% if match.source.doctype == "drill" %}
 
-                                        <div class="mr-2 mt-1">
+                                        <div class="me-2 mt-1">
                                             <font-awesome-icon icon="graduation-cap" class="text-light" />
                                         </div>
 
@@ -144,7 +144,7 @@
                                             Drill: <a href="{% url 'drill:detail' match.source.uuid %}">{{ match.source.question }}</a>
                                             </h4>
 
-                                            <div>
+                                            <div class="mt-2">
                                             {% for tag in match.source.tags %}
                                                 <a href="{% url 'search:kb_search_tag_detail' tag %}" class="tag">{{ tag }}</a>
                                             {% endfor %}
@@ -159,7 +159,7 @@
                                         </h4>
 
                                         {% for tag in match.source.tags %}
-                                            <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
+                                            <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge bg-info">{{ tag }}</a>
                                         {% endfor %}
 
                                     {% elif match.source.doctype == "bookmark" %}
@@ -172,13 +172,13 @@
 
                                     {% elif match.source.doctype == "note" %}
 
-                                        <div class="mr-2 mt-1">
+                                        <div class="me-2 mt-1">
                                             <font-awesome-icon icon="sticky-note" class="text-light" />
                                         </div>
                                         <div class="d-flex flex-column">
                                             <h4 class="mb-0">
                                                 {% if match.source.importance > 1 %}
-                                                    <font-awesome-icon icon="heart" class="favorite" data-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                                    <font-awesome-icon icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
                                                 {% endif %}
                                                 <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.name|default:"Note" }}</a>
                                             </h4>
@@ -193,13 +193,13 @@
 
                                     {% elif match.source.doctype == "document" %}
 
-                                        <div class="mr-2 mt-1">
+                                        <div class="me-2 mt-1">
                                             <font-awesome-icon icon="copy" class="text-light" />
                                         </div>
                                         <div class="d-flex flex-column">
                                             <h4 class="mb-0">
                                                 {% if match.source.importance > 1 %}
-                                                    <font-awesome-icon icon="heart" class="favorite" data-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                                    <font-awesome-icon icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
                                                 {% endif %}
                                                 <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.name|default:"Name" }}</a>
                                                 {% if match.source.creators %} <small>{{ match.source.creators }}</small>{% endif %}
@@ -215,7 +215,7 @@
 
                                     {% elif match.source.doctype == "song" %}
 
-                                        <div class="mr-2 mt-1">
+                                        <div class="me-2 mt-1">
                                             <font-awesome-icon icon="music" class="text-light" />
                                         </div>
                                         <div class="d-flex flex-column">
@@ -236,10 +236,10 @@
                                         <div>
                                             <img src="{{ IMAGES_URL }}album_artwork/{{ match.source.uuid }}" height="75" width="75" />
                                         </div>
-                                        <div class="d-flex flex-column ml-2">
+                                        <div class="d-flex flex-column ms-2">
                                             <div class="d-flex align-items-center">
                                                 <font-awesome-icon icon="music" class="text-light"></font-awesome-icon>
-                                                <h4 class="mb-0 ml-2">
+                                                <h4 class="mb-0 ms-2">
                                                     <a href="{% url 'music:album_detail' match.source.uuid %}">{{ match.source.title|default:"Title" }}</a>
                                                 </h4>
                                             </div>
@@ -255,10 +255,10 @@
                                         <div>
                                             <img src="{{ match.source.cover_url }}" />
                                         </div>
-                                        <div class="d-flex flex-column ml-2">
+                                        <div class="d-flex flex-column ms-2">
                                             <h4>
                                                 {% if match.source.importance > 1 %}
-                                                    <font-awesome-icon icon="heart" class="favorite" data-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                                    <font-awesome-icon icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
                                                 {% endif %}
                                                 <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.name|default:"No name" }}</a>
                                                 {% if match.source.creators %} <small>{{ match.source.creators }}</small>{% endif %}
@@ -273,7 +273,7 @@
 
                                     {% endif %}
 
-                                    <div class="search-result-date text-nowrap ml-auto pl-4">
+                                    <div class="search-result-date text-nowrap ms-auto pe-4">
                                         {{ match.source.date }}
                                     </div>
 

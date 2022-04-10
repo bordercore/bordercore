@@ -6,13 +6,13 @@
 
 {% block content %}
 
-    <div class="row no-gutters h-100" id="vue-app">
+    <div class="row g-0 h-100" id="vue-app">
 
         <div class="col-lg-3 d-flex flex-column">
 
             <div class="card-body">
 
-                <div class="d-flex">
+                <div class="d-flex position-relative">
                     <h4>
                         Tag Info
                     </h4>
@@ -27,7 +27,7 @@
                             @blur="onBlur"
                         />
                     </div>
-                    <div class="ml-auto d-flex align-items-center" @click="openSearchWindow">
+                    <div class="ms-auto d-flex align-items-center" @click="openSearchWindow">
                         <font-awesome-icon icon="search" class="glow text-emphasis" />
                     </div>
                 </div>
@@ -78,7 +78,7 @@
                             <h4>
                             Tag Aliases
                             </h4>
-                            <div class="ml-auto mr-2">
+                            <div class="ms-auto me-2">
                                 <div class="button-add" @click="openModal">
                                     <font-awesome-icon icon="plus" class="text-emphasis" />
                                 </div>
@@ -89,8 +89,8 @@
 
                         <div class="d-flex">
 
-                            <div class="side-panel highlight-box mt-5 mr-5">
-                                <div class="circle mr-3 mb-2">
+                            <div class="side-panel highlight-box mt-5 me-5">
+                                <div class="circle me-3 mb-2">
                                     <font-awesome-icon icon="info"></font-awesome-icon>
                                 </div>
                                 Tag aliases are labels you can assign as synonyms for tags.
@@ -104,6 +104,7 @@
                                 :default-sort="['tag.name']"
                                 hoverable
                                 class="w-100"
+                                sort-icon="chevron-up"
                                 @mouseenter="onMouseEnter"
                                 @mouseleave="onMouseLeave"
                             >
@@ -117,14 +118,13 @@
                                 </b-table-column>
 
                                 <b-table-column field="uuid" label="" cell-class="col-action" v-slot="props">
-                                    <div class="hover-target hidden">
-                                        <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="text-center">
-                                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                                            <div slot="dropdown">
+                                    <drop-down-menu :show-on-hover="true">
+                                        <div slot="dropdown">
+                                            <li>
                                                 <a class="dropdown-item" href="#" @click.prevent="onClickDelete(props.row)">Delete</a>
-                                            </div>
-                                        </dropdown-menu>
-                                    </div>
+                                            </li>
+                                        </div>
+                                    </drop-down-menu>
                                 </b-table-column>
 
                                 </template>
@@ -146,7 +146,7 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h4 class="modal-title" id="myModalLabel">Add Tag Alias</h4>
-                            <button type="button" class="close close-button" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                            <button type="button" class="close-button btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
                             <div class="form-row align-items-center">
@@ -158,7 +158,7 @@
                                         value-attribute="text"
                                         search-url="{% url 'tag:search' %}?skip_tag_aliases=true&query="
                                         place-holder="Tag"
-                                        wrapper-class="w-100 mr-3"
+                                        wrapper-class="w-100 me-3"
                                         :debounce="500"
                                     >
                                     </simple-suggest>
@@ -169,7 +169,7 @@
                         <div class="modal-footer align-items-start align-items-center">
 
                             <div class="mt-2 text-info">
-                                <font-awesome-icon v-if="addAliasMessage" class="mr-1 pt-1 success" icon="exclamation-triangle" />
+                                <font-awesome-icon v-if="addAliasMessage" class="me-1 pt-1 success" icon="exclamation-triangle" />
                                 {{ addAliasMessage }}
                             </div>
 
@@ -203,8 +203,6 @@
                     filterSearch: "",
                     items: [
                     ],
-                    show: false,
-                    right: true,
                     addAliasTagName: "",
                     addAliasAliasName: "",
                     addAliasMessage: "",
@@ -250,19 +248,21 @@
                     }, 100);
                 },
                 onMouseEnter(row, evt) {
-                    evt.currentTarget.querySelector(".hover-target").classList.remove("hidden");
+                    evt.currentTarget.querySelector(".dropdown").classList.remove("d-none");
                 },
                 onMouseLeave(row, evt) {
-                    evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
+                    evt.currentTarget.querySelector(".dropdown").classList.add("d-none");
                 },
                 onClickDelete(item, index, evt) {
                     const selectedUuid = item;
                     axios.delete("{% url 'tagalias-detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", selectedUuid))
                          .then((response) => {
-                             this.$bvToast.toast("Tag alias deleted", {
-                                 title: "Info",
-                                 variant: "primary",
-                             });
+                             EventBus.$emit(
+                                 "toast",
+                                 {
+                                     "body": "Tag alias deleted",
+                                 },
+                             );
 
                              this.getTagAliasList();
 
@@ -277,7 +277,8 @@
                     }
                 },
                 openModal() {
-                    $("#modal-tagalias").modal("show");
+                    const modal = new Modal("#modal-tagalias");
+                    modal.show();
                     setTimeout( () => {
                         this.$refs.tagAliasSuggest.$refs.suggestComponent.input.focus();
                     }, 500);
@@ -301,7 +302,9 @@
                         },
                         () => {
                             this.resetModal();
-                            $("#modal-tagalias").modal("hide");
+
+                            const modal = Modal.getInstance(document.getElementById("modal-tagalias"));
+                            modal.hide();
                             this.getTagAliasList();
                         },
                         "Tag alias added",

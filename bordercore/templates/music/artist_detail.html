@@ -5,7 +5,7 @@
 {% block nav %}
 
     <div class="d-flex mb-3" id="vue-nav">
-        <div class="mr-auto align-self-center">
+        <div class="me-auto align-self-center">
             <ul class="breadcrumb mb-0 pt-0 pb-0">
                 <li class="breadcrumb-item">
                     <a href="{% url 'music:list' %}">
@@ -21,11 +21,11 @@
 
 {% block content %}
 
-    <div class="row no-gutters h-100" id="vue-app">
+    <div class="row g-0 h-100" id="vue-app">
 
         <div class="col-lg-3 d-flex flex-column">
 
-            <div class="card-grid ml-2">
+            <div class="card-grid ms-2">
 
             {% if artist_image %}
                 <div
@@ -54,19 +54,18 @@
 
         <div class="col-lg-9">
 
-            <div class="right-column mr-2">
+            <div class="right-column me-2">
 
-                <div class="card-grid ml-2">
+                <div class="card-grid ms-2">
 
                     <div class="d-flex">
-                        <h2 class="ml-3">
+                        <h2 class="ms-3">
                             {{ artist.name }}
                         </h2>
 
                         <drop-down-menu
                             ref="dropDownMenu"
                             :links="artistDetailMenuItems"
-                            class="dropdownmenu"
                         >
                         </drop-down-menu>
                     </div>
@@ -76,7 +75,7 @@
                         <card title="">
 
                             <template v-slot:title-slot>
-                                <h4 class="font-weight-bold">
+                                <h4 class="fw-bold">
                                     {{ album_list|length }} album{{ album_list|pluralize }}
                                 </h4>
                             </template>
@@ -93,7 +92,7 @@
                                                 <img src="{{ IMAGES_URL }}album_artwork/{{ album.uuid }}" height="150" width="150" />
                                             </a>
                                         </div>
-                                        <div class="mt-2 font-weight-bold">
+                                        <div class="mt-2 fw-bold">
                                             {{ album.title }}
                                         </div>
                                         <div>
@@ -133,7 +132,7 @@
                                                     <img src="{{ IMAGES_URL }}album_artwork/{{ album.uuid }}" height="150" width="150" />
                                                 </a>
                                             </div>
-                                            <div class="mt-2 font-weight-bold">
+                                            <div class="mt-2 fw-bold">
                                                 {{ album.title }}
                                             </div>
                                             <div>
@@ -156,7 +155,7 @@
                         <card title="">
 
                             <template v-slot:title-slot>
-                                <h4 class="font-weight-cold">
+                                <h4 class="fw-cold">
                                     {{ song_list|length }} song{{ song_list|pluralize }}
                                 </h4>
                             </template>
@@ -179,7 +178,7 @@
 
                                     <b-table-column field="title" label="Title" header-class="cursor-pointer" sortable v-slot="props">
                                         <span>[[ props.row.title ]]</span>
-                                        <span class="pl-2 table-note" v-html="props.row.note"></span>
+                                        <span class="ps-2 table-note" v-html="props.row.note"></span>
                                     </b-table-column>
 
                                     <b-table-column field="year" label="Year" header-class="cursor-pointer" sortable v-slot="props">
@@ -191,15 +190,16 @@
                                     </b-table-column>
 
                                     <b-table-column field="uuid" label="" cell-class="col-action text-center align-middle" v-slot="props">
-                                        <div class="hover-target hidden">
-                                            <dropdown-menu v-model="show" :right="true" transition="translate-fade-down" class="text-center">
-                                                <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                                                <div slot="dropdown">
-                                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(props.row)">Update</a>
+                                        <drop-down-menu :show-on-hover="true">
+                                            <div slot="dropdown">
+                                                <li>
+                                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(props.row.uuid)">Update</a>
+                                                </li>
+                                                <li>
                                                     <a class="dropdown-item" href="#" @click.prevent="onClickAddToPlaylist(props.row.uuid)">Add to playlist</a>
-                                                </div>
-                                            </dropdown-menu>
-                                        </div>
+                                                </li>
+                                            </div>
+                                        </drop-down-menu>
                                     </b-table-column>
 
                                 </b-table>
@@ -229,27 +229,28 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h4 class="modal-title" id="myModalLabel">Update Artist Image</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                         </button>
                     </div>
                     <div class="modal-body">
 
-                        <div class="form-group row">
-                            <label class="col-lg-4 col-form-label font-weight-bold text-right">Artist Image</label>
-                            <div class="col-lg-8 input-group">
-                                <input type="text" name="filename" :value="artistDetailFilename" class="form-control" autocomplete="off" />
-                                <span class="input-group-append">
-                                    <label class="btn btn-primary">Choose image
-                                        <input id="id_image" type="file" name="cover_image" hidden accept="image/*" @change="onArtistImageSelect" />
-                                    </label>
-                                </span>
+                        <div class="row">
+                            <label class="col-lg-4 col-form-label fw-bold text-end">Artist Image</label>
+                            <div class="col-lg-8">
+                                <div class="input-group">
+                                    <input type="text" name="filename" :value="artistDetailFilename" class="form-control" autocomplete="off" />
+                                    <span class="input-group-append">
+                                        <label class="btn btn-primary">Choose image
+                                            <input id="id_image" type="file" name="cover_image" hidden accept="image/*" @change="onArtistImageSelect" />
+                                        </label>
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
                     </div>
                     <div class="modal-footer">
-                        <input id="btn-action" class="btn btn-primary" data-dismiss="modal" type="button" value="Update" />
+                        <input id="btn-action" class="btn btn-primary" data-bs-dismiss="modal" type="button" value="Update" />
                     </div>
                 </div>
             </div>
@@ -326,10 +327,10 @@
                     }
                 },
                 onMouseEnter(row, evt) {
-                    evt.currentTarget.querySelector(".hover-target").classList.remove("hidden");
+                    evt.currentTarget.querySelector(".dropdown").classList.remove("d-none");
                 },
                 onMouseLeave(row, evt) {
-                    evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
+                    evt.currentTarget.querySelector(".dropdown").classList.add("d-none");
                 },
                 onClickUpdate(uuid) {
                     window.location="{% url 'music:update' '00000000-0000-0000-0000-000000000000' %}?return_url={{ request.get_full_path|safe }}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
@@ -338,7 +339,8 @@
                     this.$refs.addToPlaylist.openModal(uuid);
                 },
                 handleUpdateArtistImage() {
-                    $("#modalUpdateArtistImage").modal("show")
+                    const modal = new Modal("#modalUpdateArtistImage");
+                    modal.show();
                 },
                 handleImageDrop(evt) {
                     let image = evt.dataTransfer.files[0]

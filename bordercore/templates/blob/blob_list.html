@@ -13,7 +13,7 @@
 
                 <h1>Recent Blobs</h1>
 
-                <div class="mr-2 ml-auto">
+                <div class="me-2 ms-auto">
                     <add-button :href="'{% url 'blob:create' %}'">
                     </add-button>
                 </div>
@@ -21,14 +21,14 @@
             </div>
         </div>
 
-        <ul class="blob-list-nav list-group list-group-horizontal list-unstyled pl-5 ml-3">
+        <ul class="blob-list-nav list-group list-group-horizontal list-unstyled ps-5 ms-3">
             <li v-for="nav in navAll" v-if="nav === 'All' || doctypeCount(nav) > 0" class="px-5 m-3 mx-auto justify-content-center" v-bind:class="{ 'nav-selected': nav === navCurrent }" @click="onClickNav(nav)">
-                <span class="text-center"><a href="#" v-cloak>[[ nav ]]</a></span><span class="ml-1 badge badge-info" v-html="doctypeCount(nav)"></span>
+                <span class="text-center"><a href="#" v-cloak>[[ nav ]]</a></span><span class="ms-1 badge bg-info" v-html="doctypeCount(nav)"></span>
             </li>
         </ul>
 
-        <div class="d-flex flex-row flex-wrap ml-3">
-            <div v-for="blob in blobList" class="blob-list float-left mb-2 p-3 w-25" @click="onClickBlob(blob.url)" :data-doctype="blob.doctype">
+        <div class="d-flex flex-row flex-wrap ms-3">
+            <div v-for="blob in blobList" class="blob-list float-start mb-2 p-3 w-25" @click="onClickBlob(blob.url)" :data-doctype="blob.doctype">
 
                 <div class="d-flex flex-column h-100">
 
@@ -41,7 +41,7 @@
                     <div v-if="blob.doctype === 'note' || blob.doctype === 'document'" class="blob-content" v-html="getContent(blob)"></div>
 
                     <div class="blob-info d-flex justify-content-between mt-auto">
-                        <div class="text-primary mr-auto">[[ getDeltaDays(blob.delta_days) ]]</div>
+                        <div class="text-primary me-auto">[[ getDeltaDays(blob.delta_days) ]]</div>
                         <div class="text-center">
                             <span v-if="blob.content_size !== '0 Bytes'">Size: <span class="text-primary">[[ blob.content_size ]]</span></span>
                         </div>

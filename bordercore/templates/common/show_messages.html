@@ -2,15 +2,15 @@
 
 {% for message in messages %}
 
-    <div class="row no-gutters">
+    <div class="row g-0">
         <div class="col-lg-{{ width|default:12 }} offset-lg-{{ offset|default:0 }}">
 
     {% if message.tags == "error" or "show_in_dom" in message.tags %}
 
-        <div class="card-grid ml-2 mr-2">
+        <div class="card-grid ms-2 me-2">
 
-            <div class="message-{{ message.tags }} card-body ml-0 p-3">
-                <font-awesome-icon class="mr-1" icon="exclamation-triangle"></font-awesome-icon>
+            <div class="message-{{ message.tags }} card-body ms-0 p-3">
+                <font-awesome-icon class="me-1" icon="exclamation-triangle"></font-awesome-icon>
                 {{ message|safe }}
             </div>
 
@@ -29,7 +29,7 @@
             :visible=true
             :variant="'{{ message.tags|get_message_level }}'"
         >
-            <font-awesome-icon class="mr-1 pt-1 text-success" icon="check"></font-awesome-icon>
+            <font-awesome-icon class="me-1 pt-1 text-success" icon="check"></font-awesome-icon>
             {{ message|safe }}
         </b-toast>
 

@@ -1,9 +1,9 @@
 <template>
-    <span class="ml-2" data-toggle="tooltip" data-placement="bottom" title="Recent Blobs">
+    <span class="mx-2" data-bs-toggle="tooltip" data-placement="bottom" title="Recent Blobs">
 
-        <dropdown-menu v-model="showMenu" transition="translate-fade-down" class="text-center" :right="true">
+        <drop-down-menu>
 
-            <span class="ml-2">
+            <span slot="icon" class="ms-2">
                 <font-awesome-icon class="glow" icon="object-group" />
             </span>
 
@@ -19,7 +19,7 @@
                             <font-awesome-icon icon="file-alt" class="fa-3x" />
                         </span>
                     </span>
-                    <span class="ml-2">
+                    <span class="ms-2">
                         {{ link.name }}
                     </span>
                 </a>
@@ -27,7 +27,7 @@
                     <strong>Elasticsearch Error</strong>: {{ blobListInfo.message.statusCode }}
                 </div>
             </div>
-        </dropdown-menu>
+        </drop-down-menu>
     </span>
 </template>
 
@@ -44,11 +44,6 @@
                 default: "",
                 type: String,
             },
-        },
-        data() {
-            return {
-                showMenu: false,
-            };
         },
         computed: {
             menuItems: function() {

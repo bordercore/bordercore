@@ -1,10 +1,10 @@
 <template>
     <div>
-        <div>
-            <card v-b-hover="hoverAddButton" title="Related Blobs">
+        <div @mouseenter="handleHoverNote" @mouseleave="handleHoverNote">
+            <card title="Related Blobs">
                 <template #top-right>
-                    <div class="node-add-button">
-                        <add-button href="#" :click-handler="chooseBlob" class="hover-target d-none" />
+                    <div class="node-add-button d-none">
+                        <add-button href="#" :click-handler="chooseBlob" />
                     </div>
                 </template>
 
@@ -12,9 +12,9 @@
                     <ul id="sort-container-tags" class="list-group list-group-flush">
                         <draggable v-model="blobList" ghost-class="sortable-ghost" draggable=".draggable" @change="onSort">
                             <transition-group type="transition" class="w-100">
-                                <li v-for="(blob, index) in blobList" v-cloak :key="blob.uuid" v-b-hover="hoverDropdown" class="text-info draggable d-flex align-items-center p-2" :data-uuid="blob.uuid">
+                                <li v-for="(blob, index) in blobList" v-cloak :key="blob.uuid" class="text-info draggable d-flex align-items-center p-2" :data-uuid="blob.uuid" @mouseenter="handleHover" @mouseleave="handleHover">
                                     <div class="d-flex align-items-center w-100">
-                                        <div class="align-self-start pr-2">
+                                        <div class="align-self-start pe-2">
                                             <img :src="[[ blob.cover_url ]]" height="75" width="70">
                                         </div>
 
@@ -29,16 +29,15 @@
                                             </span>
                                         </div>
 
-                                        <div class="dropdownmenu d-flex">
-                                            <dropdown-menu ref="editNoteMenu" v-model="show" transition="translate-fade-down" class="d-none" :right="true">
-                                                <font-awesome-icon icon="ellipsis-v" />
-                                                <div slot="dropdown">
+                                        <drop-down-menu ref="editNoteMenu" :show-on-hover="true">
+                                            <div slot="dropdown">
+                                                <li>
                                                     <a class="dropdown-item" href="#" @click.prevent="removeBlob(blob.uuid)">Remove</a>
                                                     <a v-if="!blob.note" class="dropdown-item" href="#" @click.prevent="addNote(blob.uuid)">Add note</a>
                                                     <a v-else class="dropdown-item" href="#" @click.prevent="activateInEditMode(blob, index)">Edit note</a>
-                                                </div>
-                                            </dropdown-menu>
-                                        </div>
+                                                </li>
+                                            </div>
+                                        </drop-down-menu>
                                     </div>
                                 </li>
                                 <div v-cloak v-if="blobList.length == 0" :key="1" class="text-secondary">
@@ -166,7 +165,6 @@
 
                 self = this;
                 setTimeout( () => {
-                    this.$refs.editNoteMenu[0].closeMenu();
                     self.$refs.input[index].focus();
                 }, 100);
             },
@@ -178,7 +176,6 @@
                 }
 
                 this.$nextTick(() => {
-                    this.$refs.editNoteMenu[0].closeMenu();
                     this.$refs.input[0].focus();
                 });
             },
@@ -208,18 +205,19 @@
             hoverDropdown(isHovered, evt) {
                 this.handleHover(isHovered, evt, ".dropdown");
             },
-            hoverAddButton(isHovered, evt) {
-                this.handleHover(isHovered, evt, ".hover-target");
-            },
-            handleHover(isHovered, evt, selector) {
-                const target = evt.currentTarget.querySelector(selector);
-                if (target === null) {
-                    return;
+            handleHover(evt) {
+                const target = evt.currentTarget.querySelector(".dropdownmenu");
+
+                if (evt.type === "mouseenter") {
+                    target.classList.remove("d-none");
+                } else {
+                    target.classList.add("d-none");
                 }
-                // Note: I've found that using a more concise "toggle" command
-                //  can cause the button's state to become out of sync, so instead
-                //  I choose to be more specific instead.
-                if (isHovered) {
+            },
+            handleHoverNote(evt) {
+                const target = evt.currentTarget.querySelector(".node-add-button");
+
+                if (evt.type === "mouseenter") {
                     target.classList.remove("d-none");
                 } else {
                     target.classList.add("d-none");

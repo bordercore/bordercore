@@ -5,7 +5,7 @@
 {% block nav %}
 
     <div class="d-flex mb-3">
-        <div class="mr-auto align-self-center">
+        <div class="me-auto align-self-center">
             <ul class="breadcrumb mb-0 pt-0 pb-0">
                 <li class="breadcrumb-item"> <a href="{% url 'collection:list' %}">Collection List</a> </li>
                 <li class="breadcrumb-item active">{{ collection.name|default:"Anonymous collection" }}</li>
@@ -17,7 +17,7 @@
 
 {% block content %}
 
-    <div class="row no-gutters h-100" id="vue-app">
+    <div class="row g-0 h-100" id="vue-app">
 
         <div class="col-lg-3 d-flex flex-column">
 
@@ -29,19 +29,19 @@
 
                 <div class="mb-3" v-cloak>
                     <strong>Count</strong>
-                    <span class="text-primary ml-1">
+                    <span class="text-primary ms-1">
                         [[ $store.state.paginator.count ]] [[ getPluralized() ]]
                     </span>
                 </div>
 
                 <div class="mb-3">
                     <strong>Updated</strong>
-                    <span class="text-primary ml-1">
+                    <span class="text-primary ms-1">
                         {{ collection.modified|date:"F j, Y" }}
                     </span>
                 </div>
 
-                <a href="{% url 'blob:create' %}?collection_uuid={{ collection.uuid }}" class="btn btn-primary mt-2" role="button"><font-awesome-icon icon="plus" class="mr-2"></font-awesome-icon>Add Blob</a>
+                <a href="{% url 'blob:create' %}?collection_uuid={{ collection.uuid }}" class="btn btn-primary mt-2" role="button"><font-awesome-icon icon="plus" class="me-2"></font-awesome-icon>Add Blob</a>
 
                 <hr />
 
@@ -49,22 +49,22 @@
 
                 <ul class="list-group flex-column w-100">
                     <div v-cloak>
-                        <div class="tag-list pl-2 py-1 pr-1 d-flex" :class="{ 'selected rounded-sm': selectedTag === null }" @click.prevent="onClickSelectTag">
-                            <div class="pl-2">
+                        <div class="tag-list ps-2 py-1 pe-1 d-flex" :class="{ 'selected rounded-sm': selectedTag === null }" @click.prevent="onClickSelectTag">
+                            <div class="ps-2">
                                 All blobs
                             </div>
-                            <div class="ml-auto pr-2">
-                                <span class="px-2 badge badge-pill badge-info">
+                            <div class="ms-auto pe-2">
+                                <span class="px-2 badge rounded-pill bg-info">
                                     {{ collection.blobs.count }}
                                 </span>
                             </div>
                         </div>
-                        <li v-for="tag in blobTags" class="tag-list pl-2 py-1 pr-1 d-flex" :class="{ 'selected rounded-sm': tag.tag === selectedTag }" @click.prevent="onClickSelectTag" :data-tag="tag.tag" :key="tag.tag">
-                            <div class="pl-2">
+                        <li v-for="tag in blobTags" class="tag-list ps-2 py-1 pe-1 d-flex" :class="{ 'selected rounded-sm': tag.tag === selectedTag }" @click.prevent="onClickSelectTag" :data-tag="tag.tag" :key="tag.tag">
+                            <div class="ps-2">
                                 [[ tag.tag ]]
                             </div>
-                            <div class="ml-auto pr-2">
-                                <span class="px-2 badge badge-pill badge-info">
+                            <div class="ms-auto pe-2">
+                                <span class="px-2 badge rounded-pill bg-info">
                                     [[ tag.blob_count ]]
                                 </span>
                             </div>
@@ -85,7 +85,7 @@
                     <template v-slot:title-slot>
 
                         <div class="d-flex align-items-center">
-                            <h3 class="mr-auto">
+                            <h3 class="me-auto">
                                 {{ collection.name }}
                             </h3>
 
@@ -96,7 +96,7 @@
                                 <span v-else>
                                     <font-awesome-icon icon="chevron-left" class="text-emphasis icon-disabled" />
                                 </span>
-                                <a v-if="$store.state.paginator.has_next" href="#" @click.prevent="paginate('next')" class="ml-1">
+                                <a v-if="$store.state.paginator.has_next" href="#" @click.prevent="paginate('next')" class="ms-1">
                                     <font-awesome-icon icon="chevron-right" class="text-emphasis glow icon-hover" />
                                 </a>
                                 <span v-else>
@@ -106,9 +106,8 @@
 
                             <drop-down-menu
                                 ref="dropDownMenu"
-                                id="album-detail-menu"
                                 :links="collectionDetailMenuItems"
-                                class="dropdownmenu ml-5"
+                                class="ms-5"
                             >
                             </drop-down-menu>
                         </div>
@@ -116,14 +115,13 @@
                     </template>
 
                     <template v-slot:content>
-                        <div class="ml-2">
+                        <div class="ms-2">
                             <blob-list inline-template>
                                 <div id="collection-list" @drop.prevent="onAddBlob($event)" @dragover.prevent="onDragOverBlob($event)" @dragleave.prevent="onDragLeaveBlob($event)" @dragenter.prevent>
                                     <ul class="list-group list-group-horizontal text-center list-unstyled collection-sortable">
                                         <draggable v-model="blob_list" @change="onChange" ghost-class="collection_ghost_class" animation="500" forceFallback="true">
-                                            <li v-for="blob in blob_list" :key="blob.id" class="collection-item hoverable cursor-pointer float-left p-3">
-                                                <button type="button" class="collection-item-delete close" data-dismiss="modal" aria-label="Close" @click="removeBlob(blob.uuid)">
-                                                    <span aria-hidden="true">&times;</span>
+                                            <li v-for="blob in blob_list" :key="blob.id" class="collection-item hoverable cursor-pointer float-start p-3">
+                                                <button type="button" class="collection-item-delete btn-close" data-bs-dismiss="modal" aria-label="Close" @click="removeBlob(blob.uuid)">
                                                 </button>
                                                 <div class="d-flex flex-column h-100" @click="onClick(blob.url)">
                                                     <a :href="[[ blob.url ]]">
@@ -131,7 +129,7 @@
                                                     </a>
 
                                                     <div class="collection-item-name mt-auto">
-                                                    [[ blob.name ]]
+                                                        [[ blob.name ]]
                                                     </div>
 
                                                 </div>
@@ -166,11 +164,11 @@
                             <h4 class="modal-title" id="myModalLabel">
                                 Update Collection
                             </h4>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                         {% for field in form %}
-                            <div class="form-group{% if field.errors %} error{% endif %} row">
+                            <div class="{% if field.errors %} error{% endif %} row mb-3">
                                 <label class="col-lg-3 col-form-label" for="inputTitle">{{ field.label }}</label>
 
                                 <div class="col-lg-9">
@@ -213,7 +211,7 @@
 
                         <div class="modal-header">
                             <h4 class="modal-title" id="myModalLabel">Delete Collection</h4>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
 
                         <div class="modal-body">
@@ -221,7 +219,7 @@
                         </div>
 
                         <div class="modal-footer justify-content-end">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <input class="btn btn-primary" type="submit" value="Confirm" />
                         </div>
 
@@ -236,7 +234,7 @@
 
                     <div class="modal-header">
                         <h4 class="modal-title" id="myModalLabel">Begin Slide Show</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
 
                     <div class="modal-body">
@@ -247,7 +245,7 @@
                                 Slide Show Type
                             </div>
 
-                            <div class="form-group row mt-3">
+                            <div class="row mt-3">
                                 <div class="col-lg-12">
                                     <div class="form-check">
                                         <input v-model="slideShowType" class="form-check-input" type="radio" name="type" value="manual" checked>
@@ -258,7 +256,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group row mt-3">
+                            <div class="row mt-3">
                                 <div class="col-lg-4">
                                     <div class="form-check">
                                         <input v-model="slideShowType" class="form-check-input" type="radio" name="type" value="automatic">
@@ -268,16 +266,18 @@
                                     </div>
                                 </div>
                                 <div class="col-lg-8">
-                                    <select v-model="slideShowInterval" class="form-control" :disabled="slideShowType === 'manual'">
-                                        <option v-for="option in slideShowOptions" :key="option.value" :value="option.value">
+                                    <div>
+                                        <select v-model="slideShowInterval" class="form-control form-select" :disabled="slideShowType === 'manual'">
+                                            <option v-for="option in slideShowOptions" :key="option.value" :value="option.value">
                                             [[ option.display ]]
-                                        </option>
-                                    </select>
-                                    <div class="d-flex flex-column pl-4 mt-2">
-                                        <div>
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="d-flex ps-1 mt-2">
+                                        <input v-model="slideShowRandomize" class="form-check-input" type="checkbox" :disabled="slideShowType === 'manual'" />
+                                        <div class="ms-2">
                                             Randomize
                                         </div>
-                                        <input v-model="slideShowRandomize" class="form-check-input" type="checkbox" :disabled="slideShowType === 'manual'" />
                                     </div>
                                 </div>
                             </div>
@@ -288,12 +288,12 @@
                                 Options
                             </div>
 
-                            <div class="form-group row mt-3">
+                            <div class="row mt-3">
                                 <div class="col-lg-4">
                                     Tag
                                 </div>
                                 <div class="col-lg-8">
-                                    <select id="tag" class="form-control">
+                                    <select id="tag" class="form-control form-select">
                                         <option v-for="tag in blobTags" :value="tag.tag">
                                             [[ tag.tag ]]
                                         </option>
@@ -333,7 +333,7 @@
                 <div>
                     Processing...
                 </div>
-                <div class="spinner-border ml-2 text-info" role="status">
+                <div class="spinner-border ms-2 text-info" role="status">
                     <span class="sr-only">Loading...</span>
                 </div>
             </h4>
@@ -382,7 +382,8 @@
                 onAddBlob(evt) {
                     document.getElementById("collection-list").classList.remove("collection-drag-over");
 
-                    $("#modalProcessing").modal("show");
+                    const modal = Modal.getInstance(document.getElementById("modalProcessing"));
+                    modal.hide();
 
                     fileList = evt.dataTransfer.files;
                     const blob = fileList[0]
@@ -395,7 +396,8 @@
                             "Content-Type": "multipart/form-data"
                         }
                     }).then(response => {
-                        $("#modalProcessing").modal("hide");
+                        const modal = Modal.getInstance(document.getElementById("modalProcessing"));
+                        modal.hide();
                         if (response.data.status === "OK") {
                             const blobUuid = response.data.blob_uuid;
                             window.location="{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, blobUuid);
@@ -406,11 +408,14 @@
                                     domProps: { innerHTML: response.data.message }
                                 }
                             )
-                            this.$bvToast.toast(message, {
-                                noAutoHide: true,
-                                title: "Error",
-                                variant: "danger"
-                            });
+                            EventBus.$emit(
+                                "toast",
+                                {
+                                    "body": message,
+                                    "variant": "danger",
+                                    "autoHide": false,
+                                },
+                            );
                         }
                     });
 
@@ -485,7 +490,6 @@
             store,
             components: {
                 BlobList,
-                DropDownMenu,
                 TagsInput
             },
             data() {
@@ -558,14 +562,17 @@
                     window.location = url;
                 },
                 onClickUpdate() {
-                    $("#modalUpdate").modal("show");
+                    const modal = new Modal("#modalUpdate");
+                    modal.show();
                 },
                 onClickSlideShow() {
                     document.getElementById("tag").value = "";
-                    $("#modalSlideShow").modal("show");
+                    const modal = new Modal("#modalSlideShow");
+                    modal.show();
                 },
                 startSlideShow() {
-                    $("#modalSlideShow").modal("hide");
+                    const modal = Modal.getInstance(document.getElementById("modalSlideShow"));
+                    modal.hide();
 
                     // Hide scrollbars
                     document.body.style.overflow = "hidden";
@@ -606,7 +613,8 @@
                     }
                 },
                 onClickDelete() {
-                    $("#modalDelete").modal("show")
+                    const modal = new Modal("#modalDelete");
+                    modal.show();
                 },
                 paginate(direction) {
                     let pageNumber;

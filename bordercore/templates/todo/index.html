@@ -4,27 +4,27 @@
 
 {% block content %}
 
-    <div class="row no-gutters h-100" id="vue-app">
+    <div class="row g-0 h-100" id="vue-app">
 
         <div class="col-lg-3 d-flex flex-column">
 
             <div class="card-body" v-cloak>
 
                 <h4>Priority</h4>
-                <div v-for="option in filterPriorityOptions" :class="getPriorityClass(option[0])" class="tag-list pl-2 py-1 pr-1 d-flex" @click.prevent="onClickPriority" :data-priority="option[0]">
+                <div v-for="option in filterPriorityOptions" :class="getPriorityClass(option[0])" class="tag-list ps-2 py-1 pe-1 d-flex" @click.prevent="onClickPriority" :data-priority="option[0]">
                     <div>[[ option[1] ]]</div>
-                    <div class="ml-auto">
-                        <span class="px-2 badge badge-pill badge-info">[[ option[2] ]]</span>
+                    <div class="ms-auto">
+                        <span class="px-2 badge rounded-pill bg-info">[[ option[2] ]]</span>
                     </div>
                 </div>
 
                 <hr class="filter-divider" />
 
                 <h4>Created</h4>
-                <div v-for="option in filterTimeOptions" :class="getTimeClass(option[0])" class="tag-list pl-2 py-1 pr-1 d-flex" @click.prevent="onClickTime" :data-created="option[0]">
+                <div v-for="option in filterTimeOptions" :class="getTimeClass(option[0])" class="tag-list ps-2 py-1 pe-1 d-flex" @click.prevent="onClickTime" :data-created="option[0]">
                     <div>[[ option[1] ]]</div>
-                    <div class="ml-auto">
-                        <span class="px-2 badge badge-pill badge-info">[[ option[2] ]]</span>
+                    <div class="ms-auto">
+                        <span class="px-2 badge rounded-pill bg-info">[[ option[2] ]]</span>
                     </div>
                 </div>
 
@@ -32,10 +32,10 @@
 
                 <h4>Tags</h4>
                 {% for tag in tags %}
-                    <div class="tag-list pl-2 py-1 pr-1 d-flex" :class="getTagClass('{{ tag.name }}')" @click.prevent="onClickTag" data-tag="{{ tag.name }}">
+                    <div class="tag-list ps-2 py-1 pe-1 d-flex" :class="getTagClass('{{ tag.name }}')" @click.prevent="onClickTag" data-tag="{{ tag.name }}">
                         <div>{{ tag.name }}</div>
-                        <div class="ml-auto">
-                            <span class="px-2 badge badge-pill {% ifequal tagsearch tag.name %}badge-dark{% else %}badge-info{% endifequal %}">{{ tag.count }}
+                        <div class="ms-auto">
+                            <span class="px-2 badge rounded-pill {% ifequal tagsearch tag.name %}bg-dark{% else %}bg-info{% endifequal %}">{{ tag.count }}
                             </span></div>
                     </div>
                 {% empty %}
@@ -48,19 +48,19 @@
 
         <div class="col-lg-9">
 
-            <div class="card-grid ml-2">
+            <div class="card-grid ms-2">
 
                 <div class="d-flex justify-content-between">
 
                     <form class="form-inline" role="form">
 
-                        <div class="form-group ml-2">
+                        <div class="ms-2">
                             <input type="text" v-model="filterSearch" class="form-control" placeholder="Search" @keydown.enter.prevent="search()">
                         </div>
 
                     </form>
 
-                    <div class="mr-2">
+                    <div class="me-2">
                         <add-button href="#" :click-handler="handleCreateTodo">
                         </add-button>
                     </div>
@@ -89,7 +89,7 @@
                     <b-table-column field="name" label="Name" sortable header-class="cursor-pointer" v-slot="props">
                         [[ props.row.name ]]
                         <span v-if="props.row.url">
-                            <a class="ml-1" :href="props.row.url">
+                            <a class="ms-1" :href="props.row.url">
                                 <font-awesome-icon icon="link"></font-awesome-icon>
                             </a>
                         </span>
@@ -105,18 +105,21 @@
                     </b-table-column>
 
                     <b-table-column field="uuid" label="" cell-class="col-action" v-slot="props">
-                        <div class="hover-target hidden">
-                            <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="text-center">
-                                <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+                        <div class="hover-target d-none">
+                            <drop-down-menu >
                                 <div slot="dropdown">
-                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(props.row)">
-                                        <font-awesome-icon icon="pencil-alt" class="text-primary mr-3"></font-awesome-icon>Update
-                                    </a>
-                                    <a class="dropdown-item" href="#" @click.prevent="onClickDelete(props.row)">
-                                        <font-awesome-icon icon="trash-alt" class="text-primary mr-3"></font-awesome-icon>Delete
-                                    </a>
+                                    <li>
+                                        <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(props.row)">
+                                            <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#" @click.prevent="onClickDelete(props.row)">
+                                            <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>Delete
+                                        </a>
+                                    </li>
                                 </div>
-                            </dropdown-menu>
+                            </drop-down-menu>
                         </div>
                     </b-table-column>
 
@@ -204,10 +207,10 @@
                     }
                 },
                 onMouseEnter(row, evt) {
-                    evt.currentTarget.querySelector(".hover-target").classList.remove("hidden");
+                    evt.currentTarget.querySelector(".hover-target").classList.remove("d-none");
                 },
                 onMouseLeave(row, evt) {
-                    evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
+                    evt.currentTarget.querySelector(".hover-target").classList.add("d-none");
                 },
                 onDragOver(payload) {
                     payload.event.dataTransfer.dropEffect = "move";
@@ -246,13 +249,15 @@
                     const self = this;
                     axios.delete("{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", todoInfo.uuid))
                          .then((response) => {
-                             this.$bvToast.toast("Todo task deleted", {
-                                 title: "Info",
-                                 variant: "primary",
-                             });
+                             EventBus.$emit(
+                                 "toast",
+                                 {
+                                     "body": "Todo task deleted",
+                                     "variant": "info",
+                                 },
+                             );
 
                              self.getTodoList();
-                             /* EventBus.$emit("get-todo-list"); */
 
                              console.log("Success");
                          }, (error) => {
@@ -323,7 +328,8 @@
                     this.$refs.updateTodo.setAction("Update");
                     this.$refs.updateTodo.todoInfo = todoInfo;
                     EventBus.$emit("addTags", todoInfo.tags);
-                    $("#modalUpdateTodo").modal("show");
+                    const modal = new Modal("#modalUpdateTodo");
+                    modal.show();
                     setTimeout( () => {
                         document.getElementById("id_name").focus();
                     }, 500);
@@ -349,7 +355,8 @@
                             "addTags", initialTagList,
                         );
                     }
-                    $("#modalUpdateTodo").modal("show");
+                    const modal = new Modal("#modalUpdateTodo");
+                    modal.show();
                     setTimeout( () => {
                         document.getElementById("id_name").focus();
                     }, 500);

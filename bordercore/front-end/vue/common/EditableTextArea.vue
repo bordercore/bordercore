@@ -2,11 +2,11 @@
     <div>
         <div v-if="textAreaValue || isEditingNote" :class="[isEditingNote ? 'editing' : '', extraClass]">
             <slot name="title" />
-            <label class="editable-textarea-label w-100" data-toggle="tooltip" data-placement="bottom" title="Doubleclick to edit note" @dblclick="editNote" v-html="textAreaMarkdown" />
+            <label class="editable-textarea-label w-100" data-bs-toggle="tooltip" data-placement="bottom" title="Doubleclick to edit note" @dblclick="editNote" v-html="textAreaMarkdown" />
             <textarea id="note" v-model="textAreaValue" class="editable-textarea px-3" placeholder="Enter note text here" @blur="onBlur()" />
         </div>
         <div v-else>
-            <div v-if="!hideAddButton" class="ml-2" :class="extraClass">
+            <div v-if="!hideAddButton" class="ms-2" :class="extraClass">
                 <font-awesome-icon icon="plus" />
                 <a href="#" @click="addNote">Add Note</a>
             </div>

@@ -104,7 +104,7 @@ class SongForm(ModelForm):
         return cleaned_data
 
     source = ModelChoiceField(queryset=SongSource.objects.all(),
-                              widget=forms.Select(attrs={"class": "form-control"}),
+                              widget=forms.Select(attrs={"class": "form-control form-select"}),
                               empty_label="Select Source")
 
     class Meta:

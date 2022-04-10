@@ -4,7 +4,7 @@
 
 {% block content %}
 
-    <div class="row no-gutters h-100">
+    <div class="row g-0 h-100">
 
         <div class="col-lg-3 d-flex flex-column">
 
@@ -17,12 +17,12 @@
                         <div>
                             <draggable v-model="$store.state.pinnedTags" @change="onSortTags" ghost-class="sortable-ghost" draggable=".draggable">
                                 <transition-group type="transition" class="w-100">
-                                    <li v-for="tag in $store.state.pinnedTags" class="bookmark-tag-list d-flex pl-2 py-1 pr-1" :class="{ 'selected rounded-sm': tag.name === $store.state.selectedTagName, draggable: tag.isDraggable }" @click.prevent="onClickTag" :data-tag="tag.name" :data-id="tag.id" :key="tag.id" @dragover="onDragOverTag($event)" @dragleave="onDragLeaveTag($event)" @drop="onAddTagToBookmark($event, tag)">
-                                        <div class="pl-2 text-truncate">
+                                    <li v-for="tag in $store.state.pinnedTags" class="bookmark-tag-list d-flex ps-2 py-1 pr-1" :class="{ 'selected rounded-sm': tag.name === $store.state.selectedTagName, draggable: tag.isDraggable }" @click.prevent="onClickTag" :data-tag="tag.name" :data-id="tag.id" :key="tag.id" @dragover="onDragOverTag($event)" @dragleave="onDragLeaveTag($event)" @drop="onAddTagToBookmark($event, tag)">
+                                        <div class="ps-2 text-truncate">
                                             [[ tag.name ]]
                                         </div>
-                                        <div v-if="tag.count" class="ml-auto pr-2">
-                                            <span class="px-2 badge badge-pill badge-info">
+                                        <div v-if="tag.count" class="ms-auto pe-2">
+                                            <span class="px-2 badge rounded-pill bg-info">
                                                 [[ tag.count ]]
                                             </span>
                                         </div>
@@ -39,9 +39,9 @@
 
         <div id="vue-app-top" class="col-lg-9">
 
-            <div class="ml-3">
+            <div class="ms-3">
 
-                <div id="bookmark-search-form" class="d-flex flex-column mr-3 p-3">
+                <div id="bookmark-search-form" class="d-flex flex-column me-3 p-3">
 
                     <div class="d-flex">
                         <form class="form-inline" role="form" method="get" @submit.prevent>
@@ -49,10 +49,10 @@
 
                             <input id="add-to-remote-from-pinned-tagname" type="hidden" name="tag" />
 
-                            <div class="form-group has-search" v-cloak>
-                                <font-awesome-icon icon="search" class="ml-2 text-info"></font-awesome-icon>
+                            <div class="has-search position-relative" v-cloak>
+                                <font-awesome-icon icon="search" class="ms-2 text-info"></font-awesome-icon>
                                 <search inline-template @search-term="onTermSearch" @get-page="getPage" ref="search">
-                                    <div class="position-relative">
+                                    <div>
                                         <simple-suggest
                                             id="bookmarkSearch"
                                             ref="simpleSuggest"
@@ -66,39 +66,41 @@
 
                         </form>
 
-                        <div class="btn-group ml-3" role="group" aria-label="List View">
+                        <div class="btn-group ms-3" role="group" aria-label="List View">
                             <button type="button" class="btn btn-primary" :class="{'active': $store.state.viewType === 'normal' }" @click="switchViewType('normal')">Normal</button>
                             <button type="button" class="btn btn-primary" :class="{'active': $store.state.viewType === 'compact' }" @click="switchViewType('compact')">Compact</button>
                         </div>
 
-                        <div class="ml-3">
+                        <div class="ms-3">
                             <add-button :href="'{% url 'bookmark:create' %}'">
                             </add-button>
                         </div>
 
-                        <div class="dropdownmenu d-flex">
-                            <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="my-auto">
-                                <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                                <div slot="dropdown" v-cloak>
+                        <drop-down-menu class="my-auto">
+                            <div slot="dropdown" v-cloak>
+                                <li>
                                     <a v-if="$store.state.selectedTagName && $store.state.selectedTagName !== 'Untagged'" class="dropdown-item" href="#" @click.prevent="togglePinStatus">
-                                        <font-awesome-icon icon="thumbtack" class="text-primary mr-3"></font-awesome-icon>
-                                    [[ getPinnedMenuItem() ]]
+                                        <font-awesome-icon icon="thumbtack" class="text-primary me-3"></font-awesome-icon>
+                                        [[ getPinnedMenuItem() ]]
                                     </a>
+                                </li>
+                                <li>
                                     <a class="dropdown-item" href=" url 'bookmark:import' %}">
-                                        <font-awesome-icon icon="file-import" class="text-primary mr-3"></font-awesome-icon>Import
+                                        <font-awesome-icon icon="file-import" class="text-primary me-3"></font-awesome-icon>
+                                        Import
                                     </a>
-                                </div>
-                            </dropdown-menu>
-                        </div>
+                                </li>
+                            </div>
+                        </drop-down-menu>
 
                     </div>
                     <div v-cloak>
-                        <div class="d-flex mt-1 ml-3">
+                        <div class="d-flex mt-1 ms-3">
 
                             <div v-if="$store.state.selectedTagName && $store.state.selectedTagName !== 'Untagged'" id="bookmark-search-filter" class="tag label label-info d-flex align-items-center">
                                 <div>Tag: <span class="text-white">[[ $store.state.selectedTagName ]]</span></div>
                                 <div>
-                                    <a class="ml-1" href="#" @click.prevent="removeFilter">
+                                    <a class="ms-1" href="#" @click.prevent="removeFilter">
                                         <font-awesome-icon icon="times" class="text-primary" />
                                     </a>
                                 </div>
@@ -107,7 +109,7 @@
                             <div v-if="$store.state.searchTerm" id="bookmark-search-filter" class="tag label label-info d-flex align-items-center">
                                 <div>Term: <span class="text-white">[[ $store.state.searchTerm ]]</span></div>
                                 <div>
-                                    <a class="ml-1" href="#" @click.prevent="removeFilter">
+                                    <a class="ms-1" href="#" @click.prevent="removeFilter">
                                         <font-awesome-icon icon="times" class="text-primary" />
                                     </a>
                                 </div>
@@ -119,7 +121,7 @@
 
             </div>
 
-            <div class="card-grid ml-2">
+            <div class="card-grid ms-2">
 
                 <bookmark-list inline-template @get-page="getPage" ref="bookmarkList" class="interior-borders scrollable-panel-scrollbar-hover vh-100">
                     <div class="row">
@@ -127,7 +129,7 @@
                             <table id="bookmark-list" class="w-100">
                                 <tbody is="draggable" v-model="bookmarkList" @change="onSortBookmarks" ghost-class="sortable-ghost">
                                     <transition-group type="transition">
-                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="bookmark-list w-100" @mouseenter="onRowHovered" @mouseleave="onRowUnhovered" v-b-hover="handleYoutubeHover" v-cloak @dragstart="startDrag($event, bookmark)" @click="onClickBookmark(bookmark.uuid)">
+                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="bookmark-list w-100" v-cloak @dragstart="startDrag($event, bookmark)" @click="onClickBookmark(bookmark.uuid)" @mouseenter="onMouseEnterLeave" @mouseleave="onMouseEnterLeave">
                                             <td class="bookmark-list-date p-2 text-info align-top">
                                                 <span>[[ bookmark.created ]]</span>
                                             </td>
@@ -139,27 +141,30 @@
                                             </td>
                                             <td class="bookmark-list-link w-100 p-2 align-top position-relative">
                                                 <a :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.name) ]]</a>
-                                                <a v-for="tag in bookmark.tags" v-if="tag != $store.state.selectedTagName" class="tag ml-2 d-inline-block" @click.prevent="onClickTag" href="#">[[ tag ]]</a>
+                                                <a v-for="tag in bookmark.tags" v-if="tag != $store.state.selectedTagName" class="tag ms-2 d-inline-block" @click.prevent="onClickTag" href="#">[[ tag ]]</a>
                                                 <div v-if="bookmark.note != null && bookmark.note != ''" class="table-note">
                                                     [[ bookmark.note ]]
                                                 </div>
-                                                <div class="yt-hover-target text-secondary position-absolute d-none" v-if="bookmark.url.startsWith('https://www.youtube.com/watch') && $store.state.viewType === 'normal'">
+                                                <div class="yt-hover-target text-info position-absolute d-none" v-if="bookmark.url.startsWith('https://www.youtube.com/watch') && $store.state.viewType === 'normal'">
                                                     Duration: [[ bookmark.video_duration ]]
                                                 </div>
                                             </td>
                                             <td class="p-2">
-                                                <div class="dropdownmenu small mr-4">
-                                                    <dropdown-menu v-model="show" :right="right" transition="translate-fade-down" class="d-none">
-                                                        <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+                                                <div class="small me-4">
+                                                    <drop-down-menu :show-on-hover="true">
                                                         <div slot="dropdown">
-                                                            <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(bookmark.uuid)">
-                                                                <font-awesome-icon icon="pencil-alt" class="text-primary mr-3"></font-awesome-icon>Update
-                                                            </a>
-                                                            <a class="dropdown-item" href="#" @click.prevent="onClickDelete(bookmark.uuid)">
-                                                                <font-awesome-icon icon="trash-alt" class="text-primary mr-3"></font-awesome-icon>Delete
-                                                            </a>
+                                                            <li>
+                                                                <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(bookmark.uuid)">
+                                                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item" href="#" @click.prevent="onClickDelete(bookmark.uuid)">
+                                                                    <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>Delete
+                                                                </a>
+                                                            </li>
                                                         </div>
-                                                    </dropdown-menu>
+                                                    </drop-down-menu>
                                                 </div>
                                             </td>
                                         </tr>
@@ -179,7 +184,7 @@
 
                 <div class="d-flex justify-content-center">
 
-                    <pagination class="ml-3 mt-3" inline-template @get-page="getPage" ref="paginator" v-cloak>
+                    <pagination class="ms-3 mt-3" inline-template @get-page="getPage" ref="paginator" v-cloak>
                         <div class="row" v-if="pagination.num_pages > 1">
                             <nav aria-label="Page navigation">
                                 <ul class="pagination">
@@ -296,10 +301,10 @@
         const BookmarkList = {
             data() {
                 return {
-                    bookmarkList: [],
-                    selectedBookmarkUuid: null,
                     show: false,
                     right: true,
+                    bookmarkList: [],
+                    selectedBookmarkUuid: null,
                 }
             },
             methods: {
@@ -351,14 +356,19 @@
                         return data.video_duration;
                     }
                 },
-                handleYoutubeHover(hovered, evt) {
-                    if (!evt.currentTarget.querySelector(".yt-hover-target")) {
-                        return;
-                    }
-                    if (hovered) {
-                        evt.currentTarget.querySelector(".yt-hover-target").classList.remove("d-none");
+                onMouseEnterLeave(evt) {
+                    const dropdownTarget = evt.currentTarget.querySelector(".dropdownmenu");
+                    const YTTarget = evt.currentTarget.querySelector(".yt-hover-target");
+                    if (evt.type === "mouseenter") {
+                        dropdownTarget.classList.remove("d-none");
+                        if (YTTarget) {
+                            YTTarget.classList.remove("d-none");
+                        }
                     } else {
-                        evt.currentTarget.querySelector(".yt-hover-target").classList.add("d-none");
+                        dropdownTarget.classList.add("d-none");
+                        if (YTTarget) {
+                            YTTarget.classList.add("d-none");
+                        }
                     }
                 },
                 getBookmarkList({ pageNumber=1, searchTerm=null, searchTag=null } = {}) {
@@ -422,10 +432,12 @@
                     axios.delete("{% url 'bookmark-detail' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', uuid))
                          .then(() => {
 
-                             this.$bvToast.toast("Bookmark deleted", {
-                                 title: "Info",
-                                 variant: "primary"
-                             })
+                             EventBus.$emit(
+                                 "toast",
+                                 {
+                                     "body": "Bookmark deleted",
+                                 },
+                             );
 
                              if (this.$store.state.selectedTagName) {
                                  if (this.$store.state.selectedTagName === "Untagged") {
@@ -437,12 +449,6 @@
                              }
 
                          })
-                },
-                onRowHovered(evt) {
-                    evt.currentTarget.querySelector(".dropdown").classList.remove("d-none");
-                },
-                onRowUnhovered(evt) {
-                    evt.currentTarget.querySelector(".dropdown").classList.add("d-none");
                 },
                 getNextBookmark() {
                     const index = this.bookmarkList.findIndex( (e) => e.uuid === this.selectedBookmarkUuid );

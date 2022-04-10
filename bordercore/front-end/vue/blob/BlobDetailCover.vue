@@ -1,6 +1,6 @@
 <template>
     <div :class="imageClass">
-        <img class="cover_image h-100 w-100" :src="coverUrl" data-toggle="modal" data-target="#myModal3" @error="loadCoverImage()">
+        <img class="cover_image h-100 w-100" :src="coverUrl" data-bs-toggle="modal" data-bs-target="#myModal3" @error="loadCoverImage()">
         <div id="myModal3" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
             <div class="modal-dialog modal-dialog-centered w-75 mw-100" role="document">
                 <div class="modal-content">

@@ -6,7 +6,7 @@
                 Your browser does not support the audio tag.
             </audio>
         </div>
-        <div class="ml-4 mt-1">
+        <div class="ms-4 mt-1">
             <input id="continuous_play" type="checkbox" @change="onContinuousPlay">
             <label for="continuous_play">Continous Play</label>
         </div>

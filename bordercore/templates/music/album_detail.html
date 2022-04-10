@@ -5,7 +5,7 @@
 {% block nav %}
 
     <div class="d-flex mb-3" id="vue-nav">
-        <div class="mr-auto align-self-center">
+        <div class="me-auto align-self-center">
             <ul class="breadcrumb mb-0 pt-0 pb-0">
                 <li class="breadcrumb-item"> <a href="{% url 'music:list' %}"><font-awesome-icon icon="home" class="icon-hover"></font-awesome-icon></a> </li>
                 <li class="breadcrumb-item"> <a href="{% url 'music:artist_detail' album.artist.uuid %}">{{ album.artist.name }}</a> </li>
@@ -18,11 +18,11 @@
 
 {% block content %}
 
-    <div class="row no-gutters h-100" id="vue-app">
+    <div class="row g-0 h-100" id="vue-app">
 
         <div class="col-lg-3 d-flex flex-column">
 
-            <div class="card-grid ml-2 d-flex flex-column align-items-center">
+            <div class="card-grid ms-2 d-flex flex-column align-items-center">
 
                 <img src="{{ IMAGES_URL }}album_artwork/{{ album.uuid }}?cache_buster={{ request.GET.cache_buster }}" class="mw-100" height="400" width="400" />
 
@@ -41,7 +41,7 @@
 
                 {% for tag in album.tags.all %}
                     {% if forloop.first %}
-                        <div class="align-self-start ml-3 mt-3 mb-3">
+                        <div class="align-self-start ms-3 mt-3 mb-3">
                             Tags:
                     {% endif %}
                     <span class="tag">{{ tag.name }}</span>
@@ -54,11 +54,11 @@
 
         </div>
 
-        <div class="col-lg-9 mr-0">
+        <div class="col-lg-9 me-0">
 
-            <div class="card-grid ml-2">
+            <div class="card-grid ms-2">
 
-                <div class="mr-2">
+                <div class="me-2">
                     <card title="">
                         <template v-slot:content>
                             <div class="d-flex">
@@ -68,7 +68,6 @@
                                 <drop-down-menu
                                     ref="dropDownMenu"
                                     :links="albumDetailMenuItems"
-                                    class="dropdownmenu"
                                 >
                                 </drop-down-menu>
                             </div>
@@ -103,7 +102,7 @@
 
                                     <b-table-column field="title" label="Title" header-class="cursor-pointer" sortable v-slot="props">
                                         <span>[[ props.row.title ]]</span>
-                                        <span class="pl-2 table-note" v-html="props.row.note"></span>
+                                        <span class="ps-2 table-note" v-html="props.row.note"></span>
                                     </b-table-column>
 
                                     <b-table-column field="length" label="Length" header-class="cursor-pointer" sortable v-slot="props">
@@ -111,15 +110,16 @@
                                     </b-table-column>
 
                                     <b-table-column field="uuid" label="" cell-class="col-action text-center align-middle" v-slot="props">
-                                        <div class="hover-target hidden">
-                                            <dropdown-menu v-model="show" :right="true" transition="translate-fade-down" class="text-center">
-                                                <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                                                <div slot="dropdown">
-                                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(props.row)">Update</a>
+                                        <drop-down-menu :show-on-hover="true">
+                                            <div slot="dropdown">
+                                                <li>
+                                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(props.row.uuid)">Update</a>
+                                                </li>
+                                                <li>
                                                     <a class="dropdown-item" href="#" @click.prevent="onClickAddToPlaylist(props.row.uuid)">Add to playlist</a>
-                                                </div>
-                                            </dropdown-menu>
-                                        </div>
+                                                </li>
+                                            </div>
+                                        </drop-down-menu>
                                     </b-table-column>
 
                                 </b-table>
@@ -146,7 +146,8 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h4 class="modal-title" id="myModalLabel">Update Album</h4>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                            </button>
                         </div>
                         <div class="modal-body">
 
@@ -154,8 +155,8 @@
 
                             {% if field.label == "Tags" %}
 
-                                <div class="form-group row">
-                                    <label class="col-lg-4 col-form-label font-weight-bold text-right">Tags</label>
+                                <div class="row mb-3">
+                                    <label class="col-lg-4 col-form-label fw-bold text-end">Tags</label>
                                     <div class="col-lg-8">
                                         <tags-input
                                             search-url="{% url 'tag:search' %}?query="
@@ -166,8 +167,8 @@
 
                             {% elif field.label == "Artist" %}
 
-                                <div class="form-group{% if field.errors %} error{% endif %} row">
-                                    <label class="col-lg-4 col-form-label font-weight-bold text-right">Artist</label>
+                                <div class="{% if field.errors %} error{% endif %} row mb-3">
+                                    <label class="col-lg-4 col-form-label fw-bold text-end">Artist</label>
 
                                     <div class="col-lg-8">
                                         <simple-suggest
@@ -189,22 +190,24 @@
 
                             {% elif field.label == "Cover image" %}
 
-                                <div class="form-group row">
-                                    <label class="col-lg-4 col-form-label font-weight-bold text-right">Cover Image</label>
-                                    <div class="col-lg-8 input-group">
-                                        <input type="text" name="filename" :value="filename" class="form-control" autocomplete="off" />
-                                        <span class="input-group-append">
-                                            <label class="btn btn-primary">Choose image
-                                                <input type="file" name="cover_image" hidden accept="image/*" @change="onCoverImageSelect" />
-                                            </label>
-                                        </span>
+                                <div class="row mb-3">
+                                    <label class="col-lg-4 col-form-label fw-bold text-end">Cover Image</label>
+                                    <div class="col-lg-8">
+                                        <div class="input-group">
+                                            <input type="text" name="filename" :value="filename" class="form-control" autocomplete="off" />
+                                            <span class="input-group-append">
+                                                <label class="btn btn-primary">Choose image
+                                                    <input type="file" name="cover_image" hidden accept="image/*" @change="onCoverImageSelect" />
+                                                </label>
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 
                             {% else %}
 
-                                <div class="form-group{% if field.errors %} error{% endif %} row">
-                                    <label class="col-lg-4 col-form-label font-weight-bold text-right">{{ field.label }}</label>
+                                <div class="{% if field.errors %} error{% endif %} row mb-3">
+                                    <label class="col-lg-4 col-form-label fw-bold text-end">{{ field.label }}</label>
 
                                     <div class="col-lg-8">
                                 {{ field }}
@@ -249,7 +252,6 @@
             el: "#vue-app",
             components: {
                 AddToPlaylist,
-                DropDownMenu,
             },
             data() {
                 const songList = [
@@ -307,10 +309,10 @@
                     }
                 },
                 onMouseEnter(row, evt) {
-                    evt.currentTarget.querySelector(".hover-target").classList.remove("hidden");
+                    evt.currentTarget.querySelector(".dropdown").classList.remove("d-none");
                 },
                 onMouseLeave(row, evt) {
-                    evt.currentTarget.querySelector(".hover-target").classList.add("hidden");
+                    evt.currentTarget.querySelector(".dropdown").classList.add("d-none");
                 },
                 onClickUpdate(uuid) {
                     window.location="{% url 'music:update' '00000000-0000-0000-0000-000000000000' %}?return_url={{ request.get_full_path }}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
@@ -322,7 +324,8 @@
                     return markdown.render(note);
                 },
                 handleUpdateAlbum() {
-                    $("#modalUpdateAlbum").modal("show")
+                    const modal = new Modal("#modalUpdateAlbum");
+                    modal.show();
                 },
                 handleDeleteAlbum() {
                     axios.delete("{% url 'album-detail' object.uuid %}")

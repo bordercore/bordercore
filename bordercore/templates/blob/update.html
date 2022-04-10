@@ -11,7 +11,7 @@
     {% if object %}
 
         <div class="d-flex mb-3">
-            <div class="mr-auto align-self-center">
+            <div class="me-auto align-self-center">
                 <ul class="breadcrumb mb-0 pt-0 pb-0">
                     <li class="breadcrumb-item"><a href="{% url 'blob:detail' object.uuid %}">Blob Detail</a></li>
                     <li class="breadcrumb-item active">Edit Blob</li>
@@ -25,7 +25,7 @@
 
 {% block content %}
 
-    <div class="scrollable-panel-container row no-gutters">
+    <div class="scrollable-panel-container row g-0">
 
         <div class="col-lg-3 h-100 d-flex flex-column">
             <div id="vue-app-left" class="scrollable-panel card-body d-flex flex-column h-100">
@@ -92,7 +92,7 @@
                             <input type="button" class="btn btn-secondary" value="Cleanup Filename" @click="onClick" />
                         </cleanup-filename-button>
                     </div>
-                    <div class="ml-3">
+                    <div class="ms-3">
                         <upper-case-first-button inline-template>
                             <input type="button" class="btn btn-secondary" value="Upper Case First" @click="onClick" />
                         </upper-case-first-button>
@@ -126,7 +126,7 @@
                         {% if linked_blob.thumbnail_url %}
                             <img src="{{ linked_blob.thumbnail_url }}" />
                         {% endif %}
-                        <h5 class="d-flex justify-content-center ml-2 w-100">
+                        <h5 class="d-flex justify-content-center ms-2 w-100">
                             <div>
                             Linking to <a href="{% url 'blob:detail' linked_blob.uuid %}">{{ linked_blob.name|default:"Blob" }}</a>
                             </div>
@@ -151,19 +151,19 @@
 
         <div class="col-lg-9 h-100 overflow-auto">
 
-            <div class="card-grid ml-2" id="vue-app-right">
+            <div class="card-grid ms-2" id="vue-app-right">
 
                 {% if form.errors %}
-                    <div class="col-lg-10 offset-lg-2 pl-1">
+                    <div class="col-lg-10 offset-lg-2 ps-1">
                     {% for field,error in form.errors.items %}
-                        <div class="message-error card-body ml-0 p-3">
+                        <div class="message-error card-body ms-0 p-3">
                             <strong class="text-white">Errors</strong> {{ error|safe }}
                     </div>
                     {% endfor %}
                     </div>
                 {% endif %}
 
-                <form id="form-blob" action="{{ request.path }}" method="post" enctype="multipart/form-data" class="mr-2">
+                <form id="form-blob" action="{{ request.path }}" method="post" enctype="multipart/form-data" class="me-2">
 
                     <input type="hidden" name="importance" value="{% if form.importance.value == 10 %}on{% endif %}" />
                     <input type="hidden" name="is_note" value="{% if form.is_note.value %}on{% endif %}" />
@@ -190,28 +190,28 @@
 
                         {% if field.label != 'Filename' and field.name != 'is_note' and field.name != 'math_support' and field.name != 'importance' %}
 
-                            <div class="form-group{% if field.errors %}error{% endif %} row">
-                                <label class="font-weight-bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">{{ field.label }}</label>
+                            <div class="{% if field.errors %}error{% endif %} row mb-3">
+                                <label class="fw-bold col-lg-2 col-sm-2 col-form-label text-end" for="inputTitle">{{ field.label }}</label>
 
                             {% if field.label == 'File' %}
 
                                 <file-upload inline-template>
-                                    <div class="col-lg-10 input-group">
-                                        <input type="text" name="filename" :value="filename" class="form-control" id="id_filename" autocomplete="off" />
-                                        <input type="hidden" name="file_modified" :value="lastModified" />
-                                        <span class="input-group-append">
+                                    <div class="col-lg-10">
+                                        <div class="input-group">
+                                            <input type="text" name="filename" :value="filename" class="form-control" id="id_filename" autocomplete="off" />
+                                            <input type="hidden" name="file_modified" :value="lastModified" />
                                             <label class="btn btn-primary">Choose file
                                                 <input type="file" name="file" id="id_file" hidden @change="onChange" />
                                             </label>
-                                        </span>
+                                        </div>
                                     </div>
                                 </file-upload>
 
                             {% elif field.label == 'Date' %}
 
-                                <div class="col-lg-8 input-group">
-                                    <date-input v-if="getDateFormat()==='standard'" inline-template>
-                                        <div>
+                                <div class="col-lg-8">
+                                    <div class="input-group">
+                                        <date-input v-if="getDateFormat()==='standard'" inline-template>
                                             <div id="dateapp">
                                                 <vuejs-datepicker
                                                     :bootstrap-styling="true"
@@ -222,30 +222,28 @@
                                                     id="id_date"
                                                     calendar-class="calendar"
                                                 >
-                                                    <span slot="afterDateInput" class="input-group-append">
-                                                        <div class="input-group-text">
+                                                    <span slot="afterDateInput">
+                                                        <div class="input-group-text h-100">
                                                             <font-awesome-icon icon="calendar-alt"></font-awesome-icon>
                                                         </div>
                                                     </span>
                                                 </vuejs-datepicker>
                                             </div>
+                                        </date-input>
+                                        <div v-else>
+                                            <input id="date_year" v-model="$store.state.date" class="form-control" type="number" name="date" size="4" placeholder="Year" autocomplete="off">
                                         </div>
-                                    </date-input>
-                                    <div v-else>
-                                        <input id="date_year" v-model="$store.state.date" class="form-control" type="number" name="date" size="4" placeholder="Year" autocomplete="off">
-                                    </div>
-
-                                    <div>
-                                        <drop-down-menu
-                                            ref="dropDownMenu"
-                                            :links="dateFormatMenuItems"
-                                            :initial-hide="false"
-                                            class="dropdownmenu calendar-date-format-menu d-flex align-items-center justify-content-center"
-                                        >
-                                        </drop-down-menu>
+                                        <div>
+                                            <drop-down-menu
+                                                ref="dropDownMenu"
+                                                :links="dateFormatMenuItems"
+                                                :initial-hide="false"
+                                                class="calendar-date-format-menu d-flex align-items-center justify-content-center"
+                                            >
+                                            </drop-down-menu>
+                                        </div>
                                     </div>
                                 </div>
-
 
                             {% elif field.label == 'Content' %}
 
@@ -279,7 +277,7 @@
 
                     <metadata-wrapper inline-template>
                         <div>
-                            <div class="form-group row">
+                            <div class="row mb-3">
 
                                 <div class="col-lg-2 col-sm-2">
                                     <simple-suggest
@@ -314,8 +312,8 @@
                             >
                                 <div>
                                     <div v-for="m in metadata">
-                                        <div class="form-group row">
-                                            <label class="font-weight-bold col-lg-2 col-sm-2 col-form-label text-right" for="inputTitle">[[ m.name ]]</label>
+                                        <div class="row mb-3 ">
+                                            <label class="fw-bold col-lg-2 col-sm-2 col-form-label text-end" for="inputTitle">[[ m.name ]]</label>
                                             <div class="col-lg-10 col-sm-10">
                                                 <div class="input-group">
                                                     <input type="text" :name="m.counter + '_' + m.name" :value="m.value" class="form-control" autocomplete="off" />
@@ -438,11 +436,14 @@
                              if (payLoad.output_date == "") {
                                  var errorString = "Invalid date format";
                                  console.error(errorString + " :" + payLoad.error);
-                                 this.$bvToast.toast(errorString, {
-                                     title: "Error",
-                                     noAutoHide: true,
-                                     variant: "danger"
-                                 })
+                                 EventBus.$emit(
+                                     "toast",
+                                     {
+                                         "title": "Error",
+                                         "body": errorString,
+                                         "variant": "danger"
+                                     },
+                                 );
                              } else {
                                  this.date = new Date(payLoad.output_date);
                              }
@@ -585,7 +586,6 @@
             components: {
                 FileUpload,
                 DateInput,
-                DropDownMenu,
                 ContentTextArea,
                 MetadataWrapper,
                 TagsInput

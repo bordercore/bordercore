@@ -6,13 +6,11 @@
                     <h4 id="myModalLabel" class="modal-title">
                         Add blob to collection
                     </h4>
-                    <button type="button" class="close" data-dismiss="modal" @click="closeModal">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" @click="closeModal" />
                 </div>
                 <div class="modal-body">
                     <div class="d-flex flex-column">
-                        <div id="search-collections" :class="{'d-none': !hideAddCollection}" class="search-with-doctypes form-group mb-0">
+                        <div id="search-collections" :class="{'d-none': !hideAddCollection}" class="search-with-doctypes mb-0">
                             <vue-simple-suggest
                                 ref="suggestComponent"
                                 display-attribute="name"
@@ -32,29 +30,29 @@
                                 <div slot="suggestion-item" slot-scope="{ suggestion }">
                                     <div :class="{'suggestion-item-disabled': suggestion.contains_blob}" class="top-search-suggestion d-flex align-items-center" @click.stop="onClick(suggestion)">
                                         <div>
-                                            <img class="mr-2" width="50" height="50" :src="suggestion.cover_url">
+                                            <img class="me-2" width="50" height="50" :src="suggestion.cover_url">
                                         </div>
-                                        <div class="mr-1">
+                                        <div class="me-1">
                                             {{ displayProperty(suggestion) }}
                                         </div>
                                         <div class="text-primary mx-1">
                                             <small>{{ suggestion.num_blobs }} blobs</small>
                                         </div>
-                                        <div v-if="suggestion.contains_blob" class="text-warning ml-auto">
+                                        <div v-if="suggestion.contains_blob" class="text-warning ms-auto">
                                             Added
                                         </div>
                                     </div>
                                 </div>
                             </vue-simple-suggest>
                             <div class="mt-3">
-                                <button class="btn btn-primary d-flex ml-auto" @click="showCreateNewCollection">
+                                <button class="btn btn-primary d-flex ms-auto" @click="showCreateNewCollection">
                                     Create new collection
                                 </button>
                             </div>
                         </div>
                         <div id="add-collection" :class="{'d-none': hideAddCollection}">
                             <input class="form-control mb-3" type="text" name="collection-name" placeholder="Collection name" autocomplete="off">
-                            <button class="btn btn-primary d-flex ml-auto" @click="createNewCollection">
+                            <button class="btn btn-primary d-flex ms-auto" @click="createNewCollection">
                                 Create
                             </button>
                         </div>
@@ -145,7 +143,8 @@
                     (response) => {
                         this.$emit("add-to-collection", collectionUuid);
 
-                        $("#modalAddToCollection").modal("hide");
+                        const modal = Modal.getInstance(document.getElementById("modalAddToCollection"));
+                        modal.hide();
 
                         this.$nextTick(() => {
                             this.$refs.suggestComponent.$el.querySelector("input").blur();
@@ -178,7 +177,8 @@
 
                         this.$emit("add-to-collection", collectionUuid);
 
-                        $("#modalAddToCollection").modal("hide");
+                        const modal = Modal.getInstance(document.getElementById("modalAddToCollection"));
+                        modal.hide();
                         this.hideAddCollection = true;
 
                         this.$nextTick(() => {

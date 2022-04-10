@@ -1,6 +1,6 @@
 class SummaryPage:
 
-    STUDY_BUTTON = "button[data-target='#modal-study']"
+    STUDY_BUTTON = "button[data-bs-target='#modal-study']"
     TAG_RADIO_OPTION = "input[value='tag-needing-review']"
     TAG_INPUT = "#tag-name input"
     START_STUDY_SESSION_BUTTON = "start-study-session"

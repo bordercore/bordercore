@@ -3,7 +3,7 @@
         <h3>
             <font-awesome-icon icon="search" />
         </h3>
-        <div class="message ml-3">
+        <div class="message ms-3">
             <h3>
                 <span>{{ title }}</span>
             </h3>

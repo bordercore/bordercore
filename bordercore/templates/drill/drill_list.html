@@ -4,7 +4,7 @@
 
 {% block content %}
 
-    <div class="row no-gutters h-100">
+    <div class="row g-0 h-100">
 
         <div class="col-lg-3 d-flex flex-column" id="vue-app-left">
 
@@ -15,7 +15,7 @@
                 </div>
 
                 <div class="mt-3">
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-study">Study</button>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-study">Study</button>
                 </div>
 
                 {% if request.session.drill_study_session %}
@@ -46,7 +46,7 @@
                 <hr />
 
                 <div>
-                    <a href="{% url 'drill:add' %}" class="btn btn-primary" role="button"><font-awesome-icon icon="plus" class="mr-2"></font-awesome-icon>Add Question</a>
+                    <a href="{% url 'drill:add' %}" class="btn btn-primary" role="button"><font-awesome-icon icon="plus" class="me-2"></font-awesome-icon>Add Question</a>
                 </div>
 
             </div>
@@ -75,8 +75,8 @@
                 <template v-slot:content>
                     <ul class="list-unstyled">
                         <li class="d-flex table_header px-2 py-1 mb-2">
-                            <div class="flex-fill font-weight-bold">Tag</div>
-                            <div class="font-weight-bold">Question Count</div>
+                            <div class="flex-fill fw-bold">Tag</div>
+                            <div class="fw-bold">Question Count</div>
                         </li>
                         {% for tag in tags_still_learning %}
                             <li class="d-flex px-2">
@@ -95,7 +95,7 @@
 
         <div class="col-lg-3" id="tag-search">
 
-            <div class="mb-2 ml-3">
+            <div class="mb-2 ms-3">
                 <simple-suggest
                     ref="simpleSuggest"
                     display-attribute="display"
@@ -135,13 +135,13 @@
                 <template v-slot:content>
                     <ul class="list-unstyled">
                         <li class="d-flex table_header px-2 py-1 mb-2">
-                            <div class="flex-fill font-weight-bold">Tag</div>
-                            <div class="font-weight-bold">Last Reviewed</div>
+                            <div class="flex-fill fw-bold">Tag</div>
+                            <div class="fw-bold">Last Reviewed</div>
                         </li>
                         {% for tag in tags_needing_review %}
                             <li class="d-flex px-2">
                                 <div class="flex-fill"><a href="{% url 'drill:start_study_session_tag' tag.name %}">{{ tag.name }}</a></div>
-                                <div class="text-info text-right">{{ tag.last_reviewed|date:"F j, Y"|default:"Never" }}</div>
+                                <div class="text-info text-end">{{ tag.last_reviewed|date:"F j, Y"|default:"Never" }}</div>
                             </li>
                          {% empty %}
                             <div class="text-success text-center">Nothing to learn</div>
@@ -150,33 +150,31 @@
                 </template>
 
             </card>
-
         </div>
 
-        <div class="col-lg-3" id="pinned_tags">
+        <div class="col-lg-3" id="pinned-tags" @mouseenter="handleHover" @mouseleave="handleHover">
 
-            <div class="right-column">
-                <card title="Pinned Tags" v-b-hover="handleHover">
+            <div class="me-3">
+                <card
+                    title="Pinned Tags"
+                >
                     <template v-slot:title-slot>
-                        <div id="pinned-tags" class="card-title d-flex align-items-center">
+
+                        <div class="card-title d-flex align-items-center">
                             <div>
                                 Pinned Tags
                             </div>
-                            <div class="dropdownmenu hidden" v-cloak>
-                                <dropdown-menu
-                                    v-model="show"
-                                    :right="right"
-                                    transition="translate-fade-down"
-                                    class="text-center"
-                                >
-                                    <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                                    <div slot="dropdown">
+                            <drop-down-menu :show-on-hover="true">
+                                <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+                                <div slot="dropdown">
+                                    <li>
                                         <a class="dropdown-item" href="#" @click="chooseTag()">
-                                            <font-awesome-icon icon="pencil-alt" class="text-primary mr-3"></font-awesome-icon>Manage Tags
+                                            <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>
+                                                Manage Tags
                                         </a>
-                                    </div>
-                                </dropdown-menu>
-                            </div>
+                                    </li>
+                                </div>
+                            </drop-down-menu>
                         </div>
                     </template>
 
@@ -192,7 +190,7 @@
                 </card>
             </div>
 
-            <div class="right-column">
+            <div class="me-3">
                 <card title="Favorites Progress">
                     <template v-slot:content>
                         <div class="d-flex">
@@ -209,7 +207,7 @@
                 </card>
             </div>
 
-            <div class="right-column">
+            <div class="me-3">
                 <card>
                     <template v-slot:title-slot>
                         <h5>Random tag: <a href="{{ random_tag.url }}">{{ random_tag.name }}</a></h5>
@@ -236,7 +234,7 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h4 class="modal-title" id="myModalLabel">Manage Tags</h4>
-                            <button type="button" class="close close-button" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                            <button type="button" class="close-button btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
                             <div class="form-row align-items-center">
@@ -259,7 +257,7 @@
                                                 <div>
                                                     [[ tag.name ]]
                                                 </div>
-                                                <div class="ml-auto my-auto">
+                                                <div class="ms-auto my-auto">
                                                     <font-awesome-icon icon="times-circle" class="list-delete" @click="onClickDelete(tag.name)" />
                                                 </div>
                                             </div>
@@ -269,7 +267,7 @@
                             </ul>
                         </div>
                         <div class="modal-footer justify-content-end">
-                            <input class="btn btn-primary" type="button" value="Done" data-dismiss="modal" />
+                            <input class="btn btn-primary" type="button" value="Done" data-bs-dismiss="modal" />
                         </div>
                     </div>
                 </div>
@@ -284,7 +282,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="myModalLabel">Start Study Session</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
 
@@ -310,7 +308,7 @@
                     <div class="form-check mt-3">
                         <input class="form-check-input" type="radio" name="flexRadioDefault" value="tag-needing-review" v-model="picked">
                         <label class="form-check-label d-flex" for="flexRadioDefault1">
-                            <div class="mr-3">Tag</div>
+                            <div class="me-3">Tag</div>
                             <tags-input search-url="{% url 'tag:search' %}?doctype=drill&query=" id="tag-name" place-holder="Tag name"></tags-input>
                         </label>
                     </div>
@@ -318,8 +316,8 @@
                     <div class="form-check mt-3">
                         <input class="form-check-input" type="radio" name="flexRadioDefault" value="random" v-model="picked">
                         <label class="form-check-label d-flex" for="flexRadioDefault1">
-                            <div class="mr-3">Random questions, count of</div>
-                            <select class="form-control" id="study-random-count">
+                            <div class="me-3">Random questions, count of</div>
+                            <select class="form-control form-select" id="study-random-count">
                                 <option value="5">5</option>
                                 <option value="10">10</option>
                                 <option value="20">20</option>
@@ -331,14 +329,12 @@
                     <div class="form-check mt-3">
                         <input class="form-check-input" type="radio" name="flexRadioDefault" value="search" v-model="picked">
                         <label class="form-check-label d-flex" for="flexRadioDefault1">
-                            <div class="mr-3">Questions matching search</div>
+                            <div class="me-3">Questions matching search</div>
                             <input class="form-control" id="search-term" placeholder="Search term" autocomplete="off" />
                         </label>
                     </div>
 
-                    <div class="form-group row mt-3 ml-3">
-                        <a id="start-study-session" href="#" type="button" class="btn btn-primary" @click="onClick">Study</a>
-                    </div>
+                    <a id="start-study-session" href="#" type="button" class="btn btn-primary mt-2" @click="onClick">Study</a>
                 </div>
             </div>
         </div>
@@ -388,7 +384,7 @@
         });
 
         new Vue({
-            el: "#pinned_tags",
+            el: "#pinned-tags",
             name: "Pinned Tags",
             store,
             components: {
@@ -397,8 +393,8 @@
             data() {
                 return {
                     show: false,
-                    right: true,
                     interactive: true,
+                    showDropDownMenu: true,
                 }
             },
             methods: {
@@ -414,13 +410,19 @@
                     );
                 },
 
-                handleHover(hovered, evt) {
-                    evt.currentTarget.querySelector(".dropdownmenu").classList.toggle("d-flex");
-                },
+                handleHover(evt) {
+                    const target = evt.currentTarget.querySelector(".dropdown");
 
+                    if (evt.type === "mouseenter") {
+                        target.classList.remove("d-none");
+                    } else {
+                        target.classList.add("d-none");
+                    }
+                },
                 chooseTag() {
 
-                    $("#modalAddTag").modal("show");
+                    const modal = new Modal("#modalAddTag");
+                    modal.show();
                     setTimeout( () => { this.$refs.simpleSuggest.$refs.suggestComponent.input.focus(); }, 500)
 
                 },

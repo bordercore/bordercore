@@ -8,7 +8,7 @@
 
     <div id="vue-app">
 
-        <div class="row no-gutters">
+        <div class="row g-0">
 
             <div class="col-lg-3">
 
@@ -22,7 +22,7 @@
                         <ul class="list-group interior-borders">
                             {% for task in tasks %}
                                 <li class="list-group-item list-group-item-secondary text-primary">{{ task.name }}
-                                    <span class="badge badge-info ml-1">{{ task.parent_category }}</span>
+                                    <span class="badge bg-info ms-1">{{ task.parent_category }}</span>
                                     {% for tag in task.tags.all %}
                                         <span class="tag">{{ tag.name }}</span>
                                     {% endfor %}
@@ -80,7 +80,7 @@
                         <template v-slot:content>
                             <ul class="list-group interior-borders">
                                 {% for bookmark in daily_bookmarks %}
-                                    <li class="list-group-item list-group-item-secondary {% if bookmark.daily.viewed == 'false' %}font-weight-bold{% endif %}"><a href="{% url 'bookmark:click' bookmark.uuid %}">{{ bookmark.name }}</a></li>
+                                    <li class="list-group-item list-group-item-secondary {% if bookmark.daily.viewed == 'false' %}fw-bold{% endif %}"><a href="{% url 'bookmark:click' bookmark.uuid %}">{{ bookmark.name }}</a></li>
                                 {% empty %}
                                     <li class="list-group-item list-group-item-secondary">No bookmarks marked as Daily.</li>
                                 {% endfor %}
@@ -124,7 +124,7 @@
                                     <div>
                                         {{ bookmark.url|favicon:16|safe }}
                                     </div>
-                                    <div class="ml-2">
+                                    <div class="ms-2">
                                         <a href="{{ bookmark.url }}">{{ bookmark.name }}</a>
                                     </div>
                                 </li>
@@ -132,7 +132,7 @@
                             </ul>
                         {% else %}
                             <li class="list-group-item list-group-item-secondary">
-                                <a class="ml-2" href="{% url 'bookmark:create' %}">Add a bookmark</a>
+                                <a class="ms-2" href="{% url 'bookmark:create' %}">Add a bookmark</a>
                             </li>
                         {% endif %}
                     </template>
@@ -147,8 +147,8 @@
                                 </div>
                             </template>
                             <template v-slot:content>
-                                <ul class="list-group list-group-horizontal text-center list-unstyled">
-                                    <li class="mx-2" v-for="blob in blob_list" :key="blob.id">
+                                <ul class="list-group list-group-horizontal text-center list-unstyled justify-content-center">
+                                    <li class="mx-3" v-for="blob in blob_list" :key="blob.id">
                                         <a :href="[[ blob.url ]]"><img :src="[[ blob.cover_url ]]" /></a>
                                     </li>
                                 </ul>
@@ -165,7 +165,7 @@
                                 {% for song in music %}
                                     <li class="list-group-item list-group-item-secondary text-info">
                                         {{ song.title }}
-                                        <a class="ml-2" href="{% url 'music:artist_detail' song.artist.uuid %}">{{ song.artist.name }}</a>
+                                        <a class="ms-2" href="{% url 'music:artist_detail' song.artist.uuid %}">{{ song.artist.name }}</a>
                                     </li>
                                 {% empty %}
                                     <li class="list-group-item list-group-item-secondary">No music listened to.</li>
@@ -216,7 +216,7 @@
                         {% endif %}
                         <template v-slot:content>
                             {% if random_image_info %}
-                                <img src="{{ random_image_info.url }}" class="mw-100" data-toggle="modal" data-target="#myModal" />
+                                <img src="{{ random_image_info.url }}" class="mw-100" data-bs-toggle="modal" data-bs-target="#myModal" />
                             {% else %}
                                 <a href="{% url 'blob:create' %}">Add a blob</a>
                             {% endif %}

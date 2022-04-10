@@ -1,20 +1,20 @@
 <template>
-    <div v-b-hover="hoverAddButton" :class="extraClass">
+    <div :class="extraClass" @mouseenter="showDropDownMenu = true" @mouseleave="showDropDownMenu = false">
         <transition :name="transitionName">
             <card v-if="bookmarkList.length > 0 || showEmptyList" :title="title">
                 <template #top-right>
                     <div v-if="showAddButton" class="node-add-button">
-                        <add-button href="#" :click-handler="openModal" class="hover-target d-none" />
+                        <add-button href="#" :click-handler="openModal" :class="{'d-none': !showDropDownMenu}" />
                     </div>
                 </template>
 
                 <template #content>
-                    <ul id="sort-container-tags" class="list-group list-group-flush">
+                    <ul id="sort-container-tags" class="list-group list-group-flush interior-borders">
                         <draggable v-model="bookmarkList" ghost-class="sortable-ghost" draggable=".draggable" @change="onSort">
                             <transition-group type="transition" class="w-100">
-                                <li v-for="(bookmark, index) in bookmarkList" v-cloak :key="bookmark.uuid" v-b-hover="hoverDropdown" class="list-group-item list-group-item-secondary text-info draggable px-0" :data-uuid="bookmark.uuid">
+                                <li v-for="(bookmark, index) in bookmarkList" v-cloak :key="bookmark.uuid" class="list-group-item list-group-item-secondary text-info draggable px-0" :data-uuid="bookmark.uuid" @mouseenter="handleHover" @mouseleave="handleHover">
                                     <div class="d-flex">
-                                        <div class="pr-2" v-html="bookmark.favicon_url" />
+                                        <div class="pe-2" v-html="bookmark.favicon_url" />
                                         <div>
                                             <a :href="bookmark.url">{{ bookmark.name }}</a>
 
@@ -25,25 +25,24 @@
                                                 <input id="add-bookmark-input" ref="input" type="text" class="form-control form-control-sm" :value="bookmark.note" placeholder="" autocomplete="off" @blur="editNote(bookmark.uuid, $event.target.value)" @keydown.enter="editNote(bookmark.uuid, $event.target.value)">
                                             </span>
                                         </div>
-                                        <div class="dropdownmenu d-flex">
-                                            <dropdown-menu ref="editNoteMenu" v-model="showDropdown" transition="translate-fade-down" class="d-none" :right="true">
-                                                <font-awesome-icon icon="ellipsis-v" />
-                                                <div slot="dropdown">
+                                        <drop-down-menu ref="editNoteMenu" :show-on-hover="true">
+                                            <div slot="dropdown">
+                                                <li>
                                                     <a class="dropdown-item" href="#" @click.prevent="removeBookmark(bookmark.uuid)">
-                                                        <font-awesome-icon icon="trash-alt" class="text-primary mr-3" />Remove
+                                                        <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
                                                     </a>
                                                     <a class="dropdown-item" :href="bookmark.edit_url">
-                                                        <font-awesome-icon icon="pencil-alt" class="text-primary mr-3" />Edit Bookmark
+                                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Edit Bookmark
                                                     </a>
                                                     <a v-if="!bookmark.note" class="dropdown-item" href="#" @click.prevent="addNote(bookmark.uuid)">
-                                                        <font-awesome-icon icon="plus" class="text-primary mr-3" />Add note
+                                                        <font-awesome-icon icon="plus" class="text-primary me-3" />Add note
                                                     </a>
                                                     <a v-if="bookmark.note" class="dropdown-item" href="#" @click.prevent="activateInEditMode(bookmark, index)">
-                                                        <font-awesome-icon icon="pencil-alt" class="text-primary mr-3" />Edit note
+                                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Edit note
                                                     </a>
-                                                </div>
-                                            </dropdown-menu>
-                                        </div>
+                                                </li>
+                                            </div>
+                                        </drop-down-menu>
                                     </div>
                                 </li>
                                 <div v-cloak v-if="bookmarkList.length == 0" :key="1" class="text-secondary">
@@ -148,7 +147,7 @@
                 mode: "search",
                 name: "",
                 bookmarkList: [],
-                showDropdown: false,
+                showDropDownMenu: false,
             };
         },
         mounted() {
@@ -194,28 +193,18 @@
                     "",
                 );
             },
-            hoverDropdown(isHovered, evt) {
-                this.handleHover(isHovered, evt, ".dropdown");
-            },
-            hoverAddButton(isHovered, evt) {
-                this.handleHover(isHovered, evt, ".hover-target");
-            },
-            handleHover(isHovered, evt, selector) {
-                const target = evt.currentTarget.querySelector(selector);
-                if (target === null) {
-                    return;
-                }
-                // Note: I've found that using a more concise "toggle" command
-                //  can cause the button's state to become out of sync, so instead
-                //  I choose to be more specific instead.
-                if (isHovered) {
+            handleHover(evt) {
+                const target = evt.currentTarget.querySelector(".dropdown");
+
+                if (evt.type === "mouseenter") {
                     target.classList.remove("d-none");
                 } else {
                     target.classList.add("d-none");
                 }
             },
             openModal() {
-                $("#modalAddBookmark").modal("show");
+                const modal = new Modal("#modalAddBookmark");
+                modal.show();
                 setTimeout( () => {
                     this.$refs.bookmarkSearch.$refs.simpleSuggest.$refs.suggestComponent.input.focus();
                 }, 500);
@@ -279,7 +268,6 @@
 
                 self = this;
                 setTimeout( () => {
-                    this.$refs.editNoteMenu[0].closeMenu();
                     self.$refs.input[index].focus();
                 }, 100);
             },
@@ -291,7 +279,6 @@
                 }
 
                 this.$nextTick(() => {
-                    this.$refs.editNoteMenu[0].closeMenu();
                     this.$refs.input[0].focus();
                 });
             },

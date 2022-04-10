@@ -3,7 +3,7 @@
         <slot name="title-slot">
             <div v-if="title" class="card-title d-flex">
                 {{ title }}
-                <div class="ml-auto">
+                <div class="ms-auto">
                     <slot name="top-right" />
                 </div>
             </div>

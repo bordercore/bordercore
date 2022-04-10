@@ -7,9 +7,7 @@
                         <h4 id="myModalLabel" class="modal-title">
                             Add To Playlist
                         </h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" />
                     </div>
                     <div class="modal-body">
                         <div class="d-flex align-items-center">
@@ -17,7 +15,7 @@
                                 Choose Playlist:
                             </div>
 
-                            <select v-model="selectedPlaylist" class="form-control ml-3">
+                            <select v-model="selectedPlaylist" class="form-control ms-3">
                                 <option v-for="playlist in playLists" :key="playlist.uuid" :value="playlist.uuid">
                                     {{ playlist.name }}
                                 </option>
@@ -73,7 +71,8 @@
         methods: {
             openModal(songUuid) {
                 this.songUuid = songUuid;
-                $("#modalAddToPlaylist").modal("show");
+                const modal = new Modal("#modalAddToPlaylist");
+                modal.show();
             },
             onClickAdd(datum) {
                 doPost(
@@ -84,7 +83,8 @@
                         "song_uuid": this.songUuid,
                     },
                     () => {
-                        $("#modalAddToPlaylist").modal("hide");
+                        const modal = Modal.getInstance(document.getElementById("modalAddToPlaylist"));
+                        modal.hide();
                     },
                     "Song added to playlist",
                 );

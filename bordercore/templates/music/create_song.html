@@ -4,7 +4,7 @@
 
 {% block content %}
 
-    <div class="row no-gutters h-100">
+    <div class="row g-0 h-100">
         <div id="vue-song-info" class="col-lg-3 d-flex flex-column">
 
             <div class="w-100" v-cloak>
@@ -18,7 +18,7 @@
                             <hr class="dupe-song-divider" />
                             <div class="d-flex">
                                 <font-awesome-icon icon="music" class="text-info mt-1"></font-awesome-icon>
-                                <div class="ml-2">
+                                <div class="ms-2">
                                     <a :href="dupe.url" target="bc-dupe-song">[[ dupe.title ]]</a>
                                     <div v-if="dupe.note" class="dupe-song-note text-truncate">
                                     [[ dupe.note ]]
@@ -35,11 +35,11 @@
                 <card v-if="$store.state.songLength !== null" title="Song Info">
                     <template v-slot:content>
                         <ul>
-                            <li>Song Length <span class="ml-1 text-primary">[[ $store.state.songLengthPretty ]]</span></li>
+                            <li>Song Length <span class="ms-1 text-primary">[[ $store.state.songLengthPretty ]]</span></li>
                             {% if action == "Create" %}
-                                <li>Song Size <span class="ml-1 text-primary">[[ $store.state.songSize ]]</span></li>
-                                <li>Sample Rate <span class="ml-1 text-primary">[[ $store.state.sampleRate ]]</span></li>
-                                <li>Bit Rate <span class="ml-1 text-primary">[[ $store.state.bitRate ]]</span></li>
+                                <li>Song Size <span class="ms-1 text-primary">[[ $store.state.songSize ]]</span></li>
+                                <li>Sample Rate <span class="ms-1 text-primary">[[ $store.state.sampleRate ]]</span></li>
+                                <li>Bit Rate <span class="ms-1 text-primary">[[ $store.state.bitRate ]]</span></li>
                             {% endif %}
                         </ul>
                     </template>
@@ -50,11 +50,11 @@
                         <ul class="list-group interior-borders">
                             {% for tag in tag_counts %}
                                 <li class="tag-list list-group-item list-group-item-secondary text-info d-flex" @click.prevent="onClickTag('{{ tag.name }}')">
-                                    <div class="pl-2 text-truncate">
+                                    <div class="ps-2 text-truncate">
                                         {{ tag.name }}
                                     </div>
-                                    <div class="ml-auto pr-2">
-                                        <span class="px-2 badge badge-pill badge-info">
+                                    <div class="ms-auto pe-2">
+                                        <span class="px-2 badge rounded-pill bg-info">
                                             {{ tag.count }}
                                         </span>
                                     </div>
@@ -88,7 +88,7 @@
                     <div class="alert alert-success offset-lg-3">Post {{ action }}ed</div>
                 {% endif %}
 
-                <p class="lead offset-lg-3 font-weight-bold pl-2">{{ action }} a Song</p>
+                <p class="lead offset-lg-3 fw-bold ps-2">{{ action }} a Song</p>
 
                 <form id="song-form" action="{{ request.path }}" method="post">
                     {% csrf_token %}
@@ -110,8 +110,8 @@
                 <input type="hidden" name="length" :value="songLength" />
 
                 {% if action == "Create" %}
-                    <div class="form-group row">
-                        <label class="col-lg-3 col-form-label font-weight-bold text-right">File</label>
+                    <div class="row mb-3">
+                        <label class="col-lg-3 col-form-label fw-bold text-end">File</label>
 
                         <div class="col-lg-9">
                             <div class="input-group">
@@ -132,8 +132,8 @@
                 {% for field in form %}
                     {% if field.label == "Tags" %}
 
-                        <div class="form-group{% if field.errors %} error{% endif %} row">
-                            <label class="col-lg-3 col-form-label font-weight-bold text-right">Tags</label>
+                        <div class="{% if field.errors %} error{% endif %} row mb-3">
+                            <label class="col-lg-3 col-form-label fw-bold text-end">Tags</label>
 
                             <div class="col-lg-9">
                                 <tags-input
@@ -149,8 +149,8 @@
 
                     {% elif field.label == "Artist" %}
 
-                        <div class="form-group{% if field.errors %} error{% endif %} row">
-                            <label class="col-lg-3 col-form-label font-weight-bold text-right">Artist</label>
+                        <div class="{% if field.errors %} error{% endif %} row mb-3">
+                            <label class="col-lg-3 col-form-label fw-bold text-end">Artist</label>
 
                             <div class="col-lg-9">
                                 <simple-suggest
@@ -173,15 +173,15 @@
 
                     {% elif field.label == 'Compilation' %}
 
-                        <div class="form-group{% if field.errors %} error{% endif %} row">
-                            <label class="col-lg-3 col-form-label font-weight-bold text-right">Compilation</label>
+                        <div class="{% if field.errors %} error{% endif %} row align-items-center mb-3">
+                            <label class="col-lg-3 col-form-label fw-bold text-end">Compilation</label>
                             <div class="col-lg-9 form-inline">
                                 <input type="checkbox" name="compilation" id="id_compilation" v-model="isCompilation" />
                             </div>
                         </div>
 
-                        <div v-if="isCompilation" class="form-group{% if field.errors %} error{% endif %} row" id="album_artist_field">
-                            <label class="col-lg-3 col-form-label font-weight-bold text-right">Album Artist</label>
+                        <div v-if="isCompilation" class="{% if field.errors %} error{% endif %} row mb-3" id="album_artist_field">
+                            <label class="col-lg-3 col-form-label fw-bold text-end">Album Artist</label>
                             <div class="col-lg-9">
                                 <input class="form-control" id="id_album_artist" name="album_artist" type="text" value="Various Artists" autocomplete="off" />
                             </div>
@@ -189,8 +189,8 @@
 
                     {% elif field.label != 'Length' and field.label != 'Sha1sum' %}
 
-                        <div class="form-group{% if field.errors %} error{% endif %} row">
-                            <label class="col-lg-3 col-form-label font-weight-bold text-right">{{ field.label }}</label>
+                        <div class="{% if field.errors %} error{% endif %} row mb-3">
+                            <label class="col-lg-3 col-form-label fw-bold text-end">{{ field.label }}</label>
 
                             <div class="col-lg-9">
                                 {{ field }}
@@ -205,13 +205,13 @@
                 {% endfor %}
 
                 {% if form.instance.album.title %}
-                    <div class="form-group row">
-                        <label class="col-lg-3 col-form-label font-weight-bold text-right">Album</label>
-                        <label class="col-lg-9 text-left mb-0 form-no-input">{{ form.instance.album.title }}</label>
+                    <div class="row mb-3">
+                        <label class="col-lg-3 col-form-label fw-bold text-end">Album</label>
+                        <label class="col-lg-9 text-start mb-0 form-no-input">{{ form.instance.album.title }}</label>
                     </div>
                 {% endif %}
 
-                <div class="form-group">
+                <div>
                     <div class="col-lg-9 offset-lg-3">
                         <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}">
                         {% if form.instance.id %}
@@ -235,7 +235,7 @@
                 <div>
                     Processing...
                 </div>
-                <div class="spinner-border ml-2 text-info" role="status">
+                <div class="spinner-border ms-2 text-info" role="status">
                     <span class="sr-only">Loading...</span>
                 </div>
             </h4>
@@ -331,7 +331,8 @@
                     const formData = new FormData();
                     formData.append("song", song);
 
-                    $("#modalProcessing").modal("show");
+                    const modal = new Modal("#modalProcessing");
+                    modal.show();
 
                     axios.post("{% url "music:get_song_id3_info" %}", formData, {
                         headers: {
@@ -360,7 +361,8 @@
                         //  really fast, then "hide" could be called too quickly after "show",
                         //  which prevents the modal from closing.
                         window.setTimeout(() => {
-                            $("#modalProcessing").modal("hide");
+                            const modal = Modal.getInstance(document.getElementById("modalProcessing"));
+                            modal.hide();
                         }, 200);
 
                         this.onDupeCheck();

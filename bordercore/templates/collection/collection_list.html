@@ -11,14 +11,14 @@
 
                 <h1>Collection List</h1>
 
-                <div class="mr-2 ml-auto" @click="onClickCreate">
+                <div class="me-2 ms-auto" @click="onClickCreate">
                     <add-button :href="'#'"></add-button>
                 </div>
 
             </div>
         </div>
 
-        <div class="card-grid ml-3">
+        <div class="card-grid ms-3">
             <div class="d-flex flex-column">
                 <div class="d-flex flex-wrap">
                     <div v-for="collection in items" class="collection-container text-center hoverable p-3" @click="onClickCollection(collection.url)">
@@ -35,7 +35,7 @@
             </div>
         </div>
 
-        <div class="card-grid ml-3">
+        <div class="card-grid ms-3">
 
             <form action="{% url 'collection:list' %}" method="post" id="form-collection-edit">
                 {% csrf_token %}
@@ -46,11 +46,11 @@
                                 <h4 class="modal-title" id="myModalLabel">
                                     <span id="action-type">Create</span> Collection
                                 </h4>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                     {% for field in form %}
-                        <div class="form-group{% if field.errors %} error{% endif %} row">
+                        <div class="{% if field.errors %} error{% endif %} row mb-3">
                             <label class="col-lg-3 col-form-label" for="inputTitle">{{ field.label }}</label>
 
                             <div class="col-lg-9">
@@ -103,23 +103,27 @@
 
         new Vue({
             el: "#vue-app",
+            components: {
+                TagsInput,
+            },
             data() {
                 return {
                     items: JSON.parse(document.getElementById("collection_list").textContent),
-                }
+                };
             },
             methods: {
                 onClickCreate(evt) {
-
                     document.getElementById("id_name").value = "";
                     document.getElementById("id_description").value = "";
                     EventBus.$emit("addTags", []);
                     document.getElementById("action-type").innerHTML = "Create";
                     document.getElementById("btn-action").value = "Create";
                     document.getElementById("form-collection-edit").setAttribute("action", "{% url 'collection:create' %}");
-                    $("#modalAdd").modal("show")
-                    window.setTimeout(() => { document.getElementById("id_name").focus() }, 500);
-
+                    const modal = new Modal("#modalAdd");
+                    modal.show();
+                    window.setTimeout(() => {
+                        document.getElementById("id_name").focus();
+                    }, 500);
                 },
                 onClickCollection(url) {
                     window.location = url;
@@ -127,9 +131,6 @@
                 getBlobCount(count) {
                     return count + " " + pluralize("blob", count);
                 },
-            },
-            components: {
-                TagsInput
             },
         });
 

@@ -4,7 +4,7 @@
 
 {% block content %}
 
-    <div class="card-grid ml-3" id="vue-app">
+    <div class="card-grid ms-3" id="vue-app">
 
         <div class="right-column">
 
@@ -22,7 +22,7 @@
                     <a :href="props.row.exercise_url">
                         [[ props.row.exercise ]]
                     </a>
-                    <span v-if="props.row.overdue === '2'" class="ml-3">
+                    <span v-if="props.row.overdue === '2'" class="ms-3">
                         OVERDUE
                     </span>
                 </b-table-column>
@@ -37,10 +37,10 @@
 
                 <b-table-column field="last_active" label="Last Workout" header-class="text-center" v-slot="props">
                     <div v-if="props.row.last_active" class="d-flex">
-                        <div class="text-nowrap mr-3">
+                        <div class="text-nowrap me-3">
                             [[ getDate(props.row.last_active) ]]
                         </div>
-                        <div class="text-nowrap ml-auto">
+                        <div class="text-nowrap ms-auto">
                             [[ getFrequency(props.row) ]]
                         </div>
                     </div>
@@ -70,10 +70,10 @@
 
                 <b-table-column field="last_active" label="Last Workout" header-class="text-center" v-slot="props">
                     <div v-if="props.row.last_active" class="d-flex">
-                        <div class="text-nowrap mr-3">
+                        <div class="text-nowrap me-3">
                             [[ getDate(props.row.last_active) ]]
                         </div>
-                        <div class="text-nowrap ml-auto">
+                        <div class="text-nowrap ms-auto">
                             [[ getFrequency(props.row) ]]
                         </div>
                     </div>

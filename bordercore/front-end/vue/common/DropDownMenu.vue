@@ -1,19 +1,25 @@
 <template>
-    <div :class="[hide ? 'hidden' : '']" class="d-flex cursor-pointer">
-        <dropdown-menu v-model="showMenu" transition="translate-fade-down" class="text-center" :right="right">
-            <slot name="top">
+    <div
+        class="dropdown cursor-pointer"
+        :class="{'dropdownmenu': showTarget, 'd-none': showOnHover}"
+    >
+        <div class="d-flex align-items-center justify-content-center h-100 w-100" :class="direction" data-bs-toggle="dropdown" data-bs-auto-close="true" data-bs-offset="0,-15">
+            <slot name="icon">
                 <font-awesome-icon icon="ellipsis-v" />
             </slot>
-            <div slot="dropdown">
-                <a v-for="link in links" :key="link.id" :href="link.url" class="dropdown-item" v-on="link.clickHandler ? { click: link.clickHandler } : {}">
+        </div>
+        <ul class="dropdown-menu">
+            <slot name="dropdown" />
+            <li v-for="link in links" :key="link.id">
+                <a :href="link.url" class="dropdown-item" v-on="link.clickHandler ? { click: link.clickHandler } : {}">
                     <font-awesome-icon v-if="link.icon" :icon="link.icon" class="text-primary mr-2" />
                     {{ link.title }}
                     <span v-if="link.extra" class="dropdown-item-extra">
                         {{ link.extra }}
                     </span>
                 </a>
-            </div>
-        </dropdown-menu>
+            </li>
+        </ul>
     </div>
 </template>
 
@@ -25,20 +31,18 @@
                 type: Array,
                 default: () => [],
             },
-            right: {
+            direction: {
+                type: String,
+                default: "dropend",
+            },
+            showTarget: {
                 type: Boolean,
                 default: true,
             },
-            initialHide: {
+            showOnHover: {
                 type: Boolean,
-                default: true,
+                default: false,
             },
-        },
-        data() {
-            return {
-                showMenu: false,
-                hide: this.initialHide,
-            };
         },
     };
 

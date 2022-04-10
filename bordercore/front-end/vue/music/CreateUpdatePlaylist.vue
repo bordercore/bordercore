@@ -7,19 +7,17 @@
                         <span id="action-type" v-html="action" />
                         Playlist
                     </h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" />
                 </div>
                 <div class="modal-body">
-                    <div class="form-group row">
+                    <div class="row mb-3">
                         <label class="col-lg-4 col-form-label" for="inputTitle">Name</label>
                         <div class="col-lg-8">
                             <input id="id_name" v-model="name" type="text" name="name" autocomplete="off" maxlength="200" required="required" class="form-control">
                         </div>
                     </div>
 
-                    <div class="form-group row">
+                    <div class="row">
                         <label class="col-lg-4 col-form-label" for="inputTitle">Note</label>
                         <div class="col-lg-8">
                             <textarea id="id_note" v-model="note" name="note" cols="40" rows="3" class="form-control" />
@@ -33,7 +31,7 @@
                             Playlist Type
                         </div>
 
-                        <div class="form-group row mt-3">
+                        <div class="row mt-3">
                             <div class="col-lg-12">
                                 <div class="form-check">
                                     <input v-model="smartType" class="form-check-input" type="radio" name="type" value="manual" checked>
@@ -44,7 +42,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group row mt-3">
+                        <div class="row mt-3">
                             <div class="col-lg-4">
                                 <div class="form-check">
                                     <input v-model="smartType" class="form-check-input" type="radio" name="type" value="tag">
@@ -58,7 +56,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group row mt-3">
+                        <div class="row mt-3">
                             <div class="col-lg-12">
                                 <div class="form-check">
                                     <input v-model="smartType" class="form-check-input" type="radio" name="type" value="recent">
@@ -69,7 +67,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group row mt-3">
+                        <div class="row mt-3">
                             <div class="col-lg-4">
                                 <div class="form-check">
                                     <input v-model="smartType" type="radio" name="type" class="form-check-input" value="time">
@@ -80,8 +78,8 @@
                             </div>
                             <div class="col-lg-8">
                                 <label class="form-check-label d-flex">
-                                    <input v-model="startYear" class="form-control mr-1" type="number" name="start_year" size="4" placeholder="Start year" autocomplete="off" :disabled="!playlistTypeIsTimePeriod">
-                                    <input v-model="endYear" class="form-control ml-1" type="number" name="end_year" size="4" placeholder="End year" autocomplete="off" :disabled="!playlistTypeIsTimePeriod">
+                                    <input v-model="startYear" class="form-control me-1" type="number" name="start_year" size="4" placeholder="Start year" autocomplete="off" :disabled="!playlistTypeIsTimePeriod">
+                                    <input v-model="endYear" class="form-control ms-1" type="number" name="end_year" size="4" placeholder="End year" autocomplete="off" :disabled="!playlistTypeIsTimePeriod">
                                 </label>
                             </div>
                         </div>
@@ -94,10 +92,10 @@
                             Options
                         </div>
 
-                        <div class="form-group row mt-3">
+                        <div class="row mt-3">
                             <label class="col-lg-4 col-form-label">Size</label>
                             <div class="col-lg-8">
-                                <select v-model="size" class="form-control" name="size">
+                                <select v-model="size" class="form-control form-select" name="size">
                                     <option v-for="option in sizeOptions" :key="option.value" :value="option.value">
                                         {{ option.display }}
                                     </option>
@@ -105,10 +103,10 @@
                             </div>
                         </div>
 
-                        <div class="form-group row mt-3">
+                        <div class="row mt-3">
                             <label class="col-lg-4 col-form-label">Exclude Recent Listens</label>
                             <div class="col-lg-8">
-                                <select v-model="exclude_recent" class="form-control" name="exclude_recent">
+                                <select v-model="exclude_recent" class="form-control form-select" name="exclude_recent">
                                     <option v-for="option in excludeRecentOptions" :key="option.value" :value="option.value">
                                         {{ option.display }}
                                     </option>
@@ -116,7 +114,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group row mt-3">
+                        <div class="row mt-3">
                             <div class="col-lg-12">
                                 <div class="form-check">
                                     <input v-model="exclude_albums" class="form-check-input" type="checkbox" name="exclude_albums">
@@ -245,8 +243,8 @@
                     (this.$refs.smartListTag && this.$refs.smartListTag.tags.length === 0)) {
                     return true;
                 } else if (this.smartType === "time" &&
-                    (!this.startYear || !this.endYear) ||
-                    parseInt(this.endYear) < parseInt(this.startYear)) {
+                           (!this.startYear || !this.endYear) ||
+                           parseInt(this.endYear) < parseInt(this.startYear)) {
                     return true;
                 }
                 return false;
@@ -276,7 +274,8 @@
                 return defaultValue;
             },
             onClickCreate(evt) {
-                $("#modalAdd").modal("show");
+                const modal = new Modal("#modalAdd");
+                modal.show();
                 window.setTimeout(() => {
                     document.getElementById("id_name").focus();
                 }, 500);

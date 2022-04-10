@@ -47,8 +47,8 @@ class UserProfileForm(ModelForm):
                 required=False,
                 to_field_name="id"
             )
-            self.fields["homepage_default_collection"].widget.attrs["class"] = "form-control"
-            self.fields["homepage_image_collection"].widget.attrs["class"] = "form-control"
+            self.fields["homepage_default_collection"].widget.attrs["class"] = "form-control form-select"
+            self.fields["homepage_image_collection"].widget.attrs["class"] = "form-control form-select"
         else:
             # If the user doesn't have any collections, remove the field
             self.fields.pop("homepage_default_collection")

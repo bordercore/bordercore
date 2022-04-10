@@ -4,16 +4,16 @@
 
 {% block content %}
 
-    <div class="row no-gutters h-100" id="vue-app">
+    <div class="row g-0 h-100" id="vue-app">
 
         {% if not collection_is_not_empty %}
 
-            <div class="card-grid ml-2">
+            <div class="card-grid ms-2">
                 <h3>
                     Your music library is empty. Feel free to add a song to begin your collection.
                 </h3>
                 <div>
-                    <a href="{% url 'music:create' %}" class="btn btn-primary" role="button"><font-awesome-icon icon="plus" class="mr-2"></font-awesome-icon>Add song</a>
+                    <a href="{% url 'music:create' %}" class="btn btn-primary" role="button"><font-awesome-icon icon="plus" class="me-2"></font-awesome-icon>Add song</a>
                 </div>
             </div>
 
@@ -52,13 +52,13 @@
                                 <div>
                                     <a href="{% url 'music:playlist_detail' playlist.uuid %}">{{ playlist.name }}</a>
                                 </div>
-                                <div class="ml-auto">
-                                    <span class="px-2 badge badge-pill badge-info">{{ playlist.num_songs }}</span>
+                                <div class="ms-auto">
+                                    <span class="px-2 badge rounded-pill bg-info">{{ playlist.num_songs }}</span>
                                 </div>
                             </li>
                         {% endfor %}
                     </ul>
-                    <div class="mt-3 ml-3">
+                    <div class="mt-3 ms-3">
                         <font-awesome-icon icon="plus"></font-awesome-icon>
                         <a href="#" class="text-info" @click="onClickCreate">Create a playlist</a>
                     </div>
@@ -73,7 +73,7 @@
                         {% for song in recent_songs %}
                             <li class="list-group-item list-group-item-secondary text-white">
                                 {{ song.title}}
-                                <a class="ml-2" href="{% url 'music:artist_detail' song.artist.uuid %}">{{ song.artist.name }}</a>
+                                <a class="ms-2" href="{% url 'music:artist_detail' song.artist.uuid %}">{{ song.artist.name }}</a>
                             </li>
                         {% endfor %}
                     </ul>
@@ -93,7 +93,7 @@
 
                             <div class="card-title">Recently Added Albums</div>
 
-                            <div class="mr-2 ml-auto">
+                            <div class="me-2 ms-auto">
                                 <add-button :href="'{% url 'music:create' %}'"></add-button>
                             </div>
 
@@ -117,7 +117,7 @@
                                         <a href="{% url 'music:album_detail' album.uuid %}">
                                             <img src="{{ IMAGES_URL }}album_artwork/{{ album.uuid }}" height="150" width="150" /> <br />
                                         </a>
-                                        <div class="mt-1 font-weight-bold">
+                                        <div class="mt-1 fw-bold">
                                             {{ album.title }}
                                         </div>
                                         <div class="text-light">
@@ -136,7 +136,7 @@
 
             <card title="Recently added music">
                 <template v-slot:content>
-                    <div class="card-grid ml-2">
+                    <div class="card-grid ms-2">
 
                         <div>
                             <b-table
@@ -148,7 +148,7 @@
                             >
                                 <b-table-column field="title" label="Title" header-class="cursor-pointer" v-slot="props">
                                     <span>[[ props.row.title ]]</span>
-                                    <span class="pl-2 table-note" v-html="props.row.note"></span>
+                                    <span class="ps-2 table-note" v-html="props.row.note"></span>
                                 </b-table-column>
 
                                 <b-table-column field="artist" label="Artist" header-class="cursor-pointer" v-slot="props">
@@ -222,7 +222,8 @@
                     })
                 },
                 onClickCreate(evt) {
-                    $("#modalCreateUpdate").modal("show")
+                    const modal = new Modal("#modalCreateUpdate");
+                    modal.show();
                     window.setTimeout(() => { document.getElementById("id_name").focus() }, 500);
                 },
             },

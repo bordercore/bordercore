@@ -1,14 +1,6 @@
 import Vue from "vue";
 window.Vue = Vue;
 
-import {PopoverPlugin, ToastPlugin, VBHoverPlugin} from "bootstrap-vue";
-Vue.use(PopoverPlugin);
-Vue.use(ToastPlugin);
-Vue.use(VBHoverPlugin);
-
-import DropdownMenu from "@innologica/vue-dropdown-menu";
-Vue.component("DropdownMenu", DropdownMenu);
-
 import draggable from "vuedraggable";
 Vue.component("draggable", draggable);
 
@@ -32,12 +24,11 @@ window.axios = axios;
 axios.defaults.xsrfCookieName = "csrftoken";
 axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
 
-import $ from "jquery";
-import jQuery from "jquery";
-window.$ = $;
-window.jQuery= jQuery;
-
 import "bootstrap";
+import {Dropdown, Modal, Tab} from "bootstrap";
+window.Dropdown = Dropdown;
+window.Modal = Modal;
+window.Tab = Tab;
 
 import {library} from "@fortawesome/fontawesome-svg-core";
 import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faExchangeAlt, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faChevronLeft, faChevronRight, faChevronUp, faClone, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faFileAlt, faFileImport, faHeart, faHome, faImage, faImages, faInfo, faGraduationCap, faLink, faList, faLock, faMusic, faNewspaper, faObjectGroup, faPencilAlt, faPlus, faQuestion, faRandom, faRunning, faSearch, faSignOutAlt, faSquareRootAlt, faStickyNote, faTags, faTasks, faThumbtack, faTimes, faTimesCircle, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
@@ -240,6 +231,10 @@ window.Pagination = Pagination;
 
 import PythonConsole from "./vue/common/PythonConsole.vue";
 window.PythonConsole = PythonConsole;
+
+import Toast from "./vue/common/Toast.vue";
+Vue.component("Toast", Toast);
+window.Toast = Pagination;
 
 import {BarController, BarElement, Chart, CategoryScale, LinearScale, Title} from "chart.js";
 window.Chart = Chart;

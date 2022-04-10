@@ -3,7 +3,7 @@
         <form id="top-search-form" class="form-inline" method="get">
             <input type="hidden" name="doctype">
             <div class="form-row">
-                <div class="search-with-doctypes col-auto has-search mr-1">
+                <div class="search-with-doctypes col-auto has-search me-1">
                     <font-awesome-icon icon="search" />
 
                     <vue-simple-suggest id="top-simple-suggest"
@@ -32,7 +32,7 @@
                                   @click.stop=""
                             >{{ scope.suggestion.name }}</span>
                             <span v-else class="top-search-suggestion">
-                                <span v-if="scope.suggestion.important === 10" class="mr-4">
+                                <span v-if="scope.suggestion.important === 10" class="me-4">
                                     <font-awesome-icon icon="heart" class="text-danger" />
                                 </span>
                                 <span class="d-inline" v-html="boldenSuggestion(scope)" />
@@ -42,7 +42,7 @@
                     <div v-if="searchFilter" id="top-search-filter" class="tag label label-info d-flex align-items-center">
                         <div>{{ getFilterName(searchFilter) }}</div>
                         <div>
-                            <a class="ml-1" href="#" @click.prevent="removeFilter()">
+                            <a class="ms-1" href="#" @click.prevent="removeFilter()">
                                 <font-awesome-icon icon="times" class="text-primary" />
                             </a>
                         </div>
@@ -50,14 +50,14 @@
                 </div>
             </div>
         </form>
-        <div v-if="query === ''" id="top-search-filter-options" class="ml-3 mt-2 p-3">
+        <div v-if="query === ''" id="top-search-filter-options" class="ms-3 mt-2 p-3">
             <div class="text-primary mb-2">
                 <strong>Filter Options</strong>
             </div>
             <div class="d-flex flex-column">
                 <div v-for="filter in searchFilterTypes" :key="filter.icon" class="tag-list d-flex p-1" :class="getFilterClass(filter.doctype)" @click.prevent="handleFilter(filter.doctype)">
                     <div class="top-search-filter-icon d-flex justify-content-center align-items-center">
-                        <font-awesome-icon class="mr-2" :icon="filter.icon" />
+                        <font-awesome-icon class="me-2" :icon="filter.icon" />
                     </div>
                     <div>
                         {{ filter.name }}
@@ -70,7 +70,7 @@
             <div class="d-flex flex-column">
                 <div v-for="recentSearch in recentSearches" :key="recentSearch.id" class="tag-list d-flex p-1" @click.prevent="handleRecentSearch(recentSearch)">
                     <div class="top-search-filter-icon d-flex justify-content-center align-items-center">
-                        <font-awesome-icon class="mr-2" icon="search" />
+                        <font-awesome-icon class="me-2" icon="search" />
                     </div>
                     <div class="text-truncate">
                         {{ recentSearch.search_text }}

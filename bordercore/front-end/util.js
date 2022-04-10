@@ -11,11 +11,14 @@ export function doGet(scope, url, callback, errorMsg) {
         .then((response) => {
             if (response.data.status && response.data.status != "OK") {
                 const vNodesMsg = getErrorMessage(scope, errorMsg);
-                scope.$bvToast.toast(vNodesMsg, {
-                    title: "Error!",
-                    autoHideDelay: 5000,
-                    variant: "danger",
-                });
+                EventBus.$emit(
+                    "toast",
+                    {
+                        title: "Error!",
+                        body: vNodesMsg,
+                        variant: "danger",
+                    },
+                );
                 console.log(errorMsg);
             } else {
                 console.log("Success");
@@ -23,11 +26,14 @@ export function doGet(scope, url, callback, errorMsg) {
             }
         })
         .catch((error) => {
-            scope.$bvToast.toast(`${errorMsg}: ${error.message}`, {
-                title: "Error!",
-                autoHideDelay: 60000,
-                variant: "danger",
-            });
+            EventBus.$emit(
+                "toast",
+                {
+                    title: "Error!",
+                    body: `${errorMsg}: ${error.message}`,
+                    variant: "danger",
+                },
+            );
             console.error(error);
         });
 }
@@ -53,24 +59,31 @@ export function doPost(scope, url, params, callback, successMsg, errorMsg) {
         data: bodyFormData,
     }).then((response) => {
         if (response.data.status && response.data.status === "Warning") {
-            scope.$bvToast.toast(response.data.message, {
-                title: "Error",
-                autoHideDelay: 10000,
-                variant: "warning",
-            });
+            EventBus.$emit(
+                "toast",
+                {
+                    title: "Error",
+                    body: response.data.message,
+                    variant: "warning",
+                },
+            );
             console.log("Warning: ", response.data.message);
         } else if (response.data.status && response.data.status != "OK") {
-            scope.$bvToast.toast(response.data.message, {
-                title: "Error",
-                noAutoHide: true,
-                variant: "danger",
-            });
+            EventBus.$emit(
+                "toast",
+                {
+                    title: "Error",
+                    body: response.data.message,
+                    variant: "danger",
+                },
+            );
             console.log("Error: ", response.data.message);
         } else {
-            scope.$bvToast.toast(
-                response.data.message ? response.data.message : successMsg,
+            EventBus.$emit(
+                "toast",
                 {
                     title: "Success",
+                    body: response.data.message ? response.data.message : successMsg,
                     variant: "info",
                 },
             );
@@ -79,11 +92,14 @@ export function doPost(scope, url, params, callback, successMsg, errorMsg) {
         }
     })
         .catch((error) => {
-            scope.$bvToast.toast(error.message, {
-                title: "Error",
-                noAutoHide: true,
-                variant: "danger",
-            });
+            EventBus.$emit(
+                "toast",
+                {
+                    title: "Error",
+                    body: error.message,
+                    variant: "danger",
+                },
+            );
             console.error(error);
         });
 }
@@ -109,17 +125,21 @@ export function doPut(scope, url, params, callback, successMsg, errorMsg) {
         data: bodyFormData,
     }).then((response) => {
         if (response.status != 200) {
-            scope.$bvToast.toast(response.data.message, {
-                title: "Error",
-                noAutoHide: true,
-                variant: "danger",
-            });
+            EventBus.$emit(
+                "toast",
+                {
+                    title: "Error",
+                    body: response.data.message,
+                    variant: "danger",
+                },
+            );
             console.log("Error: ", response.statusText);
         } else {
-            scope.$bvToast.toast(
-                response.data.message ? response.data.message : successMsg,
+            EventBus.$emit(
+                "toast",
                 {
                     title: "Success",
+                    body: response.data.message ? response.data.message : successMsg,
                     variant: "info",
                 },
             );
@@ -128,11 +148,14 @@ export function doPut(scope, url, params, callback, successMsg, errorMsg) {
         }
     })
         .catch((error) => {
-            scope.$bvToast.toast(error.message, {
-                title: "Error",
-                noAutoHide: true,
-                variant: "danger",
-            });
+            EventBus.$emit(
+                "toast",
+                {
+                    title: "Error",
+                    body: error.message,
+                    variant: "danger",
+                },
+            );
             console.error(error);
         });
 }
@@ -151,7 +174,7 @@ function getErrorMessage(vue, errorMsg) {
                 icon: "exclamation-triangle",
             },
         }),
-        h("span", {"class": ["ml-2"]}, [errorMsg]),
+        h("span", {"class": ["ms-2"]}, [errorMsg]),
     ];
 
     return vNodesMsg;

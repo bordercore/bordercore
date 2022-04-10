@@ -12,18 +12,18 @@
 
     <div id="vue-app">
 
-        <div class="row no-gutters">
+        <div class="row g-0">
             <div class="col-lg-12">
             <div class="right-column">
 
                 <div class="card-body mb-3 pb-4">
 
                     <form id="tag-filter-form" class="form-inline align-items-start" action="{% url 'search:kb_search_tag_detail' tag %}" method="get" autocomplete="off">
-                        <div class="form-group w-50">
+                        <div class="row">
 
                             <search-tags-input
                                 name="tag-search"
-                                class="w-100"
+                                class="col-lg-6"
                                 :autofocus=true
                                 place-holder="Tag"
                                 search-url="{% url 'tag:search' %}?query="
@@ -31,26 +31,29 @@
                             >
                             </search-tags-input>
 
-                        </div>
                 {% if tag_counts %}
                     <related-tag-counts inline-template>
-                        <div class="form-group ml-2">
-                            <select class="form-control" @change="onChange">
+                        <div class="col-lg-3">
+                            <div>
+                            <select class="form-control form-select" @change="onChange">
                                 <option value="-1">Related tags</option>
                         {% for tag, count in tag_counts %}
                             <option value="{{ tag }}">{{ tag }} ({{ count }})</option>
                         {% endfor %}
                             </select>
+                            </div>
                         </div>
                     </related-tag-counts>
+                        </div>
+
                 {% endif %}
                 <meta-tag-list inline-template>
-                    <div class="form-group">
+                    <div>
                 {% for tag in meta_tags %}
                     {% if forloop.first %}
-                        <label class="ml-3">Meta Tags: </label>
+                        <label class="ms-3">Meta Tags: </label>
                     {% endif %}
-                    <span class="badge badge-success ml-2"><a class="meta_tag tag" href="" @click="onClick">{{ tag }}</a></span>
+                    <span class="badge bg-success ms-2"><a class="meta_tag tag" href="" @click="onClick">{{ tag }}</a></span>
                 {% endfor %}
                     </div>
                 </meta-tag-list>
@@ -66,9 +69,9 @@
             <ul class="nav nav-tabs mx-3" id="myTab">
                 {% for doctype in doctype_counts %}
                     <li class="nav-item" data-type="{{ doctype.0 }}" @click="onClick">
-                        <a class="nav-link" data-toggle="tab" href="#{{ doctype.0 }}">
+                        <a class="nav-link" data-bs-toggle="tab" href="#{{ doctype.0 }}">
                             {{ doctype_mapping|get_doctype:doctype.0 }}
-                            <span class="badge badge-info align-middle ml-2">
+                            <span class="badge bg-info align-middle ms-2">
                                 {{ doctype.1 }}
                             </span>
                         </a>
@@ -77,7 +80,7 @@
             </ul>
         </tab-list>
 
-        <div class="tab-content pl-3 right-column h-100 mb-3">
+        <div class="tab-content ps-3 right-column h-100 mb-3">
 
             <div id="blob" class="tab-pane fade">
                 <ul class="list-unstyled d-flex flex-wrap">
@@ -89,10 +92,10 @@
                                 <div>
                                     <img src="{{ match.cover_url }}" />
                                 </div>
-                                <div class="d-flex flex-column ml-2">
+                                <div class="d-flex flex-column ms-2">
                                     <h4>
                                         {% if match.importance > 1 %}
-                                            <font-awesome-icon icon="heart" class="favorite" data-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                            <font-awesome-icon icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
                                         {% endif %}
                                         <a href="{% url 'blob:detail' match.uuid %}">
                                             {{ match.name|default:"No name" }}
@@ -134,10 +137,10 @@
                                 <div>
                                     <img src="{{ match.cover_url }}" />
                                 </div>
-                                <div class="d-flex flex-column ml-2">
+                                <div class="d-flex flex-column ms-2">
                                     <h4>
                                         {% if match.importance > 1 %}
-                                            <font-awesome-icon icon="heart" class="favorite" data-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                            <font-awesome-icon icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
                                         {% endif %}
                                         <a href="{% url 'blob:detail' match.uuid %}">
                                             {{ match.name|default:"No name" }}
@@ -156,7 +159,7 @@
                                     <div>
                                         <div class="mt-2">
                                             {% for tag in match.tags %}
-                                                <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge badge-info">{{ tag }}</a>
+                                                <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge bg-info">{{ tag }}</a>
                                             {% endfor %}
                                         </div>
                                     </div>
@@ -177,20 +180,20 @@
                         <li class="search-result">
                             <div class="d-flex my-1">
 
-                                <div class="mr-2 my-1">
+                                <div class="me-2 my-1">
                                     <font-awesome-icon icon="bookmark" class="text-light"></font-awesome-icon>
                                 </div>
 
                                 <div class="d-flex flex-column">
                                     <h4>
                                     {% if match.importance > 1 %}
-                                        <font-awesome-icon icon="heart" class="favorite" data-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                        <font-awesome-icon icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
                                     {% endif %}
                                     <a href="{{ match.url }}">{{ match.name }}</a>
                                     </h4>
                                     <div class="d-flex mb-2 align-items-center text-primary">
                                     {{ match.url|favicon|safe }}
-                                        <div class="ml-2">
+                                        <div class="ms-2">
                                         {{ match.url|domain }}
                                         </div>
                                     </div>
@@ -203,7 +206,7 @@
                                     </div>
                                 </div>
 
-                                <div class="search-result-date text-nowrap ml-auto pl-4">
+                                <div class="search-result-date text-nowrap ms-auto ps-4">
                                     {{ match.date }}
                                 </div>
 
@@ -221,13 +224,13 @@
 
                 <li class="search-result">
                     <div class="d-flex my-1">
-                        <div class="mr-2 mt-1">
+                        <div class="me-2 mt-1">
                             <font-awesome-icon icon="sticky-note" class="text-light" />
                         </div>
                         <div class="d-flex flex-column">
                             <h4>
                                 {% if match.importance > 1 %}
-                                    <font-awesome-icon icon="heart" class="favorite" data-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                    <font-awesome-icon icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
                                 {% endif %}
                                 <a href="{% url 'blob:detail' match.uuid %}">{{ match.name|default:"No Name" }}</a>
                             </h4>
@@ -239,7 +242,7 @@
                                     {% endfor %}
                                 </div>
                         </div>
-                        <div class="search-result-date text-nowrap ml-auto pl-4">
+                        <div class="search-result-date text-nowrap ms-auto ps-4">
                             {{ match.date }}
                         </div>
                     </div>
@@ -256,13 +259,13 @@
                 <li class="search-result">
                     <div class="d-flex my-1">
 
-                        <div class="mr-2 mt-1">
+                        <div class="me-2 mt-1">
                             <font-awesome-icon icon="sticky-note" class="text-light" />
                         </div>
                         <div class="d-flex flex-column">
                             <h4>
                                 {% if match.importance > 1 %}
-                                    <font-awesome-icon icon="heart" class="favorite" data-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
+                                    <font-awesome-icon icon="heart" class="favorite" data-bs-toggle="tooltip" data-placement="bottom" title="Favorite"></font-awesome-icon>
                                 {% endif %}
                                 <a href="{% url 'blob:detail' match.uuid %}">{{ match.name|default:"Note" }}</a>
                             </h4>
@@ -276,7 +279,7 @@
                                 {% endfor %}
                             </div>
                         </div>
-                        <div class="search-result-date text-nowrap ml-auto pl-4">
+                        <div class="search-result-date text-nowrap ms-auto ps-4">
                             {{ match.date }}
                         </div>
                     </div>
@@ -377,12 +380,27 @@
                 }
             },
             mounted() {
+
+                const triggerTabList = [].slice.call(document.querySelectorAll("#myTab a"));
+                triggerTabList.forEach(function (triggerEl) {
+                    const tabTrigger = new Tab(triggerEl);
+
+                    triggerEl.addEventListener("click", function (event) {
+                        event.preventDefault();
+                        tabTrigger.show();
+                    });
+                });
+
                 {% if kb_tag_detail_current_tab and kb_tag_detail_current_tab in doctypes %}
-                $("li[data-type='{{ kb_tag_detail_current_tab }}'] a").tab("show");
+                const triggerFirstTabEl = document.querySelector("li[data-type='{{ kb_tag_detail_current_tab }}'] a");
+                Tab.getInstance(triggerFirstTabEl).show();
+
                 {% else %}
                 // If the tab stored in the session doesn't match any current tab categories,
-                //  show the first tab.
-                $("#myTab a").tab("show");
+                //  select the first tab.
+                const triggerFirstTabEl = document.querySelector("#myTab li:first-child a");
+                Tab.getInstance(triggerFirstTabEl).show();
+
                 {% endif %}
 
             }
