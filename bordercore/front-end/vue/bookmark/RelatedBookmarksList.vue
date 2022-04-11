@@ -45,7 +45,7 @@
                                         </drop-down-menu>
                                     </div>
                                 </li>
-                                <div v-cloak v-if="bookmarkList.length == 0" :key="1" class="text-secondary">
+                                <div v-cloak v-if="bookmarkList.length == 0" :key="1" class="text-info">
                                     No bookmarks
                                 </div>
                             </transition-group>

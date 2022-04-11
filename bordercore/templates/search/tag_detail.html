@@ -49,9 +49,9 @@
                                <div>
                            {% for tag in meta_tags %}
                            {% if forloop.first %}
-                               <label class="ms-3">Meta Tags: </label>
+                               <label class="ms-3 mt-2">Meta Tags: </label>
                            {% endif %}
-                           <span class="badge bg-success ms-2"><a class="meta_tag tag" href="" @click="onClick">{{ tag }}</a></span>
+                           <span class="ms-2"><a class="meta_tag tag" href="" @click="onClick">{{ tag }}</a></span>
                            {% endfor %}
                                </div>
                            </meta-tag-list>

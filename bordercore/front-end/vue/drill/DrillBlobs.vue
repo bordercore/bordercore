@@ -44,7 +44,7 @@
                                         </drop-down-menu>
                                     </div>
                                 </li>
-                                <div v-cloak v-if="blobList.length == 0" :key="1" class="text-secondary">
+                                <div v-cloak v-if="blobList.length == 0" :key="1" class="text-info">
                                     No blobs
                                 </div>
                             </transition-group>
