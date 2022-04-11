@@ -22,7 +22,7 @@
         {% if not album_list and not song_list %}
             <div class="col-lg-12">
                 <div class="card-grid ms-2">
-                <search-no-result class="right-column">
+                <search-no-result class="me-3">
                     <template v-slot:message>
                         You have no music tagged with <strong>{{ tag_name }}</strong>
                     </template>
@@ -57,7 +57,7 @@
 
                 {% if album_list %}
 
-                    <div class="right-column">
+                    <div class="me-3">
                         <card>
 
                         <template v-slot:title-slot>
@@ -112,7 +112,7 @@
 
                 {% if song_list %}
 
-                <div class="right-column">
+                <div class="me-3">
                     <card>
                         <template v-slot:title-slot>
                             <h4>

@@ -11,11 +11,6 @@
   flex: 1 0 auto;
 }
 
-// Add this to the right-most column in a flex grid
-.right-column {
-  margin-right: 1rem;
-}
-
 .card-title {
   font-size: 1.2rem;
 
@@ -1499,6 +1494,10 @@ div #dateapp {
 //
 // Drill
 //
+
+#icon-list {
+  padding-right: 2.25rem;
+}
 
 #pinned-tags .card-title {
   height: 2.5rem;
