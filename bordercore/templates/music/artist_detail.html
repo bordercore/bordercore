@@ -193,10 +193,14 @@
                                         <drop-down-menu :show-on-hover="true">
                                             <div slot="dropdown">
                                                 <li>
-                                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(props.row.uuid)">Update</a>
+                                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(props.row.uuid)">
+                                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
+                                                    </a>
                                                 </li>
                                                 <li>
-                                                    <a class="dropdown-item" href="#" @click.prevent="onClickAddToPlaylist(props.row.uuid)">Add to playlist</a>
+                                                    <a class="dropdown-item" href="#" @click.prevent="onClickAddToPlaylist(props.row.uuid)">
+                                                        <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>Add to playlist
+                                                    </a>
                                                 </li>
                                             </div>
                                         </drop-down-menu>

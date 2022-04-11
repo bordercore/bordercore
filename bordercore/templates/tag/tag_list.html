@@ -121,7 +121,9 @@
                                     <drop-down-menu :show-on-hover="true">
                                         <div slot="dropdown">
                                             <li>
-                                                <a class="dropdown-item" href="#" @click.prevent="onClickDelete(props.row)">Delete</a>
+                                                <a class="dropdown-item" href="#" @click.prevent="onClickDelete(props.row)">
+                                                    <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>Delete
+                                                </a>
                                             </li>
                                         </div>
                                     </drop-down-menu>

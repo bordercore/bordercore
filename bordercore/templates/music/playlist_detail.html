@@ -139,10 +139,14 @@
                         <drop-down-menu :show-on-hover="true">
                             <div slot="dropdown">
                                 <li>
-                                    <a class="dropdown-item" href="#" @click.prevent="onClickRemove(props.row.uuid)">Remove from playlist</a>
+                                    <a class="dropdown-item" href="#" @click.prevent="onClickRemove(props.row.uuid)">
+                                        <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>Remove from playlist
+                                    </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdateSong(props.row.uuid)">Update</a>
+                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdateSong(props.row.uuid)">
+                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
+                                    </a>
                                 </li>
                             </div>
                         </drop-down-menu>

@@ -32,9 +32,13 @@
                                         <drop-down-menu ref="editNoteMenu" :show-on-hover="true">
                                             <div slot="dropdown">
                                                 <li>
-                                                    <a class="dropdown-item" href="#" @click.prevent="removeBlob(blob.uuid)">Remove</a>
-                                                    <a v-if="!blob.note" class="dropdown-item" href="#" @click.prevent="addNote(blob.uuid)">Add note</a>
-                                                    <a v-else class="dropdown-item" href="#" @click.prevent="activateInEditMode(blob, index)">Edit note</a>
+                                                    <a class="dropdown-item" href="#" @click.prevent="removeBlob(blob.uuid)"><font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove</a>
+                                                    <a v-if="!blob.note" class="dropdown-item" href="#" @click.prevent="addNote(blob.uuid)">
+                                                        <font-awesome-icon icon="plus" class="text-primary me-3" />Add note
+                                                    </a>
+                                                    <a v-else class="dropdown-item" href="#" @click.prevent="activateInEditMode(blob, index)">
+                                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Edit note
+                                                    </a>
                                                 </li>
                                             </div>
                                         </drop-down-menu>
