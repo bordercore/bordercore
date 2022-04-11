@@ -446,9 +446,24 @@ button:focus {
   outline: 0;
 }
 
-.toast.danger {
+.toast-wrapper {
+  z-index: 1;
+
   .toast-header {
-    background-color: #f00;
+    color: $white;
+  }
+
+  .danger {
+    .toast-header {
+      background-color: $danger;
+      color: $white;
+    }
+  }
+  .warning {
+    .toast-header {
+      background-color: $warning;
+      color: $black;
+    }
   }
 }
 

@@ -17,6 +17,7 @@ export function doGet(scope, url, callback, errorMsg) {
                         title: "Error!",
                         body: vNodesMsg,
                         variant: "danger",
+                        autoHide: false,
                     },
                 );
                 console.log(errorMsg);
@@ -32,6 +33,7 @@ export function doGet(scope, url, callback, errorMsg) {
                     title: "Error!",
                     body: `${errorMsg}: ${error.message}`,
                     variant: "danger",
+                    autoHide: false,
                 },
             );
             console.error(error);
@@ -65,6 +67,7 @@ export function doPost(scope, url, params, callback, successMsg, errorMsg) {
                     title: "Error",
                     body: response.data.message,
                     variant: "warning",
+                    autoHide: false,
                 },
             );
             console.log("Warning: ", response.data.message);
@@ -75,18 +78,22 @@ export function doPost(scope, url, params, callback, successMsg, errorMsg) {
                     title: "Error",
                     body: response.data.message,
                     variant: "danger",
+                    autoHide: false,
                 },
             );
             console.log("Error: ", response.data.message);
         } else {
-            EventBus.$emit(
-                "toast",
-                {
-                    title: "Success",
-                    body: response.data.message ? response.data.message : successMsg,
-                    variant: "info",
-                },
-            );
+            const body = response.data.message ? response.data.message : successMsg;
+            if (body) {
+                EventBus.$emit(
+                    "toast",
+                    {
+                        title: "Success",
+                        body: response.data.message ? response.data.message : successMsg,
+                        variant: "info",
+                    },
+                );
+            }
             console.log("Success: ", response.data);
             callback(response);
         }
@@ -98,6 +105,7 @@ export function doPost(scope, url, params, callback, successMsg, errorMsg) {
                     title: "Error",
                     body: error.message,
                     variant: "danger",
+                    autoHide: false,
                 },
             );
             console.error(error);
@@ -131,18 +139,22 @@ export function doPut(scope, url, params, callback, successMsg, errorMsg) {
                     title: "Error",
                     body: response.data.message,
                     variant: "danger",
+                    autoHide: false,
                 },
             );
             console.log("Error: ", response.statusText);
         } else {
-            EventBus.$emit(
-                "toast",
-                {
-                    title: "Success",
-                    body: response.data.message ? response.data.message : successMsg,
-                    variant: "info",
-                },
-            );
+            const body = response.data.message ? response.data.message : successMsg;
+            if (body) {
+                EventBus.$emit(
+                    "toast",
+                    {
+                        title: "Success",
+                        body: response.data.message ? response.data.message : successMsg,
+                        variant: "info",
+                    },
+                );
+            }
             console.log("Success: ", response.data);
             callback(response);
         }
@@ -154,6 +166,7 @@ export function doPut(scope, url, params, callback, successMsg, errorMsg) {
                     title: "Error",
                     body: error.message,
                     variant: "danger",
+                    autoHide: false,
                 },
             );
             console.error(error);
