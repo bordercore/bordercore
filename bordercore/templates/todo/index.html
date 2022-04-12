@@ -74,12 +74,11 @@
                     hoverable
                     draggable
                     sort-icon="chevron-up"
+                    :row-class="(row, index) => 'hover-target'"
                     @drop="onDrop"
                     @dragend="onDragEnd"
                     @dragover="onDragOver"
                     @dragstart="onDragStart"
-                    @mouseenter="onMouseEnter"
-                    @mouseleave="onMouseLeave"
                 >
 
                     <b-table-column field="sort_order" label="Manual" cell-class="todo-col-manual-sorting drag-handle text-center cursor-grab" header-class="cursor-pointer" sortable v-slot="props">
@@ -105,22 +104,20 @@
                     </b-table-column>
 
                     <b-table-column field="uuid" label="" cell-class="col-action" v-slot="props">
-                        <div class="hover-target d-none">
-                            <drop-down-menu >
-                                <div slot="dropdown">
-                                    <li>
-                                        <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(props.row)">
-                                            <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="#" @click.prevent="onClickDelete(props.row)">
-                                            <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>Delete
-                                        </a>
-                                    </li>
-                                </div>
-                            </drop-down-menu>
-                        </div>
+                        <drop-down-menu :show-on-hover="true">
+                            <div slot="dropdown">
+                                <li>
+                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(props.row)">
+                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" @click.prevent="onClickDelete(props.row)">
+                                        <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>Delete
+                                    </a>
+                                </li>
+                            </div>
+                        </drop-down-menu>
                     </b-table-column>
 
                     <template #empty>
@@ -205,12 +202,6 @@
                         sortable.option("disabled", true);
                         this.fields[0].class="drag-handle text-center";
                     }
-                },
-                onMouseEnter(row, evt) {
-                    evt.currentTarget.querySelector(".hover-target").classList.remove("d-none");
-                },
-                onMouseLeave(row, evt) {
-                    evt.currentTarget.querySelector(".hover-target").classList.add("d-none");
                 },
                 onDragOver(payload) {
                     payload.event.dataTransfer.dropEffect = "move";

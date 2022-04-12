@@ -152,7 +152,7 @@
             </card>
         </div>
 
-        <div class="col-lg-3" id="pinned-tags" @mouseenter="handleHover" @mouseleave="handleHover">
+        <div class="hover-target col-lg-3" id="pinned-tags">
 
             <div class="me-3">
                 <card
@@ -408,16 +408,6 @@
                         },
                         "Error getting pinned tags"
                     );
-                },
-
-                handleHover(evt) {
-                    const target = evt.currentTarget.querySelector(".dropdown");
-
-                    if (evt.type === "mouseenter") {
-                        target.classList.remove("d-none");
-                    } else {
-                        target.classList.add("d-none");
-                    }
                 },
                 chooseTag() {
 

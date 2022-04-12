@@ -105,8 +105,7 @@
                                 hoverable
                                 class="w-100"
                                 sort-icon="chevron-up"
-                                @mouseenter="onMouseEnter"
-                                @mouseleave="onMouseLeave"
+                                :row-class="(row, index) => 'hover-target'"
                             >
 
                                 <b-table-column field="tag.name" label="Tag" header-class="cursor-pointer" sortable v-slot="props">
@@ -248,12 +247,6 @@
                     setTimeout( () => {
                         this.$refs.simpleSuggest.$refs.suggestComponent.input.focus();
                     }, 100);
-                },
-                onMouseEnter(row, evt) {
-                    evt.currentTarget.querySelector(".dropdown").classList.remove("d-none");
-                },
-                onMouseLeave(row, evt) {
-                    evt.currentTarget.querySelector(".dropdown").classList.add("d-none");
                 },
                 onClickDelete(item, index, evt) {
                     const selectedUuid = item;

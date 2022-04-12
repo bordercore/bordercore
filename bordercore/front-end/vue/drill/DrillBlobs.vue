@@ -12,7 +12,7 @@
                     <ul id="sort-container-tags" class="list-group list-group-flush">
                         <draggable v-model="blobList" ghost-class="sortable-ghost" draggable=".draggable" @change="onSort">
                             <transition-group type="transition" class="w-100">
-                                <li v-for="(blob, index) in blobList" v-cloak :key="blob.uuid" class="text-info draggable d-flex align-items-center p-2" :data-uuid="blob.uuid" @mouseenter="handleHover" @mouseleave="handleHover">
+                                <li v-for="(blob, index) in blobList" v-cloak :key="blob.uuid" class="hover-target text-info draggable d-flex align-items-center p-2" :data-uuid="blob.uuid">
                                     <div class="d-flex align-items-center w-100">
                                         <div class="align-self-start pe-2">
                                             <img :src="[[ blob.cover_url ]]" height="75" width="70">
@@ -205,18 +205,6 @@
                     "",
                     "",
                 );
-            },
-            hoverDropdown(isHovered, evt) {
-                this.handleHover(isHovered, evt, ".dropdown");
-            },
-            handleHover(evt) {
-                const target = evt.currentTarget.querySelector(".dropdownmenu");
-
-                if (evt.type === "mouseenter") {
-                    target.classList.remove("d-none");
-                } else {
-                    target.classList.add("d-none");
-                }
             },
             handleHoverNote(evt) {
                 const target = evt.currentTarget.querySelector(".node-add-button");

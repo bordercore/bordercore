@@ -103,12 +103,11 @@
                     draggable
                     :selected.sync="selectedSong"
                     sort-icon="chevron-up"
+                    :row-class="(row, index) => 'hover-target'"
                     @drop="onDrop"
                     @dragend="onDragEnd"
                     @dragover="onDragOver"
                     @dragstart="onDragStart"
-                    @mouseenter="onMouseEnter"
-                    @mouseleave="onMouseLeave"
                     @cellclick="onSongClicked"
                     ref="table"
                 >
@@ -273,12 +272,6 @@
                     if (index != -1) {
                         this.$refs.table.selectRow(index);
                     }
-                },
-                onMouseEnter(row, evt) {
-                    evt.currentTarget.querySelector(".dropdown").classList.remove("d-none");
-                },
-                onMouseLeave(row, evt) {
-                    evt.currentTarget.querySelector(".dropdown").classList.add("d-none");
                 },
                 onDragOver(payload) {
                     payload.event.dataTransfer.dropEffect = "move";

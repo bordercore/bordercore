@@ -129,7 +129,7 @@
                             <table id="bookmark-list" class="w-100">
                                 <tbody is="draggable" v-model="bookmarkList" @change="onSortBookmarks" ghost-class="sortable-ghost">
                                     <transition-group type="transition">
-                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="bookmark-list w-100" v-cloak @dragstart="startDrag($event, bookmark)" @click="onClickBookmark(bookmark.uuid)" @mouseenter="onMouseEnterLeave" @mouseleave="onMouseEnterLeave">
+                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="hover-target bookmark-list w-100" v-cloak @dragstart="startDrag($event, bookmark)" @click="onClickBookmark(bookmark.uuid)" @mouseenter="onMouseEnterLeave" @mouseleave="onMouseEnterLeave">
                                             <td class="bookmark-list-date p-2 text-info align-top">
                                                 <span>[[ bookmark.created ]]</span>
                                             </td>
@@ -357,15 +357,12 @@
                     }
                 },
                 onMouseEnterLeave(evt) {
-                    const dropdownTarget = evt.currentTarget.querySelector(".dropdownmenu");
                     const YTTarget = evt.currentTarget.querySelector(".yt-hover-target");
                     if (evt.type === "mouseenter") {
-                        dropdownTarget.classList.remove("d-none");
                         if (YTTarget) {
                             YTTarget.classList.remove("d-none");
                         }
                     } else {
-                        dropdownTarget.classList.add("d-none");
                         if (YTTarget) {
                             YTTarget.classList.add("d-none");
                         }

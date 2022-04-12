@@ -12,7 +12,7 @@
                     <ul id="sort-container-tags" class="list-group list-group-flush interior-borders">
                         <draggable v-model="bookmarkList" ghost-class="sortable-ghost" draggable=".draggable" @change="onSort">
                             <transition-group type="transition" class="w-100">
-                                <li v-for="(bookmark, index) in bookmarkList" v-cloak :key="bookmark.uuid" class="list-group-item list-group-item-secondary text-info draggable px-0" :data-uuid="bookmark.uuid" @mouseenter="handleHover" @mouseleave="handleHover">
+                                <li v-for="(bookmark, index) in bookmarkList" v-cloak :key="bookmark.uuid" class="hover-target list-group-item list-group-item-secondary text-info draggable px-0" :data-uuid="bookmark.uuid">
                                     <div class="d-flex">
                                         <div class="pe-2" v-html="bookmark.favicon_url" />
                                         <div>
@@ -192,15 +192,6 @@
                     "Bookmark removed",
                     "",
                 );
-            },
-            handleHover(evt) {
-                const target = evt.currentTarget.querySelector(".dropdown");
-
-                if (evt.type === "mouseenter") {
-                    target.classList.remove("d-none");
-                } else {
-                    target.classList.add("d-none");
-                }
             },
             openModal() {
                 const modal = new Modal("#modalAddBookmark");

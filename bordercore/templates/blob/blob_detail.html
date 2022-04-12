@@ -193,7 +193,7 @@
                             Related Blobs
                         </template>
                         <template #content>
-                            <div v-for="blob in relatedBlobList" class="hoverable d-flex align-items-center mb-2 p-2" @mouseenter="handleHover" @mouseleave="handleHover">
+                            <div v-for="blob in relatedBlobList" class="hover-target hoverable d-flex align-items-center mb-2 p-2">
                                 <img :src="blob.cover_url" />
                                 <div class="d-flex justify-content-center ms-2 w-100">
                                     <a :href="blob.url">[[ blob.name ]]</a>
@@ -467,9 +467,6 @@
                         },
                         "Error getting related blob list"
                     );
-                },
-                handleHover(evt) {
-                    evt.currentTarget.querySelector(".dropdown").classList.toggle("d-none");
                 },
                 unlinkBlob(uuid) {
                     doPost(

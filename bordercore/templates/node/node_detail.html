@@ -41,7 +41,7 @@
                                     <ul class="list-group list-group-flush interior-borders" id="sort-container-tags">
                                         <draggable v-model="blobList" @change="onChange" ghost-class="sortable-ghost" draggable=".draggable">
                                             <transition-group type="transition" class="w-100">
-                                                <li v-for="(blob, index) in blobList" class="list-group-item list-group-item-secondary text-info draggable pe-0" :data-uuid="blob.uuid" :key="blob.uuid" v-cloak @mouseenter="handleHover" @mouseleave="handleHover">
+                                                <li v-for="(blob, index) in blobList" class="hover-target list-group-item list-group-item-secondary text-info draggable pe-0" :data-uuid="blob.uuid" :key="blob.uuid" v-cloak>
 
                                                     <div class="d-flex">
 
@@ -85,15 +85,15 @@
 
                 <div>
                     <note inline-template ref="note">
-                        <div @mouseenter="handleHover" @mouseleave="handleHover">
+                        <div class="hover-target">
                             <card>
                                 <template v-slot:title-slot>
                                     <div class="card-title d-flex" v-cloak>
                                         <div>
                                             Notes
                                         </div>
-                                        <div class="ms-auto d-none" v-if="note !== ''">
-                                            <drop-down-menu :show-on-hover="true" class="ms-5">
+                                        <div v-if="note !== ''" class="ms-auto">
+                                            <drop-down-menu :show-on-hover="true">
                                                 <div slot="dropdown">
                                                     <li>
                                                         <a v-if="note" class="dropdown-item" href="#" @click.prevent="editNote()">Edit note</a>
@@ -216,15 +216,6 @@
                     );
 
                 },
-                handleHover(evt) {
-                    const target = evt.currentTarget.querySelector(".dropdownmenu");
-
-                    if (evt.type === "mouseenter") {
-                        target.classList.remove("d-none");
-                    } else {
-                        target.classList.add("d-none");
-                    }
-                },
                 activateInEditMode(blob, event) {
 
                     const isUuid = (value) => value.uuid == blob.uuid;
@@ -337,12 +328,6 @@
                     if (input.setSelectionRange) {
                     }
                 },
-                handleHover(evt) {
-                    if (! this.note) {
-                        return;
-                    }
-                    evt.currentTarget.querySelector(".dropdown").classList.toggle("d-none");
-                }
             },
             mounted() {
                 this.getNote();
@@ -372,9 +357,6 @@
                         "Bookmark added",
                         ""
                     );
-                },
-                handleHover(evt) {
-                    evt.currentTarget.querySelector(".dropdownmenu").classList.toggle("d-none");
                 },
                 selectBlob(blob) {
                     doPost(

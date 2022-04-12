@@ -65,6 +65,7 @@
 
                         <drop-down-menu
                             ref="dropDownMenu"
+                            :show-on-hover="true"
                             :links="artistDetailMenuItems"
                         >
                         </drop-down-menu>
@@ -171,8 +172,7 @@
                                     ref="table"
                                     header-class="cursor-pointer"
                                     sort-icon="chevron-up"
-                                    @mouseenter="onMouseEnter"
-                                    @mouseleave="onMouseLeave"
+                                    :row-class="(row, index) => 'hover-target'"
                                     @cellclick="onSongClicked"
                                 >
 
@@ -329,12 +329,6 @@
                     if (index != -1) {
                         this.$refs.table.selectRow(index);
                     }
-                },
-                onMouseEnter(row, evt) {
-                    evt.currentTarget.querySelector(".dropdown").classList.remove("d-none");
-                },
-                onMouseLeave(row, evt) {
-                    evt.currentTarget.querySelector(".dropdown").classList.add("d-none");
                 },
                 onClickUpdate(uuid) {
                     window.location="{% url 'music:update' '00000000-0000-0000-0000-000000000000' %}?return_url={{ request.get_full_path|safe }}".replace(/00000000-0000-0000-0000-000000000000/, uuid);

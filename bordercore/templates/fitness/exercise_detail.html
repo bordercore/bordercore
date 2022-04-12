@@ -28,7 +28,7 @@
 
         <div class="col-lg-3 d-flex flex-column" id="vue-app-left">
 
-            <div {% if activity_info %}@mouseenter="handleHover" @mouseleave="handleHover"{% endif %}>
+            <div {% if activity_info %}class="hover-target"{% endif %}>
                 <card title="" class="flex-grow-0">
                     <template #content>
                         <div class="d-flex flex-column">
@@ -108,7 +108,7 @@
                     </div>
                 </template>
             </card>
-            <div class="flex-grow-1 mb-3" @mouseenter="handleHover" @mouseleave="handleHover">
+            <div class="hover-target flex-grow-1 mb-3">
                 <card title="" class="h-100">
                     <template #content>
 
@@ -431,15 +431,6 @@
                         "",
                         ""
                     );
-                },
-                handleHover(evt) {
-                    const target = evt.currentTarget.querySelector(".dropdown");
-
-                    if (evt.type === "mouseenter") {
-                        target.classList.remove("d-none");
-                    } else {
-                        target.classList.add("d-none");
-                    }
                 },
                 addNote() {
                     this.$refs.note.editNote();
