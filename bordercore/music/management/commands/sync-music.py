@@ -149,13 +149,13 @@ class Command(BaseCommand):
             title = self.get_id3_tag("title", id3_info)
 
         if not album_name:
-            album = self.get_id3_tag("album", id3_info, False)
+            album_name = self.get_id3_tag("album", id3_info, False)
 
-        if self.args["sync_album_song"] and not album:
+        if self.args["sync_album_song"] and not album_name:
             raise CommandError("Album name not found in file or specified")
 
-        if album:
-            album = self.sanitize_filename(album)
+        if album_name:
+            album_name = self.sanitize_filename(album_name)
 
         track_number = None
         if "tracknumber" in id3_info:
@@ -172,7 +172,7 @@ class Command(BaseCommand):
         song = Song.objects.filter(title=title, artist__name=artist)
 
         if self.args["sync_album_song"]:
-            song.filter(album__title=album)
+            song.filter(album__title=album_name)
 
         # Verify that the song is in the database
         if not song.first():
@@ -188,9 +188,9 @@ class Command(BaseCommand):
         artist_dir = self.get_artist_dir(song, artist, first_letter_dir)
 
         if self.args["sync_album_song"]:
-            self.create_album_dir(artist_dir, album)
+            self.create_album_dir(artist_dir, album_name)
 
-        path = self.get_file_path(artist_dir, album, track_number, song, title)
+        path = self.get_file_path(artist_dir, album_name, track_number, song, title)
 
         if Path(path).is_file():
             self.stdout.write(f"  {Fore.RED}File is already synced: '{path}' Skipping...{Style.RESET_ALL}")
