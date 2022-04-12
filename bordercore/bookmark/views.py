@@ -155,8 +155,7 @@ def snarf_link(request):
         messages.add_message(
             request,
             messages.WARNING,
-            f"Bookmark already exists and was added on {b.created.strftime('%B %d, %Y')}",
-            extra_tags="show_in_dom"
+            f"Bookmark already exists and was added on <strong>{b.created.strftime('%B %d, %Y')}</strong>"
         )
         return redirect("bookmark:update", b.uuid)
     except ObjectDoesNotExist:

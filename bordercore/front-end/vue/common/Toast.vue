@@ -1,12 +1,15 @@
 <template>
-    <div class="toast-wrapper position-fixed top-0 end-0 p-3">
-        <div id="liveToast" class="toast hide" :class="variant" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-wrapper position-fixed top-0 end-0 p-3" :class="variant">
+        <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header">
                 <strong class="me-auto" v-html="title" />
                 <small v-html="additionalTitle" />
                 <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close" />
             </div>
-            <div class="toast-body" v-html="body" />
+            <div class="toast-body d-flex align-items-start">
+                <font-awesome-icon class="fa-lg me-2 mb-1 pt-1 text-success" icon="check" />
+                <div v-html="body" />
+            </div>
         </div>
     </div>
 </template>
@@ -18,9 +21,23 @@
 
     export default {
         name: "Toast",
+        props: {
+            initialMessages: {
+                type: Array,
+                default: () => [],
+            },
+            defaultTitle: {
+                type: String,
+                default: "Info",
+            },
+            defaultVariant: {
+                type: String,
+                default: "info",
+            },
+        },
         data() {
             return {
-                title: "Info",
+                title: "",
                 additionalTitle: "",
                 body: "Toast Body",
                 variant: "info",
@@ -35,13 +52,25 @@
             EventBus.$on("toast", (payload) => {
                 this.toast(payload);
             });
+
+            for (const message of this.initialMessages) {
+                this.toast(message);
+            }
         },
         methods: {
             toast(payload) {
-                this.title = payload.title;
+                if (payload.title !== undefined) {
+                    this.title = payload.title;
+                } else {
+                    this.title = this.defaultTitle;
+                }
+                if (payload.variant !== null) {
+                    this.variant = payload.variant;
+                } else {
+                    this.variant = this.defaultVariant;
+                }
                 this.body = payload.body;
-                this.variant = payload.variant ? payload.variant : "info";
-                if (payload.autoHide !== null) {
+                if (payload.autoHide !== undefined) {
                     this.bsToast._config.autohide = payload.autoHide;
                 }
                 if (payload.delay) {

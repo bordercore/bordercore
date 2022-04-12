@@ -373,9 +373,6 @@ class BlobImportView(View):
         if not messages.get_messages(request):
             return HttpResponseRedirect(reverse("blob:detail", kwargs={"uuid": blob.uuid}))
         else:
-            context = {
-                "hide_messages": True
-            }
             return render(request, self.template_name, context)
 
 

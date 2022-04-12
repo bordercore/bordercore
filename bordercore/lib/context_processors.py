@@ -1,6 +1,9 @@
+import json
+
 from elasticsearch import ConnectionTimeout
 
 from django.conf import settings
+from django.contrib import messages
 from django.utils import timezone
 
 from blob.services import get_recent_blobs as get_recent_blobs_service
@@ -123,4 +126,30 @@ def set_constants(request):
     return {
         "MEDIA_URL_MUSIC": settings.MEDIA_URL_MUSIC,
         "IMAGES_URL": settings.IMAGES_URL,
+    }
+
+
+DJANGO_TO_BOOTSTRAP = {
+    "debug": "info",
+    "info": "info",
+    "success": "success",
+    "warning": "warning",
+    "error": "danger"
+}
+
+
+def json_messages(request):
+
+    return {
+        "json_messages": json.dumps(
+            [
+                {
+                    "body": str(x),
+                    "variant": DJANGO_TO_BOOTSTRAP[x.tags],
+                    "autoHide": False
+                }
+                for x in
+                messages.get_messages(request)
+            ]
+        )
     }

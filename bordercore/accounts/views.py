@@ -144,7 +144,7 @@ class ChangePasswordView(PasswordChangeView):
             request.user.set_password(request.POST["new_password1"])
             request.user.save()
             update_session_auth_hash(request, request.user)
-            messages.add_message(request, messages.INFO, "Password updated", extra_tags="show_in_dom")
+            messages.add_message(request, messages.INFO, "Password updated")
 
         return HttpResponseRedirect(self.get_success_url())
 

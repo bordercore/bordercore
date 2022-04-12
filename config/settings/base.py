@@ -196,6 +196,7 @@ TEMPLATES = [
                 'context_processors.get_recent_blobs',
                 'context_processors.get_recent_searches',
                 'context_processors.get_overdue_tasks',
+                'context_processors.json_messages'
             ]
         },
     },

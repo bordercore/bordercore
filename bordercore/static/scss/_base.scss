@@ -441,11 +441,6 @@ a.tag {
   pointer-events: none;
 }
 
-// Disable the outline around toast close buttons when you click on them
-button:focus {
-  outline: 0;
-}
-
 .toast-wrapper {
   z-index: 1;
 
@@ -453,13 +448,14 @@ button:focus {
     color: $white;
   }
 
-  .danger {
+  &.danger {
     .toast-header {
       background-color: $danger;
       color: $white;
     }
   }
-  .warning {
+
+  &.warning {
     .toast-header {
       background-color: $warning;
       color: $black;

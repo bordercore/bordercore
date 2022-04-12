@@ -239,7 +239,8 @@ class QuestionUpdateView(FormRequestMixin, UpdateView):
         review_url = urls.reverse("drill:detail", kwargs={"uuid": obj.uuid})
         messages.add_message(
             self.request,
-            messages.INFO, f"Question edited. <a href='{review_url}'>Review it here</a>",
+            messages.INFO,
+            f"Question edited. <a href='{review_url}'>Review it here</a>"
         )
 
         return HttpResponseRedirect(self.get_success_url())

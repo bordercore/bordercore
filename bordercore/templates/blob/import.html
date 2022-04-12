@@ -1,7 +1,5 @@
 {% extends "base.html" %}
 
-{% load get_message_level %}
-
 {% block title %} Blob :: Import {% endblock %}
 
 {% block content %}
@@ -87,24 +85,24 @@
 
         new Vue({
             el: "#vue-right-panel",
-            name: "Right Panel",
+            name: "RightPanel",
             data() {
                 return {
                     isProcessing: false,
-                }
+                };
+            },
+            mounted() {
+                document.getElementsByName("url")[0].focus();
             },
             methods: {
                 checkEmpty() {
                     const url = document.getElementsByName("url")[0].value;
                     if (url !== "") {
                         this.isProcessing = true;
-                        document.getElementById("import-blob-form").submit()
-                    }
-                }
+                        document.getElementById("import-blob-form").submit();
+                    };
+                },
             },
-            mounted() {
-                document.getElementsByName("url")[0].focus();
-            }
         });
 
     </script>

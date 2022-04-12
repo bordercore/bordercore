@@ -37,6 +37,7 @@
 
         <div id="vue-toast">
             <toast
+                :initial-messages="initialMessages"
             >
             </toast>
         </div>
@@ -127,17 +128,8 @@
                 <div class="row flex-grow-1">
 
                     <div class="col-lg-12">
-
-                        {% if not hide_messages %}
-                            <div id="vue-messages">
-                                {% include "common/show_messages.html" %}
-                            </div>
-                        {% endif %}
-
                         {% block content %}
                         {% endblock %}
-
-
                 </div>
 
             </div>
@@ -213,6 +205,11 @@
 
                 new Vue({
                     el: "#vue-toast",
+                    data() {
+                        return {
+                            initialMessages: JSON.parse('{{ json_messages|safe|escapejs }}'),
+                        }
+                    }
                 });
 
                 new Vue({
@@ -531,12 +528,6 @@
 
                     }
                 });
-
-                {% if not hide_messages %}
-                new Vue({
-                    el: "#vue-messages",
-                });
-                {% endif %}
 
                 new Vue({
                     name: "Help Modal",
