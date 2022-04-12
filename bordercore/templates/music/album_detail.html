@@ -100,7 +100,11 @@
                                 @cellclick="onSongClicked"
                             >
 
-                                    <b-table-column field="title" label="Title" header-class="cursor-pointer" sortable v-slot="props">
+                                <b-table-column field="track" label="#" cell-class="text-center" header-class="cursor-pointer text-center" v-slot="props">
+                                    <span>[[ props.row.track ]]</span>
+                                </b-table-column>
+
+                                <b-table-column field="title" label="Title" header-class="cursor-pointer" v-slot="props">
                                         <span>[[ props.row.title ]]</span>
                                         <span class="ps-2 table-note" v-html="props.row.note"></span>
                                     </b-table-column>
@@ -261,6 +265,7 @@
                 const songList = [
                     {% for song in song_list %}
                     {
+                        "track": "{{ song.track }}",
                         "uuid": "{{ song.uuid }}",
                         "year": "{{ song.year_effective|default:'' }}",
                         "title": "{{ song.title|safe }}",
