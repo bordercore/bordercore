@@ -51,7 +51,9 @@
 
                                                         <div>
                                                             <a :href="blob.url">[[ blob.name ]]</a>
-                                                            <div v-if="blob.note" @click="activateInEditMode(blob, $event.target)" v-show="!blob.noteIsEditable" class="node-note">[[ blob.note ]]</div>
+                                                            <div v-if="blob.note" @click="activateInEditMode(blob, index)" v-show="!blob.noteIsEditable" class="node-note">
+                                                                [[ blob.note ]]
+                                                            </div>
                                                             <span v-show="blob.noteIsEditable">
                                                                 <input type="text" class="form-control form-control-sm" :value="blob.note" ref="input" placeholder="" @blur="editNote(blob.uuid, $event.target.value)" @keydown.enter="editNote(blob.uuid, $event.target.value)" >
                                                             </span>
@@ -62,9 +64,13 @@
                                                                 <a class="dropdown-item" href="#" @click.prevent="removeBlob(blob.uuid)">
                                                                     <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>Remove
                                                                 </a>
-                                                                <a v-if="!blob.note" class="dropdown-item" href="#" @click.prevent="addNote(blob.uuid, index)">
+                                                                <a v-if="blob.note" class="dropdown-item" href="#" @click.prevent="activateInEditMode(blob, index)">
+                                                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Edit note
+                                                                </a>
+                                                                <a v-else class="dropdown-item" href="#" @click.prevent="addNote(blob.uuid, index)">
                                                                     <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>Add note
                                                                 </a>
+
                                                             </div>
                                                         </drop-down-menu>
 
@@ -216,14 +222,14 @@
                     );
 
                 },
-                activateInEditMode(blob, event) {
-
-                    const isUuid = (value) => value.uuid == blob.uuid;
-                    const index = this.blobList.findIndex(isUuid);
+                activateInEditMode(blob, index) {
 
                     this.$set(this.blobList[index], "noteIsEditable", true);
 
-                    setTimeout( () => { event.nextElementSibling.querySelector("input").focus() }, 100)
+                    self = this;
+                    setTimeout( () => {
+                        self.$refs.input[index].focus();
+                    }, 100);
 
                 },
                 addNote(blob_uuid, index) {

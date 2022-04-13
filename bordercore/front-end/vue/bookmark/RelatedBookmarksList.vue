@@ -34,11 +34,11 @@
                                                     <a class="dropdown-item" :href="bookmark.edit_url">
                                                         <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Edit Bookmark
                                                     </a>
-                                                    <a v-if="!bookmark.note" class="dropdown-item" href="#" @click.prevent="addNote(bookmark.uuid)">
-                                                        <font-awesome-icon icon="plus" class="text-primary me-3" />Add note
-                                                    </a>
                                                     <a v-if="bookmark.note" class="dropdown-item" href="#" @click.prevent="activateInEditMode(bookmark, index)">
                                                         <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Edit note
+                                                    </a>
+                                                    <a v-else class="dropdown-item" href="#" @click.prevent="addNote(bookmark.uuid)">
+                                                        <font-awesome-icon icon="plus" class="text-primary me-3" />Add note
                                                     </a>
                                                 </li>
                                             </div>
