@@ -1,13 +1,15 @@
+import time
+
+from selenium.webdriver.support.ui import Select
+
+from django.urls import reverse
+
 try:
     from selenium.webdriver.common.by import By
     from selenium.webdriver.common.keys import Keys
 except ModuleNotFoundError:
     # Don't worry if this import doesn't exist in production
     pass
-
-from selenium.webdriver.support.ui import Select
-
-from django.urls import reverse
 
 
 class PrefsPage:
@@ -67,6 +69,11 @@ class PrefsPage:
         Click the 'Update' button
         """
         update_input = self.browser.find_element(*self.UPDATE_BUTTON)
+
+        # Scroll the page to avoid 'Element...could not be scrolled into view' error
+        self.browser.execute_script("arguments[0].scrollIntoView();", update_input)
+        time.sleep(1)
+
         update_input.click()
 
     def prefs_updated_message_count(self):
