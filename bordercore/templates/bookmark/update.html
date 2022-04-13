@@ -136,9 +136,9 @@
 
                         <div>
                             <div class="col-lg-7 offset-lg-2">
-                                <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}" />
-                                <input class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %}" type="button" name="Go" value="Delete" @click="onClickDelete" />
-                                <a class="btn btn-secondary" href="{% url 'bookmark:overview' %}">Cancel</a>
+                                <input class="btn btn-primary" type="submit" name="Go" value="{{ action }}" />
+                                <input class="btn btn-secondary{% if not form.instance.id %} disabled{% endif %} ms-3" type="button" name="Go" value="Delete" @click="onClickDelete" />
+                                <a href="{% url 'bookmark:overview' %}" class="ms-3">Cancel</a>
                             </div>
                         </div>
 

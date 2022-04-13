@@ -47,7 +47,7 @@
                                 <div class="row mb-3">
                                     <label class="fw-bold col-lg-3 col-form-label text-end" for="inputUrl">Url</label>
                                     <div class="col-lg-9">
-                                        <input id="id_url" v-model="todoInfo.url" type="text" name="url" class="form-control" required autocomplete="off">
+                                        <input id="id_url" v-model="todoInfo.url" type="text" name="url" class="form-control" autocomplete="off">
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -70,27 +70,13 @@
                                         </vuejs-datepicker>
                                     </div>
                                 </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                <div class="modal-footer row g-0">
-                    <div class="col-offset-3 col-lg-9 d-flex align-items-center ps-3">
-                        <div id="feed-status">
-                            <div class="d-flex">
-                                <div v-if="checkingStatus" class="d-flex align-items-center">
-                                    <div class="spinner-border ms-2 text-info" role="status">
-                                        <span class="sr-only">Checking feed status...</span>
-                                    </div>
-                                    <div class="ms-3">
-                                        Checking feed status...
+                                <div class="row mb-3">
+                                    <div class="col-lg-12 offset-lg-3">
+                                        <input class="btn btn-primary" type="button" :value="action" @click.prevent="onAction">
                                     </div>
                                 </div>
-                                <font-awesome-icon v-else :class="statusMsg.class" class="me-2" :icon="statusMsg.icon" />
-                                <div v-html="status" />
                             </div>
-                        </div>
-                        <input class="btn btn-primary ms-auto" type="submit" :value="action" @click="onAction">
+                        </form>
                     </div>
                 </div>
             </div>
@@ -123,37 +109,8 @@
             return {
                 action: "Update",
                 todoInfo: {},
-                status: "",
-                statusIcon: "check",
-                checkingStatus: false,
                 lastResponseCode: null,
             };
-        },
-        computed: {
-            statusMsg: function() {
-                if (!this.status) {
-                    return {
-                        "class": "d-none",
-                        "icon": "check",
-                    };
-                } else if (!this.lastResponseCode || this.lastResponseCode === StatusCodes.OK) {
-                    return {
-                        "class": "d-block text-success",
-                        "icon": "check",
-                    };
-                } else {
-                    return {
-                        "class": "d-block text-danger",
-                        "icon": "exclamation-triangle",
-                    };
-                }
-            },
-        },
-        mounted() {
-            EventBus.$on("showStatus", (payload) => {
-                this.status = payload.msg;
-                this.$refs.status.classList.add(payload.classNameAdd);
-            });
         },
         methods: {
             customFormatter(date) {
@@ -161,7 +118,6 @@
             },
             setAction(action) {
                 this.action = action;
-                this.status = "";
             },
             onTagsChanged(newTags) {
                 this.todoInfo.tags = newTags;

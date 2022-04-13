@@ -61,7 +61,7 @@
                 <div class="me-2">
                     <card title="">
                         <template v-slot:content>
-                            <div class="d-flex">
+                            <div class="hover-target d-flex">
                                 <h1>
                                     {{ album.title }}
                                 </h1>
@@ -229,9 +229,12 @@
                             {% endif %}
                             {% endfor %}
 
-                        </div>
-                        <div class="modal-footer">
-                            <input id="btn-action" class="btn btn-primary" type="submit" name="Go" value="Update" />
+                            <div class="row">
+                                <div class="col-lg-12 offset-lg-4">
+                                    <input id="btn-action" class="btn btn-primary" type="submit" name="Go" value="Update" />
+                                </div>
+                            </div>
+
                         </div>
 
                     </div>

@@ -38,13 +38,13 @@
                             </div>
                         </form>
                         <form v-else @submit.prevent>
-                            <div class="row">
+                            <div class="row mb-3">
                                 <label class="col-form-label col-lg-1">URL</label>
                                 <div class="col-lg-11 d-flex">
                                     <input id="bookmark-search-url" v-model="url" class="form-control" type="text" autocomplete="off" placeholder="https://" @change="onUrlSearch">
                                 </div>
                             </div>
-                            <div class="row">
+                            <div class="row mb-3">
                                 <label class="col-form-label col-lg-1">Name</label>
                                 <div class="col-lg-11">
                                     <input v-model="name" class="form-control" :disabled="nameInputIsDisabled" type="text" placeholder="Name" autocomplete="off">
@@ -68,9 +68,9 @@
                                         <button v-if="!hideAddButton" type="button" class="btn btn-primary me-2" @click="onAdd">
                                             Add
                                         </button>
-                                        <button type="button" class="btn btn-primary" @click="selectMode('select')">
+                                        <a href="#" @click.prevent="selectMode('select')">
                                             Cancel
-                                        </button>
+                                        </a>
                                     </div>
                                 </div>
                             </div>

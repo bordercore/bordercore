@@ -213,11 +213,11 @@
 
                 <div>
                     <div class="col-lg-9 offset-lg-3">
-                        <input class="btn btn-secondary" type="submit" name="Go" value="{{ action }}">
+                        <input class="btn btn-primary ms-2" type="submit" name="Go" value="{{ action }}">
                         {% if form.instance.id %}
-                            <input class="btn btn-secondary" type="submit" name="Go" value="Delete" @click="onClickDelete">
+                            <input class="btn btn-primary ms-2" type="submit" name="Go" value="Delete" @click="onClickDelete">
                         {% endif %}
-                        <a class="btn btn-secondary" {% if request.GET.return_url %}href="{{ request.GET.return_url }}" {% else %}href="{% url 'music:list' %}"{% endif %}>Cancel</a>
+                        <a class="ms-3" {% if request.GET.return_url %}href="{{ request.GET.return_url }}" {% else %}href="{% url 'music:list' %}"{% endif %}>Cancel</a>
                     </div>
                 </div>
 

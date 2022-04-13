@@ -78,39 +78,20 @@
                     </icon-button>
                 </div>
 
-                <div class="mt-3">
-                    <button type="button" class="btn btn-primary" @click="submitForm">
-                        {{ action }}
-                    </button>
-                </div>
-
                 <hr class="filter-divider w-100" />
 
-                <div class="d-flex">
+                <div class="d-flex flex-column">
                     <div>
                         <cleanup-filename-button inline-template>
                             <input type="button" class="btn btn-secondary" value="Cleanup Filename" @click="onClick" />
                         </cleanup-filename-button>
                     </div>
-                    <div class="ms-3">
+                    <div class="mt-3">
                         <upper-case-first-button inline-template>
                             <input type="button" class="btn btn-secondary" value="Upper Case First" @click="onClick" />
                         </upper-case-first-button>
                     </div>
                 </div>
-
-                {% if object %}
-                <form class="mt-3" action="{% url 'blob:delete' object.uuid %}" method="post">
-
-                    {% csrf_token %}
-
-                    <input type="hidden" name="uuid" value="{{ object.uuid }}" />
-                    <button type="submit" class="btn btn-warning">
-                        <span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete
-                    </button>
-
-                </form>
-                {% endif %}
 
                 {% if collection_info %}
 
@@ -330,6 +311,26 @@
                             </metadata-list>
                         </div>
                     </metadata-wrapper>
+
+                    <div class="row">
+                        <div class="col-lg-12 offset-lg-2 d-flex">
+                            <button type="button" class="btn btn-primary" @click="submitForm">
+                                 {{ action }}
+                            </button>
+                            {% if object %}
+                                <form class="mt-3" action="{% url 'blob:delete' object.uuid %}" method="post">
+                                {% csrf_token %}
+                                    <input type="hidden" name="uuid" value="{{ object.uuid }}" />
+                                    <button type="submit" class="btn btn-secondary d-flex ms-3">
+                                        <span class="glyphicon glyphicon-trash pt-1" aria-hidden="true"></span>
+                                        <div class="ms-2">
+                                            Delete
+                                        </div>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
 
                 </form>
 
@@ -564,10 +565,6 @@
 
                 },
 
-                submitForm() {
-                    document.getElementById("form-blob").submit();
-                },
-
                 updateFormValue(property, value) {
                     if (property === "important") {
                         document.getElementById("form-blob").elements[property].value = 10;
@@ -638,7 +635,9 @@
                         }
                     })
                 },
-
+                submitForm() {
+                    document.getElementById("form-blob").submit();
+                },
             },
             mounted() {
                 const found = this.$store.state.date.match(/^(\d\d\d\d)T00:00$/);

@@ -109,9 +109,9 @@
 
         <div>
             <div class="col-lg-5 offset-lg-2" id="button-wrapper">
-                <input class="btn btn-primary" type="submit" name="Go" value="{{ action }}" @click="onClickEdit" />
-                <input v-if="enableDeleteButton" @click="onClickDelete" class="btn btn-secondary" type="submit" name="Go" value="Delete" />
-                <a class="btn btn-secondary ms-3" href="{% url 'drill:list' %}">Cancel</a>
+                <input class="btn btn-primary ms-1" type="submit" name="Go" value="{{ action }}" @click="onClickEdit" />
+                <input v-if="enableDeleteButton" @click="onClickDelete" class="btn btn-secondary ms-3" type="submit" name="Go" value="Delete" />
+                <a class="ms-3" href="{% url 'drill:list' %}">Cancel</a>
             </div>
         </div>
             </form>
