@@ -129,7 +129,7 @@
                             <table id="bookmark-list" class="w-100">
                                 <tbody is="draggable" v-model="bookmarkList" @change="onSortBookmarks" ghost-class="sortable-ghost">
                                     <transition-group type="transition">
-                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="hover-target bookmark-list w-100" v-cloak @dragstart="startDrag($event, bookmark)" @click="onClickBookmark(bookmark.uuid)" @mouseenter="onMouseEnterLeave" @mouseleave="onMouseEnterLeave">
+                                        <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="dropdown-height hover-target bookmark-list w-100" v-cloak @dragstart="startDrag($event, bookmark)" @click="onClickBookmark(bookmark.uuid)" @mouseenter="onMouseEnterLeave" @mouseleave="onMouseEnterLeave">
                                             <td class="bookmark-list-date p-2 text-info align-top">
                                                 <span>[[ bookmark.created ]]</span>
                                             </td>
@@ -149,23 +149,21 @@
                                                     Duration: [[ bookmark.video_duration ]]
                                                 </div>
                                             </td>
-                                            <td class="p-2">
-                                                <div class="small me-4">
-                                                    <drop-down-menu :show-on-hover="true">
-                                                        <div slot="dropdown">
-                                                            <li>
-                                                                <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(bookmark.uuid)">
-                                                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
-                                                                </a>
-                                                            </li>
-                                                            <li>
-                                                                <a class="dropdown-item" href="#" @click.prevent="onClickDelete(bookmark.uuid)">
-                                                                    <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>Delete
-                                                                </a>
-                                                            </li>
-                                                        </div>
-                                                    </drop-down-menu>
-                                                </div>
+                                            <td class="align-middle">
+                                                <drop-down-menu :show-on-hover="true" class="me-4">
+                                                    <div slot="dropdown">
+                                                        <li>
+                                                            <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(bookmark.uuid)">
+                                                                <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item" href="#" @click.prevent="onClickDelete(bookmark.uuid)">
+                                                                <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>Delete
+                                                            </a>
+                                                        </li>
+                                                    </div>
+                                                </drop-down-menu>
                                             </td>
                                         </tr>
                                     </transition-group>

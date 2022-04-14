@@ -13,7 +13,7 @@
                         <draggable v-model="bookmarkList" ghost-class="sortable-ghost" draggable=".draggable" @change="onSort">
                             <transition-group type="transition" class="w-100">
                                 <li v-for="(bookmark, index) in bookmarkList" v-cloak :key="bookmark.uuid" class="hover-target list-group-item list-group-item-secondary text-info draggable px-0" :data-uuid="bookmark.uuid">
-                                    <div class="d-flex">
+                                    <div class="dropdown-height d-flex align-items-start">
                                         <div class="pe-2" v-html="bookmark.favicon_url" />
                                         <div>
                                             <a :href="bookmark.url">{{ bookmark.name }}</a>

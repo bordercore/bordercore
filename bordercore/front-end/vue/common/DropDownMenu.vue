@@ -1,25 +1,27 @@
 <template>
-    <div
-        class="dropdown cursor-pointer"
-        :class="{'dropdownmenu': showTarget, 'd-none': showOnHover}"
-    >
-        <div class="d-flex align-items-center justify-content-center h-100 w-100" :class="direction" data-bs-toggle="dropdown" data-bs-auto-close="true" data-bs-offset="0,-15">
-            <slot name="icon">
-                <font-awesome-icon icon="ellipsis-v" />
-            </slot>
+    <div class="dropdown ms-auto">
+        <div
+            class="cursor-pointer"
+            :class="{'dropdownmenu': showTarget, 'd-none': showOnHover}"
+        >
+            <div class="d-flex align-items-center justify-content-center h-100 w-100" :class="direction" data-bs-toggle="dropdown" data-bs-auto-close="true" data-bs-offset="0,-15">
+                <slot name="icon">
+                    <font-awesome-icon icon="ellipsis-v" />
+                </slot>
+            </div>
+            <ul class="dropdown-menu">
+                <slot name="dropdown" />
+                <li v-for="link in links" :key="link.id">
+                    <a :href="link.url" class="dropdown-item" v-on="link.clickHandler ? { click: link.clickHandler } : {}">
+                        <font-awesome-icon v-if="link.icon" :icon="link.icon" class="text-primary mr-2" />
+                        {{ link.title }}
+                        <span v-if="link.extra" class="dropdown-item-extra">
+                            {{ link.extra }}
+                        </span>
+                    </a>
+                </li>
+            </ul>
         </div>
-        <ul class="dropdown-menu">
-            <slot name="dropdown" />
-            <li v-for="link in links" :key="link.id">
-                <a :href="link.url" class="dropdown-item" v-on="link.clickHandler ? { click: link.clickHandler } : {}">
-                    <font-awesome-icon v-if="link.icon" :icon="link.icon" class="text-primary mr-2" />
-                    {{ link.title }}
-                    <span v-if="link.extra" class="dropdown-item-extra">
-                        {{ link.extra }}
-                    </span>
-                </a>
-            </li>
-        </ul>
     </div>
 </template>
 

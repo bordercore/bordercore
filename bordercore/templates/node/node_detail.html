@@ -43,7 +43,7 @@
                                             <transition-group type="transition" class="w-100">
                                                 <li v-for="(blob, index) in blobList" class="hover-target list-group-item list-group-item-secondary text-info draggable pe-0" :data-uuid="blob.uuid" :key="blob.uuid" v-cloak>
 
-                                                    <div class="d-flex">
+                                                    <div class="dropdown-height d-flex align-items-start">
 
                                                         <div class="pe-2">
                                                             <img :src="[[ blob.cover_url ]]" height="75" width="70" />
@@ -70,9 +70,8 @@
                                                                 <a v-else class="dropdown-item" href="#" @click.prevent="addNote(blob.uuid, index)">
                                                                     <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>Add note
                                                                 </a>
-
                                                             </div>
-                                                        </drop-down-menu>
+                                                        </div>
 
                                                     </div>
 
@@ -95,7 +94,7 @@
                             <card>
                                 <template v-slot:title-slot>
                                     <div class="card-title d-flex" v-cloak>
-                                        <div>
+                                        <div class="dropdown-height">
                                             Notes
                                         </div>
                                         <div v-if="note !== ''" class="ms-auto">

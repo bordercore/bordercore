@@ -519,8 +519,13 @@ div.CodeMirror {
 
 // Dropdown Menus
 
+.dropdown:not(.top-drop-down) {
+  min-width: $dropdown-height;
+  min-height: $dropdown-height;
+}
+
 .hover-target:hover {
-  .dropdown {
+  .dropdown > div {
     display: flex !important;
   }
 }
@@ -537,6 +542,12 @@ div.CodeMirror {
     background-color: $text-selection-bg !important;
     color: $white;
   }
+}
+
+// Add this to any div that needs to be at least as tall
+//  as the dropdown target, to avoid on-hover jitter
+.dropdown-height {
+  min-height: $dropdown-height;
 }
 
 // Extra content after the dropdown item's name
@@ -575,21 +586,14 @@ div.CodeMirror {
 // The round, target point that spawns the dropdown menu below it
 .dropdownmenu {
   display: flex;
-  width: 2.5rem;
-  min-width: 2.5rem;
-  height: 2.5rem;
+  width: $dropdown-height;
+  height: $dropdown-height;
   margin-left: auto; // Push to the right
   font-size: 1rem;
 
   &.calendar-date-format-menu {
     // If we add this class, don't push to the right
     margin-left: none;
-  }
-
-  &.small {
-    width: 1.5rem;
-    min-width: 1.5rem;
-    height: 1.5rem;
   }
 
   &:hover {
@@ -673,23 +677,23 @@ table.b-table th {
   transition: none;
 }
 
-// BootstrapVue table sort icon: none
-body .table.b-table > tfoot > tr > [aria-sort=none],
-body .table.b-table > thead > tr > th[aria-sort=none] {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' opacity='.3' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' opacity='.3' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important;
-}
+/* // BootstrapVue table sort icon: none */
+/* body .table.b-table > tfoot > tr > [aria-sort=none], */
+/* body .table.b-table > thead > tr > th[aria-sort=none] { */
+/*   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' opacity='.3' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' opacity='.3' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important; */
+/* } */
 
-// BootstrapVue table sort icon: ascending
-body .table.b-table > tfoot > tr > [aria-sort=ascending],
-body .table.b-table > thead > tr > th[aria-sort=ascending] {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' opacity='.3' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important;
-}
+/* // BootstrapVue table sort icon: ascending */
+/* body .table.b-table > tfoot > tr > [aria-sort=ascending], */
+/* body .table.b-table > thead > tr > th[aria-sort=ascending] { */
+/*   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' opacity='.3' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important; */
+/* } */
 
-// BootstrapVue table sort icon: descending
-body .table.b-table > tfoot > tr > [aria-sort=descending],
-body .table.b-table > thead > tr > [aria-sort=descending] {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' opacity='.3' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important;
-}
+/* // BootstrapVue table sort icon: descending */
+/* body .table.b-table > tfoot > tr > [aria-sort=descending], */
+/* body .table.b-table > thead > tr > [aria-sort=descending] { */
+/*   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' opacity='.3' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important; */
+/* } */
 
 .table_header {
   border-radius: 0.25rem;
@@ -1006,10 +1010,6 @@ pre {
   &:hover {
     background-color: #1e233a;
   }
-}
-
-.bookmark-list:hover a {
-  background-color: #1e233a;
 }
 
 .bookmark-list-date {
