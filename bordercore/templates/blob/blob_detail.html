@@ -266,50 +266,68 @@
                         <div slot="dropdown" class="mt-0">
                             <li>
                                 <a class="dropdown-item" href="{% url 'blob:update' blob.uuid %}">
-                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
+                                    <span>
+                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
+                                    </span>
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item" href="#" @click.prevent="handleAddToCollection()">
-                                    <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>Add to Collection
+                                    <span>
+                                        <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>Add to Collection
+                                    </span>
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item" href="{% url 'blob:create' %}?linked_blob_uuid={{ blob.uuid }}">
-                                    <font-awesome-icon icon="file-alt" class="text-primary me-3"></font-awesome-icon>Link to New Blob
+                                    <span>
+                                        <font-awesome-icon icon="file-alt" class="text-primary me-3"></font-awesome-icon>Link to New Blob
+                                    </span>
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item" href="#" @click.prevent="handleLinkToExistingBlob()">
-                                    <font-awesome-icon icon="file-alt" class="text-primary me-3"></font-awesome-icon>Link to Existing Blob
+                                    <span>
+                                        <font-awesome-icon icon="file-alt" class="text-primary me-3"></font-awesome-icon>Link to Existing Blob
+                                    </span>
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item" href="#" @click.prevent="handleLinkToBookmark()">
-                                    <font-awesome-icon icon="link" class="text-primary me-3"></font-awesome-icon>Link to Bookmark
+                                    <span>
+                                        <font-awesome-icon icon="link" class="text-primary me-3"></font-awesome-icon>Link to Bookmark
+                                    </span>
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item" href="{% url 'blob:clone' blob.uuid %}">
-                                    <font-awesome-icon icon="clone" class="text-primary me-3"></font-awesome-icon>Clone Blob
+                                    <span>
+                                        <font-awesome-icon icon="clone" class="text-primary me-3"></font-awesome-icon>Clone Blob
+                                    </span>
                                 </a>
                             </li>
                             {% if blob.is_note %}
                                 <li>
                                     <a class="dropdown-item" href="#" @click.prevent="onClick">
-                                        <font-awesome-icon icon="thumbtack" class="text-primary me-3"></font-awesome-icon>[[ pinnedButtonValue ]]
+                                        <span>
+                                            <font-awesome-icon icon="thumbtack" class="text-primary me-3"></font-awesome-icon>[[ pinnedButtonValue ]]
+                                        </span>
                                     </a>
                                 </li>
                             {% endif %}
                             {% if blob.sha1sum and request.user|is_in_group:"Admin" %}
                                 <li>
                                     <a class="dropdown-item" href="#" @click.prevent="handleCopySha1sum('{{ blob.sha1sum }}')">
-                                        <font-awesome-icon icon="copy" class="text-primary me-3"></font-awesome-icon>Copy Sha1sum
+                                        <span>
+                                            <font-awesome-icon icon="copy" class="text-primary me-3"></font-awesome-icon>Copy Sha1sum
+                                        </span>
                                     </a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item" href="{{ aws_url }}">
-                                        <font-awesome-icon :icon="[ 'fab', 'aws' ]" class="text-primary me-2"></font-awesome-icon>S3 Link
+                                        <span>
+                                            <font-awesome-icon :icon="[ 'fab', 'aws' ]" class="text-primary me-3"></font-awesome-icon>S3 Link
+                                        </span>
                                     </a>
                                 </li>
                             {% endif %}

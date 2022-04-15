@@ -538,6 +538,12 @@ div.CodeMirror {
 .dropdown-item {
   color: $white;
 
+  span {
+    svg {
+      width: 1rem !important;
+    }
+  }
+
   &:hover {
     background-color: $text-selection-bg !important;
     color: $white;
