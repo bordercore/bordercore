@@ -92,9 +92,6 @@ Vue.component("font-awesome-icon", FontAwesomeIcon);
 import {format} from "date-fns";
 window.format = format;
 
-import EasyMDE from "easymde";
-window.EasyMDE = EasyMDE;
-
 import markdownit from "markdown-it";
 window.markdown = markdownit();
 
@@ -268,3 +265,15 @@ Vue.use(Table);
 // Wait 10 seconds after selecting a song to play
 //  for it to be marked as "listened to".
 window.MUSIC_LISTEN_TIMEOUT = 10000;
+
+import VMdEditor from "@kangc/v-md-editor";
+import enUS from "@kangc/v-md-editor/lib/lang/en-US";
+import "@kangc/v-md-editor/lib/style/base-editor.css";
+import prismTheme from "@kangc/v-md-editor/lib/theme/prism.js";
+import "@kangc/v-md-editor/lib/theme/style/github.css";
+
+VMdEditor.use(prismTheme, {
+    Prism,
+});
+Vue.use(VMdEditor);
+VMdEditor.lang.use("en-US", enUS);

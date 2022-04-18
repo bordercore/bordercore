@@ -465,8 +465,7 @@ a.tag {
 
 input.form-control,
 select.form-control,
-textarea.form-control,
-div.CodeMirror {
+textarea.form-control {
   background-color: $form-bg;
   color: $form-color;
 
@@ -1701,20 +1700,43 @@ audio {
   font-size: 0.75rem;
 }
 
-// CodeMirror
+.v-md-editor {
+  height: 35rem;
+  background-color: $form-bg !important;
+  color: $white !important;
 
-.CodeMirror-cursor {
-  border-left: 1px solid #7fe7c4 !important;
+  .v-md-editor__main {
+    border-radius: 0.25rem;
+
+    &:focus-within {
+      background-color: $form-bg-focus !important;
+      caret-color: $form-color;
+      color: $form-color;
+    }
+  }
+
+  textarea {
+    background-color: $form-bg !important;
+    color: $white !important;
+    font-size: 1rem !important;
+
+    &:focus {
+      background-color: $form-bg-focus !important;
+      caret-color: $form-color;
+      color: $form-color;
+    }
+  }
+
+  .v-md-editor__toolbar-item {
+    color: $white !important;
+    &:hover {
+      color: $form-bg !important;
+    }
+  }
 }
 
-div.CodeMirror-focused {
-  background-color: $form-bg-focus;
-  caret-color: $form-color;
-  color: $form-color;
-}
-
-.CodeMirror-selected {
-  background: $text-selection-bg !important;
+.v-md-textarea-editor section {
+  background-color: $form-bg;
 }
 
 // Tags

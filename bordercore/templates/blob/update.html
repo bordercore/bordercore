@@ -138,13 +138,16 @@
                     <div class="col-lg-10 offset-lg-2 ps-1">
                     {% for field,error in form.errors.items %}
                         <div class="message-error card-body ms-0 p-3">
-                            <strong class="text-white">Errors</strong> {{ error|safe }}
-                    </div>
+                            <strong class="text-white">
+                                Errors
+                            </strong>
+                            {{ error|safe }}
+                        </div>
                     {% endfor %}
                     </div>
                 {% endif %}
 
-                <form id="form-blob" action="{{ request.path }}" method="post" enctype="multipart/form-data" class="me-2">
+                <form id="form-blob" action="{{ request.path }}" method="post" enctype="multipart/form-data" class="me-2" v-cloak>
 
                     <input type="hidden" name="importance" value="{% if form.importance.value == 10 %}on{% endif %}" />
                     <input type="hidden" name="is_note" value="{% if form.is_note.value %}on{% endif %}" />
@@ -228,12 +231,16 @@
 
                             {% elif field.label == 'Content' %}
 
-                                <content-text-area inline-template>
-                                    <div class="col-lg-10 col-sm-10 align-self-center">
-                                        <textarea v-pre name="content" cols="40" rows="5" class="form-control" id="id_content">{{ form.content.value|default:"" }}</textarea>
-                                    </div>
+                                <div class="col-lg-10 col-sm-10 align-self-center">
+                                    <v-md-editor
+                                        ref="mdEditor"
+                                        mode="edit"
+                                        right-toolbar=""
+                                        left-toolbar="undo redo | h bold italic strikethrough quote | ul ol table hr | link image code"
+                                        v-model="content"
+                                    ></v-md-editor>
 
-                                </content-text-area>
+                                </div>
 
                             {% elif field.label == 'Tags' %}
 
@@ -318,16 +325,12 @@
                                  {{ action }}
                             </button>
                             {% if object %}
-                                <form class="mt-3" action="{% url 'blob:delete' object.uuid %}" method="post">
-                                {% csrf_token %}
-                                    <input type="hidden" name="uuid" value="{{ object.uuid }}" />
-                                    <button type="submit" class="btn btn-secondary d-flex ms-3">
-                                        <span class="glyphicon glyphicon-trash pt-1" aria-hidden="true"></span>
-                                        <div class="ms-2">
-                                            Delete
-                                        </div>
-                                    </button>
-                                </form>
+                                <button class="btn btn-secondary d-flex ms-3" @click="onClickDelete">
+                                    <span class="glyphicon glyphicon-trash pt-1" aria-hidden="true"></span>
+                                    <div class="ms-2">
+                                        Delete
+                                    </div>
+                                </button>
                             {% endif %}
                         </div>
                     </div>
@@ -415,9 +418,6 @@
         }
 
         const noDelimiter = {replace: function(){}};
-
-        const ContentTextArea = {
-        }
 
         const DateInput = {
             components: {
@@ -542,6 +542,7 @@
 
         new Vue({
             el: "#vue-app-left",
+            name: "LeftPanel",
             components: {
                 CleanupFilenameButton,
                 UpperCaseFirstButton
@@ -579,13 +580,13 @@
 
         new Vue({
             el: "#vue-app-right",
+            name: "EditForm",
             store,
             components: {
                 FileUpload,
                 DateInput,
-                ContentTextArea,
                 MetadataWrapper,
-                TagsInput
+                TagsInput,
             },
             data() {
                 return {
@@ -605,7 +606,8 @@
                             url: "#",
                             clickHandler: this.onClickDateFormatYear,
                         },
-                    ]
+                    ],
+                    content:""
                 }
             },
             methods: {
@@ -635,7 +637,22 @@
                         }
                     })
                 },
+                {% if object %}
+                onClickDelete(evt) {
+                    const formEl = document.getElementById("form-blob");
+                    formEl.setAttribute("action", "{% url 'blob:delete' object.uuid %}");
+                    formEl.submit();
+                },
+                {% endif %}
                 submitForm() {
+
+                    // Add the 'name' attribute and contents to the internal
+                    // textarea used by v-md-editor, which will then
+                    // be submitted with the rest of the form.
+                    const textarea = document.querySelector(".v-md-textarea-editor textarea");
+                    textarea.setAttribute("name", "content");
+                    textarea.setAttribute("value", this.content);
+
                     document.getElementById("form-blob").submit();
                 },
             },
@@ -646,114 +663,14 @@
                     this.dateFormat = "year";
                 }
                 this.addCheckMarkToDateFormatMenu();
+
+                this.$refs.mdEditor.insert((selected) => {
+                    return {
+                        text: "{{ form.content.value|default:""|escapejs }}",
+                        selected: "",
+                    };
+                });
             }
-        });
-
-        var easyMDE = new EasyMDE({
-            element: document.getElementById("id_content"),
-            toolbar: [
-                {
-                    name: "bold",
-                    action: EasyMDE.toggleBold,
-                    className: "fa fa-bold text-light",
-                    title: "Bold",
-                },
-                {
-                    name: "italic",
-                    action: EasyMDE.toggleItalic,
-                    className: "fa fa-italic text-light",
-                    title: "Italic",
-                },
-                {
-                    name: "heading",
-                    action: EasyMDE.toggleHeadingSmaller,
-                    className: "fa fa-header text-light",
-                    title: "Heading",
-                },
-                "|",
-                {
-                    name: "quote",
-                    action: EasyMDE.toggleBlockquote,
-                    className: "fa fa-quote-left text-light",
-                    title: "Quote",
-                },
-                {
-                    name: "unordered-list",
-                    action: EasyMDE.toggleUnorderedList,
-                    className: "fa fa-list-ul text-light",
-                    title: "Generic List",
-                },
-                {
-                    name: "ordered-list",
-                    action: EasyMDE.toggleOrderedList,
-                    className: "fa fa-list-ol text-light",
-                    title: "Numbered List",
-                },
-                {
-                    name: "table",
-                    action: function customFunction(editor) {
-                        editor.codemirror.replaceSelection("\nFirst Header  | Second Header\n------------- | -------------\nContent Cell  | Content Cell\nContent Cell  | Content Cell\n");
-                    },
-                    className: "fa fa-table",
-                    title: "Insert Table"
-                },
-                "|",
-                {
-                    name: "link",
-                    action: EasyMDE.drawLink,
-                    className: "fa fa-link text-light",
-                    title: "Create Link",
-                },
-                {
-                    name: "code",
-                    action: EasyMDE.toggleCodeBlock,
-                    className: "fa fa-code text-light",
-                    title: "Code",
-                },
-                {
-                    name: "code-block",
-                    action: function customFunction(editor) {
-
-                        replacedText = editor.codemirror.getSelection().replace(/\n/g, "\n    ").replace(/>/g, "&gt;");
-
-                        editor.codemirror.replaceSelection("    " + replacedText);
-
-                    },
-                    className: "fa fa-indent text-light",
-                    title: "Code Block",
-                },
-                {
-                    name: "escape-html",
-                    action: function customFunction(editor) {
-
-                        replacedText = editor.codemirror.getSelection().replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-                        editor.codemirror.replaceSelection(replacedText);
-
-                    },
-                    className: "fa fa-html5 text-light",
-                    title: "Escape HTML",
-                },
-                "|",
-                {
-                    name: "preview",
-                    action: EasyMDE.togglePreview,
-                    className: "fa fa-eye no-disable text-light",
-                    title: "Toggle Preview",
-                },
-                {
-                    name: "side-by-side",
-                    action: EasyMDE.toggleSideBySide,
-                    className: "fa fa-columns no-disable no-mobile text-light",
-                    title: "Toggle Side by Side",
-                },
-                {
-                    name: "fullscreen",
-                    action: EasyMDE.toggleFullScreen,
-                    className: "fa fa-arrows-alt no-disable no-mobile text-light",
-                    title: "Toggle Fullscreen",
-                },
-            ]
         });
 
     </script>
