@@ -293,7 +293,7 @@
                         "year": "{{ song.year_effective|default:'' }}",
                         "title": "{{ song.title|safe }}",
                         "length": "{{ song.length }}",
-                        "note": "{{ song.note|safe }}",
+                        "note": "{{ song.note|safe|escapejs }}",
                     },
                     {% endfor %}
                 ];
