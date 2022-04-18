@@ -242,6 +242,8 @@
                                     <simple-suggest
                                         ref="simpleSuggest"
                                         search-url="{% url 'tag:search' %}?doctype=drill&query="
+                                        display-attribute="display"
+                                        value-attribute="display"
                                         place-holder="Add Tag"
                                         wrapper-class="w-100"
                                         :debounce="500"
@@ -266,7 +268,7 @@
                                 </draggable>
                             </ul>
                         </div>
-                        <div class="modal-footer justify-content-end">
+                        <div class="modal-footer justify-content-start">
                             <input class="btn btn-primary" type="button" value="Done" data-bs-dismiss="modal" />
                         </div>
                     </div>
@@ -435,7 +437,7 @@
 
                 select(selection) {
 
-                    EventBus.$emit("add-tag", selection.value);
+                    EventBus.$emit("add-tag", selection.text);
 
                     this.$nextTick(() => {
                         this.$refs.simpleSuggest.$refs.suggestComponent.$el.querySelector("input").blur();
