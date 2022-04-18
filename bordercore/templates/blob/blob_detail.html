@@ -35,16 +35,20 @@
                         </div>
                     {% endif  %}
 
-                    {% for tag in blob.tags.all %}
-                        {% if forloop.first %}
-                            <div id="blob-tag-list" class="my-3">
-                                <font-awesome-icon icon="tags" class="text-primary"></font-awesome-icon>
-                        {% endif %}
-                        <a class="tag" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
-                        {% if forloop.last %}
+                    {% if blob.tags.all %}
+                    <div class="d-flex">
+                        <div>
+                            <font-awesome-icon icon="tags" class="text-primary"></font-awesome-icon>
+                        </div>
+                        <div class="ms-2">
+                            <div id="blob-tag-list">
+                            {% for tag in blob.tags.all %}
+                                <a class="tag" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
+                            {% endfor %}
                             </div>
-                        {% endif %}
-                    {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
 
                     {% if urls %}
                         <div class="mb-3">
