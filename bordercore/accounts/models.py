@@ -20,7 +20,6 @@ class UserProfile(models.Model):
     pinned_notes = models.ManyToManyField(Blob, through="SortOrderUserNote")
     feeds = models.ManyToManyField(Feed, through="SortOrderUserFeed")
     pinned_drill_tags = models.ManyToManyField(Tag, through="SortOrderDrillTag", related_name="pinned_drill_tags")
-    orgmode_file = models.TextField(null=True)
     google_calendar = JSONField(blank=True, null=True)
     instagram_credentials = JSONField(blank=True, null=True)
     nytimes_api_key = models.TextField(null=True)

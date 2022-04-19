@@ -29,8 +29,6 @@ class UserProfileForm(ModelForm):
         self.fields["nytimes_api_key"].label = "NYTimes API key"
         self.fields["nytimes_api_key"].required = False
 
-        self.fields["orgmode_file"].required = False
-
         collections_list = Collection.objects.filter(user=self.request.user).exclude(name="")
         if collections_list:
             self.fields["homepage_default_collection"] = ModelChoiceField(
@@ -63,12 +61,10 @@ class UserProfileForm(ModelForm):
             "homepage_image_collection",
             "nytimes_api_key",
             "instagram_credentials",
-            "orgmode_file",
             "google_calendar"
         )
         widgets = {
             "google_calendar": Textarea(attrs={"class": "form-control"}),
             "nytimes_api_key": TextInput(attrs={"class": "form-control"}),
-            "orgmode_file": TextInput(attrs={"class": "form-control"}),
             "theme": Select(attrs={"class": "form-control"})
         }

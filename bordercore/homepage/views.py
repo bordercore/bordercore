@@ -1,8 +1,5 @@
-import re
-
 from botocore.errorfactory import ClientError
 from elasticsearch.exceptions import ConnectionError
-from PyOrgMode import PyOrgMode
 
 from django.conf import settings
 from django.contrib import messages
@@ -176,19 +173,6 @@ def get_default_collection_blobs(request):
         }
     except AttributeError:
         pass
-
-
-def get_date(node):
-
-    if len(node.content) > 0 and isinstance(node.content[0], PyOrgMode.OrgDrawer.Element):
-        property = node.content[0].content[0]
-        if property.name == "CREATED":
-            raw_date = property.value
-            matches = re.match(r"\[(\d\d\d\d-\d\d-\d\d).*\]", raw_date)
-            if matches:
-                return matches.group(1)
-            else:
-                return property.value
 
 
 @login_required
