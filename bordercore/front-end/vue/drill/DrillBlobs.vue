@@ -1,10 +1,10 @@
 <template>
     <div>
-        <div @mouseenter="handleHoverNote" @mouseleave="handleHoverNote">
+        <div class="hover-reveal-target">
             <card title="Related Blobs">
                 <template #top-right>
-                    <div class="node-add-button d-none">
-                        <add-button href="#" :click-handler="chooseBlob" />
+                    <div class="node-add-button">
+                        <add-button href="#" :click-handler="chooseBlob" class="d-none hover-reveal-object" />
                     </div>
                 </template>
 
@@ -205,15 +205,6 @@
                     "",
                     "",
                 );
-            },
-            handleHoverNote(evt) {
-                const target = evt.currentTarget.querySelector(".node-add-button");
-
-                if (evt.type === "mouseenter") {
-                    target.classList.remove("d-none");
-                } else {
-                    target.classList.add("d-none");
-                }
             },
             removeBlob(blobUuid) {
                 if (this.newQuestion) {

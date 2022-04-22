@@ -363,6 +363,10 @@ a.tag {
     }
   }
 
+  td {
+    vertical-align: middle;
+  }
+
   table.is-hoverable tr {
     &:hover {
       background-color: rgba(0, 0, 0, 0.2);
@@ -514,6 +518,13 @@ textarea.form-control {
   width: 100%;
   min-height: 100vh;
   transition: all 0.3s;
+}
+
+// Use this to reveal hidden targets on-hover
+.hover-reveal-target:hover {
+  .hover-reveal-object {
+    display: flex !important;
+  }
 }
 
 // Dropdown Menus
