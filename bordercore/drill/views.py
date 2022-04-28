@@ -113,7 +113,7 @@ def handle_related_bookmarks(question, request):
         so = SortOrderQuestionBookmark(
             question=question,
             bookmark=bookmark,
-            note=bookmark_info["note"]
+            note=bookmark_info["note"] if "note" in bookmark_info else None
         )
         so.save()
 
