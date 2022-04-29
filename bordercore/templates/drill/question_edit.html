@@ -62,6 +62,7 @@
             <form @submit.prevent id="question-form" action="{{ request.path }}" method="post">
                 <input type="hidden" name="related-bookmarks" />
                 <input type="hidden" name="related-blobs" />
+                <input type="hidden" name="return_url" value="{{ request.GET.return_url }}" />
 
         {% csrf_token %}
 
@@ -111,7 +112,7 @@
             <div class="col-lg-5 offset-lg-2" id="button-wrapper">
                 <input class="btn btn-primary ms-1" type="submit" name="Go" value="{{ action }}" @click="onClickEdit" />
                 <input v-if="enableDeleteButton" @click="onClickDelete" class="btn btn-secondary ms-3" type="submit" name="Go" value="Delete" />
-                <a class="ms-3" href="{% url 'drill:list' %}">Cancel</a>
+                <a class="ms-3" href="{% if request.GET.return_url %}{{ request.GET.return_url }}{% else %}{% url 'drill:list' %}{% endif %}">Cancel</a>
             </div>
         </div>
             </form>

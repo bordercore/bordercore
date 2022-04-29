@@ -246,7 +246,11 @@ class QuestionUpdateView(FormRequestMixin, UpdateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('drill:list')
+
+        if "return_url" in self.request.POST:
+            return self.request.POST["return_url"]
+        else:
+            return reverse('drill:list')
 
 
 @login_required

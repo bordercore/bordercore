@@ -149,28 +149,23 @@
                      <h3 class="drill-text table-borders markdown" v-html="getAnswer()">
                      </h3>
 
+                     <div class="d-flex">
                      <a href="{% url 'drill:record_response' question.uuid 'good' %}" class="btn btn-primary" role="button">Good</a>
                      {% if state_name == 'Reviewing' %}
-                         <a href="{% url 'drill:record_response' question.uuid 'hard' %}" class="btn btn-primary" role="button">Hard</a>
+                         <a href="{% url 'drill:record_response' question.uuid 'hard' %}" class="btn btn-primary ms-2" role="button">Hard</a>
                      {% endif %}
-                     <a href="{% url 'drill:record_response' question.uuid 'easy' %}" class="btn btn-primary" role="button">Easy</a>
-                     <a href="{% url 'drill:record_response' question.uuid 'again' %}" class="btn btn-primary" role="button">Reset</a>
+                     <a href="{% url 'drill:record_response' question.uuid 'easy' %}" class="btn btn-primary ms-2" role="button">Easy</a>
+                     <a href="{% url 'drill:record_response' question.uuid 'again' %}" class="btn btn-primary ms-2" role="button">Reset</a>
                      <a href="{% url 'drill:study' %}" class="btn btn-primary ms-2" role="button">Skip</a>
-
-                     <form action="{% url 'drill:update' question.uuid %}" class="mt-2 float-end">
-                         <input type="submit" class="btn btn-primary" value="Update">
-                     </form>
+                     <a href="{% url 'drill:update' question.uuid %}?return_url={{ request.get_full_path }}" class="btn btn-primary ms-auto" role="button">Update</a>
+                     </div>
 
                  {% else %}
 
                      <div class="d-flex">
-                         <div>
-                             <a href="{% url 'drill:answer' question.uuid %}" class="btn btn-primary" role="button">Show Answer</a>
-                             <a href="{% url 'drill:study' %}" class="btn btn-primary ms-2" role="button">Skip</a>
-                         </div>
-                         <form action="{% url 'drill:update' question.uuid %}" class="ms-auto">
-                             <input type="submit" class="btn btn-primary" value="Update">
-                         </form>
+                         <a href="{% url 'drill:answer' question.uuid %}" class="btn btn-primary" role="button">Show Answer</a>
+                         <a href="{% url 'drill:study' %}" class="btn btn-primary ms-2" role="button">Skip</a>
+                         <a href="{% url 'drill:update' question.uuid %}?return_url={{ request.get_full_path }}" class="btn btn-primary ms-auto" role="button">Update</a>
                      </div>
 
                  {% endif %}
