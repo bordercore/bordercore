@@ -148,16 +148,6 @@ def test_drill_update(auto_login_user, question):
     assert resp.status_code == 302
 
 
-def test_drill_show_answer(auto_login_user, question):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("drill:answer", kwargs={"uuid": question[0].uuid})
-    resp = client.get(url)
-
-    assert resp.status_code == 200
-
-
 @factory.django.mute_signals(signals.post_save)
 def test_drill_start_study_session(auto_login_user, question):
 

@@ -180,34 +180,6 @@ class QuestionDetailView(DetailView):
         }
 
 
-@method_decorator(login_required, name="dispatch")
-class AnswerDetailView(DetailView):
-
-    model = Question
-    slug_field = "uuid"
-    slug_url_kwarg = "uuid"
-    template_name = "drill/question.html"
-
-    def get_object(self, queryset=None):
-        obj = Question.objects.get(user=self.request.user, uuid=self.kwargs.get("uuid"))
-        return obj
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        return {
-            **context,
-            "tag_info": self.object.get_all_tags_progress(),
-            "question": self.object,
-            "state_name": Question.get_state_name(self.object.state),
-            "learning_step_count": self.object.get_learning_step_count(),
-            "title": "Drill :: Question Detail",
-            "tag_list": ", ".join([x.name for x in self.object.tags.all()]),
-            "study_session_progress": Question.get_study_session_progress(self.request.session),
-            "show_answer": True
-        }
-
-
 @method_decorator(login_required, name='dispatch')
 class QuestionUpdateView(FormRequestMixin, UpdateView):
     model = Question

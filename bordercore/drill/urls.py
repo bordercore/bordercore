@@ -41,11 +41,6 @@ urlpatterns = [
         name="is_favorite_mutate"
     ),
     path(
-        route="answer/<uuid:uuid>/",
-        view=views.AnswerDetailView.as_view(),
-        name="answer"
-    ),
-    path(
         route="response/<uuid:uuid>/<str:response>/",
         view=views.record_response,
         name="record_response"

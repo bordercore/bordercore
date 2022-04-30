@@ -143,32 +143,30 @@
 
                  {% endif %}
 
-                 {% if show_answer %}
-
-                     <hr class="divider" />
-                     <h3 class="drill-text table-borders markdown" v-html="getAnswer()">
-                     </h3>
-
-                     <div class="d-flex">
-                     <a href="{% url 'drill:record_response' question.uuid 'good' %}" class="btn btn-primary" role="button">Good</a>
-                     {% if state_name == 'Reviewing' %}
-                         <a href="{% url 'drill:record_response' question.uuid 'hard' %}" class="btn btn-primary ms-2" role="button">Hard</a>
-                     {% endif %}
-                     <a href="{% url 'drill:record_response' question.uuid 'easy' %}" class="btn btn-primary ms-2" role="button">Easy</a>
-                     <a href="{% url 'drill:record_response' question.uuid 'again' %}" class="btn btn-primary ms-2" role="button">Reset</a>
+                 <div class="d-flex">
+                     <a href="#" class="btn btn-primary" role="button" @click.prevent="setMode('answer')">Show Answer</a>
                      <a href="{% url 'drill:study' %}" class="btn btn-primary ms-2" role="button">Skip</a>
                      <a href="{% url 'drill:update' question.uuid %}?return_url={{ request.get_full_path }}" class="btn btn-primary ms-auto" role="button">Update</a>
+                 </div>
+                 <transition name="fade">
+                     <div v-if="mode === 'answer'">
+                         <div>
+                             <hr class="divider" />
+                             <h3 class="drill-text table-borders markdown" v-html="getAnswer()">
+                             </h3>
+
+                             <div class="d-flex">
+                                 <a href="{% url 'drill:record_response' question.uuid 'good' %}" class="btn btn-primary" role="button">Good</a>
+                                 {% if state_name == 'Reviewing' %}
+                                     <a href="{% url 'drill:record_response' question.uuid 'hard' %}" class="btn btn-primary ms-2" role="button">Hard</a>
+                                 {% endif %}
+                                 <a href="{% url 'drill:record_response' question.uuid 'easy' %}" class="btn btn-primary ms-2" role="button">Easy</a>
+                                 <a href="{% url 'drill:record_response' question.uuid 'again' %}" class="btn btn-primary ms-2" role="button">Reset</a>
+                                 <a href="{% url 'drill:study' %}" class="btn btn-primary ms-2" role="button">Skip</a>
+                             </div>
+                         </div>
                      </div>
-
-                 {% else %}
-
-                     <div class="d-flex">
-                         <a href="{% url 'drill:answer' question.uuid %}" class="btn btn-primary" role="button">Show Answer</a>
-                         <a href="{% url 'drill:study' %}" class="btn btn-primary ms-2" role="button">Skip</a>
-                         <a href="{% url 'drill:update' question.uuid %}?return_url={{ request.get_full_path }}" class="btn btn-primary ms-auto" role="button">Update</a>
-                     </div>
-
-                 {% endif %}
+                 </transition>
 
             </div>
 
@@ -260,7 +258,7 @@
             },
             data() {
                 return {
-                    mode: "{% if show_answer %}answer{% else %}question{% endif %}",
+                    mode: "question",
                 };
             },
             mounted() {
@@ -287,9 +285,7 @@
                             window.location = "{% url "drill:study" %}";
                             break;
                         case "space":
-                            if (self.mode === "question") {
-                                window.location = "{% url 'drill:answer' question.uuid %}";
-                            }
+                            self.setMode("answer");
                             break;
                         case "e":
                             if (self.mode === "answer") {
@@ -320,6 +316,9 @@
 
             },
             methods: {
+                setMode(mode) {
+                    this.mode = mode;
+                },
                 getQuestion() {
                     return markdown.render("{{ question.question|escapejs }}");
                 },
