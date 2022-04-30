@@ -198,35 +198,42 @@ class Question(TimeStampedModel):
         return doc
 
     @staticmethod
-    def start_study_session(user, session, session_type, param=None):
+    def start_study_session(user, session, session_type, filter=None, param=None):
 
         questions = []
 
         if session_type == "favorites":
-            questions = Question.objects.filter(user=user, is_favorite=True).order_by("?").values("uuid")
+            questions = Question.objects.filter(
+                user=user,
+                is_favorite=True
+            ).order_by("?").values("uuid")
         elif session_type == "tag-needing-review":
             questions = Question.objects.filter(
-                Q(user=user),
-                Q(tags__name=param),
-                Q(interval__lte=timezone.now() - F("last_reviewed"))
-                | Q(last_reviewed__isnull=True)
-                | Q(state="L")
-            ).order_by("?").values("uuid")
+                user=user,
+                tags__name=param,
+            )
+            if filter == "review":
+                questions = questions.filter(
+                    Q(interval__lte=timezone.now() - F("last_reviewed"))
+                    | Q(last_reviewed__isnull=True)
+                    | Q(state="L")
+                )
+            questions = questions.order_by("?").values("uuid")
         elif session_type == "learning":
             questions = Question.objects.filter(
-                Q(user=user),
-                Q(state="L")
+                user=user,
+                state="L"
             ).order_by("?").values("uuid")
         elif session_type == "random":
             count = int(param)
             questions = Question.objects.filter(
-                Q(user=user)
+                user=user
             ).order_by("?").values("uuid")[:count]
         elif session_type == "search":
             questions = Question.objects.filter(
-                Q(user=user),
                 Q(question__icontains=param)
-                | Q(answer__icontains=param)
+                | Q(answer__icontains=param),
+                user=user
             ).order_by("?").values("uuid")
 
         if questions:

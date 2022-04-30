@@ -112,29 +112,29 @@ def test_start_study_session(question, tag):
 
     session = {}
 
-    current = Question.start_study_session(question[0].user, session, "favorites")
+    current = Question.start_study_session(question[0].user, session, "favorites", "review")
     assert current in [str(question[2].uuid), str(question[3].uuid)]
     assert len(session["drill_study_session"]["list"]) == 2
 
-    current = Question.start_study_session(question[0].user, session, "tag-needing-review", tag[0].name)
+    current = Question.start_study_session(question[0].user, session, "tag-needing-review", "review", tag[0].name)
     assert current in [str(x.uuid) for x in question]
     assert len(session["drill_study_session"]["list"]) == 1
     assert session["drill_study_session"]["tag"] == tag[0].name
 
-    current = Question.start_study_session(question[0].user, session, "learning")
+    current = Question.start_study_session(question[0].user, session, "learning", "review")
     assert current in [str(x.uuid) for x in question]
     assert len(session["drill_study_session"]["list"]) == 4
 
-    current = Question.start_study_session(question[0].user, session, "random", 3)
+    current = Question.start_study_session(question[0].user, session, "random", "review", 3)
     assert current in [str(x.uuid) for x in question]
     assert len(session["drill_study_session"]["list"]) == 3
 
     first_word_of_question = question[0].question.split(" ")[0]
-    current = Question.start_study_session(question[0].user, session, "search", first_word_of_question)
+    current = Question.start_study_session(question[0].user, session, "search", "review", first_word_of_question)
     assert current in [str(x.uuid) for x in question]
     assert len(session["drill_study_session"]["list"]) > 1
     first_word_of_answer = question[0].question.split(" ")[0]
-    current = Question.start_study_session(question[0].user, session, "search", first_word_of_answer)
+    current = Question.start_study_session(question[0].user, session, "search", "review", first_word_of_answer)
     assert current in [str(x.uuid) for x in question]
     assert len(session["drill_study_session"]["list"]) > 1
 

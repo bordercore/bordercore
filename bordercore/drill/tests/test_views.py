@@ -159,7 +159,7 @@ def test_drill_start_study_session(auto_login_user, question):
             "session_type": "favorites"
         }
     )
-    resp = client.get(url)
+    resp = client.get(url + "?filter=review")
 
     assert resp.status_code == 302
 

@@ -230,8 +230,7 @@ def start_study_session(request, session_type, param=None):
     """
     Start a study session
     """
-
-    first_question = Question.start_study_session(request.user, request.session, session_type, param)
+    first_question = Question.start_study_session(request.user, request.session, session_type, request.GET.get("filter", None), param)
 
     if first_question:
         return redirect("drill:detail", uuid=first_question)
