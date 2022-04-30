@@ -274,6 +274,10 @@
 
                 hotkeys("ctrl+return,right,space,e,g,h,r", function (event, handler) {
 
+                    // Ignore event if this is a top search query
+                    if (event.srcElement.id === "top-simple-suggest") {
+                        return;
+                    }
                     if (event.target.parentElement.classList.contains("code-input")) {
                         if (handler.key === "ctrl+return") {
                             self.$refs.pythonConsole.evaluatePython();
