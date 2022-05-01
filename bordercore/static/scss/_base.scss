@@ -754,8 +754,8 @@ $nav-tabs-link-active-border-color: 0 0 $nav-highlight-color;
 $nav-tabs-link-hover-border-color: $nav-border-color;
 
 // Modified from bootstrap/scss/_nav.scss
-.nav-tabs {
-  border-bottom: 2px solid $nav-border-color;
+.nav-tabs, .nav {
+  border-bottom: 1px solid $nav-border-color;
 
   .nav-link {
     border-bottom: 2px solid $bg-light;
@@ -763,7 +763,7 @@ $nav-tabs-link-hover-border-color: $nav-border-color;
 
     &:hover,
     &:focus {
-      color: $nav-border-color;
+      color: $white;
     }
   }
 

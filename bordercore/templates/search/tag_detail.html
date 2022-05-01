@@ -63,7 +63,7 @@
         <br />
 
         <tab-list inline-template>
-            <ul class="nav nav-tabs mx-3" id="myTab">
+            <ul class="nav mx-3" id="myTab">
                 {% for doctype in doctype_counts %}
                     <li class="nav-item" data-type="{{ doctype.0 }}" @click="onClick">
                         <a class="nav-link" data-bs-toggle="tab" href="#{{ doctype.0 }}">
