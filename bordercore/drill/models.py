@@ -217,9 +217,12 @@ class Question(TimeStampedModel):
             ).order_by("?").values("uuid")
         elif session_type == "tag-needing-review":
             questions = Question.objects.filter(
-                user=user,
-                tags__name=param,
+                user=user
             )
+            for tag in param.split(","):
+                questions = questions.filter(
+                    tags__name=tag
+                )
             if filter == "review":
                 questions = questions.filter(
                     Q(interval__lte=timezone.now() - F("last_reviewed"))
