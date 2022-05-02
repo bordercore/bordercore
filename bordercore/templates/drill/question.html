@@ -48,8 +48,12 @@
                             {% endif %}
                             {% if state_name != 'New' %}
                                 <li class="d-flex">
-                                    <div class="flex-fill fw-bold">Last reviewed</div>
+                                    <div class="flex-fill fw-bold">Reviewed</div>
                                     <div class="text-info text-end">{{ question.last_reviewed|date:"F j, Y"|default:"Never" }}</div>
+                                </li>
+                                <li class="d-flex">
+                                    <div class="flex-fill fw-bold">Last Response</div>
+                                    <div class="text-info text-end">{{ last_response.response|default:"N/A"|capfirst }}</div>
                                 </li>
                             {% endif %}
                             <li class="d-flex">

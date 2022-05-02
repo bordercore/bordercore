@@ -102,6 +102,13 @@ def test_record_response():
     assert question.learning_step == 1
 
 
+def test_get_last_response(question):
+
+    question[0].record_response("easy")
+    question[0].record_response("good")
+    assert question[0].get_last_response().response == "good"
+
+
 def test_get_all_tags_progress(question):
 
     tags_info = question[0].get_all_tags_progress()

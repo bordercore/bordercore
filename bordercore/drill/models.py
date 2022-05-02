@@ -137,6 +137,14 @@ class Question(TimeStampedModel):
         response = QuestionResponse(question=self, response=response)
         response.save()
 
+    def get_last_response(self):
+        """
+        Get the last response for this question
+        """
+        return QuestionResponse.objects.filter(
+            question=self
+        ).order_by("-date").first()
+
     def get_all_tags_progress(self):
         """
         Get review progress for all tags assocated with this question.
