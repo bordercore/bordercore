@@ -818,10 +818,12 @@ def missing_artist_images(request):
             if m:
                 unique_uuids[m.group(1)] = True
 
-    # artists = Artist.objects.all().order_by("?")
-
-    # Focus on artist associated with albums
-    artists = Artist.objects.filter(album__isnull=False).order_by("?")
+    artists = Artist.objects.all(
+    ).exclude(
+        album__artist__name="Various"
+    ).exclude(
+        album__artist__name="Various Artists"
+    ).order_by("?")
 
     for artist in artists:
         if str(artist.uuid) not in unique_uuids:
