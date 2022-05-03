@@ -4,6 +4,7 @@ from urllib.parse import unquote
 from django import urls
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import F, Max
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -25,7 +26,7 @@ from .models import (EFACTOR_DEFAULT, Question, SortOrderQuestionBlob,
                      SortOrderQuestionBookmark)
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class DrillListView(ListView):
 
     template_name = "drill/drill_list.html"
@@ -47,22 +48,22 @@ class DrillListView(ListView):
         }
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class QuestionCreateView(FormRequestMixin, CreateView):
-    template_name = 'drill/question_edit.html'
+    template_name = "drill/question_edit.html"
     form_class = QuestionForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context['action'] = 'Add'
-        context['title'] = 'Drill :: Add Question'
+        context["action"] = "Add"
+        context["title"] = "Drill :: Add Question"
 
         # If we're adding a question with an initial tag value,
         # pre-populate the form with this tag.
-        if context['form']['tags'].value():
-            tag = Tag.objects.get(user=self.request.user, name=context['form']['tags'].value())
-            context['tags'] = [
+        if context["form"]["tags"].value():
+            tag = Tag.objects.get(user=self.request.user, name=context["form"]["tags"].value())
+            context["tags"] = [
                 {
                     "text": tag.name,
                     "is_meta": tag.is_meta,
@@ -70,10 +71,19 @@ class QuestionCreateView(FormRequestMixin, CreateView):
                 }
             ]
 
+        # Get a list of the most recently used tags
+        context["recent_tags"] = Question.objects.values(
+            name=F("tags__name")
+        ).annotate(
+            max=Max("created")
+        ).order_by(
+            "-max"
+        )[:10]
+
         return context
 
     def get_initial(self):
-        tag = self.kwargs.get('tag')
+        tag = self.kwargs.get("tag")
         if tag:
             return {"tags": tag}
 
@@ -98,7 +108,7 @@ class QuestionCreateView(FormRequestMixin, CreateView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        return reverse('drill:add')
+        return reverse("drill:add")
 
 
 def handle_related_bookmarks(question, request):
@@ -135,7 +145,7 @@ def handle_related_blobs(question, request):
         so.save()
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class QuestionDeleteView(DeleteView):
 
     form_class = QuestionForm
@@ -146,11 +156,11 @@ class QuestionDeleteView(DeleteView):
         return super().delete(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
-        question = Question.objects.get(user=self.request.user, uuid=self.kwargs.get('uuid'))
+        question = Question.objects.get(user=self.request.user, uuid=self.kwargs.get("uuid"))
         return question
 
     def get_success_url(self):
-        return reverse('drill:add')
+        return reverse("drill:add")
 
 
 @method_decorator(login_required, name="dispatch")
@@ -181,20 +191,20 @@ class QuestionDetailView(DetailView):
         }
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class QuestionUpdateView(FormRequestMixin, UpdateView):
     model = Question
-    slug_field = 'uuid'
-    slug_url_kwarg = 'uuid'
+    slug_field = "uuid"
+    slug_url_kwarg = "uuid"
 
     form_class = QuestionForm
-    template_name = 'drill/question_edit.html'
+    template_name = "drill/question_edit.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['action'] = 'Update'
-        context['title'] = 'Drill :: Question Update'
-        context['tags'] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
+        context["action"] = "Update"
+        context["title"] = "Drill :: Question Update"
+        context["tags"] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
         return context
 
     def form_valid(self, form):
@@ -205,7 +215,7 @@ class QuestionUpdateView(FormRequestMixin, UpdateView):
         obj = form.save(commit=False)
 
         # Take care of the tags.  Create any that are new.
-        for tag in form.cleaned_data['tags']:
+        for tag in form.cleaned_data["tags"]:
             obj.tags.add(tag)
         obj.save()
 
@@ -223,7 +233,7 @@ class QuestionUpdateView(FormRequestMixin, UpdateView):
         if "return_url" in self.request.POST:
             return self.request.POST["return_url"]
         else:
-            return reverse('drill:list')
+            return reverse("drill:list")
 
 
 @login_required

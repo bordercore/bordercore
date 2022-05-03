@@ -55,6 +55,20 @@
             >
             </drill-blobs>
 
+            <card title="Recent Tags">
+                <template v-slot:content>
+                    <ul class="list-group interior-borders">
+                        {% for tag in recent_tags %}
+                            <li class="tag-list list-group-item list-group-item-secondary text-info d-flex ps-0" @click.prevent="onClickTag('{{ tag.name }}')">
+                                <div class="text-truncate">
+                                    {{ tag.name }}
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </template>
+            </card>
+
         </div>
 
         <div class="col-lg-9">
@@ -69,25 +83,19 @@
         {% for field in form %}
             {% if field.label == "Tags" %}
 
-                <search inline-template>
-                    <div>
-
-                        <div class="row{% if field.errors %} error{% endif %} mb-3">
-                            <label class="fw-bold col-lg-2 col-form-label text-end" for="inputTitle">Tags</label>
-
-                            <div class="col-lg-5">
-                                <tags-input
-                                    search-url="{% url 'tag:search' %}?query="
-                                >
-                                </tags-input>
-                            </div>
-                        {% for error in field.errors %}
-                            <span class="form-error">{{ error }}</span>
-                        {% endfor %}
-                        </div>
-
+                <div class="row{% if field.errors %} error{% endif %} mb-3">
+                    <label class="fw-bold col-lg-2 col-form-label text-end" for="inputTitle">Tags</label>
+                    <div class="col-lg-5">
+                        <tags-input
+                            ref="tagsInput"
+                            search-url="{% url 'tag:search' %}?query="
+                        >
+                        </tags-input>
                     </div>
-                </search>
+                    {% for error in field.errors %}
+                        <span class="form-error">{{ error }}</span>
+                    {% endfor %}
+                </div>
 
             {% else %}
 
@@ -129,14 +137,10 @@
 
     <script type="text/javascript">
 
-        const Search = {
-        };
-
         new Vue({
             el: "#vue-app",
             name: "EditQuestion",
             components: {
-                Search,
                 TagsInput,
             },
             data() {
@@ -180,6 +184,14 @@
                     form.submit();
                     {% endif %}
                 },
+                onClickTag(tagName) {
+                    let tagList = document.getElementsByName("tags")[0].value.split(",");
+                    // Ignore if we've already added this tag
+                    if (tagList.includes(tagName)) {
+                        return;
+                    }
+                    this.$refs.tagsInput.addTag(tagName);
+                }
             },
         });
 
