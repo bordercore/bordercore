@@ -44,33 +44,40 @@
                     <template v-slot:content>
                         <div class="d-flex" @click="showTestResults('unit')">
                             <div class="flex-grow-1">
-                                <ul class="list-unstyled">
-                                    <li class="d-flex">
-                                        <div class="flex-fill fw-bold">Test Count</div>
-                                        <div class="text-info pe-5">[[ unit.test_count ]]</div>
-                                    </li>
-                                    <li class="d-flex">
-                                        <div class="flex-fill fw-bold">Errors</div>
-                                        <div class="text-info pe-5">[[ unit.test_errors ]]</div>
-                                    </li>
-                                    <li class="d-flex">
-                                        <div class="flex-fill fw-bold">Failures</div>
-                                        <div class="text-info pe-5">[[ unit.test_failures ]]</div>
-                                    </li>
-                                    <hr class="bg-secondary" />
-                                    <li>
-                                        <div>
-                                            <strong>Runtime</strong> <span :class="get_overdue_status(unit)">[[ unit.test_time_elapsed ]]</span>
-                                        </div>
-                                        <div>
-                                            <strong>Date</strong> <span :class="get_overdue_status(unit)">[[ unit.test_runtime ]]</span>
-                                        </div>
-                                    </li>
-                                </ul>
+                                <div class="d-flex">
+                                    <div class="fw-bold">Test Count</div>
+                                    <div class="text-info ms-auto">
+                                        [[ unit.test_count ]]
+                                    </div>
+                                </div>
+                                <div class="d-flex">
+                                    <div class="fw-bold">Errors</div>
+                                    <div class="text-info ms-auto">
+                                        [[ unit.test_errors ]]
+                                    </div>
+                                </div>
+                                <div class="d-flex">
+                                    <div class="fw-bold">Failures</div>
+                                    <div class="text-info ms-auto">
+                                        [[ unit.test_failures ]]
+                                    </div>
+                                </div>
                             </div>
                             <div class="ms-3">
                                 <font-awesome-icon class="ms-1 fa-3x" :class="status_unit.class" :icon="status_unit.font"></font-awesome-icon>
                             </div>
+                        </div>
+                        <div class="metric-divider mt-2 pt-2">
+                            <strong>Runtime</strong>
+                            <span :class="get_overdue_status(unit)">
+                                [[ unit.test_time_elapsed ]]
+                            </span>
+                        </div>
+                        <div>
+                            <strong>Date</strong>
+                            <span :class="get_overdue_status(unit)">
+                                [[ unit.test_runtime ]]
+                            </span>
                         </div>
                     </template>
                 </card>
@@ -79,34 +86,41 @@
                     <template v-slot:content>
                         <div class="d-flex" @click="showTestResults('wumpus')">
                             <div class="flex-grow-1">
-                                <ul class="list-unstyled">
-                                    <li class="d-flex">
-                                        <div class="flex-fill fw-bold">Test Count</div>
-                                        <div class="text-info pe-5">[[ wumpus.test_count ]]</div>
-                                    </li>
-                                    <li class="d-flex">
-                                        <div class="flex-fill fw-bold">Errors</div>
-                                        <div class="text-info pe-5">[[ wumpus.test_errors ]]</div>
-                                    </li>
-                                    <li class="d-flex">
-                                        <div class="flex-fill fw-bold">Failures</div>
-                                        <div class="text-info pe-5">[[ wumpus.test_failures ]]</div>
-                                    </li>
-                                    <hr class="bg-secondary" />
-                                    <li>
-                                        <div>
-                                            <strong>Runtime</strong> <span :class="get_overdue_status(unit)">[[ wumpus.test_time_elapsed ]]</span>
-                                        </div>
-                                        <div>
-                                            <strong>Date</strong> <span :class="get_overdue_status(wumpus)">[[ wumpus.test_runtime ]]</span>
-                                        </div>
-                                    </li>
-                                </ul>
+                                <div class="d-flex">
+                                    <div class="fw-bold">Test Count</div>
+                                    <div class="text-info ms-auto">
+                                        [[ wumpus.test_count ]]
+                                    </div>
+                                </div>
+                                <div class="d-flex">
+                                    <div class="fw-bold">Errors</div>
+                                    <div class="text-info ms-auto">
+                                        [[ wumpus.test_errors ]]
+                                    </div>
+                                </div>
+                                <div class="d-flex">
+                                    <div class="fw-bold">Failures</div>
+                                    <div class="text-info ms-auto">
+                                        [[ wumpus.test_failures ]]
+                                    </div>
+                                </div>
                             </div>
                             <div class="ms-3">
                                 <font-awesome-icon class="ms-1 fa-3x" :class="status_wumpus.class" :icon="status_wumpus.font"></font-awesome-icon>
                             </div>
                         </div>
+                        <div class="metric-divider mt-2 pt-2">
+                            <strong>Runtime</strong>
+                            <span :class="get_overdue_status(unit)">
+                                [[ wumpus.test_time_elapsed ]]
+                            </span>
+                        </div>
+                            <div>
+                                <strong>Date</strong>
+                                <span :class="get_overdue_status(wumpus)">
+                                    [[ wumpus.test_runtime ]]
+                                </span>
+                            </div>
                     </template>
                 </card>
 
@@ -119,33 +133,40 @@
                     <template v-slot:content>
                         <div class="d-flex" @click="showTestResults('functional')">
                             <div class="flex-grow-1">
-                                <ul class="list-unstyled">
-                                    <li class="d-flex">
-                                        <div class="flex-fill fw-bold">Test Count</div>
-                                        <div class="text-info pe-5">[[ functional.test_count ]]</div>
-                                    </li>
-                                    <li class="d-flex">
-                                        <div class="flex-fill fw-bold">Errors</div>
-                                        <div class="text-info pe-5">[[ functional.test_errors ]]</div>
-                                    </li>
-                                    <li class="d-flex">
-                                        <div class="flex-fill fw-bold">Failures</div>
-                                        <div class="text-info pe-5">[[ functional.test_failures ]]</div>
-                                    </li>
-                                    <hr class="bg-secondary" />
-                                    <li>
-                                        <div>
-                                            <strong>Runtime</strong> <span :class="get_overdue_status(unit)">[[ functional.test_time_elapsed ]]</span>
-                                        </div>
-                                        <div>
-                                            <strong>Date</strong> <span :class="get_overdue_status(functional)">[[ functional.test_runtime ]]</span>
-                                        </div>
-                                    </li>
-                                </ul>
+                                <div class="d-flex">
+                                    <div class="fw-bold">Test Count</div>
+                                    <div class="text-info ms-auto">
+                                        [[ functional.test_count ]]
+                                    </div>
+                                </div>
+                                <div class="d-flex">
+                                    <div class="fw-bold">Errors</div>
+                                    <div class="text-info ms-auto">
+                                        [[ functional.test_errors ]]
+                                    </div>
+                                </div>
+                                <div class="d-flex">
+                                    <div class="fw-bold">Failures</div>
+                                    <div class="text-info ms-auto">
+                                        [[ functional.test_failures ]]
+                                    </div>
+                                </div>
                             </div>
                             <div class="ms-3">
                                 <font-awesome-icon class="ms-1 fa-3x" :class="status_functional.class" :icon="status_functional.font"></font-awesome-icon>
                             </div>
+                        </div>
+                        <div class="metric-divider mt-2 pt-2">
+                            <strong>Runtime</strong>
+                            <span :class="get_overdue_status(unit)">
+                                [[ functional.test_time_elapsed ]]
+                            </span>
+                        </div>
+                        <div>
+                            <strong>Date</strong>
+                            <span :class="get_overdue_status(functional)">
+                                [[ functional.test_runtime ]]
+                            </span>
                         </div>
                     </template>
 
@@ -156,22 +177,22 @@
                     <template v-slot:content>
                         <div class="d-flex">
                             <div class="flex-grow-1">
-                                <ul class="list-unstyled">
-                                    <li class="d-flex">
-                                        <div class="flex-fill fw-bold">Coverage</div>
-                                        <div class="text-info pe-5">[[ coverage.line_rate ]]%</div>
-                                    </li>
-                                    <hr class="bg-secondary" />
-                                    <li>
-                                        <div>
-                                            <strong>Date</strong> <span :class="get_overdue_status(coverage)">[[ coverage.test_runtime ]]</span>
-                                        </div>
-                                    </li>
-                                </ul>
+                                <div class="d-flex">
+                                    <div class="fw-bold">Coverage</div>
+                                    <div class="text-info ms-auto">
+                                        [[ coverage.line_rate ]]%
+                                    </div>
+                                </div>
                             </div>
                             <div class="ms-3">
                                 <font-awesome-icon class="ms-1 fa-3x" :class="status_coverage.class" :icon="status_coverage.font"></font-awesome-icon>
                             </div>
+                        </div>
+                        <div class="metric-divider mt-2 pt-2">
+                            <strong>Date</strong>
+                            <span :class="get_overdue_status(coverage)">
+                                [[ coverage.test_runtime ]]
+                            </span>
                         </div>
                     </template>
                 </card>
@@ -186,33 +207,34 @@
                         <template v-slot:content>
                             <div class="d-flex" @click="showTestResults('data')">
                                 <div class="flex-grow-1">
-                                    <ul class="list-unstyled">
-                                        <li class="d-flex">
-                                            <div class="flex-fill fw-bold">Test Count</div>
-                                            <div class="text-info pe-5">[[ data.test_count ]]</div>
-                                        </li>
-                                        <li class="d-flex">
-                                            <div class="flex-fill fw-bold">Errors</div>
-                                            <div class="text-info pe-5">[[ data.test_errors ]]</div>
-                                        </li>
-                                        <li class="d-flex">
-                                            <div class="flex-fill fw-bold">Failures</div>
-                                            <div class="text-info pe-5">[[ data.test_failures ]]</div>
-                                        </li>
-                                        <hr class="bg-secondary" />
-                                        <li>
-                                            <div>
-                                                <strong>Runtime</strong> <span :class="get_overdue_status(unit)">[[ data.test_time_elapsed ]]</span>
-                                            </div>
-                                            <div>
-                                                <strong>Date</strong> <span :class="get_overdue_status(data)">[[ data.test_runtime ]]</span>
-                                            </div>
-                                        </li>
-                                    </ul>
+                                    <div class="d-flex">
+                                        <div class="fw-bold">Test Count</div>
+                                        <div class="text-info ms-auto">[[ data.test_count ]]</div>
+                                    </div>
+                                    <div class="d-flex">
+                                        <div class="fw-bold">Errors</div>
+                                        <div class="text-info ms-auto">[[ data.test_errors ]]</div>
+                                    </div>
+                                    <div class="d-flex">
+                                        <div class="fw-bold">Failures</div>
+                                        <div class="text-info ms-auto">[[ data.test_failures ]]</div>
+                                    </div>
                                 </div>
                                 <div class="ms-3">
                                     <font-awesome-icon class="ms-1 fa-3x" :class="status_data.class" :icon="status_data.font"></font-awesome-icon>
                                 </div>
+                            </div>
+                            <div class="metric-divider mt-2 pt-2">
+                                <strong>Runtime</strong>
+                                <span :class="get_overdue_status(unit)">
+                                    [[ data.test_time_elapsed ]]
+                                </span>
+                            </div>
+                            <div>
+                                <strong>Date</strong>
+                                <span :class="get_overdue_status(data)">
+                                    [[ data.test_runtime ]]
+                                </span>
                             </div>
                         </template>
                     </card>
