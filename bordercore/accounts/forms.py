@@ -55,6 +55,7 @@ class UserProfileForm(ModelForm):
         model = UserProfile
         fields = (
             "theme",
+            "background_image",
             "sidebar_image",
             "pinned_tags",
             "homepage_default_collection",

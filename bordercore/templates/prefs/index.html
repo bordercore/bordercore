@@ -56,7 +56,33 @@
 
                     {% for field in form %}
 
-                        {% if field.label == "Sidebar image" %}
+                        {% if field.label == "Background image" %}
+                            <sidebar inline-template>
+                                <div>
+                                    <div class="row mb-3">
+                                        <label class="fw-bold col-lg-3 col-form-label text-end">Background Image</label>
+                                        <div class="col-lg-7">
+                                            <div class="input-group">
+                                                <input type="text" name="background_image" :value=background_image_filename class="form-control" id="id_background_image" autocomplete="off" />
+                                                <span class="input-group-append">
+                                                    <label class="btn btn-primary">Choose image
+                                                        <input type="file" id="customFile" name="background_image_file" hidden accept="image/*" @change="onChangeBackgroundImage" />
+                                                    </label>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row form-inline mb-3" v-show="background_image_filename !== ''" v-cloak>
+                                        <div class="col-lg-3 offset-lg-3">
+                                            <div class="form-check ps-0">
+                                                <input class="form-check-input ms-1" type="checkbox" name="delete_background" />
+                                                <label class="form-check-label fw-bold ms-2">Delete</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </sidebar>
+                        {% elif field.label == "Sidebar image" %}
                             <sidebar inline-template>
                                 <div>
                                     <div class="row mb-3">
@@ -66,7 +92,7 @@
                                                 <input type="text" name="sidebar_image" :value=filename class="form-control" id="id_sidebar_image" autocomplete="off" />
                                                 <span class="input-group-append">
                                                     <label class="btn btn-primary">Choose image
-                                                        <input type="file" id="customFile" name="sidebar_image_file" hidden accept="image/*" @change="onChange" />
+                                                        <input type="file" id="customFile" name="sidebar_image_file" hidden accept="image/*" @change="onChangeSidebarImage" />
                                                     </label>
                                                 </span>
                                             </div>
@@ -74,9 +100,9 @@
                                     </div>
                                     <div class="row form-inline mb-3" v-show="filename !== ''" v-cloak>
                                         <div class="col-lg-3 offset-lg-3">
-                                            <div class="form-check">
-                                                <label class="form-check-label fw-bold">Delete</label>
-                                                <input class="form-check-input ms-3" type="checkbox" name="delete_sidebar" />
+                                            <div class="form-check ps-0">
+                                                <input class="form-check-input ms-1" type="checkbox" name="delete_sidebar" />
+                                                <label class="form-check-label fw-bold ms-2">Delete</label>
                                             </div>
                                         </div>
                                     </div>
@@ -141,10 +167,14 @@
             data() {
                 return {
                     filename: "{{ object.sidebar_image|default:"" }}",
+                    background_image_filename: "{{ object.background_image|default:"" }}",
                 };
             },
             methods: {
-                onChange(evt) {
+                onChangeBackgroundImage(evt) {
+                    this.background_image_filename = evt.target.files[0].name;
+                },
+                onChangeSidebarImage(evt) {
                     this.filename = evt.target.files[0].name;
                 },
             },

@@ -47,6 +47,7 @@ class UserProfileUpdateView(FormRequestMixin, UpdateView):
 
     def form_valid(self, form):
         self.handle_sidebar(form)
+        self.handle_background_image(form)
 
         userprofile = form.instance
 
@@ -79,6 +80,44 @@ class UserProfileUpdateView(FormRequestMixin, UpdateView):
         context = self.get_context_data(form=form)
         context["message"] = "Preferences updated"
         return self.render_to_response(context)
+
+    def handle_background_image(self, form):
+        background_image_old = form.initial["background_image"]
+        background_image_new = self.request.FILES.get("background_image_file", None)
+
+        s3_client = boto3.client("s3")
+
+        if self.request.POST.get("delete_background") == "on":
+
+            # Delete the image from S3
+            s3_client.delete_object(
+                Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                Key=f"background/{self.request.user.userprofile.uuid}/{background_image_old}"
+            )
+
+            # Delete it from the model
+            self.object.background_image = None
+            self.object.save()
+
+        elif background_image_new and "background_image" in form.changed_data:
+
+            # Delete the old image from S3
+            s3_client.delete_object(
+                Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                Key=f"background/{self.request.user.userprofile.uuid}/{background_image_old}"
+            )
+
+            # Upload the new image to S3
+            key = f"background/{self.request.user.userprofile.uuid}/{background_image_new}"
+            fo = io.BytesIO(self.request.FILES["background_image_file"].read())
+            s3_client.upload_fileobj(fo, settings.AWS_STORAGE_BUCKET_NAME, key)
+
+            self.object.background_image = background_image_new
+            self.object.save()
+
+            # Update the user's profile immediately so the new sidebage image
+            #  will appear as soon as this view returns the response
+            self.request.user.userprofile.background_image = background_image_new
 
     def handle_sidebar(self, form):
         sidebar_image_old = form.initial["sidebar_image"]

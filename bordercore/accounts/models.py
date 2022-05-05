@@ -26,6 +26,7 @@ class UserProfile(models.Model):
     homepage_default_collection = models.OneToOneField(Collection, related_name="default_collection", null=True, on_delete=models.PROTECT)
     homepage_image_collection = models.OneToOneField(Collection, related_name="image_collection", null=True, on_delete=models.PROTECT)
     sidebar_image = models.TextField(blank=True, null=True)
+    background_image = models.TextField(blank=True, null=True)
 
     THEMES = [
         ("light", "light"),

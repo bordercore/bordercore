@@ -12,7 +12,7 @@
 
             <div class="col-lg-3">
 
-                <card>
+                <card class="card-body">
                     <template v-slot:title-slot>
                         <div class="card-title">
                             <a href="{% url 'todo:list' %}">Important Tasks</a>
@@ -36,7 +36,7 @@
 
                 <div>
 
-                    <card title="Drill Total Progress">
+                    <card title="Drill Total Progress" class="card-body">
                         <template v-slot:title-slot>
                             <div class="card-title">
                                 <a href="{% url 'drill:list' %}">Drill Total Progress</a>
@@ -60,7 +60,7 @@
 
                 <div>
 
-                    <card title="Overdue Exercises">
+                    <card title="Overdue Exercises" class="card-body">
                         <template v-slot:content>
                             <ul class="list-group interior-borders">
                                 {% for exercise in overdue_exercises %}
@@ -76,7 +76,7 @@
 
                 <div>
 
-                    <card title="Daily Bookmarks">
+                    <card title="Daily Bookmarks" class="card-body">
                         <template v-slot:content>
                             <ul class="list-group interior-borders">
                                 {% for bookmark in daily_bookmarks %}
@@ -92,7 +92,7 @@
 
                 <div>
 
-                    <card title="Pinned Bookmarks">
+                    <card title="Pinned Bookmarks" class="card-body">
                         <template v-slot:content>
                             <ul class="list-group interior-borders">
                                 {% for bookmark in pinned_bookmarks %}
@@ -110,7 +110,7 @@
 
             <div class="col-lg-5">
 
-                <card>
+                <card class="card-body">
                     <template v-slot:title-slot>
                         <div class="card-title">
                             <a class="text-emphasis" href="{% url 'bookmark:overview' %}">Recent Bookmarks</a>
@@ -120,7 +120,7 @@
                         {% if bookmarks %}
                             <ul class="list-group interior-borders scrollable-panel-scrollbar-hover vh-50">
                             {% for bookmark in bookmarks %}
-                                <li class="list-group-item list-group-item-secondary text-success d-flex">
+                                <li class="list-group-item text-success d-flex">
                                     <div>
                                         {{ bookmark.url|favicon:16|safe }}
                                     </div>
@@ -140,7 +140,7 @@
 
                 {% if default_collection %}
                     <div>
-                        <card>
+                        <card class="card-body">
                             <template v-slot:title-slot>
                                 <div class="card-title">
                                     <a href="{% url 'collection:detail' default_collection.uuid %}">{{ default_collection.name }}</a>
@@ -159,7 +159,7 @@
 
                 <div>
 
-                    <card title="Recently Played Music">
+                    <card title="Recently Played Music" class="card-body">
                         <template v-slot:content>
                             <ul class="list-group interior-borders">
                                 {% for song in music %}
@@ -178,7 +178,7 @@
 
                 <div>
 
-                    <card title="Quote">
+                    <card title="Quote" class="card-body">
                         <template v-slot:content>
                             <div>
                                 {{ quote.quote }}<br /><strong>{{ quote.source }}</strong>
@@ -194,7 +194,7 @@
 
                 <div class="me-3">
 
-                    <card title="Calendar">
+                    <card title="Calendar" class="card-body">
                         <template v-slot:content>
                             <ul class="list-group interior-borders" id="events">
                                 <li v-if="waiting" :class="errorClass" class="list-group-item list-group-item-secondary">[[ msg ]]</li>
@@ -206,7 +206,7 @@
                 </div>
 
                 <div class="me-3">
-                    <card title="Random Image">
+                    <card title="Random Image" class="card-body">
                         {% if random_image_info %}
                             <template v-slot:title-slot>
                                 <div class="card-title">
