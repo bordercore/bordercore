@@ -1,5 +1,4 @@
 import html
-from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -45,7 +44,7 @@ class MetricListView(UserPassesTestMixin, ListView):
 
             if metric.created:
 
-                if timezone.now() - metric.created > timedelta(days=1):
+                if timezone.now() - metric.created > metric.frequency:
                     metric.overdue = True
 
                 context[self.test_types[metric.name]] = metric

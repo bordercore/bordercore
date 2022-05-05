@@ -14,6 +14,7 @@ class Metric(models.Model):
     name = models.TextField()
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     note = models.TextField(blank=True, null=True)
+    frequency = models.DurationField(default=timedelta(days=1), blank=False, null=False)
 
     objects = MetricsManager()
 
@@ -30,7 +31,7 @@ class Metric(models.Model):
 
             if metric.created:
 
-                if timezone.now() - metric.created > timedelta(days=1):
+                if timezone.now() - metric.created > metric.frequency:
                     failed_test_count += 1
                 if "test_errors" in metric.latest_result:
                     failed_test_count += int(metric.latest_result["test_errors"])
