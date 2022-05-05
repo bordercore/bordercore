@@ -173,8 +173,7 @@ class SearchListView(ListView):
                         "query": search_term,
                         "fields": [
                             "answer",
-                            "metadata.artist",
-                            "metadata.author",
+                            "metadata.*",
                             "attachment.content",
                             "contents",
                             "name",
