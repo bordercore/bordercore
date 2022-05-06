@@ -215,6 +215,10 @@ import AddToCollection from "./vue/blob/AddToCollection.vue";
 Vue.component("AddToCollection", AddToCollection);
 window.AddToCollection = AddToCollection;
 
+import NodeNote from "./vue/node/NodeNote.vue";
+Vue.component("NodeNote", NodeNote);
+window.NodeNote = NodeNote;
+
 import IconButton from "./vue/common/IconButton.vue";
 Vue.component("IconButton", IconButton);
 window.IconButton = IconButton;

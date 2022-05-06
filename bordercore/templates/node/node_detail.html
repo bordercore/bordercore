@@ -88,39 +88,12 @@
                     </blob-list>
                 </div>
 
-                <div>
-                    <note inline-template ref="note">
-                        <div class="hover-target">
-                            <card>
-                                <template v-slot:title-slot>
-                                    <div class="card-title d-flex" v-cloak>
-                                        <div class="dropdown-height">
-                                            Notes
-                                        </div>
-                                        <div v-if="note !== ''" class="ms-auto">
-                                            <drop-down-menu :show-on-hover="true">
-                                                <div slot="dropdown">
-                                                    <li>
-                                                        <a v-if="note" class="dropdown-item" href="#" @click.prevent="editNote()">Edit note</a>
-                                                    </li>
-                                                </div>
-                                            </drop-down-menu>
-                                        </div>
-                                    </div>
-                                </template>
-                                <template v-slot:content>
-                                    <editable-text-area
-                                        uuid="{{ object.uuid }}"
-                                        v-model:note="note"
-                                        edit-url="{% url 'node:edit_note' %}"
-                                        ref="note"
-                                    >
-                                    </editable-text-area>
-                                </template>
-                            </card>
-                        </div>
-                    </note>
-                </div>
+                <node-note
+                    node-uuid="{{ object.uuid }}"
+                    get-node-url="{% url "node:get_note" object.uuid %}"
+                    edit-url="{% url "node:edit_note" %}"
+                >
+                </node-note>
 
             </div> <!-- - End first column -->
 
@@ -129,6 +102,7 @@
                     ref="relatedBookmarksList"
                     object-uuid="{{ object.uuid }}"
                     model-name="node.Node"
+                    title="Bookmarks"
                     get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=node.Node"
                     create-bookmark-url="{% url 'bookmark-list' %}"
                     search-bookmark-url="{% url 'bookmark:search' %}"
@@ -306,46 +280,13 @@
             }
         }
 
-        const Note = {
-            data() {
-                return {
-                    note: null,
-                    show: false,
-                    minNumberRows: 10
-                }
-            },
-            methods: {
-                editNote() {
-                    this.$refs.note.editNote();
-                },
-                getNote() {
-                    doGet(
-                        this,
-                        "{% url "node:get_note" object.uuid %}",
-                        (response) => {
-                            this.note = response.data.note;
-                            this.$refs.note.setTextAreaValue(response.data.note);
-                        },
-                        "Error getting note"
-                    );
-                },
-                setSelectionRange(input, selectionStart, selectionEnd) {
-                    if (input.setSelectionRange) {
-                    }
-                },
-            },
-            mounted() {
-                this.getNote();
-            }
-        }
-
         new Vue({
             el: "#vue-app",
             store,
             components: {
                 BlobList,
                 BlobSelect,
-                Note,
+                NodeNote,
             },
             methods: {
                 selectBookmark(bookmark_uuid) {
