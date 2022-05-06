@@ -190,7 +190,7 @@
                         {% endfor %}
                     ],
                     selectedSong: null,
-                }
+                };
             },
             methods: {
                 onSongClicked(item) {
@@ -199,9 +199,11 @@
                 selectRow(index) {
                     // Select a row based on index number. If the index is -1,
                     // assume we only want to deselect any currently selected row.
-                    this.$refs.table.clearSelected();
                     if (index != -1) {
-                        this.$refs.table.selectRow(index);
+                        const selectedRow = this.songList[index];
+                        this.$refs.table.selectRow(selectedRow);
+                    } else {
+                        this.$refs.table.selectRow({});
                     }
                 },
             },
