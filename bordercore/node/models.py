@@ -2,6 +2,7 @@ import uuid
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import JSONField
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
@@ -20,6 +21,7 @@ class Node(TimeStampedModel):
     note = models.TextField(blank=True, null=True)
     bookmarks = models.ManyToManyField(Bookmark, through="SortOrderNodeBookmark")
     blobs = models.ManyToManyField(Blob, through="SortOrderNodeBlob")
+    layout = JSONField(default=[[{"type": "blob"}], [{"type": "bookmark"}], [{"type": "note"}]], null=True, blank=True)
 
     def __str__(self):
         return self.name

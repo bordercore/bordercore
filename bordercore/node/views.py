@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.urls import reverse
@@ -193,6 +195,23 @@ def edit_note(request):
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
     node.note = note
+    node.save()
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def change_layout(request):
+
+    node_uuid = request.POST["node_uuid"]
+    layout = request.POST["layout"]
+
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    node.layout = json.loads(layout)
     node.save()
 
     response = {

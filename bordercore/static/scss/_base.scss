@@ -1535,6 +1535,12 @@ div #dateapp {
   font-size: small;
 }
 
+.node-drag-over {
+  border: 0.06rem solid #00ffff;
+  border-radius: 0.4rem;
+  box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;
+}
+
 //
 // Metrics
 //

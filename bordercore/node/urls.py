@@ -54,5 +54,10 @@ urlpatterns = [
         route="edit_note/",
         view=views.edit_note,
         name="edit_note"
+    ),
+    path(
+        route="change_layout",
+        view=views.change_layout,
+        name="change_layout"
     )
 ]

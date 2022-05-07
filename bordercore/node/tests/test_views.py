@@ -1,8 +1,10 @@
+import json
+
 import pytest
 
 from django import urls
 
-from node.models import SortOrderNodeBlob, SortOrderNodeBookmark
+from node.models import Node, SortOrderNodeBlob, SortOrderNodeBookmark
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
@@ -143,3 +145,21 @@ def test_edit_note(auto_login_user, node):
     })
 
     assert resp.status_code == 200
+
+
+def test_change_layout(auto_login_user, node):
+
+    _, client = auto_login_user()
+
+    layout = [[{"type": "note"}], [{"type": "bookmark"}], [{"type": "blob"}]]
+
+    url = urls.reverse("node:change_layout")
+    resp = client.post(url, {
+        "node_uuid": node.uuid,
+        "layout": json.dumps(layout)
+    })
+
+    assert resp.status_code == 200
+
+    changed_node = Node.objects.get(uuid=node.uuid)
+    assert changed_node.layout == layout

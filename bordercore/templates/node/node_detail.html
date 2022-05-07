@@ -23,47 +23,49 @@
 
     <div id="vue-app">
 
-        <div class="row g-0 h-100">
-            <div class="col-lg-4 d-flex flex-column">
+        <div class="row g-0 h-100 mx-2">
 
-                <node-blob-list
-                    ref="blobList"
-                    edit-blob-note-url="{% url "node:edit_blob_note" %}"
-                    get-blob-list-url="{% url "node:get_blob_list" object.uuid %}"
-                    remove-blob-url="{% url "node:remove_blob" %}"
-                    sort-blobs-url="{% url "node:sort_blobs" %}"
-                >
-                </node-blob-list>
-
-                <node-note
-                    node-uuid="{{ object.uuid }}"
-                    get-node-url="{% url "node:get_note" object.uuid %}"
-                    edit-url="{% url "node:edit_note" %}"
-                >
-                </node-note>
-
-            </div>
-
-            <div class="col-lg-4 d-flex flex-column">
-                <related-bookmarks-list
-                    ref="relatedBookmarksList"
-                    object-uuid="{{ object.uuid }}"
-                    model-name="node.Node"
-                    title="Bookmarks"
-                    get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=node.Node"
-                    create-bookmark-url="{% url 'bookmark-list' %}"
-                    search-bookmark-url="{% url 'bookmark:search' %}"
-                    get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
-                    add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
-                    :update-modified="true"
-                    remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"
-                    sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
-                    edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}"
-                    :show-add-button="true"
-                    extra-class="embedded-card ms-3"
-                    transition-name=""
-                >
-                </related-bookmarks-list>
+            <div v-for="(column, index) in layout" class="col-lg-4 d-flex flex-column" :data-col-number="index" @drop="onDrop($event, index)" @dragover.prevent="onDragOver($event, index)" @dragleave="onDragLeave($event)" @dragenter.prevent>
+                <div v-for="obj in column">
+                    <div v-if="obj.type === 'blob'" draggable @dragstart="onStartDrag($event, index, 'blob')">
+                        <node-blob-list
+                            ref="blobList"
+                            edit-blob-note-url="{% url "node:edit_blob_note" %}"
+                            get-blob-list-url="{% url "node:get_blob_list" object.uuid %}"
+                            remove-blob-url="{% url "node:remove_blob" %}"
+                            sort-blobs-url="{% url "node:sort_blobs" %}"
+                        >
+                        </node-blob-list>
+                    </div>
+                    <div v-else-if="obj.type === 'note'" draggable @dragstart="onStartDrag($event, index, 'note')">
+                        <node-note
+                            node-uuid="{{ object.uuid }}"
+                            get-node-url="{% url "node:get_note" object.uuid %}"
+                            edit-url="{% url "node:edit_note" %}"
+                        >
+                        </node-note>
+                    </div>
+                    <div v-else-if="obj.type === 'bookmark'" draggable @dragstart="onStartDrag($event, index, 'bookmark')">
+                        <related-bookmarks-list
+                            ref="relatedBookmarksList"
+                            object-uuid="{{ object.uuid }}"
+                            model-name="node.Node"
+                            title="Bookmarks"
+                            get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=node.Node"
+                            create-bookmark-url="{% url 'bookmark-list' %}"
+                            search-bookmark-url="{% url 'bookmark:search' %}"
+                            get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
+                            add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
+                            :update-modified="true"
+                            remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"
+                            sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
+                            edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}"
+                            :show-add-button="true"
+                            transition-name=""
+                        >
+                        </related-bookmarks-list>
+                    </div>
+                </div>
             </div>
 
             <blob-select
@@ -72,8 +74,6 @@
                 recent-blobs-url="{% url "blob:recent_blobs" %}"
                 @select-blob="selectBlob"
             />
-
-            </div>
 
         </div>
 
@@ -84,6 +84,8 @@
 {% block javascript %}
 
     {{ block.super }}
+
+    {{ object.layout|json_script:"layout" }}
 
     <script type="text/javascript">
 
@@ -102,6 +104,11 @@
                 BlobSelect,
                 NodeBlobList,
                 NodeNote,
+            },
+            data() {
+                return {
+                    layout: JSON.parse(document.getElementById("layout").textContent),
+                }
             },
             methods: {
                 selectBookmark(bookmark_uuid) {
@@ -134,8 +141,58 @@
                         "Blob added",
                         ""
                     );
-
                 },
+                onStartDrag(evt, sourceIndex, type) {
+                    const obj = {
+                        type: type,
+                        sourceIndex: sourceIndex
+                    }
+                    evt.dataTransfer.dropEffect = "move";
+                    evt.dataTransfer.effectAllowed = "move";
+                    evt.dataTransfer.setData("application/x-moz-node", JSON.stringify(obj));
+                },
+                onDragOver(evt, index) {
+                    evt.currentTarget.classList.add("node-drag-over");
+                },
+                onDragLeave(evt) {
+                    evt.currentTarget.classList.remove("node-drag-over");
+                },
+                onDrop(evt, destIndex) {
+                    evt.currentTarget.classList.remove("node-drag-over");
+                    const obj = JSON.parse(evt.dataTransfer.getData("application/x-moz-node"));
+
+                    // If we're moving an object to the same column, do nothing
+                    if (obj.sourceIndex === destIndex) {
+                        return;
+                    }
+
+                    // Remove this from its original column
+                    const isTarget = (element) => element.type === obj.type;
+                    for (const col in this.layout) {
+                        const index = this.layout[col].findIndex(isTarget);
+                        if (index != -1) {
+                            this.layout[col].splice(index, 1)
+                        }
+                    }
+
+                    // Add this to the top of the column in the new location
+                    this.layout[destIndex].unshift({"type": obj.type});
+
+                    // Save layout change on the backend
+                    doPost(
+                        this,
+                        "{% url "node:change_layout" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                            "layout": JSON.stringify(this.layout),
+                        },
+                        (response) => {
+                        },
+                        "",
+                        ""
+                    );
+
+                }
             },
             mounted() {
 
