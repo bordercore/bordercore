@@ -4,7 +4,7 @@
 
 {% block content %}
 
-    <div class="row g-0 h-100">
+    <div class="row g-0 h-100 mx-2">
 
         <div class="col-lg-3 d-flex flex-column" id="vue-app-left">
 
@@ -153,80 +153,74 @@
 
         <div class="hover-target col-lg-3" id="pinned-tags">
 
-            <div class="me-3">
-                <card
-                    title="Pinned Tags"
-                >
-                    <template v-slot:title-slot>
+            <card
+                title="Pinned Tags"
+            >
+                <template v-slot:title-slot>
 
-                        <div class="card-title d-flex align-items-center">
-                            <div>
-                                Pinned Tags
-                            </div>
-                            <drop-down-menu :show-on-hover="true">
-                                <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                                <div slot="dropdown">
-                                    <li>
-                                        <a class="dropdown-item" href="#" @click="chooseTag()">
-                                            <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>
-                                                Manage Tags
-                                        </a>
-                                    </li>
-                                </div>
-                            </drop-down-menu>
+                    <div class="card-title d-flex align-items-center">
+                        <div>
+                            Pinned Tags
                         </div>
-                    </template>
-
-                    <template v-slot:content>
-                        <ul class="list-unstyled">
-                            <li v-for="tag in $store.state.tagList" class="d-flex px-2">
-                                <div class="flex-fill"><a :href="tag.url">[[ tag.name ]]</a></div>
-                                <div class="text-info">[[ tag.progress ]]%</div>
-                            </li>
-                            <li v-if="!$store.state.tagList.length"><a href="#" @click="chooseTag()">Add a tag</a></li>
-                        </ul>
-                    </template>
-                </card>
-            </div>
-
-            <div class="me-3">
-                <card title="Favorites Progress">
-                    <template v-slot:content>
-                        <div class="d-flex">
-                            <div class="d-flex justify-content-center align-items-center">
-                                Percentage across favorite questions not needing review
+                        <drop-down-menu :show-on-hover="true">
+                            <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
+                            <div slot="dropdown">
+                                <li>
+                                    <a class="dropdown-item" href="#" @click="chooseTag()">
+                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>
+                                            Manage Tags
+                                    </a>
+                                </li>
                             </div>
-                            <drill-tag-progress
-                                :count={{ favorite_questions_progress.count }}
-                                       :progress={{ favorite_questions_progress.percentage }}
-                            >
-                            </drill-tag-progress>
-                        </div>
-                    </template>
-                </card>
-            </div>
+                        </drop-down-menu>
+                    </div>
+                </template>
 
-            <div class="me-3">
-                <card>
-                    <template v-slot:title-slot>
-                        <h5>Random tag: <a href="{{ random_tag.url }}">{{ random_tag.name }}</a></h5>
-                    </template>
-                    <template v-slot:content>
-                        <div class="d-flex">
-                            <div class="flex-grow-1 d-flex justify-content-center align-items-center">
-                                <ul class="list-unstyled">
-                                    <li>Last Reviewed <br/> <strong>{{ random_tag.last_reviewed }}</strong></li>
-                                </ul>
-                            </div>
-                            <drill-tag-progress
-                                :count={{ random_tag.count }}
-                                :progress={{ random_tag.progress }}
-                            >
-                            </drill-tag-progress>
+                <template v-slot:content>
+                    <ul class="list-unstyled">
+                        <li v-for="tag in $store.state.tagList" class="d-flex px-2">
+                            <div class="flex-fill"><a :href="tag.url">[[ tag.name ]]</a></div>
+                            <div class="text-info">[[ tag.progress ]]%</div>
+                        </li>
+                        <li v-if="!$store.state.tagList.length"><a href="#" @click="chooseTag()">Add a tag</a></li>
+                    </ul>
+                </template>
+            </card>
+
+            <card title="Favorites Progress">
+                <template v-slot:content>
+                    <div class="d-flex">
+                        <div class="d-flex justify-content-center align-items-center">
+                            Percentage across favorite questions not needing review
                         </div>
-                    </template>
-                </card>
-            </div>
+                        <drill-tag-progress
+                            :count={{ favorite_questions_progress.count }}
+                                   :progress={{ favorite_questions_progress.percentage }}
+                        >
+                        </drill-tag-progress>
+                    </div>
+                </template>
+            </card>
+
+            <card>
+                <template v-slot:title-slot>
+                    <h5>Random tag: <a href="{{ random_tag.url }}">{{ random_tag.name }}</a></h5>
+                </template>
+                <template v-slot:content>
+                    <div class="d-flex">
+                        <div class="flex-grow-1 d-flex justify-content-center align-items-center">
+                            <ul class="list-unstyled">
+                                <li>Last Reviewed <br/> <strong>{{ random_tag.last_reviewed }}</strong></li>
+                            </ul>
+                        </div>
+                        <drill-tag-progress
+                            :count={{ random_tag.count }}
+                                   :progress={{ random_tag.progress }}
+                        >
+                        </drill-tag-progress>
+                    </div>
+                </template>
+            </card>
 
             <div class="modal fade" id="modalAddTag" tabindex="-1" role="dialog">
                 <div class="modal-dialog" role="document">

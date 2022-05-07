@@ -780,7 +780,7 @@ $nav-tabs-link-hover-border-color: $nav-border-color;
 @supports (backdrop-filter: blur(25px) brightness(170%)) {
   .card-body {
     @extend .card-box-shadow;
-    margin: 0 0 1rem 1rem;
+    margin: 0 0.5rem 1rem 0.5rem;
     backdrop-filter: blur(25px) brightness(170%);
     background: #10163a80 !important;
     border-radius: 0.4rem;

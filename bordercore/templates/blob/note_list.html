@@ -4,7 +4,7 @@
 
 {% block content %}
 
-    <div class="scrollable-panel-container row g-0">
+    <div class="scrollable-panel-container row g-0 mx-2">
 
         <div id="left-panel" class="col-lg-3 h-100">
 
@@ -83,12 +83,12 @@
 
         <div id="right-panel" class="col-lg-9 h-100 scrollable-panel d-flex flex-column">
 
-            <div v-for="(note,index) in $store.state.notes" :class="{ 'd-none': isSearchResult && note.uuid !== $store.state.selectedNoteUuid }" class="me-3">
+            <div v-for="(note,index) in $store.state.notes" :class="{ 'd-none': isSearchResult && note.uuid !== $store.state.selectedNoteUuid }">
                 <div v-if="index === 0" class="mt-3 float-end" v-cloak>
                     <a class="btn btn-primary ms-2 me-4 float-end" href="{% url 'blob:create' %}?is_note=true">Add note</a>
                 </div>
 
-                <card :title="note.name">
+                <card :title="note.name" class="me-0">
                     <template v-slot:title-slot>
                         <h2>
                             <a :href="note.url" v-html="note.name"></a>

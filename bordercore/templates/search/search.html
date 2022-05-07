@@ -8,7 +8,7 @@
 
 {% block content %}
 
-    <div class="row g-0 h-100">
+    <div class="row g-0 h-100 mx-2">
 
         <div class="col-lg-3 d-flex flex-column">
 
@@ -46,67 +46,64 @@
 
         <div class="col-lg-9" id="search">
 
-            <div class="ms-2 me-3">
+            <div class="card-body mb-3 pb-4">
 
-                <div class="card-body mb-3 pb-4">
+                <form action="{% url 'search:search' %}" method="get" autocomplete="off">
 
-                    <form action="{% url 'search:search' %}" method="get" autocomplete="off">
-
-                        <div class="d-flex">
-                            <div class="d-flex flex-column">
-                                <div class="mb-1">
-                                    What are you searching for?
-                                </div>
-                                <div class="col-auto has-search position-relative px-0">
-
-                                    <font-awesome-icon icon="search" class="main-search-spacer text-info"></font-awesome-icon>
-
-                                    <input id="simple-suggest" name="search" placeholder="Search" autocomplete="off" autofocus="autofocus" class="default-input form-control search-box-input" />
-
-                                </div>
+                    <div class="d-flex">
+                        <div class="d-flex flex-column">
+                            <div class="mb-1">
+                                What are you searching for?
                             </div>
-                            <div class="d-flex w-100">
-                                <div class="d-flex flex-column w-20 ms-3 me-3">
-                                    <div class="mb-1">
-                                        Type
-                                    </div>
-                                    <select name="boolean_search_type" class="form-control">
-                                        <option selected="selected">AND</option>
-                                        <option>OR</option>
-                                    </select>
-                                </div>
-                                <div class="d-flex flex-column w-20 me-3">
-                                    <div class="mb-1">
-                                        Exact Match
-                                    </div>
-                                    <select name="exact_match" class="form-control">
-                                        <option{% if request.GET.exact_match == "No" %} selected="selected"{% endif %}>No</option>
-                                        <option{% if request.GET.exact_match == "Yes" %} selected="selected"{% endif %}>Yes</option>
-                                    </select>
-                                </div>
-                                <div class="d-flex flex-column w-20 me-3">
-                                    <div class="mb-1">
-                                        Sort By
-                                    </div>
-                                    <select id="search-sort-by" name="sort" class="form-control">
-                                        <option value="_score"{% if request.session.search_sort_by == "_score" %} selected="selected"{% endif %}>
-                                            Rank
-                                        </option>
-                                        <option value="date_unixtime"{% if request.session.search_sort_by == "date_unixtime" %} selected="selected"{% endif %}>
-                                            Date
-                                        </option>
-                                    </select>
-                                </div>
-                                <div class="d-flex flex-column w-20 me-1">
-                                    <div class="mb-4">
-                                    </div>
-                                    <input class="btn btn-primary" type="submit" name="Go" value="Search" />
-                                </div>
+                            <div class="col-auto has-search position-relative px-0">
+
+                                <font-awesome-icon icon="search" class="main-search-spacer text-info"></font-awesome-icon>
+
+                                <input id="simple-suggest" name="search" placeholder="Search" autocomplete="off" autofocus="autofocus" class="default-input form-control search-box-input" />
+
                             </div>
                         </div>
+                        <div class="d-flex w-100">
+                            <div class="d-flex flex-column w-20 ms-3 me-3">
+                                <div class="mb-1">
+                                    Type
+                                </div>
+                                <select name="boolean_search_type" class="form-control">
+                                    <option selected="selected">AND</option>
+                                    <option>OR</option>
+                                </select>
+                            </div>
+                            <div class="d-flex flex-column w-20 me-3">
+                                <div class="mb-1">
+                                    Exact Match
+                                </div>
+                                <select name="exact_match" class="form-control">
+                                    <option{% if request.GET.exact_match == "No" %} selected="selected"{% endif %}>No</option>
+                                    <option{% if request.GET.exact_match == "Yes" %} selected="selected"{% endif %}>Yes</option>
+                                </select>
+                            </div>
+                            <div class="d-flex flex-column w-20 me-3">
+                                <div class="mb-1">
+                                    Sort By
+                                </div>
+                                <select id="search-sort-by" name="sort" class="form-control">
+                                    <option value="_score"{% if request.session.search_sort_by == "_score" %} selected="selected"{% endif %}>
+                                        Rank
+                                    </option>
+                                    <option value="date_unixtime"{% if request.session.search_sort_by == "date_unixtime" %} selected="selected"{% endif %}>
+                                        Date
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="d-flex flex-column w-20 me-1">
+                                <div class="mb-4">
+                                </div>
+                                <input class="btn btn-primary" type="submit" name="Go" value="Search" />
+                            </div>
+                        </div>
+                    </div>
 
-                    </form>
-                </div>
+                </form>
             </div>
 
             <div>

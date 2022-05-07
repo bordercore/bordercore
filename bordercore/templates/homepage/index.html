@@ -8,7 +8,7 @@
 
     <div id="vue-app">
 
-        <div class="row g-0">
+        <div class="row g-0 mx-2">
 
             <div class="col-lg-3">
 
@@ -192,21 +192,16 @@
 
             <div class="col-lg-4">
 
-                <div class="me-3">
+                <card title="Calendar" class="card-body">
+                    <template v-slot:content>
+                        <ul class="list-group interior-borders" id="events">
+                            <li v-if="waiting" :class="errorClass" class="list-group-item list-group-item-secondary">[[ msg ]]</li>
+                            <li v-for="event in events" :key="event.count" class="list-group-item list-group-item-secondary text-primary">[[ event.start_pretty ]]: <strong class="text-emphasis">[[ event.summary ]]</strong> </li>
+                        </ul>
+                    </template>
+                </card>
 
-                    <card title="Calendar" class="card-body">
-                        <template v-slot:content>
-                            <ul class="list-group interior-borders" id="events">
-                                <li v-if="waiting" :class="errorClass" class="list-group-item list-group-item-secondary">[[ msg ]]</li>
-                                <li v-for="event in events" :key="event.count" class="list-group-item list-group-item-secondary text-primary">[[ event.start_pretty ]]: <strong class="text-emphasis">[[ event.summary ]]</strong> </li>
-                            </ul>
-                        </template>
-                    </card>
-
-                </div>
-
-                <div class="me-3">
-                    <card title="Random Image" class="card-body">
+                <card title="Random Image" class="card-body">
                         {% if random_image_info %}
                             <template v-slot:title-slot>
                                 <div class="card-title">
@@ -221,9 +216,7 @@
                                 <a href="{% url 'blob:create' %}">Add a blob</a>
                             {% endif %}
                         </template>
-                    </card>
-
-                </div>
+                </card>
 
             </div> <!-- End third column -->
 

@@ -4,7 +4,7 @@
 
 {% block content %}
 
-    <div class="row g-0 h-100" id="vue-app">
+    <div class="row g-0 h-100 mx-2" id="vue-app">
 
         {% if not collection_is_not_empty %}
 
@@ -85,54 +85,52 @@
 
         <div class="col-lg-9">
 
-            <div class="me-3">
+            <card>
+                <template v-slot:title-slot>
+                    <div class="d-flex">
 
-                <card>
-                    <template v-slot:title-slot>
-                        <div class="d-flex">
+                        <div class="card-title">Recently Added Albums</div>
 
-                            <div class="card-title">Recently Added Albums</div>
-
-                            <div class="me-2 ms-auto">
-                                <add-button :href="'{% url 'music:create' %}'"></add-button>
-                            </div>
-
+                        <div class="me-2 ms-auto">
+                            <add-button :href="'{% url 'music:create' %}'"></add-button>
                         </div>
-                    </template>
 
-                    <template v-slot:content>
-                        <table class="table-borderless mt-2">
-                            <tr>
+                    </div>
+                </template>
 
-                                {% for album in recent_albums %}
+                <template v-slot:content>
+                    <table class="table-borderless mt-2">
+                        <tr>
 
-                                    {% if forloop.counter0|divisibleby:"4" %}
+                            {% for album in recent_albums %}
 
-                            </tr>
-                            <tr class="m-2">
+                                {% if forloop.counter0|divisibleby:"4" %}
 
-                                    {% endif %}
+                        </tr>
+                        <tr class="m-2">
 
-                                    <td class="w-25 hoverable p-2">
-                                        <a href="{% url 'music:album_detail' album.uuid %}">
-                                            <img src="{{ IMAGES_URL }}album_artwork/{{ album.uuid }}" height="150" width="150" /> <br />
-                                        </a>
-                                        <div class="mt-1 fw-bold">
-                                            {{ album.title }}
-                                        </div>
-                                        <div class="text-light">
-                                            <a href="{% url 'music:artist_detail' album.artist.uuid %}">
-                                                {{ album.artist.name }}
-                                            </a>
-                                        </div>
-                                    </td>
+                            {% endif %}
 
-                                {% endfor %}
+                            <td class="w-25 hoverable p-2">
+                                <a href="{% url 'music:album_detail' album.uuid %}">
+                                    <img src="{{ IMAGES_URL }}album_artwork/{{ album.uuid }}" height="150" width="150" /> <br />
+                                </a>
+                                <div class="mt-1 fw-bold">
+                                    {{ album.title }}
+                                </div>
+                                <div class="text-light">
+                                    <a href="{% url 'music:artist_detail' album.artist.uuid %}">
+                                        {{ album.artist.name }}
+                                    </a>
+                                </div>
+                            </td>
 
-                            </tr>
-                        </table>
-                    </template>
-                </card>
+                            {% endfor %}
+
+                        </tr>
+                    </table>
+                </template>
+            </card>
 
             <card title="Recently added music">
                 <template v-slot:content>
@@ -169,7 +167,6 @@
                     </div>
                 </template>
             </card>
-            </div>
 
         </div>
 

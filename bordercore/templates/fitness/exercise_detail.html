@@ -24,7 +24,7 @@
 
 {% block content %}
 
-    <div class="row g-0 h-100">
+    <div class="row g-0 h-100 mx-2">
 
         <div class="col-lg-3 d-flex flex-column" id="vue-app-left">
 
@@ -43,7 +43,7 @@
                                             <div>
                                                 <strong class="text-white ms-1">
                                                     {{ activity_info.0.started|date:"N j, Y" }}
-                                                </strong>
+                                            </strong>
                                             </div>
                                             <div>
                                                 <span class="text-small text-primary ms-1">
@@ -233,7 +233,7 @@
 
         <div class="col-lg-9 d-flex flex-column" id="vue-app-right">
             <workout-graph inline-template>
-                <card title="" class="flex-grow-0 me-3 pt-3">
+                <card title="" class="flex-grow-0 me-2 pt-3">
                     <template #content>
                         <div class="d-flex">
                             <div>
@@ -352,7 +352,7 @@
                     </card>
                 </add-workout-form>
 
-                <card title="" id="muscles-targeted" class="w-50 me-3">
+                <card title="" id="muscles-targeted" class="w-50 me-2">
                     <template #content>
                         <div class="d-flex">
                             <div class="card-title text-primary">

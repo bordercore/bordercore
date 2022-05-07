@@ -17,7 +17,7 @@
 
 {% block content %}
 
-    <div class="row g-0 h-100" id="vue-app">
+    <div class="row g-0 h-100 mx-2" id="vue-app">
 
         <div class="col-lg-3 d-flex flex-column">
 
@@ -78,13 +78,13 @@
 
         <div class="col-lg-9">
 
-            <div class="me-3">
+            <card>
 
-                <card>
+                <template v-slot:title-slot>
 
-                    <template v-slot:title-slot>
+                    <div class="d-flex align-items-center">
 
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center" style="width: 70%">
                             <h3 class="me-auto">
                                 {{ collection.name }}
                             </h3>
@@ -103,55 +103,53 @@
                                     <font-awesome-icon icon="chevron-right" class="text-emphasis icon-disabled" />
                                 </span>
                             </h5>
-
-                            <drop-down-menu
-                                ref="dropDownMenu"
-                                :links="collectionDetailMenuItems"
-                                class="ms-5"
-                            >
-                            </drop-down-menu>
                         </div>
+                        <drop-down-menu
+                            ref="dropDownMenu"
+                            :links="collectionDetailMenuItems"
+                            class="ms-5"
+                        >
+                        </drop-down-menu>
+                    </div>
 
-                    </template>
+                </template>
 
-                    <template v-slot:content>
-                        <div class="ms-2">
-                            <blob-list inline-template>
-                                <div id="collection-list" @drop.prevent="onAddBlob($event)" @dragover.prevent="onDragOverBlob($event)" @dragleave.prevent="onDragLeaveBlob($event)" @dragenter.prevent>
-                                    <ul class="list-group list-group-horizontal text-center list-unstyled collection-sortable">
-                                        <draggable v-model="blob_list" @change="onChange" ghost-class="collection_ghost_class" animation="500" forceFallback="true">
-                                            <li v-for="blob in blob_list" :key="blob.id" class="collection-item hoverable cursor-pointer float-start p-3">
-                                                <button type="button" class="collection-item-delete btn-close" data-bs-dismiss="modal" aria-label="Close" @click="removeBlob(blob.uuid)">
-                                                </button>
-                                                <div class="d-flex flex-column h-100" @click="onClick(blob.url)">
-                                                    <a :href="[[ blob.url ]]">
-                                                        <img :src="[[ blob.cover_url ]]" />
-                                                    </a>
+                <template v-slot:content>
+                    <div class="ms-2">
+                        <blob-list inline-template>
+                            <div id="collection-list" @drop.prevent="onAddBlob($event)" @dragover.prevent="onDragOverBlob($event)" @dragleave.prevent="onDragLeaveBlob($event)" @dragenter.prevent>
+                                <ul class="list-group list-group-horizontal text-center list-unstyled collection-sortable" style="width: 100%">
+                                    <draggable v-model="blob_list" @change="onChange" ghost-class="collection_ghost_class" animation="500" forceFallback="true">
+                                        <li v-for="blob in blob_list" :key="blob.id" class="collection-item hoverable cursor-pointer float-start p-3">
+                                            <button type="button" class="collection-item-delete btn-close" data-bs-dismiss="modal" aria-label="Close" @click="removeBlob(blob.uuid)">
+                                            </button>
+                                            <div class="d-flex flex-column h-100" @click="onClick(blob.url)">
+                                                <a :href="[[ blob.url ]]">
+                                                    <img :src="[[ blob.cover_url ]]" />
+                                                </a>
 
-                                                    <div class="collection-item-name mt-auto">
-                                                        [[ blob.name ]]
-                                                    </div>
-
+                                                <div class="collection-item-name mt-auto">
+                                                    [[ blob.name ]]
                                                 </div>
 
-                                            </li>
-                                        </draggable>
-                                    </ul>
-                                </div>
-                            </blob-list>
+                                            </div>
 
-                           {% if not blob_list %}
-                               <h5 class="text-info">
+                                        </li>
+                                    </draggable>
+                                </ul>
+                            </div>
+                        </blob-list>
+
+                        {% if not blob_list %}
+                            <h5 class="text-info">
                                    This collection is empty.
-                               </h5>
-                           {% endif %}
+                            </h5>
+                        {% endif %}
 
-                        </div>
-                    </template>
+                    </div>
+                </template>
 
-                </card>
-
-            </div>
+            </card>
 
         </div>
 

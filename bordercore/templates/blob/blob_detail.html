@@ -7,7 +7,7 @@
 
 {% block content %}
 
-    <div class="scrollable-panel-container row g-0">
+    <div class="scrollable-panel-container row g-0 mx-2">
 
         <div class="col-lg-3 h-100 d-flex flex-column">
             <div id="vue-left-panel" class="scrollable-panel card-body d-flex flex-column h-100">
@@ -259,14 +259,14 @@
             >
             </blob-select>
 
-            <div class="col-lg-12 px-3">
+            <div class="col-lg-12 mx-2">
 
                 <div class="d-flex">
                     <h2 id="blob-name" class="p-2 mb-3 text-break w-100">
                         {{ name }}
                     </h2>
                     <hr />
-                    <drop-down-menu v-cloak>
+                    <drop-down-menu class="me-3" v-cloak>
                         <div slot="dropdown" class="mt-0">
                             <li>
                                 <a class="dropdown-item" href="{% url 'blob:update' blob.uuid %}">

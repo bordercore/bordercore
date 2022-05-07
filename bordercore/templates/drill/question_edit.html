@@ -15,7 +15,7 @@
 
 {% block content %}
 
-    <div class="row g-0 h-100" id="vue-app">
+    <div class="row g-0 h-100 mx-2" id="vue-app">
 
         <div class="col-lg-3 d-flex flex-column">
 
@@ -35,7 +35,6 @@
                 sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
                 edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}"
                 :show-add-button="true"
-                extra-class="embedded-card ms-3"
                 transition-name=""
                 :new-question="newQuestion"
             >
