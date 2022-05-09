@@ -43,7 +43,7 @@
 
                 {% endif %}
 
-                <div class="d-flex mt-2">
+                <div id="blob-options" class="d-flex mt-2">
                     <icon-button
                         label="Important"
                         icon="heart"
@@ -125,6 +125,13 @@
                     {% endfor %}
                     </ul>
                 {% endif %}
+
+                <related-tags
+                    ref="relatedTags"
+                    related-tags-url="{% url 'tag:get_related_tags' %}"
+                    @click-tag="onClickTag"
+                >
+                </related-tags>
 
             </div>
 
@@ -259,6 +266,8 @@
 
                                         <div class="col-lg-10 col-sm-10">
                                             <tags-input
+                                                ref="tagsInput"
+                                                @tags-changed="onTagsChanged"
                                                 search-url="{% url 'tag:search' %}?query="
                                             >
                                             </tags-input>
@@ -563,10 +572,13 @@
                 CleanupFilenameButton,
                 UpperCaseFirstButton
             },
+            mounted() {
+                EventBus.$on("tags-changed", (payload) => {
+                    this.$refs.relatedTags.setTags(payload.map( (x) => x.display ));
+                });
+            },
             methods: {
-
                 mutateCollection(collection_uuid, mutation_type) {
-
                     doPost(
                         this,
                         "{% url "blob:collection_mutate" %}",
@@ -581,7 +593,9 @@
                     );
 
                 },
-
+                onClickTag(tag) {
+                    EventBus.$emit("add-tag", tag);
+                },
                 updateFormValue(property, value) {
                     if (property === "important") {
                         document.getElementById("form-blob").elements[property].value = 10;
@@ -590,7 +604,6 @@
                         document.getElementById("form-blob").elements[property].value = value ? "on" : "";
                     }
                 }
-
             }
         });
 
@@ -641,6 +654,9 @@
                     this.$store.state.date = date.getFullYear();
                     this.addCheckMarkToDateFormatMenu();
                 },
+                onTagsChanged(tags) {
+                    EventBus.$emit("tags-changed", tags);
+                },
                 addCheckMarkToDateFormatMenu() {
                     // Indicate the current date format with a checkmark. Remove
                     //  it if it's set for any other item.
@@ -673,6 +689,10 @@
                 },
             },
             mounted() {
+                EventBus.$on("add-tag", (payload) => {
+                    this.$refs.tagsInput.addTag({"text": payload, "display": payload});
+                });
+
                 const found = this.$store.state.date.match(/^(\d\d\d\d)T00:00$/);
                 if (found) {
                     this.$store.state.date = found[1];

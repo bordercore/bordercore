@@ -112,8 +112,9 @@ def get_todo_counts(request):
 def get_related_tags(request):
 
     tag_name = request.GET["tag_name"]
+    doc_type = request.GET.get("doc_type", None)
 
-    info = find_related_tags(request.user, tag_name, "drill")
+    info = find_related_tags(request.user, tag_name, doc_type)
 
     response = {
         "status": "OK",

@@ -164,11 +164,6 @@ def find_related_tags(user, tag_name, doc_type):
                         "term": {
                             "tags.keyword": tag_name
                         }
-                    },
-                    {
-                        "term": {
-                            "doctype": doc_type
-                        }
                     }
                 ]
             }
@@ -184,6 +179,15 @@ def find_related_tags(user, tag_name, doc_type):
         "size": 0,
         "_source": ["tags"]
     }
+
+    if doc_type:
+        search_object["query"]["bool"]["must"].append(
+            {
+                "term": {
+                    "doctype": doc_type
+                }
+            }
+        )
 
     results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
 

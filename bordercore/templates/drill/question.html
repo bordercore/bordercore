@@ -117,8 +117,8 @@
                     <template v-slot:content>
                         <related-tags
                             related-tags-url="{% url 'tag:get_related_tags' %}"
-                            start-study-session-tag-url="{% url 'drill:start_study_session_tag' '666' %}"
-                            tag-name="{{ request.session.drill_study_session.tag }}"
+                            doc-type="drill"
+                            :initial-tags="['{{ request.session.drill_study_session.tag }}']"
                         >
                         </related-tags>
                     </template>
