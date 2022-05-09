@@ -81,29 +81,11 @@
             <card>
 
                 <template v-slot:title-slot>
-
                     <div class="d-flex align-items-center">
+                        <h3 class="me-auto">
+                            {{ collection.name }}
+                        </h3>
 
-                        <div class="d-flex align-items-center" style="width: 70%">
-                            <h3 class="me-auto">
-                                {{ collection.name }}
-                            </h3>
-
-                            <h5 v-if="needsPagination()" class="mb-0">
-                                <a v-if="$store.state.paginator.has_previous" href="#" @click.prevent="paginate('prev')">
-                                    <font-awesome-icon icon="chevron-left" class="text-emphasis glow icon-hover" />
-                                </a>
-                                <span v-else>
-                                    <font-awesome-icon icon="chevron-left" class="text-emphasis icon-disabled" />
-                                </span>
-                                <a v-if="$store.state.paginator.has_next" href="#" @click.prevent="paginate('next')" class="ms-1">
-                                    <font-awesome-icon icon="chevron-right" class="text-emphasis glow icon-hover" />
-                                </a>
-                                <span v-else>
-                                    <font-awesome-icon icon="chevron-right" class="text-emphasis icon-disabled" />
-                                </span>
-                            </h5>
-                        </div>
                         <drop-down-menu
                             ref="dropDownMenu"
                             :links="collectionDetailMenuItems"
@@ -111,14 +93,15 @@
                         >
                         </drop-down-menu>
                     </div>
-
                 </template>
 
                 <template v-slot:content>
-                    <div class="ms-2">
+                    <hr class="filter-divider" />
+
+                    <div class="d-flex ms-2">
                         <blob-list inline-template>
                             <div id="collection-list" @drop.prevent="onAddBlob($event)" @dragover.prevent="onDragOverBlob($event)" @dragleave.prevent="onDragLeaveBlob($event)" @dragenter.prevent>
-                                <ul class="list-group list-group-horizontal text-center list-unstyled collection-sortable" style="width: 100%">
+                                <ul class="list-group list-group-horizontal text-center list-unstyled collection-sortable w-100">
                                     <draggable v-model="blob_list" @change="onChange" ghost-class="collection_ghost_class" animation="500" forceFallback="true">
                                         <li v-for="blob in blob_list" :key="blob.id" class="collection-item hoverable cursor-pointer float-start p-3">
                                             <button type="button" class="collection-item-delete btn-close" data-bs-dismiss="modal" aria-label="Close" @click="removeBlob(blob.uuid)">
@@ -127,13 +110,10 @@
                                                 <a :href="[[ blob.url ]]">
                                                     <img :src="[[ blob.cover_url ]]" />
                                                 </a>
-
                                                 <div class="collection-item-name mt-auto">
                                                     [[ blob.name ]]
                                                 </div>
-
                                             </div>
-
                                         </li>
                                     </draggable>
                                 </ul>
@@ -142,15 +122,31 @@
 
                         {% if not blob_list %}
                             <h5 class="text-info">
-                                   This collection is empty.
+                               This collection is empty.
                             </h5>
                         {% endif %}
 
+                        <h5 v-if="needsPagination()" class="d-flex mb-0 me-1 pt-3">
+                            <div>
+                                <a v-if="$store.state.paginator.has_previous" href="#" @click.prevent="paginate('prev')">
+                                    <font-awesome-icon icon="chevron-left" class="text-emphasis glow icon-hover" />
+                                </a>
+                                <span v-else>
+                                    <font-awesome-icon icon="chevron-left" class="text-emphasis icon-disabled" />
+                                </span>
+                            </div>
+                            <div>
+                                <a v-if="$store.state.paginator.has_next" href="#" @click.prevent="paginate('next')" class="ms-1">
+                                    <font-awesome-icon icon="chevron-right" class="text-emphasis glow icon-hover" />
+                                </a>
+                                <span v-else>
+                                    <font-awesome-icon icon="chevron-right" class="text-emphasis icon-disabled" />
+                                </span>
+                            </div>
+                        </h5>
                     </div>
                 </template>
-
             </card>
-
         </div>
 
         <form action="{% url 'collection:update' collection.uuid %}" method="post" id="form-collection-edit">
