@@ -495,7 +495,7 @@ textarea.form-control {
 }
 
 .tag, .ti-input .ti-tag {
-  padding: 0 0.43rem 0 0.42rem;
+  padding: 0 0.42rem 0 0.42rem;
   border: 0.12rem solid #364b76;
   margin: 0 3px 0 0;
   background-color: #25335b !important;
@@ -1351,6 +1351,10 @@ div #dateapp {
 
 #blob-tag-list {
   line-height: 2;
+}
+
+#blob-options {
+  font-size: 12px;
 }
 
 //
