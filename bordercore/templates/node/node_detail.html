@@ -8,13 +8,30 @@
 
 {% block nav %}
 
-    <div class="d-flex mb-3">
-        <div class="me-auto align-self-center">
+    <div id="vue-nav" class="d-flex align-items-center mb-3">
+        <div class="flex-grow-1 me-auto align-self-center">
             <ul class="breadcrumb mb-0 pt-0 pb-0">
                 <li class="breadcrumb-item"> <a href="{% url 'node:list' %}">Nodes</a> </li>
                 <li class="breadcrumb-item active">{{ node.name }}</li>
             </ul>
         </div>
+        <div v-if="$store.state.editLayout" class="text-primary ms-auto me-5">
+            Edit Layout
+        </div>
+        <drop-down-menu
+            ref="dropDownMenu"
+            class="me-3"
+        >
+            <div slot="dropdown" class="mt-0">
+                <li>
+                    <a class="dropdown-item" href="#" @click.prevent="onEditMode">
+                        <span v-cloak>
+                            <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>[[ editLayoutDropDownItemValue ]]
+                        </span>
+                    </a>
+                </li>
+            </div>
+        </drop-down-menu>
     </div>
 
 {% endblock %}
@@ -27,8 +44,9 @@
 
             <div v-for="(column, index) in layout" class="col-lg-4 d-flex flex-column" :data-col-number="index" @drop="onDrop($event, index)" @dragover.prevent="onDragOver($event, index)" @dragleave="onDragLeave($event)" @dragenter.prevent>
                 <div v-for="obj in column">
-                    <div v-if="obj.type === 'blob'" draggable @dragstart="onStartDrag($event, index, 'blob')">
+                    <div v-if="obj.type === 'blob'" :draggable="$store.state.editLayout" @dragstart="onStartDrag($event, index, 'blob')">
                         <node-blob-list
+                            class="z-index-positive position-relative"
                             ref="blobList"
                             edit-blob-note-url="{% url "node:edit_blob_note" %}"
                             get-blob-list-url="{% url "node:get_blob_list" object.uuid %}"
@@ -37,16 +55,18 @@
                         >
                         </node-blob-list>
                     </div>
-                    <div v-else-if="obj.type === 'note'" draggable @dragstart="onStartDrag($event, index, 'note')">
+                    <div v-else-if="obj.type === 'note'" :draggable="$store.state.editLayout" @dragstart="onStartDrag($event, index, 'note')">
                         <node-note
+                            class="z-index-positive position-relative"
                             node-uuid="{{ object.uuid }}"
                             get-node-url="{% url "node:get_note" object.uuid %}"
                             edit-url="{% url "node:edit_note" %}"
                         >
                         </node-note>
                     </div>
-                    <div v-else-if="obj.type === 'bookmark'" draggable @dragstart="onStartDrag($event, index, 'bookmark')">
+                    <div v-else-if="obj.type === 'bookmark'" :draggable="$store.state.editLayout" @dragstart="onStartDrag($event, index, 'bookmark')">
                         <related-bookmarks-list
+                            class="z-index-positive position-relative"
                             ref="relatedBookmarksList"
                             object-uuid="{{ object.uuid }}"
                             model-name="node.Node"
@@ -91,11 +111,28 @@
 
         const store = new Vuex.Store({
             state: {
+                editLayout: false,
                 nodeUuid: "{{ object.uuid }}",
             },
             getters: {},
             mutations: {},
         });
+
+        new Vue({
+            el: "#vue-nav",
+            name: "Nav",
+            store,
+            methods: {
+                onEditMode() {
+                    this.$store.state.editLayout = !this.$store.state.editLayout;
+                },
+            },
+            computed: {
+                editLayoutDropDownItemValue: function() {
+                    return this.$store.state.editLayout ? "Disable Edit Layout" : "Enable Edit Layout"
+                }
+            },
+        })
 
         new Vue({
             el: "#vue-app",
