@@ -6,11 +6,6 @@ app_name = "todo"
 
 urlpatterns = [
     path(
-        route="delete/<uuid:uuid>/",
-        view=views.TodoDeleteView.as_view(),
-        name="delete"
-    ),
-    path(
         route="sort/",
         view=views.sort_todo,
         name="sort"

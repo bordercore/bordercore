@@ -88,16 +88,6 @@ def test_todo_update(auto_login_user, todo):
     assert "django" in [x.name for x in todo.tags.all()]
 
 
-def test_todo_delete(monkeypatch_todo, auto_login_user, todo):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("todo:delete", kwargs={"uuid": todo.uuid})
-    resp = client.post(url, {})
-
-    assert resp.status_code == 302
-
-
 def test_sort_todo(auto_login_user, todo):
 
     _, client = auto_login_user()

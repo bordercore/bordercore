@@ -3,17 +3,13 @@ import re
 from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponseRedirect, JsonResponse
-from django.urls import reverse
+from django.http import JsonResponse
 from django.utils import timezone
 from django.utils.dateformat import format
 from django.utils.decorators import method_decorator
-from django.views.generic.edit import CreateView, DeleteView
 from django.views.generic.list import ListView
 
-from lib.mixins import FormRequestMixin
 from tag.models import SortOrderTagTodo, Tag
-from todo.forms import TodoForm
 from todo.models import Todo
 from todo.services import search as search_service
 
@@ -140,59 +136,6 @@ class TodoTaskList(ListView):
         }
 
         return JsonResponse(response)
-
-
-@method_decorator(login_required, name='dispatch')
-class TodoCreateView(FormRequestMixin, CreateView):
-    template_name = 'todo/update.html'
-    form_class = TodoForm
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['nav'] = 'todo'
-        context['action'] = 'Create'
-        context['title'] = 'Todo Create'
-        if 'tagsearch' in self.request.GET and self.request.GET['tagsearch']:
-            context['tags'] = [{'text': self.request.GET['tagsearch'], 'value': self.request.GET['tagsearch'], 'is_meta': False}]
-        return context
-
-    def form_valid(self, form):
-
-        obj = form.save(commit=False)
-        obj.user = self.request.user
-
-        # Don't index in ES because the tags aren't saved yet
-        obj.save(index_es=False)
-
-        # Save the tags
-        form.save_m2m()
-
-        # Save again, this time index in ES
-        obj.save()
-
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return reverse('todo:list')
-
-
-@method_decorator(login_required, name='dispatch')
-class TodoDeleteView(DeleteView):
-    template_name = 'todo/update.html'
-    form_class = TodoForm
-    model = Todo
-    slug_field = 'uuid'
-    slug_url_kwarg = 'uuid'
-
-    # Verify that the user is the owner of the task
-    def get_object(self, queryset=None):
-        obj = super().get_object()
-        if not obj.user == self.request.user:
-            raise Http404
-        return obj
-
-    def get_success_url(self):
-        return reverse('todo:list')
 
 
 @login_required
