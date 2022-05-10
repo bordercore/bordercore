@@ -83,19 +83,18 @@
 
         <div id="right-panel" class="col-lg-9 h-100 scrollable-panel d-flex flex-column">
 
-            <div v-for="(note,index) in $store.state.notes" :class="{ 'd-none': isSearchResult && note.uuid !== $store.state.selectedNoteUuid }">
-                <div v-if="index === 0" class="mt-3 float-end" v-cloak>
-                    <a class="btn btn-primary ms-2 me-4 float-end" href="{% url 'blob:create' %}?is_note=true">Add note</a>
-                </div>
-
+            <div v-for="(note,index) in $store.state.notes" :class="{ 'd-none': isSearchResult && note.uuid !== $store.state.selectedNoteUuid }" class="position-relative">
                 <card :title="note.name" class="me-0">
                     <template v-slot:title-slot>
+                        <div v-if="index === 0" class="position-absolute end-0" v-cloak>
+                            <a class="btn btn-primary ms-2 me-4" href="{% url 'blob:create' %}?is_note=true">Add note</a>
+                        </div>
+
                         <h2>
                             <a :href="note.url" v-html="note.name"></a>
                         </h2>
                     </template>
                     <template v-slot:content>
-
                         <div class="blob-content table-borders">
 
                             <h6 class="text-primary" v-html="note.date">
