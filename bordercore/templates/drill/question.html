@@ -96,10 +96,9 @@
             >
             </drill-blobs>
 
-            <div class="d-flex flex-grow-1 flex-column">
-                <card title="Tag Progress" class="flex-grow-0">
-                    <template v-slot:content>
-                        <div class="d-flex flex-column justify-content-center">
+            <card title="Tag Progress" class="flex-grow-0 mb-0">
+                <template v-slot:content>
+                    <div class="d-flex flex-column justify-content-center">
                         {% for tag in tag_info %}
                             <drill-tag-progress
                                 :count={{ tag.count }}
@@ -110,20 +109,17 @@
                                 </template>
                             </drill-tag-progress>
                         {% endfor %}
-                        </div>
-                    </template>
-                </card>
-                <card title="Related Tags" class="flex-grow-1">
-                    <template v-slot:content>
-                        <related-tags
-                            related-tags-url="{% url 'tag:get_related_tags' %}"
-                            doc-type="drill"
-                            :initial-tags="['{{ request.session.drill_study_session.tag }}']"
-                        >
-                        </related-tags>
-                    </template>
-                </card>
-            </div>
+                    </div>
+                </template>
+            </card>
+
+            <related-tags
+                class="mx-2"
+                related-tags-url="{% url 'tag:get_related_tags' %}"
+                doc-type="drill"
+                :initial-tags="['{{ request.session.drill_study_session.tag }}']"
+            >
+            </related-tags>
 
         </div>
 

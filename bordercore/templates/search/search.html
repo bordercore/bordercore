@@ -314,15 +314,14 @@
             el: "#aggregations",
             methods: {
                 onClick(evt) {
-
                     const selectedDoctype = evt.srcElement.getAttribute("data-doctype");
                     const urlParams = new URLSearchParams(window.location.search);
                     const currentDoctype = urlParams.get("doctype");
 
-                    var searchParams = new URLSearchParams(window.location.search);
+                    const searchParams = new URLSearchParams(window.location.search);
 
                     if (selectedDoctype === currentDoctype) {
-                        searchParams.set("doctype", "")
+                        searchParams.set("doctype", "");
                     } else {
                         searchParams.set("doctype", selectedDoctype);
                     }
@@ -334,29 +333,27 @@
                     const currentDoctype = urlParams.get("doctype");
 
                     if (doctype === currentDoctype) {
-                        return "selected rounded-sm"
+                        return "selected rounded-sm";
                     }
                 },
 
-            }
+            },
         });
 
         new Vue({
             el: "#search",
+            mounted() {
+                document.getElementById("simple-suggest").value = "{{ request.GET.search|safe|escapejs }}";
+            },
             methods: {
                 select(tag) {
-
                     if (tag.doctype == "Tag") {
                         url = "{% url 'search:kb_search_tag_detail' 666 %}".replace(/666/, tag.value);
                     } else {
                         url = "{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", tag.uuid);
                     }
                     window.location=url;
-
                 },
-            },
-            mounted() {
-                document.getElementById("simple-suggest").value  = "{{ request.GET.search|safe|escapejs }}";
             },
         });
 
