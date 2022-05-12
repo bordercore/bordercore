@@ -1,7 +1,7 @@
 <template>
     <div id="top-search" class="d-none">
         <form id="top-search-form" class="form-inline" method="get">
-            <input type="hidden" name="doctype">
+            <input type="hidden" name="doctype" :value="searchFilter">
             <div class="form-row">
                 <div class="search-with-doctypes col-auto has-search me-1">
                     <font-awesome-icon icon="search" />
