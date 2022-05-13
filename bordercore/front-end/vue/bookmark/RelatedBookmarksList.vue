@@ -1,5 +1,5 @@
 <template>
-    <div :class="extraClass" @mouseenter="showDropDownMenu = true" @mouseleave="showDropDownMenu = false">
+    <div @mouseenter="showDropDownMenu = true" @mouseleave="showDropDownMenu = false">
         <transition :name="transitionName">
             <card v-if="bookmarkList.length > 0 || showEmptyList" class="mx-0">
                 <template #title-slot>
