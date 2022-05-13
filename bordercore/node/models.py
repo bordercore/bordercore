@@ -11,6 +11,13 @@ from bookmark.models import Bookmark
 from lib.mixins import SortOrderMixin, TimeStampedModel
 
 
+def default_layout():
+    """
+    Django JSONField default must be a callable
+    """
+    return [[{"type": "blob"}], [{"type": "bookmark"}], [{"type": "note"}]]
+
+
 class Node(TimeStampedModel):
     """
     A collection of blobs, bookmarks, and notes around a certain topic.
@@ -21,7 +28,7 @@ class Node(TimeStampedModel):
     note = models.TextField(blank=True, null=True)
     bookmarks = models.ManyToManyField(Bookmark, through="SortOrderNodeBookmark")
     blobs = models.ManyToManyField(Blob, through="SortOrderNodeBlob")
-    layout = JSONField(default=[[{"type": "blob"}], [{"type": "bookmark"}], [{"type": "note"}]], null=True, blank=True)
+    layout = JSONField(default=default_layout, null=True, blank=True)
 
     def __str__(self):
         return self.name
