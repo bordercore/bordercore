@@ -50,7 +50,7 @@
                                         </drop-down-menu>
                                     </div>
                                 </li>
-                                <div v-cloak v-if="bookmarkList.length == 0" :key="1" class="text-info">
+                                <div v-cloak v-if="bookmarkList.length == 0" :key="1" class="text-muted ms-3">
                                     No bookmarks
                                 </div>
                             </transition-group>

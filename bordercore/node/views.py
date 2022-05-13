@@ -10,8 +10,10 @@ from django.views.generic.list import ListView
 
 from blob.models import Blob
 from bookmark.models import Bookmark
+from todo.models import Todo
 
-from .models import Node, SortOrderNodeBlob, SortOrderNodeBookmark
+from .models import (Node, SortOrderNodeBlob, SortOrderNodeBookmark,
+                     SortOrderNodeTodo)
 from .services import get_node_list
 
 
@@ -37,6 +39,7 @@ class NodeDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["priority_list"] = json.dumps(Todo.PRIORITY_CHOICES)
         return context
 
 
@@ -196,6 +199,91 @@ def edit_note(request):
     node = Node.objects.get(uuid=node_uuid, user=request.user)
     node.note = note
     node.save()
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def get_todo_list(request, uuid):
+
+    node = Node.objects.get(uuid=uuid, user=request.user)
+    todo_list = list(node.todos.all().only("name", "uuid").order_by("sortordernodetodo__sort_order"))
+
+    response = {
+        "status": "OK",
+        "todo_list": [
+            {
+                "name": x.name,
+                "uuid": x.uuid,
+                "note": x.note,
+            }
+            for x
+            in todo_list]
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def add_todo(request):
+
+    node_uuid = request.POST["node_uuid"]
+    todo_uuid = request.POST["todo_uuid"]
+
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    todo = Todo.objects.get(uuid=todo_uuid)
+
+    so = SortOrderNodeTodo(node=node, todo=todo)
+    so.save()
+
+    so.node.modified = timezone.now()
+    so.node.save()
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def remove_todo(request):
+
+    node_uuid = request.POST["node_uuid"]
+    todo_uuid = request.POST["todo_uuid"]
+
+    so = SortOrderNodeTodo.objects.get(node__uuid=node_uuid, todo__uuid=todo_uuid)
+    so.delete()
+
+    so.node.modified = timezone.now()
+    so.node.save()
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def sort_todos(request):
+    """
+    Move a given todo to a new position in a sorted list
+    """
+
+    node_uuid = request.POST["node_uuid"]
+    todo_uuid = request.POST["todo_uuid"]
+    new_position = int(request.POST["new_position"])
+
+    so = SortOrderNodeTodo.objects.get(node__uuid=node_uuid, todo__uuid=todo_uuid)
+    SortOrderNodeTodo.reorder(so, new_position)
+
+    so.node.modified = timezone.now()
+    so.node.save()
 
     response = {
         "status": "OK",

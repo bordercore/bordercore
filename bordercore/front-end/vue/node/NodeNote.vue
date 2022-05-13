@@ -33,7 +33,7 @@
 
     export default {
 
-        name: "Note",
+        name: "Notes",
         props: {
             nodeUuid: {
                 type: String,

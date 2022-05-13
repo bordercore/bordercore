@@ -224,6 +224,10 @@ import NodeNote from "./vue/node/NodeNote.vue";
 Vue.component("NodeNote", NodeNote);
 window.NodeNote = NodeNote;
 
+import NodeTodoList from "./vue/node/NodeTodoList.vue";
+Vue.component("NodeTodoList", NodeTodoList);
+window.NodeTodoList = NodeTodoList;
+
 import IconButton from "./vue/common/IconButton.vue";
 Vue.component("IconButton", IconButton);
 window.IconButton = IconButton;

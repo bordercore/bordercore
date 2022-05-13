@@ -21,6 +21,11 @@ urlpatterns = [
         name="get_blob_list"
     ),
     path(
+        route="<uuid:uuid>/todo_list/",
+        view=views.get_todo_list,
+        name="get_todo_list"
+    ),
+    path(
         route="<uuid:uuid>/note/",
         view=views.get_note,
         name="get_note"
@@ -54,6 +59,21 @@ urlpatterns = [
         route="edit_note/",
         view=views.edit_note,
         name="edit_note"
+    ),
+    path(
+        route="todo/add/",
+        view=views.add_todo,
+        name="add_todo"
+    ),
+    path(
+        route="todo/remove/",
+        view=views.remove_todo,
+        name="remove_todo"
+    ),
+    path(
+        route="todo/sort/",
+        view=views.sort_todos,
+        name="sort_todos"
     ),
     path(
         route="change_layout",

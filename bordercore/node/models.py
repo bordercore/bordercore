@@ -9,6 +9,7 @@ from django.dispatch import receiver
 from blob.models import Blob
 from bookmark.models import Bookmark
 from lib.mixins import SortOrderMixin, TimeStampedModel
+from todo.models import Todo
 
 
 def default_layout():
@@ -28,6 +29,7 @@ class Node(TimeStampedModel):
     note = models.TextField(blank=True, null=True)
     bookmarks = models.ManyToManyField(Bookmark, through="SortOrderNodeBookmark")
     blobs = models.ManyToManyField(Blob, through="SortOrderNodeBlob")
+    todos = models.ManyToManyField(Todo, through="SortOrderNodeTodo")
     layout = JSONField(default=default_layout, null=True, blank=True)
 
     def __str__(self):
@@ -75,4 +77,26 @@ class SortOrderNodeBlob(SortOrderMixin):
 
 @receiver(pre_delete, sender=SortOrderNodeBlob)
 def remove_blob(sender, instance, **kwargs):
+    instance.handle_delete()
+
+
+class SortOrderNodeTodo(SortOrderMixin):
+
+    node = models.ForeignKey(Node, on_delete=models.CASCADE)
+    todo = models.ForeignKey(Todo, on_delete=models.CASCADE)
+
+    field_name = "node"
+
+    def __str__(self):
+        return f"SortOrder: {self.node}, {self.todo}"
+
+    class Meta:
+        ordering = ("sort_order",)
+        unique_together = (
+            ("node", "todo")
+        )
+
+
+@receiver(pre_delete, sender=SortOrderNodeTodo)
+def remove_Todo(sender, instance, **kwargs):
     instance.handle_delete()

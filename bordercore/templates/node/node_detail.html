@@ -39,7 +39,16 @@
 {% block content %}
 
     <div id="vue-app">
-
+        <create-update-todo
+            ref="updateTodo"
+            :priority-list="JSON.parse('{{ priority_list }}')"
+            update-todo-url="{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}"
+            create-todo-url="{% url 'todo-list' %}"
+            tag-search-url="{% url 'tag:search' %}?query="
+            @post-todo-add="addNodeTodo"
+            @post-todo-update="refreshNodeTodo"
+        >
+        </create-update-todo>
         <div class="row g-0 h-100 mx-2">
 
             <div v-for="(column, index) in layout" class="col-lg-4 d-flex flex-column" :data-col-number="index" @drop="onDrop($event, index)" @dragover.prevent="onDragOver($event, index)" @dragleave="onDragLeave($event)" @dragenter.prevent>
@@ -63,6 +72,18 @@
                             edit-url="{% url "node:edit_note" %}"
                         >
                         </node-note>
+                    </div>
+                    <div v-else-if="obj.type === 'todo'" :draggable="$store.state.editLayout" @dragstart="onStartDrag($event, index, 'todo')">
+                        <node-todo-list
+                            ref="todoList"
+                            class="z-index-positive position-relative"
+                            node-uuid="{{ object.uuid }}"
+                            get-todo-list-url="{% url "node:get_todo_list" object.uuid %}"
+                            add-node-todo-url="{% url "node:add_todo" %}"
+                            remove-node-todo-url="{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}"
+                            sort-node-todos-url="{% url 'node:sort_todos' %}"
+                        >
+                        </node-todo-list>
                     </div>
                     <div v-else-if="obj.type === 'bookmark'" :draggable="$store.state.editLayout" @dragstart="onStartDrag($event, index, 'bookmark')">
                         <related-bookmarks-list
@@ -148,6 +169,12 @@
                 }
             },
             methods: {
+                addNodeTodo(payload) {
+                    this.$refs.todoList[0].addNodeTodo(payload);
+                },
+                refreshNodeTodo(payload) {
+                    this.$refs.todoList[0].getTodoList();
+                },
                 selectBookmark(bookmark_uuid) {
                     doPost(
                         this,

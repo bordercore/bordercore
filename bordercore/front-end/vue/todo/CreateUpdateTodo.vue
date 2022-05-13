@@ -108,7 +108,10 @@
         data() {
             return {
                 action: "Update",
-                todoInfo: {},
+                todoInfo: {
+                    priority: 2,
+                    tags: [],
+                },
                 lastResponseCode: null,
             };
         },
