@@ -4,7 +4,7 @@
             <template #title-slot>
                 <div v-cloak class="card-title d-flex">
                     <div class="dropdown-height">
-                        Notes
+                        <font-awesome-icon icon="sticky-note" class="text-primary me-3" />Notes
                     </div>
                     <div v-if="note !== ''" class="ms-auto">
                         <drop-down-menu :show-on-hover="true">

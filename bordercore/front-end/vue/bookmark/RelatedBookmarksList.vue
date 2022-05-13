@@ -1,10 +1,15 @@
 <template>
     <div :class="extraClass" @mouseenter="showDropDownMenu = true" @mouseleave="showDropDownMenu = false">
         <transition :name="transitionName">
-            <card v-if="bookmarkList.length > 0 || showEmptyList" :title="title">
-                <template #top-right>
-                    <div v-if="showAddButton" class="node-add-button">
-                        <add-button href="#" :click-handler="openModal" :class="{'d-none': !showDropDownMenu}" />
+            <card v-if="bookmarkList.length > 0 || showEmptyList">
+                <template #title-slot>
+                    <div class="d-flex">
+                        <div class="card-title d-flex">
+                            <font-awesome-icon icon="bookmark" class="text-primary me-3 mt-1" />{{ title }}
+                        </div>
+                        <div v-if="showAddButton" class="node-add-button ms-auto">
+                            <add-button href="#" :click-handler="openModal" :class="{'d-none': !showDropDownMenu}" />
+                        </div>
                     </div>
                 </template>
 

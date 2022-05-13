@@ -1,9 +1,14 @@
 <template>
     <div @mouseenter="showDropDownMenu = true" @mouseleave="showDropDownMenu = false">
-        <card title="Blobs">
-            <template #top-right>
-                <div class="node-add-button">
-                    <add-button href="#" :click-handler="chooseBlob" :class="{'d-none': !showDropDownMenu}" />
+        <card title="">
+            <template #title-slot>
+                <div class="card-title d-flex">
+                    <div>
+                        <font-awesome-icon icon="splotch" class="text-primary me-3" />Blobs
+                    </div>
+                    <div class="node-add-button ms-auto">
+                        <add-button href="#" :click-handler="chooseBlob" :class="{'d-none': !showDropDownMenu}" />
+                    </div>
                 </div>
             </template>
 
