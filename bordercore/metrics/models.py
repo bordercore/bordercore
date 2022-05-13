@@ -20,12 +20,19 @@ class Metric(models.Model):
 
     COVERAGE_MINIMUM = 80
 
+    def __str__(self):
+        return self.name
+
     @staticmethod
     def get_failed_test_count(user):
 
         failed_test_count = 0
 
-        latest_metrics = Metric.objects.latest_metrics(user)
+        latest_metrics = Metric.objects.latest_metrics(
+            user
+        ).exclude(
+            name="Bordercore Coverage Report"
+        )
 
         for metric in latest_metrics:
 

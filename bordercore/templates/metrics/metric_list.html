@@ -324,30 +324,37 @@
                     "line_rate": "{{ coverage.latest_result.line_rate }}",
                     "test_time_elapsed": "{{ coverage.latest_result.test_time_elapsed }}",
                     "test_runtime": "{{ coverage.created }}",
+                    "test_overdue": "{{ coverage.overdue }}",
                 },
             },
             computed: {
-                status_unit: function() {
+                status_unit() {
                     return this.get_status("unit");
                 },
-                status_functional: function() {
+                status_functional() {
                     return this.get_status("functional");
                 },
-                status_data: function() {
+                status_data() {
                     return this.get_status("data");
                 },
-                status_wumpus: function() {
+                status_wumpus() {
                     return this.get_status("wumpus");
                 },
-                status_coverage: function() {
-                    return this.coverage.line_rate >= coverageMinimum ? success: failure;
+                status_coverage() {
+                    if (this.coverage.line_rate >= coverageMinimum &&
+                        !this.coverage.test_overdue) {
+                        return success;
+                    } else {
+                        return failure;
+                    }
                 },
             },
             methods: {
-                get_overdue_status: function(metric) {
+                get_overdue_status(metric) {
                     return metric.test_overdue ? "text-danger" : "text-info";
                 },
-                get_status: function(testType) {
+                get_status(testType) {
+                    console.log(this[testType].test_overdue);
                     if (this[testType].test_overdue) {
                         return question;
                     } else if ((this[testType].test_errors === "0" &&
