@@ -1,6 +1,6 @@
 <template>
     <div class="hover-reveal-target">
-        <card title="">
+        <card title="" class="mx-0">
             <template #title-slot>
                 <div class="card-title d-flex">
                     <div>

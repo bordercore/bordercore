@@ -49,9 +49,9 @@
             @post-todo-update="refreshNodeTodo"
         >
         </create-update-todo>
-        <div class="row g-0 h-100 mx-2">
+        <div class="d-flex g-0 h-100 mx-2">
 
-            <div v-for="(column, index) in layout" class="col-lg-4 d-flex flex-column" :data-col-number="index" @drop="onDrop($event, index)" @dragover.prevent="onDragOver($event, index)" @dragleave="onDragLeave($event)" @dragenter.prevent>
+            <div v-for="(column, index) in layout" class="flex-even mx-2" :data-col-number="index" @drop="onDrop($event, index)" @dragover.prevent="onDragOver($event, index)" @dragleave="onDragLeave($event)" @dragenter.prevent>
                 <div v-for="obj in column">
                     <div v-if="obj.type === 'blob'" :draggable="$store.state.editLayout" @dragstart="onStartDrag($event, index, 'blob')">
                         <node-blob-list

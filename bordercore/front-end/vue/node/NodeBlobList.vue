@@ -1,6 +1,6 @@
 <template>
     <div @mouseenter="showDropDownMenu = true" @mouseleave="showDropDownMenu = false">
-        <card title="">
+        <card title="" class="mx-0">
             <template #title-slot>
                 <div class="card-title d-flex">
                     <div>

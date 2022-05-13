@@ -11,6 +11,11 @@
   flex: 1 0 auto;
 }
 
+// Use this to create Flexbox containers of equal width
+.flex-even {
+  flex: 1;
+}
+
 .card-title {
   font-size: 1.2rem;
 

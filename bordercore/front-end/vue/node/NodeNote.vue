@@ -1,6 +1,6 @@
 <template>
     <div class="hover-target">
-        <card>
+        <card class="mx-0">
             <template #title-slot>
                 <div v-cloak class="card-title d-flex">
                     <div class="dropdown-height">
