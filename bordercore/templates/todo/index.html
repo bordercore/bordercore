@@ -136,6 +136,8 @@
             update-todo-url="{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}"
             create-todo-url="{% url 'todo-list' %}"
             tag-search-url="{% url 'tag:search' %}?query="
+            @post-todo-add="getTodoList()"
+            @post-todo-update="getTodoList()"
         >
         </create-update-todo>
 

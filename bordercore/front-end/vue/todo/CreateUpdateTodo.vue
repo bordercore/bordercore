@@ -137,8 +137,8 @@
                             "url": this.todoInfo.url || "",
                             "due_date": dueDate,
                         },
-                        () => {
-                            this.$parent.getTodoList();
+                        (response) => {
+                            this.$emit("post-todo-update", response.data.uuid);
                             const modal = Modal.getInstance(document.getElementById("modalUpdateTodo"));
                             modal.hide();
                         },
@@ -157,7 +157,7 @@
                             "due_date": dueDate,
                         },
                         (response) => {
-                            this.$parent.getTodoList();
+                            this.$emit("post-todo-add", response.data.uuid);
                             const modal = Modal.getInstance(document.getElementById("modalUpdateTodo"));
                             modal.hide();
                         },
