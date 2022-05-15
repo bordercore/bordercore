@@ -468,7 +468,7 @@
                         this,
                         "{% url 'collection:get_blob_list' collection.uuid %}",
                         (response) => {
-                            this.blob_list = response.data;
+                            this.blob_list = response.data.blob_list;
                         },
                         "Error getting blob list"
                     );
