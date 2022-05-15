@@ -39,6 +39,7 @@
 {% block content %}
 
     <div id="vue-app">
+
         <create-update-todo
             ref="updateTodo"
             :priority-list="JSON.parse('{{ priority_list }}')"
@@ -49,64 +50,73 @@
             @post-todo-update="refreshNodeTodo"
         >
         </create-update-todo>
+
         <div class="d-flex g-0 h-100 mx-2">
 
-            <div v-for="(column, index) in layout" class="flex-even mx-2" :data-col-number="index" @drop="onDrop($event, index)" @dragover.prevent="onDragOver($event, index)" @dragleave="onDragLeave($event)" @dragenter.prevent>
-                <div v-for="obj in column">
-                    <div v-if="obj.type === 'blob'" :draggable="$store.state.editLayout" @dragstart="onStartDrag($event, index, 'blob')">
-                        <node-blob-list
-                            class="z-index-positive position-relative"
-                            ref="blobList"
-                            edit-blob-note-url="{% url "node:edit_blob_note" %}"
-                            get-blob-list-url="{% url "node:get_blob_list" object.uuid %}"
-                            remove-blob-url="{% url "node:remove_blob" %}"
-                            sort-blobs-url="{% url "node:sort_blobs" %}"
-                        >
-                        </node-blob-list>
+            <div v-for="(column, colIndex) in layout" class="flex-even mx-2">
+                <draggable
+                    @change="onChange($event)"
+                    :list="layout[colIndex]"
+                    group="object"
+                    :data-col-number="colIndex"
+                    :disabled="!$store.state.editLayout"
+                >
+                    <div v-for="(obj, rowIndex) in column">
+                        <div v-if="obj.type === 'blob'" key="blob">
+                            <node-blob-list
+                                class="z-index-positive position-relative"
+                                ref="blobList"
+                                edit-blob-note-url="{% url "node:edit_blob_note" %}"
+                                get-blob-list-url="{% url "node:get_blob_list" object.uuid %}"
+                                remove-blob-url="{% url "node:remove_blob" %}"
+                                sort-blobs-url="{% url "node:sort_blobs" %}"
+                            >
+                            </node-blob-list>
+                        </div>
+                        <div v-else-if="obj.type === 'note'" :draggable="$store.state.editLayout" key="note">
+                            <node-note
+                                class="z-index-positive position-relative"
+                                node-uuid="{{ object.uuid }}"
+                                get-node-url="{% url "node:get_note" object.uuid %}"
+                                edit-url="{% url "node:edit_note" %}"
+                            >
+                            </node-note>
+                        </div>
+                        <div v-else-if="obj.type === 'todo'" :draggable="$store.state.editLayout" key="todo">
+                            <node-todo-list
+                                ref="todoList"
+                                class="z-index-positive position-relative"
+                                node-uuid="{{ object.uuid }}"
+                                get-todo-list-url="{% url "node:get_todo_list" object.uuid %}"
+                                add-node-todo-url="{% url "node:add_todo" %}"
+                                remove-node-todo-url="{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}"
+                                sort-node-todos-url="{% url 'node:sort_todos' %}"
+                            >
+                            </node-todo-list>
+                        </div>
+                        <div v-else-if="obj.type === 'bookmark'" :draggable="$store.state.editLayout" key="bookmark">
+                            <related-bookmarks-list
+                                class="z-index-positive position-relative"
+                                ref="relatedBookmarksList"
+                                object-uuid="{{ object.uuid }}"
+                                model-name="node.Node"
+                                title="Bookmarks"
+                                get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=node.Node"
+                                create-bookmark-url="{% url 'bookmark-list' %}"
+                                search-bookmark-url="{% url 'bookmark:search' %}"
+                                get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
+                                add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
+                                :update-modified="true"
+                                remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"
+                                sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
+                                edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}"
+                                :show-add-button="true"
+                                transition-name=""
+                            >
+                            </related-bookmarks-list>
+                        </div>
                     </div>
-                    <div v-else-if="obj.type === 'note'" :draggable="$store.state.editLayout" @dragstart="onStartDrag($event, index, 'note')">
-                        <node-note
-                            class="z-index-positive position-relative"
-                            node-uuid="{{ object.uuid }}"
-                            get-node-url="{% url "node:get_note" object.uuid %}"
-                            edit-url="{% url "node:edit_note" %}"
-                        >
-                        </node-note>
-                    </div>
-                    <div v-else-if="obj.type === 'todo'" :draggable="$store.state.editLayout" @dragstart="onStartDrag($event, index, 'todo')">
-                        <node-todo-list
-                            ref="todoList"
-                            class="z-index-positive position-relative"
-                            node-uuid="{{ object.uuid }}"
-                            get-todo-list-url="{% url "node:get_todo_list" object.uuid %}"
-                            add-node-todo-url="{% url "node:add_todo" %}"
-                            remove-node-todo-url="{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}"
-                            sort-node-todos-url="{% url 'node:sort_todos' %}"
-                        >
-                        </node-todo-list>
-                    </div>
-                    <div v-else-if="obj.type === 'bookmark'" :draggable="$store.state.editLayout" @dragstart="onStartDrag($event, index, 'bookmark')">
-                        <related-bookmarks-list
-                            class="z-index-positive position-relative"
-                            ref="relatedBookmarksList"
-                            object-uuid="{{ object.uuid }}"
-                            model-name="node.Node"
-                            title="Bookmarks"
-                            get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=node.Node"
-                            create-bookmark-url="{% url 'bookmark-list' %}"
-                            search-bookmark-url="{% url 'bookmark:search' %}"
-                            get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
-                            add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
-                            :update-modified="true"
-                            remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"
-                            sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
-                            edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}"
-                            :show-add-button="true"
-                            transition-name=""
-                        >
-                        </related-bookmarks-list>
-                    </div>
-                </div>
+                </draggable>
             </div>
 
             <blob-select
@@ -206,43 +216,13 @@
                         ""
                     );
                 },
-                onStartDrag(evt, sourceIndex, type) {
-                    const obj = {
-                        type: type,
-                        sourceIndex: sourceIndex
-                    }
-                    evt.dataTransfer.dropEffect = "move";
-                    evt.dataTransfer.effectAllowed = "move";
-                    evt.dataTransfer.setData("application/x-moz-node", JSON.stringify(obj));
-                },
                 onDragOver(evt, index) {
                     evt.currentTarget.classList.add("node-drag-over");
                 },
                 onDragLeave(evt) {
                     evt.currentTarget.classList.remove("node-drag-over");
                 },
-                onDrop(evt, destIndex) {
-                    evt.currentTarget.classList.remove("node-drag-over");
-                    const obj = JSON.parse(evt.dataTransfer.getData("application/x-moz-node"));
-
-                    // If we're moving an object to the same column, do nothing
-                    if (obj.sourceIndex === destIndex) {
-                        return;
-                    }
-
-                    // Remove this from its original column
-                    const isTarget = (element) => element.type === obj.type;
-                    for (const col in this.layout) {
-                        const index = this.layout[col].findIndex(isTarget);
-                        if (index != -1) {
-                            this.layout[col].splice(index, 1)
-                        }
-                    }
-
-                    // Add this to the top of the column in the new location
-                    this.layout[destIndex].unshift({"type": obj.type});
-
-                    // Save layout change on the backend
+                onChange(evt) {
                     doPost(
                         this,
                         "{% url "node:change_layout" %}",
@@ -255,8 +235,7 @@
                         "",
                         ""
                     );
-
-                }
+                },
             },
             mounted() {
 
