@@ -18,6 +18,13 @@
             </div>
             {% endif %}
 
+            <related-tags
+                ref="relatedTags"
+                related-tags-url="{% url 'tag:get_related_tags' %}"
+                @click-tag="onClickTag"
+            >
+            </related-tags>
+
             <div v-if="related_questions.length > 0" class="d-flex" :class="{'flex-grow-1': related_blobs.length === 0 && related_nodes.length === 0}">
                 <card title="Related Questions">
                     <template v-slot:content>
@@ -107,7 +114,11 @@
                                 <div class="col-lg-7">
 
                                     {% if field.label == 'Tags' %}
-                                        <tags-input search-url="{% url 'tag:search' %}?query=">
+                                        <tags-input
+                                            ref="tagsInput"
+                                            search-url="{% url 'tag:search' %}?query="
+                                            @tags-changed="onTagsChanged"
+                                        >
                                         </tags-input>
                                     {% elif field.label == "Url" %}
                                         <input
@@ -193,11 +204,19 @@
                     related_nodes: JSON.parse(document.getElementById("related_nodes").textContent),
                 }
             },
+            mounted() {
+                EventBus.$on("add-tag", (payload) => {
+                    this.$refs.tagsInput.addTag({"text": payload, "display": payload});
+                });
+            },
             methods: {
                 onClickDelete(evt) {
                     const formEl = document.getElementById("bookmark-form");
                     formEl.setAttribute("action", "{% url 'bookmark:delete' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', this.uuid));
                     formEl.submit();
+                },
+                onClickTag(tag) {
+                    EventBus.$emit("add-tag", tag);
                 },
                 onBlur(evt) {
 
@@ -226,7 +245,10 @@
                 },
                 onClick(url) {
                     window.location = url;
-                }
+                },
+                onTagsChanged(tags) {
+                    this.$refs.relatedTags.setTags(tags.map( (x) => x.display ));
+                },
             }
         });
 
