@@ -1,14 +1,21 @@
 <template>
     <div>
         <div class="hover-reveal-target">
-            <card title="Related Blobs">
-                <template #top-right>
-                    <div class="node-add-button">
-                        <add-button href="#" :click-handler="chooseBlob" class="d-none hover-reveal-object" />
+            <card class="position-relative">
+                <template #title-slot>
+                    <div class="d-flex">
+                        <div class="card-title d-flex">
+                            <font-awesome-icon icon="splotch" class="text-primary me-3 mt-1" />
+                            Blobs
+                        </div>
+                        <div class="hover-reveal-object button-add-container d-none">
+                            <add-button href="#" :click-handler="chooseBlob" />
+                        </div>
                     </div>
                 </template>
 
                 <template #content>
+                    <hr class="filter-divider mt-0">
                     <ul id="sort-container-tags" class="list-group list-group-flush">
                         <draggable v-model="blobList" ghost-class="sortable-ghost" draggable=".draggable" @change="onSort">
                             <transition-group type="transition" class="w-100">
@@ -44,7 +51,7 @@
                                         </drop-down-menu>
                                     </div>
                                 </li>
-                                <div v-cloak v-if="blobList.length == 0" :key="1" class="text-info">
+                                <div v-cloak v-if="blobList.length == 0" :key="1" class="text-muted">
                                     No blobs
                                 </div>
                             </transition-group>

@@ -1,6 +1,6 @@
 <template>
     <div class="hover-target">
-        <card class="mx-0">
+        <card>
             <template #title-slot>
                 <div v-cloak class="card-title d-flex">
                     <div class="dropdown-height">
@@ -18,6 +18,7 @@
                 </div>
             </template>
             <template #content>
+                <hr class="filter-divider mt-0">
                 <editable-text-area
                     ref="note"
                     :note="note"

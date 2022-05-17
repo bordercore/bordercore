@@ -1,18 +1,20 @@
 <template>
-    <div @mouseenter="showDropDownMenu = true" @mouseleave="showDropDownMenu = false">
-        <card title="" class="mx-0">
+    <div class="hover-reveal-target">
+        <card title="" class="position-relative">
             <template #title-slot>
                 <div class="card-title d-flex">
                     <div>
-                        <font-awesome-icon icon="splotch" class="text-primary me-3" />Blobs
+                        <font-awesome-icon icon="splotch" class="text-primary me-3" />
+                        Blobs
                     </div>
-                    <div class="node-add-button ms-auto">
-                        <add-button href="#" :click-handler="chooseBlob" :class="{'d-none': !showDropDownMenu}" />
+                    <div class="ms-auto">
+                        <add-button href="#" :click-handler="chooseBlob" class="hover-reveal-object button-add-container d-none" />
                     </div>
                 </div>
             </template>
 
             <template #content>
+                <hr class="filter-divider mt-0">
                 <ul id="sort-container-tags" class="list-group list-group-flush interior-borders">
                     <draggable v-model="blobList" ghost-class="sortable-ghost" draggable=".draggable" @change="onChange">
                         <transition-group type="transition" class="w-100">
@@ -47,8 +49,8 @@
                                     </drop-down-menu>
                                 </div>
                             </li>
-                            <div v-if="blobList.length == 0" v-cloak :key="1" class="text-secondary">
-                                Nothing to show
+                            <div v-if="blobList.length == 0" v-cloak :key="1" class="text-muted">
+                                No blobs
                             </div>
                         </transition-group>
                     </draggable>
@@ -62,7 +64,7 @@
 
     export default {
 
-        name: "Blob",
+        name: "NodeBlobList",
         props: {
             editBlobNoteUrl: {
                 type: String,
@@ -85,7 +87,6 @@
             return {
                 blobList: [],
                 show: false,
-                showDropDownMenu: false,
             };
         },
         mounted() {
@@ -112,7 +113,7 @@
                 });
             },
             chooseBlob() {
-                this.$parent.$refs.blobSelect.openModal();
+                this.$parent.$parent.$refs.blobSelect.openModal();
             },
             editNote(blobUuid, note) {
                 if (this.editingNote) {

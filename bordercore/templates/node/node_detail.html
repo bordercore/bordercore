@@ -53,7 +53,7 @@
 
         <div class="d-flex g-0 h-100 mx-2">
 
-            <div v-for="(column, colIndex) in layout" class="flex-even mx-2">
+            <div v-for="(column, colIndex) in layout" class="flex-even">
                 <draggable
                     @change="onChange($event)"
                     :list="layout[colIndex]"
@@ -167,11 +167,10 @@
 
         new Vue({
             el: "#vue-app",
+            name: "Node Detail",
             store,
             components: {
                 BlobSelect,
-                NodeBlobList,
-                NodeNote,
             },
             data() {
                 return {
@@ -209,7 +208,7 @@
                             "blob_uuid": blob.uuid,
                         },
                         (response) => {
-                            this.$refs.blobList.getBlobList();
+                            this.$refs.blobList[0].getBlobList();
                             this.$refs.blobSelect.$refs.simpleSuggest.$refs.suggestComponent.selected = null;
                         },
                         "Blob added",

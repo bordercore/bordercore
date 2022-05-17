@@ -9,7 +9,7 @@
             <a :href="getId(item.id)">{{ item.label }}</a>
             <!-- <span v-if="isFolder">[{{ isOpen ? '-' : '+' }}]</span> -->
         </div>
-        <ul v-show="isOpen" v-if="isFolder" class="mb-0">
+        <ul v-show="isOpen" v-if="isFolder" class="mb-0 ms-2">
             <tree-menu
                 v-for="(child, index) in item.nodes"
                 :key="index"

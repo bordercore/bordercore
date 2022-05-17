@@ -27,9 +27,8 @@
 
     <div class="scrollable-panel-container row g-0 mx-2">
 
-        <div class="col-lg-3 h-100 d-flex flex-column">
-            <div id="vue-app-left" class="scrollable-panel card-body d-flex flex-column h-100">
-
+        <div id="vue-app-left" class="scrollable-panel flex-grow-last col-lg-3 d-flex flex-column h-100">
+            <div class="card-body">
                 {% if object %}
 
                     {% if object.sha1sum %}
@@ -126,14 +125,14 @@
                     </ul>
                 {% endif %}
 
-                <related-tags
-                    ref="relatedTags"
-                    related-tags-url="{% url 'tag:get_related_tags' %}"
-                    @click-tag="onClickTag"
-                >
-                </related-tags>
-
             </div>
+
+            <related-tags
+                ref="relatedTags"
+                related-tags-url="{% url 'tag:get_related_tags' %}"
+                @click-tag="onClickTag"
+            >
+            </related-tags>
 
         </div>
 

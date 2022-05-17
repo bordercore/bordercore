@@ -9,57 +9,56 @@
 
     <div class="scrollable-panel-container row g-0 mx-2">
 
-        <div class="col-lg-3 h-100 d-flex flex-column">
-            <div id="vue-left-panel" class="scrollable-panel card-body d-flex flex-column h-100">
-                <div v-cloak>
+        <div id="vue-left-panel" class="scrollable-panel flex-grow-last col-lg-3 d-flex flex-column h-100">
+            <div class="card-body" v-cloak>
 
-                    <h5>
-                        {{ blob.get_edition_string }}
-                    </h5>
+                <h5>
+                    {{ blob.get_edition_string }}
+                </h5>
 
-                    {% if metadata|dict_get:"Subtitle" %}
-                        <div id="blob_subtitle">
-                            {{ metadata|dict_get:"Subtitle" }}
-                        </div>
-                    {% endif %}
+                {% if metadata|dict_get:"Subtitle" %}
+                    <div id="blob_subtitle">
+                        {{ metadata|dict_get:"Subtitle" }}
+                    </div>
+                {% endif %}
 
-                    {% if metadata|dict_get:"Author" %}
-                        <div class="mt-2">
-                            by <span class="text-info">{{ metadata|dict_get:"Author" }}</span>
-                        </div>
-                    {% endif %}
+                {% if metadata|dict_get:"Author" %}
+                    <div class="mt-2">
+                        by <span class="text-info">{{ metadata|dict_get:"Author" }}</span>
+                    </div>
+                {% endif %}
 
-                    {% if date %}
-                        <div class="mb-2">
-                            {{ date }}
-                        </div>
-                    {% endif  %}
+                {% if date %}
+                    <div class="mb-2">
+                        {{ date }}
+                    </div>
+                {% endif  %}
 
-                    {% if blob.tags.all %}
+                {% if blob.tags.all %}
                     <div class="d-flex mb-2">
                         <div>
                             <font-awesome-icon icon="tags" class="text-primary"></font-awesome-icon>
                         </div>
                         <div class="ms-2">
                             <div id="blob-tag-list">
-                            {% for tag in blob.tags.all %}
-                                <a class="tag" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
-                            {% endfor %}
+                                {% for tag in blob.tags.all %}
+                                    <a class="tag" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
+                                {% endfor %}
                             </div>
                         </div>
                     </div>
-                    {% endif %}
+                {% endif %}
 
-                    {% if urls %}
-                        <div class="mb-3">
-                            <font-awesome-icon icon="link" class="text-primary me-1"></font-awesome-icon>
-                            {% for url in urls %}
-                                <strong><a href="{{ url.url }}">{{ url.domain }}</a></strong>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+                {% if urls %}
+                    <div class="mb-3">
+                        <font-awesome-icon icon="link" class="text-primary me-1"></font-awesome-icon>
+                        {% for url in urls %}
+                            <strong><a href="{{ url.url }}">{{ url.domain }}</a></strong>
+                        {% endfor %}
+                    </div>
+                {% endif %}
 
-                    {% if show_metadata %}
+                {% if show_metadata %}
 
                     <transition name="fade">
                         <div v-if="Object.keys($store.state.elasticsearchInfo).length !== 0 || Object.keys(metadata_misc).length !== 0" class="highlight-box mb-3">
@@ -112,139 +111,139 @@
                         </div>
                     </transition>
 
-                    {% endif %}
+                {% endif %}
 
-                    {% if blob.note %}
-                        <div class="highlight-box mt-3 text-break" id="blob-note" v-html="getNote()">
-                        </div>
-                    {% endif %}
-
-                    {% if blob.is_note and blob.has_been_modified %}
-                        <div class="mt-3">
-                            <strong>Last edited</strong>
-                            <small>{{ blob.modified|date:"F j, Y" }}</small>
-                        </div>
-                    {% endif %}
-
-                    <div v-if="tree['nodes'].length > 0" class="card-body mx-0 mt-3 py-3 tree-menu">
-                        <tree-menu
-                            class="item"
-                            :item="tree"
-                            :depth="0"
-                        ></tree-menu>
+                {% if blob.note %}
+                    <div class="highlight-box mt-3 text-break" id="blob-note" v-html="getNote()">
                     </div>
+                {% endif %}
 
-                    {% if linked_blobs %}
-                        <h4 class="mt-3">
-                            Collections
-                        </h4>
+                {% if blob.is_note and blob.has_been_modified %}
+                    <div class="mt-3">
+                        <strong>Last edited</strong>
+                        <small>{{ blob.modified|date:"F j, Y" }}</small>
+                    </div>
+                {% endif %}
+
+                {% if blob.sha1sum %}
+                    <a class="button-icon mt-3" href="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" role="button">
+                        <font-awesome-icon icon="download" class="text-emphasis" />
+                    </a>
+                {% endif %}
+
+            </div>
+
+            <tree-menu v-if="tree['nodes'].length > 0"
+                       class="tree-menu item card-body"
+                       :item="tree"
+                       :depth="0"
+            ></tree-menu>
+
+            {% if linked_blobs %}
+                <card title="Collections" class="h-100">
+                    <template #content>
                         {% for collection in linked_blobs %}
                             {{ collection.name }}
-                            <ul class="list-group">
-                            {% for blob in collection.blob_list %}
-                                <li class="list-group-item list-group-item-secondary text-info d-flex align-items-center border-bottom-0">
-                                {% if blob.get_cover_url_small %}
-                                    <img src="{{ blob.get_cover_url_small }}" />
-                                {% endif %}
-                                    <div class="ms-2">
-                                        <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.name|default:"No Name" }}</a>
-                                    </div>
+                            <ul class="list-group interior-borders">
+                                {% for blob in collection.blob_list %}
+                                    <li class="list-group-item list-group-item-secondary text-info d-flex align-items-center">
+                                        {% if blob.get_cover_url_small %}
+                                            <img src="{{ blob.get_cover_url_small }}" />
+                                        {% endif %}
+                                        <div class="ms-2">
+                                            <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.name|default:"No Name" }}</a>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                                <li class="list-group-item list-group-item-secondary text-info">
+                                    <a class="btn btn-primary" href="{% url 'blob:create' %}?linked_collection={{ collection.uuid }}">Add to Collection</a>
                                 </li>
-                            {% endfor %}
-                            <li class="list-group-item list-group-item-secondary text-info">
-                                <a class="btn btn-primary" href="{% url 'blob:create' %}?linked_collection={{ collection.uuid }}">Add to Collection</a>
-                            </li>
                             </ul>
                         {% endfor %}
-                    {% endif %}
+                    </template>
+                </card>
+            {% endif %}
 
-                    <div v-if="$store.state.collectionList.length > 0" class="row mt-3">
-                        <div class="col-lg-12">
-                            In collections:
-
-                            <a v-for="(collection, index) in $store.state.collectionList" :href="collection.url">
-                                [[ collection.name ]]<span v-if="index !== $store.state.collectionList.length - 1">, </span>
-                            </a>
-                        </div>
-                    </div>
-
-                    {% if blob.sha1sum %}
-                        <a class="button-icon mt-3" href="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" role="button">
-                            <font-awesome-icon icon="download" class="text-emphasis" />
-                        </a>
-                    {% endif %}
-
-                    <related-bookmarks-list
-                        ref="relatedBookmarksList"
-                        object-uuid="{{ object.uuid }}"
-                        model-name="blob.Blob"
-                        get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=blob.Blob"
-                        create-bookmark-url="{% url 'bookmark-list' %}"
-                        search-bookmark-url="{% url 'bookmark:search' %}"
-                        get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
-                        add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
-                        remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"
-                        sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
-                        edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}"
-                        :show-add-button="false"
-                        class="embedded-card mt-3"
-                        :show-empty-list="false"
-                    >
-                    </related-bookmarks-list>
-
-                    <card v-if="relatedBlobList.length > 0" class="ms-0">
-                        <template #title-slot>
-                            Related Blobs
-                        </template>
-                        <template #content>
-                            <div v-for="blob in relatedBlobList" class="hover-target hoverable d-flex align-items-center mb-2 p-2">
-                                <img :src="blob.cover_url" />
-                                <div class="d-flex justify-content-center ms-2 w-100">
-                                    <a :href="blob.url">[[ blob.name ]]</a>
-                                </div>
-
-                                <drop-down-menu :show-on-hover="true">
-                                    <div slot="dropdown">
-                                        <li>
-                                            <a class="dropdown-item" href="#" @click.prevent="unlinkBlob(blob.uuid)">Unlink</a>
-                                        </li>
-                                    </div>
-                                </drop-down-menu>
-
-                            </div>
-                        </template>
-                    </card>
-
-                </div>
-
-                <div v-if="related_questions.length > 0" v-cloak>
-
-                    <hr class="filter-divider w-100 mt-0" />
-
-                    <div class="card-title">
-                        Related Questions
-                    </div>
-
-                    <div class="cursor-pointer">
-                        <ul class="list-group interior-borders">
-                            <li v-for="question in related_questions" class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
-                                <div class="d-flex p-1">
-                                    <div class="mt-1 me-2">
-                                        <font-awesome-icon icon="question" class="text-success"></font-awesome-icon>
-                                    </div>
-                                    <div>
-                                        <span v-html="question.question" @click="onClick(question.url)"></span>
-                                        <div>
-                                            <span v-for="tag in question.tags" class="badge bg-info me-2">[[ tag.tag ]]</span>
-                                        </div>
-                                    </div>
-                                </div>
+            <card
+                v-if="$store.state.collectionList.length > 0"
+                title="Collections"
+                class="h-100"
+            >
+                <template #content>
+                    <div class="col-lg-12">
+                        <ul>
+                            <li v-for="(collection, index) in $store.state.collectionList">
+                                <a :href="collection.url">[[ collection.name ]]</a>
                             </li>
                         </ul>
                     </div>
+                </template>
+            </card>
 
-                </div>
+            <related-bookmarks-list
+                ref="relatedBookmarksList"
+                class="h-100"
+                object-uuid="{{ object.uuid }}"
+                model-name="blob.Blob"
+                get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=blob.Blob"
+                create-bookmark-url="{% url 'bookmark-list' %}"
+                search-bookmark-url="{% url 'bookmark:search' %}"
+                get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
+                add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
+                remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"
+                sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
+                edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}"
+                :show-add-button="false"
+                :show-empty-list="false"
+            >
+            </related-bookmarks-list>
 
+            <card v-if="relatedBlobList.length > 0" title="Related Blobs">
+                <template #content>
+                    <div v-for="blob in relatedBlobList" class="hover-target hoverable d-flex align-items-center mb-2 p-2">
+                        <img :src="blob.cover_url" />
+                        <div class="d-flex justify-content-center ms-2 w-100">
+                            <a :href="blob.url">[[ blob.name ]]</a>
+                        </div>
+
+                        <drop-down-menu :show-on-hover="true">
+                            <div slot="dropdown">
+                                <li>
+                                    <a class="dropdown-item" href="#" @click.prevent="unlinkBlob(blob.uuid)">Unlink</a>
+                                </li>
+                            </div>
+                        </drop-down-menu>
+
+                    </div>
+                </template>
+            </card>
+
+        </div>
+
+        <div v-if="related_questions.length > 0" v-cloak>
+
+            <hr class="filter-divider w-100 mt-0" />
+
+            <div class="card-title">
+                Related Questions
+            </div>
+
+            <div class="cursor-pointer">
+                <ul class="list-group interior-borders">
+                    <li v-for="question in related_questions" class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
+                        <div class="d-flex p-1">
+                            <div class="mt-1 me-2">
+                                <font-awesome-icon icon="question" class="text-success"></font-awesome-icon>
+                            </div>
+                            <div>
+                                <span v-html="question.question" @click="onClick(question.url)"></span>
+                                <div>
+                                    <span v-for="tag in question.tags" class="badge bg-info me-2">[[ tag.tag ]]</span>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
             </div>
 
         </div> <!-- End first column -->

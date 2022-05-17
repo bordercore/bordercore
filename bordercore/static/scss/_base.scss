@@ -16,6 +16,10 @@
   flex: 1;
 }
 
+.flex-grow-last > div:last-child {
+  flex-grow: 1;
+}
+
 .card-title {
   font-size: 1.2rem;
 
@@ -243,6 +247,12 @@ span {
   &:hover {
     transform: translateY(-1px);
   }
+}
+
+.button-add-container {
+  position: absolute;
+  top: 0.5rem;
+  right: 1rem;
 }
 
 .button-add {
@@ -790,6 +800,7 @@ $nav-tabs-link-hover-border-color: $nav-border-color;
 @supports (backdrop-filter: blur(25px) brightness(170%)) {
   .card-body {
     @extend .card-box-shadow;
+    flex-grow: 0;
     margin: 0 0.5rem 1rem 0.5rem;
     backdrop-filter: blur(25px) brightness(170%);
     background: #10163a80 !important;
@@ -804,15 +815,6 @@ $nav-tabs-link-hover-border-color: $nav-border-color;
     .list-group-item {
       background: none;
     }
-  }
-}
-
-// This is a card inside another card and
-//  therefore should no no left margin. Contrast
-//  with the vanilla .card selector above.
-.embedded-card {
-  .card-body {
-    margin: 0 0 1rem 0;
   }
 }
 
@@ -1071,6 +1073,10 @@ pre {
 .yt-hover-target {
   right: 0.3rem;
   bottom: 0.3rem;
+}
+
+#bookmark-select-add {
+  height: 2.5rem;
 }
 
 .monospaced {
@@ -1528,10 +1534,6 @@ div #dateapp {
 //
 // Node
 //
-
-.node-add-button {
-  height: 2.5rem;
-}
 
 .node-bookmark {
   height: 3.5rem;

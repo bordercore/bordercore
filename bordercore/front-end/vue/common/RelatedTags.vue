@@ -1,9 +1,17 @@
 <template>
     <transition name="fade">
-        <card v-if="info.length > 0" title="Related Tags" class="flex-grow-0 mt-3 mx-0">
+        <card v-if="info.length > 0">
+            <template #title-slot>
+                <div class="d-flex">
+                    <div class="card-title d-flex">
+                        <font-awesome-icon icon="tags" class="text-primary me-3 mt-1" />Related Tags
+                    </div>
+                </div>
+            </template>
+
             <template #content>
                 <div v-for="tagInfo in info" :key="tagInfo.name">
-                    <hr class="filter-divider">
+                    <hr class="filter-divider mt-0">
                     <h5 class="text-success">
                         {{ tagInfo.name }}
                     </h5>

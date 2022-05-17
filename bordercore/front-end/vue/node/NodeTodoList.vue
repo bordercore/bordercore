@@ -1,18 +1,20 @@
 <template>
     <div class="hover-reveal-target">
-        <card title="" class="mx-0">
+        <card title="" class="position-relative">
             <template #title-slot>
                 <div class="card-title d-flex">
                     <div>
-                        <font-awesome-icon icon="tasks" class="text-primary me-3" />Todo Tasks
+                        <font-awesome-icon icon="tasks" class="text-primary me-3" />
+                        Todo Tasks
                     </div>
-                    <div class="node-add-button ms-auto">
-                        <add-button href="#" :click-handler="handleCreateTodo" class="d-none hover-reveal-object" />
+                    <div class="ms-auto">
+                        <add-button href="#" :click-handler="handleCreateTodo" class="hover-reveal-object button-add-container d-none" />
                     </div>
                 </div>
             </template>
 
             <template #content>
+                <hr class="filter-divider mt-0">
                 <ul id="sort-container-tags" class="list-group list-group-flush interior-borders">
                     <draggable v-model="todoList" ghost-class="sortable-ghost" draggable=".draggable" @change="handleSort">
                         <transition-group type="transition" class="w-100">
@@ -37,8 +39,8 @@
                                     </drop-down-menu>
                                 </div>
                             </li>
-                            <div v-if="todoList.length == 0" v-cloak :key="1" class="text-secondary">
-                                Nothing to show
+                            <div v-if="todoList.length == 0" v-cloak :key="1" class="text-muted">
+                                No tasks
                             </div>
                         </transition-group>
                     </draggable>
@@ -119,7 +121,7 @@
                     });
             },
             handleCreateTodo() {
-                this.$parent.$refs.updateTodo.setAction("Create");
+                this.$parent.$parent.$refs.updateTodo.setAction("Create");
                 const modal = new Modal("#modalUpdateTodo");
                 modal.show();
                 setTimeout( () => {
@@ -127,8 +129,8 @@
                 }, 500);
             },
             handleUpdateTodo(todoInfo) {
-                this.$parent.$refs.updateTodo.setAction("Update");
-                this.$parent.$refs.updateTodo.todoInfo = {
+                this.$parent.$parent.$refs.updateTodo.setAction("Update");
+                this.$parent.$parent.$refs.updateTodo.todoInfo = {
                     uuid: todoInfo.uuid,
                     name: todoInfo.name,
                     note: todoInfo.note,

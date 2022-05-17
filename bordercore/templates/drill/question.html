@@ -29,7 +29,7 @@
 
     <div class="row g-0 h-100 mx-2" id="vue-app">
 
-        <div class="col-lg-3 d-flex flex-column">
+        <div class="flex-grow-last col-lg-3 d-flex flex-column">
 
             <div class="card-body flex-grow-0">
 
@@ -96,8 +96,9 @@
             >
             </drill-blobs>
 
-            <card title="Tag Progress" class="flex-grow-0 mb-0">
+            <card title="Tag Progress" class="flex-grow-0">
                 <template v-slot:content>
+                    <hr class="filter-divider mt-0" />
                     <div class="d-flex flex-column justify-content-center">
                         {% for tag in tag_info %}
                             <drill-tag-progress

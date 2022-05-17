@@ -1,19 +1,21 @@
 <template>
-    <div @mouseenter="showDropDownMenu = true" @mouseleave="showDropDownMenu = false">
+    <div class="hover-reveal-target">
         <transition :name="transitionName">
-            <card v-if="bookmarkList.length > 0 || showEmptyList" class="mx-0">
+            <card v-if="bookmarkList.length > 0 || showEmptyList" class="position-relative">
                 <template #title-slot>
                     <div class="d-flex">
                         <div class="card-title d-flex">
-                            <font-awesome-icon icon="bookmark" class="text-primary me-3 mt-1" />{{ title }}
+                            <font-awesome-icon icon="bookmark" class="text-primary me-3 mt-1" />
+                            {{ title }}
                         </div>
-                        <div v-if="showAddButton" class="node-add-button ms-auto">
-                            <add-button href="#" :click-handler="openModal" :class="{'d-none': !showDropDownMenu}" />
+                        <div v-if="showAddButton" class="hover-reveal-object button-add-container d-none">
+                            <add-button href="#" :click-handler="openModal" />
                         </div>
                     </div>
                 </template>
 
                 <template #content>
+                    <hr class="filter-divider mt-0">
                     <ul id="sort-container-tags" class="list-group list-group-flush interior-borders">
                         <draggable v-model="bookmarkList" ghost-class="sortable-ghost" draggable=".draggable" @change="onSort">
                             <transition-group type="transition" class="w-100">
@@ -50,22 +52,22 @@
                                         </drop-down-menu>
                                     </div>
                                 </li>
-                                <div v-cloak v-if="bookmarkList.length == 0" :key="1" class="text-muted ms-3">
+                                <div v-cloak v-if="bookmarkList.length == 0" :key="1" class="text-muted">
                                     No bookmarks
                                 </div>
                             </transition-group>
                         </draggable>
                     </ul>
+                    <bookmark-select
+                        ref="bookmarkSearch"
+                        :search-url="searchBookmarkUrl"
+                        :create-bookmark-url="createBookmarkUrl"
+                        :get-title-from-url-url="getTitleFromUrlUrl"
+                        @select-bookmark="selectBookmark"
+                    />
                 </template>
             </card>
         </transition>
-        <bookmark-select
-            ref="bookmarkSearch"
-            :search-url="searchBookmarkUrl"
-            :create-bookmark-url="createBookmarkUrl"
-            :get-title-from-url-url="getTitleFromUrlUrl"
-            @select-bookmark="selectBookmark"
-        />
     </div>
 </template>
 
@@ -87,7 +89,7 @@
                 type: String,
             },
             title: {
-                default: "Related Bookmarks",
+                default: "Bookmarks",
                 type: String,
             },
             getBookmarkListUrl: {
@@ -152,7 +154,6 @@
                 mode: "search",
                 name: "",
                 bookmarkList: [],
-                showDropDownMenu: false,
             };
         },
         mounted() {
