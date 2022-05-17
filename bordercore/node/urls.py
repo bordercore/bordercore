@@ -16,6 +16,11 @@ urlpatterns = [
         name="detail"
     ),
     path(
+        route="create/",
+        view=views.NodeCreateView.as_view(),
+        name="create"
+    ),
+    path(
         route="<uuid:uuid>/blob_list/",
         view=views.get_blob_list,
         name="get_blob_list"

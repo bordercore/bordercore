@@ -1,15 +1,19 @@
 import json
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
+from django.views.generic.edit import CreateView, FormMixin
 from django.views.generic.list import ListView
 
 from blob.models import Blob
 from bookmark.models import Bookmark
+from lib.mixins import FormRequestMixin
+from node.forms import NodeForm
 from todo.models import Todo
 
 from .models import (Node, SortOrderNodeBlob, SortOrderNodeBookmark,
@@ -18,7 +22,9 @@ from .services import get_node_list
 
 
 @method_decorator(login_required, name="dispatch")
-class NodeListView(ListView):
+class NodeListView(ListView, FormMixin):
+
+    form_class = NodeForm
 
     def get_queryset(self):
         return get_node_list(self.request.user)
@@ -41,6 +47,28 @@ class NodeDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context["priority_list"] = json.dumps(Todo.PRIORITY_CHOICES)
         return context
+
+
+@method_decorator(login_required, name="dispatch")
+class NodeCreateView(FormRequestMixin, CreateView):
+    template_name = "node/node_list.html"
+    form_class = NodeForm
+
+    def form_valid(self, form):
+
+        obj = form.save(commit=False)
+        obj.user = self.request.user
+        obj.save()
+
+        # Save the tags
+        form.save_m2m()
+
+        messages.add_message(self.request, messages.INFO, f"New node created: <strong>{obj.name}</strong>")
+
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse("node:list")
 
 
 @login_required

@@ -4,11 +4,11 @@
 
 {% load favicon %}
 
-{% block title %} Node {% endblock %}
+{% block title %} Node List {% endblock %}
 
 {% block content %}
 
-    <div class="card-grid ms-3">
+    <div id="vue-app" class="card-grid d-flex ms-3">
 
         <div class="d-flex flex-row flex-wrap">
         {% for node in nodes %}
@@ -29,6 +29,70 @@
         {% endfor %}
         </div>
 
+        <div class="me-2 ms-auto" @click="onClickCreate">
+            <add-button :href="'#'"></add-button>
+        </div>
+
     </div>
+
+    <div class="card-grid ms-3">
+
+        <form action="{% url 'node:create' %}" method="post" id="form-node-create">
+            {% csrf_token %}
+            <div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="myModalLabel">
+                                Create Node
+                            </h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            {% for field in form %}
+                                <div class="{% if field.errors %} error{% endif %} row mb-3">
+                                    <label class="col-lg-3 col-form-label" for="inputTitle">{{ field.label }}</label>
+                                    <div class="col-lg-9">
+                                        {{ field }}
+                                            {% for error in field.errors %}
+                                                <span class="form-error">{{ error }}</span>
+                                            {% endfor %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="modal-footer">
+                            <input id="btn-action" class="btn btn-primary" type="submit" name="Go" value="Create" />
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        </div>
+
+{% endblock %}
+
+{% block javascript %}
+
+    {{ block.super }}
+
+    <script type="text/javascript" charset="utf-8">
+
+        new Vue({
+            el: "#vue-app",
+            methods: {
+                onClickCreate(evt) {
+                    const modal = new Modal("#modalAdd");
+                    modal.show();
+                    window.setTimeout(() => {
+                        document.getElementById("id_name").focus();
+                    }, 500);
+                },
+            },
+        });
+
+    </script>
 
 {% endblock %}

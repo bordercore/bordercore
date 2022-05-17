@@ -1,12 +1,16 @@
 import json
 
 import pytest
+from faker import Factory as FakerFactory
 
 from django import urls
 
 from node.models import Node, SortOrderNodeBlob, SortOrderNodeBookmark
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
+
+
+faker = FakerFactory.create()
 
 
 def test_node_listview(auto_login_user, node):
@@ -37,6 +41,22 @@ def test_node_detail(auto_login_user, node, blob_image_factory, blob_pdf_factory
     resp = client.get(url)
 
     assert resp.status_code == 200
+
+
+def test_node_create(auto_login_user, node):
+
+    _, client = auto_login_user()
+
+    node_name = faker.text(max_nb_chars=32)
+
+    url = urls.reverse("node:create")
+    resp = client.post(url, {
+        "name": node_name,
+        "note": faker.text(max_nb_chars=100)
+    })
+
+    assert resp.status_code == 302
+    assert Node.objects.filter(name=node_name).exists()
 
 
 def test_get_blob_list(auto_login_user, node):

@@ -16,7 +16,7 @@ def default_layout():
     """
     Django JSONField default must be a callable
     """
-    return [[{"type": "blob"}], [{"type": "bookmark"}], [{"type": "note"}]]
+    return [[{"type": "bookmark"}, {"type": "blob"}], [{"type": "todo"}], [{"type": "note"}]]
 
 
 class Node(TimeStampedModel):
