@@ -4,7 +4,6 @@ from urllib.parse import unquote
 from django import urls
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import F, Max
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -72,13 +71,7 @@ class QuestionCreateView(FormRequestMixin, CreateView):
             ]
 
         # Get a list of the most recently used tags
-        context["recent_tags"] = Question.objects.values(
-            name=F("tags__name")
-        ).annotate(
-            max=Max("created")
-        ).order_by(
-            "-max"
-        )[:10]
+        context["recent_tags"] = Question.objects.recent_tags(self.request.user)[:10]
 
         return context
 
@@ -205,6 +198,10 @@ class QuestionUpdateView(FormRequestMixin, UpdateView):
         context["action"] = "Update"
         context["title"] = "Drill :: Question Update"
         context["tags"] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
+
+        # Get a list of the most recently used tags
+        context["recent_tags"] = Question.objects.recent_tags(self.request.user)[:10]
+
         return context
 
     def form_valid(self, form):

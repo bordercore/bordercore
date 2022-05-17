@@ -1,6 +1,6 @@
 from django.apps import apps
 from django.db import models
-from django.db.models import Count, F, Min, Q
+from django.db.models import Count, F, Max, Min, Q
 from django.utils import timezone
 
 from tag.models import Tag
@@ -109,3 +109,18 @@ class DrillManager(models.Manager):
             info.append(Question.get_tag_progress(user, tag.name))
 
         return info
+
+    def recent_tags(self, user):
+        """
+        Get the tags most recently attached to questions
+        """
+
+        Question = apps.get_model("drill", "Question")
+
+        return Question.objects.values(
+            name=F("tags__name")
+        ).annotate(
+            max=Max("created")
+        ).order_by(
+            "-max"
+        )
