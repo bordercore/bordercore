@@ -25,7 +25,7 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-lg-11 offset-lg-1 d-flex">
+                                <div class="col-lg-11 offset-lg-1 d-flex align-items-center">
                                     <div class="ps-1 text-info">
                                         {{ message }}
                                     </div>
@@ -52,19 +52,16 @@
                             </div>
 
                             <div class="row">
-                                <div class="col-lg-11 offset-lg-1 d-flex">
+                                <div class="col-lg-11 offset-lg-1 d-flex align-items-center">
                                     <div class="d-flex flex-column">
                                         <div v-if="gettingTitle" class="spinner-border ms-2" role="status">
                                             <span class="sr-only">Loading...</span>
                                         </div>
-                                        <div class="mt-2 ps-1 text-info">
+                                        <div class="ps-1 text-info">
                                             {{ message }}
                                         </div>
-                                        <div class="mt-2 text-info" :class="{'d-none': hideBookmarkAdded}">
-                                            <font-awesome-icon class="me-1 pt-1 success" icon="check" /> Bookmark successfully added
-                                        </div>
                                     </div>
-                                    <div class="ms-auto">
+                                    <div id="bookmark-select-add" class="d-flex align-items-center ms-auto">
                                         <button v-if="!hideAddButton" type="button" class="btn btn-primary me-2" @click="onAdd">
                                             Add
                                         </button>
@@ -116,9 +113,6 @@
             },
             hideAddButton() {
                 return !this.url || !this.name;
-            },
-            hideBookmarkAdded() {
-                return !this.bookmarkAdded;
             },
             nameInputIsDisabled() {
                 return this.bookmarkUuid !== null;
