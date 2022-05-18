@@ -1,7 +1,7 @@
 <template>
-    <div class="hover-reveal-target">
+    <div v-if="bookmarkList.length > 0 || showEmptyList" class="hover-reveal-target mb-3">
         <transition :name="transitionName">
-            <card v-if="bookmarkList.length > 0 || showEmptyList" class="position-relative">
+            <card class="position-relative h-100">
                 <template #title-slot>
                     <div class="d-flex">
                         <div class="card-title d-flex">
@@ -58,13 +58,6 @@
                             </transition-group>
                         </draggable>
                     </ul>
-                    <bookmark-select
-                        ref="bookmarkSearch"
-                        :search-url="searchBookmarkUrl"
-                        :create-bookmark-url="createBookmarkUrl"
-                        :get-title-from-url-url="getTitleFromUrlUrl"
-                        @select-bookmark="selectBookmark"
-                    />
                 </template>
             </card>
         </transition>
@@ -93,18 +86,6 @@
                 type: String,
             },
             getBookmarkListUrl: {
-                default: "",
-                type: String,
-            },
-            searchBookmarkUrl: {
-                default: "",
-                type: String,
-            },
-            getTitleFromUrlUrl: {
-                default: "",
-                type: String,
-            },
-            createBookmarkUrl: {
                 default: "",
                 type: String,
             },
@@ -203,7 +184,7 @@
                 const modal = new Modal("#modalAddBookmark");
                 modal.show();
                 setTimeout( () => {
-                    this.$refs.bookmarkSearch.$refs.simpleSuggest.$refs.suggestComponent.input.focus();
+                    document.querySelector("#modalAddBookmark input").focus();
                 }, 500);
             },
             selectBookmark(bookmark) {

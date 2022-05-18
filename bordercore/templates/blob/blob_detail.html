@@ -197,6 +197,14 @@
                 :show-empty-list="false"
             >
             </related-bookmarks-list>
+            <bookmark-select
+                ref="bookmarkSearch"
+                search-url="{% url 'bookmark:search' %}"
+                create-bookmark-url="{% url 'bookmark-list' %}"
+                get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
+                @select-bookmark="selectBookmark"
+            >
+            </bookmark-select>
 
             <card v-if="relatedBlobList.length > 0" title="Related Blobs">
                 <template #content>
@@ -503,7 +511,10 @@
                         "Blob unlinked",
                         ""
                     );
-                }
+                },
+                selectBookmark(bookmarkInfo) {
+                    this.$refs.relatedBookmarksList[0].selectBookmark(bookmarkInfo);
+                },
             },
             mounted() {
                 {% if not elasticsearch_info %}

@@ -102,9 +102,6 @@
                                 model-name="node.Node"
                                 title="Bookmarks"
                                 get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=node.Node"
-                                create-bookmark-url="{% url 'bookmark-list' %}"
-                                search-bookmark-url="{% url 'bookmark:search' %}"
-                                get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
                                 add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
                                 :update-modified="true"
                                 remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"
@@ -124,7 +121,16 @@
                 search-blob-url="{% url 'search:search_names' %}?doc_type=blob,book,document,note&term="
                 recent-blobs-url="{% url "blob:recent_blobs" %}"
                 @select-blob="selectBlob"
-            />
+            >
+            </blob-select>
+            <bookmark-select
+                ref="bookmarkSearch"
+                search-url="{% url 'bookmark:search' %}"
+                create-bookmark-url="{% url 'bookmark-list' %}"
+                get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
+                @select-bookmark="selectBookmark"
+            >
+            </bookmark-select>
 
         </div>
 
@@ -184,20 +190,8 @@
                 refreshNodeTodo(payload) {
                     this.$refs.todoList[0].getTodoList();
                 },
-                selectBookmark(bookmark_uuid) {
-                    doPost(
-                        this,
-                        "{% url "node:add_bookmark" %}",
-                        {
-                            "node_uuid": this.$store.state.nodeUuid,
-                            "bookmark_uuid": bookmark_uuid,
-                        },
-                        (response) => {
-                            this.getBookmarkList();
-                        },
-                        "Bookmark added",
-                        ""
-                    );
+                selectBookmark(bookmarkInfo) {
+                    this.$refs.relatedBookmarksList[0].selectBookmark(bookmarkInfo);
                 },
                 selectBlob(blob) {
                     doPost(
