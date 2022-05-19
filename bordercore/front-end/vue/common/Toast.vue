@@ -7,7 +7,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close" />
             </div>
             <div class="toast-body d-flex align-items-start">
-                <font-awesome-icon class="fa-lg me-2 mb-1 pt-1 text-success" icon="check" />
+                <font-awesome-icon class="fa-lg me-2 mb-1 pt-1" :class="'text-' + variant" :icon="getIcon()" />
                 <div v-html="body" />
             </div>
         </div>
@@ -25,10 +25,6 @@
             initialMessages: {
                 type: Array,
                 default: () => [],
-            },
-            defaultTitle: {
-                type: String,
-                default: "Info",
             },
             defaultVariant: {
                 type: String,
@@ -62,7 +58,7 @@
                 if (payload.title !== undefined) {
                     this.title = payload.title;
                 } else {
-                    this.title = this.defaultTitle;
+                    this.title = payload.variant.charAt(0).toUpperCase() + payload.variant.slice(1);
                 }
                 if (payload.variant !== null) {
                     this.variant = payload.variant;
@@ -77,6 +73,15 @@
                     this.bsToast._config.delay = payload.delay;
                 }
                 this.bsToast.show();
+            },
+            getIcon() {
+                if (this.variant === "danger") {
+                    return "exclamation-triangle";
+                } else if (this.variant === "warning") {
+                    return "question";
+                } else {
+                    return "check";
+                }
             },
         },
     };
