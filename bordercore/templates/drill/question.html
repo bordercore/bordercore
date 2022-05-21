@@ -279,9 +279,8 @@
                 }
 
                 hotkeys("ctrl+return,right,space,e,g,h,r", function (event, handler) {
-
-                    // Ignore event if this is a top search query
-                    if (event.srcElement.id === "top-simple-suggest") {
+                    // Ignore event if the user is typing in an "INPUT" element
+                    if (document.activeElement.tagName === "INPUT") {
                         return;
                     }
                     if (event.target.parentElement.classList.contains("code-input")) {
