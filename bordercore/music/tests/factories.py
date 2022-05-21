@@ -19,7 +19,6 @@ class ArtistFactory(factory.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
 
 
-@factory.django.mute_signals(signals.post_save)
 class AlbumFactory(factory.DjangoModelFactory):
 
     class Meta:

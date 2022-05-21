@@ -9,6 +9,7 @@ from django import urls
 from django.db.models import signals
 
 from music.models import Album, Playlist, Song
+from music.tests.factories import AlbumFactory, ArtistFactory
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
@@ -324,3 +325,29 @@ def test_music_dupe_song_checker(auto_login_user, song):
     response = resp.json()
     assert response["dupes"][0]["title"] == song[0].title
     assert response["dupes"][0]["uuid"] == str(song[0].uuid)
+
+
+def test_music_recent_albums(auto_login_user):
+
+    user, client = auto_login_user()
+
+    artist = ArtistFactory(user=user)
+    albums = AlbumFactory.create_batch(20, artist=artist, user=user)
+
+    url = urls.reverse("music:recent_albums", kwargs={"page_number": 1})
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+    album_list = resp.json()["album_list"]
+    assert len(album_list) == 12
+    assert str(albums[-1].uuid) in [x["uuid"] for x in album_list]
+    assert str(albums[0].uuid) not in [x["uuid"] for x in album_list]
+
+    url = urls.reverse("music:recent_albums", kwargs={"page_number": 2})
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+    album_list = resp.json()["album_list"]
+    assert len(album_list) == 8
+    assert str(albums[-1].uuid) not in [x["uuid"] for x in album_list]
+    assert str(albums[0].uuid) in [x["uuid"] for x in album_list]

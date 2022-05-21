@@ -1,13 +1,15 @@
 from urllib.parse import unquote
 
 from django.conf import settings
+from django.core.paginator import Paginator
 from django.db.models import Count, Sum
 from django.db.models.functions import Coalesce
+from django.urls import reverse
 
 from lib.time_utils import convert_seconds
 from lib.util import get_elasticsearch_connection
 
-from .models import Playlist, PlaylistItem
+from .models import Album, Playlist, PlaylistItem
 
 SEARCH_LIMIT = 1000
 
@@ -60,6 +62,46 @@ def get_playlist_songs(playlist):
         "song_list": song_list,
         "playtime": playtime
     }
+
+
+def get_recent_albums(user, page_number=1):
+
+    ALBUMS_PER_PAGE = 12
+
+    query = Album.objects.filter(
+        user=user
+    ).select_related(
+        "artist"
+    ).order_by(
+        "-created"
+    )
+
+    paginator = Paginator(query, ALBUMS_PER_PAGE)
+    page = paginator.get_page(page_number)
+
+    paginator_info = {
+        "page_number": page_number,
+        "has_next": page.has_next(),
+        "has_previous": page.has_previous(),
+        "next_page_number": page.next_page_number() if page.has_next() else None,
+        "previous_page_number": page.previous_page_number() if page.has_previous() else None,
+        "count": paginator.count
+    }
+
+    recent_albums = [
+        {
+            "uuid": x.uuid,
+            "title": x.title,
+            "artist_uuid": x.artist.uuid,
+            "artist_name": x.artist.name,
+            "created": x.created.strftime("%B %Y"),
+            "album_url": reverse("music:album_detail", kwargs={"uuid": x.uuid}),
+            "artwork_url": f"{settings.IMAGES_URL}album_artwork/{x.uuid}",
+            "artist_url": reverse("music:artist_detail", kwargs={"artist_uuid": x.artist.uuid}),
+        } for x in page.object_list
+    ]
+
+    return recent_albums, paginator_info
 
 
 def search(user, artist_name):

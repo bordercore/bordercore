@@ -120,4 +120,9 @@ urlpatterns = [
         view=views.dupe_song_checker,
         name="dupe_song_checker"
     ),
+    path(
+        route="recent_albums/<int:page_number>/",
+        view=views.recent_albums,
+        name="recent_albums"
+    ),
 ]

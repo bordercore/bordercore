@@ -32,6 +32,7 @@ from music.services import search as search_service
 from .forms import AlbumForm, PlaylistForm, SongForm
 from .models import Album, Artist, Playlist, PlaylistItem, Song
 from .services import get_playlist_counts, get_playlist_songs
+from .services import get_recent_albums as get_recent_albums_service
 
 
 @login_required
@@ -51,8 +52,9 @@ def music_list(request):
     # Get all playlists and their song counts
     playlists = get_playlist_counts(request.user)
 
+    page_number = request.GET.get("page_number", None)
     # Get a list of recently added albums
-    recent_albums = Album.objects.filter(user=request.user).select_related("artist").order_by("-created")[:12]
+    recent_albums, paginator_info = get_recent_albums_service(request.user, page_number)
 
     # Verify that the user has at least one song in their collection
     collection_is_not_empty = Song.objects.filter(user=request.user).exists()
@@ -62,6 +64,7 @@ def music_list(request):
                       "cols": ["Date", "artist", "title", "id"],
                       "recent_songs": recent_songs,
                       "recent_albums": recent_albums,
+                      "paginator_info": json.dumps(paginator_info),
                       "random_album": random_album,
                       "playlists": playlists,
                       "title": "Music List",
@@ -833,3 +836,18 @@ def missing_artist_images(request):
             ))
 
     return render(request, "music/index.html")
+
+
+# @login_required
+def recent_albums(request, page_number):
+    """
+    Get a list of recently added albums
+    """
+    recent_albums, paginator = get_recent_albums_service(request.user, page_number)
+    response = {
+        "status": "OK",
+        "album_list": recent_albums,
+        "paginator": paginator
+    }
+
+    return JsonResponse(response)

@@ -19,25 +19,24 @@
 
         {% else %}
 
-        <div class="col-lg-3 d-flex flex-column">
+        <div class="flex-grow-last col-lg-3 d-flex flex-column">
 
             {% if random_album %}
                 <card title="Featured Album" class="flex-grow-0">
                     <template v-slot:content>
-                        <table class="table table-borderless">
-                            <tr>
-                                <td>
-                                    <a href="{% url 'music:album_detail' random_album.uuid %}">
-                                        <img src="{{ IMAGES_URL }}album_artwork/{{ random_album.uuid }}" height="150" width="150" />
-                                    </a>
-                                </td>
-                                <td>
-                                    <strong>{{ random_album.title }}</strong>
-                                    <br />
-                                    {{ random_album.artist }}
-                                </td>
-                            </tr>
-                        </table>
+                        <div>
+                            <a href="{% url 'music:album_detail' random_album.uuid %}">
+                                <img src="{{ IMAGES_URL }}album_artwork/{{ random_album.uuid }}" height="150" width="150" />
+                            </a>
+                        </div>
+                        <div class="mt-1 fw-bold">
+                            {{ random_album.title }}
+                        </div>
+                        <div class="text-light">
+                            <a href="{% url 'music:artist_detail' random_album.artist.uuid %}">
+                                {{ random_album.artist }}
+                            </a>
+                        </div>
                     </template>
                 </card>
             {% endif %}
@@ -99,36 +98,46 @@
                 </template>
 
                 <template v-slot:content>
-                    <table class="table-borderless mt-2">
-                        <tr>
+                    <div class="d-flex ms-2">
 
-                            {% for album in recent_albums %}
-
-                                {% if forloop.counter0|divisibleby:"4" %}
-
-                        </tr>
-                        <tr class="m-2">
-
-                            {% endif %}
-
-                            <td class="w-25 hoverable p-2">
-                                <a href="{% url 'music:album_detail' album.uuid %}">
-                                    <img src="{{ IMAGES_URL }}album_artwork/{{ album.uuid }}" height="150" width="150" /> <br />
-                                </a>
-                                <div class="mt-1 fw-bold">
-                                    {{ album.title }}
-                                </div>
-                                <div class="text-light">
-                                    <a href="{% url 'music:artist_detail' album.artist.uuid %}">
-                                        {{ album.artist.name }}
+                        <div id="album-list" class="d-flex flex-wrap justify-content-evenly">
+                            <div v-for="album in recentAlbums" class="hoverable p-2" data-bs-toggle="tooltip" data-placement="bottom" :title="'Added ' + album.created">
+                                <div>
+                                    <a :href="album.album_url">
+                                        <img :src="album.artwork_url" height="150" width="150" />
                                     </a>
                                 </div>
-                            </td>
+                                <div class="mt-1 fw-bold">
+                                    [[ album.title ]]
+                                </div>
+                                <div class="text-light">
+                                    <a :href="album.artist_url">
+                                        [[ album.artist_name ]]
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
 
-                            {% endfor %}
+                        <h5 v-if="needsPagination()" class="d-flex mb-0 me-1 pt-3">
+                            <div>
+                                <a v-if="paginator.has_previous" href="#" @click.prevent="paginate('prev')">
+                                    <font-awesome-icon icon="chevron-left" class="text-emphasis glow icon-hover" />
+                                </a>
+                                <span v-else>
+                                    <font-awesome-icon icon="chevron-left" class="text-emphasis icon-disabled" />
+                                </span>
+                            </div>
+                            <div>
+                                <a v-if="paginator.has_next" href="#" @click.prevent="paginate('next')" class="ms-1">
+                                    <font-awesome-icon icon="chevron-right" class="text-emphasis glow icon-hover" />
+                                </a>
+                                <span v-else>
+                                    <font-awesome-icon icon="chevron-right" class="text-emphasis icon-disabled" />
+                                </span>
+                            </div>
+                        </h5>
 
-                        </tr>
-                    </table>
+                    </div>
                 </template>
             </card>
 
@@ -187,6 +196,7 @@
 
     {{ block.super }}
 
+    {{ recent_albums|json_script:"recent_albums" }}
     {{ tags|json_script:"initial-tags"|default:"" }}
 
     <script type="text/javascript" charset="utf-8">
@@ -198,6 +208,8 @@
             },
             data() {
                 return {
+                    paginator: {{ paginator_info|safe }},
+                    recentAlbums: JSON.parse(document.getElementById("recent_albums").textContent),
                     songList: [],
                 }
             },
@@ -209,19 +221,30 @@
                 })
             },
             methods: {
-                myProvider(ctx, callback) {
-                    const params = "?page=" + ctx.currentPage + "&size=" + ctx.perPage
-                    const promise = axios.get("{% url "music:recent_songs" %}" + params)
-
-                    return promise.then(data => {
-                        const items = data.data.song_list
-                        return items || []
-                    })
+                needsPagination() {
+                    return this.paginator.has_previous || this.paginator.has_next;
                 },
                 onClickCreate(evt) {
                     const modal = new Modal("#modalCreateUpdate");
                     modal.show();
                     window.setTimeout(() => { document.getElementById("id_name").focus() }, 500);
+                },
+                paginate(direction) {
+                    let pageNumber;
+                    if (direction === "prev") {
+                        pageNumber = this.paginator.previous_page_number;
+                    } else {
+                        pageNumber = this.paginator.next_page_number;
+                    }
+                    doGet(
+                        this,
+                        "{% url "music:recent_albums" 666 %}".replace(/666/, pageNumber),
+                        (response) => {
+                            this.recentAlbums = response.data.album_list;
+                            this.paginator = response.data.paginator;
+                        },
+                        "Error getting recent albums",
+                    );
                 },
             },
         });
