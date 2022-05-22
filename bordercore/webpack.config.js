@@ -87,6 +87,10 @@ module.exports = (env, argv) => {
                     test: /\.(js|jsx)$/,
                     use: "babel-loader",
                 },
+                {
+                    test: /\.(png|woff|woff2|eot|ttf|svg)$/,
+                    loader: "url-loader",
+                },
             ],
         },
     };
