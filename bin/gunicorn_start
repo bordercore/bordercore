@@ -31,5 +31,5 @@ exec gunicorn ${DJANGO_WSGI_MODULE}:application \
   --user=$USER \
   --group=$GROUP \
   --bind=$HOST \
-  --log-level=debug \
+  --log-level=info \
   --log-file=-
