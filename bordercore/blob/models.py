@@ -28,26 +28,26 @@ from lib.time_utils import get_date_from_pattern
 from lib.util import get_elasticsearch_connection, is_audio, is_image, is_video
 from tag.models import Tag
 
-EDITIONS = {'1': 'First',
-            '2': 'Second',
-            '3': 'Third',
-            '4': 'Fourth',
-            '5': 'Fifth',
-            '6': 'Sixth',
-            '7': 'Seventh',
-            '8': 'Eighth',
-            '9': 'Ninth'}
+EDITIONS = {"1": "First",
+            "2": "Second",
+            "3": "Third",
+            "4": "Fourth",
+            "5": "Fifth",
+            "6": "Sixth",
+            "7": "Seventh",
+            "8": "Eighth",
+            "9": "Ninth"}
 
 MAX_COVER_IMAGE_WIDTH = 800
 
 FILE_TYPES_TO_INGEST = [
-    'azw3',
-    'chm',
-    'epub',
-    'html',
-    'mp3',
-    'pdf',
-    'txt'
+    "azw3",
+    "chm",
+    "epub",
+    "html",
+    "mp3",
+    "pdf",
+    "txt"
 ]
 
 ILLEGAL_FILENAMES = [
@@ -139,7 +139,7 @@ class Blob(TimeStampedModel):
         name = self.name
         if name:
             if remove_edition_string:
-                pattern = re.compile(r'(.*) (\d)E$')
+                pattern = re.compile(r"(.*) (\d)E$")
                 matches = pattern.match(name)
                 if matches and EDITIONS.get(matches.group(2), None):
                     return "%s" % (matches.group(1))
@@ -152,7 +152,7 @@ class Blob(TimeStampedModel):
 
     def get_edition_string(self):
         if self.name:
-            pattern = re.compile(r'(.*) (\d)E$')
+            pattern = re.compile(r"(.*) (\d)E$")
             matches = pattern.match(self.name)
             if matches and EDITIONS.get(matches.group(2), None):
                 return "%s Edition" % (EDITIONS[matches.group(2)])
@@ -333,7 +333,7 @@ class Blob(TimeStampedModel):
             {
                 "uuid": blob.uuid,
                 "name": blob.name,
-                "url": reverse('blob:detail', kwargs={"uuid": str(blob.uuid)}),
+                "url": reverse("blob:detail", kwargs={"uuid": str(blob.uuid)}),
                 "cover_url": blob.get_cover_url_small()
             }
 
@@ -648,7 +648,7 @@ class MetaData(TimeStampedModel):
         return self.name
 
     class Meta:
-        unique_together = ('name', 'value', 'blob')
+        unique_together = ("name", "value", "blob")
 
 
 class SortOrderBlobBookmark(SortOrderMixin):
