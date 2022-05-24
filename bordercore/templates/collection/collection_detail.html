@@ -19,9 +19,9 @@
 
     <div class="row g-0 h-100 mx-2" id="vue-app">
 
-        <div class="col-lg-3 d-flex flex-column">
+        <div class="col-lg-3 d-flex flex-column flex-grow-last h-100">
 
-            <div class="card-body">
+            <div class="card-body h-100">
 
                 {% if collection.description %}
                     <h3 class="mb-3">{{ collection.description }}</h3>
@@ -76,10 +76,8 @@
 
         </div>
 
-        <div class="col-lg-9">
-
-            <card>
-
+        <div class="col-lg-9 d-flex flex-column h-100">
+            <card class="h-100">
                 <template v-slot:title-slot>
                     <div class="d-flex align-items-center">
                         <h3 class="me-auto">
@@ -128,7 +126,7 @@
 
                         <h5 v-if="needsPagination()" class="d-flex mb-0 me-1 pt-3">
                             <div>
-                                <a v-if="$store.state.paginator.has_previous" href="#" @click.prevent="paginate('prev')">
+                                <a v-if="$store.state.paginator.has_previous" href="#" @click.prevent="paginate('prev')" class="me-1">
                                     <font-awesome-icon icon="chevron-left" class="text-emphasis glow icon-hover" />
                                 </a>
                                 <span v-else>
