@@ -376,10 +376,15 @@
                 onAddBlob(evt) {
                     document.getElementById("collection-list").classList.remove("collection-drag-over");
 
-                    const modal = Modal.getInstance(document.getElementById("modalProcessing"));
-                    modal.hide();
-
                     fileList = evt.dataTransfer.files;
+                    if (fileList.length === 0) {
+                        // No files means we're sorting blobs, not adding one
+                        return;
+                    }
+
+                    const modal = new Modal("#modalProcessing");
+                    modal.show();
+
                     const blob = fileList[0]
                     let formData = new FormData();
                     formData.append("blob", blob);
