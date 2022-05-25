@@ -5,6 +5,7 @@ bordercore/static/docs/
 bordercore/static/img/favicons/*
 !bordercore/static/img/favicons/README
 bordercore/static/blobs
+bordercore/static/fonts/*zip
 secrets.json
 .projectile
 node_modules/

@@ -107,15 +107,36 @@
 }
 
 //
-// Common selectors
+// Fonts
 //
 
-@import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
+@font-face {
+  font-family: "Roboto";
+  font-style: normal;
+  font-weight: 400;
+  src:  url("../../fonts/Roboto-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: normal;
+  font-weight: 400;
+  src:  url("../../fonts/Lato-Regular.ttf") format("truetype");
+}
+
+//
+// Common selectors
+//
 
 body {
   min-height: 100vh;
   background-size: cover;
-  font-family: "Poppins", sans-serif;
+  font-family: "Lato", sans-serif;
+  line-height: 2rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Roboto", sans-serif;
 }
 
 a {
@@ -162,10 +183,7 @@ input[type="checkbox"] {
 }
 
 p {
-  font-family: "Poppins", sans-serif;
-  font-size: 1.1em;
-  font-weight: 300;
-  line-height: 1.7em;
+  font-size: 1.25em;
 }
 
 i,
@@ -722,24 +740,6 @@ table.b-table th {
   transition: none;
 }
 
-/* // BootstrapVue table sort icon: none */
-/* body .table.b-table > tfoot > tr > [aria-sort=none], */
-/* body .table.b-table > thead > tr > th[aria-sort=none] { */
-/*   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' opacity='.3' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' opacity='.3' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important; */
-/* } */
-
-/* // BootstrapVue table sort icon: ascending */
-/* body .table.b-table > tfoot > tr > [aria-sort=ascending], */
-/* body .table.b-table > thead > tr > th[aria-sort=ascending] { */
-/*   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' opacity='.3' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important; */
-/* } */
-
-/* // BootstrapVue table sort icon: descending */
-/* body .table.b-table > tfoot > tr > [aria-sort=descending], */
-/* body .table.b-table > thead > tr > [aria-sort=descending] { */
-/*   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' opacity='.3' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important; */
-/* } */
-
 .table_header {
   border-radius: 0.25rem;
 }
@@ -903,6 +903,7 @@ pre {
   position: absolute;
   top: -1rem;
   right: 0;
+  line-height: 1.5rem;
 }
 
 #top-bar {
