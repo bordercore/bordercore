@@ -6,7 +6,7 @@
                 <small v-html="additionalTitle" />
                 <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close" />
             </div>
-            <div class="toast-body d-flex align-items-start">
+            <div class="toast-body d-flex align-items-center">
                 <font-awesome-icon class="fa-lg me-2 mb-1 pt-1" :class="'text-' + variant" :icon="getIcon()" />
                 <div v-html="body" />
             </div>
@@ -55,15 +55,15 @@
         },
         methods: {
             toast(payload) {
-                if (payload.title !== undefined) {
-                    this.title = payload.title;
-                } else {
-                    this.title = payload.variant.charAt(0).toUpperCase() + payload.variant.slice(1);
-                }
-                if (payload.variant !== null) {
+                if (payload.variant !== undefined) {
                     this.variant = payload.variant;
                 } else {
                     this.variant = this.defaultVariant;
+                }
+                if (payload.title !== undefined) {
+                    this.title = payload.title;
+                } else {
+                    this.title = this.variant.charAt(0).toUpperCase() + this.variant.slice(1);
                 }
                 this.body = payload.body;
                 if (payload.autoHide !== undefined) {
