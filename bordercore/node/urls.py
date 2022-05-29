@@ -84,5 +84,15 @@ urlpatterns = [
         route="change_layout",
         view=views.change_layout,
         name="change_layout"
+    ),
+    path(
+        route="collection/add",
+        view=views.add_collection,
+        name="add_collection"
+    ),
+    path(
+        route="collection/delete",
+        view=views.delete_collection,
+        name="delete_collection"
     )
 ]

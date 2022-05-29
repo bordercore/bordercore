@@ -1,6 +1,8 @@
 import pytest
 
-from collection.models import SortOrderCollectionBlob
+from blob.tests.factories import BlobFactory
+from collection.models import (SortOrderCollectionBCObject,
+                               SortOrderCollectionBlob)
 
 pytestmark = pytest.mark.django_db
 
@@ -53,3 +55,29 @@ def test_get_blob_list(collection, blob_image_factory, blob_pdf_factory):
     assert blob_list[1]["uuid"] == blob_image_factory[0].uuid
     assert blob_list[0]["name"] == blob_pdf_factory[0].name
     assert blob_list[1]["name"] == blob_image_factory[0].name
+
+
+def test_add_object(collection):
+
+    blob = BlobFactory(user=collection[0].user)
+
+    collection[0].add_object(blob)
+
+    assert SortOrderCollectionBCObject.objects.filter(
+        collection=collection[0],
+        blob=blob
+    ).exists()
+
+
+def test_remove_object(collection):
+
+    blob = BlobFactory(user=collection[0].user)
+
+    collection[0].add_object(blob)
+
+    collection[0].remove_object(blob.uuid)
+
+    assert not SortOrderCollectionBCObject.objects.filter(
+        collection=collection[0],
+        blob=blob
+    ).exists()

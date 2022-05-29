@@ -228,6 +228,10 @@ import NodeTodoList from "./vue/node/NodeTodoList.vue";
 Vue.component("NodeTodoList", NodeTodoList);
 window.NodeTodoList = NodeTodoList;
 
+import CollectionObjectList from "./vue/collection/CollectionObjectList.vue";
+Vue.component("CollectionObjectList", CollectionObjectList);
+window.CollectionObjectList = CollectionObjectList;
+
 import IconButton from "./vue/common/IconButton.vue";
 Vue.component("IconButton", IconButton);
 window.IconButton = IconButton;

@@ -140,3 +140,55 @@ def test_collection_blob_list(auto_login_user, collection, blob_image_factory, b
 
     assert blob_image_factory[0].name in [x["name"] for x in payload["blob_list"]]
     assert blob_pdf_factory[0].name in [x["name"] for x in payload["blob_list"]]
+
+
+def test_collection_get_blob_list(auto_login_user, collection):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("collection:get_blob_list", kwargs={
+        "collection_uuid": collection[0].uuid
+    })
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+
+    resp_json = resp.json()
+
+    assert len(resp_json["blob_list"]) == 2
+
+    blob_list = collection[0].blobs.all()
+    assert str(blob_list[0].uuid) in [
+        x["uuid"] for x in resp_json["blob_list"]
+    ]
+    assert str(blob_list[1].uuid) in [
+        x["uuid"] for x in resp_json["blob_list"]
+    ]
+
+
+def test_add_blob(auto_login_user, collection, blob_image_factory):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("collection:add_blob")
+    resp = client.post(url, {
+        "collection_uuid": collection[0].uuid,
+        "blob_uuid": blob_image_factory[0].uuid
+    })
+
+    assert resp.status_code == 200
+
+
+def test_remove_object(auto_login_user, collection, blob_image_factory):
+
+    _, client = auto_login_user()
+
+    collection[0].add_object(blob_image_factory[0])
+
+    url = urls.reverse("collection:remove_object")
+    resp = client.post(url, {
+        "collection_uuid": collection[0].uuid,
+        "object_uuid": blob_image_factory[0].uuid
+    })
+
+    assert resp.status_code == 200

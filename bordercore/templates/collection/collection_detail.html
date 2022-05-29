@@ -390,7 +390,7 @@
                     formData.append("blob", blob);
                     formData.append("collection_uuid", "{{ collection.uuid }}");
 
-                    axios.post("{% url "collection:add_blob" %}", formData, {
+                    axios.post("{% url "collection:create_blob" %}", formData, {
                         headers: {
                             "Content-Type": "multipart/form-data"
                         }

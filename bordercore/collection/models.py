@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import datetime
 import json
 import logging
 import re
@@ -11,6 +12,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.db import models
+from django.db.models import Q
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.urls import reverse
@@ -19,7 +21,6 @@ from lib.mixins import SortOrderMixin, TimeStampedModel
 from tag.models import Tag
 
 log = logging.getLogger(f"bordercore.{__name__}")
-
 
 BLOB_COUNT_PER_PAGE = 30
 
@@ -33,12 +34,44 @@ class Collection(TimeStampedModel):
     name = models.CharField(max_length=200)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     blobs = models.ManyToManyField("blob.Blob", through="SortOrderCollectionBlob")
+    objects = models.ManyToManyField("collection.BCObject", through="SortOrderCollectionBCObject")
     tags = models.ManyToManyField(Tag)
     description = models.TextField(blank=True, default="")
     is_private = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
+
+    def add_object(self, object):
+
+        from blob.models import Blob
+        from bookmark.models import Bookmark
+
+        if isinstance(object, Bookmark):
+            so = SortOrderCollectionBCObject(collection=self, bookmark=object)
+        elif isinstance(object, Blob):
+            so = SortOrderCollectionBCObject(collection=self, blob=object)
+        else:
+            raise ValueError(f"Unsupported type: {type(object)}")
+        so.save()
+
+        self.modified = datetime.datetime.now()
+        self.save()
+
+        # self.create_collection_thumbnail()
+
+    def remove_object(self, object_uuid):
+
+        so = SortOrderCollectionBCObject.objects.get(
+            Q(blob__uuid=object_uuid) | Q(bookmark__uuid=object_uuid),
+            collection__uuid=self.uuid
+        )
+        so.delete()
+
+        self.modified = datetime.datetime.now()
+        self.save()
+
+        # self.create_collection_thumbnail()
 
     def add_blob(self, blob):
 
@@ -136,6 +169,43 @@ class Collection(TimeStampedModel):
             "paginator": json.dumps(paginator_info)
         }
 
+    def get_object_list(self, request=None, limit=BLOB_COUNT_PER_PAGE, page_number=1):
+
+        object_list = []
+
+        queryset = SortOrderCollectionBCObject.objects.filter(collection=self).prefetch_related("blob").prefetch_related("bookmark")
+
+        # if request and "tag" in request.GET:
+        #     queryset = queryset.filter(blob__tags__name=request.GET["tag"])
+
+        # so = queryset.select_related("blob")
+
+        if request and "page" in request.GET:
+            page_number = request.GET["page"]
+
+        paginator = Paginator(queryset, limit)
+        page = paginator.page(page_number)
+
+        for so_object in page.object_list:
+            object_list.append({
+                "note": so_object.note,
+                **so_object.get_properties()
+            })
+
+        paginator_info = {
+            "page_number": page_number,
+            "has_next": page.has_next(),
+            "has_previous": page.has_previous(),
+            "next_page_number": page.next_page_number() if page.has_next() else None,
+            "previous_page_number": page.previous_page_number() if page.has_previous() else None,
+            "count": paginator.count
+        }
+
+        return {
+            "object_list": object_list,
+            "paginator": json.dumps(paginator_info)
+        }
+
     def get_recent_images(self, limit=4):
         """
         Return a list of the most recent images added to this collection
@@ -185,6 +255,61 @@ class SortOrderCollectionBlob(SortOrderMixin):
         unique_together = (
             ("collection", "blob")
         )
+
+
+class SortOrderCollectionBCObject(SortOrderMixin):
+
+    collection = models.ForeignKey(Collection, on_delete=models.CASCADE)
+    blob = models.ForeignKey("blob.Blob", null=True, on_delete=models.PROTECT)
+    bookmark = models.ForeignKey("bookmark.Bookmark", null=True, on_delete=models.PROTECT)
+    object = models.ForeignKey("collection.BCObject", on_delete=models.CASCADE, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    field_name = "collection"
+
+    class Meta:
+        ordering = ("sort_order",)
+        unique_together = (
+            ("collection", "blob", "bookmark")
+        )
+
+    def __str__(self):
+        return f"SortOrder: {self.collection}, {self.blob}, {self.bookmark}"
+
+    def get_properties(self):
+        """
+        """
+
+        if self.blob is not None:
+            return {
+                "so_id": self.id,
+                "id": self.blob.id,
+                "uuid": self.blob.uuid,
+                "filename": self.blob.file.name,
+                "name": re.sub("[\n\r]", "", self.blob.name) if self.blob.name else "",
+                "url": reverse("blob:detail", kwargs={"uuid": self.blob.uuid}),
+                "sha1sum": self.blob.sha1sum,
+                "cover_url": self.blob.get_cover_url_small(),
+            }
+        elif self.bookmark is not None:
+            return {
+                "so_id": self.id,
+                "uuid": self.bookmark.uuid,
+                "name": self.bookmark.name,
+                "url": self.bookmark.url
+            }
+        else:
+            raise ValueError(f"Unsupported object, uuid: {self.uuid}")
+
+
+class BCObject(TimeStampedModel):
+
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+
+
+@receiver(pre_delete, sender=SortOrderCollectionBCObject)
+def remove_object(sender, instance, **kwargs):
+    instance.handle_delete()
 
 
 @receiver(pre_delete, sender=SortOrderCollectionBlob)

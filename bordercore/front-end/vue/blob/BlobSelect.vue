@@ -46,10 +46,14 @@
             return {
                 name: "",
                 blobUuid: null,
+                collectionUuid: null,
+                callback: null,
             };
         },
         methods: {
-            openModal() {
+            openModal(collectionUuid, callback) {
+                this.collectionUuid = collectionUuid;
+                this.callback = callback;
                 const modal = new Modal("#modalAddBlob");
                 modal.show();
                 setTimeout( () => {
@@ -79,7 +83,7 @@
             },
             select(selection) {
                 // The parent component receives the blob uuid
-                this.$emit("select-blob", selection);
+                this.$emit("select-blob", selection, this.collectionUuid, this.callback);
 
                 const modal = Modal.getInstance(document.getElementById("modalAddBlob"));
                 modal.hide();

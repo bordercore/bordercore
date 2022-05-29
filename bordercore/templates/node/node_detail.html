@@ -24,9 +24,18 @@
         >
             <div slot="dropdown" class="mt-0">
                 <li>
+                    <a class="dropdown-item" href="#" @click.prevent="onAddCollection">
+                        <span v-cloak>
+                            <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                            Add collection
+                        </span>
+                    </a>
+                </li>
+                <li>
                     <a class="dropdown-item" href="#" @click.prevent="onEditMode">
                         <span v-cloak>
-                            <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>[[ editLayoutDropDownItemValue ]]
+                            <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>
+                            [[ editLayoutDropDownItemValue ]]
                         </span>
                     </a>
                 </li>
@@ -62,9 +71,22 @@
                     :disabled="!$store.state.editLayout"
                 >
                     <div v-for="(obj, rowIndex) in column">
+                        <div v-if="obj.type === 'collection'" key="collection">
+                            <collection-object-list
+                                :initial-name="obj.name"
+                                :uuid="obj.uuid"
+                                :node-uuid="$store.state.nodeUuid"
+                                update-collection-url="{% url "collection-detail" "00000000-0000-0000-0000-000000000000" %}"
+                                update-object-note-url="{% url "collection:update_object_note" %}"
+                                :get-object-list-url="'{% url "collection:get_object_list" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', obj.uuid)"
+                                remove-object-url="{% url "collection:remove_object" %}"
+                                sort-objects-url="{% url "collection:sort_objects" %}"
+                                @delete-collection="onDeleteCollection"
+                            >
+                            </collection-object-list>
+                        </div>
                         <div v-if="obj.type === 'blob'" key="blob">
                             <node-blob-list
-                                class="z-index-positive position-relative"
                                 ref="blobList"
                                 edit-blob-note-url="{% url "node:edit_blob_note" %}"
                                 get-blob-list-url="{% url "node:get_blob_list" object.uuid %}"
@@ -75,7 +97,6 @@
                         </div>
                         <div v-else-if="obj.type === 'note'" :draggable="$store.state.editLayout" key="note">
                             <node-note
-                                class="z-index-positive position-relative"
                                 node-uuid="{{ object.uuid }}"
                                 get-node-url="{% url "node:get_note" object.uuid %}"
                                 edit-url="{% url "node:edit_note" %}"
@@ -85,7 +106,6 @@
                         <div v-else-if="obj.type === 'todo'" :draggable="$store.state.editLayout" key="todo">
                             <node-todo-list
                                 ref="todoList"
-                                class="z-index-positive position-relative"
                                 node-uuid="{{ object.uuid }}"
                                 get-todo-list-url="{% url "node:get_todo_list" object.uuid %}"
                                 add-node-todo-url="{% url "node:add_todo" %}"
@@ -96,7 +116,6 @@
                         </div>
                         <div v-else-if="obj.type === 'bookmark'" :draggable="$store.state.editLayout" key="bookmark">
                             <related-bookmarks-list
-                                class="z-index-positive position-relative"
                                 ref="relatedBookmarksList"
                                 object-uuid="{{ object.uuid }}"
                                 model-name="node.Node"
@@ -160,6 +179,20 @@
             name: "Nav",
             store,
             methods: {
+                onAddCollection() {
+                    doPost(
+                        this,
+                        "{% url "node:add_collection" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                        },
+                        (response) => {
+                            EventBus.$emit("update-layout", response.data.layout);
+                        },
+                        "Collection added",
+                        ""
+                    );
+                },
                 onEditMode() {
                     this.$store.state.editLayout = !this.$store.state.editLayout;
                 },
@@ -193,21 +226,36 @@
                 selectBookmark(bookmarkInfo) {
                     this.$refs.relatedBookmarksList[0].selectBookmark(bookmarkInfo);
                 },
-                selectBlob(blob) {
+                selectBlob(blob, collectionUuid, callback) {
                     doPost(
                         this,
-                        "{% url "node:add_blob" %}",
+                        "{% url "collection:add_blob" %}",
                         {
-                            "node_uuid": this.$store.state.nodeUuid,
+                            "collection_uuid": collectionUuid,
                             "blob_uuid": blob.uuid,
                         },
                         (response) => {
-                            this.$refs.blobList[0].getBlobList();
+                            callback();
                             this.$refs.blobSelect.$refs.simpleSuggest.$refs.suggestComponent.selected = null;
                         },
                         "Blob added",
                         ""
                     );
+                },
+                onDeleteCollection(collectionUuid) {
+                    doPost(
+                        this,
+                        "{% url "node:delete_collection" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                            "collection_uuid": collectionUuid,
+                        },
+                        (response) => {
+                            this.layout = JSON.parse(response.data.layout);
+                        },
+                        "Collection deleted",
+                    );
+
                 },
                 onDragOver(evt, index) {
                     evt.currentTarget.classList.add("node-drag-over");
@@ -231,15 +279,17 @@
                 },
             },
             mounted() {
-
-                EventBus.$on("add-blob", payload => {
+                EventBus.$on("add-blob", (payload) => {
                     this.$refs.blobList.addBlob(payload);
                 });
 
-                EventBus.$on("add-bookmark", payload => {
+                EventBus.$on("add-bookmark", (payload) => {
                     this.$refs.bookmarkList.addBookmark(payload);
                 });
 
+                EventBus.$on("update-layout", (payload) => {
+                    this.layout = JSON.parse(payload);
+                });
             }
         });
 

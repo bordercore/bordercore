@@ -2,6 +2,8 @@ import pytest
 
 import django
 
+from collection.models import Collection
+
 django.setup()
 
 from node.models import SortOrderNodeBookmark, SortOrderNodeBlob  # isort:skip
@@ -107,3 +109,32 @@ def test_delete_blobs(node, blob_image_factory, blob_pdf_factory):
     # Verify that the last blob has a new sort order (decrease by one)
     tbso = SortOrderNodeBlob.objects.get(node=node, blob=blob_pdf_factory[0])
     assert tbso.sort_order == 1
+
+
+def test_add_collection(node):
+
+    collection = node.add_collection()
+
+    # Verify that the collection has been added to the node's layout
+    assert str(collection.uuid) in [
+        val["uuid"]
+        for sublist in node.layout
+        for val in sublist
+        if "uuid" in val
+    ]
+
+
+def test_delete_collection(node):
+
+    collection = node.add_collection()
+    node.delete_collection(collection.uuid)
+
+    assert Collection.objects.filter(uuid=collection.uuid).first() is None
+
+    # Verify that the collection has been removed from the node's layout
+    assert str(collection.uuid) not in [
+        val["uuid"]
+        for sublist in node.layout
+        for val in sublist
+        if "uuid" in val
+    ]

@@ -8,6 +8,7 @@ from django.dispatch import receiver
 
 from blob.models import Blob
 from bookmark.models import Bookmark
+from collection.models import Collection
 from lib.mixins import SortOrderMixin, TimeStampedModel
 from todo.models import Todo
 
@@ -34,6 +35,30 @@ class Node(TimeStampedModel):
 
     def __str__(self):
         return self.name
+
+    def add_collection(self):
+
+        # Collections are private to avoid display on the collection list page
+        collection = Collection.objects.create(name="New Collection", user=self.user, is_private=True)
+
+        layout = self.layout
+        layout[0].insert(0, {"type": "collection", "uuid": str(collection.uuid)})
+        self.layout = layout
+        self.save()
+
+        return collection
+
+    def delete_collection(self, collection_uuid):
+
+        collection = Collection.objects.get(uuid=collection_uuid)
+        collection.delete()
+
+        layout = self.layout
+        for i, col in enumerate(layout):
+            layout[i] = [x for x in col if "uuid" not in x or x["uuid"] != str(collection_uuid)]
+
+        self.layout = layout
+        self.save()
 
 
 class SortOrderNodeBookmark(SortOrderMixin):

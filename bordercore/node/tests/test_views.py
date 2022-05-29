@@ -5,6 +5,7 @@ from faker import Factory as FakerFactory
 
 from django import urls
 
+from collection.models import Collection
 from node.models import Node, SortOrderNodeBlob, SortOrderNodeBookmark
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
@@ -183,3 +184,51 @@ def test_change_layout(auto_login_user, node):
 
     changed_node = Node.objects.get(uuid=node.uuid)
     assert changed_node.layout == layout
+
+
+def test_add_collection(auto_login_user, node):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("node:add_collection")
+    resp = client.post(url, {
+        "node_uuid": node.uuid,
+    })
+
+    assert resp.status_code == 200
+
+    resp_json = resp.json()
+    updated_node = Node.objects.get(uuid=node.uuid)
+    # Verify that the collection has been added to the node's layout
+    assert resp_json["collection_uuid"] in [
+        val["uuid"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if "uuid" in val
+    ]
+
+
+def test_delete_collection(auto_login_user, node):
+
+    _, client = auto_login_user()
+
+    collection = node.add_collection()
+
+    url = urls.reverse("node:delete_collection")
+    resp = client.post(url, {
+        "node_uuid": node.uuid,
+        "collection_uuid": collection.uuid
+    })
+
+    assert resp.status_code == 200
+
+    assert Collection.objects.filter(uuid=collection.uuid).first() is None
+
+    # Verify that the collection has been removed from the node's layout
+    updated_node = Node.objects.get(uuid=node.uuid)
+    assert collection.uuid not in [
+        val["uuid"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if "uuid" in val
+    ]

@@ -51,8 +51,33 @@ urlpatterns = [
         name="get_blob_list"
     ),
     path(
-        route="add_blob",
+        route="create_blob",
+        view=views.create_blob,
+        name="create_blob"
+    ),
+    path(
+        route="get_object_list/<uuid:collection_uuid>/",
+        view=views.get_object_list,
+        name="get_object_list"
+    ),
+    path(
+        route="object/blob",
         view=views.add_blob,
         name="add_blob"
+    ),
+    path(
+        route="object/remove",
+        view=views.remove_object,
+        name="remove_object"
+    ),
+    path(
+        route="object/sort",
+        view=views.sort_objects,
+        name="sort_objects"
+    ),
+    path(
+        route="object/note/update",
+        view=views.update_object_note,
+        name="update_object_note"
     ),
 ]

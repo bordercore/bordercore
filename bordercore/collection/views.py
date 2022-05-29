@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Exists, OuterRef
+from django.db.models import Count, Exists, OuterRef, Q
 from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -18,7 +18,8 @@ from django.views.generic.list import ListView
 
 from blob.models import Blob
 from collection.forms import CollectionForm
-from collection.models import Collection, SortOrderCollectionBlob
+from collection.models import (Collection, SortOrderCollectionBCObject,
+                               SortOrderCollectionBlob)
 from lib.mixins import FormRequestMixin
 from tag.models import Tag
 
@@ -286,7 +287,7 @@ def get_blob_list(request, collection_uuid):
 
 
 @login_required
-def add_blob(request):
+def create_blob(request):
 
     collection_uuid = request.POST["collection_uuid"]
     file_contents = request.FILES["blob"].read()
@@ -322,5 +323,98 @@ def add_blob(request):
             "status": "OK",
             "blob_uuid": blob.uuid
         }
+
+    return JsonResponse(response)
+
+
+@login_required
+def get_object_list(request, collection_uuid):
+
+    collection = Collection.objects.get(uuid=collection_uuid)
+    object_list = collection.get_object_list()
+
+    return JsonResponse(object_list, safe=False)
+
+
+@login_required
+def add_blob(request):
+
+    collection_uuid = request.POST["collection_uuid"]
+    blob_uuid = request.POST["blob_uuid"]
+
+    collection = Collection.objects.get(uuid=collection_uuid)
+    blob = Blob.objects.get(uuid=blob_uuid)
+
+    collection.add_object(blob)
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def remove_object(request):
+
+    collection_uuid = request.POST["collection_uuid"]
+    object_uuid = request.POST["object_uuid"]
+
+    collection = Collection.objects.get(uuid=collection_uuid)
+    collection.remove_object(object_uuid)
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def sort_objects(request):
+    """
+    Move a given object to a new position in a sorted list
+    """
+
+    collection_uuid = request.POST["collection_uuid"]
+    object_uuid = request.POST["object_uuid"]
+    new_position = int(request.POST["new_position"])
+
+    so = SortOrderCollectionBCObject.objects.get(
+        Q(blob__uuid=object_uuid) | Q(bookmark__uuid=object_uuid),
+        collection__uuid=collection_uuid
+    )
+    SortOrderCollectionBCObject.reorder(so, new_position)
+
+    # so.node.modified = timezone.now()
+    # so.node.save()
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def update_object_note(request):
+
+    collection_uuid = request.POST["collection_uuid"]
+    object_uuid = request.POST["object_uuid"]
+    note = request.POST["note"]
+
+    so = SortOrderCollectionBCObject.objects.get(
+        Q(blob__uuid=object_uuid) | Q(bookmark__uuid=object_uuid),
+        collection__uuid=collection_uuid
+    )
+    so.note = note
+    so.save()
+
+    # so.node.modified = timezone.now()
+    # so.node.save()
+
+    response = {
+        "status": "OK",
+    }
 
     return JsonResponse(response)

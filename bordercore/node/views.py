@@ -12,6 +12,7 @@ from django.views.generic.list import ListView
 
 from blob.models import Blob
 from bookmark.models import Bookmark
+from collection.models import Collection
 from lib.mixins import FormRequestMixin
 from node.forms import NodeForm
 from todo.models import Todo
@@ -46,6 +47,13 @@ class NodeDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["priority_list"] = json.dumps(Todo.PRIORITY_CHOICES)
+
+        # TODO: Optimize the ORM here by getting all Collection names in one query
+        for column in self.object.layout:
+            for row in column:
+                if row["type"] == "collection":
+                    row["name"] = Collection.objects.get(uuid=row["uuid"]).name
+
         return context
 
 
@@ -332,6 +340,40 @@ def change_layout(request):
 
     response = {
         "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def add_collection(request):
+
+    node_uuid = request.POST["node_uuid"]
+
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    collection = node.add_collection()
+
+    response = {
+        "status": "OK",
+        "collection_uuid": collection.uuid,
+        "layout": json.dumps(node.layout)
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def delete_collection(request):
+
+    node_uuid = request.POST["node_uuid"]
+    collection_uuid = request.POST["collection_uuid"]
+
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    node.delete_collection(collection_uuid)
+
+    response = {
+        "status": "OK",
+        "layout": json.dumps(node.layout)
     }
 
     return JsonResponse(response)
