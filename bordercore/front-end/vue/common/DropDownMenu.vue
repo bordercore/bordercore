@@ -13,7 +13,7 @@
                 <slot name="dropdown" />
                 <li v-for="link in links" :key="link.id">
                     <a :href="link.url" class="dropdown-item" v-on="link.clickHandler ? { click: link.clickHandler } : {}">
-                        <span>
+                        <span class="me-2">
                             <font-awesome-icon v-if="link.icon" :icon="link.icon" class="text-primary" />
                         </span>
                         {{ link.title }}
