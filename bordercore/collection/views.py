@@ -20,6 +20,7 @@ from blob.models import Blob
 from collection.forms import CollectionForm
 from collection.models import (Collection, SortOrderCollectionBCObject,
                                SortOrderCollectionBlob)
+from lib.exceptions import DuplicateObjectError
 from lib.mixins import FormRequestMixin
 from tag.models import Tag
 
@@ -345,11 +346,16 @@ def add_blob(request):
     collection = Collection.objects.get(uuid=collection_uuid)
     blob = Blob.objects.get(uuid=blob_uuid)
 
-    collection.add_object(blob)
-
-    response = {
-        "status": "OK",
-    }
+    try:
+        collection.add_object(blob)
+        response = {
+            "status": "OK",
+        }
+    except DuplicateObjectError:
+        response = {
+            "status": "Error",
+            "message": "That object already belongs to this collection."
+        }
 
     return JsonResponse(response)
 

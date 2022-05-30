@@ -1,0 +1,2 @@
+class DuplicateObjectError(Exception):
+    pass

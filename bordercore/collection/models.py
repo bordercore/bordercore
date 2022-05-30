@@ -17,6 +17,7 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.urls import reverse
 
+from lib.exceptions import DuplicateObjectError
 from lib.mixins import SortOrderMixin, TimeStampedModel
 from tag.models import Tag
 
@@ -48,8 +49,12 @@ class Collection(TimeStampedModel):
         from bookmark.models import Bookmark
 
         if isinstance(object, Bookmark):
+            if SortOrderCollectionBCObject.objects.filter(collection=self, bookmark=object).exists():
+                raise DuplicateObjectError
             so = SortOrderCollectionBCObject(collection=self, bookmark=object)
         elif isinstance(object, Blob):
+            if SortOrderCollectionBCObject.objects.filter(collection=self, blob=object).exists():
+                raise DuplicateObjectError
             so = SortOrderCollectionBCObject(collection=self, blob=object)
         else:
             raise ValueError(f"Unsupported type: {type(object)}")

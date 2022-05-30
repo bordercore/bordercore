@@ -17,7 +17,7 @@
                                     class="w-100"
                                     display-attribute="name"
                                     value-attribute="uuid"
-                                    :search-url="searchBlobUrl + '&term='"
+                                    :search-url="getSearchBlobUrl()"
                                 />
                             </div>
                         </form>
@@ -51,6 +51,14 @@
             };
         },
         methods: {
+            getSearchBlobUrl() {
+                let url = this.searchBlobUrl;
+                if (this.collectionUuid) {
+                    url += `&collection_uuid=${this.collectionUuid}`;
+                }
+                url += "&term=";
+                return url;
+            },
             openModal(collectionUuid, callback) {
                 this.collectionUuid = collectionUuid;
                 this.callback = callback;

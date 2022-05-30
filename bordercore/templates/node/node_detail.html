@@ -137,7 +137,7 @@
 
             <blob-select
                 ref="blobSelect"
-                search-blob-url="{% url 'search:search_names' %}?doc_type=blob,book,document,note&term="
+                search-blob-url="{% url 'search:search_names' %}?doc_type=blob,book,document,note"
                 recent-blobs-url="{% url "blob:recent_blobs" %}"
                 @select-blob="selectBlob"
             >

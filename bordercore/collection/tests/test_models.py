@@ -3,6 +3,7 @@ import pytest
 from blob.tests.factories import BlobFactory
 from collection.models import (SortOrderCollectionBCObject,
                                SortOrderCollectionBlob)
+from lib.exceptions import DuplicateObjectError
 
 pytestmark = pytest.mark.django_db
 
@@ -67,6 +68,10 @@ def test_add_object(collection):
         collection=collection[0],
         blob=blob
     ).exists()
+
+    # Test for adding a duplicate blob
+    with pytest.raises(DuplicateObjectError):
+        collection[0].add_object(blob)
 
 
 def test_remove_object(collection):

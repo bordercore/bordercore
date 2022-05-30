@@ -178,6 +178,13 @@ def test_add_blob(auto_login_user, collection, blob_image_factory):
 
     assert resp.status_code == 200
 
+    # Test for adding a duplicate blob
+    resp = client.post(url, {
+        "collection_uuid": collection[0].uuid,
+        "blob_uuid": blob_image_factory[0].uuid
+    })
+    assert resp.json()["status"] == "Error"
+
 
 def test_remove_object(auto_login_user, collection, blob_image_factory):
 
