@@ -12,7 +12,6 @@ from django.views.generic.list import ListView
 
 from blob.models import Blob
 from bookmark.models import Bookmark
-from collection.models import Collection
 from lib.mixins import FormRequestMixin
 from node.forms import NodeForm
 from todo.models import Todo
@@ -48,11 +47,7 @@ class NodeDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context["priority_list"] = json.dumps(Todo.PRIORITY_CHOICES)
 
-        # TODO: Optimize the ORM here by getting all Collection names in one query
-        for column in self.object.layout:
-            for row in column:
-                if row["type"] == "collection":
-                    row["name"] = Collection.objects.get(uuid=row["uuid"]).name
+        self.object.populate_collection_names()
 
         return context
 

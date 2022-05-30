@@ -138,3 +138,23 @@ def test_delete_collection(node):
         for val in sublist
         if "uuid" in val
     ]
+
+
+def test_populate_collection_names(node):
+
+    collection_1 = node.add_collection()
+    collection_2 = node.add_collection()
+    collection_3 = node.add_collection()
+
+    node.populate_collection_names()
+
+    names = [
+        val["name"]
+        for sublist in node.layout
+        for val in sublist
+        if "name" in val
+    ]
+
+    assert collection_1.name in names
+    assert collection_2.name in names
+    assert collection_3.name in names

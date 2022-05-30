@@ -60,6 +60,31 @@ class Node(TimeStampedModel):
         self.layout = layout
         self.save()
 
+    def populate_collection_names(self):
+        """
+        Get all collection names for this node in one query rather than multiple.
+        """
+
+        # Get a list of all uuids for all collections in this node.
+        uuids = [
+            val["uuid"]
+            for sublist in self.layout
+            for val in sublist
+            if "uuid" in val
+            and val["type"] == "collection"
+        ]
+
+        # Populate a lookup dictionary with the collection names, uuid => name
+        lookup = {}
+        for x in Collection.objects.filter(uuid__in=uuids):
+            lookup[str(x.uuid)] = x.name
+
+        # Finally, add the collection name to the node's layout object
+        for column in self.layout:
+            for row in column:
+                if row["type"] == "collection":
+                    row["name"] = lookup[row["uuid"]]
+
 
 class SortOrderNodeBookmark(SortOrderMixin):
 
