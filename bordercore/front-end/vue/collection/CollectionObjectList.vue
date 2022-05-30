@@ -30,26 +30,28 @@
                         <font-awesome-icon icon="splotch" class="text-primary me-3" />
                         {{ name }}
                     </div>
-                    <drop-down-menu :show-on-hover="false">
-                        <div slot="dropdown">
-                            <a class="dropdown-item" href="#" @click.prevent="onAddBlob()">
-                                <font-awesome-icon icon="plus" class="text-primary me-3" />
-                                Add Blob
-                            </a>
-                            <a class="dropdown-item" href="#" @click.prevent="onAddBookmark()">
-                                <font-awesome-icon icon="plus" class="text-primary me-3" />
-                                Add Bookmark
-                            </a>
-                            <a class="dropdown-item" href="#" @click.prevent="onEditCollection()">
-                                <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
-                                Edit Collection
-                            </a>
-                            <a class="dropdown-item" href="#" @click.prevent="onDeleteCollection()">
-                                <font-awesome-icon icon="times" class="text-primary me-3" />
-                                Delete Collection
-                            </a>
-                        </div>
-                    </drop-down-menu>
+                    <div class="dropdown-menu-container ms-auto">
+                        <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
+                            <div slot="dropdown">
+                                <a class="dropdown-item" href="#" @click.prevent="onAddBlob()">
+                                    <font-awesome-icon icon="plus" class="text-primary me-3" />
+                                    Add Blob
+                                </a>
+                                <a class="dropdown-item" href="#" @click.prevent="onAddBookmark()">
+                                    <font-awesome-icon icon="plus" class="text-primary me-3" />
+                                    Add Bookmark
+                                </a>
+                                <a class="dropdown-item" href="#" @click.prevent="onEditCollection()">
+                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
+                                    Edit Collection
+                                </a>
+                                <a class="dropdown-item" href="#" @click.prevent="onDeleteCollection()">
+                                    <font-awesome-icon icon="times" class="text-primary me-3" />
+                                    Delete Collection
+                                </a>
+                            </div>
+                        </drop-down-menu>
+                    </div>
                 </div>
             </template>
 
@@ -144,17 +146,9 @@
                 objectList: [],
                 show: false,
                 name: null,
-                allowMounting: true,
             };
         },
         mounted() {
-            console.log(`allow mounting: ${this.allowMounting}`);
-            if (!this.allowMounting) {
-                console.log("don't allow mounting");
-                return;
-            }
-            console.log("mount!");
-            this.allowMounting = false;
             this.name = this.initialName;
             this.getObjectList();
         },

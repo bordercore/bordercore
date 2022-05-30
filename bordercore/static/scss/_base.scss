@@ -571,6 +571,7 @@ textarea.form-control {
 .hover-reveal-target:hover {
   .hover-reveal-object {
     display: flex !important;
+    height: $dropdown-height;
   }
 }
 
@@ -587,9 +588,13 @@ textarea.form-control {
   }
 }
 
-.dropdown-menu {
-  top: 0.6rem !important;
-  transition: all 500ms cubic-bezier(0.53, 2, 0.36, 0.85);
+.dropdown-menu-container {
+  height: $dropdown-height;
+
+  .dropdown-menu {
+    top: 0.6rem !important;
+    transition: all 500ms cubic-bezier(0.53, 2, 0.36, 0.85);
+  }
 }
 
 .dropdown-item {
