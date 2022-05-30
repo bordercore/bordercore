@@ -265,8 +265,8 @@ class SortOrderCollectionBlob(SortOrderMixin):
 class SortOrderCollectionBCObject(SortOrderMixin):
 
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE)
-    blob = models.ForeignKey("blob.Blob", null=True, on_delete=models.PROTECT)
-    bookmark = models.ForeignKey("bookmark.Bookmark", null=True, on_delete=models.PROTECT)
+    blob = models.ForeignKey("blob.Blob", null=True, on_delete=models.CASCADE)
+    bookmark = models.ForeignKey("bookmark.Bookmark", null=True, on_delete=models.CASCADE)
     object = models.ForeignKey("collection.BCObject", on_delete=models.CASCADE, null=True)
     created = models.DateTimeField(auto_now_add=True)
 
