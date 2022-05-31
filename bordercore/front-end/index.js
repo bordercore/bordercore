@@ -216,10 +216,6 @@ import AddToCollection from "./vue/blob/AddToCollection.vue";
 Vue.component("AddToCollection", AddToCollection);
 window.AddToCollection = AddToCollection;
 
-import NodeBlobList from "./vue/node/NodeBlobList.vue";
-Vue.component("NodeBlobList", NodeBlobList);
-window.NodeBlobList = NodeBlobList;
-
 import NodeNote from "./vue/node/NodeNote.vue";
 Vue.component("NodeNote", NodeNote);
 window.NodeNote = NodeNote;

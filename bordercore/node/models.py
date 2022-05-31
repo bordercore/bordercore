@@ -6,8 +6,6 @@ from django.db.models import JSONField
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
-from blob.models import Blob
-from bookmark.models import Bookmark
 from collection.models import Collection
 from lib.mixins import SortOrderMixin, TimeStampedModel
 from todo.models import Todo
@@ -28,8 +26,6 @@ class Node(TimeStampedModel):
     name = models.TextField()
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     note = models.TextField(blank=True, null=True)
-    bookmarks = models.ManyToManyField(Bookmark, through="SortOrderNodeBookmark")
-    blobs = models.ManyToManyField(Blob, through="SortOrderNodeBlob")
     todos = models.ManyToManyField(Todo, through="SortOrderNodeTodo")
     layout = JSONField(default=default_layout, null=True, blank=True)
 
@@ -84,50 +80,6 @@ class Node(TimeStampedModel):
             for row in column:
                 if row["type"] == "collection":
                     row["name"] = lookup[row["uuid"]]
-
-
-class SortOrderNodeBookmark(SortOrderMixin):
-
-    node = models.ForeignKey(Node, on_delete=models.CASCADE)
-    bookmark = models.ForeignKey(Bookmark, on_delete=models.CASCADE)
-
-    field_name = "node"
-
-    def __str__(self):
-        return f"SortOrder: {self.node}, {self.bookmark}"
-
-    class Meta:
-        ordering = ("sort_order",)
-        unique_together = (
-            ("node", "bookmark")
-        )
-
-
-@receiver(pre_delete, sender=SortOrderNodeBookmark)
-def remove_bookmark(sender, instance, **kwargs):
-    instance.handle_delete()
-
-
-class SortOrderNodeBlob(SortOrderMixin):
-
-    node = models.ForeignKey(Node, on_delete=models.CASCADE)
-    blob = models.ForeignKey(Blob, on_delete=models.CASCADE)
-
-    field_name = "node"
-
-    def __str__(self):
-        return f"SortOrder: {self.node}, {self.blob}"
-
-    class Meta:
-        ordering = ("sort_order",)
-        unique_together = (
-            ("node", "blob")
-        )
-
-
-@receiver(pre_delete, sender=SortOrderNodeBlob)
-def remove_blob(sender, instance, **kwargs):
-    instance.handle_delete()
 
 
 class SortOrderNodeTodo(SortOrderMixin):

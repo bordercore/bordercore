@@ -45,7 +45,6 @@ from feed.tests.factories import FeedFactory  # isort:skip
 from metrics.models import Metric, MetricData  # isort:skip
 from music.models import SongSource, PlaylistItem  # isort:skip
 from music.tests.factories import SongFactory, AlbumFactory, PlaylistFactory  # isort:skip
-from node.models import SortOrderNodeBookmark, SortOrderNodeBlob  # isort:skip
 from node.tests.factories import NodeFactory  # isort:skip
 from tag.tests.factories import TagFactory  # isort:skip
 from todo.tests.factories import TodoFactory  # isort:skip
@@ -453,15 +452,11 @@ def node(bookmark, blob_image_factory, blob_pdf_factory):
 
     node = NodeFactory()
 
-    so = SortOrderNodeBookmark(node=node, bookmark=bookmark[0])
-    so.save()
-    so = SortOrderNodeBookmark(node=node, bookmark=bookmark[1])
-    so.save()
-
-    so = SortOrderNodeBlob(node=node, blob=blob_image_factory[0])
-    so.save()
-    so = SortOrderNodeBlob(node=node, blob=blob_pdf_factory[0])
-    so.save()
+    collection = node.add_collection()
+    collection.add_object(bookmark[0])
+    collection.add_object(bookmark[1])
+    collection.add_object(blob_image_factory[0])
+    collection.add_object(blob_pdf_factory[0])
 
     yield node
 

@@ -12,8 +12,6 @@ from bookmark.models import Bookmark
 from bookmark.tests.factories import BookmarkFactory
 from drill.models import Question, SortOrderQuestionBookmark
 from drill.tests.factories import QuestionFactory
-from node.models import Node, SortOrderNodeBookmark
-from node.tests.factories import NodeFactory
 from tag.tests.factories import TagFactory
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
@@ -207,12 +205,12 @@ def test_bookmark_get_title_from_url(auto_login_user, bookmark):
     assert resp.status_code == 200
 
 
-def test_get_related_bookmark_list(auto_login_user, node):
+def test_get_related_bookmark_list(auto_login_user, question):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("bookmark:get_related_bookmark_list", kwargs={"uuid": node.uuid})
-    resp = client.get(f"{url}?model_name=node.Node")
+    url = urls.reverse("bookmark:get_related_bookmark_list", kwargs={"uuid": question[0].uuid})
+    resp = client.get(f"{url}?model_name=drill.Question")
 
     assert resp.status_code == 200
 
@@ -220,19 +218,6 @@ def test_get_related_bookmark_list(auto_login_user, node):
 def test_add_related_bookmark(auto_login_user, bookmark):
 
     user, client = auto_login_user()
-
-    node = NodeFactory(user=user)
-
-    url = urls.reverse("bookmark:add_related_bookmark")
-    resp = client.post(url, {
-        "bookmark_uuid": bookmark[0].uuid,
-        "object_uuid": node.uuid,
-        "model_name": "node.Node"
-    })
-
-    assert len(node.sortordernodebookmark_set.all()) == 1
-    assert node.sortordernodebookmark_set.first().bookmark == bookmark[0]
-    assert resp.status_code == 200
 
     question = QuestionFactory(user=user)
     question_modified = question.modified
@@ -270,25 +255,25 @@ def test_remove_related_bookmark(auto_login_user, bookmark):
 
     user, client = auto_login_user()
 
-    node = NodeFactory(user=user)
-    node_modified = node.modified
-    so = SortOrderNodeBookmark(node=node, bookmark=bookmark[0])
+    question = QuestionFactory(user=user)
+    question_modified = question.modified
+    so = SortOrderQuestionBookmark(question=question, bookmark=bookmark[0])
     so.save()
 
     url = urls.reverse("bookmark:remove_related_bookmark")
     resp = client.post(f"{url}?update_modified=true", {
         "bookmark_uuid": bookmark[0].uuid,
-        "object_uuid": node.uuid,
-        "model_name": "node.Node"
+        "object_uuid": question.uuid,
+        "model_name": "drill.Question"
     })
 
-    assert len(node.sortordernodebookmark_set.all()) == 0
+    assert len(question.sortorderquestionbookmark_set.all()) == 0
     assert resp.status_code == 200
 
     # Since we've passed in the 'update_modified' parameter, verify
     #  that the timestamp has been modified and is indeed later.
-    updated_node = Node.objects.get(uuid=node.uuid)
-    assert updated_node.modified > node_modified
+    updated_question = Question.objects.get(uuid=question.uuid)
+    assert updated_question.modified > question_modified
 
     question = QuestionFactory(user=user)
     so = SortOrderQuestionBookmark(question=question, bookmark=bookmark[0])
@@ -323,22 +308,22 @@ def test_sort_related_bookmark(auto_login_user, bookmark):
 
     user, client = auto_login_user()
 
-    node = NodeFactory(user=user)
-    so = SortOrderNodeBookmark(node=node, bookmark=bookmark[0])
+    question = QuestionFactory(user=user)
+    so = SortOrderQuestionBookmark(question=question, bookmark=bookmark[0])
     so.save()
-    so = SortOrderNodeBookmark(node=node, bookmark=bookmark[1])
+    so = SortOrderQuestionBookmark(question=question, bookmark=bookmark[1])
     so.save()
 
     url = urls.reverse("bookmark:sort_related_bookmarks")
     resp = client.post(url, {
         "bookmark_uuid": bookmark[1].uuid,
-        "object_uuid": node.uuid,
-        "model_name": "node.Node",
+        "object_uuid": question.uuid,
+        "model_name": "drill.Question",
         "new_position": "2"
     })
 
-    assert len(node.sortordernodebookmark_set.all()) == 2
-    related_bookmarks = node.sortordernodebookmark_set.all()
+    assert len(question.sortorderquestionbookmark_set.all()) == 2
+    related_bookmarks = question.sortorderquestionbookmark_set.all()
     assert related_bookmarks[0].bookmark == bookmark[0]
     assert related_bookmarks[1].bookmark == bookmark[1]
     assert resp.status_code == 200
@@ -348,8 +333,8 @@ def test_edit_related_bookmark_note(auto_login_user, bookmark):
 
     user, client = auto_login_user()
 
-    node = NodeFactory(user=user)
-    so = SortOrderNodeBookmark(node=node, bookmark=bookmark[0])
+    question = QuestionFactory(user=user)
+    so = SortOrderQuestionBookmark(question=question, bookmark=bookmark[0])
     so.save()
 
     note = faker.text()
@@ -357,12 +342,12 @@ def test_edit_related_bookmark_note(auto_login_user, bookmark):
     url = urls.reverse("bookmark:edit_related_bookmark_note")
     resp = client.post(url, {
         "bookmark_uuid": bookmark[0].uuid,
-        "object_uuid": node.uuid,
-        "model_name": "node.Node",
+        "object_uuid": question.uuid,
+        "model_name": "drill.Question",
         "note": note
     })
 
-    assert node.sortordernodebookmark_set.first().note == note
+    assert question.sortorderquestionbookmark_set.first().note == note
     assert resp.status_code == 200
 
 

@@ -100,13 +100,6 @@ class BookmarkUpdateView(FormRequestMixin, UpdateView, FormValidMixin):
                 "tags": [x.name for x in b.tags.all()]
             } for b in self.object.blob_set.all()
         ]
-        context["related_nodes"] = [
-            {
-                "uuid": b.uuid,
-                "name": b.name,
-                "url": reverse("node:detail", kwargs={"uuid": b.uuid}),
-            } for b in self.object.node_set.all()
-        ]
 
         return context
 
@@ -313,7 +306,7 @@ class BookmarkListView(ListView):
             query = query.filter(
                 tags__isnull=True,
                 sortorderquestionbookmark__isnull=True,
-                sortordernodebookmark__isnull=True,
+                sortordercollectionbcobject__isnull=True,
                 sortorderblobbookmark__isnull=True
             )
 

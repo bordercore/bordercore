@@ -10,15 +10,8 @@ def get_node_list(user):
 
     nodes = Node.objects.filter(user=user) \
                         .annotate(
-                            blob_count=Count("blobs")
+                            todo_count=Count("todos")
                         ) \
                 .order_by("-modified")
-
-    bookmark_counts = {}
-    for x in Node.objects.filter(user=user).annotate(bookmark_count=Count("bookmarks")):
-        bookmark_counts[x.id] = x.bookmark_count
-
-    for x in nodes:
-        x.bookmark_count = bookmark_counts[x.id]
 
     return nodes
