@@ -1,4 +1,3 @@
-@charset "UTF-8";
 .v-sidebar-menu {
   position: fixed;
   top: 0;
@@ -75,7 +74,7 @@
   transition: 0.3s transform ease;
 }
 .v-sidebar-menu .vsm--arrow:after {
-  content: "";
+  content: "\f105";
   font-family: "Font Awesome 5 Free";
 }
 .v-sidebar-menu .vsm--arrow_open {
@@ -110,7 +109,7 @@
   width: 100%;
 }
 .v-sidebar-menu .vsm--toggle-btn:after {
-  content: "";
+  content: "\f337";
   font-family: "Font Awesome 5 Free";
 }
 .v-sidebar-menu .vsm--toggle-btn_slot:after {
@@ -185,7 +184,7 @@
 .v-sidebar-menu .vsm--link_exact-active, .v-sidebar-menu .vsm--link_active {
   box-shadow: 0px 0px 10px 1px rgba(115, 103, 240, 0.7);
   background-color: #7367f0;
-  background-image: linear-gradient(90deg, #0000, #00000003);
+  background-image: linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.0117647059));
   border-radius: 5px;
 }
 .v-sidebar-menu .vsm--link_exact-active_hover, .v-sidebar-menu .vsm--link_exact-active:hover, .v-sidebar-menu .vsm--link_active_hover, .v-sidebar-menu .vsm--link_active:hover {
@@ -193,7 +192,7 @@
 }
 .v-sidebar-menu .vsm--link_level-1.vsm--link_exact-active, .v-sidebar-menu .vsm--link_level-1.vsm--link_active {
   box-shadow: 0px 0px 10px 1px rgba(115, 103, 240, 0.7);
-  background-image: linear-gradient(90deg, #0000, #00000003);
+  background-image: linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.0117647059));
   border-radius: 5px;
 }
 .v-sidebar-menu .vsm--link_level-1.vsm--link_exact-active .vsm--icon, .v-sidebar-menu .vsm--link_level-1.vsm--link_active .vsm--icon {
