@@ -62,9 +62,10 @@
                         <transition-group type="transition" class="w-100">
                             <li v-for="(object, index) in objectList" v-cloak :key="object.uuid" class="hover-target list-group-item list-group-item-secondary text-info draggable pe-0" :data-uuid="object.uuid">
                                 <div class="dropdown-height d-flex align-items-start">
-                                    <div class="pe-2">
+                                    <div v-if="object.type === 'blob'" class="pe-2">
                                         <img :src="object.cover_url" height="75" width="70">
                                     </div>
+                                    <div v-else v-html="object.favicon_url" class="pe-2" />
 
                                     <div>
                                         <a :href="object.url">{{ object.name }}</a>
@@ -199,7 +200,7 @@
                 this.$parent.$parent.$refs.blobSelect.openModal(this.uuid, this.getObjectList);
             },
             onAddBookmark() {
-                console.log("add bookmark");
+                this.$parent.$parent.$refs.bookmarkSelect.openModal(this.uuid, this.getObjectList);
             },
             onEditCollection() {
                 const modal = new Modal("#modalUpdate");

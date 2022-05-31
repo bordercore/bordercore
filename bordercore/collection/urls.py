@@ -71,6 +71,11 @@ urlpatterns = [
         name="remove_object"
     ),
     path(
+        route="object/bookmark",
+        view=views.add_bookmark,
+        name="add_bookmark"
+    ),
+    path(
         route="object/sort",
         view=views.sort_objects,
         name="sort_objects"

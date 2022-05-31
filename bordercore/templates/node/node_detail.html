@@ -143,7 +143,7 @@
             >
             </blob-select>
             <bookmark-select
-                ref="bookmarkSearch"
+                ref="bookmarkSelect"
                 search-url="{% url 'bookmark:search' %}"
                 create-bookmark-url="{% url 'bookmark-list' %}"
                 get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
@@ -223,8 +223,21 @@
                 refreshNodeTodo(payload) {
                     this.$refs.todoList[0].getTodoList();
                 },
-                selectBookmark(bookmarkInfo) {
-                    this.$refs.relatedBookmarksList[0].selectBookmark(bookmarkInfo);
+                selectBookmark(bookmarkInfo, collectionUuid, callback) {
+                    doPost(
+                        this,
+                        "{% url "collection:add_bookmark" %}",
+                        {
+                            "collection_uuid": collectionUuid,
+                            "bookmark_uuid": bookmarkInfo.uuid,
+                        },
+                        (response) => {
+                            callback();
+                            this.$refs.bookmarkSelect.$refs.simpleSuggest.$refs.suggestComponent.selected = null;
+                        },
+                        "Bookmark added",
+                        ""
+                    );
                 },
                 selectBlob(blob, collectionUuid, callback) {
                     doPost(

@@ -281,6 +281,15 @@ class SortOrderCollectionBCObject(SortOrderMixin):
     def __str__(self):
         return f"SortOrder: {self.collection}, {self.blob}, {self.bookmark}"
 
+    def get_object_type(self):
+
+        if self.blob is not None:
+            return "blob"
+        elif self.bookmark is not None:
+            return "bookmark"
+        else:
+            return "unknown"
+
     def get_properties(self):
         """
         """
@@ -288,6 +297,7 @@ class SortOrderCollectionBCObject(SortOrderMixin):
         if self.blob is not None:
             return {
                 "so_id": self.id,
+                "type": self.get_object_type(),
                 "id": self.blob.id,
                 "uuid": self.blob.uuid,
                 "filename": self.blob.file.name,
@@ -299,9 +309,11 @@ class SortOrderCollectionBCObject(SortOrderMixin):
         elif self.bookmark is not None:
             return {
                 "so_id": self.id,
+                "type": self.get_object_type(),
                 "uuid": self.bookmark.uuid,
                 "name": self.bookmark.name,
-                "url": self.bookmark.url
+                "url": self.bookmark.url,
+                "favicon_url": self.bookmark.get_favicon_url(size=16)
             }
         else:
             raise ValueError(f"Unsupported object, uuid: {self.uuid}")

@@ -105,6 +105,8 @@
                 url: "",
                 name: "",
                 message: "",
+                collectionUuid: null,
+                callback: null,
             };
         },
         computed: {
@@ -122,9 +124,18 @@
             this.selectMode(this.mode);
         },
         methods: {
+            openModal(collectionUuid, callback) {
+                this.collectionUuid = collectionUuid;
+                this.callback = callback;
+                const modal = new Modal("#modalAddBookmark");
+                modal.show();
+                setTimeout( () => {
+                    document.querySelector("#modalAddBookmark input").focus();
+                }, 500);
+            },
             select(selection) {
                 // The parent component receives the bookmark uuid and takes action
-                this.$emit("select-bookmark", selection);
+                this.$emit("select-bookmark", selection, this.collectionUuid, this.callback);
 
                 const modal = Modal.getInstance(document.getElementById("modalAddBookmark"));
                 modal.hide();

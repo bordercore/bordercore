@@ -17,6 +17,7 @@ from django.views.generic.edit import (CreateView, DeleteView, FormMixin,
 from django.views.generic.list import ListView
 
 from blob.models import Blob
+from bookmark.models import Bookmark
 from collection.forms import CollectionForm
 from collection.models import (Collection, SortOrderCollectionBCObject,
                                SortOrderCollectionBlob)
@@ -354,7 +355,7 @@ def add_blob(request):
     except DuplicateObjectError:
         response = {
             "status": "Error",
-            "message": "That object already belongs to this collection."
+            "message": "That blob already belongs to this collection."
         }
 
     return JsonResponse(response)
@@ -372,6 +373,29 @@ def remove_object(request):
     response = {
         "status": "OK",
     }
+
+    return JsonResponse(response)
+
+
+@login_required
+def add_bookmark(request):
+
+    collection_uuid = request.POST["collection_uuid"]
+    bookmark_uuid = request.POST["bookmark_uuid"]
+
+    collection = Collection.objects.get(uuid=collection_uuid)
+    bookmark = Bookmark.objects.get(uuid=bookmark_uuid)
+
+    try:
+        collection.add_object(bookmark)
+        response = {
+            "status": "OK",
+        }
+    except DuplicateObjectError:
+        response = {
+            "status": "Error",
+            "message": "That bookmark already belongs to this collection."
+        }
 
     return JsonResponse(response)
 
