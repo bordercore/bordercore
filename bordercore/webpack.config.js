@@ -6,16 +6,34 @@ const FixStyleOnlyEntriesPlugin = require("webpack-fix-style-only-entries");
 const StylelintPlugin = require("stylelint-webpack-plugin");
 const VueLoaderPlugin = require("vue-loader/lib/plugin");
 
+/**
+ * Only return CSS webpack entries if the environment
+ * variable WEBPACK_CSS_ONLY is set.
+ * @param {string} value The array value to potentially filter
+ * @return {value} the filtered value
+ */
+function filterEntries(value) {
+    if (process.env.WEBPACK_CSS_ONLY) {
+        if (value[0].search("/css/") !== -1) {
+            return value;
+        }
+    } else {
+        return value;
+    }
+}
+
 module.exports = (env, argv) => {
     const devMode = argv.mode == "development";
 
     config = {
-        entry: {
+        entry: Object.entries({
             "dist/js/javascript": ["./front-end/index.js"],
             "dist/css/theme-light": ["./static/scss/themes/theme-light.scss"],
             "dist/css/theme-dark": ["./static/scss/themes/theme-dark.scss"],
             "dist/css/vue-sidebar-menu": ["./static/css/vue-sidebar-menu/vue-sidebar-menu.scss"],
-        },
+        })
+            .filter(filterEntries)
+            .reduce((a, [name, entry]) => Object.assign(a, {[name]: entry}), {}),
         output: {
             filename: "[name]-bundle.min.js",
             path: path.resolve(__dirname, "./static"),
