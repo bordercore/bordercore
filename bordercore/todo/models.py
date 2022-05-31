@@ -34,7 +34,7 @@ class Todo(TimeStampedModel):
     ]
     priority = models.IntegerField(
         choices=PRIORITY_CHOICES,
-        default=2
+        default=3
     )
 
     def get_tags(self):

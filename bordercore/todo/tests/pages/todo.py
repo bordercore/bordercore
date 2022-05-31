@@ -12,7 +12,7 @@ class TodoPage:
     FIRST_TASK = (By.CSS_SELECTOR, "div#vue-app table tbody tr td:nth-child(2)")
     NO_TASKS = (By.CSS_SELECTOR, "div#vue-app table tbody tr td")
     PRIORITY_COLUMN = (By.CSS_SELECTOR, "div#vue-app table thead tr th:nth-child(3)")
-    MEDIUM_PRIORITY_FILTER = (By.CSS_SELECTOR, "div[data-priority='2']")
+    LOW_PRIORITY_FILTER = (By.CSS_SELECTOR, "div[data-priority='3']")
 
     def __init__(self, browser):
         self.browser = browser
@@ -53,8 +53,8 @@ class TodoPage:
         todo_element = self.browser.find_elements(*self.FIRST_TASK)
         return todo_element[0].text
 
-    def medium_priority_filter(self):
+    def low_priority_filter(self):
         """
         """
-        todo_element = self.browser.find_elements(*self.MEDIUM_PRIORITY_FILTER)
+        todo_element = self.browser.find_elements(*self.LOW_PRIORITY_FILTER)
         return todo_element[0]

@@ -23,13 +23,12 @@ def test_todo(todo, login, live_server, browser, settings):
 
     assert page.title_value() == "Bordercore :: Bordercore"
 
-
-    # There should be initially three medium tasks visible
+    # There should be initially three low priority tasks visible
     assert page.todo_count() == 3
 
-    # Select 'Medium' to toggle the selection and reveal all tasks
-    medium_priority_filter = page.medium_priority_filter()
-    medium_priority_filter.click()
+    # Select 'Low' to toggle the selection and reveal all tasks
+    low_priority_filter = page.low_priority_filter()
+    low_priority_filter.click()
 
     # Wait for the browser to refresh after the click
     time.sleep(1)
