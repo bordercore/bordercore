@@ -13,7 +13,7 @@
                         <div class=" row mb-3">
                             <label class="col-lg-3 col-form-label" for="inputTitle">Name</label>
                             <div class="col-lg-9">
-                                <input :id="`id_name_${uuid}`" type="text" name="name" :value="name" class="form-control" autocomplete="off" maxlength="200" required>
+                                <input :id="`id_name_${uuid}`" type="text" name="name" :value="name" class="form-control" autocomplete="off" maxlength="200" required @keyup.enter="onUpdateCollection">
                             </div>
                         </div>
                     </div>
@@ -205,6 +205,9 @@
             onEditCollection() {
                 const modal = new Modal("#modalUpdate");
                 modal.show();
+                setTimeout( () => {
+                    document.querySelector("#modalUpdate input").focus();
+                }, 500);
             },
             onUpdateCollection() {
                 const name = document.getElementById(`id_name_${this.uuid}`).value;
