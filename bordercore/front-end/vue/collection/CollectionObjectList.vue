@@ -1,6 +1,6 @@
 <template>
     <div class="hover-reveal-target">
-        <div id="modalUpdate" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div :id="`modalUpdate_${uuid}`" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -203,10 +203,10 @@
                 this.$parent.$parent.$refs.bookmarkSelect.openModal(this.uuid, this.getObjectList);
             },
             onEditCollection() {
-                const modal = new Modal("#modalUpdate");
+                const modal = new Modal(`#modalUpdate_${this.uuid}`);
                 modal.show();
                 setTimeout( () => {
-                    document.querySelector("#modalUpdate input").focus();
+                    document.querySelector(`#modalUpdate_${this.uuid} input`).focus();
                 }, 500);
             },
             onUpdateCollection() {
@@ -216,10 +216,11 @@
                     this.updateCollectionUrl.replace(/00000000-0000-0000-0000-000000000000/, this.uuid),
                     {
                         "name": name,
+                        "is_private": true,
                     },
                     (response) => {
                         this.name = name;
-                        const modal = Modal.getInstance(document.getElementById("modalUpdate"));
+                        const modal = Modal.getInstance(document.getElementById(`modalUpdate_${this.uuid}`));
                         modal.hide();
                     },
                     "Collection updated",

@@ -211,6 +211,8 @@ def add_collection(request):
     node = Node.objects.get(uuid=node_uuid, user=request.user)
     collection = node.add_collection()
 
+    node.populate_collection_names()
+
     response = {
         "status": "OK",
         "collection_uuid": collection.uuid,
@@ -228,6 +230,8 @@ def delete_collection(request):
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
     node.delete_collection(collection_uuid)
+
+    node.populate_collection_names()
 
     response = {
         "status": "OK",

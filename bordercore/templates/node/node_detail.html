@@ -64,14 +64,14 @@
 
             <div v-for="(column, colIndex) in layout" class="flex-even">
                 <draggable
-                    @change="onChange($event)"
+                    @change="onLayoutChange($event)"
                     :list="layout[colIndex]"
                     group="object"
                     :data-col-number="colIndex"
                     :disabled="!$store.state.editLayout"
                 >
                     <div v-for="(obj, rowIndex) in column">
-                        <div v-if="obj.type === 'collection'" key="collection">
+                        <div v-if="obj.type === 'collection'" :key="obj.uuid">
                             <collection-object-list
                                 :initial-name="obj.name"
                                 :uuid="obj.uuid"
@@ -249,7 +249,7 @@
                 onDragLeave(evt) {
                     evt.currentTarget.classList.remove("node-drag-over");
                 },
-                onChange(evt) {
+                onLayoutChange(evt) {
                     doPost(
                         this,
                         "{% url "node:change_layout" %}",
