@@ -733,7 +733,11 @@ def search_tags_es(user, search_term, doc_types):
 @login_required
 def search_names(request):
 
-    search_term = unquote(request.GET["term"].lower())
+    # Limit the search term to 10 characters, since we've configured the
+    # Elasticsearch ngram_tokenizer to only analyze tokens up to that many
+    # characters (see mappings.json). Otherwise no results will be returned
+    # for longer terms.
+    search_term = unquote(request.GET["term"].lower())[:10]
 
     doc_types = get_doc_types_from_request(request)
 
@@ -853,7 +857,6 @@ def search_names_es(user, search_term, doc_types):
         )
 
     results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
-
     matches = []
 
     cache_checker = is_cached()
