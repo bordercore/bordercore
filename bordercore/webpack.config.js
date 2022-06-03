@@ -49,6 +49,10 @@ module.exports = (env, argv) => {
 
             // Lint my SCSS
             new StylelintPlugin({
+                // By default compiler.options.output.path is included
+                // in the exclude list, which would mean our 'static'
+                // folder would be skipped. So set it to the empty list.
+                exclude: [],
                 files: "static/scss/**.scss",
             }),
 
