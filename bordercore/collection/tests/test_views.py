@@ -3,7 +3,7 @@ import pytest
 from django import urls
 
 from blob.tests.factories import BlobFactory
-from collection.models import SortOrderCollectionBlob
+from collection.models import SortOrderCollectionBCObject
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
@@ -27,8 +27,8 @@ def test_collection_detail(auto_login_user, collection):
 
     assert resp.status_code == 200
 
-    for blob in SortOrderCollectionBlob.objects.filter(collection=collection[0]):
-        blob.delete()
+    for so in SortOrderCollectionBCObject.objects.filter(collection=collection[0]):
+        so.blob.delete()
 
     url = urls.reverse("collection:detail", kwargs={"collection_uuid": collection[0].uuid})
     resp = client.get(url)
@@ -37,7 +37,7 @@ def test_collection_detail(auto_login_user, collection):
 
     # Test collections with blobs with no "null" names
     blob = BlobFactory(user=user, name=None)
-    collection[0].add_blob(blob)
+    collection[0].add_object(blob)
 
     url = urls.reverse("collection:detail", kwargs={"collection_uuid": collection[0].uuid})
     resp = client.get(url)
@@ -49,11 +49,11 @@ def test_sort_collection(auto_login_user, collection):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("collection:sort")
+    url = urls.reverse("collection:sort_objects")
     resp = client.post(url, {
         "collection_uuid": collection[0].uuid,
-        "blob_uuid": collection[0].blobs.all()[0].uuid,
-        "position": "3"
+        "object_uuid": collection[0].sortordercollectionbcobject_set.all()[0].blob.uuid,
+        "new_position": "3"
     })
 
     assert resp.status_code == 200
@@ -157,11 +157,11 @@ def test_collection_get_blob_list(auto_login_user, collection):
 
     assert len(resp_json["blob_list"]) == 2
 
-    blob_list = collection[0].blobs.all()
-    assert str(blob_list[0].uuid) in [
+    blob_list = collection[0].sortordercollectionbcobject_set.all()
+    assert str(blob_list[0].blob.uuid) in [
         x["uuid"] for x in resp_json["blob_list"]
     ]
-    assert str(blob_list[1].uuid) in [
+    assert str(blob_list[1].blob.uuid) in [
         x["uuid"] for x in resp_json["blob_list"]
     ]
 
@@ -189,8 +189,6 @@ def test_add_blob(auto_login_user, collection, blob_image_factory):
 def test_remove_object(auto_login_user, collection, blob_image_factory):
 
     _, client = auto_login_user()
-
-    collection[0].add_object(blob_image_factory[0])
 
     url = urls.reverse("collection:remove_object")
     resp = client.post(url, {

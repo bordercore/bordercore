@@ -9,8 +9,7 @@ MAGICK_TEMPORARY_PATH=/mnt/efs
 
 # We copy the dependencies rather than use symlinks because
 #  symlinks don't work inside a "--use-container" Docker image
-#cp ../../lib/util.py ./lib/
-#cp ../../blob/elasticsearch_indexer.py ./lib/
+cp ../../lib/util.py ./lib/
 
 $SAM build --use-container &&
 

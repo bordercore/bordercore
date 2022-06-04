@@ -22,7 +22,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 
 from bookmark.models import Bookmark
-from collection.models import Collection, SortOrderCollectionBlob
+from collection.models import Collection, SortOrderCollectionBCObject
 from lib.mixins import SortOrderMixin, TimeStampedModel
 from lib.time_utils import get_date_from_pattern
 from lib.util import get_elasticsearch_connection, is_audio, is_image, is_video
@@ -356,61 +356,16 @@ class Blob(TimeStampedModel):
     def get_collection_info(self):
         return Collection.objects.filter(
             user=self.user,
-            blobs__uuid=self.uuid,
+            sortordercollectionbcobject__blob__uuid=self.uuid,
             is_private=False)
 
-    def add_to_collection(self, user, collection_uuid):
-        """
-        Add this blob to the given collection.
-        """
+    def get_linked_objects(self):
 
-        collection = Collection.objects.get(user=user, uuid=collection_uuid)
-        collection.modified = datetime.datetime.now()
-        collection.save()
-
-        collection.add_blob(self)
-
-        collection.create_collection_thumbnail()
-
-    def delete_from_collection(self, user, collection_uuid):
-        """
-        Remove this blob from the given collection
-        """
-
-        collection = Collection.objects.get(user=user, uuid=collection_uuid)
-        collection.modified = datetime.datetime.now()
-        collection.save()
-
-        so = SortOrderCollectionBlob.objects.get(collection__uuid=collection_uuid, blob__uuid=self.uuid)
-        so.delete()
-
-        collection.create_collection_thumbnail()
-
-    def get_linked_blobs(self):
-
-        linked_blobs = []
-
-        for collection in Collection.objects.filter(
-                user=self.user,
-                blobs__uuid=self.uuid
-        ).prefetch_related("blobs"):
-            blob_list = Blob.objects.filter(
-                user=self.user,
-                uuid__in=[
-                    x.uuid for x in collection.blobs.all() if x.uuid != self.uuid
-                ]
-            ).select_related("user")
-            if collection.is_private:
-                linked_blobs.append(
-                    {
-                        "uuid": collection.uuid,
-                        "name": collection.name,
-                        "is_private": collection.is_private,
-                        "blob_list": blob_list
-                    }
-                )
-
-        return linked_blobs
+        return Collection.objects.filter(
+            user=self.user,
+            sortordercollectionbcobject__blob__uuid=self.uuid,
+            is_private=True
+        )
 
     def get_date(self):
         return get_date_from_pattern({"gte": self.date})
@@ -474,8 +429,8 @@ class Blob(TimeStampedModel):
             new_blob.tags.add(tag)
 
         if include_collections:
-            for collection in Collection.objects.filter(blobs__uuid=self.uuid):
-                new_blob.add_to_collection(self.user, collection.uuid)
+            for so in SortOrderCollectionBCObject.objects.filter(blob__uuid=self.uuid):
+                so.collection.add_object(new_blob)
 
         # Add to Elasticsearch
         new_blob.index_blob()

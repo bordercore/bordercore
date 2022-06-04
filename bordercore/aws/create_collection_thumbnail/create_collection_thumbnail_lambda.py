@@ -6,6 +6,8 @@ import subprocess
 import boto3
 import requests
 
+from lib.util import is_image, is_pdf
+
 logging.getLogger().setLevel(logging.INFO)
 log = logging.getLogger(__name__)
 
@@ -23,26 +25,29 @@ def download_images_from_collection(collection_uuid):
     if r.status_code != 200:
         raise Exception(f"Error: status code: {r.status_code}")
 
-    blob_list = r.json()
-    log.info(blob_list)
+    object_list = r.json()
+    log.info(object_list)
 
     filenames = []
 
-    for blob in blob_list:
+    for object in object_list:
 
-        if blob["filename"].endswith("pdf"):
+        if is_pdf(object["filename"]):
             # For pdfs, download the cover image
             s3_key = "cover-large.jpg"
-        else:
+        elif is_image(object["filename"]):
             # For images, download the image itself
-            s3_key = blob["filename"]
+            s3_key = object["filename"]
+        else:
+            # If it's any other type, skip
+            continue
 
-        # Prepend the blob's uuid to insure uniqueness
-        filename = f"{blob['uuid']}-{s3_key}"
+        # Prepend the object's uuid to insure uniqueness
+        filename = f"{object['uuid']}-{s3_key}"
         filenames.append(filename)
 
         file_path = f"{EFS_DIR}/collections/{filename}"
-        s3_client.download_file(S3_BUCKET_NAME, f"blobs/{blob['uuid']}/{s3_key}", file_path)
+        s3_client.download_file(S3_BUCKET_NAME, f"blobs/{object['uuid']}/{s3_key}", file_path)
 
     return filenames
 
@@ -61,15 +66,15 @@ def handler(event, context):
 
             thumbnail_filename = f"{collection_uuid}.jpg"
 
-            blob_list = download_images_from_collection(collection_uuid)
+            object_list = download_images_from_collection(collection_uuid)
 
-            if blob_list:
+            if object_list:
                 result = subprocess.run(
                     [
                         "sh",
                         f"{EFS_DIR}/create-cover.sh",
                         collection_uuid,
-                        *blob_list
+                        *object_list
                     ],
                     capture_output=True
                 )
@@ -85,8 +90,8 @@ def handler(event, context):
                 )
 
                 # Delete the sample images once done
-                for blob in blob_list:
-                    os.remove(f"{EFS_DIR}/collections/{blob}")
+                for object in object_list:
+                    os.remove(f"{EFS_DIR}/collections/{object}")
 
                 os.remove(f"{EFS_DIR}/collections/{thumbnail_filename}")
 

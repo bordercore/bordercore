@@ -19,8 +19,7 @@ from django.views.generic.list import ListView
 from blob.models import Blob
 from bookmark.models import Bookmark
 from collection.forms import CollectionForm
-from collection.models import (Collection, SortOrderCollectionBCObject,
-                               SortOrderCollectionBlob)
+from collection.models import Collection, SortOrderCollectionBCObject
 from lib.exceptions import DuplicateObjectError
 from lib.mixins import FormRequestMixin
 from tag.models import Tag
@@ -33,13 +32,15 @@ class CollectionListView(FormRequestMixin, FormMixin, ListView):
 
     def get_queryset(self):
 
-        query = Collection.objects.filter(user=self.request.user). \
-            filter(is_private=False)
+        query = Collection.objects.filter(
+            user=self.request.user,
+            is_private=False
+        )
 
         if "query" in self.request.GET:
             query = query.filter(name__icontains=self.request.GET.get("query"))
 
-        query = query.annotate(num_blobs=Count("blobs"))
+        query = query.annotate(num_blobs=Count("sortordercollectionbcobject__blob"))
 
         query = query.order_by("-modified")
 
@@ -75,11 +76,11 @@ class CollectionDetailView(FormRequestMixin, FormMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        blob_info = self.object.get_blob_list(request=self.request)
+        object_info = self.object.get_object_list(request=self.request)
 
-        if blob_info["blob_list"]:
-            context["blob_list"] = blob_info["blob_list"]
-            context["paginator_info"] = blob_info["paginator"]
+        if object_info["object_list"]:
+            context["object_list"] = object_info["object_list"]
+            context["paginator_info"] = object_info["paginator"]
         else:
             context["paginator_info"] = {}
 
@@ -91,15 +92,15 @@ class CollectionDetailView(FormRequestMixin, FormMixin, DetailView):
             } for x in self.object.tags.all()
         ]
 
-        # Get a list of all tags used by all blobs in this collection,
+        # Get a list of all tags used by all objects in this collection,
         #  along with their total counts
-        context["blob_tags"] = [
+        context["object_tags"] = [
             {
                 "id": x.id,
                 "tag": x.name,
                 "blob_count": x.blob_count
             } for x in Tag.objects.filter(
-                blob__collection__uuid=self.object.uuid
+                blob__sortordercollectionbcobject__collection__uuid=self.object.uuid
             ).distinct().annotate(
                 blob_count=Count("blob")
             ).order_by(
@@ -198,19 +199,6 @@ class CollectionDeleteView(DeleteView):
 
 
 @login_required
-def sort_collection(request):
-
-    collection_uuid = request.POST["collection_uuid"]
-    blob_uuid = request.POST["blob_uuid"]
-    new_position = int(request.POST["position"])
-
-    so = SortOrderCollectionBlob.objects.get(collection__uuid=collection_uuid, blob__uuid=blob_uuid)
-    SortOrderCollectionBlob.reorder(so, new_position)
-
-    return JsonResponse({"status": "OK"}, safe=False)
-
-
-@login_required
 def get_blob(request, collection_uuid):
 
     collection = Collection.objects.get(uuid=collection_uuid)
@@ -252,14 +240,14 @@ def search(request):
         query = query.filter(name__icontains=request.GET.get("query"))
 
     if "blob_uuid" in request.GET:
-        query = query.filter(blobs__uuid__in=[request.GET.get("blob_uuid")])
+        query = query.filter(sortordercollectionbcobject__blob__uuid__in=[request.GET.get("blob_uuid")])
 
     if "exclude_blob_uuid" in request.GET:
         contains_blob = Collection.objects.filter(uuid=OuterRef("uuid")) \
-                                          .filter(blobs__uuid__in=[request.GET.get("exclude_blob_uuid")])
+                                          .filter(sortordercollectionbcobject__blob__uuid__in=[request.GET.get("exclude_blob_uuid")])
         query = query.annotate(contains_blob=Exists(contains_blob))
 
-    query = query.annotate(num_blobs=Count("blobs"))
+    query = query.annotate(num_blobs=Count("sortordercollectionbcobject__blob"))
 
     collection_list = query.order_by("-modified")
 
@@ -319,7 +307,8 @@ def create_blob(request):
 
         blob.index_blob()
 
-        blob.add_to_collection(request.user, collection_uuid)
+        collection = Collection.objects.get(uuid=collection_uuid, user=request.user)
+        collection.add_object(blob)
 
         response = {
             "status": "OK",
@@ -351,6 +340,7 @@ def add_blob(request):
         collection.add_object(blob)
         response = {
             "status": "OK",
+            "message": f"Added to collection <strong>'{collection.name}'</strong>"
         }
     except DuplicateObjectError:
         response = {
@@ -416,9 +406,6 @@ def sort_objects(request):
     )
     SortOrderCollectionBCObject.reorder(so, new_position)
 
-    # so.node.modified = timezone.now()
-    # so.node.save()
-
     response = {
         "status": "OK",
     }
@@ -439,9 +426,6 @@ def update_object_note(request):
     )
     so.note = note
     so.save()
-
-    # so.node.modified = timezone.now()
-    # so.node.save()
 
     response = {
         "status": "OK",

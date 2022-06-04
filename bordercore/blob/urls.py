@@ -36,11 +36,6 @@ urlpatterns = [
         name="metadata_name_search"
     ),
     path(
-        route="mutate/",
-        view=views.collection_mutate,
-        name="collection_mutate"
-    ),
-    path(
         route="parse_date/<path:input_date>/",
         view=views.parse_date,
         name="parse_date"

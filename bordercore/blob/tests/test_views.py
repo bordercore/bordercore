@@ -226,7 +226,7 @@ def test_get_metadata_from_form(auto_login_user):
     assert len(metadata) == 0
 
 
-def test_handle_linked_collection(auto_login_user, blob_image_factory):
+def test_handle_linked_collection(monkeypatch_collection, auto_login_user, blob_image_factory):
 
     user, client = auto_login_user()
 
@@ -242,7 +242,7 @@ def test_handle_linked_collection(auto_login_user, blob_image_factory):
 
     collection_updated = Collection.objects.get(uuid=collection.uuid)
 
-    assert blob_image_factory[0] in [x for x in collection_updated.blobs.all()]
+    assert blob_image_factory[0] in [x.blob for x in collection_updated.sortordercollectionbcobject_set.all()]
 
 
 def test_blob_metadata_name_search(auto_login_user, blob_image_factory):
@@ -251,29 +251,6 @@ def test_blob_metadata_name_search(auto_login_user, blob_image_factory):
 
     url = urls.reverse("blob:metadata_name_search")
     resp = client.get(f"{url}?query=foobar")
-
-    assert resp.status_code == 200
-
-
-def test_blob_collection_mutate(monkeypatch_collection, auto_login_user, blob_text_factory, collection):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("blob:collection_mutate")
-
-    resp = client.post(url, {
-        "blob_uuid": blob_text_factory[0].uuid,
-        "collection_uuid": collection[0].uuid,
-        "mutation": "add"
-    })
-
-    assert resp.status_code == 200
-
-    resp = client.post(url, {
-        "blob_uuid": blob_text_factory[0].uuid,
-        "collection_uuid": collection[0].uuid,
-        "mutation": "delete"
-    })
 
     assert resp.status_code == 200
 

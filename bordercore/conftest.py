@@ -391,11 +391,11 @@ def collection(monkeypatch_collection, blob_image_factory, blob_pdf_factory):
     tag_2 = TagFactory(name="django")
     collection_0.tags.add(tag_1, tag_2)
 
-    collection_0.add_blob(blob_image_factory[0])
-    collection_0.add_blob(blob_pdf_factory[0])
+    collection_0.add_object(blob_image_factory[0])
+    collection_0.add_object(blob_pdf_factory[0])
 
     collection_1 = CollectionFactory(name="To Display")
-    collection_1.add_blob(blob_pdf_factory[0])
+    collection_1.add_object(blob_pdf_factory[0])
 
     yield [collection_0, collection_1]
 
@@ -448,7 +448,7 @@ def metrics(auto_login_user):
 
 
 @pytest.fixture()
-def node(bookmark, blob_image_factory, blob_pdf_factory):
+def node(monkeypatch_collection, bookmark, blob_image_factory, blob_pdf_factory):
 
     node = NodeFactory()
 

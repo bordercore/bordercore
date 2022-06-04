@@ -36,11 +36,6 @@ urlpatterns = [
         name="get_blob"
     ),
     path(
-        route="sort/",
-        view=views.sort_collection,
-        name="sort"
-    ),
-    path(
         route="search",
         view=views.search,
         name="search"

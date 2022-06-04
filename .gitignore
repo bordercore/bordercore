@@ -18,6 +18,7 @@ packaged.yaml
 bordercore/aws/create_thumbnail/lib/*
 bordercore/aws/index_blobs/lib/*
 bordercore/aws/create_bookmark_thumbnail/lib/*
+bordercore/aws/create_collection_thumbnail/lib/*
 
 **/css/theme-dark.css
 **/css/theme-dark.min.css

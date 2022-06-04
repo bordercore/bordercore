@@ -134,7 +134,7 @@ class CollectionViewSet(viewsets.ModelViewSet):
         return Collection.objects.filter(
             user=self.request.user
         ).prefetch_related(
-            "tags", "blobs"
+            "tags"
         )
 
     def perform_create(self, serializer):

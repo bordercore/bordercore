@@ -34,13 +34,13 @@ def test_homepage(monkeypatch_homepage, auto_login_user, bookmark, question, tod
     assert resp.status_code == 200
 
 
-def test_get_random_image(auto_login_user):
+def test_get_random_image(monkeypatch_collection, auto_login_user):
 
     user, client = auto_login_user()
 
     collection = CollectionFactory(user=user)
     blob = BlobFactory(user=user)
-    collection.add_blob(blob)
+    collection.add_object(blob)
     user.userprofile.homepage_image_collection = collection
 
     mock_request = MagicMock()

@@ -153,21 +153,23 @@
                        :depth="0"
             ></tree-menu>
 
-            {% if linked_blobs %}
+            {% if linked_objects %}
                 <card title="Collections">
                     <template #content>
-                        {% for collection in linked_blobs %}
+                        {% for collection in linked_objects %}
                             {{ collection.name }}
                             <ul class="list-group interior-borders">
-                                {% for blob in collection.blob_list %}
+                                {% for blob in collection.sortordercollectionbcobject_set.all %}
+                                    {% if blob.blob.uuid != object.uuid %}
                                     <li class="list-group-item list-group-item-secondary text-info d-flex align-items-center">
-                                        {% if blob.get_cover_url_small %}
-                                            <img src="{{ blob.get_cover_url_small }}" />
+                                        {% if blob.blob.get_cover_url_small %}
+                                            <img src="{{ blob.blob.get_cover_url_small }}" />
                                         {% endif %}
                                         <div class="ms-2">
-                                            <a href="{% url 'blob:detail' blob.uuid %}">{{ blob.name|default:"No Name" }}</a>
+                                            <a href="{% url 'blob:detail' blob.blob.uuid %}">{{ blob.blob.name|default:"No Name" }}</a>
                                         </div>
                                     </li>
+                                    {% endif %}
                                 {% endfor %}
                                 <li class="list-group-item list-group-item-secondary text-info">
                                     <a class="btn btn-primary" href="{% url 'blob:create' %}?linked_collection={{ collection.uuid }}">Add to Collection</a>
@@ -372,7 +374,7 @@
                 </audio>
 
                 {% if blob.content %}
-                    <div class="blob-content table-borders" id="blob-detail-content" v-html="getContent()">
+                    <div class="blob-content table-borders card-body mx-0" id="blob-detail-content" v-html="getContent()">
                     </div>
                 {% endif %}
 
@@ -380,7 +382,7 @@
                     ref="addToCollection"
                     blob-uuid="{{ blob.uuid }}"
                     search-url="{% url 'collection:search' %}?exclude_blob_uuid={{ blob.uuid }}&query="
-                    collection-mutate-url="{% url 'blob:collection_mutate' %}"
+                    add-blob-url="{% url 'collection:add_blob' %}"
                     add-collection-url="{% url 'collection-list' %}"
                     @add-to-collection="getCollectionList"
                 >

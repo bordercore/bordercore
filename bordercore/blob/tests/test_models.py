@@ -94,7 +94,7 @@ def test_get_collection_info(collection, blob_pdf_factory):
 
 
 def test_get_linked_blobs(blob_pdf_factory):
-    assert len(blob_pdf_factory[0].get_linked_blobs()) == 0
+    assert len(blob_pdf_factory[0].get_linked_objects()) == 0
 
 
 def test_get_date(blob_image_factory):
@@ -127,8 +127,8 @@ def test_clone(temp_blob_directory, monkeypatch_blob, blob_pdf_factory, collecti
     for tag in blob_pdf_factory[0].tags.all():
         assert tag in cloned_blob.tags.all()
 
-    for c in Collection.objects.filter(blobs__uuid=blob_pdf_factory[0].uuid):
-        assert cloned_blob in c.blobs.all()
+    for c in Collection.objects.filter(sortordercollectionbcobject__blob__uuid=blob_pdf_factory[0].uuid):
+        assert cloned_blob in [x.blob for x in c.sortordercollectionbcobject_set.all()]
 
 
 def count_nodes(nodes, root_node=True):

@@ -12,7 +12,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.db import models
-from django.db.models import Q
+from django.db.models import F, Q
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.urls import reverse
@@ -34,8 +34,7 @@ class Collection(TimeStampedModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
-    blobs = models.ManyToManyField("blob.Blob", through="SortOrderCollectionBlob")
-    objects = models.ManyToManyField("collection.BCObject", through="SortOrderCollectionBCObject")
+    bc_objects = models.ManyToManyField("collection.BCObject", through="SortOrderCollectionBCObject")
     tags = models.ManyToManyField(Tag)
     description = models.TextField(blank=True, default="")
     is_private = models.BooleanField(default=False)
@@ -63,7 +62,7 @@ class Collection(TimeStampedModel):
         self.modified = datetime.datetime.now()
         self.save()
 
-        # self.create_collection_thumbnail()
+        self.create_collection_thumbnail()
 
     def remove_object(self, object_uuid):
 
@@ -76,12 +75,7 @@ class Collection(TimeStampedModel):
         self.modified = datetime.datetime.now()
         self.save()
 
-        # self.create_collection_thumbnail()
-
-    def add_blob(self, blob):
-
-        so = SortOrderCollectionBlob(collection=self, blob=blob)
-        so.save()
+        self.create_collection_thumbnail()
 
     def delete(self):
 
@@ -96,7 +90,7 @@ class Collection(TimeStampedModel):
 
     def get_blob(self, position, direction, randomize=False, tag_name=None):
 
-        so = SortOrderCollectionBlob.objects.filter(
+        so = SortOrderCollectionBCObject.objects.filter(
             collection=self
         ).select_related(
             "blob"
@@ -134,7 +128,7 @@ class Collection(TimeStampedModel):
 
         blob_list = []
 
-        queryset = SortOrderCollectionBlob.objects.filter(collection=self)
+        queryset = SortOrderCollectionBCObject.objects.filter(collection=self)
 
         if request and "tag" in request.GET:
             queryset = queryset.filter(blob__tags__name=request.GET["tag"])
@@ -180,10 +174,8 @@ class Collection(TimeStampedModel):
 
         queryset = SortOrderCollectionBCObject.objects.filter(collection=self).prefetch_related("blob").prefetch_related("bookmark")
 
-        # if request and "tag" in request.GET:
-        #     queryset = queryset.filter(blob__tags__name=request.GET["tag"])
-
-        # so = queryset.select_related("blob")
+        if request and "tag" in request.GET:
+            queryset = queryset.filter(blob__tags__name=request.GET["tag"])
 
         if request and "page" in request.GET:
             page_number = request.GET["page"]
@@ -216,9 +208,14 @@ class Collection(TimeStampedModel):
         Return a list of the most recent images added to this collection
         """
 
-        return self.blobs.filter(file__iregex=r"\.(gif|jpg|jpeg|pdf|png)$").\
-            values("uuid", "file").\
-            order_by("-created")[:limit]
+        return self.sortordercollectionbcobject_set.filter(
+            blob__file__iregex=r"\.(gif|jpg|jpeg|pdf|png)$"
+        ).values(
+            uuid=F("blob__uuid"),
+            file=F("blob__file")
+        ).order_by(
+            "-blob__created"
+        )[:limit]
 
     def create_collection_thumbnail(self):
 
@@ -241,24 +238,6 @@ class Collection(TimeStampedModel):
         client.publish(
             TopicArn=settings.CREATE_COLLECTION_THUMBNAIL_TOPIC_ARN,
             Message=json.dumps(message),
-        )
-
-
-class SortOrderCollectionBlob(SortOrderMixin):
-
-    collection = models.ForeignKey(Collection, on_delete=models.CASCADE)
-    blob = models.ForeignKey("blob.Blob", on_delete=models.CASCADE)
-    created = models.DateTimeField(auto_now_add=True)
-
-    field_name = "collection"
-
-    def __str__(self):
-        return f"SortOrder: {self.collection}, {self.blob}"
-
-    class Meta:
-        ordering = ("sort_order",)
-        unique_together = (
-            ("collection", "blob")
         )
 
 
@@ -326,9 +305,4 @@ class BCObject(TimeStampedModel):
 
 @receiver(pre_delete, sender=SortOrderCollectionBCObject)
 def remove_object(sender, instance, **kwargs):
-    instance.handle_delete()
-
-
-@receiver(pre_delete, sender=SortOrderCollectionBlob)
-def remove_blob(sender, instance, **kwargs):
     instance.handle_delete()

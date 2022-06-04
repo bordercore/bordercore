@@ -81,7 +81,7 @@
                 default: "",
                 type: String,
             },
-            collectionMutateUrl: {
+            addBlobUrl: {
                 default: "",
                 type: String,
             },
@@ -134,11 +134,10 @@
             addBlobToCollection(collectionUuid) {
                 doPost(
                     this,
-                    this.collectionMutateUrl,
+                    this.addBlobUrl,
                     {
-                        "blob_uuid": this.blobUuid,
                         "collection_uuid": collectionUuid,
-                        "mutation": "add",
+                        "blob_uuid": this.blobUuid,
                     },
                     (response) => {
                         this.$emit("add-to-collection", collectionUuid);

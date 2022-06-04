@@ -22,7 +22,7 @@ from django.views.generic.list import ListView
 from blob.forms import BlobForm
 from blob.models import Blob, MetaData, RecentlyViewedBlob
 from blob.services import get_recent_blobs, import_blob
-from collection.models import Collection, SortOrderCollectionBlob
+from collection.models import Collection, SortOrderCollectionBCObject
 from lib.mixins import FormRequestMixin
 from lib.time_utils import get_javascript_date, parse_date_from_string
 
@@ -82,18 +82,18 @@ class BlobCreateView(FormRequestMixin, CreateView):
             ]
 
         if "linked_collection" in self.request.GET:
-            collection = Collection.objects.get(user=self.request.user, uuid=self.request.GET["linked_collection"])
-            context["linked_collection_info"] = collection
-            context["linked_collection_blob_list"] = collection.blobs.all()
-
-            # Grab the initial metadata and tags from one of the other blobs in the collection
-            context["metadata"] = context["linked_collection_blob_list"][0].metadata.all()
+            context["linked_collection"] = Collection.objects.get(
+                user=self.request.user,
+                uuid=self.request.GET["linked_collection"]
+            )
             context["tags"] = [
                 {
                     "text": x.name,
                     "value": x.name,
                     "is_meta": x.is_meta
-                } for x in context["linked_collection_blob_list"][0].tags.all()
+                } for x in SortOrderCollectionBCObject.objects.filter(
+                    collection__uuid=self.request.GET["linked_collection"]
+                ).first().blob.tags.all()
             ]
 
         if "collection_uuid" in self.request.GET:
@@ -133,10 +133,9 @@ class BlobCreateView(FormRequestMixin, CreateView):
 
         if "linked_collection" in self.request.GET:
             collection_uuid = self.request.GET["linked_collection"]
-            blob_uuid = Collection.objects.get(user=self.request.user, uuid=collection_uuid).blobs.all()[0].uuid
-            blob = Blob.objects.get(user=self.request.user, uuid=blob_uuid)
-            form.initial["date"] = blob.date
-            form.initial["name"] = blob.name
+            so = SortOrderCollectionBCObject.objects.filter(collection__uuid=collection_uuid).first()
+            form.initial["date"] = so.blob.date
+            form.initial["name"] = so.blob.name
 
         return form
 
@@ -159,7 +158,8 @@ class BlobCreateView(FormRequestMixin, CreateView):
         handle_linked_collection(obj, self.request)
 
         if "collection_uuid" in self.request.POST:
-            obj.add_to_collection(self.request.user, self.request.POST.get("collection_uuid"))
+            collection = Collection.objects.get(uuid=self.request.POST.get("collection_uuid"), user=self.request.user)
+            collection.add_object(obj)
 
         obj.index_blob()
 
@@ -238,7 +238,7 @@ class BlobDetailView(DetailView):
             if int(datetime.datetime.now().strftime("%s")) - int(self.object.created.strftime("%s")) > 60:
                 messages.add_message(self.request, messages.ERROR, "Blob not found in Elasticsearch")
 
-        context["linked_blobs"] = self.object.get_linked_blobs()
+        context["linked_objects"] = self.object.get_linked_objects()
 
         context["collection_list"] = self.object.get_collection_info()
 
@@ -282,7 +282,7 @@ class BlobUpdateView(FormRequestMixin, UpdateView):
             context["is_book"] = True
 
         context["collections_other"] = Collection.objects.filter(Q(user=self.request.user)
-                                                                 & ~Q(blobs__uuid=self.object.uuid)
+                                                                 & ~Q(sortordercollectionbcobject__blob__uuid=self.object.uuid)
                                                                  & Q(is_private=False))
         context["action"] = "Update"
         context["title"] = "Blob Update :: {}".format(self.object.get_name(remove_edition_string=True))
@@ -428,7 +428,7 @@ def handle_linked_collection(blob, request):
 
     if "linked_collection" in request.POST:
         collection = Collection.objects.get(user=request.user, uuid=request.POST["linked_collection"])
-        collection.add_blob(blob)
+        collection.add_object(blob)
 
 
 @login_required
@@ -439,30 +439,6 @@ def metadata_name_search(request):
     return_data = [{"value": x["name"]} for x in m]
 
     return JsonResponse(return_data, safe=False)
-
-
-@login_required
-def collection_mutate(request):
-
-    blob_uuid = request.POST["blob_uuid"]
-    collection = Collection.objects.get(user=request.user, uuid=request.POST["collection_uuid"])
-    mutation = request.POST["mutation"]
-
-    if mutation == "add":
-
-        if SortOrderCollectionBlob.objects.filter(collection=collection, blob__uuid=blob_uuid).exists():
-            message = f"Blob already in collection '{collection.name}'"
-        else:
-            blob = Blob.objects.get(uuid=blob_uuid)
-            blob.add_to_collection(request.user, collection.uuid)
-            message = f"Added to collection '{collection.name}'"
-
-    elif mutation == "delete":
-        blob = Blob.objects.get(uuid=blob_uuid)
-        blob.delete_from_collection(request.user, collection.uuid)
-        message = f"Removed from collection '{collection.name}'"
-
-    return JsonResponse({"status": "OK", "message": message}, safe=False)
 
 
 @login_required
