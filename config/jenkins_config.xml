@@ -54,6 +54,7 @@ export DJANGO_SETTINGS_MODULE=config.settings.dev
 export PYTHONPATH=$PYTHONPATH:$WORKSPACE/bordercore:$WORKSPACE
 export DJANGO_LOG_DIR=&quot;/tmp&quot;
 export BORDERCORE_HOME=&quot;./bordercore&quot;
+export PATH=/opt/node-v14.16.0-linux-x64/bin:$PATH
 
 # Install webpack and generate JavaScript bundle
 npm --prefix=./bordercore/ init -y
