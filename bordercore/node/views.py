@@ -114,6 +114,7 @@ def get_todo_list(request, uuid):
                 "name": x.name,
                 "uuid": x.uuid,
                 "note": x.note,
+                "url": x.url,
             }
             for x
             in todo_list]
