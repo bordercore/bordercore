@@ -1,6 +1,9 @@
+import logging
+
 import pytest
 
 from django import urls
+from django.conf import settings
 
 from blob.tests.factories import BlobFactory
 from collection.models import SortOrderCollectionBCObject
@@ -19,6 +22,16 @@ def test_collection_list(auto_login_user, collection):
 
 
 def test_collection_detail(auto_login_user, collection):
+
+    # Quiet spurious output
+    settings.NPLUSONE_WHITELIST = [
+        {
+            "label": "unused_eager_load",
+            "model": "collection.SortOrderCollectionBCObject"
+        }
+    ]
+    logger = logging.getLogger("bordercore.blob.models")
+    logger.propagate = False
 
     user, client = auto_login_user()
 
@@ -99,6 +112,14 @@ def test_update_collection(auto_login_user, collection):
 
 
 def test_delete_collection(auto_login_user, collection):
+
+    # Quiet spurious output
+    settings.NPLUSONE_WHITELIST = [
+        {
+            "label": "unused_eager_load",
+            "model": "collection.Collection"
+        }
+    ]
 
     _, client = auto_login_user()
 

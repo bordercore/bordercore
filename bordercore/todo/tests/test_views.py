@@ -2,6 +2,7 @@ import factory
 import pytest
 
 from django import urls
+from django.conf import settings
 from django.db.models import signals
 
 from todo.views import Todo
@@ -65,6 +66,14 @@ def test_todo_create(auto_login_user, todo):
 
 @factory.django.mute_signals(signals.post_save)
 def test_todo_update(auto_login_user, todo):
+
+    # Quiet spurious output
+    settings.NPLUSONE_WHITELIST = [
+        {
+            "label": "unused_eager_load",
+            "model": "todo.Todo"
+        }
+    ]
 
     _, client = auto_login_user()
 

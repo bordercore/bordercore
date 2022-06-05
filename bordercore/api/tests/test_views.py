@@ -1,6 +1,7 @@
 from faker import Factory as FakerFactory
 
 from django import urls
+from django.conf import settings
 
 faker = FakerFactory.create()
 
@@ -19,6 +20,14 @@ def test_album_viewset(auto_login_user, song):
 
 
 def test_blob_viewset(auto_login_user, blob_image_factory):
+
+    # Quiet spurious output
+    settings.NPLUSONE_WHITELIST = [
+        {
+            "label": "unused_eager_load",
+            "model": "blob.Blob"
+        }
+    ]
 
     _, client = auto_login_user()
 
