@@ -5,7 +5,6 @@ import pytest
 
 import django
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 
 from lib.util import get_elasticsearch_connection, get_missing_bookmark_ids
@@ -56,8 +55,10 @@ def test_bookmarks_in_db_exist_in_elasticsearch(es):
         }
 
         found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
-        assert found["hits"]["total"]["value"] == batch_size, \
-            "bookmarks found in the database but not in Elasticsearch: " + get_missing_bookmark_ids(bookmarks[batch:batch + step], found)
+        if found["hits"]["total"]["value"] != batch_size:
+            missing_uuids = get_missing_bookmark_ids(bookmarks[batch:batch + step], found)
+            uuid_list = "\nuuid:".join(x for x in missing_uuids)
+            assert False, f"bookmarks found in the database but not in Elasticsearch, \nuuid:{uuid_list}"
 
 
 def test_bookmark_tags_match_elasticsearch(es):
@@ -126,9 +127,13 @@ def test_elasticsearch_bookmarks_exist_in_db(es):
 
     found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["hits"]
 
+    missing_uuids = []
     for bookmark in found:
-        assert Bookmark.objects.filter(uuid=bookmark["_source"]["uuid"]).count() == 1, \
-            f"bookmark exists in Elasticsearch but not in database, uuid={bookmark['_source']['uuid']}"
+        if Bookmark.objects.filter(uuid=bookmark["_source"]["uuid"]).count() != 1:
+            missing_uuids.append(bookmark["_source"]["uuid"])
+    if missing_uuids:
+        uuid_list = "\nuuid:".join(x for x in missing_uuids)
+        assert False, f"bookmarks exist in Elasticsearch but not in database, \nuuid:{uuid_list}"
 
 
 def test_bookmark_fields_are_trimmed():
@@ -150,7 +155,7 @@ def test_bookmark_thumbnails_in_s3_exist_in_db():
 
     s3_resource = boto3.resource("s3")
 
-    unique_uuids = {}
+    unique_uuids = set()
 
     paginator = s3_resource.meta.client.get_paginator("list_objects")
     page_iterator = paginator.paginate(Bucket=bucket_name)
@@ -159,10 +164,13 @@ def test_bookmark_thumbnails_in_s3_exist_in_db():
         for key in page["Contents"]:
             m = re.search(r"^bookmarks/(\b[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}\b)", str(key["Key"]))
             if m:
-                unique_uuids[m.group(1)] = True
+                unique_uuids.add(m.group(1))
 
-    for key in unique_uuids.keys():
-        try:
-            Bookmark.objects.get(uuid=key)
-        except ObjectDoesNotExist:
-            raise ObjectDoesNotExist(f"Bookmark thumbnail found in S3 but not in DB: {key}")
+    missing_uuids = []
+    for key in unique_uuids:
+        if not Bookmark.objects.filter(uuid=key).exists():
+            missing_uuids.append(key)
+
+    if missing_uuids:
+        uuid_list = "\nuuid:".join(x for x in missing_uuids)
+        assert False, f"bookmark thumbnails found in S3 but not in DB, \nuuid:{uuid_list}"

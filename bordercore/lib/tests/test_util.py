@@ -121,7 +121,7 @@ def test_get_missing_bookmark_ids(auto_login_user, monkeypatch):
             user=user)
     ]
 
-    assert get_missing_bookmark_ids(expected, found) == ""
+    assert get_missing_bookmark_ids(expected, found) == []
 
     found = {
         "hits": {
@@ -148,7 +148,7 @@ def test_get_missing_bookmark_ids(auto_login_user, monkeypatch):
         }
     }
 
-    assert get_missing_bookmark_ids(expected, found) == "d2edec1c-493a-4d9c-877b-21900e848187"
+    assert get_missing_bookmark_ids(expected, found) == ["d2edec1c-493a-4d9c-877b-21900e848187"]
 
 
 def test_truncate():
