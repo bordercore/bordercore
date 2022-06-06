@@ -481,6 +481,8 @@ class SearchTagListView(ListView):
         return Song.objects.filter(
             user=self.request.user,
             tags__name=tag_name
+        ).select_related(
+            "artist"
         ).order_by(
             F("year").desc(nulls_last=True),
             "title"
@@ -508,6 +510,8 @@ class SearchTagListView(ListView):
         for match in Album.objects.filter(
                 user=self.request.user,
                 tags__name=self.request.GET["tag"]
+        ).select_related(
+            "artist"
         ).order_by("-year"):
             album_list.append(
                 {
