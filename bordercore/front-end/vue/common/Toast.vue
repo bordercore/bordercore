@@ -6,8 +6,8 @@
                 <small v-html="additionalTitle" />
                 <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close" />
             </div>
-            <div class="toast-body d-flex align-items-center">
-                <font-awesome-icon class="fa-lg me-2 mb-1 pt-1" :class="'text-' + variant" :icon="getIcon()" />
+            <div class="toast-body d-flex align-items-top">
+                <font-awesome-icon class="fa-lg me-2 mt-1 mb-1 pt-1" :class="'text-' + variant" :icon="getIcon()" />
                 <div v-html="body" />
             </div>
         </div>
