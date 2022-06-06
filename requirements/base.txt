@@ -3,7 +3,7 @@ backports-abc==0.4
 backports.ssl-match-hostname==3.5.0.1
 beautifulsoup4==4.9.0
 billiard==3.6.0.0
-boto3==1.9.201
+boto3==1.24.2
 certifi==2019.6.16
 Django==3.2.13
 djangorestframework==3.13.1
@@ -37,8 +37,8 @@ python-dateutil==2.7.3
 python-magic==0.4.15
 python-mimeparse==1.6.0
 pytz==2018.5
-requests==2.22.0
-responses==0.10.14
+requests==2.27.0
+responses==0.21.0
 rsa==4.1
 simplejson==3.6.5
 singledispatch==3.4.0.3
