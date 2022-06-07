@@ -34,19 +34,27 @@
                         <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
                             <div slot="dropdown">
                                 <a class="dropdown-item" href="#" @click.prevent="onAddBlob()">
-                                    <font-awesome-icon icon="plus" class="text-primary me-3" />
+                                    <span>
+                                        <font-awesome-icon icon="plus" class="text-primary me-3" />
+                                    </span>
                                     Add Blob
                                 </a>
                                 <a class="dropdown-item" href="#" @click.prevent="onAddBookmark()">
-                                    <font-awesome-icon icon="plus" class="text-primary me-3" />
+                                    <span>
+                                        <font-awesome-icon icon="plus" class="text-primary me-3" />
+                                    </span>
                                     Add Bookmark
                                 </a>
                                 <a class="dropdown-item" href="#" @click.prevent="onEditCollection()">
-                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
+                                    <span>
+                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
+                                    </span>
                                     Edit Collection
                                 </a>
                                 <a class="dropdown-item" href="#" @click.prevent="onDeleteCollection()">
-                                    <font-awesome-icon icon="times" class="text-primary me-3" />
+                                    <span>
+                                        <font-awesome-icon icon="times" class="text-primary me-3" />
+                                    </span>
                                     Delete Collection
                                 </a>
                             </div>
@@ -65,7 +73,7 @@
                                     <div v-if="object.type === 'blob'" class="pe-2">
                                         <img :src="object.cover_url" height="75" width="70">
                                     </div>
-                                    <div v-else v-html="object.favicon_url" class="pe-2" />
+                                    <div v-else class="pe-2" v-html="object.favicon_url" />
 
                                     <div>
                                         <a :href="object.url">{{ object.name }}</a>

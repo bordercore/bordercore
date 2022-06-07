@@ -289,6 +289,7 @@ class SortOrderCollectionBCObject(SortOrderMixin):
             return {
                 "so_id": self.id,
                 "type": self.get_object_type(),
+                "id": self.bookmark.id,
                 "uuid": self.bookmark.uuid,
                 "name": self.bookmark.name,
                 "url": self.bookmark.url,

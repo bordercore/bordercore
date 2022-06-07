@@ -106,7 +106,12 @@
                                             </button>
                                             <div class="d-flex flex-column h-100" @click="onClick(blob.url)">
                                                 <a :href="[[ blob.url ]]">
-                                                    <img :src="[[ blob.cover_url ]]" />
+                                                    <div v-if="blob.type === 'blob'">
+                                                        <img :src="[[ blob.cover_url ]]" />
+                                                    </div>
+                                                    <div v-else>
+                                                        <font-awesome-icon icon="bookmark" class="text-primary fa-4x mt-3"></font-awesome-icon>
+                                                    </div>
                                                 </a>
                                                 <div class="collection-item-name mt-auto">
                                                     [[ blob.name ]]
@@ -364,9 +369,10 @@
                         {
                             id: {{ blob.id }},
                             uuid: "{{ blob.uuid }}",
+                            type: "{{ blob.type }}",
                             object_uuid: "blob",
                             name: "{{ blob.name|escapejs|safe }}",
-                            url: "{% url 'blob:detail' blob.uuid %}",
+                            url: "{{ blob.url }}",
                             cover_url: "{{ blob.cover_url }}"
                         },
                         {% endfor %}
