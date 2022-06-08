@@ -26,6 +26,10 @@ def test_blob_viewset(auto_login_user, blob_image_factory):
         {
             "label": "unused_eager_load",
             "model": "blob.Blob"
+        },
+        {
+            "label": "n_plus_one",
+            "model": "blob.Blob"
         }
     ]
 

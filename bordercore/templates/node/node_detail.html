@@ -32,6 +32,14 @@
                     </a>
                 </li>
                 <li>
+                    <a class="dropdown-item" href="#" @click.prevent="onAddNote">
+                        <span v-cloak>
+                            <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                            Add note
+                        </span>
+                    </a>
+                </li>
+                <li>
                     <a class="dropdown-item" href="#" @click.prevent="onEditMode">
                         <span v-cloak>
                             <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>
@@ -87,11 +95,13 @@
                             >
                             </collection-object-list>
                         </div>
-                        <div v-if="obj.type === 'note'" :draggable="$store.state.editLayout" key="note">
+                        <div v-if="obj.type === 'note'" :draggable="$store.state.editLayout" :key="obj.uuid">
                             <node-note
                                 node-uuid="{{ object.uuid }}"
-                                get-node-url="{% url "node:get_note" object.uuid %}"
-                                edit-url="{% url "node:edit_note" %}"
+                                :note-uuid="obj.uuid"
+                                :get-node-url="'{% url "blob-detail" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', obj.uuid)"
+                                :update-note-url="'{% url "blob-detail" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', obj.uuid)"
+                                @delete-note="onDeleteNote"
                             >
                             </node-note>
                         </div>
@@ -165,6 +175,20 @@
                             EventBus.$emit("update-layout", response.data.layout);
                         },
                         "Collection added",
+                        ""
+                    );
+                },
+                onAddNote() {
+                    doPost(
+                        this,
+                        "{% url "node:add_note" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                        },
+                        (response) => {
+                            EventBus.$emit("update-layout", response.data.layout);
+                        },
+                        "Note added",
                         ""
                     );
                 },
@@ -242,6 +266,21 @@
                             this.layout = JSON.parse(response.data.layout);
                         },
                         "Collection deleted",
+                    );
+
+                },
+                onDeleteNote(noteUuid) {
+                    doPost(
+                        this,
+                        "{% url "node:delete_note" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                            "note_uuid": noteUuid,
+                        },
+                        (response) => {
+                            this.layout = JSON.parse(response.data.layout);
+                        },
+                        "Note deleted",
                     );
 
                 },

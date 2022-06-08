@@ -240,7 +240,7 @@ def index_blob(**kwargs):
         uuid=blob_info["uuid"],
         bordercore_id=blob_info["id"],
         sha1sum=blob_info["sha1sum"],
-        user_id=blob_info["user"],
+        user_id=blob_info["user"]["id"],
         name=blob_info["name"],
         contents=blob_info["content"],
         doctype=get_doctype(blob_info, blob_info["metadata"]),

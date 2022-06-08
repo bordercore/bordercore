@@ -2,6 +2,7 @@ import pytest
 
 import django
 
+from blob.models import Blob
 from collection.models import Collection
 
 django.setup()
@@ -39,13 +40,42 @@ def test_delete_collection(node):
     ]
 
 
-def test_populate_collection_names(node):
+def test_add_note(node):
+
+    note = node.add_note()
+
+    # Verify that the note has been added to the node's layout
+    assert str(note.uuid) in [
+        val["uuid"]
+        for sublist in node.layout
+        for val in sublist
+        if "uuid" in val
+    ]
+
+
+def test_delete_note(node):
+
+    note = node.add_collection()
+    node.delete_collection(note.uuid)
+
+    assert Blob.objects.filter(uuid=note.uuid).first() is None
+
+    # Verify that the collection has been removed from the node's layout
+    assert str(note.uuid) not in [
+        val["uuid"]
+        for sublist in node.layout
+        for val in sublist
+        if "uuid" in val
+    ]
+
+
+def test_populate_names(node):
 
     collection_1 = node.add_collection()
     collection_2 = node.add_collection()
     collection_3 = node.add_collection()
 
-    node.populate_collection_names()
+    node.populate_names()
 
     names = [
         val["name"]

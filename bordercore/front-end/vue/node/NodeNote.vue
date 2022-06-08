@@ -4,14 +4,26 @@
             <template #title-slot>
                 <div v-cloak class="card-title d-flex">
                     <div class="dropdown-height">
-                        <font-awesome-icon icon="sticky-note" class="text-primary me-3" />Notes
+                        <font-awesome-icon icon="sticky-note" class="text-primary me-3" />
+                        <span v-if="note">
+                            {{ note.name }}
+                        </span>
                     </div>
                     <div v-if="note !== ''" class="ms-auto">
                         <drop-down-menu :show-on-hover="true">
                             <div slot="dropdown">
-                                <li>
-                                    <a v-if="note" class="dropdown-item" href="#" @click.prevent="editNote()">Edit note</a>
-                                </li>
+                                <a v-if="note" class="dropdown-item" href="#" @click.prevent="onEditNote()">
+                                    <span>
+                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
+                                    </span>
+                                    Edit note
+                                </a>
+                                <a v-if="note" class="dropdown-item" href="#" @click.prevent="onDeleteNote()">
+                                    <span>
+                                        <font-awesome-icon icon="times" class="text-primary me-3" />
+                                    </span>
+                                    Delete note
+                                </a>
                             </div>
                         </drop-down-menu>
                     </div>
@@ -23,7 +35,8 @@
                     ref="note"
                     :note="note"
                     :uuid="nodeUuid"
-                    :edit-url="editUrl"
+                    :hide-add-button="true"
+                    @update-note="onUpdateNote"
                 />
             </template>
         </card>
@@ -44,7 +57,7 @@
                 type: String,
                 default: "",
             },
-            editUrl: {
+            updateNoteUrl: {
                 type: String,
                 default: "",
             },
@@ -60,16 +73,33 @@
             this.getNote();
         },
         methods: {
-            editNote() {
+            onEditNote() {
                 this.$refs.note.editNote();
+            },
+            onDeleteNote() {
+                this.$emit("delete-note", this.note.uuid);
+            },
+            onUpdateNote() {
+                doPut(
+                    this,
+                    this.updateNoteUrl,
+                    {
+                        "uuid": this.note.uuid,
+                        "name": this.note.name,
+                        "content": this.$refs.note.textAreaValue,
+                        "is_note": true,
+                    },
+                    (response) => {},
+                    "",
+                );
             },
             getNote() {
                 doGet(
                     this,
                     this.getNodeUrl,
                     (response) => {
-                        this.note = response.data.note;
-                        this.$refs.note.setTextAreaValue(response.data.note);
+                        this.note = response.data;
+                        this.$refs.note.setTextAreaValue(response.data.content);
                     },
                     "Error getting note",
                 );

@@ -5,7 +5,9 @@ from django.db import models
 from django.db.models import JSONField
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
+from django.utils import timezone
 
+from blob.models import Blob
 from collection.models import Collection
 from lib.mixins import SortOrderMixin, TimeStampedModel
 from todo.models import Todo
@@ -15,7 +17,7 @@ def default_layout():
     """
     Django JSONField default must be a callable
     """
-    return [[{"type": "bookmark"}, {"type": "blob"}], [{"type": "todo"}], [{"type": "note"}]]
+    return [[{"type": "bookmark"}, {"type": "blob"}], [{"type": "todo"}]]
 
 
 class Node(TimeStampedModel):
@@ -56,29 +58,60 @@ class Node(TimeStampedModel):
         self.layout = layout
         self.save()
 
-    def populate_collection_names(self):
+    def add_note(self):
+
+        note = Blob.objects.create(
+            user=self.user,
+            date=timezone.now().strftime("%Y-%m-%d"),
+            name="New Note",
+            is_note=True
+        )
+
+        layout = self.layout
+        layout[0].insert(0, {"type": "note", "uuid": str(note.uuid)})
+        self.layout = layout
+        self.save()
+
+        return note
+
+    def delete_note(self, note_uuid):
+
+        note = Blob.objects.get(uuid=note_uuid)
+        note.delete()
+
+        layout = self.layout
+        for i, col in enumerate(layout):
+            layout[i] = [x for x in col if "uuid" not in x or x["uuid"] != str(note_uuid)]
+
+        self.layout = layout
+        self.save()
+
+    def populate_names(self):
         """
-        Get all collection names for this node in one query rather than multiple.
+        Get all collection and note names for this node in two queries
+        rather than one for each.
         """
 
-        # Get a list of all uuids for all collections in this node.
+        # Get a list of all uuids for all collections and notes in this node.
         uuids = [
             val["uuid"]
             for sublist in self.layout
             for val in sublist
             if "uuid" in val
-            and val["type"] == "collection"
+            and val["type"] in ["collection", "note"]
         ]
 
-        # Populate a lookup dictionary with the collection names, uuid => name
+        # Populate a lookup dictionary with the collection and note names, uuid => name
         lookup = {}
         for x in Collection.objects.filter(uuid__in=uuids):
             lookup[str(x.uuid)] = x.name
+        for x in Blob.objects.filter(uuid__in=uuids):
+            lookup[str(x.uuid)] = x.name
 
-        # Finally, add the collection name to the node's layout object
+        # Finally, add the collection and note names to the node's layout object
         for column in self.layout:
             for row in column:
-                if row["type"] == "collection":
+                if row["type"] in ["collection", "note"]:
                     row["name"] = lookup[row["uuid"]]
 
 

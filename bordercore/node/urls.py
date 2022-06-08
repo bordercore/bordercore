@@ -26,11 +26,6 @@ urlpatterns = [
         name="get_todo_list"
     ),
     path(
-        route="<uuid:uuid>/note/",
-        view=views.get_note,
-        name="get_note"
-    ),
-    path(
         route="edit_note/",
         view=views.edit_note,
         name="edit_note"
@@ -64,5 +59,15 @@ urlpatterns = [
         route="collection/delete",
         view=views.delete_collection,
         name="delete_collection"
+    ),
+    path(
+        route="note/add",
+        view=views.add_note,
+        name="add_note"
+    ),
+    path(
+        route="note/delete",
+        view=views.delete_note,
+        name="delete_note"
     )
 ]

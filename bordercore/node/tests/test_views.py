@@ -5,6 +5,7 @@ from faker import Factory as FakerFactory
 
 from django import urls
 
+from blob.models import Blob
 from collection.models import Collection
 from node.models import Node
 
@@ -48,16 +49,6 @@ def test_node_create(auto_login_user, node):
 
     assert resp.status_code == 302
     assert Node.objects.filter(name=node_name).exists()
-
-
-def test_get_note(auto_login_user, node):
-
-    _, client = auto_login_user()
-
-    url = urls.reverse("node:get_note", kwargs={"uuid": node.uuid})
-    resp = client.get(url)
-
-    assert resp.status_code == 200
 
 
 def test_edit_note(auto_login_user, node):
@@ -132,6 +123,54 @@ def test_delete_collection(auto_login_user, node):
     # Verify that the collection has been removed from the node's layout
     updated_node = Node.objects.get(uuid=node.uuid)
     assert collection.uuid not in [
+        val["uuid"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if "uuid" in val
+    ]
+
+
+def test_add_note(auto_login_user, node):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("node:add_note")
+    resp = client.post(url, {
+        "node_uuid": node.uuid,
+    })
+
+    assert resp.status_code == 200
+
+    resp_json = resp.json()
+    updated_node = Node.objects.get(uuid=node.uuid)
+    # Verify that the note has been added to the node's layout
+    assert resp_json["note_uuid"] in [
+        val["uuid"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if "uuid" in val
+    ]
+
+
+def test_delete_note(auto_login_user, node):
+
+    _, client = auto_login_user()
+
+    note = node.add_note()
+
+    url = urls.reverse("node:delete_note")
+    resp = client.post(url, {
+        "node_uuid": node.uuid,
+        "note_uuid": note.uuid
+    })
+
+    assert resp.status_code == 200
+
+    assert Blob.objects.filter(uuid=note.uuid).first() is None
+
+    # Verify that the collection has been removed from the node's layout
+    updated_node = Node.objects.get(uuid=node.uuid)
+    assert note.uuid not in [
         val["uuid"]
         for sublist in updated_node.layout
         for val in sublist

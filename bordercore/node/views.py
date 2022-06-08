@@ -44,7 +44,7 @@ class NodeDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context["priority_list"] = json.dumps(Todo.PRIORITY_CHOICES)
 
-        self.object.populate_collection_names()
+        self.object.populate_names()
 
         return context
 
@@ -69,19 +69,6 @@ class NodeCreateView(FormRequestMixin, CreateView):
 
     def get_success_url(self):
         return reverse("node:list")
-
-
-@login_required
-def get_note(request, uuid):
-
-    node = Node.objects.get(uuid=uuid, user=request.user)
-
-    response = {
-        "status": "OK",
-        "note": node.note
-    }
-
-    return JsonResponse(response)
 
 
 @login_required
@@ -212,7 +199,7 @@ def add_collection(request):
     node = Node.objects.get(uuid=node_uuid, user=request.user)
     collection = node.add_collection()
 
-    node.populate_collection_names()
+    node.populate_names()
 
     response = {
         "status": "OK",
@@ -232,7 +219,45 @@ def delete_collection(request):
     node = Node.objects.get(uuid=node_uuid, user=request.user)
     node.delete_collection(collection_uuid)
 
-    node.populate_collection_names()
+    node.populate_names()
+
+    response = {
+        "status": "OK",
+        "layout": json.dumps(node.layout)
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def add_note(request):
+
+    node_uuid = request.POST["node_uuid"]
+
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    note = node.add_note()
+
+    node.populate_names()
+
+    response = {
+        "status": "OK",
+        "note_uuid": note.uuid,
+        "layout": json.dumps(node.layout)
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def delete_note(request):
+
+    node_uuid = request.POST["node_uuid"]
+    note_uuid = request.POST["note_uuid"]
+
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    node.delete_note(note_uuid)
+
+    node.populate_names()
 
     response = {
         "status": "OK",

@@ -43,8 +43,15 @@ class BlobTagsField(serializers.RelatedField):
         return data
 
 
+class BlobUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id"]
+
+
 class BlobSerializer(serializers.ModelSerializer):
 
+    user = BlobUserSerializer(read_only=True, default=serializers.CurrentUserDefault())
     uuid = serializers.UUIDField()
     file = BlobFileField(read_only=True)
     metadata = BlobMetaDataField(many=True, read_only=True)
@@ -222,9 +229,3 @@ class TodoSerializer(serializers.ModelSerializer):
         )
         instance.save()
         return instance
-
-
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["id", "url", "username", "email", "is_staff"]
