@@ -69,8 +69,10 @@
                     group="object"
                     :data-col-number="colIndex"
                     :disabled="!$store.state.editLayout"
+                    class="position-relative"
+                    :style="'z-index: ' + (2*10 - colIndex)"
                 >
-                    <div v-for="(obj, rowIndex) in column">
+                    <div v-for="(obj, rowIndex) in column" :style="'z-index: ' + (2*10 - colIndex - rowIndex)">
                         <div v-if="obj.type === 'collection'" :key="obj.uuid">
                             <collection-object-list
                                 :initial-name="obj.name"
