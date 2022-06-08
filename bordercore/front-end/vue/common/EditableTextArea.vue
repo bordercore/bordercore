@@ -10,6 +10,9 @@
                 <font-awesome-icon icon="plus" />
                 <a href="#" @click="addNote">Add Note</a>
             </div>
+            <div v-else class="ps-3">
+                No note content
+            </div>
         </div>
     </div>
 </template>
@@ -105,20 +108,7 @@
                 this.isEditingNote = false;
             },
             updateNote() {
-                doPost(
-                    this,
-                    this.editUrl,
-                    {
-                        "uuid": this.uuid,
-                        "note": this.textAreaValue,
-                    },
-                    (response) => {
-                        // Let the parent element know about the new value
-                        this.$emit("input", this.textAreaValue);
-                    },
-                    "",
-                    "",
-                );
+                this.$emit("update-note");
             },
             addNote() {
                 this.$nextTick(() => {

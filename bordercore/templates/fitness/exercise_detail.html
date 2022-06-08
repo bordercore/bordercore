@@ -129,9 +129,9 @@
                                 ref="note"
                                 uuid="{{ object.uuid }}"
                                 v-model:note="note"
-                                edit-url="{% url 'fitness:edit_note' %}"
                                 extra-class=""
                                 :hide-add-button="true"
+                                @update-note="onUpdateNote"
                             >
                                 <template v-slot:title>
                                     <div class="card-title text-primary mt-3">
@@ -438,6 +438,19 @@
                     this.$nextTick(() => {
                         document.getElementById("note").focus();
                     })
+                },
+                onUpdateNote() {
+                    doPost(
+                        this,
+                        "{% url 'fitness:edit_note' %}",
+                        {
+                            "uuid": "{{ object.uuid }}",
+                            "note": this.$refs.note.textAreaValue,
+                        },
+                        (response) => {                        },
+                        "",
+                        "",
+                    );
                 },
                 deleteNote() {
                     this.$refs.note.deleteNote();
