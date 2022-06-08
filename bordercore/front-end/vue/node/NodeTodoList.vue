@@ -137,6 +137,7 @@
                     uuid: todoInfo.uuid,
                     name: todoInfo.name,
                     note: todoInfo.note,
+                    url: todoInfo.url,
                     priority: 2,
                     tags: [],
                 };
