@@ -762,6 +762,21 @@ table.b-table th {
   border-bottom: 3px solid #ccc;
 }
 
+.table-colors {
+  table {
+    margin: 2rem 0 2rem;
+  }
+  table thead {
+    color: $success;
+  }
+  table, th, td {
+    border: 2px solid $secondary;
+  }
+  table tbody {
+    color: $primary;
+  }
+}
+
 // Animated buttons
 
 .glyphicon-refresh-animate {
