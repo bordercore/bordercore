@@ -826,24 +826,30 @@ $nav-tabs-link-hover-border-color: $nav-border-color;
   }
 }
 
+.card-body {
+  @extend .card-box-shadow;
+  position: relative;
+  z-index: 1;
+  flex-grow: 0;
+  margin: 0 0.5rem 1rem 0.5rem;
+  background: #10163a80 !important;
+  border-radius: 0.4rem;
+
+  .side-panel {
+    width: 18.75rem;
+  }
+
+  // Negate the default background for this class so that
+  //  the transparency of the parent will take effect
+  .list-group-item {
+    background: none;
+  }
+}
+
 @supports (backdrop-filter: blur(25px) brightness(170%)) {
-  .card-body {
-    @extend .card-box-shadow;
-    flex-grow: 0;
-    margin: 0 0.5rem 1rem 0.5rem;
+  .backdrop-filter {
     backdrop-filter: blur(25px) brightness(170%);
     background: #10163a80 !important;
-    border-radius: 0.4rem;
-
-    .side-panel {
-      width: 18.75rem;
-    }
-
-    // Negate the default background for this class so that
-    //  the transparency of the parent will take effect
-    .list-group-item {
-      background: none;
-    }
   }
 }
 
@@ -1307,6 +1313,11 @@ pre {
   p {
     margin-bottom: 0;
   }
+}
+
+#blob-detail-content {
+  background-color: #10163a;
+  border-radius: 0.4rem;
 }
 
 .blob-content {

@@ -147,11 +147,13 @@
 
             </div>
 
-            <tree-menu v-if="tree['nodes'].length > 0"
-                       class="tree-menu item card-body h-100"
-                       :item="tree"
-                       :depth="0"
-            ></tree-menu>
+            <div v-if="tree['nodes'].length > 0" class="card-body">
+                <tree-menu
+                    class="tree-menu item"
+                    :item="tree"
+                    :depth="0"
+                ></tree-menu>
+            </div>
 
             {% if linked_objects %}
                 <card title="Collections">
@@ -374,7 +376,7 @@
                 </audio>
 
                 {% if blob.content %}
-                    <div class="blob-content table-borders card-body mx-0" id="blob-detail-content" v-html="getContent()">
+                    <div class="blob-content table-borders mx-0 p-3" id="blob-detail-content" v-html="getContent()">
                     </div>
                 {% endif %}
 
