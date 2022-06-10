@@ -25,7 +25,7 @@
                                         <div>
                                             <a :href="bookmark.url">{{ bookmark.name }}</a>
 
-                                            <div v-show="!bookmark.noteIsEditable" v-if="bookmark.note" class="node-note" @click="activateInEditMode(bookmark, index)">
+                                            <div v-show="!bookmark.noteIsEditable" v-if="bookmark.note" class="node-object-note" @click="activateInEditMode(bookmark, index)">
                                                 {{ bookmark.note }}
                                             </div>
                                             <span v-show="bookmark.noteIsEditable">

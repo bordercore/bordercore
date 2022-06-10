@@ -77,7 +77,7 @@
 
                                     <div>
                                         <a :href="object.url">{{ object.name }}</a>
-                                        <div v-if="object.note" v-show="!object.noteIsEditable" class="node-note" @click="editNote(object, index)">
+                                        <div v-if="object.note" v-show="!object.noteIsEditable" class="node-object-note" @click="editNote(object, index)">
                                             {{ object.note }}
                                         </div>
                                         <span v-show="object.noteIsEditable">

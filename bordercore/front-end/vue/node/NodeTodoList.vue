@@ -25,7 +25,7 @@
                                         <div v-if="todo.url" class="node-url">
                                             <a :href="todo.url">Link</a>
                                         </div>
-                                        <div v-if="todo.note" class="node-note text-white">
+                                        <div v-if="todo.note" class="node-object-note text-white">
                                             {{ todo.note }}
                                         </div>
                                     </div>

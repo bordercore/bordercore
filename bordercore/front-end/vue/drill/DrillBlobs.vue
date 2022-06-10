@@ -28,7 +28,7 @@
                                         <div class="d-flex flex-column justify-content-center w-100">
                                             <a :href="blob.url">{{ blob.name }}</a>
 
-                                            <div v-show="!blob.noteIsEditable" v-if="blob.note" class="node-note" @click="activateInEditMode(blob, index)">
+                                            <div v-show="!blob.noteIsEditable" v-if="blob.note" class="node-object-note" @click="activateInEditMode(blob, index)">
                                                 {{ blob.note }}
                                             </div>
                                             <span v-show="blob.noteIsEditable">
