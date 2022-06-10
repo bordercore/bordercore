@@ -721,37 +721,6 @@ def test_blobs_have_size_field(es):
     assert found["total"]["value"] == 0, f"{found['total']['value']} blobs found with no size, uuid={found['hits'][0]['_source']['uuid']}"
 
 
-def test_all_notes_exist_in_elasticsearch(es):
-    "Assert that all notes exist in Elasticsearch"
-
-    notes = Blob.objects.filter(is_note=True)
-
-    for note in notes:
-
-        search_object = {
-            "query": {
-                "bool": {
-                    "must": [
-                        {
-                            "term": {
-                                "uuid": note.uuid
-                            }
-                        },
-                        {
-                            "term": {
-                                "doctype": "note"
-                            }
-                        }
-                    ]
-                }
-            },
-            "_source": ["uuid"]
-        }
-
-        found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)["hits"]["total"]["value"]
-        assert found == 1, f"note uuid={note.uuid} does not exist in Elasticsearch"
-
-
 def test_questions_no_tags():
     "Assert that all drill questions have at least one tag"
     t = Question.objects.filter(Q(tags__isnull=True))
