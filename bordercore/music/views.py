@@ -229,7 +229,7 @@ class AlbumUpdateView(FormRequestMixin, UpdateView):
 
         s3_client = boto3.client("s3")
 
-        key = f"artwork/{self.object.uuid}"
+        key = f"album_artwork/{self.object.uuid}"
         fo = io.BytesIO(self.request.FILES["cover_image"].read())
         s3_client.upload_fileobj(
             fo,
