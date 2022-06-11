@@ -12,7 +12,7 @@
 
             <div class="col-lg-3">
 
-                <card class="card-body">
+                <card class="card-body backdrop-filter">
                     <template v-slot:title-slot>
                         <div class="card-title">
                             <a href="{% url 'todo:list' %}">Important Tasks</a>
@@ -36,7 +36,7 @@
 
                 <div>
 
-                    <card title="Drill Total Progress" class="card-body">
+                    <card title="Drill Total Progress" class="card-body backdrop-filter">
                         <template v-slot:title-slot>
                             <div class="card-title">
                                 <a href="{% url 'drill:list' %}">Drill Total Progress</a>
@@ -60,7 +60,7 @@
 
                 <div>
 
-                    <card title="Overdue Exercises" class="card-body">
+                    <card title="Overdue Exercises" class="card-body backdrop-filter">
                         <template v-slot:content>
                             <ul class="list-group interior-borders">
                                 {% for exercise in overdue_exercises %}
@@ -76,7 +76,7 @@
 
                 <div>
 
-                    <card title="Daily Bookmarks" class="card-body">
+                    <card title="Daily Bookmarks" class="card-body backdrop-filter">
                         <template v-slot:content>
                             <ul class="list-group interior-borders">
                                 {% for bookmark in daily_bookmarks %}
@@ -92,7 +92,7 @@
 
                 <div>
 
-                    <card title="Pinned Bookmarks" class="card-body">
+                    <card title="Pinned Bookmarks" class="card-body backdrop-filter">
                         <template v-slot:content>
                             <ul class="list-group interior-borders">
                                 {% for bookmark in pinned_bookmarks %}
@@ -110,7 +110,7 @@
 
             <div class="col-lg-5">
 
-                <card class="card-body">
+                <card class="card-body backdrop-filter">
                     <template v-slot:title-slot>
                         <div class="card-title">
                             <a class="text-emphasis" href="{% url 'bookmark:overview' %}">Recent Bookmarks</a>
@@ -140,7 +140,7 @@
 
                 {% if default_collection %}
                     <div>
-                        <card class="card-body">
+                        <card class="card-body backdrop-filter">
                             <template v-slot:title-slot>
                                 <div class="card-title">
                                     <a href="{% url 'collection:detail' default_collection.uuid %}">{{ default_collection.name }}</a>
@@ -159,7 +159,7 @@
 
                 <div>
 
-                    <card title="Recently Played Music" class="card-body">
+                    <card title="Recently Played Music" class="card-body backdrop-filter">
                         <template v-slot:content>
                             <ul class="list-group interior-borders">
                                 {% for song in music %}
@@ -178,7 +178,7 @@
 
                 <div>
 
-                    <card title="Quote" class="card-body">
+                    <card title="Quote" class="card-body backdrop-filter">
                         <template v-slot:content>
                             <div>
                                 {{ quote.quote }}<br /><strong>{{ quote.source }}</strong>
@@ -192,7 +192,7 @@
 
             <div class="col-lg-4">
 
-                <card title="Calendar" class="card-body">
+                <card title="Calendar" class="card-body backdrop-filter">
                     <template v-slot:content>
                         <ul class="list-group interior-borders" id="events">
                             <li v-if="waiting" :class="errorClass" class="list-group-item list-group-item-secondary">[[ msg ]]</li>
@@ -201,7 +201,7 @@
                     </template>
                 </card>
 
-                <card title="Random Image" class="card-body">
+                <card title="Random Image" class="card-body backdrop-filter">
                         {% if random_image_info %}
                             <template v-slot:title-slot>
                                 <div class="card-title">

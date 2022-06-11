@@ -28,7 +28,7 @@
     <div class="scrollable-panel-container row g-0 mx-2">
 
         <div id="vue-app-left" class="scrollable-panel flex-grow-last col-lg-3 d-flex flex-column h-100">
-            <div class="card-body">
+            <div class="card-body backdrop-filter">
                 {% if object %}
 
                     {% if object.sha1sum %}
@@ -129,6 +129,7 @@
 
             <related-tags
                 ref="relatedTags"
+                class="backdrop-filter"
                 related-tags-url="{% url 'tag:get_related_tags' %}"
                 @click-tag="onClickTag"
             >

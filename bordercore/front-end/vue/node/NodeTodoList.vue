@@ -1,6 +1,6 @@
 <template>
     <div class="hover-reveal-target">
-        <card title="" class="position-relative">
+        <card title="" class="backdrop-filter position-relative">
             <template #title-slot>
                 <div class="card-title d-flex">
                     <div>

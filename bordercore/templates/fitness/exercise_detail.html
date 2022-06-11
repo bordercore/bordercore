@@ -29,7 +29,7 @@
         <div class="col-lg-3 d-flex flex-column" id="vue-app-left">
 
             <div {% if activity_info %}class="hover-target"{% endif %}>
-                <card title="" class="z-index-positive flex-grow-0 position-relative">
+                <card title="" class="z-index-positive flex-grow-0 position-relative backdrop-filter">
                     <template #content>
                         <div class="d-flex flex-column">
                             <div v-if="showHistoryMessage" class="text-info mb-2 d-flex flex-column">
@@ -88,7 +88,7 @@
                 </card>
             </div>
 
-            <card title="" class="flex-grow-0">
+            <card title="" class="flex-grow-0 backdrop-filter">
                 <template #title-slot>
                     <div class="card-title text-primary">
                         Last Workout
@@ -109,7 +109,7 @@
                 </template>
             </card>
             <div class="hover-target flex-grow-1 mb-3">
-                <card title="" class="z-index-positive position-relative h-100">
+                <card title="" class="z-index-positive position-relative h-100 backdrop-filter">
                     <template #content>
 
                         <div class="d-flex">
@@ -233,7 +233,7 @@
 
         <div class="col-lg-9 d-flex flex-column" id="vue-app-right">
             <workout-graph inline-template>
-                <card title="" class="flex-grow-0 me-2 pt-3">
+                <card title="" class="flex-grow-0 me-2 pt-3 backdrop-filter">
                     <template #content>
                         <div class="d-flex">
                             <div>
@@ -266,7 +266,7 @@
             <div class="d-flex flex-grow-1">
 
                 <add-workout-form inline-template>
-                    <card title="" class="w-50">
+                    <card title="" class="w-50 backdrop-filter">
                         <template #title-slot>
                             <div class="card-title text-primary">
                                 Add New Workout Data
@@ -352,7 +352,7 @@
                     </card>
                 </add-workout-form>
 
-                <card title="" id="muscles-targeted" class="w-50 me-2">
+                <card title="" id="muscles-targeted" class="w-50 me-2 backdrop-filter">
                     <template #content>
                         <div class="d-flex">
                             <div class="card-title text-primary">

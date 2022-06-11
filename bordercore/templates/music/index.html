@@ -22,7 +22,7 @@
         <div class="flex-grow-last col-lg-3 d-flex flex-column">
 
             {% if random_album %}
-                <card title="Featured Album" class="flex-grow-0">
+                <card title="Featured Album" class="flex-grow-0 backdrop-filter">
                     <template v-slot:content>
                         <div>
                             <a href="{% url 'music:album_detail' random_album.uuid %}">
@@ -41,7 +41,7 @@
                 </card>
             {% endif %}
 
-            <card title="Playlists" class="flex-grow-0">
+            <card title="Playlists" class="flex-grow-0 backdrop-filter">
 
                 <template v-slot:content>
 
@@ -66,7 +66,7 @@
             </card>
 
             {% if recent_songs %}
-            <card title="Recently Played Songs">
+            <card title="Recently Played Songs" class="backdrop-filter">
                 <template v-slot:content>
                     <ul class="list-group interior-borders">
                         {% for song in recent_songs %}
@@ -84,7 +84,7 @@
 
         <div class="col-lg-9">
 
-            <card>
+            <card class="backdrop-filter">
                 <template v-slot:title-slot>
                     <div class="d-flex">
 
@@ -141,7 +141,7 @@
                 </template>
             </card>
 
-            <card title="Recently added music">
+            <card title="Recently added music" class="backdrop-filter">
                 <template v-slot:content>
                     <div class="card-grid ms-2">
 

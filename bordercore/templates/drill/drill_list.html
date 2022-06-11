@@ -8,7 +8,7 @@
 
         <div class="col-lg-3 d-flex flex-column" id="vue-app-left">
 
-            <div class="card-body">
+            <div class="card-body backdrop-filter">
 
                 <div>
                     Click the <strong>Study</strong> button to start a study session or select a <strong>tag</strong> on the right to drill on a specific category.
@@ -54,7 +54,7 @@
 
         <div class="col-lg-3" id="vue-app">
 
-            <card title="Total Progress">
+            <card title="Total Progress backdrop-filter">
                 <template v-slot:content>
                     <div class="d-flex">
                         <div class="d-flex justify-content-center align-items-center">
@@ -69,7 +69,7 @@
                 </template>
             </card>
 
-            <card title="Tags still learning">
+            <card title="Tags still learning" class="backdrop-filter">
 
                 <template v-slot:content>
                     <ul class="list-unstyled">
@@ -106,7 +106,7 @@
             </div>
 
             <div class="d-flex flex-grow-1" v-if="tag.text">
-                <card>
+                <card class="backdrop-filter">
                     <template v-slot:title-slot>
                         <h6><a :href="tag.link">[[ tag.text ]]</a></h6>
                     </template>
@@ -129,7 +129,7 @@
                 </card>
             </div>
 
-            <card title="Tags needing review">
+            <card title="Tags needing review" class="backdrop-filter">
 
                 <template v-slot:content>
                     <ul class="list-unstyled">
@@ -155,6 +155,7 @@
 
             <card
                 title="Pinned Tags"
+                class="backdrop-filter"
             >
                 <template v-slot:title-slot>
 
@@ -187,7 +188,7 @@
                 </template>
             </card>
 
-            <card title="Favorites Progress">
+            <card title="Favorites Progress" class="backdrop-filter">
                 <template v-slot:content>
                     <div class="d-flex">
                         <div class="d-flex justify-content-center align-items-center">
@@ -202,7 +203,7 @@
                 </template>
             </card>
 
-            <card>
+            <card class="backdrop-filter">
                 <template v-slot:title-slot>
                     <h5>Random tag: <a href="{{ random_tag.url }}">{{ random_tag.name }}</a></h5>
                 </template>

@@ -24,7 +24,7 @@
             >
             </bookmark-select>
 
-            <div class="card-body" v-cloak>
+            <div class="card-body backdrop-filter" v-cloak>
 
                 <h5>
                     {{ blob.get_edition_string }}
@@ -147,7 +147,7 @@
 
             </div>
 
-            <div v-if="tree['nodes'].length > 0" class="card-body">
+            <div v-if="tree['nodes'].length > 0" class="card-body backdrop-filter">
                 <tree-menu
                     class="tree-menu item"
                     :item="tree"
@@ -156,7 +156,7 @@
             </div>
 
             {% if linked_objects %}
-                <card title="Collections">
+                <card title="Collections" class="backdrop-filter">
                     <template #content>
                         {% for collection in linked_objects %}
                             {{ collection.name }}
@@ -185,6 +185,7 @@
             <card
                 v-if="$store.state.collectionList.length > 0"
                 title="Collections"
+                class="backdrop-filter"
             >
                 <template #content>
                     <div class="col-lg-12">
@@ -214,7 +215,7 @@
             >
             </related-bookmarks-list>
 
-            <card v-if="relatedBlobList.length > 0" title="Related Blobs">
+            <card v-if="relatedBlobList.length > 0" title="Related Blobs" class="backdrop-filter">
                 <template #content>
                     <div v-for="blob in relatedBlobList" class="hover-target hoverable d-flex align-items-center mb-2 p-2">
                         <img :src="blob.cover_url" />

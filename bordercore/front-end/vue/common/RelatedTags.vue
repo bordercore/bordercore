@@ -1,6 +1,6 @@
 <template>
     <transition name="fade">
-        <card v-if="info.length > 0">
+        <card v-if="info.length > 0" class="backdrop-filter">
             <template #title-slot>
                 <div class="d-flex">
                     <div class="card-title d-flex">

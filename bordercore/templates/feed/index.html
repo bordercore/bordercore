@@ -8,7 +8,7 @@
 
         <div class="row g-0 mx-2">
 
-            <div class="col-lg-3 d-flex flex-column">
+            <div class="col-lg-3 d-flex flex-column flex-grow-last backdrop-filter">
                 <feed-info inline-template>
                     <card title="">
                         <template v-slot:title-slot>
@@ -34,7 +34,7 @@
             </div>
 
             <div class="col-lg-3 d-flex flex-column">
-                <div class="card-body">
+                <div class="card-body backdrop-filter">
                     <div class="d-flex">
                         <h3>Feed List</h3>
                     </div>
@@ -62,7 +62,7 @@
             <div class="col-lg-6 d-flex flex-column">
                 <div class="d-flex flex-grow-1">
                     <feed-item-list inline-template>
-                        <div class="card-body h-100 me-2">
+                        <div class="card-body backdrop-filter h-100 me-2">
                             <div class="d-flex">
                                 <h3 id="feed-title" v-cloak>
                                     <a :href="$store.state.currentFeed.homepage">[[ $store.state.currentFeed.name ]]</a>

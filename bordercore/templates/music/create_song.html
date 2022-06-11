@@ -32,7 +32,7 @@
                     </div>
                 </transition>
 
-                <card v-if="$store.state.songLength !== null" title="Song Info">
+                <card v-if="$store.state.songLength !== null" title="Song Info" class="backdrop-filter">
                     <template v-slot:content>
                         <ul>
                             <li>Song Length <span class="ms-1 text-primary">[[ $store.state.songLengthPretty ]]</span></li>
@@ -45,7 +45,7 @@
                     </template>
                 </card>
 
-                <card title="Tag Suggestions">
+                <card title="Tag Suggestions" class="backdrop-filter ms-3">
                     <template v-slot:content>
                         <ul class="list-group interior-borders">
                             {% for tag in tag_counts %}
@@ -68,7 +68,7 @@
 
             {% if action == "Create" %}
                 <div v-if="$store.state.songLength === null" class="flex-shrink-0">
-                    <card title="" class="flex-shrink-0">
+                    <card title="" class="flex-shrink-0 backdrop-filter ms-3">
                         <template v-slot:content>
                             <div>
                                 Choose the local MP3 file containing the song you want to upload. Any embedded <strong>ID3v2</strong> tags will be scanned and the corresponding form fields will be populated.

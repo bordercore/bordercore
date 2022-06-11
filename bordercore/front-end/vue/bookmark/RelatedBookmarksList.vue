@@ -1,7 +1,7 @@
 <template>
     <div v-if="bookmarkList.length > 0 || showEmptyList" class="hover-reveal-target mb-3">
         <transition :name="transitionName">
-            <card class="position-relative h-100">
+            <card class="position-relative h-100 backdrop-filter">
                 <template #title-slot>
                     <div class="d-flex">
                         <div class="card-title d-flex">

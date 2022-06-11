@@ -59,7 +59,7 @@
             <div class="card-grid ms-2">
 
                 <div class="me-2">
-                    <card title="">
+                    <card title="" class="backdrop-filter">
                         <template v-slot:content>
                             <div class="hover-target d-flex">
                                 <h1>
@@ -85,7 +85,7 @@
                             {% endif %}
                         </template>
                     </card>
-                    <card title="">
+                    <card title="" class="backdrop-filter">
                         <template v-slot:content>
                             <b-table
                                 :data="songList"
