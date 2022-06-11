@@ -10,7 +10,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" />
                     </div>
                     <div class="modal-body">
-                        <div class=" row mb-3">
+                        <div class="row mb-3">
                             <label class="col-lg-3 col-form-label" for="inputTitle">Name</label>
                             <div class="col-lg-9">
                                 <input :id="`id_name_${uuid}`" type="text" name="name" :value="name" class="form-control" autocomplete="off" maxlength="200" required @keyup.enter="onUpdateCollection">
@@ -125,10 +125,6 @@
                 type: String,
                 default: "",
             },
-            nodeUuid: {
-                type: String,
-                default: "",
-            },
             updateCollectionUrl: {
                 type: String,
                 default: "",
@@ -211,14 +207,10 @@
                 this.$parent.$parent.$refs.bookmarkSelect.openModal(this.uuid, this.getObjectList);
             },
             onEditCollection() {
-                const modal = new Modal(`#modalUpdate_${this.uuid}`);
-                modal.show();
-                setTimeout( () => {
-                    document.querySelector(`#modalUpdate_${this.uuid} input`).focus();
-                }, 500);
+                this.$emit("open-modal-collection-update", this.onUpdateCollection, {name: this.name});
             },
             onUpdateCollection() {
-                const name = document.getElementById(`id_name_${this.uuid}`).value;
+                const name = document.getElementById("id_name_collection").value;
                 doPut(
                     this,
                     this.updateCollectionUrl.replace(/00000000-0000-0000-0000-000000000000/, this.uuid),
@@ -228,8 +220,6 @@
                     },
                     (response) => {
                         this.name = name;
-                        const modal = Modal.getInstance(document.getElementById(`modalUpdate_${this.uuid}`));
-                        modal.hide();
                     },
                     "Collection updated",
                 );

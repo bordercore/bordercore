@@ -80,18 +80,18 @@
                     class="position-relative"
                     :style="'z-index: ' + (2*10 - colIndex)"
                 >
-                    <div v-for="(obj, rowIndex) in column" :style="'z-index: ' + (2*10 - colIndex - rowIndex)">
+                    <div v-for="(obj, rowIndex) in column" class="position-relative" :style="'z-index: ' + (2*10 - colIndex - rowIndex)">
                         <div v-if="obj.type === 'collection'" :key="obj.uuid">
                             <collection-object-list
                                 :initial-name="obj.name"
                                 :uuid="obj.uuid"
-                                :node-uuid="$store.state.nodeUuid"
                                 update-collection-url="{% url "collection-detail" "00000000-0000-0000-0000-000000000000" %}"
                                 update-object-note-url="{% url "collection:update_object_note" %}"
                                 :get-object-list-url="'{% url "collection:get_object_list" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', obj.uuid)"
                                 remove-object-url="{% url "collection:remove_object" %}"
                                 sort-objects-url="{% url "collection:sort_objects" %}"
                                 @delete-collection="onDeleteCollection"
+                                @open-modal-collection-update="openModalCollectionUpdate"
                             >
                             </collection-object-list>
                         </div>
@@ -119,6 +119,9 @@
                     </div>
                 </draggable>
             </div>
+
+            <collection-object-list-modal ref="collectionUpdate">
+            </collection-object-list-modal>
 
             <blob-select
                 ref="blobSelect"
@@ -267,7 +270,9 @@
                         },
                         "Collection deleted",
                     );
-
+                },
+                openModalCollectionUpdate(callback, data) {
+                    this.$refs.collectionUpdate.openModal(callback, data);
                 },
                 onDeleteNote(noteUuid) {
                     doPost(
@@ -282,7 +287,6 @@
                         },
                         "Note deleted",
                     );
-
                 },
                 onDragOver(evt, index) {
                     evt.currentTarget.classList.add("node-drag-over");
