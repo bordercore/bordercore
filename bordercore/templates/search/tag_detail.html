@@ -396,7 +396,9 @@
                 // If the tab stored in the session doesn't match any current tab categories,
                 //  select the first tab.
                 const triggerFirstTabEl = document.querySelector("#myTab li:first-child a");
-                Tab.getInstance(triggerFirstTabEl).show();
+                if (triggerFirstTabEl != undefined) {
+                    Tab.getInstance(triggerFirstTabEl).show();
+                }
 
                 {% endif %}
 
