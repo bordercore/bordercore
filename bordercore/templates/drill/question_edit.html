@@ -139,9 +139,6 @@
         new Vue({
             el: "#vue-app",
             name: "EditQuestion",
-            components: {
-                TagsInput,
-            },
             data() {
                 return {
                     enableDeleteButton: {% if object.uuid %}true{% else %}false{% endif %},

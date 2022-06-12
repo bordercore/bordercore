@@ -112,139 +112,111 @@ window.getFormattedDate = getFormattedDate;
 
 import EditableTextArea from "./vue/common/EditableTextArea.vue";
 Vue.component("EditableTextArea", EditableTextArea);
-window.EditableTextArea = EditableTextArea;
 
 import SimpleSuggest from "./vue/common/SimpleSuggest.vue";
 Vue.component("SimpleSuggest", SimpleSuggest);
-window.SimpleSuggest = SimpleSuggest;
 
 import TopSearch from "./vue/search/TopSearch.vue";
 Vue.component("TopSearch", TopSearch);
-window.TopSearch = TopSearch;
 
 import OverdueTasks from "./vue/todo/OverdueTasks.vue";
 Vue.component("OverdueTasks", OverdueTasks);
-window.OverdueTasks = OverdueTasks;
 
 import TagsInput from "./vue/common/TagsInput.vue";
 Vue.component("TagsInput", TagsInput);
-window.TagsInput = TagsInput;
 
 import SearchTagsInput from "./vue/common/SearchTagsInput.vue";
 Vue.component("SearchTagsInput", SearchTagsInput);
-window.SearchTagsInput = SearchTagsInput;
 
 import RelatedTags from "./vue/common/RelatedTags.vue";
 Vue.component("RelatedTags", RelatedTags);
-window.RelatedTags = RelatedTags;
 
 import Card from "./vue/common/Card.vue";
 Vue.component("Card", Card);
-window.Card = Card;
 
 import SearchNoResult from "./vue/common/SearchNoResult.vue";
 Vue.component("SearchNoResult", SearchNoResult);
-window.SearchNoResult = SearchNoResult;
 
 import TreeMenu from "./vue/common/TreeMenu.vue";
 Vue.component("TreeMenu", TreeMenu);
-window.TreeMenu = TreeMenu;
 
 import BookmarkSelect from "./vue/bookmark/BookmarkSelect.vue";
 Vue.component("BookmarkSelect", BookmarkSelect);
-window.BookmarkSelect = BookmarkSelect;
 
 import Bookmark from "./vue/bookmark/Bookmark.vue";
 Vue.component("Bookmark", Bookmark);
-window.Bookmark = Bookmark;
 
 import RelatedBookmarksList from "./vue/bookmark/RelatedBookmarksList.vue";
 Vue.component("RelatedBookmarksList", RelatedBookmarksList);
-window.RelatedBookmarksList = RelatedBookmarksList;
 
 import BlobSelect from "./vue/blob/BlobSelect.vue";
 Vue.component("BlobSelect", BlobSelect);
-window.BlobSelect = BlobSelect;
 
 import DrillTagProgress from "./vue/common/DrillTagProgress.vue";
 Vue.component("DrillTagProgress", DrillTagProgress);
-window.DrillTagProgress = DrillTagProgress;
 
 import DrillBlobs from "./vue/drill/DrillBlobs.vue";
 Vue.component("DrillBlobs", DrillBlobs);
-window.DrillBlobs = DrillBlobs;
 
 import AddButton from "./vue/common/AddButton.vue";
 Vue.component("AddButton", AddButton);
-window.AddButton = AddButton;
 
 import DropDownMenu from "./vue/common/DropDownMenu.vue";
 Vue.component("DropDownMenu", DropDownMenu);
-window.DropDownMenu = DropDownMenu;
 
 import VueSidebarMenu from "vue-sidebar-menu";
 Vue.use(VueSidebarMenu);
 
 import AddToPlaylist from "./vue/music/AddToPlaylist.vue";
 Vue.component("AddToPlaylist", AddToPlaylist);
-window.AddToPlaylist = AddToPlaylist;
 
 import AudioPlayer from "./vue/music/AudioPlayer.vue";
 Vue.component("AudioPlayer", AudioPlayer);
-window.AudioPlayer = AudioPlayer;
 
 import CreateUpdatePlaylist from "./vue/music/CreateUpdatePlaylist.vue";
-window.CreateUpdatePlaylist = CreateUpdatePlaylist;
+Vue.component("CreateUpdatePlaylist", CreateUpdatePlaylist);
 
 import BlobDetailCover from "./vue/blob/BlobDetailCover.vue";
 Vue.component("BlobDetailCover", BlobDetailCover);
-window.BlobDetailCover = BlobDetailCover;
 
 import RecentBlobs from "./vue/blob/RecentBlobs.vue";
 Vue.component("RecentBlobs", RecentBlobs);
-window.RecentBlobs = RecentBlobs;
 
 import CreateUpdateFeed from "./vue/feed/CreateUpdateFeed.vue";
 Vue.component("CreateUpdateFeed", CreateUpdateFeed);
-window.CreateUpdateFeed = CreateUpdateFeed;
 
 import CreateUpdateTodo from "./vue/todo/CreateUpdateTodo.vue";
 Vue.component("CreateUpdateTodo", CreateUpdateTodo);
-window.CreateUpdateTodo = CreateUpdateTodo;
 
 import AddToCollection from "./vue/blob/AddToCollection.vue";
 Vue.component("AddToCollection", AddToCollection);
-window.AddToCollection = AddToCollection;
 
 import NodeNote from "./vue/node/NodeNote.vue";
 Vue.component("NodeNote", NodeNote);
-window.NodeNote = NodeNote;
 
 import NodeTodoList from "./vue/node/NodeTodoList.vue";
 Vue.component("NodeTodoList", NodeTodoList);
-window.NodeTodoList = NodeTodoList;
 
-import CollectionObjectList from "./vue/collection/CollectionObjectList.vue";
-Vue.component("CollectionObjectList", CollectionObjectList);
-window.CollectionObjectList = CollectionObjectList;
+import foo from "./vue/collection/CollectionObjectList.vue";
+Vue.component("CollectionObjectList", foo);
+
+import CollectionObjectListModal from "./vue/collection/CollectionObjectListModal.vue";
+Vue.component("CollectionObjectListModal", CollectionObjectListModal);
 
 import IconButton from "./vue/common/IconButton.vue";
 Vue.component("IconButton", IconButton);
-window.IconButton = IconButton;
 
 import PerfectScrollbar from "perfect-scrollbar";
 window.PerfectScrollbar = PerfectScrollbar;
 
 import Pagination from "./vue/common/Pagination.vue";
 Vue.component("Pagination", Pagination);
-window.Pagination = Pagination;
 
 import PythonConsole from "./vue/common/PythonConsole.vue";
-window.PythonConsole = PythonConsole;
+Vue.component("PythonConsole", PythonConsole);
 
 import Toast from "./vue/common/Toast.vue";
 Vue.component("Toast", Toast);
-window.Toast = Pagination;
 
 import {BarController, BarElement, Chart, CategoryScale, LinearScale, Title} from "chart.js";
 window.Chart = Chart;

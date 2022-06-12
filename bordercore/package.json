@@ -80,6 +80,7 @@
             "stylelint-order"
         ],
         "rules": {
+            "no-irregular-whitespace": true,
             "at-rule-no-unknown": null,
             "order/order": [
                 "custom-properties",

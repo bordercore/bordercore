@@ -393,9 +393,6 @@
             el: "#pinned-tags",
             name: "Pinned Tags",
             store,
-            components: {
-                SimpleSuggest,
-            },
             data() {
                 return {
                     show: false,
@@ -503,9 +500,6 @@
 
         new Vue({
             el: "#modal-study",
-            components: {
-                TagsInput
-            },
             data() {
                 return {
                     picked: "favorites"

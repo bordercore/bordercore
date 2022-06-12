@@ -33,8 +33,6 @@
 
     export default {
 
-        components: {
-        },
         props: {
             relatedTagsUrl: {
                 type: String,
