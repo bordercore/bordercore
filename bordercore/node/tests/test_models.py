@@ -40,7 +40,7 @@ def test_delete_collection(node):
     ]
 
 
-def test_add_note(node):
+def test_add_note(monkeypatch_blob, node):
 
     note = node.add_note()
 

@@ -26,6 +26,7 @@ from collection.models import Collection, SortOrderCollectionBCObject
 from lib.mixins import SortOrderMixin, TimeStampedModel
 from lib.time_utils import get_date_from_pattern
 from lib.util import get_elasticsearch_connection, is_audio, is_image, is_video
+from node.services import delete_note_from_nodes
 from tag.models import Tag
 
 EDITIONS = {"1": "First",
@@ -591,6 +592,8 @@ class Blob(TimeStampedModel):
 
             # Pass false so FileField doesn't save the model.
             self.file.delete(False)
+
+        delete_note_from_nodes(self.user, self.uuid)
 
 
 class MetaData(TimeStampedModel):

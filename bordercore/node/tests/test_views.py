@@ -130,7 +130,7 @@ def test_delete_collection(auto_login_user, node):
     ]
 
 
-def test_add_note(auto_login_user, node):
+def test_add_note(monkeypatch_blob, auto_login_user, node):
 
     _, client = auto_login_user()
 
@@ -152,7 +152,7 @@ def test_add_note(auto_login_user, node):
     ]
 
 
-def test_delete_note(auto_login_user, node):
+def test_delete_note(monkeypatch_blob, auto_login_user, node):
 
     _, client = auto_login_user()
 

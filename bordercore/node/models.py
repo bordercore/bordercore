@@ -66,6 +66,7 @@ class Node(TimeStampedModel):
             name="New Note",
             is_note=True
         )
+        note.index_blob()
 
         layout = self.layout
         layout[0].insert(0, {"type": "note", "uuid": str(note.uuid)})
