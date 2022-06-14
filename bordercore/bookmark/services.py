@@ -17,7 +17,11 @@ def search(user, search_term):
 
     es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
 
-    search_term = unquote(search_term.lower())
+    # Limit the search term to 10 characters, since we've configured the
+    # Elasticsearch ngram_tokenizer to only analyze tokens up to that many
+    # characters (see mappings.json). Otherwise no results will be returned
+    # for longer terms.
+    search_term = unquote(search_term.lower())[:10]
 
     search_object = {
         "query": {
