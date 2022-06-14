@@ -114,7 +114,7 @@
                     {
                         "uuid": this.note.uuid,
                         "name": this.note.name,
-                        "content": this.$refs.note.textAreaValue,
+                        "content": this.$refs.note.textAreaValue || "",
                         "is_note": true,
                     },
                     (response) => {},
