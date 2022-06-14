@@ -11,6 +11,8 @@
             :disabled="disabled"
             :max-tags="maxTags"
             @tags-changed="tagsChanged"
+            @blur="onBlur"
+            @focus="onFocus"
         >
             <div slot="autocomplete-item" slot-scope="scope" @click="scope.performAdd(scope.item)">
                 <div v-if="scope.item.display">
@@ -109,6 +111,12 @@
                 this.tags = newTags;
                 // Re-emit this event in case a parent component is interested
                 this.$emit("tags-changed", newTags);
+            },
+            onBlur(evt) {
+                this.$emit("blur", evt);
+            },
+            onFocus(evt) {
+                this.$emit("focus", evt);
             },
             initItems() {
                 // Set a minimum character count to trigger the ajax call
