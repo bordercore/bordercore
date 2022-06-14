@@ -127,13 +127,17 @@
 
             </div>
 
-            <related-tags
-                ref="relatedTags"
-                class="backdrop-filter"
-                related-tags-url="{% url 'tag:get_related_tags' %}"
-                @click-tag="onClickTag"
-            >
-            </related-tags>
+            <transition name="fade">
+                <div v-show="$store.state.showRelatedTags">
+                    <related-tags
+                        ref="relatedTags"
+                        class="backdrop-filter"
+                        related-tags-url="{% url 'tag:get_related_tags' %}"
+                        @click-tag="onClickTag"
+                    >
+                    </related-tags>
+                </div>
+            </transition>
 
         </div>
 
@@ -269,6 +273,8 @@
                                                 ref="tagsInput"
                                                 search-url="{% url 'tag:search' %}?query="
                                                 @tags-changed="onTagsChanged"
+                                                @blur="onTagsBlur"
+                                                @focus="onTagsFocus"
                                             >
                                             </tags-input>
                                         </div>
@@ -387,7 +393,8 @@
 
         const store = new Vuex.Store({
             state: {
-                date: "{{ form.date.value }}"
+                date: "{{ form.date.value }}",
+                showRelatedTags: false,
             },
             getters: {},
             mutations: {},
@@ -568,13 +575,14 @@
         new Vue({
             el: "#vue-app-left",
             name: "LeftPanel",
+            store,
             components: {
                 CleanupFilenameButton,
                 UpperCaseFirstButton
             },
             mounted() {
                 EventBus.$on("tags-changed", (payload) => {
-                    this.$refs.relatedTags.setTags(payload.map( (x) => x.display ));
+                    this.$refs.relatedTags.setTags(payload.map( (x) => x.text ));
                 });
             },
             methods: {
@@ -620,7 +628,7 @@
                             clickHandler: this.onClickDateFormatYear,
                         },
                     ],
-                    content:""
+                    content:"",
                 }
             },
             methods: {
@@ -640,6 +648,12 @@
                 },
                 onTagsChanged(tags) {
                     EventBus.$emit("tags-changed", tags);
+                },
+                onTagsBlur(tags) {
+                    this.$store.state.showRelatedTags = false;
+                },
+                onTagsFocus(tags) {
+                    this.$store.state.showRelatedTags = true;
                 },
                 addCheckMarkToDateFormatMenu() {
                     // Indicate the current date format with a checkmark. Remove

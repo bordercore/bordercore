@@ -18,12 +18,16 @@
             </div>
             {% endif %}
 
-            <related-tags
-                ref="relatedTags"
-                related-tags-url="{% url 'tag:get_related_tags' %}"
-                @click-tag="onClickTag"
-            >
-            </related-tags>
+            <transition name="fade">
+                <div v-show="showRelatedTags">
+                    <related-tags
+                        ref="relatedTags"
+                        related-tags-url="{% url 'tag:get_related_tags' %}"
+                        @click-tag="onClickTag"
+                    >
+                    </related-tags>
+                </div>
+            </transition>
 
             <div v-if="related_questions.length > 0" class="d-flex" :class="{'flex-grow-1': related_blobs.length === 0 && related_nodes.length === 0}">
                 <card title="Related Questions">
@@ -113,6 +117,8 @@
                                             ref="tagsInput"
                                             search-url="{% url 'tag:search' %}?query="
                                             @tags-changed="onTagsChanged"
+                                            @blur="onTagsBlur"
+                                            @focus="onTagsFocus"
                                         >
                                         </tags-input>
                                     {% elif field.label == "Url" %}
@@ -194,6 +200,7 @@
                     ],
                     related_blobs: JSON.parse(document.getElementById("related_blobs").textContent),
                     related_nodes: JSON.parse(document.getElementById("related_nodes").textContent),
+                    showRelatedTags: false,
                 }
             },
             mounted() {
@@ -240,6 +247,12 @@
                 },
                 onTagsChanged(tags) {
                     this.$refs.relatedTags.setTags(tags.map( (x) => x.display ));
+                },
+                onTagsBlur(tags) {
+                    this.showRelatedTags = false;
+                },
+                onTagsFocus(tags) {
+                    this.showRelatedTags = true;
                 },
             }
         });
