@@ -8,8 +8,6 @@
         <meta charset="utf-8" />
         <title>Bordercore :: {{ title|default:"Bordercore" }}</title>
 
-        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bootstrap-glyphicons.css" />
-
         {% if debug %}
             <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}dist/css/theme-{{ request.user.userprofile.theme }}.css" />
             <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}dist/css/vue-sidebar-menu.css" />

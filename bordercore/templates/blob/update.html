@@ -308,7 +308,9 @@
                                         <span class="input-group-append">
                                             <add-metadata-button @add-metadata=addMetadata inline-template>
                                                 <button class="btn btn-success" type="button" @click="onClick">
-                                                    <span class="glyphicon glyphicon-plus"></span>
+                                                <span>
+                                                    <font-awesome-icon icon="plus" class="metadata-icon" />
+                                                </span>
                                                 </button>
                                             </add-metadata-button>
                                         </span>
@@ -331,7 +333,9 @@
                                                     <input type="text" :name="m.counter + '_' + m.name" :value="m.value" class="form-control" autocomplete="off" />
                                                     <span class="input-group-append">
                                                         <button class="btn btn-danger btn-remove" type="button" @click="$emit('delete', m.counter)">
-                                                            <span class="glyphicon glyphicon-minus"></span>
+                                                            <span>
+                                                                <font-awesome-icon icon="times" class="metadata-icon" />
+                                                            </span>
                                                         </button>
                                                     </span>
                                                 </div>
@@ -340,20 +344,17 @@
                                     </div>
                                 </div>
                             </metadata-list>
-                        </div>
-                    </metadata-wrapper>
+                            </div>
+                        </metadata-wrapper>
 
-                    <div class="row">
-                        <div class="col-lg-12 offset-lg-2 d-flex">
-                            <button type="button" class="btn btn-primary" @click="submitForm">
+                        <div class="row">
+                            <div class="col-lg-12 offset-lg-2 d-flex">
+                                <button type="button" class="btn btn-primary" @click="submitForm">
                                  {{ action }}
-                            </button>
+                                </button>
                             {% if object %}
                                 <button class="btn btn-secondary d-flex ms-3" @click="onClickDelete">
-                                    <span class="glyphicon glyphicon-trash pt-1" aria-hidden="true"></span>
-                                    <div class="ms-2">
-                                        Delete
-                                    </div>
+                                    Delete
                                 </button>
                             {% endif %}
                         </div>
