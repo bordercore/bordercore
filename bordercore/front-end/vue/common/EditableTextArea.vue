@@ -60,6 +60,9 @@
         methods: {
             setTextAreaValue(value) {
                 this.textAreaValue = value;
+                this.$nextTick(() => {
+                    Prism.highlightAll();
+                });
             },
             editNote() {
                 this.beforeEditCache = this.textAreaValue;
@@ -106,6 +109,7 @@
                 }
                 this.updateNote();
                 this.isEditingNote = false;
+                Prism.highlightAll();
             },
             updateNote() {
                 this.$emit("update-note");

@@ -45,7 +45,6 @@
                 <editable-text-area
                     ref="note"
                     class="node-note"
-                    :note="note"
                     :uuid="nodeUuid"
                     :hide-add-button="true"
                     @update-note="onUpdateNote"
