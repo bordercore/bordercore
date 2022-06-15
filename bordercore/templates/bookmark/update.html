@@ -29,8 +29,8 @@
                 </div>
             </transition>
 
-            <div v-if="related_questions.length > 0" class="d-flex" :class="{'flex-grow-1': related_blobs.length === 0 && related_nodes.length === 0}">
-                <card title="Related Questions">
+            <div v-if="related_questions.length > 0" class="d-flex">
+                <card title="Related Questions" class="backdrop-filter">
                     <template v-slot:content>
                         <ul class="list-group interior-borders cursor-pointer">
                             <li v-for="question in related_questions" class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
@@ -51,8 +51,8 @@
                 </card>
             </div>
 
-            <div v-if="related_blobs.length > 0" class="d-flex" :class="{'flex-grow-1': related_nodes.length === 0}">
-                <card title="Related Blobs">
+            <div v-if="related_blobs.length > 0" class="d-flex">
+                <card title="Related Blobs" class="backdrop-filter">
                     <template v-slot:content>
                         <ul class="list-group interior-borders cursor-pointer">
                             <li v-for="blob in related_blobs" class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
@@ -73,8 +73,8 @@
                 </card>
             </div>
 
-            <div v-if="related_nodes.length > 0" class="d-flex flex-grow-1">
-                <card title="Related Nodes">
+            <div v-if="related_nodes.length > 0" class="d-flex">
+                <card title="Related Nodes" class="card-body backdrop-filter w-100">
                     <template v-slot:content>
                         <ul class="list-group interior-borders cursor-pointer">
                             <li v-for="node in related_nodes" class="hoverable px-0 list-group-item list-group-item-secondary text-primary">

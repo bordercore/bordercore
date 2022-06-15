@@ -8,6 +8,8 @@ import isodate
 import requests
 from elasticsearch import helpers
 
+from django import urls
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
@@ -251,6 +253,32 @@ class Bookmark(TimeStampedModel):
             return f"<img src=\"https://www.bordercore.com/favicons/{domain}.ico\" width=\"{size}\" height=\"{size}\" />"
         else:
             return ""
+
+    def related_nodes(self):
+        """
+        Return a list of nodes with collections containing this bookmark
+        """
+
+        Node = apps.get_model("node", "Node")
+
+        found_nodes = set()
+
+        for so in self.sortordercollectionbcobject_set.all().select_related("collection"):
+            for node in Node.objects.filter(user=self.user):
+                for col in node.layout:
+                    found = [x for x in col if "uuid" in x and x["uuid"] == str(so.collection.uuid)]
+                    if found:
+                        found_nodes.add(node)
+
+        return [
+            {
+                "name": x.name,
+                "url": urls.reverse("node:detail", kwargs={"uuid": x.uuid}),
+                "uuid": x.uuid
+            }
+            for x in
+            found_nodes
+        ]
 
 
 def tags_changed(sender, **kwargs):

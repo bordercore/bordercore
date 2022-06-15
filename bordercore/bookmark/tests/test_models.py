@@ -32,3 +32,15 @@ def test_get_favicon_url(monkeypatch_bookmark):
     bookmark.url = "bordercore.com/path"
     url = bookmark.get_favicon_url()
     assert url == ""
+
+
+def test_related_nodes(monkeypatch_bookmark, node):
+
+    bookmark = BookmarkFactory(user=node.user)
+    collection = node.add_collection()
+    collection.add_object(bookmark)
+
+    related_nodes = bookmark.related_nodes()
+
+    assert len(related_nodes) == 1
+    assert node.uuid in [x["uuid"] for x in related_nodes]

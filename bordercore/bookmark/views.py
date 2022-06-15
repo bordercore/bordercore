@@ -100,6 +100,7 @@ class BookmarkUpdateView(FormRequestMixin, UpdateView, FormValidMixin):
                 "tags": [x.name for x in b.tags.all()]
             } for b in self.object.blob_set.all()
         ]
+        context["related_nodes"] = self.object.related_nodes()
 
         return context
 
