@@ -34,10 +34,10 @@ class Node(TimeStampedModel):
     def __str__(self):
         return self.name
 
-    def add_collection(self):
+    def add_collection(self, name="New Collection"):
 
         # Collections are private to avoid display on the collection list page
-        collection = Collection.objects.create(name="New Collection", user=self.user, is_private=True)
+        collection = Collection.objects.create(name=name, user=self.user, is_private=True)
 
         layout = self.layout
         layout[0].insert(0, {"type": "collection", "uuid": str(collection.uuid)})

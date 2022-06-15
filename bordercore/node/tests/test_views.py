@@ -89,6 +89,7 @@ def test_add_collection(auto_login_user, node):
     url = urls.reverse("node:add_collection")
     resp = client.post(url, {
         "node_uuid": node.uuid,
+        "collection_name": "Test Collection",
     })
 
     assert resp.status_code == 200

@@ -195,9 +195,10 @@ def change_layout(request):
 def add_collection(request):
 
     node_uuid = request.POST["node_uuid"]
+    collection_name = request.POST["collection_name"]
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
-    collection = node.add_collection()
+    collection = node.add_collection(collection_name)
 
     node.populate_names()
 

@@ -168,18 +168,7 @@
             store,
             methods: {
                 onAddCollection() {
-                    doPost(
-                        this,
-                        "{% url "node:add_collection" %}",
-                        {
-                            "node_uuid": this.$store.state.nodeUuid,
-                        },
-                        (response) => {
-                            EventBus.$emit("update-layout", response.data.layout);
-                        },
-                        "Collection added",
-                        ""
-                    );
+                    EventBus.$emit("open-collection-modal");
                 },
                 onAddNote() {
                     doPost(
@@ -216,6 +205,22 @@
                 }
             },
             methods: {
+                addCollection() {
+                    const name = document.getElementById("id_name_collection").value;
+                    doPost(
+                        this,
+                        "{% url "node:add_collection" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                            "collection_name": name,
+                        },
+                        (response) => {
+                            EventBus.$emit("update-layout", response.data.layout);
+                        },
+                        "Collection added",
+                        ""
+                    );
+                },
                 addNodeTodo(payload) {
                     this.$refs.todoList[0].addNodeTodo(payload);
                 },
@@ -269,7 +274,7 @@
                     );
                 },
                 openModalCollectionUpdate(callback, data) {
-                    this.$refs.collectionUpdate.openModal(callback, data);
+                    this.$refs.collectionUpdate.openModal("Update", callback, data);
                 },
                 onDeleteNote(noteUuid) {
                     doPost(
@@ -313,6 +318,10 @@
 
                 EventBus.$on("add-bookmark", (payload) => {
                     this.$refs.bookmarkList.addBookmark(payload);
+                });
+
+                EventBus.$on("open-collection-modal", (payload) => {
+                    this.$refs.collectionUpdate.openModal("Add", this.addCollection, {});
                 });
 
                 EventBus.$on("update-layout", (payload) => {

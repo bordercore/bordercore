@@ -1,28 +1,5 @@
 <template>
     <div class="hover-reveal-target">
-        <div :id="`modalUpdate_${uuid}`" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 id="myModalLabel" class="modal-title">
-                            Update Collection
-                        </h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" />
-                    </div>
-                    <div class="modal-body">
-                        <div class="row mb-3">
-                            <label class="col-lg-3 col-form-label" for="inputTitle">Name</label>
-                            <div class="col-lg-9">
-                                <input :id="`id_name_${uuid}`" type="text" name="name" :value="name" class="form-control" autocomplete="off" maxlength="200" required @keyup.enter="onUpdateCollection">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <input id="btn-action" class="btn btn-primary" type="button" value="Update" @click="onUpdateCollection">
-                    </div>
-                </div>
-            </div>
-        </div>
         <card title="" class="backdrop-filter position-relative">
             <template #title-slot>
                 <div class="card-title d-flex">

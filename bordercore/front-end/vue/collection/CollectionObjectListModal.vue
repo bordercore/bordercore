@@ -4,7 +4,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 id="myModalLabel" class="modal-title">
-                        Update Collection
+                        {{ action }} Collection
                     </h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" />
                 </div>
@@ -31,6 +31,7 @@
         name: "CollectionObjectListModal",
         data() {
             return {
+                action: "Update",
                 callback: null,
                 modal: null,
                 data: {},
@@ -40,7 +41,8 @@
             this.modal = new Modal("#modalUpdateCollection");
         },
         methods: {
-            openModal(callback, data) {
+            openModal(action, callback, data) {
+                this.action = action;
                 this.callback = callback;
                 this.data = data;
                 this.modal.show();
