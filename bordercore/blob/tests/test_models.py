@@ -127,8 +127,8 @@ def test_clone(temp_blob_directory, monkeypatch_blob, blob_pdf_factory, collecti
     for tag in blob_pdf_factory[0].tags.all():
         assert tag in cloned_blob.tags.all()
 
-    for c in Collection.objects.filter(sortordercollectionbcobject__blob__uuid=blob_pdf_factory[0].uuid):
-        assert cloned_blob in [x.blob for x in c.sortordercollectionbcobject_set.all()]
+    for c in Collection.objects.filter(collectionobject__blob__uuid=blob_pdf_factory[0].uuid):
+        assert cloned_blob in [x.blob for x in c.collectionobject_set.all()]
 
 
 def count_nodes(nodes, root_node=True):

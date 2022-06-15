@@ -242,7 +242,7 @@ def test_handle_linked_collection(monkeypatch_collection, auto_login_user, blob_
 
     collection_updated = Collection.objects.get(uuid=collection.uuid)
 
-    assert blob_image_factory[0] in [x.blob for x in collection_updated.sortordercollectionbcobject_set.all()]
+    assert blob_image_factory[0] in [x.blob for x in collection_updated.collectionobject_set.all()]
 
 
 def test_blob_metadata_name_search(auto_login_user, blob_image_factory):

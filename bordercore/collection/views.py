@@ -19,7 +19,7 @@ from django.views.generic.list import ListView
 from blob.models import Blob
 from bookmark.models import Bookmark
 from collection.forms import CollectionForm
-from collection.models import Collection, SortOrderCollectionBCObject
+from collection.models import Collection, CollectionObject
 from lib.exceptions import DuplicateObjectError
 from lib.mixins import FormRequestMixin
 from tag.models import Tag
@@ -40,7 +40,7 @@ class CollectionListView(FormRequestMixin, FormMixin, ListView):
         if "query" in self.request.GET:
             query = query.filter(name__icontains=self.request.GET.get("query"))
 
-        query = query.annotate(num_blobs=Count("sortordercollectionbcobject__blob"))
+        query = query.annotate(num_blobs=Count("collectionobject__blob"))
 
         query = query.order_by("-modified")
 
@@ -100,7 +100,7 @@ class CollectionDetailView(FormRequestMixin, FormMixin, DetailView):
                 "tag": x.name,
                 "blob_count": x.blob_count
             } for x in Tag.objects.filter(
-                blob__sortordercollectionbcobject__collection__uuid=self.object.uuid
+                blob__collectionobject__collection__uuid=self.object.uuid
             ).distinct().annotate(
                 blob_count=Count("blob")
             ).order_by(
@@ -240,14 +240,14 @@ def search(request):
         query = query.filter(name__icontains=request.GET.get("query"))
 
     if "blob_uuid" in request.GET:
-        query = query.filter(sortordercollectionbcobject__blob__uuid__in=[request.GET.get("blob_uuid")])
+        query = query.filter(collectionobject__blob__uuid__in=[request.GET.get("blob_uuid")])
 
     if "exclude_blob_uuid" in request.GET:
         contains_blob = Collection.objects.filter(uuid=OuterRef("uuid")) \
-                                          .filter(sortordercollectionbcobject__blob__uuid__in=[request.GET.get("exclude_blob_uuid")])
+                                          .filter(collectionobject__blob__uuid__in=[request.GET.get("exclude_blob_uuid")])
         query = query.annotate(contains_blob=Exists(contains_blob))
 
-    query = query.annotate(num_blobs=Count("sortordercollectionbcobject__blob"))
+    query = query.annotate(num_blobs=Count("collectionobject__blob"))
 
     collection_list = query.order_by("-modified")
 
@@ -400,11 +400,11 @@ def sort_objects(request):
     object_uuid = request.POST["object_uuid"]
     new_position = int(request.POST["new_position"])
 
-    so = SortOrderCollectionBCObject.objects.get(
+    so = CollectionObject.objects.get(
         Q(blob__uuid=object_uuid) | Q(bookmark__uuid=object_uuid),
         collection__uuid=collection_uuid
     )
-    SortOrderCollectionBCObject.reorder(so, new_position)
+    CollectionObject.reorder(so, new_position)
 
     response = {
         "status": "OK",
@@ -420,7 +420,7 @@ def update_object_note(request):
     object_uuid = request.POST["object_uuid"]
     note = request.POST["note"]
 
-    so = SortOrderCollectionBCObject.objects.get(
+    so = CollectionObject.objects.get(
         Q(blob__uuid=object_uuid) | Q(bookmark__uuid=object_uuid),
         collection__uuid=collection_uuid
     )

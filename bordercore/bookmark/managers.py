@@ -14,7 +14,7 @@ class BookmarkManager(models.Manager):
             user=user,
             tags__isnull=True,
             sortorderquestionbookmark__isnull=True,
-            sortordercollectionbcobject__isnull=True,
+            collectionobject__isnull=True,
             sortorderblobbookmark__isnull=True,
         )
 

@@ -1,7 +1,7 @@
 import pytest
 
 from blob.tests.factories import BlobFactory
-from collection.models import SortOrderCollectionBCObject
+from collection.models import CollectionObject
 from lib.exceptions import DuplicateObjectError
 
 pytestmark = pytest.mark.django_db
@@ -10,28 +10,28 @@ pytestmark = pytest.mark.django_db
 def test_sort_collection(collection, blob_image_factory, blob_pdf_factory):
 
     # Move the first blob to the second position
-    so = SortOrderCollectionBCObject.objects.get(collection=collection[0], blob=blob_pdf_factory[0])
-    SortOrderCollectionBCObject.reorder(so, 2)
-    so = SortOrderCollectionBCObject.objects.filter(collection=collection[0])
+    so = CollectionObject.objects.get(collection=collection[0], blob=blob_pdf_factory[0])
+    CollectionObject.reorder(so, 2)
+    so = CollectionObject.objects.filter(collection=collection[0])
     assert so[0].blob.id == blob_image_factory[0].id
     assert so[1].blob.id == blob_pdf_factory[0].id
-    assert collection[0].sortordercollectionbcobject_set.filter().count() == 2
+    assert collection[0].collectionobject_set.filter().count() == 2
 
     # Move it back the first position
-    so = SortOrderCollectionBCObject.objects.get(collection=collection[0], blob=blob_pdf_factory[0])
-    SortOrderCollectionBCObject.reorder(so, 1)
-    so = SortOrderCollectionBCObject.objects.filter(collection=collection[0])
+    so = CollectionObject.objects.get(collection=collection[0], blob=blob_pdf_factory[0])
+    CollectionObject.reorder(so, 1)
+    so = CollectionObject.objects.filter(collection=collection[0])
     assert so[0].blob.id == blob_pdf_factory[0].id
     assert so[1].blob.id == blob_image_factory[0].id
-    assert collection[0].sortordercollectionbcobject_set.filter().count() == 2
+    assert collection[0].collectionobject_set.filter().count() == 2
 
     # Move the second blob to the first position
-    so = SortOrderCollectionBCObject.objects.get(collection=collection[0], blob=blob_image_factory[0])
-    SortOrderCollectionBCObject.reorder(so, 1)
-    so = SortOrderCollectionBCObject.objects.filter(collection=collection[0])
+    so = CollectionObject.objects.get(collection=collection[0], blob=blob_image_factory[0])
+    CollectionObject.reorder(so, 1)
+    so = CollectionObject.objects.filter(collection=collection[0])
     assert so[0].blob.id == blob_image_factory[0].id
     assert so[1].blob.id == blob_pdf_factory[0].id
-    assert collection[0].sortordercollectionbcobject_set.filter().count() == 2
+    assert collection[0].collectionobject_set.filter().count() == 2
 
 
 def test_get_tags(collection):
@@ -63,7 +63,7 @@ def test_add_object(collection):
 
     collection[0].add_object(blob)
 
-    assert SortOrderCollectionBCObject.objects.filter(
+    assert CollectionObject.objects.filter(
         collection=collection[0],
         blob=blob
     ).exists()
@@ -81,7 +81,7 @@ def test_remove_object(collection):
 
     collection[0].remove_object(blob.uuid)
 
-    assert not SortOrderCollectionBCObject.objects.filter(
+    assert not CollectionObject.objects.filter(
         collection=collection[0],
         blob=blob
     ).exists()

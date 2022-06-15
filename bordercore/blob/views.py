@@ -22,7 +22,7 @@ from django.views.generic.list import ListView
 from blob.forms import BlobForm
 from blob.models import Blob, MetaData, RecentlyViewedBlob
 from blob.services import get_recent_blobs, import_blob
-from collection.models import Collection, SortOrderCollectionBCObject
+from collection.models import Collection, CollectionObject
 from lib.mixins import FormRequestMixin
 from lib.time_utils import get_javascript_date, parse_date_from_string
 
@@ -91,7 +91,7 @@ class BlobCreateView(FormRequestMixin, CreateView):
                     "text": x.name,
                     "value": x.name,
                     "is_meta": x.is_meta
-                } for x in SortOrderCollectionBCObject.objects.filter(
+                } for x in CollectionObject.objects.filter(
                     collection__uuid=self.request.GET["linked_collection"]
                 ).first().blob.tags.all()
             ]
@@ -133,7 +133,7 @@ class BlobCreateView(FormRequestMixin, CreateView):
 
         if "linked_collection" in self.request.GET:
             collection_uuid = self.request.GET["linked_collection"]
-            so = SortOrderCollectionBCObject.objects.filter(collection__uuid=collection_uuid).first()
+            so = CollectionObject.objects.filter(collection__uuid=collection_uuid).first()
             form.initial["date"] = so.blob.date
             form.initial["name"] = so.blob.name
 
@@ -282,7 +282,7 @@ class BlobUpdateView(FormRequestMixin, UpdateView):
             context["is_book"] = True
 
         context["collections_other"] = Collection.objects.filter(Q(user=self.request.user)
-                                                                 & ~Q(sortordercollectionbcobject__blob__uuid=self.object.uuid)
+                                                                 & ~Q(collectionobject__blob__uuid=self.object.uuid)
                                                                  & Q(is_private=False))
         context["action"] = "Update"
         context["title"] = "Blob Update :: {}".format(self.object.get_name(remove_edition_string=True))

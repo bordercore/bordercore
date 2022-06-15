@@ -263,7 +263,7 @@ class Bookmark(TimeStampedModel):
 
         found_nodes = set()
 
-        for so in self.sortordercollectionbcobject_set.all().select_related("collection"):
+        for so in self.collectionobject_set.all().select_related("collection"):
             for node in Node.objects.filter(user=self.user):
                 for col in node.layout:
                     found = [x for x in col if "uuid" in x and x["uuid"] == str(so.collection.uuid)]

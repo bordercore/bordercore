@@ -161,7 +161,7 @@
                         {% for collection in linked_objects %}
                             {{ collection.name }}
                             <ul class="list-group interior-borders">
-                                {% for blob in collection.sortordercollectionbcobject_set.all %}
+                                {% for blob in collection.collectionobject_set.all %}
                                     {% if blob.blob.uuid != object.uuid %}
                                     <li class="list-group-item list-group-item-secondary text-info d-flex align-items-center">
                                         {% if blob.blob.get_cover_url_small %}

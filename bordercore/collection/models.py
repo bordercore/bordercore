@@ -34,7 +34,7 @@ class Collection(TimeStampedModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=200)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
-    bc_objects = models.ManyToManyField("collection.BCObject", through="SortOrderCollectionBCObject")
+    bc_objects = models.ManyToManyField("collection.BCObject", through="CollectionObject")
     tags = models.ManyToManyField(Tag)
     description = models.TextField(blank=True, default="")
     is_private = models.BooleanField(default=False)
@@ -48,13 +48,13 @@ class Collection(TimeStampedModel):
         from bookmark.models import Bookmark
 
         if isinstance(object, Bookmark):
-            if SortOrderCollectionBCObject.objects.filter(collection=self, bookmark=object).exists():
+            if CollectionObject.objects.filter(collection=self, bookmark=object).exists():
                 raise DuplicateObjectError
-            so = SortOrderCollectionBCObject(collection=self, bookmark=object)
+            so = CollectionObject(collection=self, bookmark=object)
         elif isinstance(object, Blob):
-            if SortOrderCollectionBCObject.objects.filter(collection=self, blob=object).exists():
+            if CollectionObject.objects.filter(collection=self, blob=object).exists():
                 raise DuplicateObjectError
-            so = SortOrderCollectionBCObject(collection=self, blob=object)
+            so = CollectionObject(collection=self, blob=object)
         else:
             raise ValueError(f"Unsupported type: {type(object)}")
         so.save()
@@ -66,7 +66,7 @@ class Collection(TimeStampedModel):
 
     def remove_object(self, object_uuid):
 
-        so = SortOrderCollectionBCObject.objects.get(
+        so = CollectionObject.objects.get(
             Q(blob__uuid=object_uuid) | Q(bookmark__uuid=object_uuid),
             collection__uuid=self.uuid
         )
@@ -90,7 +90,7 @@ class Collection(TimeStampedModel):
 
     def get_blob(self, position, direction, randomize=False, tag_name=None):
 
-        so = SortOrderCollectionBCObject.objects.filter(
+        so = CollectionObject.objects.filter(
             collection=self
         ).select_related(
             "blob"
@@ -128,7 +128,7 @@ class Collection(TimeStampedModel):
 
         blob_list = []
 
-        queryset = SortOrderCollectionBCObject.objects.filter(collection=self)
+        queryset = CollectionObject.objects.filter(collection=self)
 
         if request and "tag" in request.GET:
             queryset = queryset.filter(blob__tags__name=request.GET["tag"])
@@ -172,7 +172,7 @@ class Collection(TimeStampedModel):
 
         object_list = []
 
-        queryset = SortOrderCollectionBCObject.objects.filter(collection=self).prefetch_related("blob").prefetch_related("bookmark")
+        queryset = CollectionObject.objects.filter(collection=self).prefetch_related("blob").prefetch_related("bookmark")
 
         if request and "tag" in request.GET:
             queryset = queryset.filter(blob__tags__name=request.GET["tag"])
@@ -208,7 +208,7 @@ class Collection(TimeStampedModel):
         Return a list of the most recent images added to this collection
         """
 
-        return self.sortordercollectionbcobject_set.filter(
+        return self.collectionobject_set.filter(
             blob__file__iregex=r"\.(gif|jpg|jpeg|pdf|png)$"
         ).values(
             uuid=F("blob__uuid"),
@@ -241,7 +241,7 @@ class Collection(TimeStampedModel):
         )
 
 
-class SortOrderCollectionBCObject(SortOrderMixin):
+class CollectionObject(SortOrderMixin):
 
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE)
     blob = models.ForeignKey("blob.Blob", null=True, on_delete=models.CASCADE)
@@ -304,6 +304,6 @@ class BCObject(TimeStampedModel):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
 
 
-@receiver(pre_delete, sender=SortOrderCollectionBCObject)
+@receiver(pre_delete, sender=CollectionObject)
 def remove_object(sender, instance, **kwargs):
     instance.handle_delete()

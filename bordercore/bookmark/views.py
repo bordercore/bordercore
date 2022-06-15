@@ -307,7 +307,7 @@ class BookmarkListView(ListView):
             query = query.filter(
                 tags__isnull=True,
                 sortorderquestionbookmark__isnull=True,
-                sortordercollectionbcobject__isnull=True,
+                collectionobject__isnull=True,
                 sortorderblobbookmark__isnull=True
             )
 

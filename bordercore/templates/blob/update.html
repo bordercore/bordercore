@@ -117,7 +117,7 @@
                 {% if linked_collection %}
                     <h6 class="my-3">Linking to a collection with these blobs:</h6>
                     <ul class="list-group">
-                    {% for so in linked_collection.sortordercollectionbcobject_set.all %}
+                    {% for so in linked_collection.collectionobject_set.all %}
                         <li class="list-group-item">
                             <a href="{% url 'blob:detail' so.blob.uuid %}">{{ so.blob.name|default:"No Name" }}</a>
                         </li>

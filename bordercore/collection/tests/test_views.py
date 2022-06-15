@@ -6,7 +6,7 @@ from django import urls
 from django.conf import settings
 
 from blob.tests.factories import BlobFactory
-from collection.models import SortOrderCollectionBCObject
+from collection.models import CollectionObject
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
@@ -27,7 +27,7 @@ def test_collection_detail(auto_login_user, collection):
     settings.NPLUSONE_WHITELIST = [
         {
             "label": "unused_eager_load",
-            "model": "collection.SortOrderCollectionBCObject"
+            "model": "collection.CollectionObject"
         }
     ]
     logger = logging.getLogger("bordercore.blob.models")
@@ -40,7 +40,7 @@ def test_collection_detail(auto_login_user, collection):
 
     assert resp.status_code == 200
 
-    for so in SortOrderCollectionBCObject.objects.filter(collection=collection[0]):
+    for so in CollectionObject.objects.filter(collection=collection[0]):
         so.blob.delete()
 
     url = urls.reverse("collection:detail", kwargs={"collection_uuid": collection[0].uuid})
@@ -65,7 +65,7 @@ def test_sort_collection(auto_login_user, collection):
     url = urls.reverse("collection:sort_objects")
     resp = client.post(url, {
         "collection_uuid": collection[0].uuid,
-        "object_uuid": collection[0].sortordercollectionbcobject_set.all()[0].blob.uuid,
+        "object_uuid": collection[0].collectionobject_set.all()[0].blob.uuid,
         "new_position": "3"
     })
 
@@ -178,7 +178,7 @@ def test_collection_get_blob_list(auto_login_user, collection):
 
     assert len(resp_json["blob_list"]) == 2
 
-    blob_list = collection[0].sortordercollectionbcobject_set.all()
+    blob_list = collection[0].collectionobject_set.all()
     assert str(blob_list[0].blob.uuid) in [
         x["uuid"] for x in resp_json["blob_list"]
     ]

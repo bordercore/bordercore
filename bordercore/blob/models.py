@@ -22,7 +22,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 
 from bookmark.models import Bookmark
-from collection.models import Collection, SortOrderCollectionBCObject
+from collection.models import Collection, CollectionObject
 from lib.mixins import SortOrderMixin, TimeStampedModel
 from lib.time_utils import get_date_from_pattern
 from lib.util import get_elasticsearch_connection, is_audio, is_image, is_video
@@ -357,14 +357,14 @@ class Blob(TimeStampedModel):
     def get_collection_info(self):
         return Collection.objects.filter(
             user=self.user,
-            sortordercollectionbcobject__blob__uuid=self.uuid,
+            collectionobject__blob__uuid=self.uuid,
             is_private=False)
 
     def get_linked_objects(self):
 
         return Collection.objects.filter(
             user=self.user,
-            sortordercollectionbcobject__blob__uuid=self.uuid,
+            collectionobject__blob__uuid=self.uuid,
             is_private=True
         )
 
@@ -430,7 +430,7 @@ class Blob(TimeStampedModel):
             new_blob.tags.add(tag)
 
         if include_collections:
-            for so in SortOrderCollectionBCObject.objects.filter(blob__uuid=self.uuid):
+            for so in CollectionObject.objects.filter(blob__uuid=self.uuid):
                 so.collection.add_object(new_blob)
 
         # Add to Elasticsearch

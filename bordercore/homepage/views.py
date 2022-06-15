@@ -109,7 +109,7 @@ def get_random_image(request, content_type=None):
     if request.user.userprofile.homepage_image_collection:
 
         image = Blob.objects.filter(
-            sortordercollectionbcobject__collection__id=request.user.userprofile.homepage_image_collection.id
+            collectionobject__collection__id=request.user.userprofile.homepage_image_collection.id
         ).order_by("?").values().first()
 
         # The field name is 'filename' in Elasticsearch, so that's the common
