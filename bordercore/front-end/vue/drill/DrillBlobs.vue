@@ -32,7 +32,7 @@
                                                 {{ blob.note }}
                                             </div>
                                             <span v-show="blob.noteIsEditable">
-                                                <input id="add-blob-input" ref="input" type="text" class="form-control form-control-sm" :value="blob.note" placeholder="" autocomplete="off" @blur="editNote(blob.uuid, $event.target.value)" @keydown.enter="editNote(blob.uuid, $event.target.value)">
+                                                <input id="add-blob-input" ref="input" type="text" class="form-control form-control-sm" :value="blob.note" placeholder="" autocomplete="off" @blur="editNote(blob, $event.target.value)" @keydown.enter="editNote(blob, $event.target.value)">
                                             </span>
                                         </div>
 
@@ -40,7 +40,7 @@
                                             <div slot="dropdown">
                                                 <li>
                                                     <a class="dropdown-item" href="#" @click.prevent="removeBlob(blob.uuid)"><font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove</a>
-                                                    <a v-if="!blob.note" class="dropdown-item" href="#" @click.prevent="addNote(blob.uuid)">
+                                                    <a v-if="!blob.note" class="dropdown-item" href="#" @click.prevent="addNote(blob, index)">
                                                         <font-awesome-icon icon="plus" class="text-primary me-3" />Add note
                                                     </a>
                                                     <a v-else class="dropdown-item" href="#" @click.prevent="activateInEditMode(blob, index)">
@@ -172,23 +172,20 @@
                 );
             },
             activateInEditMode(blob, index) {
-                this.$set(this.blobList[index], "noteIsEditable", true);
+                this.$set(blob, "noteIsEditable", true);
 
                 self = this;
                 setTimeout( () => {
                     self.$refs.input[index].focus();
                 }, 100);
             },
-            addNote(blobUuid) {
-                for (const blob of this.blobList) {
-                    if (blob.uuid == blobUuid) {
-                        blob.noteIsEditable = true;
-                    }
-                }
+            addNote(blob, index) {
+                blob.noteIsEditable = true;
 
-                this.$nextTick(() => {
-                    this.$refs.input[0].focus();
-                });
+                self = this;
+                setTimeout( () => {
+                    self.$refs.input[index].focus();
+                }, 100);
             },
             selectBlob(blob) {
                 if (this.newQuestion) {
@@ -234,43 +231,39 @@
                     "",
                 );
             },
-            editNote(blobUuid, note) {
+            editNote(blob, note) {
                 if (this.editingNote) {
                     return;
                 }
                 this.editingNote = true;
 
-                for (const blob of this.blobList) {
-                    if (blob.uuid == blobUuid) {
-                        // If the note hasn't changed, abort
-                        if (note == blob.note) {
-                            blob.noteIsEditable = false;
-                            this.editingNote = false;
-                            return;
-                        }
-
-                        if (this.newQuestion) {
-                            blob.note = note;
-                            blob.noteIsEditable = false;
-                        } else {
-                            doPost(
-                                this,
-                                this.editBlobNoteUrl,
-                                {
-                                    "question_uuid": this.questionUuid,
-                                    "blob_uuid": blobUuid,
-                                    "note": note,
-                                },
-                                (response) => {
-                                    this.getBlobList();
-                                },
-                                "",
-                                "",
-                            );
-                        }
-                        this.editingNote = false;
-                    }
+                // If the note hasn't changed, abort
+                if (note == blob.note) {
+                    blob.noteIsEditable = false;
+                    this.editingNote = false;
+                    return;
                 }
+
+                if (this.newQuestion) {
+                    blob.note = note;
+                    blob.noteIsEditable = false;
+                } else {
+                    doPost(
+                        this,
+                        this.editBlobNoteUrl,
+                        {
+                            "question_uuid": this.questionUuid,
+                            "blob_uuid": blob.uuid,
+                            "note": note,
+                        },
+                        (response) => {
+                            this.getBlobList();
+                        },
+                        "",
+                        "",
+                    );
+                }
+                this.editingNote = false;
             },
         },
     };
