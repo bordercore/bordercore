@@ -205,7 +205,6 @@
                 {% if user.userprofile.background_image %}
                 const body = document.querySelector("body");
                 body.style.backgroundImage = "url('https://bordercore-blobs.s3.amazonaws.com/background/{{ user.userprofile.uuid }}/{{ user.userprofile.background_image }}')";
-                console.log("url('https://bordercore-blobs.s3.amazonaws.com/background/{{ user.userprofile.uuid }}/{{ user.userprofile.background_image }}')");
                 {% endif %}
 
                 new Vue({
