@@ -32,7 +32,7 @@
                                   @click.stop=""
                             >{{ scope.suggestion.name }}</span>
                             <span v-else class="top-search-suggestion">
-                                <span v-if="scope.suggestion.important === 10" class="me-4">
+                                <span v-if="scope.suggestion.important === 10" class="me-1">
                                     <font-awesome-icon icon="heart" class="text-danger" />
                                 </span>
                                 <span class="d-inline" v-html="boldenSuggestion(scope)" />
