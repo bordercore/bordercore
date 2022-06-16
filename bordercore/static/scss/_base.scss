@@ -114,14 +114,14 @@
   font-family: "Roboto";
   font-style: normal;
   font-weight: 400;
-  src:  url("../../fonts/Roboto-Regular.ttf") format("truetype");
+  src: url("../../fonts/Roboto-Regular.ttf") format("truetype");
 }
 
 @font-face {
   font-family: "Lato";
   font-style: normal;
   font-weight: 400;
-  src:  url("../../fonts/Lato-Regular.ttf") format("truetype");
+  src: url("../../fonts/Lato-Regular.ttf") format("truetype");
 }
 
 //
@@ -331,6 +331,7 @@ a.tag {
 
 .modal-content {
   border: 0.12rem solid #566e9b;
+  background-color: $modal-bg;
 }
 
 .pagination {
@@ -366,10 +367,10 @@ a.tag {
 
   &:hover {
     // "overlay" not supported by Firefox
-    @supports not( -moz-appearance:none ){
+    @supports not( -moz-appearance:none ) {
       overflow-y: overlay;
     }
-    @supports ( -moz-appearance:none ){
+    @supports ( -moz-appearance:none ) {
       overflow-y: auto;
     }
   }
@@ -857,10 +858,6 @@ $nav-tabs-link-hover-border-color: $nav-border-color;
   background-color: $list-group-item-secondary-bg;
 }
 
-.modal-content {
-  background-color: $modal-bg;
-}
-
 // Forms
 .form-error {
   padding-top: 0.3rem;
@@ -961,7 +958,7 @@ pre {
   position: absolute;
   top: 0.30rem;
   right: 1rem;
-  text-align:center;
+  text-align: center;
 
   i {
     position: relative;

@@ -80,8 +80,16 @@
             "stylelint-order"
         ],
         "rules": {
-            "no-irregular-whitespace": true,
             "at-rule-no-unknown": null,
+            "block-closing-brace-newline-after": "always",
+            "block-opening-brace-space-before": "always",
+            "declaration-block-semicolon-newline-after": "always",
+            "declaration-block-trailing-semicolon": "always",
+            "declaration-colon-space-after": "always",
+            "indentation": 2,
+            "no-duplicate-selectors": true,
+            "no-irregular-whitespace": true,
+            "no-eol-whitespace": true,
             "order/order": [
                 "custom-properties",
                 "declarations"
@@ -96,7 +104,21 @@
                         "/^ms-transform$/"
                     ]
                 }
-            ]
+            ],
+            "rule-empty-line-before": [
+                "always-multi-line",
+                {
+                    "ignore": [
+                      "after-comment",
+                      "inside-block"
+                    ]
+                }
+            ],
+            "selector-combinator-space-after": "always",
+            "selector-combinator-space-before": "always",
+            "string-quotes": "double",
+            "value-keyword-case": "lower",
+            "value-list-comma-space-after": "always"
         }
     }
 }
