@@ -99,9 +99,12 @@
                             <node-note
                                 node-uuid="{{ object.uuid }}"
                                 :note-uuid="obj.uuid"
+                                :note-color="obj.color"
                                 :get-node-url="'{% url "blob-detail" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', obj.uuid)"
                                 :update-note-url="'{% url "blob-detail" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', obj.uuid)"
+                                :set-note-color-url="'{% url "node:set_note_color" %}'"
                                 @delete-note="onDeleteNote"
+                                @open-modal-note-update="openModalNoteUpdate"
                             >
                             </node-note>
                         </div>
@@ -122,6 +125,9 @@
 
             <collection-object-list-modal ref="collectionUpdate">
             </collection-object-list-modal>
+
+            <node-note-modal ref="noteUpdate">
+            </node-note-modal>
 
             <blob-select
                 ref="blobSelect"
@@ -275,6 +281,9 @@
                 },
                 openModalCollectionUpdate(callback, data) {
                     this.$refs.collectionUpdate.openModal("Update", callback, data);
+                },
+                openModalNoteUpdate(callback, data) {
+                    this.$refs.noteUpdate.openModal("Update", callback, data);
                 },
                 onDeleteNote(noteUuid) {
                     doPost(

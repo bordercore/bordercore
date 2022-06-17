@@ -177,3 +177,31 @@ def test_delete_note(monkeypatch_blob, auto_login_user, node):
         for val in sublist
         if "uuid" in val
     ]
+
+
+def test_node_set_note_color(monkeypatch_blob, auto_login_user, node):
+
+    _, client = auto_login_user()
+
+    note = node.add_note()
+    color = 2
+
+    url = urls.reverse("node:set_note_color")
+    resp = client.post(url, {
+        "node_uuid": node.uuid,
+        "note_uuid": note.uuid,
+        "color": color
+    })
+
+    assert resp.status_code == 200
+
+    # Verify that the collection has been removed from the node's layout
+    updated_node = Node.objects.get(uuid=node.uuid)
+
+    assert color in [
+        val["color"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if "uuid" in val
+        and val["uuid"] == str(note.uuid)
+    ]

@@ -69,7 +69,14 @@ class Node(TimeStampedModel):
         note.index_blob()
 
         layout = self.layout
-        layout[0].insert(0, {"type": "note", "uuid": str(note.uuid)})
+        layout[0].insert(
+            0,
+            {
+                "type": "note",
+                "uuid": str(note.uuid),
+                "color": 1
+            }
+        )
         self.layout = layout
         self.save()
 
@@ -114,6 +121,15 @@ class Node(TimeStampedModel):
             for row in column:
                 if row["type"] in ["collection", "note"]:
                     row["name"] = lookup[row["uuid"]]
+
+    def set_note_color(self, note_uuid, color):
+
+        for column in self.layout:
+            for row in column:
+                if "uuid" in row and row["uuid"] == note_uuid:
+                    row["color"] = color
+
+        self.save()
 
 
 class SortOrderNodeTodo(SortOrderMixin):

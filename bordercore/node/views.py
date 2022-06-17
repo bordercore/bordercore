@@ -266,3 +266,20 @@ def delete_note(request):
     }
 
     return JsonResponse(response)
+
+
+@login_required
+def set_note_color(request):
+
+    node_uuid = request.POST["node_uuid"]
+    note_uuid = request.POST["note_uuid"]
+    color = int(request.POST["color"])
+
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    node.set_note_color(note_uuid, color)
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)

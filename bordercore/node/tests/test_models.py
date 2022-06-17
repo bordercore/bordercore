@@ -87,3 +87,18 @@ def test_populate_names(node):
     assert collection_1.name in names
     assert collection_2.name in names
     assert collection_3.name in names
+
+
+def test_set_note_color(monkeypatch_blob, node):
+
+    note = node.add_note()
+    color = 1
+    node.set_note_color(note.uuid, color)
+
+    assert color in [
+        val["color"]
+        for sublist in node.layout
+        for val in sublist
+        if "uuid" in val
+        and val["uuid"] == str(note.uuid)
+    ]
