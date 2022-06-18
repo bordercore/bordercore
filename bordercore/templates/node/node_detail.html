@@ -119,6 +119,16 @@
                             >
                             </node-todo-list>
                         </div>
+                        <div v-else-if="obj.type === 'image'" :draggable="$store.state.editLayout" key="obj.uuid">
+                            <node-image
+                                :image-uuid="obj.uuid"
+                                :image-title="obj.image_title"
+                                :image-url="obj.image_url"
+                                @open-modal-note-image="openModalNoteImage"
+                                @remove-image="onRemoveImage"
+                            >
+                            </node-image>
+                        </div>
                     </div>
                 </draggable>
             </div>
@@ -128,6 +138,9 @@
 
             <node-note-modal ref="noteUpdate">
             </node-note-modal>
+
+            <node-image-modal ref="noteImage">
+            </node-image-modal>
 
             <blob-select
                 ref="blobSelect"
@@ -279,11 +292,28 @@
                         "Collection deleted",
                     );
                 },
+                onRemoveImage(imageUuid) {
+                    doPost(
+                        this,
+                        "{% url "node:remove_image" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                            "image_uuid": imageUuid,
+                        },
+                        (response) => {
+                            this.layout = JSON.parse(response.data.layout);
+                        },
+                        "Image removed",
+                    );
+                },
                 openModalCollectionUpdate(callback, data) {
                     this.$refs.collectionUpdate.openModal("Update", callback, data);
                 },
                 openModalNoteUpdate(callback, data) {
                     this.$refs.noteUpdate.openModal("Update", callback, data);
+                },
+                openModalNoteImage(data) {
+                    this.$refs.noteImage.openModal(data);
                 },
                 onDeleteNote(noteUuid) {
                     doPost(

@@ -191,6 +191,12 @@ Vue.component("CreateUpdateTodo", CreateUpdateTodo);
 import AddToCollection from "./vue/blob/AddToCollection.vue";
 Vue.component("AddToCollection", AddToCollection);
 
+import NodeImage from "./vue/node/NodeImage.vue";
+Vue.component("NodeImage", NodeImage);
+
+import NodeImageModal from "./vue/node/NodeImageModal.vue";
+Vue.component("NodeImageModal", NodeImageModal);
+
 import NodeNote from "./vue/node/NodeNote.vue";
 Vue.component("NodeNote", NodeNote);
 
@@ -200,8 +206,8 @@ Vue.component("NodeNoteModal", NodeNoteModal);
 import NodeTodoList from "./vue/node/NodeTodoList.vue";
 Vue.component("NodeTodoList", NodeTodoList);
 
-import foo from "./vue/collection/CollectionObjectList.vue";
-Vue.component("CollectionObjectList", foo);
+import CollectionObjectList from "./vue/collection/CollectionObjectList.vue";
+Vue.component("CollectionObjectList", CollectionObjectList);
 
 import CollectionObjectListModal from "./vue/collection/CollectionObjectListModal.vue";
 Vue.component("CollectionObjectListModal", CollectionObjectListModal);

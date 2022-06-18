@@ -122,6 +122,16 @@ class Node(TimeStampedModel):
                 if row["type"] in ["collection", "note"]:
                     row["name"] = lookup[row["uuid"]]
 
+    def populate_image_info(self):
+        """
+        """
+        for column in self.layout:
+            for row in column:
+                if row["type"] == "image":
+                    blob = Blob.objects.get(uuid=row["uuid"])
+                    row["image_url"] = blob.get_cover_url()
+                    row["image_title"] = blob.name
+
     def set_note_color(self, note_uuid, color):
 
         for column in self.layout:
@@ -129,6 +139,15 @@ class Node(TimeStampedModel):
                 if "uuid" in row and row["uuid"] == note_uuid:
                     row["color"] = color
 
+        self.save()
+
+    def remove_image(self, image_uuid):
+
+        layout = self.layout
+        for i, col in enumerate(layout):
+            layout[i] = [x for x in col if "uuid" not in x or x["uuid"] != str(image_uuid)]
+
+        self.layout = layout
         self.save()
 
 

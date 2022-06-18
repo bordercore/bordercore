@@ -45,6 +45,7 @@ class NodeDetailView(DetailView):
         context["priority_list"] = json.dumps(Todo.PRIORITY_CHOICES)
 
         self.object.populate_names()
+        self.object.populate_image_info()
 
         return context
 
@@ -280,6 +281,25 @@ def set_note_color(request):
 
     response = {
         "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def remove_image(request):
+
+    node_uuid = request.POST["node_uuid"]
+    image_uuid = request.POST["image_uuid"]
+
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    node.remove_image(image_uuid)
+
+    node.populate_names()
+
+    response = {
+        "status": "OK",
+        "layout": json.dumps(node.layout)
     }
 
     return JsonResponse(response)
