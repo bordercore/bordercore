@@ -215,6 +215,9 @@ Vue.component("CollectionObjectListModal", CollectionObjectListModal);
 import IconButton from "./vue/common/IconButton.vue";
 Vue.component("IconButton", IconButton);
 
+import ObjectSelect from "./vue/common/ObjectSelect.vue";
+Vue.component("ObjectSelect", ObjectSelect);
+
 import PerfectScrollbar from "perfect-scrollbar";
 window.PerfectScrollbar = PerfectScrollbar;
 
