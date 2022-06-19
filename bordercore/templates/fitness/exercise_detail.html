@@ -547,6 +547,11 @@
         });
 
         function getGradient(numberOfItems) {
+
+            if (numberOfItems <= 1) {
+                return;
+            }
+
             // The Rainbow object is from the RainbowVis-JS package
             let rainbow = new Rainbow();
             rainbow.setNumberRange(1, numberOfItems);
