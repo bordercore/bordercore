@@ -287,6 +287,25 @@ def set_note_color(request):
 
 
 @login_required
+def add_image(request):
+
+    node_uuid = request.POST["node_uuid"]
+    image_uuid = request.POST["image_uuid"]
+
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    node.add_image(image_uuid)
+
+    node.populate_image_info()
+
+    response = {
+        "status": "OK",
+        "layout": json.dumps(node.layout)
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
 def remove_image(request):
 
     node_uuid = request.POST["node_uuid"]

@@ -28,7 +28,6 @@
         },
         methods: {
             openModal(data) {
-                console.log(data);
                 this.imageUrl = data;
                 this.modal.show();
             },

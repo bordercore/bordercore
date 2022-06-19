@@ -880,7 +880,7 @@ def search_names_es(user, search_term, doc_types):
                 }
             )
             if doc_type_pretty in ["Blob", "Book", "Document"]:
-                matches[-1]["cover_url"] = settings.MEDIA_URL + Blob.get_cover_url_static(
+                matches[-1]["cover_url"] = Blob.get_cover_url_static(
                     match["_source"].get("uuid"),
                     match["_source"].get("filename"),
                     size="small"

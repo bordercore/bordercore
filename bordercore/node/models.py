@@ -141,6 +141,20 @@ class Node(TimeStampedModel):
 
         self.save()
 
+    def add_image(self, image_uuid):
+
+        layout = self.layout
+        layout[0].insert(
+            0,
+            {
+                "type": "image",
+                "uuid": str(image_uuid),
+            }
+        )
+        self.layout = layout
+        self.save()
+
+
     def remove_image(self, image_uuid):
 
         layout = self.layout

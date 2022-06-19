@@ -171,7 +171,7 @@ def test_delete_note(monkeypatch_blob, auto_login_user, node):
 
     # Verify that the collection has been removed from the node's layout
     updated_node = Node.objects.get(uuid=node.uuid)
-    assert note.uuid not in [
+    assert str(note.uuid) not in [
         val["uuid"]
         for sublist in updated_node.layout
         for val in sublist
@@ -204,4 +204,50 @@ def test_node_set_note_color(monkeypatch_blob, auto_login_user, node):
         for val in sublist
         if "uuid" in val
         and val["uuid"] == str(note.uuid)
+    ]
+
+
+def test_node_add_image(monkeypatch_blob, auto_login_user, node, blob_image_factory):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("node:add_image")
+    resp = client.post(url, {
+        "node_uuid": node.uuid,
+        "image_uuid": blob_image_factory[0].uuid
+    })
+
+    assert resp.status_code == 200
+
+    # Verify that the collection has been removed from the node's layout
+    updated_node = Node.objects.get(uuid=node.uuid)
+    assert str(blob_image_factory[0].uuid) in [
+        val["uuid"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if "uuid" in val
+    ]
+
+
+def test_node_remove_image(monkeypatch_blob, auto_login_user, node, blob_image_factory):
+
+    _, client = auto_login_user()
+
+    node.add_image(blob_image_factory[0].uuid)
+
+    url = urls.reverse("node:remove_image")
+    resp = client.post(url, {
+        "node_uuid": node.uuid,
+        "image_uuid": blob_image_factory[0].uuid
+    })
+
+    assert resp.status_code == 200
+
+    # Verify that the image has been removed from the node's layout
+    updated_node = Node.objects.get(uuid=node.uuid)
+    assert str(blob_image_factory[0].uuid) not in [
+        val["uuid"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if "uuid" in val
     ]

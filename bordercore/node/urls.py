@@ -76,6 +76,11 @@ urlpatterns = [
         name="set_note_color"
     ),
     path(
+        route="image/add",
+        view=views.add_image,
+        name="add_image"
+    ),
+    path(
         route="image/remove",
         view=views.remove_image,
         name="remove_image"

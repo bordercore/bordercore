@@ -39,7 +39,13 @@
                         </span>
                     </a>
                 </li>
-                <li>
+                    <a class="dropdown-item" href="#" @click.prevent="onAddImage">
+                        <span v-cloak>
+                            <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                            Add image
+                        </span>
+                    </a>
+                    <li>
                     <a class="dropdown-item" href="#" @click.prevent="onEditMode">
                         <span v-cloak>
                             <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>
@@ -142,6 +148,12 @@
             <node-image-modal ref="noteImage">
             </node-image-modal>
 
+            <object-select
+                ref="objectSelect"
+                search-object-url="{% url 'search:search_names' %}"
+                @select-object="selectObject"
+            >
+            </object-select>
             <blob-select
                 ref="blobSelect"
                 search-blob-url="{% url 'search:search_names' %}?doc_type=blob,book,document,note"
@@ -188,6 +200,9 @@
             methods: {
                 onAddCollection() {
                     EventBus.$emit("open-collection-modal");
+                },
+                onAddImage() {
+                    EventBus.$emit("object-select");
                 },
                 onAddNote() {
                     doPost(
@@ -259,6 +274,21 @@
                             this.$refs.bookmarkSelect.$refs.simpleSuggest.$refs.suggestComponent.selected = null;
                         },
                         "Bookmark added",
+                        ""
+                    );
+                },
+                selectObject(object) {
+                    doPost(
+                        this,
+                        "{% url "node:add_image" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                            "image_uuid": object.uuid,
+                        },
+                        (response) => {
+                            EventBus.$emit("update-layout", response.data.layout);
+                        },
+                        "Image added",
                         ""
                     );
                 },
@@ -361,6 +391,10 @@
 
                 EventBus.$on("open-collection-modal", (payload) => {
                     this.$refs.collectionUpdate.openModal("Add", this.addCollection, {});
+                });
+
+                EventBus.$on("object-select", (payload) => {
+                    this.$refs.objectSelect.openModal(["blob"]);
                 });
 
                 EventBus.$on("update-layout", (payload) => {
