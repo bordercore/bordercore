@@ -161,14 +161,14 @@
                         {% for collection in linked_objects %}
                             {{ collection.name }}
                             <ul class="list-group interior-borders">
-                                {% for blob in collection.collectionobject_set.all %}
-                                    {% if blob.blob.uuid != object.uuid %}
+                                {% for object in collection.collectionobject_set.all %}
+                                    {% if object.blob and object.blob.uuid != object.uuid %}
                                     <li class="list-group-item list-group-item-secondary text-info d-flex align-items-center">
-                                        {% if blob.blob.get_cover_url_small %}
-                                            <img src="{{ blob.blob.get_cover_url_small }}" />
+                                        {% if object.blob.get_cover_url_small %}
+                                            <img src="{{ object.blob.get_cover_url_small }}" />
                                         {% endif %}
                                         <div class="ms-2">
-                                            <a href="{% url 'blob:detail' blob.blob.uuid %}">{{ blob.blob.name|default:"No Name" }}</a>
+                                            <a href="{% url 'blob:detail' object.blob.uuid %}">{{ object.blob.name|default:"No Name" }}</a>
                                         </div>
                                     </li>
                                     {% endif %}
