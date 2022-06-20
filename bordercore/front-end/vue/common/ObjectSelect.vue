@@ -1,5 +1,5 @@
 <template>
-    <div id="modalObjectSelect" class="modal fade" tabindex="-1" role="dialog">
+    <div :id="`modalObjectSelect${label}`" class="modal fade" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -43,7 +43,7 @@
                                             <div v-if="scope.suggestion.important === 10" class="me-1">
                                                 <font-awesome-icon icon="heart" class="text-danger" />
                                             </div>
-                                            <div v-if="scope.suggestion.cover_url" style="max-width: 75px">
+                                            <div v-if="scope.suggestion.cover_url" class="cover-image">
                                                 <img class="mw-100" :src="scope.suggestion.cover_url">
                                             </div>
                                             <div class="ms-2" v-html="boldenSuggestion(scope)" />
@@ -69,7 +69,7 @@
             VueSimpleSuggest,
         },
         props: {
-            initialSearchType: {
+            label: {
                 type: String,
                 default: "",
             },
@@ -85,10 +85,10 @@
         data() {
             return {
                 name: "",
-                blobUuid: null,
                 doctypes: ["blob", "book", "document", "note"],
+                callback: null,
+                returnArgs: null,
                 query: "",
-                searchFilter: this.initialSearchType,
                 autoCompleteStyle: {
                     vueSimpleSuggest: "position-relative",
                     inputWrapper: "",
@@ -122,28 +122,27 @@
                 return result.replace(new RegExp("(.*?)(" + texts.join("|") + ")(.*?)", "gi"), "$1<b class='matched'>$2</b>$3");
             },
             search(query) {
-                /* doGet(
-                 *     this,
-                 *     this.getSearchObjectUrl(query),
-                 *     (response) => {
-                 *         return response.data;
-                 *     },
-                 *     "Search error",
-                 * ); */
-                return axios.get(this.getSearchObjectUrl(query))
-                            .then((response) => {
-                                return response.data;
-                            });
+                try {
+                    return axios.get(this.getSearchObjectUrl(query))
+                                .then((response) => {
+                                    return response.data;
+                                });
+                } catch (error) {
+                    console.log(`Error: ${error}`);
+                }
             },
             getSearchObjectUrl(query) {
+
                 let url = this.searchObjectUrl;
                 url += "?doc_type=" + this.doctypes.join(",");
                 url += "&term=" + query;
                 return url;
             },
-            openModal(doctypes) {
+            openModal(doctypes, callback, returnArgs) {
                 this.doctypes = doctypes;
-                const modal = new Modal("#modalObjectSelect");
+                this.callback = callback;
+                this.returnArgs = returnArgs;
+                const modal = new Modal(`#modalObjectSelect${this.label}`);
                 modal.show();
                 setTimeout( () => {
                     this.$refs.suggestComponent.input.focus();
@@ -151,9 +150,9 @@
             },
             select(selection) {
                 // The parent component receives the selected object info
-                this.$emit("select-object", selection);
+                this.$emit("select-object", selection, this.callback, this.returnArgs);
 
-                const modal = Modal.getInstance(document.getElementById("modalObjectSelect"));
+                const modal = Modal.getInstance(document.getElementById(`modalObjectSelect${this.label}`));
                 modal.hide();
 
                 this.$nextTick(() => {

@@ -149,18 +149,19 @@
             </node-image-modal>
 
             <object-select
-                ref="objectSelect"
+                label="_objectSelectImage"
+                ref="objectSelectImage"
                 search-object-url="{% url 'search:search_names' %}"
-                @select-object="selectObject"
+                @select-object="selectObjectImage"
             >
             </object-select>
-            <blob-select
-                ref="blobSelect"
-                search-blob-url="{% url 'search:search_names' %}?doc_type=blob,book,document,note"
-                recent-blobs-url="{% url "blob:recent_blobs" %}"
-                @select-blob="selectBlob"
+            <object-select
+                label="_objectSelectCollection"
+                ref="objectSelectCollection"
+                search-object-url="{% url 'search:search_names' %}"
+                @select-object="selectObjectCollection"
             >
-            </blob-select>
+            </object-select>
             <bookmark-select
                 ref="bookmarkSelect"
                 search-url="{% url 'bookmark:search' %}"
@@ -202,7 +203,7 @@
                     EventBus.$emit("open-collection-modal");
                 },
                 onAddImage() {
-                    EventBus.$emit("object-select");
+                    EventBus.$emit("object-select-image");
                 },
                 onAddNote() {
                     doPost(
@@ -277,7 +278,7 @@
                         ""
                     );
                 },
-                selectObject(object) {
+                selectObjectImage(object, callback) {
                     doPost(
                         this,
                         "{% url "node:add_image" %}",
@@ -286,23 +287,25 @@
                             "image_uuid": object.uuid,
                         },
                         (response) => {
+                            if (callback) {
+                                callback();
+                            }
                             EventBus.$emit("update-layout", response.data.layout);
                         },
                         "Image added",
                         ""
                     );
                 },
-                selectBlob(blob, collectionUuid, callback) {
+                selectObjectCollection(blob, callback, returnArgs) {
                     doPost(
                         this,
                         "{% url "collection:add_blob" %}",
                         {
-                            "collection_uuid": collectionUuid,
+                            "collection_uuid": returnArgs.collectionUuid,
                             "blob_uuid": blob.uuid,
                         },
                         (response) => {
                             callback();
-                            this.$refs.blobSelect.$refs.simpleSuggest.$refs.suggestComponent.selected = null;
                         },
                         "Blob added",
                         ""
@@ -393,8 +396,8 @@
                     this.$refs.collectionUpdate.openModal("Add", this.addCollection, {});
                 });
 
-                EventBus.$on("object-select", (payload) => {
-                    this.$refs.objectSelect.openModal(["blob"]);
+                EventBus.$on("object-select-image", (payload) => {
+                    this.$refs.objectSelectImage.openModal(["blob"]);
                 });
 
                 EventBus.$on("update-layout", (payload) => {

@@ -67,11 +67,8 @@
                                             <a class="dropdown-item" href="#" @click.prevent="removeObject(object.uuid)">
                                                 <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
                                             </a>
-                                            <a v-if="object.note" class="dropdown-item" href="#" @click.prevent="editNote(object, index)">
-                                                <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Edit note
-                                            </a>
-                                            <a v-else class="dropdown-item" href="#" @click.prevent="editNote(object, index)">
-                                                <font-awesome-icon icon="plus" class="text-primary me-3" />Add note
+                                            <a class="dropdown-item" href="#" @click.prevent="editNote(object, index)">
+                                                <font-awesome-icon icon="pencil-alt" class="text-primary me-3" /><span v-if="object.note">Edit</span><span v-else>Add</span> Note
                                             </a>
                                         </div>
                                     </drop-down-menu>
@@ -178,7 +175,7 @@
                 );
             },
             onAddBlob() {
-                this.$parent.$parent.$refs.blobSelect.openModal(this.uuid, this.getObjectList);
+                this.$parent.$parent.$refs.objectSelectCollection.openModal(["blob","book","document","note"], this.getObjectList, {"collectionUuid": this.uuid});
             },
             onAddBookmark() {
                 this.$parent.$parent.$refs.bookmarkSelect.openModal(this.uuid, this.getObjectList);

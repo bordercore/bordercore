@@ -994,6 +994,10 @@ pre {
   .matched {
     color: $primary;
   }
+
+  .cover-image {
+    max-width: 4.7rem;
+  }
 }
 
 #top-search-filter-options {
