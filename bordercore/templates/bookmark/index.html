@@ -419,8 +419,6 @@
                 },
                 onClickDelete(uuid) {
 
-                    var self = this;
-
                     axios.delete("{% url 'bookmark-detail' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', uuid))
                          .then(() => {
 
@@ -433,11 +431,11 @@
 
                              if (this.$store.state.selectedTagName) {
                                  if (this.$store.state.selectedTagName === "Untagged") {
-                                     this.getBookmarkList({pageNumber: 1});
+                                     this.getBookmarkList({pageNumber: this.$parent.$refs.paginator.pagination.page_number});
                                  } else
                                      this.getBookmarkList({searchTag: this.$store.state.selectedTagName});
                              } else {
-                                 this.getBookmarkList({pageNumber: this.pageNumber});
+                                 this.getBookmarkList({pageNumber: this.$parent.$refs.paginator.pagination.page_number});
                              }
 
                          })
