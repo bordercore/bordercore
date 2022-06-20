@@ -61,24 +61,21 @@
             </card>
         </div>
 
-        <blob-select
+        <object-select
+            label="_blobSelect"
             ref="blobSelect"
-            :search-blob-url="searchBlobUrl"
-            :recent-blobs-url="recentBlobsUrl"
-            @select-blob="selectBlob"
-        />
+            :search-object-url="searchBlobUrl"
+            @select-object="selectBlob"
+        >
+        </object-select>
+
     </div>
 </template>
 
 <script>
 
-    import BlobSelect from "../blob/BlobSelect.vue";
-
     export default {
 
-        components: {
-            BlobSelect,
-        },
         props: {
             questionUuid: {
                 default: "",
@@ -145,7 +142,7 @@
                 );
             },
             chooseBlob() {
-                this.$refs.blobSelect.openModal();
+                this.$refs.blobSelect.openModal(["blob", "book", "document", "note"]);
             },
             onSort(evt) {
                 const blobUuid = evt.moved.element.uuid;
@@ -204,7 +201,6 @@
                     },
                     (response) => {
                         this.getBlobList();
-                        this.$refs.blobSelect.$refs.simpleSuggest.$refs.suggestComponent.selected = null;
                     },
                     "",
                     "",

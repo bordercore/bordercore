@@ -149,9 +149,6 @@ Vue.component("Bookmark", Bookmark);
 import RelatedBookmarksList from "./vue/bookmark/RelatedBookmarksList.vue";
 Vue.component("RelatedBookmarksList", RelatedBookmarksList);
 
-import BlobSelect from "./vue/blob/BlobSelect.vue";
-Vue.component("BlobSelect", BlobSelect);
-
 import DrillTagProgress from "./vue/common/DrillTagProgress.vue";
 Vue.component("DrillTagProgress", DrillTagProgress);
 

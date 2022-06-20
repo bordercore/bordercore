@@ -175,7 +175,7 @@
                 );
             },
             onAddBlob() {
-                this.$parent.$parent.$refs.objectSelectCollection.openModal(["blob","book","document","note"], this.getObjectList, {"collectionUuid": this.uuid});
+                this.$parent.$parent.$refs.objectSelectCollection.openModal(["blob", "book", "document", "note"], this.getObjectList, {"collectionUuid": this.uuid});
             },
             onAddBookmark() {
                 this.$parent.$parent.$refs.bookmarkSelect.openModal(this.uuid, this.getObjectList);
