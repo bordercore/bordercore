@@ -96,7 +96,8 @@ class QuestionCreateView(FormRequestMixin, CreateView):
         review_url = urls.reverse("drill:detail", kwargs={"uuid": obj.uuid})
         messages.add_message(
             self.request,
-            messages.INFO, f"Question added. <a href='{review_url}'>Review it here</a>"
+            messages.INFO, f"Question added. <a href='{review_url}'>Review it here</a>",
+            extra_tags="noAutoHide"
         )
         return HttpResponseRedirect(self.get_success_url())
 
@@ -220,7 +221,8 @@ class QuestionUpdateView(FormRequestMixin, UpdateView):
         messages.add_message(
             self.request,
             messages.INFO,
-            f"Question edited. <a href='{review_url}'>Review it here</a>"
+            f"Question edited. <a href='{review_url}'>Review it here</a>",
+            extra_tags="noAutoHide"
         )
 
         return HttpResponseRedirect(self.get_success_url())

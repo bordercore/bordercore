@@ -129,13 +129,24 @@ def set_constants(request):
     }
 
 
-DJANGO_TO_BOOTSTRAP = {
-    "debug": "info",
-    "info": "info",
-    "success": "success",
-    "warning": "warning",
-    "error": "danger"
-}
+def convert_django_to_bootstrap(tags):
+
+    DJANGO_TO_BOOTSTRAP = {
+        "debug": "info",
+        "info": "info",
+        "success": "success",
+        "warning": "warning",
+        "error": "danger"
+    }
+
+    for tag in tags.split(" "):
+        if tag in DJANGO_TO_BOOTSTRAP:
+            return DJANGO_TO_BOOTSTRAP[tag]
+
+
+def has_no_autohide_tag(tags):
+
+    return False if "noAutoHide" not in tags.split(" ") else True
 
 
 def json_messages(request):
@@ -145,8 +156,8 @@ def json_messages(request):
             [
                 {
                     "body": str(x),
-                    "variant": DJANGO_TO_BOOTSTRAP[x.tags],
-                    "autoHide": False
+                    "variant": convert_django_to_bootstrap(x.tags),
+                    "autoHide": not has_no_autohide_tag(x.tags)
                 }
                 for x in
                 messages.get_messages(request)

@@ -73,7 +73,7 @@ class FormValidMixin(ModelFormMixin):
         bookmark.index_bookmark()
         bookmark.snarf_favicon()
 
-        messages.add_message(self.request, messages.INFO, "Bookmark Updated")
+        messages.add_message(self.request, messages.INFO, "Bookmark Updated", extra_tags="noAutoHide")
 
         return super().form_valid(form)
 
