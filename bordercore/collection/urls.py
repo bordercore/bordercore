@@ -56,19 +56,14 @@ urlpatterns = [
         name="get_object_list"
     ),
     path(
-        route="object/blob",
-        view=views.add_blob,
-        name="add_blob"
+        route="object/add",
+        view=views.add_object,
+        name="add_object"
     ),
     path(
         route="object/remove",
         view=views.remove_object,
         name="remove_object"
-    ),
-    path(
-        route="object/bookmark",
-        view=views.add_bookmark,
-        name="add_bookmark"
     ),
     path(
         route="object/sort",

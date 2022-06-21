@@ -26,9 +26,6 @@
                 {% if object.uuid %}
                     get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=drill.Question"
                 {% endif %}
-                create-bookmark-url="{% url 'bookmark-list' %}"
-                search-bookmark-url="{% url 'bookmark:search' %}"
-                get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
                 add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
                 :update-modified="true"
                 remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"

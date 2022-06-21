@@ -81,14 +81,13 @@
             >
             </related-bookmarks-list>
 
-            <bookmark-select
-                ref="bookmarkSearch"
-                search-url="{% url 'bookmark:search' %}"
-                create-bookmark-url="{% url 'bookmark-list' %}"
-                get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
-                @select-bookmark="selectBookmark"
+            <object-select
+                label="_objectSelectBookmark"
+                ref="objectSelectBookmark"
+                search-object-url="{% url 'search:search_names' %}"
+                @select-object="selectBookmark"
             >
-            </bookmark-select>
+            </object-select>
 
             <drill-blobs
                 question-uuid="{{ object.uuid }}"

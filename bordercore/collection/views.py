@@ -328,24 +328,35 @@ def get_object_list(request, collection_uuid):
 
 
 @login_required
-def add_blob(request):
+def add_object(request):
 
     collection_uuid = request.POST["collection_uuid"]
-    blob_uuid = request.POST["blob_uuid"]
+    blob_uuid = request.POST.get("blob_uuid", None)
+    bookmark_uuid = request.POST.get("bookmark_uuid", None)
 
     collection = Collection.objects.get(uuid=collection_uuid)
-    blob = Blob.objects.get(uuid=blob_uuid)
+
+    if blob_uuid:
+        object = Blob.objects.get(uuid=blob_uuid)
+    elif bookmark_uuid:
+        object = Bookmark.objects.get(uuid=bookmark_uuid)
+    else:
+        return JsonResponse(
+            {
+                "status": "Error",
+                "message": "You must specify a blob_uuid or bookmark_uuid"
+            }
+        )
 
     try:
-        collection.add_object(blob)
+        collection.add_object(object)
         response = {
             "status": "OK",
-            "message": f"Added to collection <strong>'{collection.name}'</strong>"
         }
     except DuplicateObjectError:
         response = {
             "status": "Error",
-            "message": "That blob already belongs to this collection."
+            "message": "That object already belongs to this collection."
         }
 
     return JsonResponse(response)
@@ -363,29 +374,6 @@ def remove_object(request):
     response = {
         "status": "OK",
     }
-
-    return JsonResponse(response)
-
-
-@login_required
-def add_bookmark(request):
-
-    collection_uuid = request.POST["collection_uuid"]
-    bookmark_uuid = request.POST["bookmark_uuid"]
-
-    collection = Collection.objects.get(uuid=collection_uuid)
-    bookmark = Bookmark.objects.get(uuid=bookmark_uuid)
-
-    try:
-        collection.add_object(bookmark)
-        response = {
-            "status": "OK",
-        }
-    except DuplicateObjectError:
-        response = {
-            "status": "Error",
-            "message": "That bookmark already belongs to this collection."
-        }
 
     return JsonResponse(response)
 

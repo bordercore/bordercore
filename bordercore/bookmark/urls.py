@@ -86,11 +86,6 @@ urlpatterns = [
         name="delete"
     ),
     path(
-        route="search",
-        view=views.search,
-        name="search"
-    ),
-    path(
         route="bookmark/add_related_bookmark",
         view=views.add_related_bookmark,
         name="add_related_bookmark"

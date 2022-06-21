@@ -140,9 +140,6 @@ Vue.component("SearchNoResult", SearchNoResult);
 import TreeMenu from "./vue/common/TreeMenu.vue";
 Vue.component("TreeMenu", TreeMenu);
 
-import BookmarkSelect from "./vue/bookmark/BookmarkSelect.vue";
-Vue.component("BookmarkSelect", BookmarkSelect);
-
 import Bookmark from "./vue/bookmark/Bookmark.vue";
 Vue.component("Bookmark", Bookmark);
 

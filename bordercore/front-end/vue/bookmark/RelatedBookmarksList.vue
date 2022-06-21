@@ -181,11 +181,7 @@
                 );
             },
             openModal() {
-                const modal = new Modal("#modalAddBookmark");
-                modal.show();
-                setTimeout( () => {
-                    document.querySelector("#modalAddBookmark input").focus();
-                }, 500);
+                this.$parent.$refs.objectSelectBookmark.openModal(["bookmark"]);
             },
             selectBookmark(bookmark) {
                 let url = this.addBookmarkUrl;

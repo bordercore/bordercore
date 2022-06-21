@@ -162,14 +162,6 @@
                 @select-object="selectObjectCollection"
             >
             </object-select>
-            <bookmark-select
-                ref="bookmarkSelect"
-                search-url="{% url 'bookmark:search' %}"
-                create-bookmark-url="{% url 'bookmark-list' %}"
-                get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
-                @select-bookmark="selectBookmark"
-            >
-            </bookmark-select>
 
         </div>
 
@@ -262,22 +254,6 @@
                 refreshNodeTodo(payload) {
                     this.$refs.todoList[0].getTodoList();
                 },
-                selectBookmark(bookmarkInfo, collectionUuid, callback) {
-                    doPost(
-                        this,
-                        "{% url "collection:add_bookmark" %}",
-                        {
-                            "collection_uuid": collectionUuid,
-                            "bookmark_uuid": bookmarkInfo.uuid,
-                        },
-                        (response) => {
-                            callback();
-                            this.$refs.bookmarkSelect.$refs.simpleSuggest.$refs.suggestComponent.selected = null;
-                        },
-                        "Bookmark added",
-                        ""
-                    );
-                },
                 selectObjectImage(object, callback) {
                     doPost(
                         this,
@@ -296,18 +272,24 @@
                         ""
                     );
                 },
-                selectObjectCollection(blob, callback, returnArgs) {
+                selectObjectCollection(object, callback, returnArgs) {
+                    let args = {
+                        "collection_uuid": returnArgs.collectionUuid
+                    };
+                    if (object.doctype === "Blob") {
+                        args.blob_uuid = object.uuid;
+                    } else {
+                        args.bookmark_uuid = object.uuid;
+                    }
+
                     doPost(
                         this,
-                        "{% url "collection:add_blob" %}",
-                        {
-                            "collection_uuid": returnArgs.collectionUuid,
-                            "blob_uuid": blob.uuid,
-                        },
+                        "{% url "collection:add_object" %}",
+                        args,
                         (response) => {
                             callback();
                         },
-                        "Blob added",
+                        "Object added",
                         ""
                     );
                 },

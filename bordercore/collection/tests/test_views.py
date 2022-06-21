@@ -187,11 +187,11 @@ def test_collection_get_blob_list(auto_login_user, collection):
     ]
 
 
-def test_add_blob(auto_login_user, collection, blob_image_factory):
+def test_add_object(auto_login_user, collection, blob_image_factory):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("collection:add_blob")
+    url = urls.reverse("collection:add_object")
     resp = client.post(url, {
         "collection_uuid": collection[0].uuid,
         "blob_uuid": blob_image_factory[0].uuid

@@ -15,14 +15,13 @@
                  Keep this here so that the resulting div doesn't get
                  included by the parent's "flex-grow-last" selector.
             -->
-            <bookmark-select
-                ref="bookmarkSearch"
-                search-url="{% url 'bookmark:search' %}"
-                create-bookmark-url="{% url 'bookmark-list' %}"
-                get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
-                @select-bookmark="selectBookmark"
+            <object-select
+                label="_objectSelectBookmark"
+                ref="objectSelectBookmark"
+                search-object-url="{% url 'search:search_names' %}"
+                @select-object="selectBookmark"
             >
-            </bookmark-select>
+            </object-select>
 
             <div class="card-body backdrop-filter" v-cloak>
 
@@ -203,9 +202,6 @@
                 object-uuid="{{ object.uuid }}"
                 model-name="blob.Blob"
                 get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=blob.Blob"
-                create-bookmark-url="{% url 'bookmark-list' %}"
-                search-bookmark-url="{% url 'bookmark:search' %}"
-                get-title-from-url-url="{% url 'drill:get_title_from_url' %}"
                 add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
                 remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"
                 sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
@@ -385,7 +381,7 @@
                     ref="addToCollection"
                     blob-uuid="{{ blob.uuid }}"
                     search-url="{% url 'collection:search' %}?exclude_blob_uuid={{ blob.uuid }}&query="
-                    add-blob-url="{% url 'collection:add_blob' %}"
+                    add-object-url="{% url 'collection:add_object' %}"
                     add-collection-url="{% url 'collection-list' %}"
                     @add-to-collection="getCollectionList"
                 >

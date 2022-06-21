@@ -81,7 +81,7 @@
                 default: "",
                 type: String,
             },
-            addBlobUrl: {
+            addObjectUrl: {
                 default: "",
                 type: String,
             },
@@ -134,7 +134,7 @@
             addBlobToCollection(collectionUuid) {
                 doPost(
                     this,
-                    this.addBlobUrl,
+                    this.addObjectUrl,
                     {
                         "collection_uuid": collectionUuid,
                         "blob_uuid": this.blobUuid,
