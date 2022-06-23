@@ -149,6 +149,7 @@
             </node-image-modal>
 
             <object-select
+                :has-filter="false"
                 label="_objectSelectImage"
                 ref="objectSelectImage"
                 search-object-url="{% url 'search:search_names' %}"
@@ -379,7 +380,7 @@
                 });
 
                 EventBus.$on("object-select-image", (payload) => {
-                    this.$refs.objectSelectImage.openModal(["blob"]);
+                    this.$refs.objectSelectImage.openModal();
                 });
 
                 EventBus.$on("update-layout", (payload) => {

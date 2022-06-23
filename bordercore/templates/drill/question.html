@@ -82,6 +82,8 @@
             </related-bookmarks-list>
 
             <object-select
+                :has-filter="false"
+                :initial-doctypes="['bookmark']"
                 label="_objectSelectBookmark"
                 ref="objectSelectBookmark"
                 search-object-url="{% url 'search:search_names' %}"

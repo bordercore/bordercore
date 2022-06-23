@@ -18,6 +18,8 @@
             <object-select
                 label="_objectSelectBookmark"
                 ref="objectSelectBookmark"
+                :has-filter="false"
+                :initial-doctypes="['bookmark']"
                 search-object-url="{% url 'search:search_names' %}"
                 @select-object="selectBookmark"
             >
@@ -266,6 +268,8 @@
             <object-select
                 label="_blobSelect"
                 ref="blobSelect"
+                :has-filter="false"
+                :initial-doctypes="['blob', 'book', 'document', 'note']"
                 search-object-url="{% url 'search:search_names' %}"
                 @select-object="selectBlob"
             >

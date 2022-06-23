@@ -10,17 +10,11 @@
                     <div class="dropdown-menu-container ms-auto">
                         <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
                             <div slot="dropdown">
-                                <a class="dropdown-item" href="#" @click.prevent="onAddBlob()">
+                                <a class="dropdown-item" href="#" @click.prevent="onAddObject()">
                                     <span>
                                         <font-awesome-icon icon="plus" class="text-primary me-3" />
                                     </span>
-                                    Add Blob
-                                </a>
-                                <a class="dropdown-item" href="#" @click.prevent="onAddBookmark()">
-                                    <span>
-                                        <font-awesome-icon icon="plus" class="text-primary me-3" />
-                                    </span>
-                                    Add Bookmark
+                                    Add Object
                                 </a>
                                 <a class="dropdown-item" href="#" @click.prevent="onEditCollection()">
                                     <span>
@@ -174,11 +168,8 @@
                     "Error getting object list",
                 );
             },
-            onAddBlob() {
-                this.$parent.$parent.$refs.objectSelectCollection.openModal(["blob", "book", "document", "note"], this.getObjectList, {"collectionUuid": this.uuid});
-            },
-            onAddBookmark() {
-                this.$parent.$parent.$refs.objectSelectCollection.openModal(["bookmark"], this.getObjectList, {"collectionUuid": this.uuid});
+            onAddObject() {
+                this.$parent.$parent.$refs.objectSelectCollection.openModal(this.getObjectList, {"collectionUuid": this.uuid});
             },
             onEditCollection() {
                 this.$emit("open-modal-collection-update", this.onUpdateCollection, {name: this.name});

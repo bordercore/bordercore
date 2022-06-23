@@ -39,19 +39,38 @@
                                         >
                                             {{ scope.suggestion.name }}
                                         </div>
-                                        <div v-else class="top-search-suggestion d-flex">
+                                        <div v-else class="object-select-suggestion d-flex">
                                             <div v-if="scope.suggestion.important === 10" class="me-1">
                                                 <font-awesome-icon icon="heart" class="text-danger" />
                                             </div>
                                             <div v-if="scope.suggestion.cover_url" class="cover-image">
                                                 <img class="mw-100" :src="scope.suggestion.cover_url">
                                             </div>
-                                            <div class="ms-2" v-html="boldenSuggestion(scope)" />
+                                            <div v-else>
+                                                {{ scope.suggestion.doctype }}
+                                            </div>
+                                            <div class="d-flex flex-column text-truncate">
+                                                <div class="text-truncate ms-2" v-html="boldenSuggestion(scope)" />
+                                                <div class="date ms-2">
+                                                    {{ scope.suggestion.date }}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </vue-simple-suggest>
                             </div>
                         </form>
+                        <div v-if="hasFilter" class="d-flex mt-2 ms-3">
+                            <div>Filter:</div>
+                            <div class="d-flex align-items-center ms-2">
+                                <input class="object-select-filter" value="bookmarks" type="checkbox" @change="filter">
+                                <label class="ms-2">Bookmarks</label>
+                            </div>
+                            <div class="d-flex align-items-center ms-3">
+                                <input class="object-select-filter" value="blobs" type="checkbox" @change="filter">
+                                <label class="ms-2">Blobs</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -69,6 +88,14 @@
             VueSimpleSuggest,
         },
         props: {
+            hasFilter: {
+                type: Boolean,
+                default: true,
+            },
+            initialDoctypes: {
+                type: Array,
+                default: () => [],
+            },
             label: {
                 type: String,
                 default: "",
@@ -85,8 +112,9 @@
         data() {
             return {
                 name: "",
-                doctypes: ["blob", "book", "document", "note"],
+                doctypes: ["blob", "book", "bookmark", "document", "note"],
                 callback: null,
+                objectSelectFilter: [],
                 returnArgs: null,
                 query: "",
                 autoCompleteStyle: {
@@ -97,6 +125,11 @@
                     suggestItem: "list-group-item",
                 },
             };
+        },
+        mounted() {
+            if (this.initialDoctypes) {
+                this.doctypes = this.initialDoctypes;
+            }
         },
         methods: {
             boldenSuggestion(scope) {
@@ -112,14 +145,25 @@
 
                 let result = this.$refs.suggestComponent.displayProperty(suggestion);
 
-                if (suggestion.doctype) {
-                    result = "<em class='top-search-object-type'>" + suggestion.doctype + "</em> - " + result;
-                }
-
                 if (!query) return result;
 
                 const texts = query.split(/[\s-_/\\|\.]/gm).filter((t) => !!t) || [""];
                 return result.replace(new RegExp("(.*?)(" + texts.join("|") + ")(.*?)", "gi"), "$1<b class='matched'>$2</b>$3");
+            },
+            filter(evt, foo) {
+                this.objectSelectFilter = evt.target.value;
+
+                if (this.objectSelectFilter === "blobs") {
+                    this.doctypes = ["blob", "book", "document", "note"];
+                } else {
+                    this.doctypes = ["bookmark"];
+                }
+
+                document.querySelectorAll(".object-select-filter").forEach(function(checkbox) {
+                    if (checkbox.value !== evt.target.value) {
+                        checkbox.checked = false;
+                    }
+                });
             },
             search(query) {
                 try {
@@ -132,14 +176,12 @@
                 }
             },
             getSearchObjectUrl(query) {
-
                 let url = this.searchObjectUrl;
                 url += "?doc_type=" + this.doctypes.join(",");
                 url += "&term=" + query;
                 return url;
             },
-            openModal(doctypes, callback, returnArgs) {
-                this.doctypes = doctypes;
+            openModal(callback, returnArgs) {
                 this.callback = callback;
                 this.returnArgs = returnArgs;
                 const modal = new Modal(`#modalObjectSelect${this.label}`);

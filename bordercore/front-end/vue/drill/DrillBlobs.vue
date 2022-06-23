@@ -62,13 +62,13 @@
         </div>
 
         <object-select
-            label="_blobSelect"
             ref="blobSelect"
+            :has-filter="false"
+            :initial-doctypes="['blob', 'book', 'document', 'note']"
+            label="_blobSelect"
             :search-object-url="searchBlobUrl"
             @select-object="selectBlob"
-        >
-        </object-select>
-
+        />
     </div>
 </template>
 

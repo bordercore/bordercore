@@ -1,3 +1,4 @@
+import datetime
 import json
 import math
 from urllib.parse import unquote
@@ -866,9 +867,18 @@ def search_names_es(user, search_term, doc_types):
         name = get_name(doc_type_pretty, match["_source"])
 
         if not cache_checker(doc_type_pretty, name):
+            if "date_unixtime" in match["_source"] and match["_source"]["date_unixtime"] is not None:
+                date = datetime.datetime.fromtimestamp(
+                    int(match["_source"]["date_unixtime"])
+                ).strftime(
+                    "%b %Y"
+                )
+            else:
+                date = ""
             matches.append(
                 {
                     "name": name,
+                    "date": date,
                     "doctype": doc_type_pretty,
                     "note": match["_source"].get("note", ""),
                     "uuid": match["_source"].get("uuid"),

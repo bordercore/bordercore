@@ -106,6 +106,31 @@
   color: $close-button-hover-color;
 }
 
+.object-select-suggestion {
+  height: 4.7rem;
+  padding: 0.6rem;
+
+  &:hover {
+    background-color: $selected-bg !important;
+  }
+  /* .vue-simple-suggest.designed .suggestions .suggest-item.hover { */
+  /*   background-color: $selected-bg !important; */
+  /* } */
+
+  .cover-image {
+    max-width: 4.7rem;
+  }
+
+  .date {
+    color: #888;
+    font-size: small;
+  }
+
+  .matched {
+    color: $primary;
+  }
+}
+
 //
 // Fonts
 //
@@ -993,10 +1018,6 @@ pre {
 
   .matched {
     color: $primary;
-  }
-
-  .cover-image {
-    max-width: 4.7rem;
   }
 }
 
