@@ -2,7 +2,15 @@
   "plugins": [
     [
       "prismjs", {
-        "languages": ["css", "javascript", "lisp", "markup", "python", "scala"],
+        "languages": [
+        "css",
+        "javascript",
+        "lisp",
+        "markup",
+        "python",
+        "scala",
+        "shell-session"
+        ],
         "css": true
       }
     ]
