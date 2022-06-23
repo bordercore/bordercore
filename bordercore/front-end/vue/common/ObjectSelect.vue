@@ -4,7 +4,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 id="myModalLabel" class="modal-title">
-                        Select Object
+                        {{ title }}
                     </h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" />
                 </div>
@@ -103,6 +103,10 @@
             maxSuggestions: {
                 type: Number,
                 default: 10,
+            },
+            title: {
+                type: String,
+                default: "Select Object",
             },
             searchObjectUrl: {
                 default: "",

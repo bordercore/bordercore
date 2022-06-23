@@ -76,6 +76,7 @@
             :initial-doctypes="['blob', 'book', 'document', 'note']"
             label="_blobSelect"
             :search-object-url="searchBlobUrl"
+            title="Select Blob"
             @select-object="selectBlob"
         />
     </div>

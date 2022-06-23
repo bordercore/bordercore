@@ -21,6 +21,7 @@
                 :has-filter="false"
                 :initial-doctypes="['bookmark']"
                 search-object-url="{% url 'search:search_names' %}"
+                title="Select Bookmark"
                 @select-object="selectBookmark"
             >
             </object-select>
@@ -271,6 +272,7 @@
                 :has-filter="false"
                 :initial-doctypes="['blob', 'book', 'document', 'note']"
                 search-object-url="{% url 'search:search_names' %}"
+                title="Select Blob"
                 @select-object="selectBlob"
             >
             </object-select>
