@@ -33,6 +33,14 @@
   margin: 0 0 $grid-margin;
 }
 
+// Hover effects
+.hover-1 {
+  transition: 0.3s ease;
+  &:hover {
+    background-color: tint-color(#10163a, 5%) !important;
+  }
+}
+
 .editable-textarea {
   display: none;
   background-color: $gray-900;
@@ -241,7 +249,7 @@ span {
 }
 
 .z-index-positive {
-  z-index: 1;
+  z-index: 10 !important;
 }
 
 // CSS Transitions
@@ -573,6 +581,7 @@ textarea.form-control {
   background-color: #25335b !important;
   border-radius: 1.5rem !important;
   color: #80b5ea !important;
+  line-height: 1.5rem;
   white-space: nowrap;
 
   &:hover {
@@ -981,7 +990,7 @@ pre {
 
 #top-search-filter {
   position: absolute;
-  top: 0.30rem;
+  top: 0.3rem;
   right: 1rem;
   text-align: center;
 
@@ -1067,6 +1076,7 @@ pre {
   //   in the container hierarchy, based on whether an item is a divider or not.
   .list-group-item {
     padding: 0 !important;
+    border: 1px solid #3c4062;
   }
 
   .vue-simple-suggest.designed .suggestions {

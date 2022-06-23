@@ -1,6 +1,6 @@
 <template>
     <div class="hover-target">
-        <card class="backdrop-filter" :class="`node-note-color-${color}`">
+        <card class="backdrop-filter hover-1" :class="`node-note-color-${color}`">
             <template #title-slot>
                 <div v-cloak class="card-title d-flex">
                     <div class="dropdown-height d-flex">

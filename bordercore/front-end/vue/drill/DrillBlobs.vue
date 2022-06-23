@@ -1,15 +1,24 @@
 <template>
     <div>
         <div class="hover-reveal-target">
-            <card class="position-relative backdrop-filter">
+            <card class="position-relative backdrop-filter z-index-positive">
                 <template #title-slot>
                     <div class="d-flex">
                         <div class="card-title d-flex">
                             <font-awesome-icon icon="splotch" class="text-primary me-3 mt-1" />
                             Blobs
                         </div>
-                        <div class="hover-reveal-object button-add-container d-none">
-                            <add-button href="#" :click-handler="chooseBlob" />
+                        <div class="dropdown-menu-container ms-auto">
+                            <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
+                                <div slot="dropdown">
+                                    <a class="dropdown-item" href="#" @click.prevent="chooseBlob">
+                                        <span>
+                                            <font-awesome-icon icon="plus" class="text-primary me-3" />
+                                        </span>
+                                        Add Blob
+                                    </a>
+                                </div>
+                            </drop-down-menu>
                         </div>
                     </div>
                 </template>

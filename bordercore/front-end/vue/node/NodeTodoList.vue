@@ -1,14 +1,23 @@
 <template>
     <div class="hover-reveal-target">
-        <card title="" class="backdrop-filter position-relative">
+        <card title="" class="backdrop-filter hover-1 position-relative">
             <template #title-slot>
                 <div class="card-title d-flex">
                     <div>
                         <font-awesome-icon icon="tasks" class="text-primary me-3" />
                         Todo Tasks
                     </div>
-                    <div class="ms-auto">
-                        <add-button href="#" :click-handler="handleCreateTodo" class="hover-reveal-object button-add-container d-none" />
+                    <div class="dropdown-menu-container ms-auto">
+                        <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
+                            <div slot="dropdown">
+                                <a class="dropdown-item" href="#" @click.prevent="handleCreateTodo">
+                                    <span>
+                                        <font-awesome-icon icon="plus" class="text-primary me-3" />
+                                    </span>
+                                    Add Task
+                                </a>
+                            </div>
+                        </drop-down-menu>
                     </div>
                 </div>
             </template>
