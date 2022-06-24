@@ -842,6 +842,27 @@ def search_names_es(user, search_term, doc_types):
     }
 
     if len(doc_types) > 0:
+
+        if "image" in doc_types:
+            # 'image' isn't an official ES doctype, so treat this
+            #  as a search for a content type that matches an image.
+            doc_types.remove("image")
+            search_object["query"]["function_score"]["query"]["bool"]["must"].append(
+                {
+                    "bool": {
+                        "should": [
+                            {
+                                "wildcard": {
+                                    "content_type": {
+                                        "value": "image/*",
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            )
+
         search_object["query"]["function_score"]["query"]["bool"]["must"].append(
             {
                 "bool": {
