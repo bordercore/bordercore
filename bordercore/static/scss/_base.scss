@@ -121,12 +121,10 @@
   &:hover {
     background-color: $selected-bg !important;
   }
-  /* .vue-simple-suggest.designed .suggestions .suggest-item.hover { */
-  /*   background-color: $selected-bg !important; */
-  /* } */
 
   .cover-image {
-    max-width: 4.7rem;
+    width: calc(4.7rem - 2*0.6rem);
+    height: calc(4.7rem - 2*0.6rem);
   }
 
   .date {
@@ -135,6 +133,15 @@
   }
 
   .matched {
+    color: $primary;
+  }
+}
+
+.object-select-misc-item-below {
+  background-color: tint-color(#262c49, 10%);
+  color: #fff;
+
+  strong {
     color: $primary;
   }
 }

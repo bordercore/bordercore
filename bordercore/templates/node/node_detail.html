@@ -279,10 +279,10 @@
                     let args = {
                         "collection_uuid": returnArgs.collectionUuid
                     };
-                    if (object.doctype === "Blob") {
-                        args.blob_uuid = object.uuid;
-                    } else {
+                    if (object.doctype === "Bookmark") {
                         args.bookmark_uuid = object.uuid;
+                    } else {
+                        args.blob_uuid = object.uuid;
                     }
 
                     doPost(

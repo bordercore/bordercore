@@ -32,27 +32,23 @@
                                     @select="select"
                                 >
                                     <div slot="suggestion-item" slot-scope="scope">
-                                        <!-- @*event*.stop="" handlers are needed to prevent the splitter from being selected -->
-                                        <div v-if="scope.suggestion.splitter"
-                                             class="top-search-splitter"
-                                             @click.stop=""
-                                        >
-                                            {{ scope.suggestion.name }}
-                                        </div>
-                                        <div v-else class="object-select-suggestion d-flex">
-                                            <div v-if="scope.suggestion.important === 10" class="me-1">
-                                                <font-awesome-icon icon="heart" class="text-danger" />
-                                            </div>
+                                        <div class="object-select-suggestion d-flex">
                                             <div v-if="scope.suggestion.cover_url" class="cover-image">
-                                                <img class="mw-100" :src="scope.suggestion.cover_url">
+                                                <img class="mh-100 mw-100" :src="scope.suggestion.cover_url">
                                             </div>
-                                            <div v-else>
-                                                {{ scope.suggestion.doctype }}
+                                            <div v-else-if="scope.suggestion.doctype === 'Note'" class="cover-image">
+                                                <font-awesome-icon icon="sticky-note" class="fa-3x w-100 h-100 text-info" />
+                                            </div>
+                                            <div v-else-if="scope.suggestion.doctype === 'Document'" class="cover-image">
+                                                <font-awesome-icon icon="fa-copy" class="fa-lg text-primary" />
                                             </div>
                                             <div class="d-flex flex-column text-truncate">
                                                 <div class="text-truncate ms-2" v-html="boldenSuggestion(scope)" />
                                                 <div class="date ms-2">
                                                     {{ scope.suggestion.date }}
+                                                    <span v-if="scope.suggestion.important === 10" class="ms-2">
+                                                        <font-awesome-icon icon="heart" class="text-danger" />
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -137,7 +133,7 @@
             };
         },
         mounted() {
-            if (this.initialDoctypes) {
+            if (this.initialDoctypes.length > 0) {
                 this.doctypes = this.initialDoctypes;
             }
         },
@@ -153,20 +149,25 @@
 
                 const {suggestion, query} = scope;
 
-                let result = this.$refs.suggestComponent.displayProperty(suggestion);
+                const result = this.$refs.suggestComponent.displayProperty(suggestion);
 
                 if (!query) return result;
 
                 const texts = query.split(/[\s-_/\\|\.]/gm).filter((t) => !!t) || [""];
                 return result.replace(new RegExp("(.*?)(" + texts.join("|") + ")(.*?)", "gi"), "$1<b class='matched'>$2</b>$3");
             },
-            filter(evt, foo) {
+            filter(evt) {
                 this.objectSelectFilter = evt.target.value;
 
-                if (this.objectSelectFilter === "blobs") {
-                    this.doctypes = ["blob", "book", "document", "note"];
+                if (evt.target.checked === false) {
+                    // Remove the filter if we're unchecking an option
+                    this.doctypes = ["blob", "book", "bookmark", "document", "note"];
                 } else {
-                    this.doctypes = ["bookmark"];
+                    if (this.objectSelectFilter === "blobs") {
+                        this.doctypes = ["blob", "book", "document", "note"];
+                    } else {
+                        this.doctypes = ["bookmark"];
+                    }
                 }
 
                 document.querySelectorAll(".object-select-filter").forEach(function(checkbox) {
