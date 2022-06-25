@@ -172,13 +172,17 @@ class Bookmark(TimeStampedModel):
 
         count, errors = helpers.bulk(es, [self.elasticsearch_document])
 
+    def thumbnail_url_static(uuid, url):
+        prefix = f"{settings.COVER_URL}bookmarks"
+
+        if url.startswith("https://www.youtube.com/watch"):
+            return f"{prefix}/{uuid}.jpg"
+        else:
+            return f"{prefix}/{uuid}-small.png"
+
     @property
     def thumbnail_url(self):
-        base = f"{settings.COVER_URL}bookmarks"
-        if self.url.startswith("https://www.youtube.com/watch"):
-            return f"{base}/{self.uuid}.jpg"
-        else:
-            return f"{base}/{self.uuid}-small.png"
+        return Bookmark.thumbnail_url_static(self.uuid, self.url)
 
     @property
     def video_duration(self):

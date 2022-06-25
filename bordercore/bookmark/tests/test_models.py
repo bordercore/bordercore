@@ -1,5 +1,6 @@
 import pytest
 
+from bookmark.models import Bookmark
 from bookmark.tests.factories import BookmarkFactory
 
 pytestmark = pytest.mark.django_db
@@ -12,6 +13,16 @@ def test_get_tags(bookmark):
 
     tags = bookmark[1].get_tags()
     assert tags == "django"
+
+
+def test_bookmark_thumbnail_url_static(bookmark):
+
+    assert Bookmark.thumbnail_url_static(bookmark[0].uuid, bookmark[0].url) == f"https://blobs.bordercore.com/bookmarks/{bookmark[0].uuid}-small.png"
+
+
+def test_bookmark_thumbnail_url(bookmark):
+
+    assert bookmark[0].thumbnail_url == f"https://blobs.bordercore.com/bookmarks/{bookmark[0].uuid}-small.png"
 
 
 def test_get_favicon_url(monkeypatch_bookmark):
