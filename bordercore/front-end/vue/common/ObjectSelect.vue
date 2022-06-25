@@ -57,6 +57,11 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div v-if="suggestionsFound > maxSuggestions" slot="misc-item-below" slot-scope="{ suggestions }" class="object-select-misc-item-below p-2">
+                                        <span>
+                                            <strong>{{ suggestionsFound - maxSuggestions }}</strong> other matches
+                                        </span>
+                                    </div>
                                 </vue-simple-suggest>
                             </div>
                         </form>
@@ -128,6 +133,7 @@
                     suggestions: "position-absolute list-group z-1000",
                     suggestItem: "list-group-item",
                 },
+                suggestionsFound: 0,
             };
         },
         mounted() {
@@ -170,9 +176,11 @@
                 });
             },
             search(query) {
+                this.suggestionsFound = 0;
                 try {
                     return axios.get(this.getSearchObjectUrl(query))
                                 .then((response) => {
+                                    this.suggestionsFound = response.data.length;
                                     return response.data;
                                 });
                 } catch (error) {
