@@ -15,6 +15,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
 from blob.models import Blob
+from bookmark.models import Bookmark
 from lib.time_utils import get_date_from_pattern, get_relative_date
 from lib.util import (get_elasticsearch_connection, get_pagination_range,
                       truncate)
@@ -923,6 +924,11 @@ def search_names_es(user, search_term, doc_types):
                     match["_source"].get("uuid"),
                     match["_source"].get("filename"),
                     size="small"
+                )
+            if doc_type_pretty == "Bookmark":
+                matches[-1]["cover_url"] = Bookmark.thumbnail_url_static(
+                    match["_source"].get("uuid"),
+                    match["_source"].get("url"),
                 )
 
     return matches

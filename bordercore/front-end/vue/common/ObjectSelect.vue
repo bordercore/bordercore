@@ -42,6 +42,9 @@
                                             <div v-else-if="scope.suggestion.doctype === 'Document'" class="cover-image">
                                                 <font-awesome-icon icon="fa-copy" class="fa-lg text-primary" />
                                             </div>
+                                            <div v-else-if="scope.suggestion.doctype === 'Bookmark'" class="cover-image">
+                                                <font-awesome-icon icon="bookmark" class="fa-3x w-100 h-100 text-primary" />
+                                            </div>
                                             <div class="d-flex flex-column text-truncate">
                                                 <div class="text-truncate ms-2" v-html="boldenSuggestion(scope)" />
                                                 <div class="date ms-2">
