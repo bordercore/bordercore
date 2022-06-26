@@ -67,12 +67,12 @@
                         <div v-if="hasFilter" class="d-flex mt-2 ms-3">
                             <div>Filter:</div>
                             <div class="d-flex align-items-center ms-2">
-                                <input class="object-select-filter" value="bookmarks" type="checkbox" @change="filter">
-                                <label class="ms-2">Bookmarks</label>
+                                <input class="object-select-filter" value="bookmarks" type="checkbox" @change="onFilterChange">
+                                <label class="ms-2" @click="onFilterLabelClick">Bookmarks</label>
                             </div>
                             <div class="d-flex align-items-center ms-3">
-                                <input class="object-select-filter" value="blobs" type="checkbox" @change="filter">
-                                <label class="ms-2">Blobs</label>
+                                <input class="object-select-filter" value="blobs" type="checkbox" @change="onFilterChange">
+                                <label class="ms-2" @click="onFilterLabelClick">Blobs</label>
                             </div>
                         </div>
                     </div>
@@ -159,10 +159,24 @@
                 const texts = query.split(/[\s-_/\\|\.]/gm).filter((t) => !!t) || [""];
                 return result.replace(new RegExp("(.*?)(" + texts.join("|") + ")(.*?)", "gi"), "$1<b class='matched'>$2</b>$3");
             },
-            filter(evt) {
-                this.objectSelectFilter = evt.target.value;
+            onFilterLabelClick(evt) {
+                const input = evt.target.parentElement.querySelector("input");
+                input.click();
+                this.onFilterChange(input, true);
+            },
+            onFilterChange(evt, isElement) {
+                let target = null;
+                if (!isElement) {
+                    // We were triggered by clicking the checkbox
+                    target = evt.target;
+                } else {
+                    // We were triggered by clicking the label and then
+                    //  called by onFilterLabelClick()
+                    target = evt;
+                }
+                this.objectSelectFilter = target.value;
 
-                if (evt.target.checked === false) {
+                if (target.checked === false) {
                     // Remove the filter if we're unchecking an option
                     this.doctypes = ["blob", "book", "bookmark", "document", "note"];
                 } else {
@@ -174,7 +188,7 @@
                 }
 
                 document.querySelectorAll(".object-select-filter").forEach(function(checkbox) {
-                    if (checkbox.value !== evt.target.value) {
+                    if (checkbox.value !== target.value) {
                         checkbox.checked = false;
                     }
                 });
