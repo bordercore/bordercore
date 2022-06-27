@@ -7,48 +7,81 @@
     <div id="vue-app">
 
         <div class="row card-grid">
-            <div class="col-lg-12 d-flex">
+            <div class="col-lg-12 d-flex align-items-center">
 
                 <h1>Collection List</h1>
+                <div class="d-flex align-items-center ms-auto">
+                    <Transition name="fade">
+                        <div v-cloak v-if="showFilterInput" id="collection-filter" class="me-3">
+                            <input type="text" class="form-control" size="20" placeholder="Name" @blur="onBlur" @keyup.enter="onFilterEnter">
+                        </div>
+                    </Transition>
 
-                <div class="me-2 ms-auto" @click="onClickCreate">
-                    <add-button :href="'#'"></add-button>
+                    <div v-if="filter" class="tag label label-info d-flex align-items-center me-3">
+                        <div v-cloak>Filter: <span class="text-white">[[ filter ]]</span></div>
+                        <div>
+                            <a class="ms-1" href="#" @click.prevent="onClickRemoveFilter">
+                                <font-awesome-icon icon="times" class="text-primary" />
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="me-5" @click="onFilterClick">
+                        <font-awesome-icon icon="search" class="glow text-emphasis" />
+                    </div>
+
+                    <drop-down-menu class="my-auto">
+                        <div slot="dropdown" v-cloak>
+                            <li>
+                                <a class="dropdown-item" href="#" @click.prevent="onClickCreate">
+                                    <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                                        Create Collection
+                                </a>
+                            </li>
+                        </div>
+                    </drop-down-menu>
+
                 </div>
-
             </div>
-        </div>
 
-        <div class="card-grid ms-3">
-            <div class="d-flex flex-column">
-                <div class="d-flex flex-wrap">
-                    <div v-for="collection in items" class="collection-container text-center hoverable p-3" @click="onClickCollection(collection.url)">
-                        <div class="position-relative collection mx-auto">
-                            <img :src="collection.cover_url" />
-                            <div class="collection-cover-container position-absolute" v-html="getBlobCount(collection.num_blobs)">
+            <div class="col-lg-12">
+                <hr class="collection-list-divider mt-0" />
+            </div>
+
+            <div class="card-grid ms-3">
+                <div class="d-flex flex-column">
+                    <div class="d-flex flex-wrap">
+                        <div v-for="collection, index in getCollectionList()" class="collection-container text-center hoverable p-3" @click="onClickCollection(collection.url)">
+                            <div class="position-relative collection mx-auto">
+                                <img :src="collection.cover_url" />
+                                <div class="collection-cover-container position-absolute" v-html="getBlobCount(collection.num_blobs)">
+                                </div>
+                            </div>
+                            <div class="text-truncate">
+                                <a :href="collection.url">[[ collection.name ]]</a>
                             </div>
                         </div>
-                        <div class="text-truncate">
-                            <a :href="collection.url">[[ collection.name ]]</a>
+                        <div v-if="getCollectionList().length === 0" class="notice-big px-3" v-cloak>
+                        No collections found
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="card-grid ms-3">
+            <div class="card-grid ms-3">
 
-            <form action="{% url 'collection:list' %}" method="post" id="form-collection-edit">
+                <form action="{% url 'collection:list' %}" method="post" id="form-collection-edit">
                 {% csrf_token %}
-                <div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h4 class="modal-title" id="myModalLabel">
-                                    <span id="action-type">Create</span> Collection
-                                </h4>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
+                    <div class="modal fade" id="modalAdd" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="myModalLabel">
+                                        <span id="action-type">Create</span> Collection
+                                    </h4>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
                     {% for field in form %}
                         <div class="{% if field.errors %} error{% endif %} row mb-3">
                             <label class="col-lg-3 col-form-label" for="inputTitle">{{ field.label }}</label>
@@ -77,15 +110,17 @@
                         </div>
                     {% endfor %}
 
-                            </div>
-                            <div class="modal-footer">
-                                <input id="btn-action" class="btn btn-primary" type="submit" name="Go" value="Create" />
-                            </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <input id="btn-action" class="btn btn-primary" type="submit" name="Go" value="Create" />
+                                </div>
 
+                            </div>
                         </div>
                     </div>
-                </div>
-            </form>
+                </form>
+
+            </div>
 
         </div>
 
@@ -105,10 +140,23 @@
             el: "#vue-app",
             data() {
                 return {
+                    filter: null,
                     items: JSON.parse(document.getElementById("collection_list").textContent),
+                    showFilterInput: false,
                 };
             },
             methods: {
+                getCollectionList() {
+                    if (this.filter) {
+                        const regex = new RegExp(this.filter, "i");
+                        return this.items.filter((c) => !c.name.search(regex));
+                    } else {
+                        return this.items;
+                    }
+                },
+                onBlur() {
+                    this.showFilterInput = false;
+                },
                 onClickCreate(evt) {
                     document.getElementById("id_name").value = "";
                     document.getElementById("id_description").value = "";
@@ -125,8 +173,23 @@
                 onClickCollection(url) {
                     window.location = url;
                 },
+                onClickRemoveFilter() {
+                    this.filter = null;
+                },
+                onFilterClick() {
+                    this.showFilterInput = true;
+                    setTimeout( () => {
+                        const el = document.getElementById("collection-filter");
+                        el.querySelector("input").focus();
+                    }, 100);
+                },
                 getBlobCount(count) {
                     return count + " " + pluralize("blob", count);
+                },
+                onFilterEnter() {
+                    this.showFilterInput = false;
+                    const el = document.getElementById("collection-filter");
+                    this.filter = el.querySelector("input").value;
                 },
             },
         });
