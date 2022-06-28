@@ -576,7 +576,7 @@
                 togglePinStatus() {
                     let formAction = null;
                     if (this.getPinnedMenuItem() === "Pin") {
-                        document.getElementById("add-to-remote-from-pinned-tagname").value = this.$refs.search.$refs.simpleSuggest.$refs.suggestComponent.text;
+                        document.getElementById("add-to-remote-from-pinned-tagname").value = this.$store.state.selectedTagName;
                         formAction = "{% url 'tag:pin' %}";
                     } else {
                         document.getElementById("add-to-remote-from-pinned-tagname").value = this.$store.state.selectedTagName;
