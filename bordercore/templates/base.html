@@ -49,8 +49,8 @@
 
                         <div id="top-bar" class="row">
 
-                            <div class="col-lg-8 card-grid my-auto text-truncate" id="top-title">
-                                <span v-if="$store.state.collapsed" v-cloak>Bordercore :: </span>{% block title %} {% endblock %}
+                            <div class="col-lg-8 card-grid my-auto text-truncate" id="top-title" v-cloak>
+                                <span v-if="$store.state.collapsed">Bordercore :: </span>{% block title %} {% endblock %}
                             </div>
 
                             <div class="col-lg-4 my-auto d-flex justify-content-end align-items-center">
