@@ -3,6 +3,6 @@ certifi==2019.6.16
 elasticsearch==7.0.5
 git+https://github.com/bordercore/elasticsearch-dsl-py.git@7.1.0
 lxml==4.6.5
-PyPDF2==1.26.0
+PyPDF2==1.27.5
 python-magic==0.4.15
 requests-aws4auth==0.9
