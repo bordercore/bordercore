@@ -149,8 +149,11 @@
                             <node-quote
                                 ref="quote"
                                 node-uuid="{{ object.uuid }}"
+                                :quote-color="obj.color"
                                 get-quote-list-url="{% url "quote-list" %}"
+                                :set-quote-color-url="'{% url "node:set_quote_color" %}'"
                                 @remove-quote="onRemoveQuote"
+                                @open-modal-quote-update="openModalQuoteUpdate"
                             >
                             </node-todo>
                         </div>
@@ -166,6 +169,9 @@
 
             <node-image-modal ref="noteImage">
             </node-image-modal>
+
+            <node-quote-modal ref="quoteUpdate">
+            </node-quote-modal>
 
             <object-select
                 :has-filter="false"
@@ -378,6 +384,9 @@
                 },
                 openModalNoteImage(data) {
                     this.$refs.noteImage.openModal(data);
+                },
+                openModalQuoteUpdate(callback, data) {
+                    this.$refs.quoteUpdate.openModal("Update", callback, data);
                 },
                 onDeleteNote(noteUuid) {
                     doPost(

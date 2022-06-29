@@ -354,3 +354,19 @@ def remove_quote(request):
     }
 
     return JsonResponse(response)
+
+
+@login_required
+def set_quote_color(request):
+
+    node_uuid = request.POST["node_uuid"]
+    color = int(request.POST["color"])
+
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    node.set_quote_color(color)
+
+    response = {
+        "status": "OK",
+    }
+
+    return JsonResponse(response)

@@ -185,6 +185,15 @@ class Node(TimeStampedModel):
         self.layout = layout
         self.save()
 
+    def set_quote_color(self, color):
+
+        for column in self.layout:
+            for row in column:
+                if row["type"] == "quote":
+                    row["color"] = color
+
+        self.save()
+
 
 class SortOrderNodeTodo(SortOrderMixin):
 

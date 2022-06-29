@@ -1,6 +1,6 @@
 <template>
     <div class="hover-target" @mouseover="hover = true" @mouseleave="hover = false">
-        <card class="backdrop-filter hover-1">
+        <card class="backdrop-filter hover-1" :class="`node-note-color-${color}`">
             <template #title-slot>
                 <div class="dropdown-height d-flex">
                     <div v-cloak class="card-title d-flex">
@@ -12,6 +12,12 @@
                     <div class="ms-auto">
                         <drop-down-menu :show-on-hover="true">
                             <div slot="dropdown">
+                                <a class="dropdown-item" href="#" @click.prevent="onUpdateQuote()">
+                                    <span>
+                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
+                                    </span>
+                                    Update quote
+                                </a>
                                 <a class="dropdown-item" href="#" @click.prevent="onRemoveQuote">
                                     <span>
                                         <font-awesome-icon icon="plus" class="text-primary me-3" />
@@ -44,6 +50,10 @@
 
         name: "NodeQuote",
         props: {
+            quoteColor: {
+                type: Number,
+                default: 1,
+            },
             nodeUuid: {
                 type: String,
                 default: "",
@@ -52,9 +62,14 @@
                 type: String,
                 default: "",
             },
+            setQuoteColorUrl: {
+                type: String,
+                default: "",
+            },
         },
         data() {
             return {
+                color: null,
                 currentQuote: null,
                 hover: false,
                 quoteList: [],
@@ -62,6 +77,8 @@
         },
         mounted() {
             this.getQuoteList();
+
+            this.color = this.quoteColor;
 
             const self = this;
 
@@ -102,11 +119,31 @@
             onRemoveQuote() {
                 this.$emit("remove-quote");
             },
+            onUpdateQuote() {
+                this.$emit("open-modal-quote-update", this.updateQuote, {"note": this.note, "color": this.color});
+            },
             previousQuote() {
                 if (this.currentQuote == 0) {
                     this.currentQuote = this.quoteList.length - 1;
                 } else {
                     this.currentQuote -= 1;
+                }
+            },
+            updateQuote(color) {
+                if (color !== this.color) {
+                    doPost(
+                        this,
+                        this.setQuoteColorUrl,
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                            "color": color,
+                        },
+                        (response) => {
+                            this.color = color;
+                        },
+                        "",
+                        "",
+                    );
                 }
             },
         },
