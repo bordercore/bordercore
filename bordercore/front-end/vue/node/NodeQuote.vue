@@ -4,7 +4,10 @@
             <template #title-slot>
                 <div class="dropdown-height d-flex">
                     <div v-cloak class="card-title d-flex">
-                        Quote
+                        <div>
+                            <font-awesome-icon icon="quote-left" class="text-primary me-3" />
+                            Quote
+                        </div>
                     </div>
                     <div class="ms-auto">
                         <drop-down-menu :show-on-hover="true">
