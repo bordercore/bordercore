@@ -11,6 +11,7 @@ from collection.models import Collection
 from drill.models import Question
 from feed.models import Feed, FeedItem
 from music.models import Album, Playlist, PlaylistItem, Song, SongSource
+from quote.models import Quote
 from tag.models import Tag, TagAlias
 from todo.models import Todo
 
@@ -19,8 +20,9 @@ from .serializers import (AlbumSerializer, BlobSerializer,
                           CollectionSerializer, FeedItemSerializer,
                           FeedSerializer, PlaylistItemSerializer,
                           PlaylistSerializer, QuestionSerializer,
-                          SongSerializer, SongSourceSerializer,
-                          TagAliasSerializer, TagSerializer, TodoSerializer)
+                          QuoteSerializer, SongSerializer,
+                          SongSourceSerializer, TagAliasSerializer,
+                          TagSerializer, TodoSerializer)
 
 
 class AlbumViewSet(viewsets.ModelViewSet):
@@ -216,6 +218,15 @@ class QuestionViewSet(viewsets.ModelViewSet):
         ).prefetch_related(
             "tags"
         )
+
+
+class QuoteViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = QuoteSerializer
+    lookup_field = "uuid"
+
+    def get_queryset(self):
+        return Quote.objects.filter(user=self.request.user)
 
 
 class SongViewSet(viewsets.ModelViewSet):

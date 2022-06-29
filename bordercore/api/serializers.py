@@ -9,6 +9,7 @@ from collection.models import Collection
 from drill.models import Question
 from feed.models import Feed, FeedItem
 from music.models import Album, Playlist, PlaylistItem, Song, SongSource
+from quote.models import Quote
 from tag.models import Tag, TagAlias
 from todo.models import Todo
 
@@ -143,6 +144,12 @@ class QuestionSerializer(serializers.ModelSerializer):
         model = Question
         fields = ["answer", "efactor", "interval", "last_reviewed",
                   "question", "tags", "times_failed", "user"]
+
+
+class QuoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Quote
+        fields = ["quote", "source", "user"]
 
 
 class SongSerializer(serializers.ModelSerializer):
