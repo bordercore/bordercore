@@ -326,6 +326,10 @@
             methods: {
                 setMode(mode) {
                     this.mode = mode;
+                    this.$nextTick(() => {
+                        MathJax.typeset();
+                        Prism.highlightAll();
+                    });
                 },
                 getQuestion() {
                     return markdown.render("{{ question.question|escapejs }}");
