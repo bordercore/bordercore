@@ -154,12 +154,33 @@ class Node(TimeStampedModel):
         self.layout = layout
         self.save()
 
-
     def remove_image(self, image_uuid):
 
         layout = self.layout
         for i, col in enumerate(layout):
             layout[i] = [x for x in col if "uuid" not in x or x["uuid"] != str(image_uuid)]
+
+        self.layout = layout
+        self.save()
+
+    def add_quote(self):
+
+        layout = self.layout
+        layout[0].insert(
+            0,
+            {
+                "type": "quote",
+                "color": 1
+            }
+        )
+        self.layout = layout
+        self.save()
+
+    def remove_quote(self):
+
+        layout = self.layout
+        for i, col in enumerate(layout):
+            layout[i] = [x for x in col if x["type"] != "quote"]
 
         self.layout = layout
         self.save()

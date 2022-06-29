@@ -84,5 +84,15 @@ urlpatterns = [
         route="image/remove",
         view=views.remove_image,
         name="remove_image"
-    )
+    ),
+    path(
+        route="quote/add/",
+        view=views.add_quote,
+        name="add_quote"
+    ),
+    path(
+        route="quote/remove/",
+        view=views.remove_quote,
+        name="remove_quote"
+    ),
 ]

@@ -322,3 +322,35 @@ def remove_image(request):
     }
 
     return JsonResponse(response)
+
+
+@login_required
+def add_quote(request):
+
+    node_uuid = request.POST["node_uuid"]
+
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    node.add_quote()
+
+    response = {
+        "status": "OK",
+        "layout": json.dumps(node.layout)
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def remove_quote(request):
+
+    node_uuid = request.POST["node_uuid"]
+
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    node.remove_quote()
+
+    response = {
+        "status": "OK",
+        "layout": json.dumps(node.layout)
+    }
+
+    return JsonResponse(response)

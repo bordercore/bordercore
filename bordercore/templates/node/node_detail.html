@@ -39,13 +39,23 @@
                         </span>
                     </a>
                 </li>
+                <li>
                     <a class="dropdown-item" href="#" @click.prevent="onAddImage">
                         <span v-cloak>
                             <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
                             Add image
                         </span>
                     </a>
-                    <li>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="#" @click.prevent="onAddQuote">
+                        <span v-cloak>
+                            <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                            Add quote
+                        </span>
+                    </a>
+                </li>
+                <li>
                     <a class="dropdown-item" href="#" @click.prevent="onEditMode">
                         <span v-cloak>
                             <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>
@@ -135,6 +145,15 @@
                             >
                             </node-image>
                         </div>
+                        <div v-else-if="obj.type === 'quote'" :draggable="$store.state.editLayout" key="quote">
+                            <node-quote
+                                ref="quote"
+                                node-uuid="{{ object.uuid }}"
+                                get-quote-list-url="{% url "quote-list" %}"
+                                @remove-quote="onRemoveQuote"
+                            >
+                            </node-todo>
+                        </div>
                     </div>
                 </draggable>
             </div>
@@ -199,6 +218,20 @@
                 },
                 onAddImage() {
                     EventBus.$emit("object-select-image");
+                },
+                onAddQuote() {
+                    doPost(
+                        this,
+                        "{% url "node:add_quote" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                        },
+                        (response) => {
+                            EventBus.$emit("update-layout", response.data.layout);
+                        },
+                        "Quote added",
+                        ""
+                    );
                 },
                 onAddNote() {
                     doPost(
@@ -322,6 +355,19 @@
                             this.layout = JSON.parse(response.data.layout);
                         },
                         "Image removed",
+                    );
+                },
+                onRemoveQuote() {
+                    doPost(
+                        this,
+                        "{% url "node:remove_quote" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                        },
+                        (response) => {
+                            this.layout = JSON.parse(response.data.layout);
+                        },
+                        "Quote removed",
                     );
                 },
                 openModalCollectionUpdate(callback, data) {

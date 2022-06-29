@@ -191,6 +191,9 @@ Vue.component("NodeImage", NodeImage);
 import NodeImageModal from "./vue/node/NodeImageModal.vue";
 Vue.component("NodeImageModal", NodeImageModal);
 
+import NodeQuote from "./vue/node/NodeQuote.vue";
+Vue.component("NodeQuote", NodeQuote);
+
 import NodeNote from "./vue/node/NodeNote.vue";
 Vue.component("NodeNote", NodeNote);
 
