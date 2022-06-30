@@ -194,6 +194,15 @@ class Node(TimeStampedModel):
 
         self.save()
 
+    def set_quote(self, quote_uuid):
+
+        for column in self.layout:
+            for row in column:
+                if row["type"] == "quote":
+                    row["uuid"] = str(quote_uuid)
+
+        self.save()
+
 
 class SortOrderNodeTodo(SortOrderMixin):
 

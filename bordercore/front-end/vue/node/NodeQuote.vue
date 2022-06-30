@@ -50,15 +50,23 @@
 
         name: "NodeQuote",
         props: {
-            quoteColor: {
-                type: Number,
-                default: 1,
-            },
             nodeUuid: {
                 type: String,
                 default: "",
             },
-            getRandomQuoteUrl: {
+            initialQuoteUuid: {
+                type: String,
+                default: "",
+            },
+            quoteColor: {
+                type: Number,
+                default: 1,
+            },
+            getAndSetQuoteUrl: {
+                type: String,
+                default: "",
+            },
+            getQuoteUrl: {
                 type: String,
                 default: "",
             },
@@ -70,18 +78,20 @@
         data() {
             return {
                 color: null,
+                quoteUuid: null,
                 quote: null,
                 hover: false,
             };
         },
         mounted() {
-            this.getRandomQuote();
-
             this.color = this.quoteColor;
+            this.quoteUuid = this.initialQuoteUuid;
+
+            this.getQuote();
 
             const self = this;
 
-            hotkeys("left,right", function(event, handler) {
+            hotkeys("right", function(event, handler) {
                 switch (handler.key) {
                     case "right":
                         if (self.hover) {
@@ -92,14 +102,28 @@
             });
         },
         methods: {
-            getRandomQuote() {
+            getQuote() {
                 doGet(
                     this,
-                    this.getRandomQuoteUrl,
+                    this.getQuoteUrl.replace("00000000-0000-0000-0000-000000000000", this.quoteUuid),
+                    (response) => {
+                        this.quote = response.data;
+                    },
+                    "Error getting quote",
+                );
+            },
+            getRandomQuote() {
+                doPost(
+                    this,
+                    this.getAndSetQuoteUrl,
+                    {
+                        "node_uuid": this.$store.state.nodeUuid,
+                    },
                     (response) => {
                         this.quote = response.data.quote;
                     },
-                    "Error getting quotes",
+                    "",
+                    "",
                 );
             },
             onRemoveQuote() {

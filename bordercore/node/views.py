@@ -12,6 +12,7 @@ from django.views.generic.list import ListView
 
 from lib.mixins import FormRequestMixin
 from node.forms import NodeForm
+from quote.models import Quote
 from todo.models import Todo
 
 from .models import Node, SortOrderNodeTodo
@@ -367,6 +368,28 @@ def set_quote_color(request):
 
     response = {
         "status": "OK",
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def get_quote(request):
+
+    node_uuid = request.POST["node_uuid"]
+
+    quote = Quote.objects.all().order_by("?")[0]
+
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    node.set_quote(quote.uuid)
+
+    response = {
+        "status": "OK",
+        "quote": {
+            "uuid": quote.uuid,
+            "quote": quote.quote,
+            "source": quote.source
+        },
     }
 
     return JsonResponse(response)

@@ -100,4 +100,9 @@ urlpatterns = [
         view=views.set_quote_color,
         name="set_quote_color"
     ),
+    path(
+        route="quote/get/",
+        view=views.get_quote,
+        name="get_quote"
+    ),
 ]
