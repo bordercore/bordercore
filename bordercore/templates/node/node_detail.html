@@ -150,7 +150,7 @@
                                 ref="quote"
                                 node-uuid="{{ object.uuid }}"
                                 :quote-color="obj.color"
-                                get-quote-list-url="{% url "quote-list" %}"
+                                get-random-quote-url="{% url "quote:random" %}"
                                 :set-quote-color-url="'{% url "node:set_quote_color" %}'"
                                 @remove-quote="onRemoveQuote"
                                 @open-modal-quote-update="openModalQuoteUpdate"

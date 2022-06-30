@@ -31,12 +31,12 @@
             </template>
             <template #content>
                 <hr class="filter-divider mt-0">
-                <div v-if="quoteList.length > 0">
+                <div v-if="quote">
                     <div>
-                        {{ quoteList[currentQuote].quote }}
+                        {{ quote.quote }}
                     </div>
                     <div class="text-primary text-smaller">
-                        {{ quoteList[currentQuote].source }}
+                        {{ quote.source }}
                     </div>
                 </div>
             </template>
@@ -58,7 +58,7 @@
                 type: String,
                 default: "",
             },
-            getQuoteListUrl: {
+            getRandomQuoteUrl: {
                 type: String,
                 default: "",
             },
@@ -70,13 +70,12 @@
         data() {
             return {
                 color: null,
-                currentQuote: null,
+                quote: null,
                 hover: false,
-                quoteList: [],
             };
         },
         mounted() {
-            this.getQuoteList();
+            this.getRandomQuote();
 
             this.color = this.quoteColor;
 
@@ -84,50 +83,30 @@
 
             hotkeys("left,right", function(event, handler) {
                 switch (handler.key) {
-                    case "left":
-                        if (self.hover) {
-                            self.previousQuote();
-                        }
-                        break;
                     case "right":
                         if (self.hover) {
-                            self.nextQuote();
+                            self.getRandomQuote();
                         }
                         break;
                 }
             });
         },
         methods: {
-            getQuoteList() {
+            getRandomQuote() {
                 doGet(
                     this,
-                    this.getQuoteListUrl,
+                    this.getRandomQuoteUrl,
                     (response) => {
-                        this.quoteList = response.data.results;
-                        this.currentQuote = Math.floor(Math.random() * this.quoteList.length);
+                        this.quote = response.data.quote;
                     },
                     "Error getting quotes",
                 );
-            },
-            nextQuote() {
-                if (this.currentQuote == this.quoteList.length - 1) {
-                    this.currentQuote = 0;
-                } else {
-                    this.currentQuote += 1;
-                }
             },
             onRemoveQuote() {
                 this.$emit("remove-quote");
             },
             onUpdateQuote() {
                 this.$emit("open-modal-quote-update", this.updateQuote, {"note": this.note, "color": this.color});
-            },
-            previousQuote() {
-                if (this.currentQuote == 0) {
-                    this.currentQuote = this.quoteList.length - 1;
-                } else {
-                    this.currentQuote -= 1;
-                }
             },
             updateQuote(color) {
                 if (color !== this.color) {
