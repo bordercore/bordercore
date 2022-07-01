@@ -166,7 +166,7 @@
             <collection-object-list-modal ref="collectionUpdate">
             </collection-object-list-modal>
 
-            <node-note-modal ref="noteUpdate">
+            <node-note-modal ref="noteUpdate" ref="noteUpdate">
             </node-note-modal>
 
             <node-image-modal ref="noteImage">
@@ -242,18 +242,7 @@
                     );
                 },
                 onAddNote() {
-                    doPost(
-                        this,
-                        "{% url "node:add_note" %}",
-                        {
-                            "node_uuid": this.$store.state.nodeUuid,
-                        },
-                        (response) => {
-                            EventBus.$emit("update-layout", response.data.layout);
-                        },
-                        "Note added",
-                        ""
-                    );
+                    EventBus.$emit("open-note-modal");
                 },
                 onEditMode() {
                     this.$store.state.editLayout = !this.$store.state.editLayout;
@@ -289,6 +278,24 @@
                             EventBus.$emit("update-layout", response.data.layout);
                         },
                         "Collection added",
+                        ""
+                    );
+                },
+                addNote() {
+                    const name = document.getElementById("id_name_note").value;
+                    const color = this.$refs.noteUpdate.selectedColor;
+                    doPost(
+                        this,
+                        "{% url "node:add_note" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                            "note_name": name,
+                            "color": color,
+                        },
+                        (response) => {
+                            EventBus.$emit("update-layout", response.data.layout);
+                        },
+                        "Note added",
                         ""
                     );
                 },
@@ -436,6 +443,10 @@
 
                 EventBus.$on("open-collection-modal", (payload) => {
                     this.$refs.collectionUpdate.openModal("Add", this.addCollection, {});
+                });
+
+                EventBus.$on("open-note-modal", (payload) => {
+                    this.$refs.noteUpdate.openModal("Add", this.addNote, {"note": {"name": null}, "color": null});
                 });
 
                 EventBus.$on("object-select-image", (payload) => {

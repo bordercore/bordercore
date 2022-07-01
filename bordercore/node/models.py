@@ -58,12 +58,12 @@ class Node(TimeStampedModel):
         self.layout = layout
         self.save()
 
-    def add_note(self):
+    def add_note(self, name="New Note"):
 
         note = Blob.objects.create(
             user=self.user,
             date=timezone.now().strftime("%Y-%m-%d"),
-            name="New Note",
+            name=name,
             is_note=True
         )
         note.index_blob()

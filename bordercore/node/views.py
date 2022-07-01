@@ -236,11 +236,14 @@ def delete_collection(request):
 def add_note(request):
 
     node_uuid = request.POST["node_uuid"]
+    note_name = request.POST["note_name"]
+    color = int(request.POST["color"])
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
-    note = node.add_note()
+    note = node.add_note(note_name)
 
     node.populate_names()
+    node.set_note_color(str(note.uuid), color)
 
     response = {
         "status": "OK",
