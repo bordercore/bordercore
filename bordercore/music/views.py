@@ -143,6 +143,8 @@ class AlbumDetailView(FormRequestMixin, ModelFormMixin, DetailView):
 
         s = Song.objects.filter(user=self.request.user, album=self.object).order_by("track")
 
+        playtime = self.object.playtime
+
         song_list = []
 
         for song in s:
@@ -166,6 +168,7 @@ class AlbumDetailView(FormRequestMixin, ModelFormMixin, DetailView):
                     "text": x.name, "is_meta": x.is_meta
                 } for x in self.object.tags.all()
             ],
+            "playtime": playtime
         }
 
     def get_queryset(self):

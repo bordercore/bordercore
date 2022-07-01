@@ -13,7 +13,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.db.models import Count, JSONField, OuterRef, Q, Subquery
+from django.db.models import Count, JSONField, OuterRef, Q, Subquery, Sum
 from django.db.models.functions import Coalesce
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
@@ -58,6 +58,24 @@ class Album(TimeStampedModel):
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
+
+    @property
+    def playtime(self):
+        """
+        Get the total album playtime in a humanized format
+        """
+
+        total_time_seconds = Song.objects.filter(
+            album=self
+        ).aggregate(
+            total_time=Coalesce(Sum("length"), 0)
+        )["total_time"]
+
+        return humanize.precisedelta(
+            timedelta(seconds=total_time_seconds),
+            minimum_unit="minutes",
+            format="%.f"
+        )
 
     def index_album(self, es=None):
 

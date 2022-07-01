@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from music.models import Song
+from music.tests.factories import AlbumFactory, SongFactory
 
 pytestmark = pytest.mark.django_db
 
@@ -32,3 +33,11 @@ def test_get_id3_info(auto_login_user, song):
     assert song_info["album_name"] == "FreePD Music"
     assert song_info["length"] == 178
     assert song_info["length_pretty"] == "2:58"
+
+
+def test_music_playtime():
+
+    album = AlbumFactory()
+    SongFactory.create_batch(10, length=300, album=album)
+
+    assert album.playtime == "50 minutes"
