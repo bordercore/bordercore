@@ -334,7 +334,10 @@ def add_quote(request):
     node_uuid = request.POST["node_uuid"]
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
-    node.add_quote()
+
+    # Choose a random quote
+    quote = Quote.objects.all().order_by("?")[0]
+    node.add_quote(quote.uuid)
 
     response = {
         "status": "OK",

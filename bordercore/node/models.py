@@ -163,13 +163,14 @@ class Node(TimeStampedModel):
         self.layout = layout
         self.save()
 
-    def add_quote(self):
+    def add_quote(self, quote_uuid):
 
         layout = self.layout
         layout[0].insert(
             0,
             {
                 "type": "quote",
+                "uuid": str(quote_uuid),
                 "color": 1
             }
         )

@@ -46,6 +46,7 @@ from metrics.models import Metric, MetricData  # isort:skip
 from music.models import SongSource, PlaylistItem  # isort:skip
 from music.tests.factories import SongFactory, AlbumFactory, PlaylistFactory  # isort:skip
 from node.tests.factories import NodeFactory  # isort:skip
+from quote.tests.factories import QuoteFactory  # isort:skip
 from tag.tests.factories import TagFactory  # isort:skip
 from todo.tests.factories import TodoFactory  # isort:skip
 
@@ -479,6 +480,13 @@ def question(tag, bookmark):
     so.save()
 
     yield [question_0, question_1, question_2, question_3]
+
+
+@pytest.fixture()
+def quote():
+
+    quote = QuoteFactory()
+    yield quote
 
 
 @pytest.fixture()

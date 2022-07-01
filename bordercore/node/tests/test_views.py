@@ -138,6 +138,8 @@ def test_add_note(monkeypatch_blob, auto_login_user, node):
     url = urls.reverse("node:add_note")
     resp = client.post(url, {
         "node_uuid": node.uuid,
+        "note_name": faker.text(max_nb_chars=32),
+        "color": 1,
     })
 
     assert resp.status_code == 200
@@ -195,7 +197,7 @@ def test_node_set_note_color(monkeypatch_blob, auto_login_user, node):
 
     assert resp.status_code == 200
 
-    # Verify that the collection has been removed from the node's layout
+    # Verify that the note's color has been updated in the node's layout
     updated_node = Node.objects.get(uuid=node.uuid)
 
     assert color in [
@@ -251,3 +253,88 @@ def test_node_remove_image(monkeypatch_blob, auto_login_user, node, blob_image_f
         for val in sublist
         if "uuid" in val
     ]
+
+
+def test_node_add_quote(auto_login_user, node, quote):
+
+    user, client = auto_login_user()
+
+    url = urls.reverse("node:add_quote")
+    resp = client.post(url, {
+        "node_uuid": node.uuid,
+    })
+
+    assert resp.status_code == 200
+
+    updated_node = Node.objects.get(uuid=node.uuid)
+
+    # Verify that the quote has been added to the node's layout
+    assert "quote" in [
+        val["type"]
+        for sublist in updated_node.layout
+        for val in sublist
+    ]
+
+
+def test_node_remove_quote(auto_login_user, node, quote):
+
+    user, client = auto_login_user()
+
+    node.add_quote(quote.uuid)
+
+    url = urls.reverse("node:remove_quote")
+    resp = client.post(url, {
+        "node_uuid": node.uuid,
+    })
+
+    assert resp.status_code == 200
+
+    # Verify that the quote has been removed from the node's layout
+    updated_node = Node.objects.get(uuid=node.uuid)
+    assert "quote" not in [
+        val["type"]
+        for sublist in updated_node.layout
+        for val in sublist
+    ]
+
+
+def test_node_set_quote_color(auto_login_user, node, quote):
+
+    user, client = auto_login_user()
+
+    node.add_quote(quote.uuid)
+    color = 2
+
+    url = urls.reverse("node:set_quote_color")
+    resp = client.post(url, {
+        "node_uuid": node.uuid,
+        "color": color
+    })
+
+    assert resp.status_code == 200
+
+    # Verify that the quote's color has been updated in the node's layout
+    updated_node = Node.objects.get(uuid=node.uuid)
+
+    assert color in [
+        val["color"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if val["type"] == "quote"
+    ]
+
+
+def test_node_get_quote(auto_login_user, node, quote):
+
+    user, client = auto_login_user()
+
+    url = urls.reverse("node:get_quote")
+    resp = client.post(url, {
+        "node_uuid": node.uuid
+    })
+
+    assert resp.status_code == 200
+
+    resp_json = resp.json()
+    assert resp_json["quote"]["uuid"] == str(quote.uuid)
+    assert resp_json["quote"]["quote"] == quote.quote
