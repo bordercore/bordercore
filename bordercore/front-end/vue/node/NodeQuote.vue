@@ -54,13 +54,9 @@
                 type: String,
                 default: "",
             },
-            initialQuoteUuid: {
-                type: String,
-                default: "",
-            },
-            quoteColor: {
-                type: Number,
-                default: 1,
+            nodeQuoteObj: {
+                type: Object,
+                default: function() {},
             },
             getAndSetQuoteUrl: {
                 type: String,
@@ -70,7 +66,7 @@
                 type: String,
                 default: "",
             },
-            setQuoteColorUrl: {
+            updateQuoteUrl: {
                 type: String,
                 default: "",
             },
@@ -78,16 +74,23 @@
         data() {
             return {
                 color: null,
-                quoteUuid: null,
-                quote: null,
                 hover: false,
+                interval: null,
+                quote: null,
+                quoteUuid: null,
+                rotate: null,
             };
         },
         mounted() {
-            this.color = this.quoteColor;
-            this.quoteUuid = this.initialQuoteUuid;
+            this.color = this.nodeQuoteObj.color;
+            this.quoteUuid = this.nodeQuoteObj.uuid;
+            this.rotate = this.nodeQuoteObj.rotate;
 
             this.getQuote();
+
+            if (this.rotate !== null && this.rotate !== -1) {
+                this.setTimer();
+            }
 
             const self = this;
 
@@ -130,19 +133,30 @@
                 this.$emit("remove-quote");
             },
             onUpdateQuote() {
-                this.$emit("open-modal-quote-update", this.updateQuote, {"note": this.note, "color": this.color});
+                this.$emit("open-modal-quote-update", this.updateQuote, {"color": this.color, "rotate": this.rotate});
             },
-            updateQuote(color) {
-                if (color !== this.color) {
+            setTimer() {
+                clearInterval(this.interval);
+                this.interval = setInterval( () => {
+                    this.getRandomQuote();
+                }, this.rotate * 1000 * 60);
+            },
+            updateQuote(color, rotate) {
+                if (color !== this.color || this.rotate !== rotate) {
                     doPost(
                         this,
-                        this.setQuoteColorUrl,
+                        this.updateQuoteUrl,
                         {
                             "node_uuid": this.$store.state.nodeUuid,
                             "color": color,
+                            "rotate": rotate,
                         },
                         (response) => {
                             this.color = color;
+                            if (this.rotate !== rotate) {
+                                this.rotate = rotate;
+                                this.setTimer();
+                            }
                         },
                         "",
                         "",

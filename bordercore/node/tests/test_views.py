@@ -298,26 +298,34 @@ def test_node_remove_quote(auto_login_user, node, quote):
     ]
 
 
-def test_node_set_quote_color(auto_login_user, node, quote):
+def test_node_update_quote(auto_login_user, node, quote):
 
     user, client = auto_login_user()
 
     node.add_quote(quote.uuid)
     color = 2
+    rotate = 10
 
-    url = urls.reverse("node:set_quote_color")
+    url = urls.reverse("node:update_quote")
     resp = client.post(url, {
         "node_uuid": node.uuid,
-        "color": color
+        "color": color,
+        "rotate": rotate
     })
 
     assert resp.status_code == 200
 
-    # Verify that the quote's color has been updated in the node's layout
+    # Verify that the quote's properties have been updated in the node's layout
     updated_node = Node.objects.get(uuid=node.uuid)
 
     assert color in [
         val["color"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if val["type"] == "quote"
+    ]
+    assert rotate in [
+        val["rotate"]
         for sublist in updated_node.layout
         for val in sublist
         if val["type"] == "quote"

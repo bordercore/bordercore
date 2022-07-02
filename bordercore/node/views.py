@@ -364,13 +364,14 @@ def remove_quote(request):
 
 
 @login_required
-def set_quote_color(request):
+def update_quote(request):
 
     node_uuid = request.POST["node_uuid"]
     color = int(request.POST["color"])
+    rotate = int(request.POST["rotate"])
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
-    node.set_quote_color(color)
+    node.update_quote(color, rotate)
 
     response = {
         "status": "OK",

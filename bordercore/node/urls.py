@@ -96,9 +96,9 @@ urlpatterns = [
         name="remove_quote"
     ),
     path(
-        route="quote/color",
-        view=views.set_quote_color,
-        name="set_quote_color"
+        route="quote/update/",
+        view=views.update_quote,
+        name="update_quote"
     ),
     path(
         route="quote/get/",
