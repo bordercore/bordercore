@@ -3,7 +3,7 @@
         <form id="top-search-form" class="form-inline" method="get">
             <input type="hidden" name="doctype" :value="searchFilter">
             <div class="form-row">
-                <div class="search-with-doctypes col-auto has-search me-1">
+                <div class="search-with-doctypes has-search me-1">
                     <font-awesome-icon icon="search" />
 
                     <vue-simple-suggest id="top-simple-suggest"
@@ -31,12 +31,12 @@
                                   class="top-search-splitter"
                                   @click.stop=""
                             >{{ scope.suggestion.name }}</span>
-                            <span v-else class="top-search-suggestion">
+                            <div v-else class="top-search-suggestion">
                                 <span v-if="scope.suggestion.important === 10" class="me-1">
                                     <font-awesome-icon icon="heart" class="text-danger" />
                                 </span>
                                 <span class="d-inline" v-html="boldenSuggestion(scope)" />
-                            </span>
+                            </div>
                         </div>
                     </vue-simple-suggest>
                     <div v-if="searchFilter" id="top-search-filter" class="tag label label-info d-flex align-items-center">
@@ -321,6 +321,7 @@
             },
             removeFilter() {
                 this.searchFilter = "";
+                this.handleFilter("");
             },
             getFilterName(doctype) {
                 const filter = this.searchFilterTypes.filter((x) => {

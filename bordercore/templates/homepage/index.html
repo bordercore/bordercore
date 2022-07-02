@@ -195,7 +195,7 @@
                 <card title="Calendar" class="card-body backdrop-filter">
                     <template v-slot:content>
                         <ul class="list-group interior-borders" id="events">
-                            <li v-if="waiting" :class="errorClass" class="list-group-item list-group-item-secondary">[[ msg ]]</li>
+                            <li v-if="waiting" :class="errorClass" class="list-group-item list-group-item-secondary text-success">[[ msg ]]</li>
                             <li v-for="event in events" :key="event.count" class="list-group-item list-group-item-secondary text-primary">[[ event.start_pretty ]]: <strong class="text-emphasis">[[ event.summary ]]</strong> </li>
                         </ul>
                     </template>
