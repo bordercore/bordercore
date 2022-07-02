@@ -112,19 +112,39 @@
                 <card title="" class="z-index-positive position-relative h-100 backdrop-filter">
                     <template #content>
 
-                        <div class="d-flex">
-                            <div>
-                            {% if object.description %}
-                                <div class="d-flex flex-column">
+                        <div class="d-flex flex-column">
+                            <div v-if="description" class="d-flex flex-column">
+                                <div class="d-flex">
                                     <div class="card-title text-primary">
                                         Description
                                     </div>
-                                    <div>
-                                        {{ object.description|safe }}
-                                    </div>
+                                    <drop-down-menu :show-on-hover="true">
+                                        <div slot="dropdown">
+                                            <li>
+                                                <a v-if="note" class="dropdown-item" href="#" @click.prevent="addNote()">
+                                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>
+                                                    Edit note
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a v-if="!note" class="dropdown-item" href="#" @click.prevent="addNote()">
+                                                    <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                                                    Add note
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a v-if="note" class="dropdown-item" href="#" @click.prevent="deleteNote()">
+                                                    <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>
+                                                    Delete note
+                                                </a>
+                                            </li>
+                                        </div>
+                                    </drop-down-menu>
                                 </div>
-                            {% endif %}
-
+                                <div v-html="description">
+                                </div>
+                            </div>
+                            <hr v-if="description && note" class="m-2" />
                             <editable-text-area
                                 ref="note"
                                 uuid="{{ object.uuid }}"
@@ -139,26 +159,6 @@
                                     </div>
                                 </template>
                             </editable-text-area>
-                            </div>
-                            <drop-down-menu :show-on-hover="true">
-                                <div slot="dropdown">
-                                    <li>
-                                        <a v-if="note" class="dropdown-item" href="#" @click.prevent="addNote()">
-                                            <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Edit note
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a v-if="!note" class="dropdown-item" href="#" @click.prevent="addNote()">
-                                            <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>Add note
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a v-if="note" class="dropdown-item" href="#" @click.prevent="deleteNote()">
-                                            <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>Delete note
-                                        </a>
-                                    </li>
-                                </div>
-                            </drop-down-menu>
                         </div>
 
                     </template>
@@ -395,6 +395,7 @@
             data() {
                 return {
                     isActiveExercise: {% if activity_info %}true{% else %}false{% endif %},
+                    description: markdown.render("{{ object.description|safe }}"),
                     showHistoryMessage: {% if activity_info %}true{% else %}false{% endif %},
                     note: "{{ object.note|escapejs }}",
                     relatedExercises: JSON.parse(document.getElementById("related_exercises").textContent),
