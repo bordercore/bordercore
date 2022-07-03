@@ -81,16 +81,16 @@
 
                 <div class="row{% if field.errors %} error{% endif %} mb-3">
                     <label class="fw-bold col-lg-2 col-form-label text-end" for="inputTitle">Tags</label>
-                    <div class="col-lg-5">
+                    <div class="col-lg-7">
                         <tags-input
                             ref="tagsInput"
                             search-url="{% url 'tag:search' %}?query="
                         >
                         </tags-input>
+                        {% for error in field.errors %}
+                            <span class="form-error">Error: {{ error }}</span>
+                        {% endfor %}
                     </div>
-                    {% for error in field.errors %}
-                        <span class="form-error">{{ error }}</span>
-                    {% endfor %}
                 </div>
 
             {% else %}
@@ -100,7 +100,7 @@
                         {{ field.label }}
                     </label>
 
-                    <div class="col-lg-5">
+                    <div class="col-lg-7">
                         {{ field }}
                         {% for error in field.errors %}
                             <span class="form-error">{{ error }}</span>
@@ -113,7 +113,7 @@
         {% endfor %}
 
         <div>
-            <div class="col-lg-5 offset-lg-2" id="button-wrapper">
+            <div class="col-lg-7 offset-lg-2" id="button-wrapper">
                 <input class="btn btn-primary ms-1" type="submit" name="Go" value="{{ action }}" @click="onClickEdit" />
                 <input v-if="enableDeleteButton" @click="onClickDelete" class="btn btn-secondary ms-3" type="submit" name="Go" value="Delete" />
                 <a class="ms-3" href="{% if request.GET.return_url %}{{ request.GET.return_url }}{% else %}{% url 'drill:list' %}{% endif %}">Cancel</a>

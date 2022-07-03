@@ -31,7 +31,10 @@ class QuestionForm(ModelForm):
 
         tags = self.cleaned_data["tags"]
         if not tags:
-            self.add_error("tags", ValidationError("You must add at least one tag"))
+            self.add_error("tags", ValidationError("You must add at least one tag."))
+
+        if True in [True for x in self.cleaned_data["tags"] if "/" in x.name]:
+            self.add_error("tags", ValidationError("You must not use the character '/' in the tag name."))
 
         return tags
 
