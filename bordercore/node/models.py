@@ -187,13 +187,14 @@ class Node(TimeStampedModel):
         self.layout = layout
         self.save()
 
-    def update_quote(self, color, rotate):
+    def update_quote(self, color, rotate, favorites_only=False):
 
         for column in self.layout:
             for row in column:
                 if row["type"] == "quote":
                     row["color"] = color
                     row["rotate"] = rotate
+                    row["favorites_only"] = favorites_only
 
         self.save()
 

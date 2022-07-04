@@ -280,11 +280,12 @@ def test_node_remove_quote(auto_login_user, node, quote):
 
     user, client = auto_login_user()
 
-    node.add_quote(quote.uuid)
+    node_quote_uuid = node.add_quote(quote.uuid)
 
     url = urls.reverse("node:remove_quote")
     resp = client.post(url, {
         "node_uuid": node.uuid,
+        "node_quote_uuid": node_quote_uuid
     })
 
     assert resp.status_code == 200
@@ -302,13 +303,14 @@ def test_node_update_quote(auto_login_user, node, quote):
 
     user, client = auto_login_user()
 
-    node.add_quote(quote.uuid)
+    node_quote_uuid = node.add_quote(quote.uuid)
     color = 2
     rotate = 10
 
     url = urls.reverse("node:update_quote")
     resp = client.post(url, {
         "node_uuid": node.uuid,
+        "node_quote_uuid": node_quote_uuid,
         "color": color,
         "rotate": rotate
     })

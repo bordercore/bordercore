@@ -20,11 +20,17 @@
                     <div class="row mb-3">
                         <label class="col-lg-3 col-form-label" for="inputTitle">Rotate</label>
                         <div class="col-lg-9">
-                            <select v-model="selectedRotate" class="form-control form-select">
-                                <option v-for="option in rotateInterval" :key="option.value" :value="option.value">
-                                    {{ option.display }}
-                                </option>
-                            </select>
+                            <div class="d-flex flex-column">
+                                <select v-model="nodeQuote.rotate" class="form-control form-select">
+                                    <option v-for="option in rotateOptions" :key="option.value" :value="option.value">
+                                        {{ option.display }}
+                                    </option>
+                                </select>
+                                <div class="ms-3 d-flex align-items-center">
+                                    <input v-model="nodeQuote.favorites_only" value="favorites-only" type="checkbox">
+                                    <label class="ms-2">Favorites Only</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -46,9 +52,8 @@
                 action: "Update",
                 callback: null,
                 modal: null,
-                data: {},
-                selectedColor: null,
-                selectedRotate: null,
+                nodeQuote: {},
+                nodeQuoteInitial: {},
                 colors: [1, 2, 3],
                 rotateOptions: [
                     {
@@ -87,25 +92,27 @@
         },
         methods: {
             getClass(color) {
-                const currentColor = `node-note-color-${color}`;
-                const selectedColor = color === this.selectedColor ? "selected-color" : "";
-                return `${currentColor} ${selectedColor}`;
+                const selectedColor = color === (this.nodeQuote && this.nodeQuote.color) ? "selected-color" : "";
+                return `node-note-color-${color} ${selectedColor}`;
             },
-            openModal(action, callback, data) {
+            openModal(action, callback, nodeQuote) {
+                this.nodeQuote = nodeQuote;
+                this.nodeQuoteInitial = {...nodeQuote};
                 this.action = action;
                 this.callback = callback;
-                this.selectedColor = data.color;
-                this.selectedRotate = data.rotate;
                 this.modal.show();
                 setTimeout( () => {
                     document.querySelector("#modalUpdateQuote input").focus();
                 }, 500);
             },
             onSelectColor(color) {
-                this.selectedColor = color;
+                this.nodeQuote.color = color;
             },
             onUpdateQuote() {
-                this.callback(this.selectedColor, this.selectedRotate);
+                // If any of the properties have changed, trigger the callback
+                if (this.nodeQuote !== this.nodeQuoteInitial) {
+                    this.callback(this.nodeQuote);
+                }
                 this.modal.hide();
             },
         },

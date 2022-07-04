@@ -149,7 +149,7 @@
                             <node-quote
                                 ref="quote"
                                 node-uuid="{{ object.uuid }}"
-                                :node-quote-obj="obj"
+                                :node-quote-initial="obj"
                                 get-quote-url="{% url "quote-detail" '00000000-0000-0000-0000-000000000000' %}"
                                 :get-and-set-quote-url="'{% url "node:get_quote" %}'"
                                 :update-quote-url="'{% url "node:update_quote" %}'"
@@ -165,7 +165,7 @@
             <collection-object-list-modal ref="collectionUpdate">
             </collection-object-list-modal>
 
-            <node-note-modal ref="noteUpdate" ref="noteUpdate">
+            <node-note-modal ref="noteUpdate">
             </node-note-modal>
 
             <node-image-modal ref="noteImage">
@@ -393,8 +393,8 @@
                 openModalNoteImage(data) {
                     this.$refs.noteImage.openModal(data);
                 },
-                openModalQuoteUpdate(callback, data) {
-                    this.$refs.quoteUpdate.openModal("Update", callback, data);
+                openModalQuoteUpdate(callback, quote) {
+                    this.$refs.quoteUpdate.openModal("Update", callback, quote);
                 },
                 onDeleteNote(noteUuid) {
                     doPost(

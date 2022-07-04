@@ -369,9 +369,10 @@ def update_quote(request):
     node_uuid = request.POST["node_uuid"]
     color = int(request.POST["color"])
     rotate = int(request.POST["rotate"])
+    favorites_only = True if request.POST["favorites_only"] == "true" else False
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
-    node.update_quote(color, rotate)
+    node.update_quote(color, rotate, favorites_only)
 
     response = {
         "status": "OK",
@@ -384,8 +385,12 @@ def update_quote(request):
 def get_quote(request):
 
     node_uuid = request.POST["node_uuid"]
+    favorites_only = request.POST.get("favorites_only", "false")
 
-    quote = Quote.objects.all().order_by("?")[0]
+    quote = Quote.objects.all()
+    if (favorites_only == "true"):
+        quote = quote.filter(is_favorite=True)
+    quote = quote.order_by("?")[0]
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
     node.set_quote(quote.uuid)
@@ -394,6 +399,7 @@ def get_quote(request):
         "status": "OK",
         "quote": {
             "uuid": quote.uuid,
+            "is_favorite": quote.is_favorite,
             "quote": quote.quote,
             "source": quote.source
         },

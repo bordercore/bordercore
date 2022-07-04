@@ -1,6 +1,6 @@
 <template>
     <div class="hover-target" @mouseover="hover = true" @mouseleave="hover = false">
-        <card class="backdrop-filter hover-1" :class="`node-note-color-${color}`">
+        <card class="backdrop-filter hover-1" :class="cardClass">
             <template #title-slot>
                 <div class="dropdown-height d-flex">
                     <div v-cloak class="card-title d-flex">
@@ -54,7 +54,7 @@
                 type: String,
                 default: "",
             },
-            nodeQuoteObj: {
+            nodeQuoteInitial: {
                 type: Object,
                 default: function() {},
             },
@@ -73,22 +73,23 @@
         },
         data() {
             return {
-                color: null,
                 hover: false,
                 interval: null,
-                quote: null,
-                quoteUuid: null,
-                rotate: null,
+                nodeQuote: {},
+                quote: {},
             };
         },
+        computed: {
+            cardClass() {
+                return `node-note-color-${this.nodeQuote.color}`;
+            },
+        },
         mounted() {
-            this.color = this.nodeQuoteObj.color;
-            this.quoteUuid = this.nodeQuoteObj.uuid;
-            this.rotate = this.nodeQuoteObj.rotate;
+            this.nodeQuote = this.nodeQuoteInitial;
 
             this.getQuote();
 
-            if (this.rotate !== null && this.rotate !== -1) {
+            if (this.nodeQuote.rotate !== null && this.nodeQuote.rotate !== -1) {
                 this.setTimer();
             }
 
@@ -96,11 +97,11 @@
 
             hotkeys("right", function(event, handler) {
                 switch (handler.key) {
-                    case "right":
-                        if (self.hover) {
-                            self.getRandomQuote();
-                        }
-                        break;
+                case "right":
+                    if (self.hover) {
+                        self.getRandomQuote();
+                    }
+                    break;
                 }
             });
         },
@@ -108,7 +109,7 @@
             getQuote() {
                 doGet(
                     this,
-                    this.getQuoteUrl.replace("00000000-0000-0000-0000-000000000000", this.quoteUuid),
+                    this.getQuoteUrl.replace("00000000-0000-0000-0000-000000000000", this.nodeQuote.uuid),
                     (response) => {
                         this.quote = response.data;
                     },
@@ -121,6 +122,7 @@
                     this.getAndSetQuoteUrl,
                     {
                         "node_uuid": this.$store.state.nodeUuid,
+                        "favorites_only": this.nodeQuote.favorites_only,
                     },
                     (response) => {
                         this.quote = response.data.quote;
@@ -133,35 +135,35 @@
                 this.$emit("remove-quote");
             },
             onUpdateQuote() {
-                this.$emit("open-modal-quote-update", this.updateQuote, {"color": this.color, "rotate": this.rotate});
+                this.$emit("open-modal-quote-update", this.updateQuote, this.nodeQuote);
             },
             setTimer() {
+                if (!this.nodeQuote.rotate) {
+                    return;
+                }
                 clearInterval(this.interval);
                 this.interval = setInterval( () => {
                     this.getRandomQuote();
-                }, this.rotate * 1000 * 60);
+                }, this.nodeQuote.rotate * 1000 * 60);
             },
-            updateQuote(color, rotate) {
-                if (color !== this.color || this.rotate !== rotate) {
-                    doPost(
-                        this,
-                        this.updateQuoteUrl,
-                        {
-                            "node_uuid": this.$store.state.nodeUuid,
-                            "color": color,
-                            "rotate": rotate,
-                        },
-                        (response) => {
-                            this.color = color;
-                            if (this.rotate !== rotate) {
-                                this.rotate = rotate;
-                                this.setTimer();
-                            }
-                        },
-                        "",
-                        "",
-                    );
-                }
+            updateQuote(quote) {
+                doPost(
+                    this,
+                    this.updateQuoteUrl,
+                    {
+                        "node_uuid": this.$store.state.nodeUuid,
+                        "color": quote.color,
+                        "rotate": quote.rotate,
+                        "favorites_only": quote.favorites_only,
+                    },
+                    (response) => {
+                        this.nodeQuote.color = quote.color;
+                        this.nodeQuote.rotate = quote.rotate;
+                        this.setTimer();
+                    },
+                    "",
+                    "",
+                );
             },
         },
     };
