@@ -984,9 +984,14 @@ pre {
 
 #top-search {
   position: absolute;
+  z-index: 1000;
   top: -1.25rem;
   right: 0.25rem;
   line-height: 1.5rem;
+
+  form .has-search svg {
+    left: 0.75rem;
+  }
 }
 
 #top-bar {
@@ -1014,7 +1019,7 @@ pre {
 
 #top-search-filter {
   position: absolute;
-  top: 0.3rem;
+  top: 0.23rem;
   right: 1rem;
   text-align: center;
 
@@ -1107,10 +1112,6 @@ pre {
     padding: 0 !important;
     color: $green !important;
   }
-}
-
-#top-search-form .has-search svg {
-  left: 0.75rem;
 }
 
 //

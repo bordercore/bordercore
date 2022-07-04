@@ -1,84 +1,86 @@
 <template>
-    <div id="top-search" class="d-none">
-        <form id="top-search-form" class="form-inline" method="get">
-            <input type="hidden" name="doctype" :value="searchFilter">
-            <div class="form-row">
-                <div class="search-with-doctypes has-search me-1">
-                    <font-awesome-icon icon="search" />
+    <Transition name="fade">
+        <div v-if="showSearchWindow" id="top-search">
+            <form class="form-inline" method="get">
+                <input type="hidden" name="doctype" :value="searchFilter">
+                <div class="form-row">
+                    <div class="search-with-doctypes has-search me-1">
+                        <font-awesome-icon icon="search" />
 
-                    <vue-simple-suggest id="top-simple-suggest"
-                                        ref="suggestComponent"
-                                        v-model="query"
-                                        accesskey="s"
-                                        :display-attribute="displayAttribute"
-                                        :value-attribute="valueAttribute"
-                                        :list="search"
-                                        :filter-by-query="false"
-                                        :debounce="200"
-                                        :min-length="2"
-                                        :max-suggestions="maxSuggestions"
-                                        placeholder="Search"
-                                        autocomplete="off"
-                                        name="search"
-                                        :styles="autoCompleteStyle"
-                                        @keydown.native="onKeyDown"
-                                        @select="select"
-                                        @keydown.native.enter.prevent="onEnter"
-                    >
-                        <div slot="suggestion-item" slot-scope="scope">
-                            <!-- @*event*.stop="" handlers are needed to prevent the splitter from being selected -->
-                            <span v-if="scope.suggestion.splitter"
-                                  class="top-search-splitter"
-                                  @click.stop=""
-                            >{{ scope.suggestion.name }}</span>
-                            <div v-else class="top-search-suggestion">
-                                <span v-if="scope.suggestion.important === 10" class="me-1">
-                                    <font-awesome-icon icon="heart" class="text-danger" />
-                                </span>
-                                <span class="d-inline" v-html="boldenSuggestion(scope)" />
+                        <vue-simple-suggest id="top-simple-suggest"
+                                            ref="suggestComponent"
+                                            v-model="query"
+                                            accesskey="s"
+                                            :display-attribute="displayAttribute"
+                                            :value-attribute="valueAttribute"
+                                            :list="search"
+                                            :filter-by-query="false"
+                                            :debounce="200"
+                                            :min-length="2"
+                                            :max-suggestions="maxSuggestions"
+                                            placeholder="Search"
+                                            autocomplete="off"
+                                            name="search"
+                                            :styles="autoCompleteStyle"
+                                            @keydown.native="onKeyDown"
+                                            @select="select"
+                                            @keydown.native.enter.prevent="onEnter"
+                        >
+                            <div slot="suggestion-item" slot-scope="scope">
+                                <!-- @*event*.stop="" handlers are needed to prevent the splitter from being selected -->
+                                <span v-if="scope.suggestion.splitter"
+                                      class="top-search-splitter"
+                                      @click.stop=""
+                                >{{ scope.suggestion.name }}</span>
+                                <div v-else class="top-search-suggestion">
+                                    <span v-if="scope.suggestion.important === 10" class="me-1">
+                                        <font-awesome-icon icon="heart" class="text-danger" />
+                                    </span>
+                                    <span class="d-inline" v-html="boldenSuggestion(scope)" />
+                                </div>
+                            </div>
+                        </vue-simple-suggest>
+                        <div v-if="searchFilter" id="top-search-filter" class="tag label label-info d-flex align-items-center">
+                            <div>{{ getFilterName(searchFilter) }}</div>
+                            <div>
+                                <a class="ms-1" href="#" @click.prevent="removeFilter()">
+                                    <font-awesome-icon icon="times" class="text-primary" />
+                                </a>
                             </div>
                         </div>
-                    </vue-simple-suggest>
-                    <div v-if="searchFilter" id="top-search-filter" class="tag label label-info d-flex align-items-center">
-                        <div>{{ getFilterName(searchFilter) }}</div>
+                    </div>
+                </div>
+            </form>
+            <div v-if="query === ''" id="top-search-filter-options" class="ms-3 mt-2 p-3">
+                <div class="text-primary mb-2">
+                    <strong>Filter Options</strong>
+                </div>
+                <div class="d-flex flex-column">
+                    <div v-for="filter in searchFilterTypes" :key="filter.icon" class="tag-list d-flex p-1" :class="getFilterClass(filter.doctype)" @click.prevent="handleFilter(filter.doctype)">
+                        <div class="top-search-filter-icon d-flex justify-content-center align-items-center">
+                            <font-awesome-icon class="me-2" :icon="filter.icon" />
+                        </div>
                         <div>
-                            <a class="ms-1" href="#" @click.prevent="removeFilter()">
-                                <font-awesome-icon icon="times" class="text-primary" />
-                            </a>
+                            {{ filter.name }}
                         </div>
                     </div>
                 </div>
-            </div>
-        </form>
-        <div v-if="query === ''" id="top-search-filter-options" class="ms-3 mt-2 p-3">
-            <div class="text-primary mb-2">
-                <strong>Filter Options</strong>
-            </div>
-            <div class="d-flex flex-column">
-                <div v-for="filter in searchFilterTypes" :key="filter.icon" class="tag-list d-flex p-1" :class="getFilterClass(filter.doctype)" @click.prevent="handleFilter(filter.doctype)">
-                    <div class="top-search-filter-icon d-flex justify-content-center align-items-center">
-                        <font-awesome-icon class="me-2" :icon="filter.icon" />
-                    </div>
-                    <div>
-                        {{ filter.name }}
-                    </div>
+                <div class="recent-searches-header text-primary my-2 pt-2">
+                    <strong>Recent Searches</strong>
                 </div>
-            </div>
-            <div class="recent-searches-header text-primary my-2 pt-2">
-                <strong>Recent Searches</strong>
-            </div>
-            <div class="d-flex flex-column">
-                <div v-for="recentSearch in recentSearches" :key="recentSearch.id" class="tag-list d-flex p-1" @click.prevent="handleRecentSearch(recentSearch)">
-                    <div class="top-search-filter-icon d-flex justify-content-center align-items-center">
-                        <font-awesome-icon class="me-2" icon="search" />
-                    </div>
-                    <div class="text-truncate">
-                        {{ recentSearch.search_text }}
+                <div class="d-flex flex-column">
+                    <div v-for="recentSearch in recentSearches" :key="recentSearch.id" class="tag-list d-flex p-1" @click.prevent="handleRecentSearch(recentSearch)">
+                        <div class="top-search-filter-icon d-flex justify-content-center align-items-center">
+                            <font-awesome-icon class="me-2" icon="search" />
+                        </div>
+                        <div class="text-truncate">
+                            {{ recentSearch.search_text }}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </Transition>
 </template>
 
 <script>
@@ -178,21 +180,25 @@
                         "doctype": "drill",
                     },
                 ],
+                showSearchWindow: false,
             };
         },
         mounted() {
             const self = this;
             document.addEventListener("keydown", function(evt) {
                 if (evt.key === "s" && evt.altKey) {
-                    self.openSearchWindow();
+                    self.showSearchWindow = true;
                 }
             } );
 
             // If a click was detected outside this component, *and*
             //  the click wasn't on the "Search icon", then hide the
             //  component.
-            const specifiedElement = document.getElementById("top-search");
             document.addEventListener("click", function(event) {
+                const specifiedElement = document.getElementById("top-search");
+                if (!specifiedElement) {
+                    return;
+                }
                 const isClickInside = specifiedElement.contains(event.target) || specifiedElement.contains(event.target.parentElement);
                 // We check for the search icon by looking for a click on the
                 //  font-awesome 'svg' element, which has a custom 'top-search-target'
@@ -204,7 +210,7 @@
                     !event.target.classList.contains("fa-times") &&
                     !event.target.parentElement.classList.contains("fa-times")
                 ) {
-                    document.getElementById("top-search").classList.add("d-none");
+                    self.showSearchWindow = false;
                 }
             });
         },
@@ -255,8 +261,7 @@
                 if (inputValue === "") {
                     return;
                 }
-
-                const form = document.getElementById("top-search-form");
+                const form = document.querySelector("#top-search form");
 
                 if (this.searchFilter === "note") {
                     form.action = this.noteQuerySearchUrl;
@@ -287,7 +292,7 @@
                 } else if (evt.key === "a" && evt.altKey) {
                     document.getElementById("top-simple-suggest").select();
                 } else if (evt.code === "Escape") {
-                    document.getElementById("top-search").classList.add("d-none");
+                    this.showSearchWindow = false;
                 }
             },
             handleFilter(filter) {
@@ -310,9 +315,6 @@
                     "",
                     "",
                 );
-            },
-            openSearchWindow() {
-                document.getElementById("top-search").classList.remove("d-none");
             },
             getFilterClass(filter) {
                 if (filter === this.searchFilter) {

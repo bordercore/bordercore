@@ -269,8 +269,10 @@
                             modal.show();
                         },
                         openSearchWindow() {
-                            this.$refs.topSearch.openSearchWindow();
-                            this.$refs.topSearch.$refs.suggestComponent.input.focus()
+                            this.$refs.topSearch.showSearchWindow = true;
+                            setTimeout( () => {
+                                this.$refs.topSearch.$refs.suggestComponent.input.focus();
+                            }, 500);
                         }
                     },
                     mounted() {

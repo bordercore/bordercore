@@ -51,9 +51,11 @@
                                         <div v-if="object.note" v-show="!object.noteIsEditable" class="node-object-note" @click="editNote(object, index)">
                                             {{ object.note }}
                                         </div>
-                                        <span v-show="object.noteIsEditable">
-                                            <input ref="input" type="text" class="form-control form-control-sm" :value="object.note" placeholder="" @blur="updateNote(object, $event.target.value)" @keydown.enter="updateNote(object, $event.target.value)">
-                                        </span>
+                                        <Transition name="fade">
+                                            <span v-show="object.noteIsEditable">
+                                                <input ref="input" type="text" class="form-control form-control-sm" :value="object.note" placeholder="" @blur="updateNote(object, $event.target.value)" @keydown.enter="updateNote(object, $event.target.value)">
+                                            </span>
+                                        </Transition>
                                     </div>
 
                                     <drop-down-menu :show-on-hover="true">
