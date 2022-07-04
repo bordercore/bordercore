@@ -9,7 +9,8 @@
         "markup",
         "python",
         "scala",
-        "shell-session"
+        "shell-session",
+        "sql",
         ],
         "css": true
       }
