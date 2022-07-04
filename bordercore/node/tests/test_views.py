@@ -312,7 +312,8 @@ def test_node_update_quote(auto_login_user, node, quote):
         "node_uuid": node.uuid,
         "node_quote_uuid": node_quote_uuid,
         "color": color,
-        "rotate": rotate
+        "rotate": rotate,
+        "favorites_only": "true",
     })
 
     assert resp.status_code == 200

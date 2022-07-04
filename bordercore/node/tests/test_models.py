@@ -4,6 +4,8 @@ import django
 
 from blob.models import Blob
 from collection.models import Collection
+from node.models import Node
+from quote.tests.factories import QuoteFactory
 
 django.setup()
 
@@ -11,7 +13,7 @@ django.setup()
 pytestmark = pytest.mark.django_db
 
 
-def test_add_collection(node):
+def test_node_add_collection(node):
 
     collection = node.add_collection()
 
@@ -24,7 +26,7 @@ def test_add_collection(node):
     ]
 
 
-def test_delete_collection(node):
+def test_node_delete_collection(node):
 
     collection = node.add_collection()
     node.delete_collection(collection.uuid)
@@ -40,7 +42,7 @@ def test_delete_collection(node):
     ]
 
 
-def test_add_note(monkeypatch_blob, node):
+def test_node_add_note(monkeypatch_blob, node):
 
     note = node.add_note()
 
@@ -53,7 +55,7 @@ def test_add_note(monkeypatch_blob, node):
     ]
 
 
-def test_delete_note(node):
+def test_node_delete_note(node):
 
     note = node.add_collection()
     node.delete_collection(note.uuid)
@@ -69,7 +71,7 @@ def test_delete_note(node):
     ]
 
 
-def test_populate_names(node):
+def test_node_populate_names(node):
 
     collection_1 = node.add_collection()
     collection_2 = node.add_collection()
@@ -89,7 +91,7 @@ def test_populate_names(node):
     assert collection_3.name in names
 
 
-def test_set_note_color(monkeypatch_blob, node):
+def test_node_set_note_color(monkeypatch_blob, node):
 
     note = node.add_note()
     color = 1
@@ -101,4 +103,108 @@ def test_set_note_color(monkeypatch_blob, node):
         for val in sublist
         if "uuid" in val
         and val["uuid"] == str(note.uuid)
+    ]
+
+
+def test_node_add_image(monkeypatch_blob, node, blob_image_factory):
+
+    node.add_image(blob_image_factory[0].uuid)
+
+    assert \
+        {
+            "uuid": str(blob_image_factory[0].uuid),
+            "type": "image"
+        } in [
+            val
+            for sublist in node.layout
+            for val in sublist
+            if "uuid" in val
+        ]
+
+
+def test_node_remove_image(node, blob_image_factory):
+
+    node.add_image(blob_image_factory[0].uuid)
+
+    node.remove_image(blob_image_factory[0].uuid)
+
+    # Verify that the image has been removed from the node's layout
+    assert str(blob_image_factory[0].uuid) not in [
+        val["uuid"]
+        for sublist in node.layout
+        for val in sublist
+        if "uuid" in val
+    ]
+
+
+def test_node_add_quote(node, quote):
+
+    node.add_quote(quote.uuid)
+
+    # Verify that the quote has been added to the node's layout
+    assert str(quote.uuid) in [
+        val["uuid"]
+        for sublist in node.layout
+        for val in sublist
+        if "uuid" in val
+    ]
+
+
+def test_node_remove_quote(node, quote):
+
+    node.add_quote(quote.uuid)
+    node.remove_quote()
+
+    # Verify that the quote has been removed from the node's layout
+    assert str(quote.uuid) not in [
+        val["uuid"]
+        for sublist in node.layout
+        for val in sublist
+        if "uuid" in val
+    ]
+
+
+def test_node_update_quote(node, quote):
+
+    node.add_quote(quote.uuid)
+    color = 2
+    rotate = 10
+    favorites_only = "false"
+
+    node.update_quote(color, rotate, favorites_only)
+
+    # Verify that the quote's properties have been updated in the node's layout
+    updated_node = Node.objects.get(uuid=node.uuid)
+
+    assert color in [
+        val["color"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if val["type"] == "quote"
+    ]
+    assert rotate in [
+        val["rotate"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if val["type"] == "quote"
+    ]
+
+
+def test_node_set_quote(auto_login_user, node):
+
+    user, client = auto_login_user()
+
+    quotes = QuoteFactory.create_batch(2, user=user)
+
+    node.add_quote(quotes[0].uuid)
+    node.set_quote(quotes[1].uuid)
+
+    # Verify that the quote's properties have been updated in the node's layout
+    updated_node = Node.objects.get(uuid=node.uuid)
+
+    assert str(quotes[1].uuid) in [
+        val["uuid"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if val["type"] == "quote"
     ]
