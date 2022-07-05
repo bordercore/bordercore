@@ -31,14 +31,16 @@
                 </div>
             </template>
             <template #content>
-                <div v-if="quote">
-                    <div>
-                        {{ quote.quote }}
+                <Transition enter-active-class="animate__animated animate__zoomIn">
+                    <div v-if="quote" :key="quote.uuid">
+                        <div>
+                            {{ quote.quote }}
+                        </div>
+                        <div class="text-primary text-smaller">
+                            {{ quote.source }}
+                        </div>
                     </div>
-                    <div class="text-primary text-smaller">
-                        {{ quote.source }}
-                    </div>
-                </div>
+                </Transition>
             </template>
         </card>
     </div>

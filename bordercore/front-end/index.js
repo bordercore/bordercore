@@ -248,6 +248,8 @@ import Prism from "prismjs";
 import {addCopyButton} from "./util.js";
 addCopyButton();
 
+import "animate.css";
+
 import hotkeys from "hotkeys-js";
 
 import {Table} from "buefy";
