@@ -168,10 +168,11 @@ def test_node_update_quote(node, quote):
 
     node.add_quote(quote.uuid)
     color = 2
+    format = "standard"
     rotate = 10
     favorites_only = "false"
 
-    node.update_quote(color, rotate, favorites_only)
+    node.update_quote(color, format, rotate, favorites_only)
 
     # Verify that the quote's properties have been updated in the node's layout
     updated_node = Node.objects.get(uuid=node.uuid)

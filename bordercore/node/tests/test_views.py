@@ -305,6 +305,7 @@ def test_node_update_quote(auto_login_user, node, quote):
 
     node_quote_uuid = node.add_quote(quote.uuid)
     color = 2
+    format = "minimal"
     rotate = 10
 
     url = urls.reverse("node:update_quote")
@@ -312,6 +313,7 @@ def test_node_update_quote(auto_login_user, node, quote):
         "node_uuid": node.uuid,
         "node_quote_uuid": node_quote_uuid,
         "color": color,
+        "format": format,
         "rotate": rotate,
         "favorites_only": "true",
     })
@@ -323,6 +325,12 @@ def test_node_update_quote(auto_login_user, node, quote):
 
     assert color in [
         val["color"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if val["type"] == "quote"
+    ]
+    assert format in [
+        val["format"]
         for sublist in updated_node.layout
         for val in sublist
         if val["type"] == "quote"

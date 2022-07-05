@@ -33,6 +33,18 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row mb-3">
+                        <label class="col-lg-3 col-form-label" for="inputTitle">Format</label>
+                        <div class="col-lg-9">
+                            <div class="d-flex flex-column">
+                                <select v-model="nodeQuote.format" class="form-control form-select">
+                                    <option v-for="option in formatOptions" :key="option.value" :value="option.value">
+                                        {{ option.display }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <input id="btn-action" class="btn btn-primary" type="button" value="Update" @click="onUpdateQuote">
@@ -55,6 +67,16 @@
                 nodeQuote: {},
                 nodeQuoteInitial: {},
                 colors: [1, 2, 3],
+                formatOptions: [
+                    {
+                        value: "standard",
+                        display: "Standard",
+                    },
+                    {
+                        value: "minimal",
+                        display: "Minimal",
+                    },
+                ],
                 rotateOptions: [
                     {
                         value: -1,

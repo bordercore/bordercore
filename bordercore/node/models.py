@@ -172,6 +172,7 @@ class Node(TimeStampedModel):
                 "type": "quote",
                 "uuid": str(quote_uuid),
                 "color": 1,
+                "format": "standard",
                 "rotate": -1,
             }
         )
@@ -187,12 +188,13 @@ class Node(TimeStampedModel):
         self.layout = layout
         self.save()
 
-    def update_quote(self, color, rotate, favorites_only=False):
+    def update_quote(self, color, format, rotate, favorites_only=False):
 
         for column in self.layout:
             for row in column:
                 if row["type"] == "quote":
                     row["color"] = color
+                    row["format"] = format
                     row["rotate"] = rotate
                     row["favorites_only"] = favorites_only
 

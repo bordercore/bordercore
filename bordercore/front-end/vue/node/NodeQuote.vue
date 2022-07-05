@@ -1,8 +1,8 @@
 <template>
     <div class="hover-target" @mouseover="hover = true" @mouseleave="hover = false">
-        <card class="backdrop-filter hover-1" :class="cardClass">
+        <card class="backdrop-filter hover-1" :class="cardClass" title="">
             <template #title-slot>
-                <div class="dropdown-height d-flex">
+                <div v-if="nodeQuoteInitial.format !== 'minimal'" class="dropdown-height d-flex">
                     <div v-cloak class="card-title d-flex">
                         <div>
                             <font-awesome-icon icon="quote-left" class="text-primary me-3" />
@@ -27,10 +27,10 @@
                             </div>
                         </drop-down-menu>
                     </div>
+                    <hr class="filter-divider mt-0">
                 </div>
             </template>
             <template #content>
-                <hr class="filter-divider mt-0">
                 <div v-if="quote">
                     <div>
                         {{ quote.quote }}
@@ -95,13 +95,16 @@
 
             const self = this;
 
-            hotkeys("right", function(event, handler) {
+            hotkeys("right,u", function(event, handler) {
                 switch (handler.key) {
-                case "right":
-                    if (self.hover) {
-                        self.getRandomQuote();
-                    }
-                    break;
+                    case "right":
+                        if (self.hover) {
+                            self.getRandomQuote();
+                        }
+                        break;
+                    case "u":
+                        self.onUpdateQuote();
+                        break;
                 }
             });
         },
@@ -153,6 +156,7 @@
                     {
                         "node_uuid": this.$store.state.nodeUuid,
                         "color": quote.color,
+                        "format": quote.format,
                         "rotate": quote.rotate,
                         "favorites_only": quote.favorites_only,
                     },
