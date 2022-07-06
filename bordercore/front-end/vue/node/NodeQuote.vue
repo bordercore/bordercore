@@ -143,7 +143,7 @@
                 this.$emit("open-modal-quote-update", this.updateQuote, this.nodeQuote);
             },
             setTimer() {
-                if (!this.nodeQuote.rotate) {
+                if (!this.nodeQuote.rotate || this.nodeQuote.rotate === -1) {
                     return;
                 }
                 clearInterval(this.interval);
