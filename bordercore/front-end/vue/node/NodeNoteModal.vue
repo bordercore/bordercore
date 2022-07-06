@@ -19,7 +19,7 @@
                         <label class="col-lg-3 col-form-label" for="inputTitle">Color</label>
                         <div class="col-lg-9">
                             <div class="d-flex">
-                                <div v-for="color in colors" :key="color" class="node-note-color flex-grow-1 mx-2" :class="getClass(color)" @click="onSelectColor(color)" />
+                                <div v-for="color in colors" :key="color" class="node-color flex-grow-1 mx-2" :class="getClass(color)" @click="onSelectColor(color)" />
                             </div>
                         </div>
                     </div>
@@ -52,7 +52,7 @@
         },
         methods: {
             getClass(color) {
-                const currentColor = `node-note-color-${color}`;
+                const currentColor = `node-color-${color}`;
                 const selectedColor = color === this.selectedColor ? "selected-color" : "";
                 return `${currentColor} ${selectedColor}`;
             },

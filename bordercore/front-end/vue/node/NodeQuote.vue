@@ -83,7 +83,7 @@
         },
         computed: {
             cardClass() {
-                return `node-note-color-${this.nodeQuote.color}`;
+                return `node-color-${this.nodeQuote.color}`;
             },
         },
         mounted() {
