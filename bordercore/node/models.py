@@ -165,10 +165,13 @@ class Node(TimeStampedModel):
 
     def add_quote(self, quote_uuid):
 
+        node_quote_uuid = str(uuid.uuid4())
+
         layout = self.layout
         layout[0].insert(
             0,
             {
+                "node_quote_uuid": node_quote_uuid,
                 "type": "quote",
                 "uuid": str(quote_uuid),
                 "color": 1,
@@ -179,20 +182,26 @@ class Node(TimeStampedModel):
         self.layout = layout
         self.save()
 
-    def remove_quote(self):
+        return node_quote_uuid
+
+    def remove_quote(self, node_quote_uuid):
 
         layout = self.layout
         for i, col in enumerate(layout):
-            layout[i] = [x for x in col if x["type"] != "quote"]
+            layout[i] = [
+                x
+                for x in col
+                if x.get("node_quote_uuid", None) != node_quote_uuid
+            ]
 
         self.layout = layout
         self.save()
 
-    def update_quote(self, color, format, rotate, favorites_only=False):
+    def update_quote(self, node_quote_uuid, color, format, rotate, favorites_only=False):
 
         for column in self.layout:
             for row in column:
-                if row["type"] == "quote":
+                if row.get("node_quote_uuid", None) == node_quote_uuid:
                     row["color"] = color
                     row["format"] = format
                     row["rotate"] = rotate

@@ -351,9 +351,10 @@ def add_quote(request):
 def remove_quote(request):
 
     node_uuid = request.POST["node_uuid"]
+    node_quote_uuid = request.POST["node_quote_uuid"]
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
-    node.remove_quote()
+    node.remove_quote(node_quote_uuid)
 
     response = {
         "status": "OK",
@@ -367,13 +368,14 @@ def remove_quote(request):
 def update_quote(request):
 
     node_uuid = request.POST["node_uuid"]
+    node_quote_uuid = request.POST["node_quote_uuid"]
     format = request.POST["format"]
     color = int(request.POST["color"])
     rotate = int(request.POST["rotate"])
     favorites_only = True if request.POST["favorites_only"] == "true" else False
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
-    node.update_quote(color, format, rotate, favorites_only)
+    node.update_quote(node_quote_uuid, color, format, rotate, favorites_only)
 
     response = {
         "status": "OK",

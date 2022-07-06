@@ -139,40 +139,42 @@ def test_node_remove_image(node, blob_image_factory):
 
 def test_node_add_quote(node, quote):
 
-    node.add_quote(quote.uuid)
+    node_quote_uuid = node.add_quote(quote.uuid)
 
     # Verify that the quote has been added to the node's layout
     assert str(quote.uuid) in [
         val["uuid"]
         for sublist in node.layout
         for val in sublist
-        if "uuid" in val
+        if "node_quote_uuid" in val
+        and val["node_quote_uuid"] == node_quote_uuid
     ]
 
 
 def test_node_remove_quote(node, quote):
 
-    node.add_quote(quote.uuid)
-    node.remove_quote()
+    node_quote_uuid = node.add_quote(quote.uuid)
+    node.remove_quote(node_quote_uuid)
 
     # Verify that the quote has been removed from the node's layout
     assert str(quote.uuid) not in [
         val["uuid"]
         for sublist in node.layout
         for val in sublist
-        if "uuid" in val
+        if "node_quote_uuid" in val
+        and val["node_quote_uuid"] == node_quote_uuid
     ]
 
 
 def test_node_update_quote(node, quote):
 
-    node.add_quote(quote.uuid)
+    node_quote_uuid = node.add_quote(quote.uuid)
     color = 2
     format = "standard"
     rotate = 10
     favorites_only = "false"
 
-    node.update_quote(color, format, rotate, favorites_only)
+    node.update_quote(node_quote_uuid, color, format, rotate, favorites_only)
 
     # Verify that the quote's properties have been updated in the node's layout
     updated_node = Node.objects.get(uuid=node.uuid)
@@ -181,13 +183,13 @@ def test_node_update_quote(node, quote):
         val["color"]
         for sublist in updated_node.layout
         for val in sublist
-        if val["type"] == "quote"
+        if val["type"] == "quote" and val.get("node_quote_uuid", None) == str(node_quote_uuid)
     ]
     assert rotate in [
         val["rotate"]
         for sublist in updated_node.layout
         for val in sublist
-        if val["type"] == "quote"
+        if val["type"] == "quote" and val.get("node_quote_uuid", None) == str(node_quote_uuid)
     ]
 
 

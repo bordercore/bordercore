@@ -157,6 +157,7 @@
                     this.updateQuoteUrl,
                     {
                         "node_uuid": this.$store.state.nodeUuid,
+                        "node_quote_uuid": quote.node_quote_uuid,
                         "color": quote.color,
                         "format": quote.format,
                         "rotate": quote.rotate,
