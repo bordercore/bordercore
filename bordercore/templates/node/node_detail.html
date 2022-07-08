@@ -15,9 +15,11 @@
                 <li class="breadcrumb-item active">{{ node.name }}</li>
             </ul>
         </div>
-        <div v-if="$store.state.editLayout" class="text-primary ms-auto me-5">
-            Edit Layout
-        </div>
+        <Transition name="fade">
+            <div v-if="$store.state.editLayout" class="text-primary ms-auto me-5">
+                Edit Layout
+            </div>
+        </Transition>
         <drop-down-menu
             ref="dropDownMenu"
             class="me-3"
