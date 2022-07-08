@@ -1,6 +1,56 @@
 // Base styles
 @import "../variables";
 
+* {
+  --brand-hue: 231;
+  --brand-saturation: 57%;
+  --brand-lightness: 15%;
+
+  --alpha: 0.8;
+
+  --text-hue: var(--brand-hue);
+  --text-saturation: 15%;
+  --text-lightness: 85%;
+
+  --text1: hsl(var(--brand-hue) var(--text-saturation) var(--text-lightness));
+  --text2: hsl(var(--brand-hue) 5% 65%);
+
+  // highlight
+  --text3-hue: 164;
+  --text3-saturation: 89%;
+  --text3-lightness: 69%;
+  --text3: hsl(var(--text3-hue) var(--text3-saturation) var(--text3-lightness));
+
+  --text4: #6ea6e0;
+
+  // "on hover" links
+  --text5: #10ff00;
+
+  --text6: #4591ff;
+
+  --text-disabled: #333;
+  --text-em: ##ffff00;
+
+  --surface1: hsl(var(--brand-hue) var(--brand-saturation) var(--brand-lightness));
+  --surface1-alpha: hsl(var(--brand-hue) var(--brand-saturation) var(--brand-lightness) var(--alpha));
+
+  // on-hover
+  --surface2: hsl(var(--brand-hue) calc(var(--brand-saturation) + 15%) var(--brand-lightness));
+
+  --surface3: hsl(var(--brand-hue) calc(var(--brand-saturation) + 25%) calc(var(--brand-lightness) + 10%));
+  --surface4: hsl(var(--brand-hue) calc(var(--brand-saturation) + 35%) calc(var(--brand-lightness) + 15%));
+
+  --surface5: #3e3e6b;
+
+  // Slightly lighter than the background
+  --surface6: #20253e;
+
+  --surface7: #7367f0;
+
+  --border-radius1: 0.25rem; // bootstrap default, defined by $border-radius
+  --border-radius2: 0.40rem;
+}
+
 // Custom Bootswatch variables which overrides the "darkly" theme
 $gray-700: #27293d;
 $gray-900: #262c49;
@@ -9,16 +59,20 @@ $primary: #6ea6e0;
 @import "../../../node_modules/bootswatch/dist/darkly/variables";
 
 // Custom Bootstrap variables
-$form-select-indicator-color: $white;
-$modal-header-border-color: #00ffd1;
-$pagination-bg: #4c547e;
-$pagination-disabled-bg: #2d3652;
-$pagination-hover-bg: #5c7cbf;
+$form-select-indicator-color: var(--text1);
+$modal-header-border-color: var(--text3);
+$pagination-bg: var(--surface5);
+$pagination-disabled-bg: var(--surface1);
+$pagination-hover-bg: var(--surface7);
 
-$table-cell-padding-y: .75rem;
-$table-cell-padding-x: .75rem;
+// $nav-link-hover-color: var(--text5); // TODO: does not work
+$nav-tabs-border-color: var(--surface5);
+$nav-tabs-border-width: 0.18rem;
 
-$list-group-item-padding-y: .75rem;
+$table-cell-padding-y: 0.75rem;
+$table-cell-padding-x: 0.75rem;
+
+$list-group-item-padding-y: 0.75rem;
 $list-group-item-padding-x: 1.25rem;
 
 $spacer: 1rem;
@@ -38,48 +92,25 @@ $card-spacer-x: $spacer * 1.25;
 @import "../../../static/css/prism-synthwave84.css";
 
 // Custom colors for this theme
-$bg-color: $gray-900;
-$bg-dark: #10163a;
-$bg-light: #262c49;
-$text-selection-bg: #0d5cc5;
-$blob-list-nav: #333c6f;
-$body-bg: #161e4e;
-$button-plus-hover-bg: #141d4f;
-$close-button-hover-color: #6af6d0;
-$form-color: #6ea6e0;
-$form-bg: #3e3e6b;
-$form-bg-focus: #10163a;
-$form-bg-disabled: #2c2c49;
-$form-border-color-hover: #7fe7c4;
-$light-blue: #212132;
-$link-hover-color: $green;
-$list-group-item-secondary-bg: $bg-dark;
-$drill-progress-circle-partial-color: #28a745;
-$drill-progress-circle-full-color: #262c49;
-$dropdown-color: $cyan;
-$dropdown-hover-bg: $bg-dark;
-$dropdown-hover-color: $white;
-$dropdown-menu-bg: $gray-700;
-$dropdown-menu-color: $white;
-$icon-glow-color: #7fe7c4;
-$link-color: #28a745;
-$link-decoration-color: #10ff00;
-$markdown-heading: #6af6d0;
+$form-bg: var(--surface5);
+$form-bg-focus: var(--surface1);
+$form-bg-disabled: var(--surface2);
+$form-border-color-hover: var(--text3);
+
+$icon-glow-color: var(--text3);
+
+$markdown-heading: var(--text3);
 $markdown-bg: $gray-700;
-$markdown-blockquote-bg: #33364b;
-$markdown-blockquote-border-left: #00ffd1;
+$markdown-blockquote-bg: var(--surface6);
+$markdown-blockquote-border-left: var(--text3);
 $markdown-border-color: $gray-600;
-$markdown-code-bg: #33364b;
-$markdown-code-color: #46b7e3;
+$markdown-code-bg: var(--surface6);
+$markdown-code-color: var(--text6);
+
 $modal-bg: $gray-900;
-$nav-border-color: #36496b;
-$nav-highlight-color: #0f0;
-$nav-not-selected-color: #888;
-$selected-bg: lighten($bg-color, 10%);
-$strong-color: #5bbad4;
-$text-highlight: #6ac2f6;
-$tree-menu-color: #2fa4e7;
-$tree-menu-folder-color: #00eaff;
+
+$nav-highlight-color: var(--text5);
+
 $vue-simple-suggest-item-bg: $gray-900;
 $vue-simple-suggest-item-hover-bold-color: $primary;
 
@@ -90,24 +121,20 @@ $table-accent-bg: $gray-900 !default;
 }
 
 .btn-primary {
-  background-color: #05376c;
+  background-color: var(--surface1);
 }
 
 em {
-  color: #00ffd1;
+  color: var(--text3);
 }
 
 .text-emphasis {
-  color: $white;
-}
-
-.gray {
-  color: #b6b6b6;
+  color: var(--text1);
 }
 
 // The close button for Bootstrap modals
 .modal-header .close {
-  color: $white;
+  color: var(--text1);
 }
 
 h4 {
@@ -124,14 +151,14 @@ hr {
 }
 
 .notice-big {
-  background-color: #094167;
+  background-color: var(--surface5);
 
-  span {
-    color: #67b9f0;
+  div.message {
+    color: var(--text3);
   }
 
   .message {
-    color: #fff;
+    color: var(--text1);
   }
 }
 

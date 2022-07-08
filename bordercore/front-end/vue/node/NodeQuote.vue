@@ -1,6 +1,6 @@
 <template>
     <div class="hover-target" @mouseover="hover = true" @mouseleave="hover = false">
-        <card class="backdrop-filter hover-1" :class="cardClass" title="">
+        <card class="backdrop-filter" :class="cardClass" title="">
             <template #title-slot>
                 <div v-if="nodeQuoteInitial.format !== 'minimal'" class="dropdown-height d-flex">
                     <div v-cloak class="card-title d-flex">

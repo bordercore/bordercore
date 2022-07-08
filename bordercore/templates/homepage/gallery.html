@@ -4,7 +4,7 @@
 
 {% block content %}
 
-    <div class="p-3" id="vue-app">
+    <div class="p-3" id="gallery">
 
         <h1>
         A gallery of Bordercore content
@@ -13,6 +13,67 @@
         <h4>
         This page contains all of the display elements found throughout Bordercore, useful for testing various CSS with both light and dark themes.
         </h4>
+
+        <h4 class="mt-5">Colors</h4>
+
+        <ul id="surfaces" class="list-unstyled">
+            <li>--surface1</li>
+            <li>--surface2</li>
+            <li>--surface3</li>
+            <li>--surface4</li>
+            <li>--surface5</li>
+            <li>--surface6</li>
+            <li>--surface7</li>
+            </ul>
+
+        <ul id="texts" class="list-unstyled">
+            <li>
+                <span class="me-3">--text1</span>
+                <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore</span>
+            </li>
+            <li>
+                <span class="me-3">--text2</span>
+                <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore</span>
+            </li>
+            <li>
+                <span class="me-3">--text3</span>
+                <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore</span>
+            </li>
+            <li>
+                <span class="me-3">--text4</span>
+                <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore</span>
+            </li>
+            <li>
+                <span class="me-3">--text5</span>
+                <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore</span>
+            </li>
+            <li>
+                <span class="me-3">--text6</span>
+                <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore</span>
+                </li>
+                <li>
+                <span class="me-3">--text-disabled</span>
+                <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore</span>
+            </li>
+        </ul>
+
+        <ul class="list-unstyled">
+            <li>
+                <a href="">Link</a>
+            </li>
+            <li>
+                <span class="me-3">Strong text</span>
+                <span>
+                    <strong>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore</strong>
+                </span>
+            </li>
+            <li>
+                <span class="me-3">Normal and strong text</span>
+                <span>
+                    Lorem ipsum <strong>dolor sit amet</strong>, consectetur adipiscing elit, <strong>sed do eiusmod tempor</strong> incididunt ut labore
+                </span>
+                </li>
+                </ul>
 
         <h4 class="mt-5">Code blocks</h4>
 
@@ -121,7 +182,7 @@
     <script type="text/javascript" charset="utf-8">
 
         new Vue({
-            el: "#vue-app",
+            el: "#gallery",
             data() {
                 return {
                     javascript_sample: `
