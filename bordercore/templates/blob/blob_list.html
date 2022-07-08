@@ -21,9 +21,12 @@
             </div>
         </div>
 
-        <ul class="blob-list-nav list-group list-group-horizontal list-unstyled mx-3">
-            <li v-for="nav in navAll" v-if="nav === 'All' || doctypeCount(nav) > 0" class="px-5 m-3 mx-auto justify-content-center" v-bind:class="{ 'nav-selected': nav === navCurrent }" @click="onClickNav(nav)">
-                <span class="text-center"><a href="#" v-cloak>[[ nav ]]</a></span><span class="ms-1 badge bg-info" v-html="doctypeCount(nav)"></span>
+        <ul class="nav nav-tabs mx-3">
+            <li v-for="nav in navAll" v-if="nav === 'All' || doctypeCount(nav) > 0" class="nav-item px-5" @click="onClickNav(nav)">
+                <a class="nav-link" data-bs-toggle="tab" href="#" v-cloak>
+                    [[ nav ]]
+                    <span class="badge bg-info align-middle ms-2" v-html="doctypeCount(nav)"></span>
+                </a>
             </li>
         </ul>
 
@@ -158,6 +161,9 @@
             },
             mounted() {
                 this.getRecentBlobs();
+
+                // Select the first tab ("All") by default
+                this.$el.querySelector(".nav li a").classList.add("active");
             }
 
         });

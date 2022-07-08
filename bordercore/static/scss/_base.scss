@@ -1244,10 +1244,6 @@ pre {
 // Blobs
 //
 
-.blob-list-nav {
-  background-color: var(--surface5);
-}
-
 .blob-list {
   .blob-content {
     overflow: hidden;
@@ -1262,10 +1258,6 @@ pre {
   &:hover {
     background-color: rgba(0, 0, 0, 0.2);
   }
-}
-
-.nav-selected {
-  border-bottom: 0.31rem solid var(--text5);
 }
 
 #blob-name {
