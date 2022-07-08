@@ -46,7 +46,7 @@
                                     <transition-group type="transition">
                                         <li v-for="feed in feedList" :key="feed.id" v-cloak>
                                             <a href="#" :data-id="feed.id" @click.prevent="onClick(feed)">[[ feed.name ]]</a>
-                                            <span v-if="feed.lastResponse !== 'OK'" class="list-annotation">[[ feed.lastResponseCode ]]</span>
+                                            <small v-if="feed.lastResponse !== 'OK'" class="text-danger">[[ feed.lastResponse ]]</small>
                                         </li>
                                     </transition-group>
                                 </draggable>

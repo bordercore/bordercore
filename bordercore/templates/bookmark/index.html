@@ -12,12 +12,12 @@
 
                 <h4>Pinned Tags</h4>
 
-                <ul id="sort-container-tags" class="list-group flex-column w-100" v-cloak>
+                <ul class="list-group flex-column w-100" v-cloak>
                     <tag-list inline-template>
                         <div>
                             <draggable v-model="$store.state.pinnedTags" @change="onSortTags" ghost-class="sortable-ghost" draggable=".draggable">
                                 <transition-group type="transition" class="w-100">
-                                    <li v-for="tag in $store.state.pinnedTags" class="bookmark-tag-list d-flex ps-2 py-1 pr-1" :class="{ 'selected rounded-sm': tag.name === $store.state.selectedTagName, draggable: tag.isDraggable }" @click.prevent="onClickTag" :data-tag="tag.name" :data-id="tag.id" :key="tag.id" @dragover="onDragOverTag($event)" @dragleave="onDragLeaveTag($event)" @drop="onAddTagToBookmark($event, tag)">
+                                    <li v-for="tag in $store.state.pinnedTags" class="bookmark-tag-list rounded d-flex ps-2 py-1 pr-1" :class="{ 'selected': tag.name === $store.state.selectedTagName, draggable: tag.isDraggable }" @click.prevent="onClickTag" :data-tag="tag.name" :data-id="tag.id" :key="tag.id" @dragover="onDragOverTag($event)" @dragleave="onDragLeaveTag($event)" @drop="onAddTagToBookmark($event, tag)">
                                         <div class="ps-2 text-truncate">
                                             [[ tag.name ]]
                                         </div>

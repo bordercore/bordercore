@@ -3,9 +3,9 @@
         <h3>
             <font-awesome-icon icon="search" />
         </h3>
-        <div class="message ms-3">
+        <div class="message ms-2">
             <h3>
-                <span>{{ title }}</span>
+                {{ title }}
             </h3>
             <slot name="message" />
         </div>

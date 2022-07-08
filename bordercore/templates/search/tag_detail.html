@@ -63,7 +63,7 @@
         <br />
 
         <tab-list inline-template>
-            <ul class="nav mx-3" id="myTab">
+            <ul class="nav nav-tabs mx-3">
                 {% for doctype in doctype_counts %}
                     <li class="nav-item" data-type="{{ doctype.0 }}" @click="onClick">
                         <a class="nav-link" data-bs-toggle="tab" href="#{{ doctype.0 }}">
@@ -378,7 +378,7 @@
             },
             mounted() {
 
-                const triggerTabList = [].slice.call(document.querySelectorAll("#myTab a"));
+                const triggerTabList = [].slice.call(this.$el.querySelectorAll(".nav a"));
                 triggerTabList.forEach(function (triggerEl) {
                     const tabTrigger = new Tab(triggerEl);
 
@@ -389,15 +389,15 @@
                 });
 
                 {% if kb_tag_detail_current_tab and kb_tag_detail_current_tab in doctypes %}
-                const triggerFirstTabEl = document.querySelector("li[data-type='{{ kb_tag_detail_current_tab }}'] a");
+                const triggerFirstTabEl = this.$el.querySelector("li[data-type='{{ kb_tag_detail_current_tab }}'] a");
                 Tab.getInstance(triggerFirstTabEl).show();
 
                 {% else %}
                 // If the tab stored in the session doesn't match any current tab categories,
                 //  select the first tab.
-                const triggerFirstTabEl = document.querySelector("#myTab li:first-child a");
-                if (triggerFirstTabEl != undefined) {
-                    Tab.getInstance(triggerFirstTabEl).show();
+                const triggerFirstTabEl = this.$el.querySelector(".nav li:first-child a");
+                    if (triggerFirstTabEl != undefined) {
+                        Tab.getInstance(triggerFirstTabEl).show();
                 }
 
                 {% endif %}
