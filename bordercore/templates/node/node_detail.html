@@ -118,8 +118,7 @@
                         <div v-if="obj.type === 'note'" :draggable="$store.state.editLayout" :key="obj.uuid">
                             <node-note
                                 node-uuid="{{ object.uuid }}"
-                                :note-uuid="obj.uuid"
-                                :note-color="obj.color"
+                                :node-note-initial="obj"
                                 :get-node-url="'{% url "blob-detail" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', obj.uuid)"
                                 :update-note-url="'{% url "blob-detail" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', obj.uuid)"
                                 :set-note-color-url="'{% url "node:set_note_color" %}'"
@@ -284,16 +283,14 @@
                         ""
                     );
                 },
-                addNote() {
-                    const name = document.getElementById("id_name_note").value;
-                    const color = this.$refs.noteUpdate.selectedColor;
+                addNote(note) {
                     doPost(
                         this,
                         "{% url "node:add_note" %}",
                         {
                             "node_uuid": this.$store.state.nodeUuid,
-                            "note_name": name,
-                            "color": color,
+                            "note_name": note.name,
+                            "color": note.color,
                         },
                         (response) => {
                             EventBus.$emit("update-layout", response.data.layout);
@@ -398,8 +395,8 @@
                 openModalNoteImage(data) {
                     this.$refs.noteImage.openModal(data);
                 },
-                openModalQuoteUpdate(callback, quote) {
-                    this.$refs.quoteUpdate.openModal("Update", callback, quote);
+                openModalQuoteUpdate(callback, data) {
+                    this.$refs.quoteUpdate.openModal("Update", callback, data);
                 },
                 onDeleteNote(noteUuid) {
                     doPost(
@@ -450,7 +447,7 @@
                 });
 
                 EventBus.$on("open-note-modal", (payload) => {
-                    this.$refs.noteUpdate.openModal("Add", this.addNote, {"note": {"name": null}, "color": null});
+                    this.$refs.noteUpdate.openModal("Add", this.addNote, {"color": 1});
                 });
 
                 EventBus.$on("object-select-image", (payload) => {

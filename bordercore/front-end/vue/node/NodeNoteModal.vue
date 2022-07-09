@@ -12,7 +12,7 @@
                     <div class="row mb-3">
                         <label class="col-lg-3 col-form-label" for="inputTitle">Name</label>
                         <div class="col-lg-9">
-                            <input id="id_name_note" v-model="data.name" type="text" class="form-control" autocomplete="off" maxlength="200" required @keyup.enter="onUpdateNote">
+                            <input id="id_name_note" v-model="nodeNote.name" type="text" class="form-control" autocomplete="off" maxlength="200" required @keyup.enter="onUpdateNote">
                         </div>
                     </div>
                     <div class="row mb-3">
@@ -25,7 +25,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <input id="btn-action" class="btn btn-primary" type="button" value="Update" @click="onUpdateNote">
+                    <input id="btn-action" class="btn btn-primary" type="button" :value="action" @click="onUpdateNote">
                 </div>
             </div>
         </div>
@@ -42,8 +42,8 @@
                 action: "Update",
                 callback: null,
                 modal: null,
-                data: {},
-                selectedColor: null,
+                nodeNote: {},
+                nodeNoteInitial: {},
                 colors: [1, 2, 3],
             };
         },
@@ -52,25 +52,27 @@
         },
         methods: {
             getClass(color) {
-                const currentColor = `node-color-${color}`;
-                const selectedColor = color === this.selectedColor ? "selected-color" : "";
-                return `${currentColor} ${selectedColor}`;
+                const selectedColor = color === (this.nodeNote && this.nodeNote.color) ? "selected-color" : "";
+                return `node-color-${color} ${selectedColor}`;
             },
-            openModal(action, callback, data) {
+            openModal(action, callback, nodeNote) {
+                this.nodeNote = nodeNote;
+                this.nodeNoteInitial = {...nodeNote};
                 this.action = action;
                 this.callback = callback;
-                this.data = data.note;
-                this.selectedColor = data.color;
                 this.modal.show();
                 setTimeout( () => {
                     document.querySelector("#modalUpdateNote input").focus();
                 }, 500);
             },
             onSelectColor(color) {
-                this.selectedColor = color;
+                this.nodeNote.color = color;
             },
             onUpdateNote() {
-                this.callback(this.selectedColor);
+                // If any of the properties have changed, trigger the callback
+                if (this.nodeNote !== this.nodeNoteInitial) {
+                    this.callback(this.nodeNote);
+                }
                 this.modal.hide();
             },
         },
