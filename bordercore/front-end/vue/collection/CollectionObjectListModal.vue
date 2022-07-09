@@ -12,7 +12,7 @@
                     <div class="row mb-3">
                         <label class="col-lg-3 col-form-label" for="inputTitle">Name</label>
                         <div class="col-lg-9">
-                            <input id="id_name_collection" type="text" name="name" :value="data.name" class="form-control" autocomplete="off" maxlength="200" required @keyup.enter="onUpdateCollection">
+                            <input v-model="collectionObjectList.name" type="text" class="form-control" autocomplete="off" maxlength="200" required @keyup.enter="onUpdateCollection">
                         </div>
                     </div>
                 </div>
@@ -33,25 +33,30 @@
             return {
                 action: "Update",
                 callback: null,
+                collectionObjectList: {},
+                collectionObjectListInitial: {},
                 modal: null,
-                data: {},
             };
         },
         mounted() {
             this.modal = new Modal("#modalUpdateCollection");
         },
         methods: {
-            openModal(action, callback, data) {
+            openModal(action, callback, collectionObjectList) {
+                this.collectionObjectList = collectionObjectList;
+                this.collectionObjectListInitial = {...collectionObjectList};
                 this.action = action;
                 this.callback = callback;
-                this.data = data;
                 this.modal.show();
                 setTimeout( () => {
                     document.querySelector("#modalUpdateCollection input").focus();
                 }, 500);
             },
             onUpdateCollection() {
-                this.callback();
+                // If any of the properties have changed, trigger the callback
+                if (this.collectionObjectList !== this.collectionObjectListInitial) {
+                    this.callback(this.collectionObjectList);
+                }
                 this.modal.hide();
             },
         },

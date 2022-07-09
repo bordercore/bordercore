@@ -5,7 +5,7 @@
                 <div class="card-title d-flex">
                     <div>
                         <font-awesome-icon icon="splotch" class="text-primary me-3" />
-                        {{ name }}
+                        {{ collectionObjectList.name }}
                     </div>
                     <div class="dropdown-menu-container ms-auto">
                         <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
@@ -87,6 +87,10 @@
 
         name: "CollectionObjectList",
         props: {
+            collectionObjectListInitial: {
+                type: Object,
+                default: function() {},
+            },
             initialName: {
                 type: String,
                 default: "",
@@ -118,12 +122,14 @@
         },
         data() {
             return {
+                collectionObjectList: {},
                 objectList: [],
-                show: false,
                 name: null,
+                show: false,
             };
         },
         mounted() {
+            this.collectionObjectList = this.collectionObjectListInitial;
             this.name = this.initialName;
             this.getObjectList();
         },
@@ -174,19 +180,18 @@
                 this.$parent.$parent.$refs.objectSelectCollection.openModal(this.getObjectList, {"collectionUuid": this.uuid});
             },
             onEditCollection() {
-                this.$emit("open-modal-collection-update", this.onUpdateCollection, {name: this.name});
+                this.$emit("open-modal-collection-update", this.onUpdateCollection, this.collectionObjectList);
             },
-            onUpdateCollection() {
-                const name = document.getElementById("id_name_collection").value;
+            onUpdateCollection(collectionObjectList) {
                 doPut(
                     this,
                     this.updateCollectionUrl.replace(/00000000-0000-0000-0000-000000000000/, this.uuid),
                     {
-                        "name": name,
+                        "name": collectionObjectList.name,
                         "is_private": true,
                     },
                     (response) => {
-                        this.name = name;
+                        this.collectionObjectList.name = collectionObjectList.name;
                     },
                     "Collection updated",
                 );
