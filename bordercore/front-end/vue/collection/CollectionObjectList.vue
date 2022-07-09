@@ -1,5 +1,5 @@
 <template>
-    <div class="hover-reveal-target">
+    <div class="hover-reveal-target" @mouseover="hover = true" @mouseleave="hover = false">
         <card title="" class="backdrop-filter hover-1 position-relative">
             <template #title-slot>
                 <div class="card-title d-flex">
@@ -36,7 +36,10 @@
 
             <template #content>
                 <hr class="filter-divider mt-0">
-                <ul id="sort-container-tags" class="list-group list-group-flush interior-borders">
+                <div v-if="collectionObjectList.display === 'individual'">
+                    <img v-if="currentObjectIndex !== null" :src="objectList[currentObjectIndex].cover_url_large" class="mw-100" @click="onClick()">
+                </div>
+                <ul v-else id="sort-container-tags" class="list-group list-group-flush interior-borders">
                     <draggable v-model="objectList" ghost-class="sortable-ghost" draggable=".draggable" @change="onSort">
                         <transition-group type="transition" class="w-100">
                             <li v-for="(object, index) in objectList" v-cloak :key="object.uuid" class="hover-target list-group-item list-group-item-secondary text-info draggable pe-0" :data-uuid="object.uuid">
@@ -87,13 +90,13 @@
 
         name: "CollectionObjectList",
         props: {
+            nodeUuid: {
+                type: String,
+                default: "",
+            },
             collectionObjectListInitial: {
                 type: Object,
                 default: function() {},
-            },
-            initialName: {
-                type: String,
-                default: "",
             },
             uuid: {
                 type: String,
@@ -123,15 +126,32 @@
         data() {
             return {
                 collectionObjectList: {},
+                currentObjectIndex: null,
+                hover: false,
                 objectList: [],
-                name: null,
+                rotateInterval: null,
                 show: false,
             };
         },
         mounted() {
             this.collectionObjectList = this.collectionObjectListInitial;
-            this.name = this.initialName;
             this.getObjectList();
+
+            const self = this;
+
+            hotkeys("left,right", function(event, handler) {
+                if (!self.hover) {
+                    return;
+                }
+                switch (handler.key) {
+                    case "left":
+                        self.showPreviousObject();
+                        break;
+                    case "right":
+                        self.showNextObject();
+                        break;
+                }
+            });
         },
         methods: {
             editNote(object, index) {
@@ -139,6 +159,9 @@
                 this.$nextTick(() => {
                     this.$refs.input[index].focus();
                 });
+            },
+            onClick() {
+                this.$emit("open-modal-note-image", this.objectList[this.currentObjectIndex].cover_url_large);
             },
             updateNote(object, note) {
                 // If the note hasn't changed, abort
@@ -172,6 +195,10 @@
                         for (const blob of this.objectList) {
                             this.$set(blob, "noteIsEditable", false);
                         }
+                        this.currentObjectIndex = 0;
+                        if (this.collectionObjectList.rotate !== null && this.collectionObjectList.rotate !== -1) {
+                            this.setTimer();
+                        }
                     },
                     "Error getting object list",
                 );
@@ -183,15 +210,20 @@
                 this.$emit("open-modal-collection-update", this.onUpdateCollection, this.collectionObjectList);
             },
             onUpdateCollection(collectionObjectList) {
-                doPut(
+                doPost(
                     this,
-                    this.updateCollectionUrl.replace(/00000000-0000-0000-0000-000000000000/, this.uuid),
+                    this.updateCollectionUrl,
                     {
+                        "collection_uuid": this.uuid,
+                        "node_uuid": this.nodeUuid,
                         "name": collectionObjectList.name,
-                        "is_private": true,
+                        "display": collectionObjectList.display,
+                        "rotate": collectionObjectList.rotate,
                     },
                     (response) => {
                         this.collectionObjectList.name = collectionObjectList.name;
+                        this.collectionObjectList.display = collectionObjectList.display;
+                        this.setTimer();
                     },
                     "Collection updated",
                 );
@@ -232,6 +264,29 @@
                     "Object removed",
                     "",
                 );
+            },
+            setTimer() {
+                if (!this.collectionObjectList.rotate || this.collectionObjectList.rotate === -1) {
+                    return;
+                }
+                clearInterval(this.rotateInterval);
+                this.rotateInterval = setInterval( () => {
+                    this.showNextObject();
+                }, this.collectionObjectList.rotate * 1000 * 60);
+            },
+            showNextObject() {
+                if (this.currentObjectIndex === this.objectList.length - 1) {
+                    this.currentObjectIndex = 0;
+                } else {
+                    this.currentObjectIndex++;
+                }
+            },
+            showPreviousObject() {
+                if (this.currentObjectIndex === 0) {
+                    this.currentObjectIndex = this.objectList.length - 1;
+                } else {
+                    this.currentObjectIndex--;
+                }
             },
         },
     };

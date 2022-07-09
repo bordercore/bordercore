@@ -40,11 +40,21 @@ class Node(TimeStampedModel):
         collection = Collection.objects.create(name=name, user=self.user, is_private=True)
 
         layout = self.layout
-        layout[0].insert(0, {"type": "collection", "uuid": str(collection.uuid)})
+        layout[0].insert(0, {"type": "collection", "uuid": str(collection.uuid), "display": "list"})
         self.layout = layout
         self.save()
 
         return collection
+
+    def update_collection(self, collection_uuid, display, rotate):
+
+        for column in self.layout:
+            for row in column:
+                if "uuid" in row and row["uuid"] == collection_uuid:
+                    row["display"] = display
+                    row["rotate"] = rotate
+
+        self.save()
 
     def delete_collection(self, collection_uuid):
 

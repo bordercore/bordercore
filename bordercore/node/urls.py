@@ -56,6 +56,11 @@ urlpatterns = [
         name="add_collection"
     ),
     path(
+        route="collection/update/",
+        view=views.update_collection,
+        name="update_collection"
+    ),
+    path(
         route="collection/delete",
         view=views.delete_collection,
         name="delete_collection"

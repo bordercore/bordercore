@@ -76,7 +76,7 @@
         data() {
             return {
                 hover: false,
-                interval: null,
+                rotateInterval: null,
                 nodeQuote: {},
                 quote: {},
             };
@@ -146,8 +146,8 @@
                 if (!this.nodeQuote.rotate || this.nodeQuote.rotate === -1) {
                     return;
                 }
-                clearInterval(this.interval);
-                this.interval = setInterval( () => {
+                clearInterval(this.rotateInterval);
+                this.rotateInterval = setInterval( () => {
                     this.getRandomQuote();
                 }, this.nodeQuote.rotate * 1000 * 60);
             },

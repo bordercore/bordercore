@@ -26,6 +26,31 @@ def test_node_add_collection(node):
     ]
 
 
+def test_node_update_collection(node):
+
+    collection = node.add_collection()
+    display = "individual"
+    rotate = "rotate"
+
+    node.update_collection(str(collection.uuid), display, rotate)
+
+    # Verify that the collection's properties have been updated in the node's layout
+    updated_node = Node.objects.get(uuid=node.uuid)
+
+    assert display in [
+        val["display"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if "uuid" in val and val["uuid"] == str(collection.uuid)
+    ]
+    assert rotate in [
+        val["rotate"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if "uuid" in val and val["uuid"] == str(collection.uuid)
+    ]
+
+
 def test_node_delete_collection(node):
 
     collection = node.add_collection()

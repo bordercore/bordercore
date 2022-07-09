@@ -105,6 +105,46 @@ def test_add_collection(auto_login_user, node):
     ]
 
 
+def test_update_collection(auto_login_user, node, quote):
+
+    user, client = auto_login_user()
+
+    collection = node.add_collection()
+    name = faker.text(max_nb_chars=32)
+    display = "individual"
+    rotate = "rotate"
+
+    url = urls.reverse("node:update_collection")
+    resp = client.post(url, {
+        "collection_uuid": collection.uuid,
+        "node_uuid": node.uuid,
+        "name": name,
+        "display": display,
+        "rotate": rotate,
+    })
+
+    assert resp.status_code == 200
+
+    updated_collection = Collection.objects.get(uuid=collection.uuid)
+    assert updated_collection.name == name
+
+    # Verify that the collections's properties have been updated in the node's layout
+    updated_node = Node.objects.get(uuid=node.uuid)
+
+    assert display in [
+        val["display"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if val["type"] == "collection" and val["uuid"] == str(collection.uuid)
+    ]
+    assert rotate in [
+        val["rotate"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if val["type"] == "collection" and val["uuid"] == str(collection.uuid)
+    ]
+
+
 def test_delete_collection(auto_login_user, node):
 
     _, client = auto_login_user()

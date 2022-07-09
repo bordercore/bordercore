@@ -10,6 +10,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, FormMixin
 from django.views.generic.list import ListView
 
+from collection.models import Collection
 from lib.mixins import FormRequestMixin
 from node.forms import NodeForm
 from quote.models import Quote
@@ -208,6 +209,29 @@ def add_collection(request):
         "status": "OK",
         "collection_uuid": collection.uuid,
         "layout": json.dumps(node.layout)
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def update_collection(request):
+
+    node_uuid = request.POST["node_uuid"]
+    collection_uuid = request.POST["collection_uuid"]
+    name = request.POST["name"]
+    display = request.POST["display"]
+    rotate = request.POST["rotate"]
+
+    collection = Collection.objects.get(uuid=collection_uuid)
+    collection.name = name
+    collection.save()
+
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    node.update_collection(collection_uuid, display, rotate)
+
+    response = {
+        "status": "OK",
     }
 
     return JsonResponse(response)

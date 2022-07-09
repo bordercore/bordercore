@@ -101,15 +101,16 @@
                     <div v-for="(obj, rowIndex) in column" class="position-relative" :style="'z-index: ' + (2*10 - colIndex - rowIndex)">
                         <div v-if="obj.type === 'collection'" :key="obj.uuid">
                             <collection-object-list
-                                :initial-name="obj.name"
+                                node-uuid="{{ object.uuid }}"
                                 :uuid="obj.uuid"
                                 :collection-object-list-initial="obj"
-                                update-collection-url="{% url "collection-detail" "00000000-0000-0000-0000-000000000000" %}"
+                                update-collection-url="{% url "node:update_collection" %}"
                                 update-object-note-url="{% url "collection:update_object_note" %}"
                                 :get-object-list-url="'{% url "collection:get_object_list" '00000000-0000-0000-0000-000000000000' %}'.replace('00000000-0000-0000-0000-000000000000', obj.uuid)"
                                 remove-object-url="{% url "collection:remove_object" %}"
                                 sort-objects-url="{% url "collection:sort_objects" %}"
                                 @delete-collection="onDeleteCollection"
+                                @open-modal-note-image="openModalNoteImage"
                                 @open-modal-collection-update="openModalCollectionUpdate"
                             >
                             </collection-object-list>
@@ -445,7 +446,7 @@
                 });
 
                 EventBus.$on("open-collection-modal", (payload) => {
-                    this.$refs.collectionUpdate.openModal("Add", this.addCollection, {});
+                    this.$refs.collectionUpdate.openModal("Add", this.addCollection, {"display": "list"});
                 });
 
                 EventBus.$on("open-note-modal", (payload) => {

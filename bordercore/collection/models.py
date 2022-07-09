@@ -284,6 +284,7 @@ class CollectionObject(SortOrderMixin):
                 "url": reverse("blob:detail", kwargs={"uuid": self.blob.uuid}),
                 "sha1sum": self.blob.sha1sum,
                 "cover_url": self.blob.get_cover_url_small(),
+                "cover_url_large": self.blob.get_cover_url(),
             }
         elif self.bookmark is not None:
             return {
