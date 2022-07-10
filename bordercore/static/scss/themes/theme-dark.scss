@@ -49,6 +49,16 @@
 
   --border-radius1: 0.25rem; // bootstrap default, defined by $border-radius
   --border-radius2: 0.40rem;
+
+  // Node colors
+  --node-color-1: hsl(231 56% 14%);
+  --node-color-1-tinted: tint-color(var(--node-color-2), 5%);
+  --node-color-2: hsl(290 55% 38%);
+  --node-color-3-tinted: tint-color(var(--node-color-1), 5%);
+  --node-color-3: hsl(225 28% 60%);
+  --node-color-3-tinted: tint-color(var(--node-color-4), 5%);
+  --node-color-4: hsl(206 66% 32%);
+  --node-color-4-tinted: tint-color(var(--node-color-4), 5%);
 }
 
 // Custom Bootswatch variables which overrides the "darkly" theme

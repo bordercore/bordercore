@@ -1613,26 +1613,34 @@ div #dateapp {
 }
 
 .node-color-1 {
-  background-color: #10163a80 !important;
+  background-color: var(--node-color-1) !important;
   transition: 0.3s ease;
   &:hover {
-    background-color: tint-color(#10163a80, 5%) !important;
+    background-color: var(--node-color-1-tinted) !important;
   }
 }
 
 .node-color-2 {
-  background-color: #892c9a80 !important;
+  background-color: var(--node-color-2) !important;
   transition: 0.3s ease;
   &:hover {
-    background-color: tint-color(#892c9a80, 5%) !important;
+    background-color: var(--node-color-2-tinted) !important;
   }
 }
 
 .node-color-3 {
-  background-color: #7f8db880 !important;
+  background-color: var(--node-color-3) !important;
   transition: 0.3s ease;
   &:hover {
-    background-color: tint-color(#7f8db880, 5%) !important;
+    background-color: var(--node-color-3-tinted) !important;
+  }
+}
+
+.node-color-4 {
+  background-color: var(--node-color-4) !important;
+  transition: 0.3s ease;
+  &:hover {
+    background-color: var(--node-color-4-tinted) !important;
   }
 }
 

@@ -44,7 +44,7 @@
                 modal: null,
                 nodeNote: {},
                 nodeNoteInitial: {},
-                colors: [1, 2, 3],
+                colors: [1, 2, 3, 4],
             };
         },
         mounted() {

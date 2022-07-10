@@ -66,7 +66,7 @@
                 modal: null,
                 nodeQuote: {},
                 nodeQuoteInitial: {},
-                colors: [1, 2, 3],
+                colors: [1, 2, 3, 4],
                 formatOptions: [
                     {
                         value: "standard",
