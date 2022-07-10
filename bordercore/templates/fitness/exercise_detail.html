@@ -395,7 +395,7 @@
             data() {
                 return {
                     isActiveExercise: {% if activity_info %}true{% else %}false{% endif %},
-                    description: markdown.render("{{ object.description|safe }}"),
+                    description: markdown.render("{{ object.description|escapejs }}"),
                     showHistoryMessage: {% if activity_info %}true{% else %}false{% endif %},
                     note: "{{ object.note|escapejs }}",
                     relatedExercises: JSON.parse(document.getElementById("related_exercises").textContent),
