@@ -4,7 +4,9 @@
       "prismjs", {
         "languages": [
         "css",
+        "diff",
         "javascript",
+        "json",
         "lisp",
         "markup",
         "python",
