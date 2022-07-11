@@ -191,6 +191,7 @@ class Question(TimeStampedModel):
                 "question": self.question,
                 "answer": self.answer,
                 "tags": [tag.name for tag in self.tags.all()],
+                "importance": 10 if self.is_favorite else 1,
                 "last_modified": self.modified,
                 "doctype": "drill",
                 "date": {"gte": self.created.strftime("%Y-%m-%d %H:%M:%S"), "lte": self.created.strftime("%Y-%m-%d %H:%M:%S")},
