@@ -50,14 +50,15 @@
   --border-radius2: 0.40rem;
 
   // Node colors
+  // Increase the HSL lightness by 5% for the tinted properties
   --node-color-1: hsl(231 56% 14%);
-  --node-color-1-tinted: tint-color(var(--node-color-1), 5%);
+  --node-color-1-tinted: hsl(231 56% 19%);
   --node-color-2: hsl(290 55% 38%);
-  --node-color-2-tinted: tint-color(var(--node-color-2), 5%);
-  --node-color-3: #7f8db880;
-  --node-color-3-tinted: tint-color(var(--node-color-3), 5%);
+  --node-color-2-tinted: hsl(290 55% 43%);
+  --node-color-3: hsl(225, 29%, 41%);
+  --node-color-3-tinted: hsl(225, 29%, 46%);
   --node-color-4: hsl(206 66% 32%);
-  --node-color-4-tinted: tint-color(var(--node-color-4), 5%);
+  --node-color-4-tinted: hsl(206 66% 37%);
 
   // Override Bootstrap CSS properties
   --bs-body-color: var(--text1);

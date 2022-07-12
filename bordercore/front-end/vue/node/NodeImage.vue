@@ -9,7 +9,7 @@
                             {{ imageTitle }}
                         </div>
                     </div>
-                    <div class="ms-auto">
+                    <div class="dropdown-menu-container ms-auto">
                         <drop-down-menu :show-on-hover="true">
                             <div slot="dropdown">
                                 <a class="dropdown-item" href="#" @click.prevent="onRemoveImage()">

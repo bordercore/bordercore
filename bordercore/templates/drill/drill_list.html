@@ -73,10 +73,11 @@
 
                 <template v-slot:content>
                     <ul class="list-unstyled">
-                        <li class="d-flex table_header px-2 py-1 mb-2">
+                        <li class="d-flex text-primary px-2 py-1">
                             <div class="flex-fill fw-bold">Tag</div>
                             <div class="fw-bold">Question Count</div>
                         </li>
+                        <hr class="divider my-1" />
                         {% for tag in tags_still_learning %}
                             <li class="d-flex px-2">
                                 <div class="flex-fill"><a href="{% url 'drill:start_study_session_tag' tag.name %}">{{ tag.name }}</a></div>
@@ -133,10 +134,11 @@
 
                 <template v-slot:content>
                     <ul class="list-unstyled">
-                        <li class="d-flex table_header px-2 py-1 mb-2">
+                        <li class="d-flex text-primary px-2 py-1">
                             <div class="flex-fill fw-bold">Tag</div>
                             <div class="fw-bold">Last Reviewed</div>
                         </li>
+                        <hr class="divider my-1" />
                         {% for tag in tags_needing_review %}
                             <li class="d-flex px-2">
                                 <div class="flex-fill"><a href="{% url 'drill:start_study_session_tag' tag.name %}">{{ tag.name }}</a></div>

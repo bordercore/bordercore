@@ -27,8 +27,10 @@
                     <div :class="{'d-none': hidePlaylistType}">
                         <hr class="mb-1">
 
-                        <div class="music-playlist-section">
-                            Playlist Type
+                        <div class="text-primary">
+                            <small>
+                                Playlist Type
+                            </small>
                         </div>
 
                         <div class="row mt-3">
@@ -88,8 +90,10 @@
                     <div :class="{'d-none': hideOptions}">
                         <hr class="mb-1">
 
-                        <div class="music-playlist-section">
-                            Options
+                        <div class="text-primary">
+                            <small>
+                                Options
+                            </small>
                         </div>
 
                         <div class="row mt-3">

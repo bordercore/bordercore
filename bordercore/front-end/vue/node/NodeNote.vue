@@ -14,7 +14,7 @@
                             </span>
                         </div>
                     </div>
-                    <div v-if="note !== ''" class="ms-auto">
+                    <div v-if="note !== ''" class="dropdown-menu-container ms-auto">
                         <drop-down-menu :show-on-hover="true">
                             <div slot="dropdown">
                                 <a class="dropdown-item" href="#" @click.prevent="onUpdateNoteContents()">

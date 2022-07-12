@@ -929,6 +929,7 @@ table.b-table th {
     &.active {
       border-bottom: 0.18rem solid var(--text5);
       background-color: var(--surface6);
+      color: var(--text1);
 
       // Modals have a different background, so we need the
       //  active tab to also have a different background

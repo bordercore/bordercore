@@ -15,7 +15,7 @@
                 <li class="breadcrumb-item active">{{ node.name }}</li>
             </ul>
         </div>
-        <Transition name="fade">
+        <Transition name="fade" v-cloak>
             <div v-if="$store.state.editLayout" class="text-primary ms-auto me-5">
                 Edit Layout
             </div>
@@ -23,6 +23,7 @@
         <drop-down-menu
             ref="dropDownMenu"
             class="me-3"
+            v-cloak
         >
             <div slot="dropdown" class="mt-0">
                 <li>

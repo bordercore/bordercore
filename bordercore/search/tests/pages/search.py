@@ -10,7 +10,7 @@ class SearchPage:
     SEARCH_INPUT = (By.CSS_SELECTOR, "#search input[name='search']")
     SUBMIT_BUTTON = (By.CSS_SELECTOR, "input[type='submit']")
     SEARCH_RESULT_COUNT = (By.CSS_SELECTOR, "h4[class^='search-result-header'] strong")
-    SEARCH_RESULT_NAME = (By.CSS_SELECTOR, "li[class='search-result'] h4 a")
+    SEARCH_RESULT_NAME = (By.CSS_SELECTOR, "li[class*='search-result'] h4 a")
     SEARCH_RESULT_TAG = (By.CSS_SELECTOR, "li a[class='tag']")
 
     def __init__(self, browser):
@@ -59,7 +59,7 @@ class SearchPage:
 class TagSearchPage:
 
     SEARCH_INPUT = (By.CSS_SELECTOR, "input[placeholder='Tag']")
-    SEARCH_TAG_RESULT = (By.CSS_SELECTOR, "li[class='search-result']")
+    SEARCH_TAG_RESULT = (By.CSS_SELECTOR, "li[class*='search-result']")
 
     def __init__(self, browser):
         self.browser = browser
