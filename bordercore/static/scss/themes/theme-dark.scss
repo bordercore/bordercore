@@ -12,7 +12,7 @@
   --text-saturation: 15%;
   --text-lightness: 85%;
 
-  --text1: hsl(var(--brand-hue) var(--text-saturation) var(--text-lightness));
+  --text1: #fff;
   --text2: hsl(var(--brand-hue) 5% 65%);
 
   // highlight
@@ -39,7 +39,6 @@
 
   --surface3: hsl(var(--brand-hue) calc(var(--brand-saturation) + 25%) calc(var(--brand-lightness) + 10%));
   --surface4: hsl(var(--brand-hue) calc(var(--brand-saturation) + 35%) calc(var(--brand-lightness) + 15%));
-
   --surface5: #3e3e6b;
 
   // Slightly lighter than the background
@@ -52,21 +51,23 @@
 
   // Node colors
   --node-color-1: hsl(231 56% 14%);
-  --node-color-1-tinted: tint-color(var(--node-color-2), 5%);
+  --node-color-1-tinted: tint-color(var(--node-color-1), 5%);
   --node-color-2: hsl(290 55% 38%);
-  --node-color-3-tinted: tint-color(var(--node-color-1), 5%);
-  --node-color-3: hsl(225 28% 60%);
-  --node-color-3-tinted: tint-color(var(--node-color-4), 5%);
+  --node-color-2-tinted: tint-color(var(--node-color-2), 5%);
+  --node-color-3: #7f8db880;
+  --node-color-3-tinted: tint-color(var(--node-color-3), 5%);
   --node-color-4: hsl(206 66% 32%);
   --node-color-4-tinted: tint-color(var(--node-color-4), 5%);
+
+  // Override Bootstrap CSS properties
+  --bs-body-color: var(--text1);
+  --bs-body-bg: var(--surface1);
 }
 
-// Custom Bootswatch variables which overrides the "darkly" theme
-$gray-700: #27293d;
-$gray-900: #262c49;
-$primary: #6ea6e0;
-
-@import "../../../node_modules/bootswatch/dist/darkly/variables";
+// TODO: These throw an error if we pass in the CSS property directly,
+//  so hard-code them for now.
+$body-color: #fff; // Should match var(--text1)
+$primary: #6ea6e0; // Should match var(--text4)
 
 // Custom Bootstrap variables
 $form-select-indicator-color: var(--text1);
@@ -75,7 +76,6 @@ $pagination-bg: var(--surface5);
 $pagination-disabled-bg: var(--surface1);
 $pagination-hover-bg: var(--surface7);
 
-// $nav-link-hover-color: var(--text5); // TODO: does not work
 $nav-tabs-border-color: var(--surface5);
 $nav-tabs-border-width: 0.18rem;
 
@@ -93,8 +93,6 @@ $card-spacer-x: $spacer * 1.25;
 // (This file imports all Bootstrap core's variables and components from the Bootstrap core package installed via npm)
 @import "../../../node_modules/bootstrap/scss/bootstrap.scss";
 
-@import "../../../node_modules/bootswatch/dist/darkly/bootswatch";
-
 // Import CSS for perfect-scrollbar
 @import "../../css/perfect-scrollbar.css";
 
@@ -106,70 +104,14 @@ $form-bg: var(--surface5);
 $form-bg-focus: var(--surface1);
 $form-bg-disabled: var(--surface2);
 $form-border-color-hover: var(--text3);
-
 $icon-glow-color: var(--text3);
-
-$markdown-heading: var(--text3);
-$markdown-bg: $gray-700;
-$markdown-blockquote-bg: var(--surface6);
-$markdown-blockquote-border-left: var(--text3);
-$markdown-border-color: $gray-600;
-$markdown-code-bg: var(--surface6);
-$markdown-code-color: var(--text6);
-
-$modal-bg: $gray-900;
-
 $nav-highlight-color: var(--text5);
 
-$vue-simple-suggest-item-bg: $gray-900;
-$vue-simple-suggest-item-hover-bold-color: $primary;
-
-$table-accent-bg: $gray-900 !default;
-
-.table_header {
-  background-color: $primary;
-}
-
-.btn-primary {
-  background-color: var(--surface1);
-}
-
-em {
-  color: var(--text3);
-}
-
-.text-emphasis {
-  color: var(--text1);
-}
-
-// The close button for Bootstrap modals
-.modal-header .close {
-  color: var(--text1);
-}
-
-h4 {
-  color: $markdown-heading;
-}
-
-hr {
-  background-color: $primary;
-}
-
-.music-playlist-section {
-  color: $markdown-heading;
-  font-size: 0.75rem;
-}
-
-.notice-big {
-  background-color: var(--surface5);
-
-  div.message {
-    color: var(--text3);
-  }
-
-  .message {
-    color: var(--text1);
-  }
+// Misc theme-related styles
+.btn-close {
+  // Mimics the Bootstrap "btn-close-white" class
+  -webkit-filter: invert(1) grayscale(100%) brightness(200%);
+  filter: invert(1) grayscale(100%) brightness(200%);
 }
 
 // Import core SCSS

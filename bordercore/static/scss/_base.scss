@@ -34,7 +34,7 @@
 }
 
 .editable-textarea {
-  background-color: $gray-900;
+  background-color: var(--surface5);
   color: var(--text1);
 }
 
@@ -171,6 +171,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 a {
+  color: var(--text3);
   text-decoration-color: transparent;
   text-underline-offset: 0.25rem;
 
@@ -179,7 +180,30 @@ a {
   }
 }
 
+hr {
+  background-color: $primary;
+}
+
 // Override Bootstrap's CSS
+
+.btn-primary {
+  background-color: var(--surface1);
+  color: var(--text1);
+
+  &:hover {
+    background-color: var(--surface5);
+    color: var(--text1);
+  }
+}
+
+.btn-secondary {
+  background-color: var(--surface6);
+
+  &:hover {
+    background-color: var(--surface5);
+  }
+}
+
 .btn-group {
   padding: 0.25rem !important;
 
@@ -198,6 +222,10 @@ a {
   :not(.active) {
     background-color: var(--surface1);
   }
+}
+
+em {
+  color: var(--text3);
 }
 
 input[type="radio"],
@@ -231,12 +259,20 @@ span {
   }
 }
 
+.list-group-item {
+  color: var(--text1);
+}
+
 .w-20 {
   width: 20%;
 }
 
 .vh-50 {
   height: 50vh;
+}
+
+.text-emphasis {
+  color: var(--text1);
 }
 
 .text-small {
@@ -263,6 +299,18 @@ span {
   background: var(--surface1);
   border-radius: 0.7rem;
   box-shadow: 0.06rem 0.06rem 0.31rem var(--surface4), -0.06rem -0.06rem 0.31rem var(--surface4);
+}
+
+.notice-big {
+  background-color: var(--surface5);
+
+  div.message {
+    color: var(--text3);
+  }
+
+  .message {
+    color: var(--text1);
+  }
 }
 
 .list-header-border {
@@ -335,8 +383,12 @@ span {
   color: var(--text-disabled);
 }
 
-li.active a {
-  color: var(--text1);
+// Lists
+
+li {
+  &.important {
+    background-color: var(--surface3);
+  }
 }
 
 a.tag {
@@ -353,9 +405,16 @@ a.tag {
   }
 }
 
+// Modals
+
+// The close button for Bootstrap modals
+.modal-header .close {
+  color: var(--text1);
+}
+
 .modal-content {
   border: 0.12rem solid var(--text4);
-  background-color: $modal-bg;
+  background-color: var(--surface6);
 }
 
 .pagination {
@@ -505,13 +564,25 @@ a.tag {
   line-height: 1.5rem;
 
   .toast-header {
+    background-color: var(--surface6);
     color: var(--text1);
+
+    button {
+      color: var(--text1);
+    }
+  }
+
+  .toast-body {
+    background-color: var(--surface1);
   }
 
   &.danger {
     .toast-header {
       background-color: $danger;
       color: $black;
+      strong {
+        color: $black;
+      }
     }
     .toast-body {
       background: tint-color($danger, 50%);
@@ -533,6 +604,7 @@ a.tag {
 input.form-control,
 select.form-control,
 textarea.form-control {
+  border: 0.06rem solid var(--surface1);
   background-color: $form-bg;
   color: var(--text4);
 
@@ -551,8 +623,10 @@ textarea.form-control {
   }
 }
 
-.form-control::placeholder {
-  color: $gray-600;
+.input-group-text {
+  border: 0.06rem solid var(--surface6);
+  background-color: var(--surface6);
+  border-radius: 0.25rem;
 }
 
 .tag {
@@ -611,6 +685,10 @@ textarea.form-control {
 }
 
 // Dropdown Menus
+
+.dropdown-menu {
+  background-color: var(--surface6);
+}
 
 .dropdown:not(.top-drop-down) {
   min-width: $dropdown-height;
@@ -721,10 +799,6 @@ textarea.form-control {
   opacity: 0.9;
 }
 
-.divider {
-  background-color: $gray-600;
-}
-
 // Help
 
 #modal-body-help {
@@ -744,6 +818,15 @@ textarea.form-control {
 //
 // Tables
 //
+
+.table {
+  border-color: var(--surface6);
+  color: var(--text1);
+
+  th {
+    color: $primary;
+  }
+}
 
 // Eliminate the focus effect when selecting a row or column
 .b-table tr:focus,
@@ -832,8 +915,7 @@ table.b-table th {
 
 // Modified from bootstrap/scss/_nav.scss
 .nav-tabs, .nav {
-  &:hover,
-  &:focus {
+  &:hover, &:focus {
     color: var(--text5);
   }
 
@@ -846,6 +928,13 @@ table.b-table th {
 
     &.active {
       border-bottom: 0.18rem solid var(--text5);
+      background-color: var(--surface6);
+
+      // Modals have a different background, so we need the
+      //  active tab to also have a different background
+      &.tab-modal {
+        background-color: var(--surface1);
+      }
     }
   }
 }
@@ -913,18 +1002,10 @@ table.b-table th {
 
 blockquote > p {
   padding: 0.5rem 0 0.5rem 0.5rem;
-  border-left: 0.25rem solid $markdown-blockquote-border-left;
+  border-left: 0.25rem solid var(--text3);
   margin: 0.5rem;
-  background-color: $markdown-blockquote-bg;
+  background-color: var(--surface6);
   white-space: pre-line;
-}
-
-pre {
-  padding: 0.3rem;
-  padding-left: 0.8rem;
-  border-top: 0.05rem solid $markdown-border-color;
-  border-bottom: 0.05rem solid $markdown-border-color;
-  background: $markdown-bg;
 }
 
 // Inline code. Exclude code in pre blocks, since
@@ -932,8 +1013,8 @@ pre {
 
 *:not(pre) > code {
   padding: 0.25rem 0.5rem 0.25rem 0.5rem;
-  background-color: $markdown-code-bg;
-  color: $markdown-code-color;
+  background-color: var(--surface6);
+  color: var(--text6);
 }
 
 // Top Title
@@ -1000,7 +1081,7 @@ pre {
 .top-search-splitter {
   width: 100%;
   padding: 0.6rem;
-  background-color: $gray-700;
+  background-color: var(--surface6);
   color: var(--text1);
   cursor: auto;
   font-size: larger;
@@ -1048,10 +1129,6 @@ pre {
   }
 }
 
-.suggest-item {
-  background-color: $gray-900;
-}
-
 .suggestion-item-disabled {
   cursor: not-allowed;
 }
@@ -1093,7 +1170,7 @@ pre {
 }
 
 .hover-tag {
-  border: 0.06rem solid $gray-900;
+  border: 0.06rem solid var(--surface3);
   background-color: var(--surface2);
   color: var(--text5);
 }
@@ -1180,6 +1257,7 @@ pre {
 .search-result {
   padding: 0.5rem 1.5rem 0.5rem 1.5rem;
   border-bottom: 0.1rem solid var(--surface3);
+  border-radius: var(--border-radius1);
 
   &:hover {
     background-color: var(--surface2);
@@ -1219,17 +1297,9 @@ pre {
   color: var(--text3);
 }
 
-.search-result-important {
-  background-color: $gray-700;
-}
-
 .search-todo-date {
   font-size: 0.5rem;
   font-weight: normal;
-}
-
-.tab-content {
-  border-radius: 0.4rem;
 }
 
 .bookmark-dropdown {
@@ -1952,14 +2022,14 @@ audio {
     opacity: 1;
 
     .suggest-item {
-      background-color: $vue-simple-suggest-item-bg;
+      background-color: var(--surface6);
       cursor: pointer;
       user-select: none;
 
       &.hover {
         background-color: none !important;
         b {
-          color: $vue-simple-suggest-item-hover-bold-color !important;
+          color: $primary !important;
         }
       }
 
