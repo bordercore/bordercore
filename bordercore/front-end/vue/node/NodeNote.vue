@@ -99,7 +99,7 @@
         },
         methods: {
             onUpdateNoteContents() {
-                this.$refs.note.editNote();
+                this.$refs.note.editNote(!this.note.content);
             },
             onEditName() {
                 this.beforeEditCache = this.note.name;
@@ -134,16 +134,19 @@
                     "",
                     "",
                 );
+                const noteContent = this.$refs.note.textAreaValue || "";
                 doPut(
                     this,
                     this.updateNoteUrl,
                     {
                         "uuid": this.note.uuid,
                         "name": this.nodeNote.name,
-                        "content": this.$refs.note.textAreaValue || "",
+                        "content": noteContent,
                         "is_note": true,
                     },
-                    (response) => {},
+                    (response) => {
+                        this.note.content = noteContent;
+                    },
                     "",
                 );
             },

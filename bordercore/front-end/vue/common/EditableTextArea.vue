@@ -1,17 +1,16 @@
 <template>
     <div>
-        <div v-if="textAreaValue || isEditingNote" :class="[isEditingNote ? 'editing' : '', extraClass]">
+        <div v-if="textAreaValue || isEditingNote" :class="extraClass" class="editable-textarea position-relative">
             <slot name="title" />
-            <label class="editable-textarea-label w-100" data-bs-toggle="tooltip" data-placement="bottom" title="Doubleclick to edit note" @dblclick="editNote" v-html="textAreaMarkdown" />
-            <textarea id="note" v-model="textAreaValue" class="editable-textarea px-3" placeholder="Enter note text here" @blur="onBlur()" />
+            <Transition name="fade" mode="out-in" @before-leave="onBeforeLeave" @before-enter="onBeforeEnter" @enter="onEnter">
+                <label v-if="!isEditingNote" class="w-100" data-bs-toggle="tooltip" data-placement="bottom" title="Doubleclick to edit note" @dblclick="editNote(false)" v-html="textAreaMarkdown" />
+                <textarea v-else v-model="textAreaValue" class="px-3 w-100" placeholder="Note text" @blur="onBlur()" />
+            </Transition>
         </div>
         <div v-else>
             <div v-if="!hideAddButton" class="ms-2" :class="extraClass">
                 <font-awesome-icon icon="plus" />
                 <a href="#" @click="addNote">Add Note</a>
-            </div>
-            <div v-else class="ps-3">
-                No note content
             </div>
         </div>
     </div>
@@ -45,6 +44,7 @@
         data() {
             return {
                 isEditingNote: false,
+                labelOffsetHeight: 0,
                 minNumberRows: 10,
                 textAreaValue: this.value,
             };
@@ -64,59 +64,78 @@
                     Prism.highlightAll();
                 });
             },
-            editNote() {
-                this.beforeEditCache = this.textAreaValue;
-                this.isEditingNote = true;
-
-                // We want the generated textarea to equal the size
-                //  of the note itself. To do this, we need to know
-                //  how many rows to use.
-
-                const txtarea = document.getElementById("note");
-
-                if (txtarea) {
-                    // The lineHeight is the height of each row
-                    const style = getComputedStyle(txtarea);
-                    const lineHeight = style.lineHeight;
-
-                    // Get the height of the note text
-                    const offsetHeight = document.querySelector(".editable-textarea-label").offsetHeight;
-
-                    // Divide the note text height by the row height to
-                    //  get target number of rows for the textarea
-                    const rows = offsetHeight / parseInt(lineHeight, 10);
-
-                    if (rows > this.minNumberRows) {
-                        txtarea.setAttribute("rows", rows);
-                    } else {
-                        txtarea.setAttribute("rows", this.minNumberRows);
-                    }
-
-                    // Position the cursor at the beginning of the textarea
-                    txtarea.focus();
-                    txtarea.setSelectionRange(0, 0);
+            onEnter() {
+                // When transitioning from editing to non-editing,
+                // ie from the textarea to the label, then
+                // tell prism.js to re-highlight any code.
+                if (!this.isEditingNote) {
+                    Prism.highlightAll();
                 }
-
+            },
+            onBeforeLeave() {
+                // When transitioning from non-editing to editing,
+                // ie from the label to the textarea, then
+                // save the offset height.
+                // We'll need it in the 'onBeforeEnter' handler.
+                if (this.isEditingNote) {
+                    // We want the generated textarea to equal the size
+                    //  of the note itself. To do this, we need to know
+                    //  how many rows to use.
+                    this.labelOffsetHeight = this.$el.querySelector(".editable-textarea label").offsetHeight;
+                }
+            },
+            onBeforeEnter() {
                 this.$nextTick(() => {
-                    document.getElementById("note").focus();
+                    const txtarea = this.$el.querySelector(".editable-textarea textarea");
+                    if (txtarea) {
+                        // The lineHeight is the height of each row
+                        const lineHeight = getComputedStyle(txtarea).lineHeight;
+
+                        // Divide the note text height by the row height to
+                        //  get target number of rows for the textarea
+                        const rows = this.labelOffsetHeight / parseInt(lineHeight, 10);
+
+                        if (rows > this.minNumberRows) {
+                            txtarea.setAttribute("rows", rows);
+                        } else {
+                            txtarea.setAttribute("rows", this.minNumberRows);
+                        }
+
+                        // Position the cursor at the beginning of the textarea
+                        this.$nextTick(() => {
+                            txtarea.focus();
+                        });
+                        txtarea.setSelectionRange(0, 0);
+                    }
                 });
             },
+            editNote(focusTextArea=false) {
+                this.beforeEditCache = this.textAreaValue;
+                this.isEditingNote = true;
+                if (focusTextArea) {
+                    // This is typically true when creating a new value,
+                    //  in which case the usual Vue transitions won't
+                    //  trigger when would ordinarily focus the element.
+                    //  So we need to do that ourselves.
+                    this.$nextTick(() => {
+                        this.$el.querySelector(".editable-textarea textarea").focus();
+                    });
+                }
+            },
             onBlur() {
+                this.isEditingNote = false;
                 // If the note hasn't changed, abort
                 if (this.beforeEditCache == this.textAreaValue) {
-                    this.isEditingNote = false;
                     return;
                 }
                 this.updateNote();
-                this.isEditingNote = false;
-                Prism.highlightAll();
             },
             updateNote() {
                 this.$emit("update-note");
             },
             addNote() {
                 this.$nextTick(() => {
-                    this.editNote();
+                    this.editNote(false);
                 });
             },
             deleteNote() {

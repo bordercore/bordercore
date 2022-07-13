@@ -34,22 +34,12 @@
 }
 
 .editable-textarea {
-  background-color: var(--surface5);
-  color: var(--text1);
-}
-
-.editable-textarea-label p:last-child {
-  margin-bottom: 0;
-}
-
-.editing {
-  .editable-textarea {
-    display: block;
-    width: 100%;
+  textarea {
+    background-color: var(--surface5);
+    color: var(--text1);
   }
-
-  .editable-textarea-label {
-    display: none;
+  label p:last-child {
+    margin-bottom: 0;
   }
 }
 
