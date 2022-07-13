@@ -199,9 +199,10 @@ def add_collection(request):
 
     node_uuid = request.POST["node_uuid"]
     collection_name = request.POST["collection_name"]
+    collection_uuid = request.POST.get("collection_uuid", None)
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
-    collection = node.add_collection(collection_name)
+    collection = node.add_collection(collection_name, collection_uuid)
 
     node.populate_names()
 
@@ -242,9 +243,10 @@ def delete_collection(request):
 
     node_uuid = request.POST["node_uuid"]
     collection_uuid = request.POST["collection_uuid"]
+    collection_type = request.POST["collection_type"]
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
-    node.delete_collection(collection_uuid)
+    node.delete_collection(collection_uuid, collection_type)
 
     node.populate_names()
 

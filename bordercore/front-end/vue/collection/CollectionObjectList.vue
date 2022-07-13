@@ -10,7 +10,7 @@
                     <div class="dropdown-menu-container ms-auto">
                         <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
                             <div slot="dropdown">
-                                <a class="dropdown-item" href="#" @click.prevent="onAddObject()">
+                                <a v-if="collectionObjectList.collection_type === 'ad-hoc'" class="dropdown-item" href="#" @click.prevent="onAddObject()">
                                     <span>
                                         <font-awesome-icon icon="plus" class="text-primary me-3" />
                                     </span>
@@ -26,7 +26,11 @@
                                     <span>
                                         <font-awesome-icon icon="times" class="text-primary me-3" />
                                     </span>
-                                    Delete Collection
+                                    <span v-if="collectionObjectList.collection_type === 'ad-hoc'">Delete</span>
+                                    <span v-else>
+                                        Remove
+                                    </span>
+                                    Collection
                                 </a>
                             </div>
                         </drop-down-menu>
@@ -229,7 +233,7 @@
                 );
             },
             onDeleteCollection() {
-                this.$emit("delete-collection", this.uuid);
+                this.$emit("delete-collection", this.uuid, this.collectionObjectList.collection_type);
             },
             onSort(evt) {
                 const uuid = evt.moved.element.uuid;

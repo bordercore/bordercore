@@ -34,13 +34,26 @@ class Node(TimeStampedModel):
     def __str__(self):
         return self.name
 
-    def add_collection(self, name="New Collection"):
+    def add_collection(self, name="New Collection", uuid=None):
 
-        # Collections are private to avoid display on the collection list page
-        collection = Collection.objects.create(name=name, user=self.user, is_private=True)
+        if uuid:
+            # If a uuid is given, use an existing collection
+            collection = Collection.objects.get(uuid=uuid)
+            display = "individual"
+            collection_type = "permanent"
+        else:
+            # New collections are private to avoid display on the collection list page
+            collection = Collection.objects.create(name=name, user=self.user, is_private=True)
+            display = "list"
+            collection_type = "ad-hoc"
 
         layout = self.layout
-        layout[0].insert(0, {"type": "collection", "uuid": str(collection.uuid), "display": "list"})
+        layout[0].insert(0, {
+            "type": "collection",
+            "uuid": str(collection.uuid),
+            "display": display,
+            "collection_type": collection_type
+        })
         self.layout = layout
         self.save()
 
@@ -56,14 +69,20 @@ class Node(TimeStampedModel):
 
         self.save()
 
-    def delete_collection(self, collection_uuid):
+    def delete_collection(self, collection_uuid, collection_type):
 
-        collection = Collection.objects.get(uuid=collection_uuid)
-        collection.delete()
+        if collection_type == "ad-hoc":
+            collection = Collection.objects.get(uuid=collection_uuid)
+            collection.delete()
 
         layout = self.layout
         for i, col in enumerate(layout):
-            layout[i] = [x for x in col if "uuid" not in x or x["uuid"] != str(collection_uuid)]
+            layout[i] = [
+                x
+                for x in col
+                if "uuid" not in x
+                or x["uuid"] != str(collection_uuid)
+            ]
 
         self.layout = layout
         self.save()

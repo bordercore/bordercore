@@ -54,7 +54,7 @@ def test_node_update_collection(node):
 def test_node_delete_collection(node):
 
     collection = node.add_collection()
-    node.delete_collection(collection.uuid)
+    node.delete_collection(collection.uuid, "ad-hoc")
 
     assert Collection.objects.filter(uuid=collection.uuid).first() is None
 
@@ -80,14 +80,14 @@ def test_node_add_note(monkeypatch_blob, node):
     ]
 
 
-def test_node_delete_note(node):
+def test_node_delete_note(monkeypatch_blob, node):
 
-    note = node.add_collection()
-    node.delete_collection(note.uuid)
+    note = node.add_note()
+    node.delete_note(note.uuid)
 
     assert Blob.objects.filter(uuid=note.uuid).first() is None
 
-    # Verify that the collection has been removed from the node's layout
+    # Verify that the note has been removed from the node's layout
     assert str(note.uuid) not in [
         val["uuid"]
         for sublist in node.layout

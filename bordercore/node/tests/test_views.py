@@ -154,7 +154,8 @@ def test_delete_collection(auto_login_user, node):
     url = urls.reverse("node:delete_collection")
     resp = client.post(url, {
         "node_uuid": node.uuid,
-        "collection_uuid": collection.uuid
+        "collection_uuid": collection.uuid,
+        "collection_type": "ad-hoc",
     })
 
     assert resp.status_code == 200

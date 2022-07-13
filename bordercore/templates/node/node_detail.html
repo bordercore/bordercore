@@ -166,7 +166,11 @@
                 </draggable>
             </div>
 
-            <collection-object-list-modal ref="collectionUpdate">
+            <collection-object-list-modal
+                ref="collectionUpdate"
+                add-collection-url="{% url 'node:add_collection' %}"
+                search-url="{% url 'collection:search' %}?query="
+            >
             </collection-object-list-modal>
 
             <node-note-modal ref="noteUpdate">
@@ -184,7 +188,7 @@
                 label="_objectSelectImage"
                 ref="objectSelectImage"
                 search-object-url="{% url 'search:search_names' %}"
-                title="Select Image"
+                title="Add Image"
                 @select-object="selectObjectImage"
             >
             </object-select>
@@ -268,14 +272,13 @@
                 }
             },
             methods: {
-                addCollection() {
-                    const name = document.getElementById("id_name_collection").value;
+                addCollection(collectionObjectList) {
                     doPost(
                         this,
                         "{% url "node:add_collection" %}",
                         {
                             "node_uuid": this.$store.state.nodeUuid,
-                            "collection_name": name,
+                            "collection_name": collectionObjectList.name,
                         },
                         (response) => {
                             EventBus.$emit("update-layout", response.data.layout);
@@ -345,13 +348,14 @@
                         ""
                     );
                 },
-                onDeleteCollection(collectionUuid) {
+                onDeleteCollection(collectionUuid, collectionType) {
                     doPost(
                         this,
                         "{% url "node:delete_collection" %}",
                         {
                             "node_uuid": this.$store.state.nodeUuid,
                             "collection_uuid": collectionUuid,
+                            "collection_type": collectionType,
                         },
                         (response) => {
                             this.layout = JSON.parse(response.data.layout);
