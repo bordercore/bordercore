@@ -113,7 +113,7 @@
                     <template #content>
 
                         <div class="d-flex flex-column">
-                            <div v-if="description" class="d-flex flex-column">
+                            <div class="d-flex flex-column">
                                 <div class="d-flex">
                                     <div class="card-title text-primary">
                                         Description
@@ -121,15 +121,9 @@
                                     <drop-down-menu :show-on-hover="true">
                                         <div slot="dropdown">
                                             <li>
-                                                <a v-if="note" class="dropdown-item" href="#" @click.prevent="addNote()">
+                                                <a class="dropdown-item" href="#" @click.prevent="addNote()">
                                                     <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>
-                                                    Edit note
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a v-if="!note" class="dropdown-item" href="#" @click.prevent="addNote()">
-                                                    <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
-                                                    Add note
+                                                    <span v-html="note ? 'Edit' : 'Add'"></span> note
                                                 </a>
                                             </li>
                                             <li>
@@ -395,8 +389,8 @@
             data() {
                 return {
                     isActiveExercise: {% if activity_info %}true{% else %}false{% endif %},
-                    description: markdown.render("{{ object.description|escapejs }}"),
-                    showHistoryMessage: {% if activity_info %}true{% else %}false{% endif %},
+                    description: markdown.render("{{ object.description|default:"No description"|escapejs }}"),
+                    showHistoryMessage: {% if activity_info %}true{% else %} false{% endif %},
                     note: "{{ object.note|escapejs }}",
                     relatedExercises: JSON.parse(document.getElementById("related_exercises").textContent),
                     relatedExercisesFields: [
@@ -434,21 +428,20 @@
                     );
                 },
                 addNote() {
-                    this.$refs.note.editNote();
-
-                    this.$nextTick(() => {
-                        document.getElementById("note").focus();
-                    })
+                    this.$refs.note.editNote(!this.note);
                 },
                 onUpdateNote() {
+                    const note = this.$refs.note.textAreaValue;
                     doPost(
                         this,
                         "{% url 'fitness:edit_note' %}",
                         {
                             "uuid": "{{ object.uuid }}",
-                            "note": this.$refs.note.textAreaValue,
+                            "note": note,
                         },
-                        (response) => {                        },
+                        (response) => {
+                            this.note = note;
+                        },
                         "",
                         "",
                     );
