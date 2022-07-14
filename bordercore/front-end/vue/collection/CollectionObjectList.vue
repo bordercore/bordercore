@@ -46,7 +46,7 @@
                 <ul v-else id="sort-container-tags" class="list-group list-group-flush interior-borders">
                     <draggable v-model="objectList" ghost-class="sortable-ghost" draggable=".draggable" @change="onSort">
                         <transition-group type="transition" class="w-100">
-                            <li v-for="(object, index) in objectList" v-cloak :key="object.uuid" class="hover-target list-group-item list-group-item-secondary text-info draggable pe-0" :data-uuid="object.uuid">
+                            <li v-for="object in objectList" v-cloak :key="object.uuid" class="hover-target list-group-item list-group-item-secondary text-info draggable pe-0" :data-uuid="object.uuid">
                                 <div class="dropdown-height d-flex align-items-start">
                                     <div v-if="object.type === 'blob'" class="pe-2">
                                         <img :src="object.cover_url" height="75" width="70">
@@ -55,11 +55,9 @@
 
                                     <div>
                                         <a :href="object.url">{{ object.name }}</a>
-                                        <div v-if="object.note" v-show="!object.noteIsEditable" class="node-object-note" @click="editNote(object, index)">
-                                            {{ object.note }}
-                                        </div>
-                                        <Transition name="fade">
-                                            <span v-show="object.noteIsEditable">
+                                        <Transition name="fade" mode="out-in" @after-enter="onAfterEnter">
+                                            <div v-if="!object.noteIsEditable" class="node-object-note" @click="editNote(object)" v-html="getNote(object.note)" />
+                                            <span v-else>
                                                 <input ref="input" type="text" class="form-control form-control-sm" :value="object.note" placeholder="" @blur="updateNote(object, $event.target.value)" @keydown.enter="updateNote(object, $event.target.value)">
                                             </span>
                                         </Transition>
@@ -70,7 +68,7 @@
                                             <a class="dropdown-item" href="#" @click.prevent="removeObject(object.uuid)">
                                                 <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
                                             </a>
-                                            <a class="dropdown-item" href="#" @click.prevent="editNote(object, index)">
+                                            <a class="dropdown-item" href="#" @click.prevent="editNote(object)">
                                                 <font-awesome-icon icon="pencil-alt" class="text-primary me-3" /><span v-if="object.note">Edit</span><span v-else>Add</span> Note
                                             </a>
                                         </div>
@@ -158,11 +156,19 @@
             });
         },
         methods: {
-            editNote(object, index) {
+            editNote(object) {
                 object.noteIsEditable = true;
-                this.$nextTick(() => {
-                    this.$refs.input[index].focus();
-                });
+            },
+            getNote(note) {
+                if (note) {
+                    return markdown.render(note);
+                }
+            },
+            onAfterEnter(evt) {
+                const input = evt.querySelector("input");
+                if (input) {
+                    input.focus();
+                }
             },
             onClick() {
                 this.$emit("open-modal-note-image", this.objectList[this.currentObjectIndex].cover_url_large);
