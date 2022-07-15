@@ -11,6 +11,7 @@ from collection.models import Collection
 from drill.models import Question
 from feed.models import Feed, FeedItem
 from music.models import Album, Playlist, PlaylistItem, Song, SongSource
+from node.models import Node
 from quote.models import Quote
 from tag.models import Tag, TagAlias
 from todo.models import Todo
@@ -18,9 +19,9 @@ from todo.models import Todo
 from .serializers import (AlbumSerializer, BlobSerializer,
                           BlobSha1sumSerializer, BookmarkSerializer,
                           CollectionSerializer, FeedItemSerializer,
-                          FeedSerializer, PlaylistItemSerializer,
-                          PlaylistSerializer, QuestionSerializer,
-                          QuoteSerializer, SongSerializer,
+                          FeedSerializer, NodeSerializer,
+                          PlaylistItemSerializer, PlaylistSerializer,
+                          QuestionSerializer, QuoteSerializer, SongSerializer,
                           SongSourceSerializer, TagAliasSerializer,
                           TagSerializer, TodoSerializer)
 
@@ -202,6 +203,15 @@ class FeedItemViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return FeedItem.objects.all().select_related("feed")
+
+
+class NodeViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
+    serializer_class = NodeSerializer
+    lookup_field = "uuid"
+
+    def get_queryset(self):
+        return Node.objects.filter(user=self.request.user)
 
 
 class QuestionViewSet(viewsets.ModelViewSet):

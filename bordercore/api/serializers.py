@@ -9,6 +9,7 @@ from collection.models import Collection
 from drill.models import Question
 from feed.models import Feed, FeedItem
 from music.models import Album, Playlist, PlaylistItem, Song, SongSource
+from node.models import Node
 from quote.models import Quote
 from tag.models import Tag, TagAlias
 from todo.models import Todo
@@ -137,6 +138,14 @@ class MetaDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = MetaData
         fields = ["name", "value", "blob", "user"]
+
+
+class NodeSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = Node
+        fields = ["name", "user"]
 
 
 class QuestionSerializer(serializers.ModelSerializer):
