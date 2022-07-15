@@ -91,7 +91,8 @@
 
             <div v-for="(column, colIndex) in layout" class="flex-even">
                 <draggable
-                    @change="onLayoutChange($event)"
+                    drag-class="draggable-chosen-class"
+                    @change="onLayoutChange"
                     :list="layout[colIndex]"
                     group="object"
                     :data-col-number="colIndex"
