@@ -204,12 +204,10 @@ def add_collection(request):
     node = Node.objects.get(uuid=node_uuid, user=request.user)
     collection = node.add_collection(collection_name, collection_uuid)
 
-    node.populate_names()
-
     response = {
         "status": "OK",
         "collection_uuid": collection.uuid,
-        "layout": json.dumps(node.layout)
+        "layout": node.get_layout()
     }
 
     return JsonResponse(response)
@@ -248,11 +246,9 @@ def delete_collection(request):
     node = Node.objects.get(uuid=node_uuid, user=request.user)
     node.delete_collection(collection_uuid, collection_type)
 
-    node.populate_names()
-
     response = {
         "status": "OK",
-        "layout": json.dumps(node.layout)
+        "layout": node.get_layout()
     }
 
     return JsonResponse(response)
@@ -268,13 +264,12 @@ def add_note(request):
     node = Node.objects.get(uuid=node_uuid, user=request.user)
     note = node.add_note(note_name)
 
-    node.populate_names()
     node.set_note_color(str(note.uuid), color)
 
     response = {
         "status": "OK",
         "note_uuid": note.uuid,
-        "layout": json.dumps(node.layout)
+        "layout": node.get_layout()
     }
 
     return JsonResponse(response)
@@ -289,11 +284,9 @@ def delete_note(request):
     node = Node.objects.get(uuid=node_uuid, user=request.user)
     node.delete_note(note_uuid)
 
-    node.populate_names()
-
     response = {
         "status": "OK",
-        "layout": json.dumps(node.layout)
+        "layout": node.get_layout()
     }
 
     return JsonResponse(response)
@@ -344,11 +337,9 @@ def remove_image(request):
     node = Node.objects.get(uuid=node_uuid, user=request.user)
     node.remove_image(image_uuid)
 
-    node.populate_names()
-
     response = {
         "status": "OK",
-        "layout": json.dumps(node.layout)
+        "layout": node.get_layout()
     }
 
     return JsonResponse(response)

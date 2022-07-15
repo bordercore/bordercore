@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 import django
@@ -94,6 +96,20 @@ def test_node_delete_note(monkeypatch_blob, node):
         for val in sublist
         if "uuid" in val
     ]
+
+
+def test_get_layout(node):
+
+    layout = node.get_layout()
+
+    assert "New Collection" in [
+        val["name"]
+        for sublist in json.loads(layout)
+        for val in sublist
+        if val["type"] == "collection"
+    ]
+
+    assert True
 
 
 def test_node_populate_names(node):

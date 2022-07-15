@@ -123,6 +123,11 @@ class Node(TimeStampedModel):
         self.layout = layout
         self.save()
 
+    def get_layout(self, populate_names=True):
+
+        self.populate_names()
+        return json.dumps(self.layout)
+
     def populate_names(self):
         """
         Get all collection and note names for this node in two queries
