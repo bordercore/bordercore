@@ -61,13 +61,13 @@ class QuestionCreateView(FormRequestMixin, CreateView):
         # If we're adding a question with an initial tag value,
         # pre-populate the form with this tag.
         if context["form"]["tags"].value():
-            tag = Tag.objects.get(user=self.request.user, name=context["form"]["tags"].value())
             context["tags"] = [
                 {
-                    "text": tag.name,
-                    "is_meta": tag.is_meta,
+                    "text": tag,
                     "classes": "badge bg-info",
                 }
+                for tag in
+                context["form"]["tags"].value().split(",")
             ]
 
         # Get a list of the most recently used tags

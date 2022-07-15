@@ -73,7 +73,7 @@
             <form @submit.prevent id="question-form" action="{{ request.path }}" method="post">
                 <input type="hidden" name="related-bookmarks" />
                 <input type="hidden" name="related-blobs" />
-                <input type="hidden" name="return_url" value="{{ request.GET.return_url }}" />
+                <input type="hidden" name="return_url" value="{% firstof request.GET.return_url request.POST.return_url %}" />
 
         {% csrf_token %}
 
