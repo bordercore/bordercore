@@ -25,10 +25,10 @@
                             </h4>
 
                             {% for doctype in aggregations %}
-                                <div class="tag-list ps-2 py-1 pe-1 d-flex" :class="getDoctypeClass('{{ doctype.doctype }}')" @click.prevent="onClick" data-doctype="{{ doctype.doctype }}">
+                                <div class="list-with-counts ps-2 py-1 pe-1 d-flex" :class="getDoctypeClass('{{ doctype.doctype }}')" @click.prevent="onClick" data-doctype="{{ doctype.doctype }}">
                                     <div>{{ doctype.doctype|title }}</div>
                                     <div class="ms-auto">
-                                        <span class="px-2 badge rounded-pill bg-info">
+                                        <span class="px-2 badge rounded-pill">
                                             {{ doctype.count }}
                                         </span>
                                     </div>
@@ -59,7 +59,7 @@
 
                                 <font-awesome-icon icon="search" class="main-search-spacer text-info"></font-awesome-icon>
 
-                                <input id="simple-suggest" name="search" placeholder="Search" autocomplete="off" autofocus="autofocus" class="default-input form-control search-box-input" />
+                                <input id="simple-suggest" name="search" placeholder="Search" autocomplete="off" autofocus="autofocus" class="default-input form-control" />
 
                             </div>
                         </div>

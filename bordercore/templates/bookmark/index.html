@@ -15,14 +15,14 @@
                 <ul class="list-group flex-column w-100" v-cloak>
                     <tag-list inline-template>
                         <div>
-                            <draggable v-model="$store.state.pinnedTags" @change="onSortTags" ghost-class="sortable-ghost" draggable=".draggable">
+                            <draggable v-model="$store.state.pinnedTags" @change="onSortTags" draggable=".draggable">
                                 <transition-group type="transition" class="w-100">
-                                    <li v-for="tag in $store.state.pinnedTags" class="bookmark-tag-list rounded d-flex ps-2 py-1 pr-1" :class="{ 'selected': tag.name === $store.state.selectedTagName, draggable: tag.isDraggable }" @click.prevent="onClickTag" :data-tag="tag.name" :data-id="tag.id" :key="tag.id" @dragover="onDragOverTag($event)" @dragleave="onDragLeaveTag($event)" @drop="onAddTagToBookmark($event, tag)">
+                                    <li v-for="tag in $store.state.pinnedTags" class="list-with-counts rounded d-flex ps-2 py-1 pr-1" :class="{ 'selected': tag.name === $store.state.selectedTagName, draggable: tag.isDraggable }" @click.prevent="onClickTag" :data-tag="tag.name" :data-id="tag.id" :key="tag.id" @dragover="onDragOverTag($event)" @dragleave="onDragLeaveTag($event)" @drop="onAddTagToBookmark($event, tag)">
                                         <div class="ps-2 text-truncate">
                                             [[ tag.name ]]
                                         </div>
                                         <div v-if="tag.count" class="ms-auto pe-2">
-                                            <span class="px-2 badge rounded-pill bg-info">
+                                            <span class="px-2 badge rounded-pill">
                                                 [[ tag.count ]]
                                             </span>
                                         </div>
@@ -127,7 +127,7 @@
                     <div class="row">
                         <div class="col-lg-12">
                             <table id="bookmark-list" class="w-100">
-                                <tbody is="draggable" v-model="bookmarkList" @change="onSortBookmarks" ghost-class="sortable-ghost">
+                                <tbody is="draggable" v-model="bookmarkList" @change="onSortBookmarks">
                                     <transition-group type="transition">
                                         <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="dropdown-height hover-target bookmark-list w-100" v-cloak @dragstart="startDrag($event, bookmark)" @click="onClickBookmark(bookmark.uuid)" @mouseenter="onMouseEnterLeave" @mouseleave="onMouseEnterLeave">
                                             <td class="bookmark-list-date p-2 text-info align-top">

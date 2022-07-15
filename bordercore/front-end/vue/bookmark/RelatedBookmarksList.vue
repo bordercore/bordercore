@@ -26,7 +26,7 @@
                 <template #content>
                     <hr class="filter-divider mt-0">
                     <ul id="sort-container-tags" class="list-group list-group-flush interior-borders">
-                        <draggable v-model="bookmarkList" ghost-class="sortable-ghost" draggable=".draggable" @change="onSort">
+                        <draggable v-model="bookmarkList" draggable=".draggable" @change="onSort">
                             <transition-group type="transition" class="w-100">
                                 <li v-for="(bookmark, index) in bookmarkList" v-cloak :key="bookmark.uuid" class="hover-target list-group-item list-group-item-secondary text-info draggable px-0" :data-uuid="bookmark.uuid">
                                     <div class="dropdown-height d-flex align-items-start">

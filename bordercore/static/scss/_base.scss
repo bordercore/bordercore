@@ -1,3 +1,13 @@
+* {
+  --border-radius1: 0.25rem; // bootstrap default, defined by $border-radius
+  --border-radius2: 0.40rem;
+  --collection-list-item-width: 12rem;
+  --dropdown-height: 2.5rem;
+  --grid-margin: 1rem;
+  --hover-bg: rgba(0,0,0,0.2);
+  --search-box-width: 30rem;
+}
+
 // The overflow:hidden eliminates the horizontal scrollbar when
 //  setting the padding to 0px on the main fluid container
 //  https://stackoverflow.com/questions/37978307/bootstrap-container-fluid-padding/50005919
@@ -245,6 +255,7 @@ span {
 
 .selected {
   background-color: var(--surface5);
+  border-radius: var(--border-radius1);
   color: var(--text1);
 }
 
@@ -380,6 +391,21 @@ span {
 
 // Lists
 
+.list-with-counts {
+  a {
+    color: var(--text1);
+  }
+
+  &:hover {
+    background-color: var(--hover-bg);
+    cursor: pointer;
+  }
+
+  span.badge {
+    background-color: var(--surface5);
+  }
+}
+
 li {
   &.important {
     background-color: var(--surface3);
@@ -488,7 +514,7 @@ a.tag {
 
   table.is-hoverable tr {
     &:hover {
-      background-color: rgba(0, 0, 0, 0.2);
+      background-color: var(--hover-bg);
     }
   }
 
@@ -507,7 +533,7 @@ a.tag {
   border-radius: 0.5rem;
 
   &:hover {
-    background-color: var(--surface2);
+    background-color: var(--hover-bg);
   }
 }
 
@@ -601,7 +627,7 @@ select.form-control,
 textarea.form-control {
   border: 0.06rem solid var(--surface1);
   background-color: $form-bg;
-  color: var(--text4);
+  color: var(--text4) !important;
 
   &:hover {
     border-color: $form-border-color-hover;
@@ -731,7 +757,7 @@ textarea.form-control {
   width: 1.25rem;
   height: 1.25rem;
   padding-top: 0.25rem;
-  background-color: $info;
+  background-color: var(--surface5);
   border-radius: 50%;
   color: var(--text1);
   font-size: 0.75rem;
@@ -750,7 +776,7 @@ textarea.form-control {
   border-radius: 50%;
   font-size: 1.2rem;
   &:hover {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: var(--hover-bg);
     cursor: pointer;
     transform: translateY(-0.06rem);
   }
@@ -773,7 +799,7 @@ textarea.form-control {
   }
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: var(--hover-bg);
     border-radius: 100%;
   }
 }
@@ -970,7 +996,7 @@ table.b-table th {
 .form-error {
   padding-top: 0.3rem;
   margin-left: 0.6rem;
-  color: var(--text-em);
+  color: var(--text5);
   font-weight: bold;
 }
 
@@ -1018,6 +1044,7 @@ blockquote > p {
 #top-title {
   padding-left: $grid-margin;
   font-size: 2rem;
+  line-height: 2.7rem;
 }
 
 //
@@ -1154,17 +1181,6 @@ blockquote > p {
 // Bookmarks
 //
 
-.bookmark-tag-list {
-  a {
-    color: var(--text1);
-  }
-
-  &:hover {
-    background-color: var(--surface2);
-    cursor: pointer;
-  }
-}
-
 .hover-tag {
   border: 0.06rem solid var(--surface3);
   background-color: var(--surface2);
@@ -1174,7 +1190,7 @@ blockquote > p {
 .bookmark-list,
 .bookmark-list a {
   &:hover {
-    background-color: var(--surface2);
+    background-color: var(--hover-bg);
     border-radius: var(--border-radius1);
   }
 }
@@ -1322,7 +1338,7 @@ blockquote > p {
   }
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: var(--hover-bg);
   }
 }
 
@@ -1535,7 +1551,7 @@ div #dateapp {
   }
 
   li:hover {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: var(--hover-bg);
   }
 }
 
@@ -1556,8 +1572,12 @@ div #dateapp {
   }
 
   &:hover {
-    background-color: var(--surface5);
+    background-color: var(--hover-bg);
     cursor: pointer;
+  }
+
+  span.badge {
+    background-color: var(--surface5);
   }
 }
 
@@ -1640,7 +1660,7 @@ div #dateapp {
     }
 
     &:hover {
-      background-color: rgba(0, 0, 0, 0.2);
+      background-color: var(--hover-bg);
 
       .list-delete {
         display: block;
@@ -1991,7 +2011,6 @@ audio {
     border: 0.06rem solid var(--surface5) !important;
     background-color: var(--surface5) !important;
     border-radius: 0.25rem !important;
-    color: var(--text1) !important;
 
     &:hover {
       border-color: var(--text3) !important;
@@ -2002,7 +2021,6 @@ audio {
     .input-wrapper input {
       border: 0.06rem solid var(--text3) !important;
       background-color: var(--surface1) !important;
-      color: var(--text1) !important;
     }
   }
 

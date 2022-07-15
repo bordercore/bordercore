@@ -26,7 +26,7 @@
                 <template #content>
                     <hr class="filter-divider mt-0">
                     <ul id="sort-container-tags" class="list-group list-group-flush">
-                        <draggable v-model="blobList" ghost-class="sortable-ghost" draggable=".draggable" @change="onSort">
+                        <draggable v-model="blobList" draggable=".draggable" @change="onSort">
                             <transition-group type="transition" class="w-100">
                                 <li v-for="(blob, index) in blobList" v-cloak :key="blob.uuid" class="hover-target text-info draggable d-flex align-items-center p-2" :data-uuid="blob.uuid">
                                     <div class="d-flex align-items-center w-100">

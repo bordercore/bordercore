@@ -49,22 +49,22 @@
 
                 <ul class="list-group flex-column w-100">
                     <div v-cloak>
-                        <div class="tag-list ps-2 py-1 pe-1 d-flex" :class="{ 'selected rounded-sm': selectedTag === null }" @click.prevent="onClickSelectTag">
+                        <div class="list-with-counts ps-2 py-1 pe-1 d-flex" :class="{ 'selected rounded-sm': selectedTag === null }" @click.prevent="onClickSelectTag">
                             <div class="ps-2">
                                 All Objects
                             </div>
                             <div class="ms-auto pe-2">
-                                <span class="px-2 badge rounded-pill bg-info">
+                                <span class="px-2 badge rounded-pill">
                                     {{ collection.collectionobject_set.count }}
                                 </span>
                             </div>
                         </div>
-                        <li v-for="tag in objectTags" class="tag-list ps-2 py-1 pe-1 d-flex" :class="{ 'selected rounded-sm': tag.tag === selectedTag }" @click.prevent="onClickSelectTag" :data-tag="tag.tag" :key="tag.tag">
+                        <li v-for="tag in objectTags" class="list-with-counts ps-2 py-1 pe-1 d-flex" :class="{ 'selected rounded-sm': tag.tag === selectedTag }" @click.prevent="onClickSelectTag" :data-tag="tag.tag" :key="tag.tag">
                             <div class="ps-2">
                                 [[ tag.tag ]]
                             </div>
                             <div class="ms-auto pe-2">
-                                <span class="px-2 badge rounded-pill bg-info">
+                                <span class="px-2 badge rounded-pill">
                                     [[ tag.blob_count ]]
                                 </span>
                             </div>

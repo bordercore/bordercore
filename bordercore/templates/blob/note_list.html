@@ -19,7 +19,7 @@
 
                     <template v-slot:content>
                         <ul class="list-group">
-                            <draggable v-model="pinnedNotes" @change="onChange" ghost-class="sortable-ghost">
+                            <draggable v-model="pinnedNotes" @change="onChange">
                                 <transition-group type="transition">
                                     <div v-for="note in pinnedNotes" :key="note.uuid">
                                         <li class="list-group-item list-group-item-secondary" :data-uuid="note.uuid">

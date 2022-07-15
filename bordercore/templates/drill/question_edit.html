@@ -51,11 +51,12 @@
             >
             </drill-blobs>
 
-            <card title="Recent Tags">
+            <card title="Recent Tags" class="backdrop-filter">
                 <template v-slot:content>
+                    <hr class="filter-divider" />
                     <ul class="list-group interior-borders">
                         {% for tag in recent_tags %}
-                            <li class="tag-list list-group-item list-group-item-secondary text-info d-flex ps-0" @click.prevent="onClickTag('{{ tag.name }}')">
+                            <li class="list-with-counts text-info ps-2 py-1 pe-1 d-flex" @click.prevent="onClickTag('{{ tag.name }}')">
                                 <div class="text-truncate">
                                     {{ tag.name }}
                                 </div>

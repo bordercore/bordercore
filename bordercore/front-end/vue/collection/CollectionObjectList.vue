@@ -44,9 +44,9 @@
                     <img v-if="currentObjectIndex !== null" :src="objectList[currentObjectIndex].cover_url_large" class="mw-100" @click="onClick()">
                 </div>
                 <ul v-else id="sort-container-tags" class="list-group list-group-flush interior-borders">
-                    <draggable v-model="objectList" ghost-class="sortable-ghost" draggable=".draggable" @change="onSort">
+                    <draggable v-model="objectList" draggable=".draggable" @change="onSort">
                         <transition-group type="transition" class="w-100">
-                            <li v-for="object in objectList" v-cloak :key="object.uuid" class="hover-target list-group-item list-group-item-secondary text-info draggable pe-0" :data-uuid="object.uuid">
+                            <li v-for="object in objectList" v-cloak :key="object.uuid" class="hover-target node-color-1 list-group-item list-group-item-secondary text-info draggable pe-0" :data-uuid="object.uuid">
                                 <div class="dropdown-height d-flex align-items-start">
                                     <div v-if="object.type === 'blob'" class="pe-2">
                                         <img :src="object.cover_url" height="75" width="70">

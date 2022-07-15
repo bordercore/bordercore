@@ -42,7 +42,7 @@
                     <ul id="sort-container" class="feed-list">
                         <feed-list inline-template>
                             <div>
-                                <draggable v-model="feedList" @change="onChange" ghost-class="collection_sortable-ghost" animation="500" forceFallback="true">
+                                <draggable v-model="feedList" @change="onChange" animation="500" forceFallback="true">
                                     <transition-group type="transition">
                                         <li v-for="feed in feedList" :key="feed.id" v-cloak>
                                             <a href="#" :data-id="feed.id" @click.prevent="onClick(feed)">[[ feed.name ]]</a>

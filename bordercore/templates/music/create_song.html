@@ -47,14 +47,15 @@
 
                 <card title="Tag Suggestions" class="backdrop-filter ms-3">
                     <template v-slot:content>
+                        <hr class="filter-divider" />
                         <ul class="list-group interior-borders">
                             {% for tag in tag_counts %}
-                                <li class="tag-list list-group-item list-group-item-secondary text-info d-flex" @click.prevent="onClickTag('{{ tag.name }}')">
+                                <li class="list-with-counts ps-2 py-1 -e-1 text-info d-flex" @click.prevent="onClickTag('{{ tag.name }}')">
                                     <div class="ps-2 text-truncate">
                                         {{ tag.name }}
                                     </div>
                                     <div class="ms-auto pe-2">
-                                        <span class="px-2 badge rounded-pill bg-info">
+                                        <span class="px-2 badge rounded-pill">
                                             {{ tag.count }}
                                         </span>
                                     </div>

@@ -56,7 +56,7 @@
                     <strong>Filter Options</strong>
                 </div>
                 <div class="d-flex flex-column">
-                    <div v-for="filter in searchFilterTypes" :key="filter.icon" class="tag-list d-flex p-1" :class="getFilterClass(filter.doctype)" @click.prevent="handleFilter(filter.doctype)">
+                    <div v-for="filter in searchFilterTypes" :key="filter.icon" class="list-with-counts d-flex p-1" :class="getFilterClass(filter.doctype)" @click.prevent="handleFilter(filter.doctype)">
                         <div class="top-search-filter-icon d-flex justify-content-center align-items-center">
                             <font-awesome-icon class="me-2" :icon="filter.icon" />
                         </div>
@@ -69,7 +69,7 @@
                     <strong>Recent Searches</strong>
                 </div>
                 <div class="d-flex flex-column">
-                    <div v-for="recentSearch in recentSearches" :key="recentSearch.id" class="tag-list d-flex p-1" @click.prevent="handleRecentSearch(recentSearch)">
+                    <div v-for="recentSearch in recentSearches" :key="recentSearch.id" class="list-with-counts d-flex p-1" @click.prevent="handleRecentSearch(recentSearch)">
                         <div class="top-search-filter-icon d-flex justify-content-center align-items-center">
                             <font-awesome-icon class="me-2" icon="search" />
                         </div>
@@ -147,7 +147,7 @@
                 autoCompleteStyle: {
                     vueSimpleSuggest: "position-relative",
                     inputWrapper: "",
-                    defaultInput: "form-control search-box-input",
+                    defaultInput: "form-control",
                     suggestions: "position-absolute list-group z-1000",
                     suggestItem: "list-group-item",
                 },

@@ -45,14 +45,15 @@
 
                 <template v-slot:content>
 
+                    <hr class="filter-divider" />
                     <ul class="list-group interior-borders">
                         {% for playlist in playlists %}
-                            <li class="tag-list list-group-item list-group-item-secondary text-info d-flex">
+                            <li class="list-with-counts list-group-item list-group-item-secondary text-info d-flex">
                                 <div>
                                     <a href="{% url 'music:playlist_detail' playlist.uuid %}">{{ playlist.name }}</a>
                                 </div>
                                 <div class="ms-auto">
-                                    <span class="px-2 badge rounded-pill bg-info">{{ playlist.num_songs }}</span>
+                                    <span class="px-2 badge rounded-pill">{{ playlist.num_songs }}</span>
                                 </div>
                             </li>
                         {% endfor %}
@@ -68,6 +69,7 @@
             {% if recent_songs %}
             <card title="Recently Played Songs" class="backdrop-filter">
                 <template v-slot:content>
+                    <hr class="filter-divider" />
                     <ul class="list-group interior-borders">
                         {% for song in recent_songs %}
                             <li class="list-group-item list-group-item-secondary text-white">
@@ -141,8 +143,9 @@
                 </template>
             </card>
 
-            <card title="Recently added music" class="backdrop-filter">
+            <card title="Recently Added Music" class="backdrop-filter">
                 <template v-slot:content>
+                    <hr class="filter-divider" />
                     <div class="card-grid ms-2">
 
                         <div>

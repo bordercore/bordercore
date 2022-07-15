@@ -136,7 +136,7 @@
                 autoCompleteStyle: {
                     vueSimpleSuggest: "position-relative",
                     inputWrapper: "",
-                    defaultInput: "form-control search-box-input",
+                    defaultInput: "form-control",
                     suggestions: "position-absolute list-group z-1000",
                     suggestItem: "list-group-item",
                 },

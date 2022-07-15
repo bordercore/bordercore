@@ -11,20 +11,20 @@
             <div class="card-body backdrop-filter" v-cloak>
 
                 <h4>Priority</h4>
-                <div v-for="option in filterPriorityOptions" :class="getPriorityClass(option[0])" class="tag-list ps-2 py-1 pe-1 d-flex" @click.prevent="onClickPriority" :data-priority="option[0]">
+                <div v-for="option in filterPriorityOptions" :class="getPriorityClass(option[0])" class="list-with-counts ps-2 py-1 pe-1 d-flex" @click.prevent="onClickPriority" :data-priority="option[0]">
                     <div>[[ option[1] ]]</div>
                     <div class="ms-auto me-1">
-                        <span class="px-2 badge rounded-pill bg-info">[[ option[2] ]]</span>
+                        <span class="px-2 badge rounded-pill">[[ option[2] ]]</span>
                     </div>
                 </div>
 
                 <hr class="filter-divider" />
 
                 <h4>Created</h4>
-                <div v-for="option in filterTimeOptions" :class="getTimeClass(option[0])" class="tag-list ps-2 py-1 pe-1 d-flex" @click.prevent="onClickTime" :data-created="option[0]">
+                <div v-for="option in filterTimeOptions" :class="getTimeClass(option[0])" class="list-with-counts ps-2 py-1 pe-1 d-flex" @click.prevent="onClickTime" :data-created="option[0]">
                     <div>[[ option[1] ]]</div>
                     <div class="ms-auto me-1">
-                        <span class="px-2 badge rounded-pill bg-info">[[ option[2] ]]</span>
+                        <span class="px-2 badge rounded-pill">[[ option[2] ]]</span>
                     </div>
                 </div>
 
@@ -32,11 +32,11 @@
 
                 <h4>Tags</h4>
                 {% for tag in tags %}
-                    <div class="tag-list ps-2 py-1 pe-1 d-flex" :class="getTagClass('{{ tag.name }}')" @click.prevent="onClickTag" data-tag="{{ tag.name }}">
+                    <div class="list-with-counts ps-2 py-1 pe-1 d-flex" :class="getTagClass('{{ tag.name }}')" @click.prevent="onClickTag" data-tag="{{ tag.name }}">
                         <div>{{ tag.name }}</div>
                         <div class="ms-auto me-1">
-                            <span class="px-2 badge rounded-pill {% ifequal tagsearch tag.name %}bg-dark{% else %}bg-info{% endifequal %}">{{ tag.count }}
-                            </span></div>
+                            <span class="px-2 badge rounded-pill">{{ tag.count }}</span>
+                        </div>
                     </div>
                 {% empty %}
                     <div class="text-success">No tags found</div>
