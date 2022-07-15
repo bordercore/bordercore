@@ -12,7 +12,7 @@
         <div class="flex-grow-1 me-auto align-self-center">
             <ul class="breadcrumb mb-0 pt-0 pb-0">
                 <li class="breadcrumb-item"> <a href="{% url 'node:list' %}">Nodes</a> </li>
-                <li class="breadcrumb-item active">{{ node.name }}</li>
+                <li class="breadcrumb-item active" v-cloak>[[ $store.state.nodeName ]]</li>
             </ul>
         </div>
         <Transition name="fade" v-cloak>
@@ -27,6 +27,14 @@
         >
             <div slot="dropdown" class="mt-0">
                 <li>
+                    <a class="dropdown-item" href="#" @click.prevent="onUpdateNode">
+                        <span v-cloak>
+                            <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                            Update node
+                            </span>
+                            </a>
+                            </li>
+                            <li>
                     <a class="dropdown-item" href="#" @click.prevent="onAddCollection">
                         <span v-cloak>
                             <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
@@ -68,6 +76,31 @@
                 </li>
             </div>
         </drop-down-menu>
+
+        <div class="modal fade" id="modalUpdateNode" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">
+                            Update Node
+                        </h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <label class="col-lg-3 col-form-label" for="inputTitle">Name</label>
+                            <div class="col-lg-9">
+                                <input type="text" autocomplete="off" maxlength="200" id="id_node_name" :value="$store.state.nodeName" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input id="btn-action" class="btn btn-primary" type="button" value="Update" @click.prevent="onClickUpdateNode">
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 {% endblock %}
@@ -218,6 +251,7 @@
         const store = new Vuex.Store({
             state: {
                 editLayout: false,
+                nodeName: "{{ object.name }}",
                 nodeUuid: "{{ object.uuid }}",
             },
             getters: {},
@@ -252,16 +286,42 @@
                 onAddNote() {
                     EventBus.$emit("open-note-modal");
                 },
+                onClickUpdateNode() {
+                    const name = document.querySelector("#id_node_name").value;
+                    doPut(
+                        this,
+                        "{% url 'node-detail' object.uuid %}",
+                        {
+                            "node_uuid": "{{ object.uuid }}",
+                            "name": name,
+                        },
+                        (response) => {
+                            this.$store.state.nodeName = name;
+                            document.querySelector(".node-name").innerHTML = name;
+                            const modal = Modal.getInstance(document.querySelector("#modalUpdateNode"));
+                            modal.hide();
+                        },
+                        "Node updated",
+                    );
+
+                },
                 onEditMode() {
                     this.$store.state.editLayout = !this.$store.state.editLayout;
                 },
+                onUpdateNode() {
+                    const modal = new Modal("#modalUpdateNode");
+                    modal.show();
+                    setTimeout(() => {
+                        document.querySelector("#id_node_name").focus();
+                    }, 500);
+                }
             },
             computed: {
                 editLayoutDropDownItemValue: function() {
                     return this.$store.state.editLayout ? "Disable Edit Layout" : "Enable Edit Layout"
                 }
             },
-        })
+        });
 
         new Vue({
             el: "#vue-app",
