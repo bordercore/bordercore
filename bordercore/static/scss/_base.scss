@@ -39,8 +39,8 @@
 }
 
 .card-grid {
-  padding: 0 $grid-margin * 0.5;
-  margin: 0 0 $grid-margin;
+  padding: 0 calc(var(--grid-margin) * 0.5);
+  margin: 0 0 var(--grid-margin);
 }
 
 .editable-textarea {
@@ -701,7 +701,7 @@ textarea.form-control {
 .hover-reveal-target:hover {
   .hover-reveal-object {
     display: flex !important;
-    height: $dropdown-height;
+    height: var(--dropdown-height);
   }
 }
 
@@ -712,8 +712,8 @@ textarea.form-control {
 }
 
 .dropdown:not(.top-drop-down) {
-  min-width: $dropdown-height;
-  min-height: $dropdown-height;
+  min-width: var(--dropdown-height);
+  min-height: var(--dropdown-height);
 }
 
 .hover-target:hover {
@@ -723,7 +723,8 @@ textarea.form-control {
 }
 
 .dropdown-menu-container {
-  height: $dropdown-height;
+  height: var(--dropdown-height);
+}
 
 .dropdown {
   .dropdown-menu {
@@ -737,7 +738,7 @@ textarea.form-control {
 }
 
 .dropdown-item {
-  border-radius: 0.25rem;
+  border-radius: var(--border-radius1);
   color: var(--text1);
 
   span {
@@ -755,7 +756,7 @@ textarea.form-control {
 // Add this to any div that needs to be at least as tall
 //  as the dropdown target, to avoid on-hover jitter
 .dropdown-height {
-  min-height: $dropdown-height;
+  min-height: var(--dropdown-height);
 }
 
 // Extra content after the dropdown item's name
@@ -794,8 +795,8 @@ textarea.form-control {
 // The round, target point that spawns the dropdown menu below it
 .dropdownmenu {
   display: flex;
-  width: $dropdown-height;
-  height: $dropdown-height;
+  width: var(--dropdown-height);
+  height: var(--dropdown-height);
   margin-left: auto; // Push to the right
   font-size: 1rem;
 
@@ -1048,7 +1049,7 @@ blockquote > p {
 // Top Title
 
 #top-title {
-  padding-left: $grid-margin;
+  padding-left: var(--grid-margin);
   font-size: 2rem;
   line-height: 2.7rem;
 }
@@ -1071,7 +1072,7 @@ blockquote > p {
 
 #top-bar {
   @extend .card-box-shadow;
-  margin: $grid-margin $grid-margin $grid-margin $grid-margin;
+  margin: var(--grid-margin) var(--grid-margin) var(--grid-margin) var(--grid-margin);
   background-color: var(--surface1);
   border-radius: 0.4rem;
 }
@@ -1821,16 +1822,16 @@ div #dateapp {
 //
 
 .collection-container {
-  width: $collection-list-item-width + 3rem;
+  width: var(--collection-list-item-width) + 3rem;
 }
 
 .collection {
   overflow: hidden;
-  width: $collection-list-item-width;
+  width: var(--collection-list-item-width);
 
   img {
-    width: $collection-list-item-width;
-    height: $collection-list-item-width;
+    width: var(--collection-list-item-width);
+    height: var(--collection-list-item-width);
     border-radius: 0.25rem;
   }
 
@@ -1838,7 +1839,7 @@ div #dateapp {
     bottom: -1.15rem;
     left: 0.01rem;
     display: block;
-    width: $collection-list-item-width;
+    width: var(--collection-list-item-width);
     height: 1.15rem;
     background-color: rgba(50, 50, 50, 0.5);
     font-size: smaller;
