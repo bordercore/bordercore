@@ -725,13 +725,19 @@ textarea.form-control {
 .dropdown-menu-container {
   height: $dropdown-height;
 
+.dropdown {
   .dropdown-menu {
     top: 0.6rem !important;
     transition: all 500ms cubic-bezier(0.53, 2, 0.36, 0.85);
   }
+  li {
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
+  }
 }
 
 .dropdown-item {
+  border-radius: 0.25rem;
   color: var(--text1);
 
   span {

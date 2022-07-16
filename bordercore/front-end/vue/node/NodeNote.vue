@@ -17,24 +17,30 @@
                     <div v-if="note !== ''" class="dropdown-menu-container ms-auto">
                         <drop-down-menu :show-on-hover="true">
                             <div slot="dropdown">
-                                <a class="dropdown-item" href="#" @click.prevent="onUpdateNoteContents()">
-                                    <span>
-                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
-                                    </span>
-                                    Update note contents
-                                </a>
-                                <a class="dropdown-item" href="#" @click.prevent="onEditNote()">
-                                    <span>
-                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
-                                    </span>
-                                    Update note
-                                </a>
-                                <a class="dropdown-item" href="#" @click.prevent="onDeleteNote()">
-                                    <span>
-                                        <font-awesome-icon icon="times" class="text-primary me-3" />
-                                    </span>
-                                    Delete note
-                                </a>
+                                <li>
+                                    <a class="dropdown-item" href="#" @click.prevent="onUpdateNoteContents()">
+                                        <span>
+                                            <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
+                                        </span>
+                                        Update note contents
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" @click.prevent="onEditNote()">
+                                        <span>
+                                            <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
+                                        </span>
+                                        Update note
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" @click.prevent="onDeleteNote()">
+                                        <span>
+                                            <font-awesome-icon icon="times" class="text-primary me-3" />
+                                        </span>
+                                        Delete note
+                                    </a>
+                                </li>
                             </div>
                         </drop-down-menu>
                     </div>

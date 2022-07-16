@@ -12,12 +12,14 @@
                     <div class="dropdown-menu-container ms-auto">
                         <drop-down-menu :show-on-hover="true">
                             <div slot="dropdown">
-                                <a class="dropdown-item" href="#" @click.prevent="onRemoveImage()">
-                                    <span>
-                                        <font-awesome-icon icon="times" class="text-primary me-3" />
-                                    </span>
-                                    Remove image
-                                </a>
+                                <li>
+                                    <a class="dropdown-item" href="#" @click.prevent="onRemoveImage()">
+                                        <span>
+                                            <font-awesome-icon icon="times" class="text-primary me-3" />
+                                        </span>
+                                        Remove image
+                                    </a>
+                                </li>
                             </div>
                         </drop-down-menu>
                     </div>

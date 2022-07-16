@@ -10,18 +10,22 @@
                     <div class="dropdown-menu-container ms-auto">
                         <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
                             <div slot="dropdown">
-                                <a class="dropdown-item" href="#" @click.prevent="onCreateTodo">
-                                    <span>
-                                        <font-awesome-icon icon="plus" class="text-primary me-3" />
-                                    </span>
-                                    Add Task
-                                </a>
-                                <a class="dropdown-item" href="#" @click.prevent="onDeleteTodoList">
-                                    <span>
-                                        <font-awesome-icon icon="plus" class="text-primary me-3" />
-                                    </span>
-                                    Remove Todo List
-                                </a>
+                                <li>
+                                    <a class="dropdown-item" href="#" @click.prevent="onCreateTodo">
+                                        <span>
+                                            <font-awesome-icon icon="plus" class="text-primary me-3" />
+                                        </span>
+                                        Add Task
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" @click.prevent="onDeleteTodoList">
+                                        <span>
+                                            <font-awesome-icon icon="plus" class="text-primary me-3" />
+                                        </span>
+                                        Remove Todo List
+                                    </a>
+                                </li>
                             </div>
                         </drop-down-menu>
                     </div>
@@ -31,7 +35,7 @@
             <template #content>
                 <hr class="filter-divider mt-0">
                 <ul id="sort-container-tags" class="list-group list-group-flush interior-borders">
-                    <draggable v-model="todoList" ghost-class="sortable-ghost" draggable=".draggable" @change="handleSort">
+                    <draggable v-model="todoList" ghost-class="draggable-ghost-class" chosen-class="draggable-ghost-class" drag-class="draggable-ghost-class" draggable=".draggable" @change="handleSort">
                         <transition-group type="transition" class="w-100">
                             <li v-for="todo in todoList" v-cloak :key="todo.uuid" class="hover-target list-group-item list-group-item-secondary text-info draggable pe-0" :data-uuid="todo.uuid">
                                 <div class="dropdown-height d-flex align-items-start">
@@ -47,12 +51,16 @@
 
                                     <drop-down-menu :show-on-hover="true">
                                         <div slot="dropdown">
-                                            <a class="dropdown-item" href="#" @click.prevent="onUpdateTodo(todo)">
-                                                <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Update
-                                            </a>
-                                            <a class="dropdown-item" href="#" @click.prevent="removeTodo(todo.uuid)">
-                                                <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
-                                            </a>
+                                            <li>
+                                                <a class="dropdown-item" href="#" @click.prevent="onUpdateTodo(todo)">
+                                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Update
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#" @click.prevent="removeTodo(todo.uuid)">
+                                                    <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
+                                                </a>
+                                            </li>
                                         </div>
                                     </drop-down-menu>
                                 </div>

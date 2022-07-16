@@ -12,18 +12,22 @@
                     <div class="dropdown-menu-container ms-auto">
                         <drop-down-menu :show-on-hover="true">
                             <div slot="dropdown">
-                                <a class="dropdown-item" href="#" @click.prevent="onUpdateQuote()">
-                                    <span>
-                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
-                                    </span>
-                                    Update quote
-                                </a>
-                                <a class="dropdown-item" href="#" @click.prevent="onRemoveQuote">
-                                    <span>
-                                        <font-awesome-icon icon="plus" class="text-primary me-3" />
-                                    </span>
-                                    Remove quote
-                                </a>
+                                <li>
+                                    <a class="dropdown-item" href="#" @click.prevent="onUpdateQuote()">
+                                        <span>
+                                            <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
+                                        </span>
+                                        Update quote
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" @click.prevent="onRemoveQuote">
+                                        <span>
+                                            <font-awesome-icon icon="plus" class="text-primary me-3" />
+                                        </span>
+                                        Remove quote
+                                    </a>
+                                </li>
                             </div>
                         </drop-down-menu>
                     </div>

@@ -11,12 +11,14 @@
                         <div class="dropdown-menu-container ms-auto">
                             <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
                                 <div slot="dropdown">
-                                    <a class="dropdown-item" href="#" @click.prevent="chooseBlob">
-                                        <span>
-                                            <font-awesome-icon icon="plus" class="text-primary me-3" />
-                                        </span>
-                                        Add Blob
-                                    </a>
+                                    <li>
+                                        <a class="dropdown-item" href="#" @click.prevent="chooseBlob">
+                                            <span>
+                                                <font-awesome-icon icon="plus" class="text-primary me-3" />
+                                            </span>
+                                            Add Blob
+                                        </a>
+                                    </li>
                                 </div>
                             </drop-down-menu>
                         </div>

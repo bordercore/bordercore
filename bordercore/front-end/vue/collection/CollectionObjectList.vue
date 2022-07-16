@@ -10,28 +10,34 @@
                     <div class="dropdown-menu-container ms-auto">
                         <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
                             <div slot="dropdown">
-                                <a v-if="collectionObjectList.collection_type === 'ad-hoc'" class="dropdown-item" href="#" @click.prevent="onAddObject()">
-                                    <span>
-                                        <font-awesome-icon icon="plus" class="text-primary me-3" />
-                                    </span>
-                                    Add Object
-                                </a>
-                                <a class="dropdown-item" href="#" @click.prevent="onEditCollection()">
-                                    <span>
-                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
-                                    </span>
-                                    Edit Collection
-                                </a>
-                                <a class="dropdown-item" href="#" @click.prevent="onDeleteCollection()">
-                                    <span>
-                                        <font-awesome-icon icon="times" class="text-primary me-3" />
-                                    </span>
-                                    <span v-if="collectionObjectList.collection_type === 'ad-hoc'">Delete</span>
-                                    <span v-else>
-                                        Remove
-                                    </span>
-                                    Collection
-                                </a>
+                                <li>
+                                    <a v-if="collectionObjectList.collection_type === 'ad-hoc'" class="dropdown-item" href="#" @click.prevent="onAddObject()">
+                                        <span>
+                                            <font-awesome-icon icon="plus" class="text-primary me-3" />
+                                        </span>
+                                        Add Object
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" @click.prevent="onEditCollection()">
+                                        <span>
+                                            <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
+                                        </span>
+                                        Edit Collection
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" @click.prevent="onDeleteCollection()">
+                                        <span>
+                                            <font-awesome-icon icon="times" class="text-primary me-3" />
+                                        </span>
+                                        <span v-if="collectionObjectList.collection_type === 'ad-hoc'">Delete</span>
+                                        <span v-else>
+                                            Remove
+                                        </span>
+                                        Collection
+                                    </a>
+                                </li>
                             </div>
                         </drop-down-menu>
                     </div>
@@ -65,12 +71,16 @@
 
                                     <drop-down-menu :show-on-hover="true">
                                         <div slot="dropdown">
-                                            <a class="dropdown-item" href="#" @click.prevent="removeObject(object.uuid)">
-                                                <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
-                                            </a>
-                                            <a class="dropdown-item" href="#" @click.prevent="editNote(object)">
-                                                <font-awesome-icon icon="pencil-alt" class="text-primary me-3" /><span v-if="object.note">Edit</span><span v-else>Add</span> Note
-                                            </a>
+                                            <li>
+                                                <a class="dropdown-item" href="#" @click.prevent="removeObject(object.uuid)">
+                                                    <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#" @click.prevent="editNote(object)">
+                                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3" /><span v-if="object.note">Edit</span><span v-else>Add</span> Note
+                                                </a>
+                                            </li>
                                         </div>
                                     </drop-down-menu>
                                 </div>
