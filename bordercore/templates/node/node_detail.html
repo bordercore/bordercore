@@ -31,10 +31,10 @@
                         <span v-cloak>
                             <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
                             Update node
-                            </span>
-                            </a>
-                            </li>
-                            <li>
+                        </span>
+                    </a>
+                </li>
+                <li>
                     <a class="dropdown-item" href="#" @click.prevent="onAddCollection">
                         <span v-cloak>
                             <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
@@ -63,6 +63,14 @@
                         <span v-cloak>
                             <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
                             Add quote
+                        </span>
+                    </a>
+                </li>
+                <li v-if="!hasTodoList">
+                    <a class="dropdown-item" href="#" @click.prevent="onAddTodoList">
+                        <span v-cloak>
+                            <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                            Add todo list
                         </span>
                     </a>
                 </li>
@@ -122,11 +130,11 @@
 
         <div class="d-flex g-0 h-100 mx-2">
 
-            <div v-for="(column, colIndex) in layout" class="flex-even">
+            <div v-for="(column, colIndex) in $store.state.layout" class="flex-even">
                 <draggable
                     drag-class="draggable-chosen-class"
                     @change="onLayoutChange"
-                    :list="layout[colIndex]"
+                    :list="$store.state.layout[colIndex]"
                     group="object"
                     :data-col-number="colIndex"
                     :disabled="!$store.state.editLayout"
@@ -170,6 +178,7 @@
                                 add-node-todo-url="{% url "node:add_todo" %}"
                                 remove-node-todo-url="{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}"
                                 sort-node-todos-url="{% url 'node:sort_todos' %}"
+                                @delete-todo-list="onDeleteTodoList"
                             >
                             </node-todo-list>
                         </div>
@@ -251,6 +260,7 @@
         const store = new Vuex.Store({
             state: {
                 editLayout: false,
+                layout: JSON.parse(document.getElementById("layout").textContent),
                 nodeName: "{{ object.name }}",
                 nodeUuid: "{{ object.uuid }}",
             },
@@ -286,6 +296,20 @@
                 onAddNote() {
                     EventBus.$emit("open-note-modal");
                 },
+                onAddTodoList() {
+                    doPost(
+                        this,
+                        "{% url "node:add_todo_list" %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                        },
+                        (response) => {
+                            EventBus.$emit("update-layout", response.data.layout);
+                        },
+                        "Todo list added",
+                        ""
+                    );
+                },
                 onClickUpdateNode() {
                     const name = document.querySelector("#id_node_name").value;
                     doPut(
@@ -319,7 +343,17 @@
             computed: {
                 editLayoutDropDownItemValue: function() {
                     return this.$store.state.editLayout ? "Disable Edit Layout" : "Enable Edit Layout"
-                }
+                },
+                hasTodoList() {
+                    for (const col of this.$store.state.layout) {
+                        for (const row of col) {
+                            if (row.type === "todo") {
+                                return true;
+                            }
+                        }
+                    }
+                    return false;
+                },
             },
         });
 
@@ -327,11 +361,6 @@
             el: "#vue-app",
             name: "Node Detail",
             store,
-            data() {
-                return {
-                    layout: JSON.parse(document.getElementById("layout").textContent),
-                }
-            },
             methods: {
                 addCollection(collectionObjectList) {
                     doPost(
@@ -419,9 +448,22 @@
                             "collection_type": collectionType,
                         },
                         (response) => {
-                            this.layout = JSON.parse(response.data.layout);
+                            this.$store.state.layout = JSON.parse(response.data.layout);
                         },
                         "Collection deleted",
+                    );
+                },
+                onDeleteTodoList() {
+                    doPost(
+                        this,
+                        "{% url 'node:delete_todo_list' %}",
+                        {
+                            "node_uuid": this.$store.state.nodeUuid,
+                        },
+                        (response) => {
+                            this.$store.state.layout = JSON.parse(response.data.layout);
+                        },
+                        "Todo list deleted",
                     );
                 },
                 onRemoveImage(imageUuid) {
@@ -433,7 +475,7 @@
                             "image_uuid": imageUuid,
                         },
                         (response) => {
-                            this.layout = JSON.parse(response.data.layout);
+                            this.$store.state.layout = JSON.parse(response.data.layout);
                         },
                         "Image removed",
                     );
@@ -447,7 +489,7 @@
                             "node_quote_uuid": nodeQuoteUuid,
                         },
                         (response) => {
-                            this.layout = JSON.parse(response.data.layout);
+                            this.$store.state.layout = JSON.parse(response.data.layout);
                         },
                         "Quote removed",
                     );
@@ -473,7 +515,7 @@
                             "note_uuid": noteUuid,
                         },
                         (response) => {
-                            this.layout = JSON.parse(response.data.layout);
+                            this.$store.state.layout = JSON.parse(response.data.layout);
                         },
                         "Note deleted",
                     );
@@ -490,7 +532,7 @@
                         "{% url "node:change_layout" %}",
                         {
                             "node_uuid": this.$store.state.nodeUuid,
-                            "layout": JSON.stringify(this.layout),
+                            "layout": JSON.stringify(this.$store.state.layout),
                         },
                         (response) => {
                         },
@@ -521,7 +563,7 @@
                 });
 
                 EventBus.$on("update-layout", (payload) => {
-                    this.layout = JSON.parse(payload);
+                    this.$store.state.layout = JSON.parse(payload);
                 });
             }
         });

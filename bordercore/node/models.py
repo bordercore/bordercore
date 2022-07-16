@@ -1,3 +1,4 @@
+import json
 import uuid
 
 from django.contrib.auth.models import User
@@ -252,6 +253,29 @@ class Node(TimeStampedModel):
 
         self.save()
 
+    def add_todo_list(self):
+
+        layout = self.layout
+        layout[0].insert(
+            0,
+            {
+                "type": "todo",
+            }
+        )
+        self.layout = layout
+        self.save()
+
+    def delete_todo_list(self):
+
+        layout = self.layout
+        for i, col in enumerate(layout):
+            layout[i] = [x for x in col if x["type"] != "todo"]
+        self.layout = layout
+        self.save()
+
+        for so in SortOrderNodeTodo.objects.filter(node=self):
+            so.todo.delete()
+
 
 class SortOrderNodeTodo(SortOrderMixin):
 
@@ -271,5 +295,5 @@ class SortOrderNodeTodo(SortOrderMixin):
 
 
 @receiver(pre_delete, sender=SortOrderNodeTodo)
-def remove_Todo(sender, instance, **kwargs):
+def remove_todo(sender, instance, **kwargs):
     instance.handle_delete()

@@ -426,3 +426,35 @@ def get_quote(request):
     }
 
     return JsonResponse(response)
+
+
+@login_required
+def add_todo_list(request):
+
+    node_uuid = request.POST["node_uuid"]
+
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    node.add_todo_list()
+
+    response = {
+        "status": "OK",
+        "layout": node.get_layout()
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def delete_todo_list(request):
+
+    node_uuid = request.POST["node_uuid"]
+
+    node = Node.objects.get(uuid=node_uuid, user=request.user)
+    node.delete_todo_list()
+
+    response = {
+        "status": "OK",
+        "layout": node.get_layout()
+    }
+
+    return JsonResponse(response)

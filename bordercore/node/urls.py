@@ -110,4 +110,14 @@ urlpatterns = [
         view=views.get_quote,
         name="get_quote"
     ),
+    path(
+        route="todo_list/add/",
+        view=views.add_todo_list,
+        name="add_todo_list"
+    ),
+    path(
+        route="todo_list/delete/",
+        view=views.delete_todo_list,
+        name="delete_todo_list"
+    ),
 ]

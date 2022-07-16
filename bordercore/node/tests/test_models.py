@@ -252,3 +252,30 @@ def test_node_set_quote(auto_login_user, node):
         for val in sublist
         if val["type"] == "quote"
     ]
+
+
+def test_node_add_todo_list(node):
+
+    node.add_todo_list()
+
+    assert \
+        {
+            "type": "todo"
+        } in [
+            val
+            for sublist in node.layout
+            for val in sublist
+        ]
+
+
+def test_node_delete_todo_list(node):
+
+    node.add_todo_list()
+    node.delete_todo_list()
+
+    # Verify that the todo list has been removed from the node's layout
+    assert "todo" not in [
+        val["type"]
+        for sublist in node.layout
+        for val in sublist
+    ]

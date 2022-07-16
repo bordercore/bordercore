@@ -398,3 +398,46 @@ def test_node_get_quote(auto_login_user, node, quote):
     resp_json = resp.json()
     assert resp_json["quote"]["uuid"] == str(quote.uuid)
     assert resp_json["quote"]["quote"] == quote.quote
+
+
+def test_node_add_todo_list(auto_login_user, node):
+
+    user, client = auto_login_user()
+
+    url = urls.reverse("node:add_todo_list")
+    resp = client.post(url, {
+        "node_uuid": node.uuid,
+    })
+
+    assert resp.status_code == 200
+
+    updated_node = Node.objects.get(uuid=node.uuid)
+
+    # Verify that the todo list has been added to the node's layout
+    assert "todo" in [
+        val["type"]
+        for sublist in updated_node.layout
+        for val in sublist
+    ]
+
+
+def test_node_delete_todo_list(auto_login_user, node):
+
+    user, client = auto_login_user()
+
+    node.add_todo_list()
+
+    url = urls.reverse("node:delete_todo_list")
+    resp = client.post(url, {
+        "node_uuid": node.uuid,
+    })
+
+    assert resp.status_code == 200
+
+    # Verify that the todo list has been removed from the node's layout
+    updated_node = Node.objects.get(uuid=node.uuid)
+    assert "todo" not in [
+        val["type"]
+        for sublist in updated_node.layout
+        for val in sublist
+    ]

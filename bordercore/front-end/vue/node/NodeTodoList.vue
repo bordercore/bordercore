@@ -10,11 +10,17 @@
                     <div class="dropdown-menu-container ms-auto">
                         <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
                             <div slot="dropdown">
-                                <a class="dropdown-item" href="#" @click.prevent="handleCreateTodo">
+                                <a class="dropdown-item" href="#" @click.prevent="onCreateTodo">
                                     <span>
                                         <font-awesome-icon icon="plus" class="text-primary me-3" />
                                     </span>
                                     Add Task
+                                </a>
+                                <a class="dropdown-item" href="#" @click.prevent="onDeleteTodoList">
+                                    <span>
+                                        <font-awesome-icon icon="plus" class="text-primary me-3" />
+                                    </span>
+                                    Remove Todo List
                                 </a>
                             </div>
                         </drop-down-menu>
@@ -41,7 +47,7 @@
 
                                     <drop-down-menu :show-on-hover="true">
                                         <div slot="dropdown">
-                                            <a class="dropdown-item" href="#" @click.prevent="handleUpdateTodo(todo)">
+                                            <a class="dropdown-item" href="#" @click.prevent="onUpdateTodo(todo)">
                                                 <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Update
                                             </a>
                                             <a class="dropdown-item" href="#" @click.prevent="removeTodo(todo.uuid)">
@@ -132,7 +138,7 @@
                         console.log(error);
                     });
             },
-            handleCreateTodo() {
+            onCreateTodo() {
                 this.$parent.$parent.$refs.updateTodo.setAction("Create");
                 const modal = new Modal("#modalUpdateTodo");
                 modal.show();
@@ -140,7 +146,10 @@
                     document.getElementById("id_name").focus();
                 }, 500);
             },
-            handleUpdateTodo(todoInfo) {
+            onDeleteTodoList() {
+                this.$emit("delete-todo-list");
+            },
+            onUpdateTodo(todoInfo) {
                 this.$parent.$parent.$refs.updateTodo.setAction("Update");
                 this.$parent.$parent.$refs.updateTodo.todoInfo = {
                     uuid: todoInfo.uuid,
