@@ -107,6 +107,7 @@
                     </div>
                 {% endif %}
 
+                <input type="hidden" name="rating" :value="rating" />
                 <input type="hidden" name="sha1sum" :value="sha1sum" />
                 <input type="hidden" name="length" :value="songLength" />
 
@@ -131,7 +132,22 @@
                 {% endif %}
 
                 {% for field in form %}
-                    {% if field.label == "Tags" %}
+                    {% if field.label == "Rating" %}
+                        <div class="row align-items-center mb-3">
+                            <label class="col-lg-3 col-form-label fw-bold text-end">Rating</label>
+
+                            <div class="col-lg-9">
+                                <span
+                                    v-for="rating in Array(5).fill().map((x,i)=>i)"
+                                    class="me-1"
+                                    :class="getStarClass(rating)"
+                                    @click="setRating(rating)"
+                                >
+                                    <font-awesome-icon icon="star"></font-awesome-icon>
+                                </span>
+                            </div>
+                        </div>
+                    {% elif field.label == "Tags" %}
 
                         <div class="{% if field.errors %} error{% endif %} row mb-3">
                             <label class="col-lg-3 col-form-label fw-bold text-end">Tags</label>
@@ -206,7 +222,7 @@
                 {% endfor %}
 
                 {% if form.instance.album.title %}
-                    <div class="row mb-3">
+                    <div class="row align-items-center mb-3">
                         <label class="col-lg-3 col-form-label fw-bold text-end">Album</label>
                         <label class="col-lg-9 text-start mb-0 form-no-input">{{ form.instance.album.title }}</label>
                     </div>
@@ -295,6 +311,7 @@
             data() {
                 return {
                     filename: null,
+                    rating: {{ form.rating.value|default:"''" }},
                     sha1sum: null,
                     isCompilation: false,
                     {% if action == "Update" %}
@@ -303,6 +320,12 @@
                 };
             },
             methods: {
+                getStarClass(rating) {
+                    if (rating <= this.rating - 1) {
+                        return "rating-star-selected";
+                    }
+                    return "";
+                },
                 onDupeCheck() {
                     const artist = document.getElementById("id_artist").value;
                     const title = document.getElementById("id_title").value;
@@ -371,6 +394,16 @@
                     });
                 },
                 select() {},
+                setRating(rating) {
+                    if (rating + 1 === this.rating) {
+                        // If we've selected the current rating, treat it
+                        // as if we've de-selected a rating entirely
+                        // and remove it.
+                        this.rating = "";
+                    } else {
+                        this.rating = rating + 1;
+                    }
+                },
                 onClickDelete(evt) {
                     const formEl = document.getElementById("song-form");
                     formEl.setAttribute("action", "{% url 'music:delete' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", this.uuid));

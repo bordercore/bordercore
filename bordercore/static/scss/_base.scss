@@ -1944,6 +1944,10 @@ audio {
   font-size: 0.75rem;
 }
 
+.rating-star-selected {
+  color: var(--surface7);
+}
+
 .v-md-editor {
   height: 35rem;
   background-color: $form-bg !important;

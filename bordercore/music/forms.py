@@ -28,6 +28,7 @@ class SongForm(ModelForm):
         super().__init__(*args, **kwargs)
 
         self.fields["source"].empty_label = None
+        self.fields["rating"].required = False
         self.fields["track"].required = False
         self.fields["note"].required = False
         self.fields["year"].required = False
@@ -89,6 +90,18 @@ class SongForm(ModelForm):
         artist, _ = Artist.objects.get_or_create(name=data, user=self.request.user)
         return artist
 
+    def clean_rating(self):
+
+        rating = self.cleaned_data.get('rating')
+
+        # An empty rating is returned as an empty string by the
+        #  form. Convert it to "None" so that the corresponding
+        #  field in the database is set to "NULL".
+        if rating == "":
+            return None
+        else:
+            return rating
+
     def clean_year(self):
         year = self.cleaned_data.get("year")
         if not year and self.data.get("album_name"):
@@ -109,7 +122,7 @@ class SongForm(ModelForm):
 
     class Meta:
         model = Song
-        fields = ("title", "artist", "track", "year", "original_year", "tags", "album_name", "compilation", "note", "source", "length", "id")
+        fields = ("title", "artist", "track", "year", "original_year", "tags", "album_name", "compilation", "rating", "note", "source", "length", "id")
         widgets = {
             "title": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
             "artist": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
