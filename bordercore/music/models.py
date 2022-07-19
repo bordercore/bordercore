@@ -13,7 +13,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.db.models import Count, JSONField, OuterRef, Q, Subquery, Sum
+from django.db.models import Count, JSONField, Sum
 from django.db.models.functions import Coalesce
 from django.db.models.signals import pre_delete
 from django.dispatch.dispatcher import receiver
@@ -391,14 +391,7 @@ class Playlist(TimeStampedModel):
 
         if "exclude_recent" in this.parameters:
 
-            latest = Listen.objects.filter(song=OuterRef("pk")).order_by("-created")
-
-            song_list = song_list.annotate(
-                latest_result=Subquery(latest.values("created")[:1])
-            ).filter(
-                Q(latest_result__isnull=True)
-                | Q(latest_result__lte=timezone.now() - timedelta(days=int(this.parameters["exclude_recent"])))
-            )
+            song_list = song_list.exclude(last_time_played__gte=timezone.now() - timedelta(days=int(this.parameters["exclude_recent"])))
 
         # If we're not returning recently added songs, randomize the final list
         if this.type != "recent":
