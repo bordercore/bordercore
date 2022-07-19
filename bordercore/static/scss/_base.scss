@@ -79,10 +79,21 @@
   }
 }
 
+//
 // Drag and Drop
-.draggable-chosen-class {
-  background-color: #000;
+//
+
+// Override default Sortable classes
+.sortable-drag {
+  background-color: var(--surface5);
 }
+
+// Drag and drop not controlled by Sortable uses
+//  this class (eg Buefy tables)
+.dragging {
+  background-color: var(--surface5) !important;
+}
+
 
 /* Used to hide mustached content before Vue has loaded */
 [v-cloak] {
@@ -535,10 +546,6 @@ a.tag {
   &:hover {
     background-color: var(--hover-bg);
   }
-}
-
-.dragging {
-  color: var(--text4);
 }
 
 // A list with only interior borders

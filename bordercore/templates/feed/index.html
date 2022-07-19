@@ -39,23 +39,21 @@
                         <h3>Feed List</h3>
                     </div>
                     <hr />
-                    <ul id="sort-container" class="feed-list">
-                        <feed-list inline-template>
-                            <div>
-                                <draggable v-model="feedList" @change="onChange" animation="500" forceFallback="true">
-                                    <transition-group type="transition">
-                                        <li v-for="feed in feedList" :key="feed.id" v-cloak>
-                                            <a href="#" :data-id="feed.id" @click.prevent="onClick(feed)">[[ feed.name ]]</a>
-                                            <small v-if="feed.lastResponse !== 'OK'" class="text-danger">[[ feed.lastResponse ]]</small>
-                                        </li>
-                                    </transition-group>
-                                </draggable>
-                                <div class="text-secondary" v-if="feedList.length === 0" v-cloak>
-                                    No feeds found. <a href="#" @click.prevent="handleUpdateFeed('Update')">Add one here.</a>
-                                </div>
+                    <feed-list inline-template>
+                        <ul>
+                            <draggable v-model="feedList" @change="onChange" animation="500">
+                                <li v-for="feed in feedList" :key="feed.id" class="ps-2" v-cloak>
+                                    <a href="#" :data-id="feed.id" @click.prevent="onClick(feed)">
+                                        [[ feed.name ]]
+                                    </a>
+                                    <small v-if="feed.lastResponse !== 'OK'" class="text-danger">[[ feed.lastResponse ]]</small>
+                                </li>
+                            </draggable>
+                            <div v-if="feedList.length === 0" class="text-secondary" v-cloak>
+                                No feeds found. <a href="#" @click.prevent="handleUpdateFeed('Update')">Add one here.</a>
                             </div>
-                        </feed-list>
-                    </ul>
+                        </ul>
+                    </feed-list>
                 </div>
             </div>
 
