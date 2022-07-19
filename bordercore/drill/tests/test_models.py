@@ -18,6 +18,13 @@ def test_str(question):
     assert str(question[0]) == question[0].question
 
 
+def test_needs_review(question):
+    assert question[0].needs_review is True
+
+    question[0].record_response("good")
+    assert question[0].needs_review is False
+
+
 def test_get_tags(question):
 
     tags = question[0].get_tags()

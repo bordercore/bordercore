@@ -60,6 +60,10 @@
                                 <div class="flex-fill fw-bold">Interval</div>
                                 <div class="text-info">{{ question.interval.days }} day{{ question.interval.days|pluralize:"s" }}</div>
                             </li>
+                            <li class="d-flex">
+                                <div class="flex-fill fw-bold">Needs Review</div>
+                                <div class="text-info">{{ question.needs_review }}</div>
+                            </li>
                         </ul>
                     </div>
                 </div>

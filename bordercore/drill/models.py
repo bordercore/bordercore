@@ -75,6 +75,12 @@ class Question(TimeStampedModel):
     def __str__(self):
         return self.question
 
+    @property
+    def needs_review(self):
+        if not self.last_reviewed:
+            return True
+        return self.interval < timezone.now() - self.last_reviewed
+
     @staticmethod
     def get_state_name(name):
         for state in QUESTION_STATES:
