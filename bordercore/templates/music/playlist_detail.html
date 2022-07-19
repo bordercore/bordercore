@@ -236,17 +236,17 @@
                             title: "Update",
                             url: "#",
                             clickHandler: this.onClickUpdatePlaylist,
-                            icon: "pencil-alt"
+                            icon: "pencil-alt",
                         },
                         {
                             id: uuidv4(),
                             title: "Delete",
                             url: "#",
                             clickHandler: this.onClickDelete,
-                            icon: "times"
-                        }
-                    ]
-                }
+                            icon: "times",
+                        },
+                    ],
+                };
             },
             methods: {
                 getPlaylist() {
@@ -257,13 +257,13 @@
                             this.songList = response.data.playlistitems;
                             this.totalTime = response.data.totalTime;
                         },
-                        "Error getting playlist"
+                        "Error getting playlist",
                     );
                 },
                 onSongClicked(row, column, rowIndex, columnIndex) {
                     // Don't play the song if we've clicked on the
-                    //  'on-hover' menu.
-                    if (columnIndex !== 5) {
+                    //  'on-hover' menu, which stores the song uuid
+                    if (column.field !== "uuid") {
                         this.$refs.audioPlayer.playTrack(row.uuid);
                     }
                 },
