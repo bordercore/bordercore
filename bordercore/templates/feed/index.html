@@ -8,9 +8,9 @@
 
         <div class="row g-0 mx-2">
 
-            <div class="col-lg-3 d-flex flex-column flex-grow-last backdrop-filter">
+            <div class="col-lg-3 d-flex flex-column flex-grow-last">
                 <feed-info inline-template>
-                    <card title="">
+                    <card title="" class="backdrop-filter">
                         <template v-slot:title-slot>
                             <div class="d-flex">
                                 <h3>Feed Info</h3>
@@ -42,7 +42,7 @@
                     <feed-list inline-template>
                         <ul>
                             <draggable v-model="feedList" @change="onChange" animation="500">
-                                <li v-for="feed in feedList" :key="feed.id" class="ps-2" v-cloak>
+                                <li v-for="feed in feedList" :key="feed.id" :class="getFeedClass(feed)" class="ps-2" v-cloak>
                                     <a href="#" :data-id="feed.id" @click.prevent="onClick(feed)">
                                         [[ feed.name ]]
                                     </a>
@@ -57,32 +57,27 @@
                 </div>
             </div>
 
-            <div class="col-lg-6 d-flex flex-column">
-                <div class="d-flex flex-grow-1">
-                    <feed-item-list inline-template>
-                        <div class="card-body backdrop-filter h-100 me-2">
-                            <div class="d-flex">
-                                <h3 id="feed-title" v-cloak>
-                                    <a :href="$store.state.currentFeed.homepage">[[ $store.state.currentFeed.name ]]</a>
-                                </h3>
-                                <drop-down-menu
-                                    ref="dropDownMenu"
-                                    :links="feedDetailMenuItems"
-                                >
-                                </drop-down-menu>
-                            </div>
-                            <hr />
-                            <ul>
-                                <li v-for="url in $store.state.currentFeed.feedItems" v-cloak>
-                                    <a :href="url.link">[[ url.title ]]</a>
-                                </li>
-                                <div v-if="$store.state.currentFeed.feedItems?.length == 0">
-                                    No feed items found.
-                                </div>
-                            </ul>
+            <div class="col-lg-6 d-flex flex-column flex-grow-last">
+                <feed-item-list inline-template>
+                    <div class="card-body backdrop-filter h-100 me-2">
+                        <div class="d-flex">
+                            <h3 id="feed-title" v-cloak>
+                                <a :href="$store.state.currentFeed.homepage">[[ $store.state.currentFeed.name ]]</a>
+                            </h3>
+                            <drop-down-menu ref="dropDownMenu" :links="feedDetailMenuItems">
+                            </drop-down-menu>
                         </div>
-                    </feed-item-list>
-                </div>
+                        <hr />
+                        <ul>
+                            <li v-for="url in $store.state.currentFeed.feedItems" v-cloak>
+                                <a :href="url.link">[[ url.title ]]</a>
+                            </li>
+                            <div v-if="$store.state.currentFeed.feedItems?.length == 0">
+                                No feed items found.
+                            </div>
+                        </ul>
+                    </div>
+                </feed-item-list>
             </div>
 
             <div id="modalDeleteFeed" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -194,6 +189,11 @@
                 };
             },
             methods: {
+                getFeedClass(feed) {
+                    if (feed === this.$store.state.currentFeed) {
+                        return "selected rounded-sm";
+                    }
+                },
                 onClick(feed) {
                     EventBus.$emit("showFeed", feed);
 
