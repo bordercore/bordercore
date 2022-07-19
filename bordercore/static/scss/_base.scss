@@ -1948,6 +1948,10 @@ audio {
   color: var(--surface7);
 }
 
+.rating-star-hovered {
+  color: var(--surface5);
+}
+
 .v-md-editor {
   height: 35rem;
   background-color: $form-bg !important;
@@ -2105,6 +2109,13 @@ audio {
     border-bottom-right-radius: 0.25rem;
     border-top-left-radius: 0.25rem;
     border-top-right-radius: 0.25rem;
+    &:hover {
+      border-color: var(--text3) !important;
+    }
+  }
+
+  &.ti-disabled .ti-input {
+    background-color: var(--surface2) !important;
   }
 
   &.ti-focus .ti-input {

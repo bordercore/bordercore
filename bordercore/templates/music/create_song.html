@@ -32,7 +32,7 @@
                     </div>
                 </transition>
 
-                <card v-if="$store.state.songLength !== null" title="Song Info" class="backdrop-filter">
+                <card v-if="$store.state.songLength !== null" title="Song Info" class="backdrop-filter ms-3">
                     <template v-slot:content>
                         <ul>
                             <li>Song Length <span class="ms-1 text-primary">[[ $store.state.songLengthPretty ]]</span></li>
@@ -136,12 +136,15 @@
                         <div class="row align-items-center mb-3">
                             <label class="col-lg-3 col-form-label fw-bold text-end">Rating</label>
 
-                            <div class="col-lg-9">
+                            <div class="col-lg-9" @mouseleave="onMouseLeaveRatingContainer">
                                 <span
-                                    v-for="rating in Array(5).fill().map((x,i)=>i)"
-                                    class="me-1"
-                                    :class="getStarClass(rating)"
-                                    @click="setRating(rating)"
+                                    v-for="starCount in Array(5).fill().map((x,i)=>i)"
+                                    :key="starCount"
+                                    class="rating me-1"
+                                    :class="getStarClass(starCount)"
+                                    :data-rating="starCount"
+                                    @click="setRating(starCount)"
+                                    @mouseover="onMouseOverRating(starCount)"
                                 >
                                     <font-awesome-icon icon="star"></font-awesome-icon>
                                 </span>
@@ -392,6 +395,26 @@
                         this.onDupeCheck();
 
                     });
+                },
+                onMouseLeaveRatingContainer() {
+                    const els = document.querySelectorAll(".rating");
+                    for (const el of els) {
+                        el.classList.remove("rating-star-hovered");
+                    }
+                },
+                onMouseOverRating(rating) {
+                    const els = document.querySelectorAll(".rating");
+                    // Loop over each star rating. Add the "hovered" class if:
+                    //  1) The rating is > the currently selected rating
+                    //  2) The rating is < the currently "hovered" rating
+                    for (const el of els) {
+                        if (!el.classList.contains("rating-star-selected") &&
+                            parseInt(el.getAttribute("data-rating"), 10) < rating + 1) {
+                            el.classList.add("rating-star-hovered");
+                        } else {
+                            el.classList.remove("rating-star-hovered");
+                        }
+                    }
                 },
                 select() {},
                 setRating(rating) {

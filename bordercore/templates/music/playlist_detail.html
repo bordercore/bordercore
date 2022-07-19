@@ -90,7 +90,9 @@
                     <h6>{{ playlist.note }}</h6>
                 {% endif %}
 
-                <small v-if="songCount > 0" class="text-primary ms-2"><strong>[[ songCount ]]</strong> [[ songCountPluralized ]], <strong v-html="totalTime"></strong></small>
+                <small v-if="songCount > 0" class="text-primary ms-2" v-cloak>
+                    <strong>[[ songCount ]]</strong> [[ songCountPluralized ]], <strong v-html="totalTime"></strong>
+                </small>
             </div>
 
             <div class="ms-3 me-3">
@@ -110,6 +112,7 @@
                     @dragstart="onDragStart"
                     @cellclick="onSongClicked"
                     ref="table"
+                    v-cloak
                 >
 
                     {% if playlist.type == "manual" %}

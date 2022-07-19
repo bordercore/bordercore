@@ -571,7 +571,7 @@ class CreatePlaylistView(FormRequestMixin, CreateView):
         playlist.parameters = {
             x: self.request.POST[x]
             for x in
-            ["tag", "start_year", "end_year", "exclude_albums", "exclude_recent"]
+            ["tag", "start_year", "end_year", "exclude_albums", "exclude_recent", "rating"]
             if x in self.request.POST and self.request.POST[x] != ""
         }
         playlist.save()

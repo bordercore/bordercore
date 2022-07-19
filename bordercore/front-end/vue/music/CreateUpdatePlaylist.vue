@@ -36,7 +36,7 @@
                         <div class="row mt-3">
                             <div class="col-lg-12">
                                 <div class="form-check">
-                                    <input v-model="smartType" class="form-check-input" type="radio" name="type" value="manual" checked>
+                                    <input v-model="smartType" class="form-check-input mt-2" type="radio" name="type" value="manual" checked>
                                     <label class="form-check-label d-flex" for="type">
                                         Manually Add Songs
                                     </label>
@@ -47,7 +47,7 @@
                         <div class="row mt-3">
                             <div class="col-lg-4">
                                 <div class="form-check">
-                                    <input v-model="smartType" class="form-check-input" type="radio" name="type" value="tag">
+                                    <input v-model="smartType" class="form-check-input mt-2" type="radio" name="type" value="tag">
                                     <label class="form-check-label d-flex" for="type">
                                         Tag
                                     </label>
@@ -61,7 +61,7 @@
                         <div class="row mt-3">
                             <div class="col-lg-12">
                                 <div class="form-check">
-                                    <input v-model="smartType" class="form-check-input" type="radio" name="type" value="recent">
+                                    <input v-model="smartType" class="form-check-input mt-2" type="radio" name="type" value="recent">
                                     <label class="form-check-label d-flex" for="type">
                                         Recently Added Songs
                                     </label>
@@ -72,7 +72,7 @@
                         <div class="row mt-3">
                             <div class="col-lg-4">
                                 <div class="form-check">
-                                    <input v-model="smartType" type="radio" name="type" class="form-check-input" value="time">
+                                    <input v-model="smartType" type="radio" name="type" class="form-check-input mt-2" value="time">
                                     <div class="from-check-label text-nowrap">
                                         Time period
                                     </div>
@@ -85,50 +85,81 @@
                                 </label>
                             </div>
                         </div>
+
+                        <div class="row mt-3">
+                            <div class="col-lg-4">
+                                <div class="form-check">
+                                    <input type="hidden" name="rating" :value="rating">
+                                    <input v-model="smartType" type="radio" name="type" class="form-check-input mt-2" value="rating">
+                                    <div class="from-check-label text-nowrap">
+                                        Rating
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-8">
+                                <label class="form-check-label d-flex">
+                                    <div @mouseleave="onMouseLeaveRatingContainer">
+                                        <span
+                                            v-for="starCount in Array(5).fill().map((x,i)=>i)"
+                                            :key="starCount"
+                                            class="rating me-1"
+                                            :class="getStarClass(starCount)"
+                                            :data-rating="starCount"
+                                            @click="setRating(starCount)"
+                                            @mouseover="onMouseOverRating(starCount)"
+                                        >
+                                            <font-awesome-icon icon="star" />
+                                        </span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
-                    <div :class="{'d-none': hideOptions}">
-                        <hr class="mb-1">
+                    <transition name="fade">
+                        <div v-if="smartType !== 'manual'">
+                            <hr class="mb-1">
 
-                        <div class="text-primary">
-                            <small>
-                                Options
-                            </small>
-                        </div>
-
-                        <div class="row mt-3">
-                            <label class="col-lg-4 col-form-label">Size</label>
-                            <div class="col-lg-8">
-                                <select v-model="size" class="form-control form-select" name="size">
-                                    <option v-for="option in sizeOptions" :key="option.value" :value="option.value">
-                                        {{ option.display }}
-                                    </option>
-                                </select>
+                            <div class="text-primary">
+                                <small>
+                                    Options
+                                </small>
                             </div>
-                        </div>
 
-                        <div class="row mt-3">
-                            <label class="col-lg-4 col-form-label">Exclude Recent Listens</label>
-                            <div class="col-lg-8">
-                                <select v-model="exclude_recent" class="form-control form-select" name="exclude_recent">
-                                    <option v-for="option in excludeRecentOptions" :key="option.value" :value="option.value">
-                                        {{ option.display }}
-                                    </option>
-                                </select>
+                            <div class="row mt-3">
+                                <label class="col-lg-4 col-form-label">Size</label>
+                                <div class="col-lg-8">
+                                    <select v-model="size" class="form-control form-select" name="size">
+                                        <option v-for="option in sizeOptions" :key="option.value" :value="option.value">
+                                            {{ option.display }}
+                                        </option>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="row mt-3">
-                            <div class="col-lg-12">
-                                <div class="form-check">
-                                    <input v-model="exclude_albums" class="form-check-input" type="checkbox" name="exclude_albums">
-                                    <label class="form-check-label">
-                                        Exclude albums
-                                    </label>
+                            <div class="row mt-3">
+                                <label class="col-lg-4 col-form-label">Exclude Recent Listens</label>
+                                <div class="col-lg-8">
+                                    <select v-model="exclude_recent" class="form-control form-select" name="exclude_recent">
+                                        <option v-for="option in excludeRecentOptions" :key="option.value" :value="option.value">
+                                            {{ option.display }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-lg-12">
+                                    <div class="form-check">
+                                        <input v-model="exclude_albums" class="form-check-input mt-2" type="checkbox" name="exclude_albums">
+                                        <label class="form-check-label">
+                                            Exclude albums
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </transition>
                 </div>
 
                 <div class="modal-footer justify-content-end">
@@ -234,6 +265,7 @@
                 size: this.getAttribute("size", 20),
                 name: this.getAttribute("name", ""),
                 note: this.getAttribute("note", ""),
+                rating: this.getAttribute("rating", undefined),
                 exclude_recent: this.getAttribute("exclude_recent", ""),
                 exclude_albums: this.getAttribute("exclude_albums", ""),
                 smartType: this.getAttribute("type", undefined),
@@ -252,9 +284,6 @@
                     return true;
                 }
                 return false;
-            },
-            hideOptions() {
-                return this.smartType === "manual";
             },
             hidePlaylistType() {
                 return this.action === "Update";
@@ -277,12 +306,53 @@
                 }
                 return defaultValue;
             },
+            getStarClass(rating) {
+                if (rating <= this.rating - 1) {
+                    return "rating-star-selected";
+                }
+                return "";
+            },
             onClickCreate(evt) {
                 const modal = new Modal("#modalAdd");
                 modal.show();
                 window.setTimeout(() => {
                     document.getElementById("id_name").focus();
                 }, 500);
+            },
+            onMouseLeaveRatingContainer() {
+                const els = document.querySelectorAll(".rating");
+                for (const el of els) {
+                    el.classList.remove("rating-star-hovered");
+                }
+            },
+            onMouseOverRating(rating) {
+                if (this.smartType !== "rating") {
+                    return;
+                }
+                const els = document.querySelectorAll(".rating");
+                // Loop over each star rating. Add the "hovered" class if:
+                //  1) The rating is > the currently selected rating
+                //  2) The rating is < the currently "hovered" rating
+                for (const el of els) {
+                    if (!el.classList.contains("rating-star-selected") &&
+                        parseInt(el.getAttribute("data-rating"), 10) < rating + 1 ) {
+                        el.classList.add("rating-star-hovered");
+                    } else {
+                        el.classList.remove("rating-star-hovered");
+                    }
+                }
+            },
+            setRating(rating) {
+                if (this.smartType === "rating") {
+                    if (rating + 1 === this.rating) {
+                        // If we've selected the current rating, treat it
+                        // as if we've de-selected a rating entirely
+                        // and remove it.
+                        this.rating = "";
+                    } else {
+                        this.rating = rating + 1;
+                    }
+                }
             },
         },
     };

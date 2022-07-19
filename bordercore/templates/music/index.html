@@ -48,7 +48,7 @@
                     <hr class="filter-divider" />
                     <ul class="list-group interior-borders">
                         {% for playlist in playlists %}
-                            <li class="list-with-counts list-group-item list-group-item-secondary text-info d-flex">
+                            <li class="list-with-counts text-info d-flex ps-2 py-1 pr-1">
                                 <div>
                                     <a href="{% url 'music:playlist_detail' playlist.uuid %}">{{ playlist.name }}</a>
                                 </div>

@@ -381,6 +381,8 @@ class Playlist(TimeStampedModel):
                 )
         elif this.type == "recent":
             song_list = Song.objects.all().order_by("-created")
+        elif this.type == "rating":
+            song_list = Song.objects.filter(rating=int(this.parameters["rating"]))
         else:
             raise ValueError(f"Playlist type not supported: {this.type}")
 
