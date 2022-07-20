@@ -16,6 +16,16 @@
   padding: 0;
 }
 
+// Use this to avoid layout shift caused by scrollbars
+.scroll-container {
+  overflow: scroll;
+
+  @supports (scrollbar-gutter: stable) {
+    overflow: auto;
+    scrollbar-gutter: stable;
+  }
+}
+
 // Used on the last block in a flex column to extend to the bottom of the page
 .extend-block {
   flex: 1 0 auto;
