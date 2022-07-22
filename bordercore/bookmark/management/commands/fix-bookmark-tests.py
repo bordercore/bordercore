@@ -24,13 +24,18 @@ class Command(BaseCommand):
             help="The test to fix",
         )
         parser.add_argument(
+            "--all",
+            help="Fix all tests",
+            action="store_true"
+        )
+        parser.add_argument(
             "--dry-run",
             help="Dry run. Take no action",
             action="store_true"
         )
 
     @atomic
-    def handle(self, *args, test, dry_run, **kwargs):
+    def handle(self, *args, test, all, dry_run, **kwargs):
 
         if test == "test_bookmarks_in_db_exist_in_elasticsearch":
             self.fix_test_bookmarks_in_db_exist_in_elasticsearch(dry_run)
@@ -38,8 +43,12 @@ class Command(BaseCommand):
             self.fix_test_elasticsearch_bookmarks_exist_in_db(dry_run)
         elif test == "test_bookmark_thumbnails_in_s3_exist_in_db":
             self.fix_test_bookmark_thumbnails_in_s3_exist_in_db(dry_run)
+        elif all:
+            self.fix_test_bookmarks_in_db_exist_in_elasticsearch(dry_run)
+            self.fix_test_elasticsearch_bookmarks_exist_in_db(dry_run)
+            self.fix_test_bookmark_thumbnails_in_s3_exist_in_db(dry_run)
         else:
-            raise ValueError("No valid test specified.")
+            raise ValueError("No test specified.")
 
     def parse_uuids(self, text):
 
