@@ -351,3 +351,20 @@ def test_music_recent_albums(auto_login_user):
     assert len(album_list) == 8
     assert str(albums[-1].uuid) not in [x["uuid"] for x in album_list]
     assert str(albums[0].uuid) in [x["uuid"] for x in album_list]
+
+
+def test_music_set_song_rating(auto_login_user, song):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("music:set_song_rating")
+    resp = client.post(url, {
+        "song_uuid": song[0].uuid,
+        "rating": 3
+    })
+
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "OK"
+
+    updated_song = Song.objects.get(uuid=song[0].uuid)
+    assert updated_song.rating == 3

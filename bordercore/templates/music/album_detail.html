@@ -88,14 +88,13 @@
                             </h6>
                         </template>
                     </card>
-                    <card title="" class="backdrop-filter">
+                    <card title="" id="album-song-list" class="backdrop-filter">
                         <template v-slot:content>
                             <b-table
                                 :data="songList"
                                 :mobile-cards="false"
                                 :default-sort="['year','desc']"
                                 hoverable
-                                :selected.sync="selectedSong"
                                 ref="table"
                                 header-class="cursor-pointer"
                                 sort-icon="chevron-up"
@@ -108,15 +107,34 @@
                                 </b-table-column>
 
                                 <b-table-column field="title" label="Title" header-class="cursor-pointer" v-slot="props">
-                                        <span>[[ props.row.title ]]</span>
-                                        <span class="ps-2 table-note" v-html="props.row.note"></span>
-                                    </b-table-column>
+                                    <div class="d-flex">
+                                        <div>[[ props.row.title ]]</div>
+                                        <div class="ps-2 table-note" v-html="props.row.note"></div>
+                                    </div>
+                                </b-table-column>
 
-                                    <b-table-column field="length" label="Length" header-class="cursor-pointer" sortable v-slot="props">
-                                        <span>[[ props.row.length ]]</span>
-                                    </b-table-column>
+                                <b-table-column field="rating" label="Rating" header-class="cursor-pointer text-end" sortable v-slot="props">
+                                    <div class="ms-auto">
+                                        <div class="rating-container d-flex" :class="{'d-none': props.row.rating === ''}" @mouseleave="onMouseLeaveRatingContainer">
+                                            <span
+                                                v-for="starCount in Array(5).fill().map((x,i)=>i)"
+                                                :key="starCount"
+                                                class="rating me-1"
+                                                    :class="getStarClass(starCount, props.row.rating)"
+                                                :data-rating="starCount"
+                                                @click="setRating(props.row, starCount)"
+                                                @mouseover="onMouseOverRating($event, starCount)">
+                                                <font-awesome-icon icon="star"></font-awesome-icon>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </b-table-column>
 
-                                    <b-table-column field="uuid" label="" cell-class="col-action text-center align-middle" v-slot="props">
+                                <b-table-column field="length" label="Length" header-class="cursor-pointer" sortable v-slot="props">
+                                    <span>[[ props.row.length ]]</span>
+                                </b-table-column>
+
+                                <b-table-column field="uuid" label="" cell-class="col-action text-center align-middle" v-slot="props">
                                         <drop-down-menu :show-on-hover="true">
                                             <div slot="dropdown">
                                                 <li>
@@ -274,6 +292,7 @@
                         "title": "{{ song.title|safe }}",
                         "length": "{{ song.length }}",
                         "note": "{{ song.note|safe|escapejs }}",
+                        "rating": "{{ song.rating|default:'' }}",
                     },
                     {% endfor %}
                 ];
@@ -305,19 +324,82 @@
                 }
             },
             methods: {
+                getStarClass(rating, currentRating) {
+                    if (rating <= currentRating - 1) {
+                        return "rating-star-selected";
+                    }
+                    return "";
+                },
+                setRating(row, rating) {
+                    rating = rating + 1;
+                    if (rating === parseInt(row.rating, 10)) {
+                        // If we've selected the current rating, treat it
+                        // as if we've de-selected a rating entirely
+                        // and remove it.
+                        rating = "";
+                    }
+                    doPost(
+                        this,
+                        "{% url 'music:set_song_rating' %}",
+                        {
+                            "song_uuid": row.uuid,
+                            "rating": rating,
+                        },
+                        (response) => {
+                            for (const song of this.songList) {
+                                if (song.uuid === row.uuid) {
+                                    song.rating = rating;
+                                }
+                            }
+                        },
+                        "",
+                    );
+                },
+                onMouseLeaveRatingContainer() {
+                    const els = document.querySelectorAll(".rating");
+                    for (const el of els) {
+                        el.classList.remove("rating-star-hovered");
+                    }
+                },
+                onMouseOverRating(event, rating) {
+                    // The event is triggered on an individual star. Go
+                    // up to the parent and select all stars for the row.
+                    const els = event.currentTarget.parentElement.querySelectorAll(".rating");
+                    // Loop over each star rating. Add the "hovered" class if:
+                    //  1) The rating is > the currently selected rating
+                    //  2) The rating is < the currently "hovered" rating
+                    for (const el of els) {
+                        el.classList.add("foobar666");
+                        if (!el.classList.contains("rating-star-selected") &&
+                            parseInt(el.getAttribute("data-rating"), 10) < rating + 1) {
+                            el.classList.add("rating-star-hovered");
+                        } else {
+                            el.classList.remove("rating-star-hovered");
+                        }
+                    }
+                },
                 onSongClicked(row, column, rowIndex, columnIndex) {
                     // Don't play the song if we've clicked on the
                     //  'on-hover' menu.
-                    if (columnIndex !== 3) {
+                    if (column.field !== "uuid" && column.field !== "rating") {
                         this.$refs.audioPlayer.playTrack(row.uuid);
+                        this.selectedSong = row;
+                        this.selectRow(rowIndex);
                     }
                 },
                 selectRow(index) {
+                    // First deselect any selected rows
+                    const allRows = document.querySelectorAll("table tr");
+                    for (const row of allRows) {
+                        row.classList.remove("is-selected");
+                    }
+
                     // Select a row based on index number. If the index is -1,
                     // assume we only want to deselect any currently selected row.
                     if (index != -1) {
                         const selectedRow = this.songList[index];
                         this.$refs.table.selectRow(selectedRow);
+                        document.querySelector(`table tr:nth-child(${index + 1})`).classList.add("is-selected");
                     } else {
                         this.$refs.table.selectRow({});
                     }

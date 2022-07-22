@@ -143,7 +143,7 @@
                                     class="rating me-1"
                                     :class="getStarClass(starCount)"
                                     :data-rating="starCount"
-                                    @click="setRating(starCount)"
+                                    @click="setRating($event, starCount)"
                                     @mouseover="onMouseOverRating(starCount)"
                                 >
                                     <font-awesome-icon icon="star"></font-awesome-icon>

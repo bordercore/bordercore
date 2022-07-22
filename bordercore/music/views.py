@@ -116,6 +116,7 @@ class ArtistDetailView(TemplateView):
             song_list.append(dict(uuid=song.uuid,
                                   year_effective=song.original_year or song.year,
                                   title=song.title,
+                                  rating=song.rating,
                                   length=convert_seconds(song.length),
                                   artist=song.artist,
                                   note=re.sub("[\n\r\"]", "", song.note or "")))
@@ -157,6 +158,7 @@ class AlbumDetailView(FormRequestMixin, ModelFormMixin, DetailView):
                                   raw_title=song.title.replace("/", "FORWARDSLASH"),
                                   title=display_title,
                                   note=song.note or "",
+                                  rating=song.rating,
                                   length_seconds=song.length,
                                   length=convert_seconds(song.length)))
 
@@ -855,6 +857,27 @@ def recent_albums(request, page_number):
         "status": "OK",
         "album_list": recent_albums,
         "paginator": paginator
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def set_song_rating(request):
+
+    song_uuid = request.POST["song_uuid"]
+
+    if request.POST["rating"] == "":
+        rating = None
+    else:
+        rating = int(request.POST["rating"])
+
+    song = Song.objects.get(uuid=song_uuid)
+    song.rating = rating
+    song.save()
+
+    response = {
+        "status": "OK"
     }
 
     return JsonResponse(response)

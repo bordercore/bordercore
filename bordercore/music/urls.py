@@ -125,4 +125,9 @@ urlpatterns = [
         view=views.recent_albums,
         name="recent_albums"
     ),
+    path(
+        route="set_song_rating",
+        view=views.set_song_rating,
+        name="set_song_rating"
+    ),
 ]

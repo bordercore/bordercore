@@ -541,6 +541,15 @@ a.tag {
 
   tr.is-selected {
     background-color: var(--surface5);
+
+    td:nth-child(1) {
+      border-bottom-left-radius: var(--border-radius2);
+      border-top-left-radius: var(--border-radius2);
+    }
+    td:nth-last-child(1) {
+      border-bottom-right-radius: var(--border-radius2);
+      border-top-right-radius: var(--border-radius2);
+    }
   }
 }
 
@@ -551,7 +560,7 @@ a.tag {
 }
 
 .hoverable {
-  border-radius: 0.5rem;
+  border-radius: var(--border-radius2);
 
   &:hover {
     background-color: var(--hover-bg);
@@ -1957,8 +1966,19 @@ audio {
   width: 19rem;
 }
 
+#album-song-list {
+  td[data-label="Rating"] {
+    width: 8rem;
+    padding-right: 0;
+  }
+}
+
 .dupe-song-note {
   font-size: 0.75rem;
+}
+
+.rating {
+  color: var(--text-disabled);
 }
 
 .rating-star-selected {
@@ -1967,6 +1987,12 @@ audio {
 
 .rating-star-hovered {
   color: var(--surface5);
+}
+
+tr.hover-target:hover {
+  .rating-container {
+    display: block !important;
+  }
 }
 
 .v-md-editor {
