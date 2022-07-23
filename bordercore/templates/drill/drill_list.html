@@ -6,7 +6,7 @@
 
     <div class="row g-0 h-100 mx-2">
 
-        <div class="col-lg-3 d-flex flex-column" id="vue-app-left">
+        <div class="col-lg-3 d-flex flex-column flex-grow-last" id="vue-app-left">
 
             <div class="card-body backdrop-filter">
 
@@ -52,7 +52,7 @@
 
         </div>
 
-        <div class="col-lg-3" id="vue-app">
+        <div class="col-lg-3 d-flex flex-column flex-grow-last" id="vue-app">
 
             <card title="Total Progress" class="backdrop-filter">
                 <template v-slot:content>
@@ -93,7 +93,7 @@
 
         </div>
 
-        <div class="col-lg-3" id="tag-search">
+        <div class="col-lg-3 d-flex flex-column flex-grow-last" id="tag-search">
 
             <div class="mb-2 ms-3">
                 <simple-suggest
@@ -153,7 +153,7 @@
             </card>
         </div>
 
-        <div class="hover-target col-lg-3" id="pinned-tags">
+        <div class="hover-target col-lg-3 d-flex flex-column flex-grow-last" id="pinned-tags">
 
             <card
                 title="Pinned Tags"
@@ -205,7 +205,7 @@
                 </template>
             </card>
 
-            <card class="backdrop-filter">
+            <card class="backdrop-filter flex-grow-1">
                 <template v-slot:title-slot>
                     <h5>Random tag: <a href="{{ random_tag.url }}">{{ random_tag.name }}</a></h5>
                 </template>

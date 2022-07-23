@@ -32,7 +32,7 @@
                             <transition-group type="transition" class="w-100">
                                 <li v-for="(blob, index) in blobList" v-cloak :key="blob.uuid" class="hover-target text-info draggable d-flex align-items-center p-2" :data-uuid="blob.uuid">
                                     <div class="d-flex align-items-center w-100">
-                                        <div class="align-self-start pe-2">
+                                        <div class="align-self-start pe-2 pt-2">
                                             <img :src="[[ blob.cover_url ]]" height="75" width="70">
                                         </div>
 

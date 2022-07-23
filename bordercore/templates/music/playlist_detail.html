@@ -72,95 +72,136 @@
 
         </div>
 
-        <div class="col-lg-9">
+        <div class="col-lg-9 d-flex flex-column flex-grow-last h-100">
 
-            <div class="card-grid ms-2">
+            <card title="" class="backdrop-filter">
+                <template v-slot:content>
+                    <div class="d-flex">
+                        <h2 class="text-info">
+                            {{ playlist.name }}
+                        </h2>
+                        <drop-down-menu :links="playlistMenuItems">
+                        </drop-down-menu>
+                    </div>
 
-                <div class="d-flex">
-                    <h2 class="text-info">
-                        {{ playlist.name }}
-                    </h2>
-                    <drop-down-menu
-                        :links="playlistMenuItems"
-                    >
-                    </drop-down-menu>
-                </div>
-
-                {% if playlist.note %}
-                    <h6>{{ playlist.note }}</h6>
-                {% endif %}
-
-                <small v-if="songCount > 0" class="text-primary ms-2" v-cloak>
-                    <strong>[[ songCount ]]</strong> [[ songCountPluralized ]], <strong v-html="totalTime"></strong>
-                </small>
-            </div>
-
-            <div class="ms-3 me-3">
-
-                <b-table
-                    :data="songList"
-                    :mobile-cards="false"
-                    :default-sort="['sort_order']"
-                    hoverable
-                    draggable
-                    :selected.sync="selectedSong"
-                    sort-icon="chevron-up"
-                    :row-class="(row, index) => 'hover-target'"
-                    @drop="onDrop"
-                    @dragend="onDragEnd"
-                    @dragover="onDragOver"
-                    @dragstart="onDragStart"
-                    @cellclick="onSongClicked"
-                    ref="table"
-                    v-cloak
-                >
-
-                    {% if playlist.type == "manual" %}
-                    <b-table-column field="sort_order" label="#" cell-class="cursor-grab" header-class="cursor-pointer" {% if playlist.type != "manual" %}sortable{% endif %} v-slot="props">
-                        <span>[[ props.row.sort_order ]]</span>
-                    </b-table-column>
+                    {% if playlist.note %}
+                        <h6>{{ playlist.note }}</h6>
                     {% endif %}
 
-                    <b-table-column field="title" label="Title" cell-class="cursor-grab" header-class="cursor-pointer" {% if playlist.type != "manual" %}sortable{% endif %} v-slot="props">
-                        <span>[[ props.row.title ]]</span>
-                    </b-table-column>
+                    <small v-if="songCount > 0" class="text-primary ms-2" v-cloak>
+                        <strong>[[ songCount ]]</strong> [[ songCountPluralized ]], <strong v-html="totalTime"></strong>
+                    </small>
+                </template>
+            </card>
 
-                    <b-table-column field="artist" label="Artist" cell-class="cursor-grab" header-class="cursor-pointer" {% if playlist.type != "manual" %}sortable{% endif %} v-slot="props">
-                        <span>[[ props.row.artist ]]</span>
-                    </b-table-column>
+            <card title="" id="album-song-list" class="backdrop-filter">
+                <template v-slot:content>
 
-                    <b-table-column field="year" label="Year" cell-class="cursor-grab text-center" header-class="cursor-pointer text-center" {% if playlist.type != "manual" %}sortable{% endif %} v-slot="props">
-                        <span>[[ props.row.year ]]</span>
-                    </b-table-column>
+                    <b-table
+                        :data="songList"
+                        :mobile-cards="false"
+                        :default-sort="['sort_order']"
+                        hoverable
+                        draggable
+                        :selected.sync="selectedSong"
+                        sort-icon="chevron-up"
+                        :row-class="(row, index) => 'hover-target'"
+                        @drop="onDrop"
+                        @dragend="onDragEnd"
+                        @dragover="onDragOver"
+                        @dragstart="onDragStart"
+                        @cellclick="onSongClicked"
+                        ref="table"
+                        v-cloak
+                    >
 
-                    <b-table-column field="length" label="Length" cell-class="cursor-grab text-center" header-class="cursor-pointer text-center" {% if playlist.type != "manual" %}sortable{% endif %} v-slot="props">
-                        <span>[[ props.row.length ]]</span>
-                    </b-table-column>
+                        {% if playlist.type == "manual" %}
+                            <b-table-column
+                                field="sort_order"
+                                label="#"
+                                cell-class="cursor-grab"
+                                header-class="cursor-pointer"
+                                v-slot="props"
+                            >
+                                <span>[[ props.row.sort_order ]]</span>
+                            </b-table-column>
+                        {% endif %}
 
-                    <b-table-column field="uuid" label="" cell-class="col-action text-center align-middle" v-slot="props">
-                        <drop-down-menu :show-on-hover="true">
-                            <div slot="dropdown">
-                                <li>
-                                    <a class="dropdown-item" href="#" @click.prevent="onClickRemove(props.row.playlistitem_uuid)">
-                                        <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>Remove from playlist
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#" @click.prevent="onClickUpdateSong(props.row.uuid)">
-                                        <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
-                                    </a>
-                                </li>
-                            </div>
-                        </drop-down-menu>
-                    </b-table-column>
+                        <b-table-column
+                            field="title"
+                            label="Title"
+                            cell-class="cursor-grab"
+                            header-class="cursor-pointer"
+                            {% if playlist.type != "manual" %}sortable{% endif %}
+                            v-slot="props"
+                        >
+                            <span>[[ props.row.title ]]</span>
+                        </b-table-column>
 
-                    <template #empty>
-                        <div class="text-center">No songs in the playlist</div>
-                    </template>
+                        <b-table-column
+                            field="artist"
+                            label="Artist"
+                            cell-class="cursor-grab"
+                            header-class="cursor-pointer"
+                            {% if playlist.type != "manual" %}sortable{% endif %}
+                            v-slot="props"
+                        >
+                            <span>[[ props.row.artist ]]</span>
+                        </b-table-column>
 
-                </b-table>
+                        <b-table-column
+                            field="year"
+                            label="Year"
+                            cell-class="cursor-grab text-center"
+                            header-class="cursor-pointer text-center"
+                            {% if playlist.type != "manual" %}sortable{% endif %}
+                            v-slot="props"
+                        >
+                            <span>[[ props.row.year ]]</span>
+                        </b-table-column>
 
-            </div>
+                        <b-table-column
+                            field="length"
+                            label="Length"
+                            cell-class="cursor-grab text-center"
+                            header-class="cursor-pointer text-center"
+                            {% if playlist.type != "manual" %}sortable{% endif %}
+                            v-slot="props"
+                        >
+                            <span>[[ props.row.length ]]</span>
+                        </b-table-column>
+
+                        <b-table-column
+                            field="uuid"
+                            label=""
+                            cell-class="col-action text-center align-middle"
+                            v-slot="props"
+                        >
+                            <drop-down-menu :show-on-hover="true">
+                                <div slot="dropdown">
+                                    <li>
+                                        <a class="dropdown-item" href="#" @click.prevent="onClickRemove(props.row.playlistitem_uuid)">
+                                            <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>
+                                            Remove from playlist
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#" @click.prevent="onClickUpdateSong(props.row.uuid)">
+                                            <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
+                                        </a>
+                                    </li>
+                                </div>
+                            </drop-down-menu>
+                        </b-table-column>
+
+                        <template #empty>
+                            <div class="text-center">No songs in the playlist</div>
+                        </template>
+
+                    </b-table>
+
+                </template>
+            </card>
 
         </div>
 
