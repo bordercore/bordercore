@@ -120,9 +120,9 @@
                                                 v-for="starCount in Array(5).fill().map((x,i)=>i)"
                                                 :key="starCount"
                                                 class="rating me-1"
-                                                    :class="getStarClass(starCount, props.row.rating)"
+                                                :class="{'rating-star-selected': parseInt(props.row.rating, 10) > starCount}"
                                                 :data-rating="starCount"
-                                                @click="setRating(props.row, starCount)"
+                                                @click="setRating($event, props.row, starCount)"
                                                 @mouseover="onMouseOverRating($event, starCount)">
                                                 <font-awesome-icon icon="star"></font-awesome-icon>
                                             </span>
@@ -324,13 +324,16 @@
                 }
             },
             methods: {
-                getStarClass(rating, currentRating) {
-                    if (rating <= currentRating - 1) {
-                        return "rating-star-selected";
+                setRating(evt, row, rating) {
+                    const els = evt.currentTarget.parentElement.querySelectorAll(".rating");
+                    for (const el of els) {
+                        el.classList.remove("rating-star-hovered");
+                        if (parseInt(el.getAttribute("data-rating", 10)) < rating + 1) {
+                            el.classList.add("rating-star-selected");
+                        } else {
+                            el.classList.remove("rating-star-selected");
+                        }
                     }
-                    return "";
-                },
-                setRating(row, rating) {
                     rating = rating + 1;
                     if (rating === parseInt(row.rating, 10)) {
                         // If we've selected the current rating, treat it
@@ -338,6 +341,9 @@
                         // and remove it.
                         rating = "";
                     }
+                    this.$nextTick(() => {
+                        animateCSS(evt.currentTarget, "heartBeat");
+                    });
                     doPost(
                         this,
                         "{% url 'music:set_song_rating' %}",
@@ -369,7 +375,6 @@
                     //  1) The rating is > the currently selected rating
                     //  2) The rating is < the currently "hovered" rating
                     for (const el of els) {
-                        el.classList.add("foobar666");
                         if (!el.classList.contains("rating-star-selected") &&
                             parseInt(el.getAttribute("data-rating"), 10) < rating + 1) {
                             el.classList.add("rating-star-hovered");

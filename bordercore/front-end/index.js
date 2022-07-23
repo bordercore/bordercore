@@ -106,11 +106,12 @@ import {
 } from "http-status-codes";
 window.getReasonPhrase = getReasonPhrase;
 
-import {doGet, doPost, doPut, getFormattedDate} from "./util.js";
+import {doGet, doPost, doPut, getFormattedDate, animateCSS} from "./util.js";
 window.doGet = doGet;
 window.doPost = doPost;
 window.doPut = doPut;
 window.getFormattedDate = getFormattedDate;
+window.animateCSS = animateCSS;
 
 import EditableTextArea from "./vue/common/EditableTextArea.vue";
 Vue.component("EditableTextArea", EditableTextArea);

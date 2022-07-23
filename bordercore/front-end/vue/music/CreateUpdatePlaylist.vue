@@ -105,7 +105,7 @@
                                             class="rating me-1"
                                             :class="getStarClass(starCount)"
                                             :data-rating="starCount"
-                                            @click="setRating(starCount)"
+                                            @click="setRating($event, starCount)"
                                             @mouseover="onMouseOverRating(starCount)"
                                         >
                                             <font-awesome-icon icon="star" />
@@ -342,7 +342,7 @@
                     }
                 }
             },
-            setRating(rating) {
+            setRating(evt, rating) {
                 if (this.smartType === "rating") {
                     if (rating + 1 === this.rating) {
                         // If we've selected the current rating, treat it
@@ -352,6 +352,9 @@
                     } else {
                         this.rating = rating + 1;
                     }
+                    this.$nextTick(() => {
+                        animateCSS(evt.currentTarget, "heartBeat");
+                    });
                 }
             },
         },

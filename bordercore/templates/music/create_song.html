@@ -141,10 +141,10 @@
                                     v-for="starCount in Array(5).fill().map((x,i)=>i)"
                                     :key="starCount"
                                     class="rating me-1"
-                                    :class="getStarClass(starCount)"
+                                    :class="{'rating-star-selected': rating > starCount}"
                                     :data-rating="starCount"
                                     @click="setRating($event, starCount)"
-                                    @mouseover="onMouseOverRating(starCount)"
+                                    @mouseover="onMouseOverRating($event, starCount)"
                                 >
                                     <font-awesome-icon icon="star"></font-awesome-icon>
                                 </span>
@@ -272,8 +272,8 @@
 
     <script type="text/javascript">
 
-        const store = new Vuex.Store({
-            state: {
+    const store = new Vuex.Store({
+        state: {
                 {% if action == "Create" %}
                 songLength: null,
                 songLengthPretty: null,
@@ -323,12 +323,6 @@
                 };
             },
             methods: {
-                getStarClass(rating) {
-                    if (rating <= this.rating - 1) {
-                        return "rating-star-selected";
-                    }
-                    return "";
-                },
                 onDupeCheck() {
                     const artist = document.getElementById("id_artist").value;
                     const title = document.getElementById("id_title").value;
@@ -402,8 +396,8 @@
                         el.classList.remove("rating-star-hovered");
                     }
                 },
-                onMouseOverRating(rating) {
-                    const els = document.querySelectorAll(".rating");
+                onMouseOverRating(evt, rating) {
+                    const els = evt.currentTarget.parentElement.querySelectorAll(".rating");
                     // Loop over each star rating. Add the "hovered" class if:
                     //  1) The rating is > the currently selected rating
                     //  2) The rating is < the currently "hovered" rating
@@ -417,7 +411,16 @@
                     }
                 },
                 select() {},
-                setRating(rating) {
+                setRating(evt, rating) {
+                    const els = evt.currentTarget.parentElement.querySelectorAll(".rating");
+                    for (const el of els) {
+                        el.classList.remove("rating-star-hovered");
+                        if (parseInt(el.getAttribute("data-rating", 10)) < rating + 1) {
+                            el.classList.add("rating-star-selected");
+                        } else {
+                            el.classList.remove("rating-star-selected");
+                        }
+                    }
                     if (rating + 1 === this.rating) {
                         // If we've selected the current rating, treat it
                         // as if we've de-selected a rating entirely
@@ -426,6 +429,11 @@
                     } else {
                         this.rating = rating + 1;
                     }
+                    // We use $nextTick() to avoid Vue's :class handling
+                    // on the star from interfering with its animation.
+                    this.$nextTick(() => {
+                        animateCSS(evt.currentTarget, "heartBeat");
+                    });
                 },
                 onClickDelete(evt) {
                     const formEl = document.getElementById("song-form");
