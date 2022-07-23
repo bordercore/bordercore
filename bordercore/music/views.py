@@ -98,6 +98,8 @@ class ArtistDetailView(TemplateView):
             artist=artist
         ).filter(
             album__isnull=True
+        ).select_related(
+            "artist"
         ).order_by(
             F("year").desc(nulls_last=True),
             "title"
