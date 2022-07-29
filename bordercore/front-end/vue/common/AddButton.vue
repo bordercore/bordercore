@@ -1,7 +1,7 @@
 <template>
     <a @click="clickHandler">
         <div class="button-add">
-            <font-awesome-icon icon="plus" class="text-emphasis" />
+            <font-awesome-icon icon="plus" />
         </div>
     </a>
 </template>

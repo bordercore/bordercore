@@ -54,6 +54,14 @@
   --node-color-4: hsl(206 66% 32%);
   --node-color-4-tinted: hsl(206 66% 37%);
 
+  // Chart colors
+  --chart-title-color: var(--text2);
+  --chart-bg: var(--surface5);
+  --chart-fill-color: var(--surface1);
+  --chart-tick-color: var(--text4);
+  --chart-gradient-start:#0000ff; // Avoid leading space before RGB value
+  --chart-gradient-end:#00065e; // Avoid leading space before RGB value
+
   // Override Bootstrap CSS properties
   --bs-body-color: var(--text1);
   --bs-body-bg: var(--surface1);
@@ -62,7 +70,8 @@
 // TODO: These throw an error if we pass in the CSS property directly,
 //  so hard-code them for now.
 $body-color: #fff; // Should match var(--text1)
-$primary: #6ea6e0; // Should match var(--text4)
+$primary: #fff; // Should match var(--text1)
+$secondary: #6ea6e0; // Should match var(--text2)
 
 // Custom Bootstrap variables
 $form-select-indicator-color: var(--text1);
@@ -77,6 +86,7 @@ $nav-tabs-border-width: 0.18rem;
 $table-cell-padding-y: 0.75rem;
 $table-cell-padding-x: 0.75rem;
 
+$list-group-item-bg: var(--surface3);
 $list-group-item-padding-y: 0.75rem;
 $list-group-item-padding-x: 1.25rem;
 
@@ -94,20 +104,36 @@ $card-spacer-x: $spacer * 1.25;
 // Import CSS for Prism syntax highlighter
 @import "../../../static/css/prism-synthwave84.css";
 
+// Import CSS for vue-sidebar-menu
+@import "../../css/vue-sidebar-menu/vue-sidebar-menu.scss";
+
 // Custom colors for this theme
+$badge-color: var(--text2);
+$btn-close-filter: invert(1) grayscale(100%) brightness(200%);
+$btn-primary-hover-color: var(--text1);
+$drill-progress-circle-full: var(--surface5);
+$drill-progress-circle-partial: var(--text5);
 $form-bg: var(--surface5);
 $form-bg-focus: var(--surface1);
 $form-bg-disabled: var(--surface2);
 $form-border-color-hover: var(--text3);
 $icon-glow-color: var(--text3);
 $nav-highlight-color: var(--text5);
-
-// Misc theme-related styles
-.btn-close {
-  // Mimics the Bootstrap "btn-close-white" class
-  -webkit-filter: invert(1) grayscale(100%) brightness(200%);
-  filter: invert(1) grayscale(100%) brightness(200%);
-}
+$notice-bg: var(--surface5);
+$notice-color: var(--text1);
+$notice-title-color: var(--text1);
+$selected-bg-color: var(--surface5);
+$selected-color: var(--text1);
+$sidebar-active-bg: var(--surface5);
+$sidebar-active-color: var(--text1);
+$sidebar-bg: var(--surface6);
+$sidebar-color: var(--text1);
+$sidebar-expanded-bg: var(--surface1);
+$sidebar-hover-bg: var(--surface3);
+$sidebar-hover-color: var(--text1);
+$sidebar-icon-color1: var(--text4);
+$sidebar-icon-color2: var(--text3);
+$sidebar-icon-color3: var(--text6);
 
 // Import core SCSS
 @import "../base";

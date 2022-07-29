@@ -80,46 +80,46 @@
                         <div v-if="Object.keys($store.state.elasticsearchInfo).length !== 0 || Object.keys(metadata_misc).length !== 0" class="highlight-box mb-3">
 
                             <div v-for="(value, name) in metadata_misc" class="d-flex">
-                                <div class="text-info me-2">
+                                <div class="item-name me-2">
                                     [[ name ]]
                                 </div>
-                                <div>
+                                <div class="item-value">
                                     [[ value ]]
                                 </div>
                             </div>
 
                             <div v-if="$store.state.elasticsearchInfo.content_type" class="d-flex">
-                                <div class="text-info me-2">
+                                <div class="item-name me-2">
                                     Object Type
                                 </div>
-                                <div>
+                                <div class="item-value">
                                     [[ $store.state.elasticsearchInfo.content_type ]]
                                 </div>
                             </div>
 
                             <div v-if="$store.state.elasticsearchInfo.size" class="d-flex">
-                                <div class="text-info me-2">
+                                <div class="item-name me-2">
                                     Size
-                                </div>
+                                </div class="item-value">
                                 <div>
                                     [[ $store.state.elasticsearchInfo.size ]]
                                 </div>
                             </div>
 
                             <div v-if="$store.state.elasticsearchInfo.num_pages" class="d-flex">
-                                <div class="text-info me-2">
+                                <div class="item-name me-2">
                                     Pages
                                 </div>
-                                <div>
+                                <div class="item-value">
                                     [[ $store.state.elasticsearchInfo.num_pages ]]
                                 </div>
                             </div>
 
                             <div v-if="$store.state.elasticsearchInfo.duration" class="d-flex">
-                                <div class="text-info me-2">
+                                <div class="item-name me-2">
                                     Duration
                                 </div>
-                                <div>
+                                <div class="item-value">
                                     [[ $store.state.elasticsearchInfo.duration ]]
                                 </div>
                             </div>
@@ -283,7 +283,6 @@
                     <h2 id="blob-name" class="p-2 mb-3 text-break w-100">
                         {{ name }}
                     </h2>
-                    <hr />
                     <drop-down-menu class="me-3" v-cloak>
                         <div slot="dropdown" class="mt-0">
                             <li>
@@ -356,6 +355,8 @@
                         </div>
                     </drop-down-menu>
                 </div>
+
+                <hr class="filter-divider m-0 py-1" />
 
                 {% if blob.is_video %}
                 <div v-cloak>

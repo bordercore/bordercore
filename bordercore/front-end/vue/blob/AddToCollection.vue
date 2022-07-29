@@ -13,6 +13,7 @@
                         <div id="search-collections" :class="{'d-none': !hideAddCollection}" class="search-with-doctypes mb-0">
                             <vue-simple-suggest
                                 ref="suggestComponent"
+                                :destyled="true"
                                 display-attribute="name"
                                 value-attribute="uuid"
                                 :list="search"

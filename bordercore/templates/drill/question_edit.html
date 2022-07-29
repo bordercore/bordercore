@@ -56,7 +56,7 @@
                     <hr class="filter-divider" />
                     <ul class="list-group interior-borders">
                         {% for tag in recent_tags %}
-                            <li class="list-with-counts text-info ps-2 py-1 pe-1 d-flex" @click.prevent="onClickTag('{{ tag.name }}')">
+                            <li class="list-with-counts ps-2 py-1 pe-1 d-flex" @click.prevent="onClickTag('{{ tag.name }}')">
                                 <div class="text-truncate">
                                     {{ tag.name }}
                                 </div>

@@ -21,7 +21,7 @@
                     <template v-slot:content>
                         <ul class="list-group interior-borders">
                             {% for task in tasks %}
-                                <li class="list-group-item list-group-item-secondary text-primary">{{ task.name }}
+                                <li class="list-group-item list-group-item-secondary">{{ task.name }}
                                     <span class="badge bg-info ms-1">{{ task.parent_category }}</span>
                                     {% for tag in task.tags.all %}
                                         <span class="tag">{{ tag.name }}</span>
@@ -64,7 +64,10 @@
                         <template v-slot:content>
                             <ul class="list-group interior-borders">
                                 {% for exercise in overdue_exercises %}
-                                    <li class="list-group-item list-group-item-secondary text-info"><a href="{% url 'fitness:exercise_detail' exercise.uuid %}">{{ exercise.name }}</a> {{ exercise.delta_days }} days</li>
+                                    <li class="list-group-item list-group-item-secondary">
+                                        <a href="{% url 'fitness:exercise_detail' exercise.uuid %}">{{ exercise.name }}</a>
+                                        <span class="item-value">{{ exercise.delta_days }} days</span>
+                                    </li>
                                 {% empty %}
                                     <li class="list-group-item list-group-item-secondary">No active exercises.</li>
                                 {% endfor %}
@@ -113,7 +116,7 @@
                 <card class="card-body backdrop-filter">
                     <template v-slot:title-slot>
                         <div class="card-title">
-                            <a class="text-emphasis" href="{% url 'bookmark:overview' %}">Recent Bookmarks</a>
+                            <a href="{% url 'bookmark:overview' %}">Recent Bookmarks</a>
                         </div>
                     </template>
                     <template v-slot:content>
@@ -163,9 +166,9 @@
                         <template v-slot:content>
                             <ul class="list-group interior-borders">
                                 {% for song in music %}
-                                    <li class="list-group-item list-group-item-secondary text-info">
+                                    <li class="list-group-item list-group-item-secondary">
                                         {{ song.title }}
-                                        <a class="ms-2" href="{% url 'music:artist_detail' song.artist.uuid %}">{{ song.artist.name }}</a>
+                                        <a class="item-value ms-2" href="{% url 'music:artist_detail' song.artist.uuid %}">{{ song.artist.name }}</a>
                                     </li>
                                 {% empty %}
                                     <li class="list-group-item list-group-item-secondary">No music listened to.</li>
@@ -194,9 +197,13 @@
 
                 <card title="Calendar" class="card-body backdrop-filter">
                     <template v-slot:content>
-                        <ul class="list-group interior-borders" id="events">
-                            <li v-if="waiting" :class="errorClass" class="list-group-item list-group-item-secondary text-success">[[ msg ]]</li>
-                            <li v-for="event in events" :key="event.count" class="list-group-item list-group-item-secondary text-primary">[[ event.start_pretty ]]: <strong class="text-emphasis">[[ event.summary ]]</strong> </li>
+                        <ul class="list-group interior-borders">
+                            <li v-if="waiting" :class="errorClass" class="list-group-item list-group-item-secondary text-success">
+                                [[ msg ]]
+                            </li>
+                            <li v-for="event in events" :key="event.count" class="list-group-item list-group-item-secondary">
+                                [[ event.start_pretty ]]: <strong class="item-value text-emphasis">[[ event.summary ]]</strong>
+                            </li>
                         </ul>
                     </template>
                 </card>

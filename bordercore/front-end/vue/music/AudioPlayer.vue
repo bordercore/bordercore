@@ -6,9 +6,9 @@
                 Your browser does not support the audio tag.
             </audio>
         </div>
-        <div class="ms-4 mt-1">
+        <div class="d-flex align-items-center ms-4">
             <input id="continuous_play" type="checkbox" @change="onContinuousPlay">
-            <label for="continuous_play">Continous Play</label>
+            <label for="continuous_play" class="ms-2">Continous Play</label>
         </div>
     </div>
 </template>

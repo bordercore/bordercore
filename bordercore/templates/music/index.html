@@ -48,7 +48,7 @@
                     <hr class="filter-divider" />
                     <ul class="list-group interior-borders">
                         {% for playlist in playlists %}
-                            <li class="list-with-counts text-info d-flex ps-2 py-1 pr-1">
+                            <li class="list-with-counts text-info d-flex ps-2 py-1 pe-2">
                                 <div>
                                     <a href="{% url 'music:playlist_detail' playlist.uuid %}">{{ playlist.name }}</a>
                                 </div>
@@ -60,7 +60,7 @@
                     </ul>
                     <div class="mt-3 ms-3">
                         <font-awesome-icon icon="plus"></font-awesome-icon>
-                        <a href="#" class="text-info" @click="onClickCreate">Create a playlist</a>
+                        <a href="#" @click="onClickCreate">Create a playlist</a>
                     </div>
                 </template>
 
@@ -72,9 +72,9 @@
                     <hr class="filter-divider" />
                     <ul class="list-group interior-borders">
                         {% for song in recent_songs %}
-                            <li class="list-group-item list-group-item-secondary text-white">
-                                {{ song.title}}
-                                <a class="ms-2" href="{% url 'music:artist_detail' song.artist.uuid %}">{{ song.artist.name }}</a>
+                            <li class="list-group-item list-group-item-secondary">
+                                <span class="item-name">{{ song.title}}</span>
+                                <a class="item-value ms-2" href="{% url 'music:artist_detail' song.artist.uuid %}">{{ song.artist.name }}</a>
                             </li>
                         {% endfor %}
                     </ul>

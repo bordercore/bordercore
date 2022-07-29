@@ -1,5 +1,5 @@
 <template>
-    <div class="notice-big alert alert-info d-flex">
+    <div class="notice-big alert d-flex">
         <h3>
             <font-awesome-icon icon="search" />
         </h3>

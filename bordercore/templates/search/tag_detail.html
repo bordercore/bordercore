@@ -68,7 +68,7 @@
                     <li class="nav-item" data-type="{{ doctype.0 }}" @click="onClick">
                         <a class="nav-link" data-bs-toggle="tab" href="#{{ doctype.0 }}">
                             {{ doctype_mapping|get_doctype:doctype.0 }}
-                            <span class="badge bg-info align-middle ms-2">
+                            <span class="badge align-middle ms-2">
                                 {{ doctype.1 }}
                             </span>
                         </a>
@@ -156,7 +156,7 @@
                                     <div>
                                         <div class="mt-2">
                                             {% for tag in match.tags %}
-                                                <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge bg-info">{{ tag }}</a>
+                                                <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge">{{ tag }}</a>
                                             {% endfor %}
                                         </div>
                                     </div>

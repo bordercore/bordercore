@@ -27,10 +27,8 @@
                     <div :class="{'d-none': hidePlaylistType}">
                         <hr class="mb-1">
 
-                        <div class="text-primary">
-                            <small>
-                                Playlist Type
-                            </small>
+                        <div class="header">
+                            Playlist Type
                         </div>
 
                         <div class="row mt-3">
@@ -120,10 +118,8 @@
                         <div v-if="smartType !== 'manual'">
                             <hr class="mb-1">
 
-                            <div class="text-primary">
-                                <small>
-                                    Options
-                                </small>
+                            <div class="header">
+                                Options
                             </div>
 
                             <div class="row mt-3">

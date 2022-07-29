@@ -8,16 +8,22 @@
 
         <div class="me-auto align-self-center">
             <ul class="breadcrumb mb-0 pt-0 pb-0">
-                <li class="breadcrumb-item"> <a href="{% url 'drill:list' %}"><font-awesome-icon icon="home" class="icon-hover"></font-awesome-icon></a> </li>
-                <li class="breadcrumb-item active">{% include "drill/nav-session.html" %}</li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'drill:list' %}">
+                        <font-awesome-icon icon="home" class="icon-hover glow"></font-awesome-icon>
+                    </a>
+                </li>
+                <li class="breadcrumb-item active">
+                    {% include "drill/nav-session.html" %}
+                </li>
             </ul>
         </div>
 
         <div id="icon-list" class="d-flex align-items-center">
             <font-awesome-icon icon="heart" class="icon-hover glow" :class="favoriteClass" @click="onClickFavorite" data-bs-toggle="tooltip" data-placement="bottom" :title="toolTip"></font-awesome-icon>
-            <font-awesome-icon :icon="['fab', 'python']" class="glow text-info ms-3" @click="showPythonConsole" data-bs-toggle="tooltip" data-placement="bottom" title="Open Python Console"></font-awesome-icon>
+            <font-awesome-icon :icon="['fab', 'python']" class="icon-hover glow ms-3" @click="showPythonConsole" data-bs-toggle="tooltip" data-placement="bottom" title="Open Python Console"></font-awesome-icon>
             <a href="{% if object.tags.all %}{% url 'drill:add_with_tag' object.tags.all.0 %}{% else %}{% url 'drill:add' %}{% endif %}">
-                <font-awesome-icon icon="plus" class="glow text-info ms-3" data-bs-toggle="tooltip" data-placement="bottom" title="Add a Question"></font-awesome-icon>
+                <font-awesome-icon icon="plus" class="icon-hover glow ms-3" data-bs-toggle="tooltip" data-placement="bottom" title="Add a Question"></font-awesome-icon>
             </a>
         </div>
 
@@ -37,32 +43,32 @@
                     <div class="flex-grow-1">
                         <ul class="list-unstyled mb-0">
                             <li class="d-flex">
-                                <div class="flex-fill fw-bold">Mode</div>
-                                <div class="text-info">{{ state_name }}</div>
+                                <div class="text-name flex-fill fw-bold">Mode</div>
+                                <div class="text-value">{{ state_name }}</div>
                             </li>
                             {% if state_name == 'Learning' %}
                                 <li class="d-flex">
-                                    <div class="flex-fill fw-bold">Learning step</div>
-                                    <div class="text-info"><strong class="text-info">{{ question.learning_step }}</strong> out of {{ learning_step_count  }}</div>
+                                    <div class="text-name flex-fill fw-bold">Learning step</div>
+                                    <div class="text-value"><strong>{{ question.learning_step }}</strong> out of {{ learning_step_count  }}</div>
                                 </li>
                             {% endif %}
                             {% if state_name != 'New' %}
                                 <li class="d-flex">
-                                    <div class="flex-fill fw-bold">Reviewed</div>
-                                    <div class="text-info text-end">{{ question.last_reviewed|date:"F j, Y"|default:"Never" }}</div>
+                                    <div class="text-name flex-fill fw-bold">Reviewed</div>
+                                    <div class="text-value text-end">{{ question.last_reviewed|date:"F j, Y"|default:"Never" }}</div>
                                 </li>
                                 <li class="d-flex">
-                                    <div class="flex-fill fw-bold">Last Response</div>
-                                    <div class="text-info text-end">{{ last_response.response|default:"N/A"|capfirst }}</div>
+                                    <div class="text-name flex-fill fw-bold">Last Response</div>
+                                    <div class="text-value text-end">{{ last_response.response|default:"N/A"|capfirst }}</div>
                                 </li>
                             {% endif %}
                             <li class="d-flex">
-                                <div class="flex-fill fw-bold">Interval</div>
-                                <div class="text-info">{{ question.interval.days }} day{{ question.interval.days|pluralize:"s" }}</div>
+                                <div class="text-name flex-fill fw-bold">Interval</div>
+                                <div class="text-value">{{ question.interval.days }} day{{ question.interval.days|pluralize:"s" }}</div>
                             </li>
                             <li class="d-flex">
-                                <div class="flex-fill fw-bold">Needs Review</div>
-                                <div class="text-info">{{ question.needs_review }}</div>
+                                <div class="text-name flex-fill fw-bold">Needs Review</div>
+                                <div class="text-value">{{ question.needs_review }}</div>
                             </li>
                         </ul>
                     </div>
@@ -234,7 +240,7 @@
             },
             computed: {
                 favoriteClass: function() {
-                    return this.is_favorite ? "favorite" : "text-info";
+                    return this.is_favorite ? "favorite" : "";
                 },
                 toolTip: function() {
                     return this.is_favorite ? "Remove this as a favorite" : "Add this as a favorite";

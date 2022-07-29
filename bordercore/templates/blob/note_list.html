@@ -39,7 +39,7 @@
 
             <div v-if="'{{ request.GET.search }}'" class="scrollable-panel-scrollbar-hover card-body d-flex flex-column h-100">
 
-                <div class="h3 text-info">
+                <div class="h3">
                     {{ object_list.hits.total.value }} Note{{ object_list.hits.total.value|pluralize:"s" }} Found
                 </div>
 
@@ -118,8 +118,8 @@
                 </card>
             </div>
 
-            <div v-if="$store.state.notes.length === 0" class="card-grid me-2" v-cloak>
-                <search-no-result class="ms-2">
+            <div v-if="$store.state.notes.length === 0" class="card-grid" v-cloak>
+                <search-no-result>
                     <template v-slot:message>
                         No notes found matching search criteria.
                     </template>
@@ -269,6 +269,9 @@
                 },
             },
             mounted() {
+                if (!this.$refs.note) {
+                    return;
+                }
                 for (let [index, element] of this.$refs.note.entries()) {
                     if (element.clientHeight < NOTE_MAX_HEIGHT || this.isSearchResult) {
                         this.$refs.expander[index].classList.add("d-none");

@@ -41,10 +41,11 @@
 }
 
 .card-title {
+  color: var(--text4);
   font-size: 1.2rem;
 
   a {
-    color: $body-color;
+    color: var(--text4);
   }
 }
 
@@ -135,10 +136,6 @@
   height: 4.7rem;
   padding: 0.6rem;
 
-  &:hover {
-    background-color: var(--surface2) !important;
-  }
-
   .cover-image {
     width: calc(4.7rem - 2*0.6rem);
     height: calc(4.7rem - 2*0.6rem);
@@ -197,7 +194,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 a {
-  color: var(--text3);
+  color: var(--text2);
   text-decoration-color: transparent;
   text-underline-offset: 0.25rem;
 
@@ -212,18 +209,29 @@ hr {
 
 // Override Bootstrap's CSS
 
+.badge {
+  background-color: var(--surface5);
+}
+
+.btn-close {
+  // Mimics the Bootstrap "btn-close-white" class
+  -webkit-filter: $btn-close-filter;
+  filter: $btn-close-filter;
+}
+
 .btn-primary {
   background-color: var(--surface1);
   color: var(--text1);
 
   &:hover {
     background-color: var(--surface5);
-    color: var(--text1);
+    color: $btn-primary-hover-color;
   }
 }
 
 .btn-secondary {
   background-color: var(--surface6);
+  color: var(--text1);
 
   &:hover {
     background-color: var(--surface5);
@@ -242,6 +250,7 @@ hr {
   }
 
   :not(.active):hover {
+    color: var(--text1);
     transform: translateY(-0.06rem);
   }
 
@@ -275,20 +284,64 @@ span {
 }
 
 .selected {
-  background-color: var(--surface5);
+  background-color: var(--surface5) !important;
   border-radius: var(--border-radius1);
-  color: var(--text1);
+  color: $selected-color !important;
+
+  a {
+    color: $selected-color !important;
+  }
 }
 
 .icon-hover {
+  color: var(--text3);
   &:hover {
     transform: scale(1.1);
   }
 }
 
+//
+// Lists
+//
+
 .list-group-item {
+  border-color: $list-group-item-bg;
   color: var(--text1);
 }
+
+.list-group-item-secondary {
+  background-color: var(--surface1);
+  color: $secondary;
+}
+
+// A list with only interior borders
+.interior-borders {
+  li:first-child {
+    border-top: none;
+  }
+
+  li:last-child {
+    border-bottom: none;
+  }
+
+  li {
+    border-right: none;
+    border-left: none;
+  }
+}
+
+// A list with separate a "name" and "value"
+.item-name {
+  color: var(--text2);
+}
+
+.item-value {
+  color: var(--text1);
+}
+
+//
+// Helper classes
+//
 
 .w-20 {
   width: 20%;
@@ -304,6 +357,10 @@ span {
 
 .text-small {
   font-size: 0.75rem;
+}
+
+.text-secondary {
+  color: var(--text3);
 }
 
 .z-index-positive {
@@ -329,10 +386,11 @@ span {
 }
 
 .notice-big {
-  background-color: var(--surface5);
+  background-color: $notice-bg;
+  color: $notice-color;
 
   div.message {
-    color: var(--text3);
+    color: $notice-title-color;
   }
 
   .message {
@@ -384,12 +442,12 @@ span {
   transition: transform 250ms;
 
   &:hover {
-    background-color: $primary;
-    color: $info !important;
+    background-color: var(--surface3);
+    color: var(--text1);
     transform: translateY(-0.25rem);
 
     .fa-plus {
-      color: var(--text1) !important;
+      color: var(--text1);
     }
   }
 
@@ -419,6 +477,7 @@ span {
 
   &:hover {
     background-color: var(--hover-bg);
+    border-radius: var(--border-radius1);
     cursor: pointer;
   }
 
@@ -567,22 +626,6 @@ a.tag {
   }
 }
 
-// A list with only interior borders
-.interior-borders {
-  li:first-child {
-    border-top: none;
-  }
-
-  li:last-child {
-    border-bottom: none;
-  }
-
-  li {
-    border-right: none;
-    border-left: none;
-  }
-}
-
 .list-delete {
   display: none;
   color: var(--text1);
@@ -596,7 +639,7 @@ a.tag {
 
 .fader::after {
   position: absolute;
-  z-index: 1;
+  z-index: 10000;
   bottom: 0;
   left: 0;
   width: 100%;
@@ -673,10 +716,11 @@ textarea.form-control {
 .input-group-text {
   border: 0.06rem solid var(--surface6);
   background-color: var(--surface6);
-  border-radius: 0.25rem;
+  border-radius: var(--border-radius1);
+  color: var(--text1);
 }
 
-.tag {
+.tag, .ti-input .ti-tag {
   padding: 0 0.3rem 0.18rem 0.3rem !important;
   border: 0.12rem solid var(--surface5);
   margin: 0 0.12rem 0 0.12rem !important;
@@ -687,25 +731,8 @@ textarea.form-control {
   white-space: nowrap;
 
   &:hover {
-    background-color: var(--surface7) !important;
-    color: var(--text1) !important;
-    text-decoration: none;
-  }
-}
-
-.ti-input .ti-tag {
-  padding: 0 0.3rem 0.06rem 0.3rem !important;
-  border: 0.12rem solid var(--surface5);
-  margin: 0 0.12rem 0 0.12rem !important;
-  background-color: var(--surface6) !important;
-  border-radius: 1.5rem !important;
-  color: var(--text4) !important;
-  line-height: 1.5rem;
-  white-space: nowrap;
-
-  &:hover {
-    background-color: var(--surface7) !important;
-    color: var(--text1) !important;
+    background-color: var(--text4) !important;
+    color: var(--surface6) !important;
     text-decoration: none;
   }
 }
@@ -792,7 +819,7 @@ textarea.form-control {
   padding-top: 0.25rem;
   background-color: var(--surface5);
   border-radius: 50%;
-  color: var(--text1);
+  color: $badge-color;
   font-size: 0.75rem;
   font-weight: bold;
   line-height: 0.75rem;
@@ -902,19 +929,9 @@ table.b-table th {
   color: var(--text3);
 }
 
-// Selected row
-.table-custom {
-  background-color: var(--surface2) !important;
-  color: var(--text1) !important;
-}
-
 .table-hover tr.selected:hover a {
   background-color: rgba(0, 0, 0, 0.075);
   transition: none;
-}
-
-.table_header {
-  border-radius: 0.25rem;
 }
 
 .table-borders table,
@@ -969,6 +986,8 @@ table.b-table th {
 
 // Modified from bootstrap/scss/_nav.scss
 .nav-tabs, .nav {
+  border-bottom-color: var(--surface5);
+
   &:hover, &:focus {
     color: var(--text5);
   }
@@ -1000,7 +1019,7 @@ table.b-table th {
   z-index: 1;
   flex-grow: 0;
   margin: 0 0.5rem 1rem 0.5rem;
-  background: var(--surface1) !important;
+  background: var(--surface2) !important;
   border-radius: 0.4rem;
 
   .side-panel {
@@ -1019,10 +1038,6 @@ table.b-table th {
     backdrop-filter: blur(1.56rem) brightness(170%);
     background: var(--surface1-alpha) !important;
   }
-}
-
-.list-group-item-secondary {
-  background-color: var(--surface1);
 }
 
 // Forms
@@ -1090,10 +1105,6 @@ blockquote > p {
   top: -1.25rem;
   right: 0.25rem;
   line-height: 1.5rem;
-
-  form .has-search svg {
-    left: 0.75rem;
-  }
 }
 
 #top-bar {
@@ -1190,23 +1201,15 @@ blockquote > p {
 }
 
 .search-with-doctypes {
-  // Note that we can't simply use ".suggest-item.hover", since a similar
-  //  selector defined by vue-simple-suggest overrides it via a !important flag
-  //  Also, don't use this selector if the selection is disabled, indicated by
-  //  the presence of a ".suggestion-item-disabled" class.
-  .vue-simple-suggest.designed .suggestions .suggest-item.hover .top-search-suggestion:not(.suggestion-item-disabled) {
-    background-color: var(--surface2) !important;
-  }
-
   // Set the padding to zero so that we can programmatically control the background color lower down
   //   in the container hierarchy, based on whether an item is a divider or not.
   .list-group-item {
-    padding: 0 !important;
+    padding: 0;
     border: 0.06rem solid var(--surface5);
   }
 
-  .vue-simple-suggest.designed .suggestions {
-    padding: 0 !important;
+  .vue-simple-suggest .suggestions {
+    padding: 0;
   }
 }
 
@@ -1224,11 +1227,19 @@ blockquote > p {
 .bookmark-list a {
   &:hover {
     background-color: var(--hover-bg);
-    border-radius: var(--border-radius1);
+    td:nth-child(1) {
+      border-bottom-left-radius: var(--border-radius2);
+      border-top-left-radius: var(--border-radius2);
+    }
+    td:nth-last-child(1) {
+      border-bottom-right-radius: var(--border-radius2);
+      border-top-right-radius: var(--border-radius2);
+    }
   }
 }
 
 .bookmark-list-date {
+  color: var(--text6);
   text-align: right;
   vertical-align: text-bottom;
   white-space: nowrap;
@@ -1250,6 +1261,7 @@ blockquote > p {
 .yt-hover-target {
   right: 0.3rem;
   bottom: 0.3rem;
+  color: var(--text6);
 }
 
 #bookmark-select-add {
@@ -1271,11 +1283,11 @@ blockquote > p {
   }
 
   // Absolutely position a search icon inside a search box.
-  // For the left position, use a page-specific spacer below.
   svg[data-icon="search"] {
     position: absolute;
     z-index: 2;
     top: 0.75rem;
+    left: 0.75rem;
     display: block;
     line-height: 2.375rem;
     pointer-events: none;
@@ -1287,9 +1299,6 @@ blockquote > p {
   font-size: 0.8rem;
 }
 
-.main-search-spacer {
-  left: 0.5rem;
-}
 
 //
 // Search
@@ -1376,9 +1385,6 @@ blockquote > p {
 }
 
 #blob-name {
-  background: var(--text4);
-  background: linear-gradient(90deg, rgba(16,22,58,1) 35%, rgba(32,37,63,0.16850490196078427) 100%);
-  border-radius: 0.4rem;
   color: var(--text4);
 }
 
@@ -1764,6 +1770,7 @@ div #dateapp {
 }
 
 .node-object-note {
+  color: var(--text3);
   font-size: small;
 }
 
@@ -1807,11 +1814,11 @@ div #dateapp {
 
 .progress-circle {
   circle.circle-partial {
-    stroke: var(--text5);
+    stroke: $drill-progress-circle-partial;
   }
 
   circle.circle-full {
-    stroke: var(--surface5);
+    stroke: $drill-progress-circle-full;
   }
 
   text {
@@ -1931,6 +1938,7 @@ hr.collection-list-divider {
   border-radius: 0.7rem;
 
   .header {
+    color: var(--text3);
     font-size: 1rem;
   }
 }
@@ -2059,26 +2067,26 @@ tr.hover-target:hover {
   list-style: none;
 }
 
-.vue-simple-suggest.designed {
+.vue-simple-suggest {
   position: relative;
 
   .input-wrapper input {
-    padding-top: 0.375rem !important;
-    padding-right: 0.75rem !important;
-    padding-bottom: 0.375rem !important;
-    border: 0.06rem solid var(--surface5) !important;
-    background-color: var(--surface5) !important;
-    border-radius: 0.25rem !important;
+    padding-top: 0.375rem;
+    padding-right: 0.75rem;
+    padding-bottom: 0.375rem;
+    border: 0.06rem solid var(--surface5);
+    background-color: $form-bg;
+    border-radius: 0.25rem;
 
     &:hover {
-      border-color: var(--text3) !important;
+      border-color: var(--text3);
     }
   }
 
   &.focus {
     .input-wrapper input {
-      border: 0.06rem solid var(--text3) !important;
-      background-color: var(--surface1) !important;
+      border: 0.06rem solid var(--text3);
+      background-color: var(--surface1);
     }
   }
 
@@ -2099,10 +2107,8 @@ tr.hover-target:hover {
       user-select: none;
 
       &.hover {
-        background-color: none !important;
-        b {
-          color: $primary !important;
-        }
+        background-color: var(--surface1);
+        color: var(--text1);
       }
 
       &.selected {
@@ -2127,11 +2133,8 @@ tr.hover-target:hover {
 .vue-tags-input {
   min-width: 100%;
   border-color: var(--surface1) !important;
-  background-color: var(--surface5) !important;
-  border-bottom-left-radius: 0.25rem;
-  border-bottom-right-radius: 0.25rem;
-  border-top-left-radius: 0.25rem;
-  border-top-right-radius: 0.25rem;
+  background-color: var(--surface2) !important;
+  border-radius: var(--border-radius1) !important;
   color: var(--text4) !important;
 
   .ti-new-tag-input {
@@ -2147,11 +2150,8 @@ tr.hover-target:hover {
   .ti-input {
     padding: 0.37rem 0.75rem;
     border-color: var(--surface1) !important;
-    background-color: var(--surface5);
-    border-bottom-left-radius: 0.25rem;
-    border-bottom-right-radius: 0.25rem;
-    border-top-left-radius: 0.25rem;
-    border-top-right-radius: 0.25rem;
+    background-color: $form-bg;
+    border-radius: var(--border-radius1);
     &:hover {
       border-color: var(--text3) !important;
     }
@@ -2165,7 +2165,7 @@ tr.hover-target:hover {
     // Mimic Bootstrap's default focus behavior
     border-color: var(--text3) !important;
 
-    background-color: var(--surface2) !important;
+    background-color: $form-bg-focus !important;
     box-shadow: 0 0 0 0.2rem rgba($primary, 0.25);
     color: var(--text4) !important;
   }
@@ -2179,15 +2179,15 @@ tr.hover-target:hover {
 // Sidebar
 
 .sidebar-icon-1 {
-  color: var(--text4);
+  color: $sidebar-icon-color1;
 }
 
 .sidebar-icon-2 {
-  color: var(--text3);
+  color: $sidebar-icon-color2;
 }
 
 .sidebar-icon-3 {
-  color: var(--text6);
+  color: $sidebar-icon-color3;
 }
 
 .wrapper {
@@ -2225,9 +2225,51 @@ tr.hover-target:hover {
 
 .v-sidebar-menu {
   z-index: 100 !important;
+  background-color: $sidebar-bg !important;
+
+  .vsm--link {
+    color: $sidebar-color !important;
+
+    &:hover {
+      background-color: $sidebar-hover-bg !important;
+      color: $sidebar-hover-color !important;
+    }
+  }
+
+  // The open menu item
+  .vsm--item_open .vsm--link_level-1 {
+    background-color: var(--surface3) !important;
+  }
+
+  .vsm--link_level-2 {
+    background-color: $sidebar-bg !important;
+    color: $sidebar-color !important;
+  }
+
+  .vsm--link_active {
+    background-color: $sidebar-active-bg !important;
+    color: $sidebar-active-color !important;
+  }
+
+  .vsm--dropdown .vsm--list {
+    background-color: $sidebar-bg !important;
+    color: $sidebar-color !important;
+  }
 
   &.vsm_expanded {
     max-width: 15rem !important;
+  }
+
+  .vsm--icon {
+    background-color: transparent !important;
+    &.vsm--link_active {
+      color: $sidebar-active-color !important;
+    }
+  }
+
+  .vsm--item {
+    background-color: $sidebar-bg !important;
+    color: $sidebar-color !important;
   }
 }
 

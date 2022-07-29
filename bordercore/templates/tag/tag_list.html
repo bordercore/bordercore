@@ -42,25 +42,25 @@
                     </div>
 
                     <div v-if="tagInfo.blob__count" v-cloak>
-                        Blobs: <span class="text-info">[[ tagInfo.blob__count ]]</span>
+                        <span class="text-name">Blobs</span>: <span class="text-value">[[ tagInfo.blob__count ]]</span>
                     </div>
                     <div v-if="tagInfo.bookmark__count" v-cloak>
-                        Bookmarks: <span class="text-info">[[ tagInfo.bookmark__count ]]</span>
+                        <span class="text-name">Bookmarks</span>: <span class="text-value">[[ tagInfo.bookmark__count ]]</span>
                     </div>
                     <div v-if="tagInfo.todo__count" v-cloak>
-                        Todos: <span class="text-info">[[ tagInfo.todo__count ]]</span>
+                        <span class="text-name">Todos</span>: <span class="text-value">[[ tagInfo.todo__count ]]</span>
                     </div>
                     <div v-if="tagInfo.question__count" v-cloak>
-                        Questions: <span class="text-info">[[ tagInfo.question__count ]]</span>
+                        <span class="text-name">Questions</span>: <span class="text-value">[[ tagInfo.question__count ]]</span>
                     </div>
                     <div v-if="tagInfo.song__count" v-cloak>
-                        Songs: <span class="text-info">[[ tagInfo.song__count ]]</span>
+                        <span class="text-name">Songs</span>: <span class="text-value">[[ tagInfo.song__count ]]</span>
                     </div>
                     <div v-if="tagInfo.album__count" v-cloak>
-                        Albums: <span class="text-info">[[ tagInfo.album__count ]]</span>
+                        <span class="text-name">Albums</span>: <span class="text-value">[[ tagInfo.album__count ]]</span>
                     </div>
                     <div v-if="tagInfo.collection__count" v-cloak>
-                        Collections: <span class="text-info">[[ tagInfo.collection__count ]]</span>
+                        <span class="text-name">Collections</span>: <span class="text-value">[[ tagInfo.collection__count ]]</span>
                     </div>
 
                 </div>
@@ -70,77 +70,74 @@
         </div>
 
         <div class="col-lg-9">
-
-            <div class="me-3">
-                <card class="backdrop-filter">
-                    <template v-slot:title-slot>
-                        <div class="d-flex">
-                            <h4>
+            <card class="backdrop-filter">
+                <template v-slot:title-slot>
+                    <div class="d-flex">
+                        <h4>
                             Tag Aliases
-                            </h4>
-                            <div class="ms-auto me-2">
-                                <div class="button-add" @click="openModal">
-                                    <font-awesome-icon icon="plus" class="text-emphasis" />
-                                </div>
+                        </h4>
+                        <div class="ms-auto me-2">
+                            <div class="button-add" @click="openModal">
+                                <font-awesome-icon icon="plus" class="text-emphasis" />
                             </div>
                         </div>
-                    </template>
-                    <template v-slot:content>
+                    </div>
+                </template>
+                <template v-slot:content>
 
-                        <div class="d-flex">
+                    <div class="d-flex">
 
-                            <div class="side-panel highlight-box mt-5 me-5">
-                                <div class="circle me-3 mb-2">
-                                    <font-awesome-icon icon="info"></font-awesome-icon>
-                                </div>
-                                Tag aliases are labels you can assign as synonyms for tags.
-                                <br /><br />
-                                An example might be the alias <span class="text-primary">math</span> for the tag <span class="text-primary">mathematics</span>
+                        <div class="side-panel highlight-box mt-5 me-5">
+                            <div class="circle me-3 mb-2">
+                                <font-awesome-icon icon="info"></font-awesome-icon>
                             </div>
-
-                            <b-table
-                                :data="items"
-                                :mobile-cards="false"
-                                :default-sort="['tag.name']"
-                                hoverable
-                                class="w-100"
-                                sort-icon="chevron-up"
-                                :row-class="(row, index) => 'hover-target'"
-                            >
-
-                                <b-table-column field="tag.name" label="Tag" header-class="cursor-pointer" sortable v-slot="props">
-                                    <span>[[ props.row.tag.name ]]</span>
-                                </b-table-column>
-
-                                <b-table-column field="name" label="Alias" header-class="cursor-pointer" sortable v-slot="props">
-                                    <span>[[ props.row.name ]]</span>
-                                </b-table-column>
-
-                                <b-table-column field="uuid" label="" cell-class="col-action" v-slot="props">
-                                    <drop-down-menu :show-on-hover="true">
-                                        <div slot="dropdown">
-                                            <li>
-                                                <a class="dropdown-item" href="#" @click.prevent="onClickDelete(props.row)">
-                                                    <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>Delete
-                                                </a>
-                                            </li>
-                                        </div>
-                                    </drop-down-menu>
-                                </b-table-column>
-
-                                </template>
-
-                                <template #empty>
-                                    <div class="text-center">No tag aliases found</div>
-                                </template>
-
-                            </b-table>
-
+                            Tag aliases are labels you can assign as synonyms for tags.
+                            <br /><br />
+                            An example might be the alias <span class="text-primary">math</span> for the tag <span class="text-primary">mathematics</span>
                         </div>
 
-                    </template>
-                </card>
-            </div>
+                        <b-table
+                            :data="items"
+                            :mobile-cards="false"
+                            :default-sort="['tag.name']"
+                            hoverable
+                            class="w-100"
+                            sort-icon="chevron-up"
+                            :row-class="(row, index) => 'hover-target'"
+                        >
+
+                            <b-table-column field="tag.name" label="Tag" header-class="cursor-pointer" sortable v-slot="props">
+                                <span>[[ props.row.tag.name ]]</span>
+                            </b-table-column>
+
+                            <b-table-column field="name" label="Alias" header-class="cursor-pointer" sortable v-slot="props">
+                                <span>[[ props.row.name ]]</span>
+                            </b-table-column>
+
+                            <b-table-column field="uuid" label="" cell-class="col-action" v-slot="props">
+                                <drop-down-menu :show-on-hover="true">
+                                    <div slot="dropdown">
+                                        <li>
+                                            <a class="dropdown-item" href="#" @click.prevent="onClickDelete(props.row)">
+                                                <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>Delete
+                                            </a>
+                                        </li>
+                                    </div>
+                                </drop-down-menu>
+                            </b-table-column>
+
+                </template>
+
+                <template #empty>
+                    <div class="text-center">No tag aliases found</div>
+                </template>
+
+                        </b-table>
+
+                    </div>
+
+                </template>
+            </card>
 
             <div class="modal fade" id="modal-tagalias" tabindex="-1" role="dialog">
                 <div class="modal-dialog" role="document">

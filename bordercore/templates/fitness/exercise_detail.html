@@ -32,21 +32,21 @@
                 <card title="" class="z-index-positive flex-grow-0 position-relative backdrop-filter">
                     <template #content>
                         <div class="d-flex flex-column">
-                            <div v-if="showHistoryMessage" class="text-info mb-2 d-flex flex-column">
+                            <div v-if="showHistoryMessage" class="mb-2 d-flex flex-column">
                                 <div class="d-flex flex-column">
                                 {% if activity_info %}
                                     <div class="d-flex">
-                                        <div>
+                                        <div class="item-name">
                                             Started
                                         </div>
-                                        <div class="d-flex flex-column ms-2">
+                                        <div class="item-value d-flex flex-column ms-2">
                                             <div>
-                                                <strong class="text-white ms-1">
+                                                <strong>
                                                     {{ activity_info.0.started|date:"N j, Y" }}
-                                            </strong>
+                                                </strong>
                                             </div>
                                             <div>
-                                                <span class="text-small text-primary ms-1">
+                                                <span class="text-small ms-1">
                                                     {{ activity_info.0.started|relative_date }}
                                                 </span>
                                             </div>
@@ -69,11 +69,15 @@
                                     {% endif %}
                                     </div>
                                     <hr class="m-2" />
-                                    <div>
-                                        Frequency
-                                        <strong class="text-white ms-1">
-                                            every [[ frequency ]] days
-                                        </strong>
+                                    <div class="d-flex">
+                                        <div class="item-name">
+                                            Frequency
+                                        </div>
+                                        <div class="item-value ms-2">
+                                            <strong>
+                                                every [[ frequency ]] days
+                                            </strong>
+                                        </div>
                                     </div>
                                 {% endif %}
                                 </div>
@@ -95,8 +99,8 @@
                     </div>
                 </template>
                 <template #content>
-                    <div class="text-info mb-4">
-                        <strong class="text-white">
+                    <div class="mb-4">
+                        <strong>
                             {{ recent_data.0.date|date:"N j, Y" }} - {{ delta_days }} day{{ delta_days|pluralize:"s" }} ago
                         </strong>
                         <canvas id="last_workout_weights" class="mt-3" :class="{'d-none': hideLastWorkoutWeights}">
@@ -354,14 +358,14 @@
                                 <ul>
                                     {% for muscle in object.get_targeted_muscles.primary %}
                                         <li>
-                                            <span class="text-info">{{ muscle }}</span>
-                                            <span class="small text-muted">PRIMARY</span>
+                                            <span class="item-name">{{ muscle }}</span>
+                                            <span class="item-value small text-muted">PRIMARY</span>
                                         </li>
                                     {% endfor %}
                                     {% for muscle in object.get_targeted_muscles.secondary %}
                                         <li>
-                                            <span class="text-info">{{ muscle }}</span>
-                                            <span class="small text-muted">SECONDARY</span>
+                                            <span class="item-name">{{ muscle }}</span>
+                                            <span class="item-value small text-muted">SECONDARY</span>
                                         </li>
                                     {% endfor %}
                                 </ul>
@@ -542,6 +546,8 @@
 
         function getGradient(numberOfItems) {
 
+            const styles = getComputedStyle(document.body);
+
             if (numberOfItems <= 1) {
                 return;
             }
@@ -550,6 +556,7 @@
             let rainbow = new Rainbow();
             rainbow.setNumberRange(1, numberOfItems);
             rainbow.setSpectrum("#0000ff", "#00065e");
+            rainbow.setSpectrum(styles.getPropertyValue("--chart-gradient-start"), styles.getPropertyValue("--chart-gradient-end"));
 
             let colorArray = [];
             for (let i = 1; i <= numberOfItems; i++) {
@@ -575,6 +582,8 @@
 
         function getRecentWorkoutGraphOptions(label) {
 
+            const styles = getComputedStyle(document.body);
+
             return {
                 events: [], // Disable 'on-hover' events
                 borderRadius: "10",
@@ -583,7 +592,7 @@
                         const ctx = this.ctx;
                         ctx.textAlign = "center";
                         ctx.textBaseline = "bottom";
-                        ctx.fillStyle = "#000";
+                        ctx.fillStyle = styles.getPropertyValue("--chart-fill-color");
                         ctx.font="bold 24px Arial";
                         this.data.datasets.forEach(function(dataset, i) {
                             var meta = chartInstance.chart.getDatasetMeta(i);
@@ -601,7 +610,7 @@
                     title: {
                         display: true,
                         text: label,
-                        color: "#fff",
+                        color: styles.getPropertyValue("--chart-title-color"),
                         font: {
                             size: "16px"
                         }
@@ -610,12 +619,12 @@
                 scales: {
                     x: {
                         ticks: {
-                            color: "#00c8ff",
+                            color: styles.getPropertyValue("--chart-tick-color"),
                         }
                     },
                     y: {
                         ticks: {
-                            color: "#00c8ff",
+                            color: styles.getPropertyValue("--chart-tick-color"),
                         }
                     }
                 }
@@ -636,6 +645,7 @@
             mounted() {
 
                 const scaleYText = "{{ plotdata.initial_plot|capfirst }}";
+                const styles = getComputedStyle(document.body);
 
                 const ctx = document.getElementById("exercise-detail-chart").getContext("2d");
                 const myChart = new Chart(ctx, {
@@ -668,7 +678,7 @@
                                 const ctx = this.ctx;
                                 ctx.textAlign = "center";
                                 ctx.textBaseline = "bottom";
-                                ctx.fillStyle = "#fff";
+                                ctx.fillStyle = styles.getPropertyValue("--chart-fill-color");
                                 ctx.font="bold 24px Arial";
                                 this.data.datasets.forEach(function(dataset, i) {
                                     var meta = chartInstance.chart.getDatasetMeta(i);
@@ -683,7 +693,7 @@
                             title: {
                                 display: true,
                                 text: "Workout Data",
-                                color: "#fff",
+                                color: styles.getPropertyValue("--chart-title-color"),
                                 font: {
                                     family: "Poppins",
                                     size: 48,
@@ -700,7 +710,7 @@
                                     color: "#21295c",
                                 },
                                 ticks: {
-                                    color: "#00c8ff",
+                                    color: styles.getPropertyValue("--chart-tick-color"),
                                     font: {
                                         family: "Poppins",
                                         size: 16,
@@ -714,14 +724,14 @@
                                 title: {
                                     display: true,
                                     text: scaleYText,
-                                    color: "#00ffd1",
+                                    color: styles.getPropertyValue("--chart-title-color"),
                                     font: {
                                         family: "Poppins",
                                         size: 24,
                                     },
                                 },
                                 ticks: {
-                                    color: "#00c8ff",
+                                    color: styles.getPropertyValue("--chart-tick-color"),
                                     font: {
                                         family: "Poppins",
                                         size: 16,
@@ -747,7 +757,7 @@
                         labels: labels,
                         datasets: [
                             {
-                                backgroundColor: "#00ffd1",
+                                backgroundColor: styles.getPropertyValue("--chart-bg"),
                                 data: {{ latest_weight|safe }},
                                 label: "Weight",
                             },
@@ -763,7 +773,7 @@
                         labels: labels,
                         datasets: [
                             {
-                                backgroundColor: "#00ffd1",
+                                backgroundColor: styles.getPropertyValue("--chart-bg"),
                                 data: {{ latest_reps|safe }},
                                 label: "Reps",
                             },
@@ -780,7 +790,7 @@
                         labels: labels,
                         datasets: [
                             {
-                                backgroundColor: "#00ffd1",
+                                backgroundColor: styles.getPropertyValue("--chart-bg"),
                                 data: {{ latest_duration|safe }},
                                 label: "Duration",
                             },

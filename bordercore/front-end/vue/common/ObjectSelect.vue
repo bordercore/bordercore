@@ -17,6 +17,7 @@
                                     ref="suggestComponent"
                                     v-model="query"
                                     accesskey="s"
+                                    :destyled="true"
                                     display-attribute="name"
                                     value-attribute="uuid"
                                     :list="search"

@@ -68,6 +68,7 @@
                         <div id="section-existing" class="tab-pane">
                             <vue-simple-suggest
                                 ref="suggestComponent"
+                                :destyled="true"
                                 display-attribute="name"
                                 value-attribute="uuid"
                                 :list="search"

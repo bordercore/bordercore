@@ -50,7 +50,7 @@
                             <input id="add-to-remote-from-pinned-tagname" type="hidden" name="tag" />
 
                             <div class="has-search position-relative" v-cloak>
-                                <font-awesome-icon icon="search" class="ms-2 text-info"></font-awesome-icon>
+                                <font-awesome-icon id="top-search-spacer" icon="search"></font-awesome-icon>
                                 <search inline-template @search-term="onTermSearch" @get-page="getPage" ref="search">
                                     <div>
                                         <simple-suggest
@@ -98,7 +98,7 @@
                         <div class="d-flex mt-1 ms-3">
 
                             <div v-if="$store.state.selectedTagName && $store.state.selectedTagName !== 'Untagged'" id="bookmark-search-filter" class="tag label label-info d-flex align-items-center">
-                                <div>Tag: <span class="text-white">[[ $store.state.selectedTagName ]]</span></div>
+                                <div>Tag: <span>[[ $store.state.selectedTagName ]]</span></div>
                                 <div>
                                     <a class="ms-1" href="#" @click.prevent="removeFilter">
                                         <font-awesome-icon icon="times" class="text-primary" />
@@ -130,7 +130,7 @@
                                 <tbody is="draggable" v-model="bookmarkList" @change="onSortBookmarks">
                                     <transition-group type="transition">
                                         <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="dropdown-height hover-target bookmark-list w-100" v-cloak @dragstart="startDrag($event, bookmark)" @click="onClickBookmark(bookmark.uuid)" @mouseenter="onMouseEnterLeave" @mouseleave="onMouseEnterLeave">
-                                            <td class="bookmark-list-date p-2 text-info align-top">
+                                            <td class="bookmark-list-date p-2 align-top">
                                                 <span>[[ bookmark.created ]]</span>
                                             </td>
                                             <td v-if="$store.state.viewType !== 'compact'" class="bookmark-list-favicon p-2">
@@ -145,7 +145,7 @@
                                                 <div v-if="bookmark.note != null && bookmark.note != ''" class="table-note">
                                                     [[ bookmark.note ]]
                                                 </div>
-                                                <div class="yt-hover-target text-info position-absolute d-none" v-if="bookmark.url.startsWith('https://www.youtube.com/watch') && $store.state.viewType === 'normal'">
+                                                <div class="yt-hover-target position-absolute d-none" v-if="bookmark.url.startsWith('https://www.youtube.com/watch') && $store.state.viewType === 'normal'">
                                                     Duration: [[ bookmark.video_duration ]]
                                                 </div>
                                             </td>

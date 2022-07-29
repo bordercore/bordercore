@@ -1,22 +1,65 @@
 * {
-  --brand-hue: 200;
-  --brand-saturation: 100%;
-  --brand-lightness: 50%;
 
-  --surface1: hsl(var(--brand-hue) 10% 10%);
-  --surface2: hsl(var(--brand-hue) 10% 15%);
-  --surface3: hsl(var(--brand-hue) 5%  20%);
-  --surface4: hsl(var(--brand-hue) 5% 25%);
+  --brand-hue: 202;
+  --brand-saturation: 85%;
+  --brand-lightness: 26%;
+
+  --text1: #000;
+  --text2: #193bbd;
+  --text3: #366163;
+  --text4: #0d1e63;
+  --text5: #0d1e63;
+  --text6: #0d1e63;
+
+  --text-disabled: #bbb;
+
+  // --surface1: hsl(var(--brand-hue) var(--brand-saturation) var(--brand-lightness));
+  --surface1: #edf2f9;
+  --surface2: #fff;
+  --surface3: #dddddd;
+  --surface4: hsl(var(--brand-hue) 5%  20%);
+  --surface5: #366163;
+  --surface6: #d5e5fa;
+  --surface7: #366163;
+
+  // Node colors
+  // Increase the HSL lightness by 5% for the tinted properties
+  --node-color-1: hsl(210 41% 78%);
+  --node-color-1-tinted: hsl(210 41% 83%);
+  --node-color-2: hsl(33 60% 91%);
+  --node-color-2-tinted: hsl(33 60% 96%);
+  --node-color-3: hsl(225, 29%, 41%);
+  --node-color-3-tinted: hsl(225, 29%, 46%);
+  --node-color-4: hsl(206 66% 32%);
+  --node-color-4-tinted: hsl(206 66% 37%);
+
+  // Chart colors
+  --chart-title-color: var(--text2);
+  --chart-bg: var(--surface5);
+  --chart-fill-color: var(--surface1);
+  --chart-tick-color: var(--text4);
+  --chart-gradient-start:#0000ff; // Avoid leading space before RGB value
+  --chart-gradient-end:#00065e; // Avoid leading space before RGB value
+
+  // Override Bootstrap CSS properties
+  --bs-body-color: var(--text1);
+  --bs-body-bg: var(--surface1);
+
 }
 
-// Custom Bootswatch variables which overrides the "cerulean" theme
-$gray-700: #495057;
-$gray-900: #212529;
-
 // Custom Bootstrap variables
+
+// TODO: These throw an error if we pass in the CSS property directly,
+//  which we'd prefer, so hard-code them for now.
+$primary: #000;  // Should match var(--text1)
+$secondary: #193bbd;  // Should match var(--text2)
+
+$modal-header-border-color: var(--text3);
+
 $table-cell-padding-y: .75rem;
 $table-cell-padding-x: .75rem;
 
+$list-group-item-bg: var(--surface1);
 $list-group-item-padding-y: .75rem;
 $list-group-item-padding-x: 1.25rem;
 
@@ -34,68 +77,36 @@ $card-spacer-x: $spacer * 1.25;
 // Import CSS for Prism syntax highlighter
 @import "../../../node_modules/prismjs/themes/prism-okaidia.css";
 
+// Import CSS for vue-sidebar-menu
+@import "../../css/vue-sidebar-menu/vue-sidebar-menu.scss";
+
 // Custom colors for this theme
-$bg-color: #fff;
-$bg-dark: #d3e8f4;
-$bg-light: #fff;
-$text-selection-bg: #0d5cc5;
-$blob-list-nav: #d7d9e6;
-$body-bg: #fff;
-$button-plus-hover-bg: #d6dae1;
-$close-button-hover-color: #6af6d0;
-$form-color: #6ea6e0;
-$form-bg: #3e3e6b;
-$form-bg-focus: #10163a;
-$form-bg-disabled: #2c2c49;
-$form-border-color-hover: #7fe7c4;
-$light-blue: #212132;
-$link-hover-color: $primary;
-$list-group-item-secondary-bg: $bg-dark;
-$list-group-item: $bg-light;
-$drill-progress-circle-color: lighten($info, 25%);
-$drill-progress-circle-partial-color: lighten($info, 25%);
-$drill-progress-circle-full-color: #262c49;
-$dropdown-color: $cyan;
-$dropdown-hover-bg: $primary;
-$dropdown-hover-color: $white;
-$dropdown-menu-bg: $primary;
-$dropdown-menu-color: $white;
-$icon-glow-color: #7fe7c4;
-$link-color: #28a745;
-$link-decoration-color: #0000ff;
-$markdown-heading: #333;
-$markdown-bg: $gray-200;
-$markdown-blockquote-bg: #f5f2f0;
-$markdown-blockquote-border-left: #e7e5e3;
-$markdown-code-bg: #f5f2f0;
-$markdown-code-color: #333;
-$modal-bg: $white;
-$nav-border-color: $gray-500;
-$nav-highlight-color: #0f0;
-$nav-not-selected-color: #888;
-$selected-bg: $cyan;
-$strong-color: #0040ff;
-$text-highlight: #6ac2f6;
-$tree-menu-color: #d2e0ee;
-$tree-menu-folder-color: #f00;
-$vue-simple-suggest-item-bg: $gray-300;
-$vue-simple-suggest-item-hover-bold-color: #1a4beb;
-
-.table_header {
-  background-color: #b0e1ff
-}
-
-.notice-big {
-  background-color: #cdd8e3;
-
-  span {
-    color: #021f3c;
-  }
-
-  .message {
-    color: text-white #bf8040;
-  }
-}
+$badge-color: var(--surface2);
+$btn-close-filter: grayscale(100%) brightness(200%);
+$btn-primary-hover-color: var(--surface3);
+$drill-progress-circle-full: var(--surface3);
+$drill-progress-circle-partial: var(--text5);
+$form-bg: var(--surface3);
+$form-bg-focus: var(--surface1);
+$form-bg-disabled: var(--surface2);
+$form-border-color-hover: var(--text3);
+$icon-glow-color: var(--text3);
+$nav-highlight-color: var(--text5);
+$notice-bg: var(--surface5);
+$notice-color: var(--surface1);
+$notice-title-color: var(--surface1);
+$selected-bg-color: var(--text3);
+$selected-color: var(--surface3);
+$sidebar-active-bg: var(--surface5);
+$sidebar-active-color: var(--surface1);
+$sidebar-bg: var(--surface6);
+$sidebar-color: var(--text5);
+$sidebar-expanded-bg: var(--surface1);
+$sidebar-hover-color: var(--surface4);
+$sidebar-hover-bg: var(--surface1);
+$sidebar-icon-color1: var(--text4);
+$sidebar-icon-color2: var(--text3);
+$sidebar-icon-color3: var(--text6);
 
 // Import core SCSS
 @import "../base";

@@ -4,6 +4,7 @@
                             ref="suggestComponent"
                             v-model="query"
                             :accesskey="accesskey"
+                            :destyled="true"
                             :display-attribute="displayAttribute"
                             :value-attribute="valueAttribute"
                             :list="search"

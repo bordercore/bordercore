@@ -25,7 +25,7 @@
             <li v-for="nav in navAll" v-if="nav === 'All' || doctypeCount(nav) > 0" class="nav-item px-5" @click="onClickNav(nav)">
                 <a class="nav-link" data-bs-toggle="tab" href="#" v-cloak>
                     [[ nav ]]
-                    <span class="badge bg-info align-middle ms-2" v-html="doctypeCount(nav)"></span>
+                    <span class="badge rounded-pill align-middle ms-2" v-html="doctypeCount(nav)"></span>
                 </a>
             </li>
         </ul>
