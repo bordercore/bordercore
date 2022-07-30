@@ -1,7 +1,7 @@
 import datetime
 from datetime import timedelta
 
-from django.db.models import F, Max, OuterRef, Subquery
+from django.db.models import F, Max, OuterRef, Q, Subquery
 from django.utils import timezone
 
 from fitness.models import Exercise, ExerciseUser
@@ -9,15 +9,18 @@ from fitness.models import Exercise, ExerciseUser
 
 def get_fitness_summary(user, count_only=False):
 
-    newest = ExerciseUser.objects.filter(exercise=OuterRef("pk")) \
-        .filter(user=user)
+    newest = ExerciseUser.objects.filter(
+        exercise=OuterRef("pk")
+    ).filter(
+        user=user
+    )
 
     exercises = Exercise.objects.annotate(
         last_active=Max("workout__data__date"),
         is_active=Subquery(newest.values("started")[:1]),
         frequency=Subquery(newest.values("frequency")[:1])) \
-        .filter(workout__user=user) \
-        .order_by(F("last_active")) \
+        .filter(Q(workout__user=user) | Q(workout__isnull=True)) \
+        .order_by(F("last_active"))
 
     if not count_only:
         exercises = exercises.prefetch_related("muscle", "muscle__muscle_group")

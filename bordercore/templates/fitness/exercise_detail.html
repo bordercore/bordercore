@@ -51,7 +51,6 @@
                                                 </span>
                                             </div>
                                         </div>
-                                    {% if activity_info %}
                                         <drop-down-menu :show-on-hover="true">
                                             <div slot="dropdown">
                                                 <li>
@@ -66,7 +65,6 @@
                                                 </li>
                                             </div>
                                         </drop-down-menu>
-                                    {% endif %}
                                     </div>
                                     <hr class="m-2" />
                                     <div class="d-flex">
@@ -81,6 +79,9 @@
                                     </div>
                                 {% endif %}
                                 </div>
+                            </div>
+                            <div v-else>
+                                Exercise not active.
                             </div>
                             <div class="mt-3">
                                 <button type="submit" class="btn btn-primary" @click=onClick v-cloak>
@@ -100,9 +101,13 @@
                 </template>
                 <template #content>
                     <div class="mb-4">
+                        {% if recent_data %}
                         <strong>
                             {{ recent_data.0.date|date:"N j, Y" }} - {{ delta_days }} day{{ delta_days|pluralize:"s" }} ago
                         </strong>
+                        {% else %}
+                            No previous workout found.
+                        {% endif %}
                         <canvas id="last_workout_weights" class="mt-3" :class="{'d-none': hideLastWorkoutWeights}">
                         </canvas>
                         <canvas id="last_workout_duration" class="mt-3" :class="{'d-none': hideLastWorkoutDuration}">
@@ -758,7 +763,7 @@
                         datasets: [
                             {
                                 backgroundColor: styles.getPropertyValue("--chart-bg"),
-                                data: {{ latest_weight|safe }},
+                                data: {{ latest_weight|safe|default:"''" }},
                                 label: "Weight",
                             },
                         ]
@@ -774,7 +779,7 @@
                         datasets: [
                             {
                                 backgroundColor: styles.getPropertyValue("--chart-bg"),
-                                data: {{ latest_reps|safe }},
+                                data: {{ latest_reps|safe|default:"''" }},
                                 label: "Reps",
                             },
                         ]
@@ -791,7 +796,7 @@
                         datasets: [
                             {
                                 backgroundColor: styles.getPropertyValue("--chart-bg"),
-                                data: {{ latest_duration|safe }},
+                                data: {{ latest_duration|safe|default:"''" }},
                                 label: "Duration",
                             },
                         ]

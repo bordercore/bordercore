@@ -53,6 +53,9 @@ class Exercise(models.Model):
             "-date"
         ).first()
 
+        if not workout:
+            return {}
+
         recent_data = workout.data_set.all()
 
         info = {
