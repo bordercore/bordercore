@@ -50,11 +50,11 @@
                         <hr class="filter-divider" />
                         <ul class="list-group interior-borders">
                             {% for tag in tag_counts %}
-                                <li class="list-with-counts ps-2 py-1 -e-1 text-info d-flex" @click.prevent="onClickTag('{{ tag.name }}')">
-                                    <div class="ps-2 text-truncate">
+                                <li class="list-with-counts ps-2 py-1 pe-2 d-flex" @click.prevent="onClickTag('{{ tag.name }}')">
+                                    <div class="text-truncate">
                                         {{ tag.name }}
                                     </div>
-                                    <div class="ms-auto pe-2">
+                                    <div class="ms-auto me-1">
                                         <span class="px-2 badge rounded-pill">
                                             {{ tag.count }}
                                         </span>

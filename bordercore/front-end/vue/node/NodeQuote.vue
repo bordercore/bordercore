@@ -41,7 +41,7 @@
                             {{ quote.quote }}
                         </div>
                         <div class="text-primary text-smaller">
-                            {{ quote.source }}
+                            <strong>{{ quote.source }}</strong>
                         </div>
                     </div>
                 </Transition>

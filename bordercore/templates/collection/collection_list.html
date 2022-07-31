@@ -17,8 +17,8 @@
                         </div>
                     </Transition>
 
-                    <div v-if="filter" class="tag label label-info d-flex align-items-center me-3">
-                        <div v-cloak>Filter: <span class="text-white">[[ filter ]]</span></div>
+                    <div v-if="filter" class="tag d-flex align-items-center me-3">
+                        <div v-cloak>Filter: <strong>[[ filter ]]</strong></div>
                         <div>
                             <a class="ms-1" href="#" @click.prevent="onClickRemoveFilter">
                                 <font-awesome-icon icon="times" class="text-primary" />
@@ -26,7 +26,7 @@
                         </div>
                     </div>
 
-                    <div class="me-5" @click="onFilterClick">
+                    <div class="ms-2 me-5" @click="onFilterClick">
                         <font-awesome-icon icon="search" class="glow text-emphasis" />
                     </div>
 

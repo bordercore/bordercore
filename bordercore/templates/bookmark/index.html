@@ -97,8 +97,8 @@
                     <div v-cloak>
                         <div class="d-flex mt-1 ms-3">
 
-                            <div v-if="$store.state.selectedTagName && $store.state.selectedTagName !== 'Untagged'" id="bookmark-search-filter" class="tag label label-info d-flex align-items-center">
-                                <div>Tag: <span>[[ $store.state.selectedTagName ]]</span></div>
+                            <div v-if="$store.state.selectedTagName && $store.state.selectedTagName !== 'Untagged'" id="bookmark-search-filter" class="tag d-flex align-items-center">
+                                <div>Tag: <strong>[[ $store.state.selectedTagName ]]</strong></div>
                                 <div>
                                     <a class="ms-1" href="#" @click.prevent="removeFilter">
                                         <font-awesome-icon icon="times" class="text-primary" />
@@ -130,22 +130,22 @@
                                 <tbody is="draggable" v-model="bookmarkList" @change="onSortBookmarks">
                                     <transition-group type="transition">
                                         <tr v-for="bookmark in bookmarkList" :data-uuid="bookmark.uuid" :key="bookmark.uuid" class="dropdown-height hover-target bookmark-list w-100" v-cloak @dragstart="startDrag($event, bookmark)" @click="onClickBookmark(bookmark.uuid)" @mouseenter="onMouseEnterLeave" @mouseleave="onMouseEnterLeave">
-                                            <td class="bookmark-list-date p-2 align-top">
+                                            <td class="date p-2 align-top">
                                                 <span>[[ bookmark.created ]]</span>
                                             </td>
-                                            <td v-if="$store.state.viewType !== 'compact'" class="bookmark-list-favicon p-2">
+                                            <td v-if="$store.state.viewType !== 'compact'" class="favicon p-2">
                                                 <img width="120" height="67" :src="bookmark.thumbnail_url + '?foo=bar'" />
                                             </td>
-                                            <td class="bookmark-list-favicon p-2 align-top">
+                                            <td class="favicon p-2 align-top">
                                                 <span v-html="bookmark.favicon_url"></span>
                                             </td>
-                                            <td class="bookmark-list-link w-100 p-2 align-top position-relative">
+                                            <td class="link w-100 p-2 align-top position-relative">
                                                 <a :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.name) ]]</a>
                                                 <a v-for="tag in bookmark.tags" v-if="tag != $store.state.selectedTagName" class="tag ms-2 d-inline-block" @click.prevent="onClickTag" href="#">[[ tag ]]</a>
                                                 <div v-if="bookmark.note != null && bookmark.note != ''" class="table-note">
                                                     [[ bookmark.note ]]
                                                 </div>
-                                                <div class="yt-hover-target position-absolute d-none" v-if="bookmark.url.startsWith('https://www.youtube.com/watch') && $store.state.viewType === 'normal'">
+                                                <div class="yt-hover-target text-secondary position-absolute d-none" v-if="bookmark.url.startsWith('https://www.youtube.com/watch') && $store.state.viewType === 'normal'">
                                                     Duration: [[ bookmark.video_duration ]]
                                                 </div>
                                             </td>

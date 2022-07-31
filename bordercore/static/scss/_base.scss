@@ -291,6 +291,10 @@ span {
   a {
     color: $selected-color !important;
   }
+
+  .text-secondary {
+    color: $selected-secondary-color !important;
+  }
 }
 
 .icon-hover {
@@ -734,6 +738,14 @@ textarea.form-control {
     background-color: var(--text4) !important;
     color: var(--surface6) !important;
     text-decoration: none;
+
+    strong, svg {
+      color: var(--surface6) !important;
+    }
+  }
+
+  svg:hover {
+    color: var(--surface1) !important;
   }
 }
 
@@ -1223,8 +1235,7 @@ blockquote > p {
   color: var(--text5);
 }
 
-.bookmark-list,
-.bookmark-list a {
+.bookmark-list {
   &:hover {
     background-color: var(--hover-bg);
     td:nth-child(1) {
@@ -1236,33 +1247,33 @@ blockquote > p {
       border-top-right-radius: var(--border-radius2);
     }
   }
+
+  .date {
+    text-align: right;
+    vertical-align: text-bottom;
+    white-space: nowrap;
+  }
+
+  .favicon {
+    vertical-align: text-bottom;
+  }
+
+  .link {
+    vertical-align: text-bottom;
+  }
+
+  .yt-hover-target {
+    right: 0.3rem;
+    bottom: 0.3rem;
+  }
 }
 
-.bookmark-list-date {
-  color: var(--text6);
-  text-align: right;
-  vertical-align: text-bottom;
-  white-space: nowrap;
-}
-
-.bookmark-list-favicon {
-  vertical-align: text-bottom;
-}
-
-.bookmark-list-link {
-  vertical-align: text-bottom;
-}
 
 #bookmark-search-form {
   background-color: var(--surface1);
   border-radius: var(--border-radius2);
 }
 
-.yt-hover-target {
-  right: 0.3rem;
-  bottom: 0.3rem;
-  color: var(--text6);
-}
 
 #bookmark-select-add {
   height: 2.5rem;
