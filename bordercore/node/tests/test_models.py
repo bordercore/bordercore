@@ -32,9 +32,10 @@ def test_node_update_collection(node):
 
     collection = node.add_collection()
     display = "individual"
+    random_order = "false"
     rotate = "rotate"
 
-    node.update_collection(str(collection.uuid), display, rotate)
+    node.update_collection(str(collection.uuid), display, random_order, rotate)
 
     # Verify that the collection's properties have been updated in the node's layout
     updated_node = Node.objects.get(uuid=node.uuid)

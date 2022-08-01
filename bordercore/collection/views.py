@@ -322,7 +322,8 @@ def create_blob(request):
 def get_object_list(request, collection_uuid):
 
     collection = Collection.objects.get(uuid=collection_uuid)
-    object_list = collection.get_object_list()
+    random_order = request.GET.get("random_order", False)
+    object_list = collection.get_object_list(random_order=random_order)
 
     return JsonResponse(object_list, safe=False)
 

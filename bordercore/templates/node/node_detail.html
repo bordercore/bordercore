@@ -362,21 +362,6 @@
             name: "Node Detail",
             store,
             methods: {
-                addCollection(collectionObjectList) {
-                    doPost(
-                        this,
-                        "{% url "node:add_collection" %}",
-                        {
-                            "node_uuid": this.$store.state.nodeUuid,
-                            "collection_name": collectionObjectList.name,
-                        },
-                        (response) => {
-                            EventBus.$emit("update-layout", response.data.layout);
-                        },
-                        "Collection added",
-                        ""
-                    );
-                },
                 addNote(note) {
                     doPost(
                         this,
@@ -551,7 +536,11 @@
                 });
 
                 EventBus.$on("open-collection-modal", (payload) => {
-                    this.$refs.collectionUpdate.openModal("Add", this.addCollection, {"display": "list"});
+                    this.$refs.collectionUpdate.openModal(
+                        "Add",
+                        null,
+                        {"collection_type": "ad-hoc", "display": "list", "rotate": -1, "uuid": ""}
+                    );
                 });
 
                 EventBus.$on("open-note-modal", (payload) => {

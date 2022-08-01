@@ -1060,6 +1060,12 @@ table.b-table th {
   font-weight: bold;
 }
 
+.form-section {
+  color: var(--text3);
+  font-size: larger;
+  font-weight: bold;
+}
+
 // Used when you want to display text instead of a form field
 .form-no-input {
   padding: 0.4rem 1.25rem;
@@ -1947,11 +1953,6 @@ hr.collection-list-divider {
 .collection-slide-show-section {
   background-color: var(--surface6);
   border-radius: 0.7rem;
-
-  .header {
-    color: var(--text3);
-    font-size: 1rem;
-  }
 }
 
 //

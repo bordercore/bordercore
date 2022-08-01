@@ -47,7 +47,8 @@
             <template #content>
                 <hr class="filter-divider mt-0">
                 <div v-if="collectionObjectList.display === 'individual'">
-                    <img v-if="currentObjectIndex !== null" :src="objectList[currentObjectIndex].cover_url_large" class="mw-100" @click="onClick()">
+                    <img v-if="currentObjectIndex !== null && objectList.length > 0" :src="objectList[currentObjectIndex].cover_url_large" class="mw-100" @click="onClick()">
+                    <span v-else class="text-muted">No objects</span>
                 </div>
                 <ul v-else id="sort-container-tags" class="list-group list-group-flush interior-borders">
                     <draggable v-model="objectList" draggable=".draggable" @change="onSort">
@@ -208,7 +209,7 @@
             getObjectList() {
                 doGet(
                     this,
-                    this.getObjectListUrl,
+                    `${this.getObjectListUrl}?random_order=${this.collectionObjectList.random_order}`,
                     (response) => {
                         this.objectList = response.data.object_list;
                         // Let Vue know that each object's "noteIsEditable" property is reactive
@@ -238,6 +239,7 @@
                         "node_uuid": this.nodeUuid,
                         "name": collectionObjectList.name,
                         "display": collectionObjectList.display,
+                        "random_order": collectionObjectList.random_order,
                         "rotate": collectionObjectList.rotate,
                     },
                     (response) => {

@@ -35,9 +35,9 @@ class Node(TimeStampedModel):
     def __str__(self):
         return self.name
 
-    def add_collection(self, name="New Collection", uuid=None):
+    def add_collection(self, name="New Collection", uuid=None, display="list", rotate=-1, random_order=False):
 
-        if uuid:
+        if uuid and uuid != "":
             # If a uuid is given, use an existing collection
             collection = Collection.objects.get(uuid=uuid)
             display = "individual"
@@ -45,7 +45,6 @@ class Node(TimeStampedModel):
         else:
             # New collections are private to avoid display on the collection list page
             collection = Collection.objects.create(name=name, user=self.user, is_private=True)
-            display = "list"
             collection_type = "ad-hoc"
 
         layout = self.layout
@@ -53,20 +52,23 @@ class Node(TimeStampedModel):
             "type": "collection",
             "uuid": str(collection.uuid),
             "display": display,
-            "collection_type": collection_type
+            "collection_type": collection_type,
+            "rotate": rotate,
+            "random_order": random_order
         })
         self.layout = layout
         self.save()
 
         return collection
 
-    def update_collection(self, collection_uuid, display, rotate):
+    def update_collection(self, collection_uuid, display, random_order, rotate):
 
         for column in self.layout:
             for row in column:
                 if "uuid" in row and row["uuid"] == collection_uuid:
                     row["display"] = display
                     row["rotate"] = rotate
+                    row["random_order"] = random_order
 
         self.save()
 

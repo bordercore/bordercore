@@ -90,6 +90,8 @@ def test_add_collection(auto_login_user, node):
     resp = client.post(url, {
         "node_uuid": node.uuid,
         "collection_name": "Test Collection",
+        "display": "list",
+        "random_order": "true",
     })
 
     assert resp.status_code == 200
@@ -112,6 +114,7 @@ def test_update_collection(auto_login_user, node, quote):
     collection = node.add_collection()
     name = faker.text(max_nb_chars=32)
     display = "individual"
+    random_order = "true"
     rotate = "rotate"
 
     url = urls.reverse("node:update_collection")
@@ -120,6 +123,7 @@ def test_update_collection(auto_login_user, node, quote):
         "node_uuid": node.uuid,
         "name": name,
         "display": display,
+        "random_order": random_order,
         "rotate": rotate,
     })
 
@@ -133,6 +137,12 @@ def test_update_collection(auto_login_user, node, quote):
 
     assert display in [
         val["display"]
+        for sublist in updated_node.layout
+        for val in sublist
+        if val["type"] == "collection" and val["uuid"] == str(collection.uuid)
+    ]
+    assert True in [
+        val["random_order"]
         for sublist in updated_node.layout
         for val in sublist
         if val["type"] == "collection" and val["uuid"] == str(collection.uuid)

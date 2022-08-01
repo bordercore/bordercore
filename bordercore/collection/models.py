@@ -168,14 +168,23 @@ class Collection(TimeStampedModel):
             "paginator": json.dumps(paginator_info)
         }
 
-    def get_object_list(self, request=None, limit=BLOB_COUNT_PER_PAGE, page_number=1):
+    def get_object_list(self, request=None, limit=BLOB_COUNT_PER_PAGE, page_number=1, random_order=False):
 
         object_list = []
 
-        queryset = CollectionObject.objects.filter(collection=self).prefetch_related("blob").prefetch_related("bookmark")
+        queryset = CollectionObject.objects.filter(
+            collection=self
+        ).prefetch_related(
+            "blob"
+        ).prefetch_related(
+            "bookmark"
+        )
 
         if request and "tag" in request.GET:
             queryset = queryset.filter(blob__tags__name=request.GET["tag"])
+
+        if random_order:
+            queryset = queryset.order_by("?")
 
         if request and "page" in request.GET:
             page_number = request.GET["page"]

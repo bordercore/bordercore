@@ -200,9 +200,12 @@ def add_collection(request):
     node_uuid = request.POST["node_uuid"]
     collection_name = request.POST["collection_name"]
     collection_uuid = request.POST.get("collection_uuid", None)
+    display = request.POST["display"]
+    random_order = True if request.POST["random_order"] == "true" else False
+    rotate = request.POST.get("rotate", -1)
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
-    collection = node.add_collection(collection_name, collection_uuid)
+    collection = node.add_collection(collection_name, collection_uuid, display, rotate, random_order)
 
     response = {
         "status": "OK",
@@ -220,6 +223,7 @@ def update_collection(request):
     collection_uuid = request.POST["collection_uuid"]
     name = request.POST["name"]
     display = request.POST["display"]
+    random_order = True if request.POST["random_order"] == "true" else False
     rotate = request.POST["rotate"]
 
     collection = Collection.objects.get(uuid=collection_uuid)
@@ -227,7 +231,7 @@ def update_collection(request):
     collection.save()
 
     node = Node.objects.get(uuid=node_uuid, user=request.user)
-    node.update_collection(collection_uuid, display, rotate)
+    node.update_collection(collection_uuid, display, random_order, rotate)
 
     response = {
         "status": "OK",
