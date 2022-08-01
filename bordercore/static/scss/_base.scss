@@ -270,6 +270,11 @@ input[type="checkbox"] {
   accent-color: var(--text3);
 }
 
+hr.divider {
+  height: 0.15rem;
+  background-color: var(--surface7);
+}
+
 p {
   font-size: 1.25em;
 }
@@ -1803,10 +1808,6 @@ div #dateapp {
 //
 // Metrics
 //
-
-.metric-divider {
-  border-top: 0.06rem solid var(--surface4);
-}
 
 .metric-test-result-popover {
   width: 50rem;
