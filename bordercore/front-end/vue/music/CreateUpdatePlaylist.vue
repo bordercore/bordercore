@@ -27,7 +27,7 @@
                     <div :class="{'d-none': hidePlaylistType}">
                         <hr class="mb-1">
 
-                        <div class="header">
+                        <div class="form-section">
                             Playlist Type
                         </div>
 
@@ -118,7 +118,7 @@
                         <div v-if="smartType !== 'manual'">
                             <hr class="mb-1">
 
-                            <div class="header">
+                            <div class="form-section">
                                 Options
                             </div>
 
