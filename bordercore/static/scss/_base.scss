@@ -300,6 +300,9 @@ span {
   .text-secondary {
     color: $selected-secondary-color !important;
   }
+
+  // The first and last cells of any selected row are highlighted
+  @extend .hoverable-cells;
 }
 
 .icon-hover {
@@ -480,13 +483,13 @@ span {
 // Lists
 
 .list-with-counts {
+  border-radius: var(--border-radius1);
   a {
     color: var(--text1);
   }
 
   &:hover {
     background-color: var(--hover-bg);
-    border-radius: var(--border-radius1);
     cursor: pointer;
   }
 
@@ -602,14 +605,19 @@ a.tag {
   }
 
   table.is-hoverable tr {
-    &:hover {
-      background-color: var(--hover-bg);
-    }
+    @extend .hoverable-cells;
   }
+}
 
-  tr.is-selected {
-    background-color: var(--surface5);
+.table-borderless td,
+.table-borderless th {
+  padding: 0.6rem;
+  border: 0;
+}
 
+.hoverable-cells {
+  &:hover {
+    background-color: var(--hover-bg);
     td:nth-child(1) {
       border-bottom-left-radius: var(--border-radius2);
       border-top-left-radius: var(--border-radius2);
@@ -619,12 +627,6 @@ a.tag {
       border-top-right-radius: var(--border-radius2);
     }
   }
-}
-
-.table-borderless td,
-.table-borderless th {
-  padding: 0.6rem;
-  border: 0;
 }
 
 .hoverable {
@@ -1247,17 +1249,7 @@ blockquote > p {
 }
 
 .bookmark-list {
-  &:hover {
-    background-color: var(--hover-bg);
-    td:nth-child(1) {
-      border-bottom-left-radius: var(--border-radius2);
-      border-top-left-radius: var(--border-radius2);
-    }
-    td:nth-last-child(1) {
-      border-bottom-right-radius: var(--border-radius2);
-      border-top-right-radius: var(--border-radius2);
-    }
-  }
+  @extend .hoverable-cells;
 
   .date {
     text-align: right;

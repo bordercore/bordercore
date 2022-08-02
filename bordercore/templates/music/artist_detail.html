@@ -406,7 +406,7 @@
                     // First deselect any selected rows
                     const allRows = document.querySelectorAll("table tr");
                     for (const row of allRows) {
-                        row.classList.remove("is-selected");
+                        row.classList.remove("selected");
                     }
 
                     // Select a row based on index number. If the index is -1,
@@ -414,7 +414,7 @@
                     if (index != -1) {
                         const selectedRow = this.songList[index];
                         this.$refs.table.selectRow(selectedRow);
-                        document.querySelector(`table tbody tr:nth-child(${index + 1})`).classList.add("is-selected");
+                        document.querySelector(`table tbody tr:nth-child(${index + 1})`).classList.add("selected");
                     } else {
                         this.$refs.table.selectRow({});
                     }
