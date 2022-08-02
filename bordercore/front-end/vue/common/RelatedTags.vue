@@ -11,7 +11,7 @@
 
             <template #content>
                 <div v-for="tagInfo in info" :key="tagInfo.name">
-                    <hr class="filter-divider mt-0">
+                    <hr class="divider mt-0">
                     <h5 class="text-success">
                         {{ tagInfo.name }}
                     </h5>

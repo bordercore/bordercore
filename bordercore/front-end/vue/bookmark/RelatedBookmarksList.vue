@@ -26,7 +26,7 @@
                 </template>
 
                 <template #content>
-                    <hr class="filter-divider mt-0">
+                    <hr class="divider mt-0">
                     <ul id="sort-container-tags" class="list-group list-group-flush interior-borders">
                         <draggable v-model="bookmarkList" draggable=".draggable" @change="onSort">
                             <transition-group type="transition" class="w-100">

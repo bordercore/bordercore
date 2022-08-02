@@ -47,7 +47,7 @@
                 </div>
             </template>
             <template #content>
-                <hr class="filter-divider mt-0">
+                <hr class="divider mt-0">
                 <editable-text-area
                     ref="note"
                     class="node-note"

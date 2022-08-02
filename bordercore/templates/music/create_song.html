@@ -15,7 +15,7 @@
                             Possible duplicate songs found
                         </h6>
                         <div v-for="dupe in $store.state.dupeSongs" class="my-2">
-                            <hr class="filter-divider" />
+                            <hr class="divider" />
                             <div class="d-flex">
                                 <font-awesome-icon icon="music" class="text-info mt-1"></font-awesome-icon>
                                 <div class="ms-2">
@@ -47,7 +47,7 @@
 
                 <card title="Tag Suggestions" class="backdrop-filter ms-3">
                     <template v-slot:content>
-                        <hr class="filter-divider" />
+                        <hr class="divider" />
                         <ul class="list-group interior-borders">
                             {% for tag in tag_counts %}
                                 <li class="list-with-counts ps-2 py-1 pe-2 d-flex" @click.prevent="onClickTag('{{ tag.name }}')">

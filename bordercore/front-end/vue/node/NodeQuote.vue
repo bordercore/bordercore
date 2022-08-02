@@ -31,7 +31,7 @@
                             </div>
                         </drop-down-menu>
                     </div>
-                    <hr class="filter-divider mt-0">
+                    <hr class="divider mt-0">
                 </div>
             </template>
             <template #content>

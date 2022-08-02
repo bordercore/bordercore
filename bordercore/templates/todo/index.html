@@ -18,7 +18,7 @@
                     </div>
                 </div>
 
-                <hr class="filter-divider" />
+                <hr class="divider" />
 
                 <h4>Created</h4>
                 <div v-for="option in filterTimeOptions" :class="getTimeClass(option[0])" class="list-with-counts ps-2 py-1 pe-1 d-flex" @click.prevent="onClickTime" :data-created="option[0]">
@@ -28,7 +28,7 @@
                     </div>
                 </div>
 
-                <hr class="filter-divider" />
+                <hr class="divider" />
 
                 <h4>Tags</h4>
                 {% for tag in tags %}

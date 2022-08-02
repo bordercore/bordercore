@@ -53,7 +53,7 @@
 
             <card title="Recent Tags" class="backdrop-filter">
                 <template v-slot:content>
-                    <hr class="filter-divider" />
+                    <hr class="divider" />
                     <ul class="list-group interior-borders">
                         {% for tag in recent_tags %}
                             <li class="list-with-counts ps-2 py-1 pe-1 d-flex" @click.prevent="onClickTag('{{ tag.name }}')">
