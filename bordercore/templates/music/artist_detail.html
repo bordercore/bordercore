@@ -414,7 +414,7 @@
                     if (index != -1) {
                         const selectedRow = this.songList[index];
                         this.$refs.table.selectRow(selectedRow);
-                        document.querySelector(`table tr:nth-child(${index + 1})`).classList.add("is-selected");
+                        document.querySelector(`table tbody tr:nth-child(${index + 1})`).classList.add("is-selected");
                     } else {
                         this.$refs.table.selectRow({});
                     }
