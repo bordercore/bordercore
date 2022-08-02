@@ -13,7 +13,7 @@
                         <div v-for="task in taskList" :key="task.uuid" class="hoverable row m-2">
                             <div class="col-lg-9 d-flex my-2">
                                 <div>
-                                    <font-awesome-icon icon="list" class="text-info me-3" />
+                                    <font-awesome-icon icon="list" class="text-secondary me-3" />
                                 </div>
                                 <div>
                                     {{ task.name }}
@@ -24,10 +24,10 @@
                             </div>
                             <div class="col-lg-3 my-2 d-flex justify-content-center">
                                 <a class="glow" href="#" @click.prevent="rescheduleTask(task.uuid)">
-                                    <font-awesome-icon icon="calendar-alt" class="text-info me-3" data-bs-toggle="tooltip" title="Reschedule Task" />
+                                    <font-awesome-icon icon="calendar-alt" class="text-secondary me-3" data-bs-toggle="tooltip" title="Reschedule Task" />
                                 </a>
                                 <a class="glow" href="#" @click.prevent="deleteTask(task.uuid)">
-                                    <font-awesome-icon icon="trash-alt" class="text-info ms-3" data-bs-toggle="tooltip" title="Delete Task" />
+                                    <font-awesome-icon icon="trash-alt" class="text-secondary ms-3" data-bs-toggle="tooltip" title="Delete Task" />
                                 </a>
                             </div>
                         </div>

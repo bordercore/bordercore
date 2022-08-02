@@ -37,7 +37,7 @@
                 <ul id="sort-container-tags" class="list-group list-group-flush interior-borders">
                     <draggable v-model="todoList" draggable=".draggable" @change="handleSort">
                         <transition-group type="transition" class="w-100">
-                            <li v-for="todo in todoList" v-cloak :key="todo.uuid" class="hover-target node-color-1 list-group-item list-group-item-secondary text-info draggable pe-0" :data-uuid="todo.uuid">
+                            <li v-for="todo in todoList" v-cloak :key="todo.uuid" class="hover-target node-color-1 list-group-item list-group-item-secondary draggable pe-0" :data-uuid="todo.uuid">
                                 <div class="dropdown-height d-flex align-items-start">
                                     <div>
                                         <a :href="todo.url">{{ todo.name }}</a>

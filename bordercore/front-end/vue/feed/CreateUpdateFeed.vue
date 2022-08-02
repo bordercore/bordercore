@@ -41,7 +41,7 @@
                         <div id="feed-status">
                             <div class="d-flex">
                                 <div v-if="checkingStatus" class="d-flex align-items-center">
-                                    <div class="spinner-border ms-2 text-info" role="status">
+                                    <div class="spinner-border ms-2 text-secondary" role="status">
                                         <span class="sr-only">Checking feed status...</span>
                                     </div>
                                     <div class="ms-3">

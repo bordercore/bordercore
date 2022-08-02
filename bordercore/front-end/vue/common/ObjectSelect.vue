@@ -38,7 +38,7 @@
                                                 <img class="mh-100 mw-100" :src="scope.suggestion.cover_url">
                                             </div>
                                             <div v-else-if="scope.suggestion.doctype === 'Note'" class="cover-image">
-                                                <font-awesome-icon icon="sticky-note" class="fa-3x w-100 h-100 text-info" />
+                                                <font-awesome-icon icon="sticky-note" class="fa-3x w-100 h-100 text-secondary" />
                                             </div>
                                             <div v-else-if="scope.suggestion.doctype === 'Document'" class="cover-image">
                                                 <font-awesome-icon icon="fa-copy" class="fa-lg text-primary" />

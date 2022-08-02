@@ -3,7 +3,7 @@
 
         <drop-down-menu>
 
-            <span slot="icon" class="ms-2">
+            <span slot="icon">
                 <font-awesome-icon class="glow" icon="object-group" />
             </span>
 

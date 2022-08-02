@@ -27,14 +27,14 @@
                         <div class="text-secondary mt-3">
                             <small>
                             {% if request.session.drill_study_session.type == "favorites" %}
-                                Currently studying your <strong class="text-info">favorite questions</strong>.
-                            {% elif request.session.drill_study_session.type == "tag-needing-review" %}Currently studying tag{% if "," in request.session.drill_study_session.tag %}s{% endif %} <strong class="text-info">{{ request.session.drill_study_session.tag }}</strong>.
+                                Currently studying your <strong>favorite questions</strong>.
+                            {% elif request.session.drill_study_session.type == "tag-needing-review" %}Currently studying tag{% if "," in request.session.drill_study_session.tag %}s{% endif %} <strong>{{ request.session.drill_study_session.tag }}</strong>.
                             {% elif request.session.drill_study_session.type == "learning" %}
                                 Currently studying questions that need learning.
                             {% elif request.session.drill_study_session.type == "random" %}
                                 Currently studying random questions.
                             {% elif request.session.drill_study_session.type == "search" %}
-                                Currently studying questions that match search <strong class="text-info">{{ request.session.drill_study_session.search_term }}</strong>.
+                                Currently studying questions that match search <strong>{{ request.session.drill_study_session.search_term }}</strong>.
                             {% endif %}
                                 <br />
                                 <strong>{{ study_session_progress }}</strong> out of <strong>{{ request.session.drill_study_session.list|length }}</strong> questions completed.

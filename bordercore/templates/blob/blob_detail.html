@@ -40,7 +40,7 @@
 
                 {% if metadata|dict_get:"Author" %}
                     <div class="mt-2">
-                        by <span class="text-info">{{ metadata|dict_get:"Author" }}</span>
+                        <span class="item-name">by</span> <span class="item-value">{{ metadata|dict_get:"Author" }}</span>
                     </div>
                 {% endif %}
 
@@ -165,7 +165,7 @@
                             <ul class="list-group interior-borders">
                                 {% for object in collection.collectionobject_set.all %}
                                     {% if object.blob and object.blob.uuid != object.uuid %}
-                                    <li class="list-group-item list-group-item-secondary text-info d-flex align-items-center">
+                                    <li class="list-group-item list-group-item-secondary d-flex align-items-center">
                                         {% if object.blob.get_cover_url_small %}
                                             <img src="{{ object.blob.get_cover_url_small }}" />
                                         {% endif %}
@@ -175,7 +175,7 @@
                                     </li>
                                     {% endif %}
                                 {% endfor %}
-                                <li class="list-group-item list-group-item-secondary text-info">
+                                <li class="list-group-item list-group-item-secondary">
                                     <a class="btn btn-primary" href="{% url 'blob:create' %}?linked_collection={{ collection.uuid }}">Add to Collection</a>
                                 </li>
                             </ul>

@@ -17,7 +17,7 @@
                         <div v-for="dupe in $store.state.dupeSongs" class="my-2">
                             <hr class="divider" />
                             <div class="d-flex">
-                                <font-awesome-icon icon="music" class="text-info mt-1"></font-awesome-icon>
+                                <font-awesome-icon icon="music" class="text-secondary mt-2"></font-awesome-icon>
                                 <div class="ms-2">
                                     <a :href="dupe.url" target="bc-dupe-song">[[ dupe.title ]]</a>
                                     <div v-if="dupe.note" class="dupe-song-note text-truncate">
@@ -255,7 +255,7 @@
                 <div>
                     Processing...
                 </div>
-                <div class="spinner-border ms-2 text-info" role="status">
+                <div class="spinner-border ms-2 text-secondary" role="status">
                     <span class="sr-only">Loading...</span>
                 </div>
             </h4>
