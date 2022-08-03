@@ -2209,7 +2209,7 @@ tr.hover-target:hover {
 
 #sidebar {
   .sidebar-header {
-    padding: 0.8rem 0 0.6rem 0;
+    padding: 1.3rem 0 0.6rem 0;
     color: var(--text3);
     font-size: 2rem;
   }
@@ -2227,6 +2227,12 @@ tr.hover-target:hover {
 .v-sidebar-menu {
   z-index: 100 !important;
   background-color: $sidebar-bg !important;
+
+  &.vsm_collapsed {
+    .first-item {
+      margin-top: 6rem !important;
+    }
+  }
 
   .vsm--link {
     color: $sidebar-color !important;
