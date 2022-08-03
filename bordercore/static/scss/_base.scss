@@ -2233,7 +2233,12 @@ tr.hover-target:hover {
 
     &:hover {
       background-color: $sidebar-hover-bg !important;
+      border-radius: 0 !important;
       color: $sidebar-hover-color !important;
+
+      .vsm--icon {
+        color: $sidebar-hover-color !important;
+      }
     }
   }
 
@@ -2249,7 +2254,12 @@ tr.hover-target:hover {
 
   .vsm--link_active {
     background-color: $sidebar-active-bg !important;
+    border-radius: 0 !important;
     color: $sidebar-active-color !important;
+
+    .vsm--icon {
+      color: $sidebar-hover-bg !important;
+    }
   }
 
   .vsm--dropdown .vsm--list {
@@ -2263,8 +2273,8 @@ tr.hover-target:hover {
 
   .vsm--icon {
     background-color: transparent !important;
-    &.vsm--link_active {
-      color: $sidebar-active-color !important;
+    &:hover {
+      background-color: $sidebar-hover-bg !important;
     }
   }
 
