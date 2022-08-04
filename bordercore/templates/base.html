@@ -1,7 +1,7 @@
 {% load is_in_group %}
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
+<html color-mode="{{ request.user.userprofile.theme }}">
 
     <head>
 
@@ -9,9 +9,9 @@
         <title>Bordercore :: {{ title|default:"Bordercore" }}</title>
 
         {% if debug %}
-            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}dist/css/theme-{{ request.user.userprofile.theme }}.css" />
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}dist/css/bordercore.css" />
         {% else %}
-            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/theme-{{ request.user.userprofile.theme }}.min.css" />
+            <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/bordercore.min.css" />
         {% endif %}
 
         {% block extra_head %}{% endblock %}

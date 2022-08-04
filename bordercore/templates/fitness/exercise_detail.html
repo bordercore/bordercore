@@ -560,8 +560,8 @@
             // The Rainbow object is from the RainbowVis-JS package
             let rainbow = new Rainbow();
             rainbow.setNumberRange(1, numberOfItems);
-            rainbow.setSpectrum("#0000ff", "#00065e");
-            rainbow.setSpectrum(styles.getPropertyValue("--chart-gradient-start"), styles.getPropertyValue("--chart-gradient-end"));
+            // Use trim() to remove the whitespace preceding the CSS property value
+            rainbow.setSpectrum(styles.getPropertyValue("--chart-gradient-start").trim(), styles.getPropertyValue("--chart-gradient-end").trim());
 
             let colorArray = [];
             for (let i = 1; i <= numberOfItems; i++) {

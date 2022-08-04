@@ -28,8 +28,7 @@ module.exports = (env, argv) => {
     config = {
         entry: Object.entries({
             "dist/js/javascript": ["./front-end/index.js"],
-            "dist/css/theme-light": ["./static/scss/themes/theme-light.scss"],
-            "dist/css/theme-dark": ["./static/scss/themes/theme-dark.scss"],
+            "dist/css/bordercore": ["./static/scss/bordercore.scss"],
             "dist/css/vue-sidebar-menu": ["./static/css/vue-sidebar-menu/vue-sidebar-menu.scss"],
         })
             .filter(filterEntries)

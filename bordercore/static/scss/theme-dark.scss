@@ -1,0 +1,93 @@
+:root[color-mode="dark"] {
+  --brand-hue: 231;
+  --brand-saturation: 57%;
+  --brand-lightness: 15%;
+
+  --text1: #ffffff;
+  --text2: hsl(var(--brand-hue) 5% 65%);
+
+  // highlight
+  --text3-hue: 164;
+  --text3-saturation: 89%;
+  --text3-lightness: 69%;
+  --text3: hsl(var(--text3-hue) var(--text3-saturation) var(--text3-lightness));
+
+  --text4: #6ea6e0;
+
+  // "on hover" links
+  --text5: #10ff00;
+
+  --text6: #4591ff;
+
+  --text-disabled: #333;
+  --text-em: ##ffff00;
+
+  --surface1: hsl(var(--brand-hue) var(--brand-saturation) var(--brand-lightness));
+  --surface1-alpha: hsl(var(--brand-hue) var(--brand-saturation) var(--brand-lightness) var(--alpha));
+
+  // on-hover
+  --surface2: hsl(var(--brand-hue) calc(var(--brand-saturation) + 15%) var(--brand-lightness));
+
+  --surface3: hsl(var(--brand-hue) calc(var(--brand-saturation) + 25%) calc(var(--brand-lightness) + 10%));
+  --surface4: hsl(var(--brand-hue) calc(var(--brand-saturation) + 35%) calc(var(--brand-lightness) + 15%));
+  --surface5: #3e3e6b;
+
+  // Slightly lighter than the background
+  --surface6: #20253e;
+
+  --surface7: #7367f0;
+
+  // Node colors
+  // Increase the HSL lightness by 5% for the tinted properties
+  --node-color-1: hsl(231 56% 14%);
+  --node-color-1-tinted: hsl(231 56% 19%);
+  --node-color-2: hsl(290 55% 38%);
+  --node-color-2-tinted: hsl(290 55% 43%);
+  --node-color-3: hsl(225, 29%, 41%);
+  --node-color-3-tinted: hsl(225, 29%, 46%);
+  --node-color-4: hsl(206 66% 32%);
+  --node-color-4-tinted: hsl(206 66% 37%);
+
+  // Chart colors
+  --chart-title-color: var(--text2);
+  --chart-bg: var(--surface5);
+  --chart-fill-color: var(--surface1);
+  --chart-tick-color: var(--text4);
+  --chart-gradient-start: #0000ff; // Avoid leading space before RGB value
+  --chart-gradient-end: #00065e; // Avoid leading space before RGB value
+
+  --btn-close-filter: invert(1) grayscale(100%) brightness(200%);
+  --btn-primary-hover-color: var(--text1);
+  --drill-progress-circle-full: var(--surface5);
+  --drill-progress-circle-partial: var(--text5);
+  --dropdown-item-extra-color: var(--text2);
+  --form-bg: var(--surface5);
+  --form-bg-disabled: var(--surface2);
+  --form-bg-focus: var(--surface1);
+  --form-border-color-hover: var(--text3);
+  --notice-color: var(--text1);
+  --notice-title-color: var(--text1);
+  --selected-color: var(--text1);
+  --selected-secondary-color: var(--text4);
+  --sidebar-active-bg: var(--surface5);
+  --sidebar-active-color: var(--text1);
+  --sidebar-bg: var(--surface6);
+  --sidebar-color: var(--text1);
+  --sidebar-hover-bg: var(--surface3);
+  --sidebar-hover-color: var(--surface3);
+  --sidebar-icon-color1: var(--text4);
+  --sidebar-icon-color2: var(--text3);
+  --sidebar-icon-color3: var(--text6);
+
+  // Override Bootstrap CSS properties
+  --bs-body-color: var(--text1);
+  --bs-body-bg: var(--surface1);
+  --card-spacer-y: 1.25;
+  --card-spacer-x: 1.25;
+  --bs-list-group-border-color: var(--surface3);
+  --bs-list-group-item-padding-x: 1.25rem;
+  --bs-list-group-item-padding-y: .75rem;
+  --bs-list-group-item-secondary: var(--text2);
+  --bs-modal-header-border-color: var(--text3);
+  --bs-secondary: var(--text2);
+}

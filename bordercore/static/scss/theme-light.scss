@@ -1,0 +1,79 @@
+:root[color-mode="light"] {
+  --brand-hue: 202;
+  --brand-saturation: 85%;
+  --brand-lightness: 26%;
+
+  --text1: #000000;
+  --text2: #193bbd;
+  --text3: #366163;
+  --text4: #0d1e63;
+  --text5: #0d1e63;
+  --text6: #0d1e63;
+
+  --text-disabled: #bbbbbb;
+
+  // --surface1: hsl(var(--brand-hue) var(--brand-saturation) var(--brand-lightness));
+  --surface1: #edf2f9;
+  --surface2: #ffffff;
+  --surface2-transparent: #ffffff00;
+  --surface3: #dddddd;
+  --surface4: hsl(var(--brand-hue) 5%  20%);
+  --surface5: #366163;
+  --surface6: #d5e5fa;
+  --surface7: #366163;
+
+  // Node colors
+  // Increase the HSL lightness by 5% for the tinted properties
+  --node-color-1: hsl(210 41% 78%);
+  --node-color-1-tinted: hsl(210 41% 83%);
+  --node-color-2: hsl(33 60% 91%);
+  --node-color-2-tinted: hsl(33 60% 96%);
+  --node-color-3: hsl(225, 29%, 41%);
+  --node-color-3-tinted: hsl(225, 29%, 46%);
+  --node-color-4: hsl(206 66% 32%);
+  --node-color-4-tinted: hsl(206 66% 37%);
+
+  // Chart colors
+  --chart-title-color: var(--text2);
+  --chart-bg: var(--surface5);
+  --chart-fill-color: var(--surface1);
+  --chart-tick-color: var(--text4);
+  --chart-gradient-start: #0000ff; // Avoid leading space before RGB value
+  --chart-gradient-end: #00065e; // Avoid leading space before RGB value
+
+  // Misc properties
+  --btn-close-filter: grayscale(100%) brightness(200%);
+  --btn-primary-hover-color: var(--surface3);
+  --drill-progress-circle-full: var(--surface3);
+  --drill-progress-circle-partial: var(--text5);
+  --dropdown-item-extra-color: var(--surface2);
+  --form-bg: var(--surface3);
+  --form-bg-disabled: var(--surface2);
+  --form-bg-focus: var(--surface1);
+  --form-border-color-hover: var(--text3);
+  --notice-color: var(--surface1);
+  --notice-title-color: var(--surface1);
+  --selected-color: var(--surface3);
+  --selected-secondary-color: var(--surface1);
+  --sidebar-active-bg: var(--surface5);
+  --sidebar-active-color: var(--surface1);
+  --sidebar-bg: var(--surface6);
+  --sidebar-color: var(--text5);
+  --sidebar-hover-bg: var(--surface1);
+  --sidebar-hover-color: var(--surface4);
+  --sidebar-icon-color1: var(--text4);
+  --sidebar-icon-color2: var(--text3);
+  --sidebar-icon-color3: var(--text6);
+
+  // Override Bootstrap CSS properties
+  --bs-body-color: var(--text1);
+  --bs-body-bg: var(--surface1);
+  --card-spacer-y: 1.25;
+  --card-spacer-x: 1.25;
+  --bs-list-group-border-color: var(--surface3);
+  --bs-list-group-item-padding-x: 1.25rem;
+  --bs-list-group-item-padding-y: .75rem;
+  --bs-list-group-item-secondary: var(--text2);
+  --bs-modal-header-border-color: var(--text3);
+  --bs-secondary: var(--text2);
+}

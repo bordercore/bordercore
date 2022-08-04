@@ -20,9 +20,7 @@ bordercore/aws/index_blobs/lib/*
 bordercore/aws/create_bookmark_thumbnail/lib/*
 bordercore/aws/create_collection_thumbnail/lib/*
 
-**/css/theme-dark.css
-**/css/theme-dark.min.css
-**/css/theme-light.css
-**/css/theme-light.min.css
+**/css/bordercore.css
+**/css/bordercore.min.css
 **/javascript-bundle.js.gz
 **/javascript-bundle.min.js.gz
