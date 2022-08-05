@@ -25,8 +25,9 @@
                                 <strong>Status</strong>: <font-awesome-icon class="ms-1" :class="status.class" :icon="status.font"></font-awesome-icon>
                             </div>
                             <div class="mt-3">
-                                <add-button href="#" :click-handler="handleCreateFeed">
-                                </add-button>
+                                <button class="btn btn-primary" @click="onCreateFeed">
+                                    Add
+                                </button>
                             </div>
                         </template>
                     </card>
@@ -134,7 +135,7 @@
 
         const FeedInfo = {
             methods: {
-                handleCreateFeed() {
+                onCreateFeed() {
                     // The actual "create feed" method is located in another
                     // component, so use an event to indirectly call it.
                     EventBus.$emit("createFeed");

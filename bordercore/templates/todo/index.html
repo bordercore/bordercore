@@ -61,8 +61,18 @@
                     </form>
 
                     <div class="me-2">
-                        <add-button href="#" :click-handler="handleCreateTodo">
-                        </add-button>
+                        <drop-down-menu class="my-auto">
+                            <div slot="dropdown" v-cloak>
+                                <li>
+                                    <a class="dropdown-item" href="#" @click="handleCreateTodo">
+                                        <span v-cloak>
+                                            <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                                            Add
+                                        </span>
+                                    </a>
+                                </li>
+                            </div>
+                        </drop-down-menu>
                     </div>
 
                 </div>

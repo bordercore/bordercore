@@ -155,9 +155,6 @@ Vue.component("DrillTagProgress", DrillTagProgress);
 import DrillBlobs from "./vue/drill/DrillBlobs.vue";
 Vue.component("DrillBlobs", DrillBlobs);
 
-import AddButton from "./vue/common/AddButton.vue";
-Vue.component("AddButton", AddButton);
-
 import DropDownMenu from "./vue/common/DropDownMenu.vue";
 Vue.component("DropDownMenu", DropDownMenu);
 

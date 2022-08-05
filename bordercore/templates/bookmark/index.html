@@ -71,11 +71,6 @@
                             <button type="button" class="btn btn-primary" :class="{'active': $store.state.viewType === 'compact' }" @click="switchViewType('compact')">Compact</button>
                         </div>
 
-                        <div class="ms-3">
-                            <add-button :href="'{% url 'bookmark:create' %}'">
-                            </add-button>
-                        </div>
-
                         <drop-down-menu class="my-auto">
                             <div slot="dropdown" v-cloak>
                                 <li>
@@ -85,9 +80,17 @@
                                     </a>
                                 </li>
                                 <li>
+                                    <a class="dropdown-item" href="{% url 'bookmark:create' %}">
+                                        <span v-cloak>
+                                            <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                                            Add
+                                        </span>
+                                    </a>
                                     <a class="dropdown-item" href="{% url 'bookmark:import' %}">
-                                        <font-awesome-icon icon="file-import" class="text-primary me-3"></font-awesome-icon>
-                                        Import
+                                        <span v-cloak>
+                                            <font-awesome-icon icon="file-import" class="text-primary me-3"></font-awesome-icon>
+                                            Import
+                                        </span>
                                     </a>
                                 </li>
                             </div>

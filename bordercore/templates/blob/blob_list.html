@@ -14,8 +14,16 @@
                 <h1>Recent Blobs</h1>
 
                 <div class="me-2 ms-auto">
-                    <add-button :href="'{% url 'blob:create' %}'">
-                    </add-button>
+                    <drop-down-menu>
+                        <div slot="dropdown">
+                            <li>
+                                <a class="dropdown-item" :href="'{% url 'blob:create' %}'">
+                                    <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                                    <span>Add Blob</span>
+                                </a>
+                            </li>
+                        </div>
+                    </drop-down-menu>
                 </div>
 
             </div>

@@ -29,9 +29,16 @@
         {% endfor %}
         </div>
 
-        <div class="me-2 ms-auto" @click="onClickCreate">
-            <add-button :href="'#'"></add-button>
-        </div>
+        <drop-down-menu>
+            <div slot="dropdown">
+                <li>
+                    <a class="dropdown-item" href="#" @click.prevent="onClickCreate">
+                        <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                        <span>Add Node</span>
+                    </a>
+                </li>
+            </div>
+        </drop-down-menu>
 
     </div>
 

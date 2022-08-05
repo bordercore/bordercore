@@ -86,16 +86,22 @@
 
         <div class="col-lg-9">
 
-            <card class="backdrop-filter">
+            <card class="backdrop-filter hover-target">
                 <template v-slot:title-slot>
                     <div class="d-flex">
-
-                        <div class="card-title">Recently Added Albums</div>
-
-                        <div class="me-2 ms-auto">
-                            <add-button :href="'{% url 'music:create' %}'"></add-button>
+                        <div class="card-title">
+                            Recently Added Albums
                         </div>
-
+                        <drop-down-menu :show-on-hover="true">
+                            <div slot="dropdown">
+                                <li>
+                                    <a class="dropdown-item" :href="'{% url 'music:create' %}'">
+                                        <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                                        <span>Add</span>
+                                    </a>
+                                </li>
+                            </div>
+                        </drop-down-menu>
                     </div>
                 </template>
 
