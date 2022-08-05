@@ -185,6 +185,16 @@
             components: {
                 Sidebar,
             },
+            methods: {
+                onSelectTheme(evt) {
+                    const theme = evt.target.value;
+                    document.documentElement.setAttribute("color-mode", theme);
+                }
+            },
+            mounted() {
+                const el = document.getElementById("id_theme");
+                el.addEventListener("change", this.onSelectTheme, false);
+            }
         });
 
     </script>
