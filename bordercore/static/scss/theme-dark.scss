@@ -70,11 +70,11 @@
   --selected-color: var(--text1);
   --selected-secondary-color: var(--text4);
   --sidebar-active-bg: var(--surface5);
-  --sidebar-active-color: var(--text1);
+  --sidebar-active-color: var(--text3);
   --sidebar-bg: var(--surface6);
   --sidebar-color: var(--text1);
   --sidebar-hover-bg: var(--surface3);
-  --sidebar-hover-color: var(--surface3);
+  --sidebar-hover-color: var(--text3);
   --sidebar-icon-color1: var(--text4);
   --sidebar-icon-color2: var(--text3);
   --sidebar-icon-color3: var(--text6);
@@ -85,9 +85,10 @@
   --card-spacer-y: 1.25;
   --card-spacer-x: 1.25;
   --bs-list-group-border-color: var(--surface3);
+  --bs-list-group-color: var(--text3);
   --bs-list-group-item-padding-x: 1.25rem;
   --bs-list-group-item-padding-y: .75rem;
-  --bs-list-group-item-secondary: var(--text2);
+  --bs-list-group-item-secondary: var(--text3);
   --bs-modal-header-border-color: var(--text3);
-  --bs-secondary: var(--text2);
+  --bs-secondary: var(--text3);
 }

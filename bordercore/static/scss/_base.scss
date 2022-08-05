@@ -317,12 +317,12 @@ span {
 //
 
 .list-group-item {
-  // color: var(--text1);
+  color: var(--text1);
 }
 
 .list-group-item-secondary {
   background-color: var(--surface1);
-  color: $secondary;
+  color: var(--text3);
 }
 
 // A list with only interior borders
@@ -2264,7 +2264,7 @@ tr.hover-target:hover {
     color: var(--sidebar-active-color) !important;
 
     .vsm--icon {
-      color: var(--sidebar-hover-bg) !important;
+      color: var(--sidebar-hover-color) !important;
     }
   }
 
