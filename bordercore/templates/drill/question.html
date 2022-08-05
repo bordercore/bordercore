@@ -247,8 +247,11 @@
                 },
             },
             methods: {
-                onClickFavorite() {
+                onClickFavorite(evt) {
                     this.is_favorite = !this.is_favorite;
+                    this.$nextTick(() => {
+                        animateCSS(evt.currentTarget, "heartBeat");
+                    });
                     doPost(
                         this,
                         "{% url "drill:is_favorite_mutate" %}",
