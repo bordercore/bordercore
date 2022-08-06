@@ -4,10 +4,21 @@
 
 {% block content %}
 
+    <div id="modalTodoNote" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    Note
+                </div>
+                <div class="modal-body">
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-0 h-100 mx-2" id="vue-app">
 
         <div class="col-lg-3 d-flex flex-column flex-grow-last">
-
             <div class="card-body backdrop-filter" v-cloak>
 
                 <h4>Priority</h4>
@@ -64,7 +75,7 @@
                         <drop-down-menu class="my-auto">
                             <div slot="dropdown" v-cloak>
                                 <li>
-                                    <a class="dropdown-item" href="#" @click="handleCreateTodo">
+                                    <a class="dropdown-item" href="#" @click.prevent="handleCreateTodo">
                                         <span v-cloak>
                                             <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
                                             Add
@@ -95,25 +106,35 @@
                         <font-awesome-icon icon="bars"></font-awesome-icon>
                     </b-table-column>
 
-                    <b-table-column field="name" label="Name" sortable header-class="cursor-pointer" v-slot="props">
-                        [[ props.row.name ]]
-                        <span v-if="props.row.url">
-                            <a class="ms-1" :href="props.row.url">
-                                <font-awesome-icon icon="link"></font-awesome-icon>
-                            </a>
-                        </span>
-                        <div class="table-note" v-html="getNote(props.row.note)"></div>
+                    <b-table-column field="name" label="Name" sortable header-class="cursor-pointer" v-slot="props" v-cloak>
+                        <div class="d-flex">
+                            <div>
+                                [[ props.row.name ]]
+                                <span v-if="props.row.url">
+                                    <a class="ms-1" :href="props.row.url">
+                                        <font-awesome-icon icon="link"></font-awesome-icon>
+                                    </a>
+                                </span>
+                            </div>
+                            <div class="ms-auto">
+                                <span v-if="props.row.note">
+                                    <a class="ms-1" href="#" @click="onShowNote(props.row)">
+                                        <font-awesome-icon icon="sticky-note" class="glow text-primary"></font-awesome-icon>
+                                    </a>
+                                </span>
+                            </div>
+                        </div>
                     </b-table-column>
 
-                    <b-table-column field="priority" label="Priority" cell-class="todo-col-priority" sortable header-class="cursor-pointer" v-slot="props">
+                    <b-table-column field="priority" label="Priority" cell-class="todo-col-priority" sortable header-class="cursor-pointer" v-slot="props" v-cloak>
                         [[ props.row.priority_name ]]
                     </b-table-column>
 
-                    <b-table-column field="created" label="Date" sortable cell-class="todo-col-date text-nowrap" header-class="cursor-pointer" v-slot="props">
+                    <b-table-column field="created" label="Date" sortable cell-class="todo-col-date text-nowrap" header-class="cursor-pointer" v-slot="props" v-cloak>
                         [[ getDate(props.row.created) ]]
                     </b-table-column>
 
-                    <b-table-column field="uuid" label="" cell-class="col-action" v-slot="props">
+                    <b-table-column field="uuid" label="" cell-class="col-action" v-slot="props" v-cloak>
                         <drop-down-menu :show-on-hover="true">
                             <div slot="dropdown">
                                 <li>
@@ -161,7 +182,7 @@
 
     <script type="text/javascript" charset="utf-8">
 
-        const table = new Vue({
+        new Vue({
             el: "#vue-app",
             name: "TodoTable",
             data() {
@@ -176,6 +197,7 @@
                     draggingRowIndex: null,
                     filterPriorityOptions: null,
                     filterTimeOptions: null,
+                    modalNote: null,
                     show: false,
                     right: true,
                     hover: true,
@@ -188,6 +210,7 @@
             },
             mounted() {
                 this.getTodoList();
+                this.modalNote = new Modal("#modalTodoNote");
             },
             methods: {
                 getTodoList() {
@@ -209,10 +232,10 @@
                 sortChanged(evt) {
                     if (evt.sortBy === "") {
                         sortable.option("disabled", false);
-                        this.fields[0].class="drag-handle text-center cursor-grab";
+                        this.fields[0].class = "drag-handle text-center cursor-grab";
                     } else {
                         sortable.option("disabled", true);
-                        this.fields[0].class="drag-handle text-center";
+                        this.fields[0].class = "drag-handle text-center";
                     }
                 },
                 onDragOver(payload) {
@@ -251,21 +274,21 @@
                 onClickDelete(todoInfo) {
                     const self = this;
                     axios.delete("{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", todoInfo.uuid))
-                         .then((response) => {
-                             EventBus.$emit(
-                                 "toast",
-                                 {
-                                     "body": "Todo task deleted",
-                                     "variant": "info",
-                                 },
-                             );
+                        .then((response) => {
+                            EventBus.$emit(
+                                "toast",
+                                {
+                                    "body": "Todo task deleted",
+                                    "variant": "info",
+                                },
+                            );
 
-                             self.getTodoList();
+                            self.getTodoList();
 
-                             console.log("Success");
-                         }, (error) => {
-                             console.log(error);
-                         });
+                            console.log("Success");
+                        }, (error) => {
+                            console.log(error);
+                        });
                 },
                 onClickTag(evt) {
                     if (this.filterTag == evt.currentTarget.dataset.tag) {
@@ -333,11 +356,10 @@
                     EventBus.$emit("addTags", todoInfo.tags);
                     const modal = new Modal("#modalUpdateTodo");
                     modal.show();
-                    setTimeout( () => {
+                    setTimeout(() => {
                         document.getElementById("id_name").focus();
                     }, 500);
                 },
-
                 handleCreateTodo() {
                     this.$refs.updateTodo.setAction("Create");
 
@@ -360,9 +382,14 @@
                     }
                     const modal = new Modal("#modalUpdateTodo");
                     modal.show();
-                    setTimeout( () => {
+                    setTimeout(() => {
                         document.getElementById("id_name").focus();
                     }, 500);
+                },
+                onShowNote(todo) {
+                    const el = document.querySelector("#modalTodoNote .modal-body");
+                    el.innerHTML = markdown.render(todo.note);
+                    this.modalNote.show();
                 },
             },
         });
