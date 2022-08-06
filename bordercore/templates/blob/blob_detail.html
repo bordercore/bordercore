@@ -28,9 +28,11 @@
 
             <div class="card-body backdrop-filter" v-cloak>
 
+                {% if blob.get_edition_string %}
                 <h5>
                     {{ blob.get_edition_string }}
                 </h5>
+                {% endif %}
 
                 {% if metadata|dict_get:"Subtitle" %}
                     <div id="blob_subtitle">
@@ -277,10 +279,10 @@
             >
             </object-select>
 
-            <div class="col-lg-12 mx-2">
+            <div class="col-lg-12">
 
                 <div class="d-flex">
-                    <h2 id="blob-name" class="p-2 mb-3 text-break w-100">
+                    <h2 id="blob-name" class="p-2 mb-1 text-break w-100">
                         {{ name }}
                     </h2>
                     <drop-down-menu class="me-3" v-cloak>
@@ -356,7 +358,7 @@
                     </drop-down-menu>
                 </div>
 
-                <hr class="divider m-0 py-1" />
+                <hr class="divider mt-0 mx-2 py-1" />
 
                 {% if blob.is_video %}
                 <div v-cloak>
@@ -367,6 +369,7 @@
                 {% elif blob.sha1sum and not blob.is_audio %}
                 <blob-detail-cover
                     cover-url="{{ blob.get_cover_url }}?nodefault=1"
+                    class="mx-2"
                     {% if blob.content %}
                         :full-size="false"
                     {% endif %}

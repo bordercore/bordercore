@@ -24,6 +24,7 @@
             {% if random_album %}
                 <card title="Featured Album" class="flex-grow-0 backdrop-filter">
                     <template v-slot:content>
+                        <hr class="divider" />
                         <div>
                             <a href="{% url 'music:album_detail' random_album.uuid %}">
                                 <img src="{{ IMAGES_URL }}album_artwork/{{ random_album.uuid }}" height="150" width="150" />
@@ -41,8 +42,24 @@
                 </card>
             {% endif %}
 
-            <card title="Playlists" class="flex-grow-0 backdrop-filter">
+            <card title="" class="flex-grow-0 backdrop-filter hover-target z-index-positive">
 
+                <template v-slot:title-slot>
+                    <div class="d-flex">
+                        <div class="card-title">
+                            Playlists
+                        </div>
+                        <drop-down-menu :show-on-hover="true">
+                            <div slot="dropdown">
+                                <li>
+                                    <a class="dropdown-item" href="#" @click.prevent="onClickCreate()">
+                                        <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>Add
+                                    </a>
+                                </li>
+                            </div>
+                        </drop-down-menu>
+                    </div>
+                </template>
                 <template v-slot:content>
 
                     <hr class="divider" />
@@ -58,10 +75,6 @@
                             </li>
                         {% endfor %}
                     </ul>
-                    <div class="mt-3 ms-3">
-                        <font-awesome-icon icon="plus"></font-awesome-icon>
-                        <a href="#" @click="onClickCreate">Create a playlist</a>
-                    </div>
                 </template>
 
             </card>
@@ -149,7 +162,7 @@
                 </template>
             </card>
 
-            <card title="Recently Added Music" class="backdrop-filter">
+            <card title="Recently Added Songs" class="backdrop-filter">
                 <template v-slot:content>
                     <hr class="divider" />
                     <div class="card-grid ms-2">

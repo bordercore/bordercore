@@ -4,7 +4,7 @@
   --collection-list-item-width: 12rem;
   --dropdown-height: 2.5rem;
   --grid-margin: 1rem;
-  --hover-bg: rgba(0,0,0,0.2);
+  --hover-bg: var(--surface1);
   --search-box-width: 30rem;
 }
 
@@ -519,9 +519,14 @@ a.tag {
 
 // Modals
 
-// The close button for Bootstrap modals
-.modal-header .close {
-  color: var(--text1);
+.modal-header {
+  color: var(--text3);
+  font-size: 1.5rem;
+
+  // The close button for Bootstrap modals
+  .close {
+    color: var(--text1);
+  }
 }
 
 .modal-content {
@@ -586,6 +591,10 @@ a.tag {
     &.is-expanded {
       transform: rotate(90deg);
     }
+  }
+
+  thead {
+    border-bottom: 0.25rem solid var(--surface3);
   }
 
   th {
@@ -1038,7 +1047,7 @@ table.b-table th {
   flex-grow: 0;
   padding: 1.25rem;
   margin: 0 0.5rem 1rem 0.5rem;
-  background: var(--surface2) !important;
+  background-color: var(--surface2) !important;
   border-radius: 0.4rem;
 
   .side-panel {
