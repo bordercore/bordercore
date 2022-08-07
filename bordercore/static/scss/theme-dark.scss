@@ -21,6 +21,7 @@
 
   --text-disabled: #333;
   --text-em: ##ffff00;
+  --text-notice: var(--text6);
 
   --surface1: hsl(var(--brand-hue), var(--brand-saturation), var(--brand-lightness));
   --surface1-transparent: hsl(var(--brand-hue), var(--brand-saturation), var(--brand-lightness), 0);
