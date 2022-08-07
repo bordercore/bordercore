@@ -50,6 +50,7 @@
                 <hr class="divider mt-0">
                 <editable-text-area
                     ref="note"
+                    default-value="No content"
                     class="node-note"
                     :uuid="nodeUuid"
                     :hide-add-button="true"
