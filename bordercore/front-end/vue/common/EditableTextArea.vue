@@ -8,6 +8,9 @@
             </Transition>
         </div>
         <div v-else>
+            <div class="text-notice">
+                {{ defaultValue }}
+            </div>
             <div v-if="!hideAddButton" class="ms-2" :class="extraClass">
                 <font-awesome-icon icon="plus" />
                 <a href="#" @click="addNote">Add Note</a>
@@ -20,6 +23,10 @@
 
     export default {
         props: {
+            defaultValue: {
+                default: "",
+                type: String,
+            },
             value: {
                 default: "",
                 type: String,
