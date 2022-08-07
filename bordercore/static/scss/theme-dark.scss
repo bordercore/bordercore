@@ -4,13 +4,13 @@
   --brand-lightness: 15%;
 
   --text1: #ffffff;
-  --text2: hsl(var(--brand-hue) 5% 65%);
+  --text2: hsl(var(--brand-hue), 5%, 65%);
 
   // highlight
   --text3-hue: 164;
   --text3-saturation: 89%;
   --text3-lightness: 69%;
-  --text3: hsl(var(--text3-hue) var(--text3-saturation) var(--text3-lightness));
+  --text3: hsl(var(--text3-hue), var(--text3-saturation), var(--text3-lightness));
 
   --text4: #6ea6e0;
 
@@ -22,15 +22,17 @@
   --text-disabled: #333;
   --text-em: ##ffff00;
 
-  --surface1: hsl(var(--brand-hue) var(--brand-saturation) var(--brand-lightness));
-  --surface1-alpha: hsl(var(--brand-hue) var(--brand-saturation) var(--brand-lightness) var(--alpha));
+  --surface1: hsl(var(--brand-hue), var(--brand-saturation), var(--brand-lightness));
+  --surface1-transparent: hsl(var(--brand-hue), var(--brand-saturation), var(--brand-lightness), 0);
 
   // on-hover
-  --surface2: hsl(var(--brand-hue) calc(var(--brand-saturation) + 15%) var(--brand-lightness));
+  --surface2: hsl(var(--brand-hue), calc(var(--brand-saturation) + 15%), var(--brand-lightness));
+  --surface2-transparent: hsl(var(--brand-hue), calc(var(--brand-saturation) + 15%), var(--brand-lightness), 0);
 
-  --surface3: hsl(var(--brand-hue) calc(var(--brand-saturation) + 25%) calc(var(--brand-lightness) + 10%));
-  --surface4: hsl(var(--brand-hue) calc(var(--brand-saturation) + 35%) calc(var(--brand-lightness) + 15%));
+  --surface3: hsl(var(--brand-hue), calc(var(--brand-saturation) + 25%), calc(var(--brand-lightness) + 10%));
+  --surface4: hsl(var(--brand-hue), calc(var(--brand-saturation) + 35%), calc(var(--brand-lightness) + 15%));
   --surface5: #3e3e6b;
+  --surface5-transparent: #3e3e6b00;
 
   // Slightly lighter than the background
   --surface6: #20253e;

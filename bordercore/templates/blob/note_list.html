@@ -44,7 +44,7 @@
                 </div>
 
                 <div class="d-flex flex-column">
-                    <ul class="list-unstyled note-search-result" v-cloak>
+                    <ul class="note-search-result list-unstyled" v-cloak>
                         <li v-for="note in $store.state.notes" class="px-2 py-3 d-flex flex-column" :class="{ 'selected': note.uuid === $store.state.selectedNoteUuid }" @click="onClick(note.uuid)">
                             <h4 class="text-primary fw-bold">
                                 [[ note.name ]]
@@ -54,7 +54,9 @@
                                 [[ note.date ]]
                             </div>
 
-                            <div v-html="getContent(note)" class="fader note-content">
+                            <div class="position-relative">
+                                <div v-html="getContent(note)" class="fader note-content">
+                                </div>
                             </div>
 
                             <div class="mt-2">

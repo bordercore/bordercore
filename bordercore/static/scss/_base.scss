@@ -5,6 +5,7 @@
   --dropdown-height: 2.5rem;
   --grid-margin: 1rem;
   --hover-bg: var(--surface1);
+  --hover-bg-transparent: var(--surface1-transparent);
   --search-box-width: 30rem;
 }
 
@@ -1064,7 +1065,7 @@ table.b-table th {
 @supports (backdrop-filter: blur(1.56rem) brightness(170%)) {
   .backdrop-filter {
     backdrop-filter: blur(1.56rem) brightness(170%);
-    background: var(--surface1-alpha) !important;
+    background: var(--surface1-transparent) !important;
   }
 }
 
@@ -1608,11 +1609,20 @@ div #dateapp {
     }
   }
 
+  .selected .fader::after {
+    background-image: linear-gradient(to bottom, var(--surface5-transparent), var(--surface5) 90%) !important;
+  }
+
   > li {
     border-top: 0.06rem solid var(--text3);
 
     &:hover {
       background-color: var(--hover-bg);
+
+      .fader::after {
+        // Note: the apparent "mismatch" between the two colors is intentional
+        background-image: linear-gradient(to bottom, var(--surface5-transparent), var(--hover-bg) 90%);
+      }
     }
   }
 }
