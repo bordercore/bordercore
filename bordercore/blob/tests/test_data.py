@@ -26,6 +26,7 @@ from tag.models import Tag  # isort:skip
 
 
 BLOB_DIR = "/home/media"
+ELASTICSEARCH_TIMEOUT = 20
 
 bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 
@@ -33,7 +34,10 @@ bucket_name = settings.AWS_STORAGE_BUCKET_NAME
 @pytest.fixture()
 def es():
 
-    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
+    es = get_elasticsearch_connection(
+        host=settings.ELASTICSEARCH_ENDPOINT,
+        timeout=ELASTICSEARCH_TIMEOUT
+    )
     yield es
 
 

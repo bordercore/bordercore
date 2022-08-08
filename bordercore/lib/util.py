@@ -4,7 +4,7 @@ from pathlib import PurePath
 
 import requests
 
-ELASTICSEARCH_TIMEOUT = 10
+ELASTICSEARCH_TIMEOUT = 20
 
 
 def get_elasticsearch_connection(host=None, timeout=ELASTICSEARCH_TIMEOUT):
