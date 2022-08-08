@@ -315,7 +315,7 @@
             el: "#aggregations",
             methods: {
                 onClick(evt) {
-                    const selectedDoctype = evt.srcElement.getAttribute("data-doctype");
+                    const selectedDoctype = evt.currentTarget.getAttribute("data-doctype");
                     const urlParams = new URLSearchParams(window.location.search);
                     const currentDoctype = urlParams.get("doctype");
 
