@@ -206,6 +206,9 @@ Vue.component("NodeNoteModal", NodeNoteModal);
 import NodeTodoList from "./vue/node/NodeTodoList.vue";
 Vue.component("NodeTodoList", NodeTodoList);
 
+import NoteModal from "./vue/common/NoteModal.vue";
+Vue.component("NoteModal", NoteModal);
+
 import CollectionObjectList from "./vue/collection/CollectionObjectList.vue";
 Vue.component("CollectionObjectList", CollectionObjectList);
 
