@@ -22,7 +22,7 @@
 {% block content %}
 
     <div class="row g-0 h-100 mx-2" id="vue-app">
-
+        <note-modal ref="note"></note-modal>
         <div class="col-lg-3 d-flex flex-column">
 
             <div class="card-grid ms-2">
@@ -176,11 +176,17 @@
                                 >
 
                                     <b-table-column field="title" label="Title" header-class="cursor-pointer" sortable v-slot="props">
-                                        <span>[[ props.row.title ]]</span>
-                                        <span class="ps-2 table-note" v-html="props.row.note"></span>
+                                        [[ props.row.title ]]
                                     </b-table-column>
 
-                                    <b-table-column field="year" label="Year" header-class="cursor-pointer" sortable v-slot="props">
+                                    <b-table-column field="note" label="" header-class="cursor-pointer" sortable v-slot="props">
+                                        <span v-if="props.row.note">
+                                            <a class="ms-1" href="#" @click="onShowNote(props.row)">
+                                                <font-awesome-icon icon="sticky-note" class="glow text-primary"></font-awesome-icon>
+                                            </a>
+                                        </span>
+                                    </b-table-column>
+                                        <b-table-column field="year" label="Year" header-class="cursor-pointer" sortable v-slot="props">
                                         <span>[[ props.row.year ]]</span>
                                     </b-table-column>
 
@@ -336,6 +342,9 @@
                     }
                     return "";
                 },
+                onShowNote(song) {
+                    this.$refs.note.showNote(song.note);
+                },
                 setRating(evt, row, rating) {
                     const els = evt.currentTarget.parentElement.querySelectorAll(".rating");
                     for (const el of els) {
@@ -395,8 +404,8 @@
                 },
                 onSongClicked(row, column, rowIndex, columnIndex) {
                     // Don't play the song if we've clicked on the
-                    //  'on-hover' menu.
-                    if (column.field !== "uuid" && column.field !== "rating") {
+                    //  'on-hover' menu or the rating or note columns.
+                    if (column.field !== "uuid" && column.field !== "rating" && column.field !== "note") {
                         this.$refs.audioPlayer.playTrack(row.uuid);
                         this.selectedSong = row;
                         this.selectRow(rowIndex);

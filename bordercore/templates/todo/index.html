@@ -4,20 +4,8 @@
 
 {% block content %}
 
-    <div id="modalTodoNote" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    Note
-                </div>
-                <div class="modal-body">
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="row g-0 h-100 mx-2" id="vue-app">
-
+        <note-modal ref="note"></note-modal>
         <div class="col-lg-3 d-flex flex-column flex-grow-last">
             <div class="card-body backdrop-filter" v-cloak>
 
@@ -197,7 +185,6 @@
                     draggingRowIndex: null,
                     filterPriorityOptions: null,
                     filterTimeOptions: null,
-                    modalNote: null,
                     show: false,
                     right: true,
                     hover: true,
@@ -210,7 +197,6 @@
             },
             mounted() {
                 this.getTodoList();
-                this.modalNote = new Modal("#modalTodoNote");
             },
             methods: {
                 getTodoList() {
@@ -387,9 +373,7 @@
                     }, 500);
                 },
                 onShowNote(todo) {
-                    const el = document.querySelector("#modalTodoNote .modal-body");
-                    el.innerHTML = markdown.render(todo.note);
-                    this.modalNote.show();
+                    this.$refs.note.showNote(todo.note);
                 },
             },
         });

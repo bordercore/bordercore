@@ -23,7 +23,7 @@
 {% block content %}
 
     <div class="row g-0 h-100" id="vue-app">
-
+        <note-modal ref="note"></note-modal>
         <div class="col-lg-3 d-flex flex-column">
 
             <div class="card-grid ms-2 d-flex flex-column align-items-center">
@@ -111,10 +111,15 @@
                                 </b-table-column>
 
                                 <b-table-column field="title" label="Title" header-class="cursor-pointer" v-slot="props">
-                                    <div class="d-flex">
-                                        <div>[[ props.row.title ]]</div>
-                                        <div class="ps-2 table-note" v-html="props.row.note"></div>
-                                    </div>
+                                    [[ props.row.title ]]
+                                </b-table-column>
+
+                                <b-table-column field="note" label="" header-class="cursor-pointer" sortable v-slot="props">
+                                    <span v-if="props.row.note">
+                                        <a class="ms-1" href="#" @click="onShowNote(props.row)">
+                                            <font-awesome-icon icon="sticky-note" class="glow text-primary"></font-awesome-icon>
+                                        </a>
+                                    </span>
                                 </b-table-column>
 
                                 <b-table-column field="rating" label="Rating" header-class="cursor-pointer text-end" sortable v-slot="props">
@@ -328,6 +333,9 @@
                 }
             },
             methods: {
+                onShowNote(song) {
+                    this.$refs.note.showNote(song.note);
+                },
                 setRating(evt, row, rating) {
                     const els = evt.currentTarget.parentElement.querySelectorAll(".rating");
                     for (const el of els) {
@@ -390,7 +398,7 @@
                 onSongClicked(row, column, rowIndex, columnIndex) {
                     // Don't play the song if we've clicked on the
                     //  'on-hover' menu.
-                    if (column.field !== "uuid" && column.field !== "rating") {
+                    if (column.field !== "uuid" && column.field !== "rating" && column.field !== "note") {
                         this.$refs.audioPlayer.playTrack(row.uuid);
                         this.selectedSong = row;
                         this.selectRow(rowIndex);
