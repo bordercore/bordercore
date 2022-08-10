@@ -23,7 +23,7 @@
   --surface5: #366163;
   --surface5-transparent: #36616300;
   --surface6: #d5e5fa;
-  --surface7: #366163;
+  --surface7: #6f7db4;
 
   // Node colors
   // Increase the HSL lightness by 5% for the tinted properties
@@ -50,13 +50,16 @@
   --drill-progress-circle-full: var(--surface3);
   --drill-progress-circle-partial: var(--text5);
   --dropdown-item-extra-color: var(--surface2);
+  --fitness-overdue-bg: var(--surface7);
+  --fitness-overdue-color: var(--surface1);
   --form-bg: var(--surface3);
   --form-bg-disabled: var(--surface2);
   --form-bg-focus: var(--surface1);
   --form-border-color-hover: var(--text3);
   --notice-color: var(--surface1);
   --notice-title-color: var(--surface1);
-  --selected-color: var(--surface3);
+  --selected-bg: var(--surface6);
+  --selected-color: var(--text1);
   --selected-secondary-color: var(--surface1);
   --sidebar-active-bg: var(--surface5);
   --sidebar-active-color: var(--surface5);
@@ -67,6 +70,8 @@
   --sidebar-icon-color1: var(--text4);
   --sidebar-icon-color2: var(--text3);
   --sidebar-icon-color3: var(--text6);
+  --top-search-splitter-bg: var(--surface7);
+  --top-search-splitter-color: var(--surface1);
 
   // Override Bootstrap CSS properties
   --bs-body-color: var(--text1);

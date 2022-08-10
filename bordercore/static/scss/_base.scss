@@ -289,8 +289,8 @@ span {
   display: inline-block;
 }
 
-.selected {
-  background-color: var(--surface5) !important;
+.selected, .is-selected {
+  background-color: var(--selected-bg) !important;
   border-radius: var(--border-radius1);
   color: var(--selected-color) !important;
 
@@ -599,7 +599,7 @@ a.tag {
   }
 
   thead {
-    border-bottom: 0.25rem solid var(--surface3);
+    border-bottom: 0.25rem solid var(--surface7);
   }
 
   th {
@@ -1187,8 +1187,8 @@ blockquote > p {
 .top-search-splitter {
   width: 100%;
   padding: 0.6rem;
-  background-color: var(--surface6);
-  color: var(--text1);
+  background-color: var(--top-search-splitter-bg);
+  color: var(--top-search-splitter-color);
   cursor: auto;
   font-size: larger;
   font-weight: bold;
@@ -1695,10 +1695,13 @@ div #dateapp {
 }
 
 .overdue {
-  background-color: var(--surface6);
+  td, a {
+    background-color: var(--fitness-overdue-bg);
+    color: var(--fitness-overdue-color);
 
-  span {
-    color: $red;
+    span {
+      color: var(--text3);
+    }
   }
 }
 
