@@ -170,6 +170,7 @@ class ExerciseUser(models.Model):
     exercise = models.ForeignKey(Exercise, on_delete=models.PROTECT)
     started = models.DateTimeField(auto_now_add=True)
     frequency = models.DurationField(default=timedelta(days=7), blank=False, null=False)
+    rest_period = models.IntegerField(blank=True, null=True)
 
     class Meta:
         unique_together = ("user", "exercise")
