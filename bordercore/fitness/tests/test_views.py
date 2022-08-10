@@ -5,7 +5,7 @@ from faker import Factory as FakerFactory
 
 from django import urls
 
-from fitness.models import Exercise
+from fitness.models import Exercise, ExerciseUser
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
@@ -93,3 +93,21 @@ def test_edit_note(auto_login_user, fitness):
 
     updated_exercise = Exercise.objects.get(uuid=fitness[0].uuid)
     assert updated_exercise.note == note
+
+
+def test_fitness_update_rest_period(auto_login_user, fitness):
+
+    user, client = auto_login_user()
+
+    rest_period = 5
+
+    url = urls.reverse("fitness:update_rest_period")
+    resp = client.post(url, {
+        "uuid": fitness[0].uuid,
+        "rest_period": str(rest_period)
+    })
+
+    assert resp.status_code == 200
+
+    updated_exercise_user = ExerciseUser.objects.get(user=user, exercise__uuid=fitness[0].uuid)
+    assert updated_exercise_user.rest_period == rest_period

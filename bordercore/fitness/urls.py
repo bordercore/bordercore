@@ -40,4 +40,9 @@ urlpatterns = [
         view=views.update_frequency,
         name="update_frequency"
     ),
+    path(
+        route="update_rest_period",
+        view=views.update_rest_period,
+        name="update_rest_period"
+    ),
 ]

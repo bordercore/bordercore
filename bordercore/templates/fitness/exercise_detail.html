@@ -168,6 +168,17 @@
                 </card>
             </div>
 
+            <div id="modalTimer" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog modal-sm" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body d-flex align-items-center">
+                            <h4 class="mb-0">Timer done!</h4>
+                            <input type="button" class="btn btn-primary ms-auto" value="Close" data-bs-dismiss="modal" aria-label="Close" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div id="modalSwitchExercise" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
@@ -354,30 +365,49 @@
                         </template>
                     </card>
                 </add-workout-form>
-
-                <card title="" id="muscles-targeted" class="w-50 me-2 backdrop-filter">
-                    <template #content>
-                        <div class="d-flex">
-                            <div class="card-title text-primary">
-                                Muscles Targeted:
-                                <ul>
-                                    {% for muscle in object.get_targeted_muscles.primary %}
-                                        <li>
-                                            <span class="item-name">{{ muscle }}</span>
-                                            <span class="item-value small text-muted">PRIMARY</span>
-                                        </li>
-                                    {% endfor %}
-                                    {% for muscle in object.get_targeted_muscles.secondary %}
-                                        <li>
-                                            <span class="item-name">{{ muscle }}</span>
-                                            <span class="item-value small text-muted">SECONDARY</span>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
+                <div class="d-flex flex-column w-50">
+                    <card title="" id="muscles-targeted" class="me-2 backdrop-filter">
+                        <template #content>
+                            <div class="d-flex">
+                                <div class="card-title text-primary">
+                                    Muscles Targeted:
+                                    <ul>
+                                        {% for muscle in object.get_targeted_muscles.primary %}
+                                            <li>
+                                                <span class="item-name">{{ muscle }}</span>
+                                                <span class="item-value small text-muted">PRIMARY</span>
+                                            </li>
+                                        {% endfor %}
+                                        {% for muscle in object.get_targeted_muscles.secondary %}
+                                            <li>
+                                                <span class="item-name">{{ muscle }}</span>
+                                                <span class="item-value small text-muted">SECONDARY</span>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-                    </template>
-                </card>
+                        </template>
+                    </card>
+                    <card title="Rest between sets" class="backdrop-filter flex-grow-1">
+                        <template #content>
+                            <hr class="filter" />
+                            <div class="d-flex">
+                                <div class="card-title">
+                                    <div class="d-flex align-items-center my-2">
+                                        <label class="w-50">Minutes</label>
+                                        <input class="form-control w-50 ms-3" type="text" size="3" v-model="restPeriod" autocomplete="off" />
+                                        <input class="btn btn-primary ms-3" type="button" value="Change" @click="onChangeRestPeriod" />
+                                        </div>
+                                        <div class="d-flex mt-3">
+                                            <input class="btn btn-primary" type="button" value="Start Timer" @click="onStartTimer" />
+                                            <div id="timer" class="ms-3"></div>
+                                        </div>
+                                </div>
+                            </div>
+                        </template>
+                    </card>
+                </div>
             </div>
         </div>
     </div>
@@ -412,7 +442,7 @@
                             label: "Last Active",
                         }
                     ],
-                    frequency: {% if activity_info %}{{ activity_info.0.frequency.days }}{% else %}null{% endif %}
+                    frequency: {% if activity_info %}{{ activity_info.0.frequency.days }}{% else %}null{% endif %},
                 }
             },
             methods: {
@@ -892,6 +922,51 @@
                 AddWorkoutForm,
                 WorkoutGraph,
             },
+            data() {
+                return {
+                    restPeriod: {% if activity_info %}{{ activity_info.0.rest_period|default:3 }}{% else %}null{% endif %},
+                    timer: null,
+                };
+            },
+            methods: {
+                onChangeRestPeriod() {
+                    doPost(
+                        this,
+                        url = "{% url "fitness:update_rest_period" %}",
+                        {
+                            "uuid": "{{ object.uuid }}",
+                            "rest_period": this.restPeriod,
+                        }
+                        ,
+                        (response) => {},
+                        "Rest period changed",
+                        ""
+                    );
+                },
+                onStartTimer() {
+                    const currentDate = new Date()
+                    this.timer = new Date(currentDate.getTime() + this.restPeriod * 60000);
+                    const timeinterval = setInterval(() => {
+
+                        const total = Date.parse(this.timer) - Date.parse(new Date());
+                        const seconds = Math.floor( (total/1000) % 60 );
+                        const minutes = Math.floor( (total/1000/60) % 60);
+
+                        if (minutes < 1) {
+                            document.getElementById("timer").innerHTML = `<strong>${seconds}</strong> seconds`;
+                        } else {
+                            document.getElementById("timer").innerHTML = `<strong>${minutes}</strong> ${pluralize("minute", minutes)} <strong>${seconds}</strong> seconds`;
+                        }
+
+                        if (total <= 0) {
+                            clearInterval(timeinterval);
+                            document.getElementById("timer").innerHTML = "Done";
+                            const modal = new Modal("#modalTimer");
+                            modal.show();
+                        }
+                    }, 1000);
+                }
+            }
         });
 
     </script>
