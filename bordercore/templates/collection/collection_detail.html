@@ -29,7 +29,7 @@
 
                 <div class="mb-3" v-cloak>
                     <strong>Count</strong>
-                    <span class="text-primary ms-1">
+                    <span v-if="$store.state.paginator" class="text-primary ms-1">
                         [[ $store.state.paginator.count ]] [[ getPluralized() ]]
                     </span>
                 </div>
@@ -49,7 +49,7 @@
 
                 <ul class="list-group flex-column w-100">
                     <div v-cloak>
-                        <div class="list-with-counts ps-2 py-1 pe-1 d-flex" :class="{ 'selected rounded-sm': selectedTag === null }" @click.prevent="onClickSelectTag">
+                        <div class="list-with-counts ps-2 py-1 pe-1 d-flex" :class="{ 'selected rounded-sm': $store.state.selectedTag === null }" @click.prevent="onClickSelectTag">
                             <div class="ps-2">
                                 All Objects
                             </div>
@@ -59,7 +59,7 @@
                                 </span>
                             </div>
                         </div>
-                        <li v-for="tag in objectTags" class="list-with-counts ps-2 py-1 pe-1 d-flex" :class="{ 'selected rounded-sm': tag.tag === selectedTag }" @click.prevent="onClickSelectTag" :data-tag="tag.tag" :key="tag.tag">
+                        <li v-for="tag in objectTags" class="list-with-counts ps-2 py-1 pe-1 d-flex" :class="{ 'selected rounded-sm': tag.tag === $store.state.selectedTag }" @click.prevent="onClickSelectTag" :data-tag="tag.tag" :key="tag.tag">
                             <div class="ps-2">
                                 [[ tag.tag ]]
                             </div>
@@ -97,39 +97,38 @@
                     <hr class="divider" />
 
                     <div class="d-flex ms-2">
-                        <blob-list inline-template>
-                            <div id="collection-list" @drop.prevent="onAddBlob($event)" @dragover.prevent="onDragOverBlob($event)" @dragleave.prevent="onDragLeaveBlob($event)" @dragenter.prevent>
-                                <ul class="list-group list-group-horizontal text-center list-unstyled collection-sortable w-100">
-                                    <draggable v-model="blob_list" @change="onSort" ghost-class="collection_ghost_class" animation="500" forceFallback="true">
-                                        <li v-for="blob in blob_list" :key="blob.id" class="collection-item hoverable cursor-pointer float-start p-3">
-                                            <button type="button" class="collection-item-delete btn-close" data-bs-dismiss="modal" aria-label="Close" @click="removeBlob(blob.uuid)">
-                                            </button>
-                                            <div class="d-flex flex-column h-100" @click="onClick(blob.url)">
-                                                <a :href="[[ blob.url ]]">
-                                                    <div v-if="blob.type === 'blob'">
-                                                        <img :src="[[ blob.cover_url ]]" />
+                        <blob-list inline-template ref="blobList">
+                            <div>
+                                <div id="collection-list" @drop.prevent="onAddBlob($event)" @dragover.prevent="onDragOverBlob($event)" @dragleave.prevent="onDragLeaveBlob($event)" @dragenter.prevent>
+                                    <ul class="list-group list-group-horizontal text-center list-unstyled collection-sortable w-100">
+                                        <draggable v-model="blob_list" @change="onSort" ghost-class="collection_ghost_class" animation="500" forceFallback="true">
+                                            <li v-for="blob in blob_list" :key="blob.id" class="collection-item hoverable cursor-pointer float-start p-3">
+                                                <button type="button" class="collection-item-delete btn-close" data-bs-dismiss="modal" aria-label="Close" @click="removeBlob(blob.uuid)">
+                                                </button>
+                                                <div class="d-flex flex-column h-100" @click="onClick(blob.url)">
+                                                    <a :href="blob.url">
+                                                        <div v-if="blob.type === 'blob'">
+                                                            <img :src="blob.cover_url" />
+                                                        </div>
+                                                        <div v-else>
+                                                            <font-awesome-icon icon="bookmark" class="text-primary fa-4x mt-3"></font-awesome-icon>
+                                                        </div>
+                                                    </a>
+                                                    <div class="collection-item-name mt-auto">
+                                                        [[ blob.name ]]
                                                     </div>
-                                                    <div v-else>
-                                                        <font-awesome-icon icon="bookmark" class="text-primary fa-4x mt-3"></font-awesome-icon>
-                                                    </div>
-                                                </a>
-                                                <div class="collection-item-name mt-auto">
-                                                    [[ blob.name ]]
                                                 </div>
-                                            </div>
-                                        </li>
-                                    </draggable>
-                                </ul>
+                                            </li>
+                                        </draggable>
+                                    </ul>
+                                </div>
+                                <h5 v-if="!blob_list" class="text-secondary">
+                                    This collection is empty.
+                                </h5>
                             </div>
                         </blob-list>
 
-                        {% if not object_list %}
-                            <h5 class="text-secondary">
-                               This collection is empty.
-                            </h5>
-                        {% endif %}
-
-                        <h5 v-if="needsPagination()" class="d-flex mb-0 me-1 pt-3">
+                        <h5 v-if="needsPagination" class="d-flex mb-0 me-1 pt-3">
                             <div>
                                 <a v-if="$store.state.paginator.has_previous" href="#" @click.prevent="paginate('prev')" class="me-1">
                                     <font-awesome-icon icon="chevron-left" class="text-emphasis glow icon-hover" />
@@ -355,30 +354,17 @@
 
         const store = new Vuex.Store({
             state: {
-                paginator: {{ paginator_info|safe }}
+                paginator: null,
+                selectedTag: {% if request.GET.tag %}"{{ request.GET.tag }}"{% else %}null{% endif %}
             },
             getters: {},
             mutations: {},
         });
 
-        sizeOfCollection = {{ blob_list|length }};
-
         const BlobList = {
             data() {
                 return {
-                    blob_list: [
-                        {% for blob in object_list %}
-                        {
-                            id: {{ blob.id }},
-                            uuid: "{{ blob.uuid }}",
-                            type: "{{ blob.type }}",
-                            object_uuid: "blob",
-                            name: "{{ blob.name|escapejs|safe }}",
-                            url: "{{ blob.url }}",
-                            cover_url: "{{ blob.cover_url }}"
-                        },
-                        {% endfor %}
-                    ]
+                    blob_list: []
                 }
             },
             methods: {
@@ -474,12 +460,19 @@
                     );
 
                 },
-                getBlobList() {
+                getBlobList(pageNumber=1) {
+                    let url = "{% url 'collection:get_object_list' collection.uuid %}?pageNumber=" + pageNumber;
+
+                    if (this.$store.state.selectedTag) {
+                        url += "&tag=" + this.$store.state.selectedTag;
+                    }
+                    console.log(url);
                     doGet(
                         this,
-                        "{% url 'collection:get_blob_list' collection.uuid %}",
+                        url,
                         (response) => {
-                            this.blob_list = response.data.blob_list;
+                            this.blob_list = response.data.object_list;
+                            this.$store.state.paginator = response.data.paginator;
                         },
                         "Error getting blob list"
                     );
@@ -488,6 +481,7 @@
             mounted() {
                 document.getElementById("id_name").value = "{{ collection.name|safe }}";
                 document.getElementById("id_description").value = "{{ collection.description|safe }}";
+                this.getBlobList();
             }
         }
 
@@ -555,7 +549,6 @@
                         },
                     ],
                     objectTags: JSON.parse(document.getElementById("object_tags").textContent),
-                    selectedTag: {% if request.GET.tag %}"{{ request.GET.tag }}"{% else %}null{% endif %}
                 }
             },
             methods: {
@@ -629,22 +622,20 @@
                     } else {
                         pageNumber = this.$store.state.paginator.next_page_number;
                     }
-                    let url = "{% url 'collection:detail' collection.uuid %}?page=" + pageNumber;
-                    if (this.selectedTag) {
-                        url += "&tag=" + this.selectedTag;
-                    }
-                    window.location = url;
-                },
-                needsPagination() {
-                    return this.$store.state.paginator.has_previous || this.$store.state.paginator.has_next;
+                    this.$refs.blobList.getBlobList(pageNumber);
                 },
                 getPluralized() {
                     return pluralize("blob", this.$store.state.paginator.count);
                 },
             },
             computed: {
+                needsPagination: function() {
+                    if (this.$store.state.paginator === null) {
+                        return false;
+                    }
+                    return this.$store.state.paginator.has_previous || this.$store.state.paginator.has_next;
+                },
             },
-
             mounted() {
 
                 let self = this;

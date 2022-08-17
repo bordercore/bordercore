@@ -124,50 +124,6 @@ class Collection(TimeStampedModel):
             "index": position
         }
 
-    def get_blob_list(self, request=None, limit=BLOB_COUNT_PER_PAGE, page_number=1):
-
-        blob_list = []
-
-        queryset = CollectionObject.objects.filter(collection=self)
-
-        if request and "tag" in request.GET:
-            queryset = queryset.filter(blob__tags__name=request.GET["tag"])
-
-        so = queryset.select_related("blob")
-
-        if request and "page" in request.GET:
-            page_number = request.GET["page"]
-
-        paginator = Paginator(so, limit)
-        page = paginator.page(page_number)
-
-        for blob in page.object_list:
-            blob_list.append(
-                {
-                    "id": blob.blob.id,
-                    "uuid": blob.blob.uuid,
-                    "filename": blob.blob.file.name,
-                    "name": re.sub("[\n\r]", "", blob.blob.name) if blob.blob.name else "",
-                    "url": reverse("blob:detail", kwargs={"uuid": blob.blob.uuid}),
-                    "sha1sum": blob.blob.sha1sum,
-                    "cover_url": blob.blob.get_cover_url_small(),
-                }
-            )
-
-        paginator_info = {
-            "page_number": page_number,
-            "has_next": page.has_next(),
-            "has_previous": page.has_previous(),
-            "next_page_number": page.next_page_number() if page.has_next() else None,
-            "previous_page_number": page.previous_page_number() if page.has_previous() else None,
-            "count": paginator.count
-        }
-
-        return {
-            "blob_list": blob_list,
-            "paginator": json.dumps(paginator_info)
-        }
-
     def get_object_list(self, request=None, limit=BLOB_COUNT_PER_PAGE, page_number=1, random_order=False):
 
         object_list = []
@@ -209,7 +165,7 @@ class Collection(TimeStampedModel):
 
         return {
             "object_list": object_list,
-            "paginator": json.dumps(paginator_info)
+            "paginator": paginator_info
         }
 
     def get_recent_images(self, limit=4):

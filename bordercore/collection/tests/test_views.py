@@ -146,11 +146,11 @@ def test_search(auto_login_user, collection, blob_image_factory, blob_pdf_factor
     assert payload[0]["num_blobs"] == 1
 
 
-def test_collection_blob_list(auto_login_user, collection, blob_image_factory, blob_pdf_factory):
+def test_collection_object_list(auto_login_user, collection, blob_image_factory, blob_pdf_factory):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("collection:get_blob_list", kwargs={"collection_uuid": collection[0].uuid})
+    url = urls.reverse("collection:get_object_list", kwargs={"collection_uuid": collection[0].uuid})
     resp = client.get(f"{url}?query=Display")
 
     assert resp.status_code == 200
@@ -159,15 +159,15 @@ def test_collection_blob_list(auto_login_user, collection, blob_image_factory, b
 
     assert len(payload) == 2
 
-    assert blob_image_factory[0].name in [x["name"] for x in payload["blob_list"]]
-    assert blob_pdf_factory[0].name in [x["name"] for x in payload["blob_list"]]
+    assert blob_image_factory[0].name in [x["name"] for x in payload["object_list"]]
+    assert blob_pdf_factory[0].name in [x["name"] for x in payload["object_list"]]
 
 
-def test_collection_get_blob_list(auto_login_user, collection):
+def test_collection_get_object_list(auto_login_user, collection):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("collection:get_blob_list", kwargs={
+    url = urls.reverse("collection:get_object_list", kwargs={
         "collection_uuid": collection[0].uuid
     })
     resp = client.get(url)
@@ -176,14 +176,14 @@ def test_collection_get_blob_list(auto_login_user, collection):
 
     resp_json = resp.json()
 
-    assert len(resp_json["blob_list"]) == 2
+    assert len(resp_json["object_list"]) == 2
 
     blob_list = collection[0].collectionobject_set.all()
     assert str(blob_list[0].blob.uuid) in [
-        x["uuid"] for x in resp_json["blob_list"]
+        x["uuid"] for x in resp_json["object_list"]
     ]
     assert str(blob_list[1].blob.uuid) in [
-        x["uuid"] for x in resp_json["blob_list"]
+        x["uuid"] for x in resp_json["object_list"]
     ]
 
 

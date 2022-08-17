@@ -76,14 +76,6 @@ class CollectionDetailView(FormRequestMixin, FormMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        object_info = self.object.get_object_list(request=self.request)
-
-        if object_info["object_list"]:
-            context["object_list"] = object_info["object_list"]
-            context["paginator_info"] = object_info["paginator"]
-        else:
-            context["paginator_info"] = {}
-
         context["tags"] = [
             {
                 "text": x.name,
@@ -268,15 +260,6 @@ def search(request):
 
 
 @login_required
-def get_blob_list(request, collection_uuid):
-
-    collection = Collection.objects.get(uuid=collection_uuid)
-    blob_list = collection.get_blob_list()
-
-    return JsonResponse(blob_list, safe=False)
-
-
-@login_required
 def create_blob(request):
 
     collection_uuid = request.POST["collection_uuid"]
@@ -323,7 +306,11 @@ def get_object_list(request, collection_uuid):
 
     collection = Collection.objects.get(uuid=collection_uuid)
     random_order = request.GET.get("random_order", False)
-    object_list = collection.get_object_list(random_order=random_order)
+    object_list = collection.get_object_list(
+        request=request,
+        page_number=int(request.GET.get("pageNumber", 1)),
+        random_order=random_order
+    )
 
     return JsonResponse(object_list, safe=False)
 
