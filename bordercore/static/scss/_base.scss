@@ -2034,6 +2034,7 @@ tr.hover-target:hover {
   height: 35rem;
   background-color: var(--form-bg) !important;
   color: var(--text1) !important;
+  font-size: 1rem !important;
 
   .v-md-editor__main {
     border-radius: 0.25rem;
@@ -2048,7 +2049,6 @@ tr.hover-target:hover {
   textarea {
     background-color: var(--form-bg) !important;
     color: var(--text1) !important;
-    font-size: 1rem !important;
 
     &:focus {
       background-color: var(--form-bg-focus) !important;
