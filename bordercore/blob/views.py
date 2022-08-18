@@ -463,7 +463,7 @@ def recent_blobs(request):
 
     message = None
     try:
-        blob_list, doctypes = get_recent_blobs(request.user, skip_content=skip_content)
+        blob_list, doctypes = get_recent_blobs(request.user, limit=5, skip_content=skip_content)
     except (ConnectionTimeout) as e:
         message = {
             "text": str(e),

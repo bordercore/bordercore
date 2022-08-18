@@ -124,6 +124,10 @@
                 default: "",
                 type: String,
             },
+            recentObjectsUrl: {
+                default: "",
+                type: String,
+            },
         },
         data() {
             return {
@@ -226,6 +230,26 @@
                 setTimeout( () => {
                     this.$refs.suggestComponent.input.focus();
                 }, 500);
+                const suggest = this.$refs.suggestComponent;
+
+                if (suggest.suggestions.length === 0) {
+                    doGet(
+                        this,
+                        this.recentObjectsUrl,
+                        (response) => {
+                            suggest.suggestions = response.data.blobList;
+                            suggest.suggestions.unshift(
+                                {
+                                    uuid: "__Recent",
+                                    name: "Recent Blobs",
+                                    splitter: true,
+                                    value: "",
+                                },
+                            );
+                        },
+                    );
+                }
+                suggest.listShown = true;
             },
             select(selection) {
                 // The parent component receives the selected object info
