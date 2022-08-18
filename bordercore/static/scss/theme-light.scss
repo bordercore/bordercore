@@ -56,8 +56,11 @@
   --form-bg-disabled: var(--surface2);
   --form-bg-focus: var(--surface1);
   --form-border-color-hover: var(--text3);
+  --hover-bg: var(--surface3);
   --notice-color: var(--surface1);
   --notice-title-color: var(--surface1);
+  --search-splitter-bg: var(--surface7);
+  --search-splitter-color: var(--surface6);
   --selected-bg: var(--surface6);
   --selected-color: var(--text1);
   --selected-secondary-color: var(--surface1);
@@ -70,8 +73,6 @@
   --sidebar-icon-color1: var(--text4);
   --sidebar-icon-color2: var(--text3);
   --sidebar-icon-color3: var(--text6);
-  --top-search-splitter-bg: var(--surface7);
-  --top-search-splitter-color: var(--surface1);
 
   // Override Bootstrap CSS properties
   --bs-body-color: var(--text1);

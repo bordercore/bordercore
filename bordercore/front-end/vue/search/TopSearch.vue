@@ -4,7 +4,7 @@
             <form class="form-inline" method="get">
                 <input type="hidden" name="doctype" :value="searchFilter">
                 <div class="form-row">
-                    <div class="search-with-doctypes has-search me-1">
+                    <div class="has-search me-1">
                         <font-awesome-icon icon="search" />
 
                         <vue-simple-suggest id="top-simple-suggest"
@@ -30,10 +30,10 @@
                             <div slot="suggestion-item" slot-scope="scope">
                                 <!-- @*event*.stop="" handlers are needed to prevent the splitter from being selected -->
                                 <span v-if="scope.suggestion.splitter"
-                                      class="top-search-splitter"
+                                      class="search-splitter"
                                       @click.stop=""
                                 >{{ scope.suggestion.name }}</span>
-                                <div v-else class="top-search-suggestion">
+                                <div v-else class="search-suggestion">
                                     <span v-if="scope.suggestion.important === 10" class="me-1">
                                         <font-awesome-icon icon="heart" class="text-danger" />
                                     </span>
@@ -52,12 +52,12 @@
                     </div>
                 </div>
             </form>
-            <div v-if="query === ''" id="top-search-filter-options" class="ms-3 mt-2 p-3">
-                <div class="text-primary mb-2">
-                    <strong>Filter Options</strong>
+            <div v-if="query === ''" id="top-search-filter-options" class="ms-3 mt-2 p-2">
+                <div class="search-splitter">
+                    Filter Options
                 </div>
                 <div class="d-flex flex-column">
-                    <div v-for="filter in searchFilterTypes" :key="filter.icon" class="list-with-counts d-flex p-1" :class="getFilterClass(filter.doctype)" @click.prevent="handleFilter(filter.doctype)">
+                    <div v-for="filter in searchFilterTypes" :key="filter.icon" class="search-suggestion d-flex" :class="getFilterClass(filter.doctype)" @click.prevent="handleFilter(filter.doctype)">
                         <div class="top-search-filter-icon d-flex justify-content-center align-items-center">
                             <font-awesome-icon class="me-2" :icon="filter.icon" />
                         </div>
@@ -66,11 +66,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="recent-searches-header text-primary my-2 pt-2">
-                    <strong>Recent Searches</strong>
+                <div class="search-splitter">
+                    Recent Searches
                 </div>
                 <div class="d-flex flex-column">
-                    <div v-for="recentSearch in recentSearches" :key="recentSearch.id" class="list-with-counts d-flex p-1" @click.prevent="handleRecentSearch(recentSearch)">
+                    <div v-for="recentSearch in recentSearches" :key="recentSearch.id" class="search-suggestion d-flex" @click.prevent="handleRecentSearch(recentSearch)">
                         <div class="top-search-filter-icon d-flex justify-content-center align-items-center">
                             <font-awesome-icon class="me-2" icon="search" />
                         </div>
@@ -150,7 +150,6 @@
                     inputWrapper: "",
                     defaultInput: "form-control",
                     suggestions: "position-absolute list-group z-1000",
-                    suggestItem: "list-group-item",
                 },
                 searchFilter: this.initialSearchType,
                 searchUrl: this.suggestSearchUrl,

@@ -50,7 +50,7 @@
                                     @select="onSelectCollection"
                                 >
                                     <div slot="suggestion-item" slot-scope="{ suggestion }">
-                                        <div :class="{'suggestion-item-disabled': suggestion.contains_blob}" class="top-search-suggestion d-flex align-items-center">
+                                        <div :class="{'suggestion-item-disabled': suggestion.contains_blob}" class="search-suggestion d-flex align-items-center">
                                             <div>
                                                 <img class="me-2 mt-2" width="50" height="50" :src="suggestion.cover_url">
                                             </div>

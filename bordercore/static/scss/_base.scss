@@ -4,7 +4,6 @@
   --collection-list-item-width: 12rem;
   --dropdown-height: 2.5rem;
   --grid-margin: 1rem;
-  --hover-bg: var(--surface1);
   --hover-bg-transparent: var(--surface1-transparent);
   --search-box-width: 30rem;
 }
@@ -135,7 +134,7 @@
 
 .object-select-suggestion {
   height: 4.7rem;
-  padding: 0.6rem;
+  padding: 0.5rem;
 
   .cover-image {
     width: calc(4.7rem - 2*0.6rem);
@@ -1184,32 +1183,6 @@ blockquote > p {
   color: var(--text3);
 }
 
-.top-search-splitter {
-  width: 100%;
-  padding: 0.6rem;
-  background-color: var(--top-search-splitter-bg);
-  color: var(--top-search-splitter-color);
-  cursor: auto;
-  font-size: larger;
-  font-weight: bold;
-}
-
-.top-search-suggestion {
-  overflow: hidden;
-  width: 100%;
-  padding: 0.6rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  svg {
-    margin-top: 0.1rem;
-  }
-
-  .matched {
-    color: $primary;
-  }
-}
-
 #top-search-filter-options {
   position: absolute;
   z-index: 1000;
@@ -1229,27 +1202,10 @@ blockquote > p {
   .tag-list:hover {
     background-color: var(--surface5);
   }
-
-  .recent-searches-header {
-    border-top: 0.06rem solid var(--surface1);
-  }
 }
 
 .suggestion-item-disabled {
   cursor: not-allowed;
-}
-
-.search-with-doctypes {
-  // Set the padding to zero so that we can programmatically control the background color lower down
-  //   in the container hierarchy, based on whether an item is a divider or not.
-  .list-group-item {
-    padding: 0;
-    border: 0.06rem solid var(--surface5);
-  }
-
-  .vue-simple-suggest .suggestions {
-    padding: 0;
-  }
 }
 
 //
@@ -1390,6 +1346,41 @@ blockquote > p {
 
 #tag-filter-form select {
   line-height: 2rem;
+}
+
+.search-suggestion {
+  overflow: hidden;
+  width: 100%;
+  padding: 0.6rem;
+  // background-color: var(--surface6);
+  border-radius: var(--border-radius1);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  svg {
+    margin-top: 0.1rem;
+  }
+
+  .matched {
+    color: $primary;
+  }
+
+  &:hover {
+    background-color: var(--hover-bg);
+    cursor: pointer;
+  }
+}
+
+.search-splitter {
+  width: 100%;
+  padding: 0.6rem;
+  border-top: 0.06rem solid var(--surface3);
+  background-color: var(--search-splitter-bg);
+  border-radius: var(--border-radius1);
+  color: var(--search-splitter-color);
+  cursor: auto;
+  font-size: larger;
+  font-weight: bold;
 }
 
 //
@@ -2120,21 +2111,20 @@ tr.hover-target:hover {
   .suggestions {
     position: absolute;
     z-index: 1000;
-    top: 100%;
     top: calc(100% + 0.3rem);
     right: 0;
     left: 0;
-    background-color: var(--text1);
+    padding: 0.5rem;
+    background-color: var(--surface2);
     border-radius: 0.18rem;
     opacity: 1;
 
     .suggest-item {
-      background-color: var(--surface6);
       cursor: pointer;
       user-select: none;
 
       &.hover {
-        background-color: var(--surface1);
+        background-color: var(--hover-bg);
         color: var(--text1);
       }
 

@@ -8,7 +8,7 @@
             </span>
 
             <div slot="dropdown" class="recent-blobs px-2">
-                <div class="top-search-splitter">
+                <div class="search-splitter">
                     Recent Blobs
                 </div>
                 <ul class="list-group list-group-flush interior-borders">

@@ -11,7 +11,7 @@
                 <div class="modal-body">
                     <div class="d-flex flex-column">
                         <form @submit.prevent>
-                            <div class="search-with-doctypes">
+                            <div>
                                 <vue-simple-suggest
                                     id="object-search"
                                     ref="suggestComponent"
@@ -33,7 +33,14 @@
                                     @select="select"
                                 >
                                     <div slot="suggestion-item" slot-scope="scope">
-                                        <div class="object-select-suggestion d-flex">
+                                        <!-- @*event*.stop="" handlers are needed to prevent the splitter from being selected -->
+                                        <div v-if="scope.suggestion.splitter"
+                                             class="search-splitter"
+                                             @click.stop=""
+                                        >
+                                            {{ scope.suggestion.name }}
+                                        </div>
+                                        <div v-else class="object-select-suggestion d-flex">
                                             <div v-if="scope.suggestion.cover_url" class="cover-image">
                                                 <img class="mh-100 mw-100" :src="scope.suggestion.cover_url">
                                             </div>
@@ -57,7 +64,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div v-if="suggestionsFound > maxSuggestions" slot="misc-item-below" slot-scope="{ suggestions }" class="object-select-misc-item-below p-2">
+                                    <div v-if="suggestionsFound > maxSuggestions" slot="misc-item-below" class="object-select-misc-item-below p-2">
                                         <span>
                                             <strong>{{ suggestionsFound - maxSuggestions }}</strong> other matches
                                         </span>
@@ -131,7 +138,6 @@
                     inputWrapper: "",
                     defaultInput: "form-control",
                     suggestions: "position-absolute list-group z-1000",
-                    suggestItem: "list-group-item",
                 },
                 suggestionsFound: 0,
             };

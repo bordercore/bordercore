@@ -10,7 +10,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="d-flex flex-column">
-                        <div id="search-collections" :class="{'d-none': !hideAddCollection}" class="search-with-doctypes mb-0">
+                        <div id="search-collections" :class="{'d-none': !hideAddCollection}" class="mb-0">
                             <vue-simple-suggest
                                 ref="suggestComponent"
                                 :destyled="true"
@@ -29,7 +29,7 @@
                                 @select="select"
                             >
                                 <div slot="suggestion-item" slot-scope="{ suggestion }">
-                                    <div :class="{'suggestion-item-disabled': suggestion.contains_blob}" class="top-search-suggestion d-flex align-items-center" @click.stop="onClick(suggestion)">
+                                    <div :class="{'suggestion-item-disabled': suggestion.contains_blob}" class="search-suggestion d-flex align-items-center" @click.stop="onClick(suggestion)">
                                         <div>
                                             <img class="me-2" width="50" height="50" :src="suggestion.cover_url">
                                         </div>

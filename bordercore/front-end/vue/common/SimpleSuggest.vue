@@ -1,5 +1,5 @@
 <template>
-    <div :class="wrapperClass" class="search-with-doctypes">
+    <div :class="wrapperClass">
         <vue-simple-suggest :id="id"
                             ref="suggestComponent"
                             v-model="query"
@@ -26,12 +26,12 @@
             <div slot="suggestion-item" slot-scope="scope">
                 <!-- @*event*.stop="" handlers are needed to prevent the splitter from being selected -->
                 <div v-if="scope.suggestion.splitter"
-                     class="top-search-splitter"
+                     class="search-splitter"
                      @click.stop=""
                 >
                     {{ scope.suggestion.name }}
                 </div>
-                <div v-else class="top-search-suggestion">
+                <div v-else class="search-suggestion">
                     <span v-if="scope.suggestion.important === 10" class="me-1">
                         <font-awesome-icon icon="heart" class="text-danger" />
                     </span>
@@ -104,7 +104,6 @@
                     inputWrapper: "",
                     defaultInput: "form-control",
                     suggestions: "position-absolute list-group z-1000",
-                    suggestItem: "list-group-item",
                 },
             };
         },
