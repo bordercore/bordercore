@@ -365,9 +365,8 @@
                     return metric.test_overdue ? "text-danger" : "";
                 },
                 get_status(testType) {
-                    console.log(this[testType].test_overdue);
                     if (this[testType].test_overdue) {
-                        return question;
+                        return failure;
                     } else if ((this[testType].test_errors === "0" &&
                                 this[testType].test_failures === "0") ||
                                this[testType].test_errors === undefined) {
