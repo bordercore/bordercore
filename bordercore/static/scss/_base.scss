@@ -204,7 +204,7 @@ a {
   text-underline-offset: 0.25rem;
 
   &:hover {
-    color: var(--text5);
+    color: var(--text4);
   }
 }
 
@@ -255,7 +255,7 @@ hr {
   }
 
   :not(.active):hover {
-    color: var(--text1);
+    // border-color: var(--surface1);
     transform: translateY(-0.06rem);
   }
 
@@ -322,6 +322,7 @@ span {
 //
 
 .list-group-item {
+  background-color: var(--surface2);
   color: var(--text1);
 }
 
@@ -352,7 +353,7 @@ span {
 }
 
 .item-value {
-  color: var(--text1);
+  color: var(--text4);
 }
 
 //
@@ -603,7 +604,7 @@ a.tag {
   }
 
   thead {
-    border-bottom: 0.25rem solid var(--surface7);
+    border-bottom: 0.25rem solid var(--surface5);
   }
 
   th {
@@ -724,7 +725,7 @@ select.form-control,
 textarea.form-control {
   border: 0.06rem solid var(--surface1);
   background-color: var(--form-bg);
-  color: var(--text4) !important;
+  color: var(--form-color) !important;
 
   &:hover {
     border-color: var(--form-border-color-hover);
@@ -1089,6 +1090,11 @@ table.b-table th {
   color: var(--text3);
   font-size: larger;
   font-weight: bold;
+}
+
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: var(--text1) !important;
+  opacity: 1 !important; /* Firefox */
 }
 
 // Used when you want to display text instead of a form field
@@ -2106,7 +2112,7 @@ tr.hover-target:hover {
   &.focus {
     .input-wrapper input {
       border: 0.06rem solid var(--text3);
-      background-color: var(--surface1);
+      background-color: var(--surface2);
     }
   }
 

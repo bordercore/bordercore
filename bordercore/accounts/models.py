@@ -31,6 +31,7 @@ class UserProfile(models.Model):
     THEMES = [
         ("light", "light"),
         ("dark", "dark"),
+        ("purple", "purple"),
     ]
 
     theme = models.CharField(

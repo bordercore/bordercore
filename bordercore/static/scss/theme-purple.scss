@@ -1,44 +1,34 @@
-:root[color-mode="dark"] {
+:root[color-mode="purple"] {
   --brand-hue: 231;
   --brand-saturation: 57%;
   --brand-lightness: 15%;
 
   --text1: #ffffff;
-  --text2: hsl(var(--brand-hue), 5%, 65%);
-
-  // highlight
-  --text3-hue: 164;
-  --text3-saturation: 89%;
-  --text3-lightness: 69%;
-  --text3: hsl(var(--text3-hue), var(--text3-saturation), var(--text3-lightness));
-
-  --text4: #6ea6e0;
-
-  // "on hover" links
-  --text5: #10ff00;
-
-  --text6: #4591ff;
+  --text2: #ffffff;
+  --text3: #ffffff;
+  --text4: #dbb3ed;
+  --text5: #ffffff;
+  --text6: #ffffff;
 
   --text-disabled: #333;
   --text-em: ##ffff00;
   --text-notice: var(--text6);
 
-  --surface1: #10173c;
-  --surface1-transparent: #10173c00;
+  --surface1: #130a16;
+  --surface2: #3e0083;
+  //--surface2: #ab8ed3;
+  --surface3: #1d2218;
+  --surface4: #552662;
+  --surface5: #865dc0;
+  --surface6: #592766;
+
+  --surface1-transparent: #3e0083;
+  // --surface1-transparent: hsl(var(--brand-hue), var(--brand-saturation), var(--brand-lightness), 0);
 
   // on-hover
-  --surface2: hsl(var(--brand-hue), calc(var(--brand-saturation) + 15%), var(--brand-lightness));
   --surface2-transparent: hsl(var(--brand-hue), calc(var(--brand-saturation) + 15%), var(--brand-lightness), 0);
 
-  --surface3: hsl(var(--brand-hue), calc(var(--brand-saturation) + 25%), calc(var(--brand-lightness) + 10%));
-  --surface4: hsl(var(--brand-hue), calc(var(--brand-saturation) + 35%), calc(var(--brand-lightness) + 15%));
-  --surface5: #3e3e6b;
   --surface5-transparent: #3e3e6b00;
-
-  // Slightly lighter than the background
-  --surface6: #20253e;
-
-  --surface7: #7367f0;
 
   // Node colors
   // Increase the HSL lightness by 5% for the tinted properties
@@ -64,17 +54,17 @@
   --drill-progress-circle-full: var(--surface5);
   --drill-progress-circle-partial: var(--text5);
   --dropdown-item-extra-color: var(--text2);
-  --fitness-overdue-bg: var(--surface7);
+  --fitness-overdue-bg: var(--surface3);
   --fitness-overdue-color: var(--text1);
   --form-bg: var(--surface5);
   --form-bg-disabled: var(--surface2);
-  --form-bg-focus: var(--surface6);
+  --form-bg-focus: var(--surface2);
   --form-border-color-hover: var(--text3);
-  --form-color: var(--text4);
-  --hover-bg: var(--surface3);
+  --form-color: var(--text5);
+  --hover-bg: var(--surface4);
   --notice-color: var(--text1);
   --notice-title-color: var(--text1);
-  --search-splitter-bg: var(--surface5);
+  --search-splitter-bg: var(--surface1);
   --search-splitter-color: var(--text6);
   --selected-bg: var(--surface6);
   --selected-color: var(--text1);
@@ -101,4 +91,11 @@
   --bs-secondary: var(--text3);
   --card-spacer-y: 1.25;
   --card-spacer-x: 1.25;
+
+  .btn-primary {
+    --bs-btn-active-bg: var(--surface2);
+    --bs-btn-active-border-color: var(--surface1);
+    --bs-btn-border-color: var(--surface2);
+    --bs-btn-hover-border-color: var(--surface5);
+  }
 }

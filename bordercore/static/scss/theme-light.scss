@@ -56,6 +56,7 @@
   --form-bg-disabled: var(--surface2);
   --form-bg-focus: var(--surface1);
   --form-border-color-hover: var(--text3);
+  --form-color: var(--text4);
   --hover-bg: var(--surface3);
   --notice-color: var(--surface1);
   --notice-title-color: var(--surface1);
@@ -85,4 +86,8 @@
   --bs-secondary: var(--text2);
   --card-spacer-y: 1.25;
   --card-spacer-x: 1.25;
+
+  .btn-primary {
+    --btn-primary-hover-color: var(--text3);
+  }
 }
