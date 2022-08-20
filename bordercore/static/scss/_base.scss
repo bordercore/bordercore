@@ -49,6 +49,11 @@
   }
 }
 
+.card-title-large {
+  @extend .card-title;
+  font-size: 1.5rem;
+}
+
 .card-grid {
   padding: 0 calc(var(--grid-margin) * 0.5);
   margin: 0 0 var(--grid-margin);
@@ -1213,7 +1218,6 @@ blockquote > p {
 //
 
 .hover-tag {
-  border: 0.06rem solid var(--surface3);
   background-color: var(--surface2);
   color: var(--text5);
 }
