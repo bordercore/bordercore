@@ -449,35 +449,6 @@ span {
   }
 }
 
-.button-add-container {
-  position: absolute;
-  top: 0.5rem;
-  right: 1rem;
-}
-
-.button-add {
-  @extend .circle;
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  transition: transform 250ms;
-
-  &:hover {
-    background-color: var(--surface3);
-    color: var(--text1);
-    transform: translateY(-0.25rem);
-
-    .fa-plus {
-      color: var(--text1);
-    }
-  }
-
-  &:focus {
-    color: var(--text1);
-    outline: 0;
-  }
-}
-
 // Add an "on hover" glow effect to images, noteably SVG font-awesome icons
 .glow {
   &:hover {

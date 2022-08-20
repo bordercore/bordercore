@@ -77,9 +77,16 @@
                             Tag Aliases
                         </h4>
                         <div class="ms-auto me-2">
-                            <div class="button-add" @click="openModal">
-                                <font-awesome-icon icon="plus" class="text-emphasis" />
-                            </div>
+                            <drop-down-menu>
+                                <div slot="dropdown">
+                                    <li>
+                                        <a class="dropdown-item" href="#" @click.prevent="openModal">
+                                            <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
+                                            <span>Add Tag</span>
+                                            </a>
+                                        </li>
+                                    </div>
+                                </drop-down-menu>
                         </div>
                     </div>
                 </template>
