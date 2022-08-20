@@ -1,7 +1,7 @@
 <template>
     <span class="mx-2" data-bs-toggle="tooltip" data-placement="bottom" title="Recent Blobs">
 
-        <drop-down-menu>
+        <drop-down-menu :show-target="false">
 
             <span slot="icon">
                 <font-awesome-icon class="glow" icon="object-group" />
@@ -11,8 +11,8 @@
                 <div class="search-splitter">
                     Recent Blobs
                 </div>
-                <ul class="list-group list-group-flush interior-borders">
-                    <li v-for="link in blobListInfo.blobList[0]" :key="link.id" class="list-group-item list-group-item-secondary">
+                <ul class="ps-0">
+                    <li v-for="link in blobListInfo.blobList[0]" :key="link.id" class="search-suggestion ms-0 px-0">
                         <a :href="link.url" class="dropdown-item d-flex align-items-center" v-on="link.clickHandler ? { click: link.clickHandler } : {}">
                             <span class="icon d-flex justify-content-center align-items-center">
                                 <img v-if="link.doctype === 'image'" :src="link.cover_url_small" class="mw-100 mh-100">

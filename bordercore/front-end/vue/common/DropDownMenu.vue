@@ -1,5 +1,5 @@
 <template>
-    <div class="dropdown ms-auto">
+    <div class="dropdown ms-auto d-flex align-items-center justify-content-center">
         <div
             class="cursor-pointer"
             :class="{'dropdownmenu': showTarget, 'd-none': showOnHover}"

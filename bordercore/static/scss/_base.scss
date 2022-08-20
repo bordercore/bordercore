@@ -1352,10 +1352,13 @@ blockquote > p {
   overflow: hidden;
   width: 100%;
   padding: 0.6rem;
-  // background-color: var(--surface6);
   border-radius: var(--border-radius1);
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  a:hover {
+    background-color: var(--surface3) !important;
+  }
 
   svg {
     margin-top: 0.1rem;
@@ -1531,11 +1534,6 @@ blockquote > p {
 }
 
 .recent-blobs {
-  div {
-    border-bottom: 0.25rem solid var(--surface7);
-    margin-bottom: 1rem;
-  }
-
   .icon {
     width: 4rem;
     height: 4rem;
