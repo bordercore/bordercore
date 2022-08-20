@@ -10,6 +10,7 @@ from io import BytesIO
 from pathlib import PurePath
 
 import boto3
+import elasticsearch_dsl
 import magic
 import requests
 from elasticsearch_dsl import DateRange
@@ -38,6 +39,44 @@ FILE_TYPES_TO_INGEST = [
 
 logging.getLogger().setLevel(logging.INFO)
 log = logging.getLogger(__name__)
+
+
+def elasticsearch_merge(data, new_data, raise_on_conflict=False):
+    """
+    This is a monkeypatched version of elasticsearch_dsl.utils.merge()
+    which avoids an issue when indexing documents with date_range fields.
+    """
+    import collections.abc as collections_abc
+
+    from elasticsearch_dsl.utils import AttrDict
+    from elasticsearch_dsl.wrappers import Range
+    from six import iteritems
+
+    if not (
+        isinstance(data, (AttrDict, collections_abc.Mapping))
+        and isinstance(new_data, (AttrDict, collections_abc.Mapping))
+    ):
+        raise ValueError(
+            "You can only merge two dicts! Got {!r} and {!r} instead.".format(
+                data, new_data
+            )
+        )
+
+    if isinstance(new_data, Range):
+        return
+
+    for key, value in iteritems(new_data):
+        if (
+            key in data
+            and isinstance(data[key], (AttrDict, collections_abc.Mapping))
+            and isinstance(value, (AttrDict, collections_abc.Mapping))
+            and not isinstance(value, Range)
+        ):
+            elasticsearch_merge(data[key], value, raise_on_conflict)
+        elif key in data and data[key] != value and raise_on_conflict:
+            raise ValueError("Incompatible data for key %r, cannot be merged." % key)
+        else:
+            data[key] = value
 
 
 class ESBlob(Document_ES):
@@ -317,5 +356,8 @@ def index_blob(**kwargs):
             # For existing blobs, remove any existing metadata first before updating,
             #  in case the user is deleting some of it.
             delete_metadata(es, article.uuid)
+
+        # Monkeypatch Elasticsearch DSL to avoid issue with date ranges
+        elasticsearch_dsl.utils.merge = elasticsearch_merge
 
         article.update(doc_as_upsert=True, **fields)
