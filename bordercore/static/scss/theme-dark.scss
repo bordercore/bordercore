@@ -91,8 +91,6 @@
   // Override Bootstrap CSS properties
   --bs-body-color: var(--text1);
   --bs-body-bg: var(--surface1);
-  --card-spacer-y: 1.25;
-  --card-spacer-x: 1.25;
   --bs-list-group-border-color: var(--surface3);
   --bs-list-group-color: var(--text3);
   --bs-list-group-item-padding-x: 1.25rem;
@@ -100,4 +98,6 @@
   --bs-list-group-item-secondary: var(--text3);
   --bs-modal-header-border-color: var(--text3);
   --bs-secondary: var(--text3);
+  --card-spacer-y: 1.25;
+  --card-spacer-x: 1.25;
 }
