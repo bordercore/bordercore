@@ -21,8 +21,8 @@ class TodoPage:
         """
         Find the value of the title element
         """
-        search_input = self.browser.find_element(*self.TITLE)
-        return search_input.get_attribute("innerHTML")
+        element = self.browser.find_element(*self.TITLE)
+        return element.get_attribute("innerHTML")
 
     def todo_count(self):
         """
