@@ -124,10 +124,6 @@
                 default: "",
                 type: String,
             },
-            recentObjectsUrl: {
-                default: "",
-                type: String,
-            },
         },
         data() {
             return {
@@ -144,6 +140,8 @@
                     suggestions: "position-absolute list-group z-1000",
                 },
                 suggestionsFound: 0,
+                // This is populated in the base template
+                recentBlobs: JSON.parse(document.getElementById("recent_blobs").textContent),
             };
         },
         mounted() {
@@ -233,19 +231,13 @@
                 const suggest = this.$refs.suggestComponent;
 
                 if (suggest.suggestions.length === 0) {
-                    doGet(
-                        this,
-                        this.recentObjectsUrl,
-                        (response) => {
-                            suggest.suggestions = response.data.blobList;
-                            suggest.suggestions.unshift(
-                                {
-                                    uuid: "__Recent",
-                                    name: "Recent Blobs",
-                                    splitter: true,
-                                    value: "",
-                                },
-                            );
+                    suggest.suggestions = this.recentBlobs.blobList[0].slice(0, 5);
+                    suggest.suggestions.unshift(
+                        {
+                            uuid: "__Recent",
+                            name: "Recent Blobs",
+                            splitter: true,
+                            value: "",
                         },
                     );
                 }
