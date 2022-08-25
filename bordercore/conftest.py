@@ -22,6 +22,7 @@ from django.conf import settings
 try:
     from pyvirtualdisplay import Display
     from selenium import webdriver
+
     from homepage.tests.pages.homepage import LoginPage
 except (ModuleNotFoundError, NameError, django.core.exceptions.AppRegistryNotReady):
     # Don't worry if these imports don't exist in production
@@ -121,6 +122,7 @@ def monkeypatch_blob(monkeypatch):
         pass
 
     from elasticsearch import Elasticsearch
+
     from blob.models import Blob
 
     monkeypatch.setattr(Elasticsearch, "delete", mock)
@@ -152,7 +154,6 @@ def monkeypatch_bookmark(monkeypatch):
         pass
 
     monkeypatch.setattr(Bookmark, "generate_cover_image", mock)
-    monkeypatch.setattr(Bookmark, "index_bookmark", mock)
     monkeypatch.setattr(Bookmark, "snarf_favicon", mock)
     monkeypatch.setattr(Bookmark, "delete", mock)
 
