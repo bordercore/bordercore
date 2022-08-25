@@ -173,9 +173,9 @@
 
                 <form id="form-blob" action="{{ request.path }}" method="post" enctype="multipart/form-data" class="me-2" v-cloak>
 
-                    <div class="tab-content pt-4">
+                    <div class="tab-content row pt-4">
 
-                        <div id="section-main" class="tab-pane fade show active">
+                        <div id="section-main" class="tab-pane col-lg-12 fade show active">
 
                             <input type="hidden" name="importance" value="{% if form.importance.value == 10 %}on{% endif %}" />
                             <input type="hidden" name="is_note" value="{% if form.is_note.value %}on{% endif %}" />
@@ -202,7 +202,7 @@
 
                                 {% if field.label != 'Filename' and field.name != 'is_note' and field.name != 'math_support' and field.name != 'importance' %}
 
-                                    <div class="{% if field.errors %}error{% endif %} row mb-3">
+                                    <div class="{% if field.errors %}error {% endif %}row mb-3">
                                         <label class="fw-bold col-lg-2 col-sm-2 col-form-label text-end" for="inputTitle">{{ field.label }}</label>
 
                                     {% if field.label == 'File' %}
@@ -298,7 +298,7 @@
                         </div>
 
                         <metadata-wrapper inline-template>
-                            <div id="section-metadata" class="tab-pane fade">
+                            <div id="section-metadata" class="tab-pane col-lg-12 fade">
                                 <div class="row mb-3">
 
                                 <div class="col-lg-2 col-sm-2">
@@ -357,18 +357,16 @@
                             </div>
                         </metadata-wrapper>
 
-                        <div class="row">
-                            <div class="col-lg-12 offset-lg-2 d-flex">
-                                <button type="button" class="btn btn-primary" @click="submitForm">
-                                 {{ action }}
-                                </button>
+                        <div class="col-lg-10 offset-lg-2 d-flex">
+                            <button type="button" class="btn btn-primary" @click="submitForm">
+                                {{ action }}
+                            </button>
                             {% if object %}
                                 <button class="btn btn-secondary d-flex ms-3" @click="onClickDelete">
                                     Delete
                                 </button>
                             {% endif %}
                         </div>
-                    </div>
                     </div>
 
                 </form>
