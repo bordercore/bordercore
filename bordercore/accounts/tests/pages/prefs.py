@@ -17,6 +17,8 @@ class PrefsPage:
     URL = reverse("accounts:prefs")
 
     TITLE = (By.TAG_NAME, "title")
+    THEME_ID = (By.ID, "id_theme")
+    COLLECTION_ID = (By.ID, "id_homepage_default_collection")
     UPDATE_BUTTON = (By.XPATH, "//input[@value='Update']")
     THEME_SELECTED = (By.XPATH, "//select[@id='id_theme']/option[@selected]")
     PINNED_TAGS_INPUT = (By.XPATH, "//div[@id='id_pinned_tags']//ul//input")
@@ -42,14 +44,14 @@ class PrefsPage:
         """
         Select the 'Dark' theme
         """
-        select = Select(self.browser.find_element_by_id("id_theme"))
+        select = Select(self.browser.find_element(*self.THEME_ID))
         select.select_by_visible_text(theme_name)
 
     def choose_default_collection(self, collection_name):
         """
         Select a 'Default collection'
         """
-        select = Select(self.browser.find_element_by_id("id_homepage_default_collection"))
+        select = Select(self.browser.find_element(*self.COLLECTION_ID))
         select.select_by_visible_text(collection_name)
 
     def add_pinned_tags(self, tag_name):
