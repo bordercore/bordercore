@@ -2007,12 +2007,20 @@ tr.hover-target:hover {
   font-size: 1rem !important;
 
   .v-md-editor__main {
+    border: 0.06rem solid var(--surface1);
     border-radius: 0.25rem;
 
     &:focus-within {
+      border: 0.06rem solid var(--form-border-color-hover) !important;
       background-color: var(--form-bg-focus) !important;
+      box-shadow: $input-btn-focus-box-shadow;
       caret-color: var(--text4);
       color: var(--text4);
+    }
+
+    &:hover {
+      border: 0.06rem solid var(--form-border-color-hover);
+      border-radius: 0 0 0.375rem 0.375rem;
     }
   }
 
