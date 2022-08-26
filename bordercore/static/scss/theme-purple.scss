@@ -7,12 +7,13 @@
   --text2: #ffffff;
   --text3: #ffffff;
   --text4: #dbb3ed;
-  --text5: #ffffff;
+  --text5: #8ce2ee;
   --text6: #ffffff;
 
   --text-disabled: #333;
   --text-em: ##ffff00;
   --text-notice: var(--text6);
+  --text-error: #ff0000;
 
   --surface1: #130a16;
   --surface2: #3e0083;
@@ -62,6 +63,7 @@
   --form-border-color-hover: var(--text3);
   --form-color: var(--text5);
   --hover-bg: var(--surface4);
+  --link-color: var(--text5);
   --notice-color: var(--text1);
   --notice-title-color: var(--text1);
   --search-splitter-bg: var(--surface1);
@@ -97,5 +99,8 @@
     --bs-btn-active-border-color: var(--surface1);
     --bs-btn-border-color: var(--surface2);
     --bs-btn-hover-border-color: var(--surface5);
+  }
+  .list-group {
+    --bs-list-group-border-color: var(--surface6);
   }
 }

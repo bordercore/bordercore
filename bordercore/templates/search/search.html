@@ -156,9 +156,11 @@
                                             Todo: {{ match.source.name }}
                                         </h4>
 
+                                        <div class="ms-2">
                                         {% for tag in match.source.tags %}
-                                            <a href="{% url 'search:kb_search_tag_detail' tag %}" class="badge bg-info">{{ tag }}</a>
+                                            <a href="{% url 'search:kb_search_tag_detail' tag %}" class="tag d-inline-block">{{ tag }}</a>
                                         {% endfor %}
+                                        </div>
 
                                     {% elif match.source.doctype == "bookmark" %}
 

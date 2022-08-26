@@ -22,6 +22,7 @@
   --text-disabled: #333;
   --text-em: ##ffff00;
   --text-notice: var(--text6);
+  --text-error: #ff0000;
 
   --surface1: #10173c;
   --surface1-transparent: #10173c00;
@@ -72,11 +73,12 @@
   --form-border-color-hover: var(--text3);
   --form-color: var(--text4);
   --hover-bg: var(--surface3);
+  --link-color: var(--text3);
   --notice-color: var(--text1);
   --notice-title-color: var(--text1);
   --search-splitter-bg: var(--surface5);
   --search-splitter-color: var(--text6);
-  --selected-bg: var(--surface6);
+  --selected-bg: var(--surface5);
   --selected-color: var(--text1);
   --selected-secondary-color: var(--text4);
   --sidebar-active-bg: var(--surface5);
@@ -92,7 +94,6 @@
   // Override Bootstrap CSS properties
   --bs-body-color: var(--text1);
   --bs-body-bg: var(--surface1);
-  --bs-list-group-border-color: var(--surface3);
   --bs-list-group-color: var(--text3);
   --bs-list-group-item-padding-x: 1.25rem;
   --bs-list-group-item-padding-y: .75rem;
@@ -101,4 +102,8 @@
   --bs-secondary: var(--text3);
   --card-spacer-y: 1.25;
   --card-spacer-x: 1.25;
+
+  .list-group {
+    --bs-list-group-border-color: var(--surface5);
+  }
 }

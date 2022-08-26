@@ -12,6 +12,7 @@
 
   --text-disabled: #bbbbbb;
   --text-notice: var(--text6);
+  --text-error: #ff0000;
 
   // --surface1: hsl(var(--brand-hue) var(--brand-saturation) var(--brand-lightness));
   --surface1: #edf2f9;
@@ -58,6 +59,7 @@
   --form-border-color-hover: var(--text3);
   --form-color: var(--text4);
   --hover-bg: var(--surface3);
+  --link-color: var(--text2);
   --notice-color: var(--surface1);
   --notice-title-color: var(--surface1);
   --search-splitter-bg: var(--surface7);
@@ -89,5 +91,8 @@
 
   .btn-primary {
     --btn-primary-hover-color: var(--text3);
+  }
+  .list-group {
+    --bs-list-group-border-color: var(--surface5);
   }
 }
