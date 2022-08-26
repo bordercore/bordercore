@@ -115,14 +115,14 @@
                     </div>
                 </div>
 
-                <div class="{% if field.errors %}error {% endif %}row mb-3">
+                <div class="{% if forms.tags.errors %}error {% endif %}row mb-3">
                     <label class="fw-bold col-lg-2 col-form-label text-end" for="inputTitle">Tags</label>
                     <div class="col-lg-7">
                         <tags-input id="id_tags" ref="tagsInput" search-url="{% url 'tag:search' %}?query=">
                         </tags-input>
-                        {% for error in field.errors %}
+                        {% for error in form.tags.errors %}
                             <span class="form-error">Error: {{ error }}</span>
-                            {% endfor %}
+                        {% endfor %}
                     </div>
                 </div>
 
