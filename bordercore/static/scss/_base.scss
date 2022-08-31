@@ -1269,6 +1269,17 @@ blockquote > p {
 // Search
 //
 
+// Use this for cancel icons inside search input fields
+.search-input-cancel {
+  position: absolute;
+  top: 0.20rem;
+  right: 0.6rem;
+
+  svg:hover {
+    color: var(--text1) !important;
+  }
+}
+
 .search-input {
   width: 25rem;
 }

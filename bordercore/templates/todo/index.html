@@ -52,12 +52,19 @@
                 <div class="d-flex justify-content-between">
 
                     <form class="form-inline" role="form">
-
-                        <div class="ms-2">
+                        <div class="position-relative ms-2">
                             <input type="text" v-model="filterSearch" class="form-control" placeholder="Search" @keydown.enter.prevent="search()">
+                            <div v-if="currentSearchFilter" class="search-input-cancel">
+                                <a class="ms-1" href="#" @click.prevent="removeSearchFilter()">
+                                    <font-awesome-icon icon="times" class="text-primary" />
+                                </a>
+                            </div>
                         </div>
-
                     </form>
+
+                    <div class="card-title ms-3 me-auto">
+                        [[ title ]]
+                    </div>
 
                     <div class="me-2">
                         <drop-down-menu class="my-auto">
@@ -175,6 +182,7 @@
             name: "TodoTable",
             data() {
                 return {
+                    currentSearchFilter: "",
                     filterTag: "{{ filter.todo_filter_tag|default:'' }}",
                     filterPriority: "{{ filter.todo_filter_priority|default:'' }}",
                     filterTime: "{{ filter.todo_filter_time|default:'' }}",
@@ -185,20 +193,43 @@
                     draggingRowIndex: null,
                     filterPriorityOptions: null,
                     filterTimeOptions: null,
-                    show: false,
-                    right: true,
-                    hover: true,
                 };
             },
             computed: {
                 isFiltered() {
                     return this.filterPriority !== "" || this.filterTime !== "";
                 },
+                title() {
+                    let title = [];
+                    if (this.currentSearchFilter) {
+                        return `Results for "${this.currentSearchFilter}"`;
+                    }
+                    if (this.filterTag) {
+                        title.push(`Tag: ${this.filterTag}`);
+                    }
+                    if (this.filterPriority && this.filterPriorityOptions) {
+                        title.push(`Priority: ${this.filterPriorityOptions[this.filterPriority - 1][1]}`);
+                    }
+                    if (this.filterTime && this.filterTimeOptions) {
+                        title.push(`Time: ${this.getPrettyTime(this.filterTime)}`);
+                    }
+                    if (title.length === 0) {
+                        title = ["All"];
+                    }
+                    return title.join(", ");
+                },
             },
             mounted() {
                 this.getTodoList();
             },
             methods: {
+                getPrettyTime(time) {
+                    for (option of this.filterTimeOptions) {
+                        if (time === option[0]) {
+                            return option[1];
+                        }
+                    }
+                },
                 getTodoList() {
                     doGet(
                         this,
@@ -214,6 +245,10 @@
                         },
                         "Error todo list",
                     );
+                },
+                removeSearchFilter() {
+                    this.filterSearch = "";
+                    this.search();
                 },
                 sortChanged(evt) {
                     if (evt.sortBy === "") {
@@ -277,6 +312,8 @@
                         });
                 },
                 onClickTag(evt) {
+                    this.currentSearchFilter = "";
+                    this.filterSearch = "";
                     if (this.filterTag == evt.currentTarget.dataset.tag) {
                         this.filterTag = "";
                     } else {
@@ -285,6 +322,8 @@
                     this.getTodoList();
                 },
                 onClickPriority(evt) {
+                    this.currentSearchFilter = "";
+                    this.filterSearch = "";
                     if (this.filterPriority == evt.currentTarget.dataset.priority) {
                         this.filterPriority = "";
                     } else {
@@ -293,6 +332,8 @@
                     this.getTodoList();
                 },
                 onClickTime(evt) {
+                    this.currentSearchFilter = "";
+                    this.filterSearch = "";
                     if (this.filterTime == evt.currentTarget.dataset.created) {
                         this.filterTime = "";
                     } else {
@@ -320,15 +361,20 @@
                 },
                 search() {
                     if (this.filterSearch === "") {
+                        this.currentSearchFilter = "";
                         this.filterPriority = this.filterCache.priority;
+                        this.filterTag = this.filterCache.tag;
                         this.filterTime = this.filterCache.time;
                         this.filterCache = {};
                     } else {
+                        this.currentSearchFilter = this.filterSearch;
                         this.filterCache = {
                             "priority": this.filterPriority,
+                            "tag": this.filterTag,
                             "time": this.filterTime,
                         };
                         this.filterPriority = "";
+                        this.filterTag = "";
                         this.filterTime = "";
                     }
                     this.getTodoList();
