@@ -5,9 +5,10 @@ import pytest
 from django.urls import reverse
 
 try:
-    from .pages.search import SearchPage, TagSearchPage, NoteSearchPage
-    from selenium.webdriver.common.keys import Keys
     from selenium.webdriver.common.action_chains import ActionChains
+    from selenium.webdriver.common.keys import Keys
+
+    from .pages.search import NoteSearchPage, SearchPage, TagSearchPage
 except (ModuleNotFoundError, NameError):
     # Don't worry if these imports don't exist in production
     pass
@@ -79,6 +80,7 @@ def test_note_search(blob_note, login, live_server, browser, settings):
     action = ActionChains(browser)
     action.move_to_element(search_input)
     action.key_down(Keys.ALT).send_keys("n").perform()
+    action.reset_actions()
 
     time.sleep(2)
     search_input.send_keys(Keys.RETURN)
