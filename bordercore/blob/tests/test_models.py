@@ -1,7 +1,11 @@
 import datetime
+from pathlib import Path
 from urllib.parse import quote_plus, urlparse
 
+import boto3
+
 import django
+from django.conf import settings
 
 from collection.models import Collection
 
@@ -129,6 +133,29 @@ def test_clone(temp_blob_directory, monkeypatch_blob, blob_pdf_factory, collecti
 
     for c in Collection.objects.filter(collectionobject__blob__uuid=blob_pdf_factory[0].uuid):
         assert cloned_blob in [x.blob for x in c.collectionobject_set.all()]
+
+
+def test_blob_update_cover_image(blob_pdf_factory, s3_resource, s3_bucket):
+
+    file_path = Path(__file__).parent / "resources/cover-large.jpg"
+
+    with open(file_path, "rb") as fh:
+        image = fh.read()
+
+    blob_pdf_factory[0].update_cover_image(image)
+
+    s3 = boto3.resource("s3")
+    bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
+
+    objects = [
+        x.key
+        for x in list(bucket.objects.filter(Prefix=f"blobs/{blob_pdf_factory[0].uuid}/"))
+    ]
+
+    # There should be 3 objects. The original blob plus the two cover images
+    assert len(objects) == 3
+    assert f"blobs/{blob_pdf_factory[0].uuid}/cover.jpg" in objects
+    assert f"blobs/{blob_pdf_factory[0].uuid}/cover-large.jpg" in objects
 
 
 def count_nodes(nodes, root_node=True):

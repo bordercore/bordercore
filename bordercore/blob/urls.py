@@ -41,6 +41,11 @@ urlpatterns = [
         name="parse_date"
     ),
     path(
+        route="update_cover_image",
+        view=views.update_cover_image,
+        name="update_cover_image"
+    ),
+    path(
         route="recent_blobs",
         view=views.recent_blobs,
         name="recent_blobs"

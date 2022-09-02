@@ -457,6 +457,25 @@ def parse_date(request, input_date):
 
 
 @login_required
+def update_cover_image(request):
+    """
+    Update the blob's cover image
+    """
+
+    blob_uuid = request.POST["blob_uuid"]
+    image = request.FILES["image"].read()
+
+    blob = Blob.objects.get(uuid=blob_uuid)
+    blob.update_cover_image(image)
+
+    response = {
+        "status": "OK"
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
 def recent_blobs(request):
 
     skip_content = True if request.GET.get("skip_content", None) else False

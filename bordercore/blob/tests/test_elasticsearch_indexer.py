@@ -10,11 +10,6 @@ from blob.elasticsearch_indexer import (get_blob_info, get_doctype,
                                         get_unixtime_from_string,
                                         is_ingestible_file)
 
-# def test_get_doctype(blob_image_factory, blob_text_factory):
-
-#     assert get_doctype(blob_image_factory, None) == "blob"
-#     assert get_doctype(blob_text_factory, None) == "document"
-
 
 def test_is_ingestible_file():
 

@@ -1,12 +1,16 @@
+import io
 import time
+from pathlib import Path
 from unittest.mock import Mock
 from urllib.parse import urlparse
 
 import factory
 import pytest
 from faker import Factory as FakerFactory
+from PIL import Image
 
 from django import urls
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import signals
 
 from blob.models import Blob
@@ -269,6 +273,30 @@ def test_blob_parse_date(auto_login_user):
     resp = client.get(url)
     assert resp.status_code == 200
     assert resp.json() == {'output_date': '', 'error': "time data '01/34/2021' does not match format '%m/%d/%Y'"}
+
+
+def test_blob_update_cover_image(s3_resource, s3_bucket, auto_login_user):
+
+    user, client = auto_login_user()
+
+    blob_1 = BlobFactory.create(user=user)
+
+    file_path = Path(__file__).parent / "resources/test_blob.jpg"
+    img = Image.open(file_path)
+    imgByteArr = io.BytesIO()
+    img.save(imgByteArr, "jpeg")
+    image_upload = SimpleUploadedFile(file_path.name, imgByteArr.getvalue())
+
+    url = urls.reverse("blob:update_cover_image")
+    resp = client.post(url, {
+        "blob_uuid": blob_1.uuid,
+        "image": image_upload,
+    })
+
+    assert resp.status_code == 200
+
+    payload = resp.json()
+    assert payload["status"] == "OK"
 
 
 def test_get_elasticsearch_info(auto_login_user):

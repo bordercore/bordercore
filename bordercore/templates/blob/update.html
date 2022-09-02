@@ -28,18 +28,21 @@
     <div class="scrollable-panel-container row g-0 mx-2">
 
         <div id="vue-app-left" class="scrollable-panel flex-grow-last col-lg-3 d-flex flex-column h-100">
-            <div class="card-body backdrop-filter">
+            <div
+                @drop.prevent="onImageDrop($event)"
+                @dragover.prevent="isOver = true"
+                @dragenter.prevent
+                @dragleave.prevent="isOver = false"
+                @drop="isOver = false"
+                class="card-body backdrop-filter drag-target"
+                :class="{over: isOver}"
+            >
                 {% if object %}
-
                     {% if object.sha1sum %}
-                        <img
-                            src="{{ cover_url }}"
-                            height="auto"
-                            width="400"
-                            class="mw-100 mb-3"
-                        />
+                        <div>
+                            <img id="coverImage" src="{{ cover_url }}" height="auto" width="400" class="mw-100 mb-3" />
+                        </div>
                     {% endif %}
-
                 {% endif %}
 
                 <div id="blob-options" class="d-flex mt-2">
@@ -587,9 +590,20 @@
                     this.$refs.relatedTags.setTags(payload.map( (x) => x.text ));
                 });
             },
+            data() {
+                return {
+                    isOver: false,
+                }
+            },
             methods: {
                 onClickTag(tag) {
                     EventBus.$emit("add-tag", tag);
+                },
+                onImageDrop(evt) {
+                    let image = evt.dataTransfer.files[0]
+                    if (image.type.indexOf("image/") >= 0) {
+                        this.uploadCoverImage(image);
+                    }
                 },
                 updateFormValue(property, value) {
                     if (property === "important") {
@@ -598,7 +612,21 @@
                         // Simulate a form checkbox value
                         document.getElementById("form-blob").elements[property].value = value ? "on" : "";
                     }
-                }
+                },
+                uploadCoverImage(image) {
+                    let formData = new FormData();
+                    formData.append("blob_uuid", "{{ object.uuid }}");
+                    formData.append("image", image);
+
+                    axios.post("{% url "blob:update_cover_image" %}", formData, {
+                        headers: {
+                            "Content-Type": "multipart/form-data"
+                        }
+                    }).then(response => {
+                        const coverImage = document.getElementById("coverImage");
+                        coverImage.src = coverImage.src + "?" + new Date().getTime();
+                    });
+                },
             }
         });
 

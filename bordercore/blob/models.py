@@ -1,5 +1,6 @@
 import datetime
 import hashlib
+import io
 import json
 import logging
 import re
@@ -11,6 +12,7 @@ from urllib.parse import quote_plus, urlparse
 import boto3
 import humanize
 from elasticsearch import NotFoundError
+from PIL import Image
 from storages.backends.s3boto3 import S3Boto3Storage
 
 from django.conf import settings
@@ -437,6 +439,46 @@ class Blob(TimeStampedModel):
         new_blob.index_blob()
 
         return new_blob
+
+    def update_cover_image(self, image):
+
+        s3_client = boto3.client("s3")
+
+        key = f"blobs/{self.uuid}/cover-large.jpg"
+        fo = io.BytesIO(image)
+        width, height = Image.open(fo).size
+        fo.seek(0)
+
+        s3_client.upload_fileobj(
+            fo,
+            settings.AWS_STORAGE_BUCKET_NAME,
+            key,
+            ExtraArgs={'Metadata': {"image-width": str(width),
+                                    "image-height": str(height),
+                                    "cover-image": "Yes"},
+                       "ContentType": "image/jpeg"}
+        )
+
+        key = f"blobs/{self.uuid}/cover.jpg"
+        fo = io.BytesIO(image)
+        cover_image_small = Image.open(fo)
+
+        size = 128, 128
+        cover_image_small.thumbnail(size)
+        width, height = cover_image_small.size
+        fo = io.BytesIO()
+        cover_image_small.save(fo, "jpeg")
+        fo.seek(0)
+
+        s3_client.upload_fileobj(
+            fo,
+            settings.AWS_STORAGE_BUCKET_NAME,
+            key,
+            ExtraArgs={'Metadata': {"image-width": str(width),
+                                    "image-height": str(height),
+                                    "cover-image": "Yes"},
+                       "ContentType": "image/jpeg"}
+        )
 
     def index_blob(self, file_changed=True, new_blob=True):
         """
