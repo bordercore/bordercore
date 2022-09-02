@@ -11,7 +11,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 from django.db.transaction import atomic
 
-from blob.models import Blob, set_s3_metadata_file_modified
+from blob.models import Blob
 
 
 class Command(BaseCommand):
@@ -75,7 +75,7 @@ class Command(BaseCommand):
                     self.stdout.write(f"{blob_info.uuid} File modification timestamp does not match. Fixing. mtime_s3={modified_time_s3}, mtime_file={modified_time_file}")
                     if not dry_run:
                         blob_info.file_modified = modified_time_file
-                        set_s3_metadata_file_modified(None, blob_info)
+                        blob_info.set_s3_metadata_file_modified()
                 elif verbose:
                     self.stdout.write(self.style.WARNING(f"{blob_info.uuid} S3 file modification timestamp exists and matches filesystem. Nothing to do."))
 
