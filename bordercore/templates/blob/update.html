@@ -150,15 +150,25 @@
 
                 <ul class="nav nav-tabs justify-content-center mb-2" role="tablist" aria-orientation="horizontal">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#" role="tab" data-bs-toggle="tab" data-bs-target="#section-main" aria-controls="v-pills-main" aria-selected="true">
+                        <a class="nav-link active" href="#" role="tab" data-bs-toggle="tab" data-bs-target="#section-main"
+                            aria-controls="v-pills-main" aria-selected="true">
                             Main
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" role="tab" data-bs-toggle="tab" data-bs-target="#section-metadata" aria-controls="v-pills-metadata" aria-selected="false">
+                        <a class="nav-link" href="#" role="tab" data-bs-toggle="tab" data-bs-target="#section-metadata"
+                            aria-controls="v-pills-metadata" aria-selected="false">
                             Metadata
                         </a>
                     </li>
+                    {% if object.is_pdf %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" role="tab" data-bs-toggle="tab" data-bs-target="#section-cover-image"
+                            aria-controls="v-pills-cover-image" aria-selected="false">
+                            Cover Image
+                        </a>
+                    </li>
+                    {% endif %}
                 </ul>
 
                 {% if form.errors %}
@@ -206,7 +216,7 @@
                                 {% if field.label != 'Filename' and field.name != 'is_note' and field.name != 'math_support' and field.name != 'importance' %}
 
                                     <div class="{% if field.errors %}error {% endif %}row mb-3">
-                                        <label class="fw-bold col-lg-2 col-sm-2 col-form-label text-end" for="inputTitle">{{ field.label }}</label>
+                                        <label class="fw-bold col-lg-2 col-sm-2 col-form-label text-end" for="id_{{ field.name }}">{{ field.label }}</label>
 
                                     {% if field.label == 'File' %}
 
@@ -288,87 +298,117 @@
 
                                     {% else %}
                                         <div class="col-lg-10 col-sm-10 align-self-center">
-                                    {{ field }}
+                                            {{ field }}
                                         </div>
-                                    {% endif %}
+                                        {% endif %}
 
-                                    </div>
+                                        </div>
 
                                 {% endif %}
 
                             {% endfor %}
 
-                        </div>
-
-                        <metadata-wrapper inline-template>
-                            <div id="section-metadata" class="tab-pane col-lg-12 fade">
-                                <div class="row mb-3">
-
-                                <div class="col-lg-2 col-sm-2">
-                                    <simple-suggest
-                                        ref="simpleSuggest"
-                                        id="simple-suggest"
-                                        search-url="{% url 'blob:metadata_name_search' %}?query="
-                                    >
-                                    </simple-suggest>
-                                </div>
-
-                                <div class="col-lg-10 col-sm-10">
-                                    <div class="input-group">
-                                        <metadata-input @add-metadata=addMetadata inline-template>
-                                            <input type="text" id="id_value" class="form-control" placeholder="Value" autocomplete="off" @keydown.enter.prevent="onKeyDown" />
-                                        </metadata-input>
-                                        <span class="input-group-append">
-                                            <add-metadata-button @add-metadata=addMetadata inline-template>
-                                                <button class="btn btn-success" type="button" @click="onClick">
-                                                <span>
-                                                    <font-awesome-icon icon="plus" class="metadata-icon" />
-                                                </span>
-                                                </button>
-                                            </add-metadata-button>
-                                        </span>
-                                    </div>
-                                </div>
-
+                            <div class="col-lg-10 offset-lg-2 d-flex">
+                                <button type="button" class="btn btn-primary" @click="submitForm">
+                                    {{ action }}
+                                </button>
+                                {% if object %}
+                                    <button class="btn btn-secondary d-flex ms-3" @click="onClickDelete">
+                                        Delete
+                                    </button>
+                                {% endif %}
                             </div>
 
-                            <metadata-list
-                                :metadata="metadata"
-                                @delete=deleteMetadata
-                                inline-template
-                            >
+                        </div>
+
+                        <div id="section-metadata" class="tab-pane col-lg-12 fade">
+                            <metadata-wrapper inline-template>
                                 <div>
-                                    <div v-for="m in metadata">
-                                        <div class="row mb-3 ">
-                                            <label class="fw-bold col-lg-2 col-sm-2 col-form-label text-end" for="inputTitle">[[ m.name ]]</label>
-                                            <div class="col-lg-10 col-sm-10">
-                                                <div class="input-group">
-                                                    <input type="text" :name="m.counter + '_' + m.name" :value="m.value" class="form-control" autocomplete="off" />
-                                                    <span class="input-group-append">
-                                                        <button class="btn btn-danger btn-remove" type="button" @click="$emit('delete', m.counter)">
+                                    <div class="row mb-3">
+
+                                        <div class="col-lg-2 col-sm-2">
+                                            <simple-suggest
+                                                ref="simpleSuggest"
+                                                id="simple-suggest"
+                                                search-url="{% url 'blob:metadata_name_search' %}?query="
+                                            >
+                                            </simple-suggest>
+                                        </div>
+
+                                        <div class="col-lg-10 col-sm-10">
+                                            <div class="input-group">
+                                                <metadata-input @add-metadata=addMetadata inline-template>
+                                                    <input type="text" id="id_value" class="form-control" placeholder="Value" autocomplete="off" @keydown.enter.prevent="onKeyDown" />
+                                                </metadata-input>
+                                                <span class="input-group-append">
+                                                    <add-metadata-button @add-metadata=addMetadata inline-template>
+                                                        <button class="btn btn-success" type="button" @click="onClick">
                                                             <span>
-                                                                <font-awesome-icon icon="times" class="metadata-icon" />
+                                                                <font-awesome-icon icon="plus" class="metadata-icon" />
                                                             </span>
                                                         </button>
-                                                    </span>
-                                                </div>
+                                                    </add-metadata-button>
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </metadata-list>
-                            </div>
-                        </metadata-wrapper>
 
-                        <div class="col-lg-10 offset-lg-2 d-flex">
-                            <button type="button" class="btn btn-primary" @click="submitForm">
-                                {{ action }}
-                            </button>
-                            {% if object %}
-                                <button class="btn btn-secondary d-flex ms-3" @click="onClickDelete">
-                                    Delete
+                                    <metadata-list
+                                        :metadata="metadata"
+                                        @delete=deleteMetadata
+                                        inline-template
+                                    >
+                                        <div>
+                                            <div v-for="m in metadata">
+                                                <div class="row mb-3 ">
+                                                    <label class="fw-bold col-lg-2 col-sm-2 col-form-label text-end">[[ m.name ]]</label>
+                                                    <div class="col-lg-10 col-sm-10">
+                                                        <div class="input-group">
+                                                            <input type="text" :name="m.counter + '_' + m.name" :value="m.value" class="form-control" autocomplete="off" />
+                                                            <span class="input-group-append">
+                                                                <button class="btn btn-danger btn-remove" type="button" @click="$emit('delete', m.counter)">
+                                                                    <span>
+                                                                    <font-awesome-icon icon="times" class="metadata-icon" />
+                                                                    </span>
+                                                                </button>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </metadata-list>
+                                </div>
+                            </metadata-wrapper>
+
+                            <div class="col-lg-10 offset-lg-2 d-flex">
+                                <button type="button" class="btn btn-primary" @click="submitForm">
+                                    {{ action }}
                                 </button>
-                            {% endif %}
+                                {% if object %}
+                                    <button class="btn btn-secondary d-flex ms-3" @click="onClickDelete">
+                                        Delete
+                                    </button>
+                                {% endif %}
+                            </div>
+
+                        </div>
+
+                        <div id="section-cover-image" class="tab-pane col-lg-12 fade">
+                            <div class="d-flex align-items-center">
+                                <div class="w-50">
+                                    Specify the PDF page number from which to extract the cover image. This usually takes a few seconds to update.
+                                </div>
+                                <div class="mb-3 d-flex">
+                                    <label class="fw-bold col-form-label text-end">Page Number</label>
+                                    <div class="d-flex ms-3">
+                                        <input type="number" min="1" value="{{ object.data.pdf_page_number|default:1 }}" size="3" class="form-control" autocomplete="off" id="id_page_number" />
+                                        <button type="button" class="btn btn-primary ms-3" @click="onUpdatePageNumber">
+                                            Update
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -495,7 +535,7 @@
         }
 
         const MetadataList = {
-            props: ['metadata']
+            props: ["metadata"]
         }
 
         const AddMetadataButton = {
@@ -554,7 +594,6 @@
                     // Clear the autocomplete and give it focus so that another name can be added
                     this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
                     window.setTimeout(() => { this.$refs.simpleSuggest.$refs.suggestComponent.inputElement.focus() }, 100);
-
                 },
                 deleteMetadata(counter) {
                     for (i = 0; i < this.metadata.length; i++) {
@@ -665,6 +704,12 @@
                 getDateFormat() {
                     return this.dateFormat;
                 },
+                getCoverImage() {
+                    // Add a datetime to bust the cache
+                    var url = new URL(document.getElementById("coverImage").src);
+                    url.searchParams.set("nocache", new Date().getTime());
+                    document.getElementById("coverImage").src = url;
+                },
                 onClickDateFormatStandard() {
                     this.dateFormat = "standard";
                     this.$store.state.date = this.$store.state.date + "-01-01T00:00";
@@ -684,6 +729,29 @@
                 },
                 onTagsFocus(tags) {
                     this.$store.state.showRelatedTags = true;
+                },
+                onUpdatePageNumber() {
+                    const pageNumber = document.getElementById("id_page_number").value;
+
+                    doPost(
+                        this,
+                        "{% url 'blob:update_page_number' %}",
+                        {
+                            "blob_uuid": "{{ object.uuid }}",
+                            "page_number": pageNumber,
+                        },
+                        (response) => {
+                            // Try four times to update the cover image, since
+                            //  it could take some time for the AWS lambda to run
+                            for (const timeout of [1000, 3000, 6000, 9000]) {
+                                setTimeout(() => {
+                                    this.getCoverImage();
+                                }, timeout);
+                            }
+                        },
+                        "",
+                        "",
+                    );
                 },
                 addCheckMarkToDateFormatMenu() {
                     // Indicate the current date format with a checkmark. Remove
@@ -705,7 +773,6 @@
                 },
                 {% endif %}
                 submitForm() {
-
                     // Add the 'name' attribute and contents to the internal
                     // textarea used by v-md-editor, which will then
                     // be submitted with the rest of the form.

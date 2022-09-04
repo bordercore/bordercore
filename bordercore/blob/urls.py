@@ -80,4 +80,9 @@ urlpatterns = [
         view=views.unlink,
         name="unlink"
     ),
+    path(
+        route="update_page_number",
+        view=views.update_page_number,
+        name="update_page_number"
+    ),
 ]

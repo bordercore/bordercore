@@ -1,7 +1,7 @@
 import io
 import time
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from urllib.parse import urlparse
 
 import factory
@@ -30,15 +30,16 @@ pytestmark = [pytest.mark.django_db, pytest.mark.views]
 faker = FakerFactory.create()
 
 
+def mock(*args, **kwargs):
+    pass
+
+
 @pytest.fixture
 def monkeypatch_collection(monkeypatch):
     """
     Prevent the collection object from interacting with AWS by
     patching out a method.
     """
-
-    def mock(*args, **kwargs):
-        pass
 
     monkeypatch.setattr(Collection, "create_collection_thumbnail", mock)
 
@@ -387,3 +388,27 @@ def test_blob_unlink(auto_login_user):
 
     linked_blob = Blob.objects.get(uuid=blob_1.uuid)
     assert linked_blob.blobs.count() == 0
+
+
+def test_blob_update_page_number(auto_login_user):
+
+    user, client = auto_login_user()
+
+    blob = BlobFactory.create(user=user)
+    page_number = 2
+
+    url = urls.reverse("blob:update_page_number")
+
+    # Patch out the call to invoke the AWS lambda to update
+    #  the blob's thumbnail
+    with patch("botocore.client.BaseClient._make_api_call", new=mock):
+
+        resp = client.post(url, {
+            "blob_uuid": blob.uuid,
+            "page_number": page_number
+        })
+
+        assert resp.status_code == 200
+
+    blob_updated = Blob.objects.get(uuid=blob.uuid)
+    assert blob_updated.data == {"pdf_page_number": page_number}

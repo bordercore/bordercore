@@ -12,12 +12,12 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 
 
-def create_thumbnail(infile, outdir):
+def create_thumbnail(infile, outdir, page_number=1):
 
     if is_image(infile):
         create_thumbnail_from_image(infile, outdir)
     elif is_pdf(infile):
-        create_thumbnail_from_pdf(infile, outdir, 1)
+        create_thumbnail_from_pdf(infile, outdir, page_number)
     elif is_video(infile):
         create_thumbnail_from_video(infile, outdir)
     else:
@@ -41,8 +41,8 @@ def create_thumbnail_from_pdf(infile, outdir, page_number=1):
 
     # Isolate the import here so other functions from this module
     #  can be imported without requiring these dependencies.
-    from PyPDF2 import PdfFileReader, PdfFileWriter
     from pdf2image import convert_from_path
+    from PyPDF2 import PdfFileReader, PdfFileWriter
 
     page_number = page_number - 1
 

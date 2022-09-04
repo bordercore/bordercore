@@ -5,6 +5,7 @@ import pprint
 import boto3
 
 import django
+from django.conf import settings
 
 django.setup()
 
@@ -23,7 +24,7 @@ def invoke(uuid):
                 "eventName": "ObjectCreated: Put",
                 "s3": {
                     "bucket": {
-                        "name": "bordercore-blobs",
+                        "name": settings.AWS_STORAGE_BUCKET_NAME,
                     },
                     "object": {
                         "key": f"blobs/{blob.uuid}/{blob.file}"

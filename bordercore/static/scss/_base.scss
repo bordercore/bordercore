@@ -1570,6 +1570,18 @@ div #dateapp {
   font-size: 0.75rem;
 }
 
+#section-cover-image {
+
+  div div:nth-child(1) {
+    padding-right: 8rem;
+    font-size: 1.25rem;
+  }
+
+  input {
+    max-width: 4rem;
+  }
+}
+
 //
 // Notes
 //

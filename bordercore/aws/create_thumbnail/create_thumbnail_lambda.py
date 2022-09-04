@@ -85,6 +85,9 @@ def handler(event, context):
             # Spaces are replaced with '+'s
             key = unquote_plus(sns_record["s3"]["object"]["key"])
 
+            # Look for an optional page number (for pdfs)
+            page_number = sns_record["s3"]["object"].get("page_number", 1)
+
             log.info(f"Creating cover image for {key}")
 
             p = PurePath(key)
@@ -110,7 +113,7 @@ def handler(event, context):
             download_path = f"{BLOBS_DIR}/{myuuid}-{filename}"
 
             s3_client.download_file(bucket, key, download_path)
-            create_thumbnail(download_path, f"{COVERS_DIR}/{myuuid}")
+            create_thumbnail(download_path, f"{COVERS_DIR}/{myuuid}", page_number)
 
             # Upload all cover images created (large or small) to S3
             for cover in glob.glob(f"{COVERS_DIR}/{myuuid}-cover*"):

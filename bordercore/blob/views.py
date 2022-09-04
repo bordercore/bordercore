@@ -576,3 +576,22 @@ def unlink(request):
     }
 
     return JsonResponse(response)
+
+
+def update_page_number(request):
+    """
+    Update the page number for a pdf that represents its cover image
+    """
+
+    blob_uuid = request.POST["blob_uuid"]
+    page_number = int(request.POST["page_number"])
+
+    blob = Blob.objects.get(uuid=blob_uuid)
+    blob.update_page_number(page_number)
+
+    response = {
+        "message": "Cover image will be updated soon",
+        "status": "OK"
+    }
+
+    return JsonResponse(response)

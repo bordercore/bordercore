@@ -18,7 +18,7 @@ from storages.backends.s3boto3 import S3Boto3Storage
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models, transaction
-from django.db.models import F
+from django.db.models import F, JSONField
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.urls import reverse
@@ -27,7 +27,8 @@ from bookmark.models import Bookmark
 from collection.models import Collection, CollectionObject
 from lib.mixins import SortOrderMixin, TimeStampedModel
 from lib.time_utils import get_date_from_pattern
-from lib.util import get_elasticsearch_connection, is_audio, is_image, is_video
+from lib.util import (get_elasticsearch_connection, is_audio, is_image, is_pdf,
+                      is_video)
 from node.services import delete_note_from_nodes
 from tag.models import Tag
 
@@ -83,6 +84,7 @@ class Blob(TimeStampedModel):
     is_note = models.BooleanField(default=False)
     is_indexed = models.BooleanField(default=True)
     math_support = models.BooleanField(default=False)
+    data = JSONField(null=True, blank=True)
     blobs = models.ManyToManyField("self", blank=True)
     bookmarks = models.ManyToManyField(Bookmark, through="SortOrderBlobBookmark")
 
@@ -353,6 +355,9 @@ class Blob(TimeStampedModel):
     def is_audio(self):
         return is_audio(self.file)
 
+    def is_pdf(self):
+        return is_pdf(self.file)
+
     def is_pinned_note(self):
         return self in self.user.userprofile.pinned_notes.all()
 
@@ -478,6 +483,50 @@ class Blob(TimeStampedModel):
                                     "image-height": str(height),
                                     "cover-image": "Yes"},
                        "ContentType": "image/jpeg"}
+        )
+
+    def update_page_number(self, page_number):
+
+        if self.data is None:
+            self.data = {"pdf_page_number": page_number}
+        else:
+            self.data["pdf_page_number"] = page_number
+        self.file_modified = None
+        self.save()
+
+        message = {
+            "Records": [
+                {
+                    "eventName": "ObjectCreated: Put",
+                    "s3": {
+                        "bucket": {
+                            "name": settings.AWS_STORAGE_BUCKET_NAME,
+                        },
+                        "object": {
+                            "key": f"blobs/{self.uuid}/{self.file}",
+                            "page_number": page_number
+                        }
+                    }
+                }
+            ]
+        }
+
+        payload = {
+            "Records": [
+                {
+                    "Sns": {
+                        "Message": json.dumps(message)
+                    }
+                }
+            ]
+        }
+
+        client = boto3.client("lambda")
+
+        client.invoke(
+            FunctionName="CreateThumbnail",
+            InvocationType="Event",
+            Payload=json.dumps(payload)
         )
 
     def index_blob(self, file_changed=True, new_blob=True):
