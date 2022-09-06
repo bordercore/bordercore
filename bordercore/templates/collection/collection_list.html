@@ -148,7 +148,7 @@
             methods: {
                 getCollectionList() {
                     if (this.filter) {
-                        const regex = new RegExp(this.filter, "i");
+                        const regex = new RegExp(`.*${this.filter}.*`, "i");
                         return this.items.filter((c) => !c.name.search(regex));
                     } else {
                         return this.items;
