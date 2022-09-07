@@ -196,19 +196,19 @@ class SearchListView(ListView):
             messages.add_message(self.request, messages.ERROR, f"Request Error: {e.status_code} {e.info['error']}")
             return []
 
-        # Django templates don't support variables with underscores or dots, so
-        #  we need to transform a few fields
         for index, _ in enumerate(results["hits"]["hits"]):
             match = results["hits"]["hits"][index]
+
+            # Django templates don't support variables with underscores or dots, so
+            #  we need to transform a few fields
             match["source"] = match.pop("_source")
+            match["score"] = match.pop("_score")
+            if "highlight" in match and "attachment.content" in match["highlight"]:
+                match["highlight"]["attachment_content"] = match["highlight"].pop("attachment.content")
 
             # Highlight matched terms using markdown italicized text when searching
             if search_term and "contents" in match["source"]:
                 match["source"]["contents"] = match["source"]["contents"].replace(search_term, f"*{search_term}*")
-
-            match["score"] = match.pop("_score")
-            if "highlight" in match and "attachment.content" in match["highlight"]:
-                match["highlight"]["attachment_content"] = match["highlight"].pop("attachment.content")
 
         return results
 
