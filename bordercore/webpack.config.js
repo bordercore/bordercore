@@ -1,5 +1,4 @@
 const path = require("path");
-const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const CompressionPlugin = require("compression-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const FixStyleOnlyEntriesPlugin = require("webpack-fix-style-only-entries");
@@ -44,8 +43,6 @@ module.exports = (env, argv) => {
             },
         },
         plugins: [
-            // new BundleAnalyzerPlugin({analyzerPort: 9999}),
-
             // Lint my SCSS
             new StylelintPlugin({
                 // By default compiler.options.output.path is included
@@ -57,12 +54,6 @@ module.exports = (env, argv) => {
 
             // Remove the boilerplate JS files from chunks of CSS only entries
             new FixStyleOnlyEntriesPlugin(),
-
-            // Compress the JavaScript bundles
-            new CompressionPlugin({
-                test: /\.js$/i,
-                deleteOriginalAssets: true,
-            }),
 
             // Extract generated CSS into separate files
             new MiniCssExtractPlugin({
@@ -118,6 +109,19 @@ module.exports = (env, argv) => {
 
     if (devMode) {
         config.output.filename = "[name]-bundle.js";
+    }
+
+    if (process.env.ANALYZER) {
+        const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+        config.plugins.push(new BundleAnalyzerPlugin({analyzerPort: 9999}));
+    } else {
+        // Compress the JavaScript bundles.
+        //  We include this here because it is not compatible
+        //  with the "webpack-bundle-analyzer" plugin.
+        config.plugins.push(new CompressionPlugin({
+            test: /\.js$/i,
+            deleteOriginalAssets: true,
+        }));
     }
 
     return config;
