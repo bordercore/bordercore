@@ -30,6 +30,8 @@ def get_fitness_summary(user, count_only=False):
 
     for e in exercises:
 
+        e.overdue = 0
+
         if e.last_active:
 
             # To determine when an exercise is overdue, convert the current datetime and the
@@ -44,9 +46,6 @@ def get_fitness_summary(user, count_only=False):
                 elif delta > e.frequency.days + 1:
                     # Exercise is overdue
                     e.overdue = 2
-                else:
-                    # Exercise is not overdue
-                    e.overdue = 0
 
             delta = timezone.now() - e.last_active
 
