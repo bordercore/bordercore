@@ -1,7 +1,15 @@
 <?xml version='1.1' encoding='UTF-8'?>
-<project>
-  <actions/>
-  <description></description>
+<flow-definition plugin="workflow-job@1207.ve6191ff089f8">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2114.v2654ca_721309"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2114.v2654ca_721309">
+      <jobProperties/>
+      <triggers/>
+      <parameters/>
+      <options/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description>Run Bordercore unit and functional tests</description>
   <keepDependencies>false</keepDependencies>
   <properties>
     <jenkins.model.BuildDiscarderProperty>
@@ -12,79 +20,29 @@
         <artifactNumToKeep>-1</artifactNumToKeep>
       </strategy>
     </jenkins.model.BuildDiscarderProperty>
+    <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+      <triggers/>
+    </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
   </properties>
-  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.10.3">
-    <configVersion>2</configVersion>
-    <userRemoteConfigs>
-      <hudson.plugins.git.UserRemoteConfig>
-        <url>/home/git/bordercore.git</url>
-      </hudson.plugins.git.UserRemoteConfig>
-    </userRemoteConfigs>
-    <branches>
-      <hudson.plugins.git.BranchSpec>
-        <name>*/master</name>
-      </hudson.plugins.git.BranchSpec>
-    </branches>
-    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
-    <submoduleCfg class="empty-list"/>
-    <extensions/>
-  </scm>
-  <canRoam>true</canRoam>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2759.v87459c4eea_ca_">
+    <script>pipeline {
+    agent any
+    stages {
+        stage(&quot;Run tests in docker container&quot;) {
+            steps {
+                sh &quot;docker run --rm --network=host bordercore-testing&quot;
+            }
+        }
+    }
+    post {
+        failure {
+            mail bcc: &apos;&apos;, body: &quot;Project: ${env.JOB_NAME}, Build Number: ${env.BUILD_NUMBER}, URL of build: ${env.BUILD_URL}&quot;, cc: &apos;&apos;, charset: &apos;UTF-8&apos;, from: &apos;&apos;, mimeType: &apos;text/plain&apos;, replyTo: &apos;&apos;, subject: &quot;ERROR CI: Project name -&gt; ${env.JOB_NAME}&quot;, to: &quot;jerrell@bordercore.com&quot;;  
+        }
+    }
+}
+</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
   <disabled>false</disabled>
-  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
-  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-  <triggers>
-    <hudson.triggers.SCMTrigger>
-      <spec>H/2 * * * *</spec>
-      <ignorePostCommitHooks>false</ignorePostCommitHooks>
-    </hudson.triggers.SCMTrigger>
-  </triggers>
-  <concurrentBuild>false</concurrentBuild>
-  <builders>
-    <jenkins.plugins.shiningpanda.builders.VirtualenvBuilder plugin="shiningpanda@0.24">
-      <pythonName>Python3</pythonName>
-      <home></home>
-      <clear>false</clear>
-      <systemSitePackages>false</systemSitePackages>
-      <nature>shell</nature>
-      <command>cd $WORKSPACE
-pip install -r $WORKSPACE/requirements/dev.txt
-export DATABASE_PASSWORD
-export DJANGO_SETTINGS_MODULE=config.settings.dev
-export PYTHONPATH=$PYTHONPATH:$WORKSPACE/bordercore:$WORKSPACE
-export DJANGO_LOG_DIR=&quot;/tmp&quot;
-export BORDERCORE_HOME=&quot;./bordercore&quot;
-export PATH=/opt/node-v14.16.0-linux-x64/bin:$PATH
-
-# Install webpack and generate JavaScript bundle
-npm --prefix=./bordercore/ init -y
-npm --prefix=./bordercore/ install webpack webpack-cli --save-dev
-npm --prefix=./bordercore/ run dev
-
-make test_unit test_functional
-</command>
-      <ignoreExitCode>false</ignoreExitCode>
-    </jenkins.plugins.shiningpanda.builders.VirtualenvBuilder>
-  </builders>
-  <publishers>
-    <hudson.tasks.Mailer plugin="mailer@408.vd726a_1130320">
-      <recipients>jerrell@bordercore.com</recipients>
-      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
-      <sendToIndividuals>false</sendToIndividuals>
-    </hudson.tasks.Mailer>
-  </publishers>
-  <buildWrappers>
-    <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@1.27.1">
-      <bindings>
-        <org.jenkinsci.plugins.credentialsbinding.impl.StringBinding>
-          <credentialsId>SECRET_KEY</credentialsId>
-          <variable>SECRET_KEY</variable>
-        </org.jenkinsci.plugins.credentialsbinding.impl.StringBinding>
-        <org.jenkinsci.plugins.credentialsbinding.impl.StringBinding>
-          <credentialsId>DATABASE_PASSWORD</credentialsId>
-          <variable>DATABASE_PASSWORD</variable>
-        </org.jenkinsci.plugins.credentialsbinding.impl.StringBinding>
-      </bindings>
-    </org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper>
-  </buildWrappers>
-</project>
+</flow-definition>

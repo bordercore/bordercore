@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Trigger a Jenkins job to run tests based on a git update.
+
+JENKINS_HOST=localhost
+JENKINS_PORT=8080
+JENKINS_USER=bordercore
+JENKINS_API_KEY=<api_key>
+JENKINS_JOB_NAME=Bordercore
+
+curl -X POST http://$JENKINS_HOST:$JENKINS_PORT/job/$JENKINS_JOB_NAME/build --user $JENKINS_USER:$JENKINS_API_KEY
