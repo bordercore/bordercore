@@ -325,6 +325,14 @@ span {
   @extend .hoverable-cells;
 }
 
+.text-name {
+  color: var(--text1);
+}
+
+.text-value {
+  color: var(--text4);
+}
+
 .icon-hover {
   color: var(--text3);
   &:hover {
@@ -608,7 +616,7 @@ a.tag {
     vertical-align: middle;
   }
 
-  table.is-hoverable tr {
+  table.is-hoverable tbody tr {
     @extend .hoverable-cells;
   }
 }

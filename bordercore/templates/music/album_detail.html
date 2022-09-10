@@ -102,19 +102,19 @@
                                 ref="table"
                                 header-class="cursor-pointer"
                                 sort-icon="chevron-up"
-                                :row-class="(row, index) => 'hover-target'"
+                                :row-class="(row, index) => 'hover-target cursor-pointer'"
                                 @cellclick="onSongClicked"
                             >
 
-                                <b-table-column field="track" label="#" cell-class="text-center" header-class="cursor-pointer text-center" v-slot="props">
+                                <b-table-column field="track" label="#" cell-class="text-center" header-class="text-center" v-slot="props">
                                     <span>[[ props.row.track ]]</span>
                                 </b-table-column>
 
-                                <b-table-column field="title" label="Title" header-class="cursor-pointer" v-slot="props">
+                                <b-table-column field="title" label="Title" v-slot="props">
                                     [[ props.row.title ]]
                                 </b-table-column>
 
-                                <b-table-column field="note" label="" header-class="cursor-pointer" sortable v-slot="props">
+                                <b-table-column field="note" label="" sortable v-slot="props">
                                     <span v-if="props.row.note">
                                         <a class="ms-1" href="#" @click="onShowNote(props.row)">
                                             <font-awesome-icon icon="sticky-note" class="glow text-primary"></font-awesome-icon>
@@ -122,7 +122,7 @@
                                     </span>
                                 </b-table-column>
 
-                                <b-table-column field="rating" label="Rating" header-class="cursor-pointer text-end" sortable v-slot="props">
+                                <b-table-column field="rating" label="Rating" header-class="text-end" v-slot="props">
                                     <div class="ms-auto">
                                         <div class="rating-container d-flex" :class="{'d-none': props.row.rating === ''}" @mouseleave="onMouseLeaveRatingContainer">
                                             <span
@@ -139,7 +139,7 @@
                                     </div>
                                 </b-table-column>
 
-                                <b-table-column field="length" label="Length" header-class="cursor-pointer" sortable v-slot="props">
+                                <b-table-column field="length" label="Length" v-slot="props">
                                     <span>[[ props.row.length ]]</span>
                                 </b-table-column>
 
