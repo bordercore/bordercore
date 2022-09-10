@@ -1,9 +1,10 @@
 # Django settings for bordercore project.
 
-import json
 import os
 import sys
 from pathlib import Path
+
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -12,14 +13,9 @@ PROJECT_DIR = BASE_DIR / "bordercore"
 sys.path.insert(0, str(PROJECT_DIR / "apps"))
 sys.path.insert(0, str(PROJECT_DIR / "lib"))
 
-# Read JSON-based secrets module, if present, and populate the environment
-try:
-    with open("{}/config/settings/secrets.json".format(BASE_DIR)) as f:
-        # secrets = json.loads(f.read())
-        for key, value in json.loads(f.read()).items():
-            os.environ[key] = value
-except FileNotFoundError:
-    pass
+# Read secrets env file and populate the environment
+
+load_dotenv("{}/config/settings/secrets.env".format(BASE_DIR))
 
 ADMINS = (
     ("F. Jerrell Schivers", "jerrell@bordercore.com"),

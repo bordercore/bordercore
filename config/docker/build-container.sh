@@ -1,3 +1,5 @@
+. ../settings/secrets.env
+
 docker build \
        --build-arg git_host=$GIT_HOST \
        --build-arg git_password=$GIT_PASSWORD \
