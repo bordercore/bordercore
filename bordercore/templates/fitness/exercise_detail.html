@@ -294,14 +294,14 @@
 
                                         <input type="hidden" name="workout-data" :value="workoutDataJson" />
 
-                                {% if latest_weight.0 %}
+                                {% if not recent_data or latest_weight.0 %}
                                     <div class="d-flex align-items-center my-2">
                                         <label class="w-50">Weight</label>
                                         <input class="form-control w-50 ms-3" type="text" name="weight" size="3" v-model="weight" autocomplete="off" />
                                     </div>
                                 {% endif %}
 
-                                {% if latest_duration.0 %}
+                                {% if not recent_data or latest_duration.0 %}
                                     <div class="d-flex align-items-center my-2">
                                         <label class="w-50">Duration</label>
                                         <input class="form-control w-50 ms-3" type="text" name="duration" size="3" v-model="duration" autocomplete="off" />
