@@ -40,7 +40,9 @@ def get_fitness_summary(user, count_only=False):
             if e.frequency:
                 delta = (timezone.now() - datetime.datetime(1970, 1, 1).astimezone()).days - \
                     (e.last_active - datetime.datetime(1970, 1, 1).astimezone()).days + 1
-                if delta == e.frequency.days + 1:
+                # If the delta mod frequency is zero and the workout was not earlier
+                #  in the day, then it's due today
+                if (delta - 1) % e.frequency.days == 0 and delta != 1:
                     # Exercise is due today
                     e.overdue = 1
                 elif delta > e.frequency.days + 1:
@@ -60,6 +62,7 @@ def get_fitness_summary(user, count_only=False):
         else:
             inactive_exercises.append(e)
 
+    active_exercises = sorted(active_exercises, key=lambda x: x.overdue, reverse=True)
     return active_exercises, inactive_exercises
 
 

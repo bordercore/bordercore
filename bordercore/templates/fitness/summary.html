@@ -14,7 +14,6 @@
                 :data="items_active"
                 :mobile-cards="false"
                 hoverable
-                default-sort="['overdue','desc']"
                 :row-class="rowClass"
                 sort-icon="chevron-up"
             >
@@ -22,7 +21,7 @@
                     <a :href="props.row.exercise_url">
                         [[ props.row.exercise ]]
                     </a>
-                    <span v-if="props.row.overdue === '2'" class="text-warning ms-3">
+                    <span v-if="props.row.overdue === 2" class="text-warning ms-3">
                         OVERDUE
                     </span>
                 </b-table-column>
@@ -111,7 +110,7 @@
                             {% if exercise.delta_days is not None %}
                             "delta_days": {{ exercise.delta_days }},
                             {% endif %}
-                            "overdue": "{{ exercise.overdue }}"
+                            "overdue": {{ exercise.overdue }}
                         },
                         {% endfor %}
                     ],
@@ -125,7 +124,7 @@
                             {% if exercise.delta_days %}
                             "delta_days": {{ exercise.delta_days }},
                             {% endif %}
-                            "overdue": "{{ exercise.overdue }}"
+                            "overdue": {{ exercise.overdue }}
                         },
                         {% endfor %}
                     ],
@@ -144,8 +143,8 @@
                 },
                 rowClass(row, index) {
                     if (!row) return;
-                    if (row.overdue === "1") return "selected";
-                    if (row.overdue === "2") return "overdue";
+                    if (row.overdue === 1) return "selected";
+                    if (row.overdue === 2) return "overdue";
                 },
             }
         });
