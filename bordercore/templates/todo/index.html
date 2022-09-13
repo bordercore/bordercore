@@ -243,21 +243,12 @@
                             this.filterPriorityOptions = response.data.priority_counts;
                             this.filterTimeOptions = response.data.created_counts;
                         },
-                        "Error todo list",
+                        "Error getting todo list",
                     );
                 },
                 removeSearchFilter() {
                     this.filterSearch = "";
                     this.search();
-                },
-                sortChanged(evt) {
-                    if (evt.sortBy === "") {
-                        sortable.option("disabled", false);
-                        this.fields[0].class = "drag-handle text-center cursor-grab";
-                    } else {
-                        sortable.option("disabled", true);
-                        this.fields[0].class = "drag-handle text-center";
-                    }
                 },
                 onDragOver(payload) {
                     payload.event.dataTransfer.dropEffect = "move";
@@ -273,6 +264,20 @@
                     payload.event.currentTarget.classList.remove("dragging");
                 },
                 onDrop(payload) {
+                    if (this.filterTime !== "" ||
+                        this.filterPriority !== "" ||
+                        this.filterTag === "") {
+                        EventBus.$emit(
+                            "toast",
+                            {
+                                "title": "Error",
+                                "body": "Drag and drop is only supported if only a tag filter is applied",
+                                "variant": "danger",
+                            },
+                        );
+                        return;
+                    }
+
                     const todoUuid = this.draggingRow.uuid;
                     const newIndex = payload.index;
 
