@@ -20,7 +20,7 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
 from blob.forms import BlobForm
-from blob.models import Blob, MetaData, RecentlyViewedBlob
+from blob.models import Blob, BlobBlob, MetaData, RecentlyViewedBlob
 from blob.services import get_recent_blobs, import_blob
 from collection.models import Collection, CollectionObject
 from lib.mixins import FormRequestMixin
@@ -592,6 +592,27 @@ def update_page_number(request):
     response = {
         "message": "Cover image will be updated soon",
         "status": "OK"
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def update_related_blob_note(request):
+
+    blob_1_uuid = request.POST["blob_1_uuid"]
+    blob_2_uuid = request.POST["blob_2_uuid"]
+    note = request.POST["note"]
+
+    bb = BlobBlob.objects.get(
+        blob_1__uuid=blob_1_uuid,
+        blob_2__uuid=blob_2_uuid
+    )
+    bb.note = note
+    bb.save()
+
+    response = {
+        "status": "OK",
     }
 
     return JsonResponse(response)

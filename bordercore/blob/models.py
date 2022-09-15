@@ -85,7 +85,7 @@ class Blob(TimeStampedModel):
     is_indexed = models.BooleanField(default=True)
     math_support = models.BooleanField(default=False)
     data = JSONField(null=True, blank=True)
-    blobs = models.ManyToManyField("self", blank=True)
+    blobs = models.ManyToManyField("blob.Blob", through="BlobBlob")
     bookmarks = models.ManyToManyField(Bookmark, through="SortOrderBlobBookmark")
 
     class Meta:
@@ -334,16 +334,17 @@ class Blob(TimeStampedModel):
             return False
 
     def get_related_blobs(self):
+
         return [
             {
-                "uuid": blob.uuid,
-                "name": blob.name,
-                "url": reverse("blob:detail", kwargs={"uuid": str(blob.uuid)}),
-                "cover_url": blob.get_cover_url_small()
+                "uuid": related.blob_2.uuid,
+                "name": related.blob_2.name,
+                "note": related.note,
+                "url": reverse("blob:detail", kwargs={"uuid": str(related.blob_2.uuid)}),
+                "cover_url": related.blob_2.get_cover_url_small()
             }
-
-            for blob in
-            self.blobs.all()
+            for related in
+            BlobBlob.objects.filter(blob_1=self).order_by("-created")
         ]
 
     def is_image(self):
@@ -714,6 +715,21 @@ class SortOrderBlobBookmark(SortOrderMixin):
         ordering = ("sort_order",)
         unique_together = (
             ("blob", "bookmark")
+        )
+
+
+class BlobBlob(TimeStampedModel):
+
+    blob_1 = models.ForeignKey(Blob, related_name="blob_1", on_delete=models.CASCADE)
+    blob_2 = models.ForeignKey(Blob, related_name="blob_2", on_delete=models.CASCADE)
+    note = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"Blob to Blob Relationship: {self.blob_1}, {self.blob_2}"
+
+    class Meta:
+        unique_together = (
+            ("blob_1", "blob_2")
         )
 
 

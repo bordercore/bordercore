@@ -85,4 +85,9 @@ urlpatterns = [
         view=views.update_page_number,
         name="update_page_number"
     ),
+    path(
+        route="related_blob/note/update",
+        view=views.update_related_blob_note,
+        name="update_related_blob_note"
+    ),
 ]

@@ -13,7 +13,7 @@ from django import urls
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import signals
 
-from blob.models import Blob
+from blob.models import Blob, BlobBlob
 from blob.tests.factories import BlobFactory
 from blob.views import (get_metadata_from_form, handle_linked_collection,
                         handle_metadata)
@@ -412,3 +412,27 @@ def test_blob_update_page_number(auto_login_user):
 
     blob_updated = Blob.objects.get(uuid=blob.uuid)
     assert blob_updated.data == {"pdf_page_number": page_number}
+
+
+def test_blob_update_related_blob_note(auto_login_user):
+
+    user, client = auto_login_user()
+
+    blob_1 = BlobFactory.create(user=user)
+    blob_2 = BlobFactory.create(user=user)
+
+    blob_1.blobs.add(blob_2)
+
+    note = faker.text()
+
+    url = urls.reverse("blob:update_related_blob_note")
+    resp = client.post(url, {
+        "blob_1_uuid": blob_1.uuid,
+        "blob_2_uuid": blob_2.uuid,
+        "note": note
+    })
+
+    assert resp.status_code == 200
+
+    linked_blob = BlobBlob.objects.get(blob_1=blob_1, blob_2=blob_2)
+    assert linked_blob.note == note
