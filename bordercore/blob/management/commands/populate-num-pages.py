@@ -5,8 +5,7 @@ import re
 import sys
 from pathlib import Path
 
-from PyPDF2 import PdfFileReader
-from PyPDF2.utils import PdfReadError
+import fitz
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -64,17 +63,8 @@ class Command(BaseCommand):
                     with open(x, "rb") as content_file:
                         content = content_file.read()
 
-                    f = io.BytesIO(content)
-
-                    try:
-                        input_pdf = PdfFileReader(f)
-                    except (TypeError, PdfReadError):
-                        continue
-
-                    try:
-                        num_pages = input_pdf.getNumPages()
-                    except (ValueError, PdfReadError):
-                        continue
+                    doc = fitz.open("pdf", io.BytesIO(content))
+                    num_pages = doc.page_count
 
                     result = self.update_metadata(blob.uuid, num_pages)
                     self.stdout.write(f" {blob.uuid} update num_pages to {num_pages}: {result}")

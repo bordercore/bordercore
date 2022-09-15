@@ -11,13 +11,12 @@ from pathlib import PurePath
 
 import boto3
 import elasticsearch_dsl
+import fitz
 import magic
 import requests
 from elasticsearch_dsl import DateRange
 from elasticsearch_dsl import Document as Document_ES
 from elasticsearch_dsl import Integer, Long, Range, Text
-from PyPDF2 import PdfFileReader
-from PyPDF2.utils import PdfReadError
 
 from lib.util import get_elasticsearch_connection, is_pdf, is_video
 
@@ -29,12 +28,12 @@ S3_BUCKET_NAME = "bordercore-blobs"
 DRF_TOKEN = os.environ.get("DRF_TOKEN")
 
 FILE_TYPES_TO_INGEST = [
-    'azw3',
-    'chm',
-    'epub',
-    'html',
-    'pdf',
-    'txt'
+    "azw3",
+    "chm",
+    "epub",
+    "html",
+    "pdf",
+    "txt"
 ]
 
 logging.getLogger().setLevel(logging.INFO)
@@ -236,9 +235,8 @@ def get_duration(filename):
 
 def get_num_pages(content):
 
-    input_pdf = PdfFileReader(io.BytesIO(content), strict=False)
-
-    return input_pdf.getNumPages()
+    doc = fitz.open("pdf", io.BytesIO(content))
+    return doc.page_count
 
 
 def delete_metadata(es, uuid):
@@ -340,7 +338,7 @@ def index_blob(**kwargs):
             try:
                 article.num_pages = get_num_pages(contents)
                 log.info(f"Number of pages: {article.num_pages}")
-            except (PdfReadError, TypeError, ValueError):
+            except (TypeError, ValueError):
                 # A pdf read failure can be caused by many
                 #  things. Ignore any such failures.
                 pass

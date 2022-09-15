@@ -1,8 +1,7 @@
 import logging
-import os
 import subprocess
-from pathlib import PurePath
 
+import fitz
 from PIL import Image
 
 from .util import is_image, is_pdf, is_video
@@ -39,37 +38,15 @@ def create_thumbnail_from_image(infile, outdir):
 
 def create_thumbnail_from_pdf(infile, outdir, page_number=1):
 
-    # Isolate the import here so other functions from this module
-    #  can be imported without requiring these dependencies.
-    from pdf2image import convert_from_path
-    from PyPDF2 import PdfFileReader, PdfFileWriter
-
     page_number = page_number - 1
-
-    # Ex: Comprehensive Report_p1.pdf
-    outfile = "{}_p{}.pdf".format(PurePath(infile).parent / PurePath(infile).stem, page_number)
-
-    input_pdf = PdfFileReader(open(infile, "rb"))
-
-    # Some documents are recognized as encrypted, even though they're not.
-    #  This is a workaround.
-    if input_pdf.getIsEncrypted():
-        input_pdf.decrypt('')
-
-    output = PdfFileWriter()
-    output.addPage(input_pdf.getPage(page_number))
-    outputStream = open(outfile, "wb")
-    output.write(outputStream)
-    outputStream.close()
-
-    # Convert the pdf page to jpg
-    pages = convert_from_path(outfile, dpi=150)
     cover_large = f"{outdir}-cover-large.jpg"
-    pages[0].save(cover_large, "JPEG")
+
+    doc = fitz.open(infile)
+    page = doc.load_page(page_number)
+    pix = page.get_pixmap(dpi=150)
+    pix.pil_save(cover_large)
 
     create_small_cover_image(cover_large, outdir)
-
-    os.remove(outfile)
 
 
 def create_thumbnail_from_video(infile, outdir):
@@ -78,7 +55,7 @@ def create_thumbnail_from_video(infile, outdir):
 
     # ffmpeg -ss 00:00:10  -i Fix*mp4 -vframes 1 -q:v 2 output.jpg
 
-    result = subprocess.run(
+    subprocess.run(
         [
             "ffmpeg",
             "-ss",

@@ -11,13 +11,12 @@ from pathlib import Path
 import boto3
 import botocore
 import factory
+import fitz
 import pytest
 from PIL import Image
 
 import django
 from django.conf import settings
-
-# import todo.models as todo_models
 
 try:
     from pyvirtualdisplay import Display
@@ -213,7 +212,11 @@ def _create_blob(**file_info):
     blob.sha1sum = hashlib.sha1(file_bytes).hexdigest()
     blob.save()
 
-    BlobFactory.index_blob(blob)
+    try:
+        BlobFactory.index_blob(blob)
+    except fitz.fitz.FileDataError:
+        # Ignore any errors when attempting to process the bogus pdf
+        pass
 
     return [blob]
 
