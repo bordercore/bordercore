@@ -85,7 +85,7 @@
                                 <div class="item-name me-2">
                                     [[ name ]]
                                 </div>
-                                <div class="item-value">
+                                <div class="item-value text-break">
                                     [[ value ]]
                                 </div>
                             </div>
@@ -404,7 +404,7 @@
                 </audio>
 
                 {% if blob.content %}
-                    <div class="blob-content table-borders mx-0 p-3" id="blob-detail-content" v-html="getContent()">
+                    <div class="blob-content table-borders mx-2 p-3" id="blob-detail-content" v-html="getContent()">
                     </div>
                 {% endif %}
 
