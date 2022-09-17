@@ -263,7 +263,7 @@
                                                 <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.name|default:"No name" }}</a>
                                                 {% if match.source.creators %} <small>{{ match.source.creators }}</small>{% endif %}
                                             </h4>
-                                            <h5 v-pre>{{ match.highlight.attachment_content.0 }}</h5>
+                                            <h5 v-pre>{{ match.highlight.attachment_content.0|safe }}</h5>
                                             <div>
                                                 {% for tag in match.source.tags %}
                                                     <a href="{% url 'search:kb_search_tag_detail' tag %}" class="tag">{{ tag }}</a>
