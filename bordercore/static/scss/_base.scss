@@ -1174,9 +1174,13 @@ blockquote > p {
 
 #top-search-filter {
   position: absolute;
-  top: 0.23rem;
-  right: 1rem;
+  top: 0.33rem;
+  right: 0.5rem;
   text-align: center;
+
+  &.tag {
+    padding: 0 0.6rem 0 0.6rem !important;
+  }
 
   i {
     position: relative;
