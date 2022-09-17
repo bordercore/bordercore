@@ -871,6 +871,33 @@ def search_names_es(user, search_term, doc_types):
                     }
                 }
             )
+        elif "media" in doc_types:
+            # 'media' isn't an official ES doctype, so treat this
+            #  as a search for a content type that matches either
+            #  an image or a video
+            doc_types.remove("media")
+            search_object["query"]["function_score"]["query"]["bool"]["must"].append(
+                {
+                    "bool": {
+                        "should": [
+                            {
+                                "wildcard": {
+                                    "content_type": {
+                                        "value": "image/*",
+                                    }
+                                }
+                            },
+                            {
+                                "wildcard": {
+                                    "content_type": {
+                                        "value": "video/*",
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            )
 
         search_object["query"]["function_score"]["query"]["bool"]["must"].append(
             {

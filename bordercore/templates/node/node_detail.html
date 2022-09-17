@@ -51,10 +51,10 @@
                     </a>
                 </li>
                 <li>
-                    <a class="dropdown-item" href="#" @click.prevent="onAddImage">
+                    <a class="dropdown-item" href="#" @click.prevent="onAddMedia">
                         <span v-cloak>
                             <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
-                            Add image
+                            Add media
                         </span>
                     </a>
                 </li>
@@ -227,11 +227,11 @@
 
             <object-select
                 :has-filter="false"
-                :initial-doctypes="['image']"
+                :initial-doctypes="['media']"
                 label="_objectSelectImage"
                 ref="objectSelectImage"
                 search-object-url="{% url 'search:search_names' %}"
-                title="Add Image"
+                title="Add Media"
                 @select-object="selectObjectImage"
             >
             </object-select>
@@ -276,7 +276,7 @@
                 onAddCollection() {
                     EventBus.$emit("open-collection-modal");
                 },
-                onAddImage() {
+                onAddMedia() {
                     EventBus.$emit("object-select-image");
                 },
                 onAddQuote() {
