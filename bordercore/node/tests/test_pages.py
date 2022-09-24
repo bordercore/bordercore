@@ -38,6 +38,7 @@ def _delete_input(action, search_input):
         send_keys(Keys.BACKSPACE). \
         perform()
 
+
 def _filtered_search(action, search_input, checkbox, name):
     """
     Perform a filtered search
@@ -50,6 +51,7 @@ def _filtered_search(action, search_input, checkbox, name):
         click(). \
         send_keys(name). \
         perform()
+
 
 @pytest.mark.parametrize("login", [reverse("node:list")], indirect=True)
 def test_node_list(node, bookmark, login, live_server, browser, settings):
@@ -71,15 +73,15 @@ def test_node_list(node, bookmark, login, live_server, browser, settings):
     action = ActionChains(browser)
     menu = page.collection_menu()
     action.move_to_element(menu).perform()
-    dropdown_menu_container = page.dropdown_menu_container(menu).click()
-    menu_item = page.menu_item(menu).click()
+    page.dropdown_menu_container(menu).click()
+    page.menu_item(menu).click()
 
     # Wait for the "Recent Blobs" menu to appear
     time.sleep(1)
 
     modal = page.select_object_modal()
     menu_items = page.recent_items(modal)
-    assert len(menu_items) == 5
+    assert len(menu_items) == 4
 
     search_input = page.search_input(modal)
 
