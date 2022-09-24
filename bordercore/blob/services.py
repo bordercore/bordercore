@@ -14,6 +14,7 @@ from instaloader import Post
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.core.files import File
 from django.core.files.temp import NamedTemporaryFile
 from django.urls import reverse
@@ -28,6 +29,9 @@ def get_recent_blobs(user, limit=10, skip_content=False):
     Return an annotated list of the most recently created blobs,
     along with counts of their doctypes.
     """
+
+    if "recent_blobs" in cache:
+        return cache.get("recent_blobs")
 
     search_object = {
         "query": {
@@ -116,6 +120,8 @@ def get_recent_blobs(user, limit=10, skip_content=False):
         returned_blob_list.append(props)
 
         doctypes[blob.doctype] += 1
+
+    cache.set("recent_blobs", (returned_blob_list, doctypes))
 
     return returned_blob_list, doctypes
 

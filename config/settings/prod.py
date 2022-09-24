@@ -5,6 +5,13 @@ import os
 
 from .base import *
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": "/var/tmp/django_cache",
+    }
+}
+
 LOGGING["handlers"]["bordercore"] = {
     "level": "DEBUG",
     "class": "logging.handlers.RotatingFileHandler",

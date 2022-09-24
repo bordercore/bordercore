@@ -29,6 +29,14 @@ INSTALLED_APPS += (
     "template_timings_panel",
 )
 
+# Use a dummy cache for dev
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+    }
+}
+
+
 DEBUG_TOOLBAR_PANELS = (
     "template_timings_panel.panels.TemplateTimings.TemplateTimings",
     "debug_toolbar.panels.cache.CachePanel",

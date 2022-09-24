@@ -17,6 +17,7 @@ from storages.backends.s3boto3 import S3Boto3Storage
 
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.db import models, transaction
 from django.db.models import F, JSONField
 from django.db.models.signals import pre_delete
@@ -300,6 +301,9 @@ class Blob(TimeStampedModel):
         # In that case we don't want to update its "file_modified" metadata.
         if self.file and self.file_modified:
             self.set_s3_metadata_file_modified()
+
+        # After every blob mutation, invalidate the "recent blobs" cache
+        cache.delete("recent_blobs")
 
     def set_s3_metadata_file_modified(self):
         """
@@ -685,7 +689,10 @@ class Blob(TimeStampedModel):
             # Pass false so FileField doesn't save the model.
             self.file.delete(False)
 
+        # After every blob mutation, invalidate the "recent blobs" cache
         delete_note_from_nodes(self.user, self.uuid)
+
+        cache.delete("recent_blobs")
 
 
 class MetaData(TimeStampedModel):

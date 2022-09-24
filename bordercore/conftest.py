@@ -59,6 +59,14 @@ except ModuleNotFoundError:
 # Add an extra Elasticsearch field to indicate test data
 settings.ELASTICSEARCH_EXTRA_FIELDS["__test__"] = 1
 
+# Use a dummy cache for testing
+settings.CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.dummy.DummyCache"
+    }
+}
+
+
 GECKO_DRIVER_LOGFILE = f"/tmp/geckodriver-{getpass.getuser()}.log"
 
 # Disable the Debug Toolbar and thereby prevent it
