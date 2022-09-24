@@ -142,7 +142,7 @@
                                             <td class="favicon p-2 align-top">
                                                 <span v-html="bookmark.favicon_url"></span>
                                             </td>
-                                            <td class="link w-100 p-2 align-top position-relative">
+                                            <td class="link w-100 p-2 align-top position-relative text-break">
                                                 <a :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.name) ]]</a>
                                                 <a v-for="tag in bookmark.tags" v-if="tag != $store.state.selectedTagName" class="tag ms-2 d-inline-block" @click.prevent="onClickTag" href="#">[[ tag ]]</a>
                                                 <div v-if="bookmark.note != null && bookmark.note != ''" class="table-note">
