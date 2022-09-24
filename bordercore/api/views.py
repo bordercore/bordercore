@@ -1,3 +1,4 @@
+from feed.models import Feed, FeedItem
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -9,7 +10,6 @@ from blob.models import Blob
 from bookmark.models import Bookmark
 from collection.models import Collection
 from drill.models import Question
-from feed.models import Feed, FeedItem
 from music.models import Album, Playlist, PlaylistItem, Song, SongSource
 from node.models import Node
 from quote.models import Quote
@@ -115,6 +115,8 @@ class BookmarkViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = BookmarkSerializer
     lookup_field = "uuid"
+    ordering_fields = ["created, modified"]
+    ordering = ["-created"]
 
     def get_queryset(self):
         return Bookmark.objects.filter(user=self.request.user)
@@ -312,13 +314,20 @@ class TodoViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = TodoSerializer
     lookup_field = "uuid"
+    ordering_fields = ["priority"]
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
     def get_queryset(self):
-        return Todo.objects.filter(
+        queryset = Todo.objects.filter(
             user=self.request.user
         ).prefetch_related(
             "tags"
         )
+
+        priority = self.request.query_params.get("priority")
+        if priority is not None:
+            queryset = queryset.filter(priority=priority)
+
+        return queryset

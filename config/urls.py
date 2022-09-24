@@ -1,3 +1,5 @@
+from book.views import BookListView
+from feed.views import update_feed_list
 from rest_framework import routers
 
 from django.conf import settings
@@ -9,11 +11,10 @@ from api.views import (AlbumViewSet, BlobSha1sumViewSet, BlobViewSet,
                        FeedViewSet, NodeViewSet, QuestionViewSet, QuoteViewSet,
                        SongSourceViewSet, SongViewSet, TagAliasViewSet,
                        TagNameViewSet, TagViewSet, TodoViewSet)
-from book.views import BookListView
 from bordercore.api.views import PlaylistItemViewSet, PlaylistViewSet
 from collection.views import get_images
-from feed.views import update_feed_list
 from homepage.views import handler403, handler404, handler500
+from lib.services import site_stats
 
 admin.autodiscover()
 
@@ -63,6 +64,7 @@ urlpatterns += [
     re_path(r"^api/", include(router.urls)),
     path("api/feeds/update_feed_list/<uuid:feed_uuid>/", update_feed_list),
     path("api/collections/images/<uuid:collection_uuid>/", get_images),
+    path("api/site/stats", site_stats),
     path("", include("rest_framework.urls", namespace="rest_framework"))
 ]
 

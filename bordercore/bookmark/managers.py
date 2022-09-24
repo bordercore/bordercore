@@ -4,7 +4,7 @@ from django.db import models
 
 class BookmarkManager(models.Manager):
 
-    def bare_bookmarks(self, user, limit=10, sort=True):
+    def bare_bookmarks(self, user, limit=10, sort=True, count_only=False):
         """
         Return all untagged bookmarks not associated with other objects
         """
@@ -21,7 +21,9 @@ class BookmarkManager(models.Manager):
         if sort:
             query = query.order_by("-created")
 
-        if limit:
+        if count_only:
+            query = query.count()
+        elif limit:
             query = query[:limit]
 
         return query
