@@ -77,7 +77,7 @@
                                 </drop-down-menu>
                             </div>
                             <h3>
-                                <a href="{% url 'music:artist_detail' album.artist.uuid %}">{{ album.artist.name }}</a>
+                                <a href="{% url 'music:artist_detail' album.artist.uuid %}">{{ album.artist.name|safe }}</a>
                             </h3>
 
                             <h6>{{ album.year }}</h6>

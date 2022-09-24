@@ -1,3 +1,4 @@
+import string
 from urllib.parse import unquote
 
 from django.conf import settings
@@ -9,7 +10,7 @@ from django.urls import reverse
 from lib.time_utils import convert_seconds
 from lib.util import get_elasticsearch_connection
 
-from .models import Album, Playlist, PlaylistItem
+from .models import Album, Artist, Playlist, PlaylistItem
 
 SEARCH_LIMIT = 1000
 
@@ -151,3 +152,50 @@ def search(user, artist_name):
         in
         results["aggregations"]["distinct_artists"]["buckets"]
     ]
+
+
+def get_unique_artist_letters(user):
+    """
+    Get a unique list of the first letter of every artist name
+    """
+    unique_letters = set()
+    queryset = Artist.objects.filter(user=user) \
+                             .filter(album__isnull=False) \
+                             .distinct("name")
+
+    for artist in queryset:
+        first_letter = artist.name.lower()[0]
+        if first_letter not in list(string.ascii_lowercase):
+            unique_letters.add("other")
+        else:
+            unique_letters.add(first_letter)
+
+    return unique_letters
+
+
+def get_artist_counts(user, letter):
+    """
+    For all artists whose name starts with the specified letter,
+    get their total song and album counts
+    """
+    album_counts = Artist.objects.filter(name__istartswith=letter) \
+        .filter(user=user) \
+        .filter(album__isnull=False) \
+        .annotate(album_count=Count("album"))
+
+    song_counts = Artist.objects.filter(name__istartswith=letter) \
+        .filter(user=user) \
+        .annotate(song_count=Count("song"))
+
+    album_counts_dict = {}
+    for artist in album_counts:
+        album_counts_dict[str(artist.uuid)] = artist.album_count
+
+    song_counts_dict = {}
+    for artist in song_counts:
+        song_counts_dict[str(artist.uuid)] = artist.song_count
+
+    return {
+        "album_counts": album_counts_dict,
+        "song_counts": song_counts_dict
+    }

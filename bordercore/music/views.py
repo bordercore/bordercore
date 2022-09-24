@@ -2,6 +2,7 @@ import io
 import json
 import os
 import re
+import string
 import uuid
 from datetime import timedelta
 
@@ -31,8 +32,10 @@ from music.services import search as search_service
 
 from .forms import AlbumForm, PlaylistForm, SongForm
 from .models import Album, Artist, Playlist, PlaylistItem, Song
-from .services import get_playlist_counts, get_playlist_songs
+from .services import (get_artist_counts, get_playlist_counts,
+                       get_playlist_songs)
 from .services import get_recent_albums as get_recent_albums_service
+from .services import get_unique_artist_letters
 
 
 @login_required
@@ -130,6 +133,52 @@ class ArtistDetailView(TemplateView):
             "album_list": albums,
             "song_list": song_list,
             "compilation_album_list": compilation_songs,
+        }
+
+
+@method_decorator(login_required, name="dispatch")
+class AlbumListView(ListView):
+
+    template_name = "music/album_list.html"
+
+    def get_queryset(self):
+        selected_letter = self.request.GET.get("letter", "a")
+
+        queryset = Artist.objects.filter(user=self.request.user) \
+                                 .filter(album__isnull=False)
+
+        if selected_letter == "other":
+            # "other" includes every artist whose name
+            #  doesn't start with a letter
+            queryset = queryset.exclude(
+                Q(*[
+                    ("name__istartswith", letter)
+                    for letter in
+                    list(string.ascii_lowercase)
+                ], _connector=Q.OR)
+            )
+        else:
+            queryset = queryset.filter(name__istartswith=selected_letter)
+        queryset = queryset.distinct("name").order_by("name")
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        selected_letter = self.request.GET.get("letter", "a")
+        artist_counts = get_artist_counts(self.request.user, selected_letter)
+
+        for artist in self.object_list:
+            artist.album_counts = artist_counts["album_counts"][str(artist.uuid)]
+            artist.song_counts = artist_counts["song_counts"][str(artist.uuid)]
+
+        return {
+            **context,
+            "nav": list(string.ascii_lowercase) + ["other"],
+            "title": "Album List",
+            "selected_letter": selected_letter,
+            "unique_artist_letters": get_unique_artist_letters(self.request.user)
         }
 
 

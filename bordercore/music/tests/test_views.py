@@ -63,6 +63,16 @@ def test_music_song_update(auto_login_user, song, song_source):
     assert resp.status_code == 200
 
 
+def test_music_album_list(auto_login_user, song):
+
+    _, client = auto_login_user()
+
+    url = urls.reverse("music:album_list")
+    resp = client.get(url)
+
+    assert resp.status_code == 200
+
+
 def test_music_album_detail(auto_login_user, song):
 
     _, client = auto_login_user()

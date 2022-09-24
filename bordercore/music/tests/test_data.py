@@ -216,4 +216,4 @@ def test_song_in_s3_exist_on_filesystem():
                 else:
                     path = f"/home/media/music/{first_letter_dir}/{sanitize_filename(song_cache[uuid].artist.name)}/{sanitize_filename(song_cache[uuid].title)}.mp3"
 
-                assert Path(path).is_file(), f"Song_Cache[Uuid] in S3 not found on filesystem: {song_cache[uuid].uuid} {path}"
+                assert Path(path).is_file(), f"{song_cache[uuid]} in S3 not found on filesystem: {song_cache[uuid].uuid} {path}"
