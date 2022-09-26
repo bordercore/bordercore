@@ -81,7 +81,7 @@ def test_node_list(node, bookmark, login, live_server, browser, settings):
 
     modal = page.select_object_modal()
     menu_items = page.recent_items(modal)
-    assert len(menu_items) == 4
+    assert len(menu_items) == 5
 
     search_input = page.search_input(modal)
 

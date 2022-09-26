@@ -1,5 +1,6 @@
 import os
 import urllib.request
+import uuid
 from unittest.mock import MagicMock, Mock, patch
 from urllib.parse import urlparse
 
@@ -7,9 +8,9 @@ from faker import Factory as FakerFactory
 from instaloader.instaloader import Instaloader
 
 from blob.models import Blob
-from blob.services import (get_authors, get_recent_blobs, import_artstation,
-                           import_instagram, import_newyorktimes, parse_date,
-                           parse_shortcode)
+from blob.services import (get_authors, get_blob_naturalsize, get_recent_blobs,
+                           import_artstation, import_instagram,
+                           import_newyorktimes, parse_date, parse_shortcode)
 
 faker = FakerFactory.create()
 
@@ -22,7 +23,7 @@ def test_get_recent_blobs(auto_login_user, blob_image_factory, blob_text_factory
 
     assert doctypes["image"] == 1
     assert doctypes["document"] == 3
-    assert doctypes["all"] == 10
+    assert doctypes["all"] == 4
 
     assert blob_image_factory[0].name in [
         x["name"]
@@ -35,6 +36,23 @@ def test_get_recent_blobs(auto_login_user, blob_image_factory, blob_text_factory
         for x in
         blob_list
     ]
+
+
+def test_get_blob_naturalizesize():
+
+    blob_uuid = str(uuid.uuid4)
+    blob = {
+        "uuid": blob_uuid
+    }
+
+    blob_sizes = {
+        blob_uuid: {
+            "size": 66666
+        }
+    }
+
+    get_blob_naturalsize(blob_sizes, blob)
+    assert blob["content_size"] == "66.7 kB"
 
 
 class MockInstaloaderPostResponse:

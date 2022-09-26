@@ -26,104 +26,98 @@ from lib.util import get_elasticsearch_connection, is_image, is_pdf, is_video
 
 def get_recent_blobs(user, limit=10, skip_content=False):
     """
-    Return an annotated list of the most recently created blobs,
+    Return a list of the most recently created blobs,
     along with counts of their doctypes.
     """
 
     if "recent_blobs" in cache:
         return cache.get("recent_blobs")
 
-    search_object = {
-        "query": {
-            "bool": {
-                "must": [
-                    {
-                        "term": {
-                            "user_id": user.id
-                        }
-                    },
-                    {
-                        "bool": {
-                            "should": [
-                                {
-                                    "term": {
-                                        "doctype": "blob"
-                                    }
-                                },
-                                {
-                                    "term": {
-                                        "doctype": "document"
-                                    }
-                                },
-                                {
-                                    "term": {
-                                        "doctype": "book"
-                                    }
-                                },
-                            ]
-                        }
-                    },
-                ]
-            }
-        },
-        "sort": {"created_date": {"order": "desc"}},
-        "from": 0, "size": limit,
-        "_source": ["created_date", "size", "uuid", "name"]
-    }
+    blob_list = Blob.objects.filter(
+        user=user
+    ).prefetch_related(
+        "tags", "metadata"
+    ).order_by(
+        "-created"
+    )[:limit]
 
-    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT, timeout=5)
-
-    results = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+    blob_sizes = get_blob_sizes(blob_list)
 
     doctypes = defaultdict(int)
-    doctypes["all"] = len(results["hits"]["hits"])
-
-    # Prefetch all matched blobs from the database in one query, rather
-    #  than using a separate query for each one in the loop below.
-    uuid_list = [x["_source"]["uuid"] for x in results["hits"]["hits"]]
-    blob_list = Blob.objects.filter(uuid__in=uuid_list).prefetch_related("tags", "metadata")
+    doctypes["all"] = len(blob_list)
 
     returned_blob_list = []
 
-    for match in results["hits"]["hits"]:
-
-        try:
-            blob = next(x for x in blob_list if str(x.uuid) == match["_source"]["uuid"])
-        except StopIteration:
-            # Handle a race condition in which a blob has just been deleted by the user
-            #  but the corresponding document in Elasticsearch is still in the
-            #  process of being removed.
-            continue
-
+    for blob in blob_list:
         delta = timezone.now() - blob.modified
 
-        props = {
+        blob_dict = {
             "name": blob.name,
             "tags": blob.get_tags(),
             "url": reverse("blob:detail", kwargs={"uuid": blob.uuid}),
             "delta_days": delta.days,
-            "uuid": blob.uuid,
+            "uuid": str(blob.uuid),
             "doctype": blob.doctype,
         }
 
         if blob.content and not skip_content:
-            props["content"] = blob.content[:10000]
-            props["content_size"] = humanize.naturalsize(len(blob.content))
+            blob_dict["content"] = blob.content[:10000]
+            blob_dict["content_size"] = humanize.naturalsize(len(blob.content))
 
-        if "size" in match["_source"]:
-            props["content_size"] = humanize.naturalsize(match["_source"]["size"])
+        get_blob_naturalsize(blob_sizes, blob_dict)
 
         if is_image(blob.file) or is_pdf(blob.file) or is_video(blob.file):
-            props["cover_url"] = blob.get_cover_url(size="large")
-            props["cover_url_small"] = blob.get_cover_url(size="small")
+            blob_dict["cover_url"] = blob.get_cover_url(size="large")
+            blob_dict["cover_url_small"] = blob.get_cover_url(size="small")
 
-        returned_blob_list.append(props)
+        returned_blob_list.append(blob_dict)
 
         doctypes[blob.doctype] += 1
 
     cache.set("recent_blobs", (returned_blob_list, doctypes))
 
     return returned_blob_list, doctypes
+
+
+def get_blob_sizes(blob_list):
+    """
+    Query Elasticsearch for the sizes of a list of blobs
+    """
+
+    search_object = {
+        "query": {
+            "bool": {
+                "should": [
+                    {
+                        "term": {
+                            "_id": str(x.uuid)
+                        }
+                    }
+                    for x
+                    in blob_list
+                ]
+            }
+        },
+        "_source": ["size", "uuid"]
+    }
+
+    es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT, timeout=5)
+    found = es.search(index=settings.ELASTICSEARCH_INDEX, body=search_object)
+
+    blob_cache = {}
+    for match in found["hits"]["hits"]:
+        blob_cache[match["_source"]["uuid"]] = match["_source"]
+
+    return blob_cache
+
+
+def get_blob_naturalsize(blob_sizes, blob):
+    """
+    Get a humanized size for a blob, when given in bytes
+    """
+
+    if blob["uuid"] in blob_sizes and "size" in blob_sizes[blob["uuid"]]:
+        blob["content_size"] = humanize.naturalsize(blob_sizes[blob["uuid"]]["size"])
 
 
 def import_blob(user, url):

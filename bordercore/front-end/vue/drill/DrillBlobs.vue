@@ -117,10 +117,6 @@
                 default: "url",
                 type: String,
             },
-            recentBlobsUrl: {
-                default: "url",
-                type: String,
-            },
             newQuestion: {
                 default: false,
                 type: Boolean,
