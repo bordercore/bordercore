@@ -1087,7 +1087,7 @@ table.b-table th {
 }
 
 ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
-  color: var(--text1) !important;
+  color: var(--form-color) !important;
   opacity: 1 !important; /* Firefox */
 }
 
@@ -1884,7 +1884,7 @@ div #dateapp {
   input.form-control {
     height: calc(1.5em + 0.75rem + 0.5rem);
     border-radius: 0.25rem;
-    font-size: 0.8rem;
+    font-size: 1.0rem;
   }
 
   #tag-name {

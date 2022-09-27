@@ -217,42 +217,41 @@ class Question(TimeStampedModel):
 
         questions = []
 
+        questions = Question.objects.filter(
+            user=user
+        )
+
         if session_type == "favorites":
             questions = Question.objects.filter(
-                user=user,
                 is_favorite=True
-            ).order_by("?").values("uuid")
-        elif session_type == "tag-needing-review":
-            questions = Question.objects.filter(
-                user=user
             )
+        elif session_type == "tag-needing-review":
             for tag in param.split(","):
                 questions = questions.filter(
                     tags__name=tag
                 )
-            if filter == "review":
-                questions = questions.filter(
-                    Q(interval__lte=timezone.now() - F("last_reviewed"))
-                    | Q(last_reviewed__isnull=True)
-                    | Q(state="L")
-                )
-            questions = questions.order_by("?").values("uuid")
         elif session_type == "learning":
             questions = Question.objects.filter(
-                user=user,
                 state="L"
-            ).order_by("?").values("uuid")
-        elif session_type == "random":
-            count = int(param)
-            questions = Question.objects.filter(
-                user=user
-            ).order_by("?").values("uuid")[:count]
+            )
         elif session_type == "search":
             questions = Question.objects.filter(
                 Q(question__icontains=param)
                 | Q(answer__icontains=param),
-                user=user
-            ).order_by("?").values("uuid")
+            )
+
+        if filter == "review":
+            questions = questions.filter(
+                Q(interval__lte=timezone.now() - F("last_reviewed"))
+                | Q(last_reviewed__isnull=True)
+                | Q(state="L")
+            )
+
+        questions = questions.order_by("?").values("uuid")
+
+        if session_type == "random":
+            count = int(param)
+            questions = questions[:count]
 
         if questions:
             session["drill_study_session"] = {

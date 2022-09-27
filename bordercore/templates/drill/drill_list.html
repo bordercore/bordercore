@@ -26,7 +26,9 @@
                     </span>
                         <div class="text-secondary mt-3">
                             <small>
-                            {% if request.session.drill_study_session.type == "favorites" %}
+                            {% if request.session.drill_study_session.type == "all" %}
+                                Currently studying <strong>all questions</strong>.
+                            {% elif request.session.drill_study_session.type == "favorites" %}
                                 Currently studying your <strong>favorite questions</strong>.
                             {% elif request.session.drill_study_session.type == "tag-needing-review" %}Currently studying tag{% if "," in request.session.drill_study_session.tag %}s{% endif %} <strong>{{ request.session.drill_study_session.tag }}</strong>.
                             {% elif request.session.drill_study_session.type == "learning" %}
@@ -303,41 +305,38 @@
                         <hr />
                     </h5>
 
-                    <div class="form-check mt-3">
+                    <div class="form-check d-flex align-items-center mt-3">
+                        <input class="form-check-input" type="radio" name="flexRadioDefault" value="all" v-model="picked">
+                        <label class="form-check-label ms-2" for="flexRadioDefault1">
+                            All questions
+                        </label>
+                    </div>
+
+                    <div class="form-check d-flex align-items-center mt-3">
                         <input class="form-check-input" type="radio" name="flexRadioDefault" value="favorites" v-model="picked">
-                        <label class="form-check-label" for="flexRadioDefault1">
+                        <label class="form-check-label ms-2" for="flexRadioDefault1">
                             Favorite questions
                         </label>
                     </div>
 
-                    <div class="form-check mt-3">
+                    <div class="form-check d-flex align-items-center mt-3">
                         <input class="form-check-input" type="radio" name="flexRadioDefault" value="learning" v-model="picked">
-                        <label class="form-check-label" for="flexRadioDefault1">
+                        <label class="form-check-label ms-2" for="flexRadioDefault1">
                             Questions to learn
                         </label>
                     </div>
 
-                    <div class="form-check mt-3">
+                    <div class="form-check d-flex align-items-center mt-3">
                         <input class="form-check-input" type="radio" name="flexRadioDefault" value="tag-needing-review" v-model="picked">
-                        <label class="form-check-label d-flex" for="flexRadioDefault1">
+                        <label class="form-check-label ms-2 d-flex align-items-center" for="flexRadioDefault1">
                             <div class="me-4">Tag</div>
                             <tags-input search-url="{% url 'tag:search' %}?doctype=drill&query=" id="tag-name" place-holder="Tag name"></tags-input>
                         </label>
                     </div>
 
-                    <div class="d-flex align-items-center mt-3 ms-4">
-                        <div class="me-3">
-                            Filter
-                        </div>
-                        <select class="form-control form-select" id="question-filter">
-                            <option value="review" selected>Questions needing review</option>
-                            <option value="all">All questions</option>
-                        </select>
-                    </div>
-
-                    <div class="form-check mt-3">
+                    <div class="form-check d-flex align-items-center mt-3">
                         <input class="form-check-input" type="radio" name="flexRadioDefault" value="random" v-model="picked">
-                        <label class="form-check-label d-flex" for="flexRadioDefault1">
+                        <label class="form-check-label ms-2 d-flex align-items-center" for="flexRadioDefault1">
                             <div class="me-3">Random questions, count of</div>
                             <select class="form-control form-select" id="study-random-count">
                                 <option value="5">5</option>
@@ -348,12 +347,23 @@
                         </label>
                     </div>
 
-                    <div class="form-check mt-3">
+                    <div class="form-check d-flex align-items-center mt-3">
                         <input class="form-check-input" type="radio" name="flexRadioDefault" value="search" v-model="picked">
-                        <label class="form-check-label d-flex" for="flexRadioDefault1">
+                        <label class="form-check-label ms-2 d-flex align-items-center" for="flexRadioDefault1">
                             <div class="me-3">Questions matching search</div>
                             <input class="form-control" id="search-term" placeholder="Search term" autocomplete="off" />
                         </label>
+                    </div>
+
+                    <hr />
+                    <div class="d-flex align-items-center my-3">
+                        <div class="me-3">
+                            Filter
+                        </div>
+                        <select class="form-control form-select" id="question-filter">
+                            <option value="review" selected>Questions needing review</option>
+                            <option value="all">All questions</option>
+                        </select>
                     </div>
 
                     <a id="start-study-session" href="#" type="button" class="btn btn-primary mt-2" @click="onClick">Study</a>
@@ -518,16 +528,18 @@
             el: "#modal-study",
             data() {
                 return {
-                    picked: "favorites"
+                    picked: "all"
                 }
             },
             methods: {
                 onClick() {
-                    if (this.picked === "favorites") {
-                        window.location = "{% url 'drill:start_study_session' 'favorites' %}";
+                    const filter = document.getElementById("question-filter").value;
+                    if (this.picked === "all") {
+                        window.location = "{% url 'drill:start_study_session' 'all' %}?filter=" + filter;
+                    } else if (this.picked === "favorites") {
+                        window.location = "{% url 'drill:start_study_session' 'favorites' %}?filter=" + filter;
                     } else if (this.picked === "tag-needing-review") {
                         const tag = document.getElementsByName("tags")[0].value;
-                        const filter = document.getElementById("question-filter").value;
                         if (tag) {
                             window.location = "{% url 'drill:start_study_session_tag' 666 %}?filter=".replace(/666/, tag) + filter;
                         }
@@ -535,11 +547,11 @@
                         window.location = "{% url 'drill:start_study_session' 'learning' %}";
                     } else if (this.picked === "random") {
                         const count = document.getElementById("study-random-count").value;
-                        window.location = "{% url 'drill:start_study_session_random' 666 %}".replace(/666/, count);
+                        window.location = "{% url 'drill:start_study_session_random' 666 %}?filter=".replace(/666/, count) + filter;
                     } else if (this.picked === "search") {
                         const search_term = document.getElementById("search-term").value;
                         if (search_term) {
-                            window.location = "{% url 'drill:start_study_session_search' 666 %}".replace(/666/, search_term);
+                            window.location = "{% url 'drill:start_study_session_search' 666 %}?filter".replace(/666/, search_term) + filter;
                         }
                     }
                 }
