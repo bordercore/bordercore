@@ -9,12 +9,14 @@ import time
 from itertools import cycle
 
 import requests
+from rich import box
 from rich.color import Color, parse_rgb_hex
 from rich.console import Console
 from rich.layout import Layout
 from rich.live import Live
 from rich.panel import Panel
 from rich.style import Style
+from rich.table import Table
 from rich.text import Text
 
 
@@ -65,8 +67,7 @@ class Dashboard():
 
     def update_bookmarks(self):
         headers = {"Authorization": f"Token {self.DRF_TOKEN}"}
-        # r = session.get("https://www.bordercore.com/api/bookmarks/?ordering=-created", headers=headers)
-        r = session.get("http://localhost:8000/api/bookmarks/?ordering=-created", headers=headers)
+        r = session.get("https://www.bordercore.com/api/bookmarks/?ordering=-created", headers=headers)
 
         if r.status_code != 200:
             raise Exception(f"Error when accessing Bordercore REST API: status code={r.status_code}")
@@ -89,7 +90,7 @@ class Dashboard():
 
     def update_todos(self):
         headers = {"Authorization": f"Token {self.DRF_TOKEN}"}
-        r = session.get("http://localhost:8000/api/todos/?priority=1", headers=headers)
+        r = session.get("https://www.bordercore.com/api/todos/?priority=1", headers=headers)
 
         if r.status_code != 200:
             raise Exception(f"Error when accessing Bordercore REST API: status code={r.status_code}")
@@ -112,7 +113,7 @@ class Dashboard():
 
     def update_stats(self):
         headers = {"Authorization": f"Token {self.DRF_TOKEN}"}
-        r = session.get("http://localhost:8000/api/site/stats", headers=headers)
+        r = session.get("https://www.bordercore.com/api/site/stats", headers=headers)
 
         if r.status_code != 200:
             raise Exception(f"Error when accessing Bordercore REST API: status code={r.status_code}")
@@ -124,11 +125,19 @@ class Dashboard():
                 Color.from_rgb(184, 40, 165)
             ]
         )
-        percentage = int(info["untagged_bookmarks"] / info["bookmarks_total"] * 100)
-        text = Text()
-        text.append(f"Untagged Bookmarks: {info['untagged_bookmarks']} ({percentage}%)", style=Style(color=next(colors)))
+
+        table = Table(
+            box=box.SIMPLE,
+            style=Style(color=Color.from_rgb(184, 40, 165)),
+            header_style=Style(color=next(colors)),
+        )
+        table.add_column("Name", justify="left", style=Style(color=Color.from_triplet(parse_rgb_hex("ee91e0"))))
+        table.add_column("Value", style=Style(color=Color.from_triplet(parse_rgb_hex("9a488e"))))
+        table.add_row("Untagged Bookmarks", f"{info['untagged_bookmarks']}")
+        table.add_row("Drill For Review", f"{info['drill_needing_review']['count']}")
+
         self.layout["stats"].update(Panel(
-            text,
+            table,
             title=Text("Site Stats")
         ))
 
@@ -142,8 +151,7 @@ if __name__ == "__main__":
 
     dash = Dashboard(session=session)
     dash.update_bookmarks()
-    # import sys; sys.exit(0)
-    # dash.console.print(dash.layout)
+
     with Live(dash.layout, screen=True):
         while True:
             try:
