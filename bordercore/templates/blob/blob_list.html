@@ -39,7 +39,7 @@
         </ul>
 
         <div class="d-flex flex-row flex-wrap ms-3">
-            <div v-for="blob in blobList" class="blob-list float-start mb-2 p-3 w-25" @click="onClickBlob(blob.url)" :data-doctype="blob.doctype">
+            <div v-for="blob in recentBlobs.blobList" class="blob-list float-start mb-2 p-3 w-25" @click="onClickBlob(blob.url)" :data-doctype="blob.doctype">
 
                 <div class="d-flex flex-column h-100">
 
@@ -86,13 +86,12 @@
                         "Notes",
                         "Images",
                         "Documents",
-                        "Blobs"
+                        "Blobs",
                     ],
                     navCurrent: "All",
-                    blobList: [],
-                    docTypes: {},
+                    recentBlobs: JSON.parse(document.getElementById("recent_blobs").textContent),
                     message: null,
-                }
+                };
             },
             methods: {
                 getContent(blob) {
@@ -103,15 +102,14 @@
 
                     // Remove the trailing 's'
                     if (doctype !== "All") {
-                        doctype = doctype.substring(0, doctype.length - 1)
+                        doctype = doctype.substring(0, doctype.length - 1);
                     }
                     return doctype;
                 },
                 doctypeCount(doctype) {
-                    return this.docTypes[this.getNormalizedDoctype(doctype)]
+                    return this.recentBlobs.docTypes[this.getNormalizedDoctype(doctype)];
                 },
                 getDeltaDays(delta) {
-
                     if (delta === 0) {
                         return "Today";
                     } else {
@@ -122,14 +120,13 @@
                     window.location = url;
                 },
                 onClickNav(doctype) {
-
                     this.navCurrent = doctype;
 
                     // Show everything
                     let objects = document.querySelectorAll("div.blob-list[data-doctype]");
                     objects.forEach(function(object) {
                         object.classList.remove("d-none");
-                    })
+                    });
 
                     if (doctype === "All") {
                         return;
@@ -141,38 +138,20 @@
 
                     objects.forEach(function(object) {
                         object.classList.add("d-none");
-                    })
-
-                },
-                getRecentBlobs() {
-                    doGet(
-                        this,
-                        "{% url "blob:recent_blobs" %}",
-                        (response) => {
-                            this.blobList = response.data.blobList;
-                            this.docTypes = response.data.docTypes;
-                            this.message = response.data.message
-
-                            this.$nextTick(() => {
-                                document.querySelectorAll(".blob-content :is(h1, h2, h3, h4, h5, h6)").forEach((el) => {
-                                    let style = window.getComputedStyle(el, null).getPropertyValue("font-size");
-                                    let fontSize = parseFloat(style);
-                                    // The 0.35 factor is based on scaling <h6> tags to 4px
-                                    el.style.fontSize = 0.35 * fontSize + "px";
-                                });
-                            });
-
-                        },
-                        "Error getting recent blobs"
-                    );
+                    });
                 },
             },
             mounted() {
-                this.getRecentBlobs();
+                document.querySelectorAll(".blob-content :is(h1, h2, h3, h4, h5, h6)").forEach((el) => {
+                    const style = window.getComputedStyle(el, null).getPropertyValue("font-size");
+                    const fontSize = parseFloat(style);
+                    // The 0.35 factor is based on scaling <h6> tags to 4px
+                    el.style.fontSize = 0.35 * fontSize + "px";
+                });
 
                 // Select the first tab ("All") by default
                 this.$el.querySelector(".nav li a").classList.add("active");
-            }
+            },
 
         });
 

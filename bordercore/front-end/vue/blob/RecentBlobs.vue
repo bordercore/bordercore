@@ -12,7 +12,7 @@
                     Recent Blobs
                 </div>
                 <ul class="ps-0">
-                    <li v-for="link in blobListInfo.blobList[0]" :key="link.id" class="search-suggestion ms-0 px-0">
+                    <li v-for="link in blobListInfo.blobList" :key="link.id" class="search-suggestion ms-0 px-0">
                         <a :href="link.url" class="dropdown-item d-flex align-items-center" v-on="link.clickHandler ? { click: link.clickHandler } : {}">
                             <span class="icon d-flex justify-content-center align-items-center">
                                 <img v-if="link.doctype === 'image'" :src="link.cover_url_small" class="mw-100 mh-100">

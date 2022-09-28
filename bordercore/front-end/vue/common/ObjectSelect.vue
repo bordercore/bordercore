@@ -231,7 +231,7 @@
                 const suggest = this.$refs.suggestComponent;
 
                 if (suggest.suggestions.length === 0) {
-                    suggest.suggestions = this.recentBlobs.blobList[0].slice(0, 5);
+                    suggest.suggestions = this.recentBlobs.blobList.slice(0, 5);
                     suggest.suggestions.unshift(
                         {
                             uuid: "__Recent",

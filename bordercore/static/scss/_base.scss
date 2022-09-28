@@ -1414,6 +1414,11 @@ blockquote > p {
     overflow: hidden;
     height: 18.75rem;
     font-size: 0.25rem;
+    line-height: 1rem;
+
+    p {
+      margin-bottom: 0.5rem;
+    }
   }
 
   .blob-info {

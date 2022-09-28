@@ -4,7 +4,6 @@ import logging
 import re
 
 import boto3
-from elasticsearch import ConnectionTimeout
 
 from django.conf import settings
 from django.contrib import messages
@@ -21,7 +20,7 @@ from django.views.generic.list import ListView
 
 from blob.forms import BlobForm
 from blob.models import Blob, BlobBlob, MetaData, RecentlyViewedBlob
-from blob.services import get_recent_blobs, import_blob
+from blob.services import import_blob
 from collection.models import Collection, CollectionObject
 from lib.mixins import FormRequestMixin
 from lib.time_utils import get_javascript_date, parse_date_from_string
@@ -32,10 +31,7 @@ log = logging.getLogger(f"bordercore.{__name__}")
 @method_decorator(login_required, name="dispatch")
 class BlobListView(ListView):
 
-    def get_queryset(self):
-        return Blob.objects.filter(user=self.request.user). \
-            prefetch_related("tags"). \
-            order_by("-created")[:10]
+    model = Blob
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -473,32 +469,6 @@ def update_cover_image(request):
     }
 
     return JsonResponse(response)
-
-
-@login_required
-def recent_blobs(request):
-
-    skip_content = True if request.GET.get("skip_content", None) else False
-
-    message = None
-    try:
-        blob_list, doctypes = get_recent_blobs(request.user, limit=5, skip_content=skip_content)
-    except (ConnectionTimeout) as e:
-        message = {
-            "text": str(e),
-            "statusCode": e.status_code
-        }
-        doctypes = []
-        blob_list = []
-
-    response = {
-        "blobList": blob_list,
-        "docTypes": doctypes,
-        "message": message,
-        "status": "OK"
-    }
-
-    return JsonResponse(response, safe=False)
 
 
 @login_required

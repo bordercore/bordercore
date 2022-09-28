@@ -2,6 +2,7 @@ import json
 
 from elasticsearch import ConnectionTimeout
 
+from django import urls
 from django.conf import settings
 from django.contrib import messages
 from django.utils import timezone
@@ -44,15 +45,20 @@ def get_counts(request):
 
 def get_recent_blobs(request):
     """
+    Get a list of recently created blobs, along with their doctypes
     """
 
     if not request.user.is_authenticated:
         return {}
 
+    # Only include the blob content on the blob list page. This
+    #  is only included when needed because of its size.
+    skip_content = urls.reverse("blob:list") != request.get_full_path()
+
     message = None
 
     try:
-        recent_blobs = get_recent_blobs_service(request.user, skip_content=True)
+        recent_blobs, doctypes = get_recent_blobs_service(request.user, skip_content=skip_content)
     except (ConnectionTimeout) as e:
         message = {
             "text": str(e),
@@ -63,6 +69,7 @@ def get_recent_blobs(request):
     return {
         "recent_blobs": {
             "blobList": recent_blobs,
+            "docTypes": doctypes,
             "message": message
         }
     }

@@ -46,11 +46,6 @@ urlpatterns = [
         name="update_cover_image"
     ),
     path(
-        route="recent_blobs",
-        view=views.recent_blobs,
-        name="recent_blobs"
-    ),
-    path(
         route="elasticsearch_info/<uuid:uuid>",
         view=views.get_elasticsearch_info,
         name="get_elasticsearch_info"
