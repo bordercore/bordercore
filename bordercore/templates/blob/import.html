@@ -9,15 +9,28 @@
         <div class="col-lg-3 d-flex flex-column">
 
             <div class="left-panel-gradient card-body d-flex flex-column backdrop-filter">
+                <h5>
+                    Import blobs from external sites
+                </h5>
+                <hr class="divider" />
                 <div>
-                    Import blobs from external sites.
-                </div>
-                <div class="mt-2">
-                    Sites supported:
-                    <ul>
-                        <li><strong>Instagram</strong></li>
-                        <li><strong>Artstation</strong></li>
-                        <li><strong>New York Times (metadata only)</strong></li>
+                    Sites supported
+                    <ul class="list-unstyled p-2">
+                        <li class="p-2">
+                            <img src="{{ STATIC_URL }}img/instagram.ico" width="38" height="38" />
+                            <strong class="ms-2">Instagram</strong>
+                        </li>
+                        <li class="p-2">
+                            <img src="{{ STATIC_URL }}img/artstation.ico" width="38" height="38" />
+                            <strong class="ms-2">Artstation</strong>
+                        </li>
+                        <li class="d-flex p-2">
+                            <img src="{{ STATIC_URL }}img/nytimes.ico" width="38" height="38" />
+                            <div class="d-flex flex-column">
+                                <strong class="ms-2">New York Times</strong>
+                                <div class="text-small text-secondary ms-3">metadata only</div>
+                            </div>
+                        </li>
                     </ul>
                 </div>
             </div>
