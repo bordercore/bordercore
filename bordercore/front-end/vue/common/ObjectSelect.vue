@@ -51,10 +51,10 @@
                                                 <font-awesome-icon icon="fa-copy" class="fa-lg text-primary" />
                                             </div>
                                             <div v-else-if="scope.suggestion.doctype === 'Bookmark'" class="cover-image">
-                                                <font-awesome-icon icon="bookmark" class="fa-3x w-100 h-100 text-primary" />
+                                                <img width="120" height="67" :src="scope.suggestion.thumbnail_url">
                                             </div>
-                                            <div class="d-flex flex-column text-truncate">
-                                                <div class="text-truncate ms-2" v-html="boldenSuggestion(scope)" />
+                                            <div class="name d-flex flex-column">
+                                                <div class="ms-2" v-html="boldenSuggestion(scope)" />
                                                 <div class="date ms-2">
                                                     {{ scope.suggestion.date }}
                                                     <span v-if="scope.suggestion.important === 10" class="ms-2">
@@ -142,6 +142,7 @@
                 suggestionsFound: 0,
                 // This is populated in the base template
                 recentBlobs: JSON.parse(document.getElementById("recent_blobs").textContent),
+                recentBookmarks: JSON.parse(document.getElementById("recent_bookmarks").textContent),
             };
         },
         mounted() {
@@ -231,15 +232,24 @@
                 const suggest = this.$refs.suggestComponent;
 
                 if (suggest.suggestions.length === 0) {
-                    suggest.suggestions = this.recentBlobs.blobList.slice(0, 5);
-                    suggest.suggestions.unshift(
+                    suggest.suggestions.push(
                         {
-                            uuid: "__Recent",
+                            uuid: "__Recent_Blobs",
                             name: "Recent Blobs",
                             splitter: true,
                             value: "",
                         },
                     );
+                    suggest.suggestions.push(...this.recentBlobs.blobList.slice(0, 5));
+                    suggest.suggestions.push(
+                        {
+                            uuid: "__Recent_Bookmarks",
+                            name: "Recent Bookmarks",
+                            splitter: true,
+                            value: "",
+                        },
+                    );
+                    suggest.suggestions.push(...this.recentBookmarks.bookmarkList.slice(0, 5));
                 }
                 suggest.listShown = true;
             },

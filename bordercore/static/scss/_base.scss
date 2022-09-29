@@ -155,10 +155,11 @@ div.drag-target {
 .object-select-suggestion {
   height: 4.7rem;
   padding: 0.5rem;
+  margin-bottom: 1rem;
 
-  .cover-image {
-    width: calc(4.7rem - 2*0.6rem);
-    height: calc(4.7rem - 2*0.6rem);
+  .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .date {

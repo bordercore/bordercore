@@ -9,6 +9,7 @@ from django.utils import timezone
 
 from blob.services import get_recent_blobs as get_recent_blobs_service
 from bookmark.models import Bookmark
+from bookmark.services import get_recent_bookmarks
 from fitness.services import get_overdue_exercises
 from metrics.models import Metric
 from search.models import RecentSearch
@@ -43,9 +44,9 @@ def get_counts(request):
     }
 
 
-def get_recent_blobs(request):
+def get_recent_objects(request):
     """
-    Get a list of recently created blobs, along with their doctypes
+    Get a list of recently created objects
     """
 
     if not request.user.is_authenticated:
@@ -66,11 +67,16 @@ def get_recent_blobs(request):
         }
         recent_blobs = []
 
+    recent_bookmarks = get_recent_bookmarks(request.user)
+
     return {
         "recent_blobs": {
             "blobList": recent_blobs,
             "docTypes": doctypes,
             "message": message
+        },
+        "recent_bookmarks": {
+            "bookmarkList": recent_bookmarks
         }
     }
 
