@@ -155,12 +155,12 @@
             data() {
                 return {
                     enableDeleteButton: {% if object.uuid %}true{% else %}false{% endif %},
-                    newQuestion: {% if action == "Add" %}true{% else %} false{% endif %},
-                    answer: "{{ object.answer|escapejs }}",
-                    question: "{{ object.question|escapejs }}",
+            newQuestion: {% if action == "Add" %}true{% else %} false{% endif %},
+                        answer: "{{ object.answer|default:form.answer.value|default_if_none:""|escapejs }}",
+                            question: "{{ object.question|default:form.question.value|default_if_none:""|escapejs }}",
                 };
             },
-            methods: {
+                        methods: {
                 onKeyUp(evt) {
                     if (evt.key !== "Tab") {
                         return;
