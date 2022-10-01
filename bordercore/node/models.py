@@ -35,12 +35,11 @@ class Node(TimeStampedModel):
     def __str__(self):
         return self.name
 
-    def add_collection(self, name="New Collection", uuid=None, display="list", rotate=-1, random_order=False):
+    def add_collection(self, name="New Collection", uuid=None, display="list", rotate=-1, random_order=False, limit=None):
 
         if uuid and uuid != "":
             # If a uuid is given, use an existing collection
             collection = Collection.objects.get(uuid=uuid)
-            display = "individual"
             collection_type = "permanent"
         else:
             # New collections are private to avoid display on the collection list page
@@ -54,14 +53,15 @@ class Node(TimeStampedModel):
             "display": display,
             "collection_type": collection_type,
             "rotate": rotate,
-            "random_order": random_order
+            "random_order": random_order,
+            "limit": limit,
         })
         self.layout = layout
         self.save()
 
         return collection
 
-    def update_collection(self, collection_uuid, display, random_order, rotate):
+    def update_collection(self, collection_uuid, display, random_order, rotate, limit):
 
         for column in self.layout:
             for row in column:
@@ -69,6 +69,7 @@ class Node(TimeStampedModel):
                     row["display"] = display
                     row["rotate"] = rotate
                     row["random_order"] = random_order
+                    row["limit"] = limit
 
         self.save()
 
@@ -149,15 +150,22 @@ class Node(TimeStampedModel):
         # Populate a lookup dictionary with the collection and note names, uuid => name
         lookup = {}
         for x in Collection.objects.filter(uuid__in=uuids):
-            lookup[str(x.uuid)] = x.name
+            lookup[str(x.uuid)] = {
+                "name": x.name,
+                "count": x.collectionobject_set.all().count()
+            }
         for x in Blob.objects.filter(uuid__in=uuids):
-            lookup[str(x.uuid)] = x.name
+            lookup[str(x.uuid)] = {
+                "name": x.name
+            }
 
         # Finally, add the collection and note names to the node's layout object
         for column in self.layout:
             for row in column:
                 if row["type"] in ["collection", "note"]:
-                    row["name"] = lookup[row["uuid"]]
+                    row["name"] = lookup[row["uuid"]]["name"]
+                    if "count" in lookup[row["uuid"]]:
+                        row["count"] = lookup[row["uuid"]]["count"]
 
     def populate_image_info(self):
         """

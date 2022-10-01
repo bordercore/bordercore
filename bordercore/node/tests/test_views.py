@@ -116,6 +116,7 @@ def test_update_collection(auto_login_user, node, quote):
     display = "individual"
     random_order = "true"
     rotate = "rotate"
+    limit = 5
 
     url = urls.reverse("node:update_collection")
     resp = client.post(url, {
@@ -125,6 +126,7 @@ def test_update_collection(auto_login_user, node, quote):
         "display": display,
         "random_order": random_order,
         "rotate": rotate,
+        "limit": limit,
     })
 
     assert resp.status_code == 200

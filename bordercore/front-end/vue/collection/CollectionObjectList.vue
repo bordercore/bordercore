@@ -7,6 +7,9 @@
                         <font-awesome-icon icon="splotch" class="text-primary me-3" />
                         {{ collectionObjectList.name }}
                     </div>
+                    <div class="text-secondary text-small ms-5">
+                        {{ collectionObjectList.count }} <span>{{ getPluralized(collectionObjectList.count) }}</span>
+                    </div>
                     <div class="dropdown-menu-container ms-auto">
                         <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
                             <div slot="dropdown">
@@ -53,7 +56,7 @@
                 <ul v-else id="sort-container-tags" class="list-group list-group-flush interior-borders">
                     <draggable v-model="objectList" draggable=".draggable" @change="onSort">
                         <transition-group type="transition" class="w-100">
-                            <li v-for="object in objectList" v-cloak :key="object.uuid" class="hover-target list-group-item list-group-item-secondary draggable pe-0" :data-uuid="object.uuid">
+                            <li v-for="object in limitedObjectList" v-cloak :key="object.uuid" class="hover-target list-group-item list-group-item-secondary draggable pe-0" :data-uuid="object.uuid">
                                 <div class="dropdown-height d-flex align-items-start">
                                     <div v-if="object.type === 'blob'" class="pe-2">
                                         <img :src="object.cover_url" height="75" width="70">
@@ -146,6 +149,11 @@
                 show: false,
             };
         },
+        computed: {
+            limitedObjectList() {
+                return this.collectionObjectList.limit ? this.objectList.slice(0, this.collectionObjectList.limit) : this.objectList;
+            },
+        },
         mounted() {
             this.collectionObjectList = this.collectionObjectListInitial;
             this.getObjectList();
@@ -224,6 +232,9 @@
                     "Error getting object list",
                 );
             },
+            getPluralized: function(count) {
+                return pluralize("object", count);
+            },
             onAddObject() {
                 this.$parent.$parent.$refs.objectSelectCollection.openModal(this.getObjectList, {"collectionUuid": this.uuid});
             },
@@ -241,6 +252,7 @@
                         "display": collectionObjectList.display,
                         "random_order": collectionObjectList.random_order,
                         "rotate": collectionObjectList.rotate,
+                        "limit": collectionObjectList.limit,
                     },
                     (response) => {
                         this.collectionObjectList.name = collectionObjectList.name;

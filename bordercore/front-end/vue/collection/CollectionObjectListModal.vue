@@ -116,6 +116,14 @@
                                 </div>
                             </div>
                         </div>
+                        <div v-else class="row mt-3">
+                            <label class="col-lg-4 col-form-label" for="inputTitle">Limit</label>
+                            <div class="col-lg-8">
+                                <div>
+                                    <input v-model="collectionObjectList.limit" type="number" class="form-control" autocomplete="off" maxlength="10" placeholder="Limit" @keyup.enter="onUpdateCollection">
+                                </div>
+                            </div>
+                        </div>
                     </Transition>
                     <div class="row align-items-center my-3">
                         <label class="col-lg-4 col-form-label" for="inputTitle">
@@ -259,6 +267,7 @@
                                 "display": this.collectionObjectList.display,
                                 "random_order": this.collectionObjectList.random_order,
                                 "rotate": this.collectionObjectList.rotate,
+                                "limit": this.collectionObjectList.limit,
                             },
                             (response) => {
                                 EventBus.$emit("update-layout", response.data.layout);

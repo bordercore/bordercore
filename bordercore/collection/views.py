@@ -305,7 +305,8 @@ def create_blob(request):
 def get_object_list(request, collection_uuid):
 
     collection = Collection.objects.get(uuid=collection_uuid)
-    random_order = request.GET.get("random_order", False)
+    random_order = request.GET.get("random_order", "false") in ("true")
+
     object_list = collection.get_object_list(
         request=request,
         page_number=int(request.GET.get("pageNumber", 1)),
