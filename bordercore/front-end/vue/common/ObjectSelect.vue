@@ -75,12 +75,12 @@
                         <div v-if="hasFilter" class="d-flex mt-2 ms-3">
                             <div>Filter:</div>
                             <div class="d-flex align-items-center ms-2">
-                                <input class="object-select-filter" value="bookmarks" type="checkbox" @change="onFilterChange">
-                                <label class="ms-2" @click="onFilterLabelClick">Bookmarks</label>
+                                <toggle-button v-model="toggleBookmarks" sync data-filter-type="bookmarks" :css-colors="true" class="toggle-button" @change="onFilterChange('bookmarks', $event)" />
+                                <label class="ms-2" @click="onFilterLabelClick('bookmarks', $event)">Bookmarks</label>
                             </div>
                             <div class="d-flex align-items-center ms-3">
-                                <input class="object-select-filter" value="blobs" type="checkbox" @change="onFilterChange">
-                                <label class="ms-2" @click="onFilterLabelClick">Blobs</label>
+                                <toggle-button v-model="toggleBlobs" sync data-filter-type="blobs" :css-colors="true" class="toggle-button" @change="onFilterChange('blobs', $event)" />
+                                <label class="ms-2" @click="onFilterLabelClick('blobs', $event)">Blobs</label>
                             </div>
                         </div>
                     </div>
@@ -130,7 +130,6 @@
                 name: "",
                 doctypes: ["blob", "book", "bookmark", "document", "note"],
                 callback: null,
-                objectSelectFilter: [],
                 returnArgs: null,
                 query: "",
                 autoCompleteStyle: {
@@ -140,6 +139,8 @@
                     suggestions: "position-absolute list-group z-1000",
                 },
                 suggestionsFound: 0,
+                toggleBookmarks: false,
+                toggleBlobs: false,
                 // This is populated in the base template
                 recentBlobs: JSON.parse(document.getElementById("recent_blobs").textContent),
                 recentBookmarks: JSON.parse(document.getElementById("recent_bookmarks").textContent),
@@ -169,39 +170,24 @@
                 const texts = query.split(/[\s-_/\\|\.]/gm).filter((t) => !!t) || [""];
                 return result.replace(new RegExp("(.*?)(" + texts.join("|") + ")(.*?)", "gi"), "$1<b class='matched'>$2</b>$3");
             },
-            onFilterLabelClick(evt) {
+            onFilterLabelClick(filterType, evt) {
                 const input = evt.target.parentElement.querySelector("input");
                 input.click();
-                this.onFilterChange(input, true);
+                this.onFilterChange(filterType, evt);
             },
-            onFilterChange(evt, isElement) {
-                let target = null;
-                if (!isElement) {
-                    // We were triggered by clicking the checkbox
-                    target = evt.target;
-                } else {
-                    // We were triggered by clicking the label and then
-                    //  called by onFilterLabelClick()
-                    target = evt;
-                }
-                this.objectSelectFilter = target.value;
-
-                if (target.checked === false) {
+            onFilterChange(filterType, evt) {
+                if (evt.value === false) {
                     // Remove the filter if we're unchecking an option
                     this.doctypes = ["blob", "book", "bookmark", "document", "note"];
                 } else {
-                    if (this.objectSelectFilter === "blobs") {
+                    if (filterType === "blobs") {
                         this.doctypes = ["blob", "book", "document", "note"];
+                        this.toggleBookmarks = false;
                     } else {
                         this.doctypes = ["bookmark"];
+                        this.toggleBlobs = false;
                     }
                 }
-
-                document.querySelectorAll(".object-select-filter").forEach(function(checkbox) {
-                    if (checkbox.value !== target.value) {
-                        checkbox.checked = false;
-                    }
-                });
             },
             search(query) {
                 this.suggestionsFound = 0;

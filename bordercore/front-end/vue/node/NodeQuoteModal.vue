@@ -26,8 +26,8 @@
                                         {{ option.display }}
                                     </option>
                                 </select>
-                                <div class="ms-3 d-flex align-items-center">
-                                    <input v-model="nodeQuote.favorites_only" value="favorites-only" type="checkbox">
+                                <div class="d-flex align-items-center mt-1">
+                                    <toggle-button v-model="nodeQuote.favorites_only" value="favorites-only" :css-colors="true" class="toggle-button" />
                                     <label class="ms-2">Favorites Only</label>
                                 </div>
                             </div>

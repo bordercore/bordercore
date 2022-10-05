@@ -715,6 +715,17 @@ a.tag {
   }
 }
 
+// vue-js-toggle-button
+.vue-js-switch.toggle-button {
+  .v-switch-core {
+    background: var(--toggle-button-color) !important;
+  }
+
+  &.toggled > .v-switch-core {
+    background: var(--toggle-button-color-toggled) !important;
+  }
+}
+
 input.form-control,
 select.form-control,
 textarea.form-control {

@@ -4,6 +4,7 @@ except ModuleNotFoundError:
     # Don't worry if this import doesn't exist in production
     pass
 
+
 class NodeListPage:
 
     TITLE = (By.TAG_NAME, "title")
@@ -15,8 +16,8 @@ class NodeListPage:
     RECENT_ITEMS = (By.CSS_SELECTOR, "li[class='suggest-item']")
     SEARCH_INPUT = (By.CSS_SELECTOR, "input[id='object-search']")
     SEARCH_SUGGESTION_FIRST = (By.CSS_SELECTOR, "div[class*='object-select-suggestion'] div:nth-child(2) div")
-    CHECKBOX_BOOKMARKS = (By.CSS_SELECTOR, "input[type='checkbox'][value='bookmarks']")
-    CHECKBOX_BLOBS = (By.CSS_SELECTOR, "input[type='checkbox'][value='blobs']")
+    CHECKBOX_BOOKMARKS = (By.CSS_SELECTOR, "label[data-filter-type='bookmarks'] input")
+    CHECKBOX_BLOBS = (By.CSS_SELECTOR, "label[data-filter-type='blobs'] input")
     SEARCH_SUGGESTION_LIST = (By.CSS_SELECTOR, "ul li[class*='suggest-item']")
 
     def __init__(self, browser):

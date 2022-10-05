@@ -125,12 +125,12 @@
                             </div>
                         </div>
                     </Transition>
-                    <div class="row align-items-center my-3">
+                    <div class="row align-items-center mt-2 mb-3">
                         <label class="col-lg-4 col-form-label" for="inputTitle">
                             Random Order
                         </label>
-                        <div class="col-lg-8 mt-1">
-                            <input v-model="collectionObjectList.random_order" value="random_order" type="checkbox">
+                        <div class="col-lg-8">
+                            <toggle-button v-model="collectionObjectList.random_order" sync :css-colors="true" class="toggle-button" />
                         </div>
                     </div>
                     <div class="modal-footer">

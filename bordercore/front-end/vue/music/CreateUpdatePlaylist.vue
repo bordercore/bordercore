@@ -145,13 +145,11 @@
                             </div>
 
                             <div class="row mt-3">
-                                <div class="col-lg-12">
-                                    <div class="form-check">
-                                        <input v-model="exclude_albums" class="form-check-input mt-2" type="checkbox" name="exclude_albums">
-                                        <label class="form-check-label">
-                                            Exclude albums
-                                        </label>
-                                    </div>
+                                <div class="col-lg-12 d-flex align-items-center">
+                                    <toggle-button v-model="exclude_albums" name="exclude_albums" :css-colors="true" class="toggle-button" />
+                                    <label class="ms-2">
+                                        Exclude albums
+                                    </label>
                                 </div>
                             </div>
                         </div>
@@ -263,7 +261,7 @@
                 note: this.getAttribute("note", ""),
                 rating: this.getAttribute("rating", undefined),
                 exclude_recent: this.getAttribute("exclude_recent", ""),
-                exclude_albums: this.getAttribute("exclude_albums", ""),
+                exclude_albums: this.getAttribute("exclude_albums", false),
                 smartType: this.getAttribute("type", undefined),
                 startYear: this.getAttribute("start_year", undefined),
                 endYear: this.getAttribute("end_year", undefined),

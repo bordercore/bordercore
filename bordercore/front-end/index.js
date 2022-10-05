@@ -254,6 +254,9 @@ import "animate.css";
 
 import hotkeys from "hotkeys-js";
 
+import ToggleButton from "vue-js-toggle-button";
+Vue.use(ToggleButton);
+
 import {Table} from "buefy";
 import Buefy from "buefy";
 

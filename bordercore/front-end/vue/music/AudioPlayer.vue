@@ -7,7 +7,7 @@
             </audio>
         </div>
         <div class="d-flex align-items-center ms-4">
-            <input id="continuous_play" type="checkbox" @change="onContinuousPlay">
+            <toggle-button id="continuous_play" v-model="continuousPlay" :css-colors="true" class="toggle-button" />
             <label for="continuous_play" class="ms-2">Continous Play</label>
         </div>
     </div>

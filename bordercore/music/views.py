@@ -624,9 +624,10 @@ class CreatePlaylistView(FormRequestMixin, CreateView):
         playlist.parameters = {
             x: self.request.POST[x]
             for x in
-            ["tag", "start_year", "end_year", "exclude_albums", "exclude_recent", "rating"]
+            ["tag", "start_year", "end_year", "exclude_recent", "rating"]
             if x in self.request.POST and self.request.POST[x] != ""
         }
+        playlist.parameters["exclude_albums"] = self.request.POST.get("exclude_albums", "") == "on"
         playlist.save()
 
         if playlist.type != "manual":
@@ -655,21 +656,24 @@ class UpdatePlaylistView(FormRequestMixin, UpdateView):
     def form_valid(self, form):
         playlist = form.save()
 
+        exclude_albums = self.request.POST.get("exclude_albums", "") == "on"
+
         # Deal with any changed parameters that could possibly
         #  refresh the song list.
         if playlist.type != "manual" and \
            (
                "size" in form.changed_data
-               or self.request.POST.get("exclude_albums", "") != playlist.parameters.get("exclude_albums", "")
+               or exclude_albums != playlist.parameters.get("exclude_albums", False)
                or self.request.POST.get("exclude_recent", "") != playlist.parameters.get("exclude_recent", "")
            ):
 
             parameters = {
                 x: self.request.POST[x]
                 for x in
-                ["start_year", "end_year", "exclude_albums", "exclude_recent"]
+                ["start_year", "end_year", "exclude_recent"]
                 if x in self.request.POST and self.request.POST[x] != ""
             }
+            parameters["exclude_albums"] = exclude_albums
 
             # We don't allow changing the tag, so it won't be included in
             #  the POST args. Add it here.

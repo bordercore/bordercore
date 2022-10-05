@@ -8,7 +8,7 @@
   --text3: #ffffff;
   --text4: #dbb3ed;
   --text5: #8ce2ee;
-  --text6: #ffffff;
+  --text6: #999999;
 
   --text-disabled: #333;
   --text-em: var(--text4);
@@ -81,6 +81,8 @@
   --sidebar-icon-color1: var(--text4);
   --sidebar-icon-color2: var(--text3);
   --sidebar-icon-color3: var(--text6);
+  --toggle-button-color: var(--text6);
+  --toggle-button-color-toggled: var(--text4);
 
   // Override Bootstrap CSS properties
   --bs-body-color: var(--text1);
