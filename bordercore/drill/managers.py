@@ -49,7 +49,7 @@ class DrillManager(models.Manager):
 
         return {
             "percentage": percentage,
-            "count": count
+            "count": todo
         }
 
     def favorite_questions_progress(self, user):
