@@ -28,7 +28,7 @@ def test_needs_review(question):
 def test_get_tags(question):
 
     tags = question[0].get_tags()
-    assert tags == "django, video"
+    assert tags == "django, video" or tags == "video, django"
 
 
 def test_get_state_name(question):
