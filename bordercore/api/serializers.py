@@ -198,7 +198,7 @@ class TagAliasSerializer(serializers.ModelSerializer):
 class TodoSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     tags = BlobTagsField(queryset=Tag.objects.all(), many=True)
-    due_date = serializers.DateField(required=False)
+    due_date = serializers.DateTimeField(required=False)
 
     class Meta:
         model = Todo
