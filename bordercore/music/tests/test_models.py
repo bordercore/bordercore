@@ -1,4 +1,3 @@
-import hashlib
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -21,12 +20,9 @@ def test_get_id3_info(auto_login_user, song):
     with open(song_path, "rb") as f:
         song_file = f.read()
 
-    sha1sum = hashlib.sha1(song_file).hexdigest()
-
     song_info = Song.get_id3_info(mock_request, {}, song_file)
 
     # A song with an album
-    assert song_info["sha1sum"] == sha1sum
     assert song_info["artist"] == "Bryan Teoh"
     assert song_info["title"] == "Mysterious Lights"
     assert song_info["year"] == "2020"

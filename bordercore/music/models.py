@@ -1,7 +1,6 @@
-import hashlib
-import os
 import uuid
 from datetime import datetime, timedelta
+from io import BytesIO
 
 import boto3
 import humanize
@@ -237,24 +236,13 @@ class Song(TimeStampedModel):
     @staticmethod
     def get_id3_info(request, messages, song):
         """
-        Write a song to the file system and extract its ID3 information
+        Read a song's ID3 information
         """
 
-        sha1sum = hashlib.sha1(song).hexdigest()
-        filename = f"/tmp/{request.user.userprofile.uuid}-{sha1sum}.mp3"
-
-        try:
-            f = open(filename, "wb")
-            f.write(song)
-            f.close()
-        except (IOError) as e:
-            messages.add_message(request, messages.ERROR, f"IOError: {e}")
-
-        info = MP3(filename, ID3=EasyID3)
+        info = MP3(fileobj=BytesIO(song), ID3=EasyID3)
 
         data = {
-            "filesize": humanize.naturalsize(os.stat(filename).st_size),
-            "sha1sum": sha1sum,
+            "filesize": humanize.naturalsize(len(song)),
             "bit_rate": info.info.bitrate,
             "sample_rate": info.info.sample_rate
         }

@@ -1,6 +1,5 @@
 import io
 import json
-import os
 import re
 import string
 import uuid
@@ -240,7 +239,7 @@ class AlbumUpdateView(FormRequestMixin, UpdateView):
     def form_valid(self, form):
 
         if "cover_image" in self.request.FILES:
-            self.handle_cover_image(form)
+            self.handle_cover_image()
 
         song = form.instance
 
@@ -278,7 +277,7 @@ class AlbumUpdateView(FormRequestMixin, UpdateView):
 
         return url
 
-    def handle_cover_image(self, form):
+    def handle_cover_image(self):
         """
         Upload the album's cover image to S3
         """
@@ -369,10 +368,7 @@ class SongCreateView(FormRequestMixin, CreateView):
         song.save()
 
         # Upload the song and its artwork to S3
-        handle_s3(song, form.cleaned_data["sha1sum"])
-
-        # Remove the uploaded song from /tmp
-        os.remove(f"/tmp/{self.request.user.userprofile.uuid}-{form.cleaned_data['sha1sum']}.mp3")
+        handle_s3(song, self.request.FILES["song"].read())
 
         # Save the song source in the session
         self.request.session["song_source"] = form.cleaned_data["source"].name
@@ -401,48 +397,42 @@ class MusicDeleteView(DeleteView):
         return song
 
 
-def handle_s3(song, sha1sum):
+def handle_s3(song_model, song_blob):
 
     s3_client = boto3.client("s3")
-    key = f"songs/{song.uuid}"
+
+    key = f"songs/{song_model.uuid}"
+    fo = io.BytesIO(song_blob)
 
     # Note: S3 Metadata cannot contain non ASCII characters
-    s3_client.upload_file(
-        f"/tmp/{song.user.userprofile.uuid}-{sha1sum}.mp3",
+    s3_client.upload_fileobj(
+        fo,
         settings.AWS_BUCKET_NAME_MUSIC,
         key,
         ExtraArgs={
             "Metadata": {
-                "artist": remove_non_ascii_characters(song.artist.name, default="Artist"),
-                "title": remove_non_ascii_characters(song.title, default="Title")
+                "artist": remove_non_ascii_characters(song_model.artist.name, default="Artist"),
+                "title": remove_non_ascii_characters(song_model.title, default="Title")
             }
         }
     )
 
-    if not song.album:
+    if not song_model.album:
         return
 
-    audio = MP3(f"/tmp/{song.user.userprofile.uuid}-{sha1sum}.mp3")
+    fo = io.BytesIO(song_blob)
+    audio = MP3(fileobj=fo)
 
     if audio:
         artwork = audio.tags.getall("APIC")
         if artwork:
-
-            artwork_file = f"/tmp/{sha1sum}-artwork.jpg"
-
-            fh = open(artwork_file, "wb")
-            fh.write(artwork[0].data)
-            fh.close()
-
-            key = f"album_artwork/{song.album.uuid}"
-            s3_client.upload_file(
-                artwork_file,
+            key = f"album_artwork/{song_model.album.uuid}"
+            s3_client.upload_fileobj(
+                io.BytesIO(artwork[0].data),
                 settings.AWS_BUCKET_NAME_MUSIC,
                 key,
                 ExtraArgs={"ContentType": "image/jpeg"}
             )
-
-            os.remove(artwork_file)
 
 
 @login_required

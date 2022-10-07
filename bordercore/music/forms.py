@@ -13,7 +13,6 @@ from .models import Album, Artist, Playlist, Song, SongSource
 
 class SongForm(ModelForm):
 
-    sha1sum = CharField()
     album_name = CharField()
     artist = CharField(widget=forms.TextInput(
         attrs={"class": "form-control"}
@@ -40,11 +39,6 @@ class SongForm(ModelForm):
         self.fields["album_name"].widget.attrs["autocomplete"] = "off"
 
         self.fields["compilation"].required = False
-
-        # If we're editing the metadata for an existing song,
-        #  there will be no file upload and thus no sha1sum
-        if "data" in kwargs and kwargs["data"]["Go"] == "Update":
-            self.fields["sha1sum"].required = False
 
         # Use the song source stored in the user's session
         song_source = self.request.session.get("song_source", "Amazon")

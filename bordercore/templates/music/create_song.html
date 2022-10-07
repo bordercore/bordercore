@@ -91,7 +91,7 @@
 
                 <p class="lead offset-lg-3 fw-bold ps-2">{{ action }} a Song</p>
 
-                <form id="song-form" action="{{ request.path }}" method="post">
+                <form enctype="multipart/form-data" id="song-form" action="{{ request.path }}" method="post">
                     {% csrf_token %}
                     <input type="hidden" name="return_url" value="{{ request.GET.return_url }}" />
 
@@ -108,7 +108,6 @@
                 {% endif %}
 
                 <input type="hidden" name="rating" :value="rating" />
-                <input type="hidden" name="sha1sum" :value="sha1sum" />
                 <input type="hidden" name="length" :value="songLength" />
 
                 {% if action == "Create" %}
@@ -207,7 +206,7 @@
                             </div>
                         </div>
 
-                    {% elif field.label != 'Length' and field.label != 'Sha1sum' %}
+                    {% elif field.label != 'Length' %}
 
                         <div class="{% if field.errors %} error{% endif %} row mb-3">
                             <label class="col-lg-3 col-form-label fw-bold text-end">{{ field.label }}</label>
@@ -315,7 +314,6 @@
                 return {
                     filename: null,
                     rating: {{ form.rating.value|default:"''" }},
-                    sha1sum: null,
                     isCompilation: false,
                     {% if action == "Update" %}
                     uuid: "{{ song.uuid }}",
@@ -376,7 +374,6 @@
                         this.$store.state.songSize = response.data.filesize;
                         this.$store.state.sampleRate = response.data.sample_rate;
                         this.$store.state.bitRate = response.data.bit_rate;
-                        this.sha1sum = response.data.sha1sum;
 
                         // Wait a tiny amount before closing the modal. If the song upload happens
                         //  really fast, then "hide" could be called too quickly after "show",

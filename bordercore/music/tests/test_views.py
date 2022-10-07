@@ -1,11 +1,10 @@
-import hashlib
 from pathlib import Path
-from shutil import copy2
 
 import factory
 import pytest
 
 from django import urls
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import signals
 
 from music.models import Album, Playlist, Song
@@ -117,7 +116,7 @@ def test_music_artist_detail(auto_login_user, song):
 
 
 @factory.django.mute_signals(signals.post_save)
-def test_music_create(s3_resource, s3_bucket, auto_login_user, song, song_source):
+def test_music_create(s3_resource, s3_bucket, auto_login_user, song_source):
 
     user, client = auto_login_user()
 
@@ -130,31 +129,23 @@ def test_music_create(s3_resource, s3_bucket, auto_login_user, song, song_source
     # Adding a new song
     mp3 = Path(__file__).parent / "resources/Mysterious Lights.mp3"
 
-    hasher = hashlib.sha1()
     with open(mp3, "rb") as f:
-        buf = f.read()
-        hasher.update(buf)
-        sha1sum = hasher.hexdigest()
-
-    # Mimic the file upload process by copying the song to /tmp
-    #  for processing by the view
-    copy2(mp3, f"/tmp/{user.userprofile.uuid}-{sha1sum}.mp3")
+        song_blob = f.read()
 
     url = urls.reverse("music:create")
 
-    with open(mp3, "rb") as f:
-        resp = client.post(url, {
-            "song": mp3,
-            "sha1sum": sha1sum,
-            "artist": "Bryan Teoh",
-            "title": "Mysterious Lights",
-            "album_name": "FreePD Music",
-            "original_release_year": "",
-            "source": song_source.id,
-            "year": 2020,
-            "tags": "synthwave",
-            "Go": "Create"
-        })
+    song_upload = SimpleUploadedFile(mp3.name, song_blob)
+    resp = client.post(url, {
+        "song": song_upload,
+        "artist": "Bryan Teoh",
+        "title": "Mysterious Lights",
+        "album_name": "FreePD Music",
+        "original_release_year": "",
+        "source": song_source.id,
+        "year": 2020,
+        "tags": "synthwave",
+        "Go": "Create"
+    })
 
     assert resp.status_code == 302
 
