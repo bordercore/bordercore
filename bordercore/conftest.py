@@ -21,6 +21,7 @@ from django.conf import settings
 try:
     from pyvirtualdisplay import Display
     from selenium import webdriver
+    from selenium.webdriver.firefox.service import Service
 
     from homepage.tests.pages.homepage import LoginPage
 except (ModuleNotFoundError, NameError, django.core.exceptions.AppRegistryNotReady):
@@ -278,7 +279,8 @@ def browser():
         display = Display(visible=0, size=(1366, 768))
         display.start()
 
-    driver = webdriver.Firefox(executable_path="/opt/bin/geckodriver", log_path=GECKO_DRIVER_LOGFILE)
+    service = Service(executable_path="/opt/bin/geckodriver", log_path=GECKO_DRIVER_LOGFILE)
+    driver = webdriver.Firefox(service=service)
 
     yield driver
 
