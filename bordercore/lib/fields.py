@@ -3,17 +3,6 @@ from django.forms import IntegerField, ModelMultipleChoiceField, TextInput
 from tag.models import Tag
 
 
-def important_check_test(value):
-    """
-    Interpret a 1 value from the database as not important, and leave the checkbox unchecked.
-    Otherwise it's important and checked.
-    """
-    if value == 1:
-        return False
-    else:
-        return True
-
-
 # http://stackoverflow.com/questions/5608576/django-enter-a-list-of-values-form-error-when-rendering-a-manytomanyfield-as-a
 class ModelCommaSeparatedChoiceField(ModelMultipleChoiceField):
 

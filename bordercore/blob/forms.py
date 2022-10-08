@@ -10,8 +10,7 @@ from django.urls import reverse_lazy
 from django.utils.safestring import mark_safe
 
 from blob.models import ILLEGAL_FILENAMES, Blob
-from lib.fields import (CheckboxIntegerField, ModelCommaSeparatedChoiceField,
-                        important_check_test)
+from lib.fields import CheckboxIntegerField, ModelCommaSeparatedChoiceField
 from lib.time_utils import get_javascript_date
 from tag.models import Tag
 
@@ -25,51 +24,51 @@ class BlobForm(ModelForm):
 
         super().__init__(*args, **kwargs)
 
-        self.fields['file'].required = False
-        self.fields['file'].label = "File"
-        self.fields['date'].required = False
-        self.fields['date'].input_formats = ['%m-%d-%Y']
-        self.fields['date'].initial = ''
-        self.fields['content'].required = False
-        self.fields['note'].required = False
-        self.fields['tags'].required = False
-        self.fields['name'].required = False
-        self.fields['importance'].required = False
+        self.fields["file"].required = False
+        self.fields["file"].label = "File"
+        self.fields["date"].required = False
+        self.fields["date"].input_formats = ["%m-%d-%Y"]
+        self.fields["date"].initial = ""
+        self.fields["content"].required = False
+        self.fields["note"].required = False
+        self.fields["tags"].required = False
+        self.fields["name"].required = False
+        self.fields["importance"].required = False
 
         if self.instance.id:
-            self.fields['filename'].initial = self.instance.file
+            self.fields["filename"].initial = self.instance.file
 
             # If this form has a model attached, get the tags and display them separated by commas
-            self.initial['tags'] = self.instance.get_tags()
+            self.initial["tags"] = self.instance.get_tags()
 
-            # Add 'T00:00' to force JavaScript to use localtime
+            # Add "T00:00" to force JavaScript to use localtime
             if self.instance.date:
-                self.initial['date'] = get_javascript_date(self.instance.date) + 'T00:00'
+                self.initial["date"] = get_javascript_date(self.instance.date) + "T00:00"
         else:
-            self.fields['filename'].disabled = True
+            self.fields["filename"].disabled = True
 
-            # Add 'T00:00' to force JavaScript to use localtime
-            self.initial['date'] = datetime.date.today().strftime("%Y-%m-%dT00:00")
+            # Add "T00:00" to force JavaScript to use localtime
+            self.initial["date"] = datetime.date.today().strftime("%Y-%m-%dT00:00")
 
-        self.fields['tags'] = ModelCommaSeparatedChoiceField(
+        self.fields["tags"] = ModelCommaSeparatedChoiceField(
             request=self.request,
             required=False,
             queryset=Tag.objects.filter(user=self.request.user),
-            to_field_name='name')
+            to_field_name="name")
 
-    filename = CharField(required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    filename = CharField(required=False, widget=forms.TextInput(attrs={"class": "form-control"}))
     file_modified = IntegerField(required=False, widget=forms.HiddenInput())
 
     def clean(self):
         cleaned_data = super().clean()
 
         try:
-            cleaned_data['author'] = [x.strip() for x in ''.join(cleaned_data['author']).split(',')]
+            cleaned_data["author"] = [x.strip() for x in "".join(cleaned_data["author"]).split(",")]
         except KeyError:
             pass
 
-        if cleaned_data.get('sha1sum', '') == '':
-            cleaned_data['sha1sum'] = None
+        if cleaned_data.get("sha1sum", "") == "":
+            cleaned_data["sha1sum"] = None
 
         return cleaned_data
 
@@ -111,7 +110,7 @@ class BlobForm(ModelForm):
                 existing_file = Blob.objects.filter(sha1sum=hasher.hexdigest())
                 if existing_file:
                     url = reverse_lazy("blob:detail", kwargs={"uuid": existing_file[0].uuid})
-                    raise forms.ValidationError(mark_safe(f'This file <a href="{url}">already exists.</a>'))
+                    raise forms.ValidationError(mark_safe(f"This file <a href='{url}'>already exists.</a>"))
 
         return file
 
@@ -132,14 +131,13 @@ class BlobForm(ModelForm):
 
     class Meta:
         model = Blob
-        fields = ('file', 'name', 'filename', 'file_modified', 'date', 'tags', 'content', 'note', 'importance', 'is_note', 'id', 'math_support')
+        fields = ("file", "name", "filename", "file_modified", "date", "tags", "content", "note", "importance", "is_note", "id", "math_support")
         widgets = {
-            'content': Textarea(attrs={'rows': 5, 'class': 'form-control'}),
-            'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),
-            'name': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-            'importance': CheckboxInput(check_test=important_check_test, attrs={'class': 'align-middle mt-2'}),
-
+            "content": Textarea(attrs={"rows": 5, "class": "form-control"}),
+            "note": Textarea(attrs={"rows": 3, "class": "form-control"}),
+            "name": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
+            "importance": CheckboxInput(),
         }
         field_classes = {
-            'importance': CheckboxIntegerField
+            "importance": CheckboxIntegerField
         }
