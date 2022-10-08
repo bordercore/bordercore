@@ -2,20 +2,8 @@ from django.forms import (CheckboxInput, JSONField, ModelForm, Textarea,
                           TextInput, URLInput, ValidationError)
 
 from bookmark.models import Bookmark
-from lib.fields import (CheckboxIntegerField, ModelCommaSeparatedChoiceField,
-                        important_check_test)
+from lib.fields import CheckboxIntegerField, ModelCommaSeparatedChoiceField
 from tag.models import Tag
-
-
-def daily_check_test(value):
-    """
-    Interpret a null value from the database as False, and leave the checkbox unchecked.
-    Otherwise it's true and checked.
-    """
-    if value == 'null' or value == 'false':
-        return False
-    else:
-        return True
 
 
 class DailyCheckboxInput(CheckboxInput):
@@ -28,47 +16,39 @@ class DailyCheckboxInput(CheckboxInput):
         return
 
 
-class CheckboxJSONField(JSONField):
-
-    def bound_data(self, data, initial):
-        """
-        Return the value that should be shown for this field on render of a
-        bound form, given the submitted POST data for the field and the initial
-        data, if any.
-        We override this to prevent the default JSONField from throwing an error
-        when trying to decode a boolean value (from the checkbox) as valid JSON.
-        """
-        if self.disabled:
-            return initial
-        return data
-
-
 class BookmarkForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
 
-        # The request object is passed in from  a view's get_form_kwargs() method
-        self.request = kwargs.pop('request', None)
+        # The request object is passed in from a view's get_form_kwargs() method
+        self.request = kwargs.pop("request", None)
 
         super().__init__(*args, **kwargs)
 
-        self.fields['note'].required = False
-        self.fields['tags'].required = False
-        self.fields['importance'].required = False
-        self.fields['importance'].label = 'Important'
+        self.fields["note"].required = False
+        self.fields["tags"].required = False
+        self.fields["importance"].required = False
+        self.fields["importance"].label = "Important"
 
-        # If this form has a model attached, get the tags and display them separated by commas
         if self.instance.id:
-            self.initial['tags'] = self.instance.get_tags()
+            # If this form has a model attached, get the tags and display them separated by commas
+            self.initial["tags"] = self.instance.get_tags()
+            # If the 'daily' field is not null (ie contains JSON), set the field to True. Otherwise False.
+            self.initial["daily"] = self.instance.daily is not None
+            # If the "importance" field is > 1 set the field to True. Otherwise False.
+            self.initial["importance"] = self.instance.importance > 1
+        else:
+            self.initial["daily"] = False
+            self.initial["importance"] = False
 
-        self.fields['tags'] = ModelCommaSeparatedChoiceField(
+        self.fields["tags"] = ModelCommaSeparatedChoiceField(
             request=self.request,
             required=False,
             queryset=Tag.objects.filter(user=self.request.user),
-            to_field_name='name')
+            to_field_name="name")
 
     def clean_url(self):
-        data = self.cleaned_data['url']
+        data = self.cleaned_data["url"]
         # Verify that this url is not a dupe.  Note: exclude current url when searching.
         b = Bookmark.objects.filter(user=self.request.user, url=data).exclude(id=self.instance.id)
         if b:
@@ -77,16 +57,14 @@ class BookmarkForm(ModelForm):
 
     class Meta:
         model = Bookmark
-        fields = ('url', 'name', 'note', 'tags', 'importance', 'is_pinned', 'daily', 'id')
+        fields = ("url", "name", "note", "tags", "importance", "is_pinned", "daily", "id")
         widgets = {
-            'url': URLInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-            'name': TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
-            'note': Textarea(attrs={'rows': 3, 'class': 'form-control'}),
-            'importance': CheckboxInput(check_test=important_check_test, attrs={'class': 'align-middle mt-2'}),
-            'daily': DailyCheckboxInput(check_test=daily_check_test, attrs={'class': 'align-middle mt-2'}),
-            'is_pinned': DailyCheckboxInput(attrs={'class': 'align-middle mt-2'})
+            "url": URLInput(attrs={"class": "form-control", "autocomplete": "off"}),
+            "name": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
+            "note": Textarea(attrs={"rows": 3, "class": "form-control"}),
+            "daily": DailyCheckboxInput(),
         }
         field_classes = {
-            'daily': CheckboxJSONField,
-            'importance': CheckboxIntegerField
+            "daily": JSONField,
+            "importance": CheckboxIntegerField
         }

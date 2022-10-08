@@ -97,7 +97,7 @@ class BookmarkUpdateView(FormRequestMixin, UpdateView, FormValidMixin):
                 "url": reverse("blob:detail", kwargs={"uuid": b.uuid}),
                 "cover_url": b.get_cover_url_small(),
                 "tags": [x.name for x in b.tags.all()]
-            } for b in self.object.blob_set.all()
+            } for b in self.object.blob_set.all().prefetch_related("tags")
         ]
         context["related_nodes"] = self.object.related_nodes()
 
