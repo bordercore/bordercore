@@ -9,8 +9,8 @@ def get_recent_bookmarks(user, limit=10):
     Return a list of recently created bookmarks
     """
 
-    if "recent_blobs" in cache:
-        return cache.get("recent_blobs")
+    if "recent_bookmarks" in cache:
+        return cache.get("recent_bookmarks")
 
     bookmark_list = Bookmark.objects.filter(
         user=user
@@ -32,6 +32,6 @@ def get_recent_bookmarks(user, limit=10):
 
         returned_bookmark_list.append(bookmark_dict)
 
-    cache.set("recent_blobs", returned_bookmark_list)
+    cache.set("recent_bookmarks", returned_bookmark_list)
 
     return returned_bookmark_list
