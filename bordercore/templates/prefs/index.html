@@ -74,8 +74,8 @@
                                     </div>
                                     <div class="row form-inline mb-3" v-show="background_image_filename !== ''" v-cloak>
                                         <div class="col-lg-3 offset-lg-3">
-                                            <div class="form-check ps-0">
-                                                <input class="form-check-input ms-1" type="checkbox" name="delete_background" />
+                                            <div class="form-check d-flex align-items-center ps-0">
+                                                <toggle-button name="delete_background" :css-colors="true" class="toggle-button"></toggle-button>
                                                 <label class="form-check-label fw-bold ms-2">Delete</label>
                                             </div>
                                         </div>
