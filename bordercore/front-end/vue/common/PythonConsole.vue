@@ -8,7 +8,7 @@
             <textarea rows="5" spellcheck="false" @input="update" @keydown="checkTab" @scroll="syncScroll" />
 
             <!-- Don't place the 'code' block on a new line to avoid whitespace issues -->
-            <pre aria-hidden="true"><code class="language-python" /></pre>
+            <pre class="python-console" aria-hidden="true"><code class="language-python" /></pre>
         </div>
 
         <div id="output-container">
@@ -153,7 +153,7 @@
     }
 
     .code-input textarea, .code-input pre, .code-input pre * {
-        /* Also add text styles to highlighing tokens */
+        /* Also add text styles to highlighting tokens */
         font-size: inherit!important;
         font-family: inherit!important;
         line-height: inherit!important;

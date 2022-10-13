@@ -221,41 +221,54 @@ function resetCopyButton(target) {
  */
 export function addCopyButton() {
     Prism.hooks.add("complete", function(env) {
-    const code = (env.element);
-    const pre = (code.parentNode);
+        const code = (env.element);
+        const pre = (code.parentNode);
 
-    // If this is the code console, since the autoloader rehighlights and
-    //  calls this function as you type, only add the copy button once.
-    if (pre.parentNode.classList.contains("code-input") && pre.parentNode.querySelector("button.copy-button")) {
-        return;
-    }
+        // If this is the code console, since the autoloader rehighlights and
+        //  calls this function as you type, only add the copy button once.
+        if ((pre.parentNode.parentNode.classList.contains("code-input") || pre.parentNode.classList.contains("code-input")) && pre.parentNode.parentNode.querySelector("button.copy-button")) {
+            return;
+        }
 
-    const copyDiv = document.createElement("div");
-    copyDiv.className = "copy-button";
+        if (!pre.classList.contains("python-console")) {
+            // Create a wrapper div with positioning "relative", but only
+            // for code blocks and not the Pyton console.
+            // The "copy" button will be absolutely positioned
+            // relative to this div rather than the <pre> container
+            // which might contain horizontal scrollbars. We don't
+            // want the "copy" button to scroll.
+            const wrapper = document.createElement("div");
+            wrapper.style.position = "relative";
 
-    const button = document.createElement("button");
-    button.className = "copy-button";
-    button.setAttribute("type", "button");
-    button.addEventListener("click", function(evt) {
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(code.textContent);
-            linkSpan.textContent = "Copied!";
-            setTimeout(resetCopyButton.bind(null, evt.currentTarget), 5000);
+            // set the wrapper as child (instead of the <pre> element)
+            pre.parentNode.replaceChild(wrapper, pre);
+            // set <pre> as child of wrapper
+            wrapper.appendChild(pre);
+        }
+
+        const button = document.createElement("button");
+        button.className = "copy-button";
+        button.setAttribute("type", "button");
+        button.addEventListener("click", function(evt) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(code.textContent);
+                linkSpan.textContent = "Copied!";
+                setTimeout(resetCopyButton.bind(null, evt.currentTarget), 5000);
+            }
+        });
+
+        const linkSpan = document.createElement("span");
+        linkSpan.textContent = "Copy";
+        button.appendChild(linkSpan);
+
+        const parentNode = pre.parentNode;
+        if (parentNode.classList.contains("code-input")) {
+            pre.parentNode.appendChild(button);
+            button.classList.add("console");
+        } else {
+            pre.appendChild(button);
         }
     });
-
-    const linkSpan = document.createElement("span");
-    linkSpan.textContent = "Copy";
-    button.appendChild(linkSpan);
-
-    const parentNode = pre.parentNode;
-    if (parentNode.classList.contains("code-input")) {
-        pre.parentNode.appendChild(button);
-        button.classList.add("console");
-    } else {
-        pre.appendChild(button);
-    }
-});
 }
 
 /**

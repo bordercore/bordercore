@@ -2365,8 +2365,6 @@ tr.hover-target:hover {
 // Copy button for code
 .code-input,
 pre[class^="language-"] {
-  position: relative;
-
   &:hover .copy-button {
     opacity: 1;
   }
@@ -2381,7 +2379,7 @@ pre[class^="language-"] {
   border: none;
   background: none;
   border-radius: .5em;
-  color: #f92aad;
+  color: #cfacd9;
   font-size: .8em;
   opacity: 0;
   text-shadow: 0 0 0.12rem #100c0f, 0 0 0.31rem #dc078e33, 0 0 0.62rem var(--text1);
