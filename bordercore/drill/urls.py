@@ -101,28 +101,23 @@ urlpatterns = [
         name="get_title_from_url"
     ),
     path(
-        route="<uuid:uuid>/blob_list",
-        view=views.get_blob_list,
-        name="get_blob_list"
+        route="related_objects/<uuid:uuid>",
+        view=views.get_related_objects,
+        name="related_objects"
     ),
     path(
-        route="blob/sort",
-        view=views.sort_blob_list,
-        name="sort_blob_list"
+        route="related_objects/add",
+        view=views.add_object,
+        name="add_object"
     ),
     path(
-        route="blob/add",
-        view=views.add_blob,
-        name="add_blob"
+        route="related_objects/remove_object",
+        view=views.remove_object,
+        name="remove_object"
     ),
     path(
-        route="blob/remove",
-        view=views.remove_blob,
-        name="remove_blob"
-    ),
-    path(
-        route="blob/edit_note",
-        view=views.edit_blob_note,
-        name="edit_blob_note"
+        route="related_objects/edit_note",
+        view=views.edit_related_object_note,
+        name="edit_related_object_note"
     ),
 ]

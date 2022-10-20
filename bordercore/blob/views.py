@@ -238,12 +238,15 @@ class BlobDetailView(DetailView):
 
         context["collection_list"] = self.object.get_collection_info()
 
-        if "content_type" in context or self.object.sha1sum or context["metadata_misc"] != "{}":
-            context["show_metadata"] = True
-        else:
-            context["show_metadata"] = False
+        context["show_metadata"] = "content_type" in context \
+            or self.object.sha1sum \
+            or context["metadata_misc"] != "{}"
 
-        context["related_questions"] = self.object.question_set.all()
+        related_objects = self.object.bcobject_set
+        if related_objects.first():
+            context["related_questions"] = related_objects.first().bc_object.all()
+        else:
+            context["related_questions"] = []
 
         context["tree"] = json.dumps(
             {

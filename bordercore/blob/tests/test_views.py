@@ -349,6 +349,18 @@ def test_get_related_blobs(auto_login_user):
     assert payload["blob_list"][0]["uuid"] == str(blob_2.uuid)
 
 
+def test_related_objects(auto_login_user, question):
+
+    user, _ = auto_login_user()
+
+    blob = BlobFactory.create(user=user)
+    question[0].add_related_object(blob.uuid)
+    related_objects = Blob.related_objects(question[0])
+
+    assert len(related_objects) == 3
+    assert blob.uuid in [x["uuid"] for x in related_objects]
+
+
 def test_blob_link(auto_login_user):
 
     user, client = auto_login_user()

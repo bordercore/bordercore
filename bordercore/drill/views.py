@@ -7,22 +7,20 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
 from accounts.models import SortOrderDrillTag
-from blob.models import Blob
+from blob.models import BCObject, Blob
 from bookmark.models import Bookmark
 from drill.forms import QuestionForm
 from lib.mixins import FormRequestMixin
 from lib.util import parse_title_from_url
 from tag.models import Tag
 
-from .models import (EFACTOR_DEFAULT, Question, SortOrderQuestionBlob,
-                     SortOrderQuestionBookmark)
+from .models import EFACTOR_DEFAULT, Question
 
 
 @method_decorator(login_required, name="dispatch")
@@ -90,8 +88,7 @@ class QuestionCreateView(FormRequestMixin, CreateView):
         # Save the tags
         form.save_m2m()
 
-        handle_related_bookmarks(obj, self.request)
-        handle_related_blobs(obj, self.request)
+        handle_related_objects(obj, self.request)
 
         review_url = urls.reverse("drill:detail", kwargs={"uuid": obj.uuid})
         messages.add_message(
@@ -105,38 +102,15 @@ class QuestionCreateView(FormRequestMixin, CreateView):
         return reverse("drill:add")
 
 
-def handle_related_bookmarks(question, request):
+def handle_related_objects(question, request):
 
-    info = request.POST.get("related-bookmarks", None)
-
-    if not info:
-        return
-
-    for bookmark_info in json.loads(info):
-        bookmark = Bookmark.objects.get(uuid=bookmark_info["uuid"])
-        so = SortOrderQuestionBookmark(
-            question=question,
-            bookmark=bookmark,
-            note=bookmark_info["note"] if "note" in bookmark_info else None
-        )
-        so.save()
-
-
-def handle_related_blobs(question, request):
-
-    info = request.POST.get("related-blobs", None)
+    info = request.POST.get("related-objects", None)
 
     if not info:
         return
 
-    for blob_info in json.loads(info):
-        blob = Blob.objects.get(uuid=blob_info["uuid"])
-        so = SortOrderQuestionBlob(
-            question=question,
-            blob=blob,
-            note=blob_info["note"]
-        )
-        so.save()
+    for object_info in json.loads(info):
+        question.add_related_object(object_info["uuid"])
 
 
 @method_decorator(login_required, name="dispatch")
@@ -436,48 +410,31 @@ def get_title_from_url(request):
     return JsonResponse(response)
 
 
-@login_required
-def get_blob_list(request, uuid):
-
-    question = Question.objects.get(uuid=uuid, user=request.user)
-    blob_list = list(question.blobs.all().only("name", "id").order_by("sortorderquestionblob__sort_order"))
-
-    response = {
-        "status": "OK",
-        "blob_list": [
-            {
-                "name": x.name,
-                "uuid": x.uuid,
-                "note": x.sortorderquestionblob_set.get(question=question).note,
-                "url": reverse("blob:detail", kwargs={"uuid": x.uuid}),
-                "cover_url": Blob.get_cover_url_static(
-                    x.uuid,
-                    x.file.name,
-                    size="small"
-                )
-            }
-            for x
-            in blob_list]
-    }
-
-    return JsonResponse(response)
-
-
-@login_required
-def sort_blob_list(request):
+def get_related_objects(request, uuid):
     """
-    Move a given blob to a new position in a sorted list
+    Get all related objects for a given blob/bookmark/question.
     """
 
+    base_object = Question.objects.filter(user=request.user, uuid=uuid)
+    if base_object.exists():
+        related_objects = Blob.related_objects(base_object.first())
+
+    response = {
+        "status": "OK",
+        "related_objects": related_objects
+    }
+
+    return JsonResponse(response)
+
+
+@login_required
+def add_object(request):
+
     question_uuid = request.POST["question_uuid"]
-    blob_uuid = request.POST["blob_uuid"]
-    new_position = int(request.POST["new_position"])
+    object_uuid = request.POST["object_uuid"]
 
-    so = SortOrderQuestionBlob.objects.get(question__uuid=question_uuid, blob__uuid=blob_uuid)
-    SortOrderQuestionBlob.reorder(so, new_position)
-
-    so.question.modified = timezone.now()
-    so.question.save()
+    question = Question.objects.get(uuid=question_uuid)
+    question.add_related_object(object_uuid)
 
     response = {
         "status": "OK",
@@ -487,45 +444,13 @@ def sort_blob_list(request):
 
 
 @login_required
-def add_blob(request):
+def remove_object(request):
 
     question_uuid = request.POST["question_uuid"]
-    blob_uuid = request.POST["blob_uuid"]
+    bc_object_uuid = request.POST["bc_object_uuid"]
 
-    response = {
-        "status": "OK",
-        "message": ""
-    }
-
-    if SortOrderQuestionBlob.objects.filter(question__uuid=question_uuid, blob__uuid=blob_uuid).exists():
-        response = {
-            "message": "Blob already related to this question",
-            "status": "Warning"
-        }
-    else:
-        question = Question.objects.get(uuid=question_uuid, user=request.user)
-        blob = Blob.objects.get(uuid=blob_uuid)
-
-        so = SortOrderQuestionBlob(question=question, blob=blob)
-        so.save()
-
-        so.question.modified = timezone.now()
-        so.question.save()
-
-    return JsonResponse(response)
-
-
-@login_required
-def remove_blob(request):
-
-    question_uuid = request.POST["question_uuid"]
-    blob_uuid = request.POST["blob_uuid"]
-
-    so = SortOrderQuestionBlob.objects.get(question__uuid=question_uuid, blob__uuid=blob_uuid)
-    so.delete()
-
-    so.question.modified = timezone.now()
-    so.question.save()
+    question = Question.objects.get(uuid=question_uuid)
+    question.remove_related_object(bc_object_uuid)
 
     response = {
         "status": "OK",
@@ -535,18 +460,14 @@ def remove_blob(request):
 
 
 @login_required
-def edit_blob_note(request):
+def edit_related_object_note(request):
 
-    question_uuid = request.POST["question_uuid"]
-    blob_uuid = request.POST["blob_uuid"]
+    bc_object_uuid = request.POST["bc_object_uuid"]
     note = request.POST["note"]
 
-    so = SortOrderQuestionBlob.objects.get(question__uuid=question_uuid, blob__uuid=blob_uuid)
-    so.note = note
-    so.save()
-
-    so.question.modified = timezone.now()
-    so.question.save()
+    bc_object = BCObject.objects.get(uuid=bc_object_uuid)
+    bc_object.note = note
+    bc_object.save()
 
     response = {
         "status": "OK",

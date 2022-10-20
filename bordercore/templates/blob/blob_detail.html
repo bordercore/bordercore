@@ -257,32 +257,31 @@
                 </template>
             </card>
 
-        </div>
+            <div v-if="related_questions.length > 0" class="card-body" v-cloak>
 
-        <div v-if="related_questions.length > 0" v-cloak>
+                <div class="card-title">
+                    Related Questions
+                </div>
 
-            <hr class="divider w-100 mt-0" />
-
-            <div class="card-title">
-                Related Questions
-            </div>
-
-            <div class="cursor-pointer">
-                <ul class="list-group interior-borders">
-                    <li v-for="question in related_questions" class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
-                        <div class="d-flex p-1">
-                            <div class="mt-1 me-2">
-                                <font-awesome-icon icon="question" class="text-success"></font-awesome-icon>
-                            </div>
+                <div class="cursor-pointer">
+                    <ul class="list-group interior-borders">
+                        <li v-for="question in related_questions"
+                            class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
+                            <div class="d-flex p-1">
+                                <div class="mt-1 me-2">
+                                    <font-awesome-icon icon="question" class="text-success"></font-awesome-icon>
+                                </div>
                             <div>
                                 <span v-html="question.question" @click="onClick(question.url)"></span>
                                 <div>
-                                    <span v-for="tag in question.tags" class="badge bg-info me-2">[[ tag.tag ]]</span>
+                                    <span v-for="tag in question.tags" class="tag me-2">[[ tag.tag ]]</span>
                                 </div>
                             </div>
-                        </div>
-                    </li>
-                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
             </div>
 
         </div> <!-- End first column -->

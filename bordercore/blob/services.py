@@ -58,6 +58,7 @@ def get_recent_blobs(user, limit=10, skip_content=False):
             "delta_days": delta.days,
             "uuid": str(blob.uuid),
             "doctype": blob.doctype,
+            "type": "blob",
         }
 
         if blob.content and not skip_content:

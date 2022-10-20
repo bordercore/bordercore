@@ -7,14 +7,12 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import F, Max, Q
-from django.db.models.signals import pre_delete
-from django.dispatch.dispatcher import receiver
 from django.urls import reverse
 from django.utils import timezone
 
-from blob.models import Blob
+from blob.models import BCObject, Blob
 from bookmark.models import Bookmark
-from lib.mixins import SortOrderMixin, TimeStampedModel
+from lib.mixins import TimeStampedModel
 from lib.util import get_elasticsearch_connection
 from tag.models import Tag
 
@@ -54,8 +52,7 @@ class Question(TimeStampedModel):
     efactor = models.FloatField(blank=False, null=False)
     is_favorite = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
-    bookmarks = models.ManyToManyField(Bookmark, through="SortOrderQuestionBookmark")
-    blobs = models.ManyToManyField(Blob, through="SortOrderQuestionBlob")
+    bc_objects = models.ManyToManyField("blob.BCObject", blank=True, related_name="bc_object")
 
     objects = DrillManager()
 
@@ -162,6 +159,28 @@ class Question(TimeStampedModel):
             info.append(Question.get_tag_progress(self.user, tag.name))
 
         return info
+
+    def add_related_object(self, object_uuid):
+
+        args = {}
+        blob = Blob.objects.filter(uuid=object_uuid)
+        if blob.exists():
+            args = {"blob": blob.first()}
+        bookmark = Bookmark.objects.filter(uuid=object_uuid)
+        if bookmark.exists():
+            args = {"bookmark": bookmark.first()}
+        bc_object, _ = BCObject.objects.get_or_create(**args)
+
+        self.bc_objects.add(bc_object)
+
+    def remove_related_object(self, bc_object_uuid):
+
+        bc_object = BCObject.objects.get(uuid=bc_object_uuid)
+        self.bc_objects.remove(bc_object)
+
+        # If there are no more objects related to this BCObject, delete it
+        if bc_object.bc_object.count() == 0:
+            bc_object.delete()
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -310,47 +329,3 @@ class QuestionResponse(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     response = models.TextField(blank=False, null=False)
     date = models.DateTimeField(auto_now_add=True)
-
-
-class SortOrderQuestionBookmark(SortOrderMixin):
-
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    bookmark = models.ForeignKey(Bookmark, on_delete=models.CASCADE)
-
-    field_name = "question"
-
-    def __str__(self):
-        return f"SortOrder: {self.question}, {self.bookmark}"
-
-    class Meta:
-        ordering = ("sort_order",)
-        unique_together = (
-            ("question", "bookmark")
-        )
-
-
-@receiver(pre_delete, sender=SortOrderQuestionBookmark)
-def remove_bookmark(sender, instance, **kwargs):
-    instance.handle_delete()
-
-
-class SortOrderQuestionBlob(SortOrderMixin):
-
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    blob = models.ForeignKey(Blob, on_delete=models.CASCADE)
-
-    field_name = "question"
-
-    def __str__(self):
-        return f"SortOrder: {self.question}, {self.blob}"
-
-    class Meta:
-        ordering = ("sort_order",)
-        unique_together = (
-            ("question", "blob")
-        )
-
-
-@receiver(pre_delete, sender=SortOrderQuestionBlob)
-def remove_blob(sender, instance, **kwargs):
-    instance.handle_delete()

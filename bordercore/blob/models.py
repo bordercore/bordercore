@@ -351,6 +351,55 @@ class Blob(TimeStampedModel):
             BlobBlob.objects.filter(blob_1=self).order_by("-created")
         ]
 
+    @staticmethod
+    def related_objects(base_object):
+
+        related_objects = []
+
+        for related_object in base_object.bc_objects.all().order_by("-created"):
+            if related_object.blob:
+                related_objects.append(
+                    {
+                        "bc_object_uuid": related_object.uuid,
+                        "type": "blob",
+                        "uuid": related_object.blob.uuid,
+                        "name": related_object.blob.name,
+                        "url": reverse("blob:detail", kwargs={"uuid": related_object.blob.uuid}),
+                        "note": related_object.note,
+                        "edit_url": reverse("blob:update", kwargs={"uuid": related_object.blob.uuid}),
+                        "cover_url": Blob.get_cover_url_static(
+                            related_object.blob.uuid,
+                            related_object.blob.file.name,
+                            size="small"
+                        )
+                    }
+                )
+            elif related_object.bookmark:
+                related_objects.append(
+                    {
+                        "bc_object_uuid": related_object.uuid,
+                        "type": "bookmark",
+                        "uuid": related_object.bookmark.uuid,
+                        "name": related_object.bookmark.name,
+                        "url": related_object.bookmark.url,
+                        "favicon_url": related_object.bookmark.get_favicon_url(size=16),
+                        "note": related_object.note,
+                        "edit_url": reverse("bookmark:update", kwargs={"uuid": related_object.bookmark.uuid})
+                    }
+                )
+            elif related_object.question:
+                related_objects.append(
+                    {
+                        "bc_object_uuid": related_object.uuid,
+                        "type": "question",
+                        "uuid": related_object.uuid,
+                        "question": related_object.question,
+                        "note": related_object.note,
+                    }
+                )
+
+        return related_objects
+
     def is_image(self):
         return is_image(self.file)
 
@@ -817,3 +866,21 @@ def remove_recently_viewed_blob(sender, instance, **kwargs):
         ).update(
             sort_order=F("sort_order") - 1
         )
+
+
+class BCObject(TimeStampedModel):
+
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False)
+    blob = models.ForeignKey("blob.Blob", null=True, on_delete=models.CASCADE)
+    bookmark = models.ForeignKey("bookmark.Bookmark", null=True, on_delete=models.CASCADE)
+    note = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        if self.blob:
+            return f"Blob: {self.blob}"
+        elif self.bookmark:
+            return f"Bookmark: {self.bookmark}"
+        elif self.question:
+            return f"Question: {self.question}"
+        else:
+            return "Empty object"

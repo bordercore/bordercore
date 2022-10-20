@@ -149,11 +149,11 @@ Vue.component("Bookmark", Bookmark);
 import RelatedBookmarksList from "./vue/bookmark/RelatedBookmarksList.vue";
 Vue.component("RelatedBookmarksList", RelatedBookmarksList);
 
+import RelatedObjects from "./vue/common/RelatedObjects.vue";
+Vue.component("RelatedObjects", RelatedObjects);
+
 import DrillTagProgress from "./vue/common/DrillTagProgress.vue";
 Vue.component("DrillTagProgress", DrillTagProgress);
-
-import DrillBlobs from "./vue/drill/DrillBlobs.vue";
-Vue.component("DrillBlobs", DrillBlobs);
 
 import DropDownMenu from "./vue/common/DropDownMenu.vue";
 Vue.component("DropDownMenu", DropDownMenu);

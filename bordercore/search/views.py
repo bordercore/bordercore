@@ -952,10 +952,12 @@ def search_names_es(user, search_term, doc_types):
                     match["_source"].get("filename"),
                     size="small"
                 )
+                matches[-1]["type"] = "blob"
             if doc_type_pretty == "Bookmark":
                 matches[-1]["cover_url"] = Bookmark.thumbnail_url_static(
                     match["_source"].get("uuid"),
                     match["_source"].get("url"),
                 )
+                matches[-1]["type"] = "bookmark"
 
     return matches

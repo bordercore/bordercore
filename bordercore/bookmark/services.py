@@ -27,7 +27,8 @@ def get_recent_bookmarks(user, limit=10):
             "url": reverse("blob:detail", kwargs={"uuid": bookmark.uuid}),
             "uuid": str(bookmark.uuid),
             "doctype": "Bookmark",
-            "thumbnail_url": bookmark.thumbnail_url
+            "thumbnail_url": bookmark.thumbnail_url,
+            "type": "bookmark"
         }
 
         returned_bookmark_list.append(bookmark_dict)

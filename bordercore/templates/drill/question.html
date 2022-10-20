@@ -76,42 +76,24 @@
 
             </div>
 
-            <related-bookmarks-list
-                ref="relatedBookmarksList"
+            <related-objects
+                ref="relatedObjectsList"
                 object-uuid="{{ object.uuid }}"
-                model-name="drill.Question"
-                get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=drill.Question"
-                add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
-                :update-modified="true"
-                remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"
-                sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
-                edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}"
-                :show-add-button="true"
-                transition-name=""
+                related-objects-url="{% url 'drill:related_objects' object.uuid %}"
+                add-object-url="{% url 'drill:add_object' %}"
+                remove-object-url="{% url 'drill:remove_object' %}" edit-object-note-url="{% url 'drill:edit_related_object_note' %}"
             >
-            </related-bookmarks-list>
+            </related-objects>
 
             <object-select
                 :has-filter="false"
-                :initial-doctypes="['bookmark']"
-                label="_objectSelectBookmark"
-                ref="objectSelectBookmark"
+                label="_objectSelect"
+                ref="objectSelect"
                 search-object-url="{% url 'search:search_names' %}"
-                title="Select Bookmark"
-                @select-object="selectBookmark"
+                title="Select Object"
+                @select-object="selectObject"
             >
             </object-select>
-
-            <drill-blobs
-                question-uuid="{{ object.uuid }}"
-                get-blob-list-url="{% url 'drill:get_blob_list' '00000000-0000-0000-0000-000000000000' %}"
-                sort-blob-list-url="{% url 'drill:sort_blob_list' %}"
-                add-blob-url="{% url 'drill:add_blob' %}"
-                remove-blob-url="{% url 'drill:remove_blob' %}"
-                edit-blob-note-url="{% url 'drill:edit_blob_note' %}"
-                search-blob-url="{% url 'search:search_names' %}?doc_type=blob,book,document,note"
-            >
-            </drill-blobs>
 
             <card title="Tag Progress" class="backdrop-filter">
                 <template v-slot:content>
@@ -349,8 +331,8 @@
                 getAnswer() {
                     return markdown.render("{{ question.answer|escapejs }}");
                 },
-                selectBookmark(bookmark) {
-                    this.$refs.relatedBookmarksList.selectBookmark(bookmark);
+                selectObject(bcObject) {
+                    this.$refs.relatedObjectsList.addObject(bcObject);
                 }
             },
 

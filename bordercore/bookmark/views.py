@@ -89,7 +89,7 @@ class BookmarkUpdateView(FormRequestMixin, UpdateView, FormValidMixin):
         context = super().get_context_data(**kwargs)
         context["action"] = "Update"
         context["tags"] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
-        context["related_questions"] = self.object.question_set.all()
+        context["related_questions"] = self.object.bcobject_set.all()
         context["related_blobs"] = [
             {
                 "uuid": b.uuid,
@@ -305,7 +305,7 @@ class BookmarkListView(ListView):
         else:
             query = query.filter(
                 tags__isnull=True,
-                sortorderquestionbookmark__isnull=True,
+                bcobject__isnull=True,
                 collectionobject__isnull=True,
                 sortorderblobbookmark__isnull=True
             )

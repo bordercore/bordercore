@@ -9,9 +9,9 @@ import responses
 from django import urls
 from django.db.models import signals
 
-from drill.models import (Question, SortOrderQuestionBlob,
-                          SortOrderQuestionBookmark)
-from drill.views import handle_related_blobs, handle_related_bookmarks
+from blob.models import BCObject
+from drill.models import Question
+from drill.views import handle_related_objects
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
 
@@ -60,14 +60,14 @@ def test_drill_create(auto_login_user, question):
     assert resp.status_code == 302
 
 
-def test_drill_handle_related_bookmarks(monkeypatch_drill, auto_login_user, question, bookmark):
+def test_drill_handle_related_objects(monkeypatch_drill, auto_login_user, question, bookmark):
 
     user, client = auto_login_user()
 
     mock_request = MagicMock()
     mock_request.user = user
     mock_request.POST = {
-        "related-bookmarks": json.dumps(
+        "related-objects": json.dumps(
             [
                 {
                     "uuid": str(bookmark[0].uuid),
@@ -77,33 +77,10 @@ def test_drill_handle_related_bookmarks(monkeypatch_drill, auto_login_user, ques
         )
     }
 
-    handle_related_bookmarks(question[1], mock_request)
+    handle_related_objects(question[1], mock_request)
 
-    so = SortOrderQuestionBookmark.objects.filter(question=question[1], bookmark=bookmark[0])
-    assert so.exists()
-
-
-def test_drill_handle_related_blobs(monkeypatch_drill, auto_login_user, question, blob_image_factory):
-
-    user, client = auto_login_user()
-
-    mock_request = MagicMock()
-    mock_request.user = user
-    mock_request.POST = {
-        "related-blobs": json.dumps(
-            [
-                {
-                    "uuid": str(blob_image_factory[0].uuid),
-                    "note": ""
-                }
-            ]
-        )
-    }
-
-    handle_related_blobs(question[0], mock_request)
-
-    so = SortOrderQuestionBlob.objects.filter(question=question[0], blob=blob_image_factory[0])
-    assert so.exists()
+    assert BCObject.objects.filter(bookmark=bookmark[0]).exists()
+    assert Question.objects.get(uuid=question[1].uuid).bc_objects.all().count() == 1
 
 
 def test_drill_delete(monkeypatch_drill, auto_login_user, question):
@@ -379,109 +356,72 @@ def test_get_title_from_url(auto_login_user, bookmark):
     assert content["title"] == "Bordercore Bookmarks"
 
 
-def test_drill_get_blob_list(auto_login_user, question, blob_note):
+def test_drill_get_related_objects(auto_login_user, question, blob_note):
 
     _, client = auto_login_user()
 
-    so = SortOrderQuestionBlob(question=question[0], blob=blob_note[0])
-    so.save()
+    question[0].add_related_object(blob_note[0].uuid)
 
-    url = urls.reverse("drill:get_blob_list", kwargs={"uuid": question[0].uuid})
+    url = urls.reverse("drill:related_objects", kwargs={"uuid": question[0].uuid})
 
     resp = client.get(url)
 
     content = json.loads(resp.content)
     assert content["status"] == "OK"
-
-    assert len(content["blob_list"]) == 1
-    assert content["blob_list"][0]["name"] == blob_note[0].name
-    assert content["blob_list"][0]["uuid"] == str(blob_note[0].uuid)
-
-
-def test_drill_sort_blob_list(auto_login_user, question, blob_note):
-
-    _, client = auto_login_user()
-
-    so = SortOrderQuestionBlob(question=question[0], blob=blob_note[0])
-    so.save()
-
-    so = SortOrderQuestionBlob(question=question[0], blob=blob_note[1])
-    so.save()
-
-    url = urls.reverse("drill:sort_blob_list")
-    resp = client.post(url, {
-        "question_uuid": question[0].uuid,
-        "blob_uuid": blob_note[1].uuid,
-        "new_position": 2,
-    })
-
-    assert resp.status_code == 200
-
-    so = SortOrderQuestionBlob.objects.get(question=question[0], blob=blob_note[0])
-    assert so.sort_order == 1
-    so = SortOrderQuestionBlob.objects.get(question=question[0], blob=blob_note[1])
-    assert so.sort_order == 2
+    assert len(content["related_objects"]) == 3
+    assert content["related_objects"][0]["name"] == blob_note[0].name
+    assert content["related_objects"][0]["uuid"] == str(blob_note[0].uuid)
 
 
-def test_drill_add_blob(auto_login_user, question, blob_note):
+def test_drill_add_object(auto_login_user, question, blob_note):
 
     _, client = auto_login_user()
 
-    url = urls.reverse("drill:add_blob")
+    url = urls.reverse("drill:add_object")
     resp = client.post(url, {
         "question_uuid": question[0].uuid,
-        "blob_uuid": blob_note[0].uuid,
+        "object_uuid": blob_note[0].uuid,
     })
 
     assert resp.status_code == 200
-
-    assert SortOrderQuestionBlob.objects.filter(question__uuid=question[0].uuid, blob__uuid=blob_note[0].uuid).exists()
-
-    url = urls.reverse("drill:add_blob")
-    resp = client.post(url, {
-        "question_uuid": question[0].uuid,
-        "blob_uuid": blob_note[0].uuid,
-    })
-
-    assert resp.status_code == 200
-    assert json.loads(resp.content) == {"message": "Blob already related to this question", "status": "Warning"}
+    assert BCObject.objects.filter(blob=blob_note[0]).exists()
+    assert Question.objects.get(uuid=question[0].uuid).bc_objects.all().count() == 3
 
 
-def test_drill_remove_blob(auto_login_user, question, blob_note):
+def test_drill_remove_object(auto_login_user, question, blob_note):
 
     _, client = auto_login_user()
 
-    so = SortOrderQuestionBlob(question=question[0], blob=blob_note[0])
-    so.save()
+    question[0].add_related_object(blob_note[0].uuid)
+    bc_object = question[0].bc_objects.filter(blob=blob_note[0]).first()
 
-    url = urls.reverse("drill:remove_blob")
+    url = urls.reverse("drill:remove_object")
     resp = client.post(url, {
         "question_uuid": question[0].uuid,
-        "blob_uuid": blob_note[0].uuid,
+        "bc_object_uuid": bc_object.uuid,
     })
 
     assert resp.status_code == 200
+    assert not BCObject.objects.filter(blob=blob_note[0]).exists()
+    assert Question.objects.get(uuid=question[0].uuid).bc_objects.all().count() == 2
 
-    assert not SortOrderQuestionBlob.objects.filter(question__uuid=question[0].uuid, blob__uuid=blob_note[0].uuid).exists()
 
-
-def test_drill_edit_blob_note(auto_login_user, question, blob_note):
+def test_drill_edit_related_object_note(auto_login_user, question, blob_note):
 
     _, client = auto_login_user()
 
-    so = SortOrderQuestionBlob(question=question[0], blob=blob_note[0])
-    so.save()
+    question[0].add_related_object(blob_note[0].uuid)
+    bc_object = question[0].bc_objects.filter(blob=blob_note[0]).first()
 
     note = "Updated Note"
 
-    url = urls.reverse("drill:edit_blob_note")
+    url = urls.reverse("drill:edit_related_object_note")
     resp = client.post(url, {
-        "question_uuid": question[0].uuid,
-        "blob_uuid": blob_note[0].uuid,
+        "bc_object_uuid": bc_object.uuid,
         "note": note
     })
 
     assert resp.status_code == 200
 
-    so = SortOrderQuestionBlob.objects.get(question__uuid=question[0].uuid, blob__uuid=blob_note[0].uuid)
-    assert so.note == note
+    bc_object = question[0].bc_objects.filter(blob=blob_note[0]).first()
+    assert bc_object.note == note

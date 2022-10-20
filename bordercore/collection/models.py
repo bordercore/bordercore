@@ -208,7 +208,7 @@ class Collection(TimeStampedModel):
 
 class CollectionObject(SortOrderMixin):
 
-    collection = models.ForeignKey(Collection, on_delete=models.CASCADE)
+    collection = models.ForeignKey("collection.Collection", null=True, on_delete=models.CASCADE)
     blob = models.ForeignKey("blob.Blob", null=True, on_delete=models.CASCADE)
     bookmark = models.ForeignKey("bookmark.Bookmark", null=True, on_delete=models.CASCADE)
     object = models.ForeignKey("collection.BCObject", on_delete=models.CASCADE, null=True)

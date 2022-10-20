@@ -13,7 +13,7 @@ class BookmarkManager(models.Manager):
         query = Bookmark.objects.filter(
             user=user,
             tags__isnull=True,
-            sortorderquestionbookmark__isnull=True,
+            bcobject__isnull=True,
             collectionobject__isnull=True,
             sortorderblobbookmark__isnull=True,
         )
