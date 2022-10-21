@@ -148,6 +148,14 @@ def test_search(auto_login_user, collection, blob_image_factory, blob_pdf_factor
 
 def test_collection_object_list(auto_login_user, collection, blob_image_factory, blob_pdf_factory):
 
+    # Quiet spurious output
+    settings.NPLUSONE_WHITELIST = [
+        {
+            "label": "unused_eager_load",
+            "model": "collection.CollectionObject"
+        }
+    ]
+
     _, client = auto_login_user()
 
     url = urls.reverse("collection:get_object_list", kwargs={"collection_uuid": collection[0].uuid})
@@ -164,6 +172,14 @@ def test_collection_object_list(auto_login_user, collection, blob_image_factory,
 
 
 def test_collection_get_object_list(auto_login_user, collection):
+
+    # Quiet spurious output
+    settings.NPLUSONE_WHITELIST = [
+        {
+            "label": "unused_eager_load",
+            "model": "collection.CollectionObject"
+        }
+    ]
 
     _, client = auto_login_user()
 
