@@ -29,7 +29,7 @@ class Node(TimeStampedModel):
     name = models.TextField()
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     note = models.TextField(blank=True, null=True)
-    todos = models.ManyToManyField(Todo, through="SortOrderNodeTodo")
+    todos = models.ManyToManyField(Todo, through="NodeTodo")
     layout = JSONField(default=default_layout, null=True, blank=True)
 
     def __str__(self):
@@ -283,11 +283,11 @@ class Node(TimeStampedModel):
         self.layout = layout
         self.save()
 
-        for so in SortOrderNodeTodo.objects.filter(node=self):
+        for so in NodeTodo.objects.filter(node=self):
             so.todo.delete()
 
 
-class SortOrderNodeTodo(SortOrderMixin):
+class NodeTodo(SortOrderMixin):
 
     node = models.ForeignKey(Node, on_delete=models.CASCADE)
     todo = models.ForeignKey(Todo, on_delete=models.CASCADE)
@@ -304,6 +304,6 @@ class SortOrderNodeTodo(SortOrderMixin):
         )
 
 
-@receiver(pre_delete, sender=SortOrderNodeTodo)
+@receiver(pre_delete, sender=NodeTodo)
 def remove_todo(sender, instance, **kwargs):
     instance.handle_delete()

@@ -128,7 +128,7 @@
                 );
             },
             removeTodo(todoUuid) {
-                // Delete the todo item, and the SortOrderNodeTodo object
+                // Delete the todo item, and the NodeTodo object
                 //  will automatically be deleted as well
                 const self = this;
                 axios.delete(this.removeNodeTodoUrl.replace("00000000-0000-0000-0000-000000000000", todoUuid))

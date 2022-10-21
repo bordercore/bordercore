@@ -71,7 +71,7 @@ class TodoTaskList(ListView):
             if tag_name:
                 queryset = queryset.filter(tag__name=tag_name)
 
-            queryset = queryset.filter(sortordernodetodo__isnull=True)
+            queryset = queryset.filter(nodetodo__isnull=True)
             queryset = queryset.order_by("name")
 
         elif tag_name:
@@ -80,7 +80,7 @@ class TodoTaskList(ListView):
                 user=self.request.user,
                 name=tag_name
             ).todos.filter(
-                sortordernodetodo__isnull=True
+                nodetodo__isnull=True
             ).order_by(
                 "sortordertagtodo__sort_order"
             )
@@ -90,7 +90,7 @@ class TodoTaskList(ListView):
             queryset = Todo.objects.filter(
                 user=self.request.user
             ).filter(
-                sortordernodetodo__isnull=True
+                nodetodo__isnull=True
             ).order_by(
                 "-created"
             )

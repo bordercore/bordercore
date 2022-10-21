@@ -16,7 +16,7 @@ from node.forms import NodeForm
 from quote.models import Quote
 from todo.models import Todo
 
-from .models import Node, SortOrderNodeTodo
+from .models import Node, NodeTodo
 from .services import get_node_list
 
 
@@ -96,7 +96,7 @@ def edit_note(request):
 def get_todo_list(request, uuid):
 
     node = Node.objects.get(uuid=uuid, user=request.user)
-    todo_list = list(node.todos.all().only("name", "uuid").order_by("sortordernodetodo__sort_order"))
+    todo_list = list(node.todos.all().only("name", "uuid").order_by("nodetodo__sort_order"))
 
     response = {
         "status": "OK",
@@ -123,7 +123,7 @@ def add_todo(request):
     node = Node.objects.get(uuid=node_uuid, user=request.user)
     todo = Todo.objects.get(uuid=todo_uuid)
 
-    so = SortOrderNodeTodo(node=node, todo=todo)
+    so = NodeTodo(node=node, todo=todo)
     so.save()
 
     so.node.modified = timezone.now()
@@ -142,7 +142,7 @@ def remove_todo(request):
     node_uuid = request.POST["node_uuid"]
     todo_uuid = request.POST["todo_uuid"]
 
-    so = SortOrderNodeTodo.objects.get(node__uuid=node_uuid, todo__uuid=todo_uuid)
+    so = NodeTodo.objects.get(node__uuid=node_uuid, todo__uuid=todo_uuid)
     so.delete()
 
     so.node.modified = timezone.now()
@@ -165,8 +165,8 @@ def sort_todos(request):
     todo_uuid = request.POST["todo_uuid"]
     new_position = int(request.POST["new_position"])
 
-    so = SortOrderNodeTodo.objects.get(node__uuid=node_uuid, todo__uuid=todo_uuid)
-    SortOrderNodeTodo.reorder(so, new_position)
+    so = NodeTodo.objects.get(node__uuid=node_uuid, todo__uuid=todo_uuid)
+    NodeTodo.reorder(so, new_position)
 
     so.node.modified = timezone.now()
     so.node.save()
