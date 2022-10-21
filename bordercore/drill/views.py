@@ -12,7 +12,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
-from accounts.models import SortOrderDrillTag
+from accounts.models import DrillTag
 from blob.models import BCObject, Blob
 from bookmark.models import Bookmark
 from drill.forms import QuestionForm
@@ -299,7 +299,7 @@ def pin_tag(request):
 
     tag_name = request.POST["tag"]
 
-    if SortOrderDrillTag.objects.filter(userprofile=request.user.userprofile, tag__name=tag_name).exists():
+    if DrillTag.objects.filter(userprofile=request.user.userprofile, tag__name=tag_name).exists():
 
         response = {
             "status": "Error",
@@ -309,7 +309,7 @@ def pin_tag(request):
     else:
 
         tag = Tag.objects.get(name=tag_name, user=request.user)
-        so = SortOrderDrillTag(userprofile=request.user.userprofile, tag=tag)
+        so = DrillTag(userprofile=request.user.userprofile, tag=tag)
         so.save()
 
         response = {
@@ -324,7 +324,7 @@ def unpin_tag(request):
 
     tag_name = request.POST["tag"]
 
-    if not SortOrderDrillTag.objects.filter(userprofile=request.user.userprofile, tag__name=tag_name).exists():
+    if not DrillTag.objects.filter(userprofile=request.user.userprofile, tag__name=tag_name).exists():
 
         response = {
             "status": "Error",
@@ -333,7 +333,7 @@ def unpin_tag(request):
 
     else:
 
-        so = SortOrderDrillTag.objects.get(userprofile=request.user.userprofile, tag__name=tag_name)
+        so = DrillTag.objects.get(userprofile=request.user.userprofile, tag__name=tag_name)
         so.delete()
 
         response = {
@@ -352,8 +352,8 @@ def sort_pinned_tags(request):
     tag_name = request.POST["tag_name"]
     new_position = int(request.POST["new_position"])
 
-    so = SortOrderDrillTag.objects.get(tag__name=tag_name, userprofile=request.user.userprofile)
-    SortOrderDrillTag.reorder(so, new_position)
+    so = DrillTag.objects.get(tag__name=tag_name, userprofile=request.user.userprofile)
+    DrillTag.reorder(so, new_position)
 
     response = {
         "status": "OK"

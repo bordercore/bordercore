@@ -19,7 +19,7 @@ class UserProfile(models.Model):
     pinned_tags = models.ManyToManyField(Tag, through="UserTag")
     pinned_notes = models.ManyToManyField(Blob, through="UserNote")
     feeds = models.ManyToManyField(Feed, through="UserFeed")
-    pinned_drill_tags = models.ManyToManyField(Tag, through="SortOrderDrillTag", related_name="pinned_drill_tags")
+    pinned_drill_tags = models.ManyToManyField(Tag, through="DrillTag", related_name="pinned_drill_tags")
     google_calendar = JSONField(blank=True, null=True)
     instagram_credentials = JSONField(blank=True, null=True)
     nytimes_api_key = models.TextField(null=True)
@@ -102,7 +102,7 @@ def remove_feed(sender, instance, **kwargs):
     instance.handle_delete()
 
 
-class SortOrderDrillTag(SortOrderMixin):
+class DrillTag(SortOrderMixin):
 
     userprofile = models.ForeignKey("accounts.UserProfile", on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
@@ -116,7 +116,7 @@ class SortOrderDrillTag(SortOrderMixin):
         )
 
 
-@receiver(pre_delete, sender=SortOrderDrillTag)
+@receiver(pre_delete, sender=DrillTag)
 def remove_tag_for_drill(sender, instance, **kwargs):
     instance.handle_delete()
 

@@ -101,7 +101,7 @@ class DrillManager(models.Manager):
 
         Question = apps.get_model("drill", "Question")
 
-        tags = user.userprofile.pinned_drill_tags.all().only("name").order_by("sortorderdrilltag__sort_order")
+        tags = user.userprofile.pinned_drill_tags.all().only("name").order_by("drilltag__sort_order")
 
         info = []
 

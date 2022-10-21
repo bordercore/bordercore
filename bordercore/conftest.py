@@ -30,7 +30,7 @@ except (ModuleNotFoundError, NameError, django.core.exceptions.AppRegistryNotRea
 
 django.setup()
 
-from accounts.models import UserTag, UserNote, UserFeed, SortOrderDrillTag  # isort:skip
+from accounts.models import UserTag, UserNote, UserFeed, DrillTag  # isort:skip
 from accounts.tests.factories import TEST_PASSWORD, UserFactory  # isort:skip
 from blob.models import MetaData  # isort:skip
 from blob.tests.factories import BlobFactory  # isort:skip
@@ -109,8 +109,8 @@ def auto_login_user(client, blob_text_factory, tag):
             admin_group, _ = Group.objects.get_or_create(name="Admin")
             admin_group.user_set.add(user)
 
-            SortOrderDrillTag.objects.get_or_create(userprofile=user.userprofile, tag=tag[0])
-            SortOrderDrillTag.objects.get_or_create(userprofile=user.userprofile, tag=tag[1])
+            DrillTag.objects.get_or_create(userprofile=user.userprofile, tag=tag[0])
+            DrillTag.objects.get_or_create(userprofile=user.userprofile, tag=tag[1])
 
         client.login(username=user.username, password=TEST_PASSWORD)
         return user, client

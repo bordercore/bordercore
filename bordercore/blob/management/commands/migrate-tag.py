@@ -10,7 +10,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.transaction import atomic
 from django.template.defaultfilters import pluralize
 
-from accounts.models import SortOrderDrillTag, UserProfile, UserTag
+from accounts.models import DrillTag, UserProfile, UserTag
 from blob.models import Blob
 from bookmark.models import Bookmark
 from collection.models import Collection
@@ -161,10 +161,10 @@ class Command(BaseCommand):
 
         # Obviously, there should only ever be one profile to update
         for profile in profiles:
-            s = SortOrderDrillTag.objects.get(tag=tag_source, userprofile=profile)
+            s = DrillTag.objects.get(tag=tag_source, userprofile=profile)
             s.delete()
 
-            so = SortOrderDrillTag(tag=tag_target, userprofile=profile)
+            so = DrillTag(tag=tag_target, userprofile=profile)
             so.save()
 
             profile.pinned_tags.add(tag_target)
