@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from django.contrib import messages
 
-from accounts.models import SortOrderUserFeed
+from accounts.models import UserFeed
 from blob.models import Blob
 from bookmark.models import Bookmark
 from collection.models import Collection
@@ -168,7 +168,7 @@ class FeedViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         instance = serializer.save(user=self.request.user)
-        so = SortOrderUserFeed(userprofile=self.request.user.userprofile, feed=instance)
+        so = UserFeed(userprofile=self.request.user.userprofile, feed=instance)
         so.save()
 
         # Save a copy of the new object so we can reference it in create()

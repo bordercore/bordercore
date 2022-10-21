@@ -10,7 +10,7 @@ from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
-from accounts.models import SortOrderUserFeed
+from accounts.models import UserFeed
 from feed.models import Feed
 
 
@@ -19,7 +19,7 @@ class FeedListView(ListView):
     template_name = "feed/index.html"
 
     def get_queryset(self):
-        return self.request.user.userprofile.feeds.all().order_by("sortorderuserfeed__sort_order").prefetch_related("feeditem_set")
+        return self.request.user.userprofile.feeds.all().order_by("userfeed__sort_order").prefetch_related("feeditem_set")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -38,8 +38,8 @@ def sort_feed(request):
     feed_id = int(request.POST["feed_id"])
     new_position = int(request.POST["position"])
 
-    s = SortOrderUserFeed.objects.get(userprofile=request.user.userprofile, feed__id=feed_id)
-    SortOrderUserFeed.reorder(s, new_position)
+    s = UserFeed.objects.get(userprofile=request.user.userprofile, feed__id=feed_id)
+    UserFeed.reorder(s, new_position)
 
     return JsonResponse({"status": "OK"}, safe=False)
 

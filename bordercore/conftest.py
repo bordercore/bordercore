@@ -30,7 +30,7 @@ except (ModuleNotFoundError, NameError, django.core.exceptions.AppRegistryNotRea
 
 django.setup()
 
-from accounts.models import UserTag, UserNote, SortOrderUserFeed, SortOrderDrillTag  # isort:skip
+from accounts.models import UserTag, UserNote, UserFeed, SortOrderDrillTag  # isort:skip
 from accounts.tests.factories import TEST_PASSWORD, UserFactory  # isort:skip
 from blob.models import MetaData  # isort:skip
 from blob.tests.factories import BlobFactory  # isort:skip
@@ -318,11 +318,11 @@ def feed(auto_login_user):
     feed_1 = FeedFactory()
     feed_2 = FeedFactory()
 
-    so = SortOrderUserFeed(userprofile=user.userprofile, feed=feed_0)
+    so = UserFeed(userprofile=user.userprofile, feed=feed_0)
     so.save()
-    so = SortOrderUserFeed(userprofile=user.userprofile, feed=feed_1)
+    so = UserFeed(userprofile=user.userprofile, feed=feed_1)
     so.save()
-    so = SortOrderUserFeed(userprofile=user.userprofile, feed=feed_2)
+    so = UserFeed(userprofile=user.userprofile, feed=feed_2)
     so.save()
 
     yield [feed_0, feed_1, feed_2]

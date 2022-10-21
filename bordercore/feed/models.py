@@ -86,7 +86,7 @@ class Feed(TimeStampedModel):
 
     @staticmethod
     def get_first_feed(user):
-        return user.userprofile.feeds.values("id", "homepage", "last_check", "name").order_by("sortorderuserfeed__sort_order").first()
+        return user.userprofile.feeds.values("id", "homepage", "last_check", "name").order_by("userfeed__sort_order").first()
 
 
 class FeedItem(models.Model):

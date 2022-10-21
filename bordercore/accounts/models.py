@@ -18,7 +18,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT)
     pinned_tags = models.ManyToManyField(Tag, through="UserTag")
     pinned_notes = models.ManyToManyField(Blob, through="UserNote")
-    feeds = models.ManyToManyField(Feed, through="SortOrderUserFeed")
+    feeds = models.ManyToManyField(Feed, through="UserFeed")
     pinned_drill_tags = models.ManyToManyField(Tag, through="SortOrderDrillTag", related_name="pinned_drill_tags")
     google_calendar = JSONField(blank=True, null=True)
     instagram_credentials = JSONField(blank=True, null=True)
@@ -80,7 +80,7 @@ class UserNote(SortOrderMixin):
         )
 
 
-class SortOrderUserFeed(SortOrderMixin):
+class UserFeed(SortOrderMixin):
 
     userprofile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     feed = models.ForeignKey(Feed, on_delete=models.CASCADE)
@@ -97,7 +97,7 @@ class SortOrderUserFeed(SortOrderMixin):
         )
 
 
-@receiver(pre_delete, sender=SortOrderUserFeed)
+@receiver(pre_delete, sender=UserFeed)
 def remove_feed(sender, instance, **kwargs):
     instance.handle_delete()
 
