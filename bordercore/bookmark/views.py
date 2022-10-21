@@ -27,7 +27,7 @@ from bookmark.forms import BookmarkForm
 from bookmark.models import Bookmark
 from lib.mixins import FormRequestMixin
 from lib.util import get_pagination_range, parse_title_from_url
-from tag.models import SortOrderTagBookmark, Tag
+from tag.models import Tag, TagBookmark
 
 BOOKMARKS_PER_PAGE = 50
 
@@ -59,7 +59,7 @@ class FormValidMixin(ModelFormMixin):
         with transaction.atomic():
 
             for tag in bookmark.tags.all():
-                s = SortOrderTagBookmark.objects.get(tag=tag, bookmark=bookmark)
+                s = TagBookmark.objects.get(tag=tag, bookmark=bookmark)
                 s.delete()
 
             # Delete all existing tags
@@ -279,7 +279,7 @@ def overview(request):
         sort=False
     ).count()
 
-    pinned_tags = request.user.userprofile.pinned_tags.all().annotate(bookmark_count=Count("sortordertagbookmark")).order_by("sortorderusertag__sort_order")
+    pinned_tags = request.user.userprofile.pinned_tags.all().annotate(bookmark_count=Count("tagbookmark")).order_by("sortorderusertag__sort_order")
 
     return render(request, "bookmark/index.html",
                   {
@@ -413,7 +413,7 @@ class BookmarkListTagView(BookmarkListView):
 
     def get_queryset(self):
 
-        return SortOrderTagBookmark.objects.filter(tag__name=self.kwargs.get("tag_filter")) \
+        return TagBookmark.objects.filter(tag__name=self.kwargs.get("tag_filter")) \
                                            .annotate(tags=ArrayAgg("bookmark__tags__name")) \
                                            .select_related("bookmark") \
                                            .order_by("sort_order")
@@ -460,8 +460,8 @@ def sort_bookmarks(request):
     bookmark_uuid = request.POST["bookmark_uuid"]
     new_position = int(request.POST["position"])
 
-    s = SortOrderTagBookmark.objects.get(tag__name=tag_name, bookmark__uuid=bookmark_uuid)
-    SortOrderTagBookmark.reorder(s, new_position)
+    s = TagBookmark.objects.get(tag__name=tag_name, bookmark__uuid=bookmark_uuid)
+    TagBookmark.reorder(s, new_position)
 
     return JsonResponse({"status": "OK"}, safe=False)
 
@@ -474,7 +474,7 @@ def add_note(request):
 
     note = request.POST["note"]
 
-    SortOrderTagBookmark.objects.filter(
+    TagBookmark.objects.filter(
         tag__name=tag_name,
         bookmark__uuid=bookmark_uuid
     ).update(note=note)

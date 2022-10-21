@@ -187,7 +187,7 @@
                 return {
                     javascript_sample: `
 \`\`\`python
-class SortOrderTagBookmark(SortOrderMixin):
+class TagBookmark(SortOrderMixin):
 
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
     bookmark = models.ForeignKey("bookmark.Bookmark", on_delete=models.CASCADE)
@@ -200,7 +200,7 @@ class SortOrderTagBookmark(SortOrderMixin):
             ("tag", "bookmark")
         )
 
-    @receiver(pre_delete, sender=SortOrderTagBookmark)
+    @receiver(pre_delete, sender=TagBookmark)
     def remove_bookmark(sender, instance, **kwargs):
         instance.handle_delete()
 \`\`\`

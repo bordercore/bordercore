@@ -19,7 +19,7 @@ from django.db.models.signals import m2m_changed
 from lib.mixins import TimeStampedModel
 from lib.time_utils import convert_seconds
 from lib.util import get_elasticsearch_connection
-from tag.models import SortOrderTagBookmark, Tag
+from tag.models import Tag, TagBookmark
 
 from .managers import BookmarkManager
 
@@ -291,7 +291,7 @@ def tags_changed(sender, **kwargs):
         bookmark = kwargs["instance"]
 
         for tag_id in kwargs["pk_set"]:
-            so = SortOrderTagBookmark(tag=Tag.objects.get(pk=tag_id), bookmark=bookmark)
+            so = TagBookmark(tag=Tag.objects.get(pk=tag_id), bookmark=bookmark)
             so.save()
 
 

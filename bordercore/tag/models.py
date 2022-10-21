@@ -17,7 +17,7 @@ class Tag(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     created = models.DateTimeField(auto_now_add=True)
 
-    bookmarks = models.ManyToManyField("bookmark.Bookmark", through="SortOrderTagBookmark")
+    bookmarks = models.ManyToManyField("bookmark.Bookmark", through="TagBookmark")
     todos = models.ManyToManyField("todo.Todo", through="SortOrderTagTodo")
 
     def __str__(self):
@@ -90,7 +90,7 @@ def remove_todo(sender, instance, **kwargs):
     instance.handle_delete()
 
 
-class SortOrderTagBookmark(SortOrderMixin):
+class TagBookmark(SortOrderMixin):
 
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
     bookmark = models.ForeignKey("bookmark.Bookmark", on_delete=models.CASCADE)
@@ -107,7 +107,7 @@ class SortOrderTagBookmark(SortOrderMixin):
         )
 
 
-@receiver(pre_delete, sender=SortOrderTagBookmark)
+@receiver(pre_delete, sender=TagBookmark)
 def remove_bookmark(sender, instance, **kwargs):
     instance.handle_delete()
 

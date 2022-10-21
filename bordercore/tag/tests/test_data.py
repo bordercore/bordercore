@@ -10,14 +10,14 @@ pytestmark = pytest.mark.data_quality
 django.setup()
 
 
-def test_sortordertagbookmark_exists():
+def test_tagbookmark_exists():
     """
-    Every bookmark with a tag must have a representative SortOrderTagBookmark object.
+    Every bookmark with a tag must have a representative TagBookmark object.
     """
 
-    bookmarks = Bookmark.objects.filter(tags__isnull=False, sortordertagbookmark__isnull=True)
+    bookmarks = Bookmark.objects.filter(tags__isnull=False, tagbookmark__isnull=True)
 
-    assert len(bookmarks) == 0, f"Tagged bookmark isn't present in SortOrderTagBookmark, bookmark_id={bookmarks.first().id}, tag={bookmarks.first().tags.first()}"
+    assert len(bookmarks) == 0, f"Tagged bookmark isn't present in TagBookmark, bookmark_id={bookmarks.first().id}, tag={bookmarks.first().tags.first()}"
 
 
 def test_tag_alias():
