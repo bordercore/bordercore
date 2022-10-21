@@ -10,7 +10,7 @@ from django.db.models.signals import m2m_changed
 
 from lib.mixins import TimeStampedModel
 from lib.util import get_elasticsearch_connection
-from tag.models import SortOrderTagTodo, Tag
+from tag.models import Tag, TagTodo
 
 from .managers import TodoManager
 
@@ -127,14 +127,14 @@ def tags_changed(sender, **kwargs):
         todo = kwargs["instance"]
 
         for tag_id in kwargs["pk_set"]:
-            so = SortOrderTagTodo(tag=Tag.objects.get(user=todo.user, pk=tag_id), todo=todo)
+            so = TagTodo(tag=Tag.objects.get(user=todo.user, pk=tag_id), todo=todo)
             so.save()
 
     elif kwargs["action"] == "post_remove":
         todo = kwargs["instance"]
 
         for tag_id in kwargs["pk_set"]:
-            so = SortOrderTagTodo.objects.get(tag__id=tag_id, todo=todo)
+            so = TagTodo.objects.get(tag__id=tag_id, todo=todo)
             so.delete()
 
 

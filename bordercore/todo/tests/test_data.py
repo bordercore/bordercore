@@ -10,7 +10,7 @@ pytestmark = pytest.mark.data_quality
 django.setup()
 
 from todo.models import Todo  # isort:skip
-from tag.models import SortOrderTagTodo  # isort:skip
+from tag.models import TagTodo  # isort:skip
 
 
 @pytest.fixture()
@@ -94,12 +94,12 @@ def test_elasticsearch_todo_tasks_exist_in_db(es):
 def test_todo_sortorder():
     """
     For every todo task, the number of tags should equal the number
-    of SortOrdertagTodo objects.
+    of TagTodo objects.
     """
 
     tasks = Todo.objects.all()
 
     for task in tasks:
         tag_count = len(task.tags.all())
-        so_count = len(SortOrderTagTodo.objects.filter(todo=task))
+        so_count = len(TagTodo.objects.filter(todo=task))
         assert tag_count == so_count, f"todo sort order corruption, todo.uuid = {task.uuid}"

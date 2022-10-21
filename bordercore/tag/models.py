@@ -18,7 +18,7 @@ class Tag(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     bookmarks = models.ManyToManyField("bookmark.Bookmark", through="TagBookmark")
-    todos = models.ManyToManyField("todo.Todo", through="SortOrderTagTodo")
+    todos = models.ManyToManyField("todo.Todo", through="TagTodo")
 
     def __str__(self):
         return self.name
@@ -68,7 +68,7 @@ class Tag(models.Model):
         return [x.name for x in tags]
 
 
-class SortOrderTagTodo(SortOrderMixin):
+class TagTodo(SortOrderMixin):
 
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
     todo = models.ForeignKey("todo.Todo", on_delete=models.CASCADE)
@@ -85,7 +85,7 @@ class SortOrderTagTodo(SortOrderMixin):
         )
 
 
-@receiver(pre_delete, sender=SortOrderTagTodo)
+@receiver(pre_delete, sender=TagTodo)
 def remove_todo(sender, instance, **kwargs):
     instance.handle_delete()
 

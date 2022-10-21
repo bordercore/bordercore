@@ -9,7 +9,7 @@ from django.utils.dateformat import format
 from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
-from tag.models import SortOrderTagTodo, Tag
+from tag.models import Tag, TagTodo
 from todo.models import Todo
 from todo.services import search as search_service
 
@@ -82,7 +82,7 @@ class TodoTaskList(ListView):
             ).todos.filter(
                 nodetodo__isnull=True
             ).order_by(
-                "sortordertagtodo__sort_order"
+                "tagtodo__sort_order"
             )
 
         else:
@@ -163,8 +163,8 @@ def sort_todo(request):
     todo_uuid = request.POST["todo_uuid"]
     new_position = int(request.POST["position"])
 
-    s = SortOrderTagTodo.objects.get(tag__name=tag_name, todo__uuid=todo_uuid)
-    SortOrderTagTodo.reorder(s, new_position)
+    s = TagTodo.objects.get(tag__name=tag_name, todo__uuid=todo_uuid)
+    TagTodo.reorder(s, new_position)
 
     return JsonResponse({"status": "OK"}, safe=False)
 

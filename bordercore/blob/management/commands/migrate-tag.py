@@ -16,7 +16,7 @@ from bookmark.models import Bookmark
 from collection.models import Collection
 from drill.models import Question
 from music.models import Song
-from tag.models import SortOrderTagTodo, Tag, TagBookmark
+from tag.models import Tag, TagBookmark, TagTodo
 from todo.models import Todo
 
 
@@ -87,7 +87,7 @@ class Command(BaseCommand):
 
         for todo in todos:
 
-            s = SortOrderTagTodo.objects.get(tag=tag_source, todo=todo)
+            s = TagTodo.objects.get(tag=tag_source, todo=todo)
             s.delete()
 
             todo.tags.add(tag_target)
