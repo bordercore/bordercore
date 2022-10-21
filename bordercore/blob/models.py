@@ -348,7 +348,7 @@ class Blob(TimeStampedModel):
                 "cover_url": related.blob_2.get_cover_url_small()
             }
             for related in
-            BlobBlob.objects.filter(blob_1=self).order_by("-created")
+            BlobBlob.objects.filter(blob_1=self).order_by("-created").select_related("blob_2")
         ]
 
     @staticmethod
@@ -356,7 +356,7 @@ class Blob(TimeStampedModel):
 
         related_objects = []
 
-        for related_object in base_object.bc_objects.all().order_by("-created"):
+        for related_object in base_object.bc_objects.all().order_by("-created").select_related("bookmark").select_related("blob"):
             if related_object.blob:
                 related_objects.append(
                     {
