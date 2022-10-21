@@ -2,8 +2,7 @@ import json
 
 import pytest
 
-from fitness.models import (Exercise, ExerciseUser, Muscle,
-                            SortOrderExerciseMuscle)
+from fitness.models import Exercise, ExerciseMuscle, ExerciseUser, Muscle
 from fitness.services import get_overdue_exercises
 
 pytestmark = pytest.mark.django_db
@@ -17,10 +16,10 @@ def test_fitness_str(auto_login_user, fitness):
     assert "Pectoralis Major" in [str(x) for x in fitness[0].muscle.all()]
     assert "Chest" in [str(x.muscle_group) for x in fitness[0].muscle.all()]
     assert str(ExerciseUser.objects.get(user=user, exercise=fitness[2])) == "Squats"
-    assert str(SortOrderExerciseMuscle.objects.get(
+    assert str(ExerciseMuscle.objects.get(
         exercise=fitness[0],
         muscle=fitness[0].muscle.first()
-    )) == "SortOrderExerciseMuscle: Bench Press, Pectoralis Major"
+    )) == "ExerciseMuscle: Bench Press, Pectoralis Major"
 
 
 def test_get_targeted_muscles(auto_login_user, fitness):

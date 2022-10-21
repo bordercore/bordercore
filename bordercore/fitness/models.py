@@ -28,7 +28,7 @@ class Muscle(models.Model):
 class Exercise(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     name = models.TextField(unique=True)
-    muscle = models.ManyToManyField(Muscle, through="SortOrderExerciseMuscle", related_name="muscle")
+    muscle = models.ManyToManyField(Muscle, through="ExerciseMuscle", related_name="muscle")
     description = models.TextField(blank=True)
     note = models.TextField(blank=True)
 
@@ -39,7 +39,7 @@ class Exercise(models.Model):
 
         muscles = defaultdict(list)
 
-        for x in SortOrderExerciseMuscle.objects.filter(exercise=self).select_related("muscle"):
+        for x in ExerciseMuscle.objects.filter(exercise=self).select_related("muscle"):
             muscles[x.target].append(x.muscle)
 
         return muscles
@@ -121,7 +121,7 @@ class Exercise(models.Model):
         ).distinct().order_by(F("last_active").desc(nulls_last=True))
 
 
-class SortOrderExerciseMuscle(models.Model):
+class ExerciseMuscle(models.Model):
 
     exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
     muscle = models.ForeignKey(Muscle, on_delete=models.CASCADE)
@@ -139,7 +139,7 @@ class SortOrderExerciseMuscle(models.Model):
     )
 
     def __str__(self):
-        return f"SortOrderExerciseMuscle: {self.exercise}, {self.muscle}"
+        return f"ExerciseMuscle: {self.exercise}, {self.muscle}"
 
     class Meta:
         unique_together = (
