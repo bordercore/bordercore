@@ -18,7 +18,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView
 
 from accounts.forms import UserProfileForm
-from accounts.models import (SortOrderUserNote, UserProfile, UserTag,
+from accounts.models import (UserNote, UserProfile, UserTag,
                              pinned_tags_has_changed)
 from blob.models import Blob
 from lib.mixins import FormRequestMixin
@@ -197,8 +197,8 @@ def sort_pinned_notes(request):
     note_uuid = request.POST["note_uuid"]
     new_position = int(request.POST["new_position"])
 
-    s = SortOrderUserNote.objects.get(userprofile=request.user.userprofile, note__uuid=note_uuid)
-    SortOrderUserNote.reorder(s, new_position)
+    s = UserNote.objects.get(userprofile=request.user.userprofile, note__uuid=note_uuid)
+    UserNote.reorder(s, new_position)
 
     return JsonResponse({"status": "OK"}, safe=False)
 
@@ -215,15 +215,15 @@ def pin_note(request):
     status = ""
 
     if remove:
-        sort_order = SortOrderUserNote.objects.get(userprofile=request.user.userprofile, note=note)
+        sort_order = UserNote.objects.get(userprofile=request.user.userprofile, note=note)
         sort_order.delete()
         status = "OK"
     else:
-        if SortOrderUserNote.objects.filter(userprofile=request.user.userprofile, note=note).exists():
+        if UserNote.objects.filter(userprofile=request.user.userprofile, note=note).exists():
             message = "That note is already pinned."
             status = "Not OK"
         else:
-            c = SortOrderUserNote(userprofile=request.user.userprofile, note=note)
+            c = UserNote(userprofile=request.user.userprofile, note=note)
             c.save()
             status = "OK"
 

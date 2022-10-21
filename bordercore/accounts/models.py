@@ -17,7 +17,7 @@ class UserProfile(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.PROTECT)
     pinned_tags = models.ManyToManyField(Tag, through="UserTag")
-    pinned_notes = models.ManyToManyField(Blob, through="SortOrderUserNote")
+    pinned_notes = models.ManyToManyField(Blob, through="UserNote")
     feeds = models.ManyToManyField(Feed, through="SortOrderUserFeed")
     pinned_drill_tags = models.ManyToManyField(Tag, through="SortOrderDrillTag", related_name="pinned_drill_tags")
     google_calendar = JSONField(blank=True, null=True)
@@ -66,7 +66,7 @@ def remove_tag(sender, instance, **kwargs):
     instance.handle_delete()
 
 
-class SortOrderUserNote(SortOrderMixin):
+class UserNote(SortOrderMixin):
 
     userprofile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     note = models.ForeignKey(Blob, on_delete=models.CASCADE)
@@ -133,7 +133,7 @@ def pinned_tags_has_changed(initial, form):
     return not set(initial_sorted) == set(form_sorted)
 
 
-@receiver(pre_delete, sender=SortOrderUserNote)
+@receiver(pre_delete, sender=UserNote)
 def remove_note(sender, instance, **kwargs):
     instance.handle_delete()
 
