@@ -140,8 +140,7 @@ def monkeypatch_blob(monkeypatch):
 @pytest.fixture
 def monkeypatch_collection(monkeypatch):
     """
-    Prevent the collection object from interacting with Elasticsearch by
-    patching out various methods.
+    Prevent the collection object from interacting with AWS
     """
 
     def mock(*args, **kwargs):
@@ -187,15 +186,20 @@ def blob_note(temp_blob_directory, db, s3_resource, s3_bucket):
 
 @pytest.fixture()
 def blob_pdf_factory(temp_blob_directory, db, s3_resource, s3_bucket):
-    yield _create_blob(extension="pdf")
+
+    filepath = Path(__file__).parent / "blob/tests/resources/test_blob.pdf"
+    with open(filepath, "rb") as fh:
+        file_contents = fh.read()
+
+    yield _create_blob(file_contents=file_contents, extension="pdf")
 
 
 @pytest.fixture()
 def blob_image_factory(temp_blob_directory, db, s3_resource, s3_bucket):
-    yield _create_blob(category="image")
+    yield _create_blob(file_contents=None, category="image")
 
 
-def _create_blob(**file_info):
+def _create_blob(file_contents=None, **file_info):
 
     blob = BlobFactory.create(
         metadata=3,
@@ -209,15 +213,17 @@ def _create_blob(**file_info):
         value=factory.Faker("text", max_nb_chars=40).generate(),
     )
 
-    # Insure that the bytes are unique per blob, since we need
-    #  each sha1sum to also be unique.
-    file_string = f"mybinarydata{blob.uuid}"
-    file_bytes = bytes(file_string, "utf-8")
-    img = BytesIO(file_bytes)
-    img.name = factory.Faker("file_name", **file_info).generate()
+    if not file_contents:
+        # If we weren't given the blob contents, generate some randomly.
+        # Insure that the bytes are unique per blob, since we need each
+        #  sha1sum to also be unique.
+        file_contents = bytes(f"mybinarydata{blob.uuid}", "utf-8")
+
+    blob_file = BytesIO(file_contents)
+    blob_file.name = factory.Faker("file_name", **file_info).generate()
     blob.file_modified = 1638644921
-    blob.file.save(img.name, img)
-    blob.sha1sum = hashlib.sha1(file_bytes).hexdigest()
+    blob.file.save(blob_file.name, blob_file)
+    blob.sha1sum = hashlib.sha1(file_contents).hexdigest()
     blob.save()
 
     try:
