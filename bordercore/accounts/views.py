@@ -18,7 +18,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic.edit import UpdateView
 
 from accounts.forms import UserProfileForm
-from accounts.models import (SortOrderUserNote, SortOrderUserTag, UserProfile,
+from accounts.models import (SortOrderUserNote, UserProfile, UserTag,
                              pinned_tags_has_changed)
 from blob.models import Blob
 from lib.mixins import FormRequestMixin
@@ -56,7 +56,7 @@ class UserProfileUpdateView(FormRequestMixin, UpdateView):
             with transaction.atomic():
 
                 for tag in userprofile.pinned_tags.all():
-                    s = SortOrderUserTag.objects.get(userprofile=userprofile, tag=tag)
+                    s = UserTag.objects.get(userprofile=userprofile, tag=tag)
                     s.delete()
 
                 # Delete all existing tags
@@ -64,7 +64,7 @@ class UserProfileUpdateView(FormRequestMixin, UpdateView):
 
                 # Then add the tags specified in the form
                 for tag in form.cleaned_data["pinned_tags"]:
-                    c = SortOrderUserTag(userprofile=userprofile, tag=tag)
+                    c = UserTag(userprofile=userprofile, tag=tag)
                     c.save()
 
         object = form.save(commit=False)

@@ -16,7 +16,7 @@ from tag.models import Tag
 class UserProfile(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.PROTECT)
-    pinned_tags = models.ManyToManyField(Tag, through="SortOrderUserTag")
+    pinned_tags = models.ManyToManyField(Tag, through="UserTag")
     pinned_notes = models.ManyToManyField(Blob, through="SortOrderUserNote")
     feeds = models.ManyToManyField(Feed, through="SortOrderUserFeed")
     pinned_drill_tags = models.ManyToManyField(Tag, through="SortOrderDrillTag", related_name="pinned_drill_tags")
@@ -41,13 +41,13 @@ class UserProfile(models.Model):
     )
 
     def get_tags(self):
-        return ", ".join([tag.name for tag in self.pinned_tags.all().order_by("sortorderusertag__sort_order")])
+        return ", ".join([tag.name for tag in self.pinned_tags.all().order_by("usertag__sort_order")])
 
     def __str__(self):
         return self.user.username
 
 
-class SortOrderUserTag(SortOrderMixin):
+class UserTag(SortOrderMixin):
 
     userprofile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
@@ -61,7 +61,7 @@ class SortOrderUserTag(SortOrderMixin):
         )
 
 
-@receiver(pre_delete, sender=SortOrderUserTag)
+@receiver(pre_delete, sender=UserTag)
 def remove_tag(sender, instance, **kwargs):
     instance.handle_delete()
 

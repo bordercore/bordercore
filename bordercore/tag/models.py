@@ -49,14 +49,14 @@ class Tag(models.Model):
 
     def pin(self):
 
-        SortOrderUserTag = apps.get_model("accounts", "SortOrderUserTag")
-        c = SortOrderUserTag(userprofile=self.user.userprofile, tag=self)
+        UserTag = apps.get_model("accounts", "UserTag")
+        c = UserTag(userprofile=self.user.userprofile, tag=self)
         c.save()
 
     def unpin(self):
 
-        SortOrderUserTag = apps.get_model("accounts", "SortOrderUserTag")
-        sort_order_user_tag = SortOrderUserTag.objects.get(userprofile=self.user.userprofile, tag=self)
+        UserTag = apps.get_model("accounts", "UserTag")
+        sort_order_user_tag = UserTag.objects.get(userprofile=self.user.userprofile, tag=self)
         sort_order_user_tag.delete()
 
     @staticmethod

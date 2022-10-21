@@ -30,7 +30,7 @@ except (ModuleNotFoundError, NameError, django.core.exceptions.AppRegistryNotRea
 
 django.setup()
 
-from accounts.models import SortOrderUserTag, SortOrderUserNote, SortOrderUserFeed, SortOrderDrillTag  # isort:skip
+from accounts.models import UserTag, SortOrderUserNote, SortOrderUserFeed, SortOrderDrillTag  # isort:skip
 from accounts.tests.factories import TEST_PASSWORD, UserFactory  # isort:skip
 from blob.models import MetaData  # isort:skip
 from blob.tests.factories import BlobFactory  # isort:skip
@@ -587,11 +587,11 @@ def sort_order_user_tag(auto_login_user, tag):
 
     user, _ = auto_login_user()
 
-    sort_order = SortOrderUserTag(userprofile=user.userprofile, tag=tag[0])
+    sort_order = UserTag(userprofile=user.userprofile, tag=tag[0])
     sort_order.save()
-    sort_order = SortOrderUserTag(userprofile=user.userprofile, tag=tag[1])
+    sort_order = UserTag(userprofile=user.userprofile, tag=tag[1])
     sort_order.save()
-    sort_order = SortOrderUserTag(userprofile=user.userprofile, tag=tag[2])
+    sort_order = UserTag(userprofile=user.userprofile, tag=tag[2])
     sort_order.save()
 
 

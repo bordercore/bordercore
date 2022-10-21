@@ -22,7 +22,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 from django.views.generic.edit import ModelFormMixin
 
-from accounts.models import SortOrderUserTag
+from accounts.models import UserTag
 from bookmark.forms import BookmarkForm
 from bookmark.models import Bookmark
 from lib.mixins import FormRequestMixin
@@ -279,7 +279,7 @@ def overview(request):
         sort=False
     ).count()
 
-    pinned_tags = request.user.userprofile.pinned_tags.all().annotate(bookmark_count=Count("tagbookmark")).order_by("sortorderusertag__sort_order")
+    pinned_tags = request.user.userprofile.pinned_tags.all().annotate(bookmark_count=Count("tagbookmark")).order_by("usertag__sort_order")
 
     return render(request, "bookmark/index.html",
                   {
@@ -439,8 +439,8 @@ def sort_pinned_tags(request):
 
         tag = Tag.objects.get(user=request.user, id=tag_id)
 
-        s = SortOrderUserTag.objects.get(userprofile=request.user.userprofile, tag=tag)
-        SortOrderUserTag.reorder(s, new_position)
+        s = UserTag.objects.get(userprofile=request.user.userprofile, tag=tag)
+        UserTag.reorder(s, new_position)
 
         response = {
             "status": "OK"
