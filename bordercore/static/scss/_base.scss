@@ -822,6 +822,10 @@ textarea.form-control {
   height: var(--dropdown-height);
 }
 
+.dropdown-menu-container-width {
+  width: 3.75rem;
+}
+
 .dropdown {
   .dropdown-menu {
     top: 0.6rem !important;
@@ -1841,6 +1845,10 @@ div #dateapp {
   &:hover {
     background-color: var(--node-color-4-tinted) !important;
   }
+}
+
+.node-column {
+  width: 33%;
 }
 
 .node-object-note {

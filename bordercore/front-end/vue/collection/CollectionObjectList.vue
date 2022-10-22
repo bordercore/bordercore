@@ -3,14 +3,14 @@
         <card title="" class="backdrop-filter node-color-1 position-relative">
             <template #title-slot>
                 <div class="card-title d-flex">
-                    <div>
+                    <div class="text-truncate">
                         <font-awesome-icon icon="splotch" class="text-primary me-3" />
                         {{ collectionObjectList.name }}
                     </div>
-                    <div class="text-secondary text-small ms-5">
+                    <div class="text-secondary text-small text-nowrap ms-3">
                         {{ collectionObjectList.count }} <span>{{ getPluralized(collectionObjectList.count) }}</span>
                     </div>
-                    <div class="dropdown-menu-container ms-auto">
+                    <div class="dropdown-menu-container dropdown-menu-container-width ms-auto">
                         <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
                             <div slot="dropdown">
                                 <li>

@@ -130,7 +130,7 @@
 
         <div class="d-flex g-0 h-100 mx-2">
 
-            <div v-for="(column, colIndex) in $store.state.layout" class="flex-even">
+            <div v-for="(column, colIndex) in $store.state.layout" class="node-column">
                 <draggable
                     drag-class="draggable-chosen-class"
                     @change="onLayoutChange"
