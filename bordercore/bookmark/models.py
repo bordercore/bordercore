@@ -12,6 +12,7 @@ from django import urls
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.db import models
 from django.db.models import JSONField
 from django.db.models.signals import m2m_changed
@@ -66,7 +67,7 @@ class Bookmark(TimeStampedModel):
 
     def save(self, *args, **kwargs):
 
-        new_object = True if not self.id else False
+        new_object = not self.id
 
         super().save(*args, **kwargs)
 
@@ -75,9 +76,15 @@ class Bookmark(TimeStampedModel):
         if new_object:
             self.generate_cover_image()
 
+        # After every bookmark mutation, invalidate the cache
+        cache.delete("recent_bookmarks")
+
     def delete(self):
 
         super().delete()
+
+        # After every bookmark mutation, invalidate the cache
+        cache.delete("recent_bookmarks")
 
         es = get_elasticsearch_connection(host=settings.ELASTICSEARCH_ENDPOINT)
         es.delete(index=settings.ELASTICSEARCH_INDEX, id=self.uuid)
@@ -227,7 +234,7 @@ class Bookmark(TimeStampedModel):
             "parse_domain": True
         }
 
-        response = client.invoke(
+        client.invoke(
             ClientContext="MyApp",
             FunctionName="SnarfFavicon",
             InvocationType="Event",
