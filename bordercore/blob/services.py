@@ -17,6 +17,7 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.files import File
 from django.core.files.temp import NamedTemporaryFile
+from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 
@@ -78,6 +79,56 @@ def get_recent_blobs(user, limit=10, skip_content=False):
     cache.set("recent_blobs", (returned_blob_list, doctypes))
 
     return returned_blob_list, doctypes
+
+
+def get_recent_media(user, limit=10):
+    """
+    Return a list of the most recently created images and video.
+    """
+
+    if "recent_media" in cache:
+        return cache.get("recent_media")
+
+    image_list = Blob.objects.filter(
+        Q(user=user) & (
+            Q(file__endswith="bmp") | Q(file__endswith="gif")
+            | Q(file__endswith="jpg") | Q(file__endswith="jpeg")
+            | Q(file__endswith="png") | Q(file__endswith="tiff")
+            | Q(file__endswith="avi") | Q(file__endswith="flv")
+            | Q(file__endswith="m4v") | Q(file__endswith="mkv")
+            | Q(file__endswith="mp4") | Q(file__endswith="webm")
+        )
+    ).prefetch_related(
+        "tags", "metadata"
+    ).order_by(
+        "-created"
+    )[:limit]
+
+    blob_sizes = get_blob_sizes(image_list)
+
+    returned_image_list = []
+
+    for blob in image_list:
+        delta = timezone.now() - blob.modified
+
+        blob_dict = {
+            "name": blob.name,
+            "tags": blob.get_tags(),
+            "url": reverse("blob:detail", kwargs={"uuid": blob.uuid}),
+            "delta_days": delta.days,
+            "uuid": str(blob.uuid),
+            "type": "blob",
+            "cover_url": blob.get_cover_url(size="large"),
+            "cover_url_small": blob.get_cover_url(size="small")
+        }
+
+        get_blob_naturalsize(blob_sizes, blob_dict)
+
+        returned_image_list.append(blob_dict)
+
+    cache.set("recent_media", returned_image_list)
+
+    return returned_image_list
 
 
 def get_blob_sizes(blob_list):

@@ -1,13 +1,12 @@
 import json
 
-from elasticsearch import ConnectionTimeout
-
 from django import urls
 from django.conf import settings
 from django.contrib import messages
 from django.utils import timezone
 
 from blob.services import get_recent_blobs as get_recent_blobs_service
+from blob.services import get_recent_media
 from bookmark.models import Bookmark
 from bookmark.services import get_recent_bookmarks
 from fitness.services import get_overdue_exercises
@@ -56,16 +55,8 @@ def get_recent_objects(request):
     #  is only included when needed because of its size.
     skip_content = urls.reverse("blob:list") != request.get_full_path()
 
-    message = None
-
-    try:
-        recent_blobs, doctypes = get_recent_blobs_service(request.user, skip_content=skip_content)
-    except (ConnectionTimeout) as e:
-        message = {
-            "text": str(e),
-            "statusCode": e.status_code
-        }
-        recent_blobs = []
+    recent_blobs, doctypes = get_recent_blobs_service(request.user, skip_content=skip_content)
+    recent_media = get_recent_media(request.user)
 
     recent_bookmarks = get_recent_bookmarks(request.user)
 
@@ -73,10 +64,12 @@ def get_recent_objects(request):
         "recent_blobs": {
             "blobList": recent_blobs,
             "docTypes": doctypes,
-            "message": message
         },
         "recent_bookmarks": {
             "bookmarkList": recent_bookmarks
+        },
+        "recent_media": {
+            "mediaList": recent_media
         }
     }
 

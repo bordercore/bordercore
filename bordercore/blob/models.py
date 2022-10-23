@@ -302,8 +302,9 @@ class Blob(TimeStampedModel):
         if self.file and self.file_modified:
             self.set_s3_metadata_file_modified()
 
-        # After every blob mutation, invalidate the "recent blobs" cache
+        # After every blob mutation, invalidate the cache
         cache.delete("recent_blobs")
+        cache.delete("recent_images")
 
     def set_s3_metadata_file_modified(self):
         """
@@ -738,10 +739,11 @@ class Blob(TimeStampedModel):
             # Pass false so FileField doesn't save the model.
             self.file.delete(False)
 
-        # After every blob mutation, invalidate the "recent blobs" cache
         delete_note_from_nodes(self.user, self.uuid)
 
+        # After every blob mutation, invalidate the  cache
         cache.delete("recent_blobs")
+        cache.delete("recent_images")
 
 
 class MetaData(TimeStampedModel):

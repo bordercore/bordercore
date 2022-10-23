@@ -9,8 +9,9 @@ from instaloader.instaloader import Instaloader
 
 from blob.models import Blob
 from blob.services import (get_authors, get_blob_naturalsize, get_recent_blobs,
-                           import_artstation, import_instagram,
-                           import_newyorktimes, parse_date, parse_shortcode)
+                           get_recent_media, import_artstation,
+                           import_instagram, import_newyorktimes, parse_date,
+                           parse_shortcode)
 
 faker = FakerFactory.create()
 
@@ -35,6 +36,27 @@ def test_get_recent_blobs(auto_login_user, blob_image_factory, blob_text_factory
         x["name"]
         for x in
         blob_list
+    ]
+
+
+def test_get_recent_media(auto_login_user, blob_image_factory, blob_text_factory):
+
+    user, _ = auto_login_user()
+
+    media_list = get_recent_media(user)
+
+    assert len(media_list) == 1
+
+    assert blob_image_factory[0].name in [
+        x["name"]
+        for x in
+        media_list
+    ]
+
+    assert blob_text_factory[0].name not in [
+        x["name"]
+        for x in
+        media_list
     ]
 
 
