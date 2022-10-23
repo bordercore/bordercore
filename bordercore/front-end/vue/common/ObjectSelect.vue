@@ -144,6 +144,7 @@
                 // This is populated in the base template
                 recentBlobs: JSON.parse(document.getElementById("recent_blobs").textContent),
                 recentBookmarks: JSON.parse(document.getElementById("recent_bookmarks").textContent),
+                recentMedia: JSON.parse(document.getElementById("recent_media").textContent),
             };
         },
         mounted() {
@@ -218,24 +219,46 @@
                 const suggest = this.$refs.suggestComponent;
 
                 if (suggest.suggestions.length === 0) {
-                    suggest.suggestions.push(
-                        {
-                            uuid: "__Recent_Blobs",
-                            name: "Recent Blobs",
-                            splitter: true,
-                            value: "",
-                        },
-                    );
-                    suggest.suggestions.push(...this.recentBlobs.blobList.slice(0, 5));
-                    suggest.suggestions.push(
-                        {
-                            uuid: "__Recent_Bookmarks",
-                            name: "Recent Bookmarks",
-                            splitter: true,
-                            value: "",
-                        },
-                    );
-                    suggest.suggestions.push(...this.recentBookmarks.bookmarkList.slice(0, 5));
+                    if (this.initialDoctypes.includes("media")) {
+                        suggest.suggestions.push(
+                            {
+                                uuid: "__Recent_Media",
+                                name: "Recent Media",
+                                splitter: true,
+                                value: "",
+                            },
+                        );
+                        suggest.suggestions.push(...this.recentMedia.mediaList.slice(0, 10));
+                    } else if (this.initialDoctypes.includes("bookmark")) {
+                        suggest.suggestions.push(
+                            {
+                                uuid: "__Recent_Bookmarks",
+                                name: "Recent Bookmarks",
+                                splitter: true,
+                                value: "",
+                            },
+                        );
+                        suggest.suggestions.push(...this.recentBookmarks.bookmarkList.slice(0, 10));
+                    } else {
+                        suggest.suggestions.push(
+                            {
+                                uuid: "__Recent_Blobs",
+                                name: "Recent Blobs",
+                                splitter: true,
+                                value: "",
+                            },
+                        );
+                        suggest.suggestions.push(...this.recentBlobs.blobList.slice(0, 5));
+                        suggest.suggestions.push(
+                            {
+                                uuid: "__Recent_Bookmarks",
+                                name: "Recent Bookmarks",
+                                splitter: true,
+                                value: "",
+                            },
+                        );
+                        suggest.suggestions.push(...this.recentBookmarks.bookmarkList.slice(0, 5));
+                    }
                 }
                 suggest.listShown = true;
             },
