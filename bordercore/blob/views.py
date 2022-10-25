@@ -50,7 +50,7 @@ class BlobCreateView(FormRequestMixin, CreateView):
     def form_invalid(self, form):
         """If the form is invalid, render the invalid form."""
 
-        # Add 'T00:00' to force JavaScript to use localtime
+        # Add "T00:00" to force JavaScript to use localtime
         form["date"].value = get_javascript_date(form["date"].value()) + "T00:00"
 
         if form["importance"].value():
@@ -101,14 +101,13 @@ class BlobCreateView(FormRequestMixin, CreateView):
         #  Some fields are also handled in form_invalid().
         context["metadata"] = get_metadata_from_form(self.request)
 
-        if self.request.POST.get("tags", "") != "":
+        if "tags" in self.request.POST:
             context["tags"] = [
                 {"text": x}
                 for x in self.request.POST["tags"].split(",")
             ]
 
-        if self.request.POST.get("is_book", "") == "on":
-            context["is_book"] = True
+        context["is_book"] = self.request.POST.get("is_book", "") == "on"
 
         context["title"] = "Create Blob"
 
@@ -139,7 +138,7 @@ class BlobCreateView(FormRequestMixin, CreateView):
 
         obj = form.save(commit=False)
         obj.user = self.request.user
-        obj.file_modified = form.cleaned_data['file_modified']
+        obj.file_modified = form.cleaned_data["file_modified"]
         obj.save()
 
         # Save the tags
@@ -162,7 +161,7 @@ class BlobCreateView(FormRequestMixin, CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy('blob:detail', kwargs={'uuid': self.object.uuid})
+        return reverse_lazy("blob:detail", kwargs={"uuid": self.object.uuid})
 
 
 @method_decorator(login_required, name="dispatch")
@@ -372,7 +371,7 @@ class BlobImportView(View):
         if not messages.get_messages(request):
             return HttpResponseRedirect(reverse("blob:detail", kwargs={"uuid": blob.uuid}))
         else:
-            return render(request, self.template_name, context)
+            return render(request, self.template_name, {})
 
 
 # Metadata objects are not handled by the form -- handle them manually

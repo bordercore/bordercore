@@ -62,10 +62,12 @@ class BlobForm(ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
-        try:
-            cleaned_data["author"] = [x.strip() for x in "".join(cleaned_data["author"]).split(",")]
-        except KeyError:
-            pass
+        if "author" in cleaned_data:
+            cleaned_data["author"] = [
+                x.strip()
+                for x in
+                "".join(cleaned_data["author"]).split(",")
+            ]
 
         if cleaned_data.get("sha1sum", "") == "":
             cleaned_data["sha1sum"] = None
