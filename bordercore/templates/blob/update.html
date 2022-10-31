@@ -802,7 +802,7 @@
                     const formData = new FormData(formElement);
                     if (this.fileObject) {
                         formData.append("file", this.fileObject);
-                        formData.append("file_modified", this.fileObject.lastModified);
+                        formData.append("file_modified", Math.round(this.fileObject.lastModified/1000));
                     }
                     axios.post("{{ request.path }}", formData, {
                         headers: {
