@@ -49,6 +49,14 @@ class Dashboard():
         # Divide the "side" layout in to two
         self.layout["side"].split(Layout(name="todo"), Layout(name="stats"))
 
+        color = Color.from_triplet(parse_rgb_hex("ffa500"))
+        text = Text(justify="center", style=Style(color=color, bold=True))
+        text.append("Bordercore Operations Console")
+        self.layout["header"].update(Panel(
+            text,
+            title=Text("Bordercore")
+        ))
+
         self.layout["bookmarks"].update(Panel("Recent bookmarks", title="Bookmarks"))
 
     def update_status(self, status, error=False):
@@ -105,7 +113,7 @@ class Dashboard():
         text = Text()
 
         for todo in info["results"]:
-            text.append(todo["name"] + "\n", style=Style(color=next(colors)))
+            text.append("• " + todo["name"] + "\n", style=Style(color=next(colors)))
             self.layout["todo"].update(Panel(
                 text,
                 title=Text("Todo Items")
