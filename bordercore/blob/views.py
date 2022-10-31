@@ -9,13 +9,15 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.forms import ValidationError
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic.base import View
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.edit import (CreateView, DeleteView, ModelFormMixin,
+                                       UpdateView)
 from django.views.generic.list import ListView
 
 from blob.forms import BlobForm
@@ -23,9 +25,80 @@ from blob.models import Blob, BlobBlob, MetaData, RecentlyViewedBlob
 from blob.services import import_blob
 from collection.models import Collection, CollectionObject
 from lib.mixins import FormRequestMixin
-from lib.time_utils import get_javascript_date, parse_date_from_string
+from lib.time_utils import parse_date_from_string
 
 log = logging.getLogger(f"bordercore.{__name__}")
+
+
+class FormValidMixin(ModelFormMixin):
+    """
+    A mixin to encapsulate common logic used in Update and Create views
+    """
+
+    def handle_renamed_file(self, blob, changed_filename):
+        """
+        If a file has been renamed, make the appropriate
+        change in the database and in S3.
+        """
+        try:
+            s3 = boto3.resource("s3")
+            key_root = f"{settings.MEDIA_ROOT}/{blob.uuid}"
+            s3.Object(
+                settings.AWS_STORAGE_BUCKET_NAME, f"{key_root}/{blob.file.name}"
+            ).copy_from(
+                CopySource=f"{settings.AWS_STORAGE_BUCKET_NAME}/{key_root}/{changed_filename}"
+            )
+            s3.Object(settings.AWS_STORAGE_BUCKET_NAME, f"{key_root}/{changed_filename}").delete()
+        except Exception as e:
+            raise ValidationError("Error: {}".format(e))
+
+    def form_valid(self, form):
+
+        new_object = not self.object
+
+        blob = form.save(commit=False)
+
+        # If a file has been renamed, save the old filename for later
+        changed_filename = None
+        if form.cleaned_data["filename"] != blob.file.name:
+            changed_filename = blob.file.name
+
+        blob.user = self.request.user
+        blob.file.name = form.cleaned_data["filename"]
+        blob.file_modified = form.cleaned_data["file_modified"]
+        blob.save()
+
+        # Save the tags
+        form.save_m2m()
+
+        handle_metadata(blob, self.request)
+
+        # Only rename a blob's file if the file itself hasn't changed
+        if "file" not in form.changed_data and changed_filename:
+            self.handle_renamed_file(blob, changed_filename)
+
+        if new_object:
+            if "linked_blob_uuid" in self.request.POST:
+                linked_blob = Blob.objects.get(uuid=self.request.POST["linked_blob_uuid"])
+                blob.blobs.add(linked_blob)
+
+            handle_linked_collection(blob, self.request)
+
+            if "collection_uuid" in self.request.POST:
+                collection = Collection.objects.get(uuid=self.request.POST.get("collection_uuid"), user=self.request.user)
+                collection.add_object(blob)
+
+        blob.index_blob()
+
+        message = "Blob created" if new_object else "Blob updated"
+        messages.add_message(self.request, messages.INFO, message)
+
+        return JsonResponse({"status": "OK", "uuid": blob.uuid})
+
+    def form_invalid(self, form):
+        """If the form is invalid, return a list of errors."""
+
+        return JsonResponse(form.errors, status=400)
 
 
 @method_decorator(login_required, name="dispatch")
@@ -43,20 +116,9 @@ class BlobListView(ListView):
 
 
 @method_decorator(login_required, name="dispatch")
-class BlobCreateView(FormRequestMixin, CreateView):
+class BlobCreateView(FormRequestMixin, CreateView, FormValidMixin):
     template_name = "blob/update.html"
     form_class = BlobForm
-
-    def form_invalid(self, form):
-        """If the form is invalid, render the invalid form."""
-
-        # Add "T00:00" to force JavaScript to use localtime
-        form["date"].value = get_javascript_date(form["date"].value()) + "T00:00"
-
-        if form["importance"].value():
-            form["importance"].value = 10
-
-        return self.render_to_response(self.get_context_data(form=form))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -133,35 +195,6 @@ class BlobCreateView(FormRequestMixin, CreateView):
             form.initial["name"] = so.blob.name
 
         return form
-
-    def form_valid(self, form):
-
-        obj = form.save(commit=False)
-        obj.user = self.request.user
-        obj.file_modified = form.cleaned_data["file_modified"]
-        obj.save()
-
-        # Save the tags
-        form.save_m2m()
-
-        handle_metadata(obj, self.request)
-
-        if "linked_blob_uuid" in self.request.POST:
-            linked_blob = Blob.objects.get(uuid=self.request.POST["linked_blob_uuid"])
-            obj.blobs.add(linked_blob)
-
-        handle_linked_collection(obj, self.request)
-
-        if "collection_uuid" in self.request.POST:
-            collection = Collection.objects.get(uuid=self.request.POST.get("collection_uuid"), user=self.request.user)
-            collection.add_object(obj)
-
-        obj.index_blob()
-
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse_lazy("blob:detail", kwargs={"uuid": self.object.uuid})
 
 
 @method_decorator(login_required, name="dispatch")
@@ -263,7 +296,7 @@ class BlobDetailView(DetailView):
 
 
 @method_decorator(login_required, name="dispatch")
-class BlobUpdateView(FormRequestMixin, UpdateView):
+class BlobUpdateView(FormRequestMixin, UpdateView, FormValidMixin):
     template_name = "blob/update.html"
     form_class = BlobForm
 
@@ -276,8 +309,7 @@ class BlobUpdateView(FormRequestMixin, UpdateView):
 
         context["metadata"] = self.object.metadata.exclude(name="is_book")
 
-        if [x for x in self.object.metadata.all() if x.name == "is_book"]:
-            context["is_book"] = True
+        context["is_book"] = self.object.metadata.filter(name="is_book").exists()
 
         context["collections_other"] = Collection.objects.filter(Q(user=self.request.user)
                                                                  & ~Q(collectionobject__blob__uuid=self.object.uuid)
@@ -296,50 +328,6 @@ class BlobUpdateView(FormRequestMixin, UpdateView):
 
     def get_object(self, queryset=None):
         return Blob.objects.get(user=self.request.user, uuid=self.kwargs.get("uuid"))
-
-    def form_valid(self, form):
-        blob = form.instance
-
-        file_changed = False if "file" not in form.changed_data else True
-
-        # Only check for a renamed file if the file itself hasn't changed
-        if not file_changed:
-            old_filename = str(form.instance.file)
-            new_filename = form.cleaned_data["filename"]
-
-            if (new_filename != old_filename):
-
-                try:
-                    key_root = f"{settings.MEDIA_ROOT}/{blob.uuid}"
-                    s3 = boto3.resource("s3")
-                    s3.Object(
-                        settings.AWS_STORAGE_BUCKET_NAME, f"{key_root}/{new_filename}"
-                    ).copy_from(
-                        CopySource=f"{settings.AWS_STORAGE_BUCKET_NAME}/{key_root}/{old_filename}"
-                    )
-                    s3.Object(settings.AWS_STORAGE_BUCKET_NAME, f"{key_root}/{old_filename}").delete()
-
-                    blob.file = new_filename
-                    blob.file_modified = None
-                    blob.save()
-                except Exception as e:
-                    from django.forms import ValidationError
-                    raise ValidationError("Error: {}".format(e))
-
-        blob.file_modified = form.cleaned_data["file_modified"]
-
-        # Delete all existing tags
-        blob.tags.clear()
-
-        handle_metadata(blob, self.request)
-
-        self.object = form.save()
-
-        self.object.index_blob(file_changed, new_blob=False)
-
-        messages.add_message(self.request, messages.INFO, "Blob updated")
-
-        return HttpResponseRedirect(reverse("blob:detail", kwargs={"uuid": str(blob.uuid)}))
 
 
 @method_decorator(login_required, name="dispatch")

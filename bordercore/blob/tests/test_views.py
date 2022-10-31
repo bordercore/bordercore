@@ -1,15 +1,18 @@
 import io
+import json
 import time
 from pathlib import Path
 from unittest.mock import Mock, patch
 from urllib.parse import urlparse
 
+import boto3
 import factory
 import pytest
 from faker import Factory as FakerFactory
 from PIL import Image
 
 from django import urls
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import signals
 
@@ -73,7 +76,7 @@ def test_blob_create(monkeypatch_blob, auto_login_user, blob_text_factory):
         "importance": 1,
     })
 
-    assert resp.status_code == 302
+    assert resp.status_code == 200
 
     # A blob linked to an existing blob -- empty form
     url = urls.reverse("blob:create")
@@ -93,10 +96,45 @@ def test_blob_create(monkeypatch_blob, auto_login_user, blob_text_factory):
         "linked_blob_uuid": blob_text_factory[0].uuid
     })
 
-    assert resp.status_code == 302
+    assert resp.status_code == 200
 
     new_blob = Blob.objects.all().order_by("-created")[0]
     assert new_blob.blobs.first().uuid == blob_text_factory[0].uuid
+
+    # A new blob with a file
+    file_path = Path(__file__).parent / "resources/test_blob.jpg"
+    with open(file_path, "rb") as f:
+        file_blob = f.read()
+    file_upload = SimpleUploadedFile(file_path.name, file_blob)
+    name = faker.text(max_nb_chars=10)
+    url = urls.reverse("blob:create")
+    resp = client.post(url, {
+        "importance": 1,
+        "file": file_upload,
+        "filename": file_path.name,
+        "name": name,
+        "tags": "django",
+    })
+
+    assert resp.status_code == 200
+
+    payload = resp.json()
+    assert payload["status"] == "OK"
+    blob_uuid = json.loads(resp.content)["uuid"]
+    blob = Blob.objects.get(uuid=blob_uuid)
+    assert blob.name == name
+
+    s3 = boto3.resource("s3")
+    bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
+    key_root = f"{settings.MEDIA_ROOT}/{blob.uuid}"
+
+    # Verify that the blob's file is in S3
+    objects = [
+        x.key
+        for x in list(bucket.objects.filter(Prefix=f"{key_root}/"))
+    ]
+    assert len(objects) == 1
+    assert f"{key_root}/{file_path.name}" in objects
 
 
 @factory.django.mute_signals(signals.pre_delete)
@@ -115,22 +153,74 @@ def test_blob_update(monkeypatch_blob, auto_login_user, blob_text_factory):
 
     _, client = auto_login_user()
 
+    s3 = boto3.resource("s3")
+    bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
+
     # The empty form
     url = urls.reverse("blob:update", kwargs={"uuid": blob_text_factory[0].uuid})
     resp = client.get(url)
-
     assert resp.status_code == 200
 
     # The submitted form
+    file_path = Path(__file__).parent / "resources/test_blob.pdf"
+    with open(file_path, "rb") as f:
+        file_blob = f.read()
+    file_upload = SimpleUploadedFile(file_path.name, file_blob)
     url = urls.reverse("blob:update", kwargs={"uuid": blob_text_factory[0].uuid})
     resp = client.post(url, {
+        "file": file_upload,
+        "filename": file_path.name,
+        "importance": 1,
         "name": "Name Changed",
         "note": "Note Changed",
+        "tags": "django"
+    })
+    assert resp.status_code == 200
+
+    # Test a blob's file is changed
+    file_path = Path(__file__).parent / "resources/test_blob.jpg"
+    with open(file_path, "rb") as f:
+        file_blob = f.read()
+    file_upload = SimpleUploadedFile(file_path.name, file_blob)
+    url = urls.reverse("blob:update", kwargs={"uuid": blob_text_factory[0].uuid})
+    resp = client.post(url, {
+        "file": file_upload,
+        "filename": file_path.name,
         "importance": 1,
+        "name": "Name Changed",
+        "note": "Note Changed",
         "tags": "django"
     })
 
-    assert resp.status_code == 302
+    assert resp.status_code == 200
+
+    # Verify that the blob's new file is in S3
+    key_root = f"{settings.MEDIA_ROOT}/{blob_text_factory[0].uuid}"
+    objects = [
+        x.key
+        for x in list(bucket.objects.filter(Prefix=f"{key_root}/"))
+    ]
+    assert len(objects) == 1
+    assert f"{key_root}/{file_path.name}" in objects
+
+    # Test a blob's filename is changed
+    url = urls.reverse("blob:update", kwargs={"uuid": blob_text_factory[0].uuid})
+    filename_new = faker.file_name(extension="jpg")
+    resp = client.post(url, {
+        "filename": filename_new,
+        "tags": ""
+    })
+    assert resp.status_code == 200
+
+    # Verify that the blob's new filename has been changed in S3
+    bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
+    key_root = f"{settings.MEDIA_ROOT}/{blob_text_factory[0].uuid}"
+    objects = [
+        x.key
+        for x in list(bucket.objects.filter(Prefix=f"{key_root}/"))
+    ]
+    assert len(objects) == 1
+    assert f"{key_root}/{filename_new}" in objects
 
 
 @pytest.mark.parametrize("blob", [pytest.lazy_fixture("blob_image_factory"), pytest.lazy_fixture("blob_text_factory")])

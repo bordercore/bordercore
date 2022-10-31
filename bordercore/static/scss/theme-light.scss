@@ -47,6 +47,8 @@
   --chart-gradient-end: #00065e; // Avoid leading space before RGB value
 
   // Misc properties
+  --blob-file-upload-gradient-start: var(--surface6);
+  --blob-file-upload-gradient-end: var(--surface1);
   --btn-close-filter: grayscale(100%) brightness(200%);
   --btn-primary-hover-color: var(--surface3);
   --drill-progress-circle-full: var(--surface3);

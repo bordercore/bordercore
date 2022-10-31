@@ -107,7 +107,7 @@ div.drag-target {
   }
 
   &.over {
-    img {
+    img, #file-upload {
       border: 0.06rem solid var(--drag-color);
       filter: drop-shadow(0.12rem 0.12rem 0.3rem var(--drag-color));
     }
@@ -1489,6 +1489,25 @@ blockquote > p {
   max-width: 100%;
   max-height: 100%;
   background-color: $black;
+}
+
+#file-upload {
+  width: 80%;
+  padding: 3rem;
+  border: 0.06rem solid var(--text2);
+  background: linear-gradient(180deg, var(--blob-file-upload-gradient-start) 29%, var(--blob-file-upload-gradient-end) 90%);
+  background-color: var(--surface6);
+  border-radius: var(--border-radius1);
+
+  #text-divider {
+    color: var(--text2);
+    font-size: 1rem;
+  }
+
+  #filename {
+    color: var(--text2);
+    font-size: 1rem;
+  }
 }
 
 .slide-show {

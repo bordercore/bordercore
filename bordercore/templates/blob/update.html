@@ -25,7 +25,7 @@
 
 {% block content %}
 
-    <div class="scrollable-panel-container row g-0 mx-2">
+    <div class="scrollable-panel-container row g-0 h-100 mx-2">
 
         <div id="vue-app-left" class="scrollable-panel flex-grow-last col-lg-3 d-flex flex-column h-100">
             <div
@@ -34,15 +34,13 @@
                 @dragenter.prevent
                 @dragleave.prevent="isOver = false"
                 @drop="isOver = false"
-                class="card-body backdrop-filter drag-target"
+                class="card-body backdrop-filter drag-target flex-grow-1"
                 :class="{over: isOver}"
             >
-                {% if object %}
-                    {% if object.sha1sum %}
-                        <div>
-                            <img id="coverImage" src="{{ cover_url }}" height="auto" width="400" class="mw-100 mb-3" />
-                        </div>
-                    {% endif %}
+                {% if object and object.sha1sum %}
+                    <div>
+                        <img id="coverImage" src="{{ cover_url }}" height="auto" width="400" class="mw-100 mb-3" />
+                    </div>
                 {% endif %}
 
                 <div id="blob-options" class="d-flex mt-2">
@@ -156,6 +154,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="#" role="tab" data-bs-toggle="tab" data-bs-target="#section-file"
+                            aria-controls="v-pills-file" aria-selected="true">
+                            File
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="#" role="tab" data-bs-toggle="tab" data-bs-target="#section-metadata"
                             aria-controls="v-pills-metadata" aria-selected="false">
                             Metadata
@@ -213,26 +217,12 @@
 
                             {% for field in form.visible_fields %}
 
-                                {% if field.label != 'Filename' and field.name != 'is_note' and field.name != 'math_support' and field.name != 'importance' %}
+                                {% if field.label != 'File' and field.label != 'Filename' and field.name != 'is_note' and field.name != 'math_support' and field.name != 'importance' %}
 
                                     <div class="{% if field.errors %}error {% endif %}row mb-3">
                                         <label class="fw-bold col-lg-2 col-sm-2 col-form-label text-end" for="id_{{ field.name }}">{{ field.label }}</label>
 
-                                    {% if field.label == 'File' %}
-
-                                        <file-upload inline-template>
-                                            <div class="col-lg-10">
-                                                <div class="input-group">
-                                                    <input type="text" name="filename" :value="filename" class="form-control" id="id_filename" autocomplete="off" />
-                                                    <input type="hidden" name="file_modified" :value="lastModified" />
-                                                    <label class="btn btn-primary">Choose file
-                                                        <input type="file" name="file" id="id_file" hidden @change="onChange" />
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </file-upload>
-
-                                    {% elif field.label == 'Date' %}
+                                    {% if field.label == 'Date' %}
 
                                         <div class="col-lg-8">
                                             <div class="input-group">
@@ -300,9 +290,9 @@
                                         <div class="col-lg-10 col-sm-10 align-self-center">
                                             {{ field }}
                                         </div>
-                                        {% endif %}
+                                {% endif %}
 
-                                        </div>
+                                    </div>
 
                                 {% endif %}
 
@@ -319,6 +309,37 @@
                                 {% endif %}
                             </div>
 
+                        </div>
+
+                        <div id="section-file" class="tab-pane col-lg-12 fade">
+                            <div
+                                class="drag-target d-flex flex-column align-items-center"
+                                @drop.prevent="onFileDrop($event)"
+                                @dragover.prevent="isOver = true"
+                                @dragenter.prevent
+                                @dragleave.prevent="isOver = false"
+                                @drop="isOver = false"
+                                :class="{over: isOver}"
+                            >
+                                <h3 id="file-upload" class="d-flex flex-column align-items-center">
+
+                                    <div>
+                                        Drag & Drop your file here
+                                    </div>
+                                    <div id="text-divider" class="mt-3">
+                                        OR
+                                    </div>
+                                    <label class="btn btn-primary mt-3">Choose file
+                                        <input type="file" name="file" id="id_file" hidden @change="onFileChange" />
+                                    </label>
+                                    <div v-if="fileName" id="filename" class="d-flex align-items-center mt-3">
+                                        <div>File:</div>
+                                        <div class="ms-2">
+                                            <input type="text" name="filename" v-model="fileName" class="form-control" id="id_filename" autocomplete="off" />
+                                        </div>
+                                    </div>
+                                </h3>
+                            </div>
                         </div>
 
                         <div id="section-metadata" class="tab-pane col-lg-12 fade">
@@ -479,21 +500,6 @@
                 }
             },
         };
-
-        const FileUpload = {
-            data() {
-                return {
-                    filename: "{{ form.filename.value|default:""|escapejs }}",
-                    lastModified: null
-                }
-            },
-            methods: {
-                onChange(evt) {
-                    this.filename = evt.target.files[0].name;
-                    this.lastModified = evt.target.files[0].lastModified;
-                }
-            }
-        }
 
         const noDelimiter = {replace: function(){}};
 
@@ -674,7 +680,6 @@
             name: "EditForm",
             store,
             components: {
-                FileUpload,
                 DateInput,
                 MetadataWrapper,
             },
@@ -697,7 +702,10 @@
                             clickHandler: this.onClickDateFormatYear,
                         },
                     ],
-                    content:"",
+                    content: "",
+                    fileName: "{{ form.filename.value|default:""|escapejs }}",
+                    fileObject: null,
+                    isOver: false,
                 }
             },
             methods: {
@@ -720,6 +728,16 @@
                     const date = new Date(this.$store.state.date);
                     this.$store.state.date = date.getFullYear();
                     this.addCheckMarkToDateFormatMenu();
+                },
+                onFileChange(evt) {
+                    this.fileName = evt.target.files[0].name;
+                },
+                onFileDrop(evt) {
+                    const fileObject = evt.dataTransfer.files[0];
+                    if (fileObject) {
+                        this.fileObject = evt.dataTransfer.files[0];
+                        this.fileName = evt.dataTransfer.files[0].name;
+                    }
                 },
                 onTagsChanged(tags) {
                     EventBus.$emit("tags-changed", tags);
@@ -780,7 +798,32 @@
                     textarea.setAttribute("name", "content");
                     textarea.setAttribute("value", this.content);
 
-                    document.getElementById("form-blob").submit();
+                    const formElement = document.getElementById("form-blob");
+                    const formData = new FormData(formElement);
+                    if (this.fileObject) {
+                        formData.append("file", this.fileObject);
+                        formData.append("file_modified", this.fileObject.lastModified);
+                    }
+                    axios.post("{{ request.path }}", formData, {
+                        headers: {
+                            "Content-Type": "multipart/form-data"
+                        }
+                    }).then(response => {
+                        window.location = "{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", response.data.uuid);
+                    }).catch(function (error) {
+                        let errors = [];
+                        for (const property in error.response.data) {
+                            errors.push(error.response.data[property][0]);
+                        }
+                        EventBus.$emit(
+                            "toast",
+                            {
+                                "body": errors.join("<br />"),
+                                "variant": "danger",
+                                "autoHide": false,
+                            },
+                        );
+                    });
                 },
             },
             mounted() {

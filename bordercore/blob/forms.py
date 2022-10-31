@@ -45,8 +45,6 @@ class BlobForm(ModelForm):
             if self.instance.date:
                 self.initial["date"] = get_javascript_date(self.instance.date) + "T00:00"
         else:
-            self.fields["filename"].disabled = True
-
             # Add "T00:00" to force JavaScript to use localtime
             self.initial["date"] = datetime.date.today().strftime("%Y-%m-%dT00:00")
 
@@ -59,25 +57,8 @@ class BlobForm(ModelForm):
     filename = CharField(required=False, widget=forms.TextInput(attrs={"class": "form-control"}))
     file_modified = IntegerField(required=False, widget=forms.HiddenInput())
 
-    def clean(self):
-        cleaned_data = super().clean()
-
-        if "author" in cleaned_data:
-            cleaned_data["author"] = [
-                x.strip()
-                for x in
-                "".join(cleaned_data["author"]).split(",")
-            ]
-
-        if cleaned_data.get("sha1sum", "") == "":
-            cleaned_data["sha1sum"] = None
-
-        return cleaned_data
-
     def clean_filename(self):
-
         filename = str(self.cleaned_data.get("filename"))
-
         if filename in ILLEGAL_FILENAMES:
             self.add_error("filename", ValidationError(f"Error: Illegal filename: {filename}"))
 
@@ -101,8 +82,7 @@ class BlobForm(ModelForm):
         #  added a file via file upload rather than simply edit the
         #  metadata for a file. Without this check the actual file
         #  can't be found to compute the sha1sum.
-        if self.files.get("file", None):
-
+        if "file" in self.files:
             hasher = hashlib.sha1()
             for chunk in file.chunks():
                 hasher.update(chunk)
@@ -112,7 +92,7 @@ class BlobForm(ModelForm):
                 existing_file = Blob.objects.filter(sha1sum=hasher.hexdigest())
                 if existing_file:
                     url = reverse_lazy("blob:detail", kwargs={"uuid": existing_file[0].uuid})
-                    raise forms.ValidationError(mark_safe(f"This file <a href='{url}'>already exists.</a>"))
+                    raise forms.ValidationError(mark_safe(f"Error: This file <a href='{url}'>already exists.</a>"))
 
         return file
 

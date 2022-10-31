@@ -269,32 +269,32 @@ class Blob(TimeStampedModel):
         # Use a custom S3 location for the blob, based on the blob's UUID
         self.file.storage.location = f"blobs/{self.uuid}"
 
-        # We rely on the readable() method to determine if we're
-        #  adding a new file or editing an existing one. If it's
-        #  new, we have access to the file since it was just
-        #  uploaded, so calculate the sha1sum. If we're editing the
-        #  file, we don't have access to any file, so don't try
-        #  to calculate the sha1sum.
-
+        # We rely on the file.readable() method to determine if a file was
+        #  uploaded during a blob update, either because the blob file is new
+        #  or the blob's file was changed. If so, calculate the sha1sum.
         if self.file and self.file.readable():
+
+            sha1sum_old = self.sha1sum
 
             hasher = hashlib.sha1()
             for chunk in self.file.chunks():
                 hasher.update(chunk)
             self.sha1sum = hasher.hexdigest()
 
-        super().save(*args, **kwargs)
+            # Check if the file has changed. If so, delete the old version from S3.
+            # Note: if there is no self.id, then this is a new blob and
+            #  therefore we don't need to check for a change.
+            if self.id and self.sha1sum != sha1sum_old:
+                # This is set in __init__
+                filename_orig = getattr(self, "__original_filename")
 
-        if self.sha1sum:
-
-            # This is set in __init__
-            filename_orig = getattr(self, "__original_filename")
-            if filename_orig and filename_orig != self.file.name:
                 key = f"{self.get_parent_dir()}/{filename_orig}"
-                log.info(f"File name changed detected. Deleting old file: {key}")
-                log.info(f"{filename_orig} != {self.file.name}")
+                log.info(f"Blob file changed detected. Deleting old file: {key}")
+                log.info(f"{sha1sum_old} != {self.sha1sum}")
                 s3 = boto3.resource("s3")
                 s3.Object(settings.AWS_STORAGE_BUCKET_NAME, key).delete()
+
+        super().save(*args, **kwargs)
 
         # self.file_modified will be "None" if we're editing a blob's
         # information or renaming the file, but not changing the file itself.
