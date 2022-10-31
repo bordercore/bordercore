@@ -22,6 +22,7 @@ from django.db import models, transaction
 from django.db.models import F, JSONField
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
+from django.forms import ValidationError
 from django.urls import reverse
 
 from bookmark.models import Bookmark
@@ -296,10 +297,13 @@ class Blob(TimeStampedModel):
 
         super().save(*args, **kwargs)
 
-        # self.file_modified will be "None" if we're editing a blob's
+        # self.file_modified won't exist if we're editing a blob's
         # information or renaming the file, but not changing the file itself.
         # In that case we don't want to update its "file_modified" metadata.
-        if self.file and self.file_modified:
+
+        if self.file and \
+           hasattr(self, "file_modified") and \
+           self.file_modified is not None:
             self.set_s3_metadata_file_modified()
 
         # After every blob mutation, invalidate the cache
@@ -546,7 +550,6 @@ class Blob(TimeStampedModel):
             self.data = {"pdf_page_number": page_number}
         else:
             self.data["pdf_page_number"] = page_number
-        self.file_modified = None
         self.save()
 
         message = {
@@ -583,6 +586,26 @@ class Blob(TimeStampedModel):
             InvocationType="Event",
             Payload=json.dumps(payload)
         )
+
+    def rename_file(self, filename):
+        """
+        Rename a file, making the appropriate changes in the database and in S3.
+        """
+
+        try:
+            s3 = boto3.resource("s3")
+            key_root = f"{settings.MEDIA_ROOT}/{self.uuid}"
+            s3.Object(
+                settings.AWS_STORAGE_BUCKET_NAME, f"{key_root}/{filename}"
+            ).copy_from(
+                CopySource=f"{settings.AWS_STORAGE_BUCKET_NAME}/{key_root}/{self.file.name}"
+            )
+            s3.Object(settings.AWS_STORAGE_BUCKET_NAME, f"{key_root}/{self.file.name}").delete()
+        except Exception as e:
+            raise ValidationError("Error renaming file: {}".format(e))
+
+        self.file.name = filename
+        self.save()
 
     def index_blob(self, file_changed=True, new_blob=True):
         """

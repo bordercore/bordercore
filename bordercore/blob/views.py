@@ -3,13 +3,10 @@ import json
 import logging
 import re
 
-import boto3
-
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.forms import ValidationError
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
@@ -35,33 +32,15 @@ class FormValidMixin(ModelFormMixin):
     A mixin to encapsulate common logic used in Update and Create views
     """
 
-    def handle_renamed_file(self, blob, changed_filename):
-        """
-        If a file has been renamed, make the appropriate
-        change in the database and in S3.
-        """
-        try:
-            s3 = boto3.resource("s3")
-            key_root = f"{settings.MEDIA_ROOT}/{blob.uuid}"
-            s3.Object(
-                settings.AWS_STORAGE_BUCKET_NAME, f"{key_root}/{blob.file.name}"
-            ).copy_from(
-                CopySource=f"{settings.AWS_STORAGE_BUCKET_NAME}/{key_root}/{changed_filename}"
-            )
-            s3.Object(settings.AWS_STORAGE_BUCKET_NAME, f"{key_root}/{changed_filename}").delete()
-        except Exception as e:
-            raise ValidationError("Error: {}".format(e))
-
     def form_valid(self, form):
 
         new_object = not self.object
 
         blob = form.save(commit=False)
 
-        # If a file has been renamed, save the old filename for later
-        changed_filename = None
-        if form.cleaned_data["filename"] != blob.file.name:
-            changed_filename = blob.file.name
+        # Only rename a blob's file if the file itself hasn't changed
+        if "file" not in form.changed_data and form.cleaned_data["filename"] != blob.file.name:
+            blob.rename_file(form.cleaned_data["filename"])
 
         blob.user = self.request.user
         blob.file.name = form.cleaned_data["filename"]
@@ -72,10 +51,6 @@ class FormValidMixin(ModelFormMixin):
         form.save_m2m()
 
         handle_metadata(blob, self.request)
-
-        # Only rename a blob's file if the file itself hasn't changed
-        if "file" not in form.changed_data and changed_filename:
-            self.handle_renamed_file(blob, changed_filename)
 
         if new_object:
             if "linked_blob_uuid" in self.request.POST:

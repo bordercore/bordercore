@@ -3,6 +3,7 @@ from pathlib import Path
 from urllib.parse import quote_plus, urlparse
 
 import boto3
+from faker import Factory as FakerFactory
 
 import django
 from django.conf import settings
@@ -12,6 +13,9 @@ from collection.models import Collection
 django.setup()
 
 from blob.models import Blob  # isort:skip
+
+
+faker = FakerFactory.create()
 
 
 def test_get_s3_key(blob_image_factory, blob_text_factory):
@@ -156,6 +160,25 @@ def test_blob_update_cover_image(blob_pdf_factory, s3_resource, s3_bucket):
     assert len(objects) == 3
     assert f"blobs/{blob_pdf_factory[0].uuid}/cover.jpg" in objects
     assert f"blobs/{blob_pdf_factory[0].uuid}/cover-large.jpg" in objects
+
+
+def test_blob_rename_file(blob_pdf_factory):
+
+    s3 = boto3.resource("s3")
+    bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
+
+    filename = faker.file_name(extension="pdf")
+    blob_pdf_factory[0].rename_file(filename)
+
+    # Verify that the blob's new filename has been changed in S3
+    bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
+    key_root = f"{settings.MEDIA_ROOT}/{blob_pdf_factory[0].uuid}"
+    objects = [
+        x.key
+        for x in list(bucket.objects.filter(Prefix=f"{key_root}/"))
+    ]
+    assert len(objects) == 1
+    assert f"{key_root}/{filename}" in objects
 
 
 def count_nodes(nodes, root_node=True):
