@@ -6,6 +6,7 @@ import logging
 import re
 import uuid
 from collections import defaultdict
+from datetime import timedelta
 from pathlib import PurePath
 from urllib.parse import quote_plus, urlparse
 
@@ -336,11 +337,7 @@ class Blob(TimeStampedModel):
         If the modified time is greater than the creation time by
         more than one second, assume it has been edited.
         """
-
-        if int(self.modified.strftime("%s")) - int(self.created.strftime("%s")) > 0:
-            return True
-        else:
-            return False
+        return self.modified - self.created > timedelta(seconds=1)
 
     def get_related_blobs(self):
 

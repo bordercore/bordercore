@@ -1,4 +1,5 @@
 import datetime
+import time
 from pathlib import Path
 from urllib.parse import quote_plus, urlparse
 
@@ -13,7 +14,7 @@ from collection.models import Collection
 django.setup()
 
 from blob.models import Blob  # isort:skip
-
+from blob.tests.factories import BlobFactory
 
 faker = FakerFactory.create()
 
@@ -60,6 +61,23 @@ def test_get_metadata(blob_image_factory):
     url = blob_image_factory[0].metadata.filter(name="Url").first()
     assert urls[0]["url"] == url.value
     assert urls[0]["domain"] == urlparse(url.value).netloc
+
+
+def test_has_been_modified(auto_login_user, blob_image_factory):
+
+    user, _ = auto_login_user()
+
+    blob = BlobFactory.create(user=user)
+    assert blob.has_been_modified() is False
+
+    blob.name = faker.text(max_nb_chars=10)
+
+    # The resolution of has_been_modified() is one second, so
+    #  we need to wait at least that long to see a difference.
+    time.sleep(1)
+
+    blob.save()
+    assert blob.has_been_modified() is True
 
 
 def test_get_content_type():
