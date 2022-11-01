@@ -111,9 +111,9 @@ class CollectionCreateView(FormRequestMixin, CreateView):
 
     def form_valid(self, form):
 
-        obj = form.save(commit=False)
-        obj.user = self.request.user
-        obj.save()
+        collection = form.save(commit=False)
+        collection.user = self.request.user
+        collection.save()
 
         # Save the tags
         form.save_m2m()
@@ -138,17 +138,17 @@ class CollectionUpdateView(FormRequestMixin, UpdateView):
 
     def form_valid(self, form):
 
-        object = form.save(commit=False)
-        object.user = self.request.user
+        collection = form.save(commit=False)
+        collection.user = self.request.user
 
         # Delete all existing tags first
-        object.tags.clear()
+        collection.tags.clear()
 
         # Then add all tags specified
         for tag in form.cleaned_data["tags"]:
-            object.tags.add(tag)
+            collection.tags.add(tag)
 
-        object.save()
+        collection.save()
 
         messages.add_message(
             self.request,

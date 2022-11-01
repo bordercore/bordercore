@@ -60,14 +60,14 @@ class NodeCreateView(FormRequestMixin, CreateView):
 
     def form_valid(self, form):
 
-        obj = form.save(commit=False)
-        obj.user = self.request.user
-        obj.save()
+        node = form.save(commit=False)
+        node.user = self.request.user
+        node.save()
 
         # Save the tags
         form.save_m2m()
 
-        messages.add_message(self.request, messages.INFO, f"New node created: <strong>{obj.name}</strong>")
+        messages.add_message(self.request, messages.INFO, f"New node created: <strong>{node.name}</strong>")
 
         return HttpResponseRedirect(self.get_success_url())
 

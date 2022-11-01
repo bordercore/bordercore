@@ -313,16 +313,17 @@ class SongUpdateView(FormRequestMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        song = form.instance
 
-        # Delete all existing tags
+        song = form.save(commit=False)
+
+        # Delete all existing tags first
         song.tags.clear()
 
-        # Then add the tags specified in the form
+        # Then add all tags specified
         for tag in form.cleaned_data["tags"]:
             song.tags.add(tag)
 
-        self.object = form.save()
+        song.save()
 
         messages.add_message(
             self.request, messages.INFO,
