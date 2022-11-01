@@ -504,7 +504,10 @@ def unlink(request):
     blob_1 = Blob.objects.get(uuid=blob_1_uuid, user=request.user)
     blob_2 = Blob.objects.get(uuid=blob_2_uuid, user=request.user)
 
+    # We don't know a priori which is blob_1 and which is blob_2,
+    #  so try removing from both directions.
     blob_1.blobs.remove(blob_2)
+    blob_2.blobs.remove(blob_1)
 
     response = {
         "status": "OK",
@@ -540,8 +543,12 @@ def update_related_blob_note(request):
     note = request.POST["note"]
 
     bb = BlobBlob.objects.get(
-        blob_1__uuid=blob_1_uuid,
-        blob_2__uuid=blob_2_uuid
+        Q(
+            Q(blob_1__uuid=blob_1_uuid) & Q(blob_2__uuid=blob_2_uuid)
+        )
+        | Q(
+            Q(blob_1__uuid=blob_2_uuid) & Q(blob_2__uuid=blob_1_uuid)
+        )
     )
     bb.note = note
     bb.save()

@@ -20,7 +20,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models, transaction
-from django.db.models import F, JSONField
+from django.db.models import F, JSONField, Q
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.forms import ValidationError
@@ -341,17 +341,27 @@ class Blob(TimeStampedModel):
 
     def get_related_blobs(self):
 
-        return [
-            {
-                "uuid": related.blob_2.uuid,
-                "name": related.blob_2.name,
-                "note": related.note,
-                "url": reverse("blob:detail", kwargs={"uuid": str(related.blob_2.uuid)}),
-                "cover_url": related.blob_2.get_cover_url_small()
-            }
-            for related in
-            BlobBlob.objects.filter(blob_1=self).order_by("-created").select_related("blob_2")
-        ]
+        related_blobs = []
+
+        for related in BlobBlob.objects.filter(
+                Q(blob_1=self) | Q(blob_2=self)
+        ).order_by(
+            "-created"
+        ).select_related(
+            "blob_1", "blob_2"
+        ):
+            other_blob = related.blob_2 if related.blob_1 == self else related.blob_1
+            related_blobs.append(
+                {
+                    "uuid": other_blob.uuid,
+                    "name": other_blob.name,
+                    "note": related.note,
+                    "url": reverse("blob:detail", kwargs={"uuid": str(other_blob.uuid)}),
+                    "cover_url": other_blob.get_cover_url_small()
+                }
+            )
+
+        return related_blobs
 
     @staticmethod
     def related_objects(base_object):

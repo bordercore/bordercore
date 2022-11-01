@@ -80,6 +80,24 @@ def test_has_been_modified(auto_login_user, blob_image_factory):
     assert blob.has_been_modified() is True
 
 
+def test_get_related_blobs(auto_login_user):
+
+    user, _ = auto_login_user()
+
+    blob_1 = BlobFactory.create(user=user)
+    blob_2 = BlobFactory.create(user=user)
+
+    blob_1.blobs.add(blob_2)
+
+    related_blobs = blob_1.get_related_blobs()
+    assert len(related_blobs) == 1
+    assert related_blobs[0]["uuid"] == blob_2.uuid
+
+    related_blobs = blob_2.get_related_blobs()
+    assert len(related_blobs) == 1
+    assert related_blobs[0]["uuid"] == blob_1.uuid
+
+
 def test_get_content_type():
     assert Blob.get_content_type("application/octet-stream") == "Video"
     assert Blob.get_content_type("text/css") == ""
