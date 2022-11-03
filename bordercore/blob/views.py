@@ -251,7 +251,7 @@ class BlobDetailView(DetailView):
 
         related_objects = self.object.bcobject_set
         if related_objects.first():
-            context["related_questions"] = related_objects.first().bc_object.all()
+            context["related_questions"] = related_objects.first().bc_objects.all()
         else:
             context["related_questions"] = []
 

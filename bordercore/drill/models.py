@@ -52,7 +52,7 @@ class Question(TimeStampedModel):
     efactor = models.FloatField(blank=False, null=False)
     is_favorite = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
-    bc_objects = models.ManyToManyField("blob.BCObject", blank=True, related_name="bc_object")
+    bc_objects = models.ManyToManyField("blob.BCObject", blank=True, related_name="bc_objects")
 
     objects = DrillManager()
 
@@ -179,7 +179,7 @@ class Question(TimeStampedModel):
         self.bc_objects.remove(bc_object)
 
         # If there are no more objects related to this BCObject, delete it
-        if bc_object.bc_object.count() == 0:
+        if bc_object.bc_objects.count() == 0:
             bc_object.delete()
 
     def save(self, *args, **kwargs):
