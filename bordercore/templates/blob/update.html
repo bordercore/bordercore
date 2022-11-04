@@ -314,7 +314,7 @@
                         <div id="section-file" class="tab-pane col-lg-12 fade">
                             <div
                                 class="drag-target d-flex flex-column align-items-center"
-                                @drop.prevent="onFileDrop($event)"
+                                @drop.prevent="onFileDrop($event.dataTransfer.files[0])"
                                 @dragover.prevent="isOver = true"
                                 @dragenter.prevent
                                 @dragleave.prevent="isOver = false"
@@ -330,7 +330,7 @@
                                         OR
                                     </div>
                                     <label class="btn btn-primary mt-3">Choose file
-                                        <input type="file" name="file" id="id_file" hidden @change="onFileChange" />
+                                        <input type="file" name="file" id="id_file" hidden @change="onFileDrop($event.target.files[0])" />
                                     </label>
                                     <div v-if="fileName" id="filename" class="d-flex align-items-center mt-3">
                                         <div>File:</div>
@@ -729,14 +729,10 @@
                     this.$store.state.date = date.getFullYear();
                     this.addCheckMarkToDateFormatMenu();
                 },
-                onFileChange(evt) {
-                    this.fileName = evt.target.files[0].name;
-                },
-                onFileDrop(evt) {
-                    const fileObject = evt.dataTransfer.files[0];
+                onFileDrop(fileObject) {
                     if (fileObject) {
-                        this.fileObject = evt.dataTransfer.files[0];
-                        this.fileName = evt.dataTransfer.files[0].name;
+                        this.fileObject = fileObject;
+                        this.fileName = fileObject.name;
                     }
                 },
                 onTagsChanged(tags) {
