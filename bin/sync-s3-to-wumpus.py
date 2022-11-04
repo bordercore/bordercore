@@ -7,7 +7,6 @@ from os import makedirs
 from pathlib import Path
 
 import boto3
-from moto.s3.models import MAX_BUCKET_NAME_LENGTH
 
 import django
 from django.conf import settings
@@ -81,10 +80,13 @@ def copy_blob_to_wumpus(uuid, filename):
 
     # Modify the file's mtime to match what's stored in S3 metadata
     obj = s3_resource.Object(bucket_name=bucket_name, key=key)
-    s3_modified = int(obj.metadata.get("file-modified", None))
-    atime = os.stat(file_path).st_atime
-    mtime = datetime.datetime.fromtimestamp(s3_modified)
-    os.utime(file_path, times=(atime, mtime.timestamp()))
+    try:
+        s3_modified = int(obj.metadata.get("file-modified", None))
+        atime = os.stat(file_path).st_atime
+        mtime = datetime.datetime.fromtimestamp(s3_modified)
+        os.utime(file_path, times=(atime, mtime.timestamp()))
+    except TypeError:
+        print("  Warning: file-modified metadata not found in S3")
 
 
 def delete_blobs_from_wumpus(uuids):
