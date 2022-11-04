@@ -11,7 +11,7 @@
                     <a href="{% url 'music:list' %}"><font-awesome-icon icon="home" class="icon-hover glow"></font-awesome-icon></a>
                 </li>
                 <li class="breadcrumb-item">
-                    <a href="{% url 'music:artist_detail' album.artist.uuid %}">{{ album.artist.name }}</a>
+                    <a href="{% url 'music:artist_detail' album.artist.uuid %}">{{ album.artist.name|safe }}</a>
                 </li>
                 <li class="breadcrumb-item active">{{ album.title }}</li>
             </ul>

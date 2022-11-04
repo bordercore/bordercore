@@ -12,7 +12,7 @@
 
         <div class="col-lg-3 d-flex flex-column">
 
-            <div class="card-body">
+            <div class="card-body flex-grow-1">
 
                 <div id="aggregations">
 
@@ -183,7 +183,7 @@
                                                 <a href="{% url 'blob:detail' match.source.uuid %}">{{ match.source.name|default:"Note" }}</a>
                                             </h4>
 
-                                            <h5 v-pre>{{ match.highlight.contents.0|safe }}</h5>
+                                            <h5 v-pre>{{ match.highlight.contents.0|escape|safe }}</h5>
                                             <div>
                                                 {% for tag in match.source.tags %}
                                                     <a href="{% url 'search:kb_search_tag_detail' tag %}" class="tag">{{ tag }}</a>

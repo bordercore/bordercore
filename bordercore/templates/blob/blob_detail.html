@@ -9,7 +9,7 @@
 
     <div class="scrollable-panel-container row g-0 h-100 mx-2">
 
-        <div id="vue-left-panel" class="scrollable-panel flex-grow-last col-lg-3 d-flex flex-column">
+        <div id="vue-left-panel" class="flex-grow-last col-lg-3 d-flex flex-column">
 
             <!--
                  Keep this here so that the resulting div doesn't get
@@ -444,7 +444,7 @@
                     {% for collection in collection_list %}
                     {
                         "uuid": "{{ collection.uuid }}",
-                        "name": "{{ collection.name }}",
+                        "name": "{{ collection.name|safe }}",
                         "url": "{% url 'collection:detail' collection.uuid %}"
                     },
                     {% endfor %}
