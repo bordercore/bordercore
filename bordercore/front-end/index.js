@@ -233,7 +233,7 @@ Vue.component("PythonConsole", PythonConsole);
 import Toast from "./vue/common/Toast.vue";
 Vue.component("Toast", Toast);
 
-import {BarController, BarElement, Chart, CategoryScale, LinearScale, Title} from "chart.js";
+import {BarController, BarElement, Chart, CategoryScale, LinearScale, Title, Tooltip} from "chart.js";
 window.Chart = Chart;
 Chart.register(
     BarController,
@@ -241,6 +241,7 @@ Chart.register(
     CategoryScale,
     LinearScale,
     Title,
+    Tooltip,
 );
 
 import Rainbow from "rainbowvis.js";

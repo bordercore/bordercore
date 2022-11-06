@@ -360,9 +360,9 @@ def fitness(auto_login_user):
     exercise_1 = Exercise.objects.create(name="Pull Ups")
     exercise_1.muscle.add(muscle)
     workout = Workout.objects.create(user=user, exercise=exercise_1)
-    Data.objects.create(workout=workout, weight=0, reps=12)
-    Data.objects.create(workout=workout, weight=0, reps=11)
-    Data.objects.create(workout=workout, weight=0, reps=8)
+    Data.objects.create(workout=workout, duration=0, weight=0, reps=12)
+    Data.objects.create(workout=workout, duration=0, weight=0, reps=11)
+    Data.objects.create(workout=workout, duration=0, weight=0, reps=8)
 
     muscle_group = MuscleGroup.objects.create(name="Legs")
     muscle = Muscle.objects.create(name="Glutes", muscle_group=muscle_group)
@@ -394,10 +394,10 @@ def fitness(auto_login_user):
     exercise_4.muscle.add(muscle)
     for i in range(10):
         workout = Workout.objects.create(user=user, exercise=exercise_4)
-        Data.objects.create(workout=workout, duration=random.randint(90, 120), reps=random.randint(1, 2))
-        Data.objects.create(workout=workout, duration=random.randint(90, 120), reps=random.randint(1, 2))
-        Data.objects.create(workout=workout, duration=random.randint(90, 120), reps=random.randint(1, 2))
-        Data.objects.create(workout=workout, duration=random.randint(90, 120), reps=random.randint(1, 2))
+        Data.objects.create(workout=workout, duration=random.randint(90, 120), weight=0, reps=random.randint(1, 2))
+        Data.objects.create(workout=workout, duration=random.randint(90, 120), weight=0, reps=random.randint(1, 2))
+        Data.objects.create(workout=workout, duration=random.randint(90, 120), weight=0, reps=random.randint(1, 2))
+        Data.objects.create(workout=workout, duration=random.randint(90, 120), weight=0, reps=random.randint(1, 2))
 
     yield [exercise_0, exercise_1, exercise_2, exercise_3, exercise_4]
 

@@ -5,9 +5,10 @@ from collections import defaultdict
 from datetime import timedelta
 
 from django.contrib.auth.models import User
+from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.paginator import Paginator
 from django.db import models
-from django.db.models import F, Max, OuterRef, Subquery
+from django.db.models import F, Max
 
 
 class MuscleGroup(models.Model):
@@ -70,12 +71,10 @@ class Exercise(models.Model):
 
     def get_plot_data(self, user, count=12, page_number=1):
 
-        workout_data = Data.objects.filter(workout=OuterRef("pk"))
-
         raw_data = Workout.objects.filter(exercise__id=self.id) \
-                                  .annotate(reps=Subquery(workout_data.values("reps")[:1])) \
-                                  .annotate(weight=Subquery(workout_data.values("weight")[:1])) \
-                                  .annotate(duration=Subquery(workout_data.values("duration")[:1])) \
+                                  .annotate(reps=ArrayAgg("data__reps", ordering="-date")) \
+                                  .annotate(weight=ArrayAgg("data__weight", ordering="-date")) \
+                                  .annotate(duration=ArrayAgg("data__duration", ordering="-date")) \
                                   .order_by("-date")
 
         p = Paginator(raw_data, count).page(page_number)
@@ -85,11 +84,10 @@ class Exercise(models.Model):
         initial_plot = "reps"
         plotdata = {}
         plotdata["reps"] = [x.reps for x in raw_data][::-1]
-
-        if [x.weight for x in raw_data if x.weight and x.weight > 0]:
+        if [x.weight for x in raw_data if x.weight and x.weight[0] > 0]:
             plotdata["weight"] = [x.weight for x in raw_data][::-1]
             initial_plot = "weight"
-        elif [x.duration for x in raw_data if x.duration and x.duration > 0]:
+        elif [x.duration for x in raw_data if x.duration and x.duration[0] > 0]:
             plotdata["duration"] = [x.duration for x in raw_data][::-1]
             initial_plot = "duration"
         labels = [x.date.strftime("%b %d") for x in raw_data]

@@ -579,6 +579,14 @@
             },
         });
 
+        /**
+         * Get the first workout data from a workout set
+         * @param {Array.<number>} an array of workout data
+         */
+        function firstSet(workoutData) {
+            return workoutData[0];
+        }
+
         function getGradient(numberOfItems) {
 
             const styles = getComputedStyle(document.body);
@@ -678,7 +686,6 @@
                 };
             },
             mounted() {
-
                 const scaleYText = "{{ plotdata.initial_plot|capfirst }}";
                 const styles = getComputedStyle(document.body);
 
@@ -689,7 +696,7 @@
                         labels: {{ plotdata.labels|safe }},
                         datasets: [
                             {
-                                data: this.plotdata[this.currentPlotData],
+                                data: this.plotdata[this.currentPlotData].map(firstSet),
                                 barThickness: 40,
                                 backgroundColor: function(context) {
                                     const chart = context.chart;
@@ -706,19 +713,18 @@
                         ]
                     },
                     options: {
-                        events: [], // Disable 'on-hover' events
                         borderRadius: "10",
                         animation: {
-                            onComplete : function(chartInstance) {
+                            onProgress: function(chartInstance) {
                                 const ctx = this.ctx;
                                 ctx.textAlign = "center";
                                 ctx.textBaseline = "bottom";
                                 ctx.fillStyle = styles.getPropertyValue("--chart-fill-color");
                                 ctx.font="bold 24px Arial";
                                 this.data.datasets.forEach(function(dataset, i) {
-                                    var meta = chartInstance.chart.getDatasetMeta(i);
+                                    const meta = chartInstance.chart.getDatasetMeta(i);
                                     meta.data.forEach(function(bar, index) {
-                                        var data = dataset.data[index];
+                                        const data = dataset.data[index];
                                         ctx.fillText(data, bar.x, bar.y + 40);
                                     });
                                 });
@@ -730,13 +736,30 @@
                                 text: "Workout Data",
                                 color: styles.getPropertyValue("--chart-title-color"),
                                 font: {
-                                    family: "Poppins",
+                                    family: "Lato",
                                     size: 48,
                                     weight: "normal",
                                 },
                             },
                             legend: {
                                 display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label(tooltipItem) {
+                                        return null;
+                                    },
+                                    title(tooltipItem) {
+                                        const vue = tooltipItem[0].chart.vueContext;
+                                        const currentPlotData = vue.currentPlotData.charAt(0).toUpperCase() + vue.currentPlotData.slice(1);
+                                        const data = vue.plotdata[vue.currentPlotData][tooltipItem[0].dataIndex];
+                                        return `${currentPlotData}: ${data}`;
+                                    },
+                                },
+                                titleMarginBottom: 0,
+                                titleFont: {
+                                    size: 18,
+                                },
                             }
                         },
                         scales: {
@@ -780,6 +803,7 @@
                     }
                 });
 
+                myChart.vueContext = this;
                 this.myChart = myChart;
 
                 let sets = Array.apply(0, Array({{ latest_weight|length }})).map(function(_,b) { return b + 1; });
@@ -848,8 +872,9 @@
                         this,
                         "{% url 'fitness:get_workout_data' %}?uuid={{ object.uuid }}&page_number=" + pageNumber,
                         (response) => {
+                            this.plotdata = JSON.parse(response.data.workout_data.plotdata);
                             this.myChart.data.labels = JSON.parse(response.data.workout_data.labels);
-                            this.myChart.data.datasets[0].data = JSON.parse(response.data.workout_data.plotdata)[this.currentPlotData];
+                            this.myChart.data.datasets[0].data = JSON.parse(response.data.workout_data.plotdata)[this.currentPlotData].map(firstSet);
                             this.myChart.update();
                             this.paginator = JSON.parse(response.data.workout_data.paginator);
                         },
@@ -858,7 +883,7 @@
                 },
                 switchPlot(dataset) {
                     this.currentPlotData = dataset;
-                    this.myChart.data.datasets[0].data = this.plotdata[dataset];
+                    this.myChart.data.datasets[0].data = this.plotdata[dataset].map(firstSet);
                     this.myChart.options.scales.y.title.text = this.capitalizeFirstLetter(dataset);
                     this.myChart.update();
                 },
@@ -918,6 +943,7 @@
 
         new Vue({
             el: "#vue-app-right",
+            name: "Right Panel",
             components: {
                 AddWorkoutForm,
                 WorkoutGraph,
