@@ -20,7 +20,7 @@ from lib.mixins import FormRequestMixin
 from lib.util import parse_title_from_url
 from tag.models import Tag
 
-from .models import EFACTOR_DEFAULT, Question
+from .models import Question
 
 
 @method_decorator(login_required, name="dispatch")
@@ -36,8 +36,7 @@ class DrillListView(ListView):
             **context,
             "cols": ["tag_name", "question_count", "last_reviewed", "lastreviewed_sort", "id"],
             "title": "Home",
-            "tags_still_learning": Question.objects.tags_still_learning(self.request.user)[:20],
-            "tags_needing_review": Question.objects.tags_needing_review(self.request.user)[:20],
+            "tags_last_reviewed": Question.objects.tags_last_reviewed(self.request.user)[:20],
             "random_tag": Question.objects.get_random_tag(self.request.user),
             "favorite_questions_progress": Question.objects.favorite_questions_progress(self.request.user),
             "total_progress": Question.objects.total_tag_progress(self.request.user),
@@ -82,7 +81,6 @@ class QuestionCreateView(FormRequestMixin, CreateView):
 
         obj = form.save(commit=False)
         obj.user = self.request.user
-        obj.efactor = EFACTOR_DEFAULT
         obj.save()
 
         # Save the tags
@@ -150,8 +148,6 @@ class QuestionDetailView(DetailView):
             **context,
             "tag_info": self.object.get_all_tags_progress(),
             "question": self.object,
-            "state_name": Question.get_state_name(self.object.state),
-            "learning_step_count": self.object.get_learning_step_count(),
             "title": "Drill :: Question Detail",
             "tag_list": ", ".join([x.name for x in self.object.tags.all()]),
             "study_session_progress": Question.get_study_session_progress(self.request.session),

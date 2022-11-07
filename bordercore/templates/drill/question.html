@@ -43,25 +43,13 @@
                     <div class="flex-grow-1">
                         <ul class="list-unstyled mb-0">
                             <li class="d-flex">
-                                <div class="text-name flex-fill fw-bold">Mode</div>
-                                <div class="text-value">{{ state_name }}</div>
+                                <div class="text-name flex-fill fw-bold">Reviewed</div>
+                                <div class="text-value text-end">{{ question.last_reviewed|date:"F j, Y"|default:"Never" }}</div>
                             </li>
-                            {% if state_name == 'Learning' %}
-                                <li class="d-flex">
-                                    <div class="text-name flex-fill fw-bold">Learning step</div>
-                                    <div class="text-value"><strong>{{ question.learning_step }}</strong> out of {{ learning_step_count  }}</div>
-                                </li>
-                            {% endif %}
-                            {% if state_name != 'New' %}
-                                <li class="d-flex">
-                                    <div class="text-name flex-fill fw-bold">Reviewed</div>
-                                    <div class="text-value text-end">{{ question.last_reviewed|date:"F j, Y"|default:"Never" }}</div>
-                                </li>
-                                <li class="d-flex">
-                                    <div class="text-name flex-fill fw-bold">Last Response</div>
-                                    <div class="text-value text-end">{{ last_response.response|default:"N/A"|capfirst }}</div>
-                                </li>
-                            {% endif %}
+                            <li class="d-flex">
+                                <div class="text-name flex-fill fw-bold">Last Response</div>
+                                <div class="text-value text-end">{{ last_response.response|default:"N/A"|capfirst }}</div>
+                            </li>
                             <li class="d-flex">
                                 <div class="text-name flex-fill fw-bold">Interval</div>
                                 <div class="text-value">{{ question.interval.days }} day{{ question.interval.days|pluralize:"s" }}</div>
@@ -156,11 +144,9 @@
 
                              <div class="d-flex">
                                  <a href="{% url 'drill:record_response' question.uuid 'good' %}" class="btn btn-primary" role="button">Good</a>
-                                 {% if state_name == 'Reviewing' %}
-                                     <a href="{% url 'drill:record_response' question.uuid 'hard' %}" class="btn btn-primary ms-2" role="button">Hard</a>
-                                 {% endif %}
+                                 <a href="{% url 'drill:record_response' question.uuid 'hard' %}" class="btn btn-primary ms-2" role="button">Hard</a>
                                  <a href="{% url 'drill:record_response' question.uuid 'easy' %}" class="btn btn-primary ms-2" role="button">Easy</a>
-                                 <a href="{% url 'drill:record_response' question.uuid 'again' %}" class="btn btn-primary ms-2" role="button">Reset</a>
+                                 <a href="{% url 'drill:record_response' question.uuid 'reset' %}" class="btn btn-primary ms-2" role="button">Reset</a>
                                  <a href="{% url 'drill:study' %}" class="btn btn-primary ms-2" role="button">Skip</a>
                              </div>
                          </div>

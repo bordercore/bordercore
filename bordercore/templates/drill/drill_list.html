@@ -58,9 +58,10 @@
 
             <card title="Total Progress" class="backdrop-filter">
                 <template v-slot:content>
+                    <hr class="divider" />
                     <div class="d-flex">
                         <div class="d-flex justify-content-center align-items-center">
-                            Percentage across all tags of questions not needing review
+                            Percentage of all questions not needing review
                         </div>
                         <drill-tag-progress
                             :count={{ total_progress.count }}
@@ -71,30 +72,17 @@
                 </template>
             </card>
 
-            <card title="Tags still learning" class="backdrop-filter">
-
+            <card title="Favorites Progress" class="backdrop-filter">
                 <template v-slot:content>
-                    <ul class="list-unstyled">
-                        <li class="d-flex text-primary px-2 py-1">
-                            <div class="flex-fill fw-bold">Tag</div>
-                            <div class="fw-bold">Question Count</div>
-                        </li>
-                        <hr class="divider my-1" />
-                        {% for tag in tags_still_learning %}
-                            <li class="d-flex px-2">
-                                <div class="item-name flex-fill">
-                                    <a href="{% url 'drill:start_study_session_tag' tag.name %}">{{ tag.name }}</a>
-                                </div>
-                                <div class="item-value">
-                                    {{ tag.count }}
-                                </div>
-                            </li>
-                        {% empty %}
-                            <div class="text-success text-center">Nothing to learn</div>
-                        {% endfor %}
-                    </ul>
+                    <hr class="divider" />
+                    <div class="d-flex">
+                        <div class="d-flex justify-content-center align-items-center">
+                            Percentage of favorite questions not needing review
+                        </div>
+                        <drill-tag-progress :count={{ favorite_questions_progress.count }} :progress={{ favorite_questions_progress.percentage }}>
+                        </drill-tag-progress>
+                    </div>
                 </template>
-
             </card>
 
         </div>
@@ -145,7 +133,7 @@
                             <div class="fw-bold">Last Reviewed</div>
                         </li>
                         <hr class="divider my-1" />
-                        {% for tag in tags_needing_review %}
+                        {% for tag in tags_last_reviewed %}
                             <li class="d-flex px-2">
                                 <div class="item-name flex-fill">
                                     <a href="{% url 'drill:start_study_session_tag' tag.name %}">{{ tag.name }}</a>
@@ -190,6 +178,7 @@
                 </template>
 
                 <template v-slot:content>
+                    <hr class="divider" />
                     <ul class="list-unstyled">
                         <li v-for="tag in $store.state.tagList" class="d-flex px-2">
                             <div class="item-name flex-fill">
@@ -206,26 +195,12 @@
                 </template>
             </card>
 
-            <card title="Favorites Progress" class="backdrop-filter">
-                <template v-slot:content>
-                    <div class="d-flex">
-                        <div class="d-flex justify-content-center align-items-center">
-                            Percentage across favorite questions not needing review
-                        </div>
-                        <drill-tag-progress
-                            :count={{ favorite_questions_progress.count }}
-                                   :progress={{ favorite_questions_progress.percentage }}
-                        >
-                        </drill-tag-progress>
-                    </div>
-                </template>
-            </card>
-
             <card class="backdrop-filter flex-grow-1">
                 <template v-slot:title-slot>
-                    <h5>Random tag: <a href="{{ random_tag.url }}">{{ random_tag.name }}</a></h5>
+                    <h5><span class="card-title">Random tag:</span> <a href="{{ random_tag.url }}">{{ random_tag.name }}</a></h5>
                 </template>
                 <template v-slot:content>
+                    <hr class="divider" />
                     <div class="d-flex">
                         <div class="flex-grow-1 d-flex justify-content-center align-items-center">
                             <ul class="list-unstyled">
@@ -316,13 +291,6 @@
                         <input class="form-check-input" type="radio" name="flexRadioDefault" value="favorites" v-model="picked">
                         <label class="form-check-label ms-2" for="flexRadioDefault1">
                             Favorite questions
-                        </label>
-                    </div>
-
-                    <div class="form-check d-flex align-items-center mt-3">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" value="learning" v-model="picked">
-                        <label class="form-check-label ms-2" for="flexRadioDefault1">
-                            Questions to learn
                         </label>
                     </div>
 

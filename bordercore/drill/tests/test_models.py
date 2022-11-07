@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from .factories import QuestionFactory
 
-from drill.models import Question, EFACTOR_DEFAULT  # isort:skip
+from drill.models import Question  # isort:skip
 
 pytestmark = pytest.mark.django_db
 
@@ -31,82 +31,31 @@ def test_get_tags(question):
     assert tags == "django, video" or tags == "video, django"
 
 
-def test_get_state_name(question):
-
-    assert Question.get_state_name("N") == "New"
-    assert Question.get_state_name("L") == "Learning"
-    assert Question.get_state_name("R") == "Reviewing"
-    assert Question.get_state_name("X") is None
-
-
-def test_get_learning_count_step(question):
-
-    assert question[0].get_learning_step_count() == 2
-
-
-def test_is_final_learning_step(question):
-
-    assert question[0].is_final_learning_step() is False
-
-    question[0].learning_step = 2
-    assert question[0].is_final_learning_step() is True
-
-
-def test_learning_step_increase(question):
-
-    assert(question[0].learning_step == question[0].LEARNING_STEPS[0][0])
-    question[0].learning_step_increase()
-    assert(question[0].learning_step == question[0].LEARNING_STEPS[1][0])
-    question[0].learning_step_increase()
-    assert(question[0].learning_step == question[0].LEARNING_STEPS[1][0])
-
-
 @factory.django.mute_signals(signals.post_save)
 def test_record_response():
 
     question = QuestionFactory()
 
     question.record_response("good")
-    assert question.state == "L"
-    assert question.interval == timedelta(days=1)
-    assert question.efactor == EFACTOR_DEFAULT
-    assert question.learning_step == 2
+    assert question.interval == timedelta(days=2)
 
     question.record_response("good")
-    assert question.state == "R"
-    assert question.interval == timedelta(days=2, seconds=43200)
-    assert question.efactor == EFACTOR_DEFAULT
-    assert question.learning_step == 2
+    assert question.interval == timedelta(days=4)
 
     question.record_response("good")
-    assert question.state == "R"
-    assert question.interval == timedelta(days=6, seconds=21600)
-    assert question.efactor == EFACTOR_DEFAULT
-    assert question.learning_step == 2
+    assert question.interval == timedelta(days=7)
 
     question.record_response("hard")
-    assert question.state == "R"
-    assert question.interval == timedelta(days=4, seconds=32400)
-    assert question.efactor == 2.125
-    assert question.learning_step == 2
+    assert question.interval == timedelta(days=2)
 
-    question.record_response("again")
-    assert question.state == "L"
+    question.record_response("reset")
     assert question.interval == timedelta(days=1)
-    assert question.efactor == 1.7
-    assert question.learning_step == 2
 
-    question.record_response("again")
-    assert question.state == "L"
+    question.record_response("reset")
     assert question.interval == timedelta(days=1)
-    assert question.efactor == 1.3599999999999999
-    assert question.learning_step == 1
 
     question.record_response("easy")
-    assert question.state == "R"
-    assert question.interval == timedelta(days=1, seconds=66355, microseconds=200000)
-    assert question.efactor == 1.5639999999999998
-    assert question.learning_step == 1
+    assert question.interval == timedelta(days=3)
 
 
 def test_get_last_response(question):
@@ -166,7 +115,7 @@ def test_get_tag_progress(question, tag):
 
     tags_info = Question.get_tag_progress(question[0].user, tag[0])
     assert str(tags_info["name"]) == "django"
-    assert tags_info["progress"] == 0
+    assert tags_info["progress"] == 100
     assert tags_info["last_reviewed"] == timezone.now().strftime("%B %d, %Y")
     assert tags_info["count"] == 1
 

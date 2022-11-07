@@ -4,6 +4,7 @@ except ModuleNotFoundError:
     # Don't worry if this import doesn't exist in production
     pass
 
+
 class SummaryPage:
 
     STUDY_BUTTON = (By.CSS_SELECTOR, "button[data-bs-target='#modal-study']")

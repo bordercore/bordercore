@@ -1,6 +1,6 @@
 from django.apps import apps
 from django.db import models
-from django.db.models import Count, F, Max, Min, Q
+from django.db.models import F, Max, Min, Q
 from django.utils import timezone
 
 from tag.models import Tag
@@ -8,17 +8,7 @@ from tag.models import Tag
 
 class DrillManager(models.Manager):
 
-    def tags_still_learning(self, user):
-        """
-        Return all tags and their counts with questions
-        in the "Learning" state.
-        """
-        return Tag.objects.only("id", "name") \
-                          .filter(user=user, question__state="L") \
-                          .annotate(count=Count("question", distinct=True)) \
-                          .order_by("-count")
-
-    def tags_needing_review(self, user):
+    def tags_last_reviewed(self, user):
         """
         Return tags which haven't been reviewed in a while
         """
@@ -40,12 +30,9 @@ class DrillManager(models.Manager):
             Q(user=user),
             Q(interval__lte=timezone.now() - F("last_reviewed"))
             | Q(last_reviewed__isnull=True)
-            | Q(state="L")).count()
+        ).count()
 
-        if count > 0:
-            percentage = 100 - (todo / count * 100)
-        else:
-            percentage = 0
+        percentage = 100 - (todo / count * 100) if count > 0 else 0
 
         return {
             "percentage": percentage,
@@ -66,12 +53,9 @@ class DrillManager(models.Manager):
             Q(is_favorite=True),
             Q(interval__lte=timezone.now() - F("last_reviewed"))
             | Q(last_reviewed__isnull=True)
-            | Q(state="L")).count()
+        ).count()
 
-        if count > 0:
-            percentage = 100 - (todo / count * 100)
-        else:
-            percentage = 0
+        percentage = 100 - (todo / count * 100) if count > 0 else 0
 
         return {
             "percentage": percentage,

@@ -18,23 +18,8 @@ from tag.models import Tag
 
 from .managers import DrillManager
 
-QUESTION_STATES = (
-    ("N", "New"),
-    ("L", "Learning"),
-    ("R", "Reviewing"),
-)
-
-EASY_FACTOR = 1.3
-HARD_FACTOR = 0.7
-
-# Starting "easiness" factor
-# Answering "Good" will increase the delay by approximately this amount
-EFACTOR_DEFAULT = 2.5
-
-# Multiplication factor for interval
-# 1.0 does nothing
-# 0.8 sets the interval at 80% their normal size
-INTERVAL_MODIFIER = 1.0
+# Default intervals
+INTERVALS = [1, 2, 3, 5, 8, 13, 21, 30]
 
 
 class Question(TimeStampedModel):
@@ -49,22 +34,12 @@ class Question(TimeStampedModel):
     last_reviewed = models.DateTimeField(null=True)
     times_failed = models.IntegerField(default=0, null=False)
     interval = models.DurationField(default=timedelta(days=1), blank=False, null=False)
-    efactor = models.FloatField(blank=False, null=False)
+    interval_index = models.IntegerField(default=0, null=False)
     is_favorite = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     bc_objects = models.ManyToManyField("blob.BCObject", blank=True, related_name="bc_objects")
 
     objects = DrillManager()
-
-    LEARNING_STEPS = (
-        (1, "1"),
-        (2, "10")
-    )
-    learning_step = models.IntegerField(default=1, null=False)
-
-    state = models.CharField(max_length=1,
-                             choices=QUESTION_STATES,
-                             default="L")
 
     def get_tags(self):
         return ", ".join([tag.name for tag in self.tags.all()])
@@ -78,29 +53,6 @@ class Question(TimeStampedModel):
             return True
         return self.interval < timezone.now() - self.last_reviewed
 
-    @staticmethod
-    def get_state_name(name):
-        for state in QUESTION_STATES:
-            if state[0] == name:
-                return state[1]
-        return None
-
-    def get_learning_step_count(self):
-        return len(self.LEARNING_STEPS)
-
-    def is_final_learning_step(self):
-        return True if self.learning_step == self.LEARNING_STEPS[-1][0] else False
-
-    def learning_step_increase(self):
-        """
-        Increment to the next learning step in the LEARNING_STEPS sequence,
-        stopping if we've reached the final one
-        """
-
-        for i, step in enumerate(self.LEARNING_STEPS):
-            if step[0] == self.learning_step and step[0] != self.LEARNING_STEPS[-1][0]:
-                self.learning_step = self.LEARNING_STEPS[i + 1][0]
-
     def record_response(self, response):
         """
         Modify the question's parameters based on the user's
@@ -108,31 +60,21 @@ class Question(TimeStampedModel):
         """
 
         if response == "good":
-            if self.state == "L":
-                if self.is_final_learning_step():
-                    self.state = "R"
-                    self.interval = self.interval * self.efactor * INTERVAL_MODIFIER
-                else:
-                    self.learning_step_increase()
-            else:
-                self.interval = self.interval * self.efactor
+            if self.interval_index + 1 < len(INTERVALS):
+                self.interval = self.interval + timedelta(days=INTERVALS[self.interval_index])
+                self.interval_index = self.interval_index + 1
         elif response == "easy":
-            # An "easy" answer to a "Learning" question is graduated to "Reviewing"
-            if self.state == "L":
-                self.state = "R"
-            self.interval = self.interval * self.efactor * EASY_FACTOR * INTERVAL_MODIFIER
-            self.efactor = self.efactor + (self.efactor * 0.15)
+            if self.interval_index + 2 < len(INTERVALS):
+                self.interval = self.interval + timedelta(days=INTERVALS[self.interval_index])
+                self.interval_index = self.interval_index + 2
         elif response == "hard":
             self.times_failed = self.times_failed + 1
-            self.interval = self.interval * HARD_FACTOR * INTERVAL_MODIFIER
-            self.efactor = self.efactor - (self.efactor * 0.15)
-        elif response == "again":
-            if self.state == "L":
-                self.learning_step = 1
-            else:
-                self.state = "L"
+            if self.interval_index > 1:
+                self.interval = self.interval - timedelta(days=INTERVALS[self.interval_index])
+                self.interval_index = self.interval_index - 2
+        elif response == "reset":
             self.interval = timedelta(days=1)
-            self.efactor = self.efactor - (self.efactor * 0.2)
+            self.interval_index = 1
 
         self.last_reviewed = timezone.now()
         self.save()
@@ -249,10 +191,6 @@ class Question(TimeStampedModel):
                 questions = questions.filter(
                     tags__name=tag
                 )
-        elif session_type == "learning":
-            questions = Question.objects.filter(
-                state="L"
-            )
         elif session_type == "search":
             questions = Question.objects.filter(
                 Q(question__icontains=param)
@@ -263,7 +201,6 @@ class Question(TimeStampedModel):
             questions = questions.filter(
                 Q(interval__lte=timezone.now() - F("last_reviewed"))
                 | Q(last_reviewed__isnull=True)
-                | Q(state="L")
             )
 
         questions = questions.order_by("?").values("uuid")
@@ -301,19 +238,20 @@ class Question(TimeStampedModel):
             Q(tags__name=tag),
             Q(interval__lte=timezone.now() - F("last_reviewed"))
             | Q(last_reviewed__isnull=True)
-            | Q(state="L")).count()
+        ).count()
 
-        last_reviewed = Tag.objects.filter(user=user, name=tag).annotate(last_reviewed=Max("question__last_reviewed")).first()
+        last_reviewed = Tag.objects.filter(
+            user=user,
+            name=tag).annotate(
+                last_reviewed=Max("question__last_reviewed")
+            ).first()
 
         if last_reviewed.last_reviewed:
             last_reviewed = last_reviewed.last_reviewed.strftime("%B %d, %Y")
         else:
             last_reviewed = "Never"
 
-        if count != 0:
-            progress = round(100 - (todo / count * 100))
-        else:
-            progress = 0
+        progress = round(100 - (todo / count * 100)) if count != 0 else 0
 
         return {
             "name": tag,

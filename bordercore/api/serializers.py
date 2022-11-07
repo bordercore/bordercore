@@ -151,7 +151,7 @@ class NodeSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
-        fields = ["answer", "efactor", "interval", "last_reviewed",
+        fields = ["answer", "interval", "last_reviewed",
                   "question", "tags", "times_failed", "user"]
 
 
