@@ -293,6 +293,7 @@ input[type="checkbox"] {
 
 hr.divider {
   height: 0.15rem;
+  margin-top: 0.25rem;
   background-color: var(--surface7);
 }
 
@@ -1901,10 +1902,6 @@ div #dateapp {
   padding-right: 2.25rem;
 }
 
-#pinned-tags .card-title {
-  height: 2.5rem;
-}
-
 .favorite {
   color: #f00;
 }
@@ -2019,6 +2016,7 @@ div #dateapp {
 
 hr.collection-list-divider {
   height: 0.3rem;
+  margin-top: 0;
   background-color: var(--surface7);
 }
 

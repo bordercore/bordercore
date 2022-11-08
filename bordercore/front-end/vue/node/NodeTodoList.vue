@@ -33,7 +33,7 @@
             </template>
 
             <template #content>
-                <hr class="divider mt-0">
+                <hr class="divider">
                 <ul id="sort-container-tags" class="list-group list-group-flush interior-borders">
                     <draggable v-model="todoList" draggable=".draggable" @change="handleSort">
                         <transition-group type="transition" class="w-100">

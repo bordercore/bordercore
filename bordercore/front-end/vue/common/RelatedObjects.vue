@@ -26,7 +26,7 @@
                 </template>
 
                 <template #content>
-                    <hr class="divider mt-0">
+                    <hr class="divider">
                     <ul class="list-group list-group-flush interior-borders">
                         <li v-for="object in objectList" v-cloak :key="object.uuid" class="hover-target list-group-item list-group-item-secondary px-0" :data-uuid="object.uuid">
                             <div class="dropdown-height d-flex align-items-start">

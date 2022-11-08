@@ -48,7 +48,7 @@
             </template>
 
             <template #content>
-                <hr class="divider mt-0">
+                <hr class="divider">
                 <div v-if="collectionObjectList.display === 'individual'">
                     <img v-if="currentObjectIndex !== null && objectList.length > 0" :src="objectList[currentObjectIndex].cover_url_large" class="mw-100" @click="onClick()">
                     <span v-else class="text-muted">No objects</span>

@@ -85,7 +85,7 @@
 
             <card title="Tag Progress" class="backdrop-filter">
                 <template v-slot:content>
-                    <hr class="divider mt-0" />
+                    <hr class="divider" />
                     <div class="d-flex flex-column justify-content-center">
                         {% for tag in tag_info %}
                             <drill-tag-progress
@@ -138,7 +138,7 @@
                  <transition name="fade">
                      <div v-if="mode === 'answer'">
                          <div>
-                             <hr class="divider" />
+                             <hr class="divider mt-3" />
                              <h3 class="drill-text table-borders table-colors markdown" v-html="getAnswer()">
                              </h3>
 

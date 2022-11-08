@@ -47,7 +47,7 @@
                 </div>
             </template>
             <template #content>
-                <hr class="divider mt-0">
+                <hr class="divider">
                 <editable-text-area
                     ref="note"
                     default-value="No content"

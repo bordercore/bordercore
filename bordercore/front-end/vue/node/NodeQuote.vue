@@ -31,10 +31,10 @@
                             </div>
                         </drop-down-menu>
                     </div>
-                    <hr class="divider mt-0">
                 </div>
             </template>
             <template #content>
+                <hr class="divider">
                 <Transition enter-active-class="animate__animated animate__zoomIn">
                     <div v-if="quote" :key="quote.uuid">
                         <div>
