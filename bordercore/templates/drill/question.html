@@ -126,11 +126,10 @@
                     {% for tag in question.tags.all %}
                         <a class="tag" href="{% url 'drill:start_study_session_tag' tag.name %}">{{ tag.name }}</a>
                     {% endfor %}
-                    <br /><br />
 
                  {% endif %}
 
-                 <div class="d-flex">
+                 <div class="d-flex mt-5">
                      <a href="#" class="btn btn-primary" role="button" @click.prevent="setMode('answer')">Show Answer</a>
                      <a href="{% url 'drill:study' %}" class="btn btn-primary ms-2" role="button">Skip</a>
                      <a href="{% url 'drill:update' question.uuid %}?return_url={{ request.get_full_path }}" class="btn btn-primary ms-auto" role="button">Update</a>
@@ -142,14 +141,22 @@
                              <h3 class="drill-text table-borders table-colors markdown" v-html="getAnswer()">
                              </h3>
 
-                             <div class="d-flex">
-                                 <a href="{% url 'drill:record_response' question.uuid 'good' %}" class="btn btn-primary" role="button">Good</a>
-                                 <a href="{% url 'drill:record_response' question.uuid 'hard' %}" class="btn btn-primary ms-2" role="button">Hard</a>
-                                 <a href="{% url 'drill:record_response' question.uuid 'easy' %}" class="btn btn-primary ms-2" role="button">Easy</a>
-                                 <a href="{% url 'drill:record_response' question.uuid 'reset' %}" class="btn btn-primary ms-2" role="button">Reset</a>
-                                 <a href="{% url 'drill:study' %}" class="btn btn-primary ms-2" role="button">Skip</a>
-                             </div>
-                         </div>
+                            <div class="d-flex mt-5">
+                                <div>
+                                    <a href="{% url 'drill:record_response' question.uuid 'good' %}" class="btn btn-primary" role="button"
+                                        @mouseover="onMouseOverResponse('good')" @mouseout="onMouseOutResponse">Good</a>
+                                    <a href="{% url 'drill:record_response' question.uuid 'hard' %}" class="btn btn-primary ms-2" role="button"
+                                        @mouseover="onMouseOverResponse('hard')" @mouseout="onMouseOutResponse">Hard</a>
+                                    <a href=" {% url 'drill:record_response' question.uuid 'easy' %}" class="btn btn-primary ms-2" role="button"
+                                        @mouseover="onMouseOverResponse('easy')" @mouseout="onMouseOutResponse">Easy</a>
+                                    <a href=" {% url 'drill:record_response' question.uuid 'reset' %}" class="btn btn-primary ms-2" role="button"
+                                        @mouseover="onMouseOverResponse('reset')" @mouseout="onMouseOutResponse">Reset</a>
+                                    <a href="{% url 'drill:study' %}" class="btn btn-primary ms-2" role="button">Skip</a>
+                                </div>
+                                <div class="text-primary ms-auto align-self-end" v-html="intervalString">
+                                </div>
+                            </div>
+                            </div>
                      </div>
                  </transition>
 
@@ -243,6 +250,8 @@
             store,
             data() {
                 return {
+                    intervals: {{ intervals|safe }},
+                    intervalString: "",
                     mode: "question",
                 };
             },
@@ -304,6 +313,12 @@
 
             },
             methods: {
+                onMouseOutResponse(response) {
+                    this.intervalString = "";
+                },
+                onMouseOverResponse(response) {
+                    this.intervalString = this.intervals[response]["description"];
+                },
                 setMode(mode) {
                     this.mode = mode;
                     this.$nextTick(() => {

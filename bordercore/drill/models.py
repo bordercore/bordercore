@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import F, Max, Q
+from django.template.defaultfilters import pluralize
 from django.urls import reverse
 from django.utils import timezone
 
@@ -53,29 +54,100 @@ class Question(TimeStampedModel):
             return True
         return self.interval < timezone.now() - self.last_reviewed
 
+    def _good_response(self):
+        """
+        Get the interval changes based on a question response of "good"
+        """
+
+        if self.interval_index + 1 < len(INTERVALS):
+            new_interval = timedelta(days=INTERVALS[self.interval_index + 1])
+            return {
+                "description": f"Increase interval to <strong>{new_interval.days} day{pluralize(new_interval.days)}</strong>",
+                "interval": new_interval,
+                "interval_index": self.interval_index + 1
+            }
+        else:
+            return {
+                "description": f"Interval stays at <strong>{self.interval.days} day{pluralize(self.interval.days)}</strong>",
+                "interval": self.interval,
+                "interval_index": self.interval_index
+            }
+
+    def _easy_response(self):
+        """
+        Get the interval changes based on a question response of "easy"
+        """
+
+        if self.interval_index + 2 < len(INTERVALS):
+            new_interval = timedelta(days=INTERVALS[self.interval_index + 2])
+            return {
+                "description": f"Increase interval to <strong>{new_interval.days} day{pluralize(new_interval.days)}</strong>",
+                "interval": new_interval,
+                "interval_index": self.interval_index + 2
+            }
+        else:
+            return {
+                "description": f"Interval stays at <strong>{self.interval.days} day{pluralize(self.interval.days)}</strong>",
+                "interval": self.interval,
+                "interval_index": self.interval_index
+            }
+
+    def _hard_response(self):
+        """
+        Get the interval changes based on a question response of "hard"
+        """
+
+        if self.interval_index > 1:
+            new_interval = timedelta(days=INTERVALS[self.interval_index - 2])
+            return {
+                "description": f"Decrease interval to <strong>{new_interval.days} day{pluralize(new_interval.days)}</strong>",
+                "interval": new_interval,
+                "interval_index": self.interval_index - 2
+            }
+        else:
+            return {
+                "description": f"Interval stays at <strong>{self.interval.days} day{pluralize(self.interval.days)}</strong>",
+                "interval": timedelta(days=1),
+                "interval_index": 0
+            }
+
+    def get_intervals(self, description_only=False):
+        """
+        Get all the possible interval changes based on various question responses
+        """
+        intervals = {
+            "good": self._good_response(),
+            "easy": self._easy_response(),
+            "hard": self._hard_response(),
+            "reset": {
+                "description": "Reset interval to <strong>1 day</strong>",
+                "interval": timedelta(days=1),
+                "interval_index": 0
+            }
+        }
+
+        if description_only:
+            # Extract the "description" key from each dictionary
+            return {
+                outer_k: {
+                    inner_k: inner_v
+                    for inner_k, inner_v in outer_v.items() if inner_k == "description"
+                }
+                for outer_k, outer_v in intervals.items()
+            }
+
+        else:
+            return intervals
+
     def record_response(self, response):
         """
         Modify the question's parameters based on the user's
         self-reported answer.
         """
 
-        if response == "good":
-            if self.interval_index + 1 < len(INTERVALS):
-                self.interval = self.interval + timedelta(days=INTERVALS[self.interval_index])
-                self.interval_index = self.interval_index + 1
-        elif response == "easy":
-            if self.interval_index + 2 < len(INTERVALS):
-                self.interval = self.interval + timedelta(days=INTERVALS[self.interval_index])
-                self.interval_index = self.interval_index + 2
-        elif response == "hard":
-            self.times_failed = self.times_failed + 1
-            if self.interval_index > 1:
-                self.interval = self.interval - timedelta(days=INTERVALS[self.interval_index])
-                self.interval_index = self.interval_index - 2
-        elif response == "reset":
-            self.interval = timedelta(days=1)
-            self.interval_index = 1
-
+        intervals = self.get_intervals()
+        self.interval = intervals[response]["interval"]
+        self.interval_index = intervals[response]["interval_index"]
         self.last_reviewed = timezone.now()
         self.save()
 

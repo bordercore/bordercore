@@ -2,12 +2,10 @@ import json
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import factory
 import pytest
 import responses
 
 from django import urls
-from django.db.models import signals
 
 from blob.models import BCObject
 from drill.models import Question
@@ -38,7 +36,6 @@ def test_drill_list(auto_login_user, question):
     assert resp.status_code == 200
 
 
-@factory.django.mute_signals(signals.post_save)
 def test_drill_create(auto_login_user, question):
 
     _, client = auto_login_user()
@@ -103,7 +100,6 @@ def test_drill_detail(auto_login_user, question):
     assert resp.status_code == 200
 
 
-@factory.django.mute_signals(signals.post_save)
 def test_drill_update(auto_login_user, question):
 
     _, client = auto_login_user()
@@ -125,7 +121,6 @@ def test_drill_update(auto_login_user, question):
     assert resp.status_code == 302
 
 
-@factory.django.mute_signals(signals.post_save)
 def test_drill_start_study_session(auto_login_user, question):
 
     _, client = auto_login_user()
@@ -141,7 +136,6 @@ def test_drill_start_study_session(auto_login_user, question):
     assert resp.status_code == 302
 
 
-@factory.django.mute_signals(signals.post_save)
 def test_drill_study(auto_login_user, question):
 
     _, client = auto_login_user()
@@ -184,7 +178,6 @@ def test_drill_study(auto_login_user, question):
     assert "drill_study_session" not in session
 
 
-@factory.django.mute_signals(signals.post_save)
 def test_drill_get_current_question(auto_login_user, question):
 
     _, client = auto_login_user()
@@ -207,7 +200,6 @@ def test_drill_get_current_question(auto_login_user, question):
     assert resp.status_code == 302
 
 
-@factory.django.mute_signals(signals.post_save)
 def test_drill_record_response(auto_login_user, question):
 
     _, client = auto_login_user()
@@ -216,7 +208,7 @@ def test_drill_record_response(auto_login_user, question):
         "drill:record_response",
         kwargs={
             "uuid": question[0].uuid,
-            "response": "Sample Response"
+            "response": "good"
         }
     )
     resp = client.get(url)
@@ -224,7 +216,6 @@ def test_drill_record_response(auto_login_user, question):
     assert resp.status_code == 302
 
 
-@factory.django.mute_signals(signals.post_save)
 def test_drill_get_pinned_tags(auto_login_user, question):
 
     _, client = auto_login_user()
@@ -237,7 +228,6 @@ def test_drill_get_pinned_tags(auto_login_user, question):
     assert resp.status_code == 200
 
 
-@factory.django.mute_signals(signals.post_save)
 def test_drill_pin_tag(auto_login_user, question, tag):
 
     _, client = auto_login_user()
@@ -259,7 +249,6 @@ def test_drill_pin_tag(auto_login_user, question, tag):
     assert resp.status_code == 200
 
 
-@factory.django.mute_signals(signals.post_save)
 def test_drill_unpin_tag(auto_login_user, question, tag):
 
     _, client = auto_login_user()
@@ -280,7 +269,6 @@ def test_drill_unpin_tag(auto_login_user, question, tag):
     assert resp.status_code == 200
 
 
-@factory.django.mute_signals(signals.post_save)
 def test_sort_pinned_tags(auto_login_user, question, tag):
 
     _, client = auto_login_user()
@@ -295,7 +283,6 @@ def test_sort_pinned_tags(auto_login_user, question, tag):
     assert resp.status_code == 200
 
 
-@factory.django.mute_signals(signals.post_save)
 def test_drill_is_favorite_mutate(auto_login_user, question, tag):
 
     _, client = auto_login_user()

@@ -1,9 +1,8 @@
+import datetime
 from datetime import timedelta
 
-import factory
 import pytest
 
-from django.db.models import signals
 from django.utils import timezone
 
 from .factories import QuestionFactory
@@ -25,13 +24,52 @@ def test_needs_review(question):
     assert question[0].needs_review is False
 
 
+def _test_one_interval(intervals, gi, gii, ei, eii, hi, hii, ri, rii):
+
+    assert intervals["good"]["interval"] == datetime.timedelta(days=gi)
+    assert intervals["good"]["interval_index"] == gii
+    assert intervals["easy"]["interval"] == datetime.timedelta(days=ei)
+    assert intervals["easy"]["interval_index"] == eii
+    assert intervals["hard"]["interval"] == datetime.timedelta(days=hi)
+    assert intervals["hard"]["interval_index"] == hii
+    assert intervals["reset"]["interval"] == datetime.timedelta(days=ri)
+    assert intervals["reset"]["interval_index"] == rii
+
+
+def test_get_intervals():
+
+    question = QuestionFactory()
+    _test_one_interval(question.get_intervals(), 2, 1, 3, 2, 1, 0, 1, 0)
+
+    question.record_response("good")
+    _test_one_interval(question.get_intervals(), 3, 2, 5, 3, 1, 0, 1, 0)
+
+    question.record_response("easy")
+    _test_one_interval(question.get_intervals(), 8, 4, 13, 5, 2, 1, 1, 0)
+
+    question.record_response("easy")
+    question.record_response("easy")
+    _test_one_interval(question.get_intervals(), 30, 7, 30, 7, 13, 5, 1, 0)
+
+    question.record_response("reset")
+    _test_one_interval(question.get_intervals(), 2, 1, 3, 2, 1, 0, 1, 0)
+
+    question.record_response("good")
+    question.record_response("good")
+    question.record_response("good")
+    question.record_response("hard")
+    _test_one_interval(question.get_intervals(), 3, 2, 5, 3, 1, 0, 1, 0)
+
+    question.record_response("hard")
+    _test_one_interval(question.get_intervals(), 2, 1, 3, 2, 1, 0, 1, 0)
+
+
 def test_get_tags(question):
 
     tags = question[0].get_tags()
     assert tags == "django, video" or tags == "video, django"
 
 
-@factory.django.mute_signals(signals.post_save)
 def test_record_response():
 
     question = QuestionFactory()
@@ -40,10 +78,10 @@ def test_record_response():
     assert question.interval == timedelta(days=2)
 
     question.record_response("good")
-    assert question.interval == timedelta(days=4)
+    assert question.interval == timedelta(days=3)
 
     question.record_response("good")
-    assert question.interval == timedelta(days=7)
+    assert question.interval == timedelta(days=5)
 
     question.record_response("hard")
     assert question.interval == timedelta(days=2)
@@ -102,7 +140,6 @@ def test_start_study_session(question, tag):
     assert len(session["drill_study_session"]["list"]) > 1
 
 
-@factory.django.mute_signals(signals.post_save)
 def test_get_tag_progress(question, tag):
 
     tags_info = Question.get_tag_progress(question[0].user, tag[0])

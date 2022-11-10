@@ -151,7 +151,8 @@ class QuestionDetailView(DetailView):
             "title": "Drill :: Question Detail",
             "tag_list": ", ".join([x.name for x in self.object.tags.all()]),
             "study_session_progress": Question.get_study_session_progress(self.request.session),
-            "last_response": self.object.get_last_response()
+            "last_response": self.object.get_last_response(),
+            "intervals": json.dumps(self.object.get_intervals(description_only=True))
         }
 
 
