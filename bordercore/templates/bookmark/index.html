@@ -145,8 +145,7 @@
                                             <td class="link w-100 p-2 align-top position-relative text-break">
                                                 <a :href="bookmark.url" :id="bookmark.linkId" target="_blank">[[ unescapeHtml(bookmark.name) ]]</a>
                                                 <a v-for="tag in bookmark.tags" v-if="tag != $store.state.selectedTagName" class="tag ms-2 d-inline-block" @click.prevent="onClickTag" href="#">[[ tag ]]</a>
-                                                <div v-if="bookmark.note != null && bookmark.note != ''" class="table-note">
-                                                    [[ bookmark.note ]]
+                                                <div v-if="bookmark.note != null && bookmark.note != ''" class="table-note" v-html="getNote(bookmark.note)">
                                                 </div>
                                                 <div class="yt-hover-target text-secondary position-absolute d-none" v-if="bookmark.url.startsWith('https://www.youtube.com/watch') && $store.state.viewType === 'normal'">
                                                     Duration: [[ bookmark.video_duration ]]
@@ -306,6 +305,9 @@
                 }
             },
             methods: {
+                getNote(note) {
+                    return markdown.render(note);
+                },
                 onClickTag(evt) {
                     const tagName = evt.srcElement.innerHTML;
                     EventBus.$emit("search-tag", tagName);
