@@ -113,7 +113,7 @@
 
         <div class="col-lg-9">
 
-            <div class="card-body me-2">
+            <div class="hover-reveal-target card-body me-2">
 
                 <div class="d-flex">
                     <h3 class="drill-text table-borders table-colors markdown mw-100 w-100" v-html="getQuestion()">
@@ -132,7 +132,20 @@
                  <div class="d-flex mt-5">
                      <a href="#" class="btn btn-primary" role="button" @click.prevent="setMode('answer')">Show Answer</a>
                      <a href="{% url 'drill:study' %}" class="btn btn-primary ms-2" role="button">Skip</a>
-                     <a href="{% url 'drill:update' question.uuid %}?return_url={{ request.get_full_path }}" class="btn btn-primary ms-auto" role="button">Update</a>
+                     <div class="dropdown-menu-container dropdown-menu-container-width ms-auto">
+                         <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
+                             <div slot="dropdown">
+                                 <li>
+                                     <a class="dropdown-item" href="{% url 'drill:update' question.uuid %}?return_url={{ request.get_full_path }}">
+                                         <span>
+                                             <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />
+                                         </span>
+                                        Update
+                                     </a>
+                                 </li>
+                             </div>
+                         </drop-down-menu>
+                     </div>
                  </div>
                  <transition name="fade">
                      <div v-if="mode === 'answer'">
