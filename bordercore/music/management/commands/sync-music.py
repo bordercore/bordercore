@@ -22,35 +22,43 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             "--uuid",
+            "-u",
             help="The UUID of the song to download",
         )
         parser.add_argument(
             "--directory",
+            "-d",
             help="The directory of songs to sync",
         )
         parser.add_argument(
             "--album-name",
+            "-l",
             help="The album name to sync",
         )
         parser.add_argument(
             "--file-name",
+            "-f",
             help="The filename to sync",
         )
         parser.add_argument(
             "--artist",
+            "-a",
             help="The song artist (overrides ID3 tag)",
         )
         parser.add_argument(
             "--title",
+            "-t",
             help="The song title (overrides ID3 tag)",
         )
         parser.add_argument(
             "--sync-album-song",
+            "-s",
             help="Sync a song as part of an album",
             action="store_true"
         )
         parser.add_argument(
             "--dry-run",
+            "-n",
             help="Dry run. Take no action",
             action="store_true"
         )
@@ -63,8 +71,11 @@ class Command(BaseCommand):
             self.download_from_s3(uuid)
         elif directory:
             self.sync_directory(directory, album_name)
-        else:
+        elif file_name:
             self.sync_file(file_name, artist, title, album_name)
+        else:
+            self.stdout.write(f"  {Fore.YELLOW}No file or directory specified. Processing the current directory...{Style.RESET_ALL}")
+            self.sync_directory(".", album_name)
 
     def get_artist_dir(self, song, artist, first_letter_dir):
         if song.first().album and song.first().album.compilation:
