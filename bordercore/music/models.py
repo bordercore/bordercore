@@ -223,6 +223,21 @@ class Song(TimeStampedModel):
 
         return doc
 
+    @property
+    def url(self):
+        """
+        Get the appropriate page url for a song.
+        If the song is part of an album, return the album detail page.
+        Otherwise return the artist detail page.
+        """
+
+        if self.album:
+            url = reverse("music:album_detail", args=[self.album.uuid])
+        else:
+            url = reverse("music:artist_detail", args=[self.artist.uuid])
+
+        return url
+
     def listen_to(self):
         """
         Increment a song's 'times played' counter and update
@@ -291,21 +306,6 @@ class Song(TimeStampedModel):
             album_info = None
 
         return album_info
-
-    @staticmethod
-    def get_song_url(song):
-        """
-        Get the appropriate page url for a song.
-        If the song is part of an album, return the album detail page.
-        Otherwise return the artist detai page.
-        """
-
-        if song.album:
-            listen_url = reverse("music:album_detail", args=[song.album.uuid])
-        else:
-            listen_url = reverse("music:artist_detail", args=[song.artist.uuid])
-
-        return listen_url
 
     @staticmethod
     def get_song_tags(user):

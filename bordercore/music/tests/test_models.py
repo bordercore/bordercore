@@ -37,3 +37,17 @@ def test_music_playtime():
     SongFactory.create_batch(10, length=300, album=album)
 
     assert album.playtime == "50 minutes"
+
+
+def test_music_song_url():
+
+    # Test url for a song that's part of an album
+    album = AlbumFactory()
+    songs = SongFactory.create_batch(10, length=300, album=album)
+
+    assert songs[0].url == f"/music/album/{album.uuid}/"
+
+    # Test url for a song that's not part of an album
+    song = SongFactory(album=None)
+
+    assert song.url == f"/music/artist/{song.artist.uuid}/"

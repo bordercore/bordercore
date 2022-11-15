@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.forms import (ModelChoiceField, ModelForm, NumberInput, Select,
                           Textarea, TextInput)
 from django.forms.fields import BooleanField, CharField, FileField
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from lib.fields import ModelCommaSeparatedChoiceField
@@ -64,7 +65,7 @@ class SongForm(ModelForm):
                                       title=album_name,
                                       artist=artist)
             if album.year != self.cleaned_data.get("year"):
-                listen_url = Song.get_song_url(album.song_set.all()[0])
+                listen_url = reverse("music:album_detail", args=[album.uuid])
                 raise forms.ValidationError(
                     mark_safe(
                         f"Error: The <a href='{listen_url}'>same album</a> already exists but with a different year."

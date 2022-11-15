@@ -374,7 +374,7 @@ class SongCreateView(FormRequestMixin, CreateView):
         # Save the song source in the session
         self.request.session["song_source"] = form.cleaned_data["source"].name
 
-        listen_url = Song.get_song_url(song)
+        listen_url = song.url
         messages.add_message(
             self.request, messages.INFO,
             f"Song successfully created.  <a href='{listen_url}'>Listen to it here.</a>"
@@ -843,7 +843,7 @@ def dupe_song_checker(request):
             {
                 "title": x.title,
                 "uuid": x.uuid,
-                "url": Song.get_song_url(x),
+                "url": x.url,
                 "note": x.note,
                 "album_name": x.album.title if x.album else "",
                 "album_url": reverse("music:album_detail", args=[x.album.uuid]) if x.album else "",
