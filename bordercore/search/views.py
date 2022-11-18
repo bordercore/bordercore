@@ -4,6 +4,7 @@ import math
 import re
 from urllib.parse import unquote
 
+import markdown
 from elasticsearch import RequestError
 
 from django.conf import settings
@@ -32,10 +33,13 @@ def get_creators(matches):
     Return all "creator" related fields
     """
 
+    if "metadata" not in matches:
+        return ""
+
     creators = [
-        matches[x][0]
+        matches["metadata"][x][0]
         for x
-        in matches.keys()
+        in matches["metadata"].keys()
         if x in ["author", "artist", "photographer"]
     ]
 
@@ -140,7 +144,9 @@ class SearchListView(ListView):
             "sort": {sort_field: {"order": "desc"}},
             "from": offset,
             "size": self.RESULT_COUNT_PER_PAGE,
-            "_source": ["artist",
+            "_source": ["album_uuid",
+                        "artist",
+                        "artist_uuid",
                         "author",
                         "bordercore_id",
                         "date",
@@ -149,6 +155,7 @@ class SearchListView(ListView):
                         "filename",
                         "importance",
                         "last_modified",
+                        "metadata.*",
                         "name",
                         "question",
                         "sha1sum",
@@ -200,7 +207,7 @@ class SearchListView(ListView):
             match = results["hits"]["hits"][index]
 
             # Django templates don't support variables with underscores or dots, so
-            #  we need to transform a few fields
+            #  we need to rename a couple of fields
             match["source"] = match.pop("_source")
             match["score"] = match.pop("_score")
             if "highlight" in match and "attachment.content" in match["highlight"]:
@@ -210,22 +217,25 @@ class SearchListView(ListView):
             if search_term and "contents" in match["source"]:
                 match["source"]["contents"] = match["source"]["contents"].replace(search_term, f"*{search_term}*")
 
+            # Display markdown for drill questions and todo items
+            if match["source"]["doctype"] == "drill":
+                match["source"]["question"] = markdown.markdown(match["source"]["question"])
+            if match["source"]["doctype"] == "todo":
+                match["source"]["name"] = markdown.markdown(match["source"]["name"])
+
         return results
 
     def refine_search(self, search_object):
         return search_object
 
     def get_context_data(self, **kwargs):
-
         context = super().get_context_data(**kwargs)
 
         if "doctype" in self.request.GET:
             context["doctype_filter"] = self.request.GET["doctype"].split(",")
 
         if context["search_results"]:
-
             for match in context["search_results"]["hits"]["hits"]:
-
                 match["source"]["creators"] = get_creators(match["source"])
                 match["source"]["date"] = get_date_from_pattern(match["source"].get("date", None))
                 match["source"]["last_modified"] = get_relative_date(match["source"]["last_modified"])
@@ -235,9 +245,12 @@ class SearchListView(ListView):
                         match["source"]["filename"],
                         size="small"
                     )
-                # Bookmarks are rendered by a Vue component, which requires json
-                if match["source"]["doctype"] == "bookmark":
-                    match["json"] = json.dumps(match["source"])
+                if match["source"]["doctype"] == "song":
+                    if "album_uuid" in match["source"]:
+                        match["source"]["url"] = reverse("music:album_detail", args=[match["source"]["album_uuid"]])
+                    else:
+                        match["source"]["url"] = reverse("music:artist_detail", args=[match["source"]["artist_uuid"]])
+                match["tags_json"] = json.dumps(match["source"]["tags"])
             context["aggregations"] = self.get_aggregations(context, "Doctype Filter")
 
             page = int(self.request.GET.get("page", 1))

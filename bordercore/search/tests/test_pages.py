@@ -39,7 +39,7 @@ def test_search(blob_image_factory, blob_pdf_factory, login, live_server, browse
 
     # Get the tag names for the search result
     tag_list = page.search_result_tags()
-    assert set([x.name for x in blob_image_factory[0].tags.all()]) == set(tag_list)
+    assert set([x.name for x in blob_image_factory[0].tags.all()]) == set([x.strip() for x in tag_list])
 
 
 @pytest.mark.parametrize("login", [reverse("search:kb_search_tag_detail_search")], indirect=True)

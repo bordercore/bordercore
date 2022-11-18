@@ -17,6 +17,7 @@ humanize==3.7.1
 instaloader==4.8.1
 isodate==0.6.1
 lxml==4.9.1
+Markdown==3.4.1
 mutagen==1.45.1
 oauth2client==4.0.0
 pdf2image==0.1.14
