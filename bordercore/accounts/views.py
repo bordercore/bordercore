@@ -110,7 +110,12 @@ class UserProfileUpdateView(FormRequestMixin, UpdateView):
             # Upload the new image to S3
             key = f"background/{self.request.user.userprofile.uuid}/{background_image_new}"
             fo = io.BytesIO(self.request.FILES["background_image_file"].read())
-            s3_client.upload_fileobj(fo, settings.AWS_STORAGE_BUCKET_NAME, key)
+            s3_client.upload_fileobj(
+                fo,
+                settings.AWS_STORAGE_BUCKET_NAME,
+                key,
+                ExtraArgs={"ContentType": "image/jpeg"}
+            )
 
             self.object.background_image = background_image_new
             self.object.save()
