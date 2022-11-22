@@ -1,6 +1,6 @@
 from django.apps import apps
 from django.db import models
-from django.db.models import F, Max, Min, Q
+from django.db.models import F, Max, Q
 from django.utils import timezone
 
 from tag.models import Tag
@@ -14,7 +14,7 @@ class DrillManager(models.Manager):
         """
         return Tag.objects.only("id", "name") \
                           .filter(user=user, question__isnull=False) \
-                          .annotate(last_reviewed=Min("question__last_reviewed")) \
+                          .annotate(last_reviewed=Max("question__last_reviewed")) \
                           .order_by(F("last_reviewed").asc(nulls_first=True))
 
     def total_tag_progress(self, user):
