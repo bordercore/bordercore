@@ -39,7 +39,7 @@
                 <div class="modal-footer row g-0">
                     <div class="col-offset-3 col-lg-9 d-flex align-items-center ps-3">
                         <div id="feed-status">
-                            <div class="d-flex">
+                            <div class="d-flex align-items-center">
                                 <div v-if="checkingStatus" class="d-flex align-items-center">
                                     <div class="spinner-border ms-2 text-secondary" role="status">
                                         <span class="sr-only">Checking feed status...</span>
