@@ -6,9 +6,9 @@
 
     <div class="row g-0 h-100 mx-2">
 
-        <div class="col-lg-3 d-flex flex-column flex-grow-last" id="vue-app-left">
+        <div class="col-lg-3 d-flex flex-column" id="vue-app-left">
 
-            <div class="card-body backdrop-filter">
+            <div class="card-body backdrop-filter flex-grow-1">
 
                 <div>
                     Click the <strong>Study</strong> button to start a study session or select a <strong>tag</strong> on the right to drill on a specific category.
@@ -54,7 +54,7 @@
 
         </div>
 
-        <div class="col-lg-3 d-flex flex-column flex-grow-last" id="vue-app">
+        <div class="col-lg-3 d-flex flex-column" id="vue-app-progress">
 
             <card title="Total Progress" class="backdrop-filter">
                 <template v-slot:content>
@@ -72,7 +72,7 @@
                 </template>
             </card>
 
-            <card title="Favorites Progress" class="backdrop-filter">
+            <card title="Favorites Progress" class="backdrop-filter flex-grow-1">
                 <template v-slot:content>
                     <hr class="divider" />
                     <div class="d-flex">
@@ -87,44 +87,9 @@
 
         </div>
 
-        <div class="col-lg-3 d-flex flex-column flex-grow-last" id="tag-search">
+        <div class="col-lg-3 d-flex flex-column" id="vue-app-tag-search">
 
-            <div class="mb-3 ms-2 me-2">
-                <simple-suggest
-                    ref="simpleSuggest"
-                    display-attribute="display"
-                    value-attribute="display"
-                    search-url="{% url 'tag:search' %}?doctype=drill&query="
-                    place-holder="Tag Search"
-                >
-                </simple-suggest>
-            </div>
-
-            <div class="d-flex flex-grow-1" v-if="tag.text">
-                <card class="backdrop-filter">
-                    <template v-slot:title-slot>
-                        <h6><a :href="tag.link">[[ tag.text ]]</a></h6>
-                    </template>
-                    <template v-slot:content>
-                        <div class="d-flex">
-                            <div class="flex-grow-1 d-flex justify-content-center align-items-center">
-                                <ul class="list-unstyled">
-                                    <li>Last Reviewed <br/> <strong>[[ tag.info.last_reviewed ]]</strong></li>
-                                </ul>
-                            </div>
-                            <div class="flex-grow-1 text-center">
-                                <drill-tag-progress
-                                    :count=tag.info.count
-                                    :progress=tag.info.progress
-                                >
-                                </drill-tag-progress>
-                            </div>
-                        </div>
-                    </template>
-                </card>
-            </div>
-
-            <card title="Tags needing review" class="backdrop-filter">
+            <card title="Tags needing review" class="backdrop-filter flex-grow-1">
 
                 <template v-slot:content>
                     <hr class="divider" />
@@ -152,11 +117,12 @@
             </card>
         </div>
 
-        <div class="hover-target col-lg-3 d-flex flex-column flex-grow-last" id="pinned-tags">
+        <div class="hover-target col-lg-3 d-flex flex-column">
 
             <card
                 title="Pinned Tags"
                 class="backdrop-filter"
+                id="vue-app-pinned-tags"
             >
                 <template v-slot:title-slot>
 
@@ -196,28 +162,47 @@
                 </template>
             </card>
 
-            <card class="backdrop-filter flex-grow-1">
+            <card class="backdrop-filter flex-grow-1" id="vue-app-featured-tag">
                 <template v-slot:title-slot>
-                    <h5><span class="card-title">Random tag:</span> <a href="{{ random_tag.url }}">{{ random_tag.name }}</a></h5>
+                    <div class="d-flex">
+                        <div v-if="showFeaturedTagInput" id="featured-tag-input" class="me-3 mb-0">
+                            <simple-suggest
+                                ref="simpleSuggest"
+                                display-attribute="display"
+                                value-attribute="display"
+                                search-url="{% url 'tag:search' %}?doctype=drill&query="
+                                place-holder="Tag"
+                                @blur="onFeaturedTagInputBlur"
+                                @keyup.enter="onFeaturedTagInputEnter"
+                            >
+                            </simple-suggest>
+                        </div>
+                        <h5 v-else class="lh-base mb-0">
+                            <span class="card-title">Featured Tag:</span> <a :href="tag.url">[[ tag.name ]]</a>
+                        </h5>
+                        <div class="ms-auto" @click="onTagSearch">
+                            <font-awesome-icon icon="search" class="glow text-emphasis" />
+                        </div>
+                    </div>
                 </template>
                 <template v-slot:content>
                     <hr class="divider" />
                     <div class="d-flex">
                         <div class="flex-grow-1 d-flex justify-content-center align-items-center">
                             <ul class="list-unstyled">
-                                <li>Last Reviewed <br/> <strong>{{ random_tag.last_reviewed }}</strong></li>
+                                <li>Last Reviewed <br/> <strong>[[ tag.last_reviewed ]]</strong></li>
                             </ul>
                         </div>
                         <drill-tag-progress
-                            :count={{ random_tag.count }}
-                                   :progress={{ random_tag.progress }}
+                            :count=tag.count
+                            :progress=tag.progress
                         >
                         </drill-tag-progress>
                     </div>
                 </template>
             </card>
 
-            <div class="modal fade" id="modalAddTag" tabindex="-1" role="dialog">
+            <div id="vue-app-manage-tags" class="modal fade" id="modalAddTag" tabindex="-1" role="dialog">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -360,32 +345,22 @@
         });
 
         new Vue({
-            el: "#vue-app-left"
+            el: "#vue-app-left",
+            name: "Left Panel",
         });
 
         new Vue({
-            el: "#vue-app"
+            el: "#vue-app-progress",
+            name: "Tag Progress",
         });
 
         new Vue({
-            el: "#tag-search",
-            data() {
-                return {
-                    tag: {},
-                }
-            },
-            methods: {
-                select(datum) {
-                    this.tag = datum;
-                },
-                boldenSuggestion(scope) {
-                    return scope.suggestion.display;
-                }
-            },
+            el: "#vue-app-tag-search",
+            name: "Tag Search",
         });
 
         new Vue({
-            el: "#pinned-tags",
+            el: "#vue-app-pinned-tags",
             name: "Pinned Tags",
             store,
             data() {
@@ -396,7 +371,6 @@
                 }
             },
             methods: {
-
                 getTagList() {
                     doGet(
                         this,
@@ -408,13 +382,8 @@
                     );
                 },
                 chooseTag() {
-
-                    const modal = new Modal("#modalAddTag");
-                    modal.show();
-                    setTimeout( () => { this.$refs.simpleSuggest.$refs.suggestComponent.input.focus(); }, 500)
-
+                    EventBus.$emit("open-manage-tags-modal");
                 },
-
                 addTag(tag) {
                     doPost(
                         this,
@@ -430,20 +399,25 @@
                     );
 
                 },
+            },
+            mounted() {
+                EventBus.$on("add-tag", payload => {
+                    this.addTag(payload);
+                });
+                EventBus.$on("get-tag-list", () => {
+                    this.getTagList();
+                });
 
-                select(selection) {
+                this.getTagList();
+            }
+        });
 
-                    EventBus.$emit("add-tag", selection.text);
-
-                    this.$nextTick(() => {
-                        this.$refs.simpleSuggest.$refs.suggestComponent.$el.querySelector("input").blur();
-                        this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
-                    });
-
-                },
-
-                onClickDelete(tag) {
-
+         new Vue({
+             el: "#vue-app-manage-tags",
+             name: "Manage Tags",
+             store,
+             methods: {
+                 onClickDelete(tag) {
                     doPost(
                         this,
                         url = "{% url "drill:unpin_tag" %}",
@@ -451,17 +425,14 @@
                             "tag": tag,
                         },
                         (response) => {
-                            this.getTagList();
+                            EventBus.$emit("get-tag-list");
                         },
                         "",
                         ""
                     );
-
-                },
-
-                onDrag(evt) {
-
-                    tag_name = evt.moved.element.name;
+                 },
+                 onDrag(evt) {
+                     tag_name = evt.moved.element.name;
 
                     // The backend expects the ordering to begin
                     // with 1, not 0, so add 1.
@@ -478,19 +449,61 @@
                         "",
                         "",
                     );
+                 },
+                 select(selection) {
+                     EventBus.$emit("add-tag", selection.text);
 
+                     this.$nextTick(() => {
+                         this.$refs.simpleSuggest.$refs.suggestComponent.$el.querySelector("input").blur();
+                         this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
+                     });
+                 },
+             },
+             mounted() {
+                 EventBus.$on("open-manage-tags-modal", (payload) => {
+                    const modal = new Modal("#vue-app-manage-tags");
+                    modal.show();
+                    setTimeout(() => { this.$refs.simpleSuggest.$refs.suggestComponent.input.focus(); }, 500)
+                });
+             }
+         });
+
+        new Vue({
+            el: "#vue-app-featured-tag",
+            name: "Featured Tag",
+            data() {
+                return {
+                    showFeaturedTagInput: false,
+                    tag: {{ random_tag | safe }}
+                };
+            },
+            methods: {
+                select(datum) {
+                    this.tag = datum.info;
+                    this.$nextTick(() => {
+                        this.$refs.simpleSuggest.$refs.suggestComponent.$el.querySelector("input").blur();
+                        this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
+                    });
+                },
+                boldenSuggestion(scope) {
+                    return scope.suggestion.display;
+                },
+                onFeaturedTagInputBlur() {
+                    this.showFeaturedTagInput = false;
+                },
+                onFeaturedTagInputEnter() {
+                    this.showFeaturedTagInput = false;
+                    const el = document.getElementById("featured-tag-input");
+                    // this.filter = el.querySelector("input").value;
+                },
+                onTagSearch() {
+                    this.showFeaturedTagInput = true;
+                    setTimeout( () => {
+                        const el = document.getElementById("featured-tag-input");
+                        el.querySelector("input").focus();
+                    }, 100);
                 }
             },
-            mounted() {
-
-                EventBus.$on("add-tag", payload => {
-                    this.addTag(payload);
-                });
-
-                this.getTagList();
-
-            }
-
         });
 
         new Vue({

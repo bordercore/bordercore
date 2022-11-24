@@ -1978,6 +1978,12 @@ div #dateapp {
   }
 }
 
+// Decrease the height to prevent screen jitter when the
+//  input appears after selecting the search icon
+#featured-tag-input input {
+  height: 1.87rem;
+}
+
 //
 // Collections
 //

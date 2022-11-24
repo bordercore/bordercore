@@ -37,7 +37,7 @@ class DrillListView(ListView):
             "cols": ["tag_name", "question_count", "last_reviewed", "lastreviewed_sort", "id"],
             "title": "Home",
             "tags_last_reviewed": Question.objects.tags_last_reviewed(self.request.user)[:20],
-            "random_tag": Question.objects.get_random_tag(self.request.user),
+            "random_tag": json.dumps(Question.objects.get_random_tag(self.request.user)),
             "favorite_questions_progress": Question.objects.favorite_questions_progress(self.request.user),
             "total_progress": Question.objects.total_tag_progress(self.request.user),
             "study_session_progress": Question.get_study_session_progress(self.request.session)

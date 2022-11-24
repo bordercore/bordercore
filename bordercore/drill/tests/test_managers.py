@@ -16,11 +16,13 @@ def test_tags_last_reviewed(auto_login_user):
     tag_0 = TagFactory()
     question_0.tags.add(tag_0)
     question_0.save()
+    question_0.record_response("good")
 
     question_1 = QuestionFactory()
     tag_1 = TagFactory()
     question_1.tags.add(tag_1)
     question_1.save()
+    question_1.record_response("good")
 
     tags = Question.objects.tags_last_reviewed(user)
     assert len(tags) == 2
