@@ -142,11 +142,16 @@
                 return result.replace(new RegExp("(.*?)(" + texts.join("|") + ")(.*?)", "gi"), "$1<b class='matched'>$2</b>$3");
             },
             select(datum) {
-                if (typeof this.$parent.select !== "function") {
-                    console.error("Error: parent component must define a select() function.");
-                } else {
-                    this.$parent.select(datum);
+                let comp = this["$parent"];
+                while (comp !== undefined) {
+                    if (typeof comp.select === "function") {
+                        comp.select(datum);
+                        return;
+                    } else {
+                        comp = comp["$parent"];
+                    }
                 }
+                console.error("Error: parent component must define a select() function.");
             },
             onBlur(evt) {
                 this.$emit("blur", evt);
