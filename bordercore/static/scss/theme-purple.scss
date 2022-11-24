@@ -50,6 +50,11 @@
   --chart-gradient-start: #0000ff; // Avoid leading space before RGB value
   --chart-gradient-end: #00065e; // Avoid leading space before RGB value
 
+  // Background sphere
+  --sphere-color-1: #fff;
+  --sphere-color-2: #f0f;
+  --sphere-color-3: #0ff;
+
   --blob-file-upload-gradient-start: var(--surface6);
   --blob-file-upload-gradient-end: var(--surface1);
   --btn-close-filter: invert(1) grayscale(100%) brightness(200%);
