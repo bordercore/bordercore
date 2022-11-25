@@ -14,9 +14,3 @@ class TodoFactory(factory.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: f"task_{n}")
     user = factory.SubFactory(UserFactory)
-
-    @factory.post_generation
-    def tags(obj, create, extracted, **kwargs):
-
-        if not create:
-            return

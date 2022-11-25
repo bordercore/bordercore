@@ -548,9 +548,7 @@ def song_source(auto_login_user):
 
 
 @pytest.fixture()
-def song(auto_login_user, song_source, tag):
-
-    user, _ = auto_login_user()
+def song(song_source, tag):
 
     album = AlbumFactory()
 

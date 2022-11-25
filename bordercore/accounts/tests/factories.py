@@ -11,7 +11,6 @@ faker = FakerFactory.create()
 
 TEST_USERNAME = "testuser"
 TEST_PASSWORD = "testpassword"
-TEST_EMAIL = "testuser@bordercore.com"
 
 
 @factory.django.mute_signals(signals.post_save)
@@ -23,7 +22,7 @@ class UserFactory(factory.DjangoModelFactory):
 
     username = TEST_USERNAME
     password = factory.PostGenerationMethodCall("set_password", TEST_PASSWORD)
-    email = TEST_PASSWORD
+    email = faker.email()
 
     @factory.post_generation
     def create_userprofile(obj, create, extracted, **kwargs):

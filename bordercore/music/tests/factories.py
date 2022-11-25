@@ -2,8 +2,6 @@ import factory
 from factory.fuzzy import FuzzyInteger
 from faker import Factory as FakerFactory
 
-from django.db.models import signals
-
 from accounts.tests.factories import UserFactory
 from music.models import Album, Artist, Playlist, Song, SongSource
 
@@ -15,7 +13,7 @@ class ArtistFactory(factory.DjangoModelFactory):
     class Meta:
         model = Artist
 
-    name = factory.Sequence(lambda n: f"arist_{n}")
+    name = factory.Sequence(lambda n: f"artist_{n}")
     user = factory.SubFactory(UserFactory)
 
 
@@ -25,7 +23,7 @@ class AlbumFactory(factory.DjangoModelFactory):
         model = Album
 
     title = factory.Sequence(lambda n: f"album_{n}")
-    artist = factory.SubFactory(ArtistFactory)
+    artist = factory.SubFactory(ArtistFactory, user=factory.SelfAttribute("..user"))
     year = FuzzyInteger(1970, 2020)
     user = factory.SubFactory(UserFactory)
 
@@ -39,29 +37,21 @@ class SongSourceFactory(factory.DjangoModelFactory):
     description = faker.text()
 
 
-@factory.django.mute_signals(signals.post_save)
 class SongFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = Song
 
     title = factory.Sequence(lambda n: f"song_{n}")
-    artist = factory.SubFactory(ArtistFactory)
-    album = factory.SubFactory(AlbumFactory)
+    artist = factory.SubFactory(ArtistFactory, user=factory.SelfAttribute("..user"))
+    album = factory.SubFactory(AlbumFactory, user=factory.SelfAttribute("..user"))
     track = FuzzyInteger(1, 10)
     year = FuzzyInteger(1970, 2020)
     source = factory.SubFactory(SongSourceFactory)
     length = FuzzyInteger(100, 400)
     user = factory.SubFactory(UserFactory)
 
-    @factory.post_generation
-    def tags(obj, create, extracted, **kwargs):
 
-        if not create:
-            return
-
-
-@factory.django.mute_signals(signals.post_save)
 class PlaylistFactory(factory.DjangoModelFactory):
 
     class Meta:
@@ -71,9 +61,3 @@ class PlaylistFactory(factory.DjangoModelFactory):
     size = FuzzyInteger(1, 50)
     type = "manual"
     user = factory.SubFactory(UserFactory)
-
-    @factory.post_generation
-    def tags(obj, create, extracted, **kwargs):
-
-        if not create:
-            return
