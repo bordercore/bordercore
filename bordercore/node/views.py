@@ -30,7 +30,6 @@ class NodeListView(ListView, FormMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["nodes"] = context["object_list"]
         context["title"] = "Node List"
 
         return context
