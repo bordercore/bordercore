@@ -112,10 +112,8 @@
                                 </span>
                             </div>
                             <div class="ms-auto">
-                                <span v-if="props.row.note">
-                                    <a class="ms-1" href="#" @click="onShowNote(props.row)">
-                                        <font-awesome-icon icon="sticky-note" class="glow text-primary"></font-awesome-icon>
-                                    </a>
+                                <span v-if="props.row.note" v-tooltip="{ content: onShowNote(props.row), html: true }">
+                                    <font-awesome-icon icon="sticky-note" class="glow text-primary"></font-awesome-icon>
                                 </span>
                             </div>
                         </div>
@@ -424,7 +422,7 @@
                     }, 500);
                 },
                 onShowNote(todo) {
-                    this.$refs.note.showNote(todo.note);
+                    return markdown.render(todo.note);
                 },
             },
         });

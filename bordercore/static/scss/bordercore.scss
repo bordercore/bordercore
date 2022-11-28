@@ -20,5 +20,8 @@ $table-cell-padding-x: .75rem;
 // Import CSS for vue-sidebar-menu
 @import "../css/vue-sidebar-menu/vue-sidebar-menu.scss";
 
+// Import CSS for Floating Vue tooltip
+@import "../../node_modules/floating-vue/dist/style.css";
+
 // Import core SCSS
 @import "./base";

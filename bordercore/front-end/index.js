@@ -16,6 +16,11 @@ import Datepicker from "vuejs-datepicker";
 Vue.component("vuejs-datepicker", Datepicker);
 window.Datepicker = Datepicker;
 
+import FloatingVue from "floating-vue";
+Vue.use(FloatingVue);
+// Allow the user to hover over the tooltip content
+FloatingVue.options.popperTriggers = ["hover"];
+
 import pluralize from "pluralize";
 window.pluralize = pluralize;
 

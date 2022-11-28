@@ -115,10 +115,8 @@
                                 </b-table-column>
 
                                 <b-table-column field="note" label="" sortable v-slot="props">
-                                    <span v-if="props.row.note">
-                                        <a class="ms-1" href="#" @click="onShowNote(props.row)">
-                                            <font-awesome-icon icon="sticky-note" class="glow text-primary"></font-awesome-icon>
-                                        </a>
+                                    <span v-if="props.row.note" v-tooltip="{ content: onShowNote(props.row), html: true }">
+                                        <font-awesome-icon icon="sticky-note" class="glow text-primary"></font-awesome-icon>
                                     </span>
                                 </b-table-column>
 
@@ -334,7 +332,7 @@
             },
             methods: {
                 onShowNote(song) {
-                    this.$refs.note.showNote(song.note);
+                    return markdown.render(song.note);
                 },
                 setRating(evt, row, rating) {
                     const els = evt.currentTarget.parentElement.querySelectorAll(".rating");
