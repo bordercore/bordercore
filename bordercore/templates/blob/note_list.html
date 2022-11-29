@@ -8,8 +8,8 @@
 
         <div id="left-panel" class="col-lg-3 h-100">
 
-            <div v-if="pinnedNotes.length > 0" class="d-flex flex-column flex-grow-last h-100 backdrop-filter">
-                <card title="Pinned Notes">
+            <div v-if="pinnedNotes.length > 0" class="d-flex flex-column h-100">
+                <card title="Pinned Notes" class="flex-grow-1">
 
                     <template v-slot:title-slot>
                         <div class="h3">
