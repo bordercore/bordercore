@@ -1,10 +1,22 @@
 <template>
     <div class="mt-3">
         <div>
-            <audio id="player" controls controlsList="nodownload" class="mw-100">
-                <source src="" type="audio/mpeg">
-                Your browser does not support the audio tag.
-            </audio>
+            <media-controller audio>
+                <audio
+                    id="player"
+                    slot="media"
+                    src=""
+                    type="audio/mpeg"
+                />
+                <media-control-bar class="media-control-bar">
+                    <media-play-button />
+                    <media-time-display show-duration />
+                    <media-time-range />
+                    <media-playback-rate-button />
+                    <media-mute-button />
+                    <media-volume-range />
+                </media-control-bar>
+            </media-controller>
         </div>
         <div class="d-flex align-items-center ms-4">
             <toggle-button id="continuous_play" v-model="continuousPlay" :css-colors="true" class="toggle-button" />
@@ -78,8 +90,7 @@
             markSongAsListenedTo() {
                 const url = this.markListenedToUrl.replace(/00000000-0000-0000-0000-000000000000/, this.currentSongUuid);
                 axios.get(url)
-                     .then((response) => {
-                     });
+                    .then((response) => {});
             },
         },
     };

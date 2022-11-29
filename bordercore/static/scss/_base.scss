@@ -2123,15 +2123,29 @@ hr.collection-list-divider {
 //
 
 // Audio player controls
-
-audio {
-  width: 37.5rem;
-  outline: none;
+.media-control-bar {
+  flex-flow: wrap;
 }
 
-#audio_player audio {
-  width: 25rem;
+media-time-range {
+  max-width: 80px;
 }
+
+media-time-display {
+  color: var(--text1);
+}
+
+media-playback-rate-button {
+  color: var(--text1);
+}
+
+@media screen and (max-width: 1200px) {
+  media-playback-rate-button {
+    display: none;
+  }
+}
+
+// Other
 
 #album-list div {
   width: 12.31rem;

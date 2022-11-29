@@ -397,10 +397,18 @@
                 </blob-detail-cover>
                 {% endif %}
 
-                <audio v-if="$store.state.elasticsearchInfo.content_type === 'Audio'" controls controlsList="nodownload" v-cloak>
-                    <source src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="audio/mpeg">
-                    Your browser does not support the audio tag.
-                </audio>
+                <media-controller v-if="$store.state.elasticsearchInfo.content_type === 'Audio'" audio v-cloak class="w-100">
+                    <audio id="player" slot="media" src="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" type="audio/mpeg">
+                    </audio>
+                    <media-control-bar class="w-100">
+                        <media-play-button></media-play-button>
+                        <media-time-display show-duration></media-time-display>
+                        <media-time-range></media-time-range>
+                        <media-playback-rate-button></media-playback-rate-button>
+                        <media-mute-button></media-mute-button>
+                        <media-volume-range></media-volume-range>
+                    </media-control-bar>
+                </media-controller>
 
                 {% if blob.content %}
                     <div class="blob-content table-borders mx-2 p-3" id="blob-detail-content" v-html="getContent()">

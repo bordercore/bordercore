@@ -103,6 +103,8 @@ window.format = format;
 import markdownit from "markdown-it";
 window.markdown = markdownit();
 
+import "media-chrome";
+
 import {v4 as uuidv4} from "uuid";
 window.uuidv4 = uuidv4;
 

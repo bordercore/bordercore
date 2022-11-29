@@ -59,16 +59,16 @@
 
                 {% endif %}
 
-                <audio-player
-                    ref="audioPlayer"
-                    :track-list="songList"
-                    song-url="{{ MEDIA_URL_MUSIC }}songs/"
-                    mark-listened-to-url="{% url 'music:mark_song_as_listened_to' '00000000-0000-0000-0000-000000000000' %}"
-                    @current-song="selectRow"
-                >
-                </audio-player>
-
             </div>
+
+            <audio-player
+                ref="audioPlayer"
+                :track-list="songList"
+                song-url="{{ MEDIA_URL_MUSIC }}songs/"
+                mark-listened-to-url="{% url 'music:mark_song_as_listened_to' '00000000-0000-0000-0000-000000000000' %}"
+                @current-song="selectRow"
+            >
+            </audio-player>
 
         </div>
 
