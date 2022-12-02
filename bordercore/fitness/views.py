@@ -63,6 +63,8 @@ def fitness_add(request, exercise_uuid):
             user=request.user,
             exercise=exercise
         )
+        if "note" in request.POST:
+            workout.note = request.POST["note"]
         workout.save()
         for datum in json.loads(request.POST["workout-data"]):
             new_data = Data(

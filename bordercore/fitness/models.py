@@ -91,10 +91,12 @@ class Exercise(models.Model):
             plotdata["duration"] = [x.duration for x in raw_data][::-1]
             initial_plot = "duration"
         labels = [x.date.strftime("%b %d") for x in raw_data]
+        notes = [x.note for x in raw_data]
 
         return {
             "labels": json.dumps(labels[::-1]),
             "plotdata": json.dumps(plotdata),
+            "notes": json.dumps(notes[::-1]),
             "initial_plot": initial_plot,
             "paginator": json.dumps({
                 "page_number": page_number,
