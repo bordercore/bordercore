@@ -516,7 +516,7 @@
                 });
 
                 {% if tag %}
-                this.getBookmarkList({searchTag: "{{ tag }}"});
+                this.getBookmarkList({searchTag: "{{ tag|safe }}"});
                 {% else %}
                 this.getBookmarkList({pageNumber: 1});
                 {% endif %}
