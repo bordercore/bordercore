@@ -41,6 +41,12 @@
                         Songs between the years <strong class="text-primary">{{ playlist.parameters.start_year }}</strong> and <strong class="text-primary">{{ playlist.parameters.end_year }}</strong>
                     </div>
 
+                {% elif playlist.type == "manual" %}
+
+                    <div>
+                        Manually created playlist
+                    </div>
+
                 {% endif %}
 
                 {% if playlist.parameters.exclude_recent %}
