@@ -24,17 +24,17 @@ from blob.models import Blob
 from lib.mixins import FormRequestMixin
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class UserProfileUpdateView(FormRequestMixin, UpdateView):
-    template_name = 'prefs/index.html'
+    template_name = "prefs/index.html"
     form_class = UserProfileForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['groups'] = ', '.join([x.name for x in self.request.user.groups.all()])
-        context['nav'] = 'prefs'
-        context['title'] = 'Preferences'
-        context['tags'] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.pinned_tags.all()[::-1]]
+        context["groups"] = ", ".join([x.name for x in self.request.user.groups.all()])
+        context["nav"] = "prefs"
+        context["title"] = "Preferences"
+        context["tags"] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.pinned_tags.all()[::-1]]
 
         if self.request.user.userprofile.instagram_credentials:
             context["instagram_username"] = self.request.user.userprofile.instagram_credentials.get("username", "")
@@ -167,7 +167,7 @@ class UserProfileUpdateView(FormRequestMixin, UpdateView):
         return super().dispatch(*args, **kwargs)
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class ChangePasswordView(PasswordChangeView):
     template_name = "prefs/password.html"
     success_url = reverse_lazy("accounts:password")
@@ -245,14 +245,14 @@ def store_in_session(request):
 
 def bc_login(request):
 
-    message = ''
+    message = ""
 
-    if request.POST.get('username'):
-        username = request.POST['username']
-        password = request.POST['password']
+    if request.POST.get("username"):
+        username = request.POST["username"]
+        password = request.POST["password"]
 
         if not User.objects.filter(username=username).count():
-            message = 'Username does not exist'
+            message = "Username does not exist"
         else:
 
             user = authenticate(username=username, password=password)
@@ -261,23 +261,23 @@ def bc_login(request):
                     login(request, user)
                     response = redirect(request.POST.get("next", "homepage:homepage"))
                     # Remember the username for a month
-                    response.set_cookie('bordercore_username', username, max_age=2592000)
+                    response.set_cookie("bordercore_username", username, max_age=2592000)
                     return response
                     # Redirect to a success page.
                 else:
-                    message = 'Disabled account'
-                    # Return a 'disabled account' error message
+                    message = "Disabled account"
+                    # Return a "disabled account" error message
             else:
-                message = 'Invalid login'
-                # Return an 'invalid login' error message.
+                message = "Invalid login"
+                # Return an "invalid login" error message.
 
-    return render(request, 'login.html', {
-        'message': message,
-        'next': request.GET.get('next')
+    return render(request, "login.html", {
+        "message": message,
+        "next": request.GET.get("next")
     })
 
 
 @login_required
 def bc_logout(request):
     logout(request)
-    return redirect('accounts:login')
+    return redirect("accounts:login")

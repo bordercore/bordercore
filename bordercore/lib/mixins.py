@@ -11,8 +11,8 @@ class TimeStampedModel(models.Model):
     modified = models.DateTimeField(auto_now=True)
 
     class Meta:
-        get_latest_by = 'modified'
-        ordering = ('-modified', '-created',)
+        get_latest_by = "modified"
+        ordering = ("-modified", "-created",)
         abstract = True
 
 
