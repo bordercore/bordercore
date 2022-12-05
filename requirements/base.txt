@@ -14,7 +14,7 @@ feedparser==6.0.2
 google-api-python-client==1.6.2
 httplib2==0.19.0
 humanize==3.7.1
-instaloader==4.8.1
+instaloader==4.9.5
 isodate==0.6.1
 lxml==4.9.1
 Markdown==3.4.1
