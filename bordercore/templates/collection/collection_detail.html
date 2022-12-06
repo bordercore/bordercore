@@ -41,8 +41,6 @@
                     </span>
                 </div>
 
-                <a href="{% url 'blob:create' %}?collection_uuid={{ collection.uuid }}" class="btn btn-primary mt-2" role="button"><font-awesome-icon icon="plus" class="me-2"></font-awesome-icon>Add Blob</a>
-
                 <hr />
 
                 <h4 class="mt-3">Tag Filter</h4>
@@ -495,6 +493,12 @@
             data() {
                 return {
                     collectionDetailMenuItems: [
+                        {
+                            id: uuidv4(),
+                            title: "Add Blob",
+                            url: "{% url 'blob:create' %}?collection_uuid={{ collection.uuid }}",
+                            icon: "plus"
+                        },
                         {
                             id: uuidv4(),
                             title: "Slide Show",
