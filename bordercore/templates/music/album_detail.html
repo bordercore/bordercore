@@ -22,9 +22,9 @@
 
 {% block content %}
 
-    <div class="row g-0 h-100" id="vue-app">
+    <div class="row g-0 h-100 align-items-start" id="vue-app">
         <note-modal ref="note"></note-modal>
-        <div class="col-lg-3 d-flex flex-column">
+        <div class="sticky-top col-lg-3 d-flex flex-column">
 
             <div class="card-grid ms-2 d-flex flex-column align-items-center">
 
@@ -58,11 +58,11 @@
 
         </div>
 
-        <div class="col-lg-9 me-0">
+        <div class="col-lg-9 h-100 me-0">
 
-            <div class="card-grid ms-2">
+            <div class="card-grid h-100 ms-2">
 
-                <div class="me-2">
+                <div class="h-100 me-2">
                     <card title="" class="backdrop-filter me-0">
                         <template v-slot:content>
                             <div class="hover-target d-flex">
@@ -92,7 +92,7 @@
                             </h6>
                         </template>
                     </card>
-                    <card title="" id="album-song-list" class="backdrop-filter me-0">
+                    <card title="" id="album-song-list" class="backdrop-filter flex-grow-1 h-100 me-0">
                         <template v-slot:content>
                             <b-table
                                 :data="songList"

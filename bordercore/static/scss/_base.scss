@@ -21,14 +21,6 @@ div.sphere {
   box-shadow: inset 0 0 3.12rem var(--sphere-color-1), inset 1.25rem 0 5rem var(--sphere-color-2), inset -1.25rem 0 5rem var(--sphere-color-3), inset 1.25rem 0 18.75rem var(--sphere-color-2), inset -1.25rem 0 18.75rem var(--sphere-color-3), 0 0 3.12rem var(--sphere-color-1), 0.62rem 0 25rem var(--sphere-color-2);
 }
 
-// The overflow:hidden eliminates the horizontal scrollbar when
-//  setting the padding to 0px on the main fluid container
-//  https://stackoverflow.com/questions/37978307/bootstrap-container-fluid-padding/50005919
-.container-fluid {
-  overflow: hidden;
-  padding: 0;
-}
-
 // Use this to avoid layout shift caused by scrollbars
 .scroll-container {
   overflow: scroll;
@@ -80,6 +72,11 @@ div.sphere {
   label p:last-child {
     margin-bottom: 0;
   }
+}
+
+.sticky-top {
+  position: sticky;
+  top: 1rem;
 }
 
 [hidden] {
