@@ -1,12 +1,24 @@
 import pytest
 
 import django
+from django.db.utils import IntegrityError
 
 django.setup()
 
-from tag.models import TagBookmark  # isort:skip
+from tag.models import TagBookmark, Tag  # isort:skip
 
 pytestmark = pytest.mark.django_db
+
+
+def test_tag_check_no_commas_constraint(auto_login_user, tag):
+    """
+    Test the constraint that prohibits tags with commas in their name
+    """
+
+    user, _ = auto_login_user()
+
+    with pytest.raises(IntegrityError):
+        Tag.objects.create(user=user, name="tag,name")
 
 
 def test_reorder(bookmark, tag):
