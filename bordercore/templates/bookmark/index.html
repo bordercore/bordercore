@@ -369,31 +369,33 @@
                     }
                 },
                 getBookmarkList({ pageNumber=1, searchTerm=null, searchTag=null } = {}) {
-                    var self = this;
 
                     if (searchTag !== null) {
                         url = "{% url 'bookmark:get_bookmarks_by_tag' 666 %}".replace(/666/, searchTag);
-                        self.$store.state.searchTerm = null;
+                        this.$store.state.searchTerm = null;
                     } else if (searchTerm !== null) {
                         url = "{% url 'bookmark:get_bookmarks_by_keyword' 666 %}".replace(/666/, searchTerm);
                     } else {
                         url = "{% url 'bookmark:get_bookmarks_by_page' 666 %}".replace(/666/, pageNumber);
                     }
 
+                    var self = this;
                     axios.get(url)
-                         .then(function (response) {
+                        .then(function (response) {
 
-                             var bookmarks = []
-                             var lastDate = null;
-                             for (bookmark of response.data.bookmarks) {
-                                 if (bookmark.created == lastDate) {
-                                     lastDate = bookmark.created;
-                                     bookmark.created = null;
-                                 } else {
-                                     lastDate = bookmark.created;
-                                 }
-                                 bookmarks.push(bookmark);
-                             }
+                            // For bookmarks which share the same date, only show the
+                            //  date for the first one, to reduce UI clutter.
+                            let bookmarks = []
+                            let lastDate = null;
+                            for (bookmark of response.data.bookmarks) {
+                                if (bookmark.created == lastDate) {
+                                    lastDate = bookmark.created;
+                                    bookmark.created = null;
+                                } else {
+                                    lastDate = bookmark.created;
+                                }
+                                bookmarks.push(bookmark);
+                            }
 
                              self.$store.state.searchTerm = searchTerm;
                              self.bookmarkList = bookmarks;
@@ -409,14 +411,14 @@
                                  self.$store.state.selectedTagName = "Untagged";
 
                                  if (self.$parent.$refs.paginator.pagination === "" || self.$parent.$refs.paginator.pagination.page_number === 1) {
-                                     self.$store.state.intervalId = window.setTimeout(self.getBookmarkList, 60000, {pageNumber: pageNumber});
+                                     // First clear any existing timeouts, if necessary
+                                     clearTimeout(self.$store.state.intervalId);
+                                     self.$store.state.intervalId = window.setTimeout(self.getBookmarkList, 60000, { pageNumber: pageNumber });
                                  }
                              }
                          })
                          .catch(function (error) {
                              console.log("Error getting new bookmarks list: " + error);
-                         })
-                         .finally(function () {
                          });
                 },
                 onClickUpdate(uuid) {
