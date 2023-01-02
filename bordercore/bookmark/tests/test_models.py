@@ -15,6 +15,13 @@ def test_get_tags(bookmark):
     assert tags == "django"
 
 
+def test_bookmark_delete_tag(bookmark):
+
+    bookmark[0].delete_tag(bookmark[0].tags.first())
+    updated_bookmark = Bookmark.objects.get(uuid=bookmark[0].uuid)
+    assert updated_bookmark.tags.count() == 1
+
+
 def test_bookmark_thumbnail_url_static(bookmark):
 
     assert Bookmark.thumbnail_url_static(bookmark[0].uuid, bookmark[0].url) == f"https://blobs.bordercore.com/bookmarks/{bookmark[0].uuid}-small.png"

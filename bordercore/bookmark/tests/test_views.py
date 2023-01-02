@@ -317,3 +317,33 @@ def test_add_tag(auto_login_user, monkeypatch_bookmark):
     assert updated_bookmark.tags.count() == 1
     assert updated_bookmark.tags.first() == tag
     assert resp.status_code == 200
+
+
+def test_remove_tag(auto_login_user, monkeypatch_bookmark):
+
+    user, client = auto_login_user()
+
+    bookmark = BookmarkFactory(user=user)
+    tag = TagFactory(user=user)
+    bookmark.tags.add(tag)
+
+    url = urls.reverse("bookmark:remove_tag")
+    resp = client.post(url, {
+        "bookmark_uuid": bookmark.uuid,
+        "tag_name": tag.name
+    })
+
+    updated_bookmark = Bookmark.objects.get(uuid=bookmark.uuid)
+    assert updated_bookmark.tags.count() == 0
+    assert resp.status_code == 200
+
+    # Trying to remove the tag again should produce an error
+    url = urls.reverse("bookmark:remove_tag")
+    resp = client.post(url, {
+        "bookmark_uuid": bookmark.uuid,
+        "tag_name": tag.name
+    })
+    assert json.loads(resp.content)["status"] == "Error"
+    updated_bookmark = Bookmark.objects.get(uuid=bookmark.uuid)
+    assert updated_bookmark.tags.count() == 0
+    assert resp.status_code == 200

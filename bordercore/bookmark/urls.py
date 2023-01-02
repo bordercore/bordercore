@@ -115,4 +115,9 @@ urlpatterns = [
         view=views.add_tag,
         name="add_tag"
     ),
+    path(
+        route="bookmark/remove_tag",
+        view=views.remove_tag,
+        name="remove_tag"
+    ),
 ]

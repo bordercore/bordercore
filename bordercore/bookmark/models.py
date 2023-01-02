@@ -91,6 +91,13 @@ class Bookmark(TimeStampedModel):
 
         self.delete_cover_image()
 
+    def delete_tag(self, tag):
+
+        s = TagBookmark.objects.get(tag=tag, bookmark=self)
+        s.delete()
+        self.tags.remove(tag)
+        self.index_bookmark()
+
     def generate_cover_image(self):
 
         if self.url.startswith("https://www.youtube.com/watch"):

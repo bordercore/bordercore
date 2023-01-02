@@ -689,7 +689,7 @@ def add_tag(request):
     tag_id = request.POST["tag_id"]
 
     bookmark = Bookmark.objects.get(uuid=bookmark_uuid)
-    tag = Tag.objects.get(id=tag_id)
+    tag = Tag.objects.get(user=request.user, id=tag_id)
 
     if tag in bookmark.tags.all():
         response = {
@@ -699,6 +699,29 @@ def add_tag(request):
     else:
         bookmark.tags.add(tag)
         bookmark.index_bookmark()
+        response = {
+            "status": "OK",
+        }
+
+    return JsonResponse(response)
+
+
+@login_required
+def remove_tag(request):
+
+    bookmark_uuid = request.POST["bookmark_uuid"]
+    tag_name = request.POST["tag_name"]
+
+    bookmark = Bookmark.objects.get(uuid=bookmark_uuid)
+    tag = Tag.objects.get(user=request.user, name=tag_name)
+
+    if tag not in bookmark.tags.all():
+        response = {
+            "status": "Error",
+            "message": f"Bookmark does not have tag {tag}"
+        }
+    else:
+        bookmark.delete_tag(tag)
         response = {
             "status": "OK",
         }

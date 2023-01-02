@@ -651,19 +651,37 @@
                         return;
                     }
 
-                    doPost(
-                        this,
-                        "{% url "bookmark:add_tag" %}",
-                        {
-                            "tag_id": tag.id,
-                            "bookmark_uuid": bookmarkUuid,
-                        },
-                        (response) => {
-                            EventBus.$emit("get-page", 1);
-                        },
-                        "",
-                        "Error adding tag"
-                    );
+                    if (tag.id === -1) {
+                        // We're moving a bookmark from a tagged category to the 'Untagged' category,
+                        //  which means we need to remove that tag from the bookmark.
+                        doPost(
+                            this,
+                            "{% url "bookmark:remove_tag" %}",
+                            {
+                                "tag_name": this.$store.state.selectedTagName,
+                                "bookmark_uuid": bookmarkUuid,
+                            },
+                            (response) => {
+                                EventBus.$emit("search-tag", this.$store.state.selectedTagName);
+                            },
+                            "",
+                            "Error removing tag"
+                        );
+                    } else {
+                        doPost(
+                            this,
+                            "{% url "bookmark:add_tag" %}",
+                            {
+                                "tag_id": tag.id,
+                                "bookmark_uuid": bookmarkUuid,
+                            },
+                            (response) => {
+                                EventBus.$emit("get-page", 1);
+                            },
+                            "",
+                            "Error adding tag"
+                        );
+                    }
                 },
                 onSortTags(evt) {
                     if (evt.added) {
