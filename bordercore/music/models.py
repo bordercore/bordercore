@@ -248,6 +248,8 @@ class Song(TimeStampedModel):
         self.last_time_played = datetime.now()
         self.save()
 
+        Listen(song=self, user=self.user).save()
+
     @staticmethod
     def get_id3_info(request, messages, song):
         """
@@ -414,3 +416,11 @@ class PlaylistItem(TimeStampedModel, SortOrderMixin):
 @receiver(pre_delete, sender=PlaylistItem)
 def remove_playlistitem(sender, instance, **kwargs):
     instance.handle_delete()
+
+
+class Listen(TimeStampedModel):
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    song = models.ForeignKey(Song, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(f"Listened to song '{self.song}'")
