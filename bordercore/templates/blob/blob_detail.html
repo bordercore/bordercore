@@ -9,7 +9,7 @@
 
     <div class="scrollable-panel-container row g-0 align-items-start h-100 mx-2">
 
-        <div id="vue-left-panel" class="sticky-top flex-grow-last col-lg-3 d-flex flex-column h-100">
+        <div id="vue-left-panel" class="flex-grow-last col-lg-3 d-flex flex-column h-100">
 
             <!--
                  Keep this here so that the resulting div doesn't get
@@ -26,155 +26,157 @@
             >
             </object-select>
 
-            <div class="card-body backdrop-filter" v-cloak>
+            <div class="sticky-top d-flex flex-column flex-grow-last">
 
-                {% if blob.get_edition_string %}
-                <h5>
-                    {{ blob.get_edition_string }}
-                </h5>
-                {% endif %}
+                <div class="card-body backdrop-filter" v-cloak>
 
-                {% if metadata|dict_get:"Subtitle" %}
-                    <div id="blob_subtitle">
+                    {% if blob.get_edition_string %}
+                        <h5>
+                        {{ blob.get_edition_string }}
+                        </h5>
+                    {% endif %}
+
+                    {% if metadata|dict_get:"Subtitle" %}
+                        <div id="blob_subtitle">
                         {{ metadata|dict_get:"Subtitle" }}
-                    </div>
-                {% endif %}
-
-                {% if metadata|dict_get:"Author" %}
-                    <div class="mt-2">
-                        <span class="item-name">by</span> <span class="item-value">{{ metadata|dict_get:"Author" }}</span>
-                    </div>
-                {% endif %}
-
-                {% if date %}
-                    <div class="mb-2">
-                        {{ date }}
-                    </div>
-                {% endif  %}
-
-                {% if blob.tags.all %}
-                    <div class="d-flex mb-2">
-                        <div>
-                            <font-awesome-icon icon="tags" class="text-primary"></font-awesome-icon>
                         </div>
-                        <div class="ms-2">
-                            <div id="blob-tag-list">
+                    {% endif %}
+
+                    {% if metadata|dict_get:"Author" %}
+                        <div class="mt-2">
+                            <span class="item-name">by</span> <span class="item-value">{{ metadata|dict_get:"Author" }}</span>
+                        </div>
+                    {% endif %}
+
+                    {% if date %}
+                        <div class="mb-2">
+                        {{ date }}
+                        </div>
+                    {% endif  %}
+
+                    {% if blob.tags.all %}
+                        <div class="d-flex mb-2">
+                            <div>
+                                <font-awesome-icon icon="tags" class="text-primary"></font-awesome-icon>
+                            </div>
+                            <div class="ms-2">
+                                <div id="blob-tag-list">
                                 {% for tag in blob.tags.all %}
                                     <a class="tag" href="{% url 'search:kb_search_tag_detail' tag.name %}">{{ tag.name }}</a>
                                 {% endfor %}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                {% endif %}
+                    {% endif %}
 
-                {% if urls %}
-                    <div class="mb-3">
-                        <font-awesome-icon icon="link" class="text-primary me-1"></font-awesome-icon>
-                        {% for url in urls %}
-                            <strong><a href="{{ url.url }}">{{ url.domain }}</a></strong>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                {% if show_metadata %}
-
-                    <transition name="fade">
-                        <div v-if="Object.keys($store.state.elasticsearchInfo).length !== 0 || Object.keys(metadata_misc).length !== 0" class="highlight-box mb-3">
-
-                            <div v-for="(value, name) in metadata_misc" class="d-flex">
-                                <div class="item-name me-2">
-                                    [[ name ]]
-                                </div>
-                                <div class="item-value text-break">
-                                    [[ value ]]
-                                </div>
-                            </div>
-
-                            <div v-if="$store.state.elasticsearchInfo.content_type" class="d-flex">
-                                <div class="item-name me-2">
-                                    Object Type
-                                </div>
-                                <div class="item-value">
-                                    [[ $store.state.elasticsearchInfo.content_type ]]
-                                </div>
-                            </div>
-
-                            <div v-if="$store.state.elasticsearchInfo.size" class="d-flex">
-                                <div class="item-name me-2">
-                                    Size
-                                </div class="item-value">
-                                <div>
-                                    [[ $store.state.elasticsearchInfo.size ]]
-                                </div>
-                            </div>
-
-                            <div v-if="$store.state.elasticsearchInfo.num_pages" class="d-flex">
-                                <div class="item-name me-2">
-                                    Pages
-                                </div>
-                                <div class="item-value">
-                                    [[ $store.state.elasticsearchInfo.num_pages ]]
-                                </div>
-                            </div>
-
-                            <div v-if="$store.state.elasticsearchInfo.duration" class="d-flex">
-                                <div class="item-name me-2">
-                                    Duration
-                                </div>
-                                <div class="item-value">
-                                    [[ $store.state.elasticsearchInfo.duration ]]
-                                </div>
-                            </div>
-
+                    {% if urls %}
+                        <div class="mb-3">
+                            <font-awesome-icon icon="link" class="text-primary me-1"></font-awesome-icon>
+                            {% for url in urls %}
+                                <strong><a href="{{ url.url }}">{{ url.domain }}</a></strong>
+                            {% endfor %}
                         </div>
-                    </transition>
+                    {% endif %}
 
-                {% endif %}
+                    {% if show_metadata %}
 
-                {% if blob.note %}
-                    <div class="highlight-box mt-3 text-break" id="blob-note" v-html="getNote()">
-                    </div>
-                {% endif %}
+                        <transition name="fade">
+                            <div v-if="Object.keys($store.state.elasticsearchInfo).length !== 0 || Object.keys(metadata_misc).length !== 0" class="highlight-box mb-3">
 
-                {% if blob.is_note and blob.has_been_modified %}
-                    <div class="mt-3">
-                        <strong>Last edited</strong>
-                        <small>{{ blob.modified|date:"F j, Y" }}</small>
-                    </div>
-                {% endif %}
+                                <div v-for="(value, name) in metadata_misc" class="d-flex">
+                                    <div class="item-name me-2">
+                                        [[ name ]]
+                                    </div>
+                                    <div class="item-value text-break">
+                                        [[ value ]]
+                                    </div>
+                                </div>
 
-                {% if blob.sha1sum %}
-                    <a class="button-icon mt-3" href="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" role="button">
-                        <font-awesome-icon icon="download" class="text-emphasis" />
-                    </a>
-                {% endif %}
+                                <div v-if="$store.state.elasticsearchInfo.content_type" class="d-flex">
+                                    <div class="item-name me-2">
+                                        Object Type
+                                    </div>
+                                    <div class="item-value">
+                                        [[ $store.state.elasticsearchInfo.content_type ]]
+                                    </div>
+                                </div>
 
-            </div>
+                                <div v-if="$store.state.elasticsearchInfo.size" class="d-flex">
+                                    <div class="item-name me-2">
+                                        Size
+                                    </div class="item-value">
+                                    <div>
+                                        [[ $store.state.elasticsearchInfo.size ]]
+                                    </div>
+                                </div>
 
-            <div v-if="tree['nodes'].length > 0" class="card-body backdrop-filter">
-                <tree-menu
-                    class="tree-menu item"
-                    :item="tree"
-                    :depth="0"
-                ></tree-menu>
-            </div>
+                                <div v-if="$store.state.elasticsearchInfo.num_pages" class="d-flex">
+                                    <div class="item-name me-2">
+                                        Pages
+                                    </div>
+                                    <div class="item-value">
+                                        [[ $store.state.elasticsearchInfo.num_pages ]]
+                                    </div>
+                                </div>
 
-            {% if linked_objects %}
-                <card title="Collections" class="backdrop-filter">
-                    <template #content>
+                                <div v-if="$store.state.elasticsearchInfo.duration" class="d-flex">
+                                    <div class="item-name me-2">
+                                        Duration
+                                    </div>
+                                    <div class="item-value">
+                                        [[ $store.state.elasticsearchInfo.duration ]]
+                                    </div>
+                                </div>
+
+                            </div>
+                        </transition>
+
+                    {% endif %}
+
+                    {% if blob.note %}
+                        <div class="highlight-box mt-3 text-break" id="blob-note" v-html="getNote()">
+                        </div>
+                    {% endif %}
+
+                    {% if blob.is_note and blob.has_been_modified %}
+                        <div class="mt-3">
+                            <strong>Last edited</strong>
+                            <small>{{ blob.modified|date:"F j, Y" }}</small>
+                        </div>
+                    {% endif %}
+
+                    {% if blob.sha1sum %}
+                        <a class="button-icon mt-3" href="{{ MEDIA_URL }}blobs/{{ blob.get_url|safe }}" role="button">
+                            <font-awesome-icon icon="download" class="text-emphasis" />
+                        </a>
+                    {% endif %}
+
+                </div>
+
+                <div v-if="tree['nodes'].length > 0" class="card-body backdrop-filter">
+                    <tree-menu
+                        class="tree-menu item"
+                        :item="tree"
+                        :depth="0"
+                    ></tree-menu>
+                </div>
+
+                {% if linked_objects %}
+                    <card title="Collections" class="backdrop-filter">
+                        <template #content>
                         {% for collection in linked_objects %}
                             {{ collection.name }}
                             <ul class="list-group interior-borders">
                                 {% for object in collection.collectionobject_set.all %}
                                     {% if object.blob and object.blob.uuid != object.uuid %}
-                                    <li class="list-group-item list-group-item-secondary d-flex align-items-center">
+                                        <li class="list-group-item list-group-item-secondary d-flex align-items-center">
                                         {% if object.blob.get_cover_url_small %}
                                             <img src="{{ object.blob.get_cover_url_small }}" />
                                         {% endif %}
-                                        <div class="ms-2">
-                                            <a href="{% url 'blob:detail' object.blob.uuid %}">{{ object.blob.name|default:"No Name" }}</a>
-                                        </div>
-                                    </li>
+                                            <div class="ms-2">
+                                                <a href="{% url 'blob:detail' object.blob.uuid %}">{{ object.blob.name|default:"No Name" }}</a>
+                                            </div>
+                                        </li>
                                     {% endif %}
                                 {% endfor %}
                                 <li class="list-group-item list-group-item-secondary">
@@ -182,104 +184,101 @@
                                 </li>
                             </ul>
                         {% endfor %}
+                        </template>
+                    </card>
+                {% endif %}
+
+                <card
+                    v-if="$store.state.collectionList.length > 0"
+                    title="Collections"
+                    class="backdrop-filter"
+                >
+                    <template #content>
+                        <div class="col-lg-12">
+                            <ul>
+                                <li v-for="(collection, index) in $store.state.collectionList">
+                                    <a :href="collection.url">[[ collection.name ]]</a>
+                                </li>
+                            </ul>
+                        </div>
                     </template>
                 </card>
-            {% endif %}
 
-            <card
-                v-if="$store.state.collectionList.length > 0"
-                title="Collections"
-                class="backdrop-filter"
-            >
-                <template #content>
-                    <div class="col-lg-12">
-                        <ul>
-                            <li v-for="(collection, index) in $store.state.collectionList">
-                                <a :href="collection.url">[[ collection.name ]]</a>
-                            </li>
-                        </ul>
-                    </div>
-                </template>
-            </card>
-
-            <related-bookmarks-list
-                ref="relatedBookmarksList"
-                object-uuid="{{ object.uuid }}"
-                model-name="blob.Blob"
+            <related-bookmarks-list ref="relatedBookmarksList" object-uuid="{{ object.uuid }}" model-name="blob.Blob"
                 get-bookmark-list-url="{% url 'bookmark:get_related_bookmark_list' object.uuid %}?model_name=blob.Blob"
                 add-bookmark-url="{% url 'bookmark:add_related_bookmark' %}"
                 remove-bookmark-url="{% url 'bookmark:remove_related_bookmark' %}"
                 sort-bookmark-list-url="{% url 'bookmark:sort_related_bookmarks' %}"
-                edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}"
-                :show-add-button="false"
-                :show-empty-list="false"
-            >
+                edit-bookmark-note-url="{% url 'bookmark:edit_related_bookmark_note' %}" :show-add-button="false"
+                :show-empty-list="false">
             </related-bookmarks-list>
 
             <card v-if="relatedBlobList.length > 0" title="Related Blobs" class="backdrop-filter">
-                <template #content>
-                    <ul class="list-group list-group-flush interior-borders">
-                        <li v-for="blob in relatedBlobList" class="hover-target hoverable list-group-item d-flex align-items-start mb-2 p-2">
-                            <div>
-                                <img :src="blob.cover_url" />
-                                <div class="d-flex justify-content-center w-100">
-                                    <a :href="blob.url">[[ blob.name ]]</a>
-                                </div>
-                                <Transition name="fade" mode="out-in" @after-enter="onAfterEnter">
-                                    <div v-if="!blob.noteIsEditable" class="node-object-note" @click="blob.noteIsEditable = true" v-html="getRelatedBlobNote(blob.note)">
-                                    </div>
-                                    <span v-else>
-                                        <input ref="input" type="text" class="form-control form-control-sm" :value="blob.note" placeholder="" @blur="onUpdateNote(blob, $event.target.value)" @keydown.enter="onUpdateNote(blob, $event.target.value)">
-                                    </span>
-                                </Transition>
-                            </div>
-
-                            <drop-down-menu :show-on-hover="true">
-                                <div slot="dropdown">
-                                    <ul class="list-group list-group-flush interior-borders">
-                                        <li class="list-group-item p-0">
-                                            <a class="dropdown-item" href="#" @click.prevent="onRemoveLink(blob.uuid)">
-                                                <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Remove Link
-                                            </a>
-                                        </li>
-                                        <li class="list-group-item p-0">
-                                            <a class="dropdown-item" href="#" @click.prevent="blob.noteIsEditable = true">
-                                                <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon><span
-                                                v-if="blob.note">Edit</span>
-                                                <span v-else>Add</span> Note
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </drop-down-menu>
-                        </li>
-                    </ul>
-                </template>
-            </card>
-
-            <div v-if="related_questions.length > 0" class="card-body" v-cloak>
-
-                <div class="card-title">
-                    Related Questions
-                </div>
-
-                <div class="cursor-pointer">
-                    <ul class="list-group interior-borders">
-                        <li v-for="question in related_questions"
-                            class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
-                            <div class="d-flex p-1">
-                                <div class="mt-1 me-2">
-                                    <font-awesome-icon icon="question" class="text-success"></font-awesome-icon>
-                                </div>
-                            <div>
-                                <span v-html="question.question" @click="onClick(question.url)"></span>
+                    <template #content>
+                        <ul class="list-group list-group-flush interior-borders">
+                            <li v-for="blob in relatedBlobList" class="hover-target hoverable list-group-item d-flex align-items-start mb-2 p-2">
                                 <div>
-                                    <span v-for="tag in question.tags" class="tag me-2">[[ tag.tag ]]</span>
+                                    <img :src="blob.cover_url" />
+                                    <div class="d-flex justify-content-center w-100">
+                                        <a :href="blob.url">[[ blob.name ]]</a>
+                                    </div>
+                                    <Transition name="fade" mode="out-in" @after-enter="onAfterEnter">
+                                        <div v-if="!blob.noteIsEditable" class="node-object-note" @click="blob.noteIsEditable = true" v-html="getRelatedBlobNote(blob.note)">
+                                        </div>
+                                        <span v-else>
+                                            <input ref="input" type="text" class="form-control form-control-sm" :value="blob.note" placeholder="" @blur="onUpdateNote(blob, $event.target.value)" @keydown.enter="onUpdateNote(blob, $event.target.value)">
+                                        </span>
+                                    </Transition>
                                 </div>
-                            </div>
-                            </div>
-                        </li>
-                    </ul>
+
+                                <drop-down-menu :show-on-hover="true">
+                                    <div slot="dropdown">
+                                        <ul class="list-group list-group-flush interior-borders">
+                                            <li class="list-group-item p-0">
+                                                <a class="dropdown-item" href="#" @click.prevent="onRemoveLink(blob.uuid)">
+                                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Remove Link
+                                                </a>
+                                            </li>
+                                            <li class="list-group-item p-0">
+                                                <a class="dropdown-item" href="#" @click.prevent="blob.noteIsEditable = true">
+                                                    <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon><span
+                                                v-if="blob.note">Edit</span>
+                                                    <span v-else>Add</span> Note
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </drop-down-menu>
+                            </li>
+                        </ul>
+                    </template>
+                </card>
+
+                <div v-if="related_questions.length > 0" class="card-body" v-cloak>
+
+                    <div class="card-title">
+                        Related Questions
+                    </div>
+
+                    <div class="cursor-pointer">
+                        <ul class="list-group interior-borders">
+                            <li v-for="question in related_questions"
+                                class="hoverable px-0 list-group-item list-group-item-secondary text-primary">
+                                <div class="d-flex p-1">
+                                    <div class="mt-1 me-2">
+                                        <font-awesome-icon icon="question" class="text-success"></font-awesome-icon>
+                                    </div>
+                                    <div>
+                                        <span v-html="question.question" @click="onClick(question.url)"></span>
+                                        <div>
+                                            <span v-for="tag in question.tags" class="tag me-2">[[ tag.tag ]]</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
                 </div>
 
             </div>
