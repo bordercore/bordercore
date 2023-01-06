@@ -26,11 +26,6 @@ urlpatterns = [
         name="create"
     ),
     path(
-        route="<uuid:uuid>/delete/",
-        view=views.BlobDeleteView.as_view(),
-        name="delete"
-    ),
-    path(
         route="metadata_name_search/",
         view=views.metadata_name_search,
         name="metadata_name_search"

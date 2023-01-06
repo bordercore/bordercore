@@ -81,6 +81,13 @@ class BlobViewSet(viewsets.ModelViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def perform_destroy(self, instance):
+        """
+        Use this DRF hook to add a message to the user.
+        """
+        instance.delete()
+        messages.add_message(self.request, messages.INFO, "Blob successfully deleted")
+
     def perform_update(self, serializer):
         instance = serializer.save()
         instance.index_blob()

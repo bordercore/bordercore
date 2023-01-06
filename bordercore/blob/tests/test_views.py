@@ -140,12 +140,20 @@ def test_blob_create(monkeypatch_blob, auto_login_user, blob_text_factory):
 @factory.django.mute_signals(signals.pre_delete)
 def test_blob_delete(monkeypatch_blob, auto_login_user, blob_text_factory):
 
+    # Quiet spurious output
+    settings.NPLUSONE_WHITELIST = [
+        {
+            "label": "unused_eager_load",
+            "model": "blob.Blob"
+        }
+    ]
+
     _, client = auto_login_user()
+    url = urls.reverse("blob-detail", kwargs={"uuid": blob_text_factory[0].uuid})
+    resp = client.delete(url)
 
-    url = urls.reverse("blob:delete", kwargs={"uuid": blob_text_factory[0].uuid})
-    resp = client.post(url)
-
-    assert resp.status_code == 302
+    assert resp.status_code == 204
+    assert not Blob.objects.filter(uuid=blob_text_factory[0].uuid).exists()
 
 
 @factory.django.mute_signals(signals.post_save)

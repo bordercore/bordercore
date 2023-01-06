@@ -374,6 +374,13 @@
                                     </a>
                                 </li>
                             {% endif %}
+                            <li>
+                                <a class="dropdown-item" href="#" @click.prevent="onClickDelete">
+                                    <span>
+                                        <font-awesome-icon icon="times" class="text-primary me-3"></font-awesome-icon>Delete
+                                    </span>
+                                </a>
+                            </li>
                         </div>
                     </drop-down-menu>
                 </div>
@@ -690,6 +697,22 @@
                         ""
                     );
 
+                },
+                onClickDelete() {
+                    axios.delete("{% url 'blob-detail' blob.uuid %}")
+                         .then((response) => {
+                             window.location = "{% url 'blob:list' %}";
+                         }, (error) => {
+                             EventBus.$emit(
+                                 "toast",
+                                 {
+                                     "title": "Error",
+                                     "body": `Error deleting blob: ${error}`,
+                                     "variant": "danger"
+                                 },
+                             );
+                             console.log(error);
+                         });
                 },
                 getContent() {
                     content = markdown.render("{{ blob.content|escapejs }}");

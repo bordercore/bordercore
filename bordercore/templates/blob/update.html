@@ -302,11 +302,6 @@
                                 <button type="button" class="btn btn-primary" @click="submitForm">
                                     {{ action }}
                                 </button>
-                                {% if object %}
-                                    <button class="btn btn-secondary d-flex ms-3" @click="onClickDelete">
-                                        Delete
-                                    </button>
-                                {% endif %}
                             </div>
 
                         </div>
@@ -406,11 +401,6 @@
                                 <button type="button" class="btn btn-primary" @click="submitForm">
                                     {{ action }}
                                 </button>
-                                {% if object %}
-                                    <button class="btn btn-secondary d-flex ms-3" @click="onClickDelete">
-                                        Delete
-                                    </button>
-                                {% endif %}
                             </div>
 
                         </div>
@@ -779,13 +769,6 @@
                         }
                     })
                 },
-                {% if object %}
-                onClickDelete(evt) {
-                    const formEl = document.getElementById("form-blob");
-                    formEl.setAttribute("action", "{% url 'blob:delete' object.uuid %}");
-                    formEl.submit();
-                },
-                {% endif %}
                 submitForm() {
                     // Add the 'name' attribute and contents to the internal
                     // textarea used by v-md-editor, which will then

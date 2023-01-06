@@ -9,12 +9,11 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic.base import View
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import (CreateView, DeleteView, ModelFormMixin,
-                                       UpdateView)
+from django.views.generic.edit import CreateView, ModelFormMixin, UpdateView
 from django.views.generic.list import ListView
 
 from blob.forms import BlobForm
@@ -170,27 +169,6 @@ class BlobCreateView(FormRequestMixin, CreateView, FormValidMixin):
             form.initial["name"] = so.blob.name
 
         return form
-
-
-@method_decorator(login_required, name="dispatch")
-class BlobDeleteView(DeleteView):
-    model = Blob
-    success_url = reverse_lazy("blob:list")
-
-    # Override delete() so that we can catch any exceptions, especially any
-    #  thrown by Elasticsearch
-    def delete(self, request, *args, **kwargs):
-        try:
-            response = super().delete(request, *args, **kwargs)
-            messages.add_message(self.request, messages.INFO, "Blob successfully deleted")
-            return response
-        except Exception as e:
-            messages.add_message(request, messages.ERROR, f"Error deleting object: {e}")
-            return HttpResponseRedirect(reverse("blob:update", kwargs={"uuid": str(self.get_object().uuid)}))
-
-    def get_object(self, queryset=None):
-        obj = Blob.objects.get(user=self.request.user, uuid=self.kwargs.get("uuid"))
-        return obj
 
 
 @method_decorator(login_required, name="dispatch")
