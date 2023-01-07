@@ -1,14 +1,17 @@
 import logging
 
 import pytest
+from faker import Factory as FakerFactory
 
 from django import urls
 from django.conf import settings
 
 from blob.tests.factories import BlobFactory
-from collection.models import CollectionObject
+from collection.models import Collection, CollectionObject
 
 pytestmark = [pytest.mark.django_db, pytest.mark.views]
+
+faker = FakerFactory.create()
 
 
 def test_collection_list(auto_login_user, collection):
@@ -17,7 +20,8 @@ def test_collection_list(auto_login_user, collection):
 
     url = urls.reverse("collection:list")
     resp = client.get(url)
-
+    assert resp.context["title"] == "Collection List"
+    assert len(resp.context_data["collection_list"]) == 2
     assert resp.status_code == 200
 
 
@@ -96,19 +100,24 @@ def test_create_collection(auto_login_user, collection):
     })
 
     assert resp.status_code == 302
+    assert Collection.objects.count() == 3
 
 
 def test_update_collection(auto_login_user, collection):
 
     _, client = auto_login_user()
 
+    name = faker.text()
+
     url = urls.reverse("collection:update", kwargs={"collection_uuid": collection[0].uuid})
     resp = client.post(url, {
-        "name": "New name",
+        "name": name,
         "tags": "django"
     })
 
     assert resp.status_code == 302
+    updated_collection = Collection.objects.get(uuid=collection[0].uuid)
+    assert updated_collection.name == name
 
 
 def test_delete_collection(auto_login_user, collection):

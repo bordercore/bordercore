@@ -59,7 +59,7 @@ def test_fitness_summary(auto_login_user, fitness):
 
 def test_fitness_change_active_status(auto_login_user, fitness):
 
-    _, client = auto_login_user()
+    user, client = auto_login_user()
 
     url = urls.reverse("fitness:change_active_status")
 
@@ -69,12 +69,14 @@ def test_fitness_change_active_status(auto_login_user, fitness):
     })
 
     assert resp.status_code == 200
+    assert not ExerciseUser.objects.filter(user=user, exercise__uuid=fitness[0].uuid).exists()
 
     resp = client.post(url, {
         "uuid": fitness[0].uuid
     })
 
     assert resp.status_code == 200
+    assert ExerciseUser.objects.filter(user=user, exercise__uuid=fitness[0].uuid).exists()
 
 
 def test_edit_note(auto_login_user, fitness):
