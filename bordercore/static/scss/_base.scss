@@ -2133,11 +2133,8 @@ hr.collection-list-divider {
 
 // Audio player controls
 .media-control-bar {
+  width: 100%;
   flex-flow: wrap;
-}
-
-media-time-range {
-  max-width: 80px;
 }
 
 media-time-display {
@@ -2152,6 +2149,10 @@ media-playback-rate-button {
   media-playback-rate-button {
     display: none;
   }
+}
+
+media-volume-range {
+  flex-grow: 1;
 }
 
 // Other

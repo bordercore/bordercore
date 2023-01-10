@@ -1,7 +1,7 @@
 <template>
     <div class="mt-3">
         <div>
-            <media-controller audio>
+            <media-controller audio class="w-100">
                 <audio
                     id="player"
                     slot="media"
