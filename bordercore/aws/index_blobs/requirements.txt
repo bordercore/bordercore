@@ -1,5 +1,5 @@
 boto3==1.9.156
-certifi==2019.6.16
+certifi==2022.12.7
 elasticsearch==7.0.5
 elasticsearch-dsl==7.4.0
 Pillow==9.3.0
