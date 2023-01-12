@@ -1,23 +1,37 @@
-import Vue from "vue";
-window.Vue = Vue;
+
+import {computed, createApp, onMounted, ref} from "vue";
+window.computed = computed;
+window.createApp = createApp;
+window.onMounted = onMounted;
+window.ref = ref;
+
+// Use the tiny-emitter package as an event bus
+import emitter from "tiny-emitter/instance";
+
+const EventBus = {
+  $on: (...args) => emitter.on(...args),
+  $once: (...args) => emitter.once(...args),
+  $off: (...args) => emitter.off(...args),
+    $emit: (...args) => emitter.emit(...args),
+};
+window.EventBus = EventBus;
 
 import draggable from "vuedraggable";
-Vue.component("draggable", draggable);
 
 import Sortable from "sortablejs";
-Vue.component("Sortable", Sortable);
 window.Sortable = Sortable;
 
-import Vuex from "vuex";
-window.Vuex = Vuex;
-Vue.use(Vuex);
+import {defineStore} from "pinia";
+window.defineStore = defineStore;
 
-import Datepicker from "vuejs-datepicker";
-Vue.component("vuejs-datepicker", Datepicker);
+import {createStore, useStore} from "vuex";
+window.createStore = createStore;
+window.useStore = useStore;
+
+import Datepicker from "vue3-datepicker";
 window.Datepicker = Datepicker;
 
 import FloatingVue from "floating-vue";
-Vue.use(FloatingVue);
 // Allow the user to hover over the tooltip content
 FloatingVue.options.popperTriggers = ["hover"];
 
@@ -96,7 +110,7 @@ library.add(faThumbtack);
 library.add(faTimes);
 library.add(faTimesCircle);
 library.add(faTrashAlt);
-Vue.component("font-awesome-icon", FontAwesomeIcon);
+window.FontAwesomeIcon = FontAwesomeIcon;
 
 import {format} from "date-fns";
 window.format = format;
@@ -122,129 +136,103 @@ window.getFormattedDate = getFormattedDate;
 window.animateCSS = animateCSS;
 
 import EditableTextArea from "./vue/common/EditableTextArea.vue";
-Vue.component("EditableTextArea", EditableTextArea);
 
 import SelectValue from "./vue/common/SelectValue.vue";
 import "vue-multiselect/dist/vue-multiselect.min.css";
-Vue.component("SelectValue", SelectValue);
+// window.SelectValue = SelectValue;
 
 import SearchResult from "./vue/search/SearchResult.vue";
-Vue.component("SearchResult", SearchResult);
 
 import TopSearch from "./vue/search/TopSearch.vue";
-Vue.component("TopSearch", TopSearch);
+window.TopSearch = TopSearch;
 
 import OverdueTasks from "./vue/todo/OverdueTasks.vue";
-Vue.component("OverdueTasks", OverdueTasks);
+window.OverdueTasks = OverdueTasks;
 
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
-Vue.component("v-select", vSelect);
 
 import TagsInput from "./vue/common/TagsInput.vue";
-Vue.component("TagsInput", TagsInput);
+window.TagsInput = TagsInput;
 
 import SearchTagsInput from "./vue/common/SearchTagsInput.vue";
-Vue.component("SearchTagsInput", SearchTagsInput);
 
 import RelatedTags from "./vue/common/RelatedTags.vue";
-Vue.component("RelatedTags", RelatedTags);
+window.RelatedTags = RelatedTags;
 
 import Card from "./vue/common/Card.vue";
-Vue.component("Card", Card);
+window.Card = Card;
 
 import SearchNoResult from "./vue/common/SearchNoResult.vue";
-Vue.component("SearchNoResult", SearchNoResult);
 
 import TreeMenu from "./vue/common/TreeMenu.vue";
-Vue.component("TreeMenu", TreeMenu);
 
 import RelatedBookmarksList from "./vue/bookmark/RelatedBookmarksList.vue";
-Vue.component("RelatedBookmarksList", RelatedBookmarksList);
 
 import RelatedObjects from "./vue/common/RelatedObjects.vue";
-Vue.component("RelatedObjects", RelatedObjects);
 
 import DrillTagProgress from "./vue/common/DrillTagProgress.vue";
-Vue.component("DrillTagProgress", DrillTagProgress);
 
 import DropDownMenu from "./vue/common/DropDownMenu.vue";
-Vue.component("DropDownMenu", DropDownMenu);
+window.DropDownMenu = DropDownMenu;
 
-import VueSidebarMenu from "vue-sidebar-menu";
-Vue.use(VueSidebarMenu);
+import {RouterLink} from "vue-router";
+window.RouterLink = RouterLink;
+
+import {SidebarMenu} from "vue-sidebar-menu";
+import "vue-sidebar-menu/dist/vue-sidebar-menu.css";
+window.SidebarMenu = SidebarMenu;
 
 import AddToPlaylist from "./vue/music/AddToPlaylist.vue";
-Vue.component("AddToPlaylist", AddToPlaylist);
 
 import AudioPlayer from "./vue/music/AudioPlayer.vue";
-Vue.component("AudioPlayer", AudioPlayer);
 
 import CreateUpdatePlaylist from "./vue/music/CreateUpdatePlaylist.vue";
-Vue.component("CreateUpdatePlaylist", CreateUpdatePlaylist);
 
 import BlobDetailCover from "./vue/blob/BlobDetailCover.vue";
-Vue.component("BlobDetailCover", BlobDetailCover);
 
 import RecentBlobs from "./vue/blob/RecentBlobs.vue";
-Vue.component("RecentBlobs", RecentBlobs);
+window.RecentBlobs = RecentBlobs;
 
 import CreateUpdateFeed from "./vue/feed/CreateUpdateFeed.vue";
-Vue.component("CreateUpdateFeed", CreateUpdateFeed);
 
 import CreateUpdateTodo from "./vue/todo/CreateUpdateTodo.vue";
-Vue.component("CreateUpdateTodo", CreateUpdateTodo);
 
 import AddToCollection from "./vue/blob/AddToCollection.vue";
-Vue.component("AddToCollection", AddToCollection);
 
 import NodeImage from "./vue/node/NodeImage.vue";
-Vue.component("NodeImage", NodeImage);
 
 import NodeImageModal from "./vue/node/NodeImageModal.vue";
-Vue.component("NodeImageModal", NodeImageModal);
 
 import NodeQuote from "./vue/node/NodeQuote.vue";
-Vue.component("NodeQuote", NodeQuote);
 
 import NodeQuoteModal from "./vue/node/NodeQuoteModal.vue";
-Vue.component("NodeQuoteModal", NodeQuoteModal);
 
 import NodeNote from "./vue/node/NodeNote.vue";
-Vue.component("NodeNote", NodeNote);
 
 import NodeNoteModal from "./vue/node/NodeNoteModal.vue";
-Vue.component("NodeNoteModal", NodeNoteModal);
 
 import NodeTodoList from "./vue/node/NodeTodoList.vue";
-Vue.component("NodeTodoList", NodeTodoList);
 
 import NoteModal from "./vue/common/NoteModal.vue";
-Vue.component("NoteModal", NoteModal);
 
 import CollectionObjectList from "./vue/collection/CollectionObjectList.vue";
-Vue.component("CollectionObjectList", CollectionObjectList);
 
 import CollectionObjectListModal from "./vue/collection/CollectionObjectListModal.vue";
-Vue.component("CollectionObjectListModal", CollectionObjectListModal);
 
 import IconButton from "./vue/common/IconButton.vue";
-Vue.component("IconButton", IconButton);
 
 import ObjectSelect from "./vue/common/ObjectSelect.vue";
-Vue.component("ObjectSelect", ObjectSelect);
 
 import PerfectScrollbar from "perfect-scrollbar";
 window.PerfectScrollbar = PerfectScrollbar;
 
 import Pagination from "./vue/common/Pagination.vue";
-Vue.component("Pagination", Pagination);
 
 import PythonConsole from "./vue/common/PythonConsole.vue";
-Vue.component("PythonConsole", PythonConsole);
 
 import Toast from "./vue/common/Toast.vue";
-Vue.component("Toast", Toast);
+window.Toast = Toast;
 
 import {BarController, BarElement, Chart, CategoryScale, LinearScale, Title, Tooltip} from "chart.js";
 window.Chart = Chart;
@@ -268,17 +256,18 @@ import "animate.css";
 
 import hotkeys from "hotkeys-js";
 
-import Oruga from "@oruga-ui/oruga";
-import "@oruga-ui/oruga/dist/oruga-full.css";
-import "@oruga-ui/oruga/dist/oruga-full-vars.css";
+import Oruga from "@oruga-ui/oruga-next";
+import "@oruga-ui/oruga-next/dist/oruga-full.css";
+import "@oruga-ui/oruga-next/dist/oruga-full-vars.css";
+window.Oruga = Oruga;
 
-Vue.use(Oruga, {
-    iconComponent: "font-awesome-icon",
-    iconPack: "fa",
-    table: {
-        sortIcon: "caret-up",
-    },
-});
+// app.use(Oruga, {
+//     iconComponent: "font-awesome-icon",
+//     iconPack: "fa",
+//     table: {
+//         sortIcon: "caret-up",
+//     },
+// });
 
 // Wait 10 seconds after selecting a song to play
 //  for it to be marked as "listened to".
@@ -293,5 +282,4 @@ import "@kangc/v-md-editor/lib/theme/style/github.css";
 VMdEditor.use(prismTheme, {
     Prism,
 });
-Vue.use(VMdEditor);
 VMdEditor.lang.use("en-US", enUS);

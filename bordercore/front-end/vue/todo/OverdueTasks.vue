@@ -9,7 +9,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" />
                 </div>
                 <div class="modal-body">
-                    <TransitionGroup name="fade" class="w-100">
+                    <TransitionGroup name="fade">
                         <div v-for="task in taskList" :key="task.uuid" class="hoverable row m-2">
                             <div class="col-lg-9 d-flex my-2">
                                 <div>

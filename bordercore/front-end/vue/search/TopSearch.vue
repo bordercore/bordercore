@@ -1,6 +1,6 @@
 <template>
     <Transition name="fade">
-        <div v-if="showSearchWindow" id="top-search">
+        <div v-show="showSearchWindow" id="top-search">
             <form class="form-inline" method="get">
                 <input type="hidden" name="doctype" :value="searchFilter">
                 <div class="form-row">
@@ -15,6 +15,8 @@
                             :search-url="suggestSearchUrl"
                             @search-change="onSearchChange"
                             @select="select"
+                            @enter="onEnter"
+                            @keydown.prevent="onKeyDown"
                         >
                             <template #option="props">
                                 <!-- @click.stop="" handlers are needed to prevent the splitter from being selected -->
@@ -80,9 +82,14 @@
 
 <script>
 
+    import SelectValue from "../common/SelectValue.vue";
+
     export default {
+        components: {
+            SelectValue,
+        },
         props: {
-            initialSearchType: {
+            initialSearchFilter: {
                 type: String,
                 default: "",
             },
@@ -111,10 +118,49 @@
                 default: () => [],
             },
         },
-        data() {
+        setup(props) {
+            function focusSearch() {
+                selectValue.value.$el.querySelector("input").focus();
+            }
+
+            function handleFilter(filter) {
+                searchFilter.value = searchFilter.value === filter ? "" : filter;
+                saveSearchFilter(searchFilter);
+            }
+
+            function saveSearchFilter(searchFilter) {
+                doPost(
+                    null,
+                    props.storeInSessionUrl,
+                    {
+                        "top_search_filter": searchFilter,
+                    }
+                    ,
+                    (response) => {},
+                    "",
+                    "",
+                );
+            }
+
+            onMounted(() => {
+                document.addEventListener("keydown", function(evt) {
+                    if (evt.key === "s" && evt.altKey) {
+                        self.showSearchWindow = true;
+                    }
+                } );
+            });
+
+            const showFilter = ref(true);
+            const showSearchWindow = ref(false);
+            const searchFilter = ref(props.initialSearchFilter);
+            const selectValue = ref(null);
+
             return {
-                searchFilter: this.initialSearchType,
-                searchUrl: this.suggestSearchUrl,
+                focusSearch,
+                handleFilter,
+                saveSearchFilter,
+                selectValue,
+                searchUrl: props.suggestSearchUrl,
                 searchFilterTypes: [
                     {
                         "name": "Books",
@@ -142,17 +188,13 @@
                         "doctype": "drill",
                     },
                 ],
-                showFilter: true,
-                showSearchWindow: false,
+                showFilter,
+                showSearchWindow,
+                searchFilter,
             };
         },
         mounted() {
             const self = this;
-            document.addEventListener("keydown", function(evt) {
-                if (evt.key === "s" && evt.altKey) {
-                    self.showSearchWindow = true;
-                }
-            } );
 
             // If a click was detected outside this component, *and*
             //  the click wasn't on the "Search icon", then hide the
@@ -178,17 +220,6 @@
             });
         },
         methods: {
-            /* search(query) {
-             *     try {
-             *         const url = this.searchUrl;
-             *         return axios.get(url + query + "&doc_type=" + this.searchFilter.toLowerCase())
-             *                     .then((response) => {
-             *                         return response.data;
-             *                     });
-             *     } catch (error) {
-             *         console.log(`Error: ${error}`);
-             *     }
-             * }, */
             boldenSuggestion(scope) {
                 if (!scope) return scope;
 
@@ -255,27 +286,8 @@
             onSearchChange(query) {
                 this.showFilter = query === "";
             },
-            handleFilter(filter) {
-                console.log("handlfFilter");
-                this.searchFilter = this.searchFilter === filter ? "" : filter;
-                this.saveSearchFilter(this.searchFilter);
-                this.$refs.suggestComponent.research();
-            },
             handleRecentSearch(searchTerm) {
                 window.location=this.querySearchUrl + "?search=" + searchTerm.search_text;
-            },
-            saveSearchFilter(searchFilter) {
-                doPost(
-                    this,
-                    this.storeInSessionUrl,
-                    {
-                        "top_search_filter": searchFilter,
-                    }
-                    ,
-                    (response) => {},
-                    "",
-                    "",
-                );
             },
             getFilterClass(filter) {
                 if (filter === this.searchFilter) {

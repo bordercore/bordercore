@@ -18,9 +18,13 @@
 
     import {Toast} from "bootstrap";
     window.Toast = Toast;
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
     export default {
         name: "Toast",
+        components: {
+            FontAwesomeIcon,
+        },
         props: {
             initialMessages: {
                 type: Array,

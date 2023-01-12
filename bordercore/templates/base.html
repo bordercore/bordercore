@@ -51,20 +51,19 @@
                         <div id="top-bar" class="row">
 
                             <div class="col-lg-8 card-grid my-auto text-truncate" id="top-title" v-cloak>
-                                <span v-if="$store.state.collapsed">Bordercore :: </span>{% block title %} {% endblock %}
+                                <span v-if="collapsed">Bordercore :: </span>{% block title %} {% endblock %}
                             </div>
 
                             <div class="col-lg-4 my-auto d-flex justify-content-end align-items-center">
                                 <div class="position-relative">
                                     <top-search
                                         ref="topSearch"
-                                        initial-search-type="{{ request.session.top_search_filter }}"
+                                        initial-search-filter="{{ request.session.top_search_filter }}"
                                         suggest-search-url="{% url 'search:search_tags_and_names' %}?term="
                                         query-search-url="{% url 'search:search' %}"
                                         note-query-search-url="{% url 'search:notes' %}"
                                         drill-query-search-url="{% url 'search:search' %}"
                                         store-in-session-url="{% url "accounts:store_in_session" %}"
-                                        recent-searches="{{ recent_searches }}"
                                         :recent-searches="recentSearches"
                                     >
                                     </top-search>
@@ -88,7 +87,7 @@
                                         :support-hover-target="false"
                                         :show-target="false"
                                     >
-                                        <div slot="icon">
+                                        <template #icon>
                                             <span class="align-middle ms-2">
                                                 Hello <strong>{{ user.get_username }}</strong>
                                             </span>
@@ -120,41 +119,41 @@
                 {% block nav %}
                 {% endblock %}
 
-                </div>
-
                 <div class="row flex-grow-1">
 
                     <div class="col-lg-12">
-                        {% block content %}
-                        {% endblock %}
+                    {% block content %}
+                    {% endblock %}
+                    </div>
+
                 </div>
 
             </div>
 
-        </div>
+            <div id="sidebar">
+                <sidebar-menu @update:collapsed="onToggleCollapse" @item-click="onItemClick" :menu="menu"
+                    :collapsed="collapsed" />
+                <span slot="toggle-icon">
+                    <font-awesome-icon icon="arrows-alt-h"></font-awesome-icon>
+                </span>
+                <span slot="dropdown-icon">
+                    <font-awesome-icon icon="angle-right"></font-awesome-icon>
+                </span>
+            </div>
 
-        <div id="sidebar">
-            <sidebar-menu @toggle-collapse="onToggleCollapse" @item-click="onItemClick" :menu="menu" :collapsed="$store.state.collapsed" ref="sidebar" />
-            <span slot="toggle-icon">
-                <font-awesome-icon icon="arrows-alt-h"></font-awesome-icon>
-            </span>
-            <span slot="dropdown-icon">
-                <font-awesome-icon icon="angle-right"></font-awesome-icon>
-            </span>
-        </div>
-
-        <div class="modal fade" id="modalHelp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title" id="myModalLabel">
-                            <font-awesome-icon icon="question" class="text-secondary me-2"></font-awesome-icon>
-                            Help
-                        </h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body" id="modal-body-help">
-                        Help!
+            <div class="modal fade" id="modalHelp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="myModalLabel">
+                                <font-awesome-icon icon="question" class="text-secondary me-2"></font-awesome-icon>
+                                Help
+                            </h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="modal-body-help">
+                            Help!
+                        </div>
                     </div>
                 </div>
             </div>
@@ -176,23 +175,18 @@
 
             <script type="text/javascript">
 
-                Vue.mixin({ delimiters: ["[[", "]]"] });
-
-                const EventBus = new Vue();
-
-                const mapGetters = Vuex.mapGetters;
-
                 // Use the name 'storeBase' to avoid conflict with stores in child templates
-                const storeBase = new Vuex.Store({
-                    state: {
-                        collapsed: {% if request.session.show_sidebar == "false" %}true{% else %}false{% endif %},
-                    },
-                    getters: {},
-                    mutations: {
-                        collapsed (state, payload) {
-                            state.collapsed = payload;
+                const storeBase = createStore({
+                    state () {
+                        return {
+                            collapsed: {% if request.session.show_sidebar == "false" %}true{% else %}false{% endif %}
                         }
                     },
+                    mutations: {
+                        toggleCollapsed(state) {
+                            state.collapsed = !state.collapsed;
+                        }
+                    }
                 });
 
                 const timestamp = new Date().getTime()
@@ -207,93 +201,143 @@
                 body.style.backgroundImage = "url('https://bordercore-blobs.s3.amazonaws.com/background/{{ user.userprofile.uuid }}/{{ user.userprofile.background_image }}')";
                 {% endif %}
 
-                new Vue({
-                    el: "#vue-toast",
-                    name: "Toast",
-                    data() {
+                const appToast = createApp({
+                    name: "ToastApp",
+                    components: {
+                        "Toast": Toast,
+                        "font-awesome-icon": FontAwesomeIcon,
+                    },
+                    setup() {
+
+                        const initialMessages = JSON.parse('{{ json_messages|safe|escapejs }}');
+
                         return {
-                            initialMessages: JSON.parse('{{ json_messages|safe|escapejs }}'),
-                        }
+                            initialMessages
+                        };
                     }
                 });
+                appToast.mount("#vue-toast");
 
-                new Vue({
-                    el: "#top-bar",
-                    store: storeBase,
+                const appTopBar = createApp({
                     name: "Top Bar",
-                    data() {
-                        return {
-                            show: false,
-                            right: true,
-                            failed_test_count: {{ failed_test_count }},
-                            userMenuItems: [
-                                {
-                                    id: uuidv4(),
-                                    title: "Preferences",
-                                    url: "{% url 'accounts:prefs' %}",
-                                    icon: "briefcase"
-                                },
-                                {% if request.user|is_in_group:"Admin" %}
-                                {
-                                    id: uuidv4(),
-                                    title: "Metrics",
-                                    url: "{% url 'metrics:list' %}",
-                                    icon: "chart-bar",
-                                    extra: {{ failed_test_count }}
-                                },
-                                {% endif %}
-                                {
-                                    id: uuidv4(),
-                                    title: "Help",
-                                    url: "#",
-                                    icon: "question",
-                                    clickHandler: this.showHelp
-                                },
-                                {
-                                    id: uuidv4(),
-                                    title: "Logout",
-                                    url: "{% url 'accounts:logout' %}",
-                                    icon: "sign-out-alt",
-                                },
-                            ],
-                            recentBlobs: JSON.parse(document.getElementById("recent_blobs").textContent),
-                            overdueTasks: JSON.parse(document.getElementById("overdue_tasks").textContent),
-                            recentSearches: JSON.parse(document.getElementById("recent_searches").textContent),
-                        }
+                    components: {
+                        DropDownMenu,
+                        OverdueTasks,
+                        RecentBlobs,
                     },
-                    methods: {
-                        showHelp(evt) {
+                    delimiters: ["[[", "]]"],
+                    setup() {
+
+                        const failed_test_count = ref({{ failed_test_count }});
+                        const right = ref(true);
+                        const show = ref(false);
+                        const userMenuItems = ref([
+                            {
+                                id: uuidv4(),
+                                title: "Preferences",
+                                url: "{% url 'accounts:prefs' %}",
+                                icon: "briefcase"
+                            },
+                            {% if request.user|is_in_group:"Admin" %}
+                            {
+                                id: uuidv4(),
+                                title: "Metrics",
+                                url: "{% url 'metrics:list' %}",
+                                icon: "chart-bar",
+                                extra: {{ failed_test_count }}
+                            },
+                            {% endif %}
+                            {
+                                id: uuidv4(),
+                                title: "Help",
+                                url: "#",
+                                icon: "question",
+                                clickHandler: this.showHelp
+                            },
+                            {
+                                id: uuidv4(),
+                                title: "Logout",
+                                url: "{% url 'accounts:logout' %}",
+                                icon: "sign-out-alt",
+                            },
+                        ]);
+                        const recentBlobs = JSON.parse(document.getElementById("recent_blobs").textContent);
+                        const overdueTasks = JSON.parse(document.getElementById("overdue_tasks").textContent);
+                        const recentSearches = JSON.parse(document.getElementById("recent_searches").textContent);
+
+                        const store = useStore();
+                        const collapsed = computed(() => store.state.collapsed);
+
+                        function showHelp(evt) {
                             const helpText = document.getElementById("help-text").innerHTML;
                             document.getElementById("modal-body-help").innerHTML = markdown.render(helpText);
                             const modal = new Modal("#modalHelp");
                             modal.show();
-                        },
-                        openSearchWindow() {
-                            this.$refs.topSearch.showSearchWindow = true;
-                            setTimeout( () => {
-                                this.$refs.topSearch.$refs.selectValue.$el.querySelector("input").focus();
+                        }
+
+                        function openSearchWindow() {
+                            topSearch.value.showSearchWindow = true;
+                            setTimeout(() => {
+                                topSearch.value.focusSearch();
                             }, 500);
                         }
-                    },
-                    mounted() {
 
-                        if (this.overdueTasks.length > 0) {
-                            const modal = new Modal("#modalOverdueTasks");
-                            modal.show();
+                        onMounted(() => {
+                            if (overdueTasks.length > 0) {
+                                const modal = new Modal("#modalOverdueTasks");
+                                modal.show();
+                            }
+                        })
+
+                        const topSearch = ref(null);
+
+                        return {
+                            failed_test_count,
+                            collapsed,
+                            right,
+                            show,
+                            storeBase,
+                            userMenuItems,
+                            recentBlobs,
+                            overdueTasks,
+                            recentSearches,
+                            showHelp,
+                            openSearchWindow,
+                            topSearch,
                         }
+
                     }
                 });
 
-                new Vue({
-                    el: "#sidebar",
-                    name: "Sidebar",
-                    store: storeBase,
-                    data() {
+                appTopBar.use(storeBase);
+                appTopBar.component("TopSearch", TopSearch);
+                appTopBar.component("font-awesome-icon", FontAwesomeIcon);
+                appTopBar.mount("#top-bar");
+
+                const appSideBar = createApp({
+                    name: "SidebarApp",
+                    components: {
+                        SidebarMenu,
+                    },
+                    setup() {
+
+                        onMounted(() => {
+                            window.setInterval(this.getUntaggedBookmarkCount, 60000);
+
+                            const ps = new PerfectScrollbar(".vsm--scroll-wrapper");
+                            // Save this so that we can update the scrollbar when expanding items in the sidebar
+                            storeBase.ps = ps;
+                        })
+
+                        const store = useStore();
+                        const collapsed = computed(() => store.state.collapsed);
+
                         return {
+                            collapsed,
+                            storeBase,
                             menu: [
                                 {
-                                    header: true,
-                                    title: "Bordercore",
+                                    header: "Bordercore",
                                     hiddenOnCollapse: true,
                                     class: "sidebar-header text-center"
                                 },
@@ -479,13 +523,9 @@
                             ],
                         }
                     },
-                    computed: {
-                        ...mapGetters(["collapsed"]),
-                    },
                     methods: {
                         onToggleCollapse(collapsed) {
-
-                            this.$store.commit("collapsed", collapsed);
+                            storeBase.commit("toggleCollapsed");
                             const wrapper = document.querySelector(".wrapper");
                             if (collapsed) {
                                 wrapper.classList.add("collapsed");
@@ -507,7 +547,7 @@
 
                         },
                         onItemClick(event, item, node) {
-                            this.ps.update();
+                            storeBase.ps.update();
                         },
                         getUntaggedBookmarkCount() {
 
@@ -525,30 +565,26 @@
                             );
                         }
                     },
-                    mounted() {
-
-                        window.setInterval(this.getUntaggedBookmarkCount, 60000);
-
-                        const ps = new PerfectScrollbar(".vsm--scroll-wrapper");
-
-                        // Save this so that we can update the scrollbar when expanding items in the sidebar
-                        this.ps = ps;
-
-                    }
                 });
 
-                new Vue({
-                    name: "Help Modal",
-                    el: "#modalHelp",
-                });
+                appSideBar.use(storeBase);
+                appSideBar.component("font-awesome-icon", FontAwesomeIcon);
+                appSideBar.component("RouterLink", RouterLink);
+                appSideBar.mount("#sidebar");
 
-            </script>
+                const appHelp = createApp({
+                    name: "Help Modal"
+                });
+                appHelp.component("font-awesome-icon", FontAwesomeIcon);
+                appHelp.mount("#modalHelp");
+
+                </script>
 
         {% endblock %}
 
         {% block help %}
             <div class="d-none" id="help-text">
-Bordercore is a place to organize all your information.
+                Bordercore is a place to organize all your information.
             </div>
         {% endblock %}
 

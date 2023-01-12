@@ -3,11 +3,11 @@
 
         <drop-down-menu :show-target="false">
 
-            <span slot="icon">
+            <template #icon>
                 <font-awesome-icon class="glow" icon="object-group" />
-            </span>
+            </template>
 
-            <div slot="dropdown" class="recent-blobs px-2">
+            <template #dropdown class="recent-blobs px-2">
                 <div class="search-splitter">
                     Recent Blobs
                 </div>
@@ -30,18 +30,24 @@
                 <div v-if="blobListInfo.message" class="text-nowrap">
                     <strong>Elasticsearch Error</strong>: {{ blobListInfo.message.statusCode }}
                 </div>
-            </div>
+            </template>
         </drop-down-menu>
     </span>
 </template>
 
 <script>
 
+    import DropDownMenu from "../common/DropDownMenu.vue";
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+
     export default {
+        components: {
+            DropDownMenu,
+            FontAwesomeIcon,
+        },
         props: {
             blobListInfo: {
-                default: function() {
-                },
+                default: function() {},
                 type: Object,
             },
             blobDetailUrl: {
@@ -64,8 +70,7 @@
             },
         },
         methods: {
-            getCoverImage() {
-            },
+            getCoverImage() {},
         },
     };
 

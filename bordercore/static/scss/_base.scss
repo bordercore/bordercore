@@ -2427,6 +2427,12 @@ tr.hover-target:hover {
     background-color: var(--surface3) !important;
   }
 
+  // Change the size of the icons
+  .vsm--link_level-1 .vsm--icon {
+    box-sizing: border-box;
+    padding: 5px;
+  }
+
   .vsm--link_level-2 {
     background-color: var(--sidebar-bg) !important;
     color: var(--sidebar-color) !important;
@@ -2449,6 +2455,10 @@ tr.hover-target:hover {
 
   &.vsm_expanded {
     max-width: 15rem !important;
+  }
+
+  .vsm--header {
+    text-transform: none !important;
   }
 
   .vsm--icon {

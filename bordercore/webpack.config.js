@@ -1,9 +1,10 @@
 const path = require("path");
+const webpack = require("webpack");
 const CompressionPlugin = require("compression-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const FixStyleOnlyEntriesPlugin = require("webpack-fix-style-only-entries");
 const StylelintPlugin = require("stylelint-webpack-plugin");
-const VueLoaderPlugin = require("vue-loader/lib/plugin");
+const {VueLoaderPlugin} = require("vue-loader");
 
 /**
  * Only return CSS webpack entries if the environment
@@ -39,7 +40,7 @@ module.exports = (env, argv) => {
         mode: "production",
         resolve: {
             alias: {
-                vue$: "vue/dist/vue.esm.js",
+                vue$: "vue/dist/vue.esm-bundler.js",
             },
         },
         plugins: [
@@ -58,6 +59,12 @@ module.exports = (env, argv) => {
             // Extract generated CSS into separate files
             new MiniCssExtractPlugin({
                 filename: devMode ? "[name].css" : "[name].min.css",
+            }),
+
+            // Define these to improve tree-shaking and muffle browser warnings
+            new webpack.DefinePlugin({
+                __VUE_OPTIONS_API__: true,
+                __VUE_PROD_DEVTOOLS__: false,
             }),
 
             // Responsible for cloning any other rules you have defined and applying them
@@ -81,7 +88,6 @@ module.exports = (env, argv) => {
                 {
                     test: /\.css$/,
                     use: [
-                        "vue-style-loader",
                         "style-loader",
                         {
                             loader: "css-loader",

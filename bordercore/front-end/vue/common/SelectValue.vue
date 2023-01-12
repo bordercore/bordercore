@@ -124,6 +124,9 @@
                 this.options = [];
                 this.value = null;
             },
+            focus() {
+                this.$el.querySelector("input").focus();
+            },
             onSubmit() {
                 const newOption = {
                     [this.label]: this.searchQuery,

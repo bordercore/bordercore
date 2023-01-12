@@ -103,7 +103,7 @@
 
                         {% for field in form %}
 
-                            <div class="{% if field.errors %}message-error{% endif %} row mb-3">
+                            <div class="{% if field.errors %}message-error {% endif %}row mb-3">
                                 <label class="fw-bold col-lg-2 col-form-label text-end">
                                     {{ field.label }}
                                 </label>
@@ -180,9 +180,64 @@
 
     <script type="text/javascript">
 
-        new Vue({
-            el: "#vue-app",
-            data() {
+        const app = createApp({
+            name: "BookmarkUpdate",
+            components: {
+                FontAwesomeIcon,
+            },
+            setup() {
+
+                function onClickDelete(evt) {
+                    const formEl = document.getElementById("bookmark-form");
+                    formEl.setAttribute("action", "{% url 'bookmark:delete' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', this.uuid));
+                    formEl.submit();
+                }
+
+                function onClickTag(tag) {
+                    EventBus.$emit("add-tag", tag);
+                }
+
+                function onBlur(evt) {
+                    // If the name has already been filled-in, abort
+                    const name = document.getElementById("id_name");
+                    if (name.value) {
+                        return;
+                    }
+
+                    let url = document.getElementById("id_url").value;
+                    if (!url) {
+                        return;
+                    }
+
+                    url = encodeURIComponent(url).replace(/%/g, "%25");
+
+                    doGet(
+                        this,
+                        "{% url "bookmark:get_title_from_url" %}?url=" + url,
+                        (response) => {
+                            name.value = response.data.title;
+                        },
+                        "Error getting title from url"
+                    );
+
+                }
+
+                function onClick(url) {
+                    window.location = url;
+                }
+
+                const relatedTags = ref(null);
+
+                function onTagsChanged(tags) {
+                    relatedTags.value.setTags(tags);
+                }
+
+                onMounted(() => {
+                    EventBus.$on("add-tag", (payload) => {
+                        relatedTags.value.tagsInput.addTag(payload);
+                    });
+                });
+
                 return {
                     importance: {{ form.importance.value|yesno:"true,false" }},
                     daily: {{ form.daily.value }},
@@ -207,56 +262,28 @@
                     ],
                     related_blobs: JSON.parse(document.getElementById("related_blobs").textContent),
                     related_nodes: JSON.parse(document.getElementById("related_nodes").textContent),
-                }
-            },
-            mounted() {
-                EventBus.$on("add-tag", (payload) => {
-                    this.$refs.tagsInput.addTag(payload);
-                });
-            },
-            methods: {
-                onClickDelete(evt) {
-                    const formEl = document.getElementById("bookmark-form");
-                    formEl.setAttribute("action", "{% url 'bookmark:delete' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', this.uuid));
-                    formEl.submit();
-                },
-                onClickTag(tag) {
-                    EventBus.$emit("add-tag", tag);
-                },
-                onBlur(evt) {
-
-                    // If the name has already been filled-in, abort
-                    const name = document.getElementById("id_name");
-                    if ( name.value ) {
-                        return;
-                    }
-
-                    let url = document.getElementById("id_url").value;
-                    if ( !url ) {
-                        return;
-                    }
-
-                    url = encodeURIComponent(url).replace(/%/g, "%25");
-
-                    doGet(
-                        this,
-                        "{% url "bookmark:get_title_from_url" %}?url=" + url,
-                        (response) => {
-                            name.value = response.data.title;
-                        },
-                        "Error getting title from url"
-                    );
-
-                },
-                onClick(url) {
-                    window.location = url;
-                },
-                onTagsChanged(tags) {
-                    this.$refs.relatedTags.setTags(tags);
-                },
+                    relatedTags,
+                    onClickDelete,
+                    onClickTag,
+                    onBlur,
+                    onClick,
+                    onTagsChanged
+                };
             }
         });
 
-    </script>
+        app.component("Card", Card);
+        app.component("RelatedTags", RelatedTags);
+        app.component("TagsInput", TagsInput);
+        app.use(Oruga, {
+            iconComponent: "font-awesome-icon",
+            iconPack: "fa",
+            table: {
+                sortIcon: "caret-up",
+            },
+        });
+        app.mount("#vue-app");
+
+</script>
 
 {% endblock %}
