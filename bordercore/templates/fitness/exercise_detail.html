@@ -196,19 +196,16 @@
                                     Selecting an exercise from the list below will make it <em>active</em> and make the exercise <strong>{{ object.name }}</strong> <em>inactive</em>.
                                 </small>
                             </div>
-                            <b-table
+                            <o-table
                                 :data="relatedExercises"
                                 :columns="relatedExercisesFields"
-                                sort-icon="chevron-up"
-                                @click="onSelectRelatedExercise"
                                 hoverable
+                                @click="onSelectRelatedExercise"
                             >
-
                                 <template #empty>
                                     <div class="text-center">No related exercises</div>
                                 </template>
-
-                            </b-table>
+                            </o-table>
                         </div>
                     </div>
                 </div>
@@ -329,43 +326,59 @@
 
                                     <hr />
 
-                                    <b-table
+                                    <o-table
                                         :data="items"
-                                        :mobile-cards="false"
-                                        sort-icon="chevron-up"
                                         class="w-75 mx-auto"
                                     >
 
                                         {% if recent_data.0.weight %}
-                                            <b-table-column field="weight" label="Weight" cell-class="text-center w-50" header-class="text-center cursor-pointer ps-4" v-slot="props">
+                                            <o-table-column
+                                                field="weight"
+                                                label="Weight"
+                                                :td-attrs="() => ({ class: 'text-center w-50' })"
+                                                :th-attrs="() => ({ class: 'text-center cursor-pointer ps-4' })"
+                                                v-slot="props"
+                                            >
                                                 <input type="text" class="form-control text-center" size="3" v-if="items[props.row.index - 1].isEdit && selectedCell === 'weight'" type="number" v-model="items[props.row.index - 1].weight" @blur="onBlur(props.row.index - 1)"></input>
                                                 <span v-else @click="editCellHandler(props.row.index - 1, 'weight')">
                                                     [[ props.row.weight ]]
                                                 </span>
-                                            </b-table-column>
+                                            </o-table-column>
                                         {% endif %}
 
                                         {% if recent_data.0.duration %}
-                                            <b-table-column field="duration" label="Duration" cell-class="text-center w-50" header-class="text-center cursor-pointer ps-4" v-slot="props">
+                                            <o-table-column
+                                                field="duration"
+                                                label="Duration"
+                                                :td-attrs="() => ({ class: 'text-center w-50' })"
+                                                :th-attrs="() => ({ class: 'text-center cursor-pointer ps-4' })"
+                                                v-slot="props"
+                                            >
                                                 <input type="text" class="form-control text-center" size="3" v-if="items[props.row.index - 1].isEdit && selectedCell === 'duration'" type="number" v-model="items[props.row.index - 1].duration" @blur="onBlur(props.row.index - 1)"></input>
                                                 <span v-else @click="editCellHandler(props.row.index - 1, 'duration')">
                                                     [[ props.row.duration ]]
                                                 </span>
-                                            </b-table-column>
+                                            </o-table-column>
                                         {% endif %}
 
-                                        <b-table-column field="reps" label="Reps" cell-class="text-center w-50" header-class="text-center cursor-pointer ps-4" v-slot="props">
+                                        <o-table-column
+                                            field="reps"
+                                            label="Reps"
+                                            :td-attrs="() => ({ class: 'text-center w-50' })"
+                                            :th-attrs="() => ({ class: 'text-center cursor-pointer ps-4' })"
+                                            v-slot="props"
+                                        >
                                             <input type="text" class="form-control text-center" size="3" v-if="items[props.row.index - 1].isEdit && selectedCell === 'reps'" type="number" v-model="items[props.row.index - 1].reps" @blur="onBlur(props.row.index - 1)"></input>
                                             <span v-else @click="editCellHandler(props.row.index - 1, 'reps')">
                                                 [[ props.row.reps ]]
                                             </span>
-                                        </b-table-column>
+                                        </o-table-column>
 
                                         <template #empty>
                                             <div class="text-center">No workout data</div>
                                         </template>
 
-                                    </b-table>
+                                    </o-table>
                                 </div>
                             </div>
                         </template>

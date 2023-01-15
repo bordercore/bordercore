@@ -613,13 +613,15 @@ a.tag {
   }
 }
 
-// Buefy tables
+// Oruga tables
 
 .is-invisible {
   display: none !important;
 }
 
-.b-table {
+.o-table {
+  border-collapse: collapse !important;
+
   .icon {
     transition: transform 150ms ease-out, opacity 86ms ease-out;
     &.is-desc {
@@ -635,23 +637,31 @@ a.tag {
   }
 
   th {
+    padding: 0.6rem;
     border-top: none;
     color: $primary;
 
-    .sort-icon {
-      margin-left: 0.5rem;
+    .o-table__th__sort-icon {
       color: var(--text2);
-      font-size: 0.62rem;
     }
   }
 
   td {
+    padding: 0.6rem;
     vertical-align: middle;
   }
 
-  table.is-hoverable tbody tr {
+  tr {
+    border-bottom: 1px solid var(--surface6);
+  }
+
+  &.o-table--hoverable tbody tr {
     @extend .hoverable-cells;
   }
+}
+
+.o-table__tr--selected {
+  @extend .selected;
 }
 
 .table-borderless td,
@@ -1785,6 +1795,7 @@ div #dateapp {
 
 .todo-col-manual-sorting {
   width: 7rem;
+  cursor: grab;
 }
 
 .todo-col-priority {
@@ -1793,6 +1804,7 @@ div #dateapp {
 
 .todo-col-date {
   width: 8rem;
+  white-space: nowrap;
 }
 
 .col-action {

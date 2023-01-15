@@ -115,6 +115,12 @@
   --card-spacer-y: 1.25;
   --card-spacer-x: 1.25;
 
+  // Oruga
+  --oruga-table-color: var(--text1);
+  --oruga-table-background-color: transparent;
+  --oruga-table-hoverable-background-color: var(--hover-bg);
+  --oruga-table-td-border: var(--text1);
+
   .list-group {
     --bs-list-group-border-color: var(--surface5);
   }

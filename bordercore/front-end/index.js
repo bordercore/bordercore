@@ -36,7 +36,7 @@ window.Modal = Modal;
 window.Tab = Tab;
 
 import {library} from "@fortawesome/fontawesome-svg-core";
-import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faExchangeAlt, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faChartBar, faCheck, faChevronLeft, faChevronRight, faChevronUp, faClone, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faFileAlt, faFileImport, faHeart, faHome, faImage, faImages, faInfo, faGraduationCap, faLink, faList, faLock, faMusic, faNewspaper, faObjectGroup, faPencilAlt, faPlus, faQuestion, faQuoteLeft, faRandom, faRunning, faSearch, faSignOutAlt, faSplotch, faSquareRootAlt, faStar, faStickyNote, faTags, faTasks, faThumbtack, faTimes, faTimesCircle, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
+import {faAlignLeft, faAngleDown, faAngleRight, faArrowsAltH, faExchangeAlt, faBars, faBook, faBookmark, faBox, faBriefcase, faCalendarAlt, faCaretUp, faChartBar, faCheck, faChevronLeft, faChevronRight, faChevronUp, faClone, faCopy, faDownload, faEllipsisV, faExclamationTriangle, faFileAlt, faFileImport, faHeart, faHome, faImage, faImages, faInfo, faGraduationCap, faLink, faList, faLock, faMusic, faNewspaper, faObjectGroup, faPencilAlt, faPlus, faQuestion, faQuoteLeft, faRandom, faRunning, faSearch, faSignOutAlt, faSplotch, faSquareRootAlt, faStar, faStickyNote, faTags, faTasks, faThumbtack, faTimes, faTimesCircle, faTrashAlt} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 import {faAws} from "@fortawesome/free-brands-svg-icons";
 import {faPython} from "@fortawesome/free-brands-svg-icons";
@@ -52,6 +52,7 @@ library.add(faBook);
 library.add(faBox);
 library.add(faBriefcase);
 library.add(faCalendarAlt);
+library.add(faCaretUp);
 library.add(faChartBar);
 library.add(faCheck);
 library.add(faChevronLeft);
@@ -265,15 +266,17 @@ import hotkeys from "hotkeys-js";
 import ToggleButton from "vue-js-toggle-button";
 Vue.use(ToggleButton);
 
-import {Table} from "buefy";
-import Buefy from "buefy";
+import Oruga from "@oruga-ui/oruga";
+import "@oruga-ui/oruga/dist/oruga-full.css";
+import "@oruga-ui/oruga/dist/oruga-full-vars.css";
 
-Vue.use(Buefy, {
-    defaultIconComponent: "font-awesome-icon",
-    defaultIconPack: "fa",
+Vue.use(Oruga, {
+    iconComponent: "font-awesome-icon",
+    iconPack: "fa",
+    table: {
+        sortIcon: "caret-up",
+    },
 });
-
-Vue.use(Table);
 
 // Wait 10 seconds after selecting a song to play
 //  for it to be marked as "listened to".

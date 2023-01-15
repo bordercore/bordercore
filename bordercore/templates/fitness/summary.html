@@ -10,31 +10,29 @@
 
             <h1>Active Exercises</h1>
 
-            <b-table
+            <o-table
                 :data="items_active"
-                :mobile-cards="false"
                 hoverable
                 :row-class="rowClass"
-                sort-icon="chevron-up"
             >
-                <b-table-column field="exercise" label="Exercise" v-slot="props">
+                <o-table-column field="exercise" label="Exercise" v-slot="props">
                     <a :href="props.row.exercise_url">
                         [[ props.row.exercise ]]
                     </a>
                     <span v-if="props.row.overdue === 2" class="text-warning ms-3">
                         OVERDUE
                     </span>
-                </b-table-column>
+                </o-table-column>
 
-                <b-table-column field="muscle_group" label="Muscle Group" cell-class="fitness-col-muscle-group text-center" header-class="text-center" v-slot="props">
+                <o-table-column field="muscle_group" label="Muscle Group" :td-attrs="() => ({ class: 'fitness-col-muscle-group text-center' })" :th-attrs="() => ({ class: 'text-center' })" v-slot="props">
                     [[ props.row.muscle_group ]]
-                </b-table-column>
+                </o-table-column>
 
-                <b-table-column field="frequency" label="Frequency" cell-class="fitness-col-frequency text-center" header-class="text-center" v-slot="props">
+                <o-table-column field="frequency" label="Frequency" :td-attrs="() => ({ class: 'fitness-col-frequency text-center' })" :th-attrs="() => ({ class: 'text-center' })" v-slot="props">
                     [[ props.row.frequency ]]
-                </b-table-column>
+                </o-table-column>
 
-                <b-table-column field="last_active" label="Last Workout" header-class="text-center" v-slot="props">
+                <o-table-column field="last_active" label="Last Workout" :th-attrs="() => ({ class: 'text-center' })" v-slot="props">
                     <div v-if="props.row.last_active" class="d-flex">
                         <div class="text-nowrap me-3">
                             [[ getDate(props.row.last_active) ]]
@@ -44,30 +42,26 @@
                         </div>
                     </div>
                     <div v-else>Never</div>
-                </b-table-column>
+                </o-table-column>
+            </o-table>
 
-            </b-table>
+            <h1 class="mt-3">Inactive Exercises</h1>
 
-            <h1>Inactive Exercises</h1>
-
-            <b-table
+            <o-table
                 :data="items_inactive"
-                :mobile-cards="false"
                 hoverable
                 :default-sort="['exercise','asc']"
-                sort-icon="chevron-up"
             >
-                <b-table-column field="exercise" label="Exercise" sortable v-slot="props">
+                <o-table-column field="exercise" label="Exercise" sortable v-slot="props">
                     <a :href="props.row.exercise_url">
                         [[ props.row.exercise ]]
                     </a>
-                </b-table-column>
-
-                <b-table-column field="muscle_group" label="Muscle Group" cell-class="text-center" header-class="text-center" v-slot="props">
+                </o-table-column>
+                <o-table-column field="muscle_group" label="Muscle Group"
+                    :td-attrs="() => ({ class: 'text-center' })" :th-attrs="() => ({ class: 'text-center' })" v-slot="props">
                     [[ props.row.muscle_group ]]
-                </b-table-column>
-
-                <b-table-column field="last_active" label="Last Workout" header-class="text-center" v-slot="props">
+                </o-table-column>
+                <o-table-column field="last_active" label="Last Workout" :th-attrs="() => ({ class: 'text-center' })" v-slot="props">
                     <div v-if="props.row.last_active" class="d-flex">
                         <div class="text-nowrap me-3">
                             [[ getDate(props.row.last_active) ]]
@@ -77,9 +71,8 @@
                         </div>
                     </div>
                     <div v-else>Never</div>
-                </b-table-column>
-
-            </b-table>
+                </o-table-column>
+            </o-table>
 
         </div>
 

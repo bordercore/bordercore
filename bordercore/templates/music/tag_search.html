@@ -124,34 +124,32 @@
 
                         <template v-slot:content>
 
-                            <b-table
+                            <o-table
                                 :data="songList"
-                                :mobile-cards="false"
                                 :default-sort="['year', 'desc']"
                                 hoverable
                                 :selected.sync="selectedSong"
-                                sort-icon="chevron-up"
                                 @select="onSongClicked"
                                 ref="table"
                             >
 
-                                <b-table-column field="title" label="Title" header-class="cursor-pointer" sortable v-slot="props">
+                                <o-table-column field="title" label="Title" sortable v-slot="props">
                                     <span>[[ props.row.title ]]</span>
-                                </b-table-column>
+                                </o-table-column>
 
-                                <b-table-column field="artist" label="Artist" header-class="cursor-pointer" sortable v-slot="props">
+                                <o-table-column field="artist" label="Artist" sortable v-slot="props">
                                     <span>[[ props.row.artist ]]</span>
-                                </b-table-column>
+                                </o-table-column>
 
-                                <b-table-column field="year" label="Year" header-class="cursor-pointer" sortable v-slot="props">
+                                <o-table-column field="year" label="Year" sortable v-slot="props">
                                     <span>[[ props.row.year ]]</span>
-                                </b-table-column>
+                                </o-table-column>
 
-                                <b-table-column field="length" label="Length" header-class="cursor-pointer" sortable v-slot="props">
+                                <o-table-column field="length" label="Length" sortable v-slot="props">
                                     <span>[[ props.row.length ]]</span>
-                                </b-table-column>
+                                </o-table-column>
 
-                            </b-table>
+                            </o-table>
 
                         </template>
 

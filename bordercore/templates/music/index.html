@@ -173,31 +173,29 @@
                     <div class="card-grid ms-2">
 
                         <div>
-                            <b-table
+                            <o-table
                                 :data="songList"
-                                :mobile-cards="false"
                                 hoverable
-                                sort-icon="chevron-up"
                                 ref="table"
                             >
-                                <b-table-column field="title" label="Title" header-class="cursor-pointer" v-slot="props">
+                                <o-table-column field="title" label="Title" v-slot="props">
                                     <span>[[ props.row.title ]]</span>
                                     <span class="ps-2 table-note" v-html="props.row.note"></span>
-                                </b-table-column>
+                                </o-table-column>
 
-                                <b-table-column field="artist" label="Artist" header-class="cursor-pointer" v-slot="props">
+                                <o-table-column field="artist" label="Artist" v-slot="props">
                                     <a :href="props.row.artist_url">[[ props.row.artist ]]</a>
-                                </b-table-column>
+                                </o-table-column>
 
-                                <b-table-column field="year" label="Year" header-class="cursor-pointer" v-slot="props">
+                                <o-table-column field="year" label="Year" v-slot="props">
                                     <span>[[ props.row.year ]]</span>
-                                </b-table-column>
+                                </o-table-column>
 
-                                <b-table-column field="length" label="Length" cell-class="text-center" header-class="cursor-pointer text-center" v-slot="props">
+                                <o-table-column field="length" label="Length" :td-attrs="() => ({ class: 'text-center' })"
+                                    :th-attrs="()=> ({ class: 'text-center' })" v-slot="props">
                                     <span>[[ props.row.length ]]</span>
-                                </b-table-column>
-
-                            </b-table>
+                                </o-table-column>
+                            </o-table>
                         </div>
 
                     </div>

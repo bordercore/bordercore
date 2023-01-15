@@ -103,84 +103,77 @@
             <card title="" id="album-song-list" class="backdrop-filter">
                 <template v-slot:content>
 
-                    <b-table
+                    <o-table
                         :data="songList"
-                        :mobile-cards="false"
                         :default-sort="['sort_order']"
-                        hoverable
                         draggable
+                        hoverable
                         :selected.sync="selectedSong"
-                        sort-icon="chevron-up"
-                        :row-class="(row, index) => 'hover-target'"
+                        :row-class="() => 'hover-target'"
                         @drop="onDrop"
                         @dragend="onDragEnd"
                         @dragover="onDragOver"
                         @dragstart="onDragStart"
-                        @cellclick="onSongClicked"
+                        @cell-click="onSongClicked"
                         ref="table"
                         v-cloak
                     >
-
                         {% if playlist.type == "manual" %}
-                            <b-table-column
+                            <o-table-column
                                 field="sort_order"
                                 label="#"
-                                cell-class="cursor-grab"
-                                header-class="cursor-pointer"
+                                :td-attrs="() => ({ class: 'cursor-grab' })"
                                 v-slot="props"
                             >
                                 <span>[[ props.row.sort_order ]]</span>
-                            </b-table-column>
+                            </o-table-column>
                         {% endif %}
 
-                        <b-table-column
+                        <o-table-column
                             field="title"
                             label="Title"
-                            cell-class="cursor-grab"
-                            header-class="cursor-pointer"
                             {% if playlist.type != "manual" %}sortable{% endif %}
                             v-slot="props"
                         >
                             <span>[[ props.row.title ]]</span>
-                        </b-table-column>
+                        </o-table-column>
 
-                        <b-table-column
+                        <o-table-column
                             field="artist"
                             label="Artist"
-                            cell-class="cursor-grab"
-                            header-class="cursor-pointer"
+                            :td-attrs="() => ({ class: 'cursor-grab' })"
                             {% if playlist.type != "manual" %}sortable{% endif %}
                             v-slot="props"
                         >
                             <span>[[ props.row.artist ]]</span>
-                        </b-table-column>
+                        </o-table-column>
 
-                        <b-table-column
+                        <o-table-column
                             field="year"
                             label="Year"
-                            cell-class="cursor-grab text-center"
-                            header-class="cursor-pointer text-center"
+                            :td-attrs="() => ({ class: 'cursor-grab text-center' })"
+                            :th-attrs="() => ({ class: 'cursor-pointer text-center' })"
                             {% if playlist.type != "manual" %}sortable{% endif %}
                             v-slot="props"
                         >
                             <span>[[ props.row.year ]]</span>
-                        </b-table-column>
+                        </o-table-column>
 
-                        <b-table-column
+                        <o-table-column
                             field="length"
                             label="Length"
-                            cell-class="cursor-grab text-center"
-                            header-class="cursor-pointer text-center"
+                            :td-attrs="() => ({ class: 'cursor-grab text-center' })"
+                            :th-attrs="() => ({ class: 'cursor-pointer text-center' })"
                             {% if playlist.type != "manual" %}sortable{% endif %}
                             v-slot="props"
                         >
                             <span>[[ props.row.length ]]</span>
-                        </b-table-column>
+                        </o-table-column>
 
-                        <b-table-column
+                        <o-table-column
                             field="uuid"
                             label=""
-                            cell-class="col-action text-center align-middle"
+                            :td-attrs="() => ({ class: 'col-action text-center align-middle' })"
                             v-slot="props"
                         >
                             <drop-down-menu :show-on-hover="true">
@@ -198,13 +191,13 @@
                                     </li>
                                 </div>
                             </drop-down-menu>
-                        </b-table-column>
+                        </o-table-column>
 
                         <template #empty>
                             <div class="text-center">No songs in the playlist</div>
                         </template>
 
-                    </b-table>
+                    </o-table>
 
                 </template>
             </card>
@@ -312,16 +305,6 @@
                     //  'on-hover' menu, which stores the song uuid
                     if (column.field !== "uuid") {
                         this.$refs.audioPlayer.playTrack(row.uuid);
-                    }
-                },
-                selectRow(index) {
-                    // Select a row based on index number. If the index is -1,
-                    // assume we only want to deselect any currently selected row.
-                    if (index != -1) {
-                        const selectedRow = this.songList[index];
-                        this.$refs.table.selectRow(selectedRow);
-                    } else {
-                        this.$refs.table.selectRow({});
                     }
                 },
                 onDragOver(payload) {

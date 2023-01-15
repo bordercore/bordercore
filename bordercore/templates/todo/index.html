@@ -83,25 +83,21 @@
 
                 </div>
 
-                <b-table
+                <o-table
                     :data="items"
-                    :mobile-cards="false"
-                    :default-sort="['sort_order','asc']"
-                    hoverable
+                    default-sort="sort_order"
                     draggable
-                    sort-icon="chevron-up"
-                    :row-class="(row, index) => 'hover-target'"
+                    hoverable
+                    :row-class="() => 'hover-target'"
                     @drop="onDrop"
                     @dragend="onDragEnd"
                     @dragover="onDragOver"
                     @dragstart="onDragStart"
                 >
-
-                    <b-table-column field="sort_order" label="Manual" cell-class="todo-col-manual-sorting drag-handle text-center cursor-grab" header-class="cursor-pointer" sortable v-slot="props">
+                    <o-table-column field="sort_order" label="Manual" :td-attrs="()=> ({ class: 'todo-col-manual-sorting text-center' })" sortable v-slot="props">
                         <font-awesome-icon icon="bars"></font-awesome-icon>
-                    </b-table-column>
-
-                    <b-table-column field="name" label="Name" sortable header-class="cursor-pointer" v-slot="props" v-cloak>
+                    </o-table-column>
+                    <o-table-column field="name" label="Name" sortable header-class="cursor-pointer" v-slot="props" v-cloak>
                         <div class="d-flex">
                             <div>
                                 [[ props.row.name ]]
@@ -117,17 +113,16 @@
                                 </span>
                             </div>
                         </div>
-                    </b-table-column>
-
-                    <b-table-column field="priority" label="Priority" cell-class="todo-col-priority" sortable header-class="cursor-pointer" v-slot="props" v-cloak>
+                    </o-table-column>
+                    <o-table-column field="priority" label="Priority" :td-attrs="()=> ({ class: 'todo-col-priority' })" sortable
+                        header-class="cursor-pointer" v-slot="props" v-cloak>
                         [[ props.row.priority_name ]]
-                    </b-table-column>
-
-                    <b-table-column field="created" label="Date" sortable cell-class="todo-col-date text-nowrap" header-class="cursor-pointer" v-slot="props" v-cloak>
+                    </o-table-column>
+                    <o-table-column field="created" label="Date" sortable :td-attrs="()=> ({ class: 'todo-col-date' })"
+                        cell-class="todo-col-date text-nowrap" header-class="cursor-pointer" v-slot="props" v-cloak>
                         [[ getDate(props.row.created) ]]
-                    </b-table-column>
-
-                    <b-table-column field="uuid" label="" cell-class="col-action" v-slot="props" v-cloak>
+                    </o-table-column>
+                    <o-table-column field="uuid" label="" :td-attrs="()=> ({ class: 'col-action' })" v-slot="props" v-cloak>
                         <drop-down-menu :show-on-hover="true">
                             <div slot="dropdown">
                                 <li>
@@ -142,14 +137,11 @@
                                 </li>
                             </div>
                         </drop-down-menu>
-                    </b-table-column>
-
+                    </o-table-column>
                     <template #empty>
                         <div class="text-center">No tasks found</div>
                     </template>
-
-                </b-table>
-
+                </o-table>
             </div>
 
         </div>

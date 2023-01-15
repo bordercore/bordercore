@@ -47,7 +47,6 @@
                     :track-list="songList"
                     song-url="{{ MEDIA_URL_MUSIC }}songs/"
                     mark-listened-to-url="{% url 'music:mark_song_as_listened_to' '00000000-0000-0000-0000-000000000000' %}"
-                    @current-song="selectRow"
                 >
                 </audio-player>
             {% endif %}
@@ -166,33 +165,31 @@
 
                             <template v-slot:content>
 
-                                <b-table
+                                <o-table
                                     :data="songList"
-                                    :mobile-cards="false"
                                     :default-sort="['year','desc']"
                                     hoverable
+                                    :selected.sync="selectedSong"
                                     ref="table"
-                                    header-class="cursor-pointer"
-                                    sort-icon="chevron-up"
                                     :row-class="(row, index) => 'hover-target cursor-pointer'"
-                                    @cellclick="onSongClicked"
+                                    @cell-click="onSongClicked"
                                 >
 
-                                    <b-table-column field="title" label="Title" header-class="cursor-pointer" sortable v-slot="props">
+                                    <o-table-column field="title" label="Title" sortable v-slot="props">
                                         [[ props.row.title ]]
-                                    </b-table-column>
+                                    </o-table-column>
 
-                                    <b-table-column field="note" label="" header-class="cursor-pointer" sortable v-slot="props">
+                                    <o-table-column field="note" label="" sortable v-slot="props">
                                         <span v-if="props.row.note" v-tooltip="{ content: onShowNote(props.row), html: true }">
                                             <font-awesome-icon icon="sticky-note" class="glow text-primary"></font-awesome-icon>
                                         </span>
-                                    </b-table-column>
+                                    </o-table-column>
 
-                                    <b-table-column field="year" label="Year" header-class="cursor-pointer text-nowrap" sortable v-slot="props">
+                                    <o-table-column field="year" label="Year" :th-attrs="()=> ({ class: 'text-nowrap' })" sortable v-slot="props">
                                         <span>[[ props.row.year ]]</span>
-                                    </b-table-column>
+                                    </o-table-column>
 
-                                    <b-table-column field="rating" label="Rating" header-class="cursor-pointer text-end" sortable v-slot="props">
+                                    <o-table-column field="rating" label="Rating" :th-attrs="()=> ({ class: 'text-end' })" sortable v-slot="props">
                                         <div class="ms-auto">
                                             <div class="rating-container d-flex" :class="{'d-none': props.row.rating === ''}"
                                                  @mouseleave="onMouseLeaveRatingContainer">
@@ -208,13 +205,13 @@
                                                 </span>
                                             </div>
                                         </div>
-                                    </b-table-column>
+                                    </o-table-column>
 
-                                    <b-table-column field="length" label="Length" header-class="cursor-pointer" sortable v-slot="props">
+                                    <o-table-column field="length" label="Length" sortable v-slot="props">
                                         <span>[[ props.row.length ]]</span>
-                                    </b-table-column>
+                                    </o-table-column>
 
-                                    <b-table-column field="uuid" label="" cell-class="col-action text-center align-middle" v-slot="props">
+                                    <o-table-column field="uuid" label="" :td-attrs="() => ({ class: 'col-action text-center align-middle' })" cell-class="col-action text-center align-middle" v-slot="props">
                                         <drop-down-menu :show-on-hover="true">
                                             <div slot="dropdown">
                                                 <li>
@@ -229,10 +226,8 @@
                                                 </li>
                                             </div>
                                         </drop-down-menu>
-                                    </b-table-column>
-
-                                </b-table>
-
+                                    </o-table-column>
+                                </o-table>
                             </template>
 
                         </card>
@@ -411,24 +406,6 @@
                     if (column.field !== "uuid" && column.field !== "rating" && column.field !== "note") {
                         this.$refs.audioPlayer.playTrack(row.uuid);
                         this.selectedSong = row;
-                        this.selectRow(rowIndex);
-                    }
-                },
-                selectRow(index) {
-                    // First deselect any selected rows
-                    const allRows = document.querySelectorAll("table tr");
-                    for (const row of allRows) {
-                        row.classList.remove("selected");
-                    }
-
-                    // Select a row based on index number. If the index is -1,
-                    // assume we only want to deselect any currently selected row.
-                    if (index != -1) {
-                        const selectedRow = this.songList[index];
-                        this.$refs.table.selectRow(selectedRow);
-                        document.querySelector(`table tbody tr:nth-child(${index + 1})`).classList.add("selected");
-                    } else {
-                        this.$refs.table.selectRow({});
                     }
                 },
                 onClickUpdate(uuid) {
