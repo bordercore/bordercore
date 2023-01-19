@@ -613,6 +613,12 @@ a.tag {
   }
 }
 
+// Oruga switches
+
+.o-switch__check--checked {
+  background: var(--toggle-button-color-toggled) !important;
+}
+
 // Oruga tables
 
 .is-invisible {
@@ -754,17 +760,6 @@ a.tag {
       background-color: $warning;
       color: $black;
     }
-  }
-}
-
-// vue-js-toggle-button
-.vue-js-switch.toggle-button {
-  .v-switch-core {
-    background: var(--toggle-button-color) !important;
-  }
-
-  &.toggled > .v-switch-core {
-    background: var(--toggle-button-color-toggled) !important;
   }
 }
 

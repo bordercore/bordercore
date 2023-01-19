@@ -146,7 +146,7 @@
 
                             <div class="row mt-3">
                                 <div class="col-lg-12 d-flex align-items-center">
-                                    <toggle-button v-model="exclude_albums" name="exclude_albums" :css-colors="true" class="toggle-button" />
+                                    <o-switch v-model="exclude_albums" name="exclude_albums" :native-value="exclude_albums" />
                                     <label class="ms-2">
                                         Exclude albums
                                     </label>

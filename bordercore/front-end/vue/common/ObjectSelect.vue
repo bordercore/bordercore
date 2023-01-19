@@ -75,11 +75,11 @@
                         <div v-if="hasFilter" class="d-flex mt-2 ms-3">
                             <div>Filter:</div>
                             <div class="d-flex align-items-center ms-2">
-                                <toggle-button v-model="toggleBookmarks" sync data-filter-type="bookmarks" :css-colors="true" class="toggle-button" @change="onFilterChange('bookmarks', $event)" />
+                                <o-switch v-model="toggleBookmarks" data-filter-type="bookmarks" @input="onFilterChange('bookmarks', $event)" />
                                 <label class="ms-2" @click="onFilterLabelClick('bookmarks', $event)">Bookmarks</label>
                             </div>
                             <div class="d-flex align-items-center ms-3">
-                                <toggle-button v-model="toggleBlobs" sync data-filter-type="blobs" :css-colors="true" class="toggle-button" @change="onFilterChange('blobs', $event)" />
+                                <o-switch v-model="toggleBlobs" data-filter-type="blobs" @input="onFilterChange('blobs', $event)" />
                                 <label class="ms-2" @click="onFilterLabelClick('blobs', $event)">Blobs</label>
                             </div>
                         </div>
@@ -176,8 +176,8 @@
                 input.click();
                 this.onFilterChange(filterType, evt);
             },
-            onFilterChange(filterType, evt) {
-                if (evt.value === false) {
+            onFilterChange(filterType, value) {
+                if (value === false) {
                     // Remove the filter if we're unchecking an option
                     this.doctypes = ["blob", "book", "bookmark", "document", "note"];
                 } else {

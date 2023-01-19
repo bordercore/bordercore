@@ -27,7 +27,7 @@
                                     </option>
                                 </select>
                                 <div class="d-flex align-items-center mt-1">
-                                    <toggle-button v-model="nodeQuote.favorites_only" value="favorites-only" :css-colors="true" class="toggle-button" />
+                                    <o-switch v-model="nodeQuote.favorites_only" value="favorites-only" />
                                     <label class="ms-2">Favorites Only</label>
                                 </div>
                             </div>

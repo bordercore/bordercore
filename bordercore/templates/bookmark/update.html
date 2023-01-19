@@ -137,13 +137,11 @@
                                         />
                                         <div class="form-error">{{ field.errors.0 }}</div>
                                     {% elif field.label == "Important" %}
-                                        <toggle-button v-model="importance" name="importance" value="{{ field.value }}" :css-colors="true" class="toggle-button">
-                                        </toggle-button>
-                                        {% elif field.label == "Is pinned" %}
-                                        <toggle-button v-model="is_pinned" name="is_pinned" value="{{ field.value }}" :css-colors="true" class="toggle-button"></toggle-button>
+                                        <o-switch v-model="importance" name="importance" value="{{ field.value }}"></o-switch>
+                                    {% elif field.label == "Is pinned" %}
+                                        <o-switch v-model="is_pinned" name="is_pinned" value="{{ field.value }}"></o-switch>
                                     {% elif field.label == "Daily" %}
-                                        <toggle-button v-model="daily" name="daily" value="{{ field.value }}" :css-colors="true" class="toggle-button">
-                                        </toggle-button>
+                                        <o-switch v-model="daily" name="daily" value="{{ field.value }}"></o-switch>
                                     {% else %}
                                         {{ field }}
                                     {% endif %}

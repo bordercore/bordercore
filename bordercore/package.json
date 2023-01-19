@@ -71,7 +71,6 @@
         "url-loader": "^4.1.1",
         "uuid": "^8.3.2",
         "vue": "^2.6.12",
-        "vue-js-toggle-button": "^1.3.3",
         "vue-sidebar-menu": "^4.7.4",
         "vue-simple-suggest": "git+https://github.com/bordercore/vue-simple-suggest.git",
         "vuedraggable": "^2.24.1",

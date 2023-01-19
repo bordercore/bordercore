@@ -130,7 +130,7 @@
                             Random Order
                         </label>
                         <div class="col-lg-8">
-                            <toggle-button v-model="collectionObjectList.random_order" sync :css-colors="true" class="toggle-button" />
+                            <o-switch v-model="collectionObjectList.random_order" />
                         </div>
                     </div>
                     <div class="modal-footer">

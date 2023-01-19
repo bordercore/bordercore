@@ -618,7 +618,7 @@ class CreatePlaylistView(FormRequestMixin, CreateView):
             ["tag", "start_year", "end_year", "exclude_recent", "rating"]
             if x in self.request.POST and self.request.POST[x] != ""
         }
-        playlist.parameters["exclude_albums"] = self.request.POST.get("exclude_albums", "") == "on"
+        playlist.parameters["exclude_albums"] = self.request.POST.get("exclude_albums", "") == "true"
         playlist.save()
 
         if playlist.type != "manual":
@@ -647,7 +647,7 @@ class UpdatePlaylistView(FormRequestMixin, UpdateView):
     def form_valid(self, form):
         playlist = form.save()
 
-        exclude_albums = self.request.POST.get("exclude_albums", "") == "on"
+        exclude_albums = self.request.POST.get("exclude_albums", "") == "true"
 
         # Deal with any changed parameters that could possibly
         #  refresh the song list.

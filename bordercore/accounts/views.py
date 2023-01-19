@@ -87,7 +87,7 @@ class UserProfileUpdateView(FormRequestMixin, UpdateView):
 
         s3_client = boto3.client("s3")
 
-        if self.request.POST.get("delete_background") == "on":
+        if self.request.POST.get("delete_background") == "true":
 
             # Delete the image from S3
             s3_client.delete_object(

@@ -263,9 +263,6 @@ import "animate.css";
 
 import hotkeys from "hotkeys-js";
 
-import ToggleButton from "vue-js-toggle-button";
-Vue.use(ToggleButton);
-
 import Oruga from "@oruga-ui/oruga";
 import "@oruga-ui/oruga/dist/oruga-full.css";
 import "@oruga-ui/oruga/dist/oruga-full-vars.css";

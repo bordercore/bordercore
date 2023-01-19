@@ -265,12 +265,12 @@
                                     <div>
                                         <select v-model="slideShowInterval" class="form-control form-select" :disabled="slideShowType === 'manual'">
                                             <option v-for="option in slideShowOptions" :key="option.value" :value="option.value">
-                                            [[ option.display ]]
+                                                [[ option.display ]]
                                             </option>
                                         </select>
                                     </div>
                                     <div class="d-flex ps-1 mt-2">
-                                        <toggle-button v-model="slideShowRandomize" value="favorites-only" :css-colors="true" class="toggle-button" :disabled="slideShowType === 'manual'"></toggle-button>
+                                        <o-switch v-model="slideShowRandomize" :disabled="slideShowType === 'manual'"></o-switch>
                                         <div class="ms-2">
                                             Randomize
                                         </div>
