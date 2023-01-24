@@ -24,7 +24,7 @@
                         </div>
                     </div>
 
-                    <div :class="{'d-none': hidePlaylistType}">
+                    <div v-if="action !== 'Update'">
                         <hr class="mb-1">
 
                         <div class="form-section">
@@ -58,7 +58,7 @@
                                     :search-url="tagSearchUrl + '&query='"
                                     name="tag"
                                     place-holder="Tag name"
-                                    :disabled="!playlistTypeIsTag"
+                                    :disabled="smartType !== 'tag'"
                                     :max-tags="1"
                                 />
                             </div>
@@ -86,8 +86,8 @@
                             </div>
                             <div class="col-lg-8">
                                 <label class="form-check-label d-flex" for="type">
-                                    <input v-model="startYear" class="form-control me-1" type="number" name="start_year" size="4" placeholder="Start year" autocomplete="off" :disabled="!playlistTypeIsTimePeriod">
-                                    <input v-model="endYear" class="form-control ms-1" type="number" name="end_year" size="4" placeholder="End year" autocomplete="off" :disabled="!playlistTypeIsTimePeriod">
+                                    <input v-model="startYear" class="form-control me-1" type="number" name="start_year" size="4" placeholder="Start year" autocomplete="off" :disabled="smartType !== 'time'">
+                                    <input v-model="endYear" class="form-control ms-1" type="number" name="end_year" size="4" placeholder="End year" autocomplete="off" :disabled="smartType !== 'time'">
                                 </label>
                             </div>
                         </div>
@@ -286,15 +286,6 @@
                     return true;
                 }
                 return false;
-            },
-            hidePlaylistType() {
-                return this.action === "Update";
-            },
-            playlistTypeIsTag() {
-                return this.smartType === "tag";
-            },
-            playlistTypeIsTimePeriod() {
-                return this.smartType === "time";
             },
         },
         methods: {
