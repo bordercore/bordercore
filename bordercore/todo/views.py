@@ -134,7 +134,7 @@ class TodoTaskList(ListView):
                 "url": self.get_field(todo, "url"),
                 "uuid": self.get_field(todo, "uuid"),
                 "due_date": self.get_field(todo, "due_date"),
-                "tags": [{"text": x, "display": x} for x in self.get_field(todo, "tags")]
+                "tags": self.get_field(todo, "tags")
             }
 
             info.append(data)

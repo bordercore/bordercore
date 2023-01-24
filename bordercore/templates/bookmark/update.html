@@ -18,16 +18,12 @@
             </div>
             {% endif %}
 
-            <transition name="fade">
-                <div v-show="showRelatedTags">
-                    <related-tags
-                        ref="relatedTags"
-                        related-tags-url="{% url 'tag:get_related_tags' %}"
-                        @click-tag="onClickTag"
-                    >
-                    </related-tags>
-                </div>
-            </transition>
+            <related-tags
+                ref="relatedTags"
+                related-tags-url="{% url 'tag:get_related_tags' %}"
+                @click-tag="onClickTag"
+            >
+            </related-tags>
 
             <div v-if="related_questions.length > 0" class="d-flex">
                 <card title="Related Questions" class="backdrop-filter mw-100">
@@ -112,14 +108,11 @@
                                     {{ field.label }}
                                 </label>
                                 <div class="col-lg-7 d-flex align-items-center">
-                                    {% if field.label == 'Tags' %}
+                                    {% if field.label == "Tags" %}
                                         <tags-input
                                             ref="tagsInput"
-                                            class="w-100"
                                             search-url="{% url 'tag:search' %}?query="
                                             @tags-changed="onTagsChanged"
-                                            @blur="onTagsBlur"
-                                            @focus="onTagsFocus"
                                         >
                                         </tags-input>
                                     {% elif field.label == "Url" %}
@@ -135,7 +128,9 @@
                                             {% endif %}
                                             autocomplete="off"
                                         />
-                                        <div class="form-error">{{ field.errors.0 }}</div>
+                                        {% if field.errors %}
+                                            <div class="form-error">{{ field.errors.0 }}</div>
+                                        {% endif %}
                                     {% elif field.label == "Important" %}
                                         <o-switch v-model="importance" name="importance" value="{{ field.value }}"></o-switch>
                                     {% elif field.label == "Is pinned" %}
@@ -212,12 +207,11 @@
                     ],
                     related_blobs: JSON.parse(document.getElementById("related_blobs").textContent),
                     related_nodes: JSON.parse(document.getElementById("related_nodes").textContent),
-                    showRelatedTags: false,
                 }
             },
             mounted() {
                 EventBus.$on("add-tag", (payload) => {
-                    this.$refs.tagsInput.addTag({"text": payload, "display": payload});
+                    this.$refs.tagsInput.addTag(payload);
                 });
             },
             methods: {
@@ -258,13 +252,7 @@
                     window.location = url;
                 },
                 onTagsChanged(tags) {
-                    this.$refs.relatedTags.setTags(tags.map( (x) => x.display ));
-                },
-                onTagsBlur(tags) {
-                    this.showRelatedTags = false;
-                },
-                onTagsFocus(tags) {
-                    this.showRelatedTags = true;
+                    this.$refs.relatedTags.setTags(tags);
                 },
             }
         });

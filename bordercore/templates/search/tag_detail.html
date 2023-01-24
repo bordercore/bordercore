@@ -21,7 +21,7 @@
 
                             <search-tags-input
                                 name="tag-search"
-                                class="col-lg-6"
+                                class-list="col-lg-6"
                                 :autofocus=true
                                 place-holder="Tag"
                                 search-url="{% url 'tag:search' %}?query="
@@ -333,7 +333,7 @@
 
         function get_tag_list_string() {
             initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
-            return initialTags.map(x => x.text).join(",")
+            return initialTags.join(",")
         }
 
         {% if tag_counts %}

@@ -390,12 +390,7 @@
                 handleCreateTodo() {
                     this.$refs.updateTodo.setAction("Create");
 
-                    const initialTagList = [
-                        {
-                            "display": this.filterTag,
-                            "text": this.filterTag,
-                        },
-                    ];
+                    const initialTagList = [this.filterTag];
 
                     this.$refs.updateTodo.todoInfo = {
                         note: "",

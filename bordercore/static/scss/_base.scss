@@ -781,7 +781,12 @@ textarea.form-control {
   }
 
   &:disabled {
+    border: none;
     background-color: var(--form-bg-disabled);
+
+    &:hover {
+      cursor: not-allowed;
+    }
   }
 }
 
@@ -2328,51 +2333,16 @@ tr.hover-target:hover {
   }
 }
 
-// Vue Tags Input VUE
+// Vue Select
 
-// Use this for forms
-.ti-new-tag-input-wrapper input {
-  font-size: $input-font-size !important;
+.vs__selected {
 }
 
-.vue-tags-input {
-  min-width: 100%;
-  border-color: var(--surface1) !important;
-  background-color: var(--surface2) !important;
-  border-radius: var(--border-radius1) !important;
-  color: var(--text4) !important;
+.v-select .vs__deselect {
+  fill: var(--vs-deselect-fill);
 
-  .ti-new-tag-input {
-    background: transparent;
-    color: var(--text4);
-  }
-
-  .ti-autocomplete {
-    background: var(--surface2) !important;
-    color: var(--text4);
-  }
-
-  .ti-input {
-    padding: 0.37rem 0.75rem;
-    border-color: var(--surface1) !important;
-    background-color: var(--form-bg);
-    border-radius: var(--border-radius1);
-    &:hover {
-      border-color: var(--text3) !important;
-    }
-  }
-
-  &.ti-disabled .ti-input {
-    background-color: var(--surface2) !important;
-  }
-
-  &.ti-focus .ti-input {
-    // Mimic Bootstrap's default focus behavior
-    border-color: var(--text3) !important;
-
-    background-color: var(--form-bg-focus) !important;
-    box-shadow: 0 0 0 0.2rem rgba($primary, 0.25);
-    color: var(--text4) !important;
+  &:hover {
+    fill: var(--vs-deselect-hover-fill);
   }
 }
 

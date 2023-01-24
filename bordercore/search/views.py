@@ -456,7 +456,7 @@ class SearchTagDetailView(ListView):
         #  don't need the original from Elasticsearch. Delete it to reduce payload size.
         context["object_list"].pop("hits")
 
-        tag_list = self.kwargs.get("taglist", "").split(",")
+        tag_list = self.kwargs.get("taglist", "").split(",") if "taglist" in self.kwargs else []
 
         # Get a list of tags and their counts, to be displayed
         #  in the "Other tags" dropdown
@@ -477,7 +477,7 @@ class SearchTagDetailView(ListView):
 
         context["kb_tag_detail_current_tab"] = self.request.session.get("kb_tag_detail_current_tab", "")
 
-        context["tag_list"] = self.get_tag_list_js(tag_list)
+        context["tag_list"] = tag_list
         if context["tag_list"]:
             context["title"] = f"Search :: Tag Detail :: {', '.join(tag_list)}"
         else:
@@ -494,19 +494,6 @@ class SearchTagDetailView(ListView):
         tag_counts_sorted = sorted(tag_counts.items(), key=operator.itemgetter(1), reverse=True)
 
         return tag_counts_sorted
-
-    def get_tag_list_js(self, tag_list):
-
-        return [
-            {
-                "text": tag,
-                "is_meta": "true" if tag in Tag.get_meta_tags(self.request.user) else "false",
-                "classes": "badge bg-info",
-            }
-            for tag in
-            tag_list
-            if tag != ""
-        ]
 
 
 def sort_results(matches):

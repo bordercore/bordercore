@@ -12,9 +12,8 @@
             },
         },
         methods: {
-            tagsChanged(newTags) {
-                const tags = newTags.map((x) => x.text).join(",");
-                window.location = this.tagsChangedUrl.replace("666", tags);
+            tagsChanged() {
+                window.location = this.tagsChangedUrl.replace("666", this.tagsCommaSeparated);
             },
         },
 

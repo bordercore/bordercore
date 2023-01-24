@@ -169,7 +169,7 @@ class QuestionUpdateView(FormRequestMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context["action"] = "Update"
         context["title"] = "Drill :: Question Update"
-        context["tags"] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
+        context["tags"] = [x.name for x in self.object.tags.all()]
 
         # Get a list of the most recently used tags
         context["recent_tags"] = Question.objects.recent_tags(self.request.user)[:10]

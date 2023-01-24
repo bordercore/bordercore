@@ -1,45 +1,48 @@
 <template>
-    <div>
-        <vue-tags-input
+    <div :class="classList">
+        <v-select
             ref="tagsInputComponent"
-            v-model="tag"
-            :tags="tags"
-            :autocomplete-items="filteredItems"
+            v-model="tags"
+            multiple
             :autofocus="autofocus"
-            :add-only-from-autocomplete="false"
             :placeholder="placeHolder"
+            :options="options"
+            :dropdown-should-open="({search, open}) => open && search.length > 2"
             :disabled="disabled"
-            :max-tags="maxTags"
-            @tags-changed="tagsChanged"
+            :selectable="() => maxTags ? tags.length < maxTags : true"
+            @search="fetchOptions"
+            @option:selected="tagsChanged"
+            @option:deselected="tagsChanged"
             @blur="onBlur"
             @focus="onFocus"
         >
-            <div slot="autocomplete-item" slot-scope="scope" @click="scope.performAdd(scope.item)">
-                <div v-if="scope.item.display">
-                    {{ scope.item.display }}
+            <template #no-options="{ search, searching }">
+                <div v-if="notFound">
+                    No tags found!
                 </div>
-                <div v-else>
-                    {{ scope.item.text }}
-                </div>
-            </div>
-        </vue-tags-input>
+            </template>
+        </v-select>
         <input type="hidden" :name="name" :value="tagsCommaSeparated">
     </div>
 </template>
 
 <script>
 
-    import VueTagsInput, {createTag} from "@johmun/vue-tags-input";
+    import vSelect from "vue-select";
 
     export default {
 
         components: {
-            VueTagsInput,
+            vSelect,
         },
         props: {
             autofocus: {
                 type: Boolean,
                 default: false,
+            },
+            classList: {
+                type: String,
+                default: "w-100",
             },
             searchUrl: {
                 default: "search-url",
@@ -68,23 +71,15 @@
         },
         data() {
             return {
-                tag: "",
                 tags: [],
-                autocompleteItems: [],
+                options: [],
+                notFound: false,
             };
         },
         computed: {
             tagsCommaSeparated: function() {
-                return this.tags.map((x) => x.text).join(",");
+                return this.tags.map((x) => x.value).join(",");
             },
-            filteredItems() {
-                return this.autocompleteItems.filter((i) => {
-                    return i.text.toLowerCase().indexOf(this.tag.toLowerCase()) !== -1;
-                });
-            },
-        },
-        watch: {
-            "tag": "initItems",
         },
         mounted() {
             // The initial set of tags can either be passed in via an event
@@ -93,45 +88,50 @@
 
             if (this.getTagsFromEvent) {
                 EventBus.$on("addTags", (payload) => {
-                    this.tags = payload;
+                    this.tags = payload.map( (x) => ({label: x, value: x}) );
                 });
             } else {
                 const initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
                 if (initialTags) {
-                    this.tags = initialTags;
+                    this.tags = initialTags.map( (x) => ({label: x, value: x}) );
                 }
+            }
+
+            if (this.autofocus) {
+                this.$refs.tagsInputComponent.$refs.search.focus();
             }
         },
         methods: {
             addTag(tagName) {
-                const tag = createTag(tagName, [tagName]);
-                this.$refs.tagsInputComponent.addTag(tag);
+                this.tags.push({"value": tagName, "label": tagName});
             },
-            tagsChanged(newTags) {
-                this.tags = newTags;
+            tagsChanged() {
                 // Re-emit this event in case a parent component is interested
-                this.$emit("tags-changed", newTags);
+                this.$emit("tags-changed", this.tags.map( (x) => x.value ));
+                this.options = [];
+            },
+            fetchOptions(search, loading) {
+                // Set a minimum character count to trigger the ajax call
+                if (search.length < 3) return;
+
+                return doGet(
+                    this,
+                    this.searchUrl + search,
+                    (response) => {
+                        this.notFound = response.data.length === 0;
+                        console.log(this.notFound);
+                        this.options = response.data.map((a) => {
+                            return {value: a.value, label: a.value};
+                        });
+                    },
+                    "",
+                );
             },
             onBlur(evt) {
                 this.$emit("blur", evt);
             },
             onFocus(evt) {
                 this.$emit("focus", evt);
-            },
-            initItems() {
-                // Set a minimum character count to trigger the ajax call
-                if (this.tag.length < 3) return;
-
-                return doGet(
-                    this,
-                    this.searchUrl + this.tag,
-                    (response) => {
-                        this.autocompleteItems = response.data.map((a) => {
-                            return {text: a.text, display: a.display};
-                        });
-                    },
-                    "",
-                );
             },
         },
 

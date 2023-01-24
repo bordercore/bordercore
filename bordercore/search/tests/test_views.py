@@ -125,21 +125,3 @@ def test_get_doc_counts():
     assert len(result) == 2
     assert result[0] == ("document", 3)
     assert result[1] == ("blob", 2)
-
-
-def test_tag_list_js(auto_login_user):
-
-    user, _ = auto_login_user()
-
-    request = RequestFactory().get("/")
-    request.user = user
-    view = SearchTagDetailView()
-    view.setup(request)
-
-    results = view.get_tag_list_js(["django", "video"])
-
-    assert len(results) == 2
-    assert results[0]["text"] == "django"
-    assert results[0]["is_meta"] == "false"
-    assert results[1]["text"] == "video"
-    assert results[1]["is_meta"] == "false"

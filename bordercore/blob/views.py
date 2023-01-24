@@ -105,13 +105,7 @@ class BlobCreateView(FormRequestMixin, CreateView, FormValidMixin):
 
             # Grab the initial metadata and tags from the linked blob
             context["metadata"] = linked_blob.metadata.all()
-            context["tags"] = [
-                {
-                    "text": x.name,
-                    "value": x.name,
-                    "is_meta": x.is_meta
-                } for x in linked_blob.tags.all()
-            ]
+            context["tags"] = [x.name for x in linked_blob.tags.all()]
 
         if "linked_collection" in self.request.GET:
             context["linked_collection"] = Collection.objects.get(
@@ -119,12 +113,9 @@ class BlobCreateView(FormRequestMixin, CreateView, FormValidMixin):
                 uuid=self.request.GET["linked_collection"]
             )
             context["tags"] = [
-                {
-                    "text": x.name,
-                    "value": x.name,
-                    "is_meta": x.is_meta
-                } for x in CollectionObject.objects.filter(
-                    collection__uuid=self.request.GET["linked_collection"]
+                x.name
+                for x in CollectionObject.objects.filter(
+                        collection__uuid=self.request.GET["linked_collection"]
                 ).first().blob.tags.all()
             ]
 
@@ -269,7 +260,7 @@ class BlobUpdateView(FormRequestMixin, UpdateView, FormValidMixin):
                                                                  & Q(is_private=False))
         context["action"] = "Update"
         context["title"] = "Blob Update :: {}".format(self.object.get_name(remove_edition_string=True))
-        context["tags"] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
+        context["tags"] = [x.name for x in self.object.tags.all()]
         return context
 
     def get(self, request, **kwargs):

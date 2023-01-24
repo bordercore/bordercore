@@ -129,8 +129,7 @@ def search(user, tag_name, doc_types=[], skip_tag_aliases=False):
         if tag_result["key"].lower().find(tag_name) != -1:
             matches.append(
                 {
-                    "display": tag_result["key"],
-                    "text": tag_result["key"],
+                    "value": tag_result["key"],
                     **get_additional_info(doc_types, user, tag_result["key"])
                 }
             )

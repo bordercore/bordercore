@@ -120,6 +120,20 @@
   --oruga-table-hoverable-background-color: var(--hover-bg);
   --oruga-table-td-border: var(--text1);
 
+  // Vue Select
+  --vs-dropdown-bg: var(--surface2);
+  --vs-dropdown-option--active-bg: var(--surface3);
+  --vs-search-input-color: var(--text4);
+  --vs-search-input-bg: var(--form-bg);
+  --vs-selected-bg: var(--surface2);
+  --vs-selected-color: var(--text4);
+  --vs-state-disabled-bg: var(--form-bg-disabled);
+  --vs-state-disabled-color: var(--text-disabled);
+
+  // Vue Select custom
+  --vs-deselect-fill: var(--text2);
+  --vs-deselect-hover-fill: var(--text1);
+
   .list-group {
     --bs-list-group-border-color: var(--surface5);
   }

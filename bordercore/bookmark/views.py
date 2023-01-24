@@ -88,7 +88,7 @@ class BookmarkUpdateView(FormRequestMixin, UpdateView, FormValidMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["action"] = "Update"
-        context["tags"] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
+        context["tags"] = [x.name for x in self.object.tags.all()]
         context["related_questions"] = self.object.bcobject_set.all()
         context["related_blobs"] = [
             {

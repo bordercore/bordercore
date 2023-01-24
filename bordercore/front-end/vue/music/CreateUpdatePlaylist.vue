@@ -52,7 +52,15 @@
                                 </div>
                             </div>
                             <div class="col-lg-8">
-                                <tags-input id="smart-list-tag" ref="smartListTag" :search-url="tagSearchUrl + '&query='" name="tag" place-holder="Tag name" :disabled="!playlistTypeIsTag" :max-tags="1" />
+                                <tags-input
+                                    id="smart-list-tag"
+                                    ref="smartListTag"
+                                    :search-url="tagSearchUrl + '&query='"
+                                    name="tag"
+                                    place-holder="Tag name"
+                                    :disabled="!playlistTypeIsTag"
+                                    :max-tags="1"
+                                />
                             </div>
                         </div>
 
@@ -77,7 +85,7 @@
                                 </div>
                             </div>
                             <div class="col-lg-8">
-                                <label class="form-check-label d-flex">
+                                <label class="form-check-label d-flex" for="type">
                                     <input v-model="startYear" class="form-control me-1" type="number" name="start_year" size="4" placeholder="Start year" autocomplete="off" :disabled="!playlistTypeIsTimePeriod">
                                     <input v-model="endYear" class="form-control ms-1" type="number" name="end_year" size="4" placeholder="End year" autocomplete="off" :disabled="!playlistTypeIsTimePeriod">
                                 </label>

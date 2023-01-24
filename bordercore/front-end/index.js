@@ -136,6 +136,10 @@ Vue.component("TopSearch", TopSearch);
 import OverdueTasks from "./vue/todo/OverdueTasks.vue";
 Vue.component("OverdueTasks", OverdueTasks);
 
+import vSelect from "vue-select";
+import "vue-select/dist/vue-select.css";
+Vue.component("v-select", vSelect);
+
 import TagsInput from "./vue/common/TagsInput.vue";
 Vue.component("TagsInput", TagsInput);
 

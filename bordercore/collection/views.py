@@ -76,13 +76,7 @@ class CollectionDetailView(FormRequestMixin, FormMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["tags"] = [
-            {
-                "text": x.name,
-                "value": x.name,
-                "is_meta": x.is_meta
-            } for x in self.object.tags.all()
-        ]
+        context["tags"] = [x.name for x in self.object.tags.all()]
 
         # Get a list of all tags used by all objects in this collection,
         #  along with their total counts

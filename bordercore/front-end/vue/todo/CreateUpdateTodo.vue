@@ -39,7 +39,7 @@
                                     <div class="col-lg-9">
                                         <tags-input
                                             :search-url="tagSearchUrl"
-                                            :get-tags-from-event="true"
+                                            get-tags-from-event
                                             @tags-changed="onTagsChanged"
                                         />
                                     </div>
@@ -136,7 +136,7 @@
                             "name": this.todoInfo.name,
                             "priority": this.todoInfo.priority,
                             "note": this.todoInfo.note,
-                            "tags": this.todoInfo.tags.map((x) => x.text),
+                            "tags": this.todoInfo.tags,
                             "url": this.todoInfo.url || "",
                             "due_date": dueDate,
                         },
@@ -155,7 +155,7 @@
                             "name": this.todoInfo.name,
                             "priority": this.todoInfo.priority,
                             "note": this.todoInfo.note || "",
-                            "tags": this.todoInfo.tags.map((x) => x.text),
+                            "tags": this.todoInfo.tags.map((x) => x.value),
                             "url": this.todoInfo.url || "",
                             "due_date": dueDate,
                         },
