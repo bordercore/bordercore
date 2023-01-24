@@ -11,14 +11,14 @@
                 </div>
                 <div class="modal-body">
                     <div class="row mb-3">
-                        <label class="col-lg-4 col-form-label" for="inputTitle">Name</label>
+                        <label class="col-lg-4 col-form-label" for="id_name">Name</label>
                         <div class="col-lg-8">
                             <input id="id_name" v-model="name" type="text" name="name" autocomplete="off" maxlength="200" required="required" class="form-control">
                         </div>
                     </div>
 
                     <div class="row">
-                        <label class="col-lg-4 col-form-label" for="inputTitle">Note</label>
+                        <label class="col-lg-4 col-form-label" for="id_note">Note</label>
                         <div class="col-lg-8">
                             <textarea id="id_note" v-model="note" name="note" cols="40" rows="3" class="form-control" />
                         </div>
@@ -34,7 +34,7 @@
                         <div class="row mt-3">
                             <div class="col-lg-12">
                                 <div class="form-check">
-                                    <input v-model="smartType" class="form-check-input mt-2" type="radio" name="type" value="manual" checked>
+                                    <input v-model="smartType" class="form-check-input mt-2" type="radio" name="type" value="manual">
                                     <label class="form-check-label d-flex" for="type">
                                         Manually Add Songs
                                     </label>
@@ -270,7 +270,7 @@
                 rating: this.getAttribute("rating", undefined),
                 exclude_recent: this.getAttribute("exclude_recent", ""),
                 exclude_albums: this.getAttribute("exclude_albums", false),
-                smartType: this.getAttribute("type", undefined),
+                smartType: this.getAttribute("type", "manual"),
                 startYear: this.getAttribute("start_year", undefined),
                 endYear: this.getAttribute("end_year", undefined),
             };
