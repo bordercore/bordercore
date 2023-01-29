@@ -216,10 +216,7 @@
                     axios("{% url "accounts:sort_pinned_notes" %}", {
                         method: "POST",
                         data: bodyFormData,
-                    }).then(response =>  {
-                        console.log("Success:", response.data);
-                    })
-                      .catch((error) => {
+                    }).catch((error) => {
                           EventBus.$emit(
                               "toast",
                               {

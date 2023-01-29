@@ -22,7 +22,6 @@ export function doGet(scope, url, callback, errorMsg) {
                 );
                 console.log(errorMsg);
             } else {
-                console.log("Success");
                 return callback(response);
             }
         })
@@ -94,7 +93,6 @@ export function doPost(scope, url, params, callback, successMsg, errorMsg) {
                     },
                 );
             }
-            console.log("Success: ", response.data);
             callback(response);
         }
     })
@@ -155,7 +153,6 @@ export function doPut(scope, url, params, callback, successMsg, errorMsg) {
                     },
                 );
             }
-            console.log("Success: ", response.data);
             callback(response);
         }
     })

@@ -223,9 +223,7 @@
                     axios("{% url "feed:sort" %}", {
                         method: "POST",
                         data: bodyFormData
-                    }).then(response => {
-                        console.log("Success:", response);
-                    })
+                    });
                 },
             },
             mounted() {
@@ -322,7 +320,6 @@
                              EventBus.$emit("deleteFeed", this.$store.state.currentFeed.uuid);
                              const modal = Modal.getInstance(document.getElementById("modalDeleteFeed"));
                              modal.hide();
-                             console.log("Success");
                          }, (error) => {
                              console.log(error);
                          });

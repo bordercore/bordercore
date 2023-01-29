@@ -281,7 +281,6 @@
                         data: bodyFormData,
                     })
                         .then((response) => {
-                            console.log("Success");
                             this.getTodoList();
                         }, (error) => {
                             console.log(error);
@@ -300,8 +299,6 @@
                             );
 
                             self.getTodoList();
-
-                            console.log("Success");
                         }, (error) => {
                             console.log(error);
                         });

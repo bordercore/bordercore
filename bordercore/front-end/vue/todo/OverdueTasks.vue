@@ -112,7 +112,6 @@
                     .then((response) => {
                         this.message = "Task deleted.";
                         this.removeTaskFromList(uuid);
-                        console.log("Success");
                     }, (error) => {
                         console.log(error);
                     });
