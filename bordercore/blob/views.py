@@ -364,9 +364,19 @@ def handle_linked_collection(blob, request):
 @login_required
 def metadata_name_search(request):
 
-    m = MetaData.objects.filter(user=request.user).values("name").filter(name__icontains=request.GET["query"]).distinct("name").order_by("name".lower())
+    m = MetaData.objects.filter(
+        user=request.user
+    ).values(
+        "name"
+    ).filter(
+        name__icontains=request.GET["query"]
+    ).distinct(
+        "name"
+    ).order_by(
+        "name".lower()
+    )
 
-    return_data = [{"value": x["name"]} for x in m]
+    return_data = [{"label": x["name"]} for x in m]
 
     return JsonResponse(return_data, safe=False)
 

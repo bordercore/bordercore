@@ -622,7 +622,7 @@
             },
             mounted() {
                 EventBus.$on("tags-changed", (payload) => {
-                    this.$refs.relatedTags.setTags(payload.map( (x) => x.text ));
+                    this.$refs.relatedTags.setTags(payload.map( (x) => x.label ));
                 });
             },
             data() {

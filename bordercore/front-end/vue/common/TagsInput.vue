@@ -4,11 +4,13 @@
             ref="tagsInputComponent"
             v-model="tags"
             multiple
+            taggable
             :autofocus="autofocus"
             :placeholder="placeHolder"
             :options="options"
             :dropdown-should-open="({search, open}) => open && search.length > 2"
             :disabled="disabled"
+            :create-option="createTag"
             :selectable="() => maxTags ? tags.length < maxTags : true"
             @search="fetchOptions"
             @option:selected="tagsChanged"
@@ -78,7 +80,7 @@
         },
         computed: {
             tagsCommaSeparated: function() {
-                return this.tags.map((x) => x.value).join(",");
+                return this.tags.map((x) => x.label).join(",");
             },
         },
         mounted() {
@@ -88,12 +90,12 @@
 
             if (this.getTagsFromEvent) {
                 EventBus.$on("addTags", (payload) => {
-                    this.tags = payload.map( (x) => ({label: x, value: x}) );
+                    this.tags = payload.map( (x) => ({label: x}) );
                 });
             } else {
                 const initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
                 if (initialTags) {
-                    this.tags = initialTags.map( (x) => ({label: x, value: x}) );
+                    this.tags = initialTags.map( (x) => ({label: x}) );
                 }
             }
 
@@ -103,11 +105,17 @@
         },
         methods: {
             addTag(tagName) {
-                this.tags.push({"value": tagName, "label": tagName});
+                this.tags.push({"label": tagName});
+            },
+            createTag(tagName, foo) {
+                const newTag = {label: tagName};
+                this.$emit("option:created", newTag);
+                return newTag;
             },
             tagsChanged() {
+                console.log("hi");
                 // Re-emit this event in case a parent component is interested
-                this.$emit("tags-changed", this.tags.map( (x) => x.value ));
+                this.$emit("tags-changed", this.tags.map( (x) => x.label ));
                 this.options = [];
             },
             fetchOptions(search, loading) {
@@ -118,10 +126,8 @@
                     this,
                     this.searchUrl + search,
                     (response) => {
-                        this.notFound = response.data.length === 0;
-                        console.log(this.notFound);
                         this.options = response.data.map((a) => {
-                            return {value: a.value, label: a.value};
+                            return {label: a.label};
                         });
                     },
                     "",

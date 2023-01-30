@@ -155,7 +155,7 @@
                             "name": this.todoInfo.name,
                             "priority": this.todoInfo.priority,
                             "note": this.todoInfo.note || "",
-                            "tags": this.todoInfo.tags.map((x) => x.value),
+                            "tags": this.todoInfo.tags,
                             "url": this.todoInfo.url || "",
                             "due_date": dueDate,
                         },

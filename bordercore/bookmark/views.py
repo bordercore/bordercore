@@ -170,7 +170,7 @@ def get_tags_used_by_bookmarks(request):
         bookmark__isnull=False
     ).distinct("name")
 
-    return JsonResponse([{"value": x.name, "is_meta": x.is_meta} for x in tags], safe=False)
+    return JsonResponse([{"label": x.name, "is_meta": x.is_meta} for x in tags], safe=False)
 
 
 def add_bookmarks_from_import(request, tag, bookmarks):
