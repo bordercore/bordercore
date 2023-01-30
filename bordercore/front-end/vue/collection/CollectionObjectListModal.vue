@@ -16,8 +16,8 @@
                         <div class="row mt-3">
                             <div class="col-lg-4">
                                 <div class="form-check d-flex align-items-center">
-                                    <input v-model="collectionObjectList.collection_type" class="form-check-input" type="radio" name="type" value="ad-hoc">
-                                    <label class="form-check-label ms-2" for="type">
+                                    <input id="id_type_new" v-model="collectionObjectList.collection_type" class="form-check-input" type="radio" name="type" value="ad-hoc">
+                                    <label class="form-check-label ms-2" for="id_type_new">
                                         New
                                     </label>
                                 </div>
@@ -26,8 +26,8 @@
                         <div class="row mt-3">
                             <div class="col-lg-4">
                                 <div class="form-check d-flex align-items-center">
-                                    <input v-model="collectionObjectList.collection_type" class="form-check-input" type="radio" name="type" value="permanent">
-                                    <label class="form-check-label ms-2" for="type">
+                                    <input id="id_type_existing" v-model="collectionObjectList.collection_type" class="form-check-input" type="radio" name="type" value="permanent">
+                                    <label class="form-check-label ms-2" for="id_type_existing">
                                         Existing
                                     </label>
                                 </div>

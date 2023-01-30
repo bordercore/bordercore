@@ -34,8 +34,8 @@
                         <div class="row mt-3">
                             <div class="col-lg-12">
                                 <div class="form-check">
-                                    <input v-model="smartType" class="form-check-input mt-2" type="radio" name="type" value="manual">
-                                    <label class="form-check-label d-flex" for="type">
+                                    <input id="id_type_manual" v-model="smartType" class="form-check-input mt-2" type="radio" name="type" value="manual">
+                                    <label class="form-check-label d-flex" for="id_type_manual">
                                         Manually Add Songs
                                     </label>
                                 </div>
@@ -45,8 +45,8 @@
                         <div class="row mt-3">
                             <div class="col-lg-4">
                                 <div class="form-check">
-                                    <input v-model="smartType" class="form-check-input mt-2" type="radio" name="type" value="tag">
-                                    <label class="form-check-label d-flex" for="type">
+                                    <input id="id_type_tag" v-model="smartType" class="form-check-input mt-2" type="radio" name="type" value="tag">
+                                    <label class="form-check-label d-flex" for="id_type_tag">
                                         Tag
                                     </label>
                                 </div>
@@ -67,8 +67,8 @@
                         <div class="row mt-3">
                             <div class="col-lg-12">
                                 <div class="form-check">
-                                    <input v-model="smartType" class="form-check-input mt-2" type="radio" name="type" value="recent">
-                                    <label class="form-check-label d-flex" for="type">
+                                    <input id="id_type_recent" v-model="smartType" class="form-check-input mt-2" type="radio" name="type" value="recent">
+                                    <label class="form-check-label d-flex" for="id_type_recent">
                                         Recently Added Songs
                                     </label>
                                 </div>
@@ -78,10 +78,10 @@
                         <div class="row mt-3">
                             <div class="col-lg-4">
                                 <div class="form-check">
-                                    <input v-model="smartType" type="radio" name="type" class="form-check-input mt-2" value="time">
-                                    <div class="from-check-label text-nowrap">
+                                    <input id="id_type_time" v-model="smartType" type="radio" name="type" class="form-check-input mt-2" value="time">
+                                    <label class="from-check-label text-nowrap" for="id_type_time">
                                         Time period
-                                    </div>
+                                    </label>
                                 </div>
                             </div>
                             <div class="col-lg-8">
@@ -96,10 +96,10 @@
                             <div class="col-lg-4">
                                 <div class="form-check">
                                     <input type="hidden" name="rating" :value="rating">
-                                    <input v-model="smartType" type="radio" name="type" class="form-check-input mt-2" value="rating">
-                                    <div class="from-check-label text-nowrap">
+                                    <input id="id_type_rating" v-model="smartType" type="radio" name="type" class="form-check-input mt-2" value="rating">
+                                    <label class="from-check-label text-nowrap" for="id_type_rating">
                                         Rating
-                                    </div>
+                                    </label>
                                 </div>
                             </div>
                             <div class="col-lg-8">
