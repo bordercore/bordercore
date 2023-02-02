@@ -123,7 +123,7 @@ class SongForm(ModelForm):
             "artist": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
             "note": Textarea(attrs={"rows": 2, "class": "form-control"}),
             "source": Select(),
-            "track": TextInput(attrs={"class": "form-control", "autocomplete": "off"}),
+            "track": NumberInput(attrs={"class": "form-control", "autocomplete": "off", "min": "1"}),
             "year": NumberInput(attrs={"class": "form-control", "autocomplete": "off"}),
             "original_year": NumberInput(attrs={"class": "form-control", "autocomplete": "off"}),
         }
