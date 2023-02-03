@@ -11,40 +11,30 @@
                 <div class="modal-body">
                     <div class="d-flex flex-column">
                         <div id="search-collections" :class="{'d-none': !hideAddCollection}" class="mb-0">
-                            <vue-simple-suggest
-                                ref="suggestComponent"
-                                :destyled="true"
-                                display-attribute="name"
-                                value-attribute="uuid"
-                                :list="search"
+                            <select-value
+                                ref="selectValue"
                                 name="search"
-                                :filter-by-query="true"
-                                :debounce="200"
-                                :min-length="2"
-                                :max-suggestions="20"
-                                placeholder="Search collections"
-                                :styles="autoCompleteStyle"
-                                autocomplete="off"
-                                :autofocus="false"
+                                place-holder="Search collections"
+                                :search-url="searchUrl"
                                 @select="select"
                             >
-                                <div slot="suggestion-item" slot-scope="{ suggestion }">
-                                    <div :class="{'suggestion-item-disabled': suggestion.contains_blob}" class="search-suggestion d-flex align-items-center" @click.stop="onClick(suggestion)">
+                                <template #option="props">
+                                    <div :class="{'multiselect--disabled': props.option.contains_blob}" class="search-suggestion d-flex align-items-center" @click.stop="onClick(props.option)">
                                         <div>
-                                            <img class="me-2" width="50" height="50" :src="suggestion.cover_url">
+                                            <img class="me-2" width="50" height="50" :src="props.option.cover_url">
                                         </div>
                                         <div class="me-1">
-                                            {{ displayProperty(suggestion) }}
+                                            {{ props.option.name }}
                                         </div>
                                         <div class="text-primary mx-1">
-                                            <small>{{ suggestion.num_blobs }} blobs</small>
+                                            <small>{{ props.option.num_blobs }} blobs</small>
                                         </div>
-                                        <div v-if="suggestion.contains_blob" class="text-warning ms-auto">
+                                        <div v-if="props.option.contains_blob" class="text-warning ms-auto">
                                             Added
                                         </div>
                                     </div>
-                                </div>
-                            </vue-simple-suggest>
+                                </template>
+                            </select-value>
                             <div class="mt-3">
                                 <button class="btn btn-primary d-flex ms-auto" @click="showCreateNewCollection">
                                     Create new collection
@@ -66,12 +56,12 @@
 
 <script>
 
-    import VueSimpleSuggest from "vue-simple-suggest";
+    import SelectValue from "../common/SelectValue.vue";
 
     export default {
 
         components: {
-            VueSimpleSuggest,
+            SelectValue,
         },
         props: {
             blobUuid: {
@@ -95,34 +85,13 @@
             return {
                 name: "",
                 collectionList: [],
-                autoCompleteStyle: {
-                    vueSimpleSuggest: "position-relative",
-                    inputWrapper: "",
-                    defaultInput: "form-control",
-                    suggestions: "position-absolute list-group z-1000",
-                    suggestItem: "list-group-item",
-                },
                 hideAddCollection: true,
             };
         },
         methods: {
-            displayProperty: function(suggestion) {
-                return this.$refs.suggestComponent.displayProperty(suggestion);
-            },
             onClick(suggestion) {
                 if (!suggestion.contains_blob) {
                     this.select(suggestion);
-                }
-            },
-            search(query) {
-                try {
-                    const url = this.searchUrl;
-                    return axios.get(url + query)
-                                .then((response) => {
-                                    return response.data;
-                                });
-                } catch (error) {
-                    console.log(`Error: ${error}`);
                 }
             },
             select(selection) {
@@ -147,8 +116,7 @@
                         modal.hide();
 
                         this.$nextTick(() => {
-                            this.$refs.suggestComponent.$el.querySelector("input").blur();
-                            this.$refs.suggestComponent.setText("");
+                            this.$refs.selectValue.select = "";
                         });
                     },
                     "",
@@ -182,8 +150,7 @@
                         this.hideAddCollection = true;
 
                         this.$nextTick(() => {
-                            this.$refs.suggestComponent.$el.querySelector("input").blur();
-                            this.$refs.suggestComponent.setText("");
+                            this.$refs.selectValue.value = "";
                         });
                     },
                     "",

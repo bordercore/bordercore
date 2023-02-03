@@ -33,41 +33,32 @@
                                 </div>
                             </div>
                             <div class="col-lg-8">
-                                <vue-simple-suggest
-                                    ref="suggestComponent"
-                                    :destyled="true"
-                                    display-attribute="name"
-                                    value-attribute="uuid"
-                                    :list="search"
-                                    :filter-by-query="true"
-                                    :debounce="200"
-                                    :min-length="2"
-                                    :max-suggestions="20"
-                                    placeholder="Search collections"
-                                    :styles="autoCompleteStyle"
-                                    autocomplete="off"
-                                    :autofocus="false"
+                                <select-value
+                                    ref="selectValue"
+                                    label="name"
+                                    place-holder="Search collections"
+                                    :search-url="searchUrl"
                                     @select="onSelectCollection"
                                 >
-                                    <div slot="suggestion-item" slot-scope="{ suggestion }">
-                                        <div :class="{'suggestion-item-disabled': suggestion.contains_blob}" class="search-suggestion d-flex align-items-center">
+                                    <template #option="props">
+                                        <div :class="{'suggestion-item-disabled': props.option_blob}" class="search-suggestion d-flex align-items-center">
                                             <div>
-                                                <img class="me-2 mt-2" width="50" height="50" :src="suggestion.cover_url">
+                                                <img class="me-2 mt-2" width="50" height="50" :src="props.option.cover_url">
                                             </div>
                                             <div class="d-flex flex-column">
                                                 <div>
-                                                    {{ displayProperty(suggestion) }}
+                                                    {{ props.option.name }}
                                                 </div>
                                                 <div class="text-secondary lh-1">
-                                                    <small>{{ suggestion.num_blobs }} blobs</small>
+                                                    <small>{{ props.option.num_blobs }} blobs</small>
                                                 </div>
-                                                <div v-if="suggestion.contains_blob" class="text-warning ms-auto">
+                                                <div v-if="props.option_blob" class="text-warning ms-auto">
                                                     Added
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </vue-simple-suggest>
+                                    </template>
+                                </select-value>
                             </div>
                         </div>
                         <hr class="my-3">
@@ -144,14 +135,10 @@
 
 <script>
 
-    import VueSimpleSuggest from "vue-simple-suggest";
 
     export default {
 
         name: "CollectionObjectListModal",
-        components: {
-            VueSimpleSuggest,
-        },
         props: {
             addCollectionUrl: {
                 default: "",
@@ -165,13 +152,6 @@
         data() {
             return {
                 action: "Update",
-                autoCompleteStyle: {
-                    vueSimpleSuggest: "position-relative",
-                    inputWrapper: "",
-                    defaultInput: "form-control",
-                    suggestions: "position-absolute list-group z-1000",
-                    suggestItem: "list-group-item",
-                },
                 callback: null,
                 collectionObjectList: {},
                 collectionObjectListInitial: {},
@@ -223,9 +203,6 @@
             this.modal = new Modal("#modalUpdateCollection");
         },
         methods: {
-            displayProperty: function(suggestion) {
-                return this.$refs.suggestComponent.displayProperty(suggestion);
-            },
             openModal(action, callback, collectionObjectList) {
                 this.collectionObjectList = collectionObjectList;
                 this.collectionObjectListInitial = {...collectionObjectList};
@@ -273,7 +250,7 @@
                                 EventBus.$emit("update-layout", response.data.layout);
                                 this.modal.hide();
                                 this.$nextTick(() => {
-                                    this.$refs.suggestComponent.hideList();
+                                    this.$refs.selectValue.clearOptions();
                                 });
                             },
                             "Collection added",

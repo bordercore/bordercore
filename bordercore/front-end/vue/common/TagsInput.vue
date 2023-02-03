@@ -113,7 +113,6 @@
                 return newTag;
             },
             tagsChanged() {
-                console.log("hi");
                 // Re-emit this event in case a parent component is interested
                 this.$emit("tags-changed", this.tags.map( (x) => x.label ));
                 this.options = [];

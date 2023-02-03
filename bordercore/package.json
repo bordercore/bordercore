@@ -70,9 +70,9 @@
         "url-loader": "^4.1.1",
         "uuid": "^8.3.2",
         "vue": "^2.6.12",
+        "vue-multiselect": "^2.1.7",
         "vue-select": "^3.20.2",
         "vue-sidebar-menu": "^4.7.4",
-        "vue-simple-suggest": "git+https://github.com/bordercore/vue-simple-suggest.git",
         "vuedraggable": "^2.24.1",
         "vuejs-datepicker": "^1.6.2",
         "vuex": "^3.5.1"

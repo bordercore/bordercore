@@ -62,9 +62,9 @@
             <div class="card-grid h-100 ms-2">
 
                 <div class="d-flex flex-column h-100 me-2">
-                    <card title="" class="backdrop-filter me-0">
+                    <card title="" class="backdrop-filter hover-target me-0">
                         <template v-slot:content>
-                            <div class="hover-target d-flex">
+                            <div class="d-flex">
                                 <h1>
                                     {{ album.title }}
                                 </h1>
@@ -205,17 +205,16 @@
                                     <label class="col-lg-4 col-form-label fw-bold text-end">Artist</label>
 
                                     <div class="col-lg-8">
-                                        <simple-suggest
+                                        <select-value
+                                            label="artist"
                                             id="id_artist"
                                             name="artist"
-                                            ref="simpleSuggest"
-                                            display-attribute="artist"
-                                            value-attribute="artist"
+                                            ref="selectValue"
+                                            :initial-value="{'artist': '{{ form.instance.artist.name }}'}"
                                             search-url="{% url 'music:search_artists' %}?term="
                                             place-holder=""
-                                            :debounce=300
                                         >
-                                        </simple-suggest>
+                                        </select-value>
                                     </div>
                                     {% for error in field.errors %}
                                         <span class="form-error">{{ error }}</span>
@@ -423,9 +422,6 @@
                     this.filename = evt.target.files[0].name;
                 }
             },
-            mounted() {
-                this.$refs.simpleSuggest.$refs.suggestComponent.text = "{{ form.instance.artist.name }}";
-            }
         });
 
     </script>

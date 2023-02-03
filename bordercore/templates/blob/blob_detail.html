@@ -645,7 +645,9 @@
                 handleAddToCollection() {
                     const modal = new Modal("#modalAddToCollection");
                     modal.show();
-                    setTimeout( () => { this.$refs.addToCollection.$refs.suggestComponent.input.focus(); }, 500);
+                    setTimeout(() => {
+                        this.$refs.addToCollection.$refs.selectValue.$el.querySelector("input").focus();
+                    }, 500);
                 },
                 handleLinkToExistingBlob() {
                     this.$refs.blobSelect.openModal(["blob", "book", "document", "note"]);

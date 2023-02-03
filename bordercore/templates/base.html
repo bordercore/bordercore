@@ -58,9 +58,6 @@
                                 <div class="position-relative">
                                     <top-search
                                         ref="topSearch"
-                                        value-attribute="id"
-                                        :max-suggestions=20
-                                        accesskey="s"
                                         initial-search-type="{{ request.session.top_search_filter }}"
                                         suggest-search-url="{% url 'search:search_tags_and_names' %}?term="
                                         query-search-url="{% url 'search:search' %}"
@@ -274,7 +271,7 @@
                         openSearchWindow() {
                             this.$refs.topSearch.showSearchWindow = true;
                             setTimeout( () => {
-                                this.$refs.topSearch.$refs.suggestComponent.input.focus();
+                                this.$refs.topSearch.$refs.selectValue.$el.querySelector("input").focus();
                             }, 500);
                         }
                     },

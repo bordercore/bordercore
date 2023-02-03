@@ -165,17 +165,16 @@
             <card class="backdrop-filter flex-grow-1" id="vue-app-featured-tag">
                 <template v-slot:title-slot>
                     <div class="d-flex">
-                        <div v-if="showFeaturedTagInput" id="featured-tag-input" class="me-3 mb-0">
-                            <simple-suggest
-                                ref="simpleSuggest"
-                                display-attribute="display"
-                                value-attribute="display"
+                        <div v-if="showFeaturedTagInput" class="me-3 mb-0">
+                            <select-value
+                                ref="selectValue"
                                 search-url="{% url 'tag:search' %}?doctype=drill&query="
                                 place-holder="Tag"
-                                @blur="onFeaturedTagInputBlur"
-                                @keyup.enter="onFeaturedTagInputEnter"
+                                @select="select"
+                                @close="showFeaturedTagInput = false"
+                                :bolden-options="true"
                             >
-                            </simple-suggest>
+                            </select-value>
                         </div>
                         <h5 v-else class="lh-base mb-0">
                             <span class="card-title">Featured Tag:</span> <a :href="tag.url">[[ tag.name ]]</a>
@@ -212,16 +211,12 @@
                         <div class="modal-body">
                             <div class="form-row align-items-center">
                                 <div class="form-row mx-1 w-100">
-                                    <simple-suggest
-                                        ref="simpleSuggest"
+                                    <select-value
+                                        ref="selectValue"
                                         search-url="{% url 'tag:search' %}?doctype=drill&query="
-                                        display-attribute="display"
-                                        value-attribute="display"
                                         place-holder="Add Tag"
-                                        wrapper-class="w-100"
-                                        :debounce="500"
                                     >
-                                    </simple-suggest>
+                                    </select-value>
                                 </div>
                             </div>
                             <ul class="list-unstyled p-2 mb-0 wide-list">
@@ -240,8 +235,8 @@
                                     </transition-group>
                                 </draggable>
                             </ul>
-                        </div>
-                        <div class="modal-footer justify-content-start">
+                            </div>
+                            <div class="modal-footer justify-content-start">
                             <input class="btn btn-primary" type="button" value="Done" data-bs-dismiss="modal" />
                         </div>
                     </div>
@@ -422,12 +417,12 @@
              name: "Manage Tags",
              store,
              methods: {
-                 onClickDelete(tag) {
+                 onClickDelete(tag_name) {
                     doPost(
                         this,
                         url = "{% url "drill:unpin_tag" %}",
                         {
-                            "tag": tag,
+                            "tag": tag_name,
                         },
                         (response) => {
                             EventBus.$emit("get-tag-list");
@@ -456,11 +451,11 @@
                     );
                  },
                  select(selection) {
-                     EventBus.$emit("add-tag", selection.text);
+                     EventBus.$emit("add-tag", selection.label);
 
                      this.$nextTick(() => {
-                         this.$refs.simpleSuggest.$refs.suggestComponent.$el.querySelector("input").blur();
-                         this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
+                         this.$refs.selectValue.$refs.multiselect.$el.querySelector("input").blur();
+                         this.$refs.selectValue.clearOptions();
                      });
                  },
              },
@@ -468,7 +463,7 @@
                  EventBus.$on("open-manage-tags-modal", (payload) => {
                     const modal = new Modal("#vue-app-manage-tags");
                     modal.show();
-                    setTimeout(() => { this.$refs.simpleSuggest.$refs.suggestComponent.input.focus(); }, 500)
+                    setTimeout(() => { this.$refs.selectValue.$refs.multiselect.$el.focus(); }, 500)
                 });
              }
          });
@@ -483,28 +478,14 @@
                 };
             },
             methods: {
-                select(datum) {
-                    this.tag = datum.info;
-                    this.$nextTick(() => {
-                        this.$refs.simpleSuggest.$refs.suggestComponent.$el.querySelector("input").blur();
-                        this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
-                    });
-                },
-                boldenSuggestion(scope) {
-                    return scope.suggestion.display;
-                },
-                onFeaturedTagInputBlur() {
+                select(tagInfo) {
                     this.showFeaturedTagInput = false;
-                },
-                onFeaturedTagInputEnter() {
-                    this.showFeaturedTagInput = false;
-                    const el = document.getElementById("featured-tag-input");
-                    // this.filter = el.querySelector("input").value;
+                    this.tag = tagInfo.info;
                 },
                 onTagSearch() {
                     this.showFeaturedTagInput = true;
                     setTimeout( () => {
-                        const el = document.getElementById("featured-tag-input");
+                        const el = document.getElementById("vue-app-featured-tag");
                         el.querySelector("input").focus();
                     }, 100);
                 }

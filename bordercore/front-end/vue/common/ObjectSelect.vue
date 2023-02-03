@@ -12,64 +12,58 @@
                     <div class="d-flex flex-column">
                         <form @submit.prevent>
                             <div>
-                                <vue-simple-suggest
+                                <select-value
                                     id="object-search"
-                                    ref="suggestComponent"
-                                    v-model="query"
-                                    accesskey="s"
-                                    :destyled="true"
-                                    display-attribute="name"
-                                    value-attribute="uuid"
-                                    :list="search"
+                                    ref="selectValue"
+                                    label="name"
                                     name="search"
-                                    :filter-by-query="true"
-                                    :debounce="200"
-                                    :min-length="2"
-                                    :max-suggestions="maxSuggestions"
-                                    placeholder="Search"
-                                    autocomplete="off"
-                                    autofocus="off"
-                                    :styles="autoCompleteStyle"
+                                    place-holder="Search"
+                                    :search-url="getSearchObjectUrl()"
+                                    :bolden-option="true"
                                     @select="select"
                                 >
-                                    <div slot="suggestion-item" slot-scope="scope">
-                                        <!-- @*event*.stop="" handlers are needed to prevent the splitter from being selected -->
-                                        <div v-if="scope.suggestion.splitter"
+                                    <template #option="props">
+                                        <!-- @click.stop="" handler is needed to prevent the splitter from being selected -->
+                                        <div v-if="props.option.splitter"
                                              class="search-splitter"
                                              @click.stop=""
                                         >
-                                            {{ scope.suggestion.name }}
+                                            {{ props.option.name }}
                                         </div>
                                         <div v-else class="object-select-suggestion d-flex">
-                                            <div v-if="scope.suggestion.cover_url" class="cover-image">
-                                                <img class="mh-100 mw-100" :src="scope.suggestion.cover_url">
+                                            <div v-if="props.option.cover_url" class="cover-image">
+                                                <img class="mh-100 mw-100" :src="props.option.cover_url">
                                             </div>
-                                            <div v-else-if="scope.suggestion.doctype === 'Note'" class="cover-image">
+                                            <div v-else-if="props.option.doctype === 'Note'" class="cover-image">
                                                 <font-awesome-icon icon="sticky-note" class="fa-3x w-100 h-100 text-secondary" />
                                             </div>
-                                            <div v-else-if="scope.suggestion.doctype === 'Document'" class="cover-image">
+                                            <div v-else-if="props.option.doctype === 'Document'" class="cover-image">
                                                 <font-awesome-icon icon="fa-copy" class="fa-lg text-primary" />
                                             </div>
-                                            <div v-else-if="scope.suggestion.doctype === 'Bookmark'" class="cover-image">
-                                                <img width="120" height="67" :src="scope.suggestion.thumbnail_url">
+                                            <div v-else-if="props.option.doctype === 'Bookmark'" class="cover-image">
+                                                <img width="120" height="67" :src="props.option.thumbnail_url">
                                             </div>
                                             <div class="name d-flex flex-column">
-                                                <div class="ms-2" v-html="boldenSuggestion(scope)" />
+                                                <div class="ms-2">
+                                                    {{ props.option.name }}
+                                                </div>
                                                 <div class="date ms-2">
-                                                    {{ scope.suggestion.date }}
-                                                    <span v-if="scope.suggestion.important === 10" class="ms-2">
+                                                    {{ props.option.date }}
+                                                    <span v-if="props.option.important === 10" class="ms-2">
                                                         <font-awesome-icon icon="heart" class="text-danger" />
                                                     </span>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div v-if="suggestionsFound > maxSuggestions" slot="misc-item-below" class="object-select-misc-item-below p-2">
-                                        <span>
-                                            <strong>{{ suggestionsFound - maxSuggestions }}</strong> other matches
-                                        </span>
-                                    </div>
-                                </vue-simple-suggest>
+                                    </template>
+                                    <!-- <template slot="afterList">
+                                         <div v-if="hasMoreThanMax()" slot="misc-item-below" class="object-select-misc-item-below p-2">
+                                         <span>
+                                         <strong>Too many mathces</strong> other matches
+                                         </span>
+                                         </div>
+                                         </template> -->
+                                </select-value>
                             </div>
                         </form>
                         <div v-if="hasFilter" class="d-flex mt-2 ms-3">
@@ -92,13 +86,7 @@
 
 <script>
 
-    import VueSimpleSuggest from "vue-simple-suggest";
-
     export default {
-
-        components: {
-            VueSimpleSuggest,
-        },
         props: {
             hasFilter: {
                 type: Boolean,
@@ -132,12 +120,6 @@
                 callback: null,
                 returnArgs: null,
                 query: "",
-                autoCompleteStyle: {
-                    vueSimpleSuggest: "position-relative",
-                    inputWrapper: "",
-                    defaultInput: "form-control",
-                    suggestions: "position-absolute list-group z-1000",
-                },
                 suggestionsFound: 0,
                 toggleBookmarks: false,
                 toggleBlobs: false,
@@ -153,23 +135,11 @@
             }
         },
         methods: {
-            boldenSuggestion(scope) {
-                // If the parent provided a custom boldenSuggestion function, use that.
-                //  Otherwise use this default code.
-                if (typeof this.$parent.boldenSuggestion === "function") {
-                    return this.$parent.boldenSuggestion(scope);
-                }
-
-                if (!scope) return scope;
-
-                const {suggestion, query} = scope;
-
-                const result = this.$refs.suggestComponent.displayProperty(suggestion);
-
-                if (!query) return result;
-
-                const texts = query.split(/[\s-_/\\|\.]/gm).filter((t) => !!t) || [""];
-                return result.replace(new RegExp("(.*?)(" + texts.join("|") + ")(.*?)", "gi"), "$1<b class='matched'>$2</b>$3");
+            hasMoreThanMax() {
+                console.log("GOT HERE!!!!!!!!!!");
+                /* console.log(this.$refs.selectValue.options.length);
+                 * console.log(maxSuggestions);
+                 * return this.$refs.selectValue.options.length > maxSuggestions; */
             },
             onFilterLabelClick(filterType, evt) {
                 const input = evt.target.parentElement.querySelector("input");
@@ -190,22 +160,10 @@
                     }
                 }
             },
-            search(query) {
-                this.suggestionsFound = 0;
-                try {
-                    return axios.get(this.getSearchObjectUrl(query))
-                                .then((response) => {
-                                    this.suggestionsFound = response.data.length;
-                                    return response.data;
-                                });
-                } catch (error) {
-                    console.log(`Error: ${error}`);
-                }
-            },
             getSearchObjectUrl(query) {
                 let url = this.searchObjectUrl;
                 url += "?doc_type=" + this.doctypes.join(",");
-                url += "&term=" + query;
+                url += "&term=";
                 return url;
             },
             openModal(callback, returnArgs) {
@@ -214,13 +172,13 @@
                 const modal = new Modal(`#modalObjectSelect${this.label}`);
                 modal.show();
                 setTimeout( () => {
-                    this.$refs.suggestComponent.input.focus();
+                    this.$refs.selectValue.$el.querySelector("input").focus();
                 }, 500);
-                const suggest = this.$refs.suggestComponent;
+                const suggest = this.$refs.selectValue;
 
-                if (suggest.suggestions.length === 0) {
+                if (suggest.$refs.multiselect.options.length === 0) {
                     if (this.initialDoctypes.includes("media")) {
-                        suggest.suggestions.push(
+                        suggest.$refs.multiselect.options.push(
                             {
                                 uuid: "__Recent_Media",
                                 name: "Recent Media",
@@ -228,9 +186,9 @@
                                 value: "",
                             },
                         );
-                        suggest.suggestions.push(...this.recentMedia.mediaList.slice(0, 10));
+                        suggest.$refs.multiselect.options.push(...this.recentMedia.mediaList.slice(0, 10));
                     } else if (this.initialDoctypes.includes("bookmark")) {
-                        suggest.suggestions.push(
+                        suggest.$refs.multiselect.options.push(
                             {
                                 uuid: "__Recent_Bookmarks",
                                 name: "Recent Bookmarks",
@@ -238,9 +196,9 @@
                                 value: "",
                             },
                         );
-                        suggest.suggestions.push(...this.recentBookmarks.bookmarkList.slice(0, 10));
+                        suggest.$refs.multiselect.options.push(...this.recentBookmarks.bookmarkList.slice(0, 10));
                     } else {
-                        suggest.suggestions.push(
+                        suggest.$refs.multiselect.options.push(
                             {
                                 uuid: "__Recent_Blobs",
                                 name: "Recent Blobs",
@@ -248,8 +206,8 @@
                                 value: "",
                             },
                         );
-                        suggest.suggestions.push(...this.recentBlobs.blobList.slice(0, 5));
-                        suggest.suggestions.push(
+                        suggest.$refs.multiselect.options.push(...this.recentBlobs.blobList.slice(0, 5));
+                        suggest.$refs.multiselect.options.push(
                             {
                                 uuid: "__Recent_Bookmarks",
                                 name: "Recent Bookmarks",
@@ -257,7 +215,7 @@
                                 value: "",
                             },
                         );
-                        suggest.suggestions.push(...this.recentBookmarks.bookmarkList.slice(0, 5));
+                        suggest.$refs.multiselect.options.push(...this.recentBookmarks.bookmarkList.slice(0, 5));
                     }
                 }
                 suggest.listShown = true;
@@ -270,9 +228,8 @@
                 modal.hide();
 
                 this.$nextTick(() => {
-                    this.$refs.suggestComponent.$el.querySelector("input").blur();
-                    this.$refs.suggestComponent.setText("");
-                    this.$refs.suggestComponent.clearSuggestions();
+                    this.$refs.selectValue.$refs.multiselect.$el.querySelector("input").blur();
+                    this.$refs.selectValue.value = "";
                 });
             },
         },

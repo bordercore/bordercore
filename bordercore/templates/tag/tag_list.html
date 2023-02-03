@@ -16,16 +16,15 @@
                     <h4>
                         Tag Info
                     </h4>
-                    <div id="tags-search" class="d-none">
-                        <simple-suggest
-                            ref="simpleSuggest"
-                            class="w-100"
-                            display-attribute="display"
-                            value-attribute="text"
-                            place-holder="Tag name"
+                    <div v-if="showTagSearch" id="tags-search">
+                        <select-value
+                            ref="selectValue"
                             search-url="{% url 'tag:search' %}?query="
-                            @blur="onBlur"
-                        />
+                            place-holder="Tag name"
+                            @select="select"
+                            @close="showTagSearch = false"
+                        >
+                        </select-value>
                     </div>
                     <div class="ms-auto d-flex align-items-center" @click="openSearchWindow">
                         <font-awesome-icon icon="search" class="glow text-emphasis" />
@@ -150,18 +149,16 @@
                         <div class="modal-body">
                             <div class="form-row align-items-center">
                                 <div class="mx-1 d-flex">
-                                    <simple-suggest
+                                    <select-value
                                         id="tag-alias-name"
                                         ref="tagAliasSuggest"
-                                        display-attribute="text"
-                                        value-attribute="text"
-                                        search-url="{% url 'tag:search' %}?skip_tag_aliases=true&query="
-                                        place-holder="Tag"
                                         wrapper-class="w-100 me-3"
-                                        :debounce="500"
+                                        search-url="{% url 'tag:search' %}?skip_tag_aliases=true&query="
+                                        place-holder="Tag name"
+                                        @select="selectAlias"
                                     >
-                                    </simple-suggest>
-                                    <input v-model="addAliasAliasName" class="form-control" type="text" name="alias" autocomplete="off" placeholder="Alias" @keydown.enter="addAlias" />
+                                    </select-value>
+                                    <input v-model="addAliasAliasName" id="tag-alias-alias" class="form-control" type="text" name="alias" autocomplete="off" placeholder="Alias" @keydown.enter="addAlias" />
                                 </div>
                             </div>
                         </div>
@@ -197,11 +194,11 @@
             data() {
                 return {
                     filterSearch: "",
-                    items: [
-                    ],
+                    items: [],
                     addAliasTagName: "",
                     addAliasAliasName: "",
                     addAliasMessage: "",
+                    showTagSearch: false,
                     tagInfo: JSON.parse(document.getElementById("random_tag_info").textContent),
                 };
             },
@@ -234,13 +231,10 @@
                         "Error retrieving tag alias list",
                     );
                 },
-                onBlur() {
-                    document.getElementById("tags-search").classList.add("d-none");
-                },
                 openSearchWindow() {
-                    document.getElementById("tags-search").classList.remove("d-none");
+                    this.showTagSearch = true;
                     setTimeout( () => {
-                        this.$refs.simpleSuggest.$refs.suggestComponent.input.focus();
+                        this.$refs.selectValue.$refs.multiselect.$el.focus();
                     }, 100);
                 },
                 onClickDelete(item, index, evt) {
@@ -268,16 +262,17 @@
                     const modal = new Modal("#modal-tagalias");
                     modal.show();
                     setTimeout( () => {
-                        this.$refs.tagAliasSuggest.$refs.suggestComponent.input.focus();
+                        this.$refs.tagAliasSuggest.$refs.multiselect.$el.focus();
                     }, 500);
                 },
                 select(tagName) {
-                    document.getElementById("tags-search").classList.add("d-none");
-                    this.getTodoCounts(tagName.text);
+                    this.getTodoCounts(tagName.label);
+                },
+                selectAlias() {
+                    document.getElementById("tag-alias-alias").focus();
                 },
                 resetModal() {
-                    this.$refs.tagAliasSuggest.$refs.suggestComponent.clearSuggestions();
-                    this.$refs.tagAliasSuggest.$refs.suggestComponent.setText("");
+                    this.$refs.tagAliasSuggest.clearOptions();
                     this.addAliasAliasName = "";
                 },
                 addAlias() {

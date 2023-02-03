@@ -172,18 +172,16 @@
                             <label class="col-lg-3 col-form-label fw-bold text-end">Artist</label>
 
                             <div class="col-lg-9">
-                                <simple-suggest
+                                <select-value
+                                    label="artist"
                                     id="id_artist"
                                     name="artist"
-                                    ref="simpleSuggest"
-                                    display-attribute="artist"
-                                    value-attribute="artist"
                                     search-url="{% url 'music:search_artists' %}?term="
                                     place-holder=""
-                                    :debounce=300
-                                    @blur="onDupeCheck()"
+                                    @select="onDupeCheck()"
+                                    :bolden-options="true"
                                 >
-                                </simple-suggest>
+                                </select-value>
                             </div>
                             {% for error in field.errors %}
                                 <span class="form-error">{{ error }}</span>
@@ -409,7 +407,6 @@
                         }
                     }
                 },
-                select() {},
                 setRating(evt, rating) {
                     const els = evt.currentTarget.parentElement.querySelectorAll(".rating");
                     for (const el of els) {

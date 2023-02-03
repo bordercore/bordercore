@@ -7,40 +7,34 @@
                     <div class="has-search me-1">
                         <font-awesome-icon icon="search" />
 
-                        <vue-simple-suggest id="top-simple-suggest"
-                                            ref="suggestComponent"
-                                            v-model="query"
-                                            accesskey="s"
-                                            :destyled="true"
-                                            :display-attribute="displayAttribute"
-                                            :value-attribute="valueAttribute"
-                                            :list="search"
-                                            :filter-by-query="false"
-                                            :debounce="200"
-                                            :min-length="2"
-                                            :max-suggestions="maxSuggestions"
-                                            placeholder="Search"
-                                            autocomplete="off"
-                                            name="search"
-                                            :styles="autoCompleteStyle"
-                                            @keydown.native="onKeyDown"
-                                            @select="select"
-                                            @keydown.native.enter.prevent="onEnter"
+                        <select-value
+                            ref="selectValue"
+                            label="name"
+                            name="search"
+                            place-holder="Search"
+                            :search-url="suggestSearchUrl"
+                            @search-change="onSearchChange"
+                            @select="select"
                         >
-                            <div slot="suggestion-item" slot-scope="scope">
-                                <!-- @*event*.stop="" handlers are needed to prevent the splitter from being selected -->
-                                <span v-if="scope.suggestion.splitter"
+                            <template #option="props">
+                                <!-- @click.stop="" handlers are needed to prevent the splitter from being selected -->
+                                <span v-if="props.option.splitter"
                                       class="search-splitter"
                                       @click.stop=""
-                                >{{ scope.suggestion.name }}</span>
+                                >
+                                    {{ props.option.name }}
+                                </span>
                                 <div v-else class="search-suggestion">
-                                    <span v-if="scope.suggestion.important === 10" class="me-1">
+                                    <span v-if="props.option.important === 10" class="me-1">
                                         <font-awesome-icon icon="heart" class="text-danger" />
                                     </span>
-                                    <span class="d-inline" v-html="boldenSuggestion(scope)" />
+                                    <span v-if="props.option.doctype">
+                                        <em class="top-search-object-type">{{ props.option.doctype }}</em> -
+                                    </span>
+                                    <span class="d-inline" v-html="boldenSuggestion(props)" />
                                 </div>
-                            </div>
-                        </vue-simple-suggest>
+                            </template>
+                        </select-value>
                         <div v-if="searchFilter" id="top-search-filter" class="tag label label-info d-flex align-items-center">
                             <div>{{ getFilterName(searchFilter) }}</div>
                             <div>
@@ -52,7 +46,7 @@
                     </div>
                 </div>
             </form>
-            <div v-if="query === ''" id="top-search-filter-options" class="ms-3 mt-2 p-2">
+            <div v-if="showFilter" id="top-search-filter-options" class="ms-3 mt-2 p-2">
                 <div class="search-splitter">
                     Filter Options
                 </div>
@@ -86,33 +80,8 @@
 
 <script>
 
-    import VueSimpleSuggest from "vue-simple-suggest";
-
     export default {
-        components: {
-            VueSimpleSuggest,
-        },
         props: {
-            accesskey: {
-                type: String,
-                default: null,
-            },
-            id: {
-                type: String,
-                default: "simple-suggest",
-            },
-            displayAttribute: {
-                type: String,
-                default: "name",
-            },
-            valueAttribute: {
-                type: String,
-                default: "name",
-            },
-            maxSuggestions: {
-                type: Number,
-                default: 10,
-            },
             initialSearchType: {
                 type: String,
                 default: "",
@@ -144,13 +113,6 @@
         },
         data() {
             return {
-                query: "",
-                autoCompleteStyle: {
-                    vueSimpleSuggest: "position-relative",
-                    inputWrapper: "",
-                    defaultInput: "form-control",
-                    suggestions: "position-absolute list-group z-1000",
-                },
                 searchFilter: this.initialSearchType,
                 searchUrl: this.suggestSearchUrl,
                 searchFilterTypes: [
@@ -180,6 +142,7 @@
                         "doctype": "drill",
                     },
                 ],
+                showFilter: true,
                 showSearchWindow: false,
             };
         },
@@ -215,30 +178,24 @@
             });
         },
         methods: {
-            search(query) {
-                try {
-                    const url = this.searchUrl;
-                    return axios.get(url + query + "&doc_type=" + this.searchFilter.toLowerCase())
-                                .then((response) => {
-                                    return response.data;
-                                });
-                } catch (error) {
-                    console.log(`Error: ${error}`);
-                }
-            },
+            /* search(query) {
+             *     try {
+             *         const url = this.searchUrl;
+             *         return axios.get(url + query + "&doc_type=" + this.searchFilter.toLowerCase())
+             *                     .then((response) => {
+             *                         return response.data;
+             *                     });
+             *     } catch (error) {
+             *         console.log(`Error: ${error}`);
+             *     }
+             * }, */
             boldenSuggestion(scope) {
-                // If the parent provided a custom boldenSuggestion function, use that.
-                //  Otherwise use this default code.
-                if (typeof this.$parent.boldenSuggestion === "function") {
-                    return this.$parent.boldenSuggestion(scope);
-                }
-
                 if (!scope) return scope;
 
-                const {suggestion, query} = scope;
+                const {option, query} = scope;
 
-                const result = this.$refs.suggestComponent.displayProperty(suggestion);
-                if (!suggestion.doctype) {
+                const result = option.name;
+                if (!option.doctype) {
                     return result;
                 }
 
@@ -247,7 +204,7 @@
                 const texts = query.split(/[\s-_/\\|\.]/gm).filter((t) => !!t) || [""];
 
                 const boldResult = result.replace(new RegExp("(.*?)(" + texts.join("|") + ")(.*?)", "gi"), "$1<b class='text-primary'>$2</b>$3");
-                return ` <em class="top-search-object-type">${suggestion.doctype}</em> - ${boldResult}`;
+                return boldResult;
             },
             select(datum) {
                 window.location = datum.link;
@@ -295,7 +252,11 @@
                     this.showSearchWindow = false;
                 }
             },
+            onSearchChange(query) {
+                this.showFilter = query === "";
+            },
             handleFilter(filter) {
+                console.log("handlfFilter");
                 this.searchFilter = this.searchFilter === filter ? "" : filter;
                 this.saveSearchFilter(this.searchFilter);
                 this.$refs.suggestComponent.research();

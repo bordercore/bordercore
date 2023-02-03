@@ -59,7 +59,7 @@
 
                                 <font-awesome-icon icon="search"></font-awesome-icon>
 
-                                <input id="simple-suggest" name="search" placeholder="Search" autocomplete="off" autofocus="autofocus" class="default-input form-control" />
+                                <input id="simple-suggest" name="search" value="{{ request.GET.search|safe|escapejs }}" placeholder="Search" autocomplete="off" autofocus="autofocus" class="default-input form-control" />
 
                             </div>
                         </div>
@@ -358,9 +358,6 @@
 
         new Vue({
             el: "#search",
-            mounted() {
-                document.getElementById("simple-suggest").value = "{{ request.GET.search|safe|escapejs }}";
-            },
             methods: {
                 select(tag) {
                     if (tag.doctype == "Tag") {

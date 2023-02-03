@@ -528,7 +528,6 @@ def sort_results(matches):
                     "id": f"__{key}",
                     "name": f"{key}s",
                     "splitter": True,
-                    "value": "Bogus"
                 },
                 *result[key]
             ]

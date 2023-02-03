@@ -44,23 +44,20 @@
                 <div id="bookmark-search-form" class="d-flex flex-column me-2 p-3">
 
                     <div class="d-flex">
-                        <form class="form-inline" role="form" method="get" @submit.prevent>
-                        {% csrf_token %}
-
+                        <form class="form-inline w-25" role="form" method="get" @submit.prevent>
                             <input id="add-to-remote-from-pinned-tagname" type="hidden" name="tag" />
 
-                            <div class="has-search position-relative" v-cloak>
-                                <font-awesome-icon id="top-search-spacer" icon="search"></font-awesome-icon>
+                            <div class="position-relative" v-cloak>
                                 <search inline-template @search-term="onTermSearch" @get-page="getPage" ref="search">
-                                    <div>
-                                        <simple-suggest
-                                            id="bookmarkSearch"
-                                            ref="simpleSuggest"
-                                            place-holder="Search term or tag"
-                                            search-url="{% url 'bookmark:get_tags_used_by_bookmarks' %}?query="
-                                        >
-                                        </simple-suggest>
-                                    </div>
+                                    <select-value
+                                        id="bookmarkSearch"
+                                        ref="selectValue"
+                                        search-url="{% url 'bookmark:get_tags_used_by_bookmarks' %}?query="
+                                        place-holder="Search term or tag"
+                                        :search-icon="true"
+                                        @select="select"
+                                    >
+                                    </select-value>
                                 </search>
                             </div>
 
@@ -269,15 +266,10 @@
         const Search = {
             methods: {
                 onEnter(evt) {
-                    // If we've hit 'Enter' and we're hovering over a tag suggestion,
-                    //  we don't want to execute a term search, so bail.
-                    if (this.$refs.simpleSuggest.$refs.suggestComponent.hovered) {
-                        return;
-                    }
                     searchTerm = evt.srcElement.value;
 
                     if (searchTerm) {
-                        this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
+                        this.$refs.selectValue.value = "";
                         EventBus.$emit("search-term", searchTerm);
                     } else {
                         // If the search box is empty, refresh the list with no filters
@@ -285,12 +277,11 @@
                     }
 
                 },
-                select(tag) {
+                select(tagInfo) {
                     this.$nextTick(() => {
-                        this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
-                        this.$refs.simpleSuggest.$refs.suggestComponent.clearSuggestions();
+                        this.$refs.selectValue.clearOptions();
                     });
-                    EventBus.$emit("search-tag", tag.value);
+                    EventBus.$emit("search-tag", tagInfo.label);
                 },
             },
         };

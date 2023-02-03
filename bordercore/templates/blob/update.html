@@ -343,12 +343,14 @@
                                     <div class="row mb-3">
 
                                         <div class="col-lg-2 col-sm-2">
-                                            <simple-suggest
-                                                ref="simpleSuggest"
-                                                id="simple-suggest"
+                                            <select-value
+                                                id="metadata_name"
+                                                ref="selectValue"
                                                 search-url="{% url 'blob:metadata_name_search' %}?query="
+                                                place-holder="Name"
+                                                @select="select"
                                             >
-                                            </simple-suggest>
+                                        </select-value>
                                         </div>
 
                                         <div class="col-lg-10 col-sm-10">
@@ -568,11 +570,11 @@
                 addMetadata(payload) {
                     metadata_count++;
 
-                    nameEl = document.getElementById("simple-suggest");
+                    nameEl = document.getElementById("metadata_name");
                     valueEl = document.getElementById("id_value");
 
                     if (nameEl.value == "" || valueEl.value == "") {
-                        this.$refs.simpleSuggest.$refs.suggestComponent.$refs.inputSlot.focus();
+                        this.$refs.selectValue.$refs.multiselect.$refs.inputSlot.focus();
                         return;
                     }
 
@@ -587,9 +589,9 @@
 
                     this.metadata.unshift(payload);
 
-                    // Clear the autocomplete and give it focus so that another name can be added
-                    this.$refs.simpleSuggest.$refs.suggestComponent.setText("");
-                    window.setTimeout(() => { this.$refs.simpleSuggest.$refs.suggestComponent.inputElement.focus() }, 100);
+                    // Clear the autocomplete and give it focus so that more metadata can be added
+                    this.$refs.selectValue.clearOptions();
+                    window.setTimeout(() => { this.$refs.selectValue.$refs.multiselect.$el.focus() }, 100);
                 },
                 deleteMetadata(counter) {
                     for (i = 0; i < this.metadata.length; i++) {

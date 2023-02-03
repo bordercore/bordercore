@@ -124,8 +124,9 @@ window.animateCSS = animateCSS;
 import EditableTextArea from "./vue/common/EditableTextArea.vue";
 Vue.component("EditableTextArea", EditableTextArea);
 
-import SimpleSuggest from "./vue/common/SimpleSuggest.vue";
-Vue.component("SimpleSuggest", SimpleSuggest);
+import SelectValue from "./vue/common/SelectValue.vue";
+import "vue-multiselect/dist/vue-multiselect.min.css";
+Vue.component("SelectValue", SelectValue);
 
 import SearchResult from "./vue/search/SearchResult.vue";
 Vue.component("SearchResult", SearchResult);
