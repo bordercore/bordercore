@@ -47,6 +47,7 @@
                     :track-list="songList"
                     song-url="{{ MEDIA_URL_MUSIC }}songs/"
                     mark-listened-to-url="{% url 'music:mark_song_as_listened_to' '00000000-0000-0000-0000-000000000000' %}"
+                    @current-song="onCurrentSong"
                 >
                 </audio-player>
             {% endif %}
@@ -339,6 +340,12 @@
                         return "rating-star-selected";
                     }
                     return "";
+                },
+                onCurrentSong(songNumber) {
+                    if (songNumber === -1) {
+                        return;
+                    }
+                    this.selectedSong = this.songList[songNumber];
                 },
                 onShowNote(song) {
                     return markdown.render(song.note);

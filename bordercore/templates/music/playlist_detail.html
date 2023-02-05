@@ -72,6 +72,7 @@
                 :track-list="songList"
                 song-url="{{ MEDIA_URL_MUSIC }}songs/"
                 mark-listened-to-url="{% url 'music:mark_song_as_listened_to' '00000000-0000-0000-0000-000000000000' %}"
+                @current-song="onCurrentSong"
             >
             </audio-player>
 
@@ -298,6 +299,12 @@
                         },
                         "Error getting playlist",
                     );
+                },
+                onCurrentSong(songNumber) {
+                    if (songNumber === -1) {
+                        return;
+                    }
+                    this.selectedSong = this.songList[songNumber];
                 },
                 onSongClicked(row, column, rowIndex, columnIndex) {
                     // Don't play the song if we've clicked on the

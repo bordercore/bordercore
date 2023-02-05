@@ -191,6 +191,12 @@
                 };
             },
             methods: {
+                onCurrentSong(songNumber) {
+                    if (songNumber === -1) {
+                        return;
+                    }
+                    this.selectedSong = this.songList[songNumber];
+                },
                 onSongClicked(item) {
                     this.$refs.audioPlayer.playTrack(item.uuid);
                 },
