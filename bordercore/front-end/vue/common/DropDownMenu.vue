@@ -30,7 +30,12 @@
 
 <script>
 
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+
     export default {
+        components: {
+            FontAwesomeIcon,
+        },
         props: {
             links: {
                 type: Array,

@@ -17,6 +17,7 @@ const EventBus = {
 window.EventBus = EventBus;
 
 import draggable from "vuedraggable";
+window.draggable = draggable;
 
 import Sortable from "sortablejs";
 window.Sortable = Sortable;
@@ -139,7 +140,7 @@ import EditableTextArea from "./vue/common/EditableTextArea.vue";
 
 import SelectValue from "./vue/common/SelectValue.vue";
 import "vue-multiselect/dist/vue-multiselect.min.css";
-// window.SelectValue = SelectValue;
+window.SelectValue = SelectValue;
 
 import SearchResult from "./vue/search/SearchResult.vue";
 

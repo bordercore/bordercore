@@ -41,11 +41,13 @@
 
 <script>
 
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
     import Multiselect from "vue-multiselect";
     import debounceMixin from "../../debounce.js";
 
     export default {
         components: {
+            FontAwesomeIcon,
             Multiselect,
         },
         mixins: [debounceMixin],
@@ -144,9 +146,9 @@
                     const url = this.searchUrl;
                     this.debounce(() => {
                         return axios.get(url + query)
-                            .then((response) => {
-                                this.options = response.data;
-                            });
+                                    .then((response) => {
+                                        this.options = response.data;
+                                    });
                     });
                 } catch (error) {
                     console.log(`Error: ${error}`);

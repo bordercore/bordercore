@@ -49,9 +49,13 @@
 
     <script type="text/javascript">
 
-        new Vue({
-            el: "#import-form",
+        const app = createApp({
+            name: "Import",
+            components: {
+                TagsInput,
+            },
         });
+        app.mount("#import-form");
 
     </script>
 
