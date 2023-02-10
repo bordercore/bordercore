@@ -221,8 +221,12 @@
 
     <script type="text/javascript">
 
-        new Vue({
-            el: "#vue-app",
+        const app = createApp({
+            components: {
+                Card,
+                DrillTagProgress,
+            },
+            delimiters: ["[[", "]]"],
             data() {
                 return {
                     errorClass: "",
@@ -261,6 +265,7 @@
                      })
             }
         });
+        app.mount("#vue-app");
 
     </script>
 

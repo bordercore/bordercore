@@ -165,6 +165,7 @@ import Card from "./vue/common/Card.vue";
 window.Card = Card;
 
 import SearchNoResult from "./vue/common/SearchNoResult.vue";
+window.SearchNoResult = SearchNoResult;
 
 import TreeMenu from "./vue/common/TreeMenu.vue";
 
@@ -173,6 +174,7 @@ import RelatedBookmarksList from "./vue/bookmark/RelatedBookmarksList.vue";
 import RelatedObjects from "./vue/common/RelatedObjects.vue";
 
 import DrillTagProgress from "./vue/common/DrillTagProgress.vue";
+window.DrillTagProgress = DrillTagProgress;
 
 import DropDownMenu from "./vue/common/DropDownMenu.vue";
 window.DropDownMenu = DropDownMenu;

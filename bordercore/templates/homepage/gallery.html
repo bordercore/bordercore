@@ -181,8 +181,12 @@
 
     <script type="text/javascript" charset="utf-8">
 
-        new Vue({
-            el: "#gallery",
+        const app = createApp({
+            components: {
+                Card,
+                FontAwesomeIcon,
+                SearchNoResult,
+            },
             data() {
                 return {
                     javascript_sample: `
@@ -223,6 +227,7 @@ class TagBookmark(SortOrderMixin):
                 },
             },
         });
+        app.mount("#gallery");
 
     </script>
 
