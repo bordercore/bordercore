@@ -294,49 +294,55 @@
 
         const coverageMinimum = 80;
 
-        new Vue({
-            el: "#vue-app",
-            data: {
-                "selectedTest": "unit",
-                "unit": {
-                    "test_count": "{{ unit.latest_result.test_count }}",
-                    "test_errors": "{{ unit.latest_result.test_errors }}",
-                    "test_failures": "{{ unit.latest_result.test_failures }}",
-                    "test_time_elapsed": "{{ unit.latest_result.test_time_elapsed }}",
-                    "test_runtime": "{{ unit.created }}",
-                    "test_output": "{{ unit.latest_result.test_output|escapejs }}",
-                },
-                "functional": {
-                    "test_count": "{{ functional.latest_result.test_count }}",
-                    "test_errors": "{{ functional.latest_result.test_errors }}",
-                    "test_failures": "{{ functional.latest_result.test_failures }}",
-                    "test_time_elapsed": "{{ functional.latest_result.test_time_elapsed }}",
-                    "test_runtime": "{{ functional.created }}",
-                    "test_output": "{{ functional.latest_result.test_output|escapejs }}",
-                },
-                "data": {
-                    "test_count": "{{ data.latest_result.test_count }}",
-                    "test_errors": "{{ data.latest_result.test_errors }}",
-                    "test_failures": "{{ data.latest_result.test_failures }}",
-                    "test_time_elapsed": "{{ data.latest_result.test_time_elapsed }}",
-                    "test_runtime": "{{ data.created }}",
-                    "test_output": "{{ data.latest_result.test_output|escapejs }}",
-                },
-                "wumpus": {
-                    "test_count": "{{ wumpus.latest_result.test_count }}",
-                    "test_errors": "{{ wumpus.latest_result.test_errors }}",
-                    "test_failures": "{{ wumpus.latest_result.test_failures }}",
-                    "test_overdue": "{{ wumpus.overdue }}",
-                    "test_time_elapsed": "{{ wumpus.latest_result.test_time_elapsed }}",
-                    "test_runtime": "{{ wumpus.created }}",
-                    "test_output": "{{ wumpus.latest_result.test_output|escapejs }}",
-                },
-                "coverage": {
-                    "line_rate": "{{ coverage.latest_result.line_rate }}",
-                    "test_time_elapsed": "{{ coverage.latest_result.test_time_elapsed }}",
-                    "test_runtime": "{{ coverage.created }}",
-                    "test_overdue": "{{ coverage.overdue }}",
-                },
+        const app = createApp({
+            components: {
+                Card,
+                FontAwesomeIcon,
+            },
+            delimiters: ["[[", "]]"],
+            data() {
+                return {
+                    "selectedTest": "unit",
+                    "unit": {
+                        "test_count": "{{ unit.latest_result.test_count }}",
+                        "test_errors": "{{ unit.latest_result.test_errors }}",
+                        "test_failures": "{{ unit.latest_result.test_failures }}",
+                        "test_time_elapsed": "{{ unit.latest_result.test_time_elapsed }}",
+                        "test_runtime": "{{ unit.created }}",
+                        "test_output": "{{ unit.latest_result.test_output|escapejs }}",
+                    },
+                    "functional": {
+                        "test_count": "{{ functional.latest_result.test_count }}",
+                        "test_errors": "{{ functional.latest_result.test_errors }}",
+                        "test_failures": "{{ functional.latest_result.test_failures }}",
+                        "test_time_elapsed": "{{ functional.latest_result.test_time_elapsed }}",
+                        "test_runtime": "{{ functional.created }}",
+                        "test_output": "{{ functional.latest_result.test_output|escapejs }}",
+                    },
+                    "data": {
+                        "test_count": "{{ data.latest_result.test_count }}",
+                        "test_errors": "{{ data.latest_result.test_errors }}",
+                        "test_failures": "{{ data.latest_result.test_failures }}",
+                        "test_time_elapsed": "{{ data.latest_result.test_time_elapsed }}",
+                        "test_runtime": "{{ data.created }}",
+                        "test_output": "{{ data.latest_result.test_output|escapejs }}",
+                    },
+                    "wumpus": {
+                        "test_count": "{{ wumpus.latest_result.test_count }}",
+                        "test_errors": "{{ wumpus.latest_result.test_errors }}",
+                        "test_failures": "{{ wumpus.latest_result.test_failures }}",
+                        "test_overdue": "{{ wumpus.overdue }}",
+                        "test_time_elapsed": "{{ wumpus.latest_result.test_time_elapsed }}",
+                        "test_runtime": "{{ wumpus.created }}",
+                        "test_output": "{{ wumpus.latest_result.test_output|escapejs }}",
+                    },
+                    "coverage": {
+                        "line_rate": "{{ coverage.latest_result.line_rate }}",
+                        "test_time_elapsed": "{{ coverage.latest_result.test_time_elapsed }}",
+                        "test_runtime": "{{ coverage.created }}",
+                        "test_overdue": "{{ coverage.overdue }}",
+                    }
+                }
             },
             computed: {
                 status_unit() {
@@ -368,8 +374,8 @@
                     if (this[testType].test_overdue) {
                         return failure;
                     } else if ((this[testType].test_errors === "0" &&
-                                this[testType].test_failures === "0") ||
-                               this[testType].test_errors === undefined) {
+                        this[testType].test_failures === "0") ||
+                        this[testType].test_errors === undefined) {
                         return success;
                     } else {
                         return failure;
@@ -382,6 +388,7 @@
                 },
             },
         });
+        app.mount("#vue-app");
 
     </script>
 
