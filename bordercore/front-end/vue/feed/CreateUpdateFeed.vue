@@ -62,12 +62,13 @@
 
 <script>
 
-    import {
-        getReasonPhrase,
-        StatusCodes,
-    } from "http-status-codes";
+    import {getReasonPhrase, StatusCodes} from "http-status-codes";
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
     export default {
+        components: {
+            FontAwesomeIcon,
+        },
         props: {
             updateFeedUrl: {
                 default: "",
@@ -82,24 +83,20 @@
                 type: String,
             },
         },
-        data() {
-            return {
-                action: "Update",
-                feedInfo: {},
-                status: "",
-                statusIcon: "check",
-                checkingStatus: false,
-                lastResponseCode: null,
-            };
-        },
-        computed: {
-            statusMsg: function() {
-                if (!this.status) {
+        setup(props) {
+            const action = ref("Action");
+            const checkingStatus = ref(false);
+            const feedInfo = ref({});
+            const lastResponseCode = ref("");
+            const status = ref("");
+
+            const statusMsg = computed(() => {
+                if (status.value === "") {
                     return {
                         "class": "d-none",
                         "icon": "check",
                     };
-                } else if (!this.lastResponseCode || this.lastResponseCode === StatusCodes.OK) {
+                } else if (!lastResponseCode.value || lastResponseCode.value === StatusCodes.OK) {
                     return {
                         "class": "d-block text-success",
                         "icon": "check",
@@ -110,29 +107,24 @@
                         "icon": "exclamation-triangle",
                     };
                 }
-            },
-        },
-        mounted() {
-            EventBus.$on("showStatus", (payload) => {
-                this.status = payload.msg;
-                this.$refs.status.classList.add(payload.classNameAdd);
             });
-        },
-        methods: {
-            setAction(action) {
-                this.action = action;
-                this.status = "";
-            },
-            onAction() {
-                if (this.action === "Update") {
+
+            function updateModal(actionParam, feedInfoParam) {
+                action.value = actionParam;
+                feedInfo.value = feedInfoParam;
+                status.value = "";
+            }
+
+            function onAction() {
+                if (action === "Update") {
                     doPut(
-                        this,
-                        this.updateFeedUrl.replace(/00000000-0000-0000-0000-000000000000/, this.feedInfo.uuid),
+                        null,
+                        props.updateFeedUrl.replace(/00000000-0000-0000-0000-000000000000/, feedInfo.uuid),
                         {
-                            "feed_uuid": this.feedInfo.uuid,
-                            "homepage": this.feedInfo.homepage,
-                            "name": this.feedInfo.name,
-                            "url": this.feedInfo.url,
+                            "feed_uuid": feedInfo.uuid,
+                            "homepage": feedInfo.homepage,
+                            "name": feedInfo.name,
+                            "url": feedInfo.url,
                         },
                         () => {
                             const modal = Modal.getInstance(document.getElementById("modalUpdateFeed"));
@@ -142,12 +134,12 @@
                     );
                 } else {
                     doPost(
-                        this,
-                        this.createFeedUrl,
+                        null,
+                        props.createFeedUrl,
                         {
-                            "homepage": this.feedInfo.homepage,
-                            "name": this.feedInfo.name,
-                            "url": this.feedInfo.url,
+                            "homepage": feedInfo.homepage,
+                            "name": feedInfo.name,
+                            "url": feedInfo.url,
                         },
                         (response) => {
                             EventBus.$emit("addFeed", response.data.feed_info);
@@ -157,9 +149,10 @@
                         "Feed created. Please wait up to an hour for the feed to update.",
                     );
                 }
-            },
-            onBlur(evt) {
-                this.checkingStatus = true;
+            }
+
+            function onBlur(evt) {
+                checkingStatus.value = true;
 
                 let feedUrl = document.getElementById("id_url").value;
                 if ( !feedUrl ) {
@@ -170,31 +163,42 @@
                 if ( !homepage ) {
                     const baseUrl = document.getElementById("id_url").value.match(/^(https?:\/\/.*?)\//);
                     if (baseUrl) {
-                        this.feedInfo.homepage = baseUrl[1];
+                        feedInfo.homepage = baseUrl[1];
                     }
                 }
 
                 feedUrl = encodeURIComponent(feedUrl).replace(/%/g, "%25");
 
-                // TODO: Replace with doGet() ?
-                const self = this;
+                doGet(
+                    null,
+                    props.feedCheckUrl.replace(/666/, feedUrl),
+                    (response) => {
+                        checkingStatus.value = false;
+                        lastResponseCode.value = response.data.status_code;
+                        if (!response || response.data.status_code != StatusCodes.OK) {
+                            status.value = "Feed error. Status: <strong>" + getReasonPhrase(response.data.status) + "</strong>";
+                        } else if (response.data.entry_count == 0) {
+                            status.value = "Feed error. Found no feed items.";
+                        } else {
+                            status.value = "Feed <strong>OK</strong>. Found <strong>" + response.data.entry_count + "</strong> feed items.";
+                        }
+                    },
+                    "Error getting quote",
+                );
+            }
 
-                axios.get(this.feedCheckUrl.replace(/666/, feedUrl))
-                     .then((response) => {
-                         self.checkingStatus = false;
-                         self.lastResponseCode = response.data.status;
-                         if (!response || response.data.status != StatusCodes.OK) {
-                             this.statusIcon = "exclamation-triangle";
-                             this.status = "Feed error. Status: <strong>" + getReasonPhrase(response.data.status) + "</strong>";
-                         } else if (response.data.entry_count == 0) {
-                             this.status = "Feed error. Found no feed items.";
-                         } else {
-                             this.status = "Feed <strong>OK</strong>. Found <strong>" + response.data.entry_count + "</strong> feed items.";
-                         }
-                     });
-            },
+            return {
+                action,
+                checkingStatus,
+                feedInfo,
+                lastResponseCode,
+                updateModal,
+                onAction,
+                onBlur,
+                status,
+                statusMsg,
+            };
         },
-
     };
 
 </script>

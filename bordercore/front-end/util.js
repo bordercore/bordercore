@@ -9,7 +9,7 @@
 export function doGet(scope, url, callback, errorMsg) {
     axios.get(url)
         .then((response) => {
-            if (response.data.status && response.data.status != "OK") {
+            if (response.data.status && response.data.status !== "OK") {
                 const vNodesMsg = getErrorMessage(scope, errorMsg);
                 EventBus.$emit(
                     "toast",
@@ -70,7 +70,7 @@ export function doPost(scope, url, params, callback, successMsg, errorMsg) {
                 },
             );
             console.log("Warning: ", response.data.message);
-        } else if (response.data.status && response.data.status != "OK") {
+        } else if (response.data.status && response.data.status !== "OK") {
             EventBus.$emit(
                 "toast",
                 {

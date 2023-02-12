@@ -1,8 +1,9 @@
-import json
+import http.client
 from urllib.parse import unquote
 
 import feedparser
 import requests
+from feed.models import Feed
 from rest_framework.decorators import api_view
 
 from django.contrib.auth.decorators import login_required
@@ -11,7 +12,6 @@ from django.utils.decorators import method_decorator
 from django.views.generic.list import ListView
 
 from accounts.models import UserFeed
-from feed.models import Feed
 
 
 @method_decorator(login_required, name="dispatch")
@@ -24,10 +24,36 @@ class FeedListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        current_feed = Feed.get_current_feed(self.request.user, self.request.session)
-
-        context["current_feed"] = json.dumps(current_feed, default=str)
         context["title"] = "Feed List"
+
+        context["feed_list"] = [
+            {
+                "id": feed.id,
+                "uuid": feed.uuid,
+                "name": feed.name,
+                "lastCheck": feed.last_check.strftime("%b %d, %Y, %I:%M %p")
+ if feed.last_check else "N/A",
+                "lastResponse": http.client.responses[feed.last_response_code] if feed.last_response_code else None,
+                "homepage": feed.homepage,
+                "url": feed.url,
+                "feedItems": [
+                    {
+                        "id": item.id,
+                        "link": item.link,
+                        "title": item.title,
+                    }
+                    for item in feed.feeditem_set.all()
+                ]
+            }
+            for feed in self.object_list
+        ]
+
+        current_feed_id = Feed.get_current_feed_id(self.request.user, self.request.session)
+        context["current_feed"] = [
+            x
+            for x in context["feed_list"]
+            if x["id"] == current_feed_id
+        ][0]
 
         return context
 
@@ -61,11 +87,17 @@ def check_url(request, url):
 
     r = requests.get(url)
     if r.status_code != 200:
-        status = {"status": r.status_code,
-                  "error": r.text}
+        status = {
+            "status": "Error",
+            "status_code": r.status_code,
+            "error": r.text
+        }
     else:
         d = feedparser.parse(r.text)
-        status = {"status": r.status_code,
-                  "entry_count": len(d.entries)}
+        status = {
+            "status": "OK",
+            "status_code": r.status_code,
+            "entry_count": len(d.entries)
+        }
 
     return JsonResponse(status, safe=False)

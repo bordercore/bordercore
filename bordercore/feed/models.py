@@ -69,24 +69,28 @@ class Feed(TimeStampedModel):
         return len(feed_list)
 
     @staticmethod
-    def get_current_feed(user, session):
+    def get_current_feed_id(user, session):
 
         current_feed_id = session.get("current_feed")
 
         if not current_feed_id:
             # If there is not a current feed in the session, then just pick the first feed
-            return Feed.get_first_feed(user)
+            return Feed.get_first_feed(user)["id"]
         else:
             try:
-                return Feed.objects.values("id", "homepage", "last_check", "name").filter(pk=current_feed_id)[0]
+                return Feed.objects.values("id").filter(pk=current_feed_id).first()["id"]
             except Exception as e:
                 log.warning(f"Feed exception: {e}")
                 # If the session's current feed has been deleted, then just pick the first feed
-                return Feed.get_first_feed(user)
+                return Feed.get_first_feed(user)["id"]
 
     @staticmethod
     def get_first_feed(user):
-        return user.userprofile.feeds.values("id", "homepage", "last_check", "name").order_by("userfeed__sort_order").first()
+        return user.userprofile.feeds.values(
+            "id"
+        ).order_by(
+            "userfeed__sort_order"
+        ).first()
 
 
 class FeedItem(models.Model):

@@ -20,37 +20,22 @@ def test_feed_str(auto_login_user, feed):
     assert str(feed[0]) == "Hacker News"
 
 
-def test_get_current_feed(auto_login_user, feed):
+def test_get_current_feed_id(auto_login_user, feed):
 
     user, _ = auto_login_user()
 
     session = {}
-    assert Feed.get_current_feed(user, session) == {
-        "id": feed[2].id,
-        "homepage": feed[2].homepage,
-        "last_check": feed[2].last_check,
-        "name": feed[2].name,
-    }
+    assert Feed.get_current_feed_id(user, session) == feed[2].id
 
     session = {"current_feed": feed[0].id}
-    assert Feed.get_current_feed(user, session) == {
-        "id": feed[0].id,
-        "homepage": feed[0].homepage,
-        "last_check": feed[0].last_check,
-        "name": feed[0].name,
-    }
+    assert Feed.get_current_feed_id(user, session) == feed[0].id
 
     # Test for a non-existent current. This should
     #  return the first feed
     # The test emits a warning we'd like to ignore
     logging.disable(logging.WARNING)
     session = {"current_feed": 666}
-    assert Feed.get_current_feed(user, session) == {
-        "id": feed[2].id,
-        "homepage": feed[2].homepage,
-        "last_check": feed[2].last_check,
-        "name": feed[2].name,
-    }
+    assert Feed.get_current_feed_id(user, session) == feed[2].id
 
 
 def test_get_first_feed(auto_login_user, feed):
@@ -58,10 +43,7 @@ def test_get_first_feed(auto_login_user, feed):
     user, _ = auto_login_user()
 
     assert Feed.get_first_feed(user) == {
-        "id": feed[2].id,
-        "homepage": feed[2].homepage,
-        "last_check": feed[2].last_check,
-        "name": feed[2].name,
+        "id": feed[2].id
     }
 
 

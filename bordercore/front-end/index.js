@@ -1,8 +1,10 @@
 
-import {computed, createApp, onMounted, ref} from "vue";
+import {computed, createApp, nextTick, onMounted, reactive, ref} from "vue";
 window.computed = computed;
 window.createApp = createApp;
+window.nextTick = nextTick;
 window.onMounted = onMounted;
+window.reactive = reactive;
 window.ref = ref;
 
 // Use the tiny-emitter package as an event bus
@@ -198,6 +200,15 @@ import RecentBlobs from "./vue/blob/RecentBlobs.vue";
 window.RecentBlobs = RecentBlobs;
 
 import CreateUpdateFeed from "./vue/feed/CreateUpdateFeed.vue";
+window.CreateUpdateFeed = CreateUpdateFeed;
+import FeedInfo from "./vue/feed/FeedInfo.vue";
+window.FeedInfo = FeedInfo;
+import FeedItemList from "./vue/feed/FeedItemList.vue";
+window.FeedItemList = FeedItemList;
+import FeedList from "./vue/feed/FeedList.vue";
+window.FeedList = FeedList;
+import store from "./vue/feed/store.js";
+window.feedStore = store;
 
 import CreateUpdateTodo from "./vue/todo/CreateUpdateTodo.vue";
 
