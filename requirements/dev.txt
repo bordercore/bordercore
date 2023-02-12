@@ -10,6 +10,7 @@ moto==3.1.12
 nplusone==1.0.0
 pytest-django==3.9.0
 PyVirtualDisplay==2.0
+rich==13.3.1
 notebook==6.4.12
 selenium==4.4.3
 tornado==6.1
