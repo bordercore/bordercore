@@ -157,6 +157,13 @@
             select(tagInfo) {
                 this.$emit("select", tagInfo);
             },
+            setValue(value) {
+                const newOption = {
+                    [this.label]: value,
+                };
+                this.options.push(newOption);
+                this.value = newOption;
+            },
             onClose(evt) {
                 this.$emit("close", evt);
             },
@@ -168,7 +175,7 @@
                 this.options = [this.initialValue];
                 this.value = this.initialValue;
             }
-        }
+        },
     };
 
 </script>
