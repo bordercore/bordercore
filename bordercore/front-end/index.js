@@ -281,14 +281,6 @@ import "@oruga-ui/oruga-next/dist/oruga-full.css";
 import "@oruga-ui/oruga-next/dist/oruga-full-vars.css";
 window.Oruga = Oruga;
 
-// app.use(Oruga, {
-//     iconComponent: "font-awesome-icon",
-//     iconPack: "fa",
-//     table: {
-//         sortIcon: "caret-up",
-//     },
-// });
-
 // Wait 10 seconds after selecting a song to play
 //  for it to be marked as "listened to".
 window.MUSIC_LISTEN_TIMEOUT = 10000;

@@ -77,15 +77,15 @@
                         </h4>
                         <div class="ms-auto me-2">
                             <drop-down-menu>
-                                <div slot="dropdown">
+                                <template #dropdown>
                                     <li>
                                         <a class="dropdown-item" href="#" @click.prevent="openModal">
                                             <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
                                             <span>Add Tag</span>
-                                            </a>
-                                        </li>
-                                    </div>
-                                </drop-down-menu>
+                                        </a>
+                                    </li>
+                                </template>
+                            </drop-down-menu>
                         </div>
                     </div>
                 </template>
@@ -120,13 +120,13 @@
 
                             <o-table-column field="uuid" label="" :td-attrs="() => ({ class: 'col-action' })" v-slot="props">
                                 <drop-down-menu :show-on-hover="true">
-                                    <div slot="dropdown">
+                                    <template #dropdown>
                                         <li>
-                                            <a class="dropdown-item" href="#" @click.prevent="onClickDelete(props.row)">
+                                            <a class="dropdown-item" href="#" @click.prevent="onClickDelete(props.row.uuid)">
                                                 <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>Delete
                                             </a>
                                         </li>
-                                    </div>
+                                    </template>
                                 </drop-down-menu>
                             </o-table-column>
                             <template #empty>
@@ -150,8 +150,9 @@
                             <div class="form-row align-items-center">
                                 <div class="mx-1 d-flex">
                                     <select-value
+                                        v-model="addAliasTagName"
+                                        ref="modalSelectValue"
                                         id="tag-alias-name"
-                                        ref="tagAliasSuggest"
                                         wrapper-class="w-100 me-3"
                                         search-url="{% url 'tag:search' %}?skip_tag_aliases=true&query="
                                         place-holder="Tag name"
@@ -189,57 +190,62 @@
 
     <script type="text/javascript" charset="utf-8">
 
-        new Vue({
-            el: "#vue-app",
-            data() {
-                return {
-                    filterSearch: "",
-                    items: [],
-                    addAliasTagName: "",
-                    addAliasAliasName: "",
-                    addAliasMessage: "",
-                    showTagSearch: false,
-                    tagInfo: JSON.parse(document.getElementById("random_tag_info").textContent),
-                };
+        const app = createApp({
+            name: "TagList",
+            delimiters: ["[[", "]]"],
+            components: {
+                Card,
+                DropDownMenu,
+                FontAwesomeIcon,
+                SelectValue,
             },
-            mounted() {
-                this.getTagAliasList();
-                this.getTodoCounts();
-            },
-            methods: {
-                getTagAliasList() {
+            setup() {
+                const filterSearch = ref("");
+                const items = ref([]);
+                const addAliasTagName = ref("");
+                const addAliasAliasName = ref("");
+                const addAliasMessage = ref("");
+                const showTagSearch = ref(false);
+                const tagInfo = ref(JSON.parse(document.getElementById("random_tag_info").textContent));
+
+                const modalSelectValue = ref(null);
+                const selectValue = ref(null);
+
+                function getTagAliasList() {
                     doGet(
-                        this,
+                        null,
                         "{% url 'tagalias-list' %}",
                         (response) => {
-                            this.items = response.data.results;
+                            items.value = response.data.results;
                         },
                         "Error retrieving tag alias list",
                     );
-                },
-                getTodoCounts(tagName) {
+                };
+
+                function getTodoCounts(tagName) {
                     let url = "{% url 'tag:get_todo_counts' %}";
                     if (tagName) {
-                        url = url + "?tag_name=" + tagName;
+                        url = url + `?tag_name=${tagName}`;
                     }
                     doGet(
-                        this,
+                        null,
                         url,
                         (response) => {
-                            this.tagInfo = response.data.info;
+                            tagInfo.value = response.data.info;
                         },
                         "Error retrieving tag alias list",
                     );
-                },
-                openSearchWindow() {
-                    this.showTagSearch = true;
+                };
+
+                function openSearchWindow() {
+                    showTagSearch.value = true;
                     setTimeout( () => {
-                        this.$refs.selectValue.$refs.multiselect.$el.focus();
-                    }, 100);
-                },
-                onClickDelete(item, index, evt) {
-                    const selectedUuid = item;
-                    axios.delete("{% url 'tagalias-detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", selectedUuid))
+                        selectValue.value.focus();
+                    }, 500);
+                };
+
+                function onClickDelete(uuid) {
+                    axios.delete("{% url 'tagalias-detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", uuid))
                          .then((response) => {
                              EventBus.$emit(
                                  "toast",
@@ -248,55 +254,96 @@
                                  },
                              );
 
-                             this.getTagAliasList();
+                             getTagAliasList();
                          }, (error) => {
                              console.log(error);
                          });
-                },
-                getTagClass(tag) {
-                    if (tag === this.filterTag) {
+                };
+
+                function getTagClass(tag) {
+                    if (tag === filterTag) {
                         return "selected rounded-sm";
                     }
-                },
-                openModal() {
+                };
+
+                function openModal() {
                     const modal = new Modal("#modal-tagalias");
                     modal.show();
                     setTimeout( () => {
-                        this.$refs.tagAliasSuggest.$refs.multiselect.$el.focus();
+                        modalSelectValue.value.focus();
                     }, 500);
-                },
-                select(tagName) {
-                    this.getTodoCounts(tagName.label);
-                },
-                selectAlias() {
+                };
+
+                function select(tagName) {
+                    getTodoCounts(tagName.label);
+                };
+
+                function selectAlias() {
                     document.getElementById("tag-alias-alias").focus();
-                },
-                resetModal() {
-                    this.$refs.tagAliasSuggest.clearOptions();
-                    this.addAliasAliasName = "";
-                },
-                addAlias() {
+                };
+
+                function resetModal() {
+                    modalSelectValue.value.clearOptions();
+                    addAliasAliasName.value = "";
+                };
+
+                function addAlias() {
                     doPost(
-                        this,
+                        null,
                         "{% url 'tag:add_alias' %}",
                         {
-                            "tag_name": this.addAliasTagName,
-                            "alias_name": this.addAliasAliasName,
+                            "tag_name": modalSelectValue.value.getValue(),
+                            "alias_name": addAliasAliasName.value,
                         },
                         () => {
-                            this.resetModal();
+                            resetModal();
 
                             const modal = Modal.getInstance(document.getElementById("modal-tagalias"));
                             modal.hide();
-                            this.getTagAliasList();
+                            getTagAliasList();
                         },
                         "Tag alias added",
                         "",
                     );
-                },
+                };
+
+                onMounted(() => {
+                    getTagAliasList();
+                    getTodoCounts();
+                });
+
+                return {
+                    addAlias,
+                    addAliasTagName,
+                    addAliasAliasName,
+                    addAliasMessage,
+                    filterSearch,
+                    getTagAliasList,
+                    getTagClass,
+                    getTodoCounts,
+                    items,
+                    modalSelectValue,
+                    onClickDelete,
+                    openModal,
+                    openSearchWindow,
+                    resetModal,
+                    showTagSearch,
+                    select,
+                    selectAlias,
+                    selectValue,
+                    tagInfo,
+                };
             },
         });
+        app.use(Oruga, {
+            iconComponent: "font-awesome-icon",
+            iconPack: "fa",
+            table: {
+                sortIcon: "caret-up",
+            },
+        });
+        app.mount("#vue-app");
 
-    </script>
+</script>
 
 {% endblock %}
