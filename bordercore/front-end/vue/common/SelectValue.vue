@@ -35,7 +35,7 @@
                 <slot name="afterList" v-bind="props" />
             </template>
         </multiselect>
-        <input :id="id" type="hidden" :name="name" :value="getValue">
+        <input :id="id" type="hidden" :name="name" :value="getValueComputed">
     </div>
 </template>
 
@@ -109,6 +109,11 @@
             };
         },
         computed: {
+            getValueComputed() {
+                return this.getValue();
+            },
+        },
+        methods: {
             getValue() {
                 if (typeof this.value === "object" && this.value !== null) {
                     return this.value[this.label];
@@ -116,8 +121,6 @@
                     return "";
                 }
             },
-        },
-        methods: {
             boldenOption(option, search) {
                 const texts = search.split(/[\s-_/\\|\.]/gm).filter((t) => !!t) || [""];
                 return option[this.label].replace(new RegExp("(.*?)(" + texts.join("|") + ")(.*?)", "gi"), "$1<b>$2</b>$3");
