@@ -29,8 +29,8 @@
 
                 <div class="mb-3" v-cloak>
                     <strong>Count</strong>
-                    <span v-if="$store.state.paginator" class="text-primary ms-1">
-                        [[ $store.state.paginator.count ]] [[ getPluralized() ]]
+                    <span v-if="paginator" class="text-primary ms-1">
+                        [[ paginator.count ]] [[ getPluralized() ]]
                     </span>
                 </div>
 
@@ -47,7 +47,7 @@
 
                 <ul class="list-group flex-column w-100">
                     <div v-cloak>
-                        <div class="list-with-counts ps-2 py-1 pe-1 d-flex" :class="{ 'selected rounded-sm': $store.state.selectedTag === null }" @click.prevent="onClickSelectTag">
+                        <div class="list-with-counts ps-2 py-1 pe-1 d-flex" :class="{ 'selected rounded-sm': selectedTag === null }" @click.prevent="onClickSelectTag">
                             <div class="ps-2">
                                 All Objects
                             </div>
@@ -57,7 +57,7 @@
                                 </span>
                             </div>
                         </div>
-                        <li v-for="tag in objectTags" class="list-with-counts ps-2 py-1 pe-1 d-flex" :class="{ 'selected rounded-sm': tag.tag === $store.state.selectedTag }" @click.prevent="onClickSelectTag" :data-tag="tag.tag" :key="tag.tag">
+                        <li v-for="tag in objectTags" class="list-with-counts ps-2 py-1 pe-1 d-flex" :class="{ 'selected rounded-sm': tag.tag === selectedTag }" @click.prevent="onClickSelectTag" :data-tag="tag.tag" :key="tag.tag">
                             <div class="ps-2">
                                 [[ tag.tag ]]
                             </div>
@@ -95,40 +95,40 @@
                     <hr class="divider" />
 
                     <div class="d-flex ms-2">
-                        <blob-list inline-template ref="blobList">
-                            <div>
-                                <div id="collection-list" @drop.prevent="onAddBlob($event)" @dragover.prevent="onDragOverBlob($event)" @dragleave.prevent="onDragLeaveBlob($event)" @dragenter.prevent>
-                                    <ul class="list-group list-group-horizontal text-center list-unstyled collection-sortable w-100">
-                                        <draggable v-model="blob_list" @change="onSort" ghost-class="collection_ghost_class" animation="500" forceFallback="true">
-                                            <li v-for="blob in blob_list" :key="blob.id" class="collection-item hoverable cursor-pointer float-start p-3">
-                                                <button type="button" class="collection-item-delete btn-close" data-bs-dismiss="modal" aria-label="Close" @click="removeBlob(blob.uuid)">
-                                                </button>
-                                                <div class="d-flex flex-column h-100" @click="onClick(blob.url)">
-                                                    <a :href="blob.url">
-                                                        <div v-if="blob.type === 'blob'">
-                                                            <img :src="blob.cover_url" />
-                                                        </div>
-                                                        <div v-else>
-                                                            <font-awesome-icon icon="bookmark" class="text-primary fa-4x mt-3"></font-awesome-icon>
-                                                        </div>
-                                                    </a>
-                                                    <div class="collection-item-name mt-auto">
-                                                        [[ blob.name ]]
+                        <div>
+                            <div id="collection-list" @drop.prevent="onAddBlob($event)" @dragover.prevent="onDragOverBlob($event)" @dragleave.prevent="onDragLeaveBlob($event)" @dragenter.prevent>
+                                <ul class="list-group list-group-horizontal text-center list-unstyled collection-sortable w-100">
+                                    <draggable v-model="blobList" @change="onSort" ghost-class="collection_ghost_class" animation="500" forceFallback="true" item-key="id">
+                                        <template #item="{element}">
+                                        <li :key="element.id" class="collection-item hoverable cursor-pointer float-start p-3">
+                                            <button type="button" class="collection-item-delete btn-close" data-bs-dismiss="modal" aria-label="Close" @click="removeBlob(element.uuid)">
+                                            </button>
+                                            <div class="d-flex flex-column h-100" @click="onClick(element.url)">
+                                                <a :href="element.url">
+                                                    <div v-if="element.type === 'blob'">
+                                                        <img :src="element.cover_url" />
                                                     </div>
+                                                    <div v-else>
+                                                        <font-awesome-icon icon="bookmark" class="text-primary fa-4x mt-3"></font-awesome-icon>
+                                                    </div>
+                                                </a>
+                                                <div class="collection-item-name mt-auto">
+                                                    [[ element.name ]]
                                                 </div>
-                                            </li>
-                                        </draggable>
-                                    </ul>
-                                </div>
-                                <h5 v-if="!blob_list" class="text-secondary">
-                                    This collection is empty.
-                                </h5>
+                                            </div>
+                                        </li>
+                                        </template>
+                                    </draggable>
+                                </ul>
                             </div>
-                        </blob-list>
+                            <h5 v-if="!blobList" class="text-secondary">
+                                This collection is empty.
+                            </h5>
+                        </div>
 
                         <h5 v-if="needsPagination" class="d-flex mb-0 me-1 pt-3">
                             <div>
-                                <a v-if="$store.state.paginator.has_previous" href="#" @click.prevent="paginate('prev')" class="me-1">
+                                <a v-if="paginator.has_previous" href="#" @click.prevent="paginate('prev')" class="me-1">
                                     <font-awesome-icon icon="chevron-left" class="text-emphasis glow icon-hover" />
                                 </a>
                                 <span v-else>
@@ -136,7 +136,7 @@
                                 </span>
                             </div>
                             <div>
-                                <a v-if="$store.state.paginator.has_next" href="#" @click.prevent="paginate('next')" class="ms-1">
+                                <a v-if="paginator.has_next" href="#" @click.prevent="paginate('next')" class="ms-1">
                                     <font-awesome-icon icon="chevron-right" class="text-emphasis glow icon-hover" />
                                 </a>
                                 <span v-else>
@@ -345,235 +345,117 @@
     {{ block.super }}
 
     {{ tags|json_script:"initial-tags"|default:"" }}
-
     {{ object_tags|json_script:"object_tags" }}
 
     <script type="text/javascript">
 
-        const store = new Vuex.Store({
-            state: {
-                paginator: null,
-                selectedTag: {% if request.GET.tag %}"{{ request.GET.tag }}"{% else %}null{% endif %}
-            },
-            getters: {},
-            mutations: {},
-        });
-
-        const BlobList = {
-            data() {
-                return {
-                    blob_list: []
-                }
-            },
-            methods: {
-                onAddBlob(evt) {
-                    document.getElementById("collection-list").classList.remove("collection-drag-over");
-
-                    fileList = evt.dataTransfer.files;
-                    if (fileList.length === 0) {
-                        // No files means we're sorting blobs, not adding one
-                        return;
-                    }
-
-                    const modal = new Modal("#modalProcessing");
-                    modal.show();
-
-                    const blob = fileList[0]
-                    let formData = new FormData();
-                    formData.append("blob", blob);
-                    formData.append("collection_uuid", "{{ collection.uuid }}");
-
-                    axios.post("{% url "collection:create_blob" %}", formData, {
-                        headers: {
-                            "Content-Type": "multipart/form-data"
-                        }
-                    }).then(response => {
-                        const modal = Modal.getInstance(document.getElementById("modalProcessing"));
-                        modal.hide();
-                        if (response.data.status === "OK") {
-                            const blobUuid = response.data.blob_uuid;
-                            window.location="{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, blobUuid);
-                        } else {
-                            const message = this.$createElement(
-                                'div',
-                                {
-                                    domProps: { innerHTML: response.data.message }
-                                }
-                            )
-                            EventBus.$emit(
-                                "toast",
-                                {
-                                    "body": message,
-                                    "variant": "danger",
-                                    "autoHide": false,
-                                },
-                            );
-                        }
-                    });
-
-                },
-                onDragOverBlob(evt) {
-                    document.getElementById("collection-list").classList.add("collection-drag-over");
-                },
-                onDragLeaveBlob(evt) {
-                    document.getElementById("collection-list").classList.remove("collection-drag-over");
-                },
-                onSort(evt) {
-
-                    // The backend expects the ordering to begin
-                    // with 1, not 0, so add 1.
-                    new_position = evt.moved.newIndex + 1;
-
-                    doPost(
-                        this,
-                        "{% url "collection:sort_objects" %}",
-                        {
-                            "collection_uuid": "{{ collection.uuid }}",
-                            "object_uuid": evt.moved.element.uuid,
-                            "new_position": new_position
-                        },
-                        () => {},
-                        "",
-                        ""
-                    );
-
-                },
-                onClick(url) {
-                    window.location=url;
-                },
-                removeBlob(uuid) {
-
-                    doPost(
-                        this,
-                        "{% url "collection:remove_object" %}",
-                        {
-                            "collection_uuid": "{{ collection.uuid }}",
-                            "object_uuid": uuid,
-                        },
-                        (response) => {
-                            this.getBlobList();
-                        },
-                        "Blob removed from collection",
-                        ""
-                    );
-
-                },
-                getBlobList(pageNumber=1) {
-                    let url = "{% url 'collection:get_object_list' collection.uuid %}?pageNumber=" + pageNumber;
-
-                    if (this.$store.state.selectedTag) {
-                        url += "&tag=" + this.$store.state.selectedTag;
-                    }
-                    console.log(url);
-                    doGet(
-                        this,
-                        url,
-                        (response) => {
-                            this.blob_list = response.data.object_list;
-                            this.$store.state.paginator = response.data.paginator;
-                        },
-                        "Error getting blob list"
-                    );
-                }
-            },
-            mounted() {
-                document.getElementById("id_name").value = "{{ collection.name|safe }}";
-                document.getElementById("id_description").value = "{{ collection.description|safe }}";
-                this.getBlobList();
-            }
-        }
-
-        new Vue({
-            el: "#vue-app",
+        const app = createApp({
             name: "BlobListContainer",
-            store,
+            delimiters: ["[[", "]]"],
             components: {
-                BlobList,
+                Card,
+                draggable,
+                DropDownMenu,
+                FontAwesomeIcon,
+                TagsInput,
             },
-            data() {
-                return {
-                    collectionDetailMenuItems: [
-                        {
-                            id: uuidv4(),
-                            title: "Add Blob",
-                            url: "{% url 'blob:create' %}?collection_uuid={{ collection.uuid }}",
-                            icon: "plus"
-                        },
-                        {
-                            id: uuidv4(),
-                            title: "Slide Show",
-                            url: "#",
-                            clickHandler: this.onClickSlideShow,
-                            icon: "images"
-                        },
-                        {
-                            id: uuidv4(),
-                            title: "Update",
-                            url: "#",
-                            clickHandler: this.onClickUpdate,
-                            icon: "pencil-alt"
-                        },
-                        {
-                            id: uuidv4(),
-                            title: "Delete",
-                            url: "#",
-                            clickHandler: this.onClickDelete,
-                            icon: "times"
-                        },
-                    ],
-                    slideShowImageInfo: {},
-                    slideShowImageIndex: -1,
-                    slideShowType: "manual",
-                    slideShowInterval: "60",
-                    slideShowRandomize: false,
-                    slideShowOptions: [
-                        {
-                            value: "1",
-                            display: "Rotate Every Minute",
-                        },
-                        {
-                            value: "5",
-                            display: "Rotate Every 5 Minutes",
-                        },
-                        {
-                            value: "10",
-                            display: "Rotate Every 10 Minutes",
-                        },
-                        {
-                            value: "30",
-                            display: "Rotate Every 30 Minutes",
-                        },
-                        {
-                            value: "60",
-                            display: "Rotate Every Hour",
-                        },
-                        {
-                            value: "1440",
-                            display: "Rotate Every Day",
-                        },
-                    ],
-                    objectTags: JSON.parse(document.getElementById("object_tags").textContent),
-                }
-            },
-            methods: {
-                onClickSelectTag(evt) {
-                    element = evt.currentTarget;
+            setup() {
+                const collectionDetailMenuItems = [
+                    {
+                        id: uuidv4(),
+                        title: "Add Blob",
+                        url: "{% url 'blob:create' %}?collection_uuid={{ collection.uuid }}",
+                        icon: "plus",
+                    },
+                    {
+                        id: uuidv4(),
+                        title: "Slide Show",
+                        url: "#",
+                        clickHandler: onClickSlideShow,
+                        icon: "images",
+                    },
+                    {
+                        id: uuidv4(),
+                        title: "Update",
+                        url: "#",
+                        clickHandler: onClickUpdate,
+                        icon: "pencil-alt",
+                    },
+                    {
+                        id: uuidv4(),
+                        title: "Delete",
+                        url: "#",
+                        clickHandler: onClickDelete,
+                        icon: "times",
+                    },
+                ];
+
+                const slideShowImageInfo = ref({});
+                const slideShowImageIndex = ref(-1);
+                const slideShowType = ref("manual");
+                const slideShowInterval = ref("60");
+                const slideShowRandomize = ref(false);
+
+                const objectTags = ref(JSON.parse(document.getElementById("object_tags").textContent));
+
+                const slideShowOptions = [
+                    {
+                        value: "1",
+                        display: "Rotate Every Minute",
+                    },
+                    {
+                        value: "5",
+                        display: "Rotate Every 5 Minutes",
+                    },
+                    {
+                        value: "10",
+                        display: "Rotate Every 10 Minutes",
+                    },
+                    {
+                        value: "30",
+                        display: "Rotate Every 30 Minutes",
+                    },
+                    {
+                        value: "60",
+                        display: "Rotate Every Hour",
+                    },
+                    {
+                        value: "1440",
+                        display: "Rotate Every Day",
+                    },
+                ];
+
+                const selectedTag = ref({% if request.GET.tag %} "{{ request.GET.tag }}"{% else %}''{% endif %});
+                const paginator = ref({});
+
+                const needsPagination = computed(() => {
+                    if (paginator === null) {
+                        return false;
+                    }
+                    return paginator.value.has_previous || paginator.value.has_next;
+                });
+
+                function onClickSelectTag(evt) {
+                    const element = evt.currentTarget;
                     let url = "{% url 'collection:detail' collection.uuid %}";
                     if (element.dataset.tag) {
                         url = url + "?tag=" + element.dataset.tag;
                     }
                     window.location = url;
-                },
-                onClickUpdate() {
+                };
+
+                function onClickUpdate() {
                     const modal = new Modal("#modalUpdate");
                     modal.show();
-                },
-                onClickSlideShow() {
+                };
+
+                function onClickSlideShow() {
                     document.getElementById("tag").value = "";
                     const modal = new Modal("#modalSlideShow");
                     modal.show();
-                },
-                startSlideShow() {
+                };
+
+                function startSlideShow() {
                     const modal = Modal.getInstance(document.getElementById("modalSlideShow"));
                     modal.hide();
 
@@ -583,26 +465,28 @@
                     // Add a black background
                     document.getElementById("overlay").classList.remove("d-none");
 
-                    this.slideShowImageIndex = -1;
+                    slideShowImageIndex.value = -1;
 
-                    if (this.slideShowType === "automatic") {
-                        this.getSlideShowImage();
+                    if (slideShowType === "automatic") {
+                        getSlideShowImage();
                         setInterval( () => {
-                            this.getSlideShowImage();
-                        }, parseInt(this.slideShowInterval * 1000 * 60));
+                            getSlideShowImage();
+                        }, parseInt(slideShowInterval * 1000 * 60));
                     } else {
-                        this.getSlideShowImage("next");
+                        getSlideShowImage("next");
                     }
-                },
-                getSlideShowImage(direction = "next") {
+                };
+
+                function getSlideShowImage(direction = "next") {
                     const tag = document.getElementById("tag").value;
-                    axios.get("{% url "collection:get_blob" collection.uuid %}" + `?randomize=${this.slideShowRandomize}&position=${this.slideShowImageIndex}&tag=${tag}&direction=${direction}`)
+                    axios.get("{% url "collection:get_blob" collection.uuid %}" + `?randomize=${slideShowRandomize.value}&position=${slideShowImageIndex.value}&tag=${tag}&direction=${direction}`)
                          .then(response => {
-                             this.slideShowImageIndex = response.data.index;
-                             this.changeSlideShowImage(response.data.url, response.data.content_type);
+                             slideShowImageIndex.value = response.data.index;
+                             changeSlideShowImage(response.data.url, response.data.content_type);
                          })
-                },
-                changeSlideShowImage(url, type) {
+                };
+
+                function changeSlideShowImage(url, type) {
                     if (type === "Image") {
                         document.querySelector("#overlay img").classList.remove("d-none");
                         document.querySelector("#overlay img").src = url;
@@ -614,60 +498,199 @@
                         document.querySelector("#overlay video").classList.remove("d-none");
                         document.querySelector("#overlay video").src = url;
                     }
-                },
-                onClickDelete() {
+                };
+
+                function onClickDelete() {
                     const modal = new Modal("#modalDelete");
                     modal.show();
-                },
-                paginate(direction) {
+                };
+
+                function paginate(direction) {
                     let pageNumber;
                     if (direction === "prev") {
-                        pageNumber = this.$store.state.paginator.previous_page_number;
+                        pageNumber = paginator.value.previous_page_number;
                     } else {
-                        pageNumber = this.$store.state.paginator.next_page_number;
+                        pageNumber = paginator.value.next_page_number;
                     }
-                    this.$refs.blobList.getBlobList(pageNumber);
-                },
-                getPluralized() {
-                    return pluralize("blob", this.$store.state.paginator.count);
-                },
-            },
-            computed: {
-                needsPagination: function() {
-                    if (this.$store.state.paginator === null) {
-                        return false;
+                    getBlobList(pageNumber);
+                };
+
+                function getPluralized() {
+                    return pluralize("blob", paginator.count);
+                };
+
+                const blobList = ref([]);
+
+                function onAddBlob(evt) {
+                    document.getElementById("collection-list").classList.remove("collection-drag-over");
+
+                    const fileList = evt.dataTransfer.files;
+                    if (fileList.length === 0) {
+                        // No files means we're sorting blobs, not adding one
+                        return;
                     }
-                    return this.$store.state.paginator.has_previous || this.$store.state.paginator.has_next;
-                },
-            },
-            mounted() {
 
-                let self = this;
+                    const modal = new Modal("#modalProcessing");
+                    modal.show();
 
-                hotkeys("right,left,escape", function (event, handler) {
-                    switch (handler.key) {
-                        case "right":
-                            self.getSlideShowImage("next");
-                            break;
-                        case "left":
-                            self.getSlideShowImage("previous");
-                            break;
-                        case "escape":
-                            document.querySelector("#overlay img").src = null;
-                            document.querySelector("#overlay video").src = null;
+                    const blob = fileList[0];
+                    const formData = new FormData();
+                    formData.append("blob", blob);
+                    formData.append("collection_uuid", "{{ collection.uuid }}");
 
-                            // Restore the scrollbars
-                            document.body.style.overflow = "visible";
+                    axios.post("{% url "collection:create_blob" %}", formData, {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                        },
+                    }).then((response) => {
+                        window.setTimeout(() => {
+                            const modal = Modal.getInstance(document.getElementById("modalProcessing"));
+                            modal.hide();
+                        }, 500);
+                        if (response.data.status === "OK") {
+                            const blobUuid = response.data.blob_uuid;
+                            window.location="{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}".replace(/00000000-0000-0000-0000-000000000000/, blobUuid);
+                        } else {
+                            EventBus.$emit(
+                                "toast",
+                                {
+                                    "body": response.data.message,
+                                    "variant": "danger",
+                                    "autoHide": false,
+                                },
+                            );
+                        }
+                    });
+                };
 
-                            // Remove the back background
-                            document.getElementById("overlay").classList.add("d-none");
-                            break;
+                function onDragOverBlob(evt) {
+                    document.getElementById("collection-list").classList.add("collection-drag-over");
+                };
+
+                function onDragLeaveBlob(evt) {
+                    document.getElementById("collection-list").classList.remove("collection-drag-over");
+                };
+
+                function onSort(evt) {
+                    // The backend expects the ordering to begin
+                    // with 1, not 0, so add 1.
+                    const newPosition = evt.moved.newIndex + 1;
+
+                    doPost(
+                        null,
+                        "{% url "collection:sort_objects" %}",
+                        {
+                            "collection_uuid": "{{ collection.uuid }}",
+                            "object_uuid": evt.moved.element.uuid,
+                            "new_position": newPosition,
+                        },
+                        () => {},
+                        "",
+                        "",
+                    );
+                };
+
+                function onClick(url) {
+                    window.location=url;
+                };
+
+                function removeBlob(uuid) {
+                    doPost(
+                        null,
+                        "{% url "collection:remove_object" %}",
+                        {
+                            "collection_uuid": "{{ collection.uuid }}",
+                            "object_uuid": uuid,
+                        },
+                        (response) => {
+                            getBlobList();
+                        },
+                        "Blob removed from collection",
+                        "",
+                    );
+                };
+
+                function getBlobList(pageNumber=1) {
+                    let url = "{% url 'collection:get_object_list' collection.uuid %}?pageNumber=" + pageNumber;
+
+                    if (selectedTag.value) {
+                        url += `&tag=${selectedTag.value}`;
                     }
+
+                    doGet(
+                        null,
+                        url,
+                        (response) => {
+                            blobList.value = response.data.object_list;
+                            paginator.value = response.data.paginator;
+                        },
+                        "Error getting blob list",
+                    );
+                };
+
+                onMounted(() => {
+                        hotkeys("right,left,escape", function(event, handler) {
+                        switch (handler.key) {
+                            case "right":
+                                getSlideShowImage("next");
+                                break;
+                            case "left":
+                                getSlideShowImage("previous");
+                                break;
+                            case "escape":
+                                document.querySelector("#overlay img").src = null;
+                                document.querySelector("#overlay video").src = null;
+
+                                // Restore the scrollbars
+                                document.body.style.overflow = "visible";
+
+                                // Remove the back background
+                                document.getElementById("overlay").classList.add("d-none");
+                                break;
+                        }
+                    });
+
+                    document.getElementById("id_name").value = "{{ collection.name|safe }}";
+                    document.getElementById("id_description").value = "{{ collection.description|safe }}";
+                    getBlobList();
                 });
 
-            }
+                return {
+                    blobList,
+                    collectionDetailMenuItems,
+                    getBlobList,
+                    getPluralized,
+                    needsPagination,
+                    objectTags,
+                    onAddBlob,
+                    onClick,
+                    onClickSelectTag,
+                    onDragLeaveBlob,
+                    onDragOverBlob,
+                    onSort,
+                    paginate,
+                    paginator,
+                    removeBlob,
+                    selectedTag,
+                    slideShowImageInfo,
+                    slideShowImageIndex,
+                    slideShowInterval,
+                    slideShowOptions,
+                    slideShowType,
+                    slideShowRandomize,
+                    startSlideShow,
+                };
+            },
         });
+        app.use(Oruga, {
+            iconComponent: "font-awesome-icon",
+            iconPack: "fa",
+            table: {
+                sortIcon: "caret-up",
+            },
+        });
+        app.mount("#vue-app");
 
-    </script>
+</script>
 
 {% endblock %}

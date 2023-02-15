@@ -31,14 +31,14 @@
                     </div>
 
                     <drop-down-menu class="my-auto">
-                        <div slot="dropdown" v-cloak>
+                        <template #dropdown v-cloak>
                             <li>
                                 <a class="dropdown-item" href="#" @click.prevent="onClickCreate">
                                     <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
                                         Create Collection
                                 </a>
                             </li>
-                        </div>
+                        </template>
                     </drop-down-menu>
 
                 </div>
@@ -61,8 +61,8 @@
                                 <a :href="collection.url">[[ collection.name ]]</a>
                             </div>
                         </div>
-                        <div v-if="getCollectionList().length === 0" class="notice-big px-3" v-cloak>
-                        No collections found
+                        <div v-if="items.length === 0" class="notice-big px-3" v-cloak>
+                            No collections found
                         </div>
                     </div>
                 </div>
@@ -136,28 +136,33 @@
 
     <script type="text/javascript" charset="utf-8">
 
-        new Vue({
-            el: "#vue-app",
-            data() {
-                return {
-                    filter: null,
-                    items: JSON.parse(document.getElementById("collection_list").textContent),
-                    showFilterInput: false,
-                };
+        const app = createApp({
+            name: "CollectionList",
+            delimiters: ["[[", "]]"],
+            components: {
+                DropDownMenu,
+                FontAwesomeIcon,
+                TagsInput,
             },
-            methods: {
-                getCollectionList() {
-                    if (this.filter) {
-                        const regex = new RegExp(`.*${this.filter}.*`, "i");
-                        return this.items.filter((c) => !c.name.search(regex));
+            setup() {
+                const filter = ref("");
+                const items = JSON.parse(document.getElementById("collection_list").textContent);
+                const showFilterInput = ref(false);
+
+                function getCollectionList() {
+                    if (filter.value) {
+                        const regex = new RegExp(`.*${filter.value}.*`, "i");
+                        return items.filter((x) => !x.name.search(regex));
                     } else {
-                        return this.items;
+                        return items;
                     }
-                },
-                onBlur() {
-                    this.showFilterInput = false;
-                },
-                onClickCreate(evt) {
+                };
+
+                function onBlur() {
+                    showFilterInput.value = false;
+                };
+
+                function onClickCreate(evt) {
                     document.getElementById("id_name").value = "";
                     document.getElementById("id_description").value = "";
                     EventBus.$emit("addTags", []);
@@ -168,31 +173,52 @@
                     window.setTimeout(() => {
                         document.getElementById("id_name").focus();
                     }, 500);
-                },
-                onClickCollection(url) {
+                };
+
+                function onClickCollection(url) {
                     window.location = url;
-                },
-                onClickRemoveFilter() {
-                    this.filter = null;
-                },
-                onFilterClick() {
-                    this.showFilterInput = true;
+                };
+
+                function onClickRemoveFilter() {
+                    filter.value = null;
+                }
+
+                function onFilterClick() {
+                    showFilterInput.value = true;
                     setTimeout( () => {
                         const el = document.getElementById("collection-filter");
                         el.querySelector("input").focus();
                     }, 100);
-                },
-                getBlobCount(count) {
+                };
+
+                function getBlobCount(count) {
                     return count + " " + pluralize("blob", count);
-                },
-                onFilterEnter() {
-                    this.showFilterInput = false;
+                };
+
+                function onFilterEnter() {
+                    showFilterInput.value = false;
                     const el = document.getElementById("collection-filter");
-                    this.filter = el.querySelector("input").value;
-                },
+                    filter.value = el.querySelector("input").value;
+                };
+
+                return {
+                    filter,
+                    getBlobCount,
+                    getCollectionList,
+                    items,
+                    onBlur,
+                    onClickCollection,
+                    onClickCreate,
+                    onClickRemoveFilter,
+                    onFilterClick,
+                    onFilterEnter,
+                    showFilterInput,
+                };
+            },
+            methods: {
             },
         });
+        app.mount("#vue-app");
 
     </script>
-
 {% endblock %}

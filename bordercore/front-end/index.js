@@ -1,7 +1,8 @@
 
-import {computed, createApp, nextTick, onMounted, reactive, ref} from "vue";
+import {computed, createApp, h, nextTick, onMounted, reactive, ref} from "vue";
 window.computed = computed;
 window.createApp = createApp;
+window.h = h;
 window.nextTick = nextTick;
 window.onMounted = onMounted;
 window.reactive = reactive;
