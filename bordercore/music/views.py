@@ -635,11 +635,6 @@ class UpdatePlaylistView(FormRequestMixin, UpdateView):
     slug_field = "uuid"
     slug_url_kwarg = "playlist_uuid"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["tags"] = [{"text": x.name, "is_meta": x.is_meta} for x in self.object.tags.all()]
-        return context
-
     def form_valid(self, form):
         playlist = form.save()
 

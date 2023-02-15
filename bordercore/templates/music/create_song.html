@@ -10,18 +10,18 @@
             <div class="w-100" v-cloak>
 
                 <transition name="fade">
-                    <div v-if="$store.state.dupeSongs.length > 0" class="card-body">
+                    <div v-if="this.$store.state.dupeSongs.length > 0" class="card-body">
                         <h6 class="text-warning mb-2 text-center">
                             Possible duplicate songs found
                         </h6>
-                        <div v-for="dupe in $store.state.dupeSongs" class="my-2">
+                        <div v-for="dupe in this.$store.state.dupeSongs" class="my-2">
                             <hr class="divider" />
                             <div class="d-flex">
                                 <font-awesome-icon icon="music" class="text-secondary mt-2"></font-awesome-icon>
                                 <div class="ms-2">
                                     <a :href="dupe.url" target="bc-dupe-song">[[ dupe.title ]]</a>
                                     <div v-if="dupe.note" class="dupe-song-note text-truncate">
-                                    [[ dupe.note ]]
+                                        [[ dupe.note ]]
                                     </div>
                                     <div v-if="dupe.album_name">
                                         <a class="text-primary" :href="dupe.album_url">[[ dupe.album_name ]]</a>
@@ -32,14 +32,14 @@
                     </div>
                 </transition>
 
-                <card v-if="$store.state.songLength !== null" title="Song Info" class="backdrop-filter ms-3">
+                <card v-if="this.$store.state.songLength !== null" title="Song Info" class="backdrop-filter ms-3">
                     <template v-slot:content>
                         <ul>
-                            <li>Song Length <span class="ms-1 text-primary">[[ $store.state.songLengthPretty ]]</span></li>
+                            <li>Song Length <span class="ms-1 text-primary">[[ this.$store.state.songLengthPretty ]]</span></li>
                             {% if action == "Create" %}
-                                <li>Song Size <span class="ms-1 text-primary">[[ $store.state.songSize ]]</span></li>
-                                <li>Sample Rate <span class="ms-1 text-primary">[[ $store.state.sampleRate ]]</span></li>
-                                <li>Bit Rate <span class="ms-1 text-primary">[[ $store.state.bitRate ]]</span></li>
+                                <li>Song Size <span class="ms-1 text-primary">[[ this.$store.state.songSize ]]</span></li>
+                                <li>Sample Rate <span class="ms-1 text-primary">[[ this.$store.state.sampleRate ]]</span></li>
+                                <li>Bit Rate <span class="ms-1 text-primary">[[ this.$store.state.bitRate ]]</span></li>
                             {% endif %}
                         </ul>
                     </template>
@@ -68,7 +68,7 @@
             </div>
 
             {% if action == "Create" %}
-                <div v-if="$store.state.songLength === null" class="flex-shrink-0">
+                <div v-if="this.$store.state.songLength === null" class="flex-shrink-0">
                     <card title="" class="flex-shrink-0 backdrop-filter ms-3">
                         <template v-slot:content>
                             <div>
@@ -84,7 +84,6 @@
         <div class="col-lg-8 h-100">
 
             <div id="vue-app">
-
                 {% if request.POST.Go and not form.errors %}
                     <div class="alert alert-success offset-lg-3">Post {{ action }}ed</div>
                 {% endif %}
@@ -173,6 +172,7 @@
 
                             <div class="col-lg-9">
                                 <select-value
+                                    ref="selectValue"
                                     label="artist"
                                     id="id_artist"
                                     name="artist"
@@ -271,8 +271,8 @@
 
     <script type="text/javascript">
 
-    const store = new Vuex.Store({
-        state: {
+        const store = createStore({
+            state: {
                 {% if action == "Create" %}
                 songLength: null,
                 songLengthPretty: null,
@@ -286,65 +286,71 @@
                 bitRate: null,
                 dupeSongs: [],
             },
-            getters: {},
-            mutations: {},
         });
 
-        new Vue({
-            el: "#vue-song-info",
-            name: "songInfo",
-            store,
-            methods: {
-                onClickTag(tagName) {
+        const songInfoApp = createApp({
+            name: "SongInfo",
+            components: {
+                Card,
+                FontAwesomeIcon,
+            },
+            delimiters: ["[[", "]]"],
+            setup() {
+                function onClickTag(tagName) {
                     EventBus.$emit("add-tag", tagName);
                 }
-            },
-        });
 
-        new Vue({
-            el: "#vue-app",
-            name: "songForm",
-            store,
-            computed: {
-                songLength() {
-                    return this.$store.state.songLength;
-                },
-            },
-            data() {
                 return {
-                    filename: null,
-                    rating: {{ form.rating.value|default:"''" }},
-                    isCompilation: false,
-                    {% if action == "Update" %}
-                    uuid: "{{ song.uuid }}",
-                    {% endif %}
-                };
+                    onClickTag,
+                }
+            }
+        });
+        songInfoApp.use(store);
+        songInfoApp.mount("#vue-song-info");
+
+        const app = createApp({
+            name: "SongForm",
+            components: {
+                FontAwesomeIcon,
+                SelectValue,
+                TagsInput,
             },
-            methods: {
-                onDupeCheck() {
+            setup() {
+                const filename = ref("");
+                const rating = ref({{ form.rating.value|default:""}});
+                const isCompilation = ref(false);
+                const uuid = ref("{{ song.uuid }}");
+
+                const selectValue = ref(null);
+                const tagsInput = ref(null);
+
+                const songLength = computed(() => {
+                    return store.state.songLength;
+                });
+
+                function onDupeCheck() {
                     const artist = document.getElementById("id_artist").value;
                     const title = document.getElementById("id_title").value;
                     if (!artist || !title) {
                         return;
                     }
                     doGet(
-                        this,
+                        null,
                         "{% url 'music:dupe_song_checker' %}?artist=" + artist + "&title=" + title,
                         (response) => {
                             let dupes = response.data.dupes;
-                            if (this.$store.state.songUuid) {
-                                this.$store.state.dupeSongs = dupes.filter((x) => x.uuid !== this.$store.state.songUuid);
+                            if (store.state.songUuid) {
+                                store.state.dupeSongs = dupes.filter((x) => x.uuid !== store.state.songUuid);
                             } else {
-                                this.$store.state.dupeSongs = dupes;
+                                store.state.dupeSongs = dupes;
                             }
                         },
                         "Error checking for duplicate songs",
                     );
-                },
-                onChange(evt) {
-                    const self = this;
+                }
 
-                    this.filename = evt.target.files[0].name;
+                function onChange(evt) {
+                    filename.value = evt.target.files[0].name;
 
                     const song = document.getElementById("id_file").files[0];
                     const formData = new FormData();
@@ -364,16 +370,15 @@
                             if (data) {
                                 document.getElementById("id_" + item).value = data;
                                 if (item === "artist") {
-                                    // Sync the artist input value with the simpleSuggest Vue component's value
-                                    self.$refs.simpleSuggest.query = data;
+                                    selectValue.value.setValue(data);
                                 }
                             }
                         });
-                        this.$store.state.songLength = response.data.length;
-                        this.$store.state.songLengthPretty = response.data.length_pretty;
-                        this.$store.state.songSize = response.data.filesize;
-                        this.$store.state.sampleRate = response.data.sample_rate;
-                        this.$store.state.bitRate = response.data.bit_rate;
+                        store.state.songLength = response.data.length;
+                        store.state.songLengthPretty = response.data.length_pretty;
+                        store.state.songSize = response.data.filesize;
+                        store.state.sampleRate = response.data.sample_rate;
+                        store.state.bitRate = response.data.bit_rate;
 
                         // Wait a tiny amount before closing the modal. If the song upload happens
                         //  really fast, then "hide" could be called too quickly after "show",
@@ -381,19 +386,20 @@
                         window.setTimeout(() => {
                             const modal = Modal.getInstance(document.getElementById("modalProcessing"));
                             modal.hide();
-                        }, 200);
+                        }, 500);
 
-                        this.onDupeCheck();
-
+                        onDupeCheck();
                     });
-                },
-                onMouseLeaveRatingContainer() {
+                }
+
+                function onMouseLeaveRatingContainer() {
                     const els = document.querySelectorAll(".rating");
                     for (const el of els) {
                         el.classList.remove("rating-star-hovered");
                     }
-                },
-                onMouseOverRating(evt, rating) {
+                }
+
+                function onMouseOverRating(evt, rating) {
                     const els = evt.currentTarget.parentElement.querySelectorAll(".rating");
                     // Loop over each star rating. Add the "hovered" class if:
                     //  1) The rating is > the currently selected rating
@@ -406,58 +412,84 @@
                             el.classList.remove("rating-star-hovered");
                         }
                     }
-                },
-                setRating(evt, rating) {
+                }
+
+                function setRating(evt, ratingParam) {
                     const els = evt.currentTarget.parentElement.querySelectorAll(".rating");
                     for (const el of els) {
                         el.classList.remove("rating-star-hovered");
-                        if (parseInt(el.getAttribute("data-rating", 10)) < rating + 1) {
+                        if (parseInt(el.getAttribute("data-rating", 10)) < ratingParam + 1) {
                             el.classList.add("rating-star-selected");
                         } else {
                             el.classList.remove("rating-star-selected");
                         }
                     }
-                    if (rating + 1 === this.rating) {
+                    if (ratingParam + 1 === rating.value) {
                         // If we've selected the current rating, treat it
                         // as if we've de-selected a rating entirely
                         // and remove it.
-                        this.rating = "";
+                        rating.value = "";
                     } else {
-                        this.rating = rating + 1;
+                        rating.value = ratingParam + 1;
                     }
                     // We use $nextTick() to avoid Vue's :class handling
                     // on the star from interfering with its animation.
-                    this.$nextTick(() => {
+                    nextTick(() => {
                         animateCSS(evt.currentTarget, "heartBeat");
                     });
-                },
-                onClickDelete(evt) {
+                }
+
+                function onClickDelete(evt) {
                     const formEl = document.getElementById("song-form");
                     formEl.setAttribute("action", "{% url 'music:delete' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", this.uuid));
                     formEl.submit();
-                },
-            },
-            mounted() {
-                {% if action == "Update" %}
-                this.$refs.simpleSuggest.query = "{{ form.artist.value|safe }}";
-                {% endif %}
+                }
 
-                // The title input is automatically generated by Django,
-                //  so use JavaScript to add an event handler after the fact.
-                const title = document.getElementById("id_title");
-                title.addEventListener("blur", this.onDupeCheck);
+                onMounted(() => {
+                    {% if action == "Update" %}
+                    selectValue.value.setValue("{{ form.artist.value|safe }}");
+                    {% endif %}
 
-                EventBus.$on("add-tag", (tagName) => {
-                    let tagList = document.getElementsByName("tags")[0].value.split(",");
-                    // Ignore if we've already added this tag
-                    if (tagList.includes(tagName)) {
-                        return;
-                    }
-                    this.$refs.tagsInput.addTag(tagName);
-                });
+                    // The title input is automatically generated by Django,
+                    //  so use JavaScript to add an event handler after the fact.
+                    const title = document.getElementById("id_title");
+                    title.addEventListener("blur", this.onDupeCheck);
 
+                    EventBus.$on("add-tag", (tagName) => {
+                        let tagList = document.getElementsByName("tags")[0].value.split(",");
+                        // Ignore if we've already added this tag
+                        if (tagList.includes(tagName)) {
+                            return;
+                        }
+                        tagsInput.value.addTag(tagName);
+                    });
+                })
+
+                return {
+                    filename,
+                    rating,
+                    isCompilation,
+                    onDupeCheck,
+                    onChange,
+                    onClickDelete,
+                    onMouseLeaveRatingContainer,
+                    onMouseOverRating,
+                    selectValue,
+                    setRating,
+                    songLength,
+                    tagsInput,
+                    uuid,
+                }
+            }
+        });
+        app.use(Oruga, {
+            iconComponent: "font-awesome-icon",
+            iconPack: "fa",
+            table: {
+                sortIcon: "caret-up",
             },
         });
+        app.mount("#vue-app");
 
     </script>
 

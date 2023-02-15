@@ -214,7 +214,7 @@
 
                                     <o-table-column field="uuid" label="" :td-attrs="() => ({ class: 'col-action text-center align-middle' })" cell-class="col-action text-center align-middle" v-slot="props">
                                         <drop-down-menu :show-on-hover="true">
-                                            <div slot="dropdown">
+                                            <template #dropdown>
                                                 <li>
                                                     <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(props.row.uuid)">
                                                         <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
@@ -225,7 +225,7 @@
                                                         <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>Add to playlist
                                                     </a>
                                                 </li>
-                                            </div>
+                                            </template>
                                         </drop-down-menu>
                                     </o-table-column>
                                 </o-table>
@@ -297,14 +297,39 @@
 
     <script type="text/javascript" charset="utf-8">
 
-        new Vue({
-            el: "#vue-nav",
+        const navApp = createApp({
+            name: "Nav",
+            components: {
+                FontAwesomeIcon,
+            },
         });
+        navApp.mount("#vue-nav");
 
-        new Vue({
-            el: "#vue-app",
-            data() {
-                const songList = [
+        const app = createApp({
+            name: "SongList",
+            delimiters: ["[[", "]]"],
+            components: {
+                AddToPlaylist,
+                AudioPlayer,
+                Card,
+                DropDownMenu,
+                FontAwesomeIcon,
+                NoteModal,
+            },
+            setup() {
+                const artistDetailFilename = ref("");
+                const artistDetailMenuItems = ref([
+                    {
+                        id: uuidv4(),
+                        title: "Update Artist Image",
+                        url: "#",
+                        clickHandler: handleUpdateArtistImage,
+                        icon: "pencil-alt",
+                    },
+                ]);
+                const isOver = ref(false);
+                const selectedSong = ref({});
+                const songList = ref([
                     {% for song in song_list %}
                     {
                         "uuid": "{{ song.uuid }}",
@@ -312,45 +337,33 @@
                         "title": "{{ song.title|safe }}",
                         "length": "{{ song.length }}",
                         "note": "{{ song.note|safe|escapejs }}",
-                        "rating": "{{ song.rating|default:'' }}"
+                        "rating": "{{ song.rating|default:'' }}",
                     },
                     {% endfor %}
-                ];
+                ]);
 
-                return {
-                    songList,
-                    selectedSong: null,
-                    artistDetailFilename: null,
-                    artistDetailMenuItems: [
-                        {
-                            id: uuidv4(),
-                            title: "Update Artist Image",
-                            url: "#",
-                            clickHandler: this.handleUpdateArtistImage,
-                            icon: "pencil-alt"
-                        },
-                    ],
-                    isOver: false,
-                    show: false,
-                }
-            },
-            methods: {
-                 getStarClass(rating, currentRating) {
+                const addToPlaylist = ref(null);
+                const audioPlayer = ref(null);
+
+                function getStarClass(rating, currentRating) {
                     if (rating <= currentRating - 1) {
                         return "rating-star-selected";
                     }
                     return "";
-                },
-                onCurrentSong(songNumber) {
+                }
+
+                function onCurrentSong(songNumber) {
                     if (songNumber === -1) {
                         return;
                     }
-                    this.selectedSong = this.songList[songNumber];
-                },
-                onShowNote(song) {
+                    selectedSong = songList[songNumber];
+                }
+
+                function onShowNote(song) {
                     return markdown.render(song.note);
-                },
-                setRating(evt, row, rating) {
+                }
+
+                function setRating(evt, row, rating) {
                     const els = evt.currentTarget.parentElement.querySelectorAll(".rating");
                     for (const el of els) {
                         el.classList.remove("rating-star-hovered");
@@ -369,14 +382,14 @@
                     }
                     animateCSS(evt.currentTarget, "heartBeat");
                     doPost(
-                        this,
+                        null,
                         "{% url 'music:set_song_rating' %}",
                         {
                             "song_uuid": row.uuid,
                             "rating": rating,
                         },
                         (response) => {
-                            for (const song of this.songList) {
+                            for (const song of songList.value) {
                                 if (song.uuid === row.uuid) {
                                     song.rating = rating;
                                 }
@@ -384,14 +397,16 @@
                         },
                         "",
                     );
-                },
-                onMouseLeaveRatingContainer() {
+                }
+
+                function onMouseLeaveRatingContainer() {
                     const els = document.querySelectorAll(".rating");
                     for (const el of els) {
                         el.classList.remove("rating-star-hovered");
                     }
-                },
-                onMouseOverRating(evt, rating) {
+                }
+
+                function onMouseOverRating(evt, rating) {
                     // The event is triggered on an individual star. Go
                     // up to the parent and select all stars for the row.
                     const els = evt.currentTarget.parentElement.querySelectorAll(".rating");
@@ -406,37 +421,44 @@
                             el.classList.remove("rating-star-hovered");
                         }
                     }
-                },
-                onSongClicked(row, column, rowIndex, columnIndex) {
+                }
+
+                function onSongClicked(row, column, rowIndex, columnIndex) {
                     // Don't play the song if we've clicked on the
                     //  'on-hover' menu or the rating or note columns.
                     if (column.field !== "uuid" && column.field !== "rating" && column.field !== "note") {
-                        this.$refs.audioPlayer.playTrack(row.uuid);
-                        this.selectedSong = row;
+                        audioPlayer.value.playTrack(row.uuid);
+                        selectedSong.value = row;
                     }
-                },
-                onClickUpdate(uuid) {
+                }
+
+                function onClickUpdate(uuid) {
                     window.location="{% url 'music:update' '00000000-0000-0000-0000-000000000000' %}?return_url={{ request.get_full_path|safe }}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
-                },
-                onClickAddToPlaylist(uuid) {
-                    this.$refs.addToPlaylist.openModal(uuid);
-                },
-                handleUpdateArtistImage() {
+                }
+
+                function onClickAddToPlaylist(uuid) {
+                    addToPlaylist.value.openModal(uuid);
+                }
+
+                function handleUpdateArtistImage() {
                     const modal = new Modal("#modalUpdateArtistImage");
                     modal.show();
-                },
-                handleImageDrop(evt) {
-                    let image = evt.dataTransfer.files[0]
+                }
+
+                function handleImageDrop(evt) {
+                    const image = evt.dataTransfer.files[0];
                     if (image.type.indexOf("image/") >= 0) {
-                        this.uploadArtistImage(image);
+                        uploadArtistImage(image);
                     }
-                },
-                onArtistImageSelect(evt) {
-                    let image = document.getElementById("id_image").files[0];
-                    this.uploadArtistImage(image);
-                },
-                uploadArtistImage(image) {
-                    let formData = new FormData();
+                }
+
+                function onArtistImageSelect(evt) {
+                    const image = document.getElementById("id_image").files[0];
+                    uploadArtistImage(image);
+                }
+
+                function uploadArtistImage(image) {
+                    const formData = new FormData();
                     formData.append("artist_uuid", "{{ artist.uuid }}");
                     formData.append("image", image);
 
@@ -445,13 +467,45 @@
                             "Content-Type": "multipart/form-data"
                         }
                     }).then(response => {
-                        this.artistDetailFilename = image.name;
+                        artistDetailFilename.value = image.name;
                         const artistImage = document.getElementById("artist_image");
                         artistImage.src = artistImage.src + "?" + new Date().getTime();
                     });
-                },
+                }
+
+                return {
+                    addToPlaylist,
+                    artistDetailFilename,
+                    artistDetailMenuItems,
+                    audioPlayer,
+                    getStarClass,
+                    isOver,
+                    handleImageDrop,
+                    handleUpdateArtistImage,
+                    onArtistImageSelect,
+                    onClickAddToPlaylist,
+                    onClickUpdate,
+                    onCurrentSong,
+                    onShowNote,
+                    onMouseLeaveRatingContainer,
+                    onMouseOverRating,
+                    onSongClicked,
+                    selectedSong,
+                    setRating,
+                    songList,
+                    uploadArtistImage,
+                };
             },
         });
+        app.use(FloatingVue);
+        app.use(Oruga, {
+            iconComponent: "font-awesome-icon",
+            iconPack: "fa",
+            table: {
+                sortIcon: "caret-up",
+            },
+        });
+        app.mount("#vue-app");
 
     </script>
 

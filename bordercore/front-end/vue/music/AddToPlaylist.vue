@@ -48,39 +48,24 @@
                 type: String,
             },
         },
-        data() {
-            return {
-                songUuid: "",
-                selectedPlaylist: "",
-                playLists: [],
-            };
-        },
-        mounted() {
-            doGet(
-                this,
-                this.getPlaylistsUrl,
-                (response) => {
-                    this.playLists = response.data.results.filter(this.isManualPlaylist);
-                    if (this.defaultPlaylist) {
-                        this.selectedPlaylist = this.defaultPlaylist;
-                    }
-                },
-                "Error getting playlists",
-            );
-        },
-        methods: {
-            openModal(songUuid) {
-                this.songUuid = songUuid;
+        setup(props) {
+            const playLists = ref([]);
+            const selectedPlaylist = ref("");
+            const songUuid = ref("");
+
+            function openModal(songUuidParam) {
+                songUuid.value = songUuidParam;
                 const modal = new Modal("#modalAddToPlaylist");
                 modal.show();
-            },
-            onClickAdd(datum) {
+            };
+
+            function onClickAdd(datum) {
                 doPost(
-                    this,
-                    this.addToPlaylistUrl,
+                    null,
+                    props.addToPlaylistUrl,
                     {
-                        "playlist_uuid": this.selectedPlaylist,
-                        "song_uuid": this.songUuid,
+                        "playlist_uuid": selectedPlaylist.value,
+                        "song_uuid": songUuid.value,
                     },
                     () => {
                         const modal = Modal.getInstance(document.getElementById("modalAddToPlaylist"));
@@ -88,10 +73,33 @@
                     },
                     "Song added to playlist",
                 );
-            },
-            isManualPlaylist(playlist) {
+            }
+
+            function isManualPlaylist(playlist) {
                 return playlist.type === "manual";
-            },
+            };
+
+            onMounted(() => {
+                doGet(
+                    null,
+                    props.getPlaylistsUrl,
+                    (response) => {
+                        playLists.value = response.data.results.filter(isManualPlaylist);
+                        if (props.defaultPlaylist) {
+                            selectedPlaylist.value = props.defaultPlaylist;
+                        }
+                    },
+                    "Error getting playlists",
+                );
+            });
+
+            return {
+                onClickAdd,
+                openModal,
+                playLists,
+                selectedPlaylist,
+                songUuid,
+            };
         },
     };
 

@@ -144,7 +144,7 @@
                             <div class="row mt-3">
                                 <label class="col-lg-4 col-form-label">Exclude Recent Listens</label>
                                 <div class="col-lg-8">
-                                    <select v-model="exclude_recent" class="form-control form-select" name="exclude_recent">
+                                    <select v-model="excludeRecent" class="form-control form-select" name="exclude_recent">
                                         <option v-for="option in excludeRecentOptions" :key="option.value" :value="option.value">
                                             {{ option.display }}
                                         </option>
@@ -154,7 +154,7 @@
 
                             <div class="row mt-3">
                                 <div class="col-lg-12 d-flex align-items-center">
-                                    <o-switch v-model="exclude_albums" name="exclude_albums" :native-value="exclude_albums" />
+                                    <o-switch v-model="excludeAlbums" name="exclude_albums" :native-value="excludeAlbums" />
                                     <label class="ms-2">
                                         Exclude albums
                                     </label>
@@ -174,7 +174,14 @@
 
 <script>
 
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+    import TagsInput from "/front-end/vue/common/TagsInput.vue";
+
     export default {
+        components: {
+            FontAwesomeIcon,
+            TagsInput,
+        },
         props: {
             tagSearchUrl: {
                 default: "",
@@ -190,8 +197,113 @@
                 type: Object,
             },
         },
-        data() {
+        setup(props) {
+            const endYear = ref(getAttribute("end_year", undefined));
+            const excludeAlbums = ref(getAttribute("exclude_albums", false));
+            const excludeRecent = ref(getAttribute("exclude_recent", ""));
+            const name = ref(getAttribute("name", ""));
+            const note = ref(getAttribute("note", ""));
+            const rating = ref(getAttribute("rating", undefined));
+            const size = ref(getAttribute("size", 20));
+            const smartType = ref(getAttribute("type", "manual"));
+            const startYear = ref(getAttribute("start_year", undefined));
+
+            const disabledCreateButton = computed(() => {
+                if (smartType === "tag" &&
+                    (this.$refs.smartListTag && this.$refs.smartListTag.tags.length === 0)) {
+                    return true;
+                } else if (smartType === "time" &&
+                           (!startYear || !endYear) ||
+                           parseInt(endYear) < parseInt(startYear)) {
+                    return true;
+                }
+                return false;
+            });
+
+            function getAttribute(attribute, defaultValue) {
+                if (props.playlist) {
+                    if (attribute in props.playlist) {
+                        return props.playlist[attribute];
+                    } else if (attribute in props.playlist.parameters ) {
+                        return props.playlist.parameters[attribute];
+                    }
+                }
+                return defaultValue;
+            }
+
+            function getStarClass(rating) {
+                if (rating <= rating - 1) {
+                    return "rating-star-selected";
+                }
+                return "";
+            }
+
+            function onClickCreate(evt) {
+                const modal = new Modal("#modalAdd");
+                modal.show();
+                window.setTimeout(() => {
+                    document.getElementById("id_name").focus();
+                }, 500);
+            }
+
+            function onMouseLeaveRatingContainer() {
+                const els = document.querySelectorAll(".rating");
+                for (const el of els) {
+                    el.classList.remove("rating-star-hovered");
+                }
+            }
+
+            function onMouseOverRating(rating) {
+                if (smartType !== "rating") {
+                    return;
+                }
+                const els = document.querySelectorAll(".rating");
+                // Loop over each star rating. Add the "hovered" class if:
+                //  1) The rating is > the currently selected rating
+                //  2) The rating is < the currently "hovered" rating
+                for (const el of els) {
+                    if (!el.classList.contains("rating-star-selected") &&
+                        parseInt(el.getAttribute("data-rating"), 10) < rating + 1 ) {
+                        el.classList.add("rating-star-hovered");
+                    } else {
+                        el.classList.remove("rating-star-hovered");
+                    }
+                }
+            }
+
+            function setRating(evt, ratingParam) {
+                if (smartType === "rating") {
+                    if (ratingParam + 1 === rating.value) {
+                        // If we've selected the current rating, treat it
+                        // as if we've de-selected a rating entirely
+                        // and remove it.
+                        rating.value = "";
+                    } else {
+                        rating.value = rating.value + 1;
+                    }
+                    nextTick(() => {
+                        animateCSS(evt.currentTarget, "heartBeat");
+                    });
+                }
+            }
+
             return {
+                disabledCreateButton,
+                endYear,
+                excludeAlbums,
+                excludeRecent,
+                getAttribute,
+                getStarClass,
+                name,
+                note,
+                onClickCreate,
+                onMouseLeaveRatingContainer,
+                onMouseOverRating,
+                rating,
+                setRating,
+                size,
+                smartType,
+                startYear,
                 fields: [
                     {
                         key: "year",
@@ -264,92 +376,7 @@
                         display: "Past 3 Months",
                     },
                 ],
-                size: this.getAttribute("size", 20),
-                name: this.getAttribute("name", ""),
-                note: this.getAttribute("note", ""),
-                rating: this.getAttribute("rating", undefined),
-                exclude_recent: this.getAttribute("exclude_recent", ""),
-                exclude_albums: this.getAttribute("exclude_albums", false),
-                smartType: this.getAttribute("type", "manual"),
-                startYear: this.getAttribute("start_year", undefined),
-                endYear: this.getAttribute("end_year", undefined),
             };
-        },
-        computed: {
-            disabledCreateButton() {
-                if (this.smartType === "tag" &&
-                    (this.$refs.smartListTag && this.$refs.smartListTag.tags.length === 0)) {
-                    return true;
-                } else if (this.smartType === "time" &&
-                           (!this.startYear || !this.endYear) ||
-                           parseInt(this.endYear) < parseInt(this.startYear)) {
-                    return true;
-                }
-                return false;
-            },
-        },
-        methods: {
-            getAttribute(attribute, defaultValue) {
-                if (this.playlist) {
-                    if (attribute in this.playlist) {
-                        return this.playlist[attribute];
-                    } else if (attribute in this.playlist.parameters ) {
-                        return this.playlist.parameters[attribute];
-                    }
-                }
-                return defaultValue;
-            },
-            getStarClass(rating) {
-                if (rating <= this.rating - 1) {
-                    return "rating-star-selected";
-                }
-                return "";
-            },
-            onClickCreate(evt) {
-                const modal = new Modal("#modalAdd");
-                modal.show();
-                window.setTimeout(() => {
-                    document.getElementById("id_name").focus();
-                }, 500);
-            },
-            onMouseLeaveRatingContainer() {
-                const els = document.querySelectorAll(".rating");
-                for (const el of els) {
-                    el.classList.remove("rating-star-hovered");
-                }
-            },
-            onMouseOverRating(rating) {
-                if (this.smartType !== "rating") {
-                    return;
-                }
-                const els = document.querySelectorAll(".rating");
-                // Loop over each star rating. Add the "hovered" class if:
-                //  1) The rating is > the currently selected rating
-                //  2) The rating is < the currently "hovered" rating
-                for (const el of els) {
-                    if (!el.classList.contains("rating-star-selected") &&
-                        parseInt(el.getAttribute("data-rating"), 10) < rating + 1 ) {
-                        el.classList.add("rating-star-hovered");
-                    } else {
-                        el.classList.remove("rating-star-hovered");
-                    }
-                }
-            },
-            setRating(evt, rating) {
-                if (this.smartType === "rating") {
-                    if (rating + 1 === this.rating) {
-                        // If we've selected the current rating, treat it
-                        // as if we've de-selected a rating entirely
-                        // and remove it.
-                        this.rating = "";
-                    } else {
-                        this.rating = rating + 1;
-                    }
-                    this.$nextTick(() => {
-                        animateCSS(evt.currentTarget, "heartBeat");
-                    });
-                }
-            },
         },
     };
 

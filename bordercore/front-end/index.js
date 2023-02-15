@@ -37,6 +37,7 @@ window.Datepicker = Datepicker;
 import FloatingVue from "floating-vue";
 // Allow the user to hover over the tooltip content
 FloatingVue.options.popperTriggers = ["hover"];
+window.FloatingVue = FloatingVue;
 
 import pluralize from "pluralize";
 window.pluralize = pluralize;
@@ -189,10 +190,13 @@ import "vue-sidebar-menu/dist/vue-sidebar-menu.css";
 window.SidebarMenu = SidebarMenu;
 
 import AddToPlaylist from "./vue/music/AddToPlaylist.vue";
+window.AddToPlaylist = AddToPlaylist;
 
 import AudioPlayer from "./vue/music/AudioPlayer.vue";
+window.AudioPlayer = AudioPlayer;
 
 import CreateUpdatePlaylist from "./vue/music/CreateUpdatePlaylist.vue";
+window.CreateUpdatePlaylist = CreateUpdatePlaylist;
 
 import BlobDetailCover from "./vue/blob/BlobDetailCover.vue";
 
@@ -229,6 +233,7 @@ import NodeNoteModal from "./vue/node/NodeNoteModal.vue";
 import NodeTodoList from "./vue/node/NodeTodoList.vue";
 
 import NoteModal from "./vue/common/NoteModal.vue";
+window.NoteModal = NoteModal;
 
 import CollectionObjectList from "./vue/collection/CollectionObjectList.vue";
 

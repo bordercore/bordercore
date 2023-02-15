@@ -128,7 +128,7 @@
                                 :data="songList"
                                 :default-sort="['year', 'desc']"
                                 hoverable
-                                :selected.sync="selectedSong"
+                                v-model:selected.sync="selectedSong"
                                 @select="onSongClicked"
                                 ref="table"
                             >
@@ -172,10 +172,46 @@
 
     <script type="text/javascript" charset="utf-8">
 
-        new Vue({
-            el: "#vue-app",
-            data() {
+        const app = createApp({
+            name: "SongList",
+            components: {
+                AudioPlayer,
+                Card,
+                SearchNoResult,
+            },
+            delimiters: ["[[", "]]"],
+            setup() {
+                const selectedSong = ref({});
+
+                const audioPlayer = ref(null);
+
+                function onCurrentSong(songNumber) {
+                    if (songNumber === -1) {
+                        return;
+                    }
+                    selectedSong.value = songList[songNumber];
+                };
+
+                function onSongClicked(row) {
+                    audioPlayer.value.playTrack(row.uuid);
+                };
+
+                function selectRow(index) {
+
+                    // Select a row based on index number. If the index is -1,
+                    // assume we only want to deselect any currently selected row.
+                    if (index != -1) {
+                        const selectedRow = songList[index];
+                        this.$refs.table.selectRow(selectedRow);
+                    } else {
+                        this.$refs.table.selectRow({});
+                    }
+                };
+
                 return {
+                    audioPlayer,
+                    onCurrentSong,
+                    onSongClicked,
                     songList: [
                         {% for song in song_list %}
                         {
@@ -187,32 +223,19 @@
                         },
                         {% endfor %}
                     ],
-                    selectedSong: null,
+                    selectedSong,
                 };
             },
-            methods: {
-                onCurrentSong(songNumber) {
-                    if (songNumber === -1) {
-                        return;
-                    }
-                    this.selectedSong = this.songList[songNumber];
-                },
-                onSongClicked(item) {
-                    this.$refs.audioPlayer.playTrack(item.uuid);
-                },
-                selectRow(index) {
-                    // Select a row based on index number. If the index is -1,
-                    // assume we only want to deselect any currently selected row.
-                    if (index != -1) {
-                        const selectedRow = this.songList[index];
-                        this.$refs.table.selectRow(selectedRow);
-                    } else {
-                        this.$refs.table.selectRow({});
-                    }
-                },
+        });
+        app.use(Oruga, {
+            iconComponent: "font-awesome-icon",
+            iconPack: "fa",
+            table: {
+                sortIcon: "caret-up",
             },
         });
+        app.mount("#vue-app");
 
-    </script>
+</script>
 
 {% endblock %}

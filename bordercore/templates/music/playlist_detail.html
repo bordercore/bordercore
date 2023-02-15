@@ -177,7 +177,7 @@
                             v-slot="props"
                         >
                             <drop-down-menu :show-on-hover="true">
-                                <div slot="dropdown">
+                                <template #dropdown>
                                     <li>
                                         <a class="dropdown-item" href="#" @click.prevent="onClickRemove(props.row.playlistitem_uuid)">
                                             <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>
@@ -189,7 +189,7 @@
                                             <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
                                         </a>
                                     </li>
-                                </div>
+                                </template>
                             </drop-down-menu>
                         </o-table-column>
 
@@ -255,79 +255,88 @@
 
     <script type="text/javascript">
 
-        new Vue({
-            el: "#vue-nav",
-        });
-
-        const table = new Vue({
-            el: "#vue-app",
-            data() {
-                return {
-                    songList: [],
-                    selectedSong: null,
-                    draggingRow: null,
-                    draggingRowIndex: null,
-                    menuValue: "",
-                    totalTime: 0,
-                    continuousPlay: true,
-                    playlistMenuItems: [
-                        {
-                            id: uuidv4(),
-                            title: "Update",
-                            url: "#",
-                            clickHandler: this.onClickUpdatePlaylist,
-                            icon: "pencil-alt",
-                        },
-                        {
-                            id: uuidv4(),
-                            title: "Delete",
-                            url: "#",
-                            clickHandler: this.onClickDelete,
-                            icon: "times",
-                        },
-                    ],
-                };
+        const navApp = createApp({
+            name: "Nav",
+            components: {
+                FontAwesomeIcon,
             },
-            methods: {
-                getPlaylist() {
+        });
+        navApp.mount("#vue-nav");
+
+        const app = createApp({
+            name: "SongList",
+            components: {
+                AudioPlayer,
+                Card,
+                CreateUpdatePlaylist,
+                DropDownMenu,
+                FontAwesomeIcon,
+            },
+            delimiters: ["[[", "]]"],
+            setup() {
+                const songList = ref([]);
+                const selectedSong = ref({});
+                const draggingRow = ref("");
+                const draggingRowIndex = ref("");
+                const menuValue = ref("");
+                const totalTime = ref(0);
+                const continuousPlay = ref(true);
+
+                const audioPlayer = ref(null);
+
+                const songCount = computed(() => {
+                    return songList.length;
+                });
+
+                const songCountPluralized = computed(() => {
+                    return pluralize("song", songList.length);
+                });
+
+                function getPlaylist() {
                     doGet(
-                        this,
+                        null,
                         "{% url "music:get_playlist" playlist.uuid %}",
                         (response) => {
-                            this.songList = response.data.playlistitems;
-                            this.totalTime = response.data.totalTime;
+                            songList.value = response.data.playlistitems;
+                            totalTime.value = response.data.totalTime;
                         },
                         "Error getting playlist",
                     );
-                },
-                onCurrentSong(songNumber) {
+                }
+
+                function onCurrentSong(songNumber) {
                     if (songNumber === -1) {
                         return;
                     }
-                    this.selectedSong = this.songList[songNumber];
-                },
-                onSongClicked(row, column, rowIndex, columnIndex) {
+                    selectedSong.value = songList[songNumber];
+                }
+
+                function onSongClicked(row, column, rowIndex, columnIndex) {
                     // Don't play the song if we've clicked on the
                     //  'on-hover' menu, which stores the song uuid
                     if (column.field !== "uuid") {
-                        this.$refs.audioPlayer.playTrack(row.uuid);
+                        audioPlayer.value.playTrack(row.uuid);
                     }
-                },
-                onDragOver(payload) {
+                }
+
+                function onDragOver(payload) {
                     payload.event.dataTransfer.dropEffect = "move";
                     payload.event.preventDefault();
-                },
-                onDragStart(payload) {
+                }
+
+                function onDragStart(payload) {
                     payload.event.currentTarget.classList.add("dragging");
-                    this.draggingRow = payload.row;
-                    this.draggingRowIndex = payload.index;
+                    draggingRow.value = payload.row;
+                    draggingRowIndex.value = payload.index;
                     payload.event.dataTransfer.effectAllowed = "move";
-                },
-                onDragEnd(payload) {
+                }
+
+                function onDragEnd(payload) {
                     payload.event.currentTarget.classList.remove("dragging");
-                },
-                onDrop(payload) {
-                    const playlistItemUuid = this.draggingRow.playlistitem_uuid;
+                }
+
+                function onDrop(payload) {
+                    const playlistItemUuid = draggingRow.playlistitem_uuid;
                     const newIndex = payload.index;
 
                     const bodyFormData = new URLSearchParams();
@@ -339,55 +348,98 @@
                         data: bodyFormData,
                     })
                         .then((response) => {
-                            this.getPlaylist();
+                            getPlaylist();
                         }, (error) => {
                             console.log(error);
                         });
+                }
 
-                },
-                onClickRemove(uuid) {
-                    const self = this;
-                    axios.delete("{% url 'playlistitem-detail' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', uuid))
-                         .then((response) => {
+                function onClickRemove(uuid) {
+                    axios.delete("{% url 'playlistitem-detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", uuid))
+                        .then((response) => {
+                            EventBus.$emit(
+                                "toast",
+                                {
+                                    "body": "Song deleted from playlist",
+                                },
+                            );
 
-                             EventBus.$emit(
-                                 "toast",
-                                 {
-                                     "body": "Song deleted from playlist",
-                                 },
-                             );
+                            getPlaylist();
+                        }, (error) => {
+                            console.log(error);
+                        });
+                }
 
-                             this.getPlaylist();
-                         }, (error) => {
-                             console.log(error);
-                         });
+                function onClickUpdateSong(uuid) {
+                    window.location = "{% url 'music:update' '00000000-0000-0000-0000-000000000000' %}?return_url={{ request.get_full_path }}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
+                }
 
-                },
-                onClickUpdateSong(uuid) {
-                    window.location="{% url 'music:update' '00000000-0000-0000-0000-000000000000' %}?return_url={{ request.get_full_path }}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
-                },
-                onClickDelete() {
+                function onClickDelete() {
                     const modal = new Modal("#modalDelete");
                     modal.show();
-                },
-                onClickUpdatePlaylist() {
+                }
+
+                function onClickUpdatePlaylist() {
                     const modal = new Modal("#modalCreateUpdate");
                     modal.show();
-                    window.setTimeout(() => { document.getElementById("id_name").focus() }, 500);
-                },
-            },
-            computed: {
-                songCount() {
-                    return this.songList.length;
-                },
-                songCountPluralized() {
-                    return pluralize("song", this.songList.length);
+                    window.setTimeout(() => {
+                        document.getElementById("id_name").focus();
+                    }, 500);
                 }
+
+                onMounted(() => {
+                    getPlaylist();
+                });
+
+                return {
+                    audioPlayer,
+                    getPlaylist,
+                    onCurrentSong,
+                    onSongClicked,
+                    onDragOver,
+                    onDragStart,
+                    onDragEnd,
+                    onDrop,
+                    onClickRemove,
+                    onClickUpdateSong,
+                    onClickDelete,
+                    onClickUpdatePlaylist,
+                    songCount,
+                    songCountPluralized,
+                    songList,
+                    selectedSong,
+                    draggingRow,
+                    draggingRowIndex,
+                    menuValue,
+                    totalTime,
+                    continuousPlay,
+                    playlistMenuItems: [
+                        {
+                            id: uuidv4(),
+                            title: "Update",
+                            url: "#",
+                            clickHandler: onClickUpdatePlaylist,
+                            icon: "pencil-alt",
+                        },
+                        {
+                            id: uuidv4(),
+                            title: "Delete",
+                            url: "#",
+                            clickHandler: onClickDelete,
+                            icon: "times",
+                        },
+                    ],
+                };
             },
-            mounted() {
-                this.getPlaylist();
-            }
         });
+        app.use(Oruga, {
+            iconComponent: "font-awesome-icon",
+            iconPack: "fa",
+            table: {
+                sortIcon: "caret-up",
+            },
+        });
+        app.mount("#vue-app");
 
     </script>
 

@@ -42,56 +42,59 @@
                 type: Array,
             },
         },
-        data() {
-            return {
-                continuousPlay: false,
-                currentSongUuid: null,
-            };
-        },
-        mounted() {
-            document.getElementById("player").onended = function(evt) {
-                EventBus.$emit("onEnded");
-            };
+        emits: ["current-song"],
+        setup(props, ctx) {
+            const continuousPlay = ref(false);
+            const currentSongUuid = ref("");
 
-            EventBus.$on("onEnded", (payload) => {
-                // If continous play is enabled, find the next song in the list to play
-                const newIndex = this.getIndex() + 1;
+            function getIndex() {
+                return props.trackList.findIndex((x) => x.uuid === currentSongUuid.value);
+            }
 
-                if (this.continuousPlay && newIndex < this.trackList.length) {
-                    this.currentSongUuid = this.trackList[newIndex].uuid;
-                    this.playTrack(this.currentSongUuid, true);
-                } else {
-                    // Let the parent know that the last song has played by
-                    //  passing in a row index of -1
-                    this.$emit("current-song", -1);
-                }
-            });
-        },
-        methods: {
-            getIndex() {
-                return this.trackList.findIndex((x) => x.uuid === this.currentSongUuid);
-            },
-            playTrack(songUuid, selectRow=false) {
-                this.currentSongUuid = songUuid;
+            function playTrack(songUuid, selectRow=false) {
+                currentSongUuid.value = songUuid;
 
                 const el = document.getElementById("player");
-                el.src = this.songUrl + songUuid;
+                el.src = props.songUrl + songUuid;
                 el.play();
 
                 if (selectRow) {
-                    this.$emit("current-song", this.getIndex());
+                    ctx.emit("current-song", getIndex());
                 }
+                setTimeout(markSongAsListenedTo, MUSIC_LISTEN_TIMEOUT);
+            }
 
-                setTimeout(this.markSongAsListenedTo, MUSIC_LISTEN_TIMEOUT);
-            },
-            onContinuousPlay(evt) {
-                this.continuousPlay = evt.srcElement.checked;
-            },
-            markSongAsListenedTo() {
-                const url = this.markListenedToUrl.replace(/00000000-0000-0000-0000-000000000000/, this.currentSongUuid);
+            function markSongAsListenedTo() {
+                const url = props.markListenedToUrl.replace(/00000000-0000-0000-0000-000000000000/, currentSongUuid.value);
                 axios.get(url)
                     .then((response) => {});
-            },
+            }
+
+            onMounted(() => {
+                document.getElementById("player").onended = function(evt) {
+                    EventBus.$emit("onEnded");
+                };
+
+                EventBus.$on("onEnded", (payload) => {
+                    // If continous play is enabled, find the next song in the list to play
+                    const newIndex = getIndex() + 1;
+
+                    if (continuousPlay && newIndex < props.trackList.length) {
+                        currentSongUuid.value = props.trackList[newIndex].uuid;
+                        playTrack(currentSongUuid.value, true);
+                    } else {
+                        // Let the parent know that the last song has played by
+                        //  passing in a row index of -1
+                        ctx.emit("current-song", -1);
+                    }
+                });
+            });
+
+            return {
+                continuousPlay,
+                currentSongUuid,
+                playTrack,
+            };
         },
     };
 

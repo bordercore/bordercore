@@ -98,7 +98,7 @@
                                 :data="songList"
                                 :default-sort="['year','desc']"
                                 hoverable
-                                :selected.sync="selectedSong"
+                                v-model:selected.sync="selectedSong"
                                 ref="table"
                                 :row-class="() => 'hover-target cursor-pointer'"
                                 @cell-click="onSongClicked"
@@ -143,7 +143,7 @@
 
                                 <o-table-column field="uuid" label="" :td-attrs="() => ({ class: 'col-action text-center align-middle' })" v-slot="props">
                                     <drop-down-menu :show-on-hover="true">
-                                        <div slot="dropdown">
+                                        <template #dropdown>
                                             <li>
                                                 <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(props.row.uuid)">
                                                     <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
@@ -154,7 +154,7 @@
                                                     <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>Add to playlist
                                                 </a>
                                             </li>
-                                        </div>
+                                        </template>
                                     </drop-down-menu>
                                 </o-table-column>
                             </o-table>
@@ -280,14 +280,49 @@
 
     <script type="text/javascript" charset="utf-8">
 
-        new Vue({
-            el: "#vue-nav",
-            name: "Nav"
+        const navApp = createApp({
+            name: "Nav",
+            components: {
+                FontAwesomeIcon,
+            },
         });
+        navApp.mount("#vue-nav");
 
-        new Vue({
-            el: "#vue-app",
-            data() {
+        const app = createApp({
+            name: "SongList",
+            components: {
+                AddToPlaylist,
+                AudioPlayer,
+                Card,
+                DropDownMenu,
+                FloatingVue,
+                FontAwesomeIcon,
+                NoteModal,
+                SelectValue,
+                TagsInput,
+            },
+            delimiters: ["[[", "]]"],
+            setup() {
+                const filename = ref("");
+                const selectedSong = ref({});
+                const albumDetailMenuItems = ref([
+                    {
+                        id: uuidv4(),
+                        title: "Update Album",
+                        url: "#",
+                        clickHandler: handleUpdateAlbum,
+                        icon: "pencil-alt"
+                    },
+                    {% if not album.song_set.all %}
+                    {
+                        id: uuidv4(),
+                        title: "Delete Album",
+                        url: "#",
+                        clickHandler: handleDeleteAlbum,
+                        icon: "times"
+                    }
+                    {% endif %}
+                ]);
                 const songList = [
                     {% for song in song_list %}
                     {
@@ -302,43 +337,21 @@
                     {% endfor %}
                 ];
 
-                return {
-                    songList,
-                    selectedSong: null,
-                    show: false,
-                    right: true,
-                    filename: null,
-                    albumDetailMenuItems: [
-                        {
-                            id: uuidv4(),
-                            title: "Update Album",
-                            url: "#",
-                            clickHandler: this.handleUpdateAlbum,
-                            icon: "pencil-alt"
-                        },
-                        {% if not album.song_set.all %}
-                        {
-                            id: uuidv4(),
-                            title: "Delete Album",
-                            url: "#",
-                            clickHandler: this.handleDeleteAlbum,
-                            icon: "times"
-                        }
-                        {% endif %}
-                    ]
-                }
-            },
-            methods: {
-                onCurrentSong(songNumber) {
+                const addToPlaylist = ref(null);
+                const audioPlayer = ref(null);
+
+                function onCurrentSong(songNumber) {
                     if (songNumber === -1) {
                         return;
                     }
-                    this.selectedSong = this.songList[songNumber];
-                },
-                onShowNote(song) {
+                    selectedSong.value = songList[songNumber];
+                }
+
+                function onShowNote(song) {
                     return markdown.render(song.note);
-                },
-                setRating(evt, row, rating) {
+                }
+
+                function setRating(evt, row, rating) {
                     const els = evt.currentTarget.parentElement.querySelectorAll(".rating");
                     for (const el of els) {
                         el.classList.remove("rating-star-hovered");
@@ -355,18 +368,18 @@
                         // and remove it.
                         rating = "";
                     }
-                    this.$nextTick(() => {
+                    nextTick(() => {
                         animateCSS(evt.currentTarget, "heartBeat");
                     });
                     doPost(
-                        this,
+                        null,
                         "{% url 'music:set_song_rating' %}",
                         {
                             "song_uuid": row.uuid,
                             "rating": rating,
                         },
                         (response) => {
-                            for (const song of this.songList) {
+                            for (const song of songList) {
                                 if (song.uuid === row.uuid) {
                                     song.rating = rating;
                                 }
@@ -374,14 +387,16 @@
                         },
                         "",
                     );
-                },
-                onMouseLeaveRatingContainer() {
+                }
+
+                function onMouseLeaveRatingContainer() {
                     const els = document.querySelectorAll(".rating");
                     for (const el of els) {
                         el.classList.remove("rating-star-hovered");
                     }
-                },
-                onMouseOverRating(event, rating) {
+                }
+
+                function onMouseOverRating(event, rating) {
                     // The event is triggered on an individual star. Go
                     // up to the parent and select all stars for the row.
                     const els = event.currentTarget.parentElement.querySelectorAll(".rating");
@@ -396,41 +411,78 @@
                             el.classList.remove("rating-star-hovered");
                         }
                     }
-                },
-                onSongClicked(row, column, rowIndex, columnIndex) {
+                }
+
+                function onSongClicked(row, column, rowIndex, columnIndex) {
                     // Don't play the song if we've clicked on the
                     //  'on-hover' menu.
                     if (column.field !== "uuid" && column.field !== "rating" && column.field !== "note") {
-                        this.$refs.audioPlayer.playTrack(row.uuid);
+                        audioPlayer.value.playTrack(row.uuid);
                     }
-                },
-                onClickUpdate(uuid) {
+                }
+
+                function onClickUpdate(uuid) {
                     window.location="{% url 'music:update' '00000000-0000-0000-0000-000000000000' %}?return_url={{ request.get_full_path }}".replace(/00000000-0000-0000-0000-000000000000/, uuid);
-                },
-                onClickAddToPlaylist(uuid) {
-                    this.$refs.addToPlaylist.openModal(uuid);
-                },
-                getNote(note) {
+                }
+
+                function onClickAddToPlaylist(uuid) {
+                    addToPlaylist.value.openModal(uuid);
+                }
+
+                function getNote(note) {
                     return markdown.render(note);
-                },
-                handleUpdateAlbum() {
+                }
+
+                function handleUpdateAlbum() {
                     const modal = new Modal("#modalUpdateAlbum");
                     modal.show();
-                },
-                handleDeleteAlbum() {
+                }
+
+                function handleDeleteAlbum() {
                     axios.delete("{% url 'album-detail' object.uuid %}")
                          .then((response) => {
                              window.location = "{% url 'music:list' %}";
                          }, (error) => {
                              console.log(error);
                          });
-                },
-                onCoverImageSelect(evt) {
-                    this.filename = evt.target.files[0].name;
+                }
+
+                function onCoverImageSelect(evt) {
+                    filename.value = evt.target.files[0].name;
+                }
+
+                return {
+                    addToPlaylist,
+                    audioPlayer,
+                    getNote,
+                    handleDeleteAlbum,
+                    handleUpdateAlbum,
+                    onClickAddToPlaylist,
+                    onClickUpdate,
+                    onCoverImageSelect,
+                    onCurrentSong,
+                    onMouseLeaveRatingContainer,
+                    onMouseOverRating,
+                    onShowNote,
+                    onSongClicked,
+                    setRating,
+                    songList,
+                    selectedSong,
+                    filename,
+                    albumDetailMenuItems,
                 }
             },
         });
+        app.use(FloatingVue);
+        app.use(Oruga, {
+            iconComponent: "font-awesome-icon",
+            iconPack: "fa",
+            table: {
+                sortIcon: "caret-up",
+            },
+        });
+        app.mount("#vue-app");
 
-    </script>
+</script>
 
 {% endblock %}
