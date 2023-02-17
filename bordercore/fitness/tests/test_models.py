@@ -56,7 +56,7 @@ def test_get_plot_data(auto_login_user, fitness):
     assert len(json.loads(plot_data["labels"])) == 11
     assert len(reps) == 11
     assert len(weight) == 11
-    assert plot_data["initial_plot"] == "weight"
+    assert plot_data["initial_plot_type"] == "weight"
     assert paginator["page_number"] == 1
     assert paginator["has_previous"] is False
     assert paginator["has_next"] is False
@@ -71,7 +71,7 @@ def test_get_plot_data(auto_login_user, fitness):
     assert len(json.loads(plot_data["labels"])) == 4
     assert len(reps) == 4
     assert len(weight) == 4
-    assert plot_data["initial_plot"] == "weight"
+    assert plot_data["initial_plot_type"] == "weight"
     assert paginator["page_number"] == 1
     assert paginator["has_previous"] is True
     assert paginator["has_next"] is False
@@ -86,7 +86,7 @@ def test_get_plot_data(auto_login_user, fitness):
     assert len(json.loads(plot_data["labels"])) == 4
     assert len(reps) == 4
     assert len(duration) == 4
-    assert plot_data["initial_plot"] == "duration"
+    assert plot_data["initial_plot_type"] == "duration"
     assert paginator["page_number"] == 2
     assert paginator["has_previous"] is True
     assert paginator["has_next"] is True

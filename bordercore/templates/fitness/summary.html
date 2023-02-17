@@ -86,61 +86,77 @@
 
     <script type="text/javascript">
 
-        new Vue({
-            el: "#vue-app",
-            data() {
-                return {
-                    items_active: [
-                        {% for exercise in active_exercises %}
-                        {
-                            "exercise_url": "{% url 'fitness:exercise_detail' exercise.uuid %}",
-                            "exercise": "{{ exercise.name|escapejs }}",
-                            "muscle_group": "{{ exercise.muscle.all.0.muscle_group }}",
-                            "frequency": "{{ exercise.frequency.days }} day{{ exercise.frequency.days|pluralize:"s" }}",
-                            {% if exercise.last_active %}
-                            "last_active": new Date("{{ exercise.last_active|date:"Y-m-d" }}"),
-                            {% endif %}
-                            {% if exercise.delta_days is not None %}
-                            "delta_days": {{ exercise.delta_days }},
-                            {% endif %}
-                            "overdue": {{ exercise.overdue }}
-                        },
-                        {% endfor %}
-                    ],
-                    items_inactive: [
-                        {% for exercise in inactive_exercises %}
-                        {
-                            "exercise_url": "{% url 'fitness:exercise_detail' exercise.uuid %}",
-                            "exercise": "{{ exercise.name|escapejs }}",
-                            "muscle_group": "{{ exercise.muscle.all.0.muscle_group }}",
-                            "last_active": "{{ exercise.last_active|date:"N j, Y" }}",
-                            {% if exercise.delta_days %}
-                            "delta_days": {{ exercise.delta_days }},
-                            {% endif %}
-                            "overdue": {{ exercise.overdue }}
-                        },
-                        {% endfor %}
-                    ],
-                }
-            },
-            methods: {
-                getFrequency(row) {
+        const app = createApp({
+            delimiters: ["[[", "]]"],
+            setup() {
+                const items_active = [
+                    {% for exercise in active_exercises %}
+                    {
+                        "exercise_url": "{% url 'fitness:exercise_detail' exercise.uuid %}",
+                        "exercise": "{{ exercise.name|escapejs }}",
+                        "muscle_group": "{{ exercise.muscle.all.0.muscle_group }}",
+                        "frequency": "{{ exercise.frequency.days }} day{{ exercise.frequency.days|pluralize:"s" }}",
+                        {% if exercise.last_active %}
+                        "last_active": new Date("{{ exercise.last_active|date:"Y-m-d" }}"),
+                        {% endif %}
+                        {% if exercise.delta_days is not None %}
+                        "delta_days": {{ exercise.delta_days }},
+                        {% endif %}
+                        "overdue": {{ exercise.overdue }}
+                    },
+                    {% endfor %}
+                ];
+
+                const items_inactive = [
+                    {% for exercise in inactive_exercises %}
+                    {
+                        "exercise_url": "{% url 'fitness:exercise_detail' exercise.uuid %}",
+                        "exercise": "{{ exercise.name|escapejs }}",
+                        "muscle_group": "{{ exercise.muscle.all.0.muscle_group }}",
+                        "last_active": "{{ exercise.last_active|date:"N j, Y" }}",
+                        {% if exercise.delta_days %}
+                        "delta_days": {{ exercise.delta_days }},
+                        {% endif %}
+                        "overdue": {{ exercise.overdue }}
+                    },
+                    {% endfor %}
+                ];
+
+                function getFrequency(row) {
                     if (row.delta_days === 0) {
                         return "Today";
                     } else {
                         return row.delta_days + " " + pluralize("day", row.delta_days) + " ago";
                     }
-                },
-                getDate(date) {
+                };
+
+                function getDate(date) {
                     return getFormattedDate(date, "long");
-                },
-                rowClass(row, index) {
+                };
+
+                function rowClass(row, index) {
                     if (!row) return;
                     if (row.overdue === 1) return "selected";
                     if (row.overdue === 2) return "overdue";
-                },
-            }
+                };
+
+                return {
+                    getDate,
+                    getFrequency,
+                    items_active,
+                    items_inactive,
+                    rowClass,
+                }
+            },
         });
+        app.use(Oruga, {
+            iconComponent: "font-awesome-icon",
+            iconPack: "fa",
+            table: {
+                sortIcon: "caret-up",
+            },
+        });
+        app.mount("#vue-app");
 
     </script>
 

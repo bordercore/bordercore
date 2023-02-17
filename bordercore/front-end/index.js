@@ -141,6 +141,7 @@ window.getFormattedDate = getFormattedDate;
 window.animateCSS = animateCSS;
 
 import EditableTextArea from "./vue/common/EditableTextArea.vue";
+window.EditableTextArea= EditableTextArea;
 
 import SelectValue from "./vue/common/SelectValue.vue";
 import "vue-multiselect/dist/vue-multiselect.min.css";
@@ -250,6 +251,11 @@ window.PerfectScrollbar = PerfectScrollbar;
 import Pagination from "./vue/common/Pagination.vue";
 
 import PythonConsole from "./vue/common/PythonConsole.vue";
+
+import AddWorkoutForm from "./vue/fitness/AddWorkoutForm.vue";
+window.AddWorkoutForm = AddWorkoutForm;
+import WorkoutGraph from "./vue/fitness/WorkoutGraph.vue";
+window.WorkoutGraph = WorkoutGraph;
 
 import Toast from "./vue/common/Toast.vue";
 window.Toast = Toast;

@@ -21,19 +21,20 @@
 
 <script>
 
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+
     export default {
+        components: {
+            FontAwesomeIcon,
+        },
         props: {
             defaultValue: {
                 default: "",
                 type: String,
             },
-            value: {
+            modelValue: {
                 default: "",
                 type: String,
-            },
-            uuid: {
-                type: String,
-                default: "",
             },
             editUrl: {
                 type: String,
@@ -53,7 +54,7 @@
                 isEditingNote: false,
                 labelOffsetHeight: 0,
                 minNumberRows: 10,
-                textAreaValue: this.value,
+                textAreaValue: this.modelValue,
             };
         },
         computed: {
@@ -66,7 +67,7 @@
         },
         methods: {
             setTextAreaValue(value) {
-                this.textAreaValue = value;
+                this.textAreaValue = modelValue;
                 this.$nextTick(() => {
                     Prism.highlightAll();
                 });

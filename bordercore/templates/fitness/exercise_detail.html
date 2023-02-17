@@ -52,7 +52,7 @@
                                             </div>
                                         </div>
                                         <drop-down-menu :show-on-hover="true">
-                                            <div slot="dropdown">
+                                            <template #dropdown>
                                                 <li>
                                                     <a class="dropdown-item" href="#" @click.prevent="onClickSwitchExercise()">
                                                         <font-awesome-icon icon="exchange-alt" class="text-primary me-3"></font-awesome-icon>Switch Exercise
@@ -63,7 +63,7 @@
                                                         <font-awesome-icon icon="calendar-alt" class="text-primary me-3"></font-awesome-icon>Change Frequency
                                                     </a>
                                                 </li>
-                                            </div>
+                                            </template>
                                         </drop-down-menu>
                                     </div>
                                     <hr class="m-2" />
@@ -90,7 +90,7 @@
                             </div>
                         </div>
                     </template>
-                </card>
+ y               </card>
             </div>
 
             <card title="" class="flex-grow-0 backdrop-filter">
@@ -128,7 +128,7 @@
                                         Description
                                     </div>
                                     <drop-down-menu :show-on-hover="true">
-                                        <div slot="dropdown">
+                                        <template #dropdown>
                                             <li>
                                                 <a class="dropdown-item" href="#" @click.prevent="addNote()">
                                                     <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>
@@ -141,7 +141,7 @@
                                                     Delete note
                                                 </a>
                                             </li>
-                                        </div>
+                                        </template>
                                     </drop-down-menu>
                                 </div>
                                 <div v-html="description">
@@ -149,9 +149,8 @@
                             </div>
                             <hr v-if="description && note" class="m-2" />
                             <editable-text-area
-                                ref="note"
-                                uuid="{{ object.uuid }}"
-                                v-model:note="note"
+                                ref="editableTextArea"
+                                v-model="note"
                                 extra-class=""
                                 :hide-add-button="true"
                                 @update-note="onUpdateNote"
@@ -190,7 +189,6 @@
                             </button>
                         </div>
                         <div class="modal-body">
-
                             <div class="mb-3 text-primary">
                                 <small>
                                     Selecting an exercise from the list below will make it <em>active</em> and make the exercise <strong>{{ object.name }}</strong> <em>inactive</em>.
@@ -242,147 +240,30 @@
 
         </div>
 
+        {% csrf_token %}
         <div class="col-lg-9 d-flex flex-column" id="vue-app-right">
-            <workout-graph inline-template>
-                <card title="" class="flex-grow-0 me-2 pt-3 backdrop-filter">
-                    <template #content>
-                        <div class="d-flex">
-                            <div>
-                                <div class="btn-group" role="group" aria-label="Basic example">
-                                    <button type="button" class="btn btn-primary" :class="{'active': currentPlotData === 'reps' }" @click="switchPlot('reps')">Reps</button>
-                                    <button v-if="Object.keys(plotdata).includes('weight')" type="button" class="btn btn-primary" :class="{'active': currentPlotData === 'weight' }" @click="switchPlot('weight')">Weight</button>
-                                    <button v-if="Object.keys(plotdata).includes('duration')" type="button" class="btn btn-primary" :class="{'active': currentPlotData === 'duration' }" @click="switchPlot('duration')">Duration</button>
-                                </div>
-                            </div>
-                            <h5 class="ms-auto">
-                                <a v-if="paginator.has_previous" href="#" @click.prevent="paginate('prev')">
-                                    <font-awesome-icon icon="chevron-left" class="text-emphasis glow icon-hover" />
-                                </a>
-                                <span v-else>
-                                    <font-awesome-icon icon="chevron-left" class="text-emphasis icon-disabled" />
-                                </span>
-                                <a v-if="paginator.has_next" href="#" @click.prevent="paginate('next')" class="ms-1">
-                                    <font-awesome-icon icon="chevron-right" class="text-emphasis glow icon-hover" />
-                                </a>
-                                <span v-else>
-                                    <font-awesome-icon icon="chevron-right" class="text-emphasis icon-disabled" />
-                                </span>
-                            </h5>
-                        </div>
-                        <canvas id="exercise-detail-chart" class="w-100"></canvas>
-                        <div v-if="has_note" id="fitness-has-note">
-                            * workout note
-                        </div>
-                    </template>
-                </card>
-            </workout-graph>
+            <workout-graph
+                date="{% now " Y - m - d" %}"
+                :latest-duration="JSON.parse('{{ latest_duration }}')"
+                :latest-weight="JSON.parse('{{ latest_weight }}')"
+                :latest-reps="JSON.parse('{{ latest_reps }}')"
+                initial-plot-type="{{ plotdata.initial_plot_type }}"
+                :notes="JSON.parse('{{ plotdata.notes|safe|escapejs }}')"
+                :initial-paginator="JSON.parse('{{ plotdata.paginator|safe|escapejs }}')"
+                :plotdata="JSON.parse('{{ plotdata.plotdata|safe|escapejs }}')"
+                :labels="JSON.parse('{{ plotdata.labels|safe|escapejs }}')"
+                get-workout-data-url="{% url 'fitness:get_workout_data' %}?uuid={{ object.uuid }}&page_number=">
+           </workout-graph>
 
             <div class="d-flex flex-grow-1">
 
-                <add-workout-form inline-template>
-                    <card title="" class="w-50 backdrop-filter">
-                        <template #title-slot>
-                            <div class="card-title text-primary">
-                                Add New Workout Data
-                            </div>
-                        </template>
-                        <template #content>
-                            <form id="form-workout" class="form-inline" action="{% url 'fitness:add' exercise.uuid %}" method="post">
-                                {% csrf_token %}
-                                <input type="hidden" name="workout-data" :value="workoutDataJson" />
-                                <div class="d-flex">
-                                    <div>
-                                        {% if not recent_data or latest_weight.0 %}
-                                            <div class="d-flex align-items-center my-2">
-                                                <label class="fitness-col-new-workout-data flex-shrink-0">Weight</label>
-                                                <input class="form-control" type="text" name="weight" size="3" v-model="weight" autocomplete="off" />
-                                            </div>
-                                        {% endif %}
-
-                                        {% if not recent_data or latest_duration.0 %}
-                                            <div class="d-flex align-items-center my-2">
-                                                <label class="fitness-col-new-workout-data flex-shrink-0">Duration</label>
-                                                <input class="form-control" type="text" name="duration" size="3" v-model="duration" autocomplete="off" />
-                                            </div>
-                                        {% endif %}
-
-                                        <div class="d-flex align-items-center my-2">
-                                            <label class="fitness-col-new-workout-data flex-shrink-0">Reps</label>
-                                            <input class="form-control" type="text" name="reps" size="3" v-model="reps" autocomplete="off" />
-                                        </div>
-                                    </div>
-                                    <div class="my-2">
-                                        <input class="btn btn-secondary ms-5" type="button" name="Go" value="Add" :disabled="addIsDisabled" @click="onAddWorkoutData" />
-                                        <input class="btn btn-primary ms-3" :class="{'d-none': submitIsHidden}" id="btn-submit" type="submit" name="Go" value="Submit" />
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center mb-2">
-                                    <label class="fitness-col-new-workout-data flex-shrink-0">Note</label>
-                                    <input class="form-control" type="text" name="note" autocomplete="off" />
-                                </div>
-                            </form>
-                            <div class="row justify-content-center align-items-center">
-                                <div class="col-lg-12">
-
-                                    <hr />
-
-                                    <o-table
-                                        :data="items"
-                                        class="w-75 mx-auto"
-                                    >
-
-                                        {% if recent_data.0.weight %}
-                                            <o-table-column
-                                                field="weight"
-                                                label="Weight"
-                                                :td-attrs="() => ({ class: 'text-center w-50' })"
-                                                :th-attrs="() => ({ class: 'text-center cursor-pointer ps-4' })"
-                                                v-slot="props"
-                                            >
-                                                <input type="text" class="form-control text-center" size="3" v-if="items[props.row.index - 1].isEdit && selectedCell === 'weight'" type="number" v-model="items[props.row.index - 1].weight" @blur="onBlur(props.row.index - 1)"></input>
-                                                <span v-else @click="editCellHandler(props.row.index - 1, 'weight')">
-                                                    [[ props.row.weight ]]
-                                                </span>
-                                            </o-table-column>
-                                        {% endif %}
-
-                                        {% if recent_data.0.duration %}
-                                            <o-table-column
-                                                field="duration"
-                                                label="Duration"
-                                                :td-attrs="() => ({ class: 'text-center w-50' })"
-                                                :th-attrs="() => ({ class: 'text-center cursor-pointer ps-4' })"
-                                                v-slot="props"
-                                            >
-                                                <input type="text" class="form-control text-center" size="3" v-if="items[props.row.index - 1].isEdit && selectedCell === 'duration'" type="number" v-model="items[props.row.index - 1].duration" @blur="onBlur(props.row.index - 1)"></input>
-                                                <span v-else @click="editCellHandler(props.row.index - 1, 'duration')">
-                                                    [[ props.row.duration ]]
-                                                </span>
-                                            </o-table-column>
-                                        {% endif %}
-
-                                        <o-table-column
-                                            field="reps"
-                                            label="Reps"
-                                            :td-attrs="() => ({ class: 'text-center w-50' })"
-                                            :th-attrs="() => ({ class: 'text-center cursor-pointer ps-4' })"
-                                            v-slot="props"
-                                        >
-                                            <input type="text" class="form-control text-center" size="3" v-if="items[props.row.index - 1].isEdit && selectedCell === 'reps'" type="number" v-model="items[props.row.index - 1].reps" @blur="onBlur(props.row.index - 1)"></input>
-                                            <span v-else @click="editCellHandler(props.row.index - 1, 'reps')">
-                                                [[ props.row.reps ]]
-                                            </span>
-                                        </o-table-column>
-
-                                        <template #empty>
-                                            <div class="text-center">No workout data</div>
-                                        </template>
-
-                                    </o-table>
-                                </div>
-                            </div>
-                        </template>
-                    </card>
+                <add-workout-form
+                    :csrf-token="csrfToken"
+                    initial-weight="{% if recent_data %}{{ latest_weight|first|default:0 }}{% else %}0{% endif %}"
+                    initial-reps="{% if recent_data %}{{ latest_reps|first|default:0 }}{% else %}0{% endif %}"
+                    initial-duration="{% if recent_data %}{{ latest_duration|first|default:0 }}{% else %}0{% endif %}"
+                    add-workout-url="{% url 'fitness:add' exercise.uuid %}"
+                >
                 </add-workout-form>
                 <div class="d-flex flex-column w-50">
                     <card title="" id="muscles-targeted" class="me-2 backdrop-filter">
@@ -441,92 +322,103 @@
 
     <script type="text/javascript" charset="utf-8">
 
-        new Vue({
-            el: "#vue-app-left",
+        const appLeft = createApp({
             name: "LeftPanel",
-            data() {
-                return {
-                    isActiveExercise: {% if activity_info %}true{% else %}false{% endif %},
-                    description: markdown.render("{{ object.description|default:"No description"|escapejs }}"),
-                    showHistoryMessage: {% if activity_info %}true{% else %} false{% endif %},
-                    note: "{{ object.note|escapejs }}",
-                    relatedExercises: JSON.parse(document.getElementById("related_exercises").textContent),
-                    relatedExercisesFields: [
-                        {
-                            field: "name",
-                            label: "Exercise"
-                        },
-                        {
-                            field: "last_active",
-                            label: "Last Active",
-                        }
-                    ],
-                    frequency: {% if activity_info %}{{ activity_info.0.frequency.days }}{% else %}null{% endif %},
-                }
+            delimiters: ["[[", "]]"],
+            components: {
+                Card,
+                DropDownMenu,
+                EditableTextArea,
+                FontAwesomeIcon,
             },
-            methods: {
-                onClick(evt) {
+            setup() {
+                const isActiveExercise = ref({% if activity_info %}true{% else %}false{% endif %});
+                const description = ref(markdown.render("{{ object.description|default:"No description"|escapejs }}"));
+                const showHistoryMessage = ref({% if activity_info %}true{% else %} false{% endif %});
+                const note = ref("{{ object.note|escapejs }}");
+                const relatedExercises = ref(JSON.parse(document.getElementById("related_exercises").textContent));
+                const relatedExercisesFields = [
+                    {
+                        field: "name",
+                        label: "Exercise",
+                    },
+                    {
+                        field: "last_active",
+                        label: "Last Active",
+                    },
+                ];
+                const frequency = ref({% if activity_info %} {{ activity_info.0.frequency.days }} {% else %} null{% endif %});
+
+                const editableTextArea = ref(null);
+
+                function onClick(evt) {
                     payload = {
-                        "uuid": "{{ object.uuid }}"
+                        "uuid": "{{ object.uuid }}",
                     };
-                    if (this.isActiveExercise) {
+                    if (isActiveExercise) {
                         payload.remove = true;
                     } else {
-                        this.showHistoryMessage = false;
+                        showHistoryMessage.value = false;
                     }
                     doPost(
-                        this,
+                        null,
                         url = "{% url "fitness:change_active_status" %}",
                         payload,
                         (response) => {
-                            this.isActiveExercise = ! this.isActiveExercise;
+                            isActiveExercise.value = !isActiveExercise.value;
                         },
                         "",
-                        ""
+                        "",
                     );
-                },
-                addNote() {
-                    this.$refs.note.editNote(!this.note);
-                },
-                onUpdateNote() {
-                    const note = this.$refs.note.textAreaValue;
+                };
+
+                function addNote() {
+                    editableTextArea.value.editNote(!note.value);
+                };
+
+                function onUpdateNote() {
+                    const noteValue = editableTextArea.value.textAreaValue;
                     doPost(
-                        this,
+                        null,
                         "{% url 'fitness:edit_note' %}",
                         {
                             "uuid": "{{ object.uuid }}",
-                            "note": note,
+                            "note": noteValue,
                         },
                         (response) => {
-                            this.note = note;
+                            note.value = noteValue;
                         },
                         "",
                         "",
                     );
-                },
-                deleteNote() {
-                    this.$refs.note.deleteNote();
-                },
-                onClickSwitchExercise(evt) {
+                };
+
+                function deleteNote() {
+                    editableTextArea.value.deleteNote();
+                };
+
+                function onClickSwitchExercise(evt) {
                     const modal = new Modal("#modalSwitchExercise");
                     modal.show();
-                },
-                onClickChangeFrequency(evt) {
+                };
+
+                function onClickChangeFrequency(evt) {
                     const modal = new Modal("#modalChangeFrequency");
                     modal.show();
-                },
-                changeFrequency(evt) {
-                    const frequency = document.getElementById("frequency").value;
+                };
+
+                function changeFrequency(evt) {
+                    const frequencyNew = document.getElementById("frequency").value;
                     doPost(
-                        this,
+                        null,
                         url = "{% url "fitness:update_frequency" %}",
                         {
                             "uuid": "{{ object.uuid }}",
-                            "frequency": frequency,
+                            "frequency": frequencyNew,
                         }
                         ,
                         (response) => {
-                            this.frequency = frequency;
+                            frequency.value = frequencyNew;
                             const modal = Modal.getInstance(document.getElementById("modalChangeFrequency"));
                             modal.hide();
                             EventBus.$emit(
@@ -537,18 +429,18 @@
                             );
                         },
                         "",
-                        ""
+                        "",
                     );
+                };
 
-                },
-                onSelectRelatedExercise(evt) {
+                function onSelectRelatedExercise(evt) {
                     const uuid = evt.uuid;
                     const name = evt.name;
                     doPost(
-                        this,
-                        url = "{% url "fitness:change_active_status" %}",
+                        null,
+                        "{% url "fitness:change_active_status" %}",
                         {
-                            "uuid": uuid
+                            "uuid": uuid,
                         },
                         (response) => {
                             const modal = Modal.getInstance(document.getElementById("modalSwitchExercise"));
@@ -561,42 +453,73 @@
                             );
 
                             doPost(
-                                this,
-                                url = "{% url "fitness:change_active_status" %}",
+                                null,
+                                "{% url "fitness:change_active_status" %}",
                                 {
                                     "uuid": "{{ object.uuid }}",
-                                    "remove": true
+                                    "remove": true,
                                 },
                                 (response) => {
-                                    this.isActiveExercise = false;
+                                    isActiveExercise.value = false;
                                     EventBus.$emit(
                                         "toast",
                                         {
-                                            "body": `Exercise '{{ object.name }}' is now inactive`,
+                                            "body": "Exercise '{{ object.name }}' is now inactive",
                                         },
                                     );
                                 },
                                 "",
-                                ""
+                                "",
                             );
                         },
                         "",
-                        ""
+                        "",
                     );
-                }
-            },
-            computed: {
-                activeButtonValue: function() {
-                    return this.isActiveExercise ? "Active" : "Activate Exercise"
-                },
-                hideLastWorkoutWeights: function() {
+                };
+
+                const activeButtonValue = computed(() => {
+                    return isActiveExercise.value ? "Active" : "Activate Exercise";
+                });
+
+                const hideLastWorkoutWeights = computed(() => {
                     return {% if latest_weight.0 > 0 %}false{% else %}true{% endif %};
-                },
-                hideLastWorkoutDuration: function() {
+                });
+
+                const hideLastWorkoutDuration = computed(() => {
                     return {% if latest_duration.0 > 0 %}false{% else %}true{% endif %};
-                },
+                });
+
+                return {
+                    activeButtonValue,
+                    addNote,
+                    changeFrequency,
+                    deleteNote,
+                    description,
+                    editableTextArea,
+                    frequency,
+                    hideLastWorkoutWeights,
+                    hideLastWorkoutDuration,
+                    isActiveExercise,
+                    note,
+                    onClick,
+                    onClickChangeFrequency,
+                    onClickSwitchExercise,
+                    onSelectRelatedExercise,
+                    onUpdateNote,
+                    relatedExercises,
+                    relatedExercisesFields,
+                    showHistoryMessage,
+                };
             },
         });
+        appLeft.use(Oruga, {
+            iconComponent: "font-awesome-icon",
+            iconPack: "fa",
+            table: {
+                sortIcon: "caret-up",
+            },
+        });
+        appLeft.mount("#vue-app-left");
 
         /**
          * Get the first workout data from a workout set
@@ -607,7 +530,6 @@
         }
 
         function getGradient(numberOfItems) {
-
             const styles = getComputedStyle(document.body);
 
             if (numberOfItems <= 1) {
@@ -615,7 +537,7 @@
             }
 
             // The Rainbow object is from the RainbowVis-JS package
-            let rainbow = new Rainbow();
+            const rainbow = new Rainbow();
             rainbow.setNumberRange(1, numberOfItems);
             // Use trim() to remove the whitespace preceding the CSS property value
             rainbow.setSpectrum(styles.getPropertyValue("--chart-gradient-start").trim(), styles.getPropertyValue("--chart-gradient-end").trim());
@@ -632,34 +554,33 @@
             ctx.textAlign = "center";
             ctx.textBaseline = "bottom";
             ctx.fillStyle = color;
-            ctx.font="bold 24px Arial";
+            ctx.font = "bold 24px Arial";
             data.datasets.forEach(function(dataset, i) {
-                var meta = chartInstance.chart.getDatasetMeta(i);
+                const meta = chartInstance.chart.getDatasetMeta(i);
                 meta.data.forEach(function(bar, index) {
-                    var data = dataset.data[index];
+                    const data = dataset.data[index];
                     ctx.fillText(data, bar.x, bar.y + 40);
                 });
             });
         }
 
         function getRecentWorkoutGraphOptions(label) {
-
             const styles = getComputedStyle(document.body);
 
             return {
                 events: [], // Disable 'on-hover' events
                 borderRadius: "10",
                 animation: {
-                    onComplete : function(chartInstance) {
+                    onComplete: function(chartInstance) {
                         const ctx = this.ctx;
                         ctx.textAlign = "center";
                         ctx.textBaseline = "bottom";
                         ctx.fillStyle = styles.getPropertyValue("--chart-fill-color");
-                        ctx.font="bold 24px Arial";
+                        ctx.font = "bold 24px Arial";
                         this.data.datasets.forEach(function(dataset, i) {
-                            var meta = chartInstance.chart.getDatasetMeta(i);
+                            const meta = chartInstance.chart.getDatasetMeta(i);
                             meta.data.forEach(function(bar, index) {
-                                var data = dataset.data[index];
+                                const data = dataset.data[index];
                                 ctx.fillText(data, bar.x, bar.y + 40);
                             });
                         });
@@ -667,345 +588,67 @@
                 },
                 plugins: {
                     legend: {
-                        display: false
+                        display: false,
                     },
                     title: {
                         display: true,
                         text: label,
                         color: styles.getPropertyValue("--chart-title-color"),
                         font: {
-                            size: "16px"
-                        }
-                    }
+                            size: "16px",
+                        },
+                    },
                 },
                 scales: {
                     x: {
                         ticks: {
                             color: styles.getPropertyValue("--chart-tick-color"),
-                        }
+                        },
                     },
                     y: {
                         ticks: {
                             color: styles.getPropertyValue("--chart-tick-color"),
-                        }
-                    }
-                }
-            }
-
+                        },
+                    },
+                },
+            };
         }
 
-        const WorkoutGraph = {
-            data() {
-                return {
-                    date: "{% now "Y- m - d" %}",
-                    myChart: null,
-                    paginator: {{ plotdata.paginator | safe }},
-                    plotdata: {{ plotdata.plotdata | safe }},
-                    notes: {{ plotdata.notes | safe }},
-                    currentPlotData: "{{ plotdata.initial_plot }}"
-                };
-            },
-            computed: {
-                has_note: function() {
-                    return this.notes.filter(x => x !== null).length > 0;
-                },
-            },
-            mounted() {
-                const scaleYText = "{{ plotdata.initial_plot|capfirst }}";
-                const styles = getComputedStyle(document.body);
-
-                const ctx = document.getElementById("exercise-detail-chart").getContext("2d");
-                const myChart = new Chart(ctx, {
-                    type: "bar",
-                    data: {
-                        labels: {{ plotdata.labels|safe }},
-                        datasets: [
-                            {
-                                data: this.plotdata[this.currentPlotData].map(firstSet),
-                                barThickness: 40,
-                                backgroundColor: function(context) {
-                                    const chart = context.chart;
-                                    const {ctx, chartArea} = chart;
-
-                                    if (!chartArea) {
-                                        // This case happens on initial chart load
-                                        return;
-                                    }
-                                    // I wish I could re-use plotdata from this Vue component's data() method, but I don't know how to access it. In this function's context 'this' refers to the window object, not the Vue component
-                                    return getGradient({{ plotdata.plotdata|safe }}.{{plotdata.initial_plot}}.length);
-                                },
-                            }
-                        ]
-                    },
-                    options: {
-                        borderRadius: "10",
-                        animation: {
-                            onProgress: function(chartInstance) {
-                                const ctx = this.ctx;
-                                ctx.textAlign = "center";
-                                ctx.textBaseline = "bottom";
-                                ctx.fillStyle = styles.getPropertyValue("--chart-fill-color");
-                                ctx.font="bold 18px Arial";
-                                const self = this;
-                                this.data.datasets.forEach(function(dataset, i) {
-                                    const meta = chartInstance.chart.getDatasetMeta(i);
-                                    meta.data.forEach(function(bar, index) {
-                                        const data = dataset.data[index];
-                                        const note = chartInstance.chart.vueContext.notes[index];
-                                        ctx.fillText(data + (note ? "\n*" : ""), bar.x, bar.y + 30);
-                                    });
-                                });
-                            },
-                        },
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: "Workout Data",
-                                color: styles.getPropertyValue("--chart-title-color"),
-                                font: {
-                                    family: "Lato",
-                                    size: 48,
-                                    weight: "normal",
-                                },
-                            },
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label(tooltipItem) {
-                                        return null;
-                                    },
-                                    title(tooltipItem) {
-                                        const vue = tooltipItem[0].chart.vueContext;
-                                        const currentPlotData = vue.currentPlotData.charAt(0).toUpperCase() + vue.currentPlotData.slice(1);
-                                        const data = vue.plotdata[vue.currentPlotData][tooltipItem[0].dataIndex];
-                                        const note = vue.notes[tooltipItem[0].dataIndex];
-                                        return `${currentPlotData}: ${data}` + (note ? `\nNote: ${note}` : "");
-                                    },
-                                },
-                                titleMarginBottom: 0,
-                                titleFont: {
-                                    size: 18,
-                                },
-                            }
-                        },
-                        scales: {
-                            x: {
-                                grid: {
-                                    color: "#21295c",
-                                },
-                                ticks: {
-                                    color: styles.getPropertyValue("--chart-tick-color"),
-                                    font: {
-                                        family: "Poppins",
-                                        size: 16,
-                                    },
-                                }
-                            },
-                            y: {
-                                grid: {
-                                    color: "#21295c",
-                                },
-                                title: {
-                                    display: true,
-                                    text: scaleYText,
-                                    color: styles.getPropertyValue("--chart-title-color"),
-                                    font: {
-                                        family: "Poppins",
-                                        size: 24,
-                                    },
-                                },
-                                ticks: {
-                                    color: styles.getPropertyValue("--chart-tick-color"),
-                                    font: {
-                                        family: "Poppins",
-                                        size: 16,
-                                    },
-                                }
-                            }
-                        },
-                        font: {
-                            size: 14,
-                        }
-                    }
-                });
-
-                myChart.vueContext = this;
-                this.myChart = myChart;
-
-                let sets = Array.apply(0, Array({{ latest_weight|length }})).map(function(_,b) { return b + 1; });
-                const labels = sets.map(x => `Set ${x}`);
-
-                const ctx_last_workout = document.getElementById("last_workout_weights").getContext("2d");
-                const lastWorkoutChartWeight = new Chart(ctx_last_workout, {
-                    type: "bar",
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                backgroundColor: styles.getPropertyValue("--chart-bg"),
-                                data: {{ latest_weight|safe|default:"''" }},
-                                label: "Weight",
-                            },
-                        ]
-                    },
-                    options: getRecentWorkoutGraphOptions("Weight"),
-                });
-
-                const ctx_last_workout_reps = document.getElementById("last_workout_reps").getContext("2d");
-                const lastWorkoutChartReps = new Chart(ctx_last_workout_reps, {
-                    type: "bar",
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                backgroundColor: styles.getPropertyValue("--chart-bg"),
-                                data: {{ latest_reps|safe|default:"''" }},
-                                label: "Reps",
-                            },
-                        ]
-                    },
-                    options: getRecentWorkoutGraphOptions("Reps"),
-
-                });
-
-                const ctx_last_workout_duration = document.getElementById("last_workout_duration").getContext("2d");
-                const lastWorkoutChartDuration = new Chart(ctx_last_workout_duration, {
-                    type: "bar",
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                backgroundColor: styles.getPropertyValue("--chart-bg"),
-                                data: {{ latest_duration|safe|default:"''" }},
-                                label: "Duration",
-                            },
-                        ]
-                    },
-                    options: getRecentWorkoutGraphOptions("Duration"),
-                });
-
-            },
-            methods: {
-                paginate(direction) {
-                    let pageNumber;
-                    if (direction === "prev") {
-                        pageNumber = this.paginator.previous_page_number;
-                    } else {
-                        pageNumber = this.paginator.next_page_number;
-                    }
-
-                    doGet(
-                        this,
-                        "{% url 'fitness:get_workout_data' %}?uuid={{ object.uuid }}&page_number=" + pageNumber,
-                        (response) => {
-                            this.plotdata = JSON.parse(response.data.workout_data.plotdata);
-                            this.notes = JSON.parse(response.data.workout_data.notes);
-                            this.myChart.data.labels = JSON.parse(response.data.workout_data.labels);
-                            this.myChart.data.datasets[0].data = JSON.parse(response.data.workout_data.plotdata)[this.currentPlotData].map(firstSet);
-                            this.myChart.update();
-                            this.paginator = JSON.parse(response.data.workout_data.paginator);
-                        },
-                        "Error getting workout data",
-                    );
-                },
-                switchPlot(dataset) {
-                    this.currentPlotData = dataset;
-                    this.myChart.data.datasets[0].data = this.plotdata[dataset].map(firstSet);
-                    this.myChart.options.scales.y.title.text = this.capitalizeFirstLetter(dataset);
-                    this.myChart.update();
-                },
-                isDisabled() {
-                    return false;
-                },
-                capitalizeFirstLetter(string) {
-                    return string.charAt(0).toUpperCase() + string.slice(1);
-                }
-            }
-        };
-
-        const AddWorkoutForm = {
-            data() {
-                return {
-                    weight: {% if recent_data %}{{ latest_weight|first|default:0 }}{% else %}0{% endif %},
-                    reps: {% if recent_data %}{{ latest_reps|first|default:0 }}{% else %}0{% endif %},
-                    duration: {% if recent_data %}{{ latest_duration|first|default:0 }}{% else %}0{% endif %},
-                    items: [],
-                    selectedCell: null,
-                    set_count: 0,
-                }
-            },
-            methods: {
-                onBlur(index) {
-                    this.items[index].isEdit = false;
-                },
-                onAddWorkoutData(evt) {
-                    this.set_count += 1;
-                    this.items.push(
-                        {
-                            "index": this.set_count,
-                            "weight": this.weight,
-                            "duration": this.duration,
-                            "reps": this.reps
-                        }
-                    );
-                },
-                editCellHandler(index, name) {
-                    this.items = this.items.map(item => ({...item, isEdit: false}));
-                    this.items[index].isEdit = true;
-                    this.selectedCell = name
-                }
-            },
-            computed: {
-                workoutDataJson() {
-                    return JSON.stringify(this.items);
-                },
-                submitIsHidden() {
-                    return this.items.length === 0;
-                },
-                addIsDisabled() {
-                    return this.weight == 0 && this.duration == 0 && this.reps == 0;
-                }
-            }
-        };
-
-        new Vue({
-            el: "#vue-app-right",
-            name: "Right Panel",
+        const appRight = createApp({
+            name: "RightPanel",
+            delimiters: ["[[", "]]"],
             components: {
                 AddWorkoutForm,
+                Card,
                 WorkoutGraph,
             },
-            data() {
-                return {
-                    restPeriod: {% if activity_info %}{{ activity_info.0.rest_period|default:3 }}{% else %}null{% endif %},
-                    timer: null,
-                };
-            },
-            methods: {
-                onChangeRestPeriod() {
+            setup() {
+                const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+                const restPeriod = ref({% if activity_info %}{{ activity_info.0.rest_period|default:3 }}{% else %}null{% endif %});
+                const timer = ref({});
+
+                function onChangeRestPeriod() {
                     doPost(
-                        this,
+                        null,
                         url = "{% url "fitness:update_rest_period" %}",
                         {
                             "uuid": "{{ object.uuid }}",
-                            "rest_period": this.restPeriod,
+                            "rest_period": restPeriod.value,
                         }
                         ,
                         (response) => {},
                         "Rest period changed",
-                        ""
+                        "",
                     );
-                },
-                onStartTimer() {
-                    const currentDate = new Date()
-                    this.timer = new Date(currentDate.getTime() + this.restPeriod * 60000);
-                    const timeinterval = setInterval(() => {
+                };
 
-                        const total = Date.parse(this.timer) - Date.parse(new Date());
-                        const seconds = Math.floor( (total/1000) % 60 );
-                        const minutes = Math.floor( (total/1000/60) % 60 );
+                function onStartTimer() {
+                    const currentDate = new Date();
+                    timer.value = new Date(currentDate.getTime() + restPeriod.value * 60000);
+                    const timeinterval = setInterval(() => {
+                        const total = Date.parse(timer.value) - Date.parse(new Date());
+                        const seconds = Math.floor((total / 1000) % 60);
+                        const minutes = Math.floor((total / 1000 / 60) % 60);
 
                         if (minutes < 1) {
                             document.getElementById("timer").innerHTML = `<strong>${seconds}</strong> seconds`;
@@ -1020,9 +663,25 @@
                             modal.show();
                         }
                     }, 1000);
-                }
-            }
+                };
+
+                return {
+                    csrfToken,
+                    onChangeRestPeriod,
+                    onStartTimer,
+                    restPeriod,
+                    timer,
+                };
+            },
         });
+        appRight.use(Oruga, {
+            iconComponent: "font-awesome-icon",
+            iconPack: "fa",
+            table: {
+                sortIcon: "caret-up",
+            },
+        });
+        appRight.mount("#vue-app-right");
 
     </script>
 
