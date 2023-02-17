@@ -289,3 +289,12 @@ new Promise((resolve, reject) => {
 
     node.addEventListener("animationend", handleAnimationEnd, {once: true});
 });
+
+/**
+ * Capitalize the first letter of a string (usually a word)
+ * @param {string} string the string
+ * @return {string} the transformed string
+ */
+export function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+};
