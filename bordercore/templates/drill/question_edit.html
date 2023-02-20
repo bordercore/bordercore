@@ -138,41 +138,49 @@
 
     <script type="text/javascript">
 
-        new Vue({
-            el: "#vue-app",
+        const app = createApp({
             name: "EditQuestion",
-            data() {
-                return {
-                    enableDeleteButton: {% if object.uuid %}true{% else %}false{% endif %},
-            newQuestion: {% if action == "Add" %}true{% else %} false{% endif %},
-                        answer: "{{ object.answer|default:form.answer.value|default_if_none:""|escapejs }}",
-                            question: "{{ object.question|default:form.question.value|default_if_none:""|escapejs }}",
-                };
+            components: {
+                Card,
+                ObjectSelect,
+                RelatedObjects,
+                TagsInput,
             },
-            methods: {
-                onKeyUp(evt) {
-                    if (evt.key !== "Tab") {
+            setup() {
+                const enableDeleteButton = ref({% if object.uuid %} true{% else %}false{% endif %});
+                const newQuestion = ref({% if action == "Add" %} true{% else %} false{% endif %});
+                const answer = ref("{{ object.answer|default:form.answer.value|default_if_none:""|escapejs }}");
+                const question = ref("{{ object.question|default:form.question.value|default_if_none:""|escapejs }}");
+
+                const mdEditorAnswer = ref(null);
+                const mdEditorQuestion = ref(null);
+                const relatedObjectsList = ref(null);
+                const tagsInput = ref(null);
+
+                    function onKeyUp(evt) {
+                        if (evt.key !== "Tab") {
                         return;
                     }
-                    if (evt.srcElement == this.$refs.mdEditorQuestion.$el.querySelector("textarea")) {
-                        this.$refs.mdEditorAnswer.$el.querySelector("textarea").focus();
-                    } else if (evt.srcElement == this.$refs.mdEditorAnswer.$el.querySelector("textarea")) {
+                    if (evt.srcElement == mdEditorQuestion.$el.querySelector("textarea")) {
+                        mdEditorAnswer.$el.querySelector("textarea").focus();
+                    } else if (evt.srcElement == mdEditorAnswer.$el.querySelector("textarea")) {
                         if (evt.shiftKey) {
-                            this.$refs.mdEditorQuestion.$el.querySelector("textarea").focus();
+                            mdEditorQuestion.$el.querySelector("textarea").focus();
                         } else {
                             document.querySelector("#id_tags input").focus();
                         }
                     } else if (evt.srcElement == document.querySelector("#id_tags li")) {
                         if (evt.shiftKey) {
-                            this.$refs.mdEditorAnswer.$el.querySelector("textarea").focus();
+                            mdEditorAnswer.$el.querySelector("textarea").focus();
                         }
                     }
-                },
-                onClickEdit() {
+                };
+
+                function onClickEdit() {
                     const form = document.getElementById("question-form");
 
                     objectInfo = [];
-                    this.$refs.relatedObjectsList.objectList.forEach((x) => {
+                    relatedObjectsList.value.objectList.forEach((x) => {
                         objectInfo.push(
                             {
                                 "uuid": x.uuid,
@@ -185,39 +193,68 @@
                     // Add the 'name' attribute and contents to the internal
                     // textarea used by v-md-editor, which will then
                     // be submitted with the rest of the form.
-                    const questionEl = this.$refs.mdEditorQuestion.$el.querySelector("textarea");
+                    const questionEl = mdEditorQuestion.value.$el.querySelector("textarea");
                     questionEl.setAttribute("name", "question");
-                    questionEl.setAttribute("value", this.question);
+                    questionEl.setAttribute("value", question);
 
                     // Add the 'name' attribute and contents to the internal
                     // textarea used by v-md-editor, which will then
                     // be submitted with the rest of the form.
-                    const answerEl = this.$refs.mdEditorAnswer.$el.querySelector("textarea");
+                    const answerEl = mdEditorAnswer.value.$el.querySelector("textarea");
                     answerEl.setAttribute("name", "answer");
-                    answerEl.setAttribute("value", this.answer);
+                    answerEl.setAttribute("value", answer);
 
                     form.submit();
-                },
+                };
+
                 {% if object.uuid %}
-                onClickDelete() {
+                function onClickDelete() {
                     const form = document.getElementById("question-form");
                     form.action = "{% url 'drill:delete' object.uuid %}";
                     form.submit();
-                },
+                };
                 {% endif %}
-                onClickTag(tagName) {
-                    let tagList = document.getElementsByName("tags")[0].value.split(",");
+
+                function onClickTag(tagName) {
+                    const tagList = document.getElementsByName("tags")[0].value.split(",");
                     // Ignore if we've already added this tag
                     if (tagList.includes(tagName)) {
                         return;
                     }
-                    this.$refs.tagsInput.addTag(tagName);
-                },
-                selectObject(bcObject) {
-                    this.$refs.relatedObjectsList.addObject(bcObject);
-                }
+                    tagsInput.value.addTag(tagName);
+                };
+
+                function selectObject(bcObject) {
+                    relatedObjectsList.value.addObject(bcObject);
+                };
+
+                return {
+                    answer,
+                    enableDeleteButton,
+                    mdEditorAnswer,
+                    mdEditorQuestion,
+                    newQuestion,
+                    {% if object.uuid %}
+                    onClickDelete,
+                    {% endif %}
+                    onClickEdit,
+                    onClickTag,
+                    question,
+                    relatedObjectsList,
+                    selectObject,
+                    tagsInput,
+                };
             },
         });
+        app.use(Oruga, {
+            iconComponent: "font-awesome-icon",
+            iconPack: "fa",
+            table: {
+                sortIcon: "caret-up",
+            },
+        });
+        app.use(VueMarkdownEditor);
+        app.mount("#vue-app");
 
     </script>
 

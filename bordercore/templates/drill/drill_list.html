@@ -4,9 +4,9 @@
 
 {% block content %}
 
-    <div class="row g-0 h-100 mx-2">
+    <div id="vue-app" class="row g-0 h-100 mx-2">
 
-        <div class="col-lg-3 d-flex flex-column" id="vue-app-left">
+        <div class="col-lg-3 d-flex flex-column">
 
             <div class="card-body backdrop-filter flex-grow-1">
 
@@ -54,7 +54,7 @@
 
         </div>
 
-        <div class="col-lg-3 d-flex flex-column" id="vue-app-progress">
+        <div class="col-lg-3 d-flex flex-column">
 
             <card title="Total Progress" class="backdrop-filter">
                 <template v-slot:content>
@@ -65,7 +65,7 @@
                         </div>
                         <drill-tag-progress
                             :count={{ total_progress.count }}
-                                   :progress={{ total_progress.percentage }}
+                            :progress={{ total_progress.percentage }}
                         >
                         </drill-tag-progress>
                     </div>
@@ -79,7 +79,10 @@
                         <div class="d-flex justify-content-center align-items-center">
                             Percentage of favorite questions not needing review
                         </div>
-                        <drill-tag-progress :count={{ favorite_questions_progress.count }} :progress={{ favorite_questions_progress.percentage }}>
+                        <drill-tag-progress
+                            :count={{ favorite_questions_progress.count }}
+                            :progress={{ favorite_questions_progress.percentage }}
+                        >
                         </drill-tag-progress>
                     </div>
                 </template>
@@ -87,7 +90,7 @@
 
         </div>
 
-        <div class="col-lg-3 d-flex flex-column" id="vue-app-tag-search">
+        <div class="col-lg-3 d-flex flex-column">
 
             <card title="Tags needing review" class="backdrop-filter flex-grow-1">
 
@@ -132,14 +135,14 @@
                         </div>
                         <drop-down-menu :show-on-hover="true">
                             <font-awesome-icon icon="ellipsis-v"></font-awesome-icon>
-                            <div slot="dropdown">
+                            <template #dropdown>
                                 <li>
                                     <a class="dropdown-item" href="#" @click="chooseTag()">
                                         <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>
-                                            Manage Tags
+                                            Pinned Tags
                                     </a>
                                 </li>
-                            </div>
+                            </template>
                         </drop-down-menu>
                     </div>
                 </template>
@@ -147,7 +150,7 @@
                 <template v-slot:content>
                     <hr class="divider" />
                     <ul class="list-unstyled">
-                        <li v-for="tag in $store.state.tagList" class="d-flex px-2">
+                        <li v-for="tag in tagList" class="d-flex px-2">
                             <div class="item-name flex-fill">
                                 <a :href="tag.url">[[ tag.name ]]</a>
                             </div>
@@ -155,29 +158,29 @@
                                 [[ tag.progress ]]%
                             </div>
                         </li>
-                        <li v-if="!$store.state.tagList.length">
+                        <li v-if="!tagList.length">
                             <a href="#" @click="chooseTag()">Add a tag</a>
                         </li>
                     </ul>
                 </template>
             </card>
 
-            <card class="backdrop-filter flex-grow-1" id="vue-app-featured-tag">
+            <card class="backdrop-filter flex-grow-1">
                 <template v-slot:title-slot>
                     <div class="d-flex">
                         <div v-if="showFeaturedTagInput" class="me-3 mb-0">
                             <select-value
-                                ref="selectValue"
+                                ref="selectValueFeaturedTag"
                                 search-url="{% url 'tag:search' %}?doctype=drill&query="
                                 place-holder="Tag"
-                                @select="select"
+                                @select="selectFeaturedTag"
                                 @close="showFeaturedTagInput = false"
                                 :bolden-options="true"
                             >
                             </select-value>
                         </div>
                         <h5 v-else class="lh-base mb-0">
-                            <span class="card-title">Featured Tag:</span> <a :href="tag.url">[[ tag.name ]]</a>
+                            <span class="card-title">Featured Tag:</span> <a :href="featuredTag.url">[[ featuredTag.name ]]</a>
                         </h5>
                         <div class="ms-auto" @click="onTagSearch">
                             <font-awesome-icon icon="search" class="glow text-emphasis" />
@@ -189,19 +192,19 @@
                     <div class="d-flex">
                         <div class="flex-grow-1 d-flex justify-content-center align-items-center">
                             <ul class="list-unstyled">
-                                <li>Last Reviewed <br/> <strong>[[ tag.last_reviewed ]]</strong></li>
+                                <li>Last Reviewed <br/> <strong>[[ featuredTag.last_reviewed ]]</strong></li>
                             </ul>
                         </div>
                         <drill-tag-progress
-                            :count=tag.count
-                            :progress=tag.progress
+                            :count=featuredTag.count
+                            :progress=featuredTag.progress
                         >
                         </drill-tag-progress>
                     </div>
                 </template>
             </card>
 
-            <div id="vue-app-manage-tags" class="modal fade" id="modalAddTag" tabindex="-1" role="dialog">
+            <div class="modal fade" id="modalAddTag" tabindex="-1" role="dialog">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -212,31 +215,32 @@
                             <div class="form-row align-items-center">
                                 <div class="form-row mx-1 w-100">
                                     <select-value
-                                        ref="selectValue"
+                                        ref="selectValuePinnedTag"
                                         search-url="{% url 'tag:search' %}?doctype=drill&query="
                                         place-holder="Add Tag"
+                                        @select="selectPinnedTag"
                                     >
                                     </select-value>
                                 </div>
                             </div>
                             <ul class="list-unstyled p-2 mb-0 wide-list">
-                                <draggable v-model="$store.state.tagList" @change="onDrag">
-                                    <transition-group type="transition">
-                                        <li v-for="tag in $store.state.tagList" :key="tag.name" class="px-2 py-1">
+                                <draggable v-model="tagList" @change="onDrag" :component-data="{type:'transition-group'}" item-key="name">
+                                    <template #item="{element}">
+                                        <li :key="element.name" class="px-2 py-1">
                                             <div class="d-flex">
                                                 <div>
-                                                    [[ tag.name ]]
+                                                    [[ element.name ]]
                                                 </div>
                                                 <div class="ms-auto my-auto">
-                                                    <font-awesome-icon icon="times-circle" class="list-delete" @click="onClickDelete(tag.name)" />
+                                                    <font-awesome-icon icon="times-circle" class="list-delete" @click="onClickDelete(element.name)" />
                                                 </div>
                                             </div>
                                         </li>
-                                    </transition-group>
+                                    </template>
                                 </draggable>
                             </ul>
-                            </div>
-                            <div class="modal-footer justify-content-start">
+                        </div>
+                        <div class="modal-footer justify-content-start">
                             <input class="btn btn-primary" type="button" value="Done" data-bs-dismiss="modal" />
                         </div>
                     </div>
@@ -245,82 +249,74 @@
 
         </div>
 
-    </div>
-
-    <div class="modal fade" id="modal-study" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="myModalLabel">Start Study Session</h4>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-
-                    <h5>
-                        Choose your study method
-                        <hr />
-                    </h5>
-
-                    <div class="form-check d-flex align-items-center mt-3">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" value="all" v-model="picked">
-                        <label class="form-check-label ms-2" for="flexRadioDefault1">
-                            All questions
-                        </label>
+        <div class="modal fade" id="modal-study" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="myModalLabel">Start Study Session</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-
-                    <div class="form-check d-flex align-items-center mt-3">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" value="favorites" v-model="picked">
-                        <label class="form-check-label ms-2" for="flexRadioDefault1">
-                            Favorite questions
-                        </label>
-                    </div>
-
-                    <div class="form-check d-flex align-items-center mt-3">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" value="tag-needing-review" v-model="picked">
-                        <label class="form-check-label ms-2 d-flex align-items-center" for="flexRadioDefault1">
-                            <div class="me-4">Tag</div>
-                            <tags-input
-                                class-list=""
-                                search-url="{% url 'tag:search' %}?doctype=drill&query="
-                                id="tag-name"
-                                place-holder="Tag name"
-                            ></tags-input>
-                        </label>
-                    </div>
-
-                    <div class="form-check d-flex align-items-center mt-3">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" value="random" v-model="picked">
-                        <label class="form-check-label ms-2 d-flex align-items-center" for="flexRadioDefault1">
-                            <div class="me-3">Random questions, count of</div>
-                            <select class="form-control form-select" id="study-random-count">
-                                <option value="5">5</option>
-                                <option value="10">10</option>
-                                <option value="20">20</option>
-                                <option value="100">100</option>
-                            </select>
-                        </label>
-                    </div>
-
-                    <div class="form-check d-flex align-items-center mt-3">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" value="search" v-model="picked">
-                        <label class="form-check-label ms-2 d-flex align-items-center" for="flexRadioDefault1">
-                            <div class="me-3">Questions matching search</div>
-                            <input class="form-control" id="search-term" placeholder="Search term" autocomplete="off" />
-                        </label>
-                    </div>
-
-                    <hr />
-                    <div class="d-flex align-items-center my-3">
-                        <div class="me-3">
-                            Filter
+                    <div class="modal-body">
+                        <h5>
+                            Choose your study method
+                            <hr />
+                        </h5>
+                        <div class="form-check d-flex align-items-center mt-3">
+                            <input id="id_studymethod_all" class="form-check-input" type="radio" value="all" v-model="studyMethod">
+                            <label class="form-check-label ms-2" for="id_studymethod_all">
+                                All questions
+                            </label>
                         </div>
-                        <select class="form-control form-select" id="question-filter">
-                            <option value="review" selected>Questions needing review</option>
-                            <option value="all">All questions</option>
-                        </select>
+                        <div class="form-check d-flex align-items-center mt-3">
+                            <input id="id_studymethod_favorites" class="form-check-input" type="radio" value="favorites" v-model="studyMethod">
+                            <label class="form-check-label ms-2" for="id_studymethod_favorites">
+                                Favorite questions
+                            </label>
+                        </div>
+                        <div class="form-check d-flex align-items-center mt-3">
+                            <input id="id_studymethod_tagsneedingreview" class="form-check-input" type="radio" value="tag-needing-review"
+                                v-model="studyMethod">
+                            <label class="form-check-label ms-2 d-flex align-items-center" for="id_studymethod_tagsneedingreview">
+                                <div class="me-4">Tag</div>
+                                <tags-input
+                                    class-list=""
+                                    search-url="{% url 'tag:search' %}?doctype=drill&query="
+                                    id="tag-name"
+                                    place-holder="Tag name"
+                                ></tags-input>
+                            </label>
+                        </div>
+                        <div class="form-check d-flex align-items-center mt-3">
+                            <input id="id_studymethod_random" class="form-check-input" type="radio" value="random" v-model="studyMethod">
+                            <label class="form-check-label ms-2 d-flex align-items-center" for="id_studymethod_random">
+                                <div class="me-3">Random questions, count of</div>
+                                <select class="form-control form-select" id="study-random-count">
+                                    <option value="5">5</option>
+                                    <option value="10">10</option>
+                                    <option value="20">20</option>
+                                    <option value="100">100</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="form-check d-flex align-items-center mt-3">
+                            <input id="id_studymethod_search" class="form-check-input" type="radio" value="search" v-model="studyMethod">
+                            <label class="form-check-label ms-2 d-flex align-items-center" for="id_studymethod_search">
+                                <div class="me-3">Questions matching search</div>
+                                <input class="form-control" id="search-term" placeholder="Search term" autocomplete="off" />
+                            </label>
+                        </div>
+                        <hr />
+                        <div class="d-flex align-items-center my-3">
+                            <div class="me-3">
+                                Filter
+                            </div>
+                            <select class="form-control form-select" id="question-filter">
+                                <option value="review" selected>Questions needing review</option>
+                                <option value="all">All questions</option>
+                            </select>
+                        </div>
+                        <a href="#" type="button" class="btn btn-primary mt-2" @click.prevent="onClickStudy">Study</a>
                     </div>
-
-                    <a id="start-study-session" href="#" type="button" class="btn btn-primary mt-2" @click="onClick">Study</a>
                 </div>
             </div>
         </div>
@@ -336,195 +332,176 @@
 
     <script type="text/javascript" charset="utf-8">
 
-        const store = new Vuex.Store({
-            state: {
-                tagList: [],
+        const app = createApp({
+            name: "DrillDashboard",
+            delimiters: ["[[", "]]"],
+            components: {
+                Card,
+                draggable,
+                DrillTagProgress,
+                DropDownMenu,
+                FontAwesomeIcon,
+                SelectValue,
+                TagsInput,
             },
-            getters: {},
-            mutations: {},
-        });
+            setup() {
+                const featuredTag = ref({{ random_tag|safe }});
+                const showFeaturedTagInput = ref(false);
+                const studyMethod = ref("all");
+                const tagList = ref([]);
 
-        new Vue({
-            el: "#vue-app-left",
-            name: "Left Panel",
-        });
+                const selectValueFeaturedTag = ref(null);
+                const selectValuePinnedTag = ref(null);
 
-        new Vue({
-            el: "#vue-app-progress",
-            name: "Tag Progress",
-        });
-
-        new Vue({
-            el: "#vue-app-tag-search",
-            name: "Tag Search",
-        });
-
-        new Vue({
-            el: "#vue-app-pinned-tags",
-            name: "Pinned Tags",
-            store,
-            data() {
-                return {
-                    show: false,
-                    interactive: true,
-                    showDropDownMenu: true,
-                }
-            },
-            methods: {
-                getTagList() {
+                function getTagList() {
                     doGet(
-                        this,
+                        null,
                         "{% url "drill:get_pinned_tags" %}",
                         (response) => {
-                            this.$store.state.tagList = response.data.tag_list;
+                            tagList.value = response.data.tag_list;
                         },
-                        "Error getting pinned tags"
+                        "Error getting pinned tags",
                     );
-                },
-                chooseTag() {
+                };
+
+                function chooseTag() {
                     EventBus.$emit("open-manage-tags-modal");
-                },
-                addTag(tag) {
+                };
+
+                function addTag(tag) {
                     doPost(
-                        this,
+                        null,
                         "{% url "drill:pin_tag" %}",
                         {
-                            "tag": tag
+                            "tag": tag,
                         },
                         (response) => {
-                            this.getTagList();
+                            getTagList();
                         },
                         "",
-                        ""
+                        "",
                     );
+                };
 
-                },
-            },
-            mounted() {
-                EventBus.$on("add-tag", payload => {
-                    this.addTag(payload);
-                });
-                EventBus.$on("get-tag-list", () => {
-                    this.getTagList();
-                });
-
-                this.getTagList();
-            }
-        });
-
-         new Vue({
-             el: "#vue-app-manage-tags",
-             name: "Manage Tags",
-             store,
-             methods: {
-                 onClickDelete(tag_name) {
+                 function onClickDelete(tagName) {
                     doPost(
-                        this,
+                        null,
                         url = "{% url "drill:unpin_tag" %}",
                         {
-                            "tag": tag_name,
+                            "tag": tagName,
                         },
                         (response) => {
                             EventBus.$emit("get-tag-list");
                         },
                         "",
-                        ""
+                        "",
                     );
-                 },
-                 onDrag(evt) {
-                     tag_name = evt.moved.element.name;
+                 };
+
+                function onClickStudy() {
+                    const filter = document.getElementById("question-filter").value;
+                    if (studyMethod.value === "all") {
+                        window.location = "{% url 'drill:start_study_session' 'all' %}?filter=" + filter;
+                    } else if (studyMethod.value === "favorites") {
+                        window.location = "{% url 'drill:start_study_session' 'favorites' %}?filter=" + filter;
+                    } else if (studyMethod.value === "tag-needing-review") {
+                        const tag = document.getElementsByName("tags")[0].value;
+                        if (tag) {
+                            window.location = "{% url 'drill:start_study_session_tag' 666 %}?filter=".replace(/666/, tag) + filter;
+                        }
+                    } else if (studyMethod.value === "learning") {
+                        window.location = "{% url 'drill:start_study_session' 'learning' %}";
+                    } else if (studyMethod.value === "random") {
+                        const count = document.getElementById("study-random-count").value;
+                        window.location = "{% url 'drill:start_study_session_random' 666 %}?filter=".replace(/666/, count) + filter;
+                    } else if (studyMethod.value === "search") {
+                        const searchTerm = document.getElementById("search-term").value;
+                        if (searchTerm) {
+                            window.location = "{% url 'drill:start_study_session_search' 666 %}?filter".replace(/666/, search_term) + filter;
+                        }
+                    }
+                };
+
+                function onDrag(evt) {
+                    const tagName = evt.moved.element.name;
 
                     // The backend expects the ordering to begin
                     // with 1, not 0, so add 1.
-                    new_position = evt.moved.newIndex + 1;
+                    const newPosition = evt.moved.newIndex + 1;
 
                     doPost(
-                        this,
+                        null,
                         "{% url "drill:sort_pinned_tags" %}",
                         {
-                            "tag_name": tag_name,
-                            "new_position": new_position,
+                            "tag_name": tagName,
+                            "new_position": newPosition,
                         },
                         () => {},
                         "",
                         "",
                     );
-                 },
-                 select(selection) {
-                     EventBus.$emit("add-tag", selection.label);
+                };
 
-                     this.$nextTick(() => {
-                         this.$refs.selectValue.$refs.multiselect.$el.querySelector("input").blur();
-                         this.$refs.selectValue.clearOptions();
+                function onTagSearch() {
+                    showFeaturedTagInput.value = true;
+                    setTimeout( () => {
+                        selectValueFeaturedTag.value.focus();
+                    }, 500);
+                };
+
+                function selectPinnedTag(selection) {
+                    EventBus.$emit("add-tag", selection.label);
+
+                     nextTick(() => {
+                         selectValuePinnedTag.value.clearOptions();
                      });
-                 },
-             },
-             mounted() {
-                 EventBus.$on("open-manage-tags-modal", (payload) => {
-                    const modal = new Modal("#vue-app-manage-tags");
-                    modal.show();
-                    setTimeout(() => { this.$refs.selectValue.$refs.multiselect.$el.focus(); }, 500)
-                });
-             }
-         });
+                };
 
-        new Vue({
-            el: "#vue-app-featured-tag",
-            name: "Featured Tag",
-            data() {
+                function selectFeaturedTag(tagInfo) {
+                    showFeaturedTagInput.value = false;
+                    featuredTag.value = tagInfo.info;
+                };
+
+                onMounted(() => {
+                    EventBus.$on("open-manage-tags-modal", (payload) => {
+                        const modal = new Modal("#modalAddTag");
+                        modal.show();
+                            setTimeout(() => {
+                                selectValuePinnedTag.value.focus();
+                            }, 500);
+                    });
+
+                    EventBus.$on("add-tag", (payload) => {
+                        addTag(payload);
+                    });
+
+                    EventBus.$on("get-tag-list", () => {
+                        getTagList();
+                    });
+
+                    getTagList();
+                });
+
                 return {
-                    showFeaturedTagInput: false,
-                    tag: {{ random_tag | safe }}
+                    addTag,
+                    chooseTag,
+                    featuredTag,
+                    getTagList,
+                    onClickDelete,
+                    onClickStudy,
+                    onDrag,
+                    onTagSearch,
+                    selectFeaturedTag,
+                    selectPinnedTag,
+                    selectValueFeaturedTag,
+                    selectValuePinnedTag,
+                    showFeaturedTagInput,
+                    studyMethod,
+                    tagList,
                 };
             },
-            methods: {
-                select(tagInfo) {
-                    this.showFeaturedTagInput = false;
-                    this.tag = tagInfo.info;
-                },
-                onTagSearch() {
-                    this.showFeaturedTagInput = true;
-                    setTimeout( () => {
-                        const el = document.getElementById("vue-app-featured-tag");
-                        el.querySelector("input").focus();
-                    }, 100);
-                }
-            },
         });
-
-        new Vue({
-            el: "#modal-study",
-            data() {
-                return {
-                    picked: "all"
-                }
-            },
-            methods: {
-                onClick() {
-                    const filter = document.getElementById("question-filter").value;
-                    if (this.picked === "all") {
-                        window.location = "{% url 'drill:start_study_session' 'all' %}?filter=" + filter;
-                    } else if (this.picked === "favorites") {
-                        window.location = "{% url 'drill:start_study_session' 'favorites' %}?filter=" + filter;
-                    } else if (this.picked === "tag-needing-review") {
-                        const tag = document.getElementsByName("tags")[0].value;
-                        if (tag) {
-                            window.location = "{% url 'drill:start_study_session_tag' 666 %}?filter=".replace(/666/, tag) + filter;
-                        }
-                    } else if (this.picked === "learning") {
-                        window.location = "{% url 'drill:start_study_session' 'learning' %}";
-                    } else if (this.picked === "random") {
-                        const count = document.getElementById("study-random-count").value;
-                        window.location = "{% url 'drill:start_study_session_random' 666 %}?filter=".replace(/666/, count) + filter;
-                    } else if (this.picked === "search") {
-                        const search_term = document.getElementById("search-term").value;
-                        if (search_term) {
-                            window.location = "{% url 'drill:start_study_session_search' 666 %}?filter".replace(/666/, search_term) + filter;
-                        }
-                    }
-                }
-            }
-        });
+        app.mount("#vue-app");
 
     </script>
 

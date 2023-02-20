@@ -134,7 +134,7 @@
                      <a href="{% url 'drill:study' %}" class="btn btn-primary ms-2" role="button">Skip</a>
                      <div class="dropdown-menu-container dropdown-menu-container-width ms-auto">
                          <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
-                             <div slot="dropdown">
+                             <template #dropdown>
                                  <li>
                                      <a class="dropdown-item" href="{% url 'drill:update' question.uuid %}?return_url={{ request.get_full_path }}">
                                          <span>
@@ -143,7 +143,7 @@
                                         Update
                                      </a>
                                  </li>
-                             </div>
+                             </template>
                          </drop-down-menu>
                      </div>
                  </div>
@@ -208,149 +208,182 @@
             },
         };
 
-        const store = new Vuex.Store({
-            state: {
-                showPythonConsole: false,
-            },
-            getters: {},
-            mutations: {},
-        });
-
-        new Vue({
-            el: "#vue-nav",
+        const navApp = createApp({
             name: "Nav",
-            store,
-            data() {
-                return {
-                    is_favorite: {{ question.is_favorite|yesno:"true,false" }},
-                }
+            components: {
+                FontAwesomeIcon,
             },
-            computed: {
-                favoriteClass: function() {
-                    return this.is_favorite ? "favorite" : "";
-                },
-                toolTip: function() {
-                    return this.is_favorite ? "Remove this as a favorite" : "Add this as a favorite";
-                },
-            },
-            methods: {
-                onClickFavorite(evt) {
-                    this.is_favorite = !this.is_favorite;
-                    this.$nextTick(() => {
+            setup() {
+                const isFavorite = ref({{ question.is_favorite|yesno:"true,false" }});
+
+                function onClickFavorite(evt) {
+                    isFavorite.value = !isFavorite.value;
+                    nextTick(() => {
                         animateCSS(evt.currentTarget, "heartBeat");
                     });
                     doPost(
-                        this,
+                        null,
                         "{% url "drill:is_favorite_mutate" %}",
                         {
                             "question_uuid": "{{ question.uuid }}",
-                            "mutation": this.is_favorite ? "add" : "delete",
+                            "mutation": isFavorite.value ? "add" : "delete",
                         },
                         (response) => {},
                         "",
                     );
-                },
-                showPythonConsole() {
-                    this.$store.state.showPythonConsole = true;
-                    EventBus.$emit("show-python-console", this.$store.state.showPythonConsole);
-                }
-            }
-        });
+                };
 
-        new Vue({
-            el: "#vue-app",
-            name: "Question",
-            store,
-            data() {
+                function showPythonConsole() {
+                    drillStore.commit("updateShowPythonConsole", true);
+                    EventBus.$emit("show-python-console");
+                };
+
+                const favoriteClass = computed(() => {
+                    return isFavorite.value ? "favorite" : "";
+                });
+
+                const toolTip = computed(() => {
+                    return isFavorite.value ? "Remove this as a favorite" : "Add this as a favorite";
+                });
+
                 return {
-                    intervals: {{ intervals|safe }},
-                    intervalString: "",
-                    mode: "question",
+                    isFavorite,
+                    favoriteClass,
+                    onClickFavorite,
+                    showPythonConsole,
+                    toolTip,
                 };
             },
-            mounted() {
+        });
+        navApp.use(drillStore);
+        navApp.mount("#vue-nav");
 
-                let self = this;
-
-                hotkeys.filter = function(event) {
-                    // By default hotkeys filters form elements. Eliminate that
-                    // filter so we can capture ctrl-return events from
-                    // the Python console textarea.
-                    return true;
-                }
-
-                hotkeys("ctrl+return,right,space,e,g,h,r", function (event, handler) {
-                    // Ignore event if the user is typing in an "INPUT" element
-                    if (document.activeElement.tagName === "INPUT") {
-                        return;
-                    }
-                    if (event.target.parentElement.classList.contains("code-input")) {
-                        if (handler.key === "ctrl+return") {
-                            self.$refs.pythonConsole.evaluatePython();
-                        }
-                        return;
-                    }
-                    switch (handler.key) {
-                        case "right":
-                            window.location = "{% url "drill:study" %}";
-                            break;
-                        case "space":
-                            self.setMode("answer");
-                            break;
-                        case "e":
-                            if (self.mode === "answer") {
-                                window.location = "{% url 'drill:record_response' question.uuid 'easy' %}";
-                            }
-                            break;
-                        case "g":
-                            if (self.mode === "answer") {
-                                window.location = "{% url 'drill:record_response' question.uuid 'good' %}";
-                            }
-                            break;
-                        case "h":
-                            if (self.mode === "answer") {
-                                window.location = "{% url 'drill:record_response' question.uuid 'hard' %}";
-                            }
-                            break;
-                        case "r":
-                            if (self.mode === "answer") {
-                                window.location = "{% url 'drill:record_response' question.uuid 'again' %}";
-                            }
-                            break;
-                    }
-                });
-
-                EventBus.$on("show-python-console", (payload) => {
-                    this.$refs.pythonConsole.initialize();
-                });
-
+        const app = createApp({
+            name: "Question",
+            components: {
+                Card,
+                DrillTagProgress,
+                DropDownMenu,
+                FontAwesomeIcon,
+                ObjectSelect,
+                PythonConsole,
+                RelatedObjects,
+                RelatedTags,
             },
-            methods: {
-                onMouseOutResponse(response) {
-                    this.intervalString = "";
-                },
-                onMouseOverResponse(response) {
-                    this.intervalString = this.intervals[response]["description"];
-                },
-                setMode(mode) {
-                    this.mode = mode;
-                    this.$nextTick(() => {
-                        MathJax.typeset();
+            setup() {
+                const intervalString = ref("");
+                const intervals = ref({{ intervals|safe }});
+                const mode = ref("question");
+
+                const pythonConsole = ref(null);
+                    const relatedObjectsList = ref(null);
+
+                function onMouseOutResponse(response) {
+                    intervalString.value = "";
+                };
+
+                function onMouseOverResponse(response) {
+                    intervalString.value = intervals.value[response]["description"];
+                };
+
+                function setMode(modeParam) {
+                    mode.value = modeParam;
+                    nextTick(() => {
+                        MathJax.typeset;
                         Prism.highlightAll();
                     });
-                },
-                getQuestion() {
-                    return markdown.render("{{ question.question|escapejs }}");
-                },
-                getAnswer() {
-                    return markdown.render("{{ question.answer|escapejs }}");
-                },
-                selectObject(bcObject) {
-                    this.$refs.relatedObjectsList.addObject(bcObject);
-                }
-            },
+                };
 
+                function getQuestion() {
+                    return markdown.render("{{ question.question|escapejs }}");
+                };
+
+                function getAnswer() {
+                    return markdown.render("{{ question.answer|escapejs }}");
+                };
+
+                function selectObject(bcObject) {
+                    relatedObjectsList.value.addObject(bcObject);
+                };
+
+                onMounted(() => {
+                    hotkeys.filter = function(event) {
+                        // By default hotkeys filters form elements. Eliminate that
+                        // filter so we can capture ctrl-return events from
+                        // the Python console textarea.
+                        return true;
+                    };
+
+                    hotkeys("ctrl+return,right,space,e,g,h,r", function(event, handler) {
+                        // Ignore event if the user is typing in an "INPUT" element
+                        if (document.activeElement.tagName === "INPUT") {
+                            return;
+                        }
+                        if (event.target.parentElement.classList.contains("code-input")) {
+                            if (handler.key === "ctrl+return") {
+                                pythonConsole.value.evaluatePython();
+                            }
+                            return;
+                        }
+                        switch (handler.key) {
+                            case "right":
+                                window.location = "{% url "drill:study" %}";
+                                break;
+                            case "space":
+                                setMode("answer");
+                                break;
+                            case "e":
+                                if (mode === "answer") {
+                                    window.location = "{% url 'drill:record_response' question.uuid 'easy' %}";
+                                }
+                                break;
+                            case "g":
+                                if (mode === "answer") {
+                                    window.location = "{% url 'drill:record_response' question.uuid 'good' %}";
+                                }
+                                break;
+                            case "h":
+                                if (mode === "answer") {
+                                    window.location = "{% url 'drill:record_response' question.uuid 'hard' %}";
+                                }
+                                break;
+                            case "r":
+                                if (mode === "answer") {
+                                    window.location = "{% url 'drill:record_response' question.uuid 'again' %}";
+                                }
+                                break;
+                        }
+                    });
+
+                    EventBus.$on("show-python-console", () => {
+                        pythonConsole.value.initialize();
+                    });
+                });
+
+                return {
+                    getAnswer,
+                    getQuestion,
+                    intervalString,
+                    intervals,
+                    mode,
+                    onMouseOutResponse,
+                    onMouseOverResponse,
+                    pythonConsole,
+                    relatedObjectsList,
+                    selectObject,
+                    setMode,
+                };
+            },
         });
+        app.use(drillStore);
+        app.use(Oruga, {
+            iconComponent: "font-awesome-icon",
+            iconPack: "fa",
+            table: {
+                sortIcon: "caret-up",
+            },
+        });
+        app.mount("#vue-app");
 
     </script>
 
