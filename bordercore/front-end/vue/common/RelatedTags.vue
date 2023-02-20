@@ -31,10 +31,12 @@
 
 <script>
 
+    import Card from "/front-end/vue/common/Card.vue";
     import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
     export default {
         components: {
+            Card,
             FontAwesomeIcon,
         },
         props: {

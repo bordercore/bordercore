@@ -37,7 +37,7 @@
 
         </div>
 
-        <div class="col-lg-9" id="vue-right-panel">
+        <div class="col-lg-9" id="vue-app">
 
             {% for message in messages %}
                 <div class="message-{{ message.tags }} card-body ms-3 p-3">
@@ -93,27 +93,33 @@
 
     <script type="text/javascript" charset="utf-8">
 
-        new Vue({
-            el: "#vue-right-panel",
+        const app = createApp({
             name: "RightPanel",
-            data() {
-                return {
-                    isProcessing: false,
-                };
+            components: {
+                FontAwesomeIcon,
             },
-            mounted() {
-                document.getElementsByName("url")[0].focus();
-            },
-            methods: {
-                checkEmpty() {
+            setup() {
+                const isProcessing = ref(false);
+
+                function checkEmpty() {
                     const url = document.getElementsByName("url")[0].value;
                     if (url !== "") {
-                        this.isProcessing = true;
+                        isProcessing.value = true;
                         document.getElementById("import-blob-form").submit();
                     };
-                },
+                };
+
+                onMounted(() => {
+                    document.getElementsByName("url")[0].focus();
+                });
+
+                return {
+                    checkEmpty,
+                    isProcessing,
+                };
             },
         });
+        app.mount("#vue-app");
 
     </script>
 

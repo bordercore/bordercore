@@ -41,11 +41,9 @@ class BlobForm(ModelForm):
             # If this form has a model attached, get the tags and display them separated by commas
             self.initial["tags"] = self.instance.get_tags()
 
-            # Add "T00:00" to force JavaScript to use localtime
             if self.instance.date:
-                self.initial["date"] = get_javascript_date(self.instance.date) + "T00:00"
+                self.initial["date"] = get_javascript_date(self.instance.date)
         else:
-            # Add "T00:00" to force JavaScript to use localtime
             self.initial["date"] = datetime.date.today().strftime("%Y-%m-%dT00:00")
 
         self.fields["tags"] = ModelCommaSeparatedChoiceField(

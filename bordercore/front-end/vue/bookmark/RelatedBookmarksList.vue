@@ -10,7 +10,7 @@
                         </div>
                         <div class="dropdown-menu-container ms-auto">
                             <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
-                                <div slot="dropdown">
+                                <template #dropdown>
                                     <li>
                                         <a class="dropdown-item" href="#" @click.prevent="openModal">
                                             <span>
@@ -19,7 +19,7 @@
                                             Add Bookmark
                                         </a>
                                     </li>
-                                </div>
+                                </template>
                             </drop-down-menu>
                         </div>
                     </div>
@@ -28,45 +28,45 @@
                 <template #content>
                     <hr class="divider">
                     <ul id="sort-container-tags" class="list-group list-group-flush interior-borders">
-                        <draggable v-model="bookmarkList" draggable=".draggable" @change="onSort">
-                            <transition-group type="transition" class="w-100">
-                                <li v-for="(bookmark, index) in bookmarkList" v-cloak :key="bookmark.uuid" class="hover-target list-group-item list-group-item-secondary draggable px-0" :data-uuid="bookmark.uuid">
+                        <div v-cloak v-if="bookmarkList.length == 0" :key="1" class="text-muted">
+                            No bookmarks
+                        </div>
+                        <draggable v-model="bookmarkList" draggable=".draggable" item-key="uuid" :component-data="{type:'transition-group'}" @change="onSort">
+                            <template #item="{element, index}">
+                                <li v-cloak :key="element.uuid" class="hover-target list-group-item list-group-item-secondary draggable px-0" :data-uuid="element.uuid">
                                     <div class="dropdown-height d-flex align-items-start">
-                                        <div class="pe-2" v-html="bookmark.favicon_url" />
+                                        <div class="pe-2" v-html="element.favicon_url" />
                                         <div>
-                                            <a :href="bookmark.url">{{ bookmark.name }}</a>
+                                            <a :href="element.url">{{ element.name }}</a>
 
-                                            <div v-show="!bookmark.noteIsEditable" v-if="bookmark.note" class="node-object-note" @click="activateInEditMode(bookmark, index)">
-                                                {{ bookmark.note }}
+                                            <div v-show="!element.noteIsEditable" v-if="element.note" class="node-object-note" @click="activateInEditMode(element, {index})">
+                                                {{ element.note }}
                                             </div>
-                                            <span v-show="bookmark.noteIsEditable">
-                                                <input id="add-bookmark-input" ref="input" type="text" class="form-control form-control-sm" :value="bookmark.note" placeholder="" autocomplete="off" @blur="editNote(bookmark.uuid, $event.target.value)" @keydown.enter="editNote(bookmark.uuid, $event.target.value)">
+                                            <span v-show="element.noteIsEditable">
+                                                <input id="add-bookmark-input" ref="input" type="text" class="form-control form-control-sm" :value="element.note" placeholder="" autocomplete="off" @blur="editNote(element.uuid, $event.target.value)" @keydown.enter="editNote(element.uuid, $event.target.value)">
                                             </span>
                                         </div>
                                         <drop-down-menu ref="editNoteMenu" :show-on-hover="true">
-                                            <div slot="dropdown">
+                                            <template #dropdown>
                                                 <li>
-                                                    <a class="dropdown-item" href="#" @click.prevent="removeBookmark(bookmark.uuid)">
+                                                    <a class="dropdown-item" href="#" @click.prevent="removeBookmark(element.uuid)">
                                                         <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
                                                     </a>
-                                                    <a class="dropdown-item" :href="bookmark.edit_url">
+                                                    <a class="dropdown-item" :href="element.edit_url">
                                                         <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Edit Bookmark
                                                     </a>
-                                                    <a v-if="bookmark.note" class="dropdown-item" href="#" @click.prevent="activateInEditMode(bookmark, index)">
+                                                    <a v-if="element.note" class="dropdown-item" href="#" @click.prevent="activateInEditMode(element, index)">
                                                         <font-awesome-icon icon="pencil-alt" class="text-primary me-3" />Edit note
                                                     </a>
-                                                    <a v-else class="dropdown-item" href="#" @click.prevent="addNote(bookmark.uuid)">
+                                                    <a v-else class="dropdown-item" href="#" @click.prevent="addNote(element.uuid)">
                                                         <font-awesome-icon icon="plus" class="text-primary me-3" />Add note
                                                     </a>
                                                 </li>
-                                            </div>
+                                            </template>
                                         </drop-down-menu>
                                     </div>
                                 </li>
-                                <div v-cloak v-if="bookmarkList.length == 0" :key="1" class="text-muted">
-                                    No bookmarks
-                                </div>
-                            </transition-group>
+                            </template>
                         </draggable>
                     </ul>
                 </template>
@@ -77,8 +77,18 @@
 
 <script>
 
-    export default {
+    import draggable from "vuedraggable";
+    import Card from "/front-end/vue/common/Card.vue";
+    import DropDownMenu from "/front-end/vue/common/DropDownMenu.vue";
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
+    export default {
+        components: {
+            Card,
+            draggable,
+            DropDownMenu,
+            FontAwesomeIcon,
+        },
         props: {
             objectUuid: {
                 default: "",
@@ -160,11 +170,6 @@
                     this.getBookmarkListUrl.replace(/00000000-0000-0000-0000-000000000000/, this.objectUuid),
                     (response) => {
                         this.bookmarkList = response.data.bookmark_list;
-
-                        // Let Vue know that each bookmark's "noteIsEditable" property is reactive
-                        for (const bookmark of this.bookmarkList) {
-                            this.$set(bookmark, "noteIsEditable", false);
-                        }
                     },
                     "Error getting bookmark list",
                 );
@@ -198,9 +203,8 @@
                 let url = this.addBookmarkUrl;
 
                 if (this.newQuestion) {
+                    bookmark.noteIsEditable = false;
                     this.bookmarkList.push(bookmark);
-                    // Let Vue know that the bookmark's "noteIsEditable" property is reactive
-                    this.$set(bookmark, "noteIsEditable", false);
                     return;
                 }
 
@@ -249,11 +253,11 @@
                 );
             },
             activateInEditMode(bookmark, index) {
-                this.$set(this.bookmarkList[index], "noteIsEditable", true);
+                this.bookmarkList[index["index"]].noteIsEditable = true;
 
                 self = this;
                 setTimeout( () => {
-                    self.$refs.input[index].focus();
+                    self.$refs.input[index["index"]].focus();
                 }, 100);
             },
             addNote(bookmarkUuid) {

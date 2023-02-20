@@ -25,9 +25,9 @@
 
 {% block content %}
 
-    <div class="scrollable-panel-container row g-0 h-100 mx-2">
+    <div id="vue-app" class="scrollable-panel-container row g-0 h-100 mx-2">
 
-        <div id="vue-app-left" class="scrollable-panel flex-grow-last col-lg-3 d-flex flex-column h-100">
+        <div class="scrollable-panel flex-grow-last col-lg-3 d-flex flex-column h-100">
             <div
                 @drop.prevent="onImageDrop($event)"
                 @dragover.prevent="isOver = true"
@@ -82,14 +82,10 @@
 
                 <div class="d-flex flex-column">
                     <div>
-                        <cleanup-filename-button inline-template>
-                            <input type="button" class="btn btn-secondary" value="Cleanup Filename" @click="onClick" />
-                        </cleanup-filename-button>
+                        <input type="button" class="btn btn-secondary" value="Cleanup Filename" @click="onClickCleanupFilename" />
                     </div>
                     <div class="mt-3">
-                        <upper-case-first-button inline-template>
-                            <input type="button" class="btn btn-secondary" value="Upper Case First" @click="onClick" />
-                        </upper-case-first-button>
+                        <input type="button" class="btn btn-secondary" value="Upper Case First" @click="onClickUppercaseFirst" />
                     </div>
                 </div>
 
@@ -129,7 +125,7 @@
             </div>
 
             <transition name="fade">
-                <div v-show="$store.state.showRelatedTags">
+                <div v-show="showRelatedTags">
                     <related-tags
                         ref="relatedTags"
                         class="backdrop-filter"
@@ -144,7 +140,7 @@
 
         <div class="scroll-container col-lg-9 h-100 overflow-auto">
 
-            <div class="card-grid ms-2" id="vue-app-right">
+            <div class="card-grid ms-2">
 
                 <ul class="nav nav-tabs justify-content-center mb-2" role="tablist" aria-orientation="horizontal">
                     <li class="nav-item">
@@ -199,9 +195,8 @@
                             <input type="hidden" name="is_book" value="{% if is_book %}on{% endif %}" />
                             <input type="hidden" name="math_support" value="{% if form.math_support.value %}on{% endif %}" />
 
-                            {% csrf_token %}
 
-                            <input type="hidden" name="metadata" id="input-metadata" />
+                            <input type="hidden" name="metadata" :value="metadataJson" />
 
                             {% if linked_blob %}
                                 <input type="hidden" name="linked_blob_uuid" value="{{ linked_blob.uuid }}" />
@@ -226,27 +221,24 @@
 
                                         <div class="col-lg-8">
                                             <div class="input-group">
-                                                <date-input v-if="getDateFormat()==='standard'" inline-template>
-                                                    <div id="dateapp">
-                                                        <vuejs-datepicker
-                                                            :bootstrap-styling="true"
-                                                            :format="customFormatter"
-                                                            :typeable="true"
-                                                            :value="$store.state.date"
-                                                            name="date"
-                                                            id="id_date"
-                                                            calendar-class="calendar"
-                                                        >
-                                                            <span slot="afterDateInput">
-                                                                <div class="input-group-text h-100">
-                                                                    <font-awesome-icon icon="calendar-alt"></font-awesome-icon>
-                                                                </div>
-                                                            </span>
-                                                        </vuejs-datepicker>
-                                                    </div>
-                                                </date-input>
+                                                <div v-if="dateFormat === 'standard'" id="dateapp">
+                                                    <Datepicker
+                                                        :typeable="true"
+                                                        v-model="date"
+                                                        input-format="yyyy-MM-dd"
+                                                        name="date"
+                                                        id="id_date"
+                                                        class="form-control"
+                                                    >
+                                                        <span slot="afterDateInput">
+                                                            <div class="input-group-text h-100">
+                                                                <font-awesome-icon icon="calendar-alt"></font-awesome-icon>
+                                                            </div>
+                                                        </span>
+                                                    </Datepicker>
+                                                </div>
                                                 <div v-else>
-                                                    <input id="date_year" v-model="$store.state.date" class="form-control" type="number" name="date" size="4" placeholder="Year" autocomplete="off">
+                                                    <input id="id_date" v-model="date" class="form-control" type="number" name="date" size="4" placeholder="" autocomplete="off">
                                                 </div>
                                                 <div class="ms-1">
                                                     <drop-down-menu
@@ -280,8 +272,8 @@
                                                 ref="tagsInput"
                                                 search-url="{% url 'tag:search' %}?query="
                                                 @tags-changed="onTagsChanged"
-                                                @blur="onTagsBlur"
-                                                @focus="onTagsFocus"
+                                                @blur="showRelatedTags = false"
+                                                @focus="showRelatedTags = true"
                                             >
                                             </tags-input>
                                         </div>
@@ -338,66 +330,49 @@
                         </div>
 
                         <div id="section-metadata" class="tab-pane col-lg-12 fade">
-                            <metadata-wrapper inline-template>
-                                <div>
-                                    <div class="row mb-3">
-
-                                        <div class="col-lg-2 col-sm-2">
-                                            <select-value
-                                                id="metadata_name"
-                                                ref="selectValue"
-                                                search-url="{% url 'blob:metadata_name_search' %}?query="
-                                                place-holder="Name"
-                                                @select="select"
-                                            >
+                            <div>
+                                <div class="row mb-3">
+                                    <div class="col-lg-2 col-sm-2">
+                                        <select-value
+                                            id="metadata_name"
+                                            ref="selectValue"
+                                            search-url="{% url 'blob:metadata_name_search' %}?query="
+                                            place-holder="Name"
+                                            @select="selectMetadataName"
+                                        >
                                         </select-value>
-                                        </div>
-
-                                        <div class="col-lg-10 col-sm-10">
-                                            <div class="input-group">
-                                                <metadata-input @add-metadata=addMetadata inline-template>
-                                                    <input type="text" id="id_value" class="form-control" placeholder="Value" autocomplete="off" @keydown.enter.prevent="onKeyDown" />
-                                                </metadata-input>
-                                                <span class="input-group-append">
-                                                    <add-metadata-button @add-metadata=addMetadata inline-template>
-                                                        <button class="btn btn-success" type="button" @click="onClick">
-                                                            <span>
-                                                                <font-awesome-icon icon="plus" class="metadata-icon" />
-                                                            </span>
-                                                        </button>
-                                                    </add-metadata-button>
+                                    </div>
+                                    <div class="col-lg-10 col-sm-10">
+                                        <div class="input-group">
+                                            <input type="text" id="id_value" class="form-control" placeholder="Value" autocomplete="off" @keydown.enter.prevent="addMetadata" />
+                                            <button class="btn btn-success" type="button" @click="addMetadata">
+                                                <span>
+                                                    <font-awesome-icon icon="plus" class="metadata-icon" />
                                                 </span>
-                                            </div>
+                                            </button>
                                         </div>
                                     </div>
-
-                                    <metadata-list
-                                        :metadata="metadata"
-                                        @delete=deleteMetadata
-                                        inline-template
-                                    >
-                                        <div>
-                                            <div v-for="m in metadata">
-                                                <div class="row mb-3 ">
-                                                    <label class="fw-bold col-lg-2 col-sm-2 col-form-label text-end">[[ m.name ]]</label>
-                                                    <div class="col-lg-10 col-sm-10">
-                                                        <div class="input-group">
-                                                            <input type="text" :name="m.counter + '_' + m.name" :value="m.value" class="form-control" autocomplete="off" />
-                                                            <span class="input-group-append">
-                                                                <button class="btn btn-danger btn-remove" type="button" @click="$emit('delete', m.counter)">
-                                                                    <span>
-                                                                    <font-awesome-icon icon="times" class="metadata-icon" />
-                                                                    </span>
-                                                                </button>
+                                </div>
+                                <div>
+                                    <div v-for="(m, index) in metadata">
+                                        <div class="row mb-3 ">
+                                            <label class="fw-bold col-lg-2 col-sm-2 col-form-label text-end">[[ m.name ]]</label>
+                                            <div class="col-lg-10 col-sm-10">
+                                                <div class="input-group">
+                                                    <input type="text" :value="m.value" class="form-control" autocomplete="off" />
+                                                    <span class="input-group-append">
+                                                        <button class="btn btn-danger btn-remove" type="button" @click="deleteMetadata(index)">
+                                                            <span>
+                                                                <font-awesome-icon icon="times" class="metadata-icon" />
                                                             </span>
-                                                        </div>
-                                                    </div>
+                                                        </button>
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
-                                    </metadata-list>
+                                    </div>
                                 </div>
-                            </metadata-wrapper>
+                            </div>
 
                             <div class="col-lg-10 offset-lg-2 d-flex">
                                 <button type="button" class="btn btn-primary" @click="submitForm">
@@ -445,73 +420,171 @@
             return capture2 ? capture1 + capture2.toUpperCase() : match.toUpperCase();
         }
 
-        var isExpanded = false;
-
-        var metadata_count = {{ metadata|length }};
-
-        const store = new Vuex.Store({
-            state: {
-                date: "{{ form.date.value }}",
-                showRelatedTags: false,
+        const app = createApp({
+            name: "BlobUpdate",
+            delimiters: ["[[", "]]"],
+            components: {
+                Datepicker,
+                DropDownMenu,
+                FontAwesomeIcon,
+                IconButton,
+                RelatedTags,
+                SelectValue,
+                TagsInput,
             },
-            getters: {},
-            mutations: {},
-        });
+            setup() {
+                const content = ref("");
+                {% if date_format == "year" %}
+                const date = ref("{{ form.date.value }}")
+                {% else %}
+                const date = ref(new Date("{{ form.date.value }}"));
+                {% endif %}
+                const dateFormat = ref("{{ date_format }}");
+                const dateFormatMenuItems = ref([
+                    {
+                        id: uuidv4(),
+                        title: "Date Format: Standard",
+                        format: "standard",
+                        icon: "check",
+                        url: "#",
+                        clickHandler: onClickDateFormatStandard,
+                    },
+                    {
+                        id: uuidv4(),
+                        title: "Date Format: Year",
+                        format: "year",
+                        icon: undefined,
+                        url: "#",
+                        clickHandler: onClickDateFormatYear,
+                    },
+                ]);
+                const fileName = ref("{{ form.filename.value|default:""|escapejs }}");
+                const fileObject = ref();
+                const isOver = ref(false);
+                const showRelatedTags = ref(false);
+                const metadata =ref([
+                    {% for m in metadata %}
+                    {
+                        name: "{{ m.name|safe|escapejs }}",
+                        value: "{{ m.value|safe|escapejs }}",
+                    },
+                    {% endfor %}
+                ]);
+                const metadataJson = computed(() => {
+                    return JSON.stringify(metadata.value);
+                });
 
-        const CleanupFilenameButton = {
-            methods: {
-                async onClick(evt) {
-                    var name = document.getElementById("id_name").value;
+                const mdEditor = ref(null);
+                const relatedTags = ref(null);
+                const selectValue = ref(null);
+                const tagsInput = ref(null);
+
+                watch(dateFormat, (newFormat) => {
+                    dateFormatMenuItems.value.forEach(function (item) {
+                        item.icon = item.format === newFormat ? "check" : undefined;
+                    });
+                })
+
+                function addMetadata(payload) {
+                    nameEl = document.getElementById("metadata_name");
+                    valueEl = document.getElementById("id_value");
+
+                    if (nameEl.value == "" || valueEl.value == "") {
+                        selectValue.value.focus();
+                        return;
+                    }
+
+                    payload = {
+                        name: nameEl.value,
+                        value: valueEl.value,
+                    };
+
+                    nameEl.value = "";
+                    valueEl.value = "";
+
+                    metadata.value.unshift(payload);
+
+                    // Clear the autocomplete and give it focus so that more metadata can be added
+                    selectValue.value.clearOptions();
+                    window.setTimeout(() => {
+                        selectValue.value.focus();
+                    }, 300);
+                };
+
+                function deleteMetadata(index) {
+                    metadata.value.splice(index, 1)
+                };
+
+                function onClickTag(tag) {
+                    tagsInput.value.addTag(tag);
+                };
+
+                function getCoverImage() {
+                    // Add a datetime to bust the cache
+                    const url = new URL(document.getElementById("coverImage").src);
+                    url.searchParams.set("nocache", new Date().getTime());
+                    document.getElementById("coverImage").src = url;
+                };
+
+                function onClickCleanupFilename(evt) {
+                    const name = document.getElementById("id_name").value;
                     if (name) {
-                        var fileNameEl = document.getElementById("id_filename");
-                        var fileName = fileNameEl.value;
-                        var match = /(.*)(\..*?)$/.exec(fileName);
+                        const fileNameEl = document.getElementById("id_filename");
+                        const fileName = fileNameEl.value;
+                        const match = /(.*)(\..*?)$/.exec(fileName);
                         if (match) {
                             fileNameEl.value = name + match[2];
                             fileNameEl.classList.add("highlight-changed-field");
-                            await new Promise(r => setTimeout(r, 2000));
-                            fileNameEl.classList.add("color-transition");
+                            setTimeout(() => {
+                                fileNameEl.classList.add("color-transition");
+                            }, 2000);
                         }
                     }
-                }
-            }
-        }
+                };
 
-        const UpperCaseFirstButton = {
-            methods: {
-                async onClick(evt) {
+                function onClickDateFormatStandard() {
+                    dateFormat.value = "standard";
+                    date.value = date.value + "-01-01T00:00";
+                };
 
+                function onClickDateFormatYear() {
+                    dateFormat.value = "year";
+                    const newDate = new Date(date.value);
+                    date.value = newDate.getFullYear();
+                };
+
+                function onClickUppercaseFirst(evt) {
                     // Transforms 'JERRELL SCHIVERS' to 'Jerrell Schivers'
-                    var nameEl = document.getElementById("id_value")
-                    nameEl.value = nameEl.value.toLowerCase().replace(/(\s+)(.)|^(.)/g, formatName)
-
+                    const nameEl = document.getElementById("id_value");
+                    nameEl.value = nameEl.value.toLowerCase().replace(/(\s+)(.)|^(.)/g, formatName);
                     nameEl.classList.add("highlight-changed-field");
-                    await new Promise(r => setTimeout(r, 2000));
-                    nameEl.classList.add("color-transition");
+                    setTimeout(() => {
+                        nameEl.classList.add("color-transition");
+                    }, 2000);
+                };
 
-                }
-            },
-        };
+                function onFileDrop(fileObjectParam) {
+                    if (fileObjectParam) {
+                        fileObject.value = fileObjectParam;
+                        fileName.value = fileObject.value.name;
+                    }
+                };
 
-        const noDelimiter = {replace: function(){}};
+                function onImageDrop(evt) {
+                    const image = evt.dataTransfer.files[0];
+                    if (image.type.indexOf("image/") >= 0) {
+                        uploadCoverImage(image);
+                    }
+                };
 
-        const DateInput = {
-            components: {
-                Datepicker
-            },
-            methods: {
-                customFormatter(date) {
-                    return format(new Date(date), "YYYY-MM-DD")
-                },
-                handlePaste(evt) {
-
-                    var clipText = encodeURIComponent(evt.clipboardData.getData("Text").trim());
+                function onPasteDate(evt) {
+                    const clipText = encodeURIComponent(evt.clipboardData.getData("Text").trim());
 
                     axios.get("{% url "blob:parse_date" 666 %}".replace(/666/, clipText))
                          .then(response => {
-                             var payLoad = response.data;
+                             const payLoad = response.data;
                              if (payLoad.output_date == "") {
-                                 var errorString = "Invalid date format";
+                                 const errorString = "Invalid date format";
                                  console.error(errorString + " :" + payLoad.error);
                                  EventBus.$emit(
                                      "toast",
@@ -522,136 +595,93 @@
                                      },
                                  );
                              } else {
-                                 this.date = new Date(payLoad.output_date);
+                                 date.value = new Date(payLoad.output_date);
                              }
                          })
-                }
-            },
-            mounted() {
-                document.getElementById("id_date").addEventListener("paste", this.handlePaste);
-            }
-        }
+                };
 
-        const MetadataList = {
-            props: ["metadata"]
-        }
+                function onTagsChanged(tags) {
+                    relatedTags.value.setTags(tags);
+                };
 
-        const AddMetadataButton = {
-            methods: {
-                onClick(evt) {
-                    this.$emit("add-metadata");
-                }
-            }
-        }
+                function onUpdatePageNumber() {
+                    const pageNumber = document.getElementById("id_page_number").value;
 
-        const MetadataInput = {
-            methods: {
-                onKeyDown(evt) {
-                    this.$emit("add-metadata");
-                }
-            }
-        };
-
-        const MetadataWrapper = {
-            data() {
-                return {
-                    metadata: [
-                        {% for m in metadata %}
+                    doPost(
+                        null,
+                        "{% url 'blob:update_page_number' %}",
                         {
-                            name: "{{ m.name|safe|escapejs }}",
-                            value: "{{ m.value|safe|escapejs }}",
-                            counter: {{ forloop.counter }}
+                            "blob_uuid": "{{ object.uuid }}",
+                            "page_number": pageNumber,
                         },
-                        {% endfor %}
-                    ]
-                }
-            },
-            methods: {
-                addMetadata(payload) {
-                    metadata_count++;
+                        (response) => {
+                            // Try four times to update the cover image, since
+                            //  it could take some time for the AWS lambda to run
+                            for (const timeout of [1000, 3000, 6000, 9000]) {
+                                setTimeout(() => {
+                                    getCoverImage();
+                                }, timeout);
+                            }
+                        },
+                        "",
+                        "",
+                    );
+                };
 
-                    nameEl = document.getElementById("metadata_name");
-                    valueEl = document.getElementById("id_value");
-
-                    if (nameEl.value == "" || valueEl.value == "") {
-                        this.$refs.selectValue.$refs.multiselect.$refs.inputSlot.focus();
-                        return;
-                    }
-
-                    payload = {
-                        name: nameEl.value,
-                        value: valueEl.value,
-                        counter: metadata_count
-                    }
-
-                    nameEl.value = "";
-                    valueEl.value = "";
-
-                    this.metadata.unshift(payload);
-
-                    // Clear the autocomplete and give it focus so that more metadata can be added
-                    this.$refs.selectValue.clearOptions();
-                    window.setTimeout(() => { this.$refs.selectValue.$refs.multiselect.$el.focus() }, 100);
-                },
-                deleteMetadata(counter) {
-                    for (i = 0; i < this.metadata.length; i++) {
-                        if (this.metadata[i].counter == counter) {
-                            this.metadata.splice(i, 1);
-                        }
-                    }
-                },
-                select(datum) {
+                function selectMetadataName() {
                     // After a metadata name is selected, focus the value field
-                    this.$nextTick(() => {
+                    nextTick(() => {
                         document.getElementById("id_value").focus();
-                    })
-                }
-            },
-            components: {
-                AddMetadataButton,
-                MetadataInput,
-                MetadataList,
-            }
-        };
+                    });
+                };
 
-        new Vue({
-            el: "#vue-app-left",
-            name: "LeftPanel",
-            store,
-            components: {
-                CleanupFilenameButton,
-                UpperCaseFirstButton
-            },
-            mounted() {
-                EventBus.$on("tags-changed", (payload) => {
-                    this.$refs.relatedTags.setTags(payload.map( (x) => x.label ));
-                });
-            },
-            data() {
-                return {
-                    isOver: false,
-                }
-            },
-            methods: {
-                onClickTag(tag) {
-                    EventBus.$emit("add-tag", tag);
-                },
-                onImageDrop(evt) {
-                    let image = evt.dataTransfer.files[0]
-                    if (image.type.indexOf("image/") >= 0) {
-                        this.uploadCoverImage(image);
+                function submitForm() {
+                    // Add the 'name' attribute and contents to the internal
+                    // textarea used by v-md-editor, which will then
+                    // be submitted with the rest of the form.
+                    const textarea = document.querySelector(".v-md-textarea-editor textarea");
+                    textarea.setAttribute("name", "content");
+                    textarea.setAttribute("value", content.value);
+
+                    const formElement = document.getElementById("form-blob");
+                    const formData = new FormData(formElement);
+                    if (fileObject.value) {
+                        formData.append("file", fileObject.value);
+                        formData.append("file_modified", Math.round(fileObject.value.lastModified/1000));
                     }
-                },
-                updateFormValue(property, value) {
+                    axios.post("{{ request.path }}", formData, {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                        },
+                    }).then((response) => {
+                        window.location = "{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", response.data.uuid);
+                    }).catch(function(error) {
+                        const errors = [];
+                        for (const i = 0; i < error.response.data.length; i++) {
+                            errors.push(error.response.data[error.response.data[i]][0]);
+                        }
+                        EventBus.$emit(
+                            "toast",
+                            {
+                                "body": errors.join("<br />"),
+                                "variant": "danger",
+                                "autoHide": false,
+                            },
+                        );
+                    });
+                };
+
+                function updateFormValue(property, value) {
                     if (property === "important") {
                         document.getElementById("form-blob").elements[property].value = 10;
                     } else {
                         // Simulate a form checkbox value
                         document.getElementById("form-blob").elements[property].value = value ? "on" : "";
                     }
-                },
-                uploadCoverImage(image) {
-                    let formData = new FormData();
+                };
+
+                function uploadCoverImage(image) {
+                    const formData = new FormData();
                     formData.append("blob_uuid", "{{ object.uuid }}");
                     formData.append("image", image);
 
@@ -663,170 +693,61 @@
                         const coverImage = document.getElementById("coverImage");
                         coverImage.src = coverImage.src + "?" + new Date().getTime();
                     });
-                },
-            }
-        });
+                };
 
-        new Vue({
-            el: "#vue-app-right",
-            name: "EditForm",
-            store,
-            components: {
-                DateInput,
-                MetadataWrapper,
-            },
-            data() {
-                return {
-                    dateFormat: "standard",
-                    dateFormatMenuItems: [
-                        {
-                            id: uuidv4(),
-                            title: "Date Format: Standard",
-                            format: "standard",
-                            url: "#",
-                            clickHandler: this.onClickDateFormatStandard,
-                        },
-                        {
-                            id: uuidv4(),
-                            title: "Date Format: Year",
-                            format: "year",
-                            url: "#",
-                            clickHandler: this.onClickDateFormatYear,
-                        },
-                    ],
-                    content: "",
-                    fileName: "{{ form.filename.value|default:""|escapejs }}",
-                    fileObject: null,
-                    isOver: false,
-                }
-            },
-            methods: {
-                getDateFormat() {
-                    return this.dateFormat;
-                },
-                getCoverImage() {
-                    // Add a datetime to bust the cache
-                    var url = new URL(document.getElementById("coverImage").src);
-                    url.searchParams.set("nocache", new Date().getTime());
-                    document.getElementById("coverImage").src = url;
-                },
-                onClickDateFormatStandard() {
-                    this.dateFormat = "standard";
-                    this.$store.state.date = this.$store.state.date + "-01-01T00:00";
-                    this.addCheckMarkToDateFormatMenu();
-                },
-                onClickDateFormatYear() {
-                    this.dateFormat = "year";
-                    const date = new Date(this.$store.state.date);
-                    this.$store.state.date = date.getFullYear();
-                    this.addCheckMarkToDateFormatMenu();
-                },
-                onFileDrop(fileObject) {
-                    if (fileObject) {
-                        this.fileObject = fileObject;
-                        this.fileName = fileObject.name;
-                    }
-                },
-                onTagsChanged(tags) {
-                    EventBus.$emit("tags-changed", tags);
-                },
-                onTagsBlur(tags) {
-                    this.$store.state.showRelatedTags = false;
-                },
-                onTagsFocus(tags) {
-                    this.$store.state.showRelatedTags = true;
-                },
-                onUpdatePageNumber() {
-                    const pageNumber = document.getElementById("id_page_number").value;
+                onMounted(() => {
+                    // document.getElementById("id_date").addEventListener("paste", onPasteDate);
 
-                    doPost(
-                        this,
-                        "{% url 'blob:update_page_number' %}",
-                        {
-                            "blob_uuid": "{{ object.uuid }}",
-                            "page_number": pageNumber,
-                        },
-                        (response) => {
-                            // Try four times to update the cover image, since
-                            //  it could take some time for the AWS lambda to run
-                            for (const timeout of [1000, 3000, 6000, 9000]) {
-                                setTimeout(() => {
-                                    this.getCoverImage();
-                                }, timeout);
-                            }
-                        },
-                        "",
-                        "",
-                    );
-                },
-                addCheckMarkToDateFormatMenu() {
-                    // Indicate the current date format with a checkmark. Remove
-                    //  it if it's set for any other item.
-                    const self = this;
-                    this.dateFormatMenuItems.forEach(function(item) {
-                        if (item.format === self.dateFormat) {
-                            item.icon = "check";
-                        } else {
-                            item.icon = undefined;
-                        }
-                    })
-                },
-                submitForm() {
-                    // Add the 'name' attribute and contents to the internal
-                    // textarea used by v-md-editor, which will then
-                    // be submitted with the rest of the form.
-                    const textarea = document.querySelector(".v-md-textarea-editor textarea");
-                    textarea.setAttribute("name", "content");
-                    textarea.setAttribute("value", this.content);
-
-                    const formElement = document.getElementById("form-blob");
-                    const formData = new FormData(formElement);
-                    if (this.fileObject) {
-                        formData.append("file", this.fileObject);
-                        formData.append("file_modified", Math.round(this.fileObject.lastModified/1000));
-                    }
-                    axios.post("{{ request.path }}", formData, {
-                        headers: {
-                            "Content-Type": "multipart/form-data"
-                        }
-                    }).then(response => {
-                        window.location = "{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", response.data.uuid);
-                    }).catch(function (error) {
-                        let errors = [];
-                        for (const property in error.response.data) {
-                            errors.push(error.response.data[property][0]);
-                        }
-                        EventBus.$emit(
-                            "toast",
-                            {
-                                "body": errors.join("<br />"),
-                                "variant": "danger",
-                                "autoHide": false,
-                            },
-                        );
+                    /* const found = date.value.match(/^(\d\d\d\d)T00:00$/);
+* if (found) {
+*     date.value = found[1];
+*     dateFormat.value = "year";
+* } */
+                    mdEditor.value.insert((selected) => {
+                        return {
+                            text: "{{ form.content.value|default:""|escapejs }}",
+                            selected: "",
+                        };
                     });
-                },
+                });
+
+                return {
+                    addMetadata,
+                    content,
+                    date,
+                    dateFormat,
+                    dateFormatMenuItems,
+                    deleteMetadata,
+                    fileName,
+                    fileObject,
+                    getCoverImage,
+                    isOver,
+                    mdEditor,
+                    metadata,
+                    metadataJson,
+                    onClickCleanupFilename,
+                    onClickDateFormatStandard,
+                    onClickDateFormatYear,
+                    onClickUppercaseFirst,
+                    onClickTag,
+                    onFileDrop,
+                    onImageDrop,
+                    onPasteDate,
+                    onTagsChanged,
+                    onUpdatePageNumber,
+                    selectMetadataName,
+                    selectValue,
+                    showRelatedTags,
+                    submitForm,
+                    updateFormValue,
+                    relatedTags,
+                    tagsInput,
+                    uploadCoverImage,
+                };
             },
-            mounted() {
-                EventBus.$on("add-tag", (payload) => {
-                    this.$refs.tagsInput.addTag({"text": payload, "display": payload});
-                });
-
-                const found = this.$store.state.date.match(/^(\d\d\d\d)T00:00$/);
-                if (found) {
-                    this.$store.state.date = found[1];
-                    this.dateFormat = "year";
-                }
-                this.addCheckMarkToDateFormatMenu();
-
-                this.$refs.mdEditor.insert((selected) => {
-                    return {
-                        text: "{{ form.content.value|default:""|escapejs }}",
-                        selected: "",
-                    };
-                });
-            }
         });
+        app.use(VueMarkdownEditor);
+        app.mount("#vue-app");
 
     </script>
 

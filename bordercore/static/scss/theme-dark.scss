@@ -134,6 +134,13 @@
   --vs-deselect-fill: var(--text2);
   --vs-deselect-hover-fill: var(--text1);
 
+  // Vue 3 Datepicker
+  --vdp-bg-color: var(--surface1);
+  --vdp-heading-hover-color: var(--surface4);
+  --vdp-hover-bg-color: var(--surface3);
+  --vdp-text-color: var(--text1);
+  --vdp-selected-bg-color: var(--surface5);
+
   .list-group {
     --bs-list-group-border-color: var(--surface5);
   }

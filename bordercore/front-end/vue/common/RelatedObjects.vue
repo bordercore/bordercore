@@ -10,7 +10,7 @@
                         </div>
                         <div class="dropdown-menu-container ms-auto">
                             <drop-down-menu class="d-none hover-reveal-object" :show-on-hover="false">
-                                <div slot="dropdown">
+                                <template #dropdown>
                                     <li>
                                         <a class="dropdown-item" href="#" @click.prevent="openModal">
                                             <span>
@@ -19,7 +19,7 @@
                                             Add Object
                                         </a>
                                     </li>
-                                </div>
+                                </template>
                             </drop-down-menu>
                         </div>
                     </div>
@@ -45,7 +45,7 @@
                                     </span>
                                 </div>
                                 <drop-down-menu ref="editNoteMenu" :show-on-hover="true">
-                                    <div slot="dropdown">
+                                    <template #dropdown>
                                         <li>
                                             <a class="dropdown-item" href="#" @click.prevent="onRemoveObject(object.bc_object_uuid, object.uuid)">
                                                 <font-awesome-icon icon="trash-alt" class="text-primary me-3" />Remove
@@ -57,7 +57,7 @@
                                                 <font-awesome-icon :icon="object.note ? 'pencil-alt' : 'plus'" class="text-primary me-3" />{{ object.note ? 'Edit' : 'Add' }} note
                                             </a>
                                         </li>
-                                    </div>
+                                    </template>
                                 </drop-down-menu>
                             </div>
                         </li>
@@ -73,8 +73,16 @@
 
 <script>
 
-    export default {
+    import Card from "/front-end/vue/common/Card.vue";
+    import DropDownMenu from "/front-end/vue/common/DropDownMenu.vue";
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
+    export default {
+        components: {
+            Card,
+            DropDownMenu,
+            FontAwesomeIcon,
+        },
         props: {
             objectUuid: {
                 default: "",
@@ -139,9 +147,9 @@
                         this.objectList = response.data.related_objects;
 
                         // Let Vue know that each objects's "noteIsEditable" property is reactive
-                        for (const object of this.objectList) {
-                            this.$set(object, "noteIsEditable", false);
-                        }
+                        /* for (const object of this.objectList) {
+                         *     this.$set(object, "noteIsEditable", false);
+                         * } */
                     },
                     "Error getting object list",
                 );

@@ -188,6 +188,12 @@ class Blob(TimeStampedModel):
             return Blob.get_s3_key(self.uuid, self.file)
         return None
 
+    @property
+    def date_is_year(self):
+        if not self.date:
+            return False
+        return True if re.compile(r'^\d\d\d\d$').match(self.date) else False
+
     @staticmethod
     def get_s3_key(uuid, file):
         return f"{settings.MEDIA_ROOT}/{uuid}/{file}"

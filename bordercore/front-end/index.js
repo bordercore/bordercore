@@ -1,5 +1,5 @@
 
-import {computed, createApp, h, nextTick, onMounted, reactive, ref} from "vue";
+import {computed, createApp, h, nextTick, onMounted, reactive, ref, watch} from "vue";
 window.computed = computed;
 window.createApp = createApp;
 window.h = h;
@@ -7,6 +7,7 @@ window.nextTick = nextTick;
 window.onMounted = onMounted;
 window.reactive = reactive;
 window.ref = ref;
+window.watch = watch;
 
 // Use the tiny-emitter package as an event bus
 import emitter from "tiny-emitter/instance";
@@ -173,13 +174,18 @@ import SearchNoResult from "./vue/common/SearchNoResult.vue";
 window.SearchNoResult = SearchNoResult;
 
 import TreeMenu from "./vue/common/TreeMenu.vue";
+window.TreeMenu = TreeMenu;
 
 import RelatedBookmarksList from "./vue/bookmark/RelatedBookmarksList.vue";
+window.RelatedBookmarksList = RelatedBookmarksList;
 
 import RelatedObjects from "./vue/common/RelatedObjects.vue";
+window.RelatedObjects = RelatedObjects;
 
 import DrillTagProgress from "./vue/common/DrillTagProgress.vue";
 window.DrillTagProgress = DrillTagProgress;
+import drillStore from "./vue/drill/store.js";
+window.drillStore = drillStore;
 
 import DropDownMenu from "./vue/common/DropDownMenu.vue";
 window.DropDownMenu = DropDownMenu;
@@ -201,6 +207,7 @@ import CreateUpdatePlaylist from "./vue/music/CreateUpdatePlaylist.vue";
 window.CreateUpdatePlaylist = CreateUpdatePlaylist;
 
 import BlobDetailCover from "./vue/blob/BlobDetailCover.vue";
+window.BlobDetailCover = BlobDetailCover;
 
 import RecentBlobs from "./vue/blob/RecentBlobs.vue";
 window.RecentBlobs = RecentBlobs;
@@ -213,12 +220,13 @@ import FeedItemList from "./vue/feed/FeedItemList.vue";
 window.FeedItemList = FeedItemList;
 import FeedList from "./vue/feed/FeedList.vue";
 window.FeedList = FeedList;
-import store from "./vue/feed/store.js";
-window.feedStore = store;
+import feedStore from "./vue/feed/store.js";
+window.feedStore = feedStore;
 
 import CreateUpdateTodo from "./vue/todo/CreateUpdateTodo.vue";
 
 import AddToCollection from "./vue/blob/AddToCollection.vue";
+window.AddToCollection = AddToCollection;
 
 import NodeImage from "./vue/node/NodeImage.vue";
 
@@ -242,15 +250,19 @@ import CollectionObjectList from "./vue/collection/CollectionObjectList.vue";
 import CollectionObjectListModal from "./vue/collection/CollectionObjectListModal.vue";
 
 import IconButton from "./vue/common/IconButton.vue";
+window.IconButton = IconButton;
 
 import ObjectSelect from "./vue/common/ObjectSelect.vue";
+window.ObjectSelect = ObjectSelect;
 
 import PerfectScrollbar from "perfect-scrollbar";
 window.PerfectScrollbar = PerfectScrollbar;
 
 import Pagination from "./vue/common/Pagination.vue";
+window.Pagination = Pagination;
 
 import PythonConsole from "./vue/common/PythonConsole.vue";
+window.PythonConsole = PythonConsole;
 
 import AddWorkoutForm from "./vue/fitness/AddWorkoutForm.vue";
 window.AddWorkoutForm = AddWorkoutForm;
@@ -291,13 +303,13 @@ window.Oruga = Oruga;
 //  for it to be marked as "listened to".
 window.MUSIC_LISTEN_TIMEOUT = 10000;
 
-import VMdEditor from "@kangc/v-md-editor";
+import VueMarkdownEditor from "@kangc/v-md-editor";
 import enUS from "@kangc/v-md-editor/lib/lang/en-US";
 import "@kangc/v-md-editor/lib/style/base-editor.css";
-import prismTheme from "@kangc/v-md-editor/lib/theme/prism.js";
-import "@kangc/v-md-editor/lib/theme/style/github.css";
-
-VMdEditor.use(prismTheme, {
+import vuepressTheme from "@kangc/v-md-editor/lib/theme/vuepress.js";
+import "@kangc/v-md-editor/lib/theme/style/vuepress.css";
+VueMarkdownEditor.use(vuepressTheme, {
     Prism,
 });
-VMdEditor.lang.use("en-US", enUS);
+VueMarkdownEditor.lang.use("en-US", enUS);
+window.VueMarkdownEditor = VueMarkdownEditor;

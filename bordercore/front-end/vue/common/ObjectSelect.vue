@@ -86,7 +86,15 @@
 
 <script>
 
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+    import SelectValue from "/front-end/vue/common/SelectValue.vue";
+    import "vue-multiselect/dist/vue-multiselect.min.css";
+
     export default {
+        components: {
+            FontAwesomeIcon,
+            SelectValue,
+        },
         props: {
             hasFilter: {
                 type: Boolean,

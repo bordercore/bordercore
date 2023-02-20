@@ -1,7 +1,6 @@
 import datetime
 import json
 import logging
-import re
 
 from django.conf import settings
 from django.contrib import messages
@@ -126,7 +125,8 @@ class BlobCreateView(FormRequestMixin, CreateView, FormValidMixin):
         #  submitted data by populating some of the form fields
         #  that aren't handled automatically by Django's form object.
         #  Some fields are also handled in form_invalid().
-        context["metadata"] = get_metadata_from_form(self.request)
+        if "metadata" in self.request.POST:
+            context["metadata"] = json.dumps(self.request.POST["metadata"])
 
         if "tags" in self.request.POST:
             context["tags"] = [
@@ -258,6 +258,7 @@ class BlobUpdateView(FormRequestMixin, UpdateView, FormValidMixin):
         context["collections_other"] = Collection.objects.filter(Q(user=self.request.user)
                                                                  & ~Q(collectionobject__blob__uuid=self.object.uuid)
                                                                  & Q(is_private=False))
+        context["date_format"] = "year" if self.object.date_is_year else "standard"
         context["action"] = "Update"
         context["title"] = "Blob Update :: {}".format(self.object.get_name(remove_edition_string=True))
         context["tags"] = [x.name for x in self.object.tags.all()]
@@ -306,52 +307,27 @@ class BlobImportView(View):
             return render(request, self.template_name, {})
 
 
-# Metadata objects are not handled by the form -- handle them manually
+# Metadata objects are not handled by the form -- handle them separately
 def handle_metadata(blob, request):
 
     metadata_old = blob.metadata.all()
     for i in metadata_old:
         i.delete()
 
-    metadata = get_metadata_from_form(request)
-    for pair in metadata:
-        new_metadata, created = MetaData.objects.get_or_create(
-            blob=blob,
-            user=request.user,
-            name=pair["name"],
-            value=pair["value"]
-        )
-        if created:
-            new_metadata.save()
+    if "metadata" in request.POST:
+        for pair in json.loads(request.POST["metadata"]):
+            new_metadata, created = MetaData.objects.get_or_create(
+                blob=blob,
+                user=request.user,
+                name=pair["name"],
+                value=pair["value"]
+            )
+            if created:
+                new_metadata.save()
 
     if request.POST.get("is_book", ""):
         new_metadata = MetaData(user=request.user, name="is_book", value="true", blob=blob)
         new_metadata.save()
-
-
-def get_metadata_from_form(request):
-    """
-    Extract metadata from POST args into a list
-    """
-    metadata = []
-
-    p = re.compile(r"^\d+_(.*)")
-
-    for key, value in request.POST.items():
-        m = p.match(key)
-        if m:
-            name = m.group(1).strip()
-            value = value.strip()
-            if name == "" or value == "":
-                continue
-            metadata.append(
-                {
-                    "name": name,
-                    "value": value
-                }
-            )
-
-    return metadata
 
 
 def handle_linked_collection(blob, request):

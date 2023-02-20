@@ -15,14 +15,14 @@
 
                 <div class="me-2 ms-auto">
                     <drop-down-menu>
-                        <div slot="dropdown">
+                        <template #dropdown>
                             <li>
                                 <a class="dropdown-item" :href="'{% url 'blob:create' %}'">
                                     <font-awesome-icon icon="plus" class="text-primary me-3"></font-awesome-icon>
                                     <span>Add Blob</span>
                                 </a>
                             </li>
-                        </div>
+                        </template>
                     </drop-down-menu>
                 </div>
 
@@ -30,7 +30,7 @@
         </div>
 
         <ul class="nav nav-tabs mx-3">
-            <li v-for="nav in navAll" v-if="nav === 'All' || doctypeCount(nav) > 0" class="nav-item px-5" @click="onClickNav(nav)">
+            <li v-for="nav in visibleNav" class="nav-item px-5" @click="onClickNav(nav)">
                 <a class="nav-link" data-bs-toggle="tab" href="#" v-cloak>
                     [[ nav ]]
                     <span class="badge rounded-pill align-middle ms-2" v-html="doctypeCount(nav)"></span>
@@ -77,27 +77,30 @@
 
     <script type="text/javascript">
 
-        new Vue({
-            el: "#vue-app",
-            data() {
-                return {
-                    navAll: [
-                        "All",
-                        "Notes",
-                        "Images",
-                        "Documents",
-                        "Blobs",
-                    ],
-                    navCurrent: "All",
-                    recentBlobs: JSON.parse(document.getElementById("recent_blobs").textContent),
-                    message: null,
-                };
+        const app = createApp({
+            name: "BlobList",
+            delimiters: ["[[", "]]"],
+            components: {
+                DropDownMenu,
+                FontAwesomeIcon,
             },
-            methods: {
-                getContent(blob) {
+            setup() {
+                const message = ref("");
+                const navAll = ref([
+                    "All",
+                    "Notes",
+                    "Images",
+                    "Documents",
+                    "Blobs",
+                ]);
+                const navCurrent = ref("All");
+                const recentBlobs = ref(JSON.parse(document.getElementById("recent_blobs").textContent));
+
+                function getContent(blob) {
                     return markdown.render(blob.content||"");
-                },
-                getNormalizedDoctype(doctype) {
+                };
+
+                function getNormalizedDoctype(doctype) {
                     doctype = doctype.toLowerCase();
 
                     // Remove the trailing 's'
@@ -105,22 +108,26 @@
                         doctype = doctype.substring(0, doctype.length - 1);
                     }
                     return doctype;
-                },
-                doctypeCount(doctype) {
-                    return this.recentBlobs.docTypes[this.getNormalizedDoctype(doctype)];
-                },
-                getDeltaDays(delta) {
+                };
+
+                function doctypeCount(doctype) {
+                    return recentBlobs.value.docTypes[getNormalizedDoctype(doctype)];
+                };
+
+                function getDeltaDays(delta) {
                     if (delta === 0) {
                         return "Today";
                     } else {
                         return delta + " " + pluralize("day", delta) + " ago";
                     }
-                },
-                onClickBlob(url) {
+                };
+
+                function onClickBlob(url) {
                     window.location = url;
-                },
-                onClickNav(doctype) {
-                    this.navCurrent = doctype;
+                };
+
+                function onClickNav(doctype) {
+                    navCurrent.value = doctype;
 
                     // Show everything
                     let objects = document.querySelectorAll("div.blob-list[data-doctype]");
@@ -132,28 +139,47 @@
                         return;
                     }
 
-                    doctype = this.getNormalizedDoctype(doctype);
+                    doctype = getNormalizedDoctype(doctype);
 
                     objects = document.querySelectorAll(`div.blob-list:not([data-doctype = ${doctype}])`);
 
                     objects.forEach(function(object) {
                         object.classList.add("d-none");
                     });
-                },
-            },
-            mounted() {
-                document.querySelectorAll(".blob-content :is(h1, h2, h3, h4, h5, h6)").forEach((el) => {
-                    const style = window.getComputedStyle(el, null).getPropertyValue("font-size");
-                    const fontSize = parseFloat(style);
-                    // The 0.35 factor is based on scaling <h6> tags to 4px
-                    el.style.fontSize = 0.35 * fontSize + "px";
+                };
+
+                const visibleNav = computed(() => {
+                    return navAll.value.filter( (x) => x === "All" || doctypeCount(x) > 0);
                 });
 
-                // Select the first tab ("All") by default
-                this.$el.querySelector(".nav li a").classList.add("active");
-            },
+                onMounted(() => {
+                    document.querySelectorAll(".blob-content :is(h1, h2, h3, h4, h5, h6)").forEach((el) => {
+                        const style = window.getComputedStyle(el, null).getPropertyValue("font-size");
+                        const fontSize = parseFloat(style);
+                        // The 0.35 factor is based on scaling <h6> tags to 4px
+                        el.style.fontSize = 0.35 * fontSize + "px";
+                    });
 
+                    // Select the first tab ("All") by default
+                    document.querySelector(".nav li a").classList.add("active");
+                });
+
+                return {
+                    doctypeCount,
+                    getContent,
+                    getDeltaDays,
+                    getNormalizedDoctype,
+                    message,
+                    onClickBlob,
+                    onClickNav,
+                    navAll,
+                    navCurrent,
+                    recentBlobs,
+                    visibleNav,
+                };
+            },
         });
+        app.mount("#vue-app");
 
     </script>
 

@@ -15,8 +15,8 @@
             @search="fetchOptions"
             @option:selected="tagsChanged"
             @option:deselected="tagsChanged"
-            @blur="onBlur"
-            @focus="onFocus"
+            @search:blur="onBlur"
+            @search:focus="onFocus"
         >
             <template #no-options="{ search, searching }">
                 <div v-if="notFound">

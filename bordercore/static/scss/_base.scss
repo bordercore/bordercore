@@ -1150,11 +1150,11 @@ table.b-table th {
 }
 
 .input-group .highlight-changed-field {
-  color: var(--text5);
+  color: var(--text5) !important;
 }
 
 .highlight-changed-field.color-transition {
-  color: var(--text4);
+  color: var(--text4) !important;
   transition: 2s;
   transition-delay: 1s;
 }
@@ -1756,6 +1756,10 @@ div #dateapp {
   }
 }
 
+.expanded-note {
+  max-height: none !important;
+}
+
 .note-content-truncated {
   overflow: hidden;
   max-height: 31.25rem;
@@ -2349,6 +2353,10 @@ tr.hover-target:hover {
 // vuejs-datepicker
 .calendar {
   color: $black;
+}
+
+.v3dp__datepicker .selected {
+  background-color: var(--vdp-bg-color) !important;
 }
 
 // Sidebar

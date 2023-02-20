@@ -18,8 +18,7 @@ from django.db.models import signals
 
 from blob.models import Blob, BlobBlob
 from blob.tests.factories import BlobFactory
-from blob.views import (get_metadata_from_form, handle_linked_collection,
-                        handle_metadata)
+from blob.views import handle_linked_collection, handle_metadata
 from collection.models import Collection
 from collection.tests.factories import CollectionFactory
 
@@ -243,7 +242,7 @@ def test_blob_detail(auto_login_user, blob):
 
     soup = BeautifulSoup(resp.content, "html.parser")
 
-    assert soup.select("div#vue-right-panel #blob-name")[0].findAll(text=True)[0].strip() == blob[0].get_name(remove_edition_string=True)
+    assert soup.select("div#vue-app #blob-name")[0].findAll(text=True)[0].strip() == blob[0].get_name(remove_edition_string=True)
 
     url = [x.value for x in blob[0].metadata.all() if x.name == "Url"][0]
     assert soup.select("strong a")[0].findAll(text=True)[0] == urlparse(url).netloc
@@ -274,8 +273,12 @@ def test_handle_metadata(auto_login_user, blob_text_factory, blob_image_factory)
     fake_url = faker.url()
 
     request_mock.POST = {
-        "1_Artist": fake_name,
-        "2_Url": fake_url
+        "metadata": json.dumps(
+            [
+                {"name": "Artist", "value": fake_name},
+                {"name": "Url", "value": fake_url}
+            ]
+        )
     }
 
     handle_metadata(blob_text_factory[0], request_mock)
@@ -288,8 +291,12 @@ def test_handle_metadata(auto_login_user, blob_text_factory, blob_image_factory)
     assert fake_url in [x.value for x in metadata]
 
     request_mock.POST = {
-        "1_Author": fake_name,
-        "is_book": "true"
+        "metadata": json.dumps(
+            [
+                {"name": "Author", "value": fake_name},
+                {"name": "is_book", "value": "true"}
+            ]
+        )
     }
 
     handle_metadata(blob_image_factory[0], request_mock)
@@ -299,34 +306,6 @@ def test_handle_metadata(auto_login_user, blob_text_factory, blob_image_factory)
     assert "Author" in [x.name for x in metadata]
     assert fake_name in [x.value for x in metadata]
     assert "is_book" in [x.name for x in metadata]
-
-
-def test_get_metadata_from_form(auto_login_user):
-
-    request_mock = Mock()
-    fake_name = faker.name()
-    fake_url = faker.url()
-
-    request_mock.POST = {
-        "1_Author": fake_name,
-        "2_Url": fake_url
-    }
-
-    metadata = get_metadata_from_form(request_mock)
-
-    assert len(metadata) == 2
-    assert "Author" in [x["name"] for x in metadata]
-    assert fake_name in [x["value"] for x in metadata]
-    assert "Url" in [x["name"] for x in metadata]
-    assert fake_url in [x["value"] for x in metadata]
-
-    request_mock.POST = {
-        "1_Author": "",
-    }
-
-    metadata = get_metadata_from_form(request_mock)
-
-    assert len(metadata) == 0
 
 
 def test_handle_linked_collection(monkeypatch_collection, auto_login_user, blob_image_factory):

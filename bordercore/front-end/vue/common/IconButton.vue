@@ -11,8 +11,12 @@
 
 <script>
 
-    export default {
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
 
+    export default {
+        components: {
+            FontAwesomeIcon,
+        },
         props: {
             icon: {
                 type: String,
