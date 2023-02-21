@@ -224,6 +224,7 @@ import feedStore from "./vue/feed/store.js";
 window.feedStore = feedStore;
 
 import CreateUpdateTodo from "./vue/todo/CreateUpdateTodo.vue";
+window.CreateUpdateTodo = CreateUpdateTodo;
 
 import AddToCollection from "./vue/blob/AddToCollection.vue";
 window.AddToCollection = AddToCollection;

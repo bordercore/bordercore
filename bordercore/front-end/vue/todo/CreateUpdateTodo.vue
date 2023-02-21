@@ -53,21 +53,20 @@
                                 <div class="row mb-3">
                                     <label class="fw-bold col-lg-3 col-form-label text-end" for="dueDate">Due Date</label>
                                     <div class="col-lg-9">
-                                        <vuejs-datepicker
+                                        <Datepicker
                                             id="id_due_date"
                                             v-model="todoInfo.due_date"
-                                            :bootstrap-styling="true"
                                             :format="customFormatter"
                                             :typeable="true"
                                             name="due_date"
-                                            calendar-class="calendar"
+                                            class="form-control"
                                         >
                                             <span slot="afterDateInput" class="input-group-append">
                                                 <div class="input-group-text h-100">
                                                     <font-awesome-icon icon="calendar-alt" />
                                                 </div>
                                             </span>
-                                        </vuejs-datepicker>
+                                        </Datepicker>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
@@ -86,7 +85,16 @@
 
 <script>
 
+    import Datepicker from "vue3-datepicker";
+    import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+    import TagsInput from "/front-end/vue/common/TagsInput.vue";
+
     export default {
+        components: {
+            Datepicker,
+            FontAwesomeIcon,
+            TagsInput,
+        },
         props: {
             priorityList: {
                 default: () => [],

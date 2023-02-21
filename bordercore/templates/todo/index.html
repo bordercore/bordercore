@@ -68,7 +68,7 @@
 
                     <div class="me-2">
                         <drop-down-menu class="my-auto">
-                            <div slot="dropdown" v-cloak>
+                            <template #dropdown v-cloak>
                                 <li>
                                     <a class="dropdown-item" href="#" @click.prevent="handleCreateTodo">
                                         <span v-cloak>
@@ -77,7 +77,7 @@
                                         </span>
                                     </a>
                                 </li>
-                            </div>
+                            </template>
                         </drop-down-menu>
                     </div>
 
@@ -124,7 +124,7 @@
                     </o-table-column>
                     <o-table-column field="uuid" label="" :td-attrs="()=> ({ class: 'col-action' })" v-slot="props" v-cloak>
                         <drop-down-menu :show-on-hover="true">
-                            <div slot="dropdown">
+                            <template #dropdown>
                                 <li>
                                     <a class="dropdown-item" href="#" @click.prevent="onClickUpdate(props.row)">
                                         <font-awesome-icon icon="pencil-alt" class="text-primary me-3"></font-awesome-icon>Update
@@ -135,7 +135,7 @@
                                         <font-awesome-icon icon="trash-alt" class="text-primary me-3"></font-awesome-icon>Delete
                                     </a>
                                 </li>
-                            </div>
+                            </template>
                         </drop-down-menu>
                     </o-table-column>
                     <template #empty>
@@ -167,96 +167,80 @@
 
     <script type="text/javascript" charset="utf-8">
 
-        new Vue({
-            el: "#vue-app",
+        const app = createApp({
             name: "TodoTable",
-            data() {
-                return {
-                    currentSearchFilter: "",
-                    filterTag: "{{ filter.todo_filter_tag|default:'' }}",
-                    filterPriority: "{{ filter.todo_filter_priority|default:'' }}",
-                    filterTime: "{{ filter.todo_filter_time|default:'' }}",
-                    filterSearch: "",
-                    filterCache: {},
-                    items: [],
-                    draggingRow: null,
-                    draggingRowIndex: null,
-                    filterPriorityOptions: null,
-                    filterTimeOptions: null,
-                };
+            delimiters: ["[[", "]]"],
+            components: {
+                CreateUpdateTodo,
+                DropDownMenu,
+                FontAwesomeIcon,
+                NoteModal,
             },
-            computed: {
-                isFiltered() {
-                    return this.filterPriority !== "" || this.filterTime !== "";
-                },
-                title() {
-                    let title = [];
-                    if (this.currentSearchFilter) {
-                        return `Results for "${this.currentSearchFilter}"`;
-                    }
-                    if (this.filterTag) {
-                        title.push(`Tag: ${this.filterTag}`);
-                    }
-                    if (this.filterPriority && this.filterPriorityOptions) {
-                        title.push(`Priority: ${this.filterPriorityOptions[this.filterPriority - 1][1]}`);
-                    }
-                    if (this.filterTime && this.filterTimeOptions) {
-                        title.push(`Time: ${this.getPrettyTime(this.filterTime)}`);
-                    }
-                    if (title.length === 0) {
-                        title = ["All"];
-                    }
-                    return title.join(", ");
-                },
-            },
-            mounted() {
-                this.getTodoList();
-            },
-            methods: {
-                getPrettyTime(time) {
-                    for (option of this.filterTimeOptions) {
+            setup() {
+                const currentSearchFilter = ref("");
+                const filterTag = ref("{{ filter.todo_filter_tag|default:'' }}");
+                const filterPriority = ref("{{ filter.todo_filter_priority|default:'' }}");
+                const filterTime = ref("{{ filter.todo_filter_time|default:'' }}");
+                const filterSearch = ref("");
+                const filterCache = ref({});
+                const items = ref([]);
+                const draggingRow = ref();
+                const draggingRowIndex = ref();
+                const filterPriorityOptions = ref();
+                const filterTimeOptions = ref();
+
+                const updateTodo = ref(null);
+
+                function getPrettyTime(time) {
+                    for (option of filterTimeOptions.value) {
                         if (time === option[0]) {
                             return option[1];
                         }
                     }
-                },
-                getTodoList() {
+                };
+
+                function getTodoList() {
                     doGet(
-                        this,
+                        null,
                         "{% url 'todo:get_tasks' %}" +
-                        `?tag=${this.filterTag}` +
-                        `&priority=${this.filterPriority}` +
-                        `&time=${this.filterTime}` +
-                        `&search=${this.filterSearch}`,
+                        `?tag=${filterTag.value}` +
+                        `&priority=${filterPriority.value}` +
+                        `&time=${filterTime.value}` +
+                        `&search=${filterSearch.value}`,
                         (response) => {
-                            this.items = response.data.todo_list;
-                            this.filterPriorityOptions = response.data.priority_counts;
-                            this.filterTimeOptions = response.data.created_counts;
+                            items.value = response.data.todo_list;
+                            filterPriorityOptions.value = response.data.priority_counts;
+                            filterTimeOptions.value = response.data.created_counts;
                         },
                         "Error getting todo list",
                     );
-                },
-                removeSearchFilter() {
-                    this.filterSearch = "";
-                    this.search();
-                },
-                onDragOver(payload) {
+                };
+
+                function removeSearchFilter() {
+                    filterSearch.value = "";
+                    search();
+                };
+
+                function onDragOver(payload) {
                     payload.event.dataTransfer.dropEffect = "move";
                     payload.event.preventDefault();
-                },
-                onDragStart(payload) {
+                };
+
+                function onDragStart(payload) {
                     payload.event.currentTarget.classList.add("dragging");
-                    this.draggingRow = payload.row;
-                    this.draggingRowIndex = payload.index;
+                    draggingRow.value = payload.row;
+                    draggingRowIndex.value = payload.index;
                     payload.event.dataTransfer.effectAllowed = "move";
-                },
-                onDragEnd(payload) {
+                };
+
+                function onDragEnd(payload) {
                     payload.event.currentTarget.classList.remove("dragging");
-                },
-                onDrop(payload) {
-                    if (this.filterTime !== "" ||
-                        this.filterPriority !== "" ||
-                        this.filterTag === "") {
+                };
+
+                function onDrop(payload) {
+                    if (filterTime.value !== "" ||
+                        filterPriority.value !== "" ||
+                        filterTag.value === "") {
                         EventBus.$emit(
                             "toast",
                             {
@@ -268,26 +252,26 @@
                         return;
                     }
 
-                    const todoUuid = this.draggingRow.uuid;
+                    const todoUuid = draggingRow.value.uuid;
                     const newIndex = payload.index;
 
                     const bodyFormData = new URLSearchParams();
                     bodyFormData.append("todo_uuid", todoUuid);
                     bodyFormData.append("position", newIndex + 1);
-                    bodyFormData.append("tag", this.filterTag);
+                    bodyFormData.append("tag", filterTag.value);
 
                     axios("{% url 'todo:sort' %}", {
                         method: "POST",
                         data: bodyFormData,
                     })
                         .then((response) => {
-                            this.getTodoList();
+                            getTodoList();
                         }, (error) => {
                             console.log(error);
                         });
-                },
-                onClickDelete(todoInfo) {
-                    const self = this;
+                };
+
+                function onClickDelete(todoInfo) {
                     axios.delete("{% url 'todo-detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", todoInfo.uuid))
                         .then((response) => {
                             EventBus.$emit(
@@ -298,103 +282,114 @@
                                 },
                             );
 
-                            self.getTodoList();
+                            getTodoList();
                         }, (error) => {
                             console.log(error);
                         });
-                },
-                onClickTag(evt) {
-                    this.currentSearchFilter = "";
-                    this.filterSearch = "";
-                    if (this.filterTag == evt.currentTarget.dataset.tag) {
-                        this.filterTag = "";
+                };
+
+                function onClickTag(evt) {
+                    currentSearchFilter.value = "";
+                    filterSearch.value = "";
+                    if (filterTag.value == evt.currentTarget.dataset.tag) {
+                        filterTag.value = "";
                     } else {
-                        this.filterTag = evt.currentTarget.dataset.tag;
+                        filterTag.value = evt.currentTarget.dataset.tag;
                     }
-                    this.getTodoList();
-                },
-                onClickPriority(evt) {
-                    this.currentSearchFilter = "";
-                    this.filterSearch = "";
-                    if (this.filterPriority == evt.currentTarget.dataset.priority) {
-                        this.filterPriority = "";
+                    getTodoList();
+                };
+
+                function onClickPriority(evt) {
+                    currentSearchFilter.value = "";
+                    filterSearch.value = "";
+                    if (filterPriority.value == evt.currentTarget.dataset.priority) {
+                        filterPriority.value = "";
                     } else {
-                        this.filterPriority = evt.currentTarget.dataset.priority;
+                        filterPriority.value = evt.currentTarget.dataset.priority;
                     }
-                    this.getTodoList();
-                },
-                onClickTime(evt) {
-                    this.currentSearchFilter = "";
-                    this.filterSearch = "";
-                    if (this.filterTime == evt.currentTarget.dataset.created) {
-                        this.filterTime = "";
+                    getTodoList();
+                };
+
+                function onClickTime(evt) {
+                    currentSearchFilter.value = "";
+                    filterSearch.value = "";
+                    if (filterTime.value == evt.currentTarget.dataset.created) {
+                        filterTime.value = "";
                     } else {
-                        this.filterTime = evt.currentTarget.dataset.created;
+                        filterTime.value = evt.currentTarget.dataset.created;
                     }
-                    this.getTodoList();
-                },
-                getTagClass(tag) {
-                    if (tag === this.filterTag) {
+                    getTodoList();
+                };
+
+                function getTagClass(tag) {
+                    if (tag === filterTag.value) {
                         return "selected rounded-sm";
                     }
-                },
-                getPriorityClass(priority) {
-                    if (priority === parseInt(this.filterPriority)) {
+                };
+
+                function getPriorityClass(priority) {
+                    if (priority === parseInt(filterPriority.value)) {
                         return "selected rounded-sm";
                     }
-                },
-                getTimeClass(created) {
-                    if (created === this.filterTime) {
+                };
+
+                function getTimeClass(created) {
+                    if (created === filterTime.value) {
                         return "selected rounded-sm";
                     }
-                },
-                getDate(date) {
+                };
+
+                function getDate(date) {
                     return getFormattedDate(date);
-                },
-                search() {
-                    if (this.filterSearch === "") {
-                        this.currentSearchFilter = "";
-                        this.filterPriority = this.filterCache.priority;
-                        this.filterTag = this.filterCache.tag;
-                        this.filterTime = this.filterCache.time;
-                        this.filterCache = {};
+                };
+
+                function search() {
+                    if (filterSearch.value === "") {
+                        currentSearchFilter.value = "";
+                        filterPriority.value = filterCache.value.priority;
+                        filterTag.value = filterCache.value.tag;
+                        filterTime.value = filterCache.value.time;
+                        filterCache.value = {};
                     } else {
-                        this.currentSearchFilter = this.filterSearch;
-                        this.filterCache = {
-                            "priority": this.filterPriority,
-                            "tag": this.filterTag,
-                            "time": this.filterTime,
+                        currentSearchFilter.value = filterSearch.value;
+                        filterCache.value = {
+                            "priority": filterPriority.value,
+                            "tag": filterTag.value,
+                            "time": filterTime.value,
                         };
-                        this.filterPriority = "";
-                        this.filterTag = "";
-                        this.filterTime = "";
+                        filterPriority.value = "";
+                        filterTag.value = "";
+                        filterTime.value = "";
                     }
-                    this.getTodoList();
-                },
-                getNote(note) {
+                    getTodoList();
+                };
+
+                function getNote(note) {
                     return markdown.render(note);
-                },
-                onClickUpdate(todoInfo) {
-                    this.$refs.updateTodo.setAction("Update");
-                    this.$refs.updateTodo.todoInfo = todoInfo;
+                };
+
+                function onClickUpdate(todoInfo) {
+                    updateTodo.value.setAction("Update");
+                    updateTodo.value.todoInfo = todoInfo;
                     EventBus.$emit("addTags", todoInfo.tags);
                     const modal = new Modal("#modalUpdateTodo");
                     modal.show();
                     setTimeout(() => {
                         document.getElementById("id_name").focus();
                     }, 500);
-                },
-                handleCreateTodo() {
-                    this.$refs.updateTodo.setAction("Create");
+                };
 
-                    const initialTagList = [this.filterTag];
+                function handleCreateTodo() {
+                    updateTodo.value.setAction("Create");
 
-                    this.$refs.updateTodo.todoInfo = {
+                    const initialTagList = [filterTag.value];
+
+                    updateTodo.value.todoInfo = {
                         note: "",
-                        priority: this.filterPriority || 2,
+                        priority: filterPriority.value || 2,
                         tags: initialTagList,
                     };
-                    if (this.filterTag) {
+                    if (filterTag.value) {
                         EventBus.$emit(
                             "addTags", initialTagList,
                         );
@@ -404,12 +399,89 @@
                     setTimeout(() => {
                         document.getElementById("id_name").focus();
                     }, 500);
-                },
-                onShowNote(todo) {
+                };
+
+                function onShowNote(todo) {
                     return markdown.render(todo.note);
-                },
+                };
+
+                const isFiltered = computed(() => {
+                    return filterPriority.value !== "" || filterTime.value !== "";
+                });
+
+                const title = computed(() => {
+                    let title = [];
+                    if (currentSearchFilter.value) {
+                        return `Results for "${currentSearchFilter.value}"`;
+                    }
+                    if (filterTag.value) {
+                        title.push(`Tag: ${filterTag.value}`);
+                    }
+                    if (filterPriority.value && filterPriorityOptions.value) {
+                        title.push(`Priority: ${filterPriorityOptions.value[filterPriority.value - 1][1]}`);
+                    }
+                    if (filterTime.value && filterTimeOptions.value) {
+                        title.push(`Time: ${getPrettyTime(filterTime.value)}`);
+                    }
+                    if (title.length === 0) {
+                        title = ["All"];
+                    }
+                    return title.join(", ");
+                });
+
+                onMounted(() => {
+                    getTodoList();
+                });
+
+                return {
+                    currentSearchFilter,
+                    filterTag,
+                    filterPriority,
+                    filterTime,
+                    filterSearch,
+                    filterCache,
+                    getDate,
+                    getNote,
+                    getPrettyTime,
+                    getPriorityClass,
+                    getTagClass,
+                    getTimeClass,
+                    getTodoList,
+                    isFiltered,
+                    items,
+                    draggingRow,
+                    draggingRowIndex,
+                    filterPriorityOptions,
+                    filterTimeOptions,
+                    handleCreateTodo,
+                    onClickDelete,
+                    onClickPriority,
+                    onClickTag,
+                    onClickTime,
+                    onClickUpdate,
+                    onDragEnd,
+                    onDragOver,
+                    onDragStart,
+                    onDrop,
+                    onShowNote,
+                    removeSearchFilter,
+                    search,
+                    title,
+                    updateTodo,
+                };
+            },
+            methods: {
+           },
+        });
+        app.use(FloatingVue);
+        app.use(Oruga, {
+            iconComponent: "font-awesome-icon",
+            iconPack: "fa",
+            table: {
+                sortIcon: "caret-up",
             },
         });
+        app.mount("#vue-app");
 
     </script>
 
