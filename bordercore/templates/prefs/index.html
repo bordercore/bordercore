@@ -99,7 +99,8 @@
                                 <div class="row form-inline mb-3" v-show="filename !== ''" v-cloak>
                                     <div class="col-lg-3 offset-lg-3">
                                         <div class="form-check ps-0">
-                                            <input class="form-check-input ms-1" type="checkbox" name="delete_sidebar" />
+                                            <o-switch v-model="deleteSidebar" name="delete_sidebar" :native-value="deleteSidebar" />
+                                            <!-- <input class="form-check-input ms-1" type="checkbox" name="delete_sidebar" /> -->
                                             <label class="form-check-label fw-bold ms-2">Delete</label>
                                         </div>
                                     </div>
@@ -169,6 +170,7 @@
                 const deleteBackground = ref(false);
                 const filename = ref("{{ object.sidebar_image|default:"" }}");
                 const background_image_filename = ref("{{ object.background_image|default:"" }}");
+                const deleteSidebar = ref(false);
 
                 onMounted(() => {
                     const el = document.getElementById("id_theme");
@@ -191,6 +193,7 @@
                 return {
                     background_image_filename,
                     deleteBackground,
+                    deleteSidebar,
                     filename,
                     onChangeBackgroundImage,
                     onChangeSidebarImage,
