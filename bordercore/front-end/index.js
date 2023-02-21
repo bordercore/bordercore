@@ -149,6 +149,7 @@ import "vue-multiselect/dist/vue-multiselect.min.css";
 window.SelectValue = SelectValue;
 
 import SearchResult from "./vue/search/SearchResult.vue";
+window.SearchResult = SearchResult;
 
 import TopSearch from "./vue/search/TopSearch.vue";
 window.TopSearch = TopSearch;
@@ -163,6 +164,7 @@ import TagsInput from "./vue/common/TagsInput.vue";
 window.TagsInput = TagsInput;
 
 import SearchTagsInput from "./vue/common/SearchTagsInput.vue";
+window.SearchTagsInput = SearchTagsInput;
 
 import RelatedTags from "./vue/common/RelatedTags.vue";
 window.RelatedTags = RelatedTags;

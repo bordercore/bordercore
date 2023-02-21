@@ -8,13 +8,13 @@
 
 {% block content %}
 
-    <div class="row g-0 h-100 mx-2">
+    <div id="vue-app" class="row g-0 h-100 mx-2">
 
         <div class="col-lg-3 d-flex flex-column">
 
             <div class="card-body flex-grow-1">
 
-                <div id="aggregations">
+                <div>
 
                     {% if request.GET and search_results %}
 
@@ -44,7 +44,7 @@
 
         </div>
 
-        <div class="col-lg-9" id="search">
+        <div class="col-lg-9">
 
             <div class="card-body mb-3 pb-4">
 
@@ -326,49 +326,51 @@
 
     <script type="text/javascript" charset="utf-8">
 
-        new Vue({
-            el: "#aggregations",
-            methods: {
-                onClick(evt) {
+        const app = createApp({
+            name: "Search",
+            components: {
+                FontAwesomeIcon,
+                Pagination,
+                SearchResult,
+            },
+            setup() {
+                function onClick(evt) {
                     const selectedDoctype = evt.currentTarget.getAttribute("data-doctype");
                     const urlParams = new URLSearchParams(window.location.search);
                     const currentDoctype = urlParams.get("doctype");
 
                     const searchParams = new URLSearchParams(window.location.search);
-
-                    if (selectedDoctype === currentDoctype) {
-                        searchParams.set("doctype", "");
-                    } else {
-                        searchParams.set("doctype", selectedDoctype);
-                    }
+                    searchParams.set("doctype", selectedDoctype === currentDoctype ? "" : selectedDoctype);
 
                     window.location.search = searchParams;
-                },
-                getDoctypeClass(doctype) {
+                };
+
+                function getDoctypeClass(doctype) {
                     const urlParams = new URLSearchParams(window.location.search);
                     const currentDoctype = urlParams.get("doctype");
 
                     if (doctype === currentDoctype) {
                         return "selected rounded-sm";
                     }
-                },
+                };
 
-            },
-        });
-
-        new Vue({
-            el: "#search",
-            methods: {
-                select(tag) {
+                function select(tag) {
                     if (tag.doctype == "Tag") {
                         url = "{% url 'search:kb_search_tag_detail' 666 %}".replace(/666/, tag.value);
                     } else {
                         url = "{% url 'blob:detail' '00000000-0000-0000-0000-000000000000' %}".replace("00000000-0000-0000-0000-000000000000", tag.uuid);
                     }
                     window.location=url;
-                },
+                };
+
+                return {
+                    getDoctypeClass,
+                    onClick,
+                    select,
+                };
             },
         });
+        app.mount("#vue-app");
 
     </script>
 

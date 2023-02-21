@@ -30,31 +30,25 @@
                             </search-tags-input>
 
                            {% if tag_counts %}
-                               <related-tag-counts inline-template>
-                                   <div class="col-lg-3">
-                                       <div>
-                                           <select class="form-control form-select" @change="onChange">
-                                               <option value="-1">Related tags</option>
-                           {% for tag, count in tag_counts %}
-                               <option value="{{ tag }}">{{ tag }} ({{ count }})</option>
-                           {% endfor %}
-                                           </select>
-                                       </div>
+                               <div class="col-lg-3">
+                                   <div>
+                                       <select class="form-control form-select" @change="onChange">
+                                           <option value="-1">Related tags</option>
+                                           {% for tag, count in tag_counts %}
+                                               <option value="{{ tag }}">{{ tag }} ({{ count }})</option>
+                                           {% endfor %}
+                                       </select>
                                    </div>
-                               </related-tag-counts>
-                        </div>
-
+                               </div>
                            {% endif %}
-                           <meta-tag-list inline-template>
-                               <div>
+                           <div>
                            {% for tag in meta_tags %}
                            {% if forloop.first %}
                                <label class="ms-3 mt-2">Meta Tags: </label>
                            {% endif %}
-                           <span class="ms-2"><a class="meta_tag tag" href="" @click="onClick">{{ tag }}</a></span>
+                           <span class="ms-2"><a class="meta_tag tag" href="" @click="onClickMetaTag">{{ tag }}</a></span>
                            {% endfor %}
-                               </div>
-                           </meta-tag-list>
+                           </div>
                     </form>
                 </div>
             </div>
@@ -62,20 +56,18 @@
 
         <br />
 
-        <tab-list inline-template>
-            <ul class="nav nav-tabs mx-3">
-                {% for doctype in doctype_counts %}
-                    <li class="nav-item" data-type="{{ doctype.0 }}" @click="onClick">
-                        <a class="nav-link" data-bs-toggle="tab" href="#{{ doctype.0 }}">
-                            {{ doctype_mapping|get_doctype:doctype.0 }}
-                            <span class="badge align-middle ms-2">
-                                {{ doctype.1 }}
-                            </span>
-                        </a>
-                    </li>
-                {% endfor %}
-            </ul>
-        </tab-list>
+        <ul class="nav nav-tabs mx-3">
+            {% for doctype in doctype_counts %}
+                <li class="nav-item" data-type="{{ doctype.0 }}" @click="onClickDoctype">
+                    <a class="nav-link" data-bs-toggle="tab" href="#{{ doctype.0 }}">
+                        {{ doctype_mapping|get_doctype:doctype.0 }}
+                        <span class="badge align-middle ms-2">
+                            {{ doctype.1 }}
+                        </span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
 
         <div class="tab-content ps-3 h-100 mb-3">
 
@@ -350,90 +342,77 @@
 
     <script type="text/javascript">
 
-        function get_tag_list_string() {
+        function getTagListString() {
             initialTags = JSON.parse(document.getElementById("initial-tags").textContent);
-            return initialTags.join(",")
+            return initialTags.join(",");
         }
 
-        {% if tag_counts %}
-        const RelatedTagCounts = {
-            methods: {
-                onChange(evt) {
-                    tag_list = get_tag_list_string() + "," + evt.srcElement.value;
-                    window.location="{% url 'search:kb_search_tag_detail' 666 %}".replace("666", tag_list);
-                }
-            }
-        };
-        {% endif %}
+        const app = createApp({
+            components: {
+                FontAwesomeIcon,
+                SearchTagsInput,
+            },
+            setup() {
+                function onChange(evt) {
+                    const tagList = getTagListString() + "," + evt.srcElement.value;
+                    window.location="{% url 'search:kb_search_tag_detail' 666 %}".replace("666", tagList);
+                };
 
-        const MetaTagList = {
-            methods: {
-                onClick(evt) {
-                    evt.preventDefault();
-                    tag_list = get_tag_list_string() + "," + evt.srcElement.innerHTML;
-                    window.location="{% url 'search:kb_search_tag_detail' 666 %}".replace(/666/, tag_list);
-                }
-            }
-        };
-
-        const TabList = {
-            methods: {
-                onClick(evt) {
-
+                function onClickDoctype(evt) {
                     doPost(
-                        this,
+                        null,
                         "{% url "accounts:store_in_session" %}",
                         {
-                            "kb_tag_detail_current_tab": evt.srcElement.parentElement.getAttribute("data-type")
+                            "kb_tag_detail_current_tab": evt.srcElement.parentElement.getAttribute("data-type"),
                         },
                         (response) => {
                             evt.preventDefault();
                         },
                         "",
-                        ""
+                        "",
                     );
+                };
 
-                }
-            },
-            mounted() {
+                function onClickMetaTag(evt) {
+                    evt.preventDefault();
+                    const tagList = getTagListString() + "," + evt.srcElement.innerHTML;
+                    window.location="{% url 'search:kb_search_tag_detail' 666 %}".replace(/666/, tagList);
+                };
 
-                const triggerTabList = [].slice.call(this.$el.querySelectorAll(".nav a"));
-                triggerTabList.forEach(function (triggerEl) {
-                    const tabTrigger = new Tab(triggerEl);
+                onMounted(() => {
+                    const triggerTabList = [].slice.call(document.querySelectorAll(".nav a"));
+                    triggerTabList.forEach(function(triggerEl) {
+                        const tabTrigger = new Tab(triggerEl);
 
-                    triggerEl.addEventListener("click", function (event) {
-                        event.preventDefault();
-                        tabTrigger.show();
+                        triggerEl.addEventListener("click", function(event) {
+                            event.preventDefault();
+                            tabTrigger.show();
+                        });
                     });
-                });
 
-                {% if kb_tag_detail_current_tab and kb_tag_detail_current_tab in doctypes %}
-                const triggerFirstTabEl = this.$el.querySelector("li[data-type='{{ kb_tag_detail_current_tab }}'] a");
-                Tab.getInstance(triggerFirstTabEl).show();
+                    {% if kb_tag_detail_current_tab and kb_tag_detail_current_tab in doctypes %}
+                    const triggerFirstTabEl = document.querySelector("li[data-type='{{ kb_tag_detail_current_tab }}'] a");
+                    Tab.getInstance(triggerFirstTabEl).show();
 
-                {% else %}
-                // If the tab stored in the session doesn't match any current tab categories,
-                //  select the first tab.
-                const triggerFirstTabEl = this.$el.querySelector(".nav li:first-child a");
+                    {% else %}
+                    // If the tab stored in the session doesn't match any current tab categories,
+                    //  select the first tab.
+                    const triggerFirstTabEl = document.querySelector(".nav li:first-child a");
                     if (triggerFirstTabEl != undefined) {
                         Tab.getInstance(triggerFirstTabEl).show();
-                }
+                    }
 
-                {% endif %}
+                    {% endif %}
+                });
 
-            }
-        };
-
-        new Vue({
-            el: "#vue-app",
-            components: {
-                {% if tag_counts %}
-                RelatedTagCounts,
-                {% endif %}
-                TabList,
-                MetaTagList,
-            }
+                return {
+                    onChange,
+                    onClickDoctype,
+                    onClickMetaTag,
+                };
+            },
         });
+        app.mount("#vue-app");
 
     </script>
 
