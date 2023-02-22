@@ -161,7 +161,7 @@ def update_frequency(request):
 def update_rest_period(request):
 
     uuid = request.POST["uuid"]
-    rest_period = int(request.POST["rest_period"])
+    rest_period = request.POST["rest_period"]
 
     eu = ExerciseUser.objects.get(user=request.user, exercise__uuid=uuid)
     eu.rest_period = rest_period
